@@ -26,21 +26,26 @@
 
 #pragma once
 
+#include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleGeneratedImage.hpp"
 
 namespace krys::boo
 {
+  class CachedImage;
   struct BlendingContext;
 
-  /// @brief A `cross-fade()` image.
-  /// FIXME: Tracking the input images' cached images (`CachedImageClient`, `imageChanged`) and drawing
-  /// (`CrossfadeGeneratedImage`).
-  class StyleCrossfadeImage final : public StyleGeneratedImage
+  /// @brief A `cross-fade()` image. It follows its input images' cached images, so its renderers hear when
+  /// they change.
+  class StyleCrossfadeImage final : public StyleGeneratedImage, private CachedImageClient
   {
   private:
     RefPtr<StyleImage> _from;
     RefPtr<StyleImage> _to;
     double _percentage;
+    CachedResourceHandle<CachedImage> _cachedFromImage;
+    CachedResourceHandle<CachedImage> _cachedToImage;
+    bool _inputImagesAreReady {false};
 
   public:
     static constexpr bool IsFixedSize = true;
@@ -59,13 +64,33 @@ namespace krys::boo
     KRYS_NODISCARD bool Equals(const StyleCrossfadeImage &) const noexcept;
     KRYS_NODISCARD bool EqualInputImages(const StyleCrossfadeImage &) const noexcept;
 
+    KRYS_NODISCARD RefPtr<StyleImage> From() const noexcept
+    {
+      return _from;
+    }
+    KRYS_NODISCARD RefPtr<StyleImage> To() const noexcept
+    {
+      return _to;
+    }
+    KRYS_NODISCARD double Percentage() const noexcept
+    {
+      return _percentage;
+    }
+
   private:
     StyleCrossfadeImage(RefPtr<StyleImage> &&, RefPtr<StyleImage> &&, double) noexcept;
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
     KRYS_NODISCARD bool IsPending() const noexcept final;
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final;
+    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &,
+                                          const GraphicsContext &destinationContext,
+                                          bool isForFirstLine) const noexcept final;
+    KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &) const noexcept final;
     KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final;
+
+    // CachedImageClient.
+    void ImageChanged(CachedImage *, const IntRect *) noexcept final;
   };
 }
 

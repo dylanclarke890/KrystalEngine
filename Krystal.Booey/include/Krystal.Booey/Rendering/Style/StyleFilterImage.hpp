@@ -26,19 +26,24 @@
 
 #pragma once
 
+#include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleGeneratedImage.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 
 namespace krys::boo
 {
-  /// @brief A `filter()` image: an image with filters applied.
-  /// FIXME: Tracking the input image's cached image (`CachedImageClient`, `imageChanged`), loading reference
-  /// filters' documents and drawing.
-  class StyleFilterImage final : public StyleGeneratedImage
+  class CachedImage;
+
+  /// @brief A `filter()` image: an image with filters applied. It follows its input image's cached image, so
+  /// its renderers hear when it changes.
+  class StyleFilterImage final : public StyleGeneratedImage, private CachedImageClient
   {
   private:
     RefPtr<StyleImage> _image;
     style::Filter _filter;
+    CachedResourceHandle<CachedImage> _cachedImage;
+    bool _inputImageIsReady {false};
 
   public:
     static constexpr bool IsFixedSize = true;
@@ -69,7 +74,17 @@ namespace krys::boo
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
     KRYS_NODISCARD bool IsPending() const noexcept final;
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final;
+    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &,
+                                          const GraphicsContext &destinationContext,
+                                          bool isForFirstLine) const noexcept final;
+    KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &) const noexcept final
+    {
+      return false;
+    }
     KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final;
+
+    // CachedImageClient.
+    void ImageChanged(CachedImage *, const IntRect *) noexcept final;
   };
 }
 

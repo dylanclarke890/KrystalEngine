@@ -28,6 +28,12 @@
 #include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
+#include "Krystal.Booey/Graphics/Images/CrossfadeGeneratedImage.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
 
 namespace krys::boo
@@ -39,7 +45,17 @@ namespace krys::boo
   {
   }
 
-  StyleCrossfadeImage::~StyleCrossfadeImage() noexcept = default;
+  StyleCrossfadeImage::~StyleCrossfadeImage() noexcept
+  {
+    if (_cachedFromImage)
+    {
+      _cachedFromImage->RemoveClient(*this);
+    }
+    if (_cachedToImage)
+    {
+      _cachedToImage->RemoveClient(*this);
+    }
+  }
 
   bool StyleCrossfadeImage::Equals(const StyleImage &other) const noexcept
   {
@@ -57,14 +73,18 @@ namespace krys::boo
     return ArePointingToEqualData(_from, other._from) && ArePointingToEqualData(_to, other._to);
   }
 
-  RefPtr<StyleCrossfadeImage> StyleCrossfadeImage::Blend(KRYS_MAYBE_UNUSED const StyleCrossfadeImage &from,
-                                                         const BlendingContext &) const noexcept
+  RefPtr<StyleCrossfadeImage> StyleCrossfadeImage::Blend(const StyleCrossfadeImage &from,
+                                                         const BlendingContext &context) const noexcept
   {
     krys_debug_assert(EqualInputImages(from));
 
-    // FIXME: Blend the percentages once both input images have loaded (their cached images), once the image
-    // follows its inputs' cached images (see Load). Until then, they never have.
-    return nullptr;
+    if (!_cachedToImage || !_cachedFromImage)
+    {
+      return nullptr;
+    }
+
+    auto newPercentage = boo::Blend(from._percentage, _percentage, context);
+    return StyleCrossfadeImage::Create(_from, _to, newPercentage);
   }
 
   Ref<css::Value> StyleCrossfadeImage::ComputedStyleValue(const RenderStyle &style) const noexcept
@@ -79,16 +99,126 @@ namespace krys::boo
 
   void StyleCrossfadeImage::Load(CachedResourceLoader &loader, const ResourceLoaderOptions &options) noexcept
   {
-    // FIXME: Follow the input images' cached images as their client (imageChanged), and blend once they're
-    // ready.
-    if (_from && _from->IsPending())
+    auto oldCachedFromImage = _cachedFromImage;
+    auto oldCachedToImage = _cachedToImage;
+
+    if (_from)
     {
-      _from->Load(loader, options);
+      if (_from->IsPending())
+      {
+        _from->Load(loader, options);
+      }
+      _cachedFromImage = _from->GetCachedImage();
+    }
+    else
+    {
+      _cachedFromImage = nullptr;
     }
 
-    if (_to && _to->IsPending())
+    if (_to)
     {
-      _to->Load(loader, options);
+      if (_to->IsPending())
+      {
+        _to->Load(loader, options);
+      }
+      _cachedToImage = _to->GetCachedImage();
+    }
+    else
+    {
+      _cachedToImage = nullptr;
+    }
+
+    if (_cachedFromImage != oldCachedFromImage)
+    {
+      if (oldCachedFromImage)
+      {
+        oldCachedFromImage->RemoveClient(*this);
+      }
+      if (_cachedFromImage)
+      {
+        _cachedFromImage->AddClient(*this);
+      }
+    }
+
+    if (_cachedToImage != oldCachedToImage)
+    {
+      if (oldCachedToImage)
+      {
+        oldCachedToImage->RemoveClient(*this);
+      }
+      if (_cachedToImage)
+      {
+        _cachedToImage->AddClient(*this);
+      }
+    }
+
+    _inputImagesAreReady = true;
+  }
+
+  RefPtr<Image> StyleCrossfadeImage::GetImage(const RenderElement *renderer, const FloatSize &size,
+                                              const GraphicsContext &destinationContext,
+                                              bool isForFirstLine) const noexcept
+  {
+    if (!renderer)
+    {
+      return ShareRefPtr(&Image::NullImage());
+    }
+
+    if (size.IsEmpty())
+    {
+      return nullptr;
+    }
+
+    if (!_from || !_to)
+    {
+      return ShareRefPtr(&Image::NullImage());
+    }
+
+    RefPtr fromImage = _from->GetImage(renderer, size, destinationContext, isForFirstLine);
+    RefPtr toImage = _to->GetImage(renderer, size, destinationContext, isForFirstLine);
+
+    if (!fromImage || !toImage)
+    {
+      return ShareRefPtr(&Image::NullImage());
+    }
+
+    if (auto *fromSVGImage = DynamicDowncast<svg::SVGImage>(fromImage.get()))
+    {
+      auto fromURL = _cachedFromImage ? _cachedFromImage->URL() : url::URL();
+      fromImage = svg::SVGImageForContainer::Create(fromSVGImage, size, 1, fromURL);
+    }
+    if (auto *toSVGImage = DynamicDowncast<svg::SVGImage>(toImage.get()))
+    {
+      auto toURL = _cachedToImage ? _cachedToImage->URL() : url::URL();
+      toImage = svg::SVGImageForContainer::Create(toSVGImage, size, 1, toURL);
+    }
+
+    return CrossfadeGeneratedImage::Create(*fromImage, *toImage, static_cast<float>(_percentage),
+                                           FixedSize(*renderer), size);
+  }
+
+  bool StyleCrossfadeImage::KnownToBeOpaque(const RenderElement &renderer) const noexcept
+  {
+    if (_from && !_from->KnownToBeOpaque(renderer))
+    {
+      return false;
+    }
+    if (_to && !_to->KnownToBeOpaque(renderer))
+    {
+      return false;
+    }
+    return true;
+  }
+
+  void StyleCrossfadeImage::ImageChanged(CachedImage *, const IntRect *) noexcept
+  {
+    if (!_inputImagesAreReady)
+    {
+      return;
+    }
+    for (const auto &[client, count] : Clients())
+    {
+      client->ImageChanged(static_cast<WrappedImagePtr>(this));
     }
   }
 

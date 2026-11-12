@@ -109,7 +109,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 
 ### Missing
 
-- External reference filters (`filter: url(doc.svg#f)`) are not loaded or watched (FIXME in `RenderLayerFilters.cpp`). `cross-fade()` and filter images load their inputs but do not follow them as clients (FIXMEs in `StyleCrossfadeImage.cpp`, `StyleFilterImage.cpp`), so they do not update when an input loads, and `StyleCrossfadeImage::Blend` always returns null, so `cross-fade()` percentages don't interpolate.
+- External reference filters (`filter: url(doc.svg#f)`) are not loaded or watched (FIXME in `RenderLayerFilters.cpp`). Nor are those in `filter()` images (FIXME in `StyleFilterImage.cpp`).
 - `CachedResource` has no preloads, priorities or streaming and partial data; a resource decodes only once all its data has arrived. `CachedResourceLoader` loads images, fonts and style sheets only; other types, request counting and loads that do not delay the load event are FIXMEs. `MemoryCache` has one LRU list. `SharedBuffer` is one contiguous immutable buffer.
 - Without a work queue from the host, every frame decodes on the main thread as it's drawn. Images still decoding aren't redrawn synchronously for a host's snapshot (`invalidateImagesWithAsyncDecodes`; FIXMEs in `Page.cpp`, `RenderImage.cpp` and `BackgroundPainter.cpp`).
 - Animated images (GIF, APNG, animated WebP) have no `allowsAnimation` override or system animation controls, and no controls for suspended documents or off-screen views.

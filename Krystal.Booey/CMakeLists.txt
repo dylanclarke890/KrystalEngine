@@ -1607,7 +1607,9 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Images/BitmapImageDescriptor.hpp
   include/Krystal.Booey/Graphics/Images/BitmapImageSource.hpp
   include/Krystal.Booey/Graphics/Images/BrokenImageIcon.hpp
+  include/Krystal.Booey/Graphics/Images/CrossfadeGeneratedImage.hpp
   include/Krystal.Booey/Graphics/Images/DecodingOptions.hpp
+  include/Krystal.Booey/Graphics/Images/FilterGeneratedImage.hpp
   include/Krystal.Booey/Graphics/Images/GeneratedImage.hpp
   include/Krystal.Booey/Graphics/Images/GradientImage.hpp
   include/Krystal.Booey/Graphics/Images/Image.hpp
@@ -1805,6 +1807,8 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Images/BitmapImageDescriptor.cpp
   src/Graphics/Images/BitmapImageSource.cpp
   src/Graphics/Images/BrokenImageIcon.cpp
+  src/Graphics/Images/CrossfadeGeneratedImage.cpp
+  src/Graphics/Images/FilterGeneratedImage.cpp
   src/Graphics/Images/GeneratedImage.cpp
   src/Graphics/Images/GradientImage.cpp
   src/Graphics/Images/Image.cpp

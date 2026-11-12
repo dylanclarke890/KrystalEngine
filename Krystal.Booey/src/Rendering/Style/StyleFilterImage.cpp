@@ -28,6 +28,13 @@
 #include "Krystal.Booey/CSS/Values/FilterImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Graphics/Images/FilterGeneratedImage.hpp"
+#include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
 
 namespace krys::boo
@@ -38,7 +45,13 @@ namespace krys::boo
   {
   }
 
-  StyleFilterImage::~StyleFilterImage() noexcept = default;
+  StyleFilterImage::~StyleFilterImage() noexcept
+  {
+    if (_cachedImage)
+    {
+      _cachedImage->RemoveClient(*this);
+    }
+  }
 
   bool StyleFilterImage::Equals(const StyleImage &other) const noexcept
   {
@@ -67,11 +80,98 @@ namespace krys::boo
   void StyleFilterImage::Load(CachedResourceLoader &cachedResourceLoader,
                               const ResourceLoaderOptions &options) noexcept
   {
-    // FIXME: Follow the input image's cached image as its client (imageChanged), and load the reference
-    // filters' external documents.
-    if (_image && _image->IsPending())
+    auto oldCachedImage = _cachedImage;
+
+    if (_image)
     {
-      _image->Load(cachedResourceLoader, options);
+      if (_image->IsPending())
+      {
+        _image->Load(cachedResourceLoader, options);
+      }
+      _cachedImage = _image->GetCachedImage();
+    }
+    else
+    {
+      _cachedImage = nullptr;
+    }
+
+    if (_cachedImage != oldCachedImage)
+    {
+      if (oldCachedImage)
+      {
+        oldCachedImage->RemoveClient(*this);
+      }
+      if (_cachedImage)
+      {
+        _cachedImage->AddClient(*this);
+      }
+    }
+
+    // FIXME: Load the reference filters' external documents (loadExternalDocumentIfNeeded).
+    _inputImageIsReady = true;
+  }
+
+  RefPtr<Image> StyleFilterImage::GetImage(const RenderElement *renderer, const FloatSize &size,
+                                           const GraphicsContext &destinationContext,
+                                           bool isForFirstLine) const noexcept
+  {
+    if (!renderer)
+    {
+      return ShareRefPtr(&Image::NullImage());
+    }
+
+    if (size.IsEmpty())
+    {
+      return nullptr;
+    }
+
+    if (!_image)
+    {
+      return ShareRefPtr(&Image::NullImage());
+    }
+
+    auto image = _image->GetImage(renderer, size, destinationContext, isForFirstLine);
+    if (!image || image->IsNull())
+    {
+      return ShareRefPtr(&Image::NullImage());
+    }
+
+    auto *page = renderer->GetDocument().GetPage();
+    if (!page)
+    {
+      return ShareRefPtr(&Image::NullImage());
+    }
+
+    auto preferredFilterRenderingModes = page->PreferredFilterRenderingModes(destinationContext);
+    auto sourceImageRect = FloatRect {FloatPoint(), size};
+
+    auto cssFilter = CSSFilterRenderer::Create(const_cast<RenderElement &>(*renderer), _filter,
+                                               {
+                                                 .ReferenceBox = sourceImageRect,
+                                                 .FilterRegion = sourceImageRect,
+                                                 .Scale = {1, 1},
+                                               },
+                                               preferredFilterRenderingModes, NullGraphicsContext());
+    if (!cssFilter)
+    {
+      return ShareRefPtr(&Image::NullImage());
+    }
+
+    cssFilter->SetFilterRegion(sourceImageRect);
+
+    // Drawn through the filter as it's painted, rather than into a filtered bitmap here.
+    return FilterGeneratedImage::Create(*image, *cssFilter, size);
+  }
+
+  void StyleFilterImage::ImageChanged(CachedImage *, const IntRect *) noexcept
+  {
+    if (!_inputImageIsReady)
+    {
+      return;
+    }
+    for (const auto &[client, count] : Clients())
+    {
+      client->ImageChanged(static_cast<WrappedImagePtr>(this));
     }
   }
 
