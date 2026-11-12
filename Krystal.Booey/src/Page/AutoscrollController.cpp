@@ -60,6 +60,39 @@ namespace krys::boo
     return _autoscrollRenderer.get();
   }
 
+  void AutoscrollController::UpdateAutoscrollRenderer() noexcept
+  {
+    auto *box = _autoscrollRenderer.get();
+    if (!box)
+    {
+      return;
+    }
+
+    RenderObject *renderer = box;
+    if (PanScrollInProgress())
+    {
+      auto &frameView = box->View().FrameView();
+      auto hitTest = frameView.Frame().GetEventHandler().HitTestResultAtPoint(
+        LayoutPoint(frameView.WindowToContents(_panScrollStartPosition)),
+        {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active});
+      if (auto *nodeAtPoint = hitTest.InnerNode())
+      {
+        if (auto *rendererAtPoint = nodeAtPoint->Renderer())
+        {
+          renderer = rendererAtPoint;
+        }
+      }
+    }
+
+    while (renderer && !(Is<RenderBox>(*renderer) && Downcast<RenderBox>(*renderer).CanAutoscroll()))
+    {
+      renderer = renderer->Parent();
+    }
+
+    auto *autoscrollable = renderer ? DynamicDowncast<RenderBox>(*renderer) : nullptr;
+    _autoscrollRenderer = autoscrollable ? CreateWeakPtr(autoscrollable) : nullptr;
+  }
+
   bool AutoscrollController::AutoscrollInProgress() const noexcept
   {
     return _autoscrollType == AutoscrollType::Selection;

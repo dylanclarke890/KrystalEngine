@@ -79,6 +79,9 @@ namespace krys::boo
     KRYS_NODISCARD bool PanScrollInProgress() const noexcept;
 
     void StartAutoscrollForSelection(RenderObject *renderer) noexcept;
+    /// @brief Finds the box to autoscroll again after a scroll passed on to an enclosing box: the nearest one
+    /// that can autoscroll from what's under the pan's start (or the box itself, for other autoscrolls).
+    void UpdateAutoscrollRenderer() noexcept;
     /// @brief Starts panning @p scrollable from @p lastKnownMousePosition (in the window).
     void StartPanScrolling(RenderBox &scrollable, const IntPoint &lastKnownMousePosition) noexcept;
     /// @brief A mouse button was released: stops panning, unless it's the release of the press that started

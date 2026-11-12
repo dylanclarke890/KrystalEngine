@@ -1,7 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 
@@ -523,5 +527,46 @@ namespace krys::boo::tests
   (composite-operation source-over)
   (blend-mode normal))
 (restore))");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderLayer: an autoscroll scrolls boxes with scrollable overflow, and editable ones",
+                   "[Rendering][RenderLayer]")
+  {
+    EditorFixture fixture(
+      u8"<style>body{margin:0}div{width:100px;height:50px}p{height:200px;margin:0}</style>"
+      u8"<div id=hidden style='overflow:hidden'><p>text</p></div>"
+      u8"<div id=editable style='overflow:hidden' contenteditable><p>text</p></div>"
+      u8"<div id=auto style='overflow:auto'><p>text</p></div>");
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto mouse = [](PlatformEvent::Type type, IntPoint position)
+    {
+      DoublePoint point(position.X(), position.Y());
+      return PlatformMouseEvent(point, point, MouseButton::Left, type,
+                                type == PlatformEvent::Type::MousePressed ? 1 : 0, {}, MonotonicTime::Now());
+    };
+    auto autoscroll = [&](dom::DOMStringView id)
+    {
+      auto &element = fixture.ById(id);
+      auto &box = Downcast<RenderBox>(*element.Renderer());
+      auto bounds = box.AbsoluteBoundingBoxRect();
+      box.Autoscroll({bounds.X() + 10, bounds.MaxY() + 20});
+      return element.ScrollTop();
+    };
+
+    // Outside an autoscroll, revealing a point scrolls overflow: hidden too.
+    CHECK(autoscroll(u8"hidden") > 0);
+    fixture.ById(u8"hidden").SetScrollTop(0);
+
+    // Dragging a selection in the last box starts an autoscroll.
+    (void)handler.HandleMousePressEvent(mouse(PlatformEvent::Type::MousePressed, {5, 105}));
+    (void)handler.HandleMouseMoveEvent(mouse(PlatformEvent::Type::MouseMoved, {5, 145}));
+    REQUIRE(handler.AutoscrollInProgress());
+
+    // During one, only boxes with scrollable overflow and editable boxes scroll.
+    CHECK(autoscroll(u8"hidden") == 0);
+    CHECK(autoscroll(u8"editable") > 0);
+    CHECK(autoscroll(u8"auto") > 0);
+    (void)handler.HandleMouseReleaseEvent(mouse(PlatformEvent::Type::MouseReleased, {5, 145}));
   }
 }

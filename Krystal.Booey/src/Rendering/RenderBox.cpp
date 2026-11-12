@@ -4080,8 +4080,8 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Editable elements too (hasEditableStyle).
-    return false;
+    auto *element = GetElement();
+    return element && element->HasEditableStyle();
   }
 
   bool RenderBox::ScrollLayer(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,

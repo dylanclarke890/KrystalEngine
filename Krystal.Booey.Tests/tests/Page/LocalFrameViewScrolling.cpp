@@ -1,4 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
@@ -14,6 +15,7 @@
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
@@ -361,6 +363,24 @@ namespace krys::boo::tests
     CHECK(painted.ends_with(u8"(restore)"));
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the root background shows under the scrollbars",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {u8"<!DOCTYPE html><style>html{background:linear-gradient(red,blue)}body{margin:0}"
+                           u8"div{width:400px;height:600px}</style><div></div>"};
+    fixture.View().SetScrollPosition({30, 40});
+    auto painted = fixture.PaintedScrolled();
+    INFO(css::tests::ToNarrow(painted));
+    // Under the vertical scrollbar and the corner, clipped to them, the gradient is drawn as in the page.
+    for (utf8_stringview strip : {u8"(rect at (179,0) size 21x79)", u8"(rect at (179,79) size 21x21)"})
+    {
+      auto clip = painted.find(strip);
+      REQUIRE(clip != utf8_string::npos);
+      auto gradient = painted.find(u8"(draw-pattern-imagebuffer", clip);
+      CHECK(gradient < painted.find(u8"(restore)", clip));
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: scrolling into view",
                    "[Page][LocalFrameView][Scrolling]")
   {
@@ -612,6 +632,26 @@ namespace krys::boo::tests
       (void)fixture.Document->UpdateLayout();
       CHECK(fixture.View().GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Default);
       CHECK_FALSE(fixture.View().UseDarkAppearanceForScrollbars());
+    }
+
+    SECTION("the host's preference wins over the page's background")
+    {
+      class LightScrollbarsChromeClient final : public ChromeClient
+      {
+      public:
+        void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
+        {
+        }
+        KRYS_NODISCARD Maybe<ScrollbarOverlayStyle> PreferredScrollbarOverlayStyle() const noexcept override
+        {
+          return ScrollbarOverlayStyle::Light;
+        }
+      };
+      auto chrome = CreateUnique<LightScrollbarsChromeClient>();
+      auto testPage = Page::Create(krys::move(chrome));
+      PageInFrameFixture fixture(*testPage, page(u8"white"));
+      (void)fixture.Document->UpdateLayout();
+      CHECK(fixture.Frame->View()->GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Light);
     }
   }
 

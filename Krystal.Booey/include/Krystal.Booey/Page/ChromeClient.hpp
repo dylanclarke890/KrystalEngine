@@ -31,8 +31,10 @@
 #include "Krystal.Booey/Platform/Choosers/FileChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenu.hpp"
 #include "Krystal.Booey/Platform/GraphicsClient.hpp"
+#include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::html
@@ -303,6 +305,13 @@ namespace krys::boo
     KRYS_NODISCARD virtual IntPoint ScreenToRootView(const IntPoint &point) const noexcept
     {
       return point;
+    }
+
+    /// @brief The overlay scrollbars' style the host wants, whatever the page's background; null to follow
+    /// the background (light scrollbars over a dark one).
+    KRYS_NODISCARD virtual Maybe<ScrollbarOverlayStyle> PreferredScrollbarOverlayStyle() const noexcept
+    {
+      return null;
     }
 
     /// @brief The screen's size, in CSS pixels (`device-width`, `device-height`, `device-aspect-ratio`).

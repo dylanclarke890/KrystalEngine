@@ -220,7 +220,7 @@ namespace krys::boo
           }
         }
 
-        // FIXME: Update the autoscroll renderer, once there's pan scrolling.
+        renderer.View().FrameView().Frame().GetEventHandler().UpdateAutoscrollRenderer();
       }
     }
     else

@@ -388,6 +388,8 @@ namespace krys::boo
     KRYS_NODISCARD bool ShouldUpdateAutoscroll() const noexcept;
     KRYS_NODISCARD IntPoint TargetPositionInWindowForSelectionAutoscroll() const noexcept;
     KRYS_NODISCARD RenderBox *AutoscrollRenderer() const noexcept;
+    /// @brief Finds the box to autoscroll again, after a scroll passed on from it to an enclosing box.
+    void UpdateAutoscrollRenderer() noexcept;
 
     void SetMouseDownMayStartAutoscroll() noexcept
     {

@@ -16,6 +16,7 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -807,6 +808,18 @@ namespace krys::boo::tests
         CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::SouthPanning);
       }
 
+      SECTION("the icon is painted again as the contents move under it")
+      {
+        (void)fixture.Document->UpdateLayout();
+        (void)view->TakeDamage();
+        (void)fixture.Move(100, 80);
+        wait();
+        REQUIRE(view->ScrollY() > 0);
+        // The moved pixels include the icon's, so the square around it is damaged.
+        auto damage = view->TakeDamage();
+        CHECK(damage.Contains(Region(IntRect(92, 12, 16, 16))));
+      }
+
       SECTION("a press stops it, and is swallowed")
       {
         (void)fixture.Move(100, 80);
@@ -864,6 +877,27 @@ namespace krys::boo::tests
       (void)fixture.Move(50, 45);
       wait();
       CHECK(box.ScrollTop() > 0);
+    }
+
+    SECTION("a box at its end passes the pan on, then pans what's under the start")
+    {
+      MouseFixture fixture(u8"<div id=a style=height:50px;overflow:auto><div style=height:60px></div></div>"
+                           u8"<div style=height:1000px></div>");
+      auto &box = fixture.ById(u8"a");
+      auto *view = fixture.Frame->View();
+      (void)fixture.Move(50, 10);
+      (void)fixture.Press(50, 10, MouseButton::Middle);
+      REQUIRE(fixture.Handler().PanScrollInProgress());
+      CHECK(fixture.Handler().AutoscrollRenderer() == box.Renderer());
+      (void)fixture.Move(50, 95);
+      for (int32 i = 0; i < 10 && view->ScrollY() < 60; ++i)
+      {
+        wait();
+      }
+      CHECK(box.ScrollTop() == 10);
+      REQUIRE(view->ScrollY() >= 60);
+      // The box has moved away from under the start, so the view pans.
+      CHECK(fixture.Handler().AutoscrollRenderer() == fixture.Document->GetRenderView());
     }
 
     SECTION("a list box")

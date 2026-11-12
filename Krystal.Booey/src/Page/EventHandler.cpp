@@ -3635,6 +3635,11 @@ namespace krys::boo
     return _autoscrollController->AutoscrollRenderer();
   }
 
+  void EventHandler::UpdateAutoscrollRenderer() noexcept
+  {
+    _autoscrollController->UpdateAutoscrollRenderer();
+  }
+
   bool EventHandler::PanScrollInProgress() const noexcept
   {
     return _autoscrollController->PanScrollInProgress();

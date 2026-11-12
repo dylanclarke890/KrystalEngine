@@ -117,6 +117,8 @@ namespace krys::boo
     Region _damage;
     /// @brief The painted contents the host moves before it paints the damage, as scrolling moved them.
     Maybe<ScrolledContents> _scrolledContents;
+    // The root background's painting area while the view paints it under its scrollbars.
+    Maybe<IntRect> _extendedBackgroundRect;
     /// @brief Renderers that paint a background fixed to the viewport (`background-attachment: fixed`): the
     /// contents can't be moved when the view scrolls. Keyed by address; renderers remove themselves.
     HashSet<const RenderElement *> _slowRepaintObjects;
@@ -285,14 +287,15 @@ namespace krys::boo
     /// @brief The scale of the frame's content (the page's scale).
     KRYS_NODISCARD float FrameScaleFactor() const noexcept;
 
-    /// @brief Whether the background is painted beyond the document, while rubber-banding: never.
+    /// @brief Whether the root background is painted beyond the document: only while the view paints it under
+    /// its scrollbars.
     KRYS_NODISCARD bool HasExtendedBackgroundRectForPainting() const noexcept
     {
-      return false;
+      return _extendedBackgroundRect.has_value();
     }
     KRYS_NODISCARD IntRect ExtendedBackgroundRectForPainting() const noexcept
     {
-      return {};
+      return _extendedBackgroundRect.value_or(IntRect());
     }
 
 #pragma region Scrolling

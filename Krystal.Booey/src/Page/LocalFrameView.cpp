@@ -31,6 +31,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
@@ -62,6 +63,8 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/Painting/BackgroundPainter.hpp"
+#include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
@@ -322,7 +325,6 @@ namespace krys::boo
 
   void LocalFrameView::ScrollContents(const IntSize &scrollDelta) noexcept
   {
-    // FIXME: The pan scroll icon, once there's pan scrolling.
     IntRect clipRect(IntPoint(), _frameRect.Size());
     IntRect scrollViewRect = RectToCopyOnScroll();
     IntRect updateRect = clipRect;
@@ -339,6 +341,18 @@ namespace krys::boo
     {
       // We need to repaint the entire backing store.
       ScrollContentsSlowPath(updateRect);
+    }
+
+    // The pan scroll icon stays where the pan started while the contents move under it, so what's around it
+    // is painted again.
+    if (_panScrollIconPosition)
+    {
+      int32 length =
+        2 * (PanScrollIconSize + std::max(std::abs(scrollDelta.Width()), std::abs(scrollDelta.Height())));
+      IntRect panScrollIconDirtyRect(_panScrollIconPosition->X() - length / 2,
+                                     _panScrollIconPosition->Y() - length / 2, length, length);
+      panScrollIconDirtyRect.Intersect(clipRect);
+      InvalidateRect(panScrollIconDirtyRect);
     }
   }
 
@@ -1043,9 +1057,49 @@ namespace krys::boo
 
   void LocalFrameView::PaintScrollbarsBackground(GraphicsContext &context) noexcept
   {
-    // As the root background is painted: its colour over the base background colour, unless the view is
-    // transparent.
-    // FIXME: The root's background images, which stop at the scrollbars.
+    // Classic scrollbars have no track, so the canvas shows through: the root element paints its background
+    // there too, as if the document extended under them.
+    auto *rootView = GetRenderView();
+    RefPtr documentElement = Frame().Document() ? Frame().Document()->DocumentElement() : nullptr;
+    auto *rootBox = documentElement ? DynamicDowncast<RenderBox>(documentElement->Renderer()) : nullptr;
+    if (rootView && rootBox)
+    {
+      float scale = FrameScaleFactor();
+      auto paintUnder = [&](const IntRect &rect)
+      {
+        if (rect.IsEmpty())
+        {
+          return;
+        }
+        GraphicsContextStateSaver stateSaver(context);
+        context.Clip(FloatRect(rect));
+        context.Translate(static_cast<float>(-ScrollX()), static_cast<float>(-ScrollY()));
+        context.Scale(scale);
+
+        FloatRect contentsRect(rect);
+        contentsRect.Move(static_cast<float>(ScrollX()), static_cast<float>(ScrollY()));
+        contentsRect.Scale(1 / scale);
+        auto paintRect = LayoutRect(EnclosingIntRect(contentsRect));
+        auto extendedRect = rootView->UnextendedBackgroundRect();
+        extendedRect.Unite(paintRect);
+        SetForScope extendBackground(_extendedBackgroundRect, Maybe<IntRect>(SnappedIntRect(extendedRect)));
+
+        PaintInfo paintInfo(context, paintRect, PaintPhase::BlockBackground, {});
+        BackgroundPainter(*rootBox, paintInfo).PaintBackground(extendedRect, BleedAvoidance::None);
+      };
+      if (_horizontalScrollbar)
+      {
+        paintUnder(_horizontalScrollbar->FrameRect());
+      }
+      if (_verticalScrollbar)
+      {
+        paintUnder(_verticalScrollbar->FrameRect());
+      }
+      paintUnder(ScrollCornerRect());
+      return;
+    }
+
+    // Without a root element, the base background colour, unless the view is transparent.
     Color color = IsTransparent() ? Color() : BaseBackgroundColor();
     if (auto *renderView = GetRenderView())
     {
@@ -1329,10 +1383,15 @@ namespace krys::boo
 
   void LocalFrameView::RecalculateScrollbarOverlayStyle() noexcept
   {
-    // FIXME: The client's preferred style (ChromeClient::preferredScrollbarOverlayStyle), once a host wants
-    // one.
     auto style = [this]
     {
+      if (auto *page = Frame().GetPage())
+      {
+        if (auto clientStyle = page->GetChromeClient().PreferredScrollbarOverlayStyle())
+        {
+          return *clientStyle;
+        }
+      }
       auto background = DocumentBackgroundColor();
       if (background.IsVisible())
       {

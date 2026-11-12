@@ -5068,9 +5068,14 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Boxes being autoscrolled (autoscrollInProgress).
-
     auto &box = *GetRenderBox();
+
+    if (box.View().FrameView().Frame().GetEventHandler().AutoscrollInProgress())
+    {
+      // The "programmatically" here is misleading; this asks whether the box has scrollable overflow, or is a
+      // special case like a form control.
+      return box.CanBeProgramaticallyScrolled();
+    }
 
     // Programmatic scrolls can scroll overflow: hidden but not overflow: clip.
     return box.HasPotentiallyScrollableOverflow()

@@ -5940,8 +5940,11 @@ namespace krys::boo
       return false;
     }
 
-    const LayoutPoint &adjustedLocation = accumulatedOffset;
-    // FIXME: The frame view's scroll position (added for the view) comes with frame view scrolling.
+    LayoutPoint adjustedLocation = accumulatedOffset;
+    if (auto *renderView = DynamicDowncast<RenderView>(*this))
+    {
+      adjustedLocation += ToLayoutSize(renderView->FrameView().GetScrollPosition());
+    }
 
     const auto &set = _floatingObjects->Set();
     for (auto it = set.rbegin(); it != set.rend(); ++it)
