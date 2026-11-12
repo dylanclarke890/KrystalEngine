@@ -286,7 +286,6 @@ namespace krys::boo
     KRYS_NODISCARD float FrameScaleFactor() const noexcept;
 
     /// @brief Whether the background is painted beyond the document, while rubber-banding: never.
-    /// FIXME: Comes with scrolling the viewport.
     KRYS_NODISCARD bool HasExtendedBackgroundRectForPainting() const noexcept
     {
       return false;
@@ -907,7 +906,6 @@ namespace krys::boo
     /// the scrollbars.
     KRYS_NODISCARD IntRect RectToCopyOnScroll() const noexcept;
     /// @brief Scrolls to @p desiredPosition, within the scroll range.
-    // FIXME: Adding and removing scrollbars.
     void UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept;
 
   public:

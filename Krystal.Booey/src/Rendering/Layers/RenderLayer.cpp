@@ -7012,8 +7012,6 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: Fixed container sampling (isForFixedContainerSampling) comes with scrolling.
-
     // The natural thing would be to keep HitTestingTransformState on the stack, but it's big, so we
     // heap-allocate.
 

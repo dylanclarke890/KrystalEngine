@@ -748,8 +748,7 @@ namespace krys::boo
 
   Ref<Scrollbar> RenderLayerScrollableArea::CreateScrollbar(ScrollbarOrientation orientation) noexcept
   {
-    // FIXME: The scrollbars of user agent shadow trees' hosts (rendererForScrollbar), once there are any. Add
-    // the scrollbar to the frame view's widgets, once it has some.
+    // FIXME: The scrollbars of user agent shadow trees' hosts (rendererForScrollbar), once there are any.
     auto widget = Scrollbar::CreateNativeScrollbar(*this, orientation, ScrollbarWidthStyle());
     DidAddScrollbar(widget.get(), orientation);
     return widget;

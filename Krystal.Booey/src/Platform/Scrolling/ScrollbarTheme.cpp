@@ -32,7 +32,6 @@ namespace krys::boo
 {
   ScrollbarTheme &ScrollbarTheme::Theme() noexcept
   {
-    // FIXME: Mock scrollbars (mockScrollbarsEnabled), if they're ever wanted.
     static ScrollbarThemeAdwaita theme;
     return theme;
   }

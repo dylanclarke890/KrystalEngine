@@ -1428,7 +1428,6 @@ namespace krys::boo
 
     // To combat the inability to scroll on a page with overflow:hidden on the root when scaled, disregard
     // hidden when there is a frameScaleFactor that is greater than one on the main frame.
-    // FIXME: Also when there's a header or footer, once there are those.
     bool overrideHidden = Frame().FrameScaleFactor() > 1;
 
     Overflow overflowX = renderer.Style().OverflowX();
@@ -2627,7 +2626,6 @@ namespace krys::boo
 
   void LocalFrameView::ScrollPositionChanged(const ScrollPosition &, const ScrollPosition &) noexcept
   {
-    // FIXME: Throttling the scroll events (eventThrottlingDelay).
     ScheduleScrollEvent();
 
     if (auto *renderView = GetRenderViewForUpdate())
@@ -2797,8 +2795,7 @@ namespace krys::boo
 
   LayoutPoint LocalFrameView::ScrollPositionForFixedPosition() const noexcept
   {
-    // FIXME: The layout viewport's origin (visualViewportEnabled), and the header and footer, once there are
-    // visual viewports and headers.
+    // FIXME: The layout viewport's origin (visualViewportEnabled), once there are visual viewports.
     LayoutPoint position(GetScrollPosition());
     LayoutRect visibleContentRect(VisibleContentRect());
     LayoutSize totalContentsSize(ContentsSize());

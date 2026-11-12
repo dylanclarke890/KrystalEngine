@@ -139,7 +139,6 @@ namespace krys::boo
       if (auto *view = frame->View())
       {
         // The visual viewport is the visible content, less the scrollbars, unscaled.
-        // FIXME: The header and footer (visibleDocumentRect), once there are those.
         auto visualViewportRect = FloatRect(view->VisibleContentRect());
         visualViewportRect.Scale(1 / view->FrameScaleFactor());
         auto layoutViewportRect = FloatRect(view->LayoutViewportRect());

@@ -534,8 +534,6 @@ namespace krys::boo
     UpdateLastScrollbarUnderMouse(scrollbar.get(), SetOrClearLastScrollbar::Set);
     bool passedToScrollbar = scrollbar && PassMousePressEventToScrollbar(mouseEvent, scrollbar.get());
 
-    // FIXME: Pan scrolling.
-
     // A press while panning only stops it: the click mustn't go on to do what it would, like follow a link.
     bool isPanScrollInProgress = PanScrollInProgress();
     StopAutoscrollTimer();
@@ -1276,8 +1274,6 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Pan scrolling.
-
     // Check for cases where we are too early for events -- possible unmatched key up from pressing return in
     // the location bar.
     RefPtr<dom::Element> element = ShareRefPtr(EventTargetElementForDocument(_frame.Document()));
@@ -1942,8 +1938,6 @@ namespace krys::boo
       return null;
     }
 
-    // FIXME: Pan scrolling and auto-hiding cursors.
-
     // Use always pointer cursor for scrollbars.
     if (result.GetScrollbar())
     {
@@ -2207,8 +2201,6 @@ namespace krys::boo
     (void)document->HitTest(request, result);
 
     RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement());
-
-    // FIXME: Widgets (isOverWidget, passWheelEventToWidget), once there are any.
 
     // The start and end of a touchpad's gesture move nothing, so no event fires for them.
     if (element && (event.DeltaX() || event.DeltaY()))

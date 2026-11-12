@@ -462,15 +462,13 @@ namespace krys::boo
 
   LayoutUnit RenderView::ClientLogicalWidthForFixedPosition() const noexcept
   {
-    // FIXME: Fixed elements that lay out relative to the frame, and the layout viewport
-    // (visualViewportEnabled), once the frame view scrolls.
+    // FIXME: The layout viewport (visualViewportEnabled), once there are visual viewports.
     return ClientLogicalWidth();
   }
 
   LayoutUnit RenderView::ClientLogicalHeightForFixedPosition() const noexcept
   {
-    // FIXME: Fixed elements that lay out relative to the frame, and the layout viewport
-    // (visualViewportEnabled), once the frame view scrolls.
+    // FIXME: The layout viewport (visualViewportEnabled), once there are visual viewports.
     return ClientLogicalHeight();
   }
 

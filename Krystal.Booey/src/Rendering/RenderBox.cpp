@@ -949,7 +949,6 @@ namespace krys::boo
     }
     auto *scrollableArea = Layer()->GetScrollableArea();
     krys_debug_assert(scrollableArea);
-    // FIXME: The wheel event monitor (setupWheelEventMonitor), once there are wheel events.
     scrollableArea->ScrollToXPosition(newLeft, options);
   }
 
@@ -961,7 +960,6 @@ namespace krys::boo
     }
     auto *scrollableArea = Layer()->GetScrollableArea();
     krys_debug_assert(scrollableArea);
-    // FIXME: The wheel event monitor (setupWheelEventMonitor), once there are wheel events.
     scrollableArea->ScrollToYPosition(newTop, options);
   }
 
@@ -974,7 +972,6 @@ namespace krys::boo
     }
     auto *scrollableArea = Layer()->GetScrollableArea();
     krys_debug_assert(scrollableArea);
-    // FIXME: The wheel event monitor (setupWheelEventMonitor), once there are wheel events.
     scrollableArea->SetScrollPosition(position, options);
   }
 
@@ -4117,7 +4114,6 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Autoscrolling near the edge of a box (the start box and the wheel event's point).
     RenderBlock *nextScrollBlock = ContainingBlock();
 
     if (nextScrollBlock && !nextScrollBlock->IsRenderView())

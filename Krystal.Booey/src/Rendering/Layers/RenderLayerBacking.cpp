@@ -1471,8 +1471,6 @@ namespace krys::boo
       primaryLayerPosition = {};
     }
 
-    // FIXME: Fixed container edges (setNeedsFixedContainerEdgesUpdateIfNeeded), once hosts sample them.
-
     if (_contentsContainmentLayer)
     {
       _contentsContainmentLayer->SetPreserves3D(preserves3D);

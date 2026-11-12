@@ -85,7 +85,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 
 ### Missing
 
-- There's no scroll anchoring, autoscroll timers beyond the scrollbar repeat, kinetic scrolling or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
+- There's no scroll anchoring, kinetic scrolling or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
 - Scroll snapping for touchpads without phases: a touchpad that isn't a precision one (or a host that doesn't take `OnTouchpadPan`) reports its pans as the wheel's notches, each going to the next snap position, so its small deltas page through a mandatory container.
 - There are no native scrollbars.
 - `VisualViewport` is the layout viewport at the page scale and never scrolls within it, so its `scroll` event never fires (its `resize` does). There are no obscured insets, auto-sizing, base viewport layout size scale factor (FIXME in `VisualViewport.cpp`) or layout viewport separate from the scroll position. Pinch zoom is only the page scale (1 to 5) from the view's gesture recogniser.
