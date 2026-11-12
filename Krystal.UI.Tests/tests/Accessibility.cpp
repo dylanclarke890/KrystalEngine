@@ -384,6 +384,50 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
+  TEST_CASE("View: accessibility of text styles", "[UI][Accessibility]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; background: white }</style>"
+                  u8"<p style='font: 16px monospace; color: red'>plain <b>bold</b> <i>it</i> <u>under</u> "
+                  u8"<s>gone</s> <span style='background: blue'>blue</span></p>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    AccessibilityWindow window;
+    view.AttachAccessibility(window, {0, 0});
+    auto &tree = *window.Tree;
+    auto paragraph = FindByRole(tree, tree.Root(), pal::AccessibilityRole::Paragraph);
+    REQUIRE(paragraph != 0);
+    auto text = tree.Text(paragraph);
+    REQUIRE(text == u8"plain bold it under gone blue");
+
+    // Each text node is a run, with how its text is drawn.
+    auto plain = tree.TextRunAt(paragraph, 0);
+    REQUIRE(plain);
+    CHECK(plain->Start == 0);
+    CHECK(plain->End == 6);
+    // The face drawn with, not a generic family's name.
+    CHECK_FALSE(plain->Style.FontName.empty());
+    CHECK_FALSE(plain->Style.FontName.starts_with(u8"-internal-"));
+    CHECK(plain->Style.FontSize == 16);
+    CHECK(plain->Style.FontWeight == 400);
+    CHECK_FALSE(plain->Style.Italic);
+    CHECK(plain->Style.ForegroundColor == 0xFF'FF'00'00u);
+    CHECK(plain->Style.BackgroundColor == 0xFF'FF'FF'FFu);
+
+    auto bold = tree.TextRunAt(paragraph, text.find(u8"bold") + 1);
+    REQUIRE(bold);
+    CHECK(bold->Start == text.find(u8"bold"));
+    CHECK(bold->End == text.find(u8"bold") + 4);
+    CHECK(bold->Style.FontWeight == 700);
+    CHECK(tree.TextRunAt(paragraph, text.find(u8"it"))->Style.Italic);
+    CHECK(tree.TextRunAt(paragraph, text.find(u8"under"))->Style.Underline);
+    CHECK(tree.TextRunAt(paragraph, text.find(u8"gone"))->Style.Strikethrough);
+    CHECK(tree.TextRunAt(paragraph, text.find(u8"blue"))->Style.BackgroundColor == 0xFF'00'00'FFu);
+    // Past the end is the last character's run.
+    CHECK(tree.TextRunAt(paragraph, text.size())->Style.BackgroundColor == 0xFF'00'00'FFu);
+  }
+
   TEST_CASE("View: accessibility of overlays", "[UI][Accessibility]")
   {
     View view({400, 300});
@@ -492,7 +536,8 @@ namespace krys::ui::tests
                   u8"<input id=field aria-label=Name value=Hello>"
                   u8"<input id=box type=checkbox aria-label=Agree>"
                   u8"<textarea aria-label=Notes style='width: 100px; font: 16px monospace'>"
-                  u8"aaaa bbbb cccc</textarea>");
+                  u8"aaaa bbbb cccc</textarea>"
+                  u8"<div role=textbox contenteditable aria-label=Rich><b>Bold</b> plain</div>");
     WaitForLoad(view);
     view.UpdateRendering();
     int32 clicks = 0;
@@ -580,6 +625,46 @@ namespace krys::ui::tests
       CHECK(SUCCEEDED(line->GetText(-1, &firstLine)));
       CHECK(std::wstring(firstLine ? firstLine : L"") == L"aaaa bbbb ");
       ::SysFreeString(firstLine);
+
+      // Text attributes come from how the text is drawn, mixed where it differs.
+      ComRef<IUIAutomationElement> rich;
+      FindByName(*automation.Pointer, *root.Pointer, L"Rich", rich);
+      REQUIRE(rich);
+      ComRef<IUIAutomationTextPattern> richText;
+      REQUIRE(SUCCEEDED(rich->GetCurrentPatternAs(UIA_TextPatternId, __uuidof(IUIAutomationTextPattern),
+                                                  reinterpret_cast<void **>(&richText))));
+      REQUIRE(richText);
+      ComRef<IUIAutomationTextRange> richRange;
+      REQUIRE(SUCCEEDED(richText->get_DocumentRange(&richRange)));
+      VARIANT weight;
+      ::VariantInit(&weight);
+      REQUIRE(SUCCEEDED(richRange->GetAttributeValue(UIA_FontWeightAttributeId, &weight)));
+      IUnknown *mixed = nullptr;
+      REQUIRE(SUCCEEDED(::UiaGetReservedMixedAttributeValue(&mixed)));
+      CHECK(weight.vt == VT_UNKNOWN);
+      CHECK(weight.punkVal == mixed);
+      ::VariantClear(&weight);
+      VARIANT italic;
+      ::VariantInit(&italic);
+      REQUIRE(SUCCEEDED(richRange->GetAttributeValue(UIA_IsItalicAttributeId, &italic)));
+      CHECK(italic.vt == VT_BOOL);
+      CHECK(italic.boolVal == VARIANT_FALSE);
+
+      // Finding an attribute's value gives the run that has it.
+      VARIANT bold;
+      bold.vt = VT_I4;
+      bold.lVal = 700;
+      ComRef<IUIAutomationTextRange> found;
+      REQUIRE(SUCCEEDED(richRange->FindAttribute(UIA_FontWeightAttributeId, bold, FALSE, &found)));
+      REQUIRE(found);
+      BSTR foundText = nullptr;
+      CHECK(SUCCEEDED(found->GetText(-1, &foundText)));
+      CHECK(std::wstring(foundText ? foundText : L"") == L"Bold");
+      ::SysFreeString(foundText);
+      italic.boolVal = VARIANT_TRUE;
+      ComRef<IUIAutomationTextRange> none;
+      REQUIRE(SUCCEEDED(richRange->FindAttribute(UIA_IsItalicAttributeId, italic, FALSE, &none)));
+      CHECK_FALSE(none);
 
       ComRef<IUIAutomationElement> box;
       FindByName(*automation.Pointer, *root.Pointer, L"Agree", box);

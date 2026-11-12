@@ -195,6 +195,33 @@ namespace krys::pal
     uint64 Length {0};
   };
 
+  /// @brief How a run of text is drawn, for assistive technology.
+  struct AccessibilityTextStyle
+  {
+    /// @brief The first font family asked for.
+    utf8_string FontName;
+    /// @brief The font's size, in pixels.
+    float FontSize {0};
+    uint16 FontWeight {400};
+    bool Italic {false};
+    bool Underline {false};
+    bool Strikethrough {false};
+    /// @brief The text's colour, as 0xAARRGGBB.
+    uint32 ForegroundColor {0xFF'00'00'00};
+    /// @brief The colour behind the text (the nearest background drawn), as 0xAARRGGBB.
+    uint32 BackgroundColor {0};
+
+    KRYS_NODISCARD bool operator==(const AccessibilityTextStyle &) const noexcept = default;
+  };
+
+  /// @brief A run of a node's text drawn alike, in bytes of its UTF-8 text.
+  struct AccessibilityTextRun
+  {
+    uint64 Start {0};
+    uint64 End {0};
+    AccessibilityTextStyle Style;
+  };
+
   /// @brief What changed in a node, which the window tells assistive technology.
   enum class AccessibilityEvent : uint8
   {
@@ -278,5 +305,9 @@ namespace krys::pal
     /// @brief Where each line of @p node's text after the first starts, as ascending offsets in its text, as
     /// it's laid out (wrapped lines included).
     KRYS_NODISCARD virtual List<uint64> TextLineStarts(AccessibilityNodeID node) noexcept = 0;
+    /// @brief The run of @p node's text drawn alike that the character at @p offset is in (the last
+    /// character's, past the end); null if it has no text.
+    KRYS_NODISCARD virtual Maybe<AccessibilityTextRun> TextRunAt(AccessibilityNodeID node,
+                                                                 uint64 offset) noexcept = 0;
   };
 }

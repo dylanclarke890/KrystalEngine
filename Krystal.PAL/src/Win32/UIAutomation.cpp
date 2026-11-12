@@ -214,6 +214,58 @@ namespace krys::pal::win32
       value.bstrVal = ToBSTR(text);
     }
 
+    void SetDouble(VARIANT &value, double number) noexcept
+    {
+      value.vt = VT_R8;
+      value.dblVal = number;
+    }
+
+    /// @brief @p argb (0xAARRGGBB) as a COLORREF (0x00BBGGRR), as UI Automation gives colours.
+    KRYS_NODISCARD long ToColorRef(uint32 argb) noexcept
+    {
+      return static_cast<long>(((argb & 0xFFu) << 16) | (argb & 0xFF00u) | ((argb >> 16) & 0xFFu));
+    }
+
+    /// @brief Sets @p value to @p style's @p attribute; whether the text has that attribute.
+    bool SetTextAttribute(VARIANT &value, const AccessibilityTextStyle &style,
+                          TEXTATTRIBUTEID attribute) noexcept
+    {
+      switch (attribute)
+      {
+        case UIA_FontNameAttributeId:   SetString(value, style.FontName); return true;
+        // UI Automation's sizes are in points, at 96 pixels to the inch.
+        case UIA_FontSizeAttributeId:   SetDouble(value, style.FontSize * 0.75); return true;
+        case UIA_FontWeightAttributeId: SetInt(value, style.FontWeight); return true;
+        case UIA_IsItalicAttributeId:   SetBool(value, style.Italic); return true;
+        case UIA_UnderlineStyleAttributeId:
+          SetInt(value, style.Underline ? TextDecorationLineStyle_Single : TextDecorationLineStyle_None);
+          return true;
+        case UIA_StrikethroughStyleAttributeId:
+          SetInt(value, style.Strikethrough ? TextDecorationLineStyle_Single : TextDecorationLineStyle_None);
+          return true;
+        case UIA_ForegroundColorAttributeId: SetInt(value, ToColorRef(style.ForegroundColor)); return true;
+        case UIA_BackgroundColorAttributeId: SetInt(value, ToColorRef(style.BackgroundColor)); return true;
+        default:                             return false;
+      }
+    }
+
+    /// @brief Whether @p a and @p b are the same attribute value.
+    KRYS_NODISCARD bool SameAttributeValue(const VARIANT &a, const VARIANT &b) noexcept
+    {
+      if (a.vt != b.vt)
+      {
+        return false;
+      }
+      switch (a.vt)
+      {
+        case VT_BSTR: return std::wstring_view(a.bstrVal ? a.bstrVal : L"") == (b.bstrVal ? b.bstrVal : L"");
+        case VT_R8:   return a.dblVal == b.dblVal;
+        case VT_I4:   return a.lVal == b.lVal;
+        case VT_BOOL: return a.boolVal == b.boolVal;
+        default:      return false;
+      }
+    }
+
     // Text units, for the text pattern. Word boundaries are where a run of letters and digits, or a mark,
     // starts; line boundaries are where the host lays out lines, and paragraph boundaries follow line breaks.
 
@@ -1236,15 +1288,50 @@ namespace krys::pal::win32
       return S_OK;
     }
 
-    IFACEMETHODIMP FindAttribute(TEXTATTRIBUTEID, VARIANT, BOOL,
+    IFACEMETHODIMP FindAttribute(TEXTATTRIBUTEID attribute, VARIANT sought, BOOL backward,
                                  ITextRangeProvider **result) noexcept override
     {
       if (!result)
       {
         return E_POINTER;
       }
-      // The text has no attributes to find.
       *result = nullptr;
+      auto *owner = _element->Owner();
+      if (!owner || !_element->Info())
+      {
+        return UIA_E_ELEMENTNOTAVAILABLE;
+      }
+      // The first (or last) run in the range with the value, cut to the range.
+      auto &tree = owner->Tree();
+      auto text = tree.Text(_element->Node());
+      auto start = ToUTF8Offset(text, _start);
+      auto end = ToUTF8Offset(text, _end);
+      Maybe<AccessibilityTextRun> found;
+      for (auto position = start; position < end;)
+      {
+        auto run = tree.TextRunAt(_element->Node(), position);
+        if (!run || run->End <= position)
+        {
+          break;
+        }
+        VARIANT value;
+        ::VariantInit(&value);
+        if (SetTextAttribute(value, run->Style, attribute) && SameAttributeValue(value, sought))
+        {
+          found = run;
+        }
+        ::VariantClear(&value);
+        if (found && !backward)
+        {
+          break;
+        }
+        position = run->End;
+      }
+      if (found)
+      {
+        *result = new UIATextRange(*_element, ToUTF16Offset(text, (std::max)(found->Start, start)),
+                                   ToUTF16Offset(text, (std::min)(found->End, end)));
+      }
       return S_OK;
     }
 
@@ -1299,8 +1386,38 @@ namespace krys::pal::win32
         SetBool(*value, !info->States.Contains(AccessibilityState::Editable));
         return S_OK;
       }
-      value->vt = VT_UNKNOWN;
-      return ::UiaGetReservedNotSupportedValue(&value->punkVal);
+      // The value of the first run in the range, unless another run in it differs.
+      auto &tree = _element->Owner()->Tree();
+      auto text = tree.Text(_element->Node());
+      auto start = ToUTF8Offset(text, _start);
+      auto end = ToUTF8Offset(text, _end);
+      auto run = tree.TextRunAt(_element->Node(), start);
+      if (!run || !SetTextAttribute(*value, run->Style, attribute))
+      {
+        ::VariantClear(value);
+        value->vt = VT_UNKNOWN;
+        return ::UiaGetReservedNotSupportedValue(&value->punkVal);
+      }
+      for (auto position = run->End; position < end;)
+      {
+        auto next = tree.TextRunAt(_element->Node(), position);
+        if (!next || next->End <= position)
+        {
+          break;
+        }
+        VARIANT other;
+        ::VariantInit(&other);
+        bool same = SetTextAttribute(other, next->Style, attribute) && SameAttributeValue(*value, other);
+        ::VariantClear(&other);
+        if (!same)
+        {
+          ::VariantClear(value);
+          value->vt = VT_UNKNOWN;
+          return ::UiaGetReservedMixedAttributeValue(&value->punkVal);
+        }
+        position = next->End;
+      }
+      return S_OK;
     }
 
     IFACEMETHODIMP GetBoundingRectangles(SAFEARRAY **result) noexcept override

@@ -4,11 +4,18 @@
 #include "Krystal.Booey/Accessibility/AXNotifications.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.UI/View.hpp"
 #include <cmath>
@@ -145,6 +152,46 @@ namespace krys::ui
         case AccessibilityRole::SpinButton:        return true;
         default:                                   return false;
       }
+    }
+
+    /// @brief @p color as 0xAARRGGBB.
+    KRYS_NODISCARD uint32 ToARGB(const boo::Color &color) noexcept
+    {
+      auto [r, g, b, a] = color.ToColorTypeLossy<SRGBA<uint8>>().Resolved();
+      return (static_cast<uint32>(a) << 24) | (static_cast<uint32>(r) << 16) | (static_cast<uint32>(g) << 8)
+             | b;
+    }
+
+    /// @brief How the text @p renderer draws looks, for assistive technology.
+    KRYS_NODISCARD pal::AccessibilityTextStyle TextStyleOf(const boo::RenderObject &renderer) noexcept
+    {
+      const auto &style = renderer.Style();
+      const auto &font = style.GetFontDescription();
+      pal::AccessibilityTextStyle result;
+      // The face used, rather than the family asked for (which may be a generic family).
+      result.FontName = style.GetFontCascade().PrimaryFont()->PlatformData().FamilyName();
+      if (result.FontName.empty() && font.FamilyCount())
+      {
+        result.FontName = utf8_string(font.FirstFamily().View());
+      }
+      result.FontSize = style.ComputedFontSize();
+      result.FontWeight = static_cast<uint16>(static_cast<float>(font.Weight()));
+      result.Italic = boo::IsItalic(font.FontStyleSlope());
+      auto decorations = style.TextDecorationLineInEffect();
+      result.Underline = decorations.HasUnderline();
+      result.Strikethrough = decorations.HasLineThrough();
+      result.ForegroundColor = ToARGB(style.ColorResolvingCurrentColor(boo::css::PropertyId::Color));
+      // The background is the nearest one drawn behind the text.
+      for (auto *ancestor = &renderer; ancestor; ancestor = ancestor->Parent())
+      {
+        auto background = ancestor->Style().ColorResolvingCurrentColor(boo::css::PropertyId::BackgroundColor);
+        if (background.IsVisible())
+        {
+          result.BackgroundColor = ToARGB(background);
+          break;
+        }
+      }
+      return result;
     }
 
     /// @brief The event Krystal.PAL has for @p notification, if it has one.
@@ -876,5 +923,47 @@ namespace krys::ui
       lineStart = next;
     }
     return starts;
+  }
+
+  Maybe<pal::AccessibilityTextRun> ViewAccessibility::TextRunAt(pal::AccessibilityNodeID node,
+                                                                uint64 offset) noexcept
+  {
+    auto *object = Object(node);
+    auto text = object ? Text(node) : utf8_string {};
+    if (text.empty())
+    {
+      return null;
+    }
+    offset = (std::min)(offset, static_cast<uint64>(text.size() - 1));
+    // The character at the offset is the one before the position after it, in the text node it's in.
+    auto position = object->VisiblePositionForIndex(static_cast<int32>(offset + 1)).DeepEquivalent();
+    auto *container = position.GetContainerNode();
+    const boo::RenderObject *renderer = nullptr;
+    for (auto *ancestor = container; ancestor && !renderer; ancestor = ancestor->ParentNode())
+    {
+      renderer = ancestor->Renderer();
+    }
+    if (!renderer)
+    {
+      return null;
+    }
+    pal::AccessibilityTextRun run {offset, offset + 1, TextStyleOf(*renderer)};
+    // A text node is drawn alike throughout.
+    if (auto *textNode = DynamicDowncast<boo::dom::Text>(container))
+    {
+      auto start =
+        object->IndexForVisiblePosition(boo::VisiblePosition(boo::FirstPositionInOrBeforeNode(textNode)));
+      auto end =
+        object->IndexForVisiblePosition(boo::VisiblePosition(boo::LastPositionInOrAfterNode(textNode)));
+      if (start >= 0 && static_cast<uint64>(start) <= offset)
+      {
+        run.Start = static_cast<uint64>(start);
+      }
+      if (end > 0 && static_cast<uint64>(end) > offset)
+      {
+        run.End = (std::min)(static_cast<uint64>(end), static_cast<uint64>(text.size()));
+      }
+    }
+    return run;
   }
 }
