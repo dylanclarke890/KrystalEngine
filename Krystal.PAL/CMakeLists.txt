@@ -56,11 +56,13 @@ if(WIN32)
     PRIVATE
       include/Krystal.PAL/Win32/DirectManipulationPan.hpp
       include/Krystal.PAL/Win32/DropTarget.hpp
+      include/Krystal.PAL/Win32/UIAutomation.hpp
       include/Krystal.PAL/Win32/Utils.hpp
       include/Krystal.PAL/Win32/Win32Window.hpp
       src/Win32/DirectManipulationPan.cpp
       src/Win32/DropTarget.cpp
       src/Win32/Platform.cpp
+      src/Win32/UIAutomation.cpp
       src/Win32/Utils.cpp
       src/Win32/Win32Window.cpp
       src/Win32/XInputGamepadBackend.cpp

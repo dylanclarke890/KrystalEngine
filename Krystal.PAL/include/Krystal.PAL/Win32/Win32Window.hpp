@@ -15,6 +15,7 @@ namespace krys::pal::win32
 {
   class DirectManipulationPan;
   class DropTarget;
+  class UIAutomation;
 
   class Win32Window final : public IWindow
   {
@@ -60,8 +61,8 @@ namespace krys::pal::win32
     /// @brief The display the refresh rate was last read for, and its rate; a display change clears them.
     mutable HMONITOR _refreshRateMonitor {nullptr};
     mutable Maybe<uint32> _refreshRate;
-    /// @brief The tree the window exposes to assistive technology, if the host gave one.
-    IAccessibilityTree *_accessibilityTree {nullptr};
+    /// @brief Exposes the host's accessibility tree to UI Automation, while the host gives one.
+    UniquePtr<UIAutomation> _uiAutomation;
 
   public:
     Win32Window(const WindowSettings &settings);

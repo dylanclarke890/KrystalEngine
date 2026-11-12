@@ -6,6 +6,18 @@
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
 
+#ifdef _WIN32
+  #include "Krystal.PAL/Platform.hpp"
+  #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+  #endif
+  #include <ole2.h>
+  #include <uiautomation.h>
+  #include <windows.h>
+  // Windows' macro would hide Krystal.PAL's function.
+  #undef CreateWindow
+#endif
+
 namespace krys::ui::tests
 {
   namespace
@@ -294,4 +306,152 @@ namespace krys::ui::tests
       CHECK(window.Tree == nullptr);
     }
   }
+#ifdef _WIN32
+  namespace
+  {
+    /// @brief Releases a COM interface when it goes.
+    template <typename T>
+    struct ComRef
+    {
+      T *Pointer {nullptr};
+
+      ComRef() noexcept = default;
+      ComRef(const ComRef &) = delete;
+      ComRef &operator=(const ComRef &) = delete;
+      ~ComRef() noexcept
+      {
+        if (Pointer)
+        {
+          Pointer->Release();
+        }
+      }
+
+      T *operator->() const noexcept
+      {
+        return Pointer;
+      }
+      T **operator&() noexcept
+      {
+        return &Pointer;
+      }
+      explicit operator bool() const noexcept
+      {
+        return Pointer != nullptr;
+      }
+    };
+
+    /// @brief The first element under @p root named @p name.
+    void FindByName(IUIAutomation &automation, IUIAutomationElement &root, const wchar_t *name,
+                    ComRef<IUIAutomationElement> &found) noexcept
+    {
+      VARIANT value;
+      value.vt = VT_BSTR;
+      value.bstrVal = ::SysAllocString(name);
+      ComRef<IUIAutomationCondition> condition;
+      (void)automation.CreatePropertyCondition(UIA_NamePropertyId, value, &condition);
+      ::VariantClear(&value);
+      if (condition)
+      {
+        (void)root.FindFirst(TreeScope_Descendants, condition.Pointer, &found);
+      }
+    }
+  }
+
+  TEST_CASE("View: UI Automation", "[UI][Accessibility]")
+  {
+    pal::Initialise();
+    auto window = pal::CreateWindow({.Title = "Accessibility", .Size = {400, 300}, .Visible = false});
+    REQUIRE(window.has_value());
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 }</style>"
+                  u8"<button id=button style='width: 100px; height: 40px'>Go</button>"
+                  u8"<input id=field aria-label=Name value=Hello>"
+                  u8"<input id=box type=checkbox aria-label=Agree>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    int32 clicks = 0;
+    struct ClickCounter final : boo::dom::EventListenerCallback
+    {
+      int32 &Clicks;
+      explicit ClickCounter(int32 &clicks) noexcept : Clicks(clicks)
+      {
+      }
+      void HandleEvent(boo::dom::Event &) noexcept override
+      {
+        ++Clicks;
+      }
+    };
+    view.Document()
+      .GetElementById(u8"button")
+      ->AddEventListener(boo::dom::DOMStringAtom(u8"click"),
+                         Ref<boo::dom::EventListenerCallback>(CreateRef<ClickCounter>(clicks)), false);
+    view.AttachAccessibility(**window);
+
+    auto handle = (*window)->GetWindowHandle().As<HWND>();
+    {
+      ComRef<IUIAutomation> automation;
+      REQUIRE(SUCCEEDED(::CoCreateInstance(__uuidof(CUIAutomation), nullptr, CLSCTX_INPROC_SERVER,
+                                           __uuidof(IUIAutomation), reinterpret_cast<void **>(&automation))));
+      ComRef<IUIAutomationElement> root;
+      REQUIRE(SUCCEEDED(automation->ElementFromHandle(handle, &root)));
+      REQUIRE(root);
+
+      ComRef<IUIAutomationElement> button;
+      FindByName(*automation.Pointer, *root.Pointer, L"Go", button);
+      REQUIRE(button);
+      CONTROLTYPEID type = 0;
+      CHECK(SUCCEEDED(button->get_CurrentControlType(&type)));
+      CHECK(type == UIA_ButtonControlTypeId);
+      ComRef<IUIAutomationInvokePattern> invoke;
+      REQUIRE(SUCCEEDED(button->GetCurrentPatternAs(UIA_InvokePatternId, __uuidof(IUIAutomationInvokePattern),
+                                                    reinterpret_cast<void **>(&invoke))));
+      REQUIRE(invoke);
+      CHECK(SUCCEEDED(invoke->Invoke()));
+      CHECK(clicks == 1);
+
+      ComRef<IUIAutomationElement> field;
+      FindByName(*automation.Pointer, *root.Pointer, L"Name", field);
+      REQUIRE(field);
+      ComRef<IUIAutomationValuePattern> value;
+      REQUIRE(SUCCEEDED(field->GetCurrentPatternAs(UIA_ValuePatternId, __uuidof(IUIAutomationValuePattern),
+                                                   reinterpret_cast<void **>(&value))));
+      REQUIRE(value);
+      BSTR text = nullptr;
+      CHECK(SUCCEEDED(value->get_CurrentValue(&text)));
+      CHECK(std::wstring(text ? text : L"") == L"Hello");
+      ::SysFreeString(text);
+      BSTR changed = ::SysAllocString(L"Changed");
+      CHECK(SUCCEEDED(value->SetValue(changed)));
+      ::SysFreeString(changed);
+      CHECK(Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"field")).Value()
+            == u8"Changed");
+
+      ComRef<IUIAutomationTextPattern> textPattern;
+      REQUIRE(SUCCEEDED(field->GetCurrentPatternAs(UIA_TextPatternId, __uuidof(IUIAutomationTextPattern),
+                                                   reinterpret_cast<void **>(&textPattern))));
+      REQUIRE(textPattern);
+      ComRef<IUIAutomationTextRange> range;
+      REQUIRE(SUCCEEDED(textPattern->get_DocumentRange(&range)));
+      BSTR all = nullptr;
+      CHECK(SUCCEEDED(range->GetText(-1, &all)));
+      CHECK(std::wstring(all ? all : L"") == L"Changed");
+      ::SysFreeString(all);
+
+      ComRef<IUIAutomationElement> box;
+      FindByName(*automation.Pointer, *root.Pointer, L"Agree", box);
+      REQUIRE(box);
+      ComRef<IUIAutomationTogglePattern> toggle;
+      REQUIRE(SUCCEEDED(box->GetCurrentPatternAs(UIA_TogglePatternId, __uuidof(IUIAutomationTogglePattern),
+                                                 reinterpret_cast<void **>(&toggle))));
+      REQUIRE(toggle);
+      CHECK(SUCCEEDED(toggle->Toggle()));
+      ToggleState state = ToggleState_Off;
+      CHECK(SUCCEEDED(toggle->get_CurrentToggleState(&state)));
+      CHECK(state == ToggleState_On);
+    }
+    view.DetachAccessibility();
+    window->reset();
+    pal::Shutdown();
+  }
+#endif
 }
