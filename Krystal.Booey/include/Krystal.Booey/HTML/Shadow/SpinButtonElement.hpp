@@ -27,7 +27,14 @@
 #pragma once
 
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
+#include "Krystal.Booey/Page/PopupOpeningObserver.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo
+{
+  class Page;
+}
 
 namespace krys::boo::html
 {
@@ -44,7 +51,7 @@ namespace krys::boo::html
 
   /// @brief A number field's spin button (the `::-webkit-inner-spin-button` part): its upper half steps up
   /// and its lower half down, repeating while held.
-  class SpinButtonElement final : public HTMLDivElement
+  class SpinButtonElement final : public HTMLDivElement, public PopupOpeningObserver
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SpinButtonElement);
 
@@ -60,12 +67,15 @@ namespace krys::boo::html
     // The owner clears this when it goes (RemoveSpinButtonOwner).
     SpinButtonOwner *_spinButtonOwner;
     bool _capturing {false};
+    // The page told of popups while the mouse is captured.
+    WeakPtr<boo::Page> _popupObservedPage;
     UpDownState _upDownState {UpDownState::Indeterminate};
     UpDownState _pressStartingState {UpDownState::Indeterminate};
     Timer _repeatingTimer;
 
   public:
     SpinButtonElement(dom::Document &, SpinButtonOwner &) noexcept;
+    ~SpinButtonElement() noexcept override;
 
     // The owner of SpinButtonElement must call removeSpinButtonOwner
     // because SpinButtonElement can be outlive SpinButtonOwner
@@ -99,7 +109,11 @@ namespace krys::boo::html
 
   private:
     void WillDetachRenderers() noexcept final;
-    // FIXME: Releasing the capture when a popup opens (PopupOpeningObserver::willOpenPopup).
+
+    // PopupOpeningObserver.
+    void WillOpenPopup() noexcept final;
+    void StopObservingPopups() noexcept;
+
     void DoStepAction(int32) noexcept;
     void StartRepeatingTimer() noexcept;
     void StopRepeatingTimer() noexcept;

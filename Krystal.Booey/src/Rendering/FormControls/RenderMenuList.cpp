@@ -390,6 +390,7 @@ namespace krys::boo
     {
       if (auto *page = GetDocument().GetPage())
       {
+        page->NotifyPopupOpeningObservers();
         _popup = page->GetChromeClient().CreatePopupMenu(*this);
       }
     }

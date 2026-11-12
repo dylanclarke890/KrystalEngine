@@ -51,6 +51,7 @@ namespace krys::boo
   class LocalFrame;
   class PointerCaptureController;
   class PointerLockController;
+  class PopupOpeningObserver;
 
   /// @brief The steps of the rendering update that something asked for.
   // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, paint and
@@ -110,6 +111,7 @@ namespace krys::boo
     UniquePtr<DragController> _dragController;
     UniquePtr<DragCaretController> _dragCaretController;
     RefPtr<LocalFrame> _mainFrame;
+    List<PopupOpeningObserver *> _popupOpeningObservers;
     /// @brief The steps of the rendering update in progress that haven't run yet.
     EnumSet<RenderingUpdateStep> _renderingUpdateRemainingSteps;
     /// @brief Steps asked for during a rendering update after they had run, for the next one.
@@ -156,6 +158,12 @@ namespace krys::boo
     {
       return *_chromeClient;
     }
+
+    /// @brief Tells @p observer before each popup the page opens, until it unregisters.
+    void RegisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept;
+    void UnregisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept;
+    /// @brief Tells the popup opening observers a popup is about to open; whoever opens one calls it first.
+    void NotifyPopupOpeningObservers() const noexcept;
 
     KRYS_NODISCARD EditorClient &GetEditorClient() const noexcept
     {

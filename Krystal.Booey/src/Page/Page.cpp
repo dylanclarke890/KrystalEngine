@@ -37,6 +37,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
+#include "Krystal.Booey/Page/PopupOpeningObserver.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
@@ -630,6 +631,35 @@ namespace krys::boo
     }
     _deviceScaleFactor = deviceScaleFactor;
     UpdateStyleAfterChangeInEnvironment();
+  }
+
+  void Page::RegisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept
+  {
+    _popupOpeningObservers.push_back(&observer);
+  }
+
+  void Page::UnregisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept
+  {
+    auto it = std::find(_popupOpeningObservers.begin(), _popupOpeningObservers.end(), &observer);
+    krys_debug_assert(it != _popupOpeningObservers.end());
+    if (it != _popupOpeningObservers.end())
+    {
+      _popupOpeningObservers.erase(it);
+    }
+  }
+
+  void Page::NotifyPopupOpeningObservers() const noexcept
+  {
+    // An observer may unregister as it's told.
+    auto observers = _popupOpeningObservers;
+    for (auto *observer : observers)
+    {
+      if (std::find(_popupOpeningObservers.begin(), _popupOpeningObservers.end(), observer)
+          != _popupOpeningObservers.end())
+      {
+        observer->WillOpenPopup();
+      }
+    }
   }
 
   void Page::SetUseDarkAppearance(bool useDarkAppearance) noexcept

@@ -30,6 +30,7 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
@@ -308,6 +309,10 @@ namespace krys::boo::html
     }
     Ref<FileChooser> chooser = FileChooser::Create(*this, ChooserSettings());
     _fileChooser = chooser;
+    if (auto *page = frame->GetPage())
+    {
+      page->NotifyPopupOpeningObservers();
+    }
     chromeClient->RunOpenPanel(*frame, *chooser);
   }
 

@@ -32,6 +32,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
@@ -42,6 +43,11 @@ namespace krys::boo::html
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks),
         _spinButtonOwner(&spinButtonOwner), _repeatingTimer(*this, &SpinButtonElement::RepeatingTimerFired)
   {
+  }
+
+  SpinButtonElement::~SpinButtonElement() noexcept
+  {
+    StopObservingPopups();
   }
 
   Ref<SpinButtonElement> SpinButtonElement::Create(dom::Document &document,
@@ -131,7 +137,11 @@ namespace krys::boo::html
           {
             frame->GetEventHandler().SetCapturingMouseEventsElement(ShareRefPtr(this));
             _capturing = true;
-            // FIXME: Registering as a popup opening observer (Chrome::registerPopupOpeningObserver).
+            if (auto *page = NodeDocument().GetPage())
+            {
+              page->RegisterPopupOpeningObserver(*this);
+              _popupObservedPage = CreateWeakPtr(page);
+            }
           }
         }
         auto oldUpDownState = _upDownState;
@@ -189,6 +199,12 @@ namespace krys::boo::html
     ReleaseCapture();
   }
 
+  void SpinButtonElement::WillOpenPopup() noexcept
+  {
+    ReleaseCapture();
+    _upDownState = UpDownState::Indeterminate;
+  }
+
   void SpinButtonElement::ReleaseCapture() noexcept
   {
     StopRepeatingTimer();
@@ -200,6 +216,16 @@ namespace krys::boo::html
         _capturing = false;
       }
     }
+    StopObservingPopups();
+  }
+
+  void SpinButtonElement::StopObservingPopups() noexcept
+  {
+    if (auto *page = _popupObservedPage.get())
+    {
+      page->UnregisterPopupOpeningObserver(*this);
+    }
+    _popupObservedPage = nullptr;
   }
 
   bool SpinButtonElement::MatchesReadWritePseudoClass() const noexcept

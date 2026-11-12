@@ -46,6 +46,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
@@ -257,6 +258,10 @@ namespace krys::boo::html
         Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
         if (auto *element = Element())
         {
+          if (auto *page = element->NodeDocument().GetPage())
+          {
+            page->NotifyPopupOpeningObservers();
+          }
           styleInvalidation.emplace(*element, css::SelectorPseudoClass::Open, true);
         }
         _chooser = chromeClient->CreateColorChooser(*this, ValueAsColor());

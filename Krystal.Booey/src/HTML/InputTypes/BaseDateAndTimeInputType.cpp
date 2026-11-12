@@ -41,6 +41,7 @@
 #include "Krystal.Booey/HTML/InputTypes/BaseClickableWithKeyInputType.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp"
 #include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
@@ -332,6 +333,10 @@ namespace krys::boo::html
       return;
     }
 
+    if (auto *page = Element()->NodeDocument().GetPage())
+    {
+      page->NotifyPopupOpeningObservers();
+    }
     {
       style::PseudoClassChangeInvalidation styleInvalidation(*Element(), css::SelectorPseudoClass::Open,
                                                              true);

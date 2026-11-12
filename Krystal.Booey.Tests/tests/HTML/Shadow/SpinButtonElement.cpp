@@ -6,6 +6,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 
 namespace krys::boo::tests
@@ -92,5 +93,37 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
     (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {bounds.X(), 10}));
     CHECK(moves->Count == 1);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "SpinButtonElement: a press releases the mouse when a popup opens",
+                   "[HTML][SpinButtonElement]")
+  {
+    EditorFixture fixture(u8"<style>body{margin:0}input{margin:0}div{height:50px}</style>"
+                          u8"<input type=number id=number value=5><div id=other></div><select id=select>"
+                          u8"<option>a</option></select>");
+    auto &number = Downcast<html::HTMLInputElement>(fixture.ById(u8"number"));
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto moves = CreateRef<CountingListener>();
+    fixture.ById(u8"other").AddEventListener(dom::DOMStringAtom(EventNames::MouseMove), moves, false);
+
+    auto &spinButton = Downcast<html::SpinButtonElement>(*number.InnerSpinButtonElement());
+    auto bounds = spinButton.GetRenderBox()->AbsoluteBoundingBoxRect();
+    IntPoint upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
+
+    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, upper));
+    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, upper));
+    CHECK(number.Value() == u8"6");
+    CHECK(spinButton.GetUpDownState() == html::SpinButtonElement::UpDownState::Up);
+
+    // A select's menu opening releases it and forgets the half pressed, so moves go to what's under the
+    // mouse.
+    Downcast<RenderMenuList>(*fixture.ById(u8"select").Renderer()).ShowPopup();
+    CHECK(spinButton.GetUpDownState() == html::SpinButtonElement::UpDownState::Indeterminate);
+    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {bounds.X(), bounds.MaxY() + 10}));
+    CHECK(moves->Count == 1);
+
+    // Another popup after the release finds nothing to release.
+    Downcast<RenderMenuList>(*fixture.ById(u8"select").Renderer()).ShowPopup();
   }
 }

@@ -973,6 +973,7 @@ namespace krys::boo::html
     if (!_suggestionPicker && !Suggestions().empty())
     {
       // The field matches :open while its suggestions are shown.
+      page->NotifyPopupOpeningObservers();
       style::PseudoClassChangeInvalidation styleInvalidation(element, css::SelectorPseudoClass::Open, true);
       _suggestionPicker = page->GetChromeClient().CreateDataListSuggestionPicker(*this);
     }

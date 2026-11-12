@@ -2562,6 +2562,7 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/PointerCaptureController.hpp
   include/Krystal.Booey/Page/PointerCharacteristics.hpp
   include/Krystal.Booey/Page/PointerLockController.hpp
+  include/Krystal.Booey/Page/PopupOpeningObserver.hpp
   include/Krystal.Booey/Page/ResizeObserver/ResizeObservation.hpp
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserverBoxOptions.hpp
