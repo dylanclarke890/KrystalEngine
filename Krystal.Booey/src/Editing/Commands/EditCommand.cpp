@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
@@ -106,6 +107,28 @@ namespace krys::boo
   }
 
   EditCommand::~EditCommand() noexcept = default;
+
+  void EditCommand::PostTextStateChangeNotification(ax::AXTextChange change, utf8_stringview text) noexcept
+  {
+    if (ax::AXObjectCache::AccessibilityEnabled())
+    {
+      PostTextStateChangeNotification(change, text, _document->Selection().Selection().VisibleStart());
+    }
+  }
+
+  void EditCommand::PostTextStateChangeNotification(ax::AXTextChange change, utf8_stringview text,
+                                                    const VisiblePosition &position) noexcept
+  {
+    if (!ax::AXObjectCache::AccessibilityEnabled() || text.empty())
+    {
+      return;
+    }
+    if (auto *cache = _document->ExistingAXObjectCache())
+    {
+      auto node = HighestEditableRoot(position.DeepEquivalent());
+      cache->PostTextStateChangeNotification(node.get(), change, text, position);
+    }
+  }
 
   EditAction EditCommand::EditingAction() const noexcept
   {

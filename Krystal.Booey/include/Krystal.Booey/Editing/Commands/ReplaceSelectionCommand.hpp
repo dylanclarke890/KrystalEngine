@@ -53,8 +53,6 @@ namespace krys::boo
 {
   /// @brief Replaces the selection with a fragment (pasted, dropped or moved content), merging its first and
   /// last paragraphs with the paragraphs around it and removing the styles it doesn't need.
-  // FIXME: The accessibility selection of the inserted text (visibleSelectionForInsertedText), with
-  // accessibility.
   class ReplaceSelectionCommand : public CompositeEditCommand
   {
   public:

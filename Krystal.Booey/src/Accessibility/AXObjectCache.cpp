@@ -48,6 +48,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
@@ -2738,6 +2740,80 @@ namespace krys::boo::ax
     }
   }
 
+  AccessibilityObject *AXObjectCache::ObservableObjectForNode(dom::Node *node) noexcept
+  {
+    auto *object = node ? GetOrCreate(*node) : nullptr;
+    if (auto *observable = object ? object->ObservableObject() : nullptr)
+    {
+      return observable;
+    }
+    return GetOrCreate(_document);
+  }
+
+  void AXObjectCache::PostTextStateChangeNotification(dom::Node *node, AXTextChange change,
+                                                      dom::DOMStringView text,
+                                                      const VisiblePosition &position) noexcept
+  {
+    if (change == AXTextChange::Inserted)
+    {
+      PostTextReplacementNotification(node, {}, text, position);
+    }
+    else
+    {
+      PostTextReplacementNotification(node, text, {}, position);
+    }
+  }
+
+  void AXObjectCache::PostTextReplacementNotification(dom::Node *node, dom::DOMStringView deletedText,
+                                                      dom::DOMStringView insertedText,
+                                                      const VisiblePosition &position) noexcept
+  {
+    if (!node || (deletedText.empty() && insertedText.empty()))
+    {
+      return;
+    }
+    auto *object = ObservableObjectForNode(node);
+    if (!object)
+    {
+      return;
+    }
+    // The offset is worked out now, while the position is still where the change happened: after the inserted
+    // text, which is where the deleted text was.
+    auto index = static_cast<uint64>(std::max(object->IndexForVisiblePosition(position), 0));
+    auto offset = index - std::min<uint64>(index, insertedText.size());
+    if (!deletedText.empty())
+    {
+      _textChangesToPost.push_back(
+        {ShareRef(*object), AXTextChange::Deleted, offset, dom::DOMString(deletedText)});
+    }
+    if (!insertedText.empty())
+    {
+      _textChangesToPost.push_back(
+        {ShareRef(*object), AXTextChange::Inserted, offset, dom::DOMString(insertedText)});
+    }
+    if (!_notificationPostTimer.IsActive())
+    {
+      _notificationPostTimer.StartOneShot({});
+    }
+  }
+
+  void AXObjectCache::PostTextSelectionChangeNotification(const dom::Position &start) noexcept
+  {
+    auto *node = start.DeprecatedNode();
+    if (!node)
+    {
+      return;
+    }
+    // An ignored object (text, say) doesn't expose text: its unignored parent does.
+    auto *object = GetOrCreate(*node);
+    if (object && object->IsIgnored())
+    {
+      object = object->ParentObjectUnignored();
+    }
+    auto *observable = object ? object->ObservableObject() : nullptr;
+    PostNotification(observable ? observable : GetOrCreate(_document), AXNotification::SelectedTextChanged);
+  }
+
   void AXObjectCache::PostNotification(dom::Node *node, AXNotification notification) noexcept
   {
     // Get an existing object (creating one here can lay out, in the middle of a render tree update): the
@@ -2799,6 +2875,66 @@ namespace krys::boo::ax
         }
       }
       PostPlatformNotification(*object, notification);
+    }
+
+    auto textChanges = std::exchange(_textChangesToPost, {});
+    auto *page = _document.GetPage();
+    auto *view = _document.View();
+    for (const auto &textChange : textChanges)
+    {
+      if (textChange.Object->IsDetached() || !textChange.Object->AxObjectCache())
+      {
+        continue;
+      }
+      // As for the notifications, the host mustn't ask about the object mid-layout or with style out of date.
+      if (!page || !view || view->LayoutContext().IsInLayout() || _document.ChildNeedsStyleRecalc())
+      {
+        break;
+      }
+      page->GetChromeClient().PostAccessibilityTextChange(*textChange.Object, textChange.Change,
+                                                          textChange.Offset, textChange.Text);
+    }
+  }
+
+  AccessibilityReplacedText::AccessibilityReplacedText(const VisibleSelection &selection) noexcept
+  {
+    if (!AXObjectCache::AccessibilityEnabled())
+    {
+      return;
+    }
+    _replacedRange.StartIndex.Value =
+      IndexForVisiblePosition(selection.VisibleStart(), _replacedRange.StartIndex.Scope);
+    if (selection.IsRange())
+    {
+      _replacedText = AccessibilityObject::StringForVisiblePositionRange(
+        {selection.VisibleStart(), selection.VisibleEnd()});
+      _replacedRange.EndIndex.Value =
+        IndexForVisiblePosition(selection.VisibleEnd(), _replacedRange.EndIndex.Scope);
+    }
+    else
+    {
+      _replacedRange.EndIndex = _replacedRange.StartIndex;
+    }
+  }
+
+  void AccessibilityReplacedText::PostTextStateChangeNotification(
+    AXObjectCache *cache, dom::DOMStringView insertedText, const VisibleSelection &selection) const noexcept
+  {
+    if (!cache || !AXObjectCache::AccessibilityEnabled())
+    {
+      return;
+    }
+    // After the inserted text (the start of a caret selection, the end of the inserted text if it's
+    // selected).
+    auto position = selection.VisibleEnd();
+    auto node = HighestEditableRoot(position.DeepEquivalent());
+    if (!_replacedText.empty())
+    {
+      cache->PostTextReplacementNotification(node.get(), _replacedText, insertedText, position);
+    }
+    else
+    {
+      cache->PostTextStateChangeNotification(node.get(), AXTextChange::Inserted, insertedText, position);
     }
   }
 

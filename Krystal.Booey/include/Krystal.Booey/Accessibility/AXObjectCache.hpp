@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
 #include "Krystal.Booey/Accessibility/AXNotifications.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -91,6 +92,15 @@ namespace krys::boo::ax
     Maybe<AXID> _scrollViewID;
 
     List<Pair<Ref<AccessibilityObject>, AXNotification>> _notificationsToPost;
+    // Text inserted or deleted, posted with the notifications.
+    struct TextChange
+    {
+      Ref<AccessibilityObject> Object;
+      AXTextChange Change;
+      uint64 Offset;
+      dom::DOMString Text;
+    };
+    List<TextChange> _textChangesToPost;
     Timer _notificationPostTimer;
 
     // Each object's relations to others (both ways round), worked out for the whole document when needed.
@@ -311,6 +321,23 @@ namespace krys::boo::ax
       _relationsNeedUpdate = true;
     }
 
+    // Text state changes.
+
+    /// @brief @p text was inserted or deleted in the editable region @p node, ending (for an insertion) or
+    /// starting (for a deletion) at @p position: the host is told, for the object that tells it about the
+    /// region's changes (the web area's if none does), with the change's offset in that object's text.
+    void PostTextStateChangeNotification(dom::Node *node, AXTextChange change, dom::DOMStringView text,
+                                         const VisiblePosition &position) noexcept;
+    /// @brief @p deletedText was replaced by @p insertedText, which ends at @p position, in the editable
+    /// region
+    /// @p node.
+    void PostTextReplacementNotification(dom::Node *node, dom::DOMStringView deletedText,
+                                         dom::DOMStringView insertedText,
+                                         const VisiblePosition &position) noexcept;
+    /// @brief The selection (starting at @p start) changed: `SelectedTextChanged` is posted for the object
+    /// that tells the host about the changes where it is (the web area's if none does).
+    void PostTextSelectionChangeNotification(const dom::Position &start) noexcept;
+
     // Notifications.
 
     /// @brief Queues @p notification for @p object, to post to the platform once the current task ends.
@@ -386,6 +413,8 @@ namespace krys::boo::ax
     KRYS_NODISCARD static bool IsNodeVisible(const dom::Node *node) noexcept;
     void DeferModalChange(dom::Element &element) noexcept;
     void HandleChildrenChanged(AccessibilityObject &object) noexcept;
+    /// @brief The object that tells the host about @p node's changes; the web area's if none does.
+    KRYS_NODISCARD AccessibilityObject *ObservableObjectForNode(dom::Node *node) noexcept;
     void DeferElementAddedOrRemoved(dom::Element *element) noexcept;
     void HandleMenuOpened(dom::Element &element) noexcept;
     void HandleLiveRegionCreated(dom::Element &element) noexcept;
@@ -410,5 +439,26 @@ namespace krys::boo::ax
     void PostPlatformNotification(AccessibilityObject &object, AXNotification notification) noexcept;
 
     friend class AccessibilityObject;
+  };
+
+  /// @brief The text an edit replaces (the selection it started with), so inserting the edit's text can be
+  /// posted as a replacement.
+  class AccessibilityReplacedText
+  {
+  private:
+    dom::DOMString _replacedText;
+    VisiblePositionIndexRange _replacedRange;
+
+  public:
+    AccessibilityReplacedText() noexcept = default;
+    explicit AccessibilityReplacedText(const VisibleSelection &selection) noexcept;
+
+    /// @brief @p insertedText replaced the text (if there was any), leaving @p selection.
+    void PostTextStateChangeNotification(AXObjectCache *cache, dom::DOMStringView insertedText,
+                                         const VisibleSelection &selection) const noexcept;
+    KRYS_NODISCARD const VisiblePositionIndexRange &ReplacedRange() const noexcept
+    {
+      return _replacedRange;
+    }
   };
 }

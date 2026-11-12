@@ -646,6 +646,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Accessibility/AXObjectCacheChanges.cpp
 		tests/Accessibility/AXRelations.cpp
 		tests/Accessibility/AXTextRanges.cpp
+		tests/Accessibility/AXTextStateChanges.cpp
 		tests/Accessibility/AccessibilityImageMap.cpp
 		tests/Accessibility/AccessibilityListBoxOption.cpp
 		tests/Accessibility/AccessibilityMathMLElement.cpp

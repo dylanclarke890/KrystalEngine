@@ -48,6 +48,7 @@ namespace krys::boo::ax
 {
   class AccessibilityObject;
   enum class AXNotification : uint8;
+  enum class AXTextChange : uint8;
 }
 
 namespace krys::boo
@@ -105,6 +106,16 @@ namespace krys::boo
     {
       (void)object;
       (void)notification;
+    }
+    /// @brief Called when @p text was inserted into or deleted from @p object's text (an editable region's,
+    /// or the web area's) at @p offset, a byte index in its UTF-8 text.
+    virtual void PostAccessibilityTextChange(ax::AccessibilityObject &object, ax::AXTextChange change,
+                                             uint64 offset, utf8_stringview text) noexcept
+    {
+      (void)object;
+      (void)change;
+      (void)offset;
+      (void)text;
     }
 
     /// @brief Called when an `<image>` in the page has loaded its image.

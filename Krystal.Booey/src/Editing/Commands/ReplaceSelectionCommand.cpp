@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/ReplaceSelectionCommand.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
@@ -1814,8 +1815,6 @@ namespace krys::boo
     }
   }
 
-  // FIXME: The accessibility selection of the inserted text (m_visibleSelectionForInsertedText), with
-  // accessibility's text state changes.
   void ReplaceSelectionCommand::CompleteHTMLReplacement(const dom::Position &lastPositionToSelect) noexcept
   {
     dom::Position start = PositionAtStartOfInsertedContent().DeepEquivalent();
@@ -1866,6 +1865,11 @@ namespace krys::boo
     else
     {
       return;
+    }
+
+    if (ax::AXObjectCache::AccessibilityEnabled() && EditingAction() == EditAction::Paste)
+    {
+      _visibleSelectionForInsertedText = VisibleSelection(start, end);
     }
 
     if (_selectReplacement)
@@ -2095,8 +2099,10 @@ namespace krys::boo
 
     VisibleSelection selectionAfterReplace(_selectReplacement ? start : end, end);
 
-    // FIXME: The accessibility selection of pasted text (m_visibleSelectionForInsertedText), with
-    // accessibility's text state changes.
+    if (ax::AXObjectCache::AccessibilityEnabled() && EditingAction() == EditAction::Paste)
+    {
+      _visibleSelectionForInsertedText = VisibleSelection(start, end);
+    }
     SetEndingSelection(selectionAfterReplace);
 
     return true;

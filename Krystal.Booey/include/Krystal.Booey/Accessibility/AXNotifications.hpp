@@ -146,6 +146,13 @@
 namespace krys::boo::ax
 {
   /// @brief A change to an accessibility object that assistive technology is told about.
+  /// @brief Whether text was inserted or deleted.
+  enum class AXTextChange : uint8
+  {
+    Inserted,
+    Deleted,
+  };
+
   enum class AXNotification : uint8
   {
 #define KRYS_AX_DEFINE_NOTIFICATION(name) name,

@@ -53,9 +53,8 @@ namespace krys::boo
 {
   /// @brief Typing: text, line breaks, paragraph breaks and deletions, which go into the same command (and so
   /// are undone together) while the selection stays where the last one left it.
-  // FIXME: Accessibility's notifications of typed and deleted text (postTextStateChangeNotification and
-  // AccessibilityReplacedText), with accessibility; spelling after typing (markMisspellingsAfterTyping), with
-  // text checking; and the kill ring (addRangeToKillRing), with the kill ring.
+  // FIXME: Spelling after typing (markMisspellingsAfterTyping), with text checking; and the kill ring
+  // (addRangeToKillRing), with the kill ring.
   class TypingCommand final : public TextInsertionBaseCommand
   {
     friend class TypingCommandLineOperation;
@@ -133,6 +132,12 @@ namespace krys::boo
     void DeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept;
     void ForwardDeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept;
     void DeleteSelection(bool smartDelete) noexcept;
+    // Typing that tells accessibility what it inserted (and what it replaced).
+    void InsertTextAndNotifyAccessibility(utf8_stringview text, bool selectInsertedText) noexcept;
+    void InsertLineBreakAndNotifyAccessibility() noexcept;
+    void InsertParagraphSeparatorAndNotifyAccessibility() noexcept;
+    /// @brief Tells accessibility @p selection's text is being deleted.
+    void PostTextStateChangeNotificationForDeletion(const VisibleSelection &selection) noexcept;
 
     void SetCompositionType(TextCompositionType type) noexcept
     {

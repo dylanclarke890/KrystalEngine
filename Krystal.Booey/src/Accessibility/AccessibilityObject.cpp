@@ -1397,6 +1397,13 @@ namespace krys::boo::ax
     return static_cast<int32>(result.Value);
   }
 
+  dom::DOMString
+    AccessibilityObject::StringForVisiblePositionRange(const VisiblePositionRange &range) noexcept
+  {
+    auto simpleRange = MakeSimpleRange(range);
+    return simpleRange ? PlainText(*simpleRange) : dom::DOMString {};
+  }
+
   int32 AccessibilityObject::Index(const VisiblePosition &position) const noexcept
   {
     auto *node = GetNode();

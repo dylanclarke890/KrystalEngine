@@ -3,6 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
+#include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXLogger.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
@@ -15,6 +16,14 @@ namespace krys::boo::ax::tests
   {
   public:
     List<Pair<Ref<AccessibilityObject>, AXNotification>> Notifications;
+    struct TextChange
+    {
+      Ref<AccessibilityObject> Object;
+      AXTextChange Change;
+      uint64 Offset;
+      utf8_string Text;
+    };
+    List<TextChange> TextChanges;
 
     void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
     {
@@ -24,6 +33,12 @@ namespace krys::boo::ax::tests
                                        AXNotification notification) noexcept final
     {
       Notifications.emplace_back(ShareRef(object), notification);
+    }
+
+    void PostAccessibilityTextChange(AccessibilityObject &object, AXTextChange change, uint64 offset,
+                                     utf8_stringview text) noexcept final
+    {
+      TextChanges.push_back({ShareRef(object), change, offset, utf8_string(text)});
     }
   };
 
@@ -37,7 +52,8 @@ namespace krys::boo::ax::tests
     {
       auto recorder = CreateUnique<NotificationRecorder>();
       Recorder = recorder.get();
-      return Page::Create(krys::move(recorder));
+      // An editor client keeps the undo stack.
+      return Page::Create(krys::move(recorder), CreateUnique<boo::tests::TestEditorClient>());
     }
   };
 
@@ -78,6 +94,13 @@ namespace krys::boo::ax::tests
     {
       html::EventLoop::Current().RunUntilIdle();
       return std::exchange(Recorder->Notifications, {});
+    }
+
+    /// @brief The text changes posted to the host since last asked.
+    KRYS_NODISCARD List<NotificationRecorder::TextChange> TakeTextChanges() noexcept
+    {
+      html::EventLoop::Current().RunUntilIdle();
+      return std::exchange(Recorder->TextChanges, {});
     }
 
     /// @brief Whether @p notification was posted for @p object, among @p notifications.

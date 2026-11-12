@@ -635,6 +635,9 @@ namespace krys::boo::ax
     {
       return nullptr;
     }
+    /// @brief The text from @p range's start to its end.
+    KRYS_NODISCARD static dom::DOMString
+      StringForVisiblePositionRange(const VisiblePositionRange &range) noexcept;
     /// @brief A text control's index of @p position; -1 if the position isn't in it or this isn't a text
     /// control.
     KRYS_NODISCARD int32 Index(const VisiblePosition &position) const noexcept;

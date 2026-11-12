@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/TypingCommand.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -305,7 +306,8 @@ namespace krys::boo
         options.Contains(Option::RetainAutocorrectionIndicator));
       lastTypingCommand->SetShouldPreventSpellChecking(options.Contains(Option::PreventSpellChecking));
       lastTypingCommand->SetTriggeringEventIsUntrusted(triggeringEventIsUntrusted);
-      lastTypingCommand->InsertText(newText, options.Contains(Option::SelectInsertedText));
+      lastTypingCommand->InsertTextAndNotifyAccessibility(newText,
+                                                          options.Contains(Option::SelectInsertedText));
       return;
     }
 
@@ -324,7 +326,7 @@ namespace krys::boo
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
         options.Contains(Option::RetainAutocorrectionIndicator));
-      lastTypingCommand->InsertLineBreak();
+      lastTypingCommand->InsertLineBreakAndNotifyAccessibility();
       return;
     }
 
@@ -340,7 +342,7 @@ namespace krys::boo
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
         options.Contains(Option::RetainAutocorrectionIndicator));
-      lastTypingCommand->InsertParagraphSeparator();
+      lastTypingCommand->InsertParagraphSeparatorAndNotifyAccessibility();
       return;
     }
 
@@ -402,9 +404,9 @@ namespace krys::boo
       case Type::DeleteSelection:          DeleteSelection(_smartDelete); return;
       case Type::DeleteKey:                DeleteKeyPressed(_granularity, _shouldAddToKillRing); return;
       case Type::ForwardDeleteKey:         ForwardDeleteKeyPressed(_granularity, _shouldAddToKillRing); return;
-      case Type::InsertLineBreak:          InsertLineBreak(); return;
-      case Type::InsertParagraphSeparator: InsertParagraphSeparator(); return;
-      case Type::InsertText:               InsertText(_textToInsert, _selectInsertedText); return;
+      case Type::InsertLineBreak:          InsertLineBreakAndNotifyAccessibility(); return;
+      case Type::InsertParagraphSeparator: InsertParagraphSeparatorAndNotifyAccessibility(); return;
+      case Type::InsertText:               InsertTextAndNotifyAccessibility(_textToInsert, _selectInsertedText); return;
     }
 
     krys_debug_assert(false);
@@ -510,6 +512,61 @@ namespace krys::boo
 
     ApplyCommandToComposite(krys::move(command), EndingSelection());
     TypingAddedToOpenCommand(Type::InsertText);
+  }
+
+  void TypingCommand::InsertTextAndNotifyAccessibility(utf8_stringview text, bool selectInsertedText) noexcept
+  {
+    ax::AccessibilityReplacedText replacedText(GetDocument().Selection().Selection());
+    InsertText(text, selectInsertedText);
+    replacedText.PostTextStateChangeNotification(GetDocument().ExistingAXObjectCache(), text,
+                                                 GetDocument().Selection().Selection());
+    if (auto *composition = Composition())
+    {
+      composition->SetRangeDeletedByUnapply(replacedText.ReplacedRange());
+    }
+  }
+
+  void TypingCommand::InsertLineBreakAndNotifyAccessibility() noexcept
+  {
+    ax::AccessibilityReplacedText replacedText(GetDocument().Selection().Selection());
+    InsertLineBreak();
+    replacedText.PostTextStateChangeNotification(GetDocument().ExistingAXObjectCache(), u8"\n",
+                                                 GetDocument().Selection().Selection());
+    if (auto *composition = Composition())
+    {
+      composition->SetRangeDeletedByUnapply(replacedText.ReplacedRange());
+    }
+  }
+
+  void TypingCommand::InsertParagraphSeparatorAndNotifyAccessibility() noexcept
+  {
+    ax::AccessibilityReplacedText replacedText(GetDocument().Selection().Selection());
+    InsertParagraphSeparator();
+    replacedText.PostTextStateChangeNotification(GetDocument().ExistingAXObjectCache(), u8"\n",
+                                                 GetDocument().Selection().Selection());
+    if (auto *composition = Composition())
+    {
+      composition->SetRangeDeletedByUnapply(replacedText.ReplacedRange());
+    }
+  }
+
+  void TypingCommand::PostTextStateChangeNotificationForDeletion(const VisibleSelection &selection) noexcept
+  {
+    if (!ax::AXObjectCache::AccessibilityEnabled())
+    {
+      return;
+    }
+    PostTextStateChangeNotification(ax::AXTextChange::Deleted,
+                                    ax::AccessibilityObject::StringForVisiblePositionRange(
+                                      {selection.VisibleStart(), selection.VisibleEnd()}),
+                                    selection.VisibleStart());
+    VisiblePositionIndexRange range;
+    range.StartIndex.Value = IndexForVisiblePosition(selection.VisibleStart(), range.StartIndex.Scope);
+    range.EndIndex.Value = IndexForVisiblePosition(selection.VisibleEnd(), range.EndIndex.Scope);
+    if (auto *composition = Composition())
+    {
+      composition->SetRangeDeletedByUnapply(range);
+    }
   }
 
   void TypingCommand::InsertLineBreak() noexcept
@@ -709,6 +766,9 @@ namespace krys::boo
       return;
     }
 
+    // While the selection to delete is still there to read.
+    PostTextStateChangeNotificationForDeletion(selectionToDelete);
+
     // Make undo select everything that has been deleted, unless an undo will undo more than just this
     // deletion.
     // FIXME: This behaves like TextEdit except for the case where you open with text insertion and then
@@ -847,6 +907,9 @@ namespace krys::boo
     {
       return;
     }
+
+    // While the selection to delete is still there to read.
+    PostTextStateChangeNotificationForDeletion(selectionToDelete);
 
     // make undo select what was deleted
     SetStartingSelection(selectionAfterUndo);

@@ -522,6 +522,8 @@ namespace krys::boo
     void UpdateAndRevealSelection(ScrollBehavior scrollBehavior = ScrollBehavior::Instant,
                                   RevealExtentOption revealExtent = RevealExtentOption::RevealExtent,
                                   ForceCenterScroll forceCenterScroll = ForceCenterScroll::No) noexcept;
+    /// @brief Tells accessibility the selection changed.
+    void NotifyAccessibilityForSelectionChange() noexcept;
 
     KRYS_NODISCARD TextDirection DirectionOfEnclosingBlock() noexcept;
     KRYS_NODISCARD TextDirection DirectionOfSelection() noexcept;
