@@ -71,12 +71,13 @@ namespace krys::boo::layout::tests
     CHECK_FALSE(select.UsesMenuList());
     REQUIRE(listBox.VerticalScrollbar());
     CHECK(listBox.VerticalScrollbar()->Enabled());
-    // The list box draws its items itself; only the optgroup has a (empty) renderer.
+    // The list box draws its items itself; only the optgroup has a (empty) renderer. Its baseline is 7
+    // pixels above its bottom.
     CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 400x300
   RenderView at (0,0) size 400x300
-layer at (0,0) size 400x44
-  RenderBlock {HTML} at (0,0) size 400x44
-    RenderBody {BODY} at (0,0) size 400x44
+layer at (0,0) size 400x37
+  RenderBlock {HTML} at (0,0) size 400x37
+    RenderBody {BODY} at (0,0) size 400x37
       RenderListBox {SELECT} at (0,0) size 74x37 [bgcolor=#FFFFFF] [border: (1px inset #808080)] id="s"
         RenderInline {OPTGROUP} at (0,0) size 0x0
 )");

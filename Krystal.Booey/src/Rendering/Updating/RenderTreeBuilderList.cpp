@@ -60,8 +60,7 @@ namespace krys::boo
           fallbackParent = &blockContainer;
         }
 
-        // FIXME: Menu lists.
-        if (child.IsFloating() || child.IsOutOfFlowPositioned())
+        if (child.IsFloating() || child.IsOutOfFlowPositioned() || child.IsRenderMenuList())
         {
           continue;
         }

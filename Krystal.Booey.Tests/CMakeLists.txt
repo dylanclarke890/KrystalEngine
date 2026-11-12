@@ -488,6 +488,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/LayoutState.cpp
 		tests/Layout/LayoutTree/LayoutBoxGeometry.cpp
 		tests/Layout/Floats/FloatingContext.cpp
+		tests/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.cpp
 		tests/Layout/Integration/LayoutIntegrationBoxTreeUpdater.cpp
 		tests/Layout/Integration/LayoutIntegrationUtils.cpp
 		tests/Layout/Integration/Inline/LayoutIntegrationLineLayout.cpp

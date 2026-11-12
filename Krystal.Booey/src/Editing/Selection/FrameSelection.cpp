@@ -43,6 +43,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -1970,10 +1971,17 @@ namespace krys::boo
                                    result.LocalPoint(), HitTestSource::User)));
   }
 
-  // FIXME: Select elements (selectAll on a focused select), with them.
   void FrameSelection::SelectAll() noexcept
   {
     auto *focusedElement = _document->FocusedElement();
+    if (auto *selectElement = DynamicDowncast<html::HTMLSelectElement>(focusedElement))
+    {
+      if (selectElement->CanSelectAll())
+      {
+        selectElement->SelectAll();
+        return;
+      }
+    }
 
     RefPtr<dom::Node> root;
     RefPtr<dom::Node> selectStartTarget;

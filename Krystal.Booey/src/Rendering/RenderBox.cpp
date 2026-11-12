@@ -2832,7 +2832,13 @@ namespace krys::boo
     {
       intrinsicHeight = *height;
     }
-    // FIXME: Menu lists keep their theme's height.
+    else if (IsRenderMenuList())
+    {
+      // RenderMenuList has its own theme, if there isn't explicitIntrinsicInnerLogicalHeight, as a size
+      // containment, it should be treated as if there is no content, and the height should the original
+      // logical height for theme.
+      return;
+    }
 
     // We need the exact width of border and padding here, yet we can't use borderAndPadding* interfaces.
     // Because these interfaces evetually call borderAfter/Before, and RenderBlock::borderBefore

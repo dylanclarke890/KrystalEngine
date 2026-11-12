@@ -780,8 +780,8 @@ namespace krys::boo
         }
         firstLetter = current.NextSibling();
       }
-      // FIXME: Menu lists.
-      else if (current.IsBlockLevelReplacedOrAtomicInline() || current.IsRenderButton())
+      else if (current.IsBlockLevelReplacedOrAtomicInline() || current.IsRenderButton()
+               || current.IsRenderMenuList())
       {
         break;
       }
