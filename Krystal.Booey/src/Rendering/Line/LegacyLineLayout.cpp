@@ -24,6 +24,7 @@
 
 #include "Krystal.Booey/Rendering/Line/LegacyLineLayout.hpp"
 
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
@@ -327,8 +328,13 @@ namespace krys::boo
   LegacyRootInlineBox *LegacyLineLayout::CreateAndAppendRootInlineBox() noexcept
   {
     _legacyRootInlineBox = CreateRootInlineBox();
-    // FIXME: Recompute whether the element is ignored (AXObjectCache::deferRecomputeIsIgnored), once there's
-    // accessibility.
+    if (ax::AXObjectCache::AccessibilityEnabled()) KRYS_UNLIKELY
+    {
+      if (auto *cache = _flow.GetDocument().ExistingAXObjectCache())
+      {
+        cache->DeferRecomputeIsIgnored(_flow.GetElement());
+      }
+    }
     return _legacyRootInlineBox.get();
   }
 

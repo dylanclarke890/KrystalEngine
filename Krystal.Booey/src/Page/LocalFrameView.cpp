@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Algorithms/FindRevealAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -42,6 +43,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -169,7 +171,10 @@ namespace krys::boo
 
     ViewportContentsChanged();
 
-    // FIXME: Tell the document its view changed size (didChangeViewSize).
+    if (auto *imageDocument = DynamicDowncast<html::ImageDocument>(Frame().Document()))
+    {
+      imageDocument->DidChangeViewSize();
+    }
   }
 
   void LocalFrameView::Resize(const IntSize &size) noexcept
@@ -1071,7 +1076,6 @@ namespace krys::boo
 
   void LocalFrameView::PaintScrollCorner(GraphicsContext &context, const IntRect &cornerRect) noexcept
   {
-    // FIXME: Custom scroll corners (::-webkit-scrollbar-corner), dropped as non-standard.
     if (cornerRect.IsEmpty())
     {
       return;
@@ -1230,7 +1234,6 @@ namespace krys::boo
 
   Ref<Scrollbar> LocalFrameView::CreateScrollbar(ScrollbarOrientation orientation) noexcept
   {
-    // FIXME: Custom scrollbars (::-webkit-scrollbar, dropped as non-standard).
     return Scrollbar::CreateNativeScrollbar(*this, orientation, ScrollbarWidthStyle());
   }
 
@@ -3239,7 +3242,10 @@ namespace krys::boo
     }
     ScrollRectToVisible(rect, renderer, insideFixed, options);
 
-    // FIXME: Telling accessibility (handleScrolledToAnchor), with accessibility.
+    if (auto *cache = Frame().Document() ? Frame().Document()->ExistingAXObjectCache() : nullptr)
+    {
+      cache->HandleScrolledToAnchor(*anchorNode);
+    }
 
     // scrollRectToVisible can call into setScrollPosition(), which resets _maintainScrollPositionAnchor.
     _maintainScrollPositionAnchor = CreateWeakPtr(anchorNode.get());

@@ -42,7 +42,6 @@ namespace krys::boo
   };
 
   /// @brief Replaces the selection with a line of text (or a tab, which goes in a tab span).
-  // FIXME: Smart lists, with InsertListCommand (on Cocoa platforms only).
   class InsertTextCommand : public CompositeEditCommand
   {
     friend class TypingCommand;

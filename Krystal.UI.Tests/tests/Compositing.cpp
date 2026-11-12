@@ -350,6 +350,38 @@ namespace krys::ui::tests
     CHECK(PixelAt(image, 150, 50) == Array<uint8, 4> {239, 71, 111, 255});
   }
 
+  TEST_CASE("Compositing: debug borders and repaint counters", "[UI][GPU][Compositing]")
+  {
+    CompositingFixture fixture(200u, 100u);
+    auto root = fixture.CreateLayer(u8"root", {}, {200, 100});
+    auto drawn = fixture.CreateLayer(u8"drawn", {0, 0}, {200, 100});
+    drawn->SetDrawsContent(true);
+    fixture.Client.ContentsByName[u8"drawn"] = {Rgb(0x118ab2), {}, {}};
+    root->AddChild(drawn);
+    constexpr Array<uint8, 4> Content {17, 138, 178, 255};
+    constexpr Array<uint8, 4> White {255, 255, 255, 255};
+
+    auto image = fixture.Composite(*root);
+    CHECK(PixelAt(image, 6, 5) == Content);
+
+    // The count is drawn in the top-left corner, as white seven-segment digits on a box of the border's
+    // colour: a 1 lights the right-hand segments.
+    drawn->SetShowDebugBorder(true);
+    drawn->SetShowRepaintCounter(true);
+    drawn->SetNeedsDisplay();
+    image = fixture.Composite(*root);
+    CHECK(PixelAt(image, 6, 5) == White);
+    CHECK(PixelAt(image, 3, 2) != White);
+    CHECK(PixelAt(image, 3, 5) != Content);
+    CHECK(PixelAt(image, 3, 5) != White);
+    CHECK(PixelAt(image, 100, 50) == Content);
+
+    // Painting again counts 2, which lights the top segment too.
+    drawn->SetNeedsDisplay();
+    image = fixture.Composite(*root);
+    CHECK(PixelAt(image, 3, 2) == White);
+  }
+
   TEST_CASE("Compositing: filter and individual transform animations run on layers", "[UI][GPU][Compositing]")
   {
     CompositingFixture fixture(200u, 100u);

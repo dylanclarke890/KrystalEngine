@@ -1,6 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/Painting/OutlinePainter.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 
 namespace krys::boo::tests
 {
@@ -43,6 +48,50 @@ namespace krys::boo::tests
   (outline-offset 0.00)
   (outline-width 3.00)
   (color #0000FF)))");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "OutlinePainter: paints focus rings around SVG graphics",
+                   "[Rendering][OutlinePainter]")
+  {
+    // A shape's ring is its bounding box, in the SVG's coordinates; a container's unites what its children
+    // paint.
+    auto painted = Painted(u8"<style>body{margin:0}</style><svg width=100 height=50>"
+                           u8"<rect x=10 y=5 width=20 height=10 style='fill:none;outline:3px auto blue'/>"
+                           u8"<g style='outline:3px auto red'><rect x=40 y=5 width=10 height=10 />"
+                           u8"<rect x=60 y=20 width=10 height=10 /></g></svg>");
+    CHECK(painted.contains(u8R"(
+(draw-focus-ring-rects
+  (rects [at (10,5) size 20x10])
+  (outline-offset 0.00)
+  (outline-width 3.00)
+  (color #0000FF)))"));
+    CHECK(painted.contains(u8R"(
+(draw-focus-ring-rects
+  (rects [at (40,5) size 30x25])
+  (outline-offset 0.00)
+  (outline-width 3.00)
+  (color #FF0000)))"));
+  }
+
+  TEST_CASE("OutlinePainter: rings a list box's active item while the control key moves it",
+            "[Rendering][OutlinePainter]")
+  {
+    PaintFixture fixture(
+      u8"<!DOCTYPE html><style>body{margin:0}select{margin:0;outline:3px auto blue}</style>"
+      u8"<select id=s multiple size=3><option>a</option><option>b</option><option>c</option>"
+      u8"</select>");
+    auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
+    select.Focus();
+    // Otherwise the ring is around the whole list box.
+    CHECK(fixture.Painted().contains(u8"(rects [at (2,2) size 32x51])"));
+
+    // Moving with the control key held moves the active item without selecting it, and rings the item.
+    (void)fixture.Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
+      PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowDown", u8"ArrowDown", u8"Down", vk::Down, false,
+      false, false, {PlatformEvent::Modifier::ControlKey}, {}));
+    CHECK(select.ActiveSelectionEndListIndex() == 0);
+    CHECK(select.SelectedIndex() == -1);
+    CHECK(fixture.Painted().contains(u8"(rects [at (3,3) size 9x14])"));
   }
 
   TEST_CASE("OutlinePainter: outlines inline boxes around their line boxes", "[Rendering][OutlinePainter]")

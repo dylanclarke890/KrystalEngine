@@ -66,7 +66,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RefPtr<dom::Node> SelectionShadowAncestor(LocalFrame &frame) noexcept
     {
-      auto *node = frame.Document()->Selection().Selection().Base().AnchorNode();
+      auto *node = frame.Document()->Selection().Selection().CanonicalAnchor().AnchorNode();
       if (!node || !node->IsInShadowTree())
       {
         return nullptr;
@@ -428,7 +428,7 @@ namespace krys::boo
     }
     auto &selection = frame->Document()->Selection();
     auto newSelection = selection.Selection();
-    newSelection.SetExtent(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset));
+    newSelection.SetFocus(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset));
     selection.DisassociateLiveRange();
     selection.SetSelection(newSelection);
     return {};

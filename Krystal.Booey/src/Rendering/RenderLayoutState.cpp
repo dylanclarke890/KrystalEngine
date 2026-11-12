@@ -25,19 +25,32 @@
 
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 
 namespace krys::boo
 {
-  RenderLayoutState::RenderLayoutState(KRYS_MAYBE_UNUSED RenderElement &renderer) noexcept
+  RenderLayoutState::RenderLayoutState(RenderElement &renderer) noexcept
 #if KRYS_DEBUG
       : _renderer(&renderer)
 #endif
   {
-    // FIXME: Start from the container's absolute position, clipped and scrolled by it when it clips its
-    // overflow (localToAbsolute, cachedSizeForOverflowClip, scrollPosition).
+    if (auto *container = renderer.Container())
+    {
+      FloatPoint absContentPoint =
+        container->LocalToAbsolute(FloatPoint(), {MapCoordinatesMode::UseTransforms});
+      _paintOffset = LayoutSize(absContentPoint.X(), absContentPoint.Y());
+
+      if (container->HasNonVisibleOverflow())
+      {
+        _clipped = true;
+        auto &containerBox = Downcast<RenderBox>(*container);
+        _clipRect = LayoutRect(ToLayoutPoint(_paintOffset), containerBox.CachedSizeForOverflowClip());
+        _paintOffset -= ToLayoutSize(LayoutPoint(containerBox.GetScrollPosition()));
+      }
+    }
     if (_isPaginated)
     {
       // This is just a flag for known page height (see
@@ -65,13 +78,21 @@ namespace krys::boo
     ComputePaginationInformation(layoutStateStack, renderer, pageLogicalHeight, pageLogicalHeightChanged);
   }
 
-  void RenderLayoutState::ComputeOffsets(const RenderLayoutState &ancestor,
-                                         KRYS_MAYBE_UNUSED RenderBox &renderer, LayoutSize offset) noexcept
+  void RenderLayoutState::ComputeOffsets(const RenderLayoutState &ancestor, RenderBox &renderer,
+                                         LayoutSize offset) noexcept
   {
-    // FIXME: Fixed positioned boxes start from the view's absolute position (localToAbsolute).
-    _paintOffset = ancestor.PaintOffset() + offset;
+    bool fixed = renderer.IsFixedPositioned();
+    if (fixed)
+    {
+      FloatPoint fixedOffset = renderer.View().LocalToAbsolute(FloatPoint(), {MapCoordinatesMode::IsFixed});
+      _paintOffset = LayoutSize(fixedOffset.X(), fixedOffset.Y()) + offset;
+    }
+    else
+    {
+      _paintOffset = ancestor.PaintOffset() + offset;
+    }
 
-    if (renderer.IsOutOfFlowPositioned() && !renderer.IsFixedPositioned())
+    if (renderer.IsOutOfFlowPositioned() && !fixed)
     {
       if (auto *container = DynamicDowncast<RenderInline>(renderer.Container());
           container && container->IsInFlowPositioned())
@@ -82,8 +103,15 @@ namespace krys::boo
 
     _layoutOffset = _paintOffset;
 
-    // FIXME: In-flow positioned boxes with a layer move by the layer's offset, and boxes that clip their
-    // overflow by their scroll position.
+    if (renderer.IsInFlowPositioned() && renderer.HasLayer())
+    {
+      _paintOffset += renderer.Layer()->OffsetForInFlowPosition();
+    }
+
+    if (renderer.HasNonVisibleOverflow())
+    {
+      _paintOffset -= ToLayoutSize(LayoutPoint(renderer.GetScrollPosition()));
+    }
 
     _layoutDelta = ancestor.LayoutDelta();
 #if KRYS_DEBUG
@@ -104,8 +132,19 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Intersect with the box's overflow clip at its scroll position (scrollPosition,
-    // cachedSizeForOverflowClip).
+    auto paintOffsetForClipRect =
+      ToLayoutPoint(_paintOffset + ToLayoutSize(LayoutPoint(renderer.GetScrollPosition())));
+    LayoutRect clipRect(paintOffsetForClipRect + renderer.View().FrameView().LayoutContext().LayoutDelta(),
+                        renderer.CachedSizeForOverflowClip());
+    if (_clipped)
+    {
+      _clipRect.Intersect(clipRect);
+    }
+    else
+    {
+      _clipRect = clipRect;
+    }
+    _clipped = true;
   }
 
   void RenderLayoutState::ComputePaginationInformation(
@@ -135,9 +174,17 @@ namespace krys::boo
       _pageLogicalHeightChanged = ancestor->PageLogicalHeightChanged();
       _pageOffset = ancestor->PageOffset();
 
-      // FIXME: Disable pagination for objects we don't support (isUnsplittableForPagination), and paginate
-      // inside fragmented flows (enclosingFragmentedFlow), once there's fragmentation.
-      _isPaginated = static_cast<bool>(_pageLogicalHeight);
+      // Disable pagination for objects we don't support. For now this includes overflow:scroll/auto, inline
+      // blocks and writing mode roots.
+      if (renderer.IsUnsplittableForPagination())
+      {
+        _pageLogicalHeight = 0_lu;
+        _isPaginated = false;
+      }
+      else
+      {
+        _isPaginated = _pageLogicalHeight || renderer.EnclosingFragmentedFlow();
+      }
     }
   }
 

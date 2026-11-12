@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/Layers/LayerOverlapMap.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
@@ -611,12 +612,12 @@ namespace krys::boo
 
   void RenderLayerCompositor::CacheAcceleratedCompositingFlags() noexcept
   {
-    // FIXME: The settings (acceleratedCompositingEnabled, showDebugBorders, showRepaintCounter,
-    // acceleratedDrawingEnabled) and the chrome's compositing triggers, once there are settings: compositing
-    // is on whenever the host makes graphics layers, as forceCompositingMode has it.
+    // Compositing is on whenever the host makes graphics layers, as forceCompositingMode has it.
+    // FIXME: The chrome's compositing triggers.
     bool hasAcceleratedCompositing = GetGraphicsLayerFactory() != nullptr;
-    bool showDebugBorders = false;
-    bool showRepaintCounter = false;
+    const auto &settings = _renderView.GetDocument().GetSettings();
+    bool showDebugBorders = settings.ShowDebugBorders;
+    bool showRepaintCounter = settings.ShowRepaintCounter;
     bool acceleratedDrawingEnabled = false;
 
     bool forceCompositingMode = hasAcceleratedCompositing;
@@ -889,8 +890,6 @@ namespace krys::boo
     {
       auto &rootLayer = RootRenderLayer();
       CompositingState compositingState(updateRoot);
-      // FIXME: The overlappingBackingStoreProvidersEnabled setting, once there are settings: on, as
-      // upstream's default.
       BackingSharingState backingSharingState(true);
       LayerOverlapMap overlapMap(rootLayer);
 
@@ -2951,8 +2950,13 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: Fragmented flows, once there are any.
-      return true;
+      if (!layer.IsInsideFragmentedFlow())
+      {
+        return true;
+      }
+
+      // Fragmented flows don't need to be composited: their fragments render them.
+      return !layer.IsRenderFragmentedFlow();
     }
     return false;
   }
@@ -4202,7 +4206,6 @@ namespace krys::boo
     Color backgroundColor;
     bool isTransparent = ViewHasTransparentBackground(&backgroundColor);
 
-    // FIXME: Extending the background beyond the page, once there's a setting for it.
     Color extendedBackgroundColor;
 
     bool transparencyChanged = _viewBackgroundIsTransparent != isTransparent;
@@ -4592,7 +4595,6 @@ namespace krys::boo
 
   void RenderLayerCompositor::UpdateRootContentLayerClipping() noexcept
   {
-    // FIXME: Extending the background beyond the page, once there's a setting for it.
     _rootContentsLayer->SetMasksToBounds(true);
   }
 

@@ -42,9 +42,6 @@
 
 namespace krys::boo::css
 {
-  // FIXME: Generate this from the property definitions and use it for PropertyShorthandList too.
-  constexpr size_t MaxShorthandsForLonghand = 4uz;
-
   Ref<ImmutableStyleProperties> StyleProperties::ImmutableCopyIfNeeded() const noexcept
   {
     if (_isMutable)

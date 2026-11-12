@@ -31,6 +31,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
@@ -139,10 +140,9 @@ namespace krys::boo
     }
     if (!_needsYAdjustment)
     {
-      // FIXME: Both branches read align-self; the vertical writing mode one is likely meant to read
-      // justify-self.
+      // Upstream reads align-self in both branches.
       _needsYAdjustment = containingWritingMode.IsHorizontal() ? style.GetAlignSelf().IsAnchorCenter()
-                                                               : style.GetAlignSelf().IsAnchorCenter();
+                                                               : style.GetJustifySelf().IsAnchorCenter();
     }
 
     _isHidden = style.IsForceHidden();
@@ -441,15 +441,73 @@ namespace krys::boo::style
     return offset;
   }
 
+  static LayoutRect BoundingRectForFragmentedAnchor(const RenderBoxModelObject &anchorBox,
+                                                    const RenderElement &containingBlock,
+                                                    const RenderFragmentedFlow &fragmentedFlow) noexcept
+  {
+    // Compute the bounding box of the fragments. Location is relative to the fragmented flow.
+    const auto *anchorRenderBox = DynamicDowncast<RenderBox>(&anchorBox);
+    if (!anchorRenderBox)
+    {
+      anchorRenderBox = anchorBox.ContainingBlock();
+    }
+    LayoutPoint offsetRelativeToFragmentedFlow =
+      fragmentedFlow.MapFromLocalToFragmentedFlow(anchorRenderBox, {}).Location();
+    auto unfragmentedBorderBox = anchorBox.BorderBoundingBox();
+    unfragmentedBorderBox.MoveBy(offsetRelativeToFragmentedFlow);
+    fragmentedFlow.FlipForWritingMode(unfragmentedBorderBox); // Convert to RenderLayer coords.
+    auto fragmentsBoundingBox = fragmentedFlow.FragmentsBoundingBox(unfragmentedBorderBox);
+    fragmentedFlow.FlipForWritingMode(fragmentsBoundingBox); // Convert to RenderBox coords.
+
+    // Now convert to physical coordinates (top/left origin) and walk up. RenderFragmentedFlow doesn't have a
+    // usable frame rect, so use its container's content rect.
+    const auto *fragmentedFlowContainer = fragmentedFlow.ContainingBlock();
+    if (!fragmentedFlowContainer)
+    {
+      krys_debug_assert(false);
+      return fragmentsBoundingBox;
+    }
+    auto fragmentedFlowRect = fragmentedFlowContainer->ContentBoxRect();
+    if (fragmentedFlow.GetWritingMode().IsBlockFlipped())
+    {
+      if (fragmentedFlow.GetWritingMode().IsHorizontal())
+      {
+        fragmentsBoundingBox.SetY(fragmentedFlowRect.Height() - fragmentsBoundingBox.MaxY());
+      }
+      else
+      {
+        fragmentsBoundingBox.SetX(fragmentedFlowRect.Width() - fragmentsBoundingBox.MaxX());
+      }
+    }
+    fragmentsBoundingBox.MoveBy(fragmentedFlowRect.Location());
+
+    // Change the location to be relative to the anchor's containing block.
+    if (fragmentedFlowContainer != &containingBlock)
+    {
+      fragmentsBoundingBox.Move(OffsetFromAncestorContainer(*fragmentedFlowContainer, containingBlock));
+    }
+
+    return fragmentsBoundingBox;
+  }
+
   // This computes the top left location, physical width, and physical height of the specified anchor element.
   // The location is computed relative to the specified containing block.
-  // FIXME: The bounding rectangle of a fragmented anchor's fragments (boundingRectForFragmentedAnchor), once
-  // there are fragmented flows.
   LayoutRect
     AnchorPositionEvaluator::ComputeAnchorRectRelativeToContainingBlock(const RenderBoxModelObject &anchorBox,
                                                                         const RenderElement &containingBlock,
                                                                         const RenderBox &anchoredBox) noexcept
   {
+    // Fragmented flows are a little tricky to deal with. One example of a fragmented flow is a block anchor
+    // element that is "fragmented" or split across multiple columns as a result of multi-column layout. In
+    // this case, we need to compute "the axis-aligned bounding rectangle of the fragments' border boxes" and
+    // make that our anchorHeight/Width. We also need to adjust the anchor's top left location to match that
+    // of the bounding box instead of the first fragment.
+    if (auto *fragmentedFlow = anchorBox.EnclosingFragmentedFlow();
+        fragmentedFlow && fragmentedFlow->IsDescendantOf(&containingBlock))
+    {
+      return BoundingRectForFragmentedAnchor(anchorBox, containingBlock, *fragmentedFlow);
+    }
+
     auto anchorWidth = anchorBox.OffsetWidth();
     auto anchorHeight = anchorBox.OffsetHeight();
     auto anchorLocation = ToLayoutPoint(OffsetFromAncestorContainer(anchorBox, containingBlock));
@@ -973,9 +1031,16 @@ namespace krys::boo::style
       }
     }
 
-    // FIXME: The bounding rectangle of a fragmented anchor's fragments (boundingRectForFragmentedAnchor),
-    // once there are fragmented flows.
     auto anchorBorderBoundingBox = anchorRenderer->BorderBoundingBox();
+    if (auto *fragmentedFlow = anchorRenderer->EnclosingFragmentedFlow())
+    {
+      const auto *containingBlock = anchorPositionedRenderer->ContainingBlock();
+      if (containingBlock && fragmentedFlow->IsDescendantOf(containingBlock))
+      {
+        anchorBorderBoundingBox =
+          BoundingRectForFragmentedAnchor(*anchorRenderer, *containingBlock, *fragmentedFlow);
+      }
+    }
 
     // Adjust for CSS `zoom` property and page zoom.
 

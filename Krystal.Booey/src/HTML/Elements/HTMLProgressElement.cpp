@@ -19,6 +19,7 @@
  */
 
 #include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
@@ -164,7 +165,10 @@ namespace krys::boo::html
     {
       renderer->UpdateFromElement();
     }
-    // FIXME: Telling accessibility the value changed (AXObjectCache::valueChanged), with accessibility.
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->ValueChanged(*this);
+    }
   }
 
   void HTMLProgressElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept

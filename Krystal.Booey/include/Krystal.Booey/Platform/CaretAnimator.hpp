@@ -70,7 +70,6 @@ namespace krys::boo
 
   /// @brief Animates a caret: whether it's shown as it blinks, serviced at each rendering update its timer
   /// asks for.
-  // FIXME: The accessibility setting that prefers a caret that doesn't blink, once the host reports it.
   class CaretAnimator
   {
     KRYS_NON_COPY_MOVABLE(CaretAnimator);

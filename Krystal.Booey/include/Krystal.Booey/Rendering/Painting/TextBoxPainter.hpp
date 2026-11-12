@@ -64,9 +64,8 @@ namespace krys::boo
 
   /// @brief Paints a text box: its text, with shadows, emphasis marks, decorations, highlights, the selection
   /// and an input method's composition (its underlines, or else its fill).
-  /// FIXME: The composition's custom highlights, event regions, accessibility bounds and contentful paint
-  /// tracking come with event regions and accessibility. There are no document markers (see DIFFERENCES.md).
-  /// FIXME: Combined text (`text-combine-upright`, `RenderCombineText`) is still to come.
+  /// FIXME: Event regions and contentful paint tracking come with event regions and paint timing. There are
+  /// no document markers (see DIFFERENCES.md).
   class TextBoxPainter
   {
     KRYS_NON_COPY_MOVABLE(TextBoxPainter);
@@ -83,6 +82,7 @@ namespace krys::boo
     const TextBoxSelectableRange _selectableRange;
     const LayoutPoint _paintOffset;
     const FloatRect _paintRect;
+    const bool _isCombinedText;
     const bool _isFirstLine;
     const bool _isPrinting;
     const bool _haveSelection;
@@ -123,7 +123,6 @@ namespace krys::boo
     /// @brief The rect of the box's text from @p startOffset to @p endOffset, as tall as the line's
     /// selection.
     KRYS_NODISCARD LayoutRect SelectionRectForRange(uint32 startOffset, uint32 endOffset) const noexcept;
-    // FIXME: Rounded backgrounds (BackgroundStyle::Rounded), with IME composition highlights.
     void PaintBackgroundFillForRange(uint32 startOffset, uint32 endOffset, const Color &color) noexcept;
     KRYS_NODISCARD bool ComputeHaveSelection() const noexcept;
     void PaintForeground(const StyledMarkedText &markedText) noexcept;

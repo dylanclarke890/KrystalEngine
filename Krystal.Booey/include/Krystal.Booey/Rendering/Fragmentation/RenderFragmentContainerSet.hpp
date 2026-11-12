@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2020 Apple Inc. All rights reserved.
+ * Copyright (C) 2012 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,31 +25,38 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
-#include <compare>
-#include <utility>
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentContainer.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
 
 namespace krys::boo
 {
-  /// @brief Colours for part of the text being composed with an input method.
-  struct CompositionHighlight
+  class RenderFragmentedFlow;
+
+  /// @brief A run of fragments that all have the same width and height (such as a run of same-sized
+  /// columns), so one renderer stands for them all.
+  // FIXME: For now we derive from RenderFragmentContainer, but this may change at some point.
+  class RenderFragmentContainerSet : public RenderFragmentContainer
   {
-    /// @brief The fill behind a composition that has no underlines.
-    static constexpr auto DefaultCompositionFillColor = SRGBA<uint8> {225, 221, 85};
+    KRYS_NON_COPY_MOVABLE(RenderFragmentContainerSet);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderFragmentContainerSet);
 
-    uint32 StartOffset {0};
-    uint32 EndOffset {0};
-    Maybe<Color> BackgroundColor;
-    Maybe<Color> ForegroundColor;
+  public:
+    /// @brief Extends the set's portion of the flow to the end of the flow's content and overflow, since a
+    /// set can always make more columns for it.
+    void ExpandToEncompassFragmentedFlowContentsIfNeeded() noexcept;
 
-    friend std::strong_ordering operator<=>(const CompositionHighlight &a,
-                                            const CompositionHighlight &b) noexcept
+  protected:
+    RenderFragmentContainerSet(Type type, dom::Document &document, RenderStyle &&style,
+                               RenderFragmentedFlow &fragmentedFlow) noexcept;
+    ~RenderFragmentContainerSet() noexcept override;
+
+  private:
+    void InstallFragmentedFlow() noexcept final;
+
+    KRYS_NODISCARD bool IsRenderFragmentContainerSet() const noexcept final
     {
-      return std::make_pair(a.StartOffset, a.EndOffset) <=> std::make_pair(b.StartOffset, b.EndOffset);
+      return true;
     }
-
-    friend bool operator==(const CompositionHighlight &, const CompositionHighlight &) noexcept = default;
   };
 }

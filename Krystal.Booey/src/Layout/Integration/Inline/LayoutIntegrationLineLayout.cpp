@@ -36,6 +36,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationPagination.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationUtils.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
@@ -434,8 +435,7 @@ namespace krys::boo::layout_integration
 
   RenderBlockFlow *LineLayout::BlockContainer(const RenderObject &renderer) noexcept
   {
-    // FIXME: Renderer replicas and scrollbar parts have their parent set but are not actually in the tree,
-    // once there are any.
+    // FIXME: Renderer replicas have their parent set but are not actually in the tree, once there are any.
     for (auto *parent = renderer.Parent(); parent; parent = parent->Parent())
     {
       if (!parent->ChildrenInline())
@@ -766,7 +766,6 @@ namespace krys::boo::layout_integration
     {
       switch (paintInfo.Phase)
       {
-        case PaintPhase::Accessibility:
         case PaintPhase::Foreground:
         case PaintPhase::EventRegion:
         case PaintPhase::TextClip:
@@ -1027,9 +1026,17 @@ namespace krys::boo::layout_integration
 
     _lineDamage = nullptr;
 
-    // FIXME: Adjust the lines for pagination (adjustContentForPagination), once there's pagination.
+    auto adjustments = AdjustContentForPagination(isPartialLayout);
 
-    UpdateRenderTreePositions(inlineFormattingContext.GetLayoutState(), didDiscardContent);
+    UpdateRenderTreePositions(adjustments, inlineFormattingContext.GetLayoutState(), didDiscardContent);
+
+    if (_lineDamage)
+    {
+      // Pagination may require another layout pass.
+      (void)Layout(marginInfo);
+
+      krys_debug_assert(!_lineDamage);
+    }
 
     marginInfo = layout::IntegrationUtils::ToMarginInfo(parentBlockLayoutState.GetMarginState());
 
@@ -1040,6 +1047,46 @@ namespace krys::boo::layout_integration
     }
 
     return isPartialLayout ? Maybe<LayoutRect> {repaintRect} : null;
+  }
+
+  List<LineAdjustment> LineLayout::AdjustContentForPagination(bool isPartialLayout) noexcept
+  {
+    krys_debug_assert(!_lineDamage);
+
+    if (!_inlineContent)
+    {
+      return {};
+    }
+
+    auto &layoutState = *Flow().View().FrameView().LayoutContext().LayoutState();
+    if (!layoutState.IsPaginated())
+    {
+      return {};
+    }
+
+    bool allowLayoutRestart = !isPartialLayout;
+    auto [adjustments, layoutRestartLine] = ComputeAdjustmentsForPagination(
+      *_inlineContent, _blockFormattingState.GetPlacedFloats(), allowLayoutRestart, Flow());
+
+    if (!adjustments.empty())
+    {
+      AdjustLinePositionsForPagination(*_inlineContent, adjustments);
+      _inlineContent->SetFirstLinePaginationOffset(adjustments[0].Offset.ToFloat());
+    }
+
+    if (layoutRestartLine)
+    {
+      auto invalidation = layout::InlineInvalidation {
+        EnsureLineDamage(), _inlineContentCache.GetInlineItems().Content(), _inlineContent->DisplayContent()};
+      auto canRestart =
+        invalidation.RestartForPagination(layoutRestartLine->Index, layoutRestartLine->Offset);
+      if (!canRestart)
+      {
+        _lineDamage = nullptr;
+      }
+    }
+
+    return adjustments;
   }
 
   FloatRect LineLayout::ConstructContent(const layout::InlineLayoutState &inlineLayoutState,
@@ -1061,7 +1108,8 @@ namespace krys::boo::layout_integration
     return damagedRect;
   }
 
-  void LineLayout::UpdateRenderTreePositions(const layout::InlineLayoutState &inlineLayoutState,
+  void LineLayout::UpdateRenderTreePositions(const List<LineAdjustment> &lineAdjustments,
+                                             const layout::InlineLayoutState &inlineLayoutState,
                                              bool didDiscardContent) noexcept
   {
     if (!_inlineContent && !didDiscardContent)
@@ -1072,6 +1120,19 @@ namespace krys::boo::layout_integration
     auto &blockFlow = Flow();
     auto placedFloatsWritingMode =
       _blockFormattingState.GetPlacedFloats().BlockFormattingContextRoot().Style().GetWritingMode();
+
+    auto visualAdjustmentOffset = [&](uint64 lineIndex)
+    {
+      if (lineAdjustments.empty())
+      {
+        return LayoutSize {};
+      }
+      if (!placedFloatsWritingMode.IsHorizontal())
+      {
+        return LayoutSize {lineAdjustments[lineIndex].Offset, 0_lu};
+      }
+      return LayoutSize {0_lu, lineAdjustments[lineIndex].Offset};
+    };
 
     if (_inlineContent)
     {
@@ -1099,7 +1160,19 @@ namespace krys::boo::layout_integration
       }
     }
 
-    // FIXME: The floats' pagination offsets, once there's pagination.
+    HashMap<const layout::Box *, LayoutSize> floatPaginationOffsetMap;
+    if (!lineAdjustments.empty())
+    {
+      for (const auto &floatItem : _blockFormattingState.GetPlacedFloats().GetList())
+      {
+        if (!floatItem.LayoutBox() || !floatItem.PlacedByLine())
+        {
+          continue;
+        }
+        floatPaginationOffsetMap.emplace(floatItem.LayoutBox(),
+                                         visualAdjustmentOffset(*floatItem.PlacedByLine()));
+      }
+    }
 
     for (auto &layoutBox : layout::FormattingContextBoxes(RootLayoutBox()))
     {
@@ -1129,6 +1202,13 @@ namespace krys::boo::layout_integration
             logicalGeometry, _inlineContentConstraints->FormattingRootBorderBoxSize(),
             placedFloatsWritingMode);
 
+        auto paginationOffset = floatPaginationOffsetMap.find(&layoutBox);
+        bool hasPaginationOffset = paginationOffset != floatPaginationOffsetMap.end();
+        if (hasPaginationOffset)
+        {
+          marginBoxVisualRect.Move(paginationOffset->second);
+          borderBoxVisualRect.Move(paginationOffset->second);
+        }
         if (isInitialLetter)
         {
           auto firstLineTrim = LayoutUnit {inlineLayoutState.FirstLineStartTrimForInitialLetter()};
@@ -1155,6 +1235,13 @@ namespace krys::boo::layout_integration
           {
             renderer.Repaint();
           }
+        }
+
+        if (hasPaginationOffset)
+        {
+          // Float content may be affected by the new position.
+          renderer.MarkForPaginationRelayoutIfNeeded();
+          renderer.LayoutIfNeeded();
         }
         continue;
       }

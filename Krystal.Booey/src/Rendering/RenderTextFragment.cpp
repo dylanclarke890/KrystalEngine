@@ -24,6 +24,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderAncestorIterator.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -121,7 +122,11 @@ namespace krys::boo
     }
     for (auto &block : AncestorsOfType<RenderBlock>(*_firstLetter))
     {
-      // FIXME: Stop at a multi-column flow, once there are multi-column flows.
+      // The first letter of a multi-column flow's content is its container's.
+      if (Is<RenderMultiColumnFlow>(block))
+      {
+        break;
+      }
       if (block.Style().HasPseudoStyle(PseudoElementType::FirstLetter) && block.CanHaveChildren())
       {
         return &block;

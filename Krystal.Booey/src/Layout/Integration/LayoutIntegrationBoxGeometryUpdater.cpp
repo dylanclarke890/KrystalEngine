@@ -30,6 +30,11 @@
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderButton.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlMultiLine.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
@@ -46,6 +51,7 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
+#include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -64,7 +70,6 @@ namespace krys::boo::layout_integration
       Round
     };
 
-    // Subpixel inline layout is off, so values snap to integers.
     KRYS_NODISCARD LayoutUnit SnapToInt(LayoutUnit value,
                                         SnapDirection direction = SnapDirection::Round) noexcept
     {
@@ -256,9 +261,8 @@ namespace krys::boo::layout_integration
           continue;
         }
 
-        // FIXME: Menu lists.
         if (Is<RenderFlexibleBox>(*inflowBox) || Is<RenderGrid>(*inflowBox) || Is<RenderBlockFlow>(*inflowBox)
-            || Is<RenderTextControlInnerContainer>(*inflowBox))
+            || Is<RenderTextControlInnerContainer>(*inflowBox) || Is<RenderMenuList>(*inflowBox))
         {
           if (auto baseline = BaselineForBox(*inflowBox))
           {
@@ -294,16 +298,35 @@ namespace krys::boo::layout_integration
         return null;
       }
 
-      // FIXME: Images, buttons, list boxes, file upload controls and sliders have their own
-      // baseline.
       if (Is<LegacyRenderSVGRoot>(renderBox) || Is<RenderHTMLCanvas>(renderBox)
           || Is<RenderTextControlMultiLine>(renderBox))
       {
         return null;
       }
 
+      auto borderBoxBottom = renderBox.Height();
       auto marginBoxBottom = renderBox.MarginBoxLogicalHeight(writingMode)
                              - (writingMode.IsHorizontal() ? renderBox.MarginTop() : renderBox.MarginRight());
+
+      if (Is<RenderImage>(renderBox))
+      {
+        return null;
+      }
+
+      if (Is<RenderButton>(renderBox))
+      {
+        // We cannot rely on RenderFlexibleBox::BaselinePosition() because of flexboxes have some special
+        // behavior regarding baselines that shouldn't apply to buttons.
+        return renderBox.LastLineBaseline();
+      }
+
+      if (Is<RenderListBox>(renderBox))
+      {
+        // FIXME: This hardcoded baselineAdjustment is what we used to do for the old widget, but I'm not sure
+        // this is right for the new control.
+        constexpr int baselineAdjustment = 7;
+        return SnapToInt(marginBoxBottom) - baselineAdjustment;
+      }
 
       if (auto *textControl = DynamicDowncast<RenderTextControlSingleLine>(renderBox))
       {
@@ -332,6 +355,20 @@ namespace krys::boo::layout_integration
         return null;
       }
 
+      if (auto *fileUpload = DynamicDowncast<RenderFileUploadControl>(renderBox))
+      {
+        if (auto *inlineLayout = fileUpload->InlineLayout())
+        {
+          return std::min(marginBoxBottom, inlineLayout->LastLineBaseline().value_or(0_lu));
+        }
+        return null;
+      }
+
+      if (Is<RenderSlider>(renderBox))
+      {
+        return borderBoxBottom;
+      }
+
       if (renderBox.IsRenderMathMLBlock())
       {
         return renderBox.FirstLineBaseline();
@@ -342,11 +379,10 @@ namespace krys::boo::layout_integration
         return renderBox.FirstLineBaseline();
       }
 
-      // FIXME: Menu lists, which also behave differently from flex boxes, with them.
-      if (Is<RenderTextControlInnerContainer>(renderBox))
+      if (Is<RenderMenuList>(renderBox) || Is<RenderTextControlInnerContainer>(renderBox))
       {
-        // Inner containers are a type of flex box but they behave slightly differently so always check them
-        // before checking for flex.
+        // Both menu list and inner container are types of flex box but they behave slightly differently so
+        // always check them before checking for flex.
         return LastInflowBoxBaseline(Downcast<RenderBlock>(renderBox));
       }
 
@@ -490,11 +526,11 @@ namespace krys::boo::layout_integration
           return !renderListMarker->IsImage();
         }
 
-        // FIXME: List boxes, sliders and buttons.
         if ((Is<RenderReplaced>(renderBox) && renderBox.Style().Display() == DisplayType::Inline)
+            || Is<RenderListBox>(renderBox) || Is<RenderSlider>(renderBox)
             || Is<RenderTextControlMultiLine>(renderBox) || Is<RenderTable>(renderBox)
             || Is<RenderGrid>(renderBox) || Is<RenderFlexibleBox>(renderBox)
-            || renderBox.IsRenderMathMLBlock())
+            || renderBox.IsRenderMathMLBlock() || Is<RenderButton>(renderBox))
         {
           // These are special RenderBlock renderers that override the default baseline position behavior of
           // the inline block box.
@@ -539,7 +575,14 @@ namespace krys::boo::layout_integration
             return SnapToInt(marginBoxLogicalHeight);
           }
 
-          // FIXME: Buttons use their content box bottom.
+          if (Is<RenderButton>(renderBox))
+          {
+            auto contentBoxBottom =
+              rootWritingMode.IsHorizontal()
+                ? renderBox.BorderTop() + renderBox.PaddingTop() + renderBox.ContentBoxHeight()
+                : renderBox.BorderRight() + renderBox.PaddingRight() + renderBox.ContentBoxWidth();
+            return marginBefore + SnapToInt(contentBoxBottom);
+          }
 
           return SnapToInt(marginBoxLogicalHeight);
         };

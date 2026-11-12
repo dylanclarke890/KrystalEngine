@@ -591,9 +591,6 @@ namespace krys::boo::style
         return true;
       }
 
-      // FIXME: With the layer-based SVG engine (off by default), the z-index property applies to all SVG
-      // elements but outermost <svg> elements that aren't positioned.
-
       // Make sure our z-index value is only applied if the object is positioned.
       return style.GetPosition() == PositionType::Static
              && !parentBoxStyle.IsDisplayFlexibleOrGridFormattingContextBox();
@@ -601,9 +598,8 @@ namespace krys::boo::style
 
     bool hasAutoSpecifiedZIndex = hasAutoZIndex(style, _parentBoxStyle);
 
-    // FIXME: SVG transforms that aren't stored on the style ('animatedLocalTransform', <use> x/y, the
-    // viewBox) count as transforms with the layer-based SVG engine (off by default), and so does a hidden
-    // backface in a 3D context with the backface visibility interoperability setting (off by default).
+    // FIXME: A hidden backface in a 3D context counts as a transform with the backface visibility
+    // interoperability setting (off by default).
     auto hasTransformRelatedProperty = [](const RenderStyle &style)
     {
       return style.HasTransformRelatedProperty();
@@ -646,7 +642,7 @@ namespace krys::boo::style
                                                                               : TextSecurity::None);
       }
 
-      // Disallow -webkit-user-modify on ::pseudo elements, except if that pseudo-element targets a slot,
+      // Disallow -internal-user-modify on ::pseudo elements, except if that pseudo-element targets a slot,
       // in which case we want the editability to be passed onto the slotted contents.
       if (element->IsInUserAgentShadowTree() && element->UserAgentPart() != dom::DOMStringAtom::Null()
           && !Is<html::HTMLSlotElement>(*element))
@@ -866,9 +862,6 @@ namespace krys::boo::style
     {
       style.SetPosition(ComputedStyle::InitialPosition());
     }
-
-    // FIXME: With the layer-based SVG engine (off by default), SVG2's stacking context rules give some SVG
-    // elements a used z-index of 0.
 
     // (Legacy)RenderSVGRoot handles zooming for the whole SVG subtree, so foreignObject content should
     // not be scaled again.

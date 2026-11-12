@@ -1,4 +1,5 @@
 ﻿#include "Krystal.UI/View.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
@@ -262,6 +263,47 @@ namespace krys::ui
     void RequestPointerUnlock(Func<void(bool)> &&completionHandler) noexcept override
     {
       completionHandler(_view && _view->UnlockPointer());
+    }
+
+    void PostAccessibilityNotification(boo::ax::AccessibilityObject &object,
+                                       boo::ax::AXNotification notification) noexcept override
+    {
+      if (auto *accessibility = Accessibility())
+      {
+        accessibility->NotificationPosted(object, notification);
+      }
+    }
+
+    void AccessibilityObjectDetached(boo::ax::AccessibilityObject &object,
+                                     boo::ax::AccessibilityDetachmentType) noexcept override
+    {
+      if (auto *accessibility = Accessibility())
+      {
+        accessibility->ObjectDetached(object);
+      }
+    }
+
+    void PostAccessibilityTextChange(boo::ax::AccessibilityObject &object, boo::ax::AXTextChange change,
+                                     uint64 offset, utf8_stringview text) noexcept override
+    {
+      if (auto *accessibility = Accessibility())
+      {
+        accessibility->TextChanged(object, change, offset, text);
+      }
+    }
+
+    /// @brief What exposes the page: the view's, or for an overlay's page, its owner's.
+    KRYS_NODISCARD ViewAccessibility *Accessibility() const noexcept
+    {
+      if (!_view)
+      {
+        return nullptr;
+      }
+      if (_view->_accessibility)
+      {
+        return _view->_accessibility.get();
+      }
+      return _view->_overlayOwner ? _view->_overlayOwner->_accessibility.get() : nullptr;
     }
 
     void SetView(View *view) noexcept
@@ -551,11 +593,26 @@ namespace krys::ui
     {
       _overlay->Hide();
     }
+    _accessibility.reset();
     _chromeClient->SetView(nullptr);
     _frameLoaderClient->SetView(nullptr);
     _dragClient->SetView(nullptr);
     // The layers go before the texture mapper that holds their textures.
     _frame->SetDocument(nullptr);
+  }
+
+  void View::AttachAccessibility(pal::IWindow &window, const boo::IntPoint &origin) noexcept
+  {
+    if (!_accessibility)
+    {
+      _accessibility = CreateUnique<ViewAccessibility>(*this);
+    }
+    _accessibility->Attach(window, origin);
+  }
+
+  void View::DetachAccessibility() noexcept
+  {
+    _accessibility.reset();
   }
 
   boo::dom::HTMLDocument &View::Document() const noexcept
@@ -937,9 +994,18 @@ namespace krys::ui
       RefPtr<Overlay> previous = _overlay;
       previous->Hide();
     }
+    bool isNew = _overlay.get() != &overlay;
     _overlay = ShareRefPtr(&overlay);
     _pageOwnsPress = _buttons != 0;
     _needsPaint = true;
+    if (isNew)
+    {
+      overlay.ContentView()._overlayOwner = this;
+      if (_accessibility)
+      {
+        _accessibility->OverlayShown(overlay);
+      }
+    }
   }
 
   void View::OverlayHidden(Overlay &overlay) noexcept
@@ -948,6 +1014,11 @@ namespace krys::ui
     {
       _overlay = nullptr;
       _needsPaint = true;
+      overlay.ContentView()._overlayOwner = nullptr;
+      if (_accessibility)
+      {
+        _accessibility->OverlayHidden(overlay);
+      }
     }
   }
 
@@ -1279,9 +1350,9 @@ namespace krys::ui
       }
       case pal::PointerAction::Cancelled:
       {
-        // FIXME: End the event handler's press too, without the release's events.
         _penButton = boo::MouseButton::None;
         _penButtons = 0;
+        handler.CancelMousePress();
         _page->GetPointerCaptureController().CancelPointer(boo::PenPointerID,
                                                            _frame->View()->WindowToContents(intPoint));
         break;

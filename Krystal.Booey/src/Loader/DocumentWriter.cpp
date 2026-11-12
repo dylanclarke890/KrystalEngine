@@ -31,9 +31,11 @@
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Text/EncodingRegistry.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
@@ -64,20 +66,6 @@ namespace krys::boo
       return 1;
     }
 
-    /// @brief @p text with each byte that isn't part of well-formed UTF-8 replaced by U+FFFD.
-    KRYS_NODISCARD utf8_string ReplaceInvalidUTF8(utf8_string text) noexcept
-    {
-      if (text::IsValidUTF8(text))
-      {
-        return krys::move(text);
-      }
-      StringBuilder builder;
-      for (text::CodePointIterator it(Span<const char8>(text.data(), text.size())); !it.AtEnd(); ++it)
-      {
-        builder.Append(*it);
-      }
-      return krys::move(builder).ToString();
-    }
   }
 
   namespace
@@ -158,6 +146,9 @@ namespace krys::boo
     {
       parser->Detach();
     }
+    _parser = nullptr;
+    _imageDocument = nullptr;
+    _imageData.clear();
     _pendingBytes.clear();
     _hasReceivedSomeData = false;
 
@@ -181,7 +172,12 @@ namespace krys::boo
     // The document is loading until its parser finishes.
     document->SetParsing(true);
     dom::DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Loading);
-    if (auto *htmlDocument = DynamicDowncast<dom::HTMLDocument>(document.get()))
+    if (auto *imageDocument = DynamicDowncast<html::ImageDocument>(document.get()))
+    {
+      // An image document's bytes go to its image as they are.
+      _imageDocument = ShareRefPtr(imageDocument);
+    }
+    else if (auto *htmlDocument = DynamicDowncast<dom::HTMLDocument>(document.get()))
     {
       _parser = CreateRef<html::DocumentParser>(*htmlDocument);
       if (IsTextDocumentMIMEType(_mimeType))
@@ -200,7 +196,21 @@ namespace krys::boo
   void DocumentWriter::AddData(Span<const uint8> data) noexcept
   {
     krys_assert(_state != State::NotStarted);
-    if (_state == State::Finished || (!_parser && !_xmlParser))
+    if (_state == State::Finished)
+    {
+      return;
+    }
+
+    if (RefPtr<html::ImageDocument> imageDocument = _imageDocument)
+    {
+      _hasReceivedSomeData = true;
+      _imageData.insert(_imageData.end(), data.begin(), data.end());
+      auto buffer = SharedBuffer::Create(Span<const uint8>(_imageData));
+      imageDocument->UpdateDuringParsing(*buffer.get());
+      return;
+    }
+
+    if (!_parser && !_xmlParser)
     {
       return;
     }
@@ -242,10 +252,10 @@ namespace krys::boo
 
     if (RefPtr<xml::XMLDocumentParser> xmlParser = _xmlParser)
     {
-      xmlParser->Append(ReplaceInvalidUTF8(krys::move(chunk)));
+      xmlParser->Append(text::ReplaceInvalidUTF8(krys::move(chunk)));
       return;
     }
-    _parser->InputStream().Append(ReplaceInvalidUTF8(krys::move(chunk)));
+    _parser->InputStream().Append(text::ReplaceInvalidUTF8(krys::move(chunk)));
     _parser->PumpTokenizer();
   }
 
@@ -256,10 +266,17 @@ namespace krys::boo
     _state = State::Finished;
 
     RefPtr<LocalFrame> protectedFrame = ShareRefPtr(_frame.get());
-    if (RefPtr<xml::XMLDocumentParser> xmlParser = krys::move(_xmlParser))
+    if (RefPtr<html::ImageDocument> imageDocument = krys::move(_imageDocument))
     {
       _hasReceivedSomeData = true;
-      xmlParser->Append(ReplaceInvalidUTF8(krys::move(_pendingBytes)));
+      auto data = SharedBuffer::Create(krys::move(_imageData));
+      _imageData = {};
+      imageDocument->FinishLoading(data.get());
+    }
+    else if (RefPtr<xml::XMLDocumentParser> xmlParser = krys::move(_xmlParser))
+    {
+      _hasReceivedSomeData = true;
+      xmlParser->Append(text::ReplaceInvalidUTF8(krys::move(_pendingBytes)));
       _pendingBytes.clear();
       xmlParser->Finish();
       xmlParser->Detach();
@@ -273,7 +290,7 @@ namespace krys::boo
       }
 
       _hasReceivedSomeData = true;
-      parser->InputStream().Append(ReplaceInvalidUTF8(krys::move(_pendingBytes)), IsEOF(true));
+      parser->InputStream().Append(text::ReplaceInvalidUTF8(krys::move(_pendingBytes)), IsEOF(true));
       _pendingBytes.clear();
       parser->PumpTokenizer();
     }

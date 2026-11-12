@@ -46,6 +46,7 @@
 #include "Krystal.Booey/Rendering/Tables/RenderTableSection.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 #include <limits>
 
@@ -167,9 +168,9 @@ namespace krys::boo
     // In the collapsed border model, there is no cell spacing.
     auto usedZoom = Style().UsedZoomForLength();
     _hSpacing =
-      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().BorderHorizontalSpacing(), usedZoom);
+      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().GetBorderSpacing().Width(), usedZoom);
     _vSpacing =
-      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().BorderVerticalSpacing(), usedZoom);
+      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().GetBorderSpacing().Height(), usedZoom);
     krys_debug_assert(_hSpacing >= 0);
     krys_debug_assert(_vSpacing >= 0);
 
@@ -587,6 +588,7 @@ namespace krys::boo
     RecalcSectionsIfNeeded();
 
     bool sectionMoved = false;
+    uint32 sectionCount = 0;
     LayoutUnit movedSectionLogicalTop;
     bool shouldCacheIntrinsicContentLogicalHeightForFlexItem = true;
 
@@ -725,6 +727,7 @@ namespace krys::boo
       // position the table sections
       for (auto *section = TopSection(); section; section = SectionBelow(section))
       {
+        sectionCount++;
         if (!sectionMoved && section->LogicalTop() != LogicalHeight())
         {
           sectionMoved = true;
@@ -763,7 +766,11 @@ namespace krys::boo
       ComputeOverflow(ClientLogicalBottom());
     }
 
-    // FIXME: The page offset, once there's pagination.
+    auto *layoutState = LayoutContext().LayoutState();
+    if (layoutState && layoutState->PageLogicalHeight())
+    {
+      SetPageLogicalOffset(layoutState->PageLogicalOffset(this, LogicalTop()));
+    }
 
     bool didFullRepaint = repainter.RepaintAfterLayout();
     // Repaint with our new bounds if they are different from our old bounds.
@@ -783,8 +790,22 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Laying the table out again when a section moved in paginated layout
-    // (markForPaginationRelayoutIfNeeded), once there's pagination.
+    bool paginated = layoutState && layoutState->IsPaginated();
+    if (sectionCount && sectionMoved && paginated)
+    {
+      // FIXME: Table layout should always stabilize even when section moves (see webkit.org/b/174412).
+      if (_recursiveSectionMovedWithPaginationLevel < sectionCount)
+      {
+        SetForScope recursiveSectionMovedWithPaginationLevel(_recursiveSectionMovedWithPaginationLevel,
+                                                             _recursiveSectionMovedWithPaginationLevel + 1);
+        MarkForPaginationRelayoutIfNeeded();
+        LayoutIfNeeded();
+      }
+      else
+      {
+        krys_debug_assert(false);
+      }
+    }
 
     // FIXME: This value isn't the intrinsic content logical height, but we need
     // to update the value as its used by flexbox layout. crbug.com/367324
@@ -795,6 +816,28 @@ namespace krys::boo
 
     _columnLogicalWidthChanged = false;
     ClearNeedsLayout();
+  }
+
+  void RenderTable::MarkForPaginationRelayoutIfNeeded() noexcept
+  {
+    auto *layoutState = LayoutContext().LayoutState();
+    if (!layoutState || !layoutState->IsPaginated()
+        || (!layoutState->PageLogicalHeightChanged()
+            && (!layoutState->PageLogicalHeight()
+                || layoutState->PageLogicalOffset(this, LogicalTop()) == PageLogicalOffset())))
+    {
+      return;
+    }
+
+    // When a table moves, we have to dirty all of the sections too.
+    SetChildNeedsLayout(RenderObjectMarkingBehavior::MarkOnlyThis);
+    for (auto &child : ChildrenOfType<RenderTableSection>(*this))
+    {
+      if (!child.NeedsLayout())
+      {
+        child.SetChildNeedsLayout(RenderObjectMarkingBehavior::MarkOnlyThis);
+      }
+    }
   }
 
   void RenderTable::InvalidateCollapsedBordersAfterStyleChangeIfNeeded(
@@ -2003,7 +2046,6 @@ namespace krys::boo
     {
       return null;
     }
-    // Subpixel inline layout is off, so the section's top is snapped to an integer.
     return LayoutUnit(topNonEmptySection->LogicalTop().ToInt()) + *baseline;
   }
 
@@ -2024,7 +2066,6 @@ namespace krys::boo
 
     if (auto lastLineBaseline = tableSection->LastLineBaseline())
     {
-      // Subpixel inline layout is off, so the section's top is snapped to an integer.
       return LayoutUnit(tableSection->LogicalTop().ToInt()) + *lastLineBaseline;
     }
 
@@ -2032,14 +2073,14 @@ namespace krys::boo
   }
 
   LayoutRect RenderTable::OverflowClipRect(const LayoutPoint &location,
-                                           OverlayScrollbarSizeRelevancy relevancy) const noexcept
+                                           OverlayScrollbarSizeRelevancy relevancy,
+                                           PaintPhase phase) const noexcept
   {
     LayoutRect rect;
     // Don't clip out the table's side of the collapsed borders if we're in the paint phase that will ask the
     // sections to paint them. Likewise, if we're self-painting we avoid clipping them out as the clip rect
     // that will be passed down to child layers from RenderLayer will do that instead.
-    // FIXME: The paint phase that paints the collapsed borders (PaintPhase::ChildBlockBackgrounds).
-    if (Layer() && Layer()->IsSelfPaintingLayer())
+    if (phase == PaintPhase::ChildBlockBackgrounds || (Layer() && Layer()->IsSelfPaintingLayer()))
     {
       rect = BorderBoxRect();
       rect.SetLocation(location + rect.Location());
@@ -2169,8 +2210,6 @@ namespace krys::boo
       PaintMask(paintInfo, paintOffset);
       return;
     }
-
-    // FIXME: Accessibility bounds come with accessibility.
 
     // We're done.  We don't bother painting any children.
     if (paintPhase == PaintPhase::BlockBackground)

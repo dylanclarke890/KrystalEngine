@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
@@ -64,5 +65,32 @@ namespace krys::boo::tests
     (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, upper));
     (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, upper));
     CHECK(number.Value() == u8"4");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "SpinButtonElement: a press releases the mouse when the field's renderer goes",
+                   "[HTML][SpinButtonElement]")
+  {
+    EditorFixture fixture(u8"<style>body{margin:0}input{margin:0}div{height:50px}</style>"
+                          u8"<input type=number id=number value=5><div id=other></div>");
+    auto &number = Downcast<html::HTMLInputElement>(fixture.ById(u8"number"));
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto moves = CreateRef<CountingListener>();
+    fixture.ById(u8"other").AddEventListener(dom::DOMStringAtom(EventNames::MouseMove), moves, false);
+
+    auto &spinButton = Downcast<html::SpinButtonElement>(*number.InnerSpinButtonElement());
+    auto bounds = spinButton.GetRenderBox()->AbsoluteBoundingBoxRect();
+    IntPoint upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
+
+    // Pressing the spin button captures the mouse until it's released.
+    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, upper));
+    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, upper));
+    CHECK(number.Value() == u8"6");
+
+    // Hiding the field mid-press releases it, so moves go to what's under the mouse.
+    number.SetAttribute(u8"style", u8"display:none");
+    (void)fixture.Document->UpdateLayout();
+    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {bounds.X(), 10}));
+    CHECK(moves->Count == 1);
   }
 }

@@ -25,14 +25,20 @@
 
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {
-  /// @brief An image generated from its CSS description rather than loaded.
-  /// FIXME: Generated images are made again for each paint rather than kept per size for a few seconds
-  /// (`cachedImageForSize`).
+  class GeneratedImage;
+
+  /// @brief An image generated from its CSS description rather than loaded. Those that can be (gradients)
+  /// keep the images they make, per size, for a few seconds after they were last painted.
   class StyleGeneratedImage : public StyleImage
   {
+  private:
+    class CachedGeneratedImage;
+
   protected:
     FloatSize _containerSize;
 
@@ -40,6 +46,8 @@ namespace krys::boo
     bool _fixedSize;
     // Counted: a renderer can use an image more than once.
     HashMap<RenderElement *, uint32> _clients;
+    // Few sizes are painted at once, so a list is enough.
+    List<UniquePtr<CachedGeneratedImage>> _images;
 
   protected:
     StyleGeneratedImage(StyleImage::Type, bool fixedSize) noexcept;
@@ -90,12 +98,16 @@ namespace krys::boo
       _containerSize = containerSize;
     }
 
-    // All generated images must be able to compute their fixed size.
-    // FIXME: Pure upstream; the generated images other than gradients implement it with their drawing.
-    KRYS_NODISCARD virtual FloatSize FixedSize(const RenderElement &) const noexcept
-    {
-      return {};
-    }
+    /// @brief The image made for @p size, if it's still kept; it's then kept for longer.
+    KRYS_NODISCARD GeneratedImage *CachedImageForSize(FloatSize size) noexcept;
+    /// @brief Keeps @p image, made for @p size, until it hasn't been asked for in a few seconds.
+    void SaveCachedImageForSize(FloatSize size, GeneratedImage &image) noexcept;
+
+    /// @brief The image's size when it's fixed-size (it doesn't take the size of its container).
+    KRYS_NODISCARD virtual FloatSize FixedSize(const RenderElement &) const noexcept = 0;
+
+  private:
+    void EvictCachedGeneratedImage(const CachedGeneratedImage &) noexcept;
   };
 }
 

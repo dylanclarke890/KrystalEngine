@@ -210,7 +210,10 @@ namespace krys::boo::GridLayoutFunctions
       return true;
     }
 
-    // FIXME: Multi-column flows (isRenderMultiColumnFlow), once there are those.
+    if (gridItem.IsRenderMultiColumnFlow())
+    {
+      return true;
+    }
 
     if (IsAspectRatioBlockSizeDependentGridItem(gridItem))
     {

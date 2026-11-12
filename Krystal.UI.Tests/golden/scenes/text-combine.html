@@ -1,0 +1,25 @@
+﻿<!doctype html>
+<!-- The "text-combine" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 20px/28px "Liberation Sans"; color: #222222; writing-mode: vertical-rl; }
+  p { margin: 0 0 0 12px; height: 176px; }
+  .tcy { text-combine-upright: all; }
+  .marked { text-combine-upright: all; color: #ef476f; text-emphasis: filled dot #118ab2; }
+  .underlined { text-combine-upright: all; text-decoration: underline #06d6a0; }
+</style>
+</head>
+<body>
+  <!-- Two digits fit in an em as they are; four are compressed. -->
+  <p>Day <span class="tcy">12</span> of <span class="tcy">365</span></p>
+  <p>In <span class="tcy">2026</span> and <span class="tcy">7</span></p>
+  <!-- Emphasis marks and decorations are drawn upright too. -->
+  <p>Marked <span class="marked">24</span> lined <span class="underlined">48</span></p>
+  <!-- Without text-combine-upright, digits are set sideways. -->
+  <p>Plain 12 and 2026</p>
+</body>
+</html>

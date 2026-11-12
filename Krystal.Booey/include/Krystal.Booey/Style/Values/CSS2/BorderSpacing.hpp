@@ -25,11 +25,24 @@
 
 #pragma once
 
+#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumeric.hpp"
 
 namespace krys::boo::style
 {
-  // <'-webkit-border-horizontal-spacing'/'-webkit-border-vertical-spacing'> = <length [0,∞]>
-  // NOTE: There is no standard associated with this property.
-  using WebkitBorderSpacing = Length<css::NonNegativeUnzoomed>;
+  /// @brief One of `border-spacing`'s lengths.
+  using BorderSpacingLength = Length<css::NonNegativeUnzoomed>;
+
+  /// @brief The horizontal (`Width()`) and vertical (`Height()`) spacing between a table's cells.
+  // <'border-spacing'> = <length [0,∞]>{1,2}
+  // https://drafts.csswg.org/css2/#propdef-border-spacing
+  using BorderSpacing = css::MinimallySerialisingSpaceSeparatedSize<BorderSpacingLength>;
+
+  // MARK: - Conversion
+
+  template <>
+  struct CSSValueConversion<BorderSpacing>
+  {
+    KRYS_NODISCARD BorderSpacing operator()(BuilderState &, const css::Value &) noexcept;
+  };
 }

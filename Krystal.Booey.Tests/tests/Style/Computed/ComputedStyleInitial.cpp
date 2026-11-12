@@ -23,7 +23,7 @@ namespace krys::boo::style::tests
       CHECK(ComputedStyle::InitialOpacity() == Opacity {1});
       CHECK(ComputedStyle::InitialWidth() == PreferredSize {css::keywords::Auto {}});
       CHECK(ComputedStyle::InitialBorderTopWidth() == LineWidth {LineWidth::Length {3.0f}});
-      CHECK(ComputedStyle::InitialBorderHorizontalSpacing() == WebkitBorderSpacing {0_css_px});
+      CHECK(ComputedStyle::InitialBorderSpacing() == BorderSpacing {0_css_px});
       CHECK(ComputedStyle::InitialBorderImageSource().IsNone());
     }
 

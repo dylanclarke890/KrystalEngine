@@ -909,9 +909,7 @@ namespace krys::boo
         if (borderStyle == BorderStyle::Dashed)
         {
           // Along the middle of the border, where corners are shorter than on its outside edge. The extra
-          // thickness is, as above, so that the clip antialiases the edges.
-          // FIXME: With different widths on each side, Chrome's gaps come out a little different: it has a
-          // longer centerline than this one, by about 4px on a 105x40 box with a radius of 12.
+          // thickness is, as above, so that the clip antialiases the edges (see DIFFERENCES.md).
           auto centerline = borderShape.DeprecatedPixelSnappedRoundedRect(Document().DeviceScaleFactor());
           const float top = edges.At(BoxSide::Top).WidthForPainting() / 2;
           const float right = edges.At(BoxSide::Right).WidthForPainting() / 2;

@@ -89,7 +89,6 @@ namespace krys::boo::layout_integration
 
     if (box.IsLineBreak())
     {
-      // FIXME: Accessibility bounds come with accessibility.
       return;
     }
 

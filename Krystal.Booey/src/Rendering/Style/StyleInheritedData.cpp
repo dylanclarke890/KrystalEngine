@@ -27,17 +27,15 @@ namespace krys::boo
 {
 
   StyleInheritedData::StyleInheritedData() noexcept
-      : BorderHorizontalSpacing(style::ComputedStyle::InitialBorderHorizontalSpacing()),
-        BorderVerticalSpacing(style::ComputedStyle::InitialBorderVerticalSpacing()),
+      : BorderSpacing(style::ComputedStyle::InitialBorderSpacing()),
         LineHeight(style::ComputedStyle::InitialLineHeight()), FontData(StyleFontData::Create()),
         Color(style::ComputedStyle::InitialColor())
   {
   }
 
   inline StyleInheritedData::StyleInheritedData(const StyleInheritedData &o) noexcept
-      : RefCounted<StyleInheritedData>(), BorderHorizontalSpacing(o.BorderHorizontalSpacing),
-        BorderVerticalSpacing(o.BorderVerticalSpacing), LineHeight(o.LineHeight), FontData(o.FontData),
-        Color(o.Color)
+      : RefCounted<StyleInheritedData>(), BorderSpacing(o.BorderSpacing), LineHeight(o.LineHeight),
+        FontData(o.FontData), Color(o.Color)
   {
     krys_debug_assert_msg(o == *this, "StyleInheritedData should be properly copied.");
   }
@@ -63,8 +61,7 @@ namespace krys::boo
   bool StyleInheritedData::NonFastPathInheritedEqual(const StyleInheritedData &other) const noexcept
   {
     return LineHeight == other.LineHeight && FontData == other.FontData
-           && BorderHorizontalSpacing == other.BorderHorizontalSpacing
-           && BorderVerticalSpacing == other.BorderVerticalSpacing;
+           && BorderSpacing == other.BorderSpacing;
   }
 
   void StyleInheritedData::FastPathInheritFrom(const StyleInheritedData &inheritParent) noexcept

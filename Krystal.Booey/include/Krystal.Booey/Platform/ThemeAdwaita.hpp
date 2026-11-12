@@ -35,8 +35,6 @@ namespace krys::boo
   {
   private:
     Color _accentColor {SRGBA<uint8> {52, 132, 228}};
-    bool _prefersReducedMotion {false};
-    bool _prefersContrast {false};
 
   public:
     ThemeAdwaita() noexcept = default;
@@ -44,9 +42,6 @@ namespace krys::boo
     virtual void PlatformColorsDidChange() noexcept
     {
     }
-
-    KRYS_NODISCARD bool UserPrefersContrast() const noexcept final;
-    KRYS_NODISCARD bool UserPrefersReducedMotion() const noexcept final;
 
     void SetAccentColor(const Color &) noexcept;
     KRYS_NODISCARD Color AccentColor() const noexcept;

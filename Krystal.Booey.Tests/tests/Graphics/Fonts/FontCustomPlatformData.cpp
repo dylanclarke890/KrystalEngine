@@ -7,12 +7,13 @@ namespace krys::boo::tests
   TEST_CASE("FontCustomPlatformData::SupportsFormat", "[Graphics][FontCustomPlatformData]")
   {
     for (auto format : {u8"truetype", u8"OpenType", u8"woff", u8"woff2", u8"woff-variations",
-                        u8"woff2-variations", u8"truetype-variations", u8"opentype-variations", u8"svg"})
+                        u8"woff2-variations", u8"truetype-variations", u8"opentype-variations"})
     {
       CHECK(FontCustomPlatformData::SupportsFormat(format));
     }
 
     CHECK_FALSE(FontCustomPlatformData::SupportsFormat(u8"collection"));
+    CHECK_FALSE(FontCustomPlatformData::SupportsFormat(u8"svg"));
     CHECK_FALSE(FontCustomPlatformData::SupportsFormat(u8"embedded-opentype"));
     CHECK_FALSE(FontCustomPlatformData::SupportsFormat(u8""));
   }

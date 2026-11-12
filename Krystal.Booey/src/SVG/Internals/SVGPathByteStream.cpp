@@ -28,6 +28,12 @@ namespace krys::boo::svg
     (void)BuildSVGPathByteStreamFromString(string, *this, PathParsingMode::UnalteredParsing);
   }
 
+  Ref<SVGPathByteStream::Data> SVGPathByteStream::Data::Empty() noexcept
+  {
+    static const Ref<Data> empty = AdoptRef(*new Data);
+    return empty;
+  }
+
   const SVGPathByteStream &SVGPathByteStream::Empty() noexcept
   {
     static const SVGPathByteStream empty;

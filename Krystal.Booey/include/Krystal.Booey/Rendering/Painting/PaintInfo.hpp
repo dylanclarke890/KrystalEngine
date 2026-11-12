@@ -43,7 +43,7 @@ namespace krys::boo
    * Paint the object and its children, clipped by (x|y|w|h).
    * (tx|ty) is the calculated position of the parent
    */
-  // FIXME: Event and accessibility regions (`regionContext`) aren't ported.
+  // FIXME: Event regions (`regionContext`) aren't ported.
   struct PaintInfo
   {
     LayoutRect Rect;

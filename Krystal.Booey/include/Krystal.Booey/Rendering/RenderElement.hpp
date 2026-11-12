@@ -155,7 +155,6 @@ namespace krys::boo
 
     /// @brief Replaces the renderer's style, doing at least @p minimalStyleDifference of the work a style
     /// change needs.
-    /// @note FIXME: The difference doesn't invalidate layout or painting yet (no layout, painting or layers).
     void SetStyle(RenderStyle &&style,
                   style::DifferenceResult minimalStyleDifference = style::DifferenceResult::Equal) noexcept;
 
@@ -200,6 +199,13 @@ namespace krys::boo
 
     void InsertedIntoTree() noexcept override;
     void WillBeRemovedFromTree() noexcept override;
+
+    /// @brief Takes the element and its descendants out of their fragmented flows.
+    void RemoveFromRenderFragmentedFlow() noexcept;
+    /// @brief Drops the box info @p fragmentedFlow keeps for the element and its descendants, and the blocks'
+    /// cached enclosing flows.
+    virtual void ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(
+      RenderFragmentedFlow *fragmentedFlow) noexcept;
 
     KRYS_NODISCARD bool IsFixedPositioned() const noexcept;
     KRYS_NODISCARD bool IsAbsolutelyPositioned() const noexcept;
@@ -466,6 +472,11 @@ namespace krys::boo
 
     void WillBeDestroyed() noexcept override;
 
+    /// @brief Updates the fragmented flow state of the element's subtree when a style change can give its
+    /// descendants another containing block.
+    void AdjustFragmentedFlowStateOnContainingBlockChangeIfNeeded(const RenderStyle &oldStyle,
+                                                                  const RenderStyle &newStyle) noexcept;
+
     // FIXME: Scroll anchoring, once there is any.
     virtual void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept;
     virtual void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept;
@@ -523,6 +534,8 @@ namespace krys::boo
   private:
     RenderElement(Type type, dom::ContainerNode &elementOrDocument, RenderStyle &&style,
                   EnumSet<TypeFlag> flags, TypeSpecificFlags typeSpecificFlags) noexcept;
+
+    void RemoveFromRenderFragmentedFlowIncludingDescendants(bool shouldUpdateState) noexcept;
 
     // Called by RenderTreeBuilder: they take and give up ownership of the child.
     RenderObject *AttachRendererInternal(RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;

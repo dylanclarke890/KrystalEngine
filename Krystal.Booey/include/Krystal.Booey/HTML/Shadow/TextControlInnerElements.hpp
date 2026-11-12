@@ -121,7 +121,6 @@ namespace krys::boo::html
   };
 
   /// @brief The decoration at the start of a search field (the `::-webkit-search-results-decoration` part).
-  // FIXME: The recent searches menu it opens (the `results` attribute), which isn't standard.
   class SearchFieldResultsButtonElement final : public HTMLDivElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SearchFieldResultsButtonElement);

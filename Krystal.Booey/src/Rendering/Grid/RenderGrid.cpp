@@ -550,7 +550,7 @@ namespace krys::boo
       ClearGridItemOverridingSizesBeforeLayout(*this);
       ComputeLayoutRequirementsForItemsBeforeLayout(gridLayoutState);
 
-      // FIXME: The fragments' widths (preparePaginationBeforeBlockLayout), once there's pagination.
+      PreparePaginationBeforeBlockLayout(relayoutChildren);
       BeginUpdateScrollInfoAfterLayoutTransaction();
 
       LayoutSize previousSize = Size();
@@ -738,7 +738,7 @@ namespace krys::boo
 
       ClearGridItemOverridingSizesBeforeLayout(*this);
 
-      // FIXME: The fragments' widths (preparePaginationBeforeBlockLayout), once there's pagination.
+      PreparePaginationBeforeBlockLayout(relayoutChildren);
       BeginUpdateScrollInfoAfterLayoutTransaction();
 
       LayoutSize previousSize = Size();
@@ -2595,7 +2595,6 @@ namespace krys::boo
       baseline = BaselineAlignmentState::SynthesizedBaseline(
         *baselineGridItem, dominantBaseline, gridWritingMode, direction, BaselineSynthesisEdge::BorderBox);
     }
-    // Subpixel inline layout is off: the item's top is snapped to an integer.
     return LayoutUnit(LogicalTopForChild(*baselineGridItem).ToInt()) + *baseline;
   }
 
@@ -2626,7 +2625,6 @@ namespace krys::boo
       baseline = BaselineAlignmentState::SynthesizedBaseline(
         *baselineGridItem, dominantBaseline, gridWritingMode, direction, BaselineSynthesisEdge::BorderBox);
     }
-    // Subpixel inline layout is off: the item's top is snapped to an integer.
     return LayoutUnit(LogicalTopForChild(*baselineGridItem).ToInt()) + *baseline;
   }
 
@@ -3419,7 +3417,10 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: No cache inside fragmented flows (enclosingFragmentedFlow), once there's pagination.
+    if (EnclosingFragmentedFlow())
+    {
+      return false;
+    }
 
     for (auto &gridItem : ChildrenOfType<RenderBox>(*this))
     {

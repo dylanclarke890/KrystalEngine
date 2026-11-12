@@ -28,13 +28,18 @@
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderEdge.hpp"
 #include "Krystal.Booey/Rendering/Painting/ImageQualityController.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/Painting/TextBoxPainter.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -1003,8 +1008,7 @@ namespace krys::boo
       // FIXME: Inside an inline formatting context, the position of the inline offset parent's first inline
       // box (firstInlineBoxTopLeft).
 
-      // FIXME: Also when the renderer is in a fragmented flow, once there are fragmented flows.
-      if (!IsOutOfFlowPositioned())
+      if (!IsOutOfFlowPositioned() || EnclosingFragmentedFlow())
       {
         if (IsRelativelyPositioned())
         {
@@ -1019,11 +1023,21 @@ namespace krys::boo
         while (ancestor != offsetParent)
         {
           // FIXME: What are we supposed to do inside SVG content?
-          // FIXME: The translation of a multi-column flow, once there are multi-column flows.
-          if (auto *renderBox = DynamicDowncast<RenderBox>(*ancestor);
-              renderBox && !Is<RenderTableRow>(*ancestor))
+          if (auto *renderMultiColumnFlow = DynamicDowncast<RenderMultiColumnFlow>(*ancestor))
           {
-            referencePoint.MoveBy(renderBox->TopLeftLocation());
+            // We need to apply a translation based off what region we are inside.
+            if (auto *fragment = renderMultiColumnFlow->PhysicalTranslationFromFlowToFragment(referencePoint))
+            {
+              referencePoint.MoveBy(fragment->TopLeftLocation());
+            }
+          }
+          else if (!IsOutOfFlowPositioned())
+          {
+            if (auto *renderBox = DynamicDowncast<RenderBox>(*ancestor);
+                renderBox && !Is<RenderTableRow>(*ancestor))
+            {
+              referencePoint.MoveBy(renderBox->TopLeftLocation());
+            }
           }
 
           ancestor = ancestor->Parent();
@@ -1247,7 +1261,11 @@ namespace krys::boo
   DecodingMode RenderBoxModelObject::DecodingModeForImageDraw(const Image &image,
                                                               const PaintInfo &paintInfo) const noexcept
   {
-    // (Skipped: image documents decoding synchronously, as there are none; see KNOWN-ISSUES.md.)
+    // Some document types force synchronous decoding.
+    if (Is<html::ImageDocument>(GetDocument()))
+    {
+      return DecodingMode::Synchronous;
+    }
 
     // A PaintBehavior may force synchronous decoding.
     if (paintInfo.PaintBehavior.Contains(PaintBehavior::Snapshotting))
@@ -1320,6 +1338,38 @@ namespace krys::boo
 
     // Choose a decodingMode such that the image does not flicker.
     return defaultDecodingMode();
+  }
+
+  void RenderBoxModelObject::PaintMaskForTextFillBox(GraphicsContext &context, const FloatRect &paintRect,
+                                                     const inline_iterator::InlineBoxIterator &inlineBox,
+                                                     const LayoutRect &scrolledPaintRect) noexcept
+  {
+    // The text is added to the mask with the text clip phase, which paints it in black.
+    PaintInfo maskInfo(context, LayoutRect(paintRect), PaintPhase::TextClip, {PaintBehavior::ForceBlackText});
+    if (inlineBox)
+    {
+      auto paintOffset =
+        scrolledPaintRect.Location()
+        - ToLayoutSize(LayoutPoint(inlineBox->VisualRectIgnoringBlockDirection().Location()));
+
+      for (auto box = inlineBox->FirstLeafBox(), end = inlineBox->EndLeafBox(); box != end;
+           box.TraverseLineRightwardOnLine())
+      {
+        if (!box->IsText())
+        {
+          continue;
+        }
+        const auto &modernPath = box->ModernPath();
+        TextBoxPainter {modernPath.GetInlineContent(), modernPath.GetBox(), modernPath.GetBox().Style(),
+                        maskInfo, paintOffset}
+          .Paint();
+      }
+      return;
+    }
+
+    auto *renderBox = DynamicDowncast<RenderBox>(*this);
+    auto localOffset = renderBox ? renderBox->LocationOffset() : LayoutSize();
+    Paint(maskInfo, scrolledPaintRect.Location() - localOffset);
   }
 
   InterpolationQuality RenderBoxModelObject::ChooseInterpolationQuality(GraphicsContext &context,

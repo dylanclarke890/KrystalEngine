@@ -36,16 +36,6 @@
 
 namespace krys::boo::style
 {
-  namespace
-  {
-    // FIXME: `document().settings().standardFontFamily()` once there's a `Settings` port. The default
-    // settings have no standard font family, so it's the empty string.
-    KRYS_NODISCARD css::CSSOMStringAtom StandardFontFamily(const BuilderState &) noexcept
-    {
-      return css::CSSOMStringAtom::Empty();
-    }
-  }
-
   // MARK: - Conversion
 
   FontFamilies CSSValueConversion<FontFamilies>::operator()(BuilderState &state,

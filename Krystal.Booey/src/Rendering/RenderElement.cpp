@@ -23,6 +23,7 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp"
@@ -41,6 +42,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
@@ -49,6 +51,7 @@
 #include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/Painting/OutlinePainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
@@ -380,7 +383,7 @@ namespace krys::boo
     _style = krys::move(style);
     bool detachedFromParent = !Parent();
 
-    // FIXME: The fragmented flow state when the containing block changes, once there are fragmented flows.
+    AdjustFragmentedFlowStateOnContainingBlockChangeIfNeeded(oldStyle, _style);
 
     StyleDidChange(diff, &oldStyle);
 
@@ -987,7 +990,6 @@ namespace krys::boo
 
   bool RenderElement::IsInsideEntirelyHiddenLayer() const noexcept
   {
-    // FIXME: Layers inside hidden SVG containers and resources.
     return Style().UsedVisibility() != Visibility::Visible && !EnclosingLayer()->HasVisibleContent();
   }
 
@@ -1013,7 +1015,12 @@ namespace krys::boo
 
   void RenderElement::UpdateOutlineAutoAncestor(bool hasOutlineAuto) noexcept
   {
-    // FIXME: Column spanner placeholders, once there are multi-column flows.
+    if (auto *placeholder = DynamicDowncast<RenderMultiColumnSpannerPlaceholder>(*this))
+    {
+      auto *spanner = placeholder->Spanner();
+      spanner->SetHasOutlineAutoAncestor(hasOutlineAuto);
+      spanner->UpdateOutlineAutoAncestor(hasOutlineAuto);
+    }
 
     for (auto &child : ChildrenOfType<RenderObject>(*this))
     {
@@ -1085,9 +1092,16 @@ namespace krys::boo
           (void)lineLayout->StyleWillChange(*this, newStyle, diff);
         }
       }
-      // FIXME: The stacking context's z-order lists, rendering-dependent regions, the accessibility cache,
-      // the enclosing layer's visible content status and event region and the fragmented flow, once there are
-      // any.
+      // FIXME: The stacking context's z-order lists, rendering-dependent regions and the enclosing layer's
+      // visible content status and event region, once there are any.
+      if (_style.UsedVisibility() != newStyle.UsedVisibility()
+          || _style.EffectiveInert() != newStyle.EffectiveInert())
+      {
+        if (auto *cache = GetDocument().ExistingAXObjectCache())
+        {
+          cache->OnInertOrVisibilityChange(*this);
+        }
+      }
 
       if (IsFloating() && _style.Floating() != newStyle.Floating())
       {
@@ -1100,6 +1114,21 @@ namespace krys::boo
         // For changes in positioning styles, we need to conceivably remove ourselves
         // from the positioned objects list.
         Downcast<RenderBox>(*this).RemoveFloatingOrOutOfFlowChildFromBlockLists();
+      }
+
+      // A box whose new containing block is outside its fragmented flow leaves the flow's box info.
+      if (GetFragmentedFlowState() == FragmentedFlowState::InsideFlow
+          && _style.GetPosition() != newStyle.GetPosition())
+      {
+        auto *newContainingBlock = ContainingBlockForPositionType(newStyle.GetPosition(), *this);
+        if (newContainingBlock && ContainingBlock() != newContainingBlock)
+        {
+          if (auto *enclosingFragmentedFlow = LocateEnclosingFragmentedFlow();
+              enclosingFragmentedFlow && !newContainingBlock->IsDescendantOf(enclosingFragmentedFlow))
+          {
+            enclosingFragmentedFlow->RemoveFlowChildInfo(*this);
+          }
+        }
       }
 
       // reset style flags
@@ -1119,8 +1148,7 @@ namespace krys::boo
 
     // FIXME: Outline counting, once there's any.
 
-    // FIXME: A fixed root background composited on its own isn't slow; and the setting for fixed
-    // backgrounds painting relative to the document, once there are settings for it.
+    // FIXME: A fixed root background composited on its own isn't slow.
     bool newStyleSlowScroll =
       style::HasImageWithAttachment(newStyle.GetBackgroundLayers(), FillAttachment::FixedBackground);
 
@@ -1628,10 +1656,9 @@ namespace krys::boo
 
   bool RenderElement::IsAnonymousBlock() const noexcept
   {
-    // FIXME: Multi-column sets, once there are any.
     return IsAnonymous() && Style().Display() == DisplayType::Block && !Style().GetPseudoElementType()
            && IsRenderBlock() && !IsRenderMathMLBlock() && !IsRenderListMarker() && !IsRenderFragmentedFlow()
-           && !IsRenderView();
+           && !IsRenderMultiColumnSet() && !IsRenderView();
   }
 
   bool RenderElement::IsBlockContainer() const noexcept
@@ -2057,8 +2084,6 @@ namespace krys::boo
     {
       textRenderer->StyleDidChange(style::DifferenceResult::Equal, nullptr);
     }
-
-    // FIXME: Remove the layers created in hidden SVG subtrees.
   }
 
   RenderObject *RenderElement::AttachRendererInternal(RenderPtr<RenderObject> child,
@@ -2229,8 +2254,6 @@ namespace krys::boo
 
   bool RenderElement::AllowsAnimation() const noexcept
   {
-    // FIXME: An image element's own animation control (HTMLImageElement::allowsAnimation), once there are
-    // per-element animation controls.
     auto *page = GetDocument().GetPage();
     return !page || page->ImageAnimationEnabled();
   }
@@ -2569,6 +2592,127 @@ namespace krys::boo
     }
   }
 
+  void RenderElement::AdjustFragmentedFlowStateOnContainingBlockChangeIfNeeded(
+    const RenderStyle &oldStyle, const RenderStyle &newStyle) noexcept
+  {
+    if (GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow)
+    {
+      return;
+    }
+
+    // Make sure we invalidate the containing block cache for flows when the containing block context changes
+    // so that StyleDidChange can safely use RenderBlock::LocateEnclosingFragmentedFlow().
+    // FIXME: Share some code with RenderElement::CanContain*.
+    auto mayNotBeContainingBlockForDescendantsAnymore =
+      oldStyle.GetPosition() != newStyle.GetPosition()
+      || oldStyle.HasTransformRelatedProperty() != newStyle.HasTransformRelatedProperty()
+      || oldStyle.GetWillChange() != newStyle.GetWillChange()
+      || oldStyle.HasBackdropFilter() != newStyle.HasBackdropFilter()
+      || oldStyle.UsedContain().Contains(style::ContainValue::Layout)
+           != newStyle.UsedContain().Contains(style::ContainValue::Layout)
+      || oldStyle.UsedContain().Contains(style::ContainValue::Size)
+           != newStyle.UsedContain().Contains(style::ContainValue::Size);
+    if (!mayNotBeContainingBlockForDescendantsAnymore)
+    {
+      return;
+    }
+
+    // Invalidate the containing block caches.
+    if (auto *block = DynamicDowncast<RenderBlock>(*this))
+    {
+      block->ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(nullptr);
+    }
+    else
+    {
+      // Relatively positioned inline boxes can have absolutely positioned block descendants. We need to reset
+      // them as well.
+      for (auto &descendant : DescendantsOfType<RenderBlock>(*this))
+      {
+        descendant.ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(nullptr);
+      }
+    }
+
+    // Adjust the flow thread state on the subtree.
+    SetFragmentedFlowState(ComputedFragmentedFlowState(*this));
+    for (auto &descendant : DescendantsOfType<RenderObject>(*this))
+    {
+      descendant.SetFragmentedFlowState(ComputedFragmentedFlowState(descendant));
+    }
+  }
+
+  void RenderElement::RemoveFromRenderFragmentedFlow() noexcept
+  {
+    krys_debug_assert(GetFragmentedFlowState() != FragmentedFlowState::NotInsideFlow);
+    // Sometimes we remove the element from the flow, but it's not destroyed at that time.
+    // It's only until later when we actually destroy it and remove all the children from it.
+    // Currently, that happens for firstLetter elements and list markers.
+    RemoveFromRenderFragmentedFlowIncludingDescendants(true);
+  }
+
+  void RenderElement::RemoveFromRenderFragmentedFlowIncludingDescendants(bool shouldUpdateState) noexcept
+  {
+    // Once we reach another flow thread we don't need to update the flow thread state
+    // but we have to continue cleanup the flow thread info.
+    if (IsRenderFragmentedFlow())
+    {
+      shouldUpdateState = false;
+    }
+
+    for (auto &child : ChildrenOfType<RenderObject>(*this))
+    {
+      if (auto *element = DynamicDowncast<RenderElement>(child))
+      {
+        element->RemoveFromRenderFragmentedFlowIncludingDescendants(shouldUpdateState);
+        continue;
+      }
+      if (shouldUpdateState)
+      {
+        child.SetFragmentedFlowState(FragmentedFlowState::NotInsideFlow);
+      }
+    }
+
+    // We have to ask for our containing flow thread as it may be above the removed sub-tree.
+    auto *enclosingFragmentedFlow = EnclosingFragmentedFlow();
+    while (enclosingFragmentedFlow)
+    {
+      enclosingFragmentedFlow->RemoveFlowChildInfo(*this);
+
+      if (enclosingFragmentedFlow->GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow)
+      {
+        break;
+      }
+      auto *parent = enclosingFragmentedFlow->Parent();
+      if (!parent)
+      {
+        break;
+      }
+      enclosingFragmentedFlow = parent->EnclosingFragmentedFlow();
+    }
+    if (auto *block = DynamicDowncast<RenderBlock>(*this))
+    {
+      block->SetCachedEnclosingFragmentedFlowNeedsUpdate();
+    }
+
+    if (shouldUpdateState)
+    {
+      SetFragmentedFlowState(FragmentedFlowState::NotInsideFlow);
+    }
+  }
+
+  void RenderElement::ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(
+    RenderFragmentedFlow *fragmentedFlow) noexcept
+  {
+    if (fragmentedFlow)
+    {
+      fragmentedFlow->RemoveFlowChildInfo(*this);
+    }
+
+    for (auto &child : ChildrenOfType<RenderElement>(*this))
+    {
+      child.ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(fragmentedFlow);
+    }
+  }
+
   void RenderElement::InsertedIntoTree() noexcept
   {
     // Keep our layer hierarchy updated. Optimize for the common case where we don't have any children
@@ -2708,7 +2852,7 @@ namespace krys::boo
     // This is also used by other elements (e.g. flex items and grid items).
     PaintPhase paintPhaseToUse = IsExcludedAndPlacedInBorder() ? paintInfo.Phase : PaintPhase::Foreground;
     if (paintInfo.Phase == PaintPhase::Selection || paintInfo.Phase == PaintPhase::EventRegion
-        || paintInfo.Phase == PaintPhase::TextClip || paintInfo.Phase == PaintPhase::Accessibility)
+        || paintInfo.Phase == PaintPhase::TextClip)
     {
       Paint(paintInfo, childPoint);
     }

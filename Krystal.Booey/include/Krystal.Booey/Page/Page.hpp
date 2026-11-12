@@ -97,7 +97,7 @@ namespace krys::boo
   /// before the host paints them (the specification's "update the rendering"). Something that changes what
   /// the page shows schedules a rendering update; the host runs it at its next rendering opportunity.
   /// @see https://html.spec.whatwg.org/#update-the-rendering
-  // FIXME: The rest of the page: settings, the focus controller, the rest of the chrome, page overlays.
+  // FIXME: The rest of the page: the focus controller, the rest of the chrome, page overlays.
   class Page final : public RefCounted<Page>, public CanMakeWeakPtr<Page>
   {
     KRYS_NON_COPY_MOVABLE(Page);
@@ -123,6 +123,7 @@ namespace krys::boo
     mutable bool _skippedRenderBlockedDocument {false};
     bool _isVisible {true};
     bool _imageAnimationEnabled {true};
+    bool _prefersNonBlinkingCaret {false};
     bool _scriptedAnimationsSuspended {false};
     bool _useDarkAppearance {false};
     ApplicationDisplayMode _displayMode {ApplicationDisplayMode::Browser};
@@ -283,6 +284,17 @@ namespace krys::boo
     /// stop at the frame they show, and SMIL animations pause, in the page's documents and its SVG images. A
     /// page starts with them playing.
     void SetImageAnimationEnabled(bool enabled) noexcept;
+
+    /// @brief Keeps carets shown rather than blinking, for users who prefer a caret that doesn't blink (an
+    /// accessibility preference the host reports). A page starts with carets blinking.
+    void SetPrefersNonBlinkingCaret(bool prefers) noexcept
+    {
+      _prefersNonBlinkingCaret = prefers;
+    }
+    KRYS_NODISCARD bool PrefersNonBlinkingCaret() const noexcept
+    {
+      return _prefersNonBlinkingCaret;
+    }
     KRYS_NODISCARD bool ImageAnimationEnabled() const noexcept
     {
       return _imageAnimationEnabled;

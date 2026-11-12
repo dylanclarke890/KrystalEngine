@@ -21,6 +21,15 @@ namespace krys::boo::html
     dom::ExceptionOr<void> Text(dom::DOMString value) noexcept;
 
 #pragma endregion
+
+  protected:
+    void OnInsert() noexcept override;
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnChildrenChanged() noexcept override;
+
+  private:
+    /// @brief Tells the accessibility cache the document's title may have changed.
+    void TitleMayHaveChanged() noexcept;
   };
 }
 

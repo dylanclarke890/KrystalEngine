@@ -443,36 +443,6 @@ namespace krys::boo::css
       return true;
     }
 
-    KRYS_NODISCARD static bool ConsumeBorderSpacingShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                             const PropertyShorthand &,
-                                                             PropertyParserResult &result) noexcept
-    {
-      RefPtr horizontalSpacing =
-        PrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
-      if (!horizontalSpacing)
-      {
-        return false;
-      }
-
-      RefPtr verticalSpacing = horizontalSpacing;
-      if (!tokens.IsAtEnd())
-      {
-        verticalSpacing = PrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
-      }
-
-      if (!verticalSpacing || !tokens.IsAtEnd())
-      {
-        return false;
-      }
-
-      result.AddPropertyForCurrentShorthand(state, PropertyId::InternalBorderHorizontalSpacing,
-                                            krys::move(horizontalSpacing));
-      result.AddPropertyForCurrentShorthand(state, PropertyId::InternalBorderVerticalSpacing,
-                                            krys::move(verticalSpacing));
-
-      return true;
-    }
-
     KRYS_NODISCARD static bool ConsumeAnimationShorthand(TokenRange &tokens, PropertyParserState &state,
                                                          const PropertyShorthand &shorthand,
                                                          PropertyParserResult &result) noexcept
@@ -2482,48 +2452,6 @@ namespace krys::boo::css
       return tokens.IsAtEnd();
     }
 
-    KRYS_NODISCARD static bool
-      ConsumeOverscrollBehaviorShorthand(TokenRange &tokens, PropertyParserState &state,
-                                         KRYS_MAYBE_UNUSED const PropertyShorthand &shorthand,
-                                         PropertyParserResult &result) noexcept
-    {
-      krys_debug_assert(shorthand.Size() == 2);
-
-      if (tokens.IsAtEnd())
-      {
-        return false;
-      }
-
-      RefPtr overscrollBehaviorX = PropertyParsing::ConsumeOverscrollBehaviorX(tokens);
-      if (!overscrollBehaviorX)
-      {
-        return false;
-      }
-
-      RefPtr<Value> overscrollBehaviorY;
-      tokens.DiscardWhitespace();
-      if (tokens.IsAtEnd())
-      {
-        overscrollBehaviorY = overscrollBehaviorX;
-      }
-      else
-      {
-        overscrollBehaviorY = PropertyParsing::ConsumeOverscrollBehaviorY(tokens);
-        tokens.DiscardWhitespace();
-        if (!tokens.IsAtEnd())
-        {
-          return false;
-        }
-      }
-
-      result.AddPropertyForCurrentShorthand(state, PropertyId::OverscrollBehaviorX,
-                                            krys::move(overscrollBehaviorX));
-      result.AddPropertyForCurrentShorthand(state, PropertyId::OverscrollBehaviorY,
-                                            krys::move(overscrollBehaviorY));
-
-      return true;
-    }
-
     KRYS_NODISCARD static bool ConsumeContainerShorthand(TokenRange &tokens, PropertyParserState &state,
                                                          const PropertyShorthand &,
                                                          PropertyParserResult &result) noexcept
@@ -2559,49 +2487,6 @@ namespace krys::boo::css
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::ContainerName, krys::move(name));
       result.AddPropertyForCurrentShorthand(state, PropertyId::ContainerType, krys::move(type));
-
-      return true;
-    }
-
-    KRYS_NODISCARD static bool
-      ConsumeContainIntrinsicSizeShorthand(TokenRange &tokens, PropertyParserState &state,
-                                           KRYS_MAYBE_UNUSED const PropertyShorthand &shorthand,
-                                           PropertyParserResult &result) noexcept
-    {
-      krys_debug_assert(shorthand.Size() == 2);
-      krys_debug_assert(IsExposed(PropertyId::ContainIntrinsicSize, &state.Context.PropertySettings));
-
-      if (tokens.IsAtEnd())
-      {
-        return false;
-      }
-
-      RefPtr containIntrinsicWidth = PropertyParsing::ConsumeContainIntrinsicWidth(tokens, state);
-      if (!containIntrinsicWidth)
-      {
-        return false;
-      }
-
-      RefPtr<Value> containIntrinsicHeight;
-      tokens.DiscardWhitespace();
-      if (tokens.IsAtEnd())
-      {
-        containIntrinsicHeight = containIntrinsicWidth;
-      }
-      else
-      {
-        containIntrinsicHeight = PropertyParsing::ConsumeContainIntrinsicHeight(tokens, state);
-        tokens.DiscardWhitespace();
-        if (!tokens.IsAtEnd() || !containIntrinsicHeight)
-        {
-          return false;
-        }
-      }
-
-      result.AddPropertyForCurrentShorthand(state, PropertyId::ContainIntrinsicWidth,
-                                            krys::move(containIntrinsicWidth));
-      result.AddPropertyForCurrentShorthand(state, PropertyId::ContainIntrinsicHeight,
-                                            krys::move(containIntrinsicHeight));
 
       return true;
     }

@@ -97,6 +97,12 @@ namespace krys::boo::html
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTableSectionElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  {
+    return Is<krys::boo::html::HTMLElement>(target)
+           && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLTableSectionElement();
+  }
+
   KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
   {
     return target.IsHTMLTableSectionElement();

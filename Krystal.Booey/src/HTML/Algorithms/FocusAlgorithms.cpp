@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
@@ -1556,6 +1557,10 @@ namespace krys::boo::html
     if (auto *editorClient = document.GetEditor().Client())
     {
       editorClient->SetInputMethodState(element);
+    }
+    if (auto *cache = document.ExistingAXObjectCache())
+    {
+      cache->OnFocusChange(oldFocusedElement.get(), element);
     }
   }
 }

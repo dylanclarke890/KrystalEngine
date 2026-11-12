@@ -33,6 +33,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
@@ -277,7 +278,7 @@ namespace krys::boo::html
 
   void SearchFieldResultsButtonElement::DefaultEventHandler(dom::Event &event) noexcept
   {
-    // On mousedown, bring up a menu, if needed
+    // A press focuses the field and selects its text.
     if (RefPtr<HTMLInputElement> input =
           ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this))))
     {
@@ -286,7 +287,6 @@ namespace krys::boo::html
       {
         input->Focus();
         input->Select();
-        // FIXME: Showing and hiding the recent searches popup (RenderSearchField), with recent searches.
         event.SetDefaultHandled();
       }
     }
@@ -310,7 +310,7 @@ namespace krys::boo::html
   {
     auto element = CreateRef<SearchFieldCancelButtonElement>(document);
     element->SetUserAgentPart(css::UserAgentParts::WebkitSearchCancelButton());
-    // FIXME: The accessibility label (aria-label), with accessibility.
+    (void)element->SetAttribute(u8"aria-label", AXSearchFieldCancelButtonText());
     (void)element->SetAttribute(u8"role", u8"button");
     return element;
   }

@@ -81,12 +81,6 @@ namespace krys::boo
       return;
     }
 
-    if (_paintInfo.Phase == PaintPhase::Accessibility)
-    {
-      // FIXME: Accessibility bounds come with accessibility.
-      return;
-    }
-
     PaintDecorations();
   }
 

@@ -27,8 +27,8 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleFontData.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
+#include "Krystal.Booey/Style/Values/CSS2/BorderSpacing.hpp"
 #include "Krystal.Booey/Style/Values/Inline/LineHeight.hpp"
-#include "Krystal.Booey/Style/Values/NonStandard/WebKitBorderSpacing.hpp"
 #include "Krystal.Core/Types/DataRef.hpp"
 
 namespace krys::boo
@@ -48,8 +48,7 @@ namespace krys::boo
     KRYS_NODISCARD bool NonFastPathInheritedEqual(const StyleInheritedData &) const noexcept;
     void FastPathInheritFrom(const StyleInheritedData &) noexcept;
 
-    style::WebkitBorderSpacing BorderHorizontalSpacing;
-    style::WebkitBorderSpacing BorderVerticalSpacing;
+    style::BorderSpacing BorderSpacing;
 
     style::LineHeight LineHeight;
 

@@ -425,6 +425,31 @@ namespace krys::boo::style::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "AnchorPositionEvaluator: scroll adjustment of anchor-center in a vertical writing mode",
+                   "[Style][AnchorPositionEvaluator]")
+  {
+    // The y axis is the inline axis, so justify-self's anchor-center compensates it.
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      html { writing-mode: vertical-lr }
+      body { margin: 0; width: 2000px }
+      #scroller { position: absolute; left: 0; top: 0; width: 300px; height: 200px; overflow: scroll }
+      #content { width: 10px; height: 1000px }
+      #anchor { position: absolute; left: 50px; top: 100px; width: 40px; height: 20px; anchor-name: --a }
+      #target { position: absolute; position-anchor: --a; justify-self: anchor-center; left: 0; width: 20px;
+                height: 10px }
+    </style><div id=scroller><div id=content><div id=anchor></div></div></div><div id=target></div>)html"};
+    auto &target = fixture.ById(u8"target");
+
+    CHECK(FrameRectOf(target) == LayoutRect(0, 105, 20, 10));
+    fixture.ById(u8"scroller").SetScrollTop(30);
+    auto *box = DynamicDowncast<RenderBox>(target.Renderer());
+    REQUIRE(box);
+    REQUIRE(box->Layer());
+    REQUIRE(box->Layer()->AnchorScrollAdjustment());
+    CHECK(*box->Layer()->AnchorScrollAdjustment() == LayoutSize(0, -30));
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "AnchorPositionEvaluator: scroll adjustment of fixed boxes",
                    "[Style][AnchorPositionEvaluator]")
   {

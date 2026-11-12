@@ -64,8 +64,8 @@ namespace krys::boo::tests
     CHECK(!backward.IsBaseFirst());
     CHECK(IsAt(backward.Start(), text, 4));
     CHECK(IsAt(backward.End(), text, 9));
-    CHECK(IsAt(backward.Base(), text, 9));
-    CHECK(IsAt(backward.Extent(), text, 4));
+    CHECK(IsAt(backward.CanonicalAnchor(), text, 9));
+    CHECK(IsAt(backward.CanonicalFocus(), text, 4));
     CHECK(IsAt(backward.UncanonicalizedStart(), text, 4));
     CHECK(forward != backward);
 
@@ -82,11 +82,11 @@ namespace krys::boo::tests
 
     // Extending moves the focus and keeps the anchor.
     VisibleSelection extended = caret;
-    extended.SetExtent(At(second, 6));
+    extended.SetFocus(At(second, 6));
     CHECK(extended.IsRange());
     CHECK(IsAt(extended.Start(), text, 4));
     CHECK(IsAt(extended.End(), second, 6));
-    extended.SetBase(At(second, 6));
+    extended.SetAnchor(At(second, 6));
     CHECK(extended.IsCaret());
 
     CHECK(extended.GetDocument().get() == fixture.Document.get());

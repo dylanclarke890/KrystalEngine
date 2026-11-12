@@ -30,6 +30,8 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
@@ -77,8 +79,6 @@ namespace krys::boo
       return TextDirection::RTL;
     }
 
-    // This is temporary and will be removed when subpixel inline layout is enabled.
-    // FIXME: Stop snapping once inline layout is subpixel.
     enum class SnapDirection : uint8
     {
       Floor,
@@ -202,7 +202,7 @@ namespace krys::boo
 
   void RenderListMarker::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
-    if (paintInfo.Phase != PaintPhase::Foreground && paintInfo.Phase != PaintPhase::Accessibility)
+    if (paintInfo.Phase != PaintPhase::Foreground)
     {
       return;
     }
@@ -224,12 +224,6 @@ namespace krys::boo
 
     auto markerRect = RelativeMarkerRect();
     markerRect.MoveBy(boxOrigin);
-
-    if (paintInfo.Phase == PaintPhase::Accessibility)
-    {
-      // FIXME: Accessibility bounds come with accessibility.
-      return;
-    }
 
     if (markerRect.IsEmpty())
     {
@@ -352,9 +346,14 @@ namespace krys::boo
   RenderBox *RenderListMarker::ParentBox(RenderBox &box) noexcept
   {
     krys_debug_assert(_listItem);
-    // FIXME: The column spanner placeholder's parent inside a multi-column flow, once there's multi-column
-    // layout.
-    return box.ParentBox();
+    // A spanner's parent is its placeholder's, where it is in the flow.
+    auto *multiColumnFlow = DynamicDowncast<RenderMultiColumnFlow>(_listItem->EnclosingFragmentedFlow());
+    if (!multiColumnFlow)
+    {
+      return box.ParentBox();
+    }
+    auto *placeholder = multiColumnFlow->FindColumnSpannerPlaceholder(box);
+    return placeholder ? placeholder->ParentBox() : box.ParentBox();
   }
 
   void RenderListMarker::Layout() noexcept

@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
@@ -574,7 +575,7 @@ namespace krys::boo
            && GetRenderTreePosition().Parent().Style().IsSkippedRootOrSkippedContent());
     if (shouldCreateNewRenderer)
     {
-      // FIXME: Custom style resolve callbacks (willAttachRenderers), once there are any.
+      element.WillAttachRenderers();
       CreateRenderer(element, krys::move(elementUpdateStyle));
 
       RenderingParent().DidCreateOrDestroyChildRenderer = true;
@@ -641,7 +642,11 @@ namespace krys::boo
 
     _builder->Attach(insertionPosition.Parent(), krys::move(newRenderer), insertionPosition.NextSibling());
 
-    // FIXME: The text manipulation controller and the accessibility cache, once there are any.
+    // FIXME: The text manipulation controller, once there is one.
+    if (auto *cache = element.NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnRendererCreated(element);
+    }
   }
 
   bool RenderTreeUpdater::TextRendererIsNeeded(const dom::Text &textNode) noexcept
@@ -768,7 +773,11 @@ namespace krys::boo
 
     _builder->Attach(renderTreePosition.Parent(), krys::move(textRenderer), renderTreePosition.NextSibling());
 
-    // FIXME: The text manipulation controller and the accessibility cache, once there are any.
+    // FIXME: The text manipulation controller, once there is one.
+    if (auto *cache = textNode.NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnRendererCreated(textNode);
+    }
   }
 
   void RenderTreeUpdater::UpdateTextRenderer(dom::Text &text, const style::TextUpdate *textUpdate,
@@ -1037,7 +1046,7 @@ namespace krys::boo
 
     auto push = [&](dom::Element &element)
     {
-      // FIXME: Custom style resolve callbacks (willDetachRenderers), once there are any.
+      element.WillDetachRenderers();
       teardownStack.push_back(&element);
     };
 
@@ -1152,8 +1161,6 @@ namespace krys::boo
     }
 
     pop(0, needsDescendantRepaintAndLayout);
-
-    // FIXME: Leftover pagination renderers, once there's multi-column layout.
   }
 
   void RenderTreeUpdater::TearDownLeftoverChildrenOfComposedTree(dom::Element &element,

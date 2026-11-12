@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
@@ -883,7 +884,10 @@ namespace krys::boo::html
     bool textIsChanged = value != previousValue;
     if (textIsChanged || !innerText->HasChildNodes())
     {
-      // FIXME: Telling accessibility the value changed (onEditableTextValueChanged), with accessibility.
+      if (auto *cache = NodeDocument().ExistingAXObjectCache())
+      {
+        cache->OnEditableTextValueChanged(*this);
+      }
       bool endsWithNewLine = value.ends_with(u8'\n') || value.ends_with(u8'\r');
       innerText->InnerText(krys::move(value));
 
@@ -1058,8 +1062,6 @@ namespace krys::boo::html
     // so we need to inherit the direction and unicode-bidi style from the element.
     textBlockStyle.SetDirection(parentStyle.GetWritingMode().ComputedTextDirection());
     textBlockStyle.SetUnicodeBidi(parentStyle.GetUnicodeBidi());
-
-    // FIXME: The inner text element's `-webkit-user-modify` presentational hint, which nothing sets.
 
     if (parentStyle.GetFieldSizing() == FieldSizing::Content)
     {

@@ -91,6 +91,16 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool ContainsUnknownType() const noexcept;
 
+    /// @brief The syntax string the syntax was parsed from, normalised: `*`, or its components joined by ` |
+    /// `.
+    /// @see https://drafts.css-houdini.org/css-properties-values-api/#syntax-strings
+    KRYS_NODISCARD CSSOMString SyntaxString() const noexcept;
+
+    /// @brief The syntax serialised as a `<css-type>`: a single component's syntax string, otherwise the
+    /// syntax string in `type()`.
+    /// @see https://drafts.csswg.org/css-mixins/#serialize-a-css-type
+    KRYS_NODISCARD CSSOMString CSSTypeString() const noexcept;
+
   private:
     KRYS_NODISCARD static Maybe<Component> ParseComponent(CSSOMStringView component) noexcept;
     KRYS_NODISCARD static Type TypeForTypeName(CSSOMStringView dataTypeName) noexcept;

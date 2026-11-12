@@ -26,6 +26,7 @@
  */
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/Timelines/AnimationTimelinesController.hpp"
@@ -283,6 +284,8 @@ namespace krys::boo::dom
 
   Document::~Document() noexcept
   {
+    ClearAXObjectCache();
+
     if (_intersectionObserverData)
     {
       for (const auto &observer : _intersectionObserverData->Observers)
@@ -1883,7 +1886,10 @@ namespace krys::boo::dom
     {
       _hoveredElement = ShareRefPtr(_hoveredElement->ParentElement());
     }
-    // FIXME: Schedule a hover state update (the event handler's scheduleHoverStateUpdate).
+    if (auto *frame = Frame())
+    {
+      frame->GetEventHandler().ScheduleHoverStateUpdate();
+    }
   }
 
   bool Document::HasFocus() const noexcept
@@ -1949,11 +1955,16 @@ namespace krys::boo::dom
         element = ShareRefPtr(element->ParentElement());
       }
     };
+    const auto *hoveredElement = _hoveredElement.get();
     moveOutOfRemovedSubtree(_hoveredElement);
     moveOutOfRemovedSubtree(_activeElement);
 
     if (auto *frame = Frame())
     {
+      if (_hoveredElement.get() != hoveredElement)
+      {
+        frame->GetEventHandler().ScheduleHoverStateUpdate();
+      }
       frame->GetEventHandler().NodeWillBeRemoved(node);
       _selection->NodeWillBeRemoved(node);
       if (auto *page = frame->GetPage())
@@ -3736,6 +3747,14 @@ namespace krys::boo::dom
     {
       svgExtensions->StartAnimations();
     }
+
+    if (Frame() && HasLivingRenderTree() && ax::AXObjectCache::AccessibilityEnabled())
+    {
+      if (auto *cache = AxObjectCache())
+      {
+        cache->OnDocumentLoaded();
+      }
+    }
   }
 
   void Document::IconLinksMayHaveChanged() noexcept
@@ -3994,13 +4013,37 @@ namespace krys::boo::dom
     ResolveStyle(ResolveStyleType::Rebuild);
   }
 
+  ax::AXObjectCache *Document::AxObjectCache() noexcept
+  {
+    if (!ax::AXObjectCache::AccessibilityEnabled())
+    {
+      return nullptr;
+    }
+    if (!_axObjectCache)
+    {
+      if (!Frame())
+      {
+        return nullptr;
+      }
+      _axObjectCache = CreateUnique<ax::AXObjectCache>(*this);
+    }
+    return _axObjectCache.get();
+  }
+
+  void Document::ClearAXObjectCache() noexcept
+  {
+    // The member is cleared before the cache is destroyed, since destroying it can ask for it.
+    auto cache = krys::move(_axObjectCache);
+  }
+
   void Document::DestroyRenderTree() noexcept
   {
     krys_debug_assert(HasLivingRenderTree());
 
     SetForScope change(_renderTreeBeingDestroyed, true);
 
-    // FIXME: The accessibility cache and telling the view, once there are any.
+    ClearAXObjectCache();
+    // FIXME: Telling the view the render tree is going (willDestroyRenderTree), once it has anything to do.
 
     // documentWillBecomeInactive
     if (auto *frameView = View())
@@ -4025,7 +4068,10 @@ namespace krys::boo::dom
         builder.Destroy(*_renderView->FirstChild());
       }
 
-      // FIXME: Delete the layout context's detached renderers.
+      if (auto *view = View())
+      {
+        view->LayoutContext().DeleteDetachedRenderersNow();
+      }
 
       _renderView->Destroy();
     }
@@ -4537,11 +4583,11 @@ namespace krys::boo::dom
     return *_fontLoader;
   }
 
-  RefPtr<FontLoadRequest> Document::GetFontLoadRequest(utf8_stringview url, bool isSVG,
+  RefPtr<FontLoadRequest> Document::GetFontLoadRequest(utf8_stringview url,
                                                        bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
     CachedResourceHandle<CachedFont> cachedFont =
-      GetFontLoader().GetCachedFont(CompleteURL(url), isSVG, isInitiatingElementInUserAgentShadowTree);
+      GetFontLoader().GetCachedFont(CompleteURL(url), isInitiatingElementInUserAgentShadowTree);
     if (!cachedFont)
     {
       return nullptr;
@@ -4628,6 +4674,10 @@ namespace krys::boo::dom
       // 2.1. Set this's design mode enabled to true.
       _designModeEnabled = true;
       ScheduleFullStyleRebuild();
+      if (auto *cache = ExistingAXObjectCache())
+      {
+        cache->HandlePageEditabilityChanged();
+      }
 
       // NOTE: only a document in a frame has a selection and a focused area.
       if (Frame())
@@ -4651,6 +4701,10 @@ namespace krys::boo::dom
     {
       _designModeEnabled = false;
       ScheduleFullStyleRebuild();
+      if (auto *cache = ExistingAXObjectCache())
+      {
+        cache->HandlePageEditabilityChanged();
+      }
     }
   }
 

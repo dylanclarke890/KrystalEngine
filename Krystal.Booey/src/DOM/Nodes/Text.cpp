@@ -23,6 +23,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
@@ -99,14 +100,17 @@ namespace krys::boo::dom
     }
   }
 
-  RenderPtr<RenderText> Text::CreateTextRenderer(const RenderStyle &) noexcept
+  RenderPtr<RenderText> Text::CreateTextRenderer(const RenderStyle &style) noexcept
   {
     if (IsSVGText(*this))
     {
       return CreateRenderer<RenderSVGInlineText>(*this, Data());
     }
 
-    // FIXME: text-combine-upright (RenderCombineText), once there's that renderer.
+    if (style.HasTextCombine())
+    {
+      return CreateRenderer<RenderCombineText>(*this, Data());
+    }
     return CreateRenderer<RenderText>(RenderObject::Type::Text, *this, Data());
   }
 

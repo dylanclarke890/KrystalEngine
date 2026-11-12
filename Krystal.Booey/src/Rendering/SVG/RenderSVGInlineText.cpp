@@ -213,8 +213,9 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity RenderSVGInlineText::PositionForPoint(const LayoutPoint &point,
-                                                                  HitTestSource) noexcept
+  dom::PositionWithAffinity
+    RenderSVGInlineText::PositionForPoint(const LayoutPoint &point, HitTestSource,
+                                          const RenderFragmentContainer * /*fragment*/) noexcept
   {
     if (!inline_iterator::LineLeftmostTextBoxFor(*this) || Text().empty())
     {

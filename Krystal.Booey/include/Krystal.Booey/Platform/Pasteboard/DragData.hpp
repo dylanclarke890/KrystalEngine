@@ -56,7 +56,7 @@ namespace krys::boo
   /// source allows a drop to do with it.
   /// @note The data dragged is the host's, which outlives the drag data.
   // FIXME: Colours (asColor, containsColor), with dragging colour inputs; smart replacing (canSmartReplace),
-  // with the smart paste type; promised files, which are Cocoa's.
+  // with the smart paste type.
   class DragData
   {
   public:

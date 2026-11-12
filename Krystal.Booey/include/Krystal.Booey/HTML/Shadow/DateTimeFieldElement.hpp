@@ -111,12 +111,16 @@ namespace krys::boo::html
   protected:
     DateTimeFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
-    /// @brief Makes @p field the part named @p part, focusable (its parts are what a date input focuses).
-    static void Initialize(DateTimeFieldElement &field, dom::DOMStringAtom part) noexcept;
+    /// @brief Makes @p field the part named @p part, focusable (its parts are what a date input focuses),
+    /// and a spin button named @p label for accessibility.
+    static void Initialize(DateTimeFieldElement &field, dom::DOMStringAtom part,
+                           utf8_stringview label = {}) noexcept;
 
     KRYS_NODISCARD Locale &LocaleForOwner() const noexcept;
     KRYS_NODISCARD dom::DOMString LocaleIdentifier() const noexcept;
     void UpdateVisibleValue(EventBehavior eventBehavior) noexcept;
+    /// @brief Sets `aria-valuenow` and `aria-valuetext` to the field's value, or removes them without one.
+    void UpdateAriaValueAttributes() noexcept;
     virtual void AdjustMinInlineSize(RenderStyle &style) const noexcept = 0;
     KRYS_NODISCARD virtual int ValueAsInteger() const noexcept = 0;
     KRYS_NODISCARD virtual int PlaceholderValueAsInteger() const noexcept = 0;

@@ -106,4 +106,27 @@ namespace krys::boo
 
     return false;
   }
+
+  FloatSize StyleCrossfadeImage::FixedSize(const RenderElement &renderer) const noexcept
+  {
+    if (!_from || !_to)
+    {
+      return {};
+    }
+
+    auto fromImageSize = _from->ImageSize(&renderer, 1);
+    auto toImageSize = _to->ImageSize(&renderer, 1);
+
+    // Rounding issues can cause transitions between images of equal size to return a different fixed size;
+    // avoid performing the interpolation if the images are the same size.
+    if (fromImageSize == toImageSize)
+    {
+      return fromImageSize;
+    }
+
+    auto percentage = static_cast<float>(_percentage);
+    auto inversePercentage = 1 - percentage;
+
+    return fromImageSize * inversePercentage + toImageSize * percentage;
+  }
 }

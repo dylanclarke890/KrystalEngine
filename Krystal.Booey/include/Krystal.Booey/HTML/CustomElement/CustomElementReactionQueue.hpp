@@ -44,6 +44,7 @@ namespace krys::boo::dom
 namespace krys::boo::html
 {
   class CustomElementInterface;
+  class ElementInternals;
   class HTMLFormElement;
 
   /// @brief A custom element reaction: an upgrade, or a callback with its arguments.
@@ -153,7 +154,7 @@ namespace krys::boo::html
   private:
     const Ref<CustomElementInterface> _interface;
     List<Item> _items;
-    bool _elementInternalsAttached {false};
+    RefPtr<ElementInternals> _attachedInternals;
 
   public:
     explicit CustomElementReactionQueue(CustomElementInterface &elementInterface) noexcept;
@@ -186,8 +187,10 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool ObservesStyleAttribute() const noexcept;
     KRYS_NODISCARD bool IsElementInternalsDisabled() const noexcept;
-    KRYS_NODISCARD bool IsElementInternalsAttached() const noexcept;
-    void SetElementInternalsAttached() noexcept;
+    /// @brief The element's attached internals, null until `attachInternals()` is called.
+    /// @see https://html.spec.whatwg.org/#attached-internals
+    KRYS_NODISCARD ElementInternals *AttachedInternals() const noexcept;
+    void SetAttachedInternals(Ref<ElementInternals> internals) noexcept;
     KRYS_NODISCARD bool IsFormAssociated() const noexcept;
 
     /// @brief The definition the element is defined by or is to be upgraded to.

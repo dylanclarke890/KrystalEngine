@@ -29,6 +29,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -378,14 +379,14 @@ namespace krys::boo::html
     return _interface->IsFormAssociated();
   }
 
-  bool CustomElementReactionQueue::IsElementInternalsAttached() const noexcept
+  ElementInternals *CustomElementReactionQueue::AttachedInternals() const noexcept
   {
-    return _elementInternalsAttached;
+    return _attachedInternals.get();
   }
 
-  void CustomElementReactionQueue::SetElementInternalsAttached() noexcept
+  void CustomElementReactionQueue::SetAttachedInternals(Ref<ElementInternals> internals) noexcept
   {
-    _elementInternalsAttached = true;
+    _attachedInternals = krys::move(internals);
   }
 
   void CustomElementReactionQueue::InvokeAll(dom::Element &element) noexcept

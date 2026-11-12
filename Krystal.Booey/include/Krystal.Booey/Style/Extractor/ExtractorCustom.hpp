@@ -150,7 +150,6 @@ namespace krys::boo::style
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(MaskBorderShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(MaskPositionShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(OffsetShorthand);
-    KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(OverscrollBehaviorShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(PageBreakAfterShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(PageBreakBeforeShorthand);
     KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(PageBreakInsideShorthand);
@@ -614,43 +613,36 @@ namespace krys::boo::style
     }
   };
 
-  template <css::PropertyId>
-  struct PageBreakSharedAdaptor
+  /// @brief Calls @p functor with the legacy `page-break-before` or `page-break-after` keyword for @p value.
+  /// @return False if @p value has no legacy keyword.
+  // https://drafts.csswg.org/css-break-3/#page-break-properties
+  template <typename F>
+  KRYS_NODISCARD bool VisitPageBreakKeyword(BreakBetween value, F &&functor) noexcept
   {
-    template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &, BreakBetween value, F &&functor) const noexcept
+    switch (value)
     {
-      switch (value)
-      {
-        case BreakBetween::Page:
-        case BreakBetween::LeftPage:
-        case BreakBetween::RightPage:
-        case BreakBetween::RectoPage:
-        case BreakBetween::VersoPage:
-          // CSS 2.1 allows us to map these to always.
-          return functor(css::keywords::Always {});
-        case BreakBetween::Avoid:
-        case BreakBetween::AvoidPage:   return functor(css::keywords::Avoid {});
-        case BreakBetween::AvoidColumn:
-        case BreakBetween::Column:
-        case BreakBetween::Auto:        return functor(css::keywords::Auto {});
-      }
-      krys_unreachable();
+      case BreakBetween::Auto:      functor(css::keywords::Auto {}); return true;
+      case BreakBetween::Avoid:     functor(css::keywords::Avoid {}); return true;
+      case BreakBetween::LeftPage:  functor(css::keywords::Left {}); return true;
+      case BreakBetween::RightPage: functor(css::keywords::Right {}); return true;
+      case BreakBetween::Page:      functor(css::keywords::Always {}); return true;
+      default:                      return false;
     }
+  }
 
-    template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &, BreakInside value, F &&functor) const noexcept
+  /// @brief Calls @p functor with the legacy `page-break-inside` keyword for @p value.
+  /// @return False if @p value has no legacy keyword.
+  // https://drafts.csswg.org/css-break-3/#page-break-properties
+  template <typename F>
+  KRYS_NODISCARD bool VisitPageBreakKeyword(BreakInside value, F &&functor) noexcept
+  {
+    switch (value)
     {
-      switch (value)
-      {
-        case BreakInside::Avoid:
-        case BreakInside::AvoidPage:   return functor(css::keywords::Avoid {});
-        case BreakInside::AvoidColumn:
-        case BreakInside::Auto:        return functor(css::keywords::Auto {});
-      }
-      krys_unreachable();
+      case BreakInside::Auto:  functor(css::keywords::Auto {}); return true;
+      case BreakInside::Avoid: functor(css::keywords::Avoid {}); return true;
+      default:                 return false;
     }
-  };
+  }
 
   // MARK: - Adaptors
 
@@ -838,9 +830,6 @@ namespace krys::boo::style
   KRYS_EXTRACTOR_SHARED_ADAPTOR(MaxWidth, MaximumSizeSharedAdaptor, MaxWidth);
   KRYS_EXTRACTOR_SHARED_ADAPTOR(MinHeight, MinimumSizeSharedAdaptor, MinHeight);
   KRYS_EXTRACTOR_SHARED_ADAPTOR(MinWidth, MinimumSizeSharedAdaptor, MinWidth);
-  KRYS_EXTRACTOR_SHARED_ADAPTOR(PageBreakAfter, PageBreakSharedAdaptor, BreakAfter);
-  KRYS_EXTRACTOR_SHARED_ADAPTOR(PageBreakBefore, PageBreakSharedAdaptor, BreakBefore);
-  KRYS_EXTRACTOR_SHARED_ADAPTOR(PageBreakInside, PageBreakSharedAdaptor, GetBreakInside);
 
 #undef KRYS_EXTRACTOR_SHARED_ADAPTOR
 
@@ -1055,16 +1044,6 @@ namespace krys::boo::style
     decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
     {
       return functor(state.Style.GetMaskBorder());
-    }
-  };
-
-  template <>
-  struct PropertyExtractorAdaptor<css::PropertyId::OverscrollBehavior>
-  {
-    template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
-    {
-      return functor(std::max(state.Style.OverscrollBehaviorX(), state.Style.OverscrollBehaviorY()));
     }
   };
 
@@ -2215,12 +2194,12 @@ namespace krys::boo::style
 
     if (state.Renderer)
     {
-      // FIXME: The render tree. The transform operation data should come from the renderer (its motion path
-      // data and whether it's an SVG renderer).
       return css::TransformListValue::Create(CreateCSSValue(
         state.Pool, state.Style,
         TransformResolver::ComputeTransform(
-          state.Style, TransformOperationData(state.Renderer->TransformReferenceBoxRect(state.Style)), {})));
+          state.Style,
+          TransformOperationData(state.Renderer->TransformReferenceBoxRect(state.Style), state.Renderer),
+          {})));
     }
 
     // https://w3c.github.io/csswg-drafts/css-transforms-1/#serialization-of-the-computed-value
@@ -2246,11 +2225,12 @@ namespace krys::boo::style
 
     if (state.Renderer)
     {
-      // FIXME: The render tree, as in `ExtractTransform`.
       Serialise(
         builder, context, state.Style,
         TransformResolver::ComputeTransform(
-          state.Style, TransformOperationData(state.Renderer->TransformReferenceBoxRect(state.Style)), {}));
+          state.Style,
+          TransformOperationData(state.Renderer->TransformReferenceBoxRect(state.Style), state.Renderer),
+          {}));
       return;
     }
 
@@ -2671,10 +2651,6 @@ namespace krys::boo::style
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(FontSynthesis)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(LineClamp)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(MaskBorder)
-  KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(OverscrollBehavior)
-  KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(PageBreakAfter)
-  KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(PageBreakBefore)
-  KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(PageBreakInside)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(PerspectiveOrigin)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(TextBox)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(TextDecoration)
@@ -2683,6 +2659,28 @@ namespace krys::boo::style
   KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(WhiteSpace)
 
 #undef KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND
+
+#define KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND(name, getter)                                      \
+  inline RefPtr<css::Value> ExtractorCustom::Extract##name##Shorthand(ExtractorState &state) noexcept        \
+  {                                                                                                          \
+    RefPtr<css::Value> result;                                                                               \
+    (void)VisitPageBreakKeyword(state.Style.getter(), [&](auto keyword)                                      \
+                                { result = CreateCSSValue(state.Pool, state.Style, keyword); });             \
+    return result;                                                                                           \
+  }                                                                                                          \
+                                                                                                             \
+  inline void ExtractorCustom::Extract##name##ShorthandSerialisation(                                        \
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept        \
+  {                                                                                                          \
+    (void)VisitPageBreakKeyword(state.Style.getter(),                                                        \
+                                [&](auto keyword) { Serialise(builder, context, state.Style, keyword); });   \
+  }
+
+  KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND(PageBreakAfter, BreakAfter)
+  KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND(PageBreakBefore, BreakBefore)
+  KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND(PageBreakInside, GetBreakInside)
+
+#undef KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND
 
   inline constexpr Array<css::PropertyId, 4> BorderSections {
     css::PropertyId::BorderTop, css::PropertyId::BorderRight, css::PropertyId::BorderBottom,

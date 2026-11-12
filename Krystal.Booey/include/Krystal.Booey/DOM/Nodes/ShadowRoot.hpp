@@ -35,6 +35,8 @@
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::css
 {
@@ -110,6 +112,10 @@ namespace krys::boo::dom
     friend class NodeAlgorithms;
     friend class html::TreeBuilder;
 
+  public:
+    /// @brief Each part name of the shadow tree that the host exports, with the names it's exported as.
+    using PartMappings = HashMap<DOMStringAtom, SmallList<DOMStringAtom, 1>>;
+
   private:
     /// @brief Open, closed, or the user agent's own (treated as closed).
     /// @see https://dom.spec.whatwg.org/#shadowroot-mode
@@ -130,6 +136,8 @@ namespace krys::boo::dom
     bool _keepCustomElementRegistryNull : 1 {false};
     bool _containsFocusedElement : 1 {false};
     RefPtr<css::StyleSheetList> _styleSheetList;
+    /// @brief Parsed from the host's `exportparts` when first needed.
+    mutable Maybe<PartMappings> _partMappings;
 
   public:
     ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry = nullptr,
@@ -265,6 +273,15 @@ namespace krys::boo::dom
     void SetContainsFocusedElement(bool flag) noexcept
     {
       _containsFocusedElement = flag;
+    }
+
+    /// @brief The part names the host's `exportparts` attribute exports from the shadow tree.
+    /// @see https://drafts.csswg.org/css-shadow-parts/#exportparts-attr
+    KRYS_NODISCARD const PartMappings &GetPartMappings() const noexcept;
+    /// @brief Forgets the part mappings, after the host's `exportparts` changes.
+    void InvalidatePartMappings() noexcept
+    {
+      _partMappings = null;
     }
 
   private:

@@ -23,6 +23,7 @@
  */
 
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
@@ -77,6 +78,16 @@ namespace krys::boo::dom
 
   Node::~Node() noexcept
   {
+    // willBeDeletedFrom: the document's accessibility cache lets go of the node's object. (A document's own
+    // cache is gone by now.)
+    if (!IsDocumentNode())
+    {
+      if (auto *cache = _nodeDocument->ExistingAXObjectCache())
+      {
+        cache->Remove(*this);
+      }
+    }
+
     // Before releasing the document, which what the rare data holds may refer to.
     _nodeRareData = nullptr;
 
@@ -880,7 +891,7 @@ namespace krys::boo::dom
     }
 
     // Style-based editability is always possible (no style sheet records whether it uses
-    // `-webkit-user-modify`), so style is brought up to date.
+    // `-internal-user-modify`), so style is brought up to date.
     if (shouldUpdateStyle == ShouldUpdateStyle::Update && document->NeedsStyleRecalc())
     {
       document->UpdateStyleIfNeeded();

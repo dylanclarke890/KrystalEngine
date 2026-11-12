@@ -2,6 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
+#include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -55,6 +58,26 @@ namespace krys::boo::tests
       {
         auto &style = Rendered(id);
         return Serialised(style, style.Height());
+      }
+    };
+
+    /// @brief Records the paint, calling back when an image buffer is drawn (as painting a canvas does).
+    class ImageBufferCallbackRecorder final : public display_list::RecorderImpl
+    {
+    private:
+      Func<void()> _onDrawImageBuffer;
+
+    public:
+      explicit ImageBufferCallbackRecorder(Func<void()> onDrawImageBuffer) noexcept
+          : RecorderImpl(FloatSize(800, 600)), _onDrawImageBuffer(krys::move(onDrawImageBuffer))
+      {
+      }
+
+      void DrawImageBuffer(ImageBuffer &buffer, const FloatRect &destRect, const FloatRect &srcRect,
+                           ImagePaintingOptions options) noexcept override
+      {
+        _onDrawImageBuffer();
+        RecorderImpl::DrawImageBuffer(buffer, destRect, srcRect, options);
       }
     };
   }
@@ -408,5 +431,41 @@ namespace krys::boo::tests
       loop.RunUntilIdle();
       CHECK(fixture.Document->HasPendingStyleRecalc());
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: no layout while painting",
+                   "[Page][LocalFrameView]")
+  {
+    FrameFixture fixture {
+      u8"<!DOCTYPE html><div id=box style='width:10px;height:10px'></div><canvas id=canvas></canvas>"};
+    html::EventLoop::Current().RunUntilIdle();
+    auto &layoutContext = fixture.View().LayoutContext();
+    REQUIRE_FALSE(layoutContext.NeedsLayout());
+    auto *renderer = fixture.ById(u8"box").Renderer();
+    REQUIRE(renderer);
+    auto canvasContext = Downcast<html::HTMLCanvasElement>(fixture.ById(u8"canvas")).GetContext2d();
+    REQUIRE(canvasContext);
+    canvasContext->FillRect(0, 0, 10, 10);
+
+    // Something that asks for a layout while the view paints gets it after the paint.
+    bool painted = false;
+    bool neededLayoutInPaint = false;
+    ImageBufferCallbackRecorder context {[&]
+                                         {
+                                           if (painted)
+                                           {
+                                             return;
+                                           }
+                                           painted = true;
+                                           renderer->SetNeedsLayout();
+                                           layoutContext.Layout();
+                                           neededLayoutInPaint = layoutContext.NeedsLayout();
+                                         }};
+    fixture.View().Paint(context, {0, 0, 800, 600});
+    REQUIRE(painted);
+    CHECK(neededLayoutInPaint);
+    CHECK(layoutContext.NeedsLayout());
+    layoutContext.Layout();
+    CHECK_FALSE(layoutContext.NeedsLayout());
   }
 }

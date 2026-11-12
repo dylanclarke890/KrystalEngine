@@ -33,6 +33,7 @@ namespace krys::boo
 {
   class FontCascade;
   class GraphicsContext;
+  class RenderCombineText;
   class RenderStyle;
   class TextRun;
 
@@ -47,8 +48,8 @@ namespace krys::boo
   }
 
   /// @brief Paints a range of a text run: its shadows, the text, and its emphasis marks.
-  /// FIXME: Cached glyph display lists (`setGlyphDisplayListIfNeeded`, `GlyphDisplayListCache`) and combined
-  /// text (`text-combine-upright`, `RenderCombineText`) are still to come.
+  /// FIXME: Cached glyph display lists (`setGlyphDisplayListIfNeeded`, `GlyphDisplayListCache`) are still to
+  /// come.
   class TextPainter
   {
   private:
@@ -59,11 +60,13 @@ namespace krys::boo
     StringAtom _emphasisMark;
     const style::TextShadows &_shadow;
     float _emphasisMarkOffset {0};
+    const RenderCombineText *_combinedText;
 
   public:
     TextPainter(GraphicsContext &context, const FontCascade &font, const RenderStyle &renderStyle,
                 const TextPaintStyle &textPaintStyle, const style::TextShadows &shadow,
-                const StringAtom &emphasisMark, float emphasisMarkOffset) noexcept;
+                const StringAtom &emphasisMark, float emphasisMarkOffset,
+                const RenderCombineText *combinedText = nullptr) noexcept;
 
     /// @brief Paints @p textRun from byte offset @p start to @p end.
     /// @param boxRect The rect of the whole text box.

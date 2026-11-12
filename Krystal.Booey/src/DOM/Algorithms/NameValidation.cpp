@@ -1,12 +1,30 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Core/Text/Encodings/Decode.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Text/CodePointIterator.hpp"
 
 namespace krys::boo::dom
 {
   namespace
   {
+    /// @brief Whether every code point of a name passes `predicate`, given the code point and whether it's
+    /// the first. Invalid UTF-8 fails.
+    template <typename F>
+    KRYS_NODISCARD bool AllNameCodePoints(DOMStringView name, F predicate) noexcept
+    {
+      Span<const char8> data {name.data(), name.size()};
+      for (bool isFirst = true; !data.empty(); isFirst = false)
+      {
+        auto decoded = krys::text::DecodeUTF8(data);
+        if (!decoded.IsValid || !predicate(decoded.CodePoint, isFirst))
+        {
+          return false;
+        }
+        data = data.subspan(decoded.Length);
+      }
+      return true;
+    }
+
     KRYS_NODISCARD bool IsXMLNameStartChar(char32 ch) noexcept
     {
       return ch == ':' || ch == '_' || krys::text::IsASCIIAlpha(ch) || (ch >= 0xC0 && ch <= 0xD6)
@@ -84,32 +102,22 @@ namespace krys::boo::dom
       return true;
     }
 
-    // FIXME: We need to iterate over codepoints instead of decoding the entire string at once
-    auto decodeResult = krys::text::Decode<krys::text::UTF8>(name);
-    krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
-
     // 3. If name's 0th code point is not U+003A (:), U+005F (_), or in the range U+0080 to U+10FFFF,
     // inclusive, then return false.
-    auto &utf32 = decodeResult.Output;
-    auto first = utf32[0];
-    if (first != ':' && first != '_' && !(first >= 0x0080 && first <= 0x10FFFF))
-    {
-      return false;
-    }
-
     // 4. If name's subsequent code points, if any, are not ASCII alphas, ASCII digits, U+002D (-), U+002E
     // (.), U+003A (:), U+005F (_), or in the range U+0080 to U+10FFFF, inclusive, then return false.
-    for (auto ch : utf32_stringview {utf32.begin() + 1uz, utf32.end()})
-    {
-      if (!krys::text::IsASCIIAlpha(ch) && !krys::text::IsASCIIDigit(ch) && ch != '-' && ch != '.'
-          && ch != ':' && ch != '_' && !(ch >= 0x0080 && ch <= 0x10FFFF))
-      {
-        return false;
-      }
-    }
-
     // 5. Return true.
-    return true;
+    return AllNameCodePoints(name,
+                             [](char32 ch, bool isFirst)
+                             {
+                               if (ch == ':' || ch == '_' || (ch >= 0x0080 && ch <= 0x10FFFF))
+                               {
+                                 return true;
+                               }
+                               return !isFirst
+                                      && (krys::text::IsASCIIAlpha(ch) || krys::text::IsASCIIDigit(ch)
+                                          || ch == '-' || ch == '.');
+                             });
   }
 
   bool NameValidation::IsValidDocTypeName(DOMStringView name) noexcept
@@ -268,23 +276,7 @@ namespace krys::boo::dom
       return false;
     }
 
-    // FIXME: We can't guarantee that the name is valid UTF-8, validate before converting.
-    auto decodeResult = krys::text::Decode<krys::text::UTF8>(name);
-    krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
-    auto &utf32 = decodeResult.Output;
-    if (!IsXMLNameStartChar(utf32[0]))
-    {
-      return false;
-    }
-
-    for (auto ch : utf32_stringview {utf32.begin() + 1uz, utf32.end()})
-    {
-      if (!IsXMLNameChar(ch))
-      {
-        return false;
-      }
-    }
-
-    return true;
+    return AllNameCodePoints(name, [](char32 ch, bool isFirst)
+                             { return isFirst ? IsXMLNameStartChar(ch) : IsXMLNameChar(ch); });
   }
 }

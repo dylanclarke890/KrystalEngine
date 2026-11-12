@@ -54,7 +54,7 @@ namespace krys::boo::dom
   class Element;
 }
 
-namespace krys::boo::style::lerp
+namespace krys::boo::style::interpolation
 {
   struct Context;
 }
@@ -1313,7 +1313,8 @@ namespace krys::boo::style
   ///   [optional default=false] bool RequiresInterpolationForAccumulativeIteration(const StyleType&, const
   ///                                                                               StyleType&) noexcept;
   ///
-  ///   StyleType Blend(const StyleType&, const StyleType&, const [BlendingContext|lerp::Context]&) noexcept;
+  ///   StyleType Blend(const StyleType&, const StyleType&, const [BlendingContext|interpolation::Context]&)
+  ///   noexcept;
   /// };
   ///
   /// or, if a RenderStyle is needed for blending:
@@ -1332,7 +1333,7 @@ namespace krys::boo::style
   ///
   ///   StyleType Blend(
   ///       const StyleType&, const StyleType&, const RenderStyle&, const RenderStyle&, const
-  ///       [BlendingContext|lerp::Context]&
+  ///       [BlendingContext|interpolation::Context]&
   ///   ) noexcept;
   /// };
   template <typename>
@@ -1407,7 +1408,7 @@ namespace krys::boo::style
   concept HasBlendWithoutRenderStyleAndWithInterpolationContext = requires {
     {
       Blending<StyleType> {}.Blend(std::declval<const StyleType &>(), std::declval<const StyleType &>(),
-                                   std::declval<const lerp::Context &>())
+                                   std::declval<const interpolation::Context &>())
     } -> SameType<StyleType>;
   };
 
@@ -1424,7 +1425,7 @@ namespace krys::boo::style
     {
       Blending<StyleType> {}.Blend(std::declval<const StyleType &>(), std::declval<const StyleType &>(),
                                    std::declval<const RenderStyle &>(), std::declval<const RenderStyle &>(),
-                                   std::declval<const lerp::Context &>())
+                                   std::declval<const interpolation::Context &>())
     } -> SameType<StyleType>;
   };
 
@@ -1575,7 +1576,7 @@ namespace krys::boo::style
   {
     template <typename StyleType>
     KRYS_NODISCARD StyleType operator()(const StyleType &a, const StyleType &b,
-                                        const lerp::Context &context) const noexcept
+                                        const interpolation::Context &context) const noexcept
     {
       return Blending<StyleType> {}.Blend(a, b, context);
     }
@@ -1590,7 +1591,7 @@ namespace krys::boo::style
     template <typename StyleType>
     KRYS_NODISCARD StyleType operator()(const StyleType &a, const StyleType &b, const RenderStyle &aStyle,
                                         const RenderStyle &bStyle,
-                                        const lerp::Context &context) const noexcept
+                                        const interpolation::Context &context) const noexcept
     {
       if constexpr (HasBlendWithRenderStyleAndWithInterpolationContext<StyleType>
                     || HasBlendWithRenderStyleAndWithBlendingContext<StyleType>)

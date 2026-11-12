@@ -65,11 +65,6 @@ namespace krys::boo
     bool OutputScanlines();
     void JpegComplete();
 
-    void SetOrientation(ImageOrientation orientation) noexcept
-    {
-      _orientation = orientation;
-    }
-
   private:
     JPEGImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
     void TryDecodeSize(bool allDataReceived) noexcept override

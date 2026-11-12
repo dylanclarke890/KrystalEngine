@@ -127,6 +127,11 @@ namespace krys::boo::style
     auto copy = value;
     return copy;
   }
+  KRYS_NODISCARD inline BorderSpacing ForwardInheritedValue(const BorderSpacing &value) noexcept
+  {
+    auto copy = value;
+    return copy;
+  }
   KRYS_NODISCARD inline BoxShadows ForwardInheritedValue(const BoxShadows &value) noexcept
   {
     auto copy = value;

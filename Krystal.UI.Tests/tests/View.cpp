@@ -849,6 +849,22 @@ namespace krys::ui::tests
                                   "pointerup:b/pen2/0/0", "mouseup:b/0"});
     }
 
+    SECTION("a cancelled pen ends its press without releasing it")
+    {
+      view.PenInput({10, 10}, input(pal::PointerType::Pen, pal::PointerAction::Pressed));
+      REQUIRE(view.Frame().GetEventHandler().MousePressed());
+      view.PenInput({10, 10}, input(pal::PointerType::Pen, pal::PointerAction::Cancelled));
+      CHECK_FALSE(view.Frame().GetEventHandler().MousePressed());
+
+      // The next press and release click on their own, with no click left from the cancelled press.
+      view.PenInput({10, 60}, input(pal::PointerType::Pen, pal::PointerAction::Pressed));
+      view.PenInput({10, 60}, input(pal::PointerType::Pen, pal::PointerAction::Released));
+      CHECK(records
+            == List<std::string> {"pointerdown:a/pen2/1/50", "mousedown:a/1", "pointercancel:a/pen2/0/0",
+                                  "pointerdown:b/pen2/1/50", "mousedown:b/1", "pointerup:b/pen2/0/0",
+                                  "mouseup:b/0", "click:b/pen2/0/0"});
+    }
+
     SECTION("touches: ids from the lowest free, every touch in the events, and no mouse events")
     {
       auto first = input(pal::PointerType::Touch, pal::PointerAction::Pressed, 100);

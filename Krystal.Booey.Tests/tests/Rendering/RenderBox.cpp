@@ -2,8 +2,10 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -213,6 +215,23 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderBox: size containment of a menu list",
+                   "[Rendering][RenderBox]")
+  {
+    // A size-contained menu list keeps the height its theme gives it, as if it had no options; a block is as
+    // tall as its border and padding.
+    ResolverFixture fixture {
+      u8"<style>select,div{margin:0;contain:size}</style><select id=contained><option>a</option></select>"
+      u8"<select id=empty></select><div id=block style='padding:2px'>a</div>"};
+    (void)fixture.Document->UpdateLayout();
+    auto &contained = Downcast<RenderBox>(*fixture.ById(u8"contained").Renderer());
+    auto &empty = Downcast<RenderBox>(*fixture.ById(u8"empty").Renderer());
+    auto &block = Downcast<RenderBox>(*fixture.ById(u8"block").Renderer());
+    CHECK(contained.Height() > 4_lu);
+    CHECK(contained.Height() == empty.Height());
+    CHECK(block.Height() == 4_lu);
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderBox: containing blocks", "[Rendering][RenderBox]")
   {
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
@@ -280,5 +299,73 @@ namespace krys::boo::tests
       CHECK_FALSE(renderer(u8"static").CanContainAbsolutelyPositionedObjects());
       CHECK(view->CanContainFixedPositionObjects());
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderBox: transforms add to the container's scrollable overflow",
+                   "[Rendering][RenderBox][!shouldfail]")
+  {
+    // FIXME: Transforms aren't in the overflow they propagate yet (see KNOWN-ISSUES.md: they'd stretch
+    // balanced columns).
+    ResolverFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}#s{width:100px;height:100px;overflow:hidden}"
+      u8"#s>div{width:50px;height:50px}</style><div id=s><div id=child></div></div>"};
+    auto &scroller = fixture.ById(u8"s");
+    auto &child = fixture.ById(u8"child");
+    (void)fixture.Document->UpdateLayout();
+    CHECK(scroller.ScrollWidth() == 100);
+    CHECK(scroller.ScrollHeight() == 100);
+
+    REQUIRE_FALSE(child.SetAttribute(u8"style", u8"transform: translate(200px, 300px)").HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(scroller.ScrollWidth() == 250);
+    CHECK(scroller.ScrollHeight() == 350);
+
+    // Relative positioning moves the box before its transform.
+    REQUIRE_FALSE(
+      child.SetAttribute(u8"style", u8"position: relative; left: 10px; transform: translateX(200px)")
+        .HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(scroller.ScrollWidth() == 260);
+  }
+
+  // A box's transform includes its motion path, placed relative to its containing block.
+  TEST_CASE("RenderBox: transforms include the motion path data of the box", "[Rendering][RenderBox]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0 }
+      #container { position: relative; width: 200px; height: 200px }
+      #moving { width: 10px; height: 10px; offset-path: ray(90deg); offset-distance: 50px }
+    </style><div id=container><div id=moving></div></div>)html"};
+    (void)fixture.Document->UpdateLayout();
+    auto *box = DynamicDowncast<RenderBox>(fixture.ById(u8"moving").Renderer());
+    REQUIRE(box);
+
+    // The ray starts at the containing block's centre and points right, and the box's centre follows it.
+    TransformationMatrix matrix;
+    box->ApplyTransform(matrix, box->Style(), box->TransformReferenceBoxRect());
+    CHECK(matrix.M41() == 145);
+    CHECK(matrix.M42() == 95);
+  }
+
+  // The layer's transform waits for the containing block's layout when the motion path depends on its size.
+  TEST_CASE("RenderBox: a motion path transform updates after its containing block's layout",
+            "[Rendering][RenderBox]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0 }
+      #container { position: relative; width: 200px }
+      #moving { width: 10px; height: 10px; offset-path: ray(90deg); offset-distance: 50px }
+    </style><div id=container><div id=moving></div><div style=height:190px></div></div>)html"};
+    (void)fixture.Document->UpdateLayout();
+    auto *box = DynamicDowncast<RenderBox>(fixture.ById(u8"moving").Renderer());
+    REQUIRE(box);
+    REQUIRE(box->HasLayer());
+    auto *transform = box->Layer()->Transform();
+    REQUIRE(transform);
+
+    // The ray starts at the centre of the 200px tall container, which is known only after its layout.
+    CHECK(transform->M41() == 145);
+    CHECK(transform->M42() == 95);
   }
 }

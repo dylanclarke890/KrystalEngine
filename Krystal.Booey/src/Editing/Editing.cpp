@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -143,6 +144,12 @@ namespace krys::boo
       switch (editableType)
       {
         case EditableType::ContentIsEditable: return false;
+        case EditableType::HasEditableAXRole:
+          if (auto *cache = node.NodeDocument().ExistingAXObjectCache())
+          {
+            return cache->RootAXEditableElement(node) != nullptr;
+          }
+          return false;
       }
       krys_unreachable();
     }
@@ -187,6 +194,12 @@ namespace krys::boo
 
     switch (editableType)
     {
+      case EditableType::HasEditableAXRole:
+        if (auto *cache = node->NodeDocument().ExistingAXObjectCache())
+        {
+          return cache->RootAXEditableElement(*node);
+        }
+        [[fallthrough]];
       case EditableType::ContentIsEditable: return node->RootEditableElement();
     }
     return nullptr;
@@ -944,7 +957,9 @@ namespace krys::boo
     auto position = visiblePosition.DeepEquivalent();
     auto &document = *position.GetDocument();
 
-    auto editableRoot = HighestEditableRoot(position, EditableType::ContentIsEditable);
+    auto editableRoot = HighestEditableRoot(position, ax::AXObjectCache::AccessibilityEnabled()
+                                                        ? EditableType::HasEditableAXRole
+                                                        : EditableType::ContentIsEditable);
     if (editableRoot && !document.InDesignMode())
     {
       scope = editableRoot;

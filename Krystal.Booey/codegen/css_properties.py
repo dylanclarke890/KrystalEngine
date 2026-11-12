@@ -2511,10 +2511,12 @@ class Term:
 
 class BuiltinSchema:
     class StringParameter:
-        def __init__(self, name, *, mappings: dict[str, str] | None = None, default=None):
+        def __init__(self, name, *, mappings: dict[str, str] | None = None, default=None, separator=", "):
             self.name = name
             self.mappings = mappings
             self.default = default
+            # Joins the mapped values of a parameter given several (e.g. " | " for a set of flags).
+            self.separator = separator
 
     class RangeParameter:
         def __init__(self, name):
@@ -2572,7 +2574,7 @@ class BuiltinSchema:
                                         f"'{parameter}' passed to <{self.entry.name.name}> does not match any of the supported mappings. Supported mappings are {', '.join(quote_iterable(descriptor.mappings.keys()))}."
                                     )
 
-                            self.parameter_map[descriptor.name] = ", ".join(
+                            self.parameter_map[descriptor.name] = descriptor.separator.join(
                                 map(lambda x: descriptor.mappings[x], parameter.value)
                             )
                         else:
@@ -2605,7 +2607,7 @@ class BuiltinSchema:
                     if descriptor.name in self.parameter_map:
                         self.results[descriptor.name] = self.parameter_map[descriptor.name]
                     elif descriptor.mappings and descriptor.default:
-                        self.results[descriptor.name] = ", ".join(
+                        self.results[descriptor.name] = descriptor.separator.join(
                             map(
                                 lambda x: descriptor.mappings[x],
                                 (descriptor.default if isinstance(descriptor.default, list) else [descriptor.default]),
@@ -2726,6 +2728,7 @@ class ReferenceTerm:
                 "allowed-types",
                 mappings=ALLOWED_COLOR_TYPES_MAPPINGS,
                 default=["absolute", "current", "system"],
+                separator=" | ",
             ),
         ),
         BuiltinSchema.Entry(
@@ -2734,6 +2737,7 @@ class ReferenceTerm:
                 "allowed-types",
                 mappings=ALLOWED_IMAGE_TYPES_MAPPINGS,
                 default=["url", "image-set", "generated"],
+                separator=" | ",
             ),
         ),
         BuiltinSchema.Entry("string"),
@@ -4849,13 +4853,11 @@ class TermGeneratorReferenceTerm(TermGenerator):
                 return f"ConsumePosition({range_string}, {state_string})"
             elif isinstance(builtin, BuiltinColorConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    # FIXME: Temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
-                    return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{{builtin.allowed_types.replace(",", " |")}}}}})"
+                    return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{{builtin.allowed_types}}}}})"
                 return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{}}}})"
             elif isinstance(builtin, BuiltinImageConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    # FIXME: Temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
-                    return f"ConsumeImage({range_string}, {state_string}, {builtin.allowed_types.replace(",", " |")})"
+                    return f"ConsumeImage({range_string}, {state_string}, {builtin.allowed_types})"
                 return f"ConsumeImage({range_string}, {state_string}, AllowedImageType::None)"
             elif isinstance(builtin, BuiltinCustomIdentConsumer):  # type: ignore
                 if builtin.excluding:
@@ -8853,7 +8855,7 @@ class GeneratePropertyParsing:
                     f"// Allow internal properties as we use them to parse several internal-only-shorthands (e.g. background-repeat),"
                 )
                 to.write(
-                    f"// and to handle certain DOM-exposed values (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta'))."
+                    f"// and to handle certain DOM-exposed values."
                 )
                 to.write(f"krys_debug_assert(false);")
                 to.write("return {};")
@@ -8979,6 +8981,7 @@ class GeneratePropertyShorthandFunctions:
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Core/Attributes.hpp",
+                    "Krystal.Core/Numeric.hpp",
                 ],
             )
 
@@ -8986,6 +8989,31 @@ class GeneratePropertyShorthandFunctions:
                 writer.forward_declarations(classes=["PropertyShorthand"])
                 for property in self.style_properties.all_shorthands:
                     writer.write(f"KRYS_NODISCARD PropertyShorthand {property.id_without_prefix}Shorthand() noexcept;")
+
+                writer.newline()
+                writer.write("/// @brief The most shorthands any longhand belongs to.")
+                writer.write(f"constexpr size_t MaxShorthandsForLonghand = {self._max_shorthands_for_longhand()}uz;")
+                writer.newline()
+                writer.write("/// @brief The most longhands of any shorthand but `all`.")
+                max_length = max(
+                    len(p.codegen_properties.longhands) for p in self.style_properties.all_shorthands if p.name != "all"
+                )
+                writer.write(f"constexpr size_t MaxShorthandLength = {max_length}uz;")
+
+    def _max_shorthands_for_longhand(self):
+        # Counted as _generate_style_property_shorthand_functions_accessors maps longhands to shorthands.
+        counts = {}
+        for property in self.style_properties.all_shorthands:
+            for longhand in property.codegen_properties.longhands:
+                if longhand.name == "all":
+                    targets = [
+                        p for p in self.style_properties.all_non_shorthands if p.name not in ("direction", "unicode-bidi")
+                    ]
+                else:
+                    targets = [longhand]
+                for target in targets:
+                    counts[target.name] = counts.get(target.name, 0) + 1
+        return max(counts.values())
 
     def _generate_style_property_shorthand_functions_cpp(self):
         with open(self.generation_context.output_cpp_path("CSS/Properties/PropertyShorthandFunctions.cpp"), "w") as output_file:

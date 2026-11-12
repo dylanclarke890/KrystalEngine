@@ -133,6 +133,8 @@ namespace krys::boo
         return true;
       }
       KRYS_NODISCARD Transform Blend(const Transform &, const Transform &, const BlendingContext &) noexcept;
+      KRYS_NODISCARD Transform Blend(const Transform &, const Transform &,
+                                     const interpolation::Context &) noexcept;
     };
 
     // MARK: - Platform

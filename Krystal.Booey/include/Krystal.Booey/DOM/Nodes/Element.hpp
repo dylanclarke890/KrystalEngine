@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Accessibility/ARIAMixin.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
 #include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
@@ -177,7 +178,7 @@ namespace krys::boo::dom
   /// @brief A node with a qualified name and attributes.
   /// @see https://dom.spec.whatwg.org/#interface-element
   /// @see https://dom.spec.whatwg.org/#concept-element
-  class Element : public ContainerNode
+  class KRYS_EMPTY_BASE_CLASS Element : public ContainerNode, public aria::mixins::ARIAMixin<Element>
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 
@@ -547,6 +548,9 @@ namespace krys::boo::dom
     /// @brief Scrolls the element's ancestors so its start (or, if @p alignToTop is false, its end) is
     /// aligned with theirs.
     void ScrollIntoView(bool alignToTop) noexcept;
+    /// @brief Scrolls the element's ancestors so the element is visible, if it isn't: centred in them if
+    /// @p centerIfNotVisible, otherwise to their nearest edge.
+    void ScrollIntoViewIfNotVisible(bool centerIfNotVisible = true) noexcept;
 
     void Scroll(const ScrollToOptions &options = {}) noexcept;
     void Scroll(double x, double y) noexcept;
@@ -970,20 +974,24 @@ namespace krys::boo::dom
     void ClearDisplayContentsOrNoneStyle() noexcept;
 
     /// @brief The renderer the element gets with @p style, or null if it gets none.
-    // FIXME: The insertion position in the render tree, and the overrides that need renderer classes (images,
-    // line breaks, form controls, media, frames, SVG, ...).
+    // FIXME: The insertion position in the render tree, and media elements' and frame sets' overrides.
     KRYS_NODISCARD virtual RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept;
 
     /// @brief Whether the element would have a renderer with @p style.
-    // FIXME: The overrides (form controls, frame sets, SVG elements, ...) come with the render tree.
+    // FIXME: Media elements' overrides, once they have renderers.
     KRYS_NODISCARD virtual bool RendererIsNeeded(const RenderStyle &style) noexcept;
 
     /// @brief Whether @p child, a child of the element in the composed tree, gets a renderer when the element
     /// has one.
-    // FIXME: The overrides (media, ...) come with their renderers.
+    // FIXME: Media elements' override, once they have renderers.
     KRYS_NODISCARD virtual bool ChildShouldCreateRenderer(const Node &) const noexcept
     {
       return true;
+    }
+
+    /// @brief Called by the render tree updater before the element's renderer is created.
+    virtual void WillAttachRenderers() noexcept
+    {
     }
 
     /// @brief Called by the render tree updater after the element's renderer (and its descendants') was
@@ -992,9 +1000,20 @@ namespace krys::boo::dom
     {
     }
 
+    /// @brief Called by the render tree updater before the element's renderer (and its descendants') is torn
+    /// down (a control releases the mouse it captured).
+    virtual void WillDetachRenderers() noexcept
+    {
+    }
+
     /// @brief Called by the render tree updater after the element's renderer was torn down (a control closes
     /// its picker).
     virtual void DidDetachRenderers() noexcept
+    {
+    }
+
+    /// @brief Called before the element's computed style (kept for elements without a renderer) is dropped.
+    virtual void WillResetComputedStyle() noexcept
     {
     }
 
@@ -1519,6 +1538,26 @@ namespace krys::boo::dom
 
     /// @brief Whether @p attributeName (in the null namespace) is reflected by an `Element?` IDL attribute.
     KRYS_NODISCARD static bool IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept;
+
+    /// @brief The elements a `FrozenArray<Element>?` reflection attribute refers to: the ones set through its
+    /// IDL attribute that are still in the element's shadow-including ancestors' trees, else the ones with
+    /// the attribute's IDs in the element's tree; null if neither is set.
+    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    KRYS_NODISCARD Maybe<List<Ref<Element>>>
+      ElementsForAttributeInternal(DOMStringAtom attributeName) const noexcept;
+
+    /// @brief Sets a `FrozenArray<Element>?` reflection attribute's elements: the content attribute becomes
+    /// empty, or is removed if @p elements is null.
+    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    void SetElementsArrayAttribute(DOMStringAtom attributeName,
+                                   const Maybe<List<Ref<Element>>> &elements) noexcept;
+
+    /// @brief Whether @p attributeName (in the null namespace) is reflected by a `FrozenArray<Element>?` IDL
+    /// attribute.
+    KRYS_NODISCARD static bool IsElementsArrayReflectionAttribute(DOMStringAtom attributeName) noexcept;
+
+    /// @brief The first element in tree order whose root is this element's root and whose ID is @p id.
+    KRYS_NODISCARD RefPtr<Element> ElementInTreeWithId(DOMStringView id) const noexcept;
 
 #pragma endregion
 

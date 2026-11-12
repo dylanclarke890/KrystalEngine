@@ -151,9 +151,9 @@ namespace krys::boo
       {
         continue;
       }
-      entries.push_back(ResizeObserverEntry::Create(ShareRef(*target), observation->ComputeContentRect(),
-                                                    observation->BorderBoxSize(),
-                                                    observation->ContentBoxSize()));
+      entries.push_back(ResizeObserverEntry::Create(
+        ShareRef(*target), observation->ComputeContentRect(), observation->BorderBoxSize(),
+        observation->ContentBoxSize(), observation->DevicePixelContentBoxSize()));
     }
     _activeObservations.clear();
 

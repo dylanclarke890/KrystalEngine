@@ -82,7 +82,6 @@ namespace krys::boo::css
 
     // CSSOM functions. Don't make these public.
     KRYS_NODISCARD CSSRule *ParentRule() const noexcept final;
-    KRYS_NODISCARD CSSRule *CssRules() const noexcept final;
     KRYS_NODISCARD uint32 Length() const noexcept final;
     KRYS_NODISCARD CSSOMString Item(uint32 index) const noexcept final;
     KRYS_NODISCARD CSSOMString GetPropertyValue(const CSSOMString &propertyName) noexcept final;

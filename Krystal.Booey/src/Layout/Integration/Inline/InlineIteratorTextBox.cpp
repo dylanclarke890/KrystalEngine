@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
+#include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
@@ -38,8 +39,10 @@ namespace krys::boo::inline_iterator
 
   const FontCascade &TextBox::GetFontCascade() const noexcept
   {
-    // FIXME: The combined text's font (RenderCombineText::textCombineFont), once there's
-    // text-combine-upright.
+    if (auto *renderer = DynamicDowncast<RenderCombineText>(Renderer()); renderer && renderer->IsCombined())
+    {
+      return renderer->TextCombineFont();
+    }
     return Style().GetFontCascade();
   }
 

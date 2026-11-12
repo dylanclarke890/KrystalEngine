@@ -414,7 +414,6 @@ namespace krys::boo
     /// @p text's code units); empty @p text cancels the composition. Fires `compositionstart` (with the text
     /// it replaces) when one starts, `compositionupdate` while it has text, and `compositionend` when it's
     /// cancelled.
-    // FIXME: The host's custom highlights and annotations (Cocoa's inline predictions).
     void SetComposition(utf8_stringview text, const List<CompositionUnderline> &underlines,
                         uint32 selectionStart, uint32 selectionEnd) noexcept;
     /// @brief Confirms the composition as it is: its text stays, and `compositionend` fires.

@@ -25,14 +25,20 @@
  */
 
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderButton.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -55,6 +61,7 @@
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFormControls.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderMultiColumn.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderSVG.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderTable.hpp"
@@ -163,8 +170,8 @@ namespace krys::boo
       : _view(view), _tableBuilder(CreateUnique<Table>(*this)), _blockBuilder(CreateUnique<Block>(*this)),
         _blockFlowBuilder(CreateUnique<BlockFlow>(*this)), _inlineBuilder(CreateUnique<Inline>(*this)),
         _firstLetterBuilder(CreateUnique<FirstLetter>(*this)), _listBuilder(CreateUnique<List>(*this)),
-        _rubyBuilder(CreateUnique<Ruby>(*this)), _formControlsBuilder(CreateUnique<FormControls>(*this)),
-        _svgBuilder(CreateUnique<SVG>(*this))
+        _multiColumnBuilder(CreateUnique<MultiColumn>(*this)), _rubyBuilder(CreateUnique<Ruby>(*this)),
+        _formControlsBuilder(CreateUnique<FormControls>(*this)), _svgBuilder(CreateUnique<SVG>(*this))
   {
     krys_assert(!s_current || &_view != &s_current->_view);
     _previous = s_current;
@@ -245,8 +252,18 @@ namespace krys::boo
     // FIXME: webkit.org/b/182909.
     tearDownSubTreeIfApplicable();
 
-    // FIXME: Renderers detached during layout wait in the layout context's detached renderer list; for now
-    // `toDestroy` is destroyed here.
+    auto delayDestroyRendererIfApplicable = [&]
+    {
+      auto &rendererToDelete = *toDestroy;
+      if (rendererToDelete.View().FrameView().LayoutContext().AddToDetachedRendererList(
+            krys::move(toDestroy)))
+      {
+        rendererToDelete._isBeingDestroyed = true;
+        rendererToDelete.WillBeDestroyed();
+        rendererToDelete.GetWeakPtrFactory().RevokeAll();
+      }
+    };
+    delayDestroyRendererIfApplicable();
   }
 
   void RenderTreeBuilder::Attach(RenderElement &parent, RenderPtr<RenderObject> child,
@@ -265,7 +282,13 @@ namespace krys::boo
     {
       if (&parent == &parentCandidate)
       {
-        // FIXME: Parents inside multicols can't call internal attach directly, once there are any.
+        // Parents inside multicols can't call internal attach directly.
+        if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(parent);
+            blockFlow && blockFlow->MultiColumnFlow())
+        {
+          BlockFlowBuilder().Attach(*blockFlow, krys::move(child), beforeChild);
+          return;
+        }
         AttachToRenderElement(parent, krys::move(child), beforeChild);
         return;
       }
@@ -281,7 +304,18 @@ namespace krys::boo
         beforeChild = wrapperInline;
       }
     }
-    // FIXME: A beforeChild that's a column spanner, once there are multi-column flows.
+    else if (auto *beforeChildBox = DynamicDowncast<RenderBox>(beforeChild))
+    {
+      // Adjust the beforeChild if it happens to be a spanner and its actual location is inside the
+      // fragmented flow.
+      if (auto *multiColumnFlow = DynamicDowncast<RenderMultiColumnFlow>(parent.EnclosingFragmentedFlow()))
+      {
+        if (auto *spannerPlaceholder = multiColumnFlow->FindColumnSpannerPlaceholder(*beforeChildBox))
+        {
+          beforeChild = spannerPlaceholder;
+        }
+      }
+    }
 
     if (auto *text = DynamicDowncast<RenderSVGText>(parent))
     {
@@ -498,7 +532,8 @@ namespace krys::boo
   void RenderTreeBuilder::AttachToRenderElementInternal(RenderElement &parent, RenderPtr<RenderObject> child,
                                                         RenderObject *beforeChild) noexcept
   {
-    // FIXME: Assert layout isn't mutating the render tree.
+    krys_assert_msg(!parent.View().FrameView().LayoutContext().LayoutState(),
+                    "Layout must not mutate render tree");
     krys_debug_assert(parent.CanHaveChildren() || parent.CanHaveGeneratedChildren());
     krys_debug_assert(!child->Parent());
     krys_debug_assert(
@@ -534,7 +569,11 @@ namespace krys::boo
 
     if (_internalMovesType == IsInternalMove::No)
     {
-      // FIXME: The fragmented flow state and multi-column descendants, once there are fragmented flows.
+      newChild->InitializeFragmentedFlowStateOnInsertion();
+      if (auto *fragmentedFlow = DynamicDowncast<RenderMultiColumnFlow>(newChild->EnclosingFragmentedFlow()))
+      {
+        MultiColumnBuilder().MultiColumnDescendantInserted(*fragmentedFlow, *newChild);
+      }
       if (auto *listItemRenderer = DynamicDowncast<RenderListItem>(*newChild))
       {
         listItemRenderer->UpdateListMarkerNumbers();
@@ -589,11 +628,14 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = parent.GetDocument().ExistingAXObjectCache())
+    {
+      cache->ChildrenChanged(parent, newChild);
+    }
 
-    // FIXME: Not after a multi-column set, once there are multi-column flows.
-    if (parent.HasOutlineAutoAncestor()
-        || parent.OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto)
+    if ((parent.HasOutlineAutoAncestor()
+         || parent.OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto)
+        && !Is<RenderMultiColumnSet>(newChild->PreviousSibling()))
     {
       newChild->SetHasOutlineAutoAncestor();
     }
@@ -607,7 +649,13 @@ namespace krys::boo
     // positioned renderer maps don't become stale. It would be too slow to do the map lookup on each call.
     krys_debug_assert(&from == child.Parent());
     krys_debug_assert(!beforeChild || &to == beforeChild->Parent());
-    // FIXME: Remove percent height descendants.
+    if (normalizeAfterInsertion == NormalizeAfterInsertion::Yes && from.IsRenderBlock())
+    {
+      if (auto *box = DynamicDowncast<RenderBox>(child))
+      {
+        RenderBlock::RemovePercentHeightDescendant(*box);
+      }
+    }
     if (normalizeAfterInsertion == NormalizeAfterInsertion::Yes
         && (to.IsRenderBlock() || to.IsRenderInline()))
     {
@@ -743,8 +791,71 @@ namespace krys::boo
     bool isOutOfFlowPositioned = renderer.Style().HasOutOfFlowPosition();
     bool startsAffectingParent = false;
     bool noLongerAffectsParent = false;
-    // FIXME: Fragmented flow state changes (handleFragmentedFlowStateChange), once there are multi-column
-    // flows.
+    auto handleFragmentedFlowStateChange = [&]
+    {
+      if (!renderer.Parent())
+      {
+        return;
+      }
+      // Out of flow children of RenderMultiColumnFlow are not really part of the multicolumn flow. We need to
+      // ensure that changes in positioning like this trigger insertions into the multicolumn flow.
+      auto *enclosingFragmentedFlow =
+        DynamicDowncast<RenderMultiColumnFlow>(renderer.Parent()->EnclosingFragmentedFlow());
+      if (!enclosingFragmentedFlow)
+      {
+        return;
+      }
+      auto movingIntoMulticolumn = [&]
+      {
+        if (wasOutOfFlowPositioned && !isOutOfFlowPositioned)
+        {
+          return true;
+        }
+        if (auto *containingBlock = renderer.ContainingBlock(); containingBlock && isOutOfFlowPositioned)
+        {
+          // Sometimes the flow state could change even when the renderer stays out-of-flow (e.g when going
+          // from fixed to absolute and the containing block is inside a multi-column flow).
+          return containingBlock->GetFragmentedFlowState() == RenderObject::FragmentedFlowState::InsideFlow
+                 && renderer.GetFragmentedFlowState() == RenderObject::FragmentedFlowState::NotInsideFlow;
+        }
+        return false;
+      }();
+      if (movingIntoMulticolumn)
+      {
+        renderer.InitializeFragmentedFlowStateOnInsertion();
+        MultiColumnBuilder().MultiColumnDescendantInserted(*enclosingFragmentedFlow, renderer);
+        return;
+      }
+      auto movingOutOfMulticolumn = !wasOutOfFlowPositioned && isOutOfFlowPositioned;
+      if (movingOutOfMulticolumn)
+      {
+        MultiColumnBuilder().RestoreColumnSpannersForContainer(*enclosingFragmentedFlow, renderer);
+        return;
+      }
+
+      // Style change may have moved some subtree out of the fragmented flow. Their flow states have already
+      // been updated (see AdjustFragmentedFlowStateOnContainingBlockChangeIfNeeded) and here is where we take
+      // care of the remaining, spanner tree mutation.
+      krys::List<RenderBlock *> spannerContainingBlocks;
+      for (auto &descendant : DescendantsOfType<RenderMultiColumnSpannerPlaceholder>(renderer))
+      {
+        if (auto *containingBlock = descendant.ContainingBlock();
+            containingBlock && containingBlock->EnclosingFragmentedFlow() != enclosingFragmentedFlow
+            && !std::ranges::contains(spannerContainingBlocks, containingBlock))
+        {
+          spannerContainingBlocks.push_back(containingBlock);
+        }
+      }
+      auto oldEnclosingFragmentedFlow = CreateWeakPtr(enclosingFragmentedFlow);
+      for (auto *containingBlock : spannerContainingBlocks)
+      {
+        if (!oldEnclosingFragmentedFlow)
+        {
+          break;
+        }
+        MultiColumnBuilder().RestoreColumnSpannersForContainer(*oldEnclosingFragmentedFlow, *containingBlock);
+      }
+    };
 
     auto &parent = *renderer.Parent();
     if (Is<RenderBlock>(parent))
@@ -770,6 +881,7 @@ namespace krys::boo
         ChildFlowStateChangesAndAffectsParentBlock(renderer);
       }
       // WARNING: original parent might be deleted at this point.
+      handleFragmentedFlowStateChange();
       return;
     }
 
@@ -805,6 +917,8 @@ namespace krys::boo
         }
       }
     }
+
+    handleFragmentedFlowStateChange();
   }
 
   void RenderTreeBuilder::CreateAnonymousWrappersForInlineContent(RenderBlock &parent,
@@ -863,9 +977,8 @@ namespace krys::boo
   RenderObject *RenderTreeBuilder::SplitAnonymousBoxesAroundChild(RenderBoxModelObject &parent,
                                                                   RenderObject &originalBeforeChild) noexcept
   {
-    // FIXME: Adjust beforeChild if it is a column spanner that has been moved out of its original position,
-    // once there are multi-column flows.
-    auto *beforeChild = &originalBeforeChild;
+    // Adjust beforeChild if it is a column spanner and has been moved out of its original position.
+    auto *beforeChild = MultiColumn::AdjustBeforeChildForMultiColumnSpannerIfNeeded(originalBeforeChild);
     bool didSplitParentAnonymousBoxes = false;
 
     while (beforeChild->Parent() != &parent)
@@ -1027,7 +1140,6 @@ namespace krys::boo
 
     auto isAnonymousAndSafeToDelete = [](const RenderElement &renderer)
     {
-      // FIXME: SVG viewport containers.
       return renderer.IsAnonymous() && !renderer.IsRenderView() && !renderer.IsRenderFragmentedFlow();
     };
 
@@ -1130,8 +1242,6 @@ namespace krys::boo
 
   void RenderTreeBuilder::UpdateAfterDescendants(RenderElement &renderer) noexcept
   {
-    // FIXME: Layer-based SVG roots.
-
     // Do not early return here in any case. For example, RenderListItem derives
     // from RenderBlockFlow and indirectly from RenderBlock thus fulfilling all
     // update conditions below.
@@ -1143,8 +1253,11 @@ namespace krys::boo
     {
       ListBuilder().UpdateItemMarker(*listItem);
     }
+    if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(renderer))
+    {
+      MultiColumnBuilder().UpdateAfterDescendants(*blockFlow);
+    }
     FormControlsBuilder().UpdateAfterDescendants(renderer);
-    // FIXME: Multi-column flows (their builder's updateAfterDescendants).
   }
 
   RenderPtr<RenderObject> RenderTreeBuilder::DetachFromRenderGrid(RenderGrid &parent, RenderObject &child,
@@ -1201,7 +1314,8 @@ namespace krys::boo
                                                                      RenderObject &child,
                                                                      WillBeDestroyed willBeDestroyed) noexcept
   {
-    // FIXME: Assert layout isn't mutating the render tree.
+    krys_assert_msg(!parent.View().FrameView().LayoutContext().LayoutState(),
+                    "Layout must not mutate render tree");
     krys_debug_assert(parent.CanHaveChildren() || parent.CanHaveGeneratedChildren());
     krys_debug_assert(child.Parent() == &parent);
 
@@ -1222,7 +1336,10 @@ namespace krys::boo
       InvalidateLineLayout(child, IsRemoval::Yes);
     }
 
-    // FIXME: The fragmented flow state, once there are fragmented flows.
+    if (_internalMovesType == IsInternalMove::No)
+    {
+      child.ResetFragmentedFlowStateOnRemoval();
+    }
 
     child.WillBeRemovedFromTree();
     // WARNING: There should be no code running between willBeRemovedFromTree() and the actual removal below.
@@ -1230,7 +1347,10 @@ namespace krys::boo
     // and the code running here would force an untimely rebuilding, leaving |child| dangling.
     auto childToTake = parent.DetachRendererInternal(child);
 
-    // FIXME: The accessibility cache, once there is one.
+    if (auto *cache = parent.GetDocument().ExistingAXObjectCache())
+    {
+      cache->ChildrenChanged(parent);
+    }
 
     return childToTake;
   }

@@ -4,6 +4,7 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
+#include "Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
@@ -150,6 +151,24 @@ namespace krys::boo::tests
     CHECK(Count(painted, u8"draw-glyphs") == 2u);
     CHECK(Count(painted, u8"(color #C0C0C0)") >= 1u);
     CHECK(Count(painted, u8"draw-native-image") == 0u);
+  }
+
+  TEST_CASE("HTMLImageElement: a failed image without alt text shows the broken image icon",
+            "[HTML][HTMLImageElement]")
+  {
+    LoaderFixture loader;
+    ImageFixture fixture(u8"<img id=broken src='file:///none.png'><br>"
+                         u8"<img id=large style='width: 60px; height: 40px' src='file:///none.png'><br>"
+                         u8"<img id=tiny style='width: 10px; height: 10px' src='file:///none.png'>");
+    RunNetworkingTasks();
+
+    // The 16px icon with 4px of padding sizes the box.
+    CHECK(fixture.RendererSize(u8"broken") == IntSize(20, 20));
+
+    // It's drawn (its hill is green) inside the grey outline wherever it fits: not in the tiny image.
+    auto painted = fixture.Painted();
+    CHECK(Count(painted, u8"(color #549662)") == 2u);
+    CHECK(Count(painted, u8"(color #C0C0C0)") >= 1u);
   }
 
   TEST_CASE("HTMLImageElement: the box follows the alt text when there's no image",
@@ -379,6 +398,25 @@ namespace krys::boo::tests
     CHECK(loader.Strategy.Requests.size() == 2u);
   }
 
+  TEST_CASE("HTMLImageElement: the natural size is the density-corrected size, for the selected density",
+            "[HTML][HTMLImageElement][html:density-corrected-intrinsic-width-and-height]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.jpg"] = images::DensityJPEG;
+
+    ImageFixture fixture(u8"<img id=one src='file:///a.jpg'><img id=two srcset='file:///a.jpg 2x'>");
+    RunNetworkingTasks();
+
+    // 16x8 at 144 dots per inch.
+    CHECK(fixture.Image(u8"one").NaturalWidth() == 8u);
+    CHECK(fixture.Image(u8"one").NaturalHeight() == 4u);
+    CHECK(fixture.RendererSize(u8"one") == IntSize(8, 4));
+    // Then halved again for its density.
+    CHECK(fixture.Image(u8"two").NaturalWidth() == 4u);
+    CHECK(fixture.Image(u8"two").NaturalHeight() == 2u);
+    CHECK(fixture.RendererSize(u8"two") == IntSize(4, 2));
+  }
+
   TEST_CASE("HTMLImageElement: generated content images", "[HTML][HTMLImageElement]")
   {
     LoaderFixture loader;
@@ -434,6 +472,41 @@ namespace krys::boo::tests
     loop.Run(start + 200ms);
     CHECK(image.CurrentFrameIndex() == 2u);
     CHECK(backgroundImage.CurrentFrameIndex() == 2u);
+  }
+
+  TEST_CASE("HTMLImageElement: a loaded animated image starts animating when another element shows it",
+            "[HTML][HTMLImageElement]")
+  {
+    using namespace std::chrono_literals;
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.gif"] = images::AnimatedGIF;
+    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+
+    ImageFixture fixture(u8"<img id=animated src='file:///a.gif'><img id=still src='file:///a.png'>"
+                         u8"<img id=second><img id=third>");
+    RunNetworkingTasks();
+    auto &loop = html::EventLoop::Current();
+    auto &animated = Downcast<BitmapImage>(*fixture.Image(u8"animated").GetImage());
+    auto &still = Downcast<BitmapImage>(*fixture.Image(u8"still").GetImage());
+    REQUIRE_FALSE(animated.IsAnimating());
+
+    // The cached image gains a client, and its animation starts once the timers run, unpainted.
+    REQUIRE_FALSE(fixture.Image(u8"second").SetAttribute(u8"src", u8"file:///a.gif").HasException());
+    REQUIRE_FALSE(fixture.Image(u8"third").SetAttribute(u8"src", u8"file:///a.png").HasException());
+    RunNetworkingTasks();
+    REQUIRE(fixture.Image(u8"second").GetImage() == &animated);
+    (void)fixture.Document->UpdateLayout();
+    auto start = loop.Now();
+    loop.Run(start);
+    CHECK(animated.IsAnimating());
+    CHECK_FALSE(still.IsAnimating());
+    CHECK(animated.CurrentFrameIndex() == 0u);
+
+    // Its first frame shows for its whole duration.
+    loop.Run(start + 99ms);
+    CHECK(animated.CurrentFrameIndex() == 0u);
+    loop.Run(start + 100ms);
+    CHECK(animated.CurrentFrameIndex() == 1u);
   }
 
   TEST_CASE("HTMLImageElement: animations pause out of view and resume in view", "[HTML][HTMLImageElement]")

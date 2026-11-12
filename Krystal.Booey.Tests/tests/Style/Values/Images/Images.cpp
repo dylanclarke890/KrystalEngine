@@ -1,9 +1,13 @@
 ﻿#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
+#include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
+#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleFilterImage.hpp"
@@ -236,5 +240,43 @@ namespace krys::boo::style::tests
     CHECK(invalid->IsInvalidImage());
     // An invalid image is never equal, even to itself.
     CHECK_FALSE((*invalid == *invalid));
+  }
+
+  TEST_CASE("Style gradient images are kept per size while they're painted", "[Style][Values][Images]")
+  {
+    using namespace std::chrono_literals;
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html>
+      <div id=fixed style="list-style-image: linear-gradient(red, blue)"></div>
+      <div id=current style="color: green; list-style-image: linear-gradient(currentcolor, blue)"></div>)html"};
+    fixture.Document->UpdateStyleIfNeeded();
+    display_list::RecorderImpl context(FloatSize(10, 10));
+    auto imageFor = [&](dom::DOMStringView id, FloatSize size)
+    {
+      auto *renderer = fixture.ById(id).Renderer();
+      REQUIRE(renderer);
+      auto styleImage = renderer->Style().ListStyleImage().TryStyleImage();
+      REQUIRE(styleImage);
+      return styleImage->GetImage(renderer, size, context, false);
+    };
+    auto advance = [](MonotonicTime::duration delta)
+    {
+      auto &loop = html::EventLoop::Current();
+      loop.Run(loop.Now() + delta);
+    };
+
+    auto first = imageFor(u8"fixed", FloatSize(20, 10));
+    CHECK(imageFor(u8"fixed", FloatSize(20, 10)) == first);
+    CHECK(imageFor(u8"fixed", FloatSize(30, 10)) != first);
+
+    // Each use keeps it for another three seconds.
+    advance(2s);
+    CHECK(imageFor(u8"fixed", FloatSize(20, 10)) == first);
+    advance(2s);
+    CHECK(imageFor(u8"fixed", FloatSize(20, 10)) == first);
+    advance(3s);
+    CHECK(imageFor(u8"fixed", FloatSize(20, 10)) != first);
+
+    // A stop that depends on the style isn't kept.
+    CHECK(imageFor(u8"current", FloatSize(20, 10)) != imageFor(u8"current", FloatSize(20, 10)));
   }
 }

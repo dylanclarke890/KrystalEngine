@@ -388,7 +388,7 @@ namespace krys::boo::html
     // 1. If el's disabled attribute is set, then return false.
     if (_disabledState != DisabledState::Disabled && treatAsStyleSheet && document.Frame() && _url.IsValid())
     {
-      // FIXME: The charset attribute's encoding, or else the document's, once sheets decode other encodings.
+      // Style sheets are UTF-8 only, whatever the charset attribute says (see DIFFERENCES.md).
       auto charset = GetAttribute(u8"charset").value_or(dom::DOMString());
 
       if (CachedResourceHandle cachedSheet = std::exchange(_cachedSheet, nullptr))
@@ -914,9 +914,6 @@ namespace krys::boo::html
 
   bool HTMLLinkElement::Disabled() const noexcept
   {
-    // FIXME: Whenever the disabled attribute is removed, set the link element's
-    // explicitly enabled attribute to true. This is more than just changing this method because the attribute
-    // can be set in other ways.
     return Reflect<bool>(*this, u8"disabled");
   }
 

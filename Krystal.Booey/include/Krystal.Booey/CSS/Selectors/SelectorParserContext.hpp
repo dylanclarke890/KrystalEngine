@@ -48,7 +48,6 @@ namespace krys::boo::css
     explicit SelectorParserContext(const ParserContext &context) noexcept;
 
     /// @brief The document's mode and settings.
-    /// FIXME: the settings are the defaults until there's a `Settings`.
     explicit SelectorParserContext(const dom::Document &document) noexcept;
 
     KRYS_NODISCARD friend bool operator==(const SelectorParserContext &,

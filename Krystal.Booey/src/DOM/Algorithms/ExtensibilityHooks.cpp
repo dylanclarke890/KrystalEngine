@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/DOM/Algorithms/ExtensibilityHooks.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
@@ -253,6 +254,10 @@ namespace krys::boo::dom
                                                bool onlyReplacedElementsInserted) noexcept
   {
     node.OnChildrenChanged();
+    if (auto *cache = node.NodeDocument().ExistingAXObjectCache())
+    {
+      cache->ChildrenChanged(node);
+    }
 
     if (node.NodeDocument().IsDirAttributeDirty()) KRYS_UNLIKELY
     {
@@ -376,6 +381,13 @@ namespace krys::boo::dom
       NotifyIdTargetObservers(removedNode, oldAncestor.TreeScope());
     }
 
+    if (wasConnected)
+    {
+      if (auto *cache = oldAncestor.NodeDocument().ExistingAXObjectCache())
+      {
+        cache->Remove(removedNode);
+      }
+    }
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);
 
     // The removed node loses its parent's tree reference (which may delete it).
@@ -392,6 +404,10 @@ namespace krys::boo::dom
 
   void ExtensibilityHooks::NodeAdopted(Node &node, Document &oldDocument) noexcept
   {
+    if (auto *cache = oldDocument.ExistingAXObjectCache())
+    {
+      cache->Remove(node);
+    }
     node.OnAdopt(oldDocument);
   }
 
@@ -400,5 +416,13 @@ namespace krys::boo::dom
                                                    DOMStringAtom namespaceURI) noexcept
   {
     element.OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    // Only attributes in no namespace mean anything to accessibility.
+    if (namespaceURI.View().empty())
+    {
+      if (auto *cache = element.NodeDocument().ExistingAXObjectCache())
+      {
+        cache->DeferAttributeChangeIfNeeded(element, localName, oldValue, value);
+      }
+    }
   }
 }

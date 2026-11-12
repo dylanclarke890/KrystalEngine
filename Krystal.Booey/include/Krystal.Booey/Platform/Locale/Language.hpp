@@ -37,4 +37,15 @@ namespace krys::boo
 
   /// @brief The languages the host set; empty if it set none.
   KRYS_NODISCARD const List<utf8_string> &UserPreferredLanguagesOverride() noexcept;
+
+  /// @brief The user's preferred languages, most preferred first: the host's, or else the system's.
+  KRYS_NODISCARD List<utf8_string> UserPreferredLanguages() noexcept;
+
+  /// @brief A number that changes whenever the host sets the user's preferred languages, for caches of what
+  /// they decide.
+  KRYS_NODISCARD uint32 UserPreferredLanguagesGeneration() noexcept;
+
+  /// @brief Whether Han text with no language of its own prefers Simplified Chinese: unless the user prefers
+  /// `zh-TW` before `zh-CN`.
+  KRYS_NODISCARD bool UserPrefersSimplifiedChinese() noexcept;
 }

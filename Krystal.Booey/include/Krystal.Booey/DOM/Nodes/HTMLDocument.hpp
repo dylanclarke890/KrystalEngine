@@ -36,6 +36,9 @@ namespace krys::boo::dom
     HTMLDocument() noexcept : Document(DocumentFlags::IsHTMLDocument)
     {
     }
+    explicit HTMLDocument(DocumentFlags flags) noexcept : Document(flags | DocumentFlags::IsHTMLDocument)
+    {
+    }
 
     /// @brief Whether attribute selectors match the values of @p attributeName case-sensitively on HTML
     /// elements in HTML documents.

@@ -128,6 +128,13 @@ namespace krys::boo
     {
       return CurrentNativeImage();
     }
+    /// @brief The current frame laid out as drawn with the orientation, at its full resolution: unlike the
+    /// pre-transformed image, not scaled to a density-corrected size.
+    KRYS_NODISCARD virtual RefPtr<NativeImage>
+      CurrentOrientedNativeImage(ImageOrientation orientation) noexcept
+    {
+      return CurrentPreTransformedNativeImage(orientation);
+    }
 
     KRYS_NODISCARD virtual RefPtr<NativeImage> NativeImageAtIndex(uint32) noexcept
     {

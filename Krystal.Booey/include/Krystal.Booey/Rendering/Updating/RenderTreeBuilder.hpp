@@ -44,8 +44,7 @@ namespace krys::boo
 
   /// @brief Builds and tears down the render tree: attaches renderers to their parents, wrapping them in the
   /// anonymous boxes the CSS box tree needs, and detaches and destroys them, cleaning the wrappers up.
-  // FIXME: The multi-column builder comes with its renderers. There are
-  // no continuations: blocks in inlines are laid out in inline layout
+  // There are no continuations: blocks in inlines are laid out in inline layout
   // (`blocksInInlineLayoutEnabled`, on by default upstream).
   class RenderTreeBuilder
   {
@@ -89,6 +88,7 @@ namespace krys::boo
     class FormControls;
     class Inline;
     class List;
+    class MultiColumn;
     class Ruby;
     class SVG;
     class Table;
@@ -104,6 +104,7 @@ namespace krys::boo
     UniquePtr<Inline> _inlineBuilder;
     UniquePtr<FirstLetter> _firstLetterBuilder;
     UniquePtr<List> _listBuilder;
+    UniquePtr<MultiColumn> _multiColumnBuilder;
     UniquePtr<Ruby> _rubyBuilder;
     UniquePtr<FormControls> _formControlsBuilder;
     UniquePtr<SVG> _svgBuilder;
@@ -224,6 +225,10 @@ namespace krys::boo
     KRYS_NODISCARD List &ListBuilder() noexcept
     {
       return *_listBuilder;
+    }
+    KRYS_NODISCARD MultiColumn &MultiColumnBuilder() noexcept
+    {
+      return *_multiColumnBuilder;
     }
     KRYS_NODISCARD Ruby &RubyBuilder() noexcept
     {

@@ -94,6 +94,8 @@ namespace krys::boo
       void ScheduleRenderingUpdate(const Image &) noexcept final;
 
       KRYS_NODISCARD bool AllowsAnimation(const Image &) const noexcept final;
+      KRYS_NODISCARD Settings *GetSettings() const noexcept final;
+      KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept final;
     };
 
     struct ContainerContext
@@ -104,6 +106,8 @@ namespace krys::boo
     };
 
     RefPtr<CachedImageObserver> _imageObserver;
+    /// @brief The settings of the document that loaded the image.
+    RefPtr<Settings> _settings;
     RefPtr<Image> _image;
     UniquePtr<svg::SVGImageCache> _svgImageCache;
     HashMap<const CachedImageClient *, ContainerContext> _pendingContainerContextRequests;
@@ -193,6 +197,8 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool AllowsAnimation(const Image &) const noexcept;
+    /// @brief Whether a client showing the image is drawn with the dark appearance.
+    KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept;
 
   private:
     void Clear() noexcept;

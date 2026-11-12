@@ -211,7 +211,7 @@ namespace krys::boo
     return _innerNonSharedNode->NodeDocument().Selection().Contains(_hitTestLocation.Point());
   }
 
-  // FIXME: The document's encoding's display string (displayStringModifiedByEncoding), with text encodings.
+  // Documents are UTF-8 only, so no encoding modifies the display string (see DIFFERENCES.md).
   utf8_string HitTestResult::AltDisplayString() const noexcept
   {
     if (!_innerNonSharedNode)

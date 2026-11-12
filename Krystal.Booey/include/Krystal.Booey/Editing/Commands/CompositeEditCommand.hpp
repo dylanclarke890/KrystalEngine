@@ -69,10 +69,34 @@ namespace krys::boo
     ForceBlock
   };
 
+  /// @brief What accessibility needs to tell the host what text an undo or redo replaces: the ranges the edit
+  /// replaced and inserted, as indexes (which survive the DOM changing).
+  class AccessibilityUndoReplacedText
+  {
+  private:
+    dom::DOMString _replacedText;
+    VisiblePositionIndexRange _rangeDeletedByUnapply;
+    VisiblePositionIndexRange _rangeDeletedByReapply;
+
+  public:
+    void ConfigureRangeDeletedByReapplyWithStartingSelection(const VisibleSelection &selection) noexcept;
+    void ConfigureRangeDeletedByReapplyWithEndingSelection(const VisibleSelection &selection) noexcept;
+    /// @brief The range the edit replaced (which an undo puts the old text back in).
+    void SetRangeDeletedByUnapply(const VisiblePositionIndexRange &range) noexcept;
+
+    void CaptureTextForUnapply() noexcept;
+    void CaptureTextForReapply() noexcept;
+
+    void PostTextStateChangeNotificationForUnapply(ax::AXObjectCache *cache) noexcept;
+    void PostTextStateChangeNotificationForReapply(ax::AXObjectCache *cache) noexcept;
+
+  private:
+    KRYS_NODISCARD dom::DOMString TextDeletedByUnapply() const noexcept;
+    KRYS_NODISCARD dom::DOMString TextDeletedByReapply() const noexcept;
+  };
+
   /// @brief The simple commands a top-level command made, which undo and redo it, and the selections before
   /// and after it.
-  // FIXME: Accessibility's record of the text an undo or redo replaces (AccessibilityUndoReplacedText), with
-  // accessibility.
   class EditCommandComposition final : public UndoStep
   {
   public:
@@ -90,6 +114,7 @@ namespace krys::boo
     RefPtr<dom::Element> _startingRootEditableElement;
     RefPtr<dom::Element> _endingRootEditableElement;
     EditAction _editAction;
+    AccessibilityUndoReplacedText _replacedText;
 
   public:
     EditCommandComposition(dom::Document &document, const VisibleSelection &startingSelection,
@@ -123,6 +148,11 @@ namespace krys::boo
     }
     void SetStartingSelection(const VisibleSelection &selection) noexcept;
     void SetEndingSelection(const VisibleSelection &selection) noexcept;
+    /// @brief The range the edit replaced, for accessibility to tell the host what an undo puts back.
+    void SetRangeDeletedByUnapply(const VisiblePositionIndexRange &range) noexcept
+    {
+      _replacedText.SetRangeDeletedByUnapply(range);
+    }
     KRYS_NODISCARD dom::Element *StartingRootEditableElement() const noexcept
     {
       return _startingRootEditableElement.get();

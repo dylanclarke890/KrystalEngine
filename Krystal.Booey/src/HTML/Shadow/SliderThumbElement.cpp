@@ -335,6 +335,17 @@ namespace krys::boo::html
     }
   }
 
+  void SliderThumbElement::WillDetachRenderers() noexcept
+  {
+    if (_inDragMode)
+    {
+      if (auto *frame = NodeDocument().Frame())
+      {
+        frame->GetEventHandler().SetCapturingMouseEventsElement(nullptr);
+      }
+    }
+  }
+
   void SliderThumbElement::StopDragging() noexcept
   {
     if (!_inDragMode)

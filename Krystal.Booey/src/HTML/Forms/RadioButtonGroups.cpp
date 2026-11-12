@@ -19,6 +19,7 @@
  */
 
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <algorithm>
@@ -275,8 +276,10 @@ namespace krys::boo::html
     }
     group->Add(element);
 
-    // FIXME: Telling accessibility (AXObjectCache::onRadioGroupMembershipChanged), once there's
-    // accessibility.
+    if (auto *cache = element.NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnRadioGroupMembershipChanged(element, GroupMembers(element));
+    }
   }
 
   List<Ref<HTMLInputElement>> RadioButtonGroups::GroupMembers(const HTMLInputElement &element) const noexcept
@@ -364,12 +367,20 @@ namespace krys::boo::html
       return;
     }
     group->second->Remove(element);
+    // The buttons left in the group.
+    List<Ref<HTMLInputElement>> members;
     if (group->second->IsEmpty())
     {
       _nameToGroupMap.erase(group);
     }
+    else
+    {
+      members = GroupMembers(element);
+    }
 
-    // FIXME: Telling accessibility (AXObjectCache::onRadioGroupMembershipChanged), once there's
-    // accessibility.
+    if (auto *cache = element.NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnRadioGroupMembershipChanged(element, members);
+    }
   }
 }

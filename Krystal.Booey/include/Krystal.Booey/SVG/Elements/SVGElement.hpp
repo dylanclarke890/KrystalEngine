@@ -174,7 +174,7 @@ namespace krys::boo::svg
                SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags::None,
                dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 
-    // FIXME: Only for the elements that aren't ported yet, whose only properties are SVGElement's.
+    // For the elements whose only properties are SVGElement's (script and unknown elements).
     SVGElement(dom::Document &document, SVGElementInterface interface,
                SVGElementFlags flags = SVGElementFlags::None,
                dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;

@@ -337,6 +337,12 @@ namespace krys::ui::tests
     CheckPage("backgrounds", 360u, 240u);
   }
 
+  TEST_CASE("Golden: background clips", "[UI][GPU][Golden]")
+  {
+    // Text renders differently from Chrome's, so it's only reported against Chrome.
+    CheckPage("background-clips", 360u, 160u, true);
+  }
+
   TEST_CASE("Golden: layers", "[UI][GPU][Golden]")
   {
     CheckPage("layers", 360u, 240u);
@@ -359,6 +365,12 @@ namespace krys::ui::tests
     // Chrome on Windows rasterises glyphs with DirectWrite, whose hinting and contrast differ from
     // FreeType's, so its golden is only reported.
     CheckPage("text", 360u, 200u, true);
+  }
+
+  TEST_CASE("Golden: text combine", "[UI][GPU][Golden]")
+  {
+    // Glyphs rasterise differently from Chrome's (see "text"), so its golden is only reported.
+    CheckPage("text-combine", 360u, 200u, true);
   }
 
   TEST_CASE("Golden: bidi text", "[UI][GPU][Golden]")
@@ -467,6 +479,11 @@ namespace krys::ui::tests
   TEST_CASE("Golden: fieldset", "[UI][GPU][Golden]")
   {
     CheckPage("fieldset", 480u, 360u, true);
+  }
+
+  TEST_CASE("Golden: multicol", "[UI][GPU][Golden]")
+  {
+    CheckPage("multicol", 480u, 360u);
   }
 
   TEST_CASE("Golden: variable fonts", "[UI][GPU][Golden]")
@@ -783,6 +800,16 @@ namespace krys::ui::tests
   TEST_CASE("Golden: img", "[UI][GPU][Golden]")
   {
     CheckPage("img", 360u, 240u, false,
+              [](View &view)
+              {
+                boo::html::EventLoop::Current().RunUntilIdle();
+                view.UpdateRendering();
+              });
+  }
+
+  TEST_CASE("Golden: image density", "[UI][GPU][Golden]")
+  {
+    CheckPage("image-density", 360u, 200u, false,
               [](View &view)
               {
                 boo::html::EventLoop::Current().RunUntilIdle();

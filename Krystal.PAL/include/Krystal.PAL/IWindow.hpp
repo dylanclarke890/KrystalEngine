@@ -8,6 +8,7 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
+#include "Krystal.PAL/Accessibility.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/DragAndDrop.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
@@ -188,5 +189,24 @@ namespace krys::pal
     /// the drag's input (none until it does, and after the drag leaves or drops): the drag's source hears it
     /// at the drag's next move, and at the drop. A drop is reported only if the last answer was an operation.
     virtual void SetDropOperation(Maybe<DropOperation> operation) noexcept = 0;
+
+    /// @brief Sets the tree the window exposes to assistive technology (null for none, the default), which
+    /// the window asks about only when assistive technology does. The host keeps it alive while it's set.
+    virtual void SetAccessibilityTree(IAccessibilityTree *tree) noexcept = 0;
+
+    /// @brief Whether assistive technology has asked for the window's accessibility tree, so the host's
+    /// events reach it.
+    KRYS_NODISCARD virtual bool IsAccessibilityActive() const noexcept = 0;
+
+    /// @brief Tells assistive technology @p event happened to @p node.
+    virtual void RaiseAccessibilityEvent(AccessibilityNodeID node, AccessibilityEvent event) noexcept = 0;
+
+    /// @brief Tells assistive technology @p text was inserted into or deleted from @p node's text at
+    /// @p offset (in bytes of its UTF-8 text).
+    virtual void RaiseAccessibilityTextChange(AccessibilityNodeID node, AccessibilityTextChange change,
+                                              uint64 offset, utf8_stringview text) noexcept = 0;
+
+    /// @brief Tells the window @p node left the tree, so it lets go of what it made for it.
+    virtual void AccessibilityNodeRemoved(AccessibilityNodeID node) noexcept = 0;
   };
 }

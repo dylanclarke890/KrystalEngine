@@ -45,8 +45,7 @@ namespace krys::boo
 
   /// @brief A scrollbar of a scrollable area: its frame, its range (the visible and total sizes), its
   /// position, the parts the mouse is over and pressing, and painting through its theme.
-  // FIXME: The
-  // widget tree (Widget: the frame rect is in the scrollable area's coordinates) and custom scrollbars.
+  // FIXME: The widget tree (Widget: the frame rect is in the scrollable area's coordinates).
   class Scrollbar : public RefCounted<Scrollbar>
   {
     KRYS_NON_COPY_MOVABLE(Scrollbar);
@@ -148,11 +147,6 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD ScrollableArea &GetScrollableArea() const noexcept;
-
-    KRYS_NODISCARD bool IsCustomScrollbar() const noexcept
-    {
-      return false;
-    }
 
     KRYS_NODISCARD ScrollbarOrientation Orientation() const noexcept
     {

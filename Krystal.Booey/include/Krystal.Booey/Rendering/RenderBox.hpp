@@ -61,7 +61,6 @@ namespace krys::boo
 
   /// @brief A renderer that generates a box: its frame rect (relative to its container), margins, overflow
   /// and the computation of its sizes.
-  // FIXME: Fragmentation.
   class RenderBox : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderBox);
@@ -920,10 +919,10 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatRect ReferenceBoxRect(CSSBoxType boxType) const noexcept override;
 
-    KRYS_NODISCARD virtual LayoutRect
-      OverflowClipRect(const LayoutPoint &location,
-                       OverlayScrollbarSizeRelevancy relevancy =
-                         OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize) const noexcept;
+    KRYS_NODISCARD virtual LayoutRect OverflowClipRect(
+      const LayoutPoint &location,
+      OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
+      PaintPhase phase = PaintPhase::BlockBackground) const noexcept;
     KRYS_NODISCARD virtual LayoutRect
       OverflowClipRectForChildLayers(const LayoutPoint &location,
                                      OverlayScrollbarSizeRelevancy relevancy) const noexcept
@@ -932,10 +931,46 @@ namespace krys::boo
     }
     KRYS_NODISCARD LayoutRect ClipRect(const LayoutPoint &location) const noexcept;
 
+#pragma region Fragmentation
+
+    /// @brief @p fragment, or the first or last of the box's own fragments when @p fragment is before or
+    /// after them, so lines and blocks that overflow the box size as though the box extended into their
+    /// fragment.
+    KRYS_NODISCARD RenderFragmentContainer *
+      ClampToStartAndEndFragments(RenderFragmentContainer *fragment) const noexcept;
+    /// @brief The box's logical top in its fragmented flow (or the paginated layout), 0 outside one.
+    KRYS_NODISCARD virtual LayoutUnit OffsetFromLogicalTopOfFirstPage() const noexcept;
+    /// @brief What the box has in @p fragment, if it has been laid out there.
+    KRYS_NODISCARD RenderBoxFragmentInfo *
+      GetRenderBoxFragmentInfo(RenderFragmentContainer *fragment) const noexcept;
+    /// @brief Whether the box can extend outside its containing block's fragments.
+    KRYS_NODISCARD bool CanHaveOutsideFragmentRange() const noexcept
+    {
+      return !IsRenderFragmentedFlow();
+    }
+    /// @brief Whether the box mustn't be split across columns (replaced boxes, form controls, scrollers,
+    /// writing mode roots and size-contained boxes).
+    KRYS_NODISCARD bool IsUnsplittableForPagination() const noexcept;
+    /// @brief Whether the box scrolls its overflow in the block direction and has a specified height, so
+    /// splitting it would split its scrollbar.
+    KRYS_NODISCARD bool HasUnsplittableScrollingOverflow() const noexcept;
+    /// @brief Marks the box for layout when it moved relative to its column, or the columns' height changed.
+    virtual void MarkForPaginationRelayoutIfNeeded() noexcept
+    {
+    }
+    /// @brief Whether the box must be laid out again when its range of fragments changes.
+    KRYS_NODISCARD virtual bool NeedsLayoutAfterFragmentRangeChange() const noexcept
+    {
+      return false;
+    }
+
+#pragma endregion
+
 #pragma region Hit testing
 
-    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
-                                                              HitTestSource source) noexcept override;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept override;
 
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,

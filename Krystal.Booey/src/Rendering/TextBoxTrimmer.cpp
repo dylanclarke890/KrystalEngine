@@ -27,6 +27,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -37,8 +38,10 @@ namespace krys::boo
   {
     KRYS_NODISCARD TextBoxTrim GetTextBoxTrim(const RenderBlockFlow &textBoxTrimRoot) noexcept
     {
-      // FIXME: A multi-column flow takes its multi-column block's text-box-trim, once there are multi-column
-      // flows.
+      if (auto *multiColumnFlow = DynamicDowncast<RenderMultiColumnFlow>(textBoxTrimRoot))
+      {
+        return multiColumnFlow->MultiColumnBlockFlow()->Style().GetTextBoxTrim();
+      }
       return textBoxTrimRoot.Style().GetTextBoxTrim();
     }
 

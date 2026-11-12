@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -41,6 +42,7 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -354,6 +356,7 @@ namespace krys::boo
     RemoveFromUpdateScrollInfoAfterLayoutTransaction();
     RemoveContainerFromTrackedRendererMaps(*this);
     GetOutOfFlowDescendantsMap().RemoveContainingBlock(*this);
+    (void)View().FrameView().LayoutContext().TakeBoxesNeedingTransformUpdateAfterContainerLayout(*this);
     RenderBox::WillBeDestroyed();
   }
 
@@ -777,8 +780,8 @@ namespace krys::boo
         }
         firstLetter = current.NextSibling();
       }
-      // FIXME: Menu lists.
-      else if (current.IsBlockLevelReplacedOrAtomicInline() || current.IsRenderButton())
+      else if (current.IsBlockLevelReplacedOrAtomicInline() || current.IsRenderButton()
+               || current.IsRenderMenuList())
       {
         break;
       }
@@ -975,8 +978,10 @@ namespace krys::boo
   {
     RenderBox::StyleDidChange(diff, oldStyle);
 
-    // FIXME: Adjust the fragmented flow state when the containing block changes, once there are fragmented
-    // flows.
+    if (oldStyle)
+    {
+      AdjustFragmentedFlowStateOnContainingBlockChangeIfNeeded(*oldStyle, Style());
+    }
 
     PropagateStyleToAnonymousChildren(StylePropagationType::BlockAndRubyChildren);
 
@@ -1236,7 +1241,10 @@ namespace krys::boo
     RenderTheme::Singleton().AdjustRepaintRect(*this, inflatedRect);
     AddVisualOverflow(LayoutRect(SnappedIntRect(LayoutRect(inflatedRect))));
 
-    // FIXME: The fragments' visual overflow (addFragmentsVisualOverflowFromTheme), with fragmented flows.
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+    {
+      fragmentedFlow->AddFragmentsVisualOverflowFromTheme(*this);
+    }
   }
 
   void RenderBlock::SetLogicalLeftForChild(RenderBox &child, LayoutUnit logicalLeft,
@@ -1367,7 +1375,13 @@ namespace krys::boo
       SimplifiedNormalFlowLayout();
     }
 
-    // FIXME: Apply a forced break after the content of a fragmented flow, once there are fragmented flows.
+    // Make sure a forced break is applied after the content if we are a flow thread in a simplified layout.
+    // This ensures the size information is correctly computed for the last auto-height fragment receiving
+    // content.
+    if (auto *fragmentedFlow = DynamicDowncast<RenderFragmentedFlow>(*this))
+    {
+      fragmentedFlow->ApplyBreakAfterContent(ClientLogicalBottom());
+    }
 
     // Lay out our positioned objects if our positioned child bit is set.
     // Also, if an absolute position element inside a relative positioned container moves, and the absolute
@@ -1456,7 +1470,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The box's fragment range, once there are fragmented flows.
+    EstimateFragmentRangeForBoxChild(outOfFlowBox);
 
     // A fixed position element with an absolute positioned ancestor has no way of knowing if the latter has
     // changed position. So if this is a fixed position element, mark it for layout if it has an abspos
@@ -1489,7 +1503,7 @@ namespace krys::boo
       outOfFlowBox.SetNeedsPreferredWidthsUpdate(MarkingBehavior::MarkOnlyThis);
     }
 
-    // FIXME: Mark the box for relayout when its pagination changed, once there's pagination.
+    outOfFlowBox.MarkForPaginationRelayoutIfNeeded();
 
     // We don't have to do a full layout.  We just have to update our position. Try that first. If we have
     // shrink-to-fit width and we hit the available width constraint, the layoutIfNeeded() will catch it and
@@ -1544,8 +1558,19 @@ namespace krys::boo
       outOfFlowBox.LayoutIfNeeded();
     }
 
-    // FIXME: Relayout the box when its fragment range changed, and adjust a size-contained box for
-    // pagination, once there are fragmented flows and pagination.
+    if (UpdateFragmentRangeForBoxChild(outOfFlowBox))
+    {
+      outOfFlowBox.SetNeedsLayout(MarkingBehavior::MarkOnlyThis);
+      outOfFlowBox.LayoutIfNeeded();
+    }
+
+    if (layoutState && layoutState->IsPaginated())
+    {
+      if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(*this))
+      {
+        blockFlow->AdjustSizeContainmentChildForPagination(outOfFlowBox, outOfFlowBox.LogicalTop());
+      }
+    }
   }
 
   void RenderBlock::LayoutOutOfFlowBoxes(RelayoutChildren relayoutChildren,
@@ -1607,7 +1632,6 @@ namespace krys::boo
         }
         if (auto baseline = child->FirstLineBaseline())
         {
-          // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
           return LayoutUnit(child->LogicalTop().ToInt()) + *baseline;
         }
       }
@@ -1638,7 +1662,6 @@ namespace krys::boo
         }
         if (auto baseline = child->LastLineBaseline())
         {
-          // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
           return LayoutUnit(child->LogicalTop().ToInt()) + *baseline;
         }
       }
@@ -1750,8 +1773,15 @@ namespace krys::boo
 
   void RenderBlock::UpdateDescendantTransformsAfterLayout() noexcept
   {
-    // FIXME: Update the transforms of the boxes whose transform depends on this container's size
-    // (takeBoxesNeedingTransformUpdateAfterContainerLayout).
+    auto boxes =
+      View().FrameView().LayoutContext().TakeBoxesNeedingTransformUpdateAfterContainerLayout(*this);
+    for (auto &box : boxes)
+    {
+      if (box && box->HasLayer())
+      {
+        box->Layer()->UpdateTransform();
+      }
+    }
   }
 
   void RenderBlock::LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept
@@ -2647,13 +2677,17 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The accessibility and event region phases.
+    // FIXME: The event region phase.
 
     // Adjust our painting position if we're inside a scrolled layer (e.g., an overflow:auto div).
     LayoutPoint scrolledOffset = paintOffset;
     scrolledOffset.MoveBy(-GetScrollPosition());
 
-    // FIXME: Column rules (paintColumnRules), once there's multi-column layout.
+    if ((paintPhase == PaintPhase::BlockBackground || paintPhase == PaintPhase::ChildBlockBackground)
+        && Style().UsedVisibility() == Visibility::Visible)
+    {
+      PaintColumnRules(paintInfo, scrolledOffset);
+    }
 
     // Done with backgrounds, borders and column rules.
     if (paintPhase == PaintPhase::BlockBackground)
@@ -2681,12 +2715,11 @@ namespace krys::boo
     {
       // 4. paint floats.
       if (paintPhase == PaintPhase::Float || paintPhase == PaintPhase::Selection
-          || paintPhase == PaintPhase::TextClip || paintPhase == PaintPhase::EventRegion
-          || paintPhase == PaintPhase::Accessibility)
+          || paintPhase == PaintPhase::TextClip || paintPhase == PaintPhase::EventRegion)
       {
         PaintFloats(paintInfo, scrolledOffset,
                     paintPhase == PaintPhase::Selection || paintPhase == PaintPhase::TextClip
-                      || paintPhase == PaintPhase::EventRegion || paintPhase == PaintPhase::Accessibility);
+                      || paintPhase == PaintPhase::EventRegion);
       }
     }
 
@@ -3018,16 +3051,37 @@ namespace krys::boo
     {
       auto visibility =
         source == HitTestSource::Script ? box.Style().GetVisibility() : box.Style().UsedVisibility();
-      return box.Height() && visibility == Visibility::Visible && !box.IsOutOfFlowPositioned();
+      return box.Height() && visibility == Visibility::Visible && !box.IsOutOfFlowPositioned()
+             && !box.IsRenderFragmentedFlow();
+    }
+
+    // Valid candidates in a fragmented flow must be rendered by the fragment.
+    KRYS_NODISCARD bool IsChildHitTestCandidate(const RenderBox &box, const RenderFragmentContainer *fragment,
+                                                const LayoutPoint &point, HitTestSource source) noexcept
+    {
+      if (!IsChildHitTestCandidate(box, source))
+      {
+        return false;
+      }
+      if (!fragment)
+      {
+        return true;
+      }
+      const auto *block = DynamicDowncast<RenderBlock>(box);
+      if (!block)
+      {
+        block = box.ContainingBlock();
+      }
+      return block->FragmentAtBlockOffset(point.Y()) == fragment;
     }
   }
 
-  dom::PositionWithAffinity RenderBlock::PositionForPoint(const LayoutPoint &point,
-                                                          HitTestSource source) noexcept
+  dom::PositionWithAffinity RenderBlock::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                          const RenderFragmentContainer *fragment) noexcept
   {
     if (IsRenderTable())
     {
-      return RenderBox::PositionForPoint(point, source);
+      return RenderBox::PositionForPoint(point, source, fragment);
     }
 
     if (IsBlockLevelReplacedOrAtomicInline())
@@ -3055,7 +3109,7 @@ namespace krys::boo
     }
     if (IsRenderFlexibleBox() || IsRenderGrid())
     {
-      return RenderBox::PositionForPoint(point, source);
+      return RenderBox::PositionForPoint(point, source, fragment);
     }
 
     LayoutPoint pointInContents = point;
@@ -3073,8 +3127,13 @@ namespace krys::boo
 
     RenderBox *lastCandidateBox = LastChildBox();
 
-    // FIXME: Fragmented flows' candidates must be rendered by the fragment at the point, once there are any.
-    while (lastCandidateBox && !IsChildHitTestCandidate(*lastCandidateBox, source))
+    if (!fragment)
+    {
+      fragment = FragmentAtBlockOffset(pointInLogicalContents.Y());
+    }
+
+    while (lastCandidateBox
+           && !IsChildHitTestCandidate(*lastCandidateBox, fragment, pointInLogicalContents, source))
     {
       lastCandidateBox = lastCandidateBox->PreviousSiblingBox();
     }
@@ -3090,7 +3149,7 @@ namespace krys::boo
 
       for (auto *childBox = FirstChildBox(); childBox; childBox = childBox->NextSiblingBox())
       {
-        if (!IsChildHitTestCandidate(*childBox, source))
+        if (!IsChildHitTestCandidate(*childBox, fragment, pointInLogicalContents, source))
         {
           continue;
         }
@@ -3109,7 +3168,7 @@ namespace krys::boo
     }
 
     // We only get here if there are no hit test candidate children below the click.
-    return RenderBox::PositionForPoint(point, source);
+    return RenderBox::PositionForPoint(point, source, fragment);
   }
 
   LayoutUnit RenderBlock::TextIndentOffset() const noexcept
@@ -3656,6 +3715,261 @@ namespace krys::boo
       currentCache = info.Cache();
     }
     return logicalRight;
+  }
+
+#pragma endregion
+
+#pragma region Fragmentation
+
+  RenderFragmentedFlow *RenderBlock::CachedEnclosingFragmentedFlow() const noexcept
+  {
+    if (!HasRareData() || !GetRareData().EnclosingFragmentedFlow)
+    {
+      return nullptr;
+    }
+    return GetRareData().EnclosingFragmentedFlow->get();
+  }
+
+  bool RenderBlock::CachedEnclosingFragmentedFlowNeedsUpdate() const noexcept
+  {
+    return !HasRareData() || !GetRareData().EnclosingFragmentedFlow;
+  }
+
+  void RenderBlock::SetCachedEnclosingFragmentedFlowNeedsUpdate() noexcept
+  {
+    if (HasRareData())
+    {
+      EnsureRareData().EnclosingFragmentedFlow = null;
+    }
+  }
+
+  RenderFragmentedFlow *
+    RenderBlock::UpdateCachedEnclosingFragmentedFlow(RenderFragmentedFlow *fragmentedFlow) const noexcept
+  {
+    // Only a found flow is cached, so blocks outside fragmented flows need no rare data.
+    if (!fragmentedFlow)
+    {
+      return nullptr;
+    }
+    const_cast<RenderBlock &>(*this).EnsureRareData().EnclosingFragmentedFlow = CreateWeakPtr(fragmentedFlow);
+    return fragmentedFlow;
+  }
+
+  RenderFragmentedFlow *RenderBlock::LocateEnclosingFragmentedFlow() const noexcept
+  {
+    if (CachedEnclosingFragmentedFlowNeedsUpdate())
+    {
+      return UpdateCachedEnclosingFragmentedFlow(RenderBox::LocateEnclosingFragmentedFlow());
+    }
+    krys_debug_assert(CachedEnclosingFragmentedFlow() == RenderBox::LocateEnclosingFragmentedFlow());
+    return CachedEnclosingFragmentedFlow();
+  }
+
+  void RenderBlock::ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(
+    RenderFragmentedFlow *fragmentedFlow) noexcept
+  {
+    if (GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow)
+    {
+      return;
+    }
+
+    if (auto *cachedFragmentedFlow = CachedEnclosingFragmentedFlow())
+    {
+      fragmentedFlow = cachedFragmentedFlow;
+    }
+    SetCachedEnclosingFragmentedFlowNeedsUpdate();
+    RenderElement::ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(fragmentedFlow);
+  }
+
+  LayoutUnit RenderBlock::OffsetFromLogicalTopOfFirstPage() const noexcept
+  {
+    auto *layoutState = LayoutContext().LayoutState();
+    if (layoutState && !layoutState->IsPaginated())
+    {
+      return 0_lu;
+    }
+
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+    {
+      return fragmentedFlow->OffsetFromLogicalTopOfFirstFragment(this);
+    }
+
+    if (layoutState)
+    {
+      krys_debug_assert(layoutState->Renderer() == this);
+
+      LayoutSize offsetDelta = layoutState->LayoutOffset() - layoutState->PageOffset();
+      return IsHorizontalWritingMode() ? offsetDelta.Height() : offsetDelta.Width();
+    }
+
+    krys_debug_assert_msg(false, "A block is only paginated during layout or in a fragmented flow.");
+    return 0_lu;
+  }
+
+  LayoutUnit RenderBlock::PaginationStrut() const noexcept
+  {
+    return HasRareData() ? GetRareData().PaginationStrut : 0_lu;
+  }
+
+  void RenderBlock::SetPaginationStrut(LayoutUnit strut) noexcept
+  {
+    if (!HasRareData() && !strut)
+    {
+      return;
+    }
+    EnsureRareData().PaginationStrut = strut;
+  }
+
+  LayoutUnit RenderBlock::PageLogicalOffset() const noexcept
+  {
+    return HasRareData() ? GetRareData().PageLogicalOffset : 0_lu;
+  }
+
+  void RenderBlock::SetPageLogicalOffset(LayoutUnit logicalOffset) noexcept
+  {
+    if (!HasRareData() && !logicalOffset)
+    {
+      return;
+    }
+    EnsureRareData().PageLogicalOffset = logicalOffset;
+  }
+
+  void RenderBlock::MarkForPaginationRelayoutIfNeeded() noexcept
+  {
+    auto *layoutState = LayoutContext().LayoutState();
+    if (NeedsLayout() || !layoutState || !layoutState->IsPaginated())
+    {
+      return;
+    }
+
+    if (layoutState->PageLogicalHeightChanged()
+        || (layoutState->PageLogicalHeight()
+            && layoutState->PageLogicalOffset(this, LogicalTop()) != PageLogicalOffset()))
+    {
+      SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+    }
+  }
+
+  void RenderBlock::PreparePaginationBeforeBlockLayout(RelayoutChildren &relayoutChildren) noexcept
+  {
+    // Fragments changing widths can force us to relayout our children.
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow())
+    {
+      fragmentedFlow->LogicalWidthChangedInFragmentsForBlock(*this, relayoutChildren);
+    }
+  }
+
+  RenderFragmentContainer *RenderBlock::FragmentAtBlockOffset(LayoutUnit blockOffset) const noexcept
+  {
+    if (auto *fragmentedFlow = EnclosingFragmentedFlow();
+        fragmentedFlow && fragmentedFlow->HasValidFragmentInfo())
+    {
+      return fragmentedFlow->FragmentAtBlockOffset(this, OffsetFromLogicalTopOfFirstPage() + blockOffset,
+                                                   true);
+    }
+    return nullptr;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool
+      CanComputeFragmentRangeForBox(const RenderBlock &parentBlock, const RenderBox &childBox,
+                                    const RenderFragmentedFlow &enclosingFragmentedFlow) noexcept
+    {
+      if (!enclosingFragmentedFlow.HasFragments())
+      {
+        return false;
+      }
+      if (!childBox.CanHaveOutsideFragmentRange())
+      {
+        return false;
+      }
+      return enclosingFragmentedFlow.HasCachedFragmentRangeForBox(parentBlock);
+    }
+  }
+
+  bool RenderBlock::ChildBoxIsUnsplittableForFragmentation(const RenderBox &child) const noexcept
+  {
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    bool checkColumnBreaks = fragmentedFlow && fragmentedFlow->ShouldCheckColumnBreaks();
+    auto breakInside = child.Style().GetBreakInside();
+    return child.IsUnsplittableForPagination() || breakInside == BreakInside::Avoid
+           || (checkColumnBreaks && breakInside == BreakInside::AvoidColumn);
+  }
+
+  void RenderBlock::ComputeFragmentRangeForBoxChild(const RenderBox &box) const noexcept
+  {
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    krys_debug_assert(fragmentedFlow && CanComputeFragmentRangeForBox(*this, box, *fragmentedFlow));
+    krys_debug_assert(box.GetFragmentedFlowState() == FragmentedFlowState::InsideFlow);
+
+    LayoutUnit offsetFromLogicalTopOfFirstFragment = box.OffsetFromLogicalTopOfFirstPage();
+    auto *startFragment =
+      fragmentedFlow->FragmentAtBlockOffset(this, offsetFromLogicalTopOfFirstFragment, true);
+    auto *endFragment = startFragment;
+    if (!ChildBoxIsUnsplittableForFragmentation(box))
+    {
+      endFragment = fragmentedFlow->FragmentAtBlockOffset(
+        this, offsetFromLogicalTopOfFirstFragment + LogicalHeightForChild(box), true);
+    }
+
+    fragmentedFlow->SetFragmentRangeForBox(box, startFragment, endFragment);
+  }
+
+  void RenderBlock::EstimateFragmentRangeForBoxChild(const RenderBox &box) const noexcept
+  {
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    if (!fragmentedFlow || box.GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow
+        || !CanComputeFragmentRangeForBox(*this, box, *fragmentedFlow))
+    {
+      return;
+    }
+
+    if (ChildBoxIsUnsplittableForFragmentation(box))
+    {
+      ComputeFragmentRangeForBoxChild(box);
+      return;
+    }
+
+    auto estimatedValues =
+      box.ComputeLogicalHeight(RenderFragmentedFlow::MaxLogicalHeight(), LogicalTopForChild(box));
+    LayoutUnit offsetFromLogicalTopOfFirstFragment = box.OffsetFromLogicalTopOfFirstPage();
+    auto *startFragment =
+      fragmentedFlow->FragmentAtBlockOffset(this, offsetFromLogicalTopOfFirstFragment, true);
+    auto *endFragment = fragmentedFlow->FragmentAtBlockOffset(
+      this, offsetFromLogicalTopOfFirstFragment + estimatedValues.Extent, true);
+
+    fragmentedFlow->SetFragmentRangeForBox(box, startFragment, endFragment);
+  }
+
+  bool RenderBlock::UpdateFragmentRangeForBoxChild(const RenderBox &box) const noexcept
+  {
+    auto *fragmentedFlow = EnclosingFragmentedFlow();
+    if (!fragmentedFlow || box.GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow
+        || !CanComputeFragmentRangeForBox(*this, box, *fragmentedFlow))
+    {
+      return false;
+    }
+
+    RenderFragmentContainer *startFragment = nullptr;
+    RenderFragmentContainer *endFragment = nullptr;
+    fragmentedFlow->GetFragmentRangeForBox(box, startFragment, endFragment);
+
+    ComputeFragmentRangeForBoxChild(box);
+
+    RenderFragmentContainer *newStartFragment = nullptr;
+    RenderFragmentContainer *newEndFragment = nullptr;
+    fragmentedFlow->GetFragmentRangeForBox(box, newStartFragment, newEndFragment);
+
+    // Changing the start fragment means we shift everything and a relayout is needed.
+    if (newStartFragment != startFragment)
+    {
+      return true;
+    }
+
+    // The fragment range of the box has changed. Some boxes (e.g floats) may have been positioned assuming
+    // a different range.
+    return box.NeedsLayoutAfterFragmentRangeChange() && newEndFragment != endFragment;
   }
 
 #pragma endregion

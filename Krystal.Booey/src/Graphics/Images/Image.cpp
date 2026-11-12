@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
@@ -40,6 +41,19 @@ namespace krys::boo
   }
 
   Image::~Image() noexcept = default;
+
+  void Image::StartAnimationAsynchronously() noexcept
+  {
+    if (!_animationStartTimer)
+    {
+      _animationStartTimer = CreateUnique<Timer>(*this, &Image::StartAnimation);
+    }
+    if (_animationStartTimer->IsActive())
+    {
+      return;
+    }
+    _animationStartTimer->StartOneShot({});
+  }
 
   RefPtr<ImageObserver> Image::GetImageObserver() const noexcept
   {

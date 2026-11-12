@@ -42,10 +42,12 @@ namespace krys::boo
     if (IsBlinkingSuspended())
     {
       // Ensure the caret is always visible when blinking is suspended.
-      if (_presentationProperties.Blink == PresentationProperties::BlinkState::On)
+      if (_presentationProperties.Blink == PresentationProperties::BlinkState::Off)
       {
-        _blinkTimer.StartOneShot(caretBlinkInterval.value_or(MonotonicTime::duration {}));
+        SetBlinkState(PresentationProperties::BlinkState::On);
+        _lastTimeCaretPaintWasToggled = currentTime;
       }
+      _blinkTimer.StartOneShot(caretBlinkInterval.value_or(MonotonicTime::duration {}));
       return;
     }
 

@@ -237,6 +237,15 @@ namespace krys
             if (_pageView)
             {
               _pageView->SetVisible(_view == EditorView::Page);
+              // Screen readers see the page only while it's shown.
+              if (_view == EditorView::Page)
+              {
+                AttachPageAccessibility();
+              }
+              else
+              {
+                _pageView->DetachAccessibility();
+              }
             }
           }
 
@@ -841,6 +850,10 @@ namespace krys
       _pageView = CreateUnique<ui::View>(PageSize());
       _pageView->SetFocused(_focused);
       _pageView->SetPointingDevices(pal::GetPointingDevices());
+      if (_view == EditorView::Page)
+      {
+        AttachPageAccessibility();
+      }
       // The window hides and confines the cursor while the page has locked the pointer.
       _pageView->SetPointerLockHandler(
         [&](bool locked)
@@ -869,6 +882,12 @@ namespace krys
       _booeyFonts.Regular =
         boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, false, false});
       _booeyFonts.Bold = boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, true, false});
+    }
+
+    /// @brief Exposes the page to screen readers through the window, below the header.
+    void AttachPageAccessibility() noexcept
+    {
+      _pageView->AttachAccessibility(*_context->Window, {0, static_cast<int32>(HeaderHeight)});
     }
 
     /// @brief Shows the guide's topics in place and loads links to the editor's other pages; logs any other

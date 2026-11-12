@@ -44,4 +44,26 @@ namespace krys::boo::css::tests
       CHECK(ToNarrow(style.Result()) == "calc(var(--x) * 2)");
     }
   }
+
+  TEST_CASE("CSSFunctionRule: parameter and return types", "[CSS][CSSOM][CSSFunctionRule]")
+  {
+    auto sheet =
+      SheetFromText(u8"@function --f(--a <length>, --b <length>+: 1px, --c type(<number> | auto#), "
+                    u8"--d type(*)) returns type(<color> | none) { result: red; }");
+    auto &rule = RuleAt<CSSFunctionRule>(*sheet, 0);
+
+    CHECK(ToNarrow(rule.ReturnType()) == "<color> | none");
+
+    auto parameters = rule.GetParameters();
+    REQUIRE(parameters.size() == 4);
+    CHECK(ToNarrow(parameters[0].Type) == "<length>");
+    CHECK(ToNarrow(parameters[1].Type) == "<length>+");
+    CHECK(ToNarrow(parameters[2].Type) == "<number> | auto#");
+    CHECK(ToNarrow(parameters[3].Type) == "*");
+
+    // Types of more than one component are wrapped in type(), and universal types are left out.
+    CHECK(RuleText(rule)
+          == "@function --f(--a <length>, --b <length>+: 1px, --c type(<number> | auto#), --d) "
+             "returns type(<color> | none) { result: red; }");
+  }
 }

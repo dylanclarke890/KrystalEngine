@@ -7,8 +7,10 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -17,8 +19,9 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    /// @brief Dispatches a trusted-looking click of @p button at @p target, with Ctrl held if @p ctrlKey.
-    void Click(dom::Element &target, int16 button = 0, bool ctrlKey = false) noexcept
+    /// @brief Dispatches a trusted-looking click of @p button at @p target, with Ctrl held if @p ctrlKey and
+    /// Shift if @p shiftKey.
+    void Click(dom::Element &target, int16 button = 0, bool ctrlKey = false, bool shiftKey = false) noexcept
     {
       dom::MouseEventInit init;
       init.Bubbles = true;
@@ -26,8 +29,19 @@ namespace krys::boo::html::tests
       init.Composed = true;
       init.Button = button;
       init.CtrlKey = ctrlKey;
+      init.ShiftKey = shiftKey;
       auto type = button == 0 ? dom::DOMStringAtom(u8"click") : dom::DOMStringAtom(u8"auxclick");
       (void)target.DispatchEvent(*CreateRef<dom::MouseEvent>(type, init));
+    }
+
+    /// @brief Dispatches a mouse press at @p target, with Shift held if @p shiftKey.
+    void MouseDown(dom::Element &target, bool shiftKey) noexcept
+    {
+      dom::MouseEventInit init;
+      init.Bubbles = true;
+      init.Cancelable = true;
+      init.ShiftKey = shiftKey;
+      (void)target.DispatchEvent(*CreateRef<dom::MouseEvent>(dom::DOMStringAtom(u8"mousedown"), init));
     }
   }
 
@@ -110,6 +124,49 @@ namespace krys::boo::html::tests
       // The right button doesn't.
       Click(fixture.ById(u8"inner"), 2);
       CHECK(fixture.Navigations().size() == 1);
+    }
+  }
+
+  TEST_CASE("HTMLAnchorElement: links in editable content follow the editable link behaviour",
+            "[HTML][HTMLAnchorElement]")
+  {
+    NavigationFixture fixture(u8R"(<div contenteditable><a id=a href="next.html">Next</a></div>)");
+    auto settings = Settings::Create();
+    fixture.Document->SetSettings(Ref<Settings>(settings));
+    auto &a = fixture.Get<HTMLAnchorElement>(u8"a");
+
+    SECTION("by default, they never act as links")
+    {
+      Click(a);
+      Click(a, 0, false, true);
+      CHECK(fixture.Navigations().empty());
+      MouseDown(a, true);
+      CHECK_FALSE(a.IsLiveLink());
+      CHECK_FALSE(IsDraggableLink(a));
+    }
+
+    SECTION("always")
+    {
+      settings->EditableLinkBehavior = EditableLinkBehavior::AlwaysLive;
+      Click(a);
+      CHECK(fixture.Navigations().size() == 1);
+      MouseDown(a, false);
+      CHECK(IsDraggableLink(a));
+    }
+
+    SECTION("only with the shift key")
+    {
+      settings->EditableLinkBehavior = EditableLinkBehavior::OnlyLiveWithShiftKey;
+      Click(a);
+      CHECK(fixture.Navigations().empty());
+      Click(a, 0, false, true);
+      CHECK(fixture.Navigations().size() == 1);
+
+      // A drag takes the shift key from the press that starts it.
+      MouseDown(a, false);
+      CHECK_FALSE(IsDraggableLink(a));
+      MouseDown(a, true);
+      CHECK(IsDraggableLink(a));
     }
   }
 

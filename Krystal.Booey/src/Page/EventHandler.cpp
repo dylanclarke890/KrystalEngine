@@ -27,6 +27,7 @@
  */
 
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
@@ -254,7 +255,8 @@ namespace krys::boo
 
   EventHandler::EventHandler(LocalFrame &frame) noexcept
       : _frame(frame), _autoscrollController(CreateUnique<AutoscrollController>()),
-        _fakeMouseMoveEventTimer(*this, &EventHandler::FakeMouseMoveEventTimerFired)
+        _fakeMouseMoveEventTimer(*this, &EventHandler::FakeMouseMoveEventTimerFired),
+        _hoverTimer(*this, &EventHandler::HoverTimerFired)
   {
   }
 
@@ -388,6 +390,7 @@ namespace krys::boo
 
   void EventHandler::Clear() noexcept
   {
+    _hoverTimer.Stop();
     _resizeLayer = nullptr;
     _capturingMouseEventsElement = nullptr;
     ClearElementUnderMouse();
@@ -713,6 +716,32 @@ namespace krys::boo
     }
 
     return swallowEvent;
+  }
+
+  void EventHandler::CancelMousePress() noexcept
+  {
+    if (auto *document = _frame.Document())
+    {
+      document->Selection().SetCaretBlinkingSuspended(false);
+    }
+    if (AutoscrollInProgress())
+    {
+      StopAutoscrollTimer();
+    }
+
+    _mousePressed = false;
+    _capturesDragging = false;
+    _mouseDownMayStartDrag = false;
+    _mouseDownMayStartSelect = false;
+    _mouseDownMayStartAutoscroll = false;
+
+    if (auto *resizeLayer = _resizeLayer.get())
+    {
+      resizeLayer->SetInResizeMode(false);
+      _resizeLayer = nullptr;
+    }
+
+    InvalidateClick();
   }
 
   void EventHandler::InvalidateClick() noexcept
@@ -1329,8 +1358,6 @@ namespace krys::boo
       keydown->SetIsDefaultEventHandlerIgnored();
     }
 
-    // FIXME: Accessibility stopping the propagation (accessibilityPreventsEventPropagation), with
-    // accessibility.
     (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
     if (handledByInputMethod)
     {
@@ -1610,9 +1637,8 @@ namespace krys::boo
 
     if (node)
     {
-      // FIXME: List boxes, which scroll themselves.
       auto *r = node->Renderer();
-      if (r && r->EnclosingBox().Scroll(direction, granularity))
+      if (r && !r->IsRenderListBox() && r->EnclosingBox().Scroll(direction, granularity))
       {
         SetFrameWasScrolledByUser();
         return true;
@@ -1646,7 +1672,8 @@ namespace krys::boo
     if (node)
     {
       auto *r = node->Renderer();
-      if (r && r->EnclosingBox().LogicalScroll(direction, granularity, 1, nullptr, animated))
+      if (r && !r->IsRenderListBox()
+          && r->EnclosingBox().LogicalScroll(direction, granularity, 1, nullptr, animated))
       {
         SetFrameWasScrolledByUser();
         return true;
@@ -1818,6 +1845,33 @@ namespace krys::boo
     (void)MouseMoved(fakeMouseMoveEvent);
   }
 
+  void EventHandler::ScheduleHoverStateUpdate() noexcept
+  {
+    if (!_hoverTimer.IsActive())
+    {
+      _hoverTimer.StartOneShot({});
+    }
+  }
+
+  void EventHandler::HoverTimerFired() noexcept
+  {
+    _hoverTimer.Stop();
+
+    RefPtr<dom::Document> document = ShareRefPtr(_frame.Document());
+    auto *view = _frame.View();
+    // Unlike upstream, which hit tests at the origin, there's nothing to hover without a known position.
+    if (!document || !view || !_lastKnownMousePosition)
+    {
+      return;
+    }
+
+    HitTestRequest request(
+      {HitTestRequest::Type::Move, HitTestRequest::Type::DisallowUserAgentShadowContent});
+    HitTestResult result(view->WindowToContents(FlooredIntPoint(*_lastKnownMousePosition)));
+    document->HitTest(request, result);
+    document->UpdateHoverActiveState(request, result.TargetElement());
+  }
+
   void EventHandler::UpdateCursor() noexcept
   {
     if (!_lastKnownMousePosition)
@@ -1861,14 +1915,18 @@ namespace krys::boo
 
   bool EventHandler::UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) const noexcept
   {
-    (void)shiftKey;
     if (!node)
     {
       return false;
     }
 
-    // FIXME: Editable links (hasEditableStyle and the editable link behavior setting) and submit images.
-    return isOverLink;
+    // A link in editable content shows the hand only while it acts as a link.
+    bool editableLinkEnabled =
+      !node->HasEditableStyle()
+      || IsEditableLinkLive(node->NodeDocument().GetSettings().EditableLinkBehavior, shiftKey);
+    const auto *input = DynamicDowncast<html::HTMLInputElement>(*node);
+    bool isSubmitImage = input && input->IsImageButton();
+    return (isOverLink || isSubmitImage) && editableLinkEnabled;
   }
 
   Maybe<Cursor> EventHandler::SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept
@@ -2412,10 +2470,10 @@ namespace krys::boo
       }
 
       VisibleSelection newSelection(selection);
-      newSelection.SetBase(dom::PositionBeforeNode(nodeToSelect.get())
-                             .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
-      newSelection.SetExtent(dom::PositionAfterNode(nodeToSelect.get())
-                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetAnchor(dom::PositionBeforeNode(nodeToSelect.get())
+                               .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetFocus(dom::PositionAfterNode(nodeToSelect.get())
+                              .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
 
       return newSelection;
     }
@@ -2561,8 +2619,6 @@ namespace krys::boo
 
     if (targetNode && targetNode->Renderer())
     {
-      // FIXME: The system's lookup of the word under the point
-      // (selectClosestWordFromHitTestResultBasedOnLookup), which only the Mac has.
       VisiblePosition pos(
         targetNode->Renderer()->VisiblePositionForPoint(result.LocalPoint(), HitTestSource::User));
       if (pos.IsNotNull())
@@ -3138,12 +3194,12 @@ namespace krys::boo
       {
         if (newSelection.GetDirectionality() == Directionality::Strong)
         {
-          RefPtr<dom::Node> baseNode =
-            ShareRefPtr(newSelection.IsBaseFirst() ? newSelection.Base().ComputeNodeAfterPosition()
-                                                   : newSelection.Base().ComputeNodeBeforePosition());
+          RefPtr<dom::Node> baseNode = ShareRefPtr(
+            newSelection.IsBaseFirst() ? newSelection.CanonicalAnchor().ComputeNodeAfterPosition()
+                                       : newSelection.CanonicalAnchor().ComputeNodeBeforePosition());
           if (!baseNode)
           {
-            baseNode = ShareRefPtr(newSelection.Base().GetContainerNode());
+            baseNode = ShareRefPtr(newSelection.CanonicalAnchor().GetContainerNode());
           }
           if (baseNode)
           {
@@ -3154,16 +3210,16 @@ namespace krys::boo
             {
               if (newSelection.IsBaseFirst() && pos < newSelection.Start())
               {
-                newSelection.SetBase(expandedBaseSelection.End());
+                newSelection.SetAnchor(expandedBaseSelection.End());
               }
               else if (!newSelection.IsBaseFirst() && newSelection.End() < pos)
               {
-                newSelection.SetBase(expandedBaseSelection.Start());
+                newSelection.SetAnchor(expandedBaseSelection.Start());
               }
             }
           }
         }
-        newSelection.SetExtent(pos);
+        newSelection.SetFocus(pos);
       }
 
       if (selection.Granularity() != TextGranularity::CharacterGranularity)
@@ -3195,7 +3251,6 @@ namespace krys::boo
     return node->CanStartSelection() || dom::Position::NodeIsUserSelectAll(node);
   }
 
-  // FIXME: The textInteractionEnabled setting, once there's one.
   bool EventHandler::MouseDownMayStartSelect() const noexcept
   {
     return _mouseDownMayStartSelect;
@@ -3422,7 +3477,7 @@ namespace krys::boo
 
     // Special case to limit selection to the containing block for SVG text.
     // FIXME: Isn't there a better non-SVG-specific way to do this?
-    if (RefPtr<dom::Node> selectionBaseNode = ShareRefPtr(newSelection.Base().DeprecatedNode()))
+    if (RefPtr<dom::Node> selectionBaseNode = ShareRefPtr(newSelection.CanonicalAnchor().DeprecatedNode()))
     {
       if (auto *selectionBaseRenderer = selectionBaseNode->Renderer())
       {
@@ -3456,10 +3511,10 @@ namespace krys::boo
     if (rootUserSelectAllForMousePressNode
         && rootUserSelectAllForMousePressNode == dom::Position::RootUserSelectAllForNode(target.get()))
     {
-      newSelection.SetBase(dom::PositionBeforeNode(rootUserSelectAllForMousePressNode.get())
-                             .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
-      newSelection.SetExtent(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
-                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetAnchor(dom::PositionBeforeNode(rootUserSelectAllForMousePressNode.get())
+                               .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetFocus(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+                              .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
     }
     else
     {
@@ -3476,24 +3531,24 @@ namespace krys::boo
       // Reset base for user select all when base is inside user-select-all area and extent < base.
       if (rootUserSelectAllForMousePressNode && targetVisiblePosition() < dragStart())
       {
-        newSelection.SetBase(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
-                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+        newSelection.SetAnchor(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+                                 .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
 
       RefPtr<dom::Node> rootUserSelectAllForTarget = dom::Position::RootUserSelectAllForNode(target.get());
       if (rootUserSelectAllForTarget && _mousePressNode->Renderer() && targetVisiblePosition() < dragStart())
       {
-        newSelection.SetExtent(dom::PositionBeforeNode(rootUserSelectAllForTarget.get())
-                                 .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+        newSelection.SetFocus(dom::PositionBeforeNode(rootUserSelectAllForTarget.get())
+                                .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
       else if (rootUserSelectAllForTarget && _mousePressNode->Renderer())
       {
-        newSelection.SetExtent(dom::PositionAfterNode(rootUserSelectAllForTarget.get())
-                                 .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+        newSelection.SetFocus(dom::PositionAfterNode(rootUserSelectAllForTarget.get())
+                                .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
       else
       {
-        newSelection.SetExtent(targetPosition);
+        newSelection.SetFocus(targetPosition);
       }
     }
 
@@ -3503,7 +3558,7 @@ namespace krys::boo
       if (!newSelection.IsBaseFirst() && !oldSelection.IsBaseFirst()
           && oldSelection.End() < newSelection.End())
       {
-        newSelection.SetBase(oldSelection.End());
+        newSelection.SetAnchor(oldSelection.End());
       }
       else if (newSelection.IsBaseFirst() && !oldSelection.IsBaseFirst()
                && oldSelection.Start() < newSelection.Start() && _dragStartSelection)
@@ -3512,7 +3567,7 @@ namespace krys::boo
         dragStartSelection.ExpandUsingGranularity(selection.Granularity());
         if (!dragStartSelection.IsNoneOrOrphaned())
         {
-          newSelection.SetBase(dragStartSelection.Start());
+          newSelection.SetAnchor(dragStartSelection.Start());
         }
       }
     }
@@ -3632,9 +3687,13 @@ namespace krys::boo
     return GetDragState().Source.get();
   }
 
-  // FIXME: Telling the accessibility tree the drag source changed (onDragElementChanged), with accessibility.
   void EventHandler::SetDragStateSource(dom::Element *element) const noexcept
   {
+    auto *document = _frame.Document();
+    if (auto *cache = document ? document->ExistingAXObjectCache() : nullptr)
+    {
+      cache->OnDragElementChanged(GetDragState().Source.get(), element);
+    }
     GetDragState().Source = ShareRefPtr(element);
   }
 
@@ -3708,8 +3767,6 @@ namespace krys::boo
              &_frame, targetElement, RoundedIntPoint(result.GetHitTestLocation().Point()), state);
   }
 
-  // FIXME: Telling the accessibility tree of the drag events (onDraggingStarted and the others), with
-  // accessibility.
   bool EventHandler::DispatchDragEvent(dom::DOMStringAtom eventType, dom::Element &dragTarget,
                                        const PlatformMouseEvent &event,
                                        dom::DataTransfer &dataTransfer) noexcept
@@ -3730,6 +3787,38 @@ namespace krys::boo
       event.Force(), SyntheticClickType::NoTap, &dataTransfer);
 
     (void)dragTarget.DispatchEvent(*dragEvent);
+
+    if (auto *cache = frame->Document() ? frame->Document()->ExistingAXObjectCache() : nullptr)
+    {
+      auto notification = [&]() -> Maybe<ax::AXNotification>
+      {
+        if (eventType == u8"dragstart")
+        {
+          return ax::AXNotification::DraggingStarted;
+        }
+        if (eventType == u8"dragend")
+        {
+          return ax::AXNotification::DraggingEnded;
+        }
+        if (eventType == u8"dragenter")
+        {
+          return ax::AXNotification::DraggingEnteredDropZone;
+        }
+        if (eventType == u8"dragleave")
+        {
+          return ax::AXNotification::DraggingExitedDropZone;
+        }
+        if (eventType == u8"drop")
+        {
+          return ax::AXNotification::DraggingDropped;
+        }
+        return null;
+      }();
+      if (notification)
+      {
+        cache->PostNotification(&dragTarget, *notification);
+      }
+    }
 
     return dragEvent->DefaultPrevented();
   }

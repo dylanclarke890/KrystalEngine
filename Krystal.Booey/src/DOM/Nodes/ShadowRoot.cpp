@@ -44,6 +44,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::dom
@@ -265,6 +266,90 @@ namespace krys::boo::dom
     }
 
     return nullptr;
+  }
+
+  namespace
+  {
+    /// @brief One mapping of an `exportparts` list: `name` or `name : exported`.
+    KRYS_NODISCARD Maybe<Pair<DOMStringAtom, DOMStringAtom>> ParsePartMapping(DOMStringView mapping) noexcept
+    {
+      auto skipWhitespace = [&](size_t position)
+      {
+        while (position < mapping.size() && krys::text::IsASCIIWhitespace(mapping[position]))
+        {
+          ++position;
+        }
+        return position;
+      };
+      auto collectValue = [&](size_t position)
+      {
+        while (position < mapping.size() && !krys::text::IsASCIIWhitespace(mapping[position])
+               && mapping[position] != u8':')
+        {
+          ++position;
+        }
+        return position;
+      };
+
+      auto begin = skipWhitespace(0uz);
+      auto firstPartEnd = collectValue(begin);
+      if (firstPartEnd == begin)
+      {
+        return null;
+      }
+      auto firstPart = DOMStringAtom(mapping.substr(begin, firstPartEnd - begin));
+
+      begin = skipWhitespace(firstPartEnd);
+      if (begin == mapping.size())
+      {
+        return Pair {firstPart, firstPart};
+      }
+      if (mapping[begin] != u8':')
+      {
+        return null;
+      }
+
+      begin = skipWhitespace(begin + 1uz);
+      auto secondPartEnd = collectValue(begin);
+      if (secondPartEnd == begin)
+      {
+        return null;
+      }
+      auto secondPart = DOMStringAtom(mapping.substr(begin, secondPartEnd - begin));
+
+      if (skipWhitespace(secondPartEnd) != mapping.size())
+      {
+        return null;
+      }
+      return Pair {firstPart, secondPart};
+    }
+  }
+
+  const ShadowRoot::PartMappings &ShadowRoot::GetPartMappings() const noexcept
+  {
+    if (!_partMappings)
+    {
+      PartMappings mappings;
+      if (auto exportParts = Host()->GetAttribute(u8"exportparts"))
+      {
+        DOMStringView remaining = *exportParts;
+        while (true)
+        {
+          auto comma = remaining.find(u8',');
+          if (auto mapping = ParsePartMapping(remaining.substr(0uz, comma)))
+          {
+            mappings[mapping->first].push_back(mapping->second);
+          }
+          if (comma == DOMStringView::npos)
+          {
+            break;
+          }
+          remaining.remove_prefix(comma + 1uz);
+        }
+      }
+      _partMappings = krys::move(mappings);
+    }
+    return *_partMappings;
   }
 
   List<Ref<ShadowRoot>> AssignedShadowRootsIfSlotted(const Node &node) noexcept

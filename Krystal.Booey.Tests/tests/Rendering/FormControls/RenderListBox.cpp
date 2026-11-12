@@ -71,12 +71,13 @@ namespace krys::boo::layout::tests
     CHECK_FALSE(select.UsesMenuList());
     REQUIRE(listBox.VerticalScrollbar());
     CHECK(listBox.VerticalScrollbar()->Enabled());
-    // The list box draws its items itself; only the optgroup has a (empty) renderer.
+    // The list box draws its items itself; only the optgroup has a (empty) renderer. Its baseline is 7
+    // pixels above its bottom.
     CHECK(DumpWithIds(fixture) == u8R"(layer at (0,0) size 400x300
   RenderView at (0,0) size 400x300
-layer at (0,0) size 400x44
-  RenderBlock {HTML} at (0,0) size 400x44
-    RenderBody {BODY} at (0,0) size 400x44
+layer at (0,0) size 400x37
+  RenderBlock {HTML} at (0,0) size 400x37
+    RenderBody {BODY} at (0,0) size 400x37
       RenderListBox {SELECT} at (0,0) size 74x37 [bgcolor=#FFFFFF] [border: (1px inset #808080)] id="s"
         RenderInline {OPTGROUP} at (0,0) size 0x0
 )");
@@ -118,6 +119,29 @@ layer at (0,0) size 400x44
       CHECK_FALSE(listBox.ListIndexIsVisible(0));
       CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 3 * itemHeight));
       CHECK(changes->Count == 2);
+      settings.ScrollAnimatorEnabled = true;
+    }
+
+    SECTION("An item's element is where it's drawn, and scrolling it into view scrolls the list box")
+    {
+      auto &settings = fixture.Document->GetSettings();
+      settings.ScrollAnimatorEnabled = false;
+      auto bounds = [](dom::Element &element)
+      {
+        auto rect = element.GetBoundingClientRect();
+        return FloatRect(static_cast<float>(rect->X()), static_cast<float>(rect->Y()),
+                         static_cast<float>(rect->Width()), static_cast<float>(rect->Height()));
+      };
+
+      auto &elderberry = *select.ListItems()[5].get();
+      CHECK(bounds(elderberry) == FloatRect(listBox.ItemBoundingBoxRect({}, 5)));
+      CHECK(elderberry.GetClientRects()->Length() == 1u);
+
+      elderberry.ScrollIntoView(true);
+      CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 3 * itemHeight));
+      CHECK(listBox.ListIndexIsVisible(5));
+      // Its bounds follow the scroll.
+      CHECK(bounds(elderberry) == FloatRect(listBox.ItemBoundingBoxRect({}, 5)));
       settings.ScrollAnimatorEnabled = true;
     }
 

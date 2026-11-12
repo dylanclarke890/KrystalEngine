@@ -390,8 +390,7 @@ namespace krys::boo
     {
       case BackTrackPart:
       case ForwardTrackPart:
-        // FIXME: The system's setting (primaryButtonWarpsSlider), once the host reports it; off, as on
-        // platforms other than GTK and WPE. The shift key or middle/right button reverses the sense.
+        // A click pages; with shift, or a middle or right click, it centres the thumb there.
         if (event.ShiftKey() || event.Button() != MouseButton::Left)
         {
           warpSlider = !warpSlider;

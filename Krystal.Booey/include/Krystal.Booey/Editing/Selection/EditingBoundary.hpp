@@ -38,9 +38,12 @@ namespace krys::boo
   };
 
   /// @brief What makes a node count as editable.
-  /// FIXME: `HasEditableAXRole`, once there's accessibility.
   enum class EditableType : uint8
   {
-    ContentIsEditable
+    /// @brief Editable content (`contenteditable`, a text control's inner text).
+    ContentIsEditable,
+    /// @brief Editable content, or content in a text control assistive technology sees (including ARIA text
+    /// boxes), as the accessibility cache decides.
+    HasEditableAXRole
   };
 }

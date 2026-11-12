@@ -169,6 +169,25 @@ namespace krys::boo
   KRYS_NODISCARD dom::Node *CommonInclusiveAncestor(const VisiblePosition &a,
                                                     const VisiblePosition &b) noexcept;
 
+  /// @brief A position as its index in a scope (from `IndexForVisiblePosition`), which survives the DOM
+  /// changing.
+  struct VisiblePositionIndex
+  {
+    int32 Value {-1};
+    RefPtr<dom::ContainerNode> Scope;
+  };
+
+  struct VisiblePositionIndexRange
+  {
+    VisiblePositionIndex StartIndex;
+    VisiblePositionIndex EndIndex;
+
+    KRYS_NODISCARD bool IsNull() const noexcept
+    {
+      return StartIndex.Value == -1 || EndIndex.Value == -1;
+    }
+  };
+
   /// @brief A pair of visible positions, not necessarily in order.
   struct VisiblePositionRange
   {

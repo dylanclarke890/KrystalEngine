@@ -73,4 +73,16 @@ namespace krys::boo
   KRYS_NODISCARD utf8_string ValidationMessageStepMismatchText(utf8_stringview base,
                                                                utf8_stringview step) noexcept;
   KRYS_NODISCARD utf8_string ValidationMessageBadInputForNumberText() noexcept;
+
+  /// @brief The accessible name of a search field's cancel button.
+  KRYS_NODISCARD utf8_string AXSearchFieldCancelButtonText() noexcept;
+  /// @brief The accessible names of a date or time input's fields.
+  KRYS_NODISCARD utf8_string AXDateFieldDayText() noexcept;
+  KRYS_NODISCARD utf8_string AXDateFieldMonthText() noexcept;
+  KRYS_NODISCARD utf8_string AXDateFieldWeekText() noexcept;
+  KRYS_NODISCARD utf8_string AXDateFieldYearText() noexcept;
+  KRYS_NODISCARD utf8_string AXTimeFieldHourText() noexcept;
+  KRYS_NODISCARD utf8_string AXTimeFieldMinuteText() noexcept;
+  KRYS_NODISCARD utf8_string AXTimeFieldSecondText() noexcept;
+  KRYS_NODISCARD utf8_string AXTimeFieldMillisecondText() noexcept;
 }

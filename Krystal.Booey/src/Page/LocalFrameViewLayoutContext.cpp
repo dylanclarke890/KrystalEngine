@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -46,6 +47,32 @@ namespace krys::boo
   }
 
   LocalFrameViewLayoutContext::~LocalFrameViewLayoutContext() noexcept = default;
+
+  bool LocalFrameViewLayoutContext::DetachedRendererList::Append(RenderPtr<RenderObject> renderer) noexcept
+  {
+    krys_debug_assert(!renderer->Parent());
+    krys_debug_assert(!renderer->BeingDestroyed());
+
+    if (renderer->RenderTreeBeingDestroyed())
+    {
+      return false;
+    }
+
+    constexpr size_t maximumNumberOfDetachedRenderers = 5'000;
+    if (_renderers.size() == maximumNumberOfDetachedRenderers)
+    {
+      Clear();
+    }
+
+    _renderers.push_back(UniquePtr<RenderObject>(renderer.release()));
+    return true;
+  }
+
+  void LocalFrameViewLayoutContext::DetachedRendererList::Clear() noexcept
+  {
+    // Deleting a renderer can't add to the list, but take the list first so it's never walked as it changes.
+    auto renderers = std::exchange(_renderers, {});
+  }
 
   LocalFrame &LocalFrameViewLayoutContext::Frame() const noexcept
   {
@@ -272,6 +299,14 @@ namespace krys::boo
     _frameView.ScheduleResizeEventIfNeeded();
     _frameView.LayoutOrVisualViewportChanged();
     _frameView.UpdateSnapOffsetsAndResnap();
+    // The cache brings itself up to date (on its own timer) with the changes it deferred until now.
+    if (auto *document = Document())
+    {
+      if (auto *cache = document->ExistingAXObjectCache(); cache && layoutRoot)
+      {
+        cache->OnLayoutComplete(*layoutRoot);
+      }
+    }
   }
 
   bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterStyleChange() noexcept
@@ -389,7 +424,10 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Not while the view is painting.
+    if (View().IsPainting())
+    {
+      return false;
+    }
 
     if (!SubtreeLayoutRoot() && !GetRenderView())
     {
@@ -506,8 +544,6 @@ namespace krys::boo
 
     // FIXME: Update the elements affected by media queries (the active theme colour meta element, and images
     // whose sources depend on media queries), once they're tracked.
-    // FIXME: Apply the pagination of the document element's or <body>'s `overflow` to the view
-    // (applyPaginationToViewport), once there's pagination.
 
     // Always ensure our style info is up-to-date. This can happen in situations where
     // the layout beats any sort of style recalc update that needs to occur.
@@ -528,6 +564,25 @@ namespace krys::boo
     LocalFrameViewLayoutContext::IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept
   {
     return _percentHeightIgnoreList.contains(&flexItem);
+  }
+
+  void LocalFrameViewLayoutContext::SetBoxNeedsTransformUpdateAfterContainerLayout(
+    RenderBox &box, const RenderBlock &container) noexcept
+  {
+    _containersWithDescendantsNeedingTransformUpdate[&container].push_back(CreateWeakPtr(&box));
+  }
+
+  List<WeakPtr<RenderBox>> LocalFrameViewLayoutContext::TakeBoxesNeedingTransformUpdateAfterContainerLayout(
+    const RenderBlock &container) noexcept
+  {
+    auto it = _containersWithDescendantsNeedingTransformUpdate.find(&container);
+    if (it == _containersWithDescendantsNeedingTransformUpdate.end())
+    {
+      return {};
+    }
+    auto boxes = krys::move(it->second);
+    _containersWithDescendantsNeedingTransformUpdate.erase(it);
+    return boxes;
   }
 
   bool LocalFrameViewLayoutContext::IsSkippedContentForLayout(const RenderElement &renderer) const noexcept
@@ -617,9 +672,9 @@ namespace krys::boo
                                                     LayoutUnit pageHeight, bool pageHeightChanged) noexcept
   {
     // We push LayoutState even if layoutState is disabled because it stores layoutDelta too.
-    // FIXME: Boxes inside a fragmented flow (enclosingFragmentedFlow) too, once there's fragmentation.
     auto *layoutState = this->LayoutState();
-    if (!layoutState || !NeedsFullRepaint() || layoutState->IsPaginated())
+    if (!layoutState || !NeedsFullRepaint() || layoutState->IsPaginated()
+        || renderer.EnclosingFragmentedFlow())
     {
       _layoutStateStack.push_back(
         CreateUnique<RenderLayoutState>(_layoutStateStack, renderer, offset, pageHeight, pageHeightChanged,

@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationPagination.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -78,7 +79,6 @@ namespace krys::boo::layout_integration
   /// @brief Lays out a block container's inline content with the inline formatting context and hands the
   /// result to the render tree: the lines and boxes, the geometry of the boxes in it, its height and
   /// baselines.
-  // FIXME: Pagination, once there is any.
   class LineLayout final : public CanMakeCheckedPtr<LineLayout>
   {
     KRYS_NON_COPY_MOVABLE(LineLayout);
@@ -212,8 +212,11 @@ namespace krys::boo::layout_integration
     void PreparePlacedFloats() noexcept;
     FloatRect ConstructContent(const layout::InlineLayoutState &inlineLayoutState,
                                layout::InlineLayoutResult &&layoutResult) noexcept;
-    void UpdateRenderTreePositions(const layout::InlineLayoutState &inlineLayoutState,
+    void UpdateRenderTreePositions(const List<LineAdjustment> &lineAdjustments,
+                                   const layout::InlineLayoutState &inlineLayoutState,
                                    bool didDiscardContent) noexcept;
+    /// @brief Moves the lines down to fit in their columns, and whether layout must restart for widows.
+    List<LineAdjustment> AdjustContentForPagination(bool isPartialLayout) noexcept;
 
     InlineContent &EnsureInlineContent() noexcept;
 

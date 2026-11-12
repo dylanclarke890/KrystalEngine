@@ -175,8 +175,8 @@ namespace krys::boo
 
   FontCascadeFonts &FontCascade::EnsureFonts() const noexcept
   {
-    // FIXME: Every cascade should be updated (given its document's font selector) before it's used; some
-    // aren't yet, so they get fonts without a font selector.
+    // Every cascade is updated (given its document's font selector) before it's used.
+    krys_debug_assert(_fonts);
     if (!_fonts)
     {
       Update(krys::move(_fontSelector));

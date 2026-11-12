@@ -81,7 +81,10 @@ namespace krys::boo
   class RenderBlock;
   class RenderBlockFlow;
   class RenderBox;
+  class RenderBoxFragmentInfo;
   class RenderElement;
+  class RenderFragmentContainer;
+  class RenderFragmentedFlow;
   class RenderLayer;
   class RenderLayerModelObject;
   class RenderTreeBuilder;
@@ -95,7 +98,6 @@ namespace krys::boo
   enum class Affinity : bool;
   enum class HitTestSource : bool;
 
-  // FIXME: SVG transforms come with SVG.
   enum class RenderObjectStateFlag : uint8
   {
     IsBlock,
@@ -117,7 +119,15 @@ namespace krys::boo
     HasTransformRelatedProperty,
     ChildrenInline,
     PaintContainmentApplies,
-    WasSkippedDuringLastLayoutDueToContentVisibility
+    WasSkippedDuringLastLayoutDueToContentVisibility,
+    InsideFragmentedFlow
+  };
+
+  /// @brief Whether a renderer is laid out in a fragmented flow.
+  enum class RenderObjectFragmentedFlowState : bool
+  {
+    NotInsideFlow,
+    InsideFlow
   };
 
   /// @brief How coordinates are mapped between a renderer and its ancestors.
@@ -222,7 +232,7 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectStateFlag, 20uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectStateFlag, 21uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectTypeFlag, 8uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectBlockFlowFlag, 4uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectLineBreakFlag, 1uz);
@@ -235,12 +245,11 @@ namespace krys::boo
   class RenderElement;
   class RenderStyle;
 
-  /// @brief A node of the render tree: the box, text or other object a node (or, for anonymous objects, the
-  /// document) is rendered as.
-  /// @note FIXME: There's no render tree yet: renderers have no parent, children, layout or painting.
   /// @brief An opaque pointer identifying the image data behind a style image.
   using WrappedImagePtr = const void *;
 
+  /// @brief A node of the render tree: the box, text or other object a node (or, for anonymous objects, the
+  /// document) is rendered as.
   class RenderObject : public CanMakeWeakPtr<RenderObject>, public CanMakeCheckedPtr<RenderObject>
   {
     KRYS_NON_COPY_MOVABLE(RenderObject);
@@ -277,7 +286,6 @@ namespace krys::boo
       Progress,
       Quote,
       Replica,
-      ScrollbarPart,
       SearchField,
       Slider,
       SliderContainer,
@@ -484,7 +492,7 @@ namespace krys::boo
       const RenderLayerModelObject *Renderer {nullptr};
     };
     /// @brief The renderer whose coordinates the renderer's repaints are in: null for the render view.
-    // FIXME: Compositing layers, filter layers and fragmented flows, once there are any.
+    // FIXME: Compositing layers and filter layers, once there are any.
     KRYS_NODISCARD RepaintContainerStatus ContainerForRepaint() const noexcept;
     /// @brief Repaints @p rect, in @p repaintContainer's coordinates (the render view's if null).
     void RepaintUsingContainer(const RenderLayerModelObject *repaintContainer, const LayoutRect &rect,
@@ -689,6 +697,7 @@ namespace krys::boo
       void DidRemoveCachedImageClient(CachedImage &) noexcept final;
       void ImageContentChanged(CachedImage &) noexcept final;
       void ScheduleRenderingUpdateForImage(CachedImage &) noexcept final;
+      KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept final;
     };
 
     mutable UniquePtr<CachedImageListener> _cachedImageClient;
@@ -803,6 +812,48 @@ namespace krys::boo
 
     virtual void InsertedIntoTree() noexcept;
     virtual void WillBeRemovedFromTree() noexcept;
+
+#pragma region Fragmentation
+
+    using FragmentedFlowState = RenderObjectFragmentedFlowState;
+
+    /// @brief Whether the object is laid out in a fragmented flow (such as a multi-column flow).
+    KRYS_NODISCARD FragmentedFlowState GetFragmentedFlowState() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::InsideFragmentedFlow) ? FragmentedFlowState::InsideFlow
+                                                                   : FragmentedFlowState::NotInsideFlow;
+    }
+    void SetFragmentedFlowState(FragmentedFlowState state) noexcept
+    {
+      _stateFlags.Set(StateFlag::InsideFragmentedFlow, state == FragmentedFlowState::InsideFlow);
+    }
+
+    /// @brief Whether a nested fragmented flow keeps its own state when its ancestor's changes.
+    enum class SkipDescendentFragmentedFlow : bool
+    {
+      No,
+      Yes
+    };
+    void SetFragmentedFlowStateIncludingDescendants(
+      FragmentedFlowState state,
+      SkipDescendentFragmentedFlow skipDescendentFragmentedFlow = SkipDescendentFragmentedFlow::Yes) noexcept;
+
+    /// @brief The fragmented flow the object is laid out in, if any.
+    KRYS_NODISCARD RenderFragmentedFlow *EnclosingFragmentedFlow() const noexcept
+    {
+      if (GetFragmentedFlowState() == FragmentedFlowState::NotInsideFlow)
+      {
+        return nullptr;
+      }
+      return LocateEnclosingFragmentedFlow();
+    }
+
+    /// @brief Sets the state of an object just inserted from its new container's.
+    void InitializeFragmentedFlowStateOnInsertion() noexcept;
+    /// @brief Takes an object being removed out of its fragmented flow.
+    void ResetFragmentedFlowStateOnRemoval() noexcept;
+
+#pragma endregion
 
     KRYS_NODISCARD bool IsRenderElement() const noexcept
     {
@@ -951,6 +1002,23 @@ namespace krys::boo
     {
       return IsRenderBlockFlow()
              && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsFragmentedFlow);
+    }
+    KRYS_NODISCARD bool IsRenderFragmentContainer() const noexcept
+    {
+      return IsRenderBlockFlow()
+             && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsFragmentContainer);
+    }
+    KRYS_NODISCARD bool IsRenderMultiColumnFlow() const noexcept
+    {
+      return _type == Type::MultiColumnFlow;
+    }
+    KRYS_NODISCARD bool IsRenderMultiColumnSet() const noexcept
+    {
+      return _type == Type::MultiColumnSet;
+    }
+    KRYS_NODISCARD bool IsRenderMultiColumnSpannerPlaceholder() const noexcept
+    {
+      return _type == Type::MultiColumnSpannerPlaceholder;
     }
     KRYS_NODISCARD bool IsRenderTextControl() const noexcept
     {
@@ -1139,6 +1207,10 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderSVGInline() const noexcept
     {
       return _type == Type::SVGInline || _type == Type::SVGTSpan || _type == Type::SVGTextPath;
+    }
+    KRYS_NODISCARD bool IsRenderCombineText() const noexcept
+    {
+      return _type == Type::CombineText;
     }
     KRYS_NODISCARD bool IsRenderSVGInlineText() const noexcept
     {
@@ -1537,10 +1609,12 @@ namespace krys::boo
 #pragma region Editing
 
     /// @brief The position nearest @p point (in this renderer's coordinates), for hit testing to positions.
-    KRYS_NODISCARD virtual dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
-                                                                      HitTestSource source) noexcept;
-    KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const LayoutPoint &point,
-                                                           HitTestSource source) noexcept;
+    KRYS_NODISCARD virtual dom::PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept;
+    KRYS_NODISCARD VisiblePosition
+      VisiblePositionForPoint(const LayoutPoint &point, HitTestSource source,
+                              const RenderFragmentContainer *fragment = nullptr) noexcept;
     /// @brief The position at @p offset in this renderer's node, or near it if the renderer is anonymous; a
     /// visually equivalent editable position is preferred.
     KRYS_NODISCARD dom::PositionWithAffinity CreatePositionWithAffinity(int32 offset,
@@ -1723,6 +1797,12 @@ namespace krys::boo
   protected:
     static void ScheduleLayout(RenderElement *layoutRoot) noexcept;
 
+    /// @brief Finds the fragmented flow the object is laid out in, through its containing blocks.
+    KRYS_NODISCARD virtual RenderFragmentedFlow *LocateEnclosingFragmentedFlow() const noexcept;
+    /// @brief The state @p renderer should have in its current place in the tree.
+    KRYS_NODISCARD static FragmentedFlowState
+      ComputedFragmentedFlowState(const RenderObject &renderer) noexcept;
+
     void SetNeedsOutOfFlowMovementLayoutBit(bool b) noexcept
     {
       _stateFlags.Set(StateFlag::NeedsOutOfFlowMovementLayout, b);
@@ -1772,6 +1852,11 @@ namespace krys::boo
 
       // From RenderBox
       RefPtr<ControlPart> Control;
+
+      // From RenderBlock: null when it needs finding again.
+      Maybe<WeakPtr<RenderFragmentedFlow>> EnclosingFragmentedFlow;
+      LayoutUnit PaginationStrut;
+      LayoutUnit PageLogicalOffset;
     };
     KRYS_NODISCARD bool HasRareData() const noexcept
     {

@@ -176,6 +176,52 @@ namespace krys::boo::style::tests
     CHECK_FALSE(interpolation::IsAdditiveOrCumulative(css::PropertyId::StrokeDasharray));
   }
 
+  TEST_CASE("Interpolation: dynamic-range-limit's computed values", "[Style][Interpolation]")
+  {
+    InterpolationFixture fixture(u8R"(
+      #a { dynamic-range-limit: standard }
+      #b { dynamic-range-limit: dynamic-range-limit-mix(standard 10%, constrained 30%) }
+    )");
+
+    CHECK(fixture.Value(*fixture.From, css::PropertyId::DynamicRangeLimit) == "standard");
+    CHECK(fixture.Value(*fixture.To, css::PropertyId::DynamicRangeLimit)
+          == "dynamic-range-limit-mix(standard 25%, constrained 75%)");
+  }
+
+  TEST_CASE("Interpolation: dynamic-range-limit blends by dynamic-range-limit-mix()",
+            "[Style][Interpolation]")
+  {
+    InterpolationFixture fixture(u8R"(
+      #a { dynamic-range-limit: standard }
+      #b { dynamic-range-limit: no-limit }
+    )");
+
+    CHECK(interpolation::CanInterpolate(css::PropertyId::DynamicRangeLimit));
+    CHECK(interpolation::CanInterpolate(css::PropertyId::DynamicRangeLimit, *fixture.From, *fixture.To,
+                                        *fixture.Document));
+    CHECK_FALSE(interpolation::Equals(css::PropertyId::DynamicRangeLimit, *fixture.From, *fixture.To,
+                                      *fixture.Document));
+    CHECK(fixture.Blended(css::PropertyId::DynamicRangeLimit, 0) == "standard");
+    CHECK(fixture.Blended(css::PropertyId::DynamicRangeLimit, 0.25)
+          == "dynamic-range-limit-mix(standard 75%, no-limit 25%)");
+    CHECK(fixture.Blended(css::PropertyId::DynamicRangeLimit, 1) == "no-limit");
+  }
+
+  TEST_CASE("Interpolation: border-spacing blends both lengths", "[Style][Interpolation]")
+  {
+    InterpolationFixture fixture(u8R"(
+      #a { border-spacing: 0px }
+      #b { border-spacing: 10px 20px }
+    )");
+
+    CHECK(interpolation::CanInterpolate(css::PropertyId::BorderSpacing));
+    CHECK_FALSE(
+      interpolation::Equals(css::PropertyId::BorderSpacing, *fixture.From, *fixture.To, *fixture.Document));
+    CHECK(fixture.Blended(css::PropertyId::BorderSpacing, 0) == "0px");
+    CHECK(fixture.Blended(css::PropertyId::BorderSpacing, 0.5) == "5px 10px");
+    CHECK(fixture.Blended(css::PropertyId::BorderSpacing, 1) == "10px 20px");
+  }
+
   TEST_CASE("Interpolation: equality and the changed animatable properties", "[Style][Interpolation]")
   {
     InterpolationFixture fixture(u8R"(

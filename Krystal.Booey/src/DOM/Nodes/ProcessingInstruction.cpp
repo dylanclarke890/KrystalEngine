@@ -315,8 +315,7 @@ namespace krys::boo::dom
 
         krys_debug_assert(!_cachedSheet);
 
-        // FIXME: The charset pseudo-attribute's encoding, or else the document's, once sheets decode other
-        // encodings.
+        // Style sheets are UTF-8 only, whatever the charset pseudo-attribute says (see DIFFERENCES.md).
         CachedResourceRequest request(ResourceRequest(document->CompleteURL(href)),
                                       CachedResourceLoader::DefaultCachedResourceOptions());
         request.SetCharset(get(u8"charset"));

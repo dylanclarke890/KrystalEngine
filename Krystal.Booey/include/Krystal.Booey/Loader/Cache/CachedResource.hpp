@@ -66,7 +66,6 @@ namespace krys::boo
       CSSStyleSheet,
       Script,
       FontResource,
-      SVGFontResource,
       MediaResource,
       RawResource,
       Icon,

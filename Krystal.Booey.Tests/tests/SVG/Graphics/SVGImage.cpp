@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGRectElement.hpp"
@@ -199,5 +200,37 @@ namespace krys::boo::svg::tests
 
     auto painted = fixture.Painted();
     CHECK(Contains(painted, u8"(color #008000)"));
+  }
+  TEST_CASE("SVGImage: an SVG image takes its loader's settings and the dark appearance of what shows it",
+            "[SVG][SVGImage]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddText(
+      u8"file:///scheme.svg",
+      u8R"svg(<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><style>rect { fill: red })svg"
+      u8R"svg( @media (prefers-color-scheme: dark) { rect { fill: lime } }</style>)svg"
+      u8R"svg(<rect width="40" height="20"/></svg>)svg",
+      u8"image/svg+xml");
+    auto page = Page::Create();
+    page->SetUseDarkAppearance(true);
+    PageInFrameFixture fixture(*page, u8R"html(<body style="margin: 0"></body>)html");
+
+    auto settings = Settings::Create();
+    fixture.Document->SetSettings(Ref<Settings>(settings));
+    auto image = fixture.Document->CreateElement(u8"img").ReleaseValue();
+    REQUIRE_FALSE(image->SetAttribute(u8"id", u8"i").HasException());
+    REQUIRE_FALSE(image->SetAttribute(u8"src", u8"file:///scheme.svg").HasException());
+    REQUIRE_FALSE(fixture.Document->Body()->AppendChild(*image).HasException());
+    (void)fixture.Document->UpdateLayout();
+    RunNetworkingTasks();
+
+    auto *svgImage = SVGImageOf(ImageById(fixture, u8"i"));
+    REQUIRE(svgImage);
+    auto root = svgImage->RootElement();
+    REQUIRE(root);
+    CHECK(&root->NodeDocument().GetSettings() == settings.get());
+    auto painted = fixture.Painted();
+    CHECK(Contains(painted, u8"(color #00FF00)"));
+    CHECK_FALSE(Contains(painted, u8"(color #FF0000)"));
   }
 }

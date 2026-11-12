@@ -36,9 +36,9 @@ namespace krys::boo
 {
   class Image;
   class IntRect;
+  struct Settings;
 
   /// @brief Interface for notification about changes to an image, including decoding, drawing, and animating.
-  // FIXME: The settings and dark appearance queries, once there are settings.
   class ImageObserver : public RefCounted<ImageObserver>, public CanMakeWeakPtr<ImageObserver>
   {
   public:
@@ -72,6 +72,19 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool AllowsAnimation(const Image &) const noexcept
     {
       return true;
+    }
+
+    /// @brief The settings of the document that loaded the image, for images that are documents themselves
+    /// (SVG images); null if there's none.
+    KRYS_NODISCARD virtual Settings *GetSettings() const noexcept
+    {
+      return nullptr;
+    }
+
+    /// @brief Whether what shows the image is drawn with the dark appearance.
+    KRYS_NODISCARD virtual bool UseSystemDarkAppearance() const noexcept
+    {
+      return false;
     }
 
   protected:

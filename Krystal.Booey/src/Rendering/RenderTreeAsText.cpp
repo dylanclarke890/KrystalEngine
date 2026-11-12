@@ -97,13 +97,6 @@ namespace krys::boo
       }
       return n->NodeName();
     }
-
-    KRYS_NODISCARD bool ShouldEnableSubpixelPrecisionForTextDump(const dom::Document &) noexcept
-    {
-      // FIXME: Documents with rendered outermost <svg> elements in the layer-based SVG engine dump with
-      // subpixel precision.
-      return false;
-    }
   }
 
   utf8_string QuoteAndEscapeNonPrintables(utf8_stringview s) noexcept
@@ -184,7 +177,6 @@ namespace krys::boo
       }
     }
 
-    bool enableSubpixelPrecisionForTextDump = ShouldEnableSubpixelPrecisionForTextDump(o.GetDocument());
     LayoutRect r;
     if (auto *text = DynamicDowncast<RenderText>(o))
     {
@@ -212,14 +204,7 @@ namespace krys::boo
     }
     // FIXME: Convert layout test results to report sub-pixel values, in the meantime using enclosingIntRect
     // for consistency with old results.
-    if (enableSubpixelPrecisionForTextDump)
-    {
-      ts << ' ' << r;
-    }
-    else
-    {
-      ts << ' ' << EnclosingIntRect(r);
-    }
+    ts << ' ' << EnclosingIntRect(r);
 
     // The SVG painting features and visual overflow of the layer-based SVG renderers (RenderSVGModelObject)
     // aren't written: there are none, and the legacy ones write theirs (SVGRenderTreeAsText.cpp).
@@ -682,13 +667,6 @@ namespace krys::boo
                     LayerPaintPhase paintPhase = LayerPaintPhaseAll,
                     EnumSet<RenderAsTextFlag> behavior = {}) noexcept
     {
-      if (ShouldEnableSubpixelPrecisionForTextDump(layer.Renderer().GetDocument()))
-      {
-        WriteLayerUsingGeometryType<LayoutRect>(ts, layer, layerBounds, backgroundClipRect, clipRect,
-                                                paintPhase, behavior);
-        return;
-      }
-
       WriteLayerUsingGeometryType<IntRect>(ts, layer, SnappedIntRect(layerBounds),
                                            SnappedIntRect(backgroundClipRect), SnappedIntRect(clipRect),
                                            paintPhase, behavior);
@@ -776,7 +754,34 @@ namespace krys::boo
                    rects.DirtyForegroundRect().Rect(),
                    paintsBackgroundSeparately ? LayerPaintPhaseForeground : LayerPaintPhaseAll, behavior);
 
-        // FIXME: The layer's fragments (ShowLayerFragments, collectFragments), once there's fragmentation.
+        if (behavior.Contains(RenderAsTextFlag::ShowLayerFragments))
+        {
+          LayerFragments layerFragments;
+          layer.CollectFragments(layerFragments, &rootLayer, paintDirtyRect,
+                                 RenderLayer::ExcludeCompositedPaginatedLayers, PaintingClipRects,
+                                 RenderLayer::ClipRectTemporaryOptions, offsetFromRoot);
+
+          if (layerFragments.size() > 1)
+          {
+            ts.IncreaseIndent(2);
+            for (uint64 i = 0; i < layerFragments.size(); ++i)
+            {
+              const auto &fragment = layerFragments[i];
+              ts << Indent << " fragment " << i << ": bounds in layer " << fragment.LayerBounds()
+                 << " fragment bounds ";
+              if (auto boundingBox = fragment.BoundingBox())
+              {
+                ts << *boundingBox;
+              }
+              else
+              {
+                ts << "nullopt";
+              }
+              ts << "\n";
+            }
+            ts.DecreaseIndent(2);
+          }
+        }
 
         WriteLayerRenderers(
           ts, layer, paintsBackgroundSeparately ? LayerPaintPhaseForeground : LayerPaintPhaseAll, behavior);
@@ -828,18 +833,11 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD TextStream CreateTextStream(const dom::Document &document) noexcept
+    KRYS_NODISCARD TextStream CreateTextStream(const dom::Document &) noexcept
     {
-      auto formattingFlags = [&document]() -> EnumSet<TextStream::Formatting>
-      {
-        if (ShouldEnableSubpixelPrecisionForTextDump(document))
-        {
-          return {TextStream::Formatting::SVGStyleRect};
-        }
-        return {TextStream::Formatting::SVGStyleRect, TextStream::Formatting::LayoutUnitsAsIntegers};
-      };
-
-      return TextStream {TextStream::LineMode::MultipleLine, formattingFlags()};
+      return TextStream {
+        TextStream::LineMode::MultipleLine,
+        {TextStream::Formatting::SVGStyleRect, TextStream::Formatting::LayoutUnitsAsIntegers}};
     }
 
     KRYS_NODISCARD utf8_string ExternalRepresentation(RenderBox &renderer,

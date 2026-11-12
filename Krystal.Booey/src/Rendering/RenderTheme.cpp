@@ -236,7 +236,6 @@ namespace krys::boo
       style.SetEffectiveDisplay(DisplayType::Block);
     }
 
-    // FIXME: Devolvable widgets (devolvableWidgetsEnabled, isDevolvableWidget), behind a setting that is off.
     bool hasAppearanceFromUAStyle = element && HasAppearanceForElementTypeFromUAStyle(*element);
     bool widgetHasNativeAppearanceDisabled = hasAppearanceFromUAStyle && IsControlStyled(style);
 

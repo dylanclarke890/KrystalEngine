@@ -269,6 +269,38 @@ namespace krys::boo::svg::tests
     CHECK(empty.empty());
   }
 
+  TEST_CASE("SVGPathByteStream: copies share their bytes and path", "[SVG][SVGPathByteStream]")
+  {
+    SVGPathByteStream original(u8"M 1 2 L 3 4");
+    SVGPathByteStream copy = original;
+    CHECK(&copy.GetBytes() == &original.GetBytes());
+
+    // The path built from the bytes is cached with them, for every stream that shares them.
+    CHECK_FALSE(original.CachedPath());
+    auto path = BuildPathFromByteStream(original);
+    REQUIRE(copy.CachedPath());
+    CHECK(copy.CachedPath()->DefinitelyEqual(path));
+    CHECK(BuildPathFromByteStream(copy).DefinitelyEqual(path));
+
+    // Changing a copy gives it its own bytes, without a path, and leaves the original as it was.
+    copy.Append(SVGPathByteStream(u8"M 3 4 L 5 6"));
+    CHECK(&copy.GetBytes() != &original.GetBytes());
+    CHECK_FALSE(copy.CachedPath());
+    CHECK(original.CachedPath());
+    CHECK(original == SVGPathByteStream(u8"M 1 2 L 3 4"));
+    CHECK(BuildPathFromByteStream(copy).BoundingRect() == FloatRect(1, 2, 4, 4));
+
+    // A stream can be appended to itself.
+    SVGPathByteStream doubled(u8"M 1 2");
+    doubled.Append(doubled);
+    CHECK(doubled == SVGPathByteStream(u8"M 1 2 M 1 2"));
+
+    // A moved-from stream is empty.
+    SVGPathByteStream moved = krys::move(original);
+    CHECK(moved == SVGPathByteStream(u8"M 1 2 L 3 4"));
+    CHECK(original.IsEmpty());
+  }
+
   TEST_CASE("SVG path utilities", "[SVG][SVGPath]")
   {
     using Catch::Approx;

@@ -333,4 +333,51 @@ namespace krys::boo::html::tests
     CHECK(elements->Length() == 1);
     CHECK(elements->Item(0).get() == &ById(u8"a"));
   }
+
+  TEST_CASE_METHOD(InternalsFixture, "ElementInternals: ARIA defaults",
+                   "[HTML][CustomElement][ElementInternals][html:accessibility-semantics]"
+                   "[html:internal-content-attribute-map][html:attr-associated-element]"
+                   "[html:attr-associated-elements]")
+  {
+    DefineInternals(u8"x-aria");
+    Parse(u8"<x-aria id=x></x-aria><span id=a></span><span id=b></span>");
+    auto &element = ById(u8"x");
+    auto &internals = InternalsOf(u8"x");
+
+    SECTION("strings go to the internal content attribute map, not the element's attributes")
+    {
+      CHECK_FALSE(internals.Role());
+      internals.Role(dom::DOMString(u8"checkbox"));
+      internals.AriaChecked(dom::DOMString(u8"false"));
+      CHECK(internals.Role() == u8"checkbox");
+      CHECK(internals.InternalContentAttribute(dom::DOMStringAtom(u8"aria-checked")) == u8"false");
+      CHECK_FALSE(element.HasAttribute(u8"role"));
+      CHECK_FALSE(element.Role());
+      internals.AriaChecked(null);
+      CHECK_FALSE(internals.InternalContentAttribute(dom::DOMStringAtom(u8"aria-checked")));
+    }
+
+    SECTION("element references resolve in the element's tree")
+    {
+      internals.AriaActiveDescendantElement(&ById(u8"a"));
+      CHECK(internals.AriaActiveDescendantElement().get() == &ById(u8"a"));
+      CHECK_FALSE(element.AriaActiveDescendantElement());
+
+      internals.AriaLabelledByElements(
+        List<Ref<dom::Element>> {ShareRef(ById(u8"b")), ShareRef(ById(u8"a"))});
+      auto labelledBy = internals.AriaLabelledByElements();
+      REQUIRE(labelledBy);
+      REQUIRE(labelledBy->size() == 2);
+      CHECK((*labelledBy)[0].get() == &ById(u8"b"));
+      CHECK((*labelledBy)[1].get() == &ById(u8"a"));
+
+      REQUIRE_FALSE(ById(u8"b").Remove().HasException());
+      labelledBy = internals.AriaLabelledByElements();
+      REQUIRE(labelledBy);
+      CHECK(labelledBy->size() == 1);
+
+      internals.AriaLabelledByElements(null);
+      CHECK_FALSE(internals.AriaLabelledByElements());
+    }
+  }
 }

@@ -23,11 +23,13 @@
  */
 
 #include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
+#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -48,6 +50,30 @@ namespace krys::boo::css
         buffer.remove_prefix(1uz);
       }
     }
+
+    struct SyntaxTypeName
+    {
+      CSSOMStringView Name;
+      CustomPropertySyntax::Type Type;
+    };
+
+    constexpr SyntaxTypeName SyntaxTypeNames[] = {
+      {u8"angle", CustomPropertySyntax::Type::Angle},
+      {u8"color", CustomPropertySyntax::Type::Color},
+      {u8"custom-ident", CustomPropertySyntax::Type::CustomIdent},
+      {u8"image", CustomPropertySyntax::Type::Image},
+      {u8"integer", CustomPropertySyntax::Type::Integer},
+      {u8"length", CustomPropertySyntax::Type::Length},
+      {u8"length-percentage", CustomPropertySyntax::Type::LengthPercentage},
+      {u8"number", CustomPropertySyntax::Type::Number},
+      {u8"percentage", CustomPropertySyntax::Type::Percentage},
+      {u8"resolution", CustomPropertySyntax::Type::Resolution},
+      {u8"string", CustomPropertySyntax::Type::String},
+      {u8"time", CustomPropertySyntax::Type::Time},
+      {u8"transform-function", CustomPropertySyntax::Type::TransformFunction},
+      {u8"transform-list", CustomPropertySyntax::Type::TransformList},
+      {u8"url", CustomPropertySyntax::Type::URL},
+    };
 
     /// @brief The part of `begin` that has been consumed to reach `buffer`.
     KRYS_NODISCARD CSSOMStringView ConsumedSince(CSSOMStringView begin, CSSOMStringView buffer) noexcept
@@ -244,31 +270,7 @@ namespace krys::boo::css
 
   auto CustomPropertySyntax::TypeForTypeName(CSSOMStringView dataTypeName) noexcept -> Type
   {
-    struct Mapping
-    {
-      CSSOMStringView Name;
-      boo::css::CustomPropertySyntax::Type Type;
-    };
-
-    constexpr static Mapping mappings[] = {
-      {u8"angle", Type::Angle},
-      {u8"color", Type::Color},
-      {u8"custom-ident", Type::CustomIdent},
-      {u8"image", Type::Image},
-      {u8"integer", Type::Integer},
-      {u8"length", Type::Length},
-      {u8"length-percentage", Type::LengthPercentage},
-      {u8"number", Type::Number},
-      {u8"percentage", Type::Percentage},
-      {u8"resolution", Type::Resolution},
-      {u8"string", Type::String},
-      {u8"time", Type::Time},
-      {u8"transform-function", Type::TransformFunction},
-      {u8"transform-list", Type::TransformList},
-      {u8"url", Type::URL},
-    };
-
-    for (auto &mapping : mappings)
+    for (auto &mapping : SyntaxTypeNames)
     {
       if (mapping.Name == dataTypeName)
       {
@@ -276,5 +278,63 @@ namespace krys::boo::css
       }
     }
     return Type::Unknown;
+  }
+
+  CSSOMString CustomPropertySyntax::SyntaxString() const noexcept
+  {
+    if (IsUniversal())
+    {
+      return u8"*";
+    }
+
+    StringBuilder builder;
+    CSSOMStringView separator = u8"";
+    for (auto &component : Definition)
+    {
+      builder.Append(separator);
+      separator = u8" | ";
+
+      if (component.Ident != CSSOMStringAtom::Null())
+      {
+        SerialiseIdentifier(CSSOMString(component.Ident.View()), builder);
+      }
+      else
+      {
+        // Unknown types aren't kept by name, and fail to parse wherever a syntax is serialised.
+        krys_debug_assert(component.Type != Type::Unknown);
+        for (auto &mapping : SyntaxTypeNames)
+        {
+          if (mapping.Type == component.Type)
+          {
+            builder.Append(u8'<', mapping.Name, u8'>');
+            break;
+          }
+        }
+      }
+
+      if (component.Multiplier == Multiplier::SpaceList)
+      {
+        builder.Append(u8'+');
+      }
+      else if (component.Multiplier == Multiplier::CommaList)
+      {
+        builder.Append(u8'#');
+      }
+    }
+    return krys::move(builder).ToString();
+  }
+
+  CSSOMString CustomPropertySyntax::CSSTypeString() const noexcept
+  {
+    // 1. If the <css-type> consists of a single <syntax-component>, return the corresponding syntax string.
+    if (Definition.size() == 1uz)
+    {
+      return SyntaxString();
+    }
+
+    // 2. Otherwise, return the concatenation of "type(", the corresponding syntax string and ")".
+    StringBuilder builder;
+    builder.Append(u8"type(", SyntaxString(), u8')');
+    return krys::move(builder).ToString();
   }
 }

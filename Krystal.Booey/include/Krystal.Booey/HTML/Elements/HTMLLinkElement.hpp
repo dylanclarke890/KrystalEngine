@@ -227,9 +227,12 @@ namespace krys::boo::html
     }
     /// @brief Whether the sheet, or one it imports, is still loading.
     KRYS_NODISCARD bool StyleSheetIsLoading() const noexcept;
+    /// @brief Whether it's an alternative style sheet that hasn't been explicitly enabled (by removing its
+    /// `disabled` attribute).
+    /// @see https://html.spec.whatwg.org/#explicitly-enabled
     KRYS_NODISCARD bool IsAlternate() const noexcept
     {
-      return _relIsStyleSheet && _relIsAlternate;
+      return _disabledState == DisabledState::Unset && _relIsStyleSheet && _relIsAlternate;
     }
     /// @brief Whether it names an icon (its `rel` has `icon`).
     /// @see https://html.spec.whatwg.org/#rel-icon

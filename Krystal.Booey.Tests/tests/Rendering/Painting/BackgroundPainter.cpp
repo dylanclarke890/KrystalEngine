@@ -371,4 +371,43 @@ namespace krys::boo::tests
 
     PlatformStrategies::Singleton().SetWorkQueue(nullptr);
   }
+
+  TEST_CASE("BackgroundPainter: clips to the text with a mask", "[Rendering][BackgroundPainter]")
+  {
+    auto painted = Painted(u8"<style>body{margin:0;font:20px/1 sans-serif}div{width:60px;color:transparent;"
+                           u8"background:green;background-clip:text}</style><div>Hi</div>");
+    // The text is painted into a layer, and the background into another composited onto it with source-in.
+    auto mask = painted.find(u8"(begin-transparency-layer");
+    REQUIRE(mask != utf8_string::npos);
+    auto maskText = painted.find(u8"(draw-glyphs", mask);
+    auto sourceIn = painted.find(u8"(composite-operation source-in)", mask);
+    auto background = painted.find(u8"(color #008000)", mask);
+    CHECK(maskText < sourceIn);
+    CHECK(sourceIn < background);
+    CHECK(painted.find(u8"(begin-transparency-layer", mask + 1uz) < background);
+    // The text itself is painted afterwards, transparent.
+    CHECK(painted.find(u8"(draw-glyphs", background) != utf8_string::npos);
+  }
+
+  TEST_CASE("BackgroundPainter: clips to the border area", "[Rendering][BackgroundPainter]")
+  {
+    // A solid border's area is a path to clip to.
+    auto solid = Painted(u8"<style>body{margin:0}div{width:40px;height:20px;border:4px solid "
+                         u8"transparent;background:green border-area}</style><div></div>");
+    CHECK(solid.find(u8R"((clip-path
+  (path add rect at (0,0) size 48x28, add rect at (4,4) size 40x20)
+  (wind-rule EVEN-ODD)))")
+          != utf8_string::npos);
+    CHECK(solid.find(u8"(begin-transparency-layer") == utf8_string::npos);
+
+    // Other borders are painted into a mask.
+    auto dotted = Painted(u8"<style>body{margin:0}div{width:40px;height:20px;border:4px dotted "
+                          u8"transparent;background:green border-area}</style><div></div>");
+    auto mask = dotted.find(u8"(begin-transparency-layer");
+    REQUIRE(mask != utf8_string::npos);
+    auto border = dotted.find(u8"(stroke-style dotted-stroke)", mask);
+    auto sourceIn = dotted.find(u8"(composite-operation source-in)", mask);
+    CHECK(border < sourceIn);
+    CHECK(sourceIn < dotted.find(u8"(color #008000)", mask));
+  }
 }

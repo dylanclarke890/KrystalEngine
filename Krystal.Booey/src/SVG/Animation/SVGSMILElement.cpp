@@ -245,7 +245,6 @@ namespace krys::boo::svg
     auto value = AttributeValue(SVGNames::AttributeNameAttr()).value_or(dom::DOMString {});
     dom::DOMStringView qualifiedName = value;
 
-    // FIXME: Document::parseQualifiedName also checks the name's characters are XML name characters.
     auto colon = qualifiedName.find(u8':');
     dom::DOMStringView prefix;
     dom::DOMStringView localName = qualifiedName;

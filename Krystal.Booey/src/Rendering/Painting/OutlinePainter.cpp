@@ -28,8 +28,11 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatPointGraph.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
+#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
@@ -329,7 +332,13 @@ namespace krys::boo
       CollectFocusRingRectsForInline(*renderInline, rects, additionalOffset, paintContainer);
       return;
     }
-    // FIXME: List boxes' focus ring rects (collectFocusRingRectsForListBox).
+    if (const auto *listBox = DynamicDowncast<RenderListBox>(renderer))
+    {
+      if (CollectFocusRingRectsForListBox(*listBox, rects, additionalOffset, paintContainer))
+      {
+        return;
+      }
+    }
     if (const auto *block = DynamicDowncast<RenderBlock>(renderer))
     {
       if (CollectFocusRingRectsForBlock(*block, rects, additionalOffset, paintContainer))
@@ -411,6 +420,39 @@ namespace krys::boo
         CollectFocusRingRectsForChildBox(renderBox, rects, additionalOffset, paintContainer);
       }
     }
+  }
+
+  bool OutlinePainter::CollectFocusRingRectsForListBox(const RenderListBox &renderer, List<LayoutRect> &rects,
+                                                       const LayoutPoint &additionalOffset,
+                                                       const RenderLayerModelObject *) noexcept
+  {
+    auto &selectElement = renderer.SelectElement();
+    if (!selectElement.AllowsNonContiguousSelection())
+    {
+      return false;
+    }
+
+    // Focus the last selected item.
+    int32 selectedItem = selectElement.ActiveSelectionEndListIndex();
+    if (selectedItem >= 0)
+    {
+      rects.push_back(SnappedIntRect(renderer.ItemBoundingBoxRect(additionalOffset, selectedItem)));
+      return true;
+    }
+
+    // No selected items, find the first non-disabled item.
+    int32 indexOfFirstEnabledOption = 0;
+    for (auto &item : selectElement.ListItems())
+    {
+      if (Is<html::HTMLOptionElement>(item.get()) && !item->IsDisabledFormControl())
+      {
+        selectElement.SetActiveSelectionEndIndex(indexOfFirstEnabledOption);
+        rects.push_back(renderer.ItemBoundingBoxRect(additionalOffset, indexOfFirstEnabledOption));
+        return true;
+      }
+      ++indexOfFirstEnabledOption;
+    }
+    return true;
   }
 
   bool OutlinePainter::CollectFocusRingRectsForBlock(const RenderBlock &renderer, List<LayoutRect> &rects,

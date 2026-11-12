@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
+#include "Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
@@ -136,6 +137,42 @@ namespace krys::boo::tests
     // The decoder reports the encoded size; the image applies the orientation.
     CHECK(rotated->Size() == IntSize(16, 8));
     CHECK(rotated->FrameOrientationAtIndex(0) == ImageOrientation::Orientation::OriginRightTop);
+  }
+
+  TEST_CASE("ScalableImageDecoder: EXIF resolution gives the density-corrected size",
+            "[Platform][ImageDecoders][html:prepare-an-image-for-presentation]")
+  {
+    SECTION("A JPEG at 144 dots per inch is half its size")
+    {
+      auto decoder = Decode(images::DensityJPEG);
+      REQUIRE(decoder);
+      CHECK(decoder->Size() == IntSize(16, 8));
+      CHECK(decoder->FrameDensityCorrectedSizeAtIndex(0) == IntSize(8, 4));
+      CHECK(Pixels(*decoder).size() == 16u * 8u);
+    }
+
+    SECTION("Without EXIF, or when its dimensions or unit don't match, there's none")
+    {
+      for (auto bytes : {images::JPEG, images::MismatchedDensityJPEG, images::CentimetreDensityJPEG})
+      {
+        auto decoder = Decode(bytes);
+        REQUIRE(decoder);
+        CHECK(decoder->Size() == IntSize(16, 8));
+        CHECK_FALSE(decoder->FrameDensityCorrectedSizeAtIndex(0));
+      }
+    }
+
+    SECTION("As in Chrome, PNG's eXIf chunk and WebP's EXIF chunk don't give it")
+    {
+      for (auto bytes : {images::DensityPNG, images::DensityWebP})
+      {
+        auto decoder = Decode(bytes, AlphaOption::NotPremultiplied);
+        REQUIRE(decoder);
+        CHECK(decoder->Size() == IntSize(3, 2));
+        CHECK_FALSE(decoder->FrameDensityCorrectedSizeAtIndex(0));
+        CHECK(Pixels(*decoder) == List<uint32> {Red, Green, Blue, White, Black, 0x80'FF'00'00u});
+      }
+    }
   }
 
   TEST_CASE("WEBPImageDecoder: decodes lossless pixels", "[Platform][ImageDecoders]")

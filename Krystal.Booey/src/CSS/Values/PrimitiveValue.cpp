@@ -119,19 +119,13 @@ namespace krys::boo::css
     SetPrimitiveUnitType(UnitType::ValueId);
     _value.ValueId = valueId;
 
-    // FIXME: We should handle this like webkit (by having ref count increment by 2 so a value of 1 is
-    // reserved for static values that will not be destroyed) . For now, we will just increase the ref count
-    // by 1.
-    AddRef();
+    MakeStatic();
   }
 
   PrimitiveValue::PrimitiveValue(StaticValueTag, double number, UnitType type) noexcept
       : PrimitiveValue(number, type)
   {
-    // FIXME: We should handle this like webkit (by having ref count increment by 2 so a value of 1 is
-    // reserved for static values that will not be destroyed) . For now, we will just increase the ref count
-    // by 1.
-    AddRef();
+    MakeStatic();
   }
 
   PrimitiveValue::PrimitiveValue(StaticValueTag, CreateImplicitInitialValueTag) noexcept

@@ -44,6 +44,7 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
@@ -558,8 +559,8 @@ namespace krys::boo::html
       }
     }
 
-    // FIXME: Turning interactive validation off (Settings::interactiveFormValidationEnabled), with settings.
-    bool shouldValidate = NodeDocument().GetPage() && !NoValidate();
+    bool shouldValidate = NodeDocument().GetPage()
+                          && NodeDocument().GetSettings().InteractiveFormValidationEnabled && !NoValidate();
     if (shouldValidate)
     {
       auto *submitElement = submitter ? submitter : FindSubmitter(event);

@@ -89,6 +89,8 @@ namespace krys::boo
     bool _columnLogicalWidthChanged : 1 {false};
     mutable bool _columnRenderersValid : 1 {false};
     mutable bool _hasCellColspanThatDeterminesTableWidth : 1 {false};
+    // How many times layout has been repeated because a section moved in paginated layout.
+    uint32 _recursiveSectionMovedWithPaginationLevel {0};
 
     LayoutUnit _hSpacing;
     LayoutUnit _vSpacing;
@@ -341,6 +343,7 @@ namespace krys::boo
     void SimplifiedNormalFlowLayout() noexcept final;
 
     void Layout() noexcept final;
+    void MarkForPaginationRelayoutIfNeeded() noexcept final;
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minWidth, LayoutUnit &maxWidth,
                                        TableIntrinsics intrinsics) const noexcept;
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minWidth, LayoutUnit &maxWidth) const noexcept final;
@@ -366,10 +369,10 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit
       ConvertStyleLogicalHeightToComputedHeight(const TSize &styleLogicalHeight) noexcept;
 
-    KRYS_NODISCARD LayoutRect
-      OverflowClipRect(const LayoutPoint &location,
-                       OverlayScrollbarSizeRelevancy relevancy =
-                         OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize) const noexcept final;
+    KRYS_NODISCARD LayoutRect OverflowClipRect(
+      const LayoutPoint &location,
+      OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
+      PaintPhase phase = PaintPhase::BlockBackground) const noexcept final;
     KRYS_NODISCARD LayoutRect OverflowClipRectForChildLayers(
       const LayoutPoint &location, OverlayScrollbarSizeRelevancy relevancy) const noexcept override
     {

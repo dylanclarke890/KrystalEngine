@@ -115,12 +115,12 @@ namespace krys::boo
 
   const dom::Position &VisibleSelection::UncanonicalizedStart() const noexcept
   {
-    return _anchorIsFirst ? _anchor : _focus;
+    return _anchorIsBeforeFocus ? _anchor : _focus;
   }
 
   const dom::Position &VisibleSelection::UncanonicalizedEnd() const noexcept
   {
-    return _anchorIsFirst ? _focus : _anchor;
+    return _anchorIsBeforeFocus ? _focus : _anchor;
   }
 
   Maybe<dom::SimpleRange> VisibleSelection::Range() const noexcept
@@ -134,31 +134,31 @@ namespace krys::boo
     return dom::MakeSimpleRange({start.ParentAnchoredEquivalent(), end.ParentAnchoredEquivalent()});
   }
 
-  void VisibleSelection::SetBase(const dom::Position &position) noexcept
+  void VisibleSelection::SetAnchor(const dom::Position &position) noexcept
   {
     _anchor = position;
     Validate();
   }
 
-  void VisibleSelection::SetBase(const VisiblePosition &visiblePosition) noexcept
+  void VisibleSelection::SetAnchor(const VisiblePosition &visiblePosition) noexcept
   {
-    SetBase(visiblePosition.DeepEquivalent());
+    SetAnchor(visiblePosition.DeepEquivalent());
   }
 
-  void VisibleSelection::SetExtent(const dom::Position &position) noexcept
+  void VisibleSelection::SetFocus(const dom::Position &position) noexcept
   {
     _focus = position;
     Validate();
   }
 
-  void VisibleSelection::SetExtent(const VisiblePosition &visiblePosition) noexcept
+  void VisibleSelection::SetFocus(const VisiblePosition &visiblePosition) noexcept
   {
-    SetExtent(visiblePosition.DeepEquivalent());
+    SetFocus(visiblePosition.DeepEquivalent());
   }
 
   bool VisibleSelection::IsOrphan() const noexcept
   {
-    if (_base.IsOrphan() || _extent.IsOrphan() || _start.IsOrphan() || _end.IsOrphan())
+    if (_canonicalAnchor.IsOrphan() || _canonicalFocus.IsOrphan() || _start.IsOrphan() || _end.IsOrphan())
     {
       return true;
     }
@@ -175,7 +175,7 @@ namespace krys::boo
 
   RefPtr<dom::Document> VisibleSelection::GetDocument() const noexcept
   {
-    auto *document = _base.GetDocument();
+    auto *document = _canonicalAnchor.GetDocument();
     if (!document)
     {
       document = _anchor.GetDocument();
@@ -185,7 +185,7 @@ namespace krys::boo
       }
     }
 
-    if (_extent.GetDocument() != document || _start.GetDocument() != document
+    if (_canonicalFocus.GetDocument() != document || _start.GetDocument() != document
         || _end.GetDocument() != document)
     {
       return nullptr;
@@ -305,7 +305,7 @@ namespace krys::boo
         break;
       }
       _end = dom::MakeDeprecatedLegacyPosition(charIt.Range().End);
-      if (_anchorIsFirst)
+      if (_anchorIsBeforeFocus)
       {
         _focus = _end;
       }
@@ -316,7 +316,7 @@ namespace krys::boo
     }
   }
 
-  void VisibleSelection::SetBaseAndExtentToDeepEquivalents() noexcept
+  void VisibleSelection::SetCanonicalAnchorAndFocusToDeepEquivalents() noexcept
   {
     // If only one of anchor and focus is null, convert to a caret selection.
     // FIXME: Seems like a better rule would be to convert to no selection.
@@ -329,26 +329,26 @@ namespace krys::boo
       _focus = _anchor;
     }
 
-    _anchorIsFirst = std::is_lteq(dom::TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
+    _anchorIsBeforeFocus = std::is_lteq(dom::TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
 
-    _base = VisiblePosition(_anchor, _affinity).DeepEquivalent();
+    _canonicalAnchor = VisiblePosition(_anchor, _affinity).DeepEquivalent();
     if (_anchor == _focus)
     {
-      _extent = _base;
+      _canonicalFocus = _canonicalAnchor;
     }
     else
     {
-      _extent = VisiblePosition(_focus, _affinity).DeepEquivalent();
+      _canonicalFocus = VisiblePosition(_focus, _affinity).DeepEquivalent();
     }
-    if (_base.IsNull() != _extent.IsNull())
+    if (_canonicalAnchor.IsNull() != _canonicalFocus.IsNull())
     {
-      if (_base.IsNull())
+      if (_canonicalAnchor.IsNull())
       {
-        _base = _extent;
+        _canonicalAnchor = _canonicalFocus;
       }
       else
       {
-        _extent = _base;
+        _canonicalFocus = _canonicalAnchor;
       }
     }
   }
@@ -532,10 +532,10 @@ namespace krys::boo
 
   void VisibleSelection::Validate(TextGranularity granularity) noexcept
   {
-    SetBaseAndExtentToDeepEquivalents();
+    SetCanonicalAnchorAndFocusToDeepEquivalents();
 
-    _start = _anchorIsFirst ? _base : _extent;
-    _end = _anchorIsFirst ? _extent : _base;
+    _start = _anchorIsBeforeFocus ? _canonicalAnchor : _canonicalFocus;
+    _end = _anchorIsBeforeFocus ? _canonicalFocus : _canonicalAnchor;
 
     auto startBeforeAdjustments = _start;
     auto endBeforeAdjustments = _end;
@@ -569,13 +569,13 @@ namespace krys::boo
 
     if (shouldUpdateAnchor)
     {
-      _anchor = _anchorIsFirst ? _start : _end;
-      _base = _anchor;
+      _anchor = _anchorIsBeforeFocus ? _start : _end;
+      _canonicalAnchor = _anchor;
     }
     if (shouldUpdateFocus)
     {
-      _focus = _anchorIsFirst ? _end : _start;
-      _extent = _focus;
+      _focus = _anchorIsBeforeFocus ? _end : _start;
+      _canonicalFocus = _focus;
     }
   }
 
@@ -591,11 +591,11 @@ namespace krys::boo
     krys_debug_assert(_affinity == Affinity::Downstream);
     _anchor = anchor;
     _focus = focus;
-    _anchorIsFirst = std::is_lteq(dom::TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
-    _base = anchor;
-    _extent = focus;
-    _start = _anchorIsFirst ? anchor : focus;
-    _end = _anchorIsFirst ? focus : anchor;
+    _anchorIsBeforeFocus = std::is_lteq(dom::TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
+    _canonicalAnchor = anchor;
+    _canonicalFocus = focus;
+    _start = _anchorIsBeforeFocus ? anchor : focus;
+    _end = _anchorIsBeforeFocus ? focus : anchor;
     _type = anchor == focus ? Type::Caret : Type::Range;
   }
 
@@ -668,17 +668,17 @@ namespace krys::boo
     }
 
     // Correct the focus if necessary.
-    if (_anchorIsFirst)
+    if (_anchorIsBeforeFocus)
     {
-      _extent = AdjustPositionForEnd(_end, _start.GetContainerNode());
-      _end = _extent;
+      _canonicalFocus = AdjustPositionForEnd(_end, _start.GetContainerNode());
+      _end = _canonicalFocus;
     }
     else
     {
-      _extent = AdjustPositionForStart(_start, _end.GetContainerNode());
-      _start = _extent;
+      _canonicalFocus = AdjustPositionForStart(_start, _end.GetContainerNode());
+      _start = _canonicalFocus;
     }
-    _focus = _extent;
+    _focus = _canonicalFocus;
   }
 
   void VisibleSelection::AdjustSelectionToAvoidCrossingEditingBoundaries() noexcept
@@ -690,16 +690,16 @@ namespace krys::boo
 
     // Early return in the caret case (the state hasn't actually been set yet, so we can't use IsCaret()) to
     // avoid the expense of computing HighestEditableRoot.
-    if (_base == _start && _base == _end)
+    if (_canonicalAnchor == _start && _canonicalAnchor == _end)
     {
       return;
     }
 
-    auto baseRoot = HighestEditableRoot(_base);
+    auto baseRoot = HighestEditableRoot(_canonicalAnchor);
     auto startRoot = HighestEditableRoot(_start);
     auto endRoot = HighestEditableRoot(_end);
 
-    auto *baseEditableAncestor = LowestEditableAncestor(_base.GetContainerNode());
+    auto *baseEditableAncestor = LowestEditableAncestor(_canonicalAnchor.GetContainerNode());
 
     // The base, start and end are all in the same region.  No adjustment necessary.
     if (baseRoot == startRoot && baseRoot == endRoot)
@@ -813,10 +813,10 @@ namespace krys::boo
     }
 
     // Correct the focus if necessary.
-    if (baseEditableAncestor != LowestEditableAncestor(_extent.GetContainerNode()))
+    if (baseEditableAncestor != LowestEditableAncestor(_canonicalFocus.GetContainerNode()))
     {
-      _extent = _anchorIsFirst ? _end : _start;
-      _focus = _extent;
+      _canonicalFocus = _anchorIsBeforeFocus ? _end : _start;
+      _focus = _canonicalFocus;
     }
   }
 

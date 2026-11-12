@@ -64,7 +64,10 @@ namespace krys::boo
     // init RenderObject attributes
     SetInline(false);
 
-    // FIXME: The preferred widths.
+    _minPreferredLogicalWidth = 0;
+    _maxPreferredLogicalWidth = 0;
+
+    SetNeedsPreferredWidthsUpdate(MarkingBehavior::MarkOnlyThis);
 
     SetPositionState(PositionType::Absolute); // to 0,0 :)
 
@@ -210,7 +213,10 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: SVG roots with a clip path (isRenderOrLegacyRenderSVGRoot).
+      if (rootElement.HasClipPath() && rootElement.IsLegacyRenderSVGRoot())
+      {
+        return false;
+      }
 
       auto *rendererForBackground = rootElement.View().RendererForRootBackground();
       if (!rendererForBackground)
@@ -274,8 +280,6 @@ namespace krys::boo
     // if there is a transform on the <html>, or if there is a page scale factor less than 1.
     // Only fill with a background color (typically white) if we're the root document,
     // since iframes/frames with no background in the child document should show the parent's background.
-    // FIXME: The document's background colour when the background extends beyond the page
-    // (backgroundShouldExtendBeyondPage), a setting that isn't ported.
     auto &frameView = FrameView();
     if (!frameView.IsTransparent())
     {
@@ -370,7 +374,6 @@ namespace krys::boo
 
       for (auto &box : ChildrenOfType<RenderBox>(*this))
       {
-        // FIXME: SVG roots too.
         if (box.HasRelativeLogicalHeight() || box.Style().LogicalHeight().IsPercentOrCalculated()
             || box.Style().LogicalMinHeight().IsPercentOrCalculated()
             || box.Style().LogicalMaxHeight().IsPercentOrCalculated())
@@ -416,10 +419,7 @@ namespace krys::boo
 
   LayoutUnit RenderView::AvailableLogicalHeight(AvailableLogicalHeightType) const noexcept
   {
-    // Make sure block progression pagination for percentages uses the column extent and
-    // not the view's extent. See https://bugs.webkit.org/show_bug.cgi?id=135204.
-    // FIXME: The column height of a multi-column view, once there are columns.
-
+    // There are no paginated views (a view laid out in columns), so this is the view's extent.
     auto layoutSize = _frameView.GetLayoutSize();
     return LayoutUnit(IsHorizontalWritingMode() ? layoutSize.Height() : layoutSize.Width());
   }
@@ -563,8 +563,6 @@ namespace krys::boo
     {
       return;
     }
-
-    // FIXME: Multi-column flows (their first column set's hit test result) come with multi-column layout.
 
     if (auto *node = NodeForHitTest())
     {
@@ -843,7 +841,5 @@ namespace krys::boo
     {
       RemoveRendererWithPausedImageAnimations(*renderer, *image);
     }
-
-    // FIXME: SVG elements with paused animations.
   }
 }
