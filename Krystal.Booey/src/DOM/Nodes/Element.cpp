@@ -83,6 +83,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -3892,6 +3895,89 @@ namespace krys::boo::dom
     }
   }
 
+  namespace
+  {
+    /// @brief The select element whose list box draws @p element, an option or optgroup.
+    KRYS_NODISCARD html::HTMLSelectElement *OwningSelectElementOfListBoxItem(const Element &element) noexcept
+    {
+      if (auto *optionElement = DynamicDowncast<html::HTMLOptionElement>(element))
+      {
+        return optionElement->OwnerSelectElement();
+      }
+      if (auto *optGroupElement = DynamicDowncast<html::HTMLOptGroupElement>(element))
+      {
+        return optGroupElement->OwnerSelectElement();
+      }
+      return nullptr;
+    }
+
+    /// @brief The list box that draws @p element, an option or optgroup, and its bounds in the list box.
+    KRYS_NODISCARD Maybe<Pair<RenderListBox *, LayoutRect>>
+      ListBoxElementBoundingBox(const Element &element) noexcept
+    {
+      auto *selectElement = OwningSelectElementOfListBoxItem(element);
+      if (!selectElement)
+      {
+        return null;
+      }
+
+      auto *listBoxRenderer = DynamicDowncast<RenderListBox>(selectElement->Renderer());
+      if (!listBoxRenderer)
+      {
+        return null;
+      }
+
+      Maybe<LayoutRect> boundingBox;
+      if (auto *optionElement = DynamicDowncast<html::HTMLOptionElement>(element))
+      {
+        boundingBox = listBoxRenderer->LocalBoundsOfOption(*optionElement);
+      }
+      else if (auto *optGroupElement = DynamicDowncast<html::HTMLOptGroupElement>(element))
+      {
+        boundingBox = listBoxRenderer->LocalBoundsOfOptGroup(*optGroupElement);
+      }
+
+      if (!boundingBox)
+      {
+        return null;
+      }
+      return Pair<RenderListBox *, LayoutRect> {listBoxRenderer, *boundingBox};
+    }
+
+    /// @brief Scrolls the list box that draws @p element, an option or optgroup, to it.
+    /// @return The list box and the item's bounds in it.
+    KRYS_NODISCARD Maybe<Pair<RenderListBox *, LayoutRect>>
+      ListBoxElementScrollIntoView(const Element &element) noexcept
+    {
+      auto *selectElement = OwningSelectElementOfListBoxItem(element);
+      if (!selectElement)
+      {
+        return null;
+      }
+
+      auto *listBoxRenderer = DynamicDowncast<RenderListBox>(selectElement->Renderer());
+      if (!listBoxRenderer)
+      {
+        return null;
+      }
+
+      int32 itemIndex = 0;
+      auto &listItems = selectElement->ListItems();
+      for (size_t i = 0; i < listItems.size(); ++i)
+      {
+        if (listItems[i].get() == &element)
+        {
+          itemIndex = static_cast<int32>(i);
+          (void)listBoxRenderer->ScrollToRevealElementAtListIndex(itemIndex);
+          break;
+        }
+      }
+
+      return Pair<RenderListBox *, LayoutRect> {listBoxRenderer,
+                                                listBoxRenderer->ItemBoundingBoxRect({}, itemIndex)};
+    }
+  }
+
   Ref<DOMRectList> Element::GetClientRects() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
@@ -3902,13 +3988,17 @@ namespace krys::boo::dom
 
     List<FloatQuad> quads;
 
-    // FIXME: The option and optgroup elements of list boxes.
     if (auto *svgElement = ElementWithSVGLayoutBox(*this))
     {
       if (auto localRect = svgElement->GetBoundingBox())
       {
         quads.push_back(renderer->LocalToAbsoluteQuad(*localRect));
       }
+    }
+    else if (auto listBoxItem = ListBoxElementBoundingBox(*this))
+    {
+      renderer = listBoxItem->first;
+      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(listBoxItem->second))));
     }
     else if (ShouldObtainBoundsFromBoxModel(*this))
     {
@@ -3930,13 +4020,17 @@ namespace krys::boo::dom
   {
     auto *renderer = Renderer();
     List<FloatQuad> quads;
-    // FIXME: The option and optgroup elements of list boxes.
     if (auto *svgElement = ElementWithSVGLayoutBox(*this))
     {
       if (auto localRect = svgElement->GetBoundingBox())
       {
         quads.push_back(renderer->LocalToAbsoluteQuad(*localRect));
       }
+    }
+    else if (auto listBoxItem = ListBoxElementBoundingBox(*this))
+    {
+      renderer = listBoxItem->first;
+      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(listBoxItem->second))));
     }
     else if (ShouldObtainBoundsFromBoxModel(*this))
     {
@@ -4001,15 +4095,27 @@ namespace krys::boo::dom
 
     document.UpdateLayoutIgnorePendingStylesheets();
 
-    // FIXME: Scroll a list box to the option or optgroup.
-    auto *renderer = Renderer();
-    if (!renderer)
-    {
-      return;
-    }
-
+    RenderElement *renderer = nullptr;
     bool insideFixed = false;
-    auto absoluteBounds = renderer->AbsoluteAnchorRectWithScrollMargin(&insideFixed).first;
+    LayoutRect absoluteBounds;
+    if (auto listBoxScrollResult = ListBoxElementScrollIntoView(*this))
+    {
+      renderer = listBoxScrollResult->first;
+      absoluteBounds = listBoxScrollResult->second;
+
+      auto listBoxAbsoluteBounds = renderer->AbsoluteAnchorRectWithScrollMargin(&insideFixed).first;
+      absoluteBounds.MoveBy(listBoxAbsoluteBounds.Location());
+    }
+    else
+    {
+      renderer = Renderer();
+      if (!renderer)
+      {
+        return;
+      }
+
+      absoluteBounds = renderer->AbsoluteAnchorRectWithScrollMargin(&insideFixed).first;
+    }
 
     auto writingMode = renderer->GetWritingMode();
     auto alignX = ToScrollAlignmentForInlineDirection(options.InlinePosition, writingMode);

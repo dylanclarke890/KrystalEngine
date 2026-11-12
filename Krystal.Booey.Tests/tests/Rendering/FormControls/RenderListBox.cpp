@@ -122,6 +122,29 @@ layer at (0,0) size 400x37
       settings.ScrollAnimatorEnabled = true;
     }
 
+    SECTION("An item's element is where it's drawn, and scrolling it into view scrolls the list box")
+    {
+      auto &settings = fixture.Document->GetSettings();
+      settings.ScrollAnimatorEnabled = false;
+      auto bounds = [](dom::Element &element)
+      {
+        auto rect = element.GetBoundingClientRect();
+        return FloatRect(static_cast<float>(rect->X()), static_cast<float>(rect->Y()),
+                         static_cast<float>(rect->Width()), static_cast<float>(rect->Height()));
+      };
+
+      auto &elderberry = *select.ListItems()[5].get();
+      CHECK(bounds(elderberry) == FloatRect(listBox.ItemBoundingBoxRect({}, 5)));
+      CHECK(elderberry.GetClientRects()->Length() == 1u);
+
+      elderberry.ScrollIntoView(true);
+      CHECK(listBox.GetScrollPosition() == ScrollPosition(0, 3 * itemHeight));
+      CHECK(listBox.ListIndexIsVisible(5));
+      // Its bounds follow the scroll.
+      CHECK(bounds(elderberry) == FloatRect(listBox.ItemBoundingBoxRect({}, 5)));
+      settings.ScrollAnimatorEnabled = true;
+    }
+
     SECTION("The wheel scrolls by pixels, as far as the last item")
     {
       auto center = RoundedIntPoint(FloatPoint(listBox.ItemBoundingBoxRect({}, 1).Center()));

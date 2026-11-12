@@ -39,10 +39,10 @@ namespace krys::boo
   class RenderElement;
   class RenderInline;
   class RenderLayerModelObject;
+  class RenderListBox;
   struct PaintInfo;
 
   /// @brief Paints a box's outline (`outline`), or its focus ring for `outline-style: auto`.
-  // FIXME: List box focus rings come with controls.
   class OutlinePainter
   {
   private:
@@ -82,6 +82,8 @@ namespace krys::boo
                                                        const RenderLayerModelObject *) noexcept;
     static bool CollectFocusRingRectsForBlock(const RenderBlock &, List<LayoutRect> &, const LayoutPoint &,
                                               const RenderLayerModelObject *) noexcept;
+    static bool CollectFocusRingRectsForListBox(const RenderListBox &, List<LayoutRect> &,
+                                                const LayoutPoint &, const RenderLayerModelObject *) noexcept;
     static void CollectFocusRingRectsForChildBox(const RenderBox &, List<LayoutRect> &, const LayoutPoint &,
                                                  const RenderLayerModelObject *) noexcept;
   };

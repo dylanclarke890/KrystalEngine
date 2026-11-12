@@ -1134,7 +1134,11 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: List boxes handle their scrollbars by themselves.
+    // List box parts handle the scrollbars by themselves so we have nothing to do.
+    if (box->Style().UsedAppearance() == StyleAppearance::Listbox)
+    {
+      return;
+    }
 
     bool hadVerticalScrollbar = HasVerticalScrollbar();
     UpdateScrollbarPresenceAndState();
@@ -1160,7 +1164,11 @@ namespace krys::boo
     RenderBox *box = _layer.GetRenderBox();
     krys_debug_assert(box);
 
-    // FIXME: List boxes handle their scrollbars by themselves.
+    // List box parts handle the scrollbars by themselves so we have nothing to do.
+    if (box->Style().UsedAppearance() == StyleAppearance::Listbox)
+    {
+      return;
+    }
 
     bool hadHorizontalScrollbar = HasHorizontalScrollbar();
     bool hadVerticalScrollbar = HasVerticalScrollbar();
