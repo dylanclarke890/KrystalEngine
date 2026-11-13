@@ -2,6 +2,7 @@
 #include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include <algorithm>
 
@@ -146,5 +147,35 @@ namespace krys::boo::ax::tests
 
     REQUIRE_FALSE(Downcast<html::HTMLElement>(page.ById(u8"popover")).ShowPopover().HasException());
     CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), button, AXNotification::ExpandedChanged));
+  }
+
+  TEST_CASE("AXRelations: references to a shadow host go to its reference target",
+            "[Accessibility][AXRelations][html:resolve-the-reference-target]")
+  {
+    AccessibilityFixture page(u8"<button id=button aria-controls=host aria-labelledby=host>Go</button>"
+                              u8"<x-host id=host>Outside</x-host>");
+    auto shadow =
+      page.ById(u8"host").AttachShadow({.ReferenceTarget = dom::DOMString(u8"inner")}).ReleaseValue();
+    REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<div id=inner>Inner</div><div id=other>Other</div><slot></slot>")
+                    .HasException());
+    (void)page.TakeNotifications();
+    page.Cache().RelationsNeedUpdate();
+    auto &button = page.Object(u8"button");
+    auto &inner = *page.Cache().GetOrCreate(*shadow->GetElementById(u8"inner"));
+    auto &other = *page.Cache().GetOrCreate(*shadow->GetElementById(u8"other"));
+
+    CHECK(Contains(button.ControlledObjects(), inner));
+    CHECK(Contains(inner.Controllers(), button));
+    // The name comes from what the reference names, not the host.
+    CHECK(button.AccessibleName() == u8"Inner");
+
+    // Changing the reference target moves the relations.
+    shadow->SetReferenceTarget(dom::DOMString(u8"other"));
+    CHECK_FALSE(Contains(button.ControlledObjects(), inner));
+    CHECK(Contains(button.ControlledObjects(), other));
+
+    // A reference target naming nothing leaves no relation.
+    shadow->SetReferenceTarget(dom::DOMString(u8"missing"));
+    CHECK(button.ControlledObjects().empty());
   }
 }

@@ -434,15 +434,16 @@ namespace krys::boo::ax
       KRYS_NODISCARD dom::DOMString ComputeFromReferences(const dom::Element &element,
                                                           dom::DOMStringView attribute) noexcept
       {
-        auto references = element.ElementsForAttributeInternal(dom::DOMStringAtom(attribute));
-        if (!references || references->empty())
+        // The resolved targets, through shadow hosts' reference targets.
+        auto references = element.ResolvedElementsForAttribute(dom::DOMStringAtom(attribute));
+        if (references.empty())
         {
           return {};
         }
         // 2B.i. Set the accumulated text to the empty string.
         dom::DOMString accumulated;
         // 2B.ii. For each IDREF:
-        for (const auto &reference : *references)
+        for (const auto &reference : references)
         {
           // 2B.ii.a. Set the current node to the node referenced by the IDREF.
           // 2B.ii.b. Compute the text alternative of the current node beginning with step 2. Set the result
@@ -792,9 +793,8 @@ namespace krys::boo::ax
         {
           childNodes.push_back(ShareRef(child));
         }
-        if (auto owned = element.ElementsForAttributeInternal(dom::DOMStringAtom(u8"aria-owns")))
         {
-          for (auto &ownedElement : *owned)
+          for (auto &ownedElement : element.ResolvedElementsForAttribute(dom::DOMStringAtom(u8"aria-owns")))
           {
             // (A child it also owns isn't counted twice.)
             if (std::ranges::none_of(childNodes,

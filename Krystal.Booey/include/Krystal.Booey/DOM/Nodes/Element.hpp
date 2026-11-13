@@ -1564,6 +1564,13 @@ namespace krys::boo::dom
     KRYS_NODISCARD Maybe<List<Ref<Element>>>
       ElementsForAttributeInternal(DOMStringAtom attributeName) const noexcept;
 
+    /// @brief The elements a set of element references attribute resolves to: its unresolved targets
+    /// (`ElementsForAttributeInternal`), each with its reference target resolved, leaving out those that
+    /// resolve to nothing.
+    /// @see https://html.spec.whatwg.org/#resolved-attribute-target-elements
+    KRYS_NODISCARD List<Ref<Element>>
+      ResolvedElementsForAttribute(DOMStringAtom attributeName) const noexcept;
+
     /// @brief Sets a `FrozenArray<Element>?` reflection attribute's elements: the content attribute becomes
     /// empty, or is removed if @p elements is null.
     /// @see https://html.spec.whatwg.org/#attr-associated-elements

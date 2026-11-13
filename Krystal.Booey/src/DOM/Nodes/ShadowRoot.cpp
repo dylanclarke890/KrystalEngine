@@ -26,6 +26,7 @@
  */
 
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
@@ -104,6 +105,12 @@ namespace krys::boo::dom
     // When a shadow root shadow's reference target changes and shadow's host has an ID, the user agent must
     // reset the form owners with a form attribute given shadow's host's root and « shadow's host's ID ».
     NotifyHostIdTargetObservers();
+
+    // References to the host, accessibility's relations among them, go somewhere else.
+    if (auto *cache = NodeDocument().ExistingAXObjectCache())
+    {
+      cache->RelationsNeedUpdate();
+    }
   }
 
   void ShadowRoot::NotifyHostIdTargetObservers() noexcept

@@ -1263,7 +1263,8 @@ namespace krys::boo::ax
       {
         for (auto id : {oldValue, newValue})
         {
-          if (auto control = id.empty() ? nullptr : element.ElementInTreeWithId(id))
+          auto target = id.empty() ? nullptr : element.ElementInTreeWithId(id);
+          if (auto control = target ? target->ResolveReferenceTarget() : nullptr)
           {
             PostNotification(control.get(), AXNotification::TextChanged);
           }
@@ -1790,11 +1791,20 @@ namespace krys::boo::ax
     auto relation = AttributeToRelationType(attribute);
     auto name = dom::DOMStringAtom(attribute);
     bool addedRelation = false;
+    // The relations go to the resolved target elements: through a shadow host's reference target to the
+    // element it names, leaving out a host whose reference target names nothing.
+    auto addResolvedRelation = [&](dom::Element &unresolvedTarget)
+    {
+      if (auto target = unresolvedTarget.ResolveReferenceTarget())
+      {
+        addedRelation |= AddRelation(origin, *target, relation);
+      }
+    };
     auto addRelations = [&](const List<Ref<dom::Element>> &targets)
     {
       for (const auto &target : targets)
       {
-        addedRelation |= AddRelation(origin, *target, relation);
+        addResolvedRelation(*target);
       }
     };
 
@@ -1803,7 +1813,8 @@ namespace krys::boo::ax
     {
       if (auto target = origin.ElementForAttributeInternal(name))
       {
-        return AddRelation(origin, *target, relation);
+        addResolvedRelation(*target);
+        return addedRelation;
       }
     }
     else if (dom::Element::IsElementsArrayReflectionAttribute(name))
@@ -1827,7 +1838,7 @@ namespace krys::boo::ax
       }
       if (auto target = internals->ElementForAttributeInternal(name))
       {
-        addedRelation |= AddRelation(origin, *target, relation);
+        addResolvedRelation(*target);
       }
       else if (auto targets = internals->ElementsForAttributeInternal(name))
       {
@@ -1842,7 +1853,7 @@ namespace krys::boo::ax
       auto target = origin.ElementInTreeWithId(id);
       if (target && target.get() != &origin)
       {
-        addedRelation |= AddRelation(origin, *target, relation);
+        addResolvedRelation(*target);
       }
     }
     return addedRelation;

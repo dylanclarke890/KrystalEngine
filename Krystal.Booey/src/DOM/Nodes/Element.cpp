@@ -3513,6 +3513,31 @@ namespace krys::boo::dom
     return unresolvedTarget->ResolveReferenceTarget();
   }
 
+  List<Ref<Element>> Element::ResolvedElementsForAttribute(DOMStringAtom attributeName) const noexcept
+  {
+    // 1. Let unresolvedTargets be the result of running this's get the unresolved attr target elements.
+    auto unresolvedTargets = ElementsForAttributeInternal(attributeName);
+    // 2. If unresolvedTargets is null, then return « ».
+    // 3. Let resolvedTargets be « ».
+    List<Ref<Element>> resolvedTargets;
+    if (!unresolvedTargets)
+    {
+      return resolvedTargets;
+    }
+    // 4. For each unresolvedTarget of unresolvedTargets:
+    for (auto &unresolvedTarget : *unresolvedTargets)
+    {
+      // 4a. Let resolvedTarget be the result of resolving the reference target on unresolvedTarget.
+      // 4b. If resolvedTarget is not null, then append resolvedTarget to resolvedTargets.
+      if (auto resolvedTarget = unresolvedTarget->ResolveReferenceTarget())
+      {
+        resolvedTargets.push_back(ShareRef(*resolvedTarget));
+      }
+    }
+    // 5. Return resolvedTargets.
+    return resolvedTargets;
+  }
+
   RefPtr<Element> Element::RetargetForBindings(Element *element) const noexcept
   {
     if (!element)
