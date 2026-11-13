@@ -169,6 +169,22 @@ namespace krys::boo
       return _isTouchScroll || _phase != PlatformWheelEventPhase::None
              || _momentumPhase != PlatformWheelEventPhase::None;
     }
+    /// @brief Whether the event is part of a touchpad's gesture or its momentum, so goes to the element and
+    /// scroller the gesture started over.
+    KRYS_NODISCARD bool UseLatchedEventElement() const noexcept
+    {
+      return _phase != PlatformWheelEventPhase::None || _momentumPhase != PlatformWheelEventPhase::None;
+    }
+    /// @brief Whether the event starts a touchpad's gesture.
+    KRYS_NODISCARD bool IsGestureStart() const noexcept
+    {
+      return _phase == PlatformWheelEventPhase::Began;
+    }
+    /// @brief Whether the event is a step of a touchpad's gesture with the fingers down (not its momentum).
+    KRYS_NODISCARD bool IsGestureContinuation() const noexcept
+    {
+      return _phase == PlatformWheelEventPhase::Changed;
+    }
     /// @brief Whether the event ends a touchpad's gesture, and the momentum after it.
     KRYS_NODISCARD bool EndsGesture() const noexcept
     {

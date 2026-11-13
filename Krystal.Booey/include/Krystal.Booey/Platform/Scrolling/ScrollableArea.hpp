@@ -85,6 +85,7 @@ namespace krys::boo
     bool _scrollOriginChanged {false};
     bool _isAwaitingScrollend {false};
     bool _isGestureScrollInProgress {false};
+    bool _scrollShouldClearLatchedState {false};
     ScrollbarOverlayStyle _scrollbarOverlayStyle {ScrollbarOverlayStyle::Default};
     UniquePtr<ScrollAnimator> _scrollAnimator;
     mutable UniquePtr<ScrollbarsController> _scrollbarsController;
@@ -305,6 +306,16 @@ namespace krys::boo
     KRYS_NODISCARD bool ScrollOriginChanged() const noexcept
     {
       return _scrollOriginChanged;
+    }
+
+    /// @brief Whether script scrolled this, so a wheel event a listener cancels ends the gesture's latching.
+    KRYS_NODISCARD bool ScrollShouldClearLatchedState() const noexcept
+    {
+      return _scrollShouldClearLatchedState;
+    }
+    void SetScrollShouldClearLatchedState(bool shouldClear) noexcept
+    {
+      _scrollShouldClearLatchedState = shouldClear;
     }
 
     KRYS_NODISCARD virtual ScrollPosition GetScrollPosition() const noexcept = 0;

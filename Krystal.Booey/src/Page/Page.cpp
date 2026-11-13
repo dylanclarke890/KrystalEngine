@@ -38,7 +38,9 @@
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/PopupOpeningObserver.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Page/WheelEventDeltaFilter.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -96,6 +98,8 @@ namespace krys::boo
       : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient)),
         _pointerCaptureController(CreateUnique<PointerCaptureController>(*this)),
         _pointerLockController(CreateUnique<PointerLockController>(*this)),
+        _scrollLatchingController(CreateUnique<ScrollLatchingController>()),
+        _wheelEventDeltaFilter(CreateUnique<WheelEventDeltaFilter>()),
         _dragController(CreateUnique<DragController>(
           *this,
           dragClient ? krys::move(dragClient) : UniquePtr<DragClient>(CreateUnique<EmptyDragClient>()))),

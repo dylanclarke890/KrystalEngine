@@ -402,6 +402,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/TextRuns/WidthIterator.cpp
 		tests/Page/LocalFrameView.cpp
 		tests/Page/LocalFrameViewScrolling.cpp
+		tests/Page/Scrolling/ScrollLatchingController.cpp
 		tests/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
 		tests/Platform/Scrolling/ScrollAnimator.cpp
 		tests/Rendering/GeneratedContent/RenderCounter.cpp
@@ -583,6 +584,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/MultiColumn/RenderMultiColumnFlow.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Page/Settings.cpp
+		tests/Page/WheelEventDeltaFilter.cpp
 		tests/Style/Adjuster.cpp
 		tests/Style/AnchorPositionEvaluator.cpp
 		tests/Style/Builder/Builder.cpp

@@ -4632,8 +4632,10 @@ namespace krys::boo::dom
     {
       int32 clampedLeft = ClampToInteger(newLeft * renderer->Style().UsedZoom());
       renderer->SetScrollLeft(clampedLeft, options);
-      // FIXME: Clear the latched wheel event state (setScrollShouldClearLatchedState), once wheel events
-      // latch.
+      if (auto *scrollableArea = renderer->HasLayer() ? renderer->Layer()->GetScrollableArea() : nullptr)
+      {
+        scrollableArea->SetScrollShouldClearLatchedState(true);
+      }
     }
   }
 
@@ -4662,8 +4664,10 @@ namespace krys::boo::dom
     {
       int32 clampedTop = ClampToInteger(newTop * renderer->Style().UsedZoom());
       renderer->SetScrollTop(clampedTop, options);
-      // FIXME: Clear the latched wheel event state (setScrollShouldClearLatchedState), once wheel events
-      // latch.
+      if (auto *scrollableArea = renderer->HasLayer() ? renderer->Layer()->GetScrollableArea() : nullptr)
+      {
+        scrollableArea->SetScrollShouldClearLatchedState(true);
+      }
     }
   }
 

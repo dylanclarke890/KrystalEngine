@@ -157,7 +157,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 ### Missing
 
 - Context menus are not built: only the `contextmenu` event is dispatched, and there is no keyboard (menu key) route to it (`sendContextMenuEventForKey`).
-- Wheel: `PlatformWheelEvent` has no velocities or inverted directions, and there is no scroll latching or wheel delta filter. A precision touchpad's pans come with their phases and momentum (DirectManipulation in Krystal.PAL), but not its pinches or swipes. Pan gestures chain on to the next scroll box mid-gesture, as the wheel does.
+- Wheel: `PlatformWheelEvent` has no velocities or inverted directions. A precision touchpad's pans come with their phases and momentum (DirectManipulation in Krystal.PAL), but not its pinches or swipes. A touch's pans (`EventHandler::HandleTouchScroll`) have no phases, so don't latch as a touchpad's do: they chain on to the next scroll box mid-gesture, as the wheel does.
 - Drag and drop: colour drags and drops are absent. Touch and pen drags are not done (pointer events cancel when a drag starts).
 - Sequential focus navigation does not handle moving the focus out to the host, and wraps at the end of the document. Focusable areas do not include scrollable regions or draggable elements (FIXMEs in `FocusAlgorithms.cpp`).
 - Touch: touch event emulation from the mouse is absent. Touch `pointermove` events do not carry the delta since the last event.

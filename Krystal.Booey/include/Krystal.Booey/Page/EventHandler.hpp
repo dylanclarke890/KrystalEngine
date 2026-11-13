@@ -482,8 +482,8 @@ namespace krys::boo
     /// @brief Handles a turn of the mouse wheel: `wheel` at the element under the mouse, then, unless it's
     /// cancelled, a scroll of the nearest box that can scroll that way, or else the view.
     /// @return Whether the event was cancelled or scrolled something.
-    /// @note A touchpad's pan scrolls freely, and what it scrolled snaps once it and its momentum end.
-    // FIXME: Latching and the delta filter.
+    /// @note A touchpad's pan scrolls freely, and what it scrolled snaps once it and its momentum end. Its
+    /// events go to the element it started over, and scroll only the scroller its first step found.
     bool HandleWheelEvent(const PlatformWheelEvent &event) noexcept;
     /// @brief The default action of a `wheel` event at @p startNode: scrolls the nearest enclosing box that
     /// can scroll by the event's deltas, passing over boxes at their end unless `overscroll-behavior` stops
@@ -630,7 +630,13 @@ namespace krys::boo
     void HoverTimerFired() noexcept;
 
     bool HandleWheelEventInternal(const PlatformWheelEvent &event, EnumSet<EventHandling> &handling) noexcept;
-    bool ProcessWheelEventForScrolling(const PlatformWheelEvent &event) noexcept;
+    /// @brief The element and scroller @p wheelEvent goes to: those it's over, or its gesture's latched ones.
+    void DetermineWheelEventTarget(const PlatformWheelEvent &wheelEvent,
+                                   RefPtr<dom::Element> &wheelEventTarget,
+                                   WeakPtr<ScrollableArea> &scrollableArea) noexcept;
+    bool ProcessWheelEventForScrolling(const PlatformWheelEvent &event,
+                                       const WeakPtr<ScrollableArea> &scrollableArea) noexcept;
+    void ClearLatchedState() noexcept;
     /// @param biasedDelta The delta whose axes `overscroll-behavior` may stop from passing to the boxes
     /// further out.
     bool HandleWheelEventInAppropriateEnclosingBox(dom::Node *startNode, const PlatformWheelEvent &event,

@@ -52,6 +52,8 @@ namespace krys::boo
   class PointerCaptureController;
   class PointerLockController;
   class PopupOpeningObserver;
+  class ScrollLatchingController;
+  class WheelEventDeltaFilter;
 
   /// @brief The steps of the rendering update that something asked for.
   // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, paint and
@@ -108,6 +110,8 @@ namespace krys::boo
     UniquePtr<EditorClient> _editorClient;
     UniquePtr<PointerCaptureController> _pointerCaptureController;
     UniquePtr<PointerLockController> _pointerLockController;
+    UniquePtr<ScrollLatchingController> _scrollLatchingController;
+    UniquePtr<WheelEventDeltaFilter> _wheelEventDeltaFilter;
     UniquePtr<DragController> _dragController;
     UniquePtr<DragCaretController> _dragCaretController;
     RefPtr<LocalFrame> _mainFrame;
@@ -236,6 +240,17 @@ namespace krys::boo
     KRYS_NODISCARD PointerCaptureController &GetPointerCaptureController() const noexcept
     {
       return *_pointerCaptureController;
+    }
+
+    /// @brief The element and scroller a touchpad's gesture keeps to.
+    KRYS_NODISCARD ScrollLatchingController &GetScrollLatchingController() const noexcept
+    {
+      return *_scrollLatchingController;
+    }
+    /// @brief Keeps a touchpad's gesture to one axis.
+    KRYS_NODISCARD WheelEventDeltaFilter &GetWheelEventDeltaFilter() const noexcept
+    {
+      return *_wheelEventDeltaFilter;
     }
 
     /// @brief The page's pointer lock.

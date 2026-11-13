@@ -2572,11 +2572,13 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp
   include/Krystal.Booey/Page/ScrollBehavior.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp
   include/Krystal.Booey/Page/ScrollOptions.hpp
   include/Krystal.Booey/Page/Settings.hpp
   include/Krystal.Booey/Page/SpatialNavigation.hpp
   include/Krystal.Booey/Page/VisualViewport.hpp
+  include/Krystal.Booey/Page/WheelEventDeltaFilter.hpp
 )
 
 set(KRYSTAL_BOOEY_PAGE_SOURCES
@@ -2598,10 +2600,12 @@ set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/ResizeObserver/ResizeObserver.cpp
   src/Page/ScrollBehavior.cpp
   src/Page/Scrolling/ScrollingConstraints.cpp
+  src/Page/Scrolling/ScrollLatchingController.cpp
   src/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
   src/Page/Settings.cpp
   src/Page/SpatialNavigation.cpp
   src/Page/VisualViewport.cpp
+  src/Page/WheelEventDeltaFilter.cpp
 )
 
 set(KRYSTAL_BOOEY_PLATFORM_HEADERS

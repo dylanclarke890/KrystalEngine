@@ -37,6 +37,7 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 
@@ -337,6 +338,7 @@ namespace krys::boo::dom
       {
         page->GetPointerLockController().ElementWasRemoved(*element);
         page->GetPointerCaptureController().ElementWasRemoved(*element);
+        page->GetScrollLatchingController().RemoveLatchingStateForTarget(*element);
       }
       style::Styleable::FromElement(*element).ElementWasRemoved();
       element->NodeDocument().UserActionElements().ClearAllForElement(*element);

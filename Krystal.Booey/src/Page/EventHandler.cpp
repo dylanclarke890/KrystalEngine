@@ -67,7 +67,9 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Page/WheelEventDeltaFilter.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
@@ -91,6 +93,16 @@ namespace krys::boo
 {
   namespace
   {
+    /// @brief The scrollable area a box scrolls with: a list box's own, or its layer's.
+    KRYS_NODISCARD ScrollableArea *ScrollableAreaForBox(RenderBox &box) noexcept
+    {
+      if (auto *renderListBox = DynamicDowncast<RenderListBox>(box))
+      {
+        return renderListBox;
+      }
+      return box.HasLayer() ? box.Layer()->GetScrollableArea() : nullptr;
+    }
+
     // Match key code of composition keydown event on windows.
     // IE sends VK_PROCESSKEY which has value 229;
     constexpr int32 CompositionEventKeyCode = 229;
@@ -2191,16 +2203,23 @@ namespace krys::boo
 
     _isHandlingWheelEvent = true;
 
-    // FIXME: Latching and the wheel delta filter, once there are touchpad gestures.
     SetFrameWasScrolledByUser();
     SetLastKnownMousePosition(DoublePoint(event.Position().X(), event.Position().Y()),
                               DoublePoint(event.GlobalPosition().X(), event.GlobalPosition().Y()));
+
+    if (auto *page = frame->GetPage())
+    {
+      page->GetScrollLatchingController().ReceivedWheelEvent(event);
+      page->GetWheelEventDeltaFilter().UpdateFromEvent(event);
+    }
 
     HitTestRequest request;
     HitTestResult result(LayoutPoint(view->WindowToContents(event.Position())));
     (void)document->HitTest(request, result);
 
     RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement());
+    WeakPtr<ScrollableArea> scrollableArea;
+    DetermineWheelEventTarget(event, element, scrollableArea);
 
     // The start and end of a touchpad's gesture move nothing, so no event fires for them.
     if (element && (event.DeltaX() || event.DeltaY()))
@@ -2208,8 +2227,23 @@ namespace krys::boo
       if (!element->DispatchWheelEvent(event, handling))
       {
         _isHandlingWheelEvent = false;
+        if (scrollableArea && scrollableArea->ScrollShouldClearLatchedState())
+        {
+          // Web developer is controlling scrolling, so don't attempt to latch.
+          if (handling.Contains(EventHandling::DispatchedToDOM)
+              && handling.Contains(EventHandling::DefaultPrevented))
+          {
+            ClearLatchedState();
+          }
+          scrollableArea->SetScrollShouldClearLatchedState(false);
+        }
         return true;
       }
+    }
+
+    if (scrollableArea)
+    {
+      scrollableArea->SetScrollShouldClearLatchedState(false);
     }
 
     // Event handling may have disconnected the frame.
@@ -2220,25 +2254,115 @@ namespace krys::boo
       return false;
     }
 
-    auto filteredDelta = view->DeltaForPropagation(event.Delta());
+    if (auto *page = frame->GetPage())
+    {
+      WeakPtr<ScrollableArea> latchedScroller;
+      if (!page->GetScrollLatchingController().LatchingAllowsScrolling(latchedScroller))
+      {
+        _isHandlingWheelEvent = false;
+        return false;
+      }
+    }
+
+    // The view takes a gesture's steps on its axis too, as the boxes do.
+    auto delta = event.Delta();
+    if (auto *page = frame->GetPage(); page && WheelEventDeltaFilter::ShouldApplyFilteringForEvent(event))
+    {
+      delta = page->GetWheelEventDeltaFilter().FilteredDelta();
+    }
+    auto filteredDelta = view->DeltaForPropagation(delta);
     if (view->ShouldBlockScrollPropagation(filteredDelta))
     {
       _isHandlingWheelEvent = false;
       return true;
     }
 
-    return ProcessWheelEventForScrolling(event.CopyWithDelta(filteredDelta));
+    return ProcessWheelEventForScrolling(event.CopyWithDelta(filteredDelta), scrollableArea);
   }
 
-  bool EventHandler::ProcessWheelEventForScrolling(const PlatformWheelEvent &event) noexcept
+  void EventHandler::DetermineWheelEventTarget(const PlatformWheelEvent &wheelEvent,
+                                               RefPtr<dom::Element> &wheelEventTarget,
+                                               WeakPtr<ScrollableArea> &scrollableArea) noexcept
+  {
+    auto *view = _frame.View();
+    if (!view)
+    {
+      return;
+    }
+
+    // A gesture's start moves nothing, so its scroller is found at its first step, from the element it
+    // started over rather than the one the pointer has reached.
+    auto *page = _frame.GetPage();
+    if (auto *latchedElement = page && wheelEvent.UseLatchedEventElement()
+                                 ? page->GetScrollLatchingController().LatchedElement()
+                                 : nullptr)
+    {
+      wheelEventTarget = ShareRefPtr(latchedElement);
+    }
+
+    scrollableArea = CreateWeakPtr<ScrollableArea>(view);
+    // Find the first node with a valid scrollable area starting with the current node and traversing its
+    // parents (or shadow hosts).
+    for (dom::ContainerNode *candidate = wheelEventTarget.get(); candidate;
+         candidate = candidate->ParentInComposedTree())
+    {
+      if (Is<html::HTMLHtmlElement>(*candidate) || Is<dom::Document>(*candidate))
+      {
+        break;
+      }
+
+      auto *box = candidate->GetRenderBox();
+      if (!box || !box->CanBeScrolledAndHasScrollableArea())
+      {
+        continue;
+      }
+
+      auto *candidateArea = ScrollableAreaForBox(*box);
+      if (!candidateArea)
+      {
+        continue;
+      }
+
+      if (candidateArea->ShouldBlockScrollPropagation(wheelEvent.Delta())
+          || ScrollableAreaCanHandleEvent(wheelEvent, *candidateArea))
+      {
+        scrollableArea = CreateWeakPtr(candidateArea);
+        break;
+      }
+    }
+
+    if (page)
+    {
+      page->GetScrollLatchingController().UpdateAndFetchLatchingState(*view, wheelEvent, wheelEventTarget,
+                                                                      scrollableArea);
+    }
+  }
+
+  bool EventHandler::ProcessWheelEventForScrolling(const PlatformWheelEvent &event,
+                                                   const WeakPtr<ScrollableArea> &scrollableArea) noexcept
   {
     // We do another check on the frame view because the event handler can run JS which results in the frame
     // getting destroyed.
     RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
 
+    // A gesture latched to a box scrolled it in the wheel event's default action, and goes no further.
+    if (event.UseLatchedEventElement() && scrollableArea && scrollableArea.get() != view.get())
+    {
+      _isHandlingWheelEvent = false;
+      return !event.Delta().IsZero();
+    }
+
     bool didHandleEvent = view ? HandleWheelEventInScrollableArea(event, *view) : false;
     _isHandlingWheelEvent = false;
     return didHandleEvent;
+  }
+
+  void EventHandler::ClearLatchedState() noexcept
+  {
+    if (auto *page = _frame.GetPage())
+    {
+      page->GetScrollLatchingController().Clear();
+    }
   }
 
   bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(
@@ -2276,25 +2400,11 @@ namespace krys::boo
       return false;
     }
 
-    auto scrollableAreaForBox = [](RenderBox &box) -> ScrollableArea *
-    {
-      if (auto *renderListBox = DynamicDowncast<RenderListBox>(box))
-      {
-        return renderListBox;
-      }
-
-      if (box.HasLayer())
-      {
-        return box.Layer()->GetScrollableArea();
-      }
-      return nullptr;
-    };
-
     RenderBox *currentEnclosingBox = &startNode->Renderer()->EnclosingBox();
 
     while (currentEnclosingBox)
     {
-      if (auto *boxScrollableArea = scrollableAreaForBox(*currentEnclosingBox))
+      if (auto *boxScrollableArea = ScrollableAreaForBox(*currentEnclosingBox))
       {
         bool scrollingWasHandled = ScrollableAreaCanHandleEvent(event, *boxScrollableArea)
                                    && HandleWheelEventInScrollableArea(event, *boxScrollableArea);
@@ -2370,7 +2480,30 @@ namespace krys::boo
       filteredPlatformDelta = platformEvent->Delta();
     }
 
-    // FIXME: The wheel delta filter and latching, once there are touchpad gestures.
+    auto *page = _frame.GetPage();
+    auto &platformEvent = wheelEvent.UnderlyingPlatformEvent();
+    if (page && platformEvent && WheelEventDeltaFilter::ShouldApplyFilteringForEvent(*platformEvent))
+    {
+      filteredPlatformDelta = page->GetWheelEventDeltaFilter().FilteredDelta();
+    }
+
+    WeakPtr<ScrollableArea> latchedScroller;
+    if (page && !page->GetScrollLatchingController().LatchingAllowsScrolling(latchedScroller))
+    {
+      return false;
+    }
+
+    if (platformEvent && latchedScroller)
+    {
+      // The view's scrolling is handled via ProcessWheelEventForScrolling().
+      if (latchedScroller.get() == static_cast<ScrollableArea *>(_frame.View()))
+      {
+        return false;
+      }
+      return HandleWheelEventInScrollableArea(platformEvent->CopyWithDelta(filteredPlatformDelta),
+                                              *latchedScroller);
+    }
+
     return HandleWheelEventInAppropriateEnclosingBox(startNode, wheelEvent, filteredPlatformDelta);
   }
 
