@@ -17,7 +17,6 @@ namespace krys::boo::dom
     ToggleEventInit eventInit = init;
     eventInit.Bubbles = false;
     eventInit.Cancelable = isCancelable;
-    eventInit.Composed = false;
     auto event = CreateRef<ToggleEvent>(type, eventInit);
     event->_isTrusted = true;
     return event;

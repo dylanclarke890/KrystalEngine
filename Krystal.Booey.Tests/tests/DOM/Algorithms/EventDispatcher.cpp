@@ -479,4 +479,45 @@ namespace krys::boo::dom::tests
     CHECK(a.Value().empty());
     CHECK(fixture.Document->FocusedElement() == &a);
   }
+
+  TEST_CASE("Dispatch: an event an element sets off at another stops at the source's tree",
+            "[EventDispatcher][dom:concept-event-dispatch][dom:fire-an-event-relatedtarget]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto host = NewElement(*document, u8"div");
+    auto outside = NewElement(*document, u8"button");
+    auto root = NewElement(*document, u8"div");
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+    REQUIRE_FALSE(root->Append({Ref<Node>(host), Ref<Node>(outside)}).HasException());
+    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+    auto target = NewElement(*document, u8"div");
+    auto inside = NewElement(*document, u8"button");
+    REQUIRE_FALSE(shadow->Append({Ref<Node>(target), Ref<Node>(inside)}).HasException());
+
+    EventTarget *targetAtHost = nullptr;
+    auto onHost =
+      host->AddEventListener(EventNames::Click, [&](Event &e) { targetAtHost = e.Target().get(); });
+    auto composed = []
+    {
+      return CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true, .Composed = true});
+    };
+
+    SECTION("from outside the shadow tree, it leaves it, retargeted to the host")
+    {
+      (void)EventDispatcher::DispatchFromSource(*composed(), *target, outside.get());
+      CHECK(targetAtHost == host.get());
+    }
+
+    SECTION("from inside it, it stays there, though it's composed")
+    {
+      (void)EventDispatcher::DispatchFromSource(*composed(), *target, inside.get());
+      CHECK(targetAtHost == nullptr);
+    }
+
+    SECTION("without a source, it leaves")
+    {
+      (void)EventDispatcher::DispatchFromSource(*composed(), *target, nullptr);
+      CHECK(targetAtHost == host.get());
+    }
+  }
 }

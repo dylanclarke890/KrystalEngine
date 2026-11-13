@@ -105,6 +105,9 @@ namespace krys::boo::dom
     bool _defaultHandled : 1 {false};
     bool _isDefaultEventHandlerIgnored : 1 {false};
     RefPtr<Event> _underlyingEvent;
+    /// @brief The relatedTarget an event without its own (a mouse or focus event's) was fired with.
+    /// @see https://dom.spec.whatwg.org/#event-relatedtarget
+    RefPtr<EventTarget> _relatedTarget;
 
   public:
     /// @brief The dictionary its constructor takes.
@@ -302,13 +305,13 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#event-relatedtarget
     virtual RefPtr<EventTarget> RelatedTarget() const noexcept
     {
-      return nullptr;
+      return _relatedTarget;
     }
 
     /// @see https://dom.spec.whatwg.org/#event-relatedtarget
     virtual void RelatedTarget(EventTarget *relatedTarget) noexcept
     {
-      (void)relatedTarget;
+      _relatedTarget = ShareRefPtr(relatedTarget);
     }
 
     /// @see https://dom.spec.whatwg.org/#event-touch-target-list

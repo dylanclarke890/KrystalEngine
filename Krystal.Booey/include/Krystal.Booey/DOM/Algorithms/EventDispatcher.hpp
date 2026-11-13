@@ -34,6 +34,7 @@ namespace krys::boo
 
 namespace krys::boo::dom
 {
+  class Element;
   class EventTarget;
   class EventPathItem;
   class EventListener;
@@ -46,6 +47,12 @@ namespace krys::boo::dom
     KRYS_NODISCARD static bool DispatchToTarget(Event &event, EventTarget *target,
                                                 bool legacyTargetOverrideFlag = false,
                                                 bool *legacyOutputDidListenersThrowFlag = nullptr) noexcept;
+
+    /// @brief Dispatches @p event at @p target as HTML fires the events an element @p source sets off at
+    /// another (command, submit, beforetoggle and toggle): with its relatedTarget @p target if retargeting
+    /// @p source against @p target gives @p target, and @p source otherwise.
+    /// @note The event should be composed, as those are.
+    KRYS_NODISCARD static bool DispatchFromSource(Event &event, Element &target, Element *source) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-path-append
     static void AppendToEventPath(Event &event, EventTarget &invocationTarget,

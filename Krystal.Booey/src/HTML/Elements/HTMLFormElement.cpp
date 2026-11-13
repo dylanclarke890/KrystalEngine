@@ -580,8 +580,10 @@ namespace krys::boo::html
 
     Ref<HTMLFormElement> protectedThis = ShareRef(*this);
 
+    // Let relatedTarget be form if the result of retargeting submitterButton against form is form; otherwise
+    // submitterButton. Fire submit, composed, with relatedTarget set to relatedTarget.
     auto submitEvent = SubmitEvent::Create(ShareRefPtr(static_cast<HTMLElement *>(submitter)));
-    (void)dom::EventDispatcher::DispatchToTarget(*submitEvent, this);
+    (void)dom::EventDispatcher::DispatchFromSource(*submitEvent, *this, submitter);
 
     // Event handling could have resulted in _shouldSubmit becoming true as a side effect, too.
     if (!submitEvent->DefaultPrevented())

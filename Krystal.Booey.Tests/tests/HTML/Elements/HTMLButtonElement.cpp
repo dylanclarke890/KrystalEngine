@@ -401,4 +401,33 @@ namespace krys::boo::html::tests
     button.Click();
     CHECK(popover.IsPopoverShowing());
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "HTMLButtonElement: the command event is composed, from the button",
+                   "[HTML][HTMLButtonElement][html:attr-button-commandfor][dom:fire-an-event-relatedtarget]")
+  {
+    NavigationFixture fixture(u8"<button id=t commandfor=h command=--go>T</button><x-host id=h></x-host>");
+    auto &host = fixture.ById(u8"h");
+    auto shadow = host.AttachShadow({.ReferenceTarget = dom::DOMString(u8"p")}).ReleaseValue();
+    REQUIRE_FALSE(
+      shadow->SetHTMLUnsafe(u8"<div id=p></div><button id=inner commandfor=p command=--go></button>")
+        .HasException());
+    int32 heardAtHost = 0;
+    bool composed = false;
+    auto onHost = host.AddEventListener(u8"command",
+                                        [&](dom::Event &event)
+                                        {
+                                          ++heardAtHost;
+                                          composed = event.Composed();
+                                        });
+
+    // From the button outside, it reaches the host, the target's place in the button's tree.
+    fixture.Get<HTMLButtonElement>(u8"t").Click();
+    CHECK(heardAtHost == 1);
+    CHECK(composed);
+
+    // From a button beside the target in the shadow tree, it stays there.
+    Downcast<HTMLButtonElement>(*shadow->GetElementById(u8"inner")).Click();
+    CHECK(heardAtHost == 1);
+  }
 }

@@ -1523,9 +1523,12 @@ namespace krys::boo::html
     dom::ToggleEventInit init;
     init.OldState = stringForState(oldState);
     init.NewState = stringForState(newState);
+    // Composed, with relatedTarget the subject if retargeting the source against it gives it, else the
+    // source.
+    init.Composed = true;
     init.Source = ShareRefPtr<dom::Element>(source);
     auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(EventNames::BeforeToggle), init, cancelable);
-    (void)dom::EventDispatcher::DispatchToTarget(*event, this);
+    (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }
 

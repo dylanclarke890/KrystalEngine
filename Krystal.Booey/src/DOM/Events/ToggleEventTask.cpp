@@ -68,9 +68,13 @@ namespace krys::boo::dom
         ToggleEventInit init;
         init.OldState = stringForState(data.OldState);
         init.NewState = stringForState(data.NewState);
+        // Composed, with relatedTarget the element if retargeting the source against it gives it, else the
+        // source.
+        init.Composed = true;
         init.Source = krys::move(data.Source);
+        RefPtr<Element> source = init.Source;
         auto event = ToggleEvent::Create(DOMStringAtom(EventNames::Toggle), init, false);
-        (void)EventDispatcher::DispatchToTarget(*event, element.get());
+        (void)EventDispatcher::DispatchFromSource(*event, *element, source.get());
       });
   }
 }

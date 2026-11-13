@@ -384,6 +384,22 @@ namespace krys::boo::dom
     return !event._canceled;
   }
 
+  bool EventDispatcher::DispatchFromSource(Event &event, Element &target, Element *source) noexcept
+  {
+    // Let relatedTarget be target if the result of retargeting source against target is target; otherwise
+    // source.
+    EventTarget *relatedTarget = source;
+    if (source && EventTargetAlgorithms::Retarget(source, target) == &target)
+    {
+      relatedTarget = &target;
+    }
+
+    // Fire an event ... with relatedTarget set to relatedTarget: set event's relatedTarget to relatedTarget,
+    // then dispatch it at target.
+    event.RelatedTarget(relatedTarget);
+    return DispatchToTarget(event, &target);
+  }
+
   void EventDispatcher::AppendToEventPath(Event &event, EventTarget &invocationTarget,
                                           EventTarget *shadowAdjustedTarget, EventTarget *relatedTarget,
                                           List<Ref<EventTarget>> &touchTargets,

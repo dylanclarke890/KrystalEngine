@@ -379,21 +379,26 @@ namespace krys::boo::html
       return;
     }
 
-    // 5c. Let continue be the result of firing an event named command at target, using CommandEvent, with its
-    //     command attribute initialized to command, its source attribute initialized to element, and its
-    //     cancelable attribute initialized to true.
+    // 5c. Let relatedTarget be target if the result of retargeting element against target is target;
+    // otherwise
+    //     element.
+    // 5d. Let continue be the result of firing an event named command at target, using CommandEvent, with its
+    //     command attribute initialized to command, its source attribute initialized to element, its
+    //     cancelable attribute initialized to true, its composed flag set, and relatedTarget set to
+    //     relatedTarget.
     dom::CommandEventInit init;
     init.Bubbles = false;
     init.Cancelable = true;
+    init.Composed = true;
     init.Source = ShareRefPtr<dom::Element>(this);
     init.Command = commandRaw.value_or(dom::DOMString());
 
     auto event = dom::CommandEvent::Create(dom::DOMStringAtom(EventNames::Command), init, true);
-    (void)dom::EventDispatcher::DispatchToTarget(*event, invokee.get());
+    (void)dom::EventDispatcher::DispatchFromSource(*event, *invokee, this);
 
-    // 5d. If continue is false, then return.
-    // 5e. If target is not connected, then return.
-    // 5f. If command is in the Custom state, then return.
+    // 5e. If continue is false, then return.
+    // 5f. If target is not connected, then return.
+    // 5g. If command is in the Custom state, then return.
     if (event->DefaultPrevented() || !invokee->IsConnected() || command == dom::CommandType::Custom)
     {
       return;

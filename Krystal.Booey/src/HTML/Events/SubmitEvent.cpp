@@ -14,6 +14,7 @@ namespace krys::boo::html
     SubmitEventInit init;
     init.Bubbles = true;
     init.Cancelable = true;
+    init.Composed = true;
     init.Submitter = krys::move(submitter);
     auto event = CreateRef<SubmitEvent>(dom::DOMStringAtom(EventNames::Submit), init);
     event->_isTrusted = true;

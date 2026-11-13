@@ -503,4 +503,22 @@ namespace krys::boo::html::tests
     trigger.Click();
     CHECK(popover.IsPopoverShowing());
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Popover: toggle events are composed, from the invoker",
+                   "[HTML][Popover][html:show-popover][dom:fire-an-event-relatedtarget]")
+  {
+    NavigationFixture fixture(u8"<button id=t popovertarget=h>T</button><x-host id=h></x-host>");
+    auto &host = fixture.ById(u8"h");
+    auto shadow = host.AttachShadow({.ReferenceTarget = dom::DOMString(u8"p")}).ReleaseValue();
+    REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<div id=p popover>P</div>").HasException());
+    List<std::string> heard;
+    auto onBefore =
+      host.AddEventListener(u8"beforetoggle", [&](dom::Event &) { heard.push_back("beforetoggle"); });
+    auto onToggle = host.AddEventListener(u8"toggle", [&](dom::Event &) { heard.push_back("toggle"); });
+
+    Downcast<HTMLButtonElement>(fixture.ById(u8"t")).Click();
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(Downcast<HTMLElement>(*shadow->GetElementById(u8"p")).IsPopoverShowing());
+    CHECK(heard == List<std::string> {"beforetoggle", "toggle"});
+  }
 }

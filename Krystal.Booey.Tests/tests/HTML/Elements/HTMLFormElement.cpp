@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/HTML/FormTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/FormDataEvent.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Collections/HTMLFormControlsCollection.hpp"
 #include "Krystal.Booey/HTML/Collections/RadioNodeList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
@@ -559,5 +560,26 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       }
       CHECK(Downcast<HTMLImageElement>(Downcast<HTMLElement>(*image)).Form() == nullptr);
     }
+  }
+
+  TEST_CASE("HTMLFormElement: the submit event is composed, from its submitter",
+            "[HTML][Forms][html:concept-form-submit][dom:fire-an-event-relatedtarget]")
+  {
+    FormFixture fixture(u8R"(<x-host id=h></x-host>)");
+    auto &host = fixture.ById(u8"h");
+    auto shadow = host.AttachShadow({}).ReleaseValue();
+    REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<form id=f><input type=submit id=go></form>").HasException());
+    auto &form = Downcast<HTMLFormElement>(*shadow->GetElementById(u8"f"));
+    // Every submission is cancelled at the form, so none is left to run.
+    auto onForm = form.AddEventListener(u8"submit", [](dom::Event &event) { event.PreventDefault(); });
+    int32 heardAtHost = 0;
+    auto onHost = host.AddEventListener(u8"submit", [&](dom::Event &) { ++heardAtHost; });
+
+    // Without a submitter it leaves the shadow tree; from a submitter beside the form there, it doesn't.
+    REQUIRE_FALSE(form.RequestSubmit().HasException());
+    CHECK(heardAtHost == 1);
+    REQUIRE_FALSE(
+      form.RequestSubmit(&Downcast<HTMLInputElement>(*shadow->GetElementById(u8"go"))).HasException());
+    CHECK(heardAtHost == 1);
   }
 }
