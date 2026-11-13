@@ -3056,14 +3056,13 @@ namespace krys::boo::dom
           scope.AddElementById(DOMStringAtom(*value), *this);
         }
 
-        auto &registry = TreeScope().IdTargetObserverRegistry();
         if (oldValue && !oldValue->empty())
         {
-          registry.NotifyObservers(*this, DOMStringAtom(*oldValue));
+          scope.NotifyIdTargetObservers(*this, DOMStringAtom(*oldValue));
         }
         if (value && !value->empty())
         {
-          registry.NotifyObservers(*this, DOMStringAtom(*value));
+          scope.NotifyIdTargetObservers(*this, DOMStringAtom(*value));
         }
       }
     }
@@ -3499,6 +3498,19 @@ namespace krys::boo::dom
 #pragma endregion
 
 #pragma region Element Reflection
+
+  RefPtr<Element> Element::ResolvedElementForAttribute(DOMStringAtom attributeName) const noexcept
+  {
+    // 1. Let unresolvedTarget be the result of running this's get the unresolved attr target element.
+    auto unresolvedTarget = ElementForAttributeInternal(attributeName);
+    // 2. If unresolvedTarget is null, then return null.
+    if (!unresolvedTarget)
+    {
+      return nullptr;
+    }
+    // 3. Return the result of resolving the reference target on unresolvedTarget.
+    return unresolvedTarget->ResolveReferenceTarget();
+  }
 
   RefPtr<Element> Element::ResolveReferenceTarget() noexcept
   {

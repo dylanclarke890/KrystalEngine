@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
@@ -478,5 +479,28 @@ namespace krys::boo::html::tests
       trigger.Click();
       CHECK(popover.IsPopoverShowing());
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "Popover: popovertarget naming a shadow host invokes its reference target",
+                   "[HTML][Popover][html:popover-target-element][html:resolve-the-reference-target]")
+  {
+    NavigationFixture fixture(u8"<button id=t popovertarget=h>T</button><x-host id=h></x-host>");
+    // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
+    auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
+    {
+      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = dom::DOMString(target)}).ReleaseValue();
+      REQUIRE_FALSE(shadow->SetHTMLUnsafe(markup).HasException());
+      return shadow;
+    };
+    auto shadow = attach(u8"h", u8"p", u8"<div id=p popover>P</div>");
+    auto &popover = Downcast<HTMLElement>(*shadow->GetElementById(u8"p"));
+    auto &trigger = Downcast<HTMLButtonElement>(fixture.ById(u8"t"));
+
+    CHECK(trigger.PopoverTargetElement().get() == &popover);
+    // The IDL attribute is the host the attribute names.
+    CHECK(trigger.PopoverTargetElementForBindings().get() == &fixture.ById(u8"h"));
+    trigger.Click();
+    CHECK(popover.IsPopoverShowing());
   }
 }

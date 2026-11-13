@@ -207,6 +207,9 @@ namespace krys::boo::dom
     }
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-referencetarget
     void SetReferenceTarget(Maybe<DOMString> referenceTarget) noexcept;
+    /// @brief Tells the observers of the host's ID (form controls whose `form` names it) that what a
+    /// reference to the host resolves to may have changed.
+    void NotifyHostIdTargetObservers() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-host
     KRYS_NODISCARD Element *Host() const noexcept;

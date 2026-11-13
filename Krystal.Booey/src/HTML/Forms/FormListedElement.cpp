@@ -70,17 +70,15 @@ namespace krys::boo::html
       {
         if (auto formId = element.GetAttribute(u8"form"))
         {
-          // The element is associated with the first element in its tree whose ID is the value of the form
-          // attribute, so the tree's element by that ID wins over the given form.
-          auto *newFormCandidate = DynamicDowncast<HTMLFormElement>(ElementForId(element, *formId));
-          if (!newFormCandidate)
+          // Let candidate be element's resolved form target element: the first element in its tree with the
+          // attribute's ID, or the element its shadow root's reference target names. If candidate is a form
+          // element, then set newForm to candidate.
+          RefPtr<dom::Element> candidate = ShareRefPtr(ElementForId(element, *formId));
+          if (candidate)
           {
-            return nullptr;
+            candidate = candidate->ResolveReferenceTarget();
           }
-          if (&dom::TreeQueries::Root(element) == &dom::TreeQueries::Root(*newFormCandidate))
-          {
-            return newFormCandidate;
-          }
+          return DynamicDowncast<HTMLFormElement>(candidate.get());
         }
       }
 

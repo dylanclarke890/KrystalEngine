@@ -2046,7 +2046,9 @@ namespace krys::boo::html
     {
       return nullptr;
     }
-    return DynamicDowncast<HTMLDataListElement>(ElementForAttributeInternal(u8"list"));
+    // The suggestions source element is the input element's resolved list target element, if that is a
+    // datalist element.
+    return DynamicDowncast<HTMLDataListElement>(ResolvedElementForAttribute(u8"list"));
   }
 
   void HTMLInputElement::DataListMayHaveChanged() noexcept

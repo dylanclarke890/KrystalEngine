@@ -57,7 +57,7 @@ namespace krys::boo::dom
       auto id = element->GetAttribute(u8"id");
       if (id && !id->empty())
       {
-        scope.IdTargetObserverRegistry().NotifyObservers(*element, DOMStringAtom(*id));
+        scope.NotifyIdTargetObservers(*element, DOMStringAtom(*id));
       }
     }
 

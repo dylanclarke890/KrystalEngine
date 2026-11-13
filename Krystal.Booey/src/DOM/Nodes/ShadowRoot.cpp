@@ -94,8 +94,29 @@ namespace krys::boo::dom
 
   void ShadowRoot::SetReferenceTarget(Maybe<DOMString> referenceTarget) noexcept
   {
+    if (_referenceTarget == referenceTarget)
+    {
+      return;
+    }
     // The setter steps are to set this's reference target to the given value.
     _referenceTarget = krys::move(referenceTarget);
+
+    // When a shadow root shadow's reference target changes and shadow's host has an ID, the user agent must
+    // reset the form owners with a form attribute given shadow's host's root and « shadow's host's ID ».
+    NotifyHostIdTargetObservers();
+  }
+
+  void ShadowRoot::NotifyHostIdTargetObservers() noexcept
+  {
+    auto *host = Host();
+    if (!host)
+    {
+      return;
+    }
+    if (auto id = host->GetAttribute(u8"id"); id && !id->empty())
+    {
+      host->TreeScope().NotifyIdTargetObservers(*host, DOMStringAtom(*id));
+    }
   }
 
   Element *ShadowRoot::Host() const noexcept

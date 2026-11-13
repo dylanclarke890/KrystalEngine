@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FormTestUtils.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include <cmath>
 
@@ -514,5 +516,23 @@ namespace krys::boo::html::tests
       CHECK(d.Checked());
       CHECK_FALSE(b.Checked());
     }
+  }
+
+  TEST_CASE("HTMLInputElement: a list naming a shadow host takes the datalist its reference target names",
+            "[HTML][Forms][Input][html:concept-input-list][html:resolve-the-reference-target]")
+  {
+    FormFixture fixture(u8R"(<input id=i list=h><x-host id=h></x-host>)");
+    // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
+    auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
+    {
+      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = dom::DOMString(target)}).ReleaseValue();
+      REQUIRE_FALSE(shadow->SetHTMLUnsafe(markup).HasException());
+      return shadow;
+    };
+    auto shadow = attach(u8"h", u8"d", u8"<datalist id=d><option value=x></datalist>");
+    auto &input = fixture.Get<HTMLInputElement>(u8"i");
+    CHECK(input.List().get() == shadow->GetElementById(u8"d").get());
+    shadow->SetReferenceTarget(null);
+    CHECK_FALSE(input.List());
   }
 }

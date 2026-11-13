@@ -43,7 +43,7 @@ namespace krys::boo::html
   {
     if (auto id = GetAttribute(u8"id"); id && !id->empty() && IsConnected())
     {
-      TreeScope().IdTargetObserverRegistry().NotifyObservers(*this, dom::DOMStringAtom(*id));
+      TreeScope().NotifyIdTargetObservers(*this, dom::DOMStringAtom(*id));
     }
   }
 

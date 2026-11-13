@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FormTestUtils.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Collections/HTMLFormControlsCollection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
@@ -76,6 +77,63 @@ namespace krys::boo::html::tests
     {
       a.RemoveAttribute(u8"form");
       CHECK(a.Form() == &fixture.Get<HTMLFormElement>(u8"g"));
+    }
+  }
+
+  TEST_CASE("Form owners: a form attribute naming a shadow host reaches the form its reference target names",
+            "[HTML][Forms][html:reset-the-form-owner][html:attr-fae-form][html:resolve-the-reference-target]")
+  {
+    FormFixture fixture(u8R"(<input id=before form=h><x-host id=h></x-host><input id=a form=h>)");
+    // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
+    auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
+    {
+      auto shadow = fixture.ById(id).AttachShadow({.ReferenceTarget = dom::DOMString(target)}).ReleaseValue();
+      REQUIRE_FALSE(shadow->SetHTMLUnsafe(markup).HasException());
+      return shadow;
+    };
+    auto shadow = attach(u8"h", u8"f", u8"<form id=f></form>");
+    auto &form = Downcast<HTMLFormElement>(*shadow->GetElementById(u8"f"));
+    auto &a = fixture.Get<HTMLInputElement>(u8"a");
+    auto &before = fixture.Get<HTMLInputElement>(u8"before");
+    CHECK(a.Form() == &form);
+    CHECK(before.Form() == &form);
+
+    SECTION("in tree order, placed where the host is")
+    {
+      REQUIRE(form.Length() == 2);
+      CHECK(form.Item(0).get() == &before);
+      CHECK(form.Item(1).get() == &a);
+    }
+
+    SECTION("changing the reference target changes it")
+    {
+      shadow->SetReferenceTarget(null);
+      CHECK(a.Form() == nullptr);
+      shadow->SetReferenceTarget(dom::DOMString(u8"f"));
+      CHECK(a.Form() == &form);
+    }
+
+    SECTION("so does the form gaining or losing that ID")
+    {
+      REQUIRE_FALSE(form.SetAttribute(u8"id", u8"g").HasException());
+      CHECK(a.Form() == nullptr);
+      REQUIRE_FALSE(form.SetAttribute(u8"id", u8"f").HasException());
+      CHECK(a.Form() == &form);
+    }
+
+    SECTION("or leaving and joining the shadow tree")
+    {
+      Ref<HTMLFormElement> protectedForm = ShareRef(form);
+      form.Remove();
+      CHECK(a.Form() == nullptr);
+      REQUIRE_FALSE(shadow->AppendChild(form).HasException());
+      CHECK(a.Form() == &form);
+    }
+
+    SECTION("or the host losing its ID")
+    {
+      REQUIRE_FALSE(fixture.ById(u8"h").SetAttribute(u8"id", u8"other").HasException());
+      CHECK(a.Form() == nullptr);
     }
   }
 }

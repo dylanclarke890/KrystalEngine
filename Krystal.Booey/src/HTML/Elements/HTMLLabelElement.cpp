@@ -37,9 +37,17 @@ namespace krys::boo::html
 {
   namespace
   {
-    /// @brief The labelable element with the ID @p id in @p label's tree.
-    KRYS_NODISCARD HTMLElement *ElementForAttributeIfLabelable(const HTMLLabelElement &label,
-                                                               dom::DOMStringView id) noexcept
+    /// @brief @p element, resolved through its reference target, if that's a labelable element.
+    KRYS_NODISCARD RefPtr<HTMLElement> ResolvedIfLabelable(dom::Element &element) noexcept
+    {
+      auto resolved = element.ResolveReferenceTarget();
+      auto *labelable = DynamicDowncast<HTMLElement>(resolved.get());
+      return labelable && labelable->IsLabelable() ? ShareRefPtr(labelable) : nullptr;
+    }
+
+    /// @brief The resolved target of the ID @p id in @p label's tree, if that's a labelable element.
+    KRYS_NODISCARD RefPtr<HTMLElement> ElementForAttributeIfLabelable(const HTMLLabelElement &label,
+                                                                      dom::DOMStringView id) noexcept
     {
       auto &root = dom::TreeQueries::Root(const_cast<HTMLLabelElement &>(label));
       RefPtr<dom::Element> element;
@@ -52,8 +60,7 @@ namespace krys::boo::html
         element = fragment->GetElementById(id);
       }
 
-      auto *labelableElement = DynamicDowncast<HTMLElement>(element.get());
-      return labelableElement && labelableElement->IsLabelable() ? labelableElement : nullptr;
+      return element ? ResolvedIfLabelable(*element) : nullptr;
     }
   }
 
@@ -85,21 +92,32 @@ namespace krys::boo::html
 
   RefPtr<HTMLElement> HTMLLabelElement::Control() const noexcept
   {
-    auto forAttribute = GetAttribute(u8"for");
-    if (!forAttribute)
+    // 1. If label's for attribute is specified:
+    if (auto forAttribute = GetAttribute(u8"for"))
     {
-      // https://html.spec.whatwg.org/#labeled-control
-      for (auto *node = dom::TreeQueries::Next(*this, this); node; node = dom::TreeQueries::Next(*node, this))
-      {
-        if (auto *descendant = DynamicDowncast<HTMLElement>(*node); descendant && descendant->IsLabelable())
-        {
-          return ShareRefPtr(descendant);
-        }
-      }
-      return nullptr;
+      // 1a. Let target be label's resolved for target element.
+      // 1b. If target is not null and target is a labelable element, then return target.
+      // 1c. Otherwise, return null.
+      // (Only when connected.)
+      return IsConnected() ? ElementForAttributeIfLabelable(*this, *forAttribute) : nullptr;
     }
 
-    return IsConnected() ? ShareRefPtr(ElementForAttributeIfLabelable(*this, *forAttribute)) : nullptr;
+    // 2. For each element descendant that is a descendant of label, in tree order:
+    for (auto *node = dom::TreeQueries::Next(*this, this); node; node = dom::TreeQueries::Next(*node, this))
+    {
+      // 2a. Let candidate be the result of resolving the reference target on descendant.
+      // 2b. If candidate is a labelable element, then return candidate.
+      if (auto *descendant = DynamicDowncast<dom::Element>(*node))
+      {
+        if (auto candidate = ResolvedIfLabelable(*descendant))
+        {
+          return candidate;
+        }
+      }
+    }
+
+    // 3. Return null.
+    return nullptr;
   }
 
   RefPtr<HTMLElement> HTMLLabelElement::ControlForBindings() const noexcept

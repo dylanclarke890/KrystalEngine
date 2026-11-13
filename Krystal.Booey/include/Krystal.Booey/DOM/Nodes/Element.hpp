@@ -1527,6 +1527,11 @@ namespace krys::boo::dom
 
 #pragma region Element Reflection
 
+    /// @brief The element an element-reference attribute's target resolves to: the unresolved target
+    /// (`ElementForAttributeInternal`) with its reference target resolved, as behaviour uses it.
+    /// @see https://html.spec.whatwg.org/#get-the-resolved-attribute-target-element
+    KRYS_NODISCARD RefPtr<Element> ResolvedElementForAttribute(DOMStringAtom attributeName) const noexcept;
+
     /// @brief The element a reference to this one targets: this, or, through its shadow root's reference
     /// target, the element in its shadow tree with that ID (resolved in turn); null if there's no such
     /// element.

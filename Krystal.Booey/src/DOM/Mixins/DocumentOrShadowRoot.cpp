@@ -35,6 +35,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -343,6 +344,17 @@ namespace krys::boo::dom
     if (_elementsById)
     {
       _elementsById->Remove(id, element);
+    }
+  }
+
+  void DocumentOrShadowRoot::NotifyIdTargetObservers(Element &element, DOMStringAtom id) noexcept
+  {
+    IdTargetObserverRegistry().NotifyObservers(element, id);
+
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(RootNode());
+        shadowRoot && shadowRoot->ReferenceTarget() && id.View() == *shadowRoot->ReferenceTarget())
+    {
+      shadowRoot->NotifyHostIdTargetObservers();
     }
   }
 

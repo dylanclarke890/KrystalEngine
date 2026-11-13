@@ -317,7 +317,7 @@ namespace krys::boo::html
 
   RefPtr<dom::Element> HTMLButtonElement::CommandForElement() const noexcept
   {
-    return ElementForAttributeInternal(dom::DOMStringAtom(u8"commandfor"));
+    return ResolvedElementForAttribute(dom::DOMStringAtom(u8"commandfor"));
   }
 
   // https://html.spec.whatwg.org/#attr-button-command
@@ -442,8 +442,9 @@ namespace krys::boo::html
 
   RefPtr<dom::Element> HTMLButtonElement::CommandForElementForBindings() const noexcept
   {
-    // FIXME: Retargeting against the button's tree, once there are reference targets.
-    return CommandForElement();
+    // The getter steps are to return the result of running this's get the unresolved commandfor target
+    // element (a host, not what its reference target names).
+    return ElementForAttributeInternal(dom::DOMStringAtom(u8"commandfor"));
   }
 
   void HTMLButtonElement::CommandForElementForBindings(dom::Element *element) noexcept

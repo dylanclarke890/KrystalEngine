@@ -262,11 +262,11 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    // 4. Let popoverElement be the result of running node's get the popovertarget-associated element.
+    // 4. Let popoverElement be node's resolved popovertarget target element.
     // 5. If popoverElement is null, then return null.
     // 6. If popoverElement's popover attribute is in the No Popover state, then return null.
     // 7. Return popoverElement.
-    RefPtr<dom::Element> element = ElementForAttributeInternal(dom::DOMStringAtom(u8"popovertarget"));
+    RefPtr<dom::Element> element = ResolvedElementForAttribute(dom::DOMStringAtom(u8"popovertarget"));
     auto *popover = element ? DynamicDowncast<HTMLElement>(*element) : nullptr;
     if (popover && popover->GetPopoverState() != dom::PopoverState::None)
     {
@@ -277,7 +277,8 @@ namespace krys::boo::html
 
   RefPtr<dom::Element> HTMLFormControlElement::PopoverTargetElementForBindings() const noexcept
   {
-    // FIXME: Retargeting against the control's tree, once there are reference targets.
+    // The getter steps are to return the result of running this's get the unresolved popovertarget target
+    // element (a host, not what its reference target names).
     return ElementForAttributeInternal(dom::DOMStringAtom(u8"popovertarget"));
   }
 

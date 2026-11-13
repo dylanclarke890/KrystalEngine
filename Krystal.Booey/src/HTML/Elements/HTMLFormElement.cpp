@@ -25,6 +25,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/FormDataEvent.hpp"
@@ -823,7 +824,11 @@ namespace krys::boo::html
     // The element with a form attribute is a separate case, for speed.
     if (listedHTMLElement.HasAttribute(u8"form") && listedHTMLElement.IsConnected())
     {
-      auto order = dom::TreeOrder(listedHTMLElement, *this);
+      // A form in a shadow tree the control's form attribute reaches through its host's reference target is
+      // placed where the host is.
+      auto &formInControlTree =
+        Downcast<dom::Node>(*dom::EventTargetAlgorithms::Retarget(this, listedHTMLElement));
+      auto order = dom::TreeOrder(listedHTMLElement, formInControlTree);
       krys_debug_assert(order != std::partial_ordering::unordered);
       if (std::is_lt(order))
       {
