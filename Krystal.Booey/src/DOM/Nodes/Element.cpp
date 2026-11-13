@@ -2348,10 +2348,10 @@ namespace krys::boo::dom
     }
 
     // 4. Run attach a shadow root with this, init["mode"], init["delegatesFocus"], init["serializable"],
-    //    init["slotAssignment"], init["clonable"], and registry.
-    if (auto attachResult =
-          ElementAlgorithms::AttachShadowRoot(*this, init.Mode, init.Clonable, init.Serialisable,
-                                              init.DelegatesFocus, init.SlotAssignment, registry);
+    //    init["slotAssignment"], init["clonable"], init["referenceTarget"], and registry.
+    if (auto attachResult = ElementAlgorithms::AttachShadowRoot(
+          *this, init.Mode, init.Clonable, init.Serialisable, init.DelegatesFocus, init.SlotAssignment,
+          init.ReferenceTarget, registry);
         attachResult.HasException())
     {
       return attachResult.ReleaseException();
@@ -3499,6 +3499,30 @@ namespace krys::boo::dom
 #pragma endregion
 
 #pragma region Element Reflection
+
+  RefPtr<Element> Element::ResolveReferenceTarget() noexcept
+  {
+    // 1. If element is not a shadow host, or element's shadow root's reference target is null, then return
+    //    element.
+    auto *shadowRoot = TreeQueries::GetShadowRoot(*this);
+    if (!shadowRoot || !shadowRoot->ReferenceTarget())
+    {
+      return ShareRefPtr(this);
+    }
+
+    // 2. Let candidate be the first element, in tree order, whose root is element's shadow root and whose ID
+    //    is element's shadow root's reference target, if there is one; otherwise null.
+    auto candidate = shadowRoot->GetElementById(*shadowRoot->ReferenceTarget());
+
+    // 3. If candidate is null, then return null.
+    if (!candidate)
+    {
+      return nullptr;
+    }
+
+    // 4. Return the result of resolving the reference target on candidate.
+    return candidate->ResolveReferenceTarget();
+  }
 
   RefPtr<Element> Element::ElementForAttributeInternal(DOMStringAtom attributeName) const noexcept
   {

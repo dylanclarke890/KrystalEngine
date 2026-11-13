@@ -343,7 +343,7 @@ namespace krys::boo::dom::tests
     {
       return ElementAlgorithms::AttachShadowRoot(element, ShadowRootMode::Open, Clonable(false),
                                                  Serialisable(false), DelegatesFocus(false),
-                                                 SlotAssignmentMode::Named, nullptr);
+                                                 SlotAssignmentMode::Named, null, nullptr);
     };
     auto requireNotSupported = [](const ExceptionOr<void> &result)
     {
@@ -372,9 +372,9 @@ namespace krys::boo::dom::tests
     auto host = document->CreateElement(u8"div").ReleaseValue();
     auto registry = html::CustomElementRegistry::CreateScoped();
 
-    REQUIRE_FALSE(ElementAlgorithms::AttachShadowRoot(*host, ShadowRootMode::Open, Clonable(true),
-                                                      Serialisable(true), DelegatesFocus(true),
-                                                      SlotAssignmentMode::Manual, registry.get())
+    REQUIRE_FALSE(ElementAlgorithms::AttachShadowRoot(
+                    *host, ShadowRootMode::Open, Clonable(true), Serialisable(true), DelegatesFocus(true),
+                    SlotAssignmentMode::Manual, DOMString(u8"inner"), registry.get())
                     .HasException());
 
     auto shadow = host->ShadowRoot();
@@ -386,14 +386,15 @@ namespace krys::boo::dom::tests
     CHECK(shadow->Clonable());
     CHECK(shadow->Serialisable());
     CHECK(shadow->SlotAssignment() == SlotAssignmentMode::Manual);
+    CHECK(shadow->ReferenceTarget() == DOMString(u8"inner"));
     CHECK(shadow->CustomElementRegistry() == registry);
     CHECK_FALSE(shadow->IsAvailableToElementInternals());
     CHECK_FALSE(shadow->HasChildNodes());
 
     // A second attach throws, as the shadow root isn't declarative.
-    auto again =
-      ElementAlgorithms::AttachShadowRoot(*host, ShadowRootMode::Open, Clonable(true), Serialisable(true),
-                                          DelegatesFocus(true), SlotAssignmentMode::Manual, registry.get());
+    auto again = ElementAlgorithms::AttachShadowRoot(*host, ShadowRootMode::Open, Clonable(true),
+                                                     Serialisable(true), DelegatesFocus(true),
+                                                     SlotAssignmentMode::Manual, null, registry.get());
     REQUIRE(again.HasException());
     CHECK(again.GetException().Code() == ExceptionCode::NotSupportedError);
   }

@@ -36,6 +36,7 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::css
@@ -97,6 +98,8 @@ namespace krys::boo::dom
     SlotAssignmentMode SlotAssignment {SlotAssignmentMode::Named};
     Clonable Clonable {false};
     Serialisable Serialisable {false};
+    /// @see https://dom.spec.whatwg.org/#dom-shadowrootinit-referencetarget
+    Maybe<DOMString> ReferenceTarget;
     html::CustomElementRegistry *CustomElementRegistry {nullptr};
   };
 
@@ -136,6 +139,9 @@ namespace krys::boo::dom
     bool _keepCustomElementRegistryNull : 1 {false};
     bool _containsFocusedElement : 1 {false};
     RefPtr<css::StyleSheetList> _styleSheetList;
+    /// @brief The ID of the element in the shadow tree that references to the host go to, or null.
+    /// @see https://dom.spec.whatwg.org/#shadowroot-reference-target
+    Maybe<DOMString> _referenceTarget;
     /// @brief Parsed from the host's `exportparts` when first needed.
     mutable Maybe<PartMappings> _partMappings;
 
@@ -191,6 +197,16 @@ namespace krys::boo::dom
     {
       return _serializable;
     }
+
+    /// @brief The ID of the element in the shadow tree that references to the host (a label's `for`, a
+    /// button's `commandfor`) go to, or null for the host itself.
+    /// @see https://dom.spec.whatwg.org/#dom-shadowroot-referencetarget
+    KRYS_NODISCARD const Maybe<DOMString> &ReferenceTarget() const noexcept
+    {
+      return _referenceTarget;
+    }
+    /// @see https://dom.spec.whatwg.org/#dom-shadowroot-referencetarget
+    void SetReferenceTarget(Maybe<DOMString> referenceTarget) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-host
     KRYS_NODISCARD Element *Host() const noexcept;

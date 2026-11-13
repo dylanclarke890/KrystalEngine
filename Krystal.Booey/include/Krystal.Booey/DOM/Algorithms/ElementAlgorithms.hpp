@@ -76,11 +76,10 @@ namespace krys::boo::dom
                                                    Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-attach-a-shadow-root
-    KRYS_NODISCARD static ExceptionOr<void> AttachShadowRoot(Element &element, ShadowRootMode mode,
-                                                             Clonable clonable, Serialisable serializable,
-                                                             DelegatesFocus delegatesFocus,
-                                                             SlotAssignmentMode slotAssignment,
-                                                             html::CustomElementRegistry *registry) noexcept;
+    KRYS_NODISCARD static ExceptionOr<void>
+      AttachShadowRoot(Element &element, ShadowRootMode mode, Clonable clonable, Serialisable serializable,
+                       DelegatesFocus delegatesFocus, SlotAssignmentMode slotAssignment,
+                       Maybe<DOMString> referenceTarget, html::CustomElementRegistry *registry) noexcept;
 
     /// @brief Attaches a user agent shadow root to @p element, which must have no shadow root.
     static ShadowRoot &AttachUserAgentShadowRoot(Element &element) noexcept;

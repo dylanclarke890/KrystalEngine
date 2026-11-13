@@ -736,4 +736,63 @@ namespace krys::boo::dom::tests
     CHECK_FALSE(button->HasAttribute(u8"commandfor"));
     CHECK_FALSE(button->ElementForAttributeInternal(u8"commandfor"));
   }
+  TEST_CASE("Element: resolving the reference target goes into shadow roots that name one",
+            "[DOM][Element][html:resolve-the-reference-target]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto withId = [&](const char8_t *name, const char8_t *id)
+    {
+      auto element = document->CreateElement(DOMStringAtom(name)).ReleaseValue();
+      REQUIRE_FALSE(element->SetAttribute(u8"id", DOMString(id)).HasException());
+      return element;
+    };
+    auto host = withId(u8"div", u8"host");
+
+    SECTION("an element that isn't a shadow host is its own target")
+    {
+      CHECK(host->ResolveReferenceTarget() == host);
+    }
+
+    SECTION("nor is a shadow host whose shadow root has none")
+    {
+      (void)host->AttachShadow({}).ReleaseValue();
+      CHECK(host->ResolveReferenceTarget() == host);
+    }
+
+    SECTION("a shadow host whose shadow root names one")
+    {
+      auto shadow = host->AttachShadow({.ReferenceTarget = DOMString(u8"inner")}).ReleaseValue();
+
+      SECTION("the element in the shadow tree with the reference target's ID")
+      {
+        auto first = withId(u8"input", u8"inner");
+        auto second = withId(u8"input", u8"inner");
+        REQUIRE_FALSE(shadow->Append({Ref<Node>(first), Ref<Node>(second)}).HasException());
+        CHECK(host->ResolveReferenceTarget() == first);
+      }
+
+      SECTION("null if there's no such element, even one in the host's tree")
+      {
+        auto container = withId(u8"div", u8"container");
+        REQUIRE_FALSE(document->AppendChild(*container).HasException());
+        REQUIRE_FALSE(
+          container->Append({Ref<Node>(host), Ref<Node>(withId(u8"input", u8"inner"))}).HasException());
+        CHECK(host->ResolveReferenceTarget() == nullptr);
+      }
+
+      SECTION("through nested shadow roots")
+      {
+        auto innerHost = withId(u8"div", u8"inner");
+        REQUIRE_FALSE(shadow->AppendChild(*innerHost).HasException());
+        auto innerShadow = innerHost->AttachShadow({.ReferenceTarget = DOMString(u8"deep")}).ReleaseValue();
+        auto deep = withId(u8"input", u8"deep");
+        REQUIRE_FALSE(innerShadow->AppendChild(*deep).HasException());
+        CHECK(host->ResolveReferenceTarget() == deep);
+
+        // A nested shadow root naming nothing in it makes the whole chain null.
+        innerShadow->SetReferenceTarget(DOMString(u8"missing"));
+        CHECK(host->ResolveReferenceTarget() == nullptr);
+      }
+    }
+  }
 }

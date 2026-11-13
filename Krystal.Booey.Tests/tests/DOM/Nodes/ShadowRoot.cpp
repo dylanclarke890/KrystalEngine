@@ -142,6 +142,37 @@ namespace krys::boo::dom::tests
           == scoped);
   }
 
+  TEST_CASE("ShadowRoot.referenceTarget: null unless attachShadow() or the setter gives one",
+            "[DOM][ShadowRoot][dom:shadowroot-reference-target][dom:dom-shadowroot-referencetarget]"
+            "[dom:dom-shadowrootinit-referencetarget]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+
+    SECTION("without one")
+    {
+      CHECK_FALSE(host->AttachShadow({}).ReleaseValue()->ReferenceTarget());
+    }
+
+    SECTION("from attachShadow()")
+    {
+      auto shadow = host->AttachShadow({.ReferenceTarget = DOMString(u8"inner")}).ReleaseValue();
+      CHECK(shadow->ReferenceTarget() == DOMString(u8"inner"));
+    }
+
+    SECTION("set, and back to null")
+    {
+      auto shadow = host->AttachShadow({}).ReleaseValue();
+      shadow->SetReferenceTarget(DOMString(u8"inner"));
+      CHECK(shadow->ReferenceTarget() == DOMString(u8"inner"));
+      // Any string, an empty one too, as nothing checks it's an ID.
+      shadow->SetReferenceTarget(DOMString());
+      CHECK(shadow->ReferenceTarget() == DOMString());
+      shadow->SetReferenceTarget(null);
+      CHECK_FALSE(shadow->ReferenceTarget());
+    }
+  }
+
   TEST_CASE("ShadowRoot.onslotchange: an event handler for the slotchange event, which bubbles to it",
             "[DOM][ShadowRoot][dom:dom-shadowroot-onslotchange][dom:shadowroot-onslotchange]")
   {

@@ -409,6 +409,7 @@ namespace krys::boo::dom
                                                         Clonable clonable, Serialisable serializable,
                                                         DelegatesFocus delegatesFocus,
                                                         SlotAssignmentMode slotAssignment,
+                                                        Maybe<DOMString> referenceTarget,
                                                         html::CustomElementRegistry *registry) noexcept
   {
     // 1. If element's namespace is not the HTML namespace, then throw a "NotSupportedError" DOMException.
@@ -471,7 +472,7 @@ namespace krys::boo::dom
 
     // 5. Let shadow be the result of creating a node that implements ShadowRoot, given element's node
     //    document.
-    // 14. Set shadow's custom element registry to registry.
+    // 15. Set shadow's custom element registry to registry.
     auto shadow = CreateRef<ShadowRoot>(element.NodeDocument(), ShareRefPtr(registry));
     // 6. Set shadow's host to element.
     shadow->_host = CreateWeakPtr(&element);
@@ -496,8 +497,10 @@ namespace krys::boo::dom
     shadow->_slotAssignment = slotAssignment;
     // 13. Set shadow's clonable to clonable.
     shadow->_clonable = clonable;
+    // 14. Set shadow's reference target to referenceTarget.
+    shadow->_referenceTarget = krys::move(referenceTarget);
 
-    // 15. Set element's shadow root to shadow.
+    // 16. Set element's shadow root to shadow.
     AddShadowRoot(element, shadow);
 
     return {};

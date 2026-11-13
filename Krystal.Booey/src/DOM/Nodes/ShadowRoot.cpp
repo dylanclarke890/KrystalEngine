@@ -92,6 +92,12 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+  void ShadowRoot::SetReferenceTarget(Maybe<DOMString> referenceTarget) noexcept
+  {
+    // The setter steps are to set this's reference target to the given value.
+    _referenceTarget = krys::move(referenceTarget);
+  }
+
   Element *ShadowRoot::Host() const noexcept
   {
     if (auto host = _host.lock())

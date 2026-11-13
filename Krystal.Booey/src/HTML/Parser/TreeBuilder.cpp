@@ -4250,7 +4250,7 @@ namespace krys::boo::html
     //           user agent may report an error to the developer console; return.
     if (auto result = dom::ElementAlgorithms::AttachShadowRoot(*declarativeShadowHostElement, *mode, clonable,
                                                                serializable, delegatesFocus, slotAssignment,
-                                                               registry.get());
+                                                               null, registry.get());
         result.HasException())
     {
       InsertElementAtAdjustedInsertionLocation(templateElement, insertionLocation, true);

@@ -1527,6 +1527,12 @@ namespace krys::boo::dom
 
 #pragma region Element Reflection
 
+    /// @brief The element a reference to this one targets: this, or, through its shadow root's reference
+    /// target, the element in its shadow tree with that ID (resolved in turn); null if there's no such
+    /// element.
+    /// @see https://html.spec.whatwg.org/#resolve-the-reference-target
+    KRYS_NODISCARD RefPtr<Element> ResolveReferenceTarget() noexcept;
+
     /// @brief The element an element reflection attribute refers to: the one set through its IDL attribute,
     /// if it's still in the element's shadow-including ancestors' trees, else the one with the attribute's
     /// value as its ID in the element's tree.

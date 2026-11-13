@@ -117,13 +117,12 @@ namespace krys::boo::dom
         }
 
         // 6d. Attach a shadow root with copy, node's shadow root's mode, node's shadow root's delegates
-        // focus,
-        //     node's shadow root's serializable, node's shadow root's slot assignment, true, and
-        //     shadowRootRegistry.
+        //     focus, node's shadow root's serializable, node's shadow root's slot assignment, true, node's
+        //     shadow root's reference target, and shadowRootRegistry.
         if (auto attach = ElementAlgorithms::AttachShadowRoot(
               *elementCopy, shadowRoot->Mode(), Clonable(true), Serialisable(shadowRoot->Serialisable()),
               DelegatesFocus(shadowRoot->DelegatesFocus()), shadowRoot->SlotAssignment(),
-              shadowRootRegistry.get());
+              shadowRoot->ReferenceTarget(), shadowRootRegistry.get());
             attach.HasException())
         {
           return attach.ReleaseException();

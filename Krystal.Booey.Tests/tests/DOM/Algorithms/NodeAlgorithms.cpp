@@ -153,7 +153,8 @@ namespace krys::boo::dom::tests
                                       .DelegatesFocus = DelegatesFocus(true),
                                       .SlotAssignment = SlotAssignmentMode::Manual,
                                       .Clonable = Clonable(true),
-                                      .Serialisable = Serialisable(true)})
+                                      .Serialisable = Serialisable(true),
+                                      .ReferenceTarget = DOMString(u8"inner")})
                       .ReleaseValue();
       auto inner = CreateElement(*document, u8"p");
       Append(*inner, *document->CreateTextNode(u8"deep"));
@@ -169,6 +170,7 @@ namespace krys::boo::dom::tests
       CHECK(copyShadow->SlotAssignment() == SlotAssignmentMode::Manual);
       CHECK(copyShadow->Clonable());
       CHECK(copyShadow->Serialisable());
+      CHECK(copyShadow->ReferenceTarget() == DOMString(u8"inner"));
 
       // The shadow tree is cloned in full.
       REQUIRE(copyShadow->FirstChild() != nullptr);
