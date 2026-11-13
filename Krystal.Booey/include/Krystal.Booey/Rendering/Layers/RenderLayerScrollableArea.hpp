@@ -263,6 +263,7 @@ namespace krys::boo
     KRYS_NODISCARD GraphicsLayer *LayerForScrollCorner() const noexcept;
     void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept override;
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override;
+    KRYS_NODISCARD bool ScrollAnimatorEnabled() const noexcept override;
 
     /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset. Overlay scrollbars paint over
     /// everything else, in a second pass through the layer tree (@p paintingOverlayControls): the first pass

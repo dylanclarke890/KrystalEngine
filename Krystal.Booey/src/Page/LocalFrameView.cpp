@@ -1720,6 +1720,12 @@ namespace krys::boo
     return renderView->GetWritingMode().IsBlockFlipped();
   }
 
+  bool LocalFrameView::ScrollAnimatorEnabled() const noexcept
+  {
+    auto *document = Frame().Document();
+    return document && document->GetSettings().ScrollAnimatorEnabled;
+  }
+
   bool LocalFrameView::IsScrollable() const noexcept
   {
     // Check for:

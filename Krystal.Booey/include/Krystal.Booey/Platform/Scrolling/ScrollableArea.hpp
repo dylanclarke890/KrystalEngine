@@ -151,12 +151,16 @@ namespace krys::boo
     bool SingleAxisScroll(ScrollEventAxis axis, float delta,
                           ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
 
-    /// @brief Scrolls by @p wheelEvent's deltas, as a user scroll.
+    /// @brief Scrolls by @p wheelEvent's deltas, as a user scroll: smoothly for a wheel's notches, if the
+    /// area's scroll animator is enabled, and following the fingers for a gesture.
     /// @return Whether it scrolled: false if it can't scroll, or is at its end in the event's direction.
-    // FIXME: Animated scrolling of notches outside a scroll snap container, and momentum the host doesn't
-    // send.
     virtual bool HandleWheelEventForScrolling(const PlatformWheelEvent &wheelEvent) noexcept;
     KRYS_NODISCARD virtual bool IsScrollableOrRubberbandable() const noexcept = 0;
+    /// @brief Whether a wheel's notches scroll smoothly (`Settings::ScrollAnimatorEnabled`).
+    KRYS_NODISCARD virtual bool ScrollAnimatorEnabled() const noexcept
+    {
+      return false;
+    }
 
     // Should be called when the scroll position changes externally, for example if the scroll layer position
     // is updated on the scrolling thread and we need to notify the main thread.

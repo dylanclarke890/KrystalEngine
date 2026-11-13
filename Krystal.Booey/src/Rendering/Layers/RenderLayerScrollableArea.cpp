@@ -54,6 +54,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
@@ -1755,5 +1756,10 @@ namespace krys::boo
   {
     auto *box = _layer.GetRenderBox();
     return box && box->CanBeScrolledAndHasScrollableArea();
+  }
+
+  bool RenderLayerScrollableArea::ScrollAnimatorEnabled() const noexcept
+  {
+    return _layer.Renderer().GetDocument().GetSettings().ScrollAnimatorEnabled;
   }
 }

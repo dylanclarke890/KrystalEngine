@@ -66,7 +66,7 @@ namespace krys::boo::tests
       }
     };
 
-    /// @brief The keyboard scrolling at once, for what's about where it goes rather than how.
+    /// @brief The keyboard and the wheel scrolling at once, for what's about where they go rather than how.
     struct ScrollAnimatorOff
     {
       Settings &Value;
@@ -854,6 +854,7 @@ namespace krys::boo::tests
     ScrollFixture fixture {utf8_string(TallPage)
                            + u8"<div id=box style=position:fixed;top:0;width:100px;height:50px;overflow:auto>"
                              u8"<div style=height:200px></div></div>"};
+    ScrollAnimatorOff animatorOff {fixture.Document->GetSettings()};
     auto &view = fixture.View();
     auto &handler = fixture.Frame->GetEventHandler();
     auto &box = fixture.ById(u8"box");

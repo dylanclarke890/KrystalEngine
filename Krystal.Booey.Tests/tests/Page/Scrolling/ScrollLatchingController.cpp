@@ -5,7 +5,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
 
 namespace krys::boo::tests
 {
@@ -112,6 +114,10 @@ namespace krys::boo::tests
 
     SECTION("a mouse wheel's notches don't latch")
     {
+      // Where they go, so at once rather than smoothly.
+      auto &settings = fixture.Document->GetSettings();
+      settings.ScrollAnimatorEnabled = false;
+      auto restoreSettings = MakeScopeExit([&] { settings.ScrollAnimatorEnabled = true; });
       box.SetScrollTop(200);
       auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
       CHECK(handler.HandleWheelEvent(

@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Page/ScrollOptions.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -338,6 +339,70 @@ namespace krys::boo::tests
       settings.ScrollAnimatorEnabled = false;
       CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
       CHECK(scroller.ScrollTop() == 40);
+      settings.ScrollAnimatorEnabled = true;
+    }
+  }
+
+  TEST_CASE("ScrollAnimator: a wheel's notches are animated", "[Platform][Scrolling][ScrollAnimator]")
+  {
+    AnimationPageFixture fixture {utf8_string(Page)};
+    auto &scroller = fixture.ById(u8"s");
+    auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
+    // A notch down (the content moves up), over the box.
+    auto notch = [&](IntPoint position = {10, 10})
+    {
+      return handler.HandleWheelEvent(PlatformWheelEvent(
+        position, position, 0, -100, 0, -1, PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {}));
+    };
+
+    SECTION("over frames")
+    {
+      CHECK(notch());
+      CHECK(scroller.ScrollTop() == 0);
+      CHECK(AreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
+      fixture.Frame();
+      fixture.Frame(50ms);
+      CHECK(scroller.ScrollTop() > 0);
+      CHECK(scroller.ScrollTop() < 100);
+      Finish(fixture);
+      CHECK(scroller.ScrollTop() == 100);
+    }
+
+    SECTION("notches in quick succession add up")
+    {
+      CHECK(notch());
+      fixture.Frame();
+      CHECK(notch());
+      CHECK(notch());
+      Finish(fixture);
+      CHECK(scroller.ScrollTop() == 300);
+    }
+
+    SECTION("the view's too")
+    {
+      fixture.SetStyle(u8"s", u8"margin-bottom:1000px");
+      CHECK(notch({150, 50}));
+      auto &view = *fixture.Document->View();
+      CHECK(view.ScrollY() == 0);
+      Finish(fixture);
+      CHECK(view.ScrollY() == 100);
+    }
+
+    SECTION("but not a touchpad's pan, which follows the fingers")
+    {
+      CHECK(handler.HandleWheelEvent(
+        PlatformWheelEvent(IntPoint(10, 10), IntPoint(10, 10), 0, -30, 0, 0,
+                           PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})
+          .CopyAsTouchpadPan(PlatformWheelEventPhase::Changed, PlatformWheelEventPhase::None)));
+      CHECK(scroller.ScrollTop() == 30);
+    }
+
+    SECTION("nor if the user's preference turns them off")
+    {
+      auto &settings = fixture.Document->GetSettings();
+      settings.ScrollAnimatorEnabled = false;
+      CHECK(notch());
+      CHECK(scroller.ScrollTop() == 100);
       settings.ScrollAnimatorEnabled = true;
     }
   }

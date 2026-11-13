@@ -565,6 +565,7 @@ namespace krys::boo
     {
       return IsScrollable();
     }
+    KRYS_NODISCARD bool ScrollAnimatorEnabled() const noexcept override;
 
     /// @brief The view's scrollbar at @p windowPoint, if any.
     KRYS_NODISCARD Scrollbar *ScrollbarAtPoint(const IntPoint &windowPoint) const noexcept;

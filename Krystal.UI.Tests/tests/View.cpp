@@ -33,6 +33,7 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
@@ -41,6 +42,7 @@
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Core/Threading/ManualWorkQueue.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
@@ -1720,6 +1722,10 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
     pal::WheelScrollSettings threeLines {.Lines = 3u, .Chars = 3};
+    // How far each notch goes, so at once rather than smoothly.
+    auto &settings = view.Document().GetSettings();
+    settings.ScrollAnimatorEnabled = false;
+    auto restoreSettings = MakeScopeExit([&] { settings.ScrollAnimatorEnabled = true; });
 
     // A notch towards the user is three lines down, at 100 pixels per three lines.
     CHECK(view.MouseWheel({50, 50}, 0, -1, {}, threeLines));

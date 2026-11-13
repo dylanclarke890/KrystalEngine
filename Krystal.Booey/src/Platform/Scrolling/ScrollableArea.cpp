@@ -583,8 +583,8 @@ namespace krys::boo
       return false;
     }
 
-    // The scroll animator's and the scrolling effects controller's handleWheelEvent, without animation
-    // outside a scroll snap container, or kinetic scrolling.
+    // The scroll animator's and the scrolling effects controller's handleWheelEvent, without kinetic
+    // scrolling.
     auto scrollOffset = GetScrollOffset();
     float deltaX = AllowsHorizontalScrolling() ? wheelEvent.DeltaX() : 0;
     float deltaY = AllowsVerticalScrolling() ? wheelEvent.DeltaY() : 0;
@@ -634,13 +634,14 @@ namespace krys::boo
       return false;
     }
 
-    // A notch goes to the next snap position that way. A gesture (a touch's or a touchpad's pan) moves
-    // freely, and snaps when it ends.
+    // A notch goes to the next snap position that way, smoothly, as it does elsewhere when the scroll
+    // animator is enabled. A gesture (a touch's or a touchpad's pan) moves freely, and snaps when it ends.
     if (wheelEvent.IsGestureScroll())
     {
       _isGestureScrollInProgress = true;
     }
-    else if (_scrollAnimator && _scrollAnimator->UsesScrollSnap())
+    else if ((_scrollAnimator && _scrollAnimator->UsesScrollSnap())
+             || (ScrollAnimatorEnabled() && !wheelEvent.HasPreciseScrollingDeltas()))
     {
       if (deltaX)
       {
