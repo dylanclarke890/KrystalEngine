@@ -128,7 +128,6 @@ namespace krys::boo
 
     // The selection is brought up to date and revealed at the next rendering update, by which time a
     // temporary one is gone, so it's revealed now.
-    // FIXME: Revealing only forward (OnlyAllowForwardScrolling), once revealing selections does.
     if (isTemporarySelection == IsTemporarySelection::Yes
         && _options.Contains(TemporarySelectionOption::RevealSelection))
     {
@@ -139,7 +138,10 @@ namespace krys::boo
           ? RevealExtentOption::DoNotRevealExtent
           : RevealExtentOption::RevealExtent,
         _options.Contains(TemporarySelectionOption::ForceCenterScroll) ? ForceCenterScroll::Yes
-                                                                       : ForceCenterScroll::No);
+                                                                       : ForceCenterScroll::No,
+        _options.Contains(TemporarySelectionOption::OnlyAllowForwardScrolling)
+          ? OnlyAllowForwardScrolling::Yes
+          : OnlyAllowForwardScrolling::No);
     }
   }
 }

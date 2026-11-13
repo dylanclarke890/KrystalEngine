@@ -127,6 +127,7 @@ namespace krys::boo
     ScrollBehavior Behavior {ScrollBehavior::Auto};
     AllowScrollingOverflowHidden AllowOverflowHidden {AllowScrollingOverflowHidden::Yes};
     Maybe<LayoutRect> VisibilityCheckRect;
+    OnlyAllowForwardScrolling OnlyAllowForward {OnlyAllowForwardScrolling::No};
   };
 
   enum class RepaintStatus : uint8

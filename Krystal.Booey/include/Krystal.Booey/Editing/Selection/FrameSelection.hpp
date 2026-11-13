@@ -89,13 +89,13 @@ namespace krys::boo
     Yes
   };
 
-  // FIXME: Only scrolling forward (onlyAllowForwardScrolling), once scrolling a rect into view can.
   struct RevealSelectionOptions
   {
     SelectionRevealMode RevealMode {SelectionRevealMode::Reveal};
     ScrollAlignment Alignment {ScrollAlignment::AlignCenterIfNeeded};
     RevealExtentOption RevealExtent {RevealExtentOption::DoNotRevealExtent};
     ScrollBehavior Behavior {ScrollBehavior::Instant};
+    OnlyAllowForwardScrolling OnlyAllowForward {OnlyAllowForwardScrolling::No};
   };
 
   enum class FrameSelectionSetSelectionOption : uint8
@@ -519,9 +519,11 @@ namespace krys::boo
     void SetFocusedElementIfNeeded(EnumSet<SetSelectionOption> options) noexcept;
 
     void UpdateSelectionAppearanceNow() noexcept;
-    void UpdateAndRevealSelection(ScrollBehavior scrollBehavior = ScrollBehavior::Instant,
-                                  RevealExtentOption revealExtent = RevealExtentOption::RevealExtent,
-                                  ForceCenterScroll forceCenterScroll = ForceCenterScroll::No) noexcept;
+    void UpdateAndRevealSelection(
+      ScrollBehavior scrollBehavior = ScrollBehavior::Instant,
+      RevealExtentOption revealExtent = RevealExtentOption::RevealExtent,
+      ForceCenterScroll forceCenterScroll = ForceCenterScroll::No,
+      OnlyAllowForwardScrolling onlyAllowForwardScrolling = OnlyAllowForwardScrolling::No) noexcept;
     /// @brief Tells accessibility the selection changed.
     void NotifyAccessibilityForSelectionChange() noexcept;
 

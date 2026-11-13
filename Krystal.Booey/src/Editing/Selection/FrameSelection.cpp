@@ -563,7 +563,9 @@ namespace krys::boo
       options.Contains(SetSelectionOption::RevealSelectionBounds) ? RevealExtentOption::DoNotRevealExtent
                                                                   : RevealExtentOption::RevealExtent,
       options.Contains(SetSelectionOption::ForceCenterScroll) ? ForceCenterScroll::Yes
-                                                              : ForceCenterScroll::No);
+                                                              : ForceCenterScroll::No,
+      options.Contains(SetSelectionOption::OnlyAllowForwardScrolling) ? OnlyAllowForwardScrolling::Yes
+                                                                      : OnlyAllowForwardScrolling::No);
   }
 
   void FrameSelection::UpdateSelectionAppearanceNow() noexcept
@@ -592,7 +594,8 @@ namespace krys::boo
 
   void FrameSelection::UpdateAndRevealSelection(ScrollBehavior scrollBehavior,
                                                 RevealExtentOption revealExtent,
-                                                ForceCenterScroll forceCenterScroll) noexcept
+                                                ForceCenterScroll forceCenterScroll,
+                                                OnlyAllowForwardScrolling onlyAllowForwardScrolling) noexcept
   {
     if (!_pendingSelectionUpdate)
     {
@@ -623,7 +626,8 @@ namespace krys::boo
         alignment = ScrollAlignment::AlignCenterAlways;
       }
 
-      RevealSelection({_selectionRevealMode, alignment, revealExtent, scrollBehavior});
+      RevealSelection(
+        {_selectionRevealMode, alignment, revealExtent, scrollBehavior, onlyAllowForwardScrolling});
     }
     if (!_document->GetEditor().IgnoreSelectionChanges())
     {
@@ -691,6 +695,7 @@ namespace krys::boo
     options.AlignX = revealSelectionOptions.Alignment;
     options.AlignY = revealSelectionOptions.Alignment;
     options.Behavior = revealSelectionOptions.Behavior;
+    options.OnlyAllowForward = revealSelectionOptions.OnlyAllowForward;
     (void)LocalFrameView::ScrollRectToVisible(rect, *start.DeprecatedNode()->Renderer(), insideFixed,
                                               options);
     UpdateAppearance();

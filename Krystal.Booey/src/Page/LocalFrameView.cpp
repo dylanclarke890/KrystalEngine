@@ -2176,9 +2176,8 @@ namespace krys::boo
       GetPossiblyFixedRectToExpose(viewRect, targetRect, isFixed, options.AlignX, options.AlignY);
 
     // Avoid scrolling to the rounded value of revealRect.location() if we don't actually need to scroll
-    // (Only scrolling forward, OnlyAllowForwardScrolling, is for find in page, which there isn't; see
-    // DIFFERENCES.md.)
-    if (revealRect != viewRect)
+    if (revealRect != viewRect
+        && (options.OnlyAllowForward == OnlyAllowForwardScrolling::No || revealRect.Y() > viewRect.Y()))
     {
       ScrollOffset clampedScrollPosition =
         RoundedIntPoint(revealRect.Location()).ConstrainedBetween(minScrollPosition, maxScrollPosition);

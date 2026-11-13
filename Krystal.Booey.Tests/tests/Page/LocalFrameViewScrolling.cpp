@@ -7,7 +7,10 @@
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp"
+#include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -460,6 +463,42 @@ namespace krys::boo::tests
       auto rect = link.GetBoundingClientRect();
       CHECK(rect->Y() >= 0);
       CHECK(rect->Y() + rect->Height() <= 100);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: revealing a selection only forward",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {u8"<!DOCTYPE html><style>body{margin:0}#page{width:400px;height:600px}</style>"
+                           u8"<div id=page><div id=top style=height:20px>top</div>"
+                           u8"<div id=target style=margin-top:280px;height:20px>target</div></div>"};
+    auto &view = fixture.View();
+    auto reveal = [&](utf8_stringview id, EnumSet<TemporarySelectionOption> extraOptions)
+    {
+      auto &text = *fixture.ById(id).FirstChild();
+      VisibleSelection selection(dom::SimpleRange {{ShareRef(text), 0}, {ShareRef(text), 1}});
+      TemporarySelectionChange change(*fixture.Document, selection,
+                                      EnumSet {TemporarySelectionOption::RevealSelection} | extraOptions);
+    };
+
+    SECTION("it scrolls down to what's below the view")
+    {
+      reveal(u8"target", {TemporarySelectionOption::OnlyAllowForwardScrolling});
+      CHECK(view.GetScrollPosition().Y() > 200);
+    }
+
+    SECTION("but not back up to what's above it")
+    {
+      view.SetScrollPosition(ScrollPosition(0, 500));
+      reveal(u8"top", {TemporarySelectionOption::OnlyAllowForwardScrolling});
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 500));
+    }
+
+    SECTION("which it does otherwise")
+    {
+      view.SetScrollPosition(ScrollPosition(0, 500));
+      reveal(u8"top", {});
+      CHECK(view.GetScrollPosition().Y() < 20);
     }
   }
 

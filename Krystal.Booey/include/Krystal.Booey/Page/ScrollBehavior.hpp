@@ -44,6 +44,13 @@ namespace krys::boo
     Smooth
   };
 
+  /// @brief Whether revealing something may only scroll the view down, never back up.
+  enum class OnlyAllowForwardScrolling : bool
+  {
+    No,
+    Yes
+  };
+
   /// @brief Whether a scroll with @p behavior, of the scrolling box of @p associatedElement, is smooth.
   /// @see https://drafts.csswg.org/cssom-view/#scrolling
   KRYS_NODISCARD bool UseSmoothScrolling(ScrollBehavior behavior,
