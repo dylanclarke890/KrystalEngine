@@ -381,6 +381,61 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "LocalFrameView: while scrolling is prohibited, a contents size change doesn't scroll",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}</style><div id=page style=height:600px></div>"};
+    auto &view = fixture.View();
+    auto &page = fixture.ById(u8"page");
+    view.SetScrollPosition({0, 500});
+    REQUIRE(view.ScrollY() == 500);
+
+    auto shrink = [&]
+    {
+      REQUIRE_FALSE(page.SetAttribute(u8"style", u8"height:50px;width:50px").HasException());
+      (void)fixture.Document->UpdateLayout();
+    };
+
+    SECTION("it catches up when the scope ends")
+    {
+      auto prohibit = view.ProhibitScrollingWhileContentSizeChanges();
+      shrink();
+      CHECK(view.ContentsSize().Height() == 100);
+      CHECK(view.ScrollY() == 500);
+      CHECK(view.VerticalScrollbar());
+
+      prohibit = nullptr;
+      CHECK(view.ScrollY() == 0);
+      CHECK_FALSE(view.VerticalScrollbar());
+    }
+
+    SECTION("or after the layout that's due")
+    {
+      auto prohibit = view.ProhibitScrollingWhileContentSizeChanges();
+      shrink();
+      REQUIRE_FALSE(page.SetAttribute(u8"style", u8"height:40px;width:50px").HasException());
+      prohibit = nullptr;
+      CHECK(view.ScrollY() == 500);
+
+      (void)fixture.Document->UpdateLayout();
+      CHECK(view.ScrollY() == 0);
+      CHECK_FALSE(view.VerticalScrollbar());
+    }
+
+    SECTION("scopes nest")
+    {
+      auto outer = view.ProhibitScrollingWhileContentSizeChanges();
+      auto inner = view.ProhibitScrollingWhileContentSizeChanges();
+      shrink();
+      inner = nullptr;
+      CHECK(view.ScrollY() == 500);
+      outer = nullptr;
+      CHECK(view.ScrollY() == 0);
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: scrolling into view",
                    "[Page][LocalFrameView][Scrolling]")
   {

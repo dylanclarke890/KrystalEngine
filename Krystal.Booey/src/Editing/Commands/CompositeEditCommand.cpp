@@ -65,6 +65,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -125,8 +126,6 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Stopping scrolling as content size changes during the undo
-  // (prohibitScrollingWhenChangingContentSize).
   void EditCommandComposition::Unapply(AddToUndoStack addToUndoStack) noexcept
   {
     if (!_document->Frame())
@@ -147,6 +146,9 @@ namespace krys::boo
     // of VisiblePositions).
     _document->UpdateLayoutIgnorePendingStylesheets();
 
+    // The page doesn't scroll as the edit changes its size.
+    auto prohibitScrollingForScope =
+      _document->View() ? _document->View()->ProhibitScrollingWhileContentSizeChanges() : nullptr;
     if (addToUndoStack == AddToUndoStack::Yes && !_document->GetEditor().WillUnapplyEditing(*this))
     {
       return;
@@ -198,6 +200,8 @@ namespace krys::boo
     // of VisiblePositions).
     _document->UpdateLayoutIgnorePendingStylesheets();
 
+    auto prohibitScrollingForScope =
+      _document->View() ? _document->View()->ProhibitScrollingWhileContentSizeChanges() : nullptr;
     if (!_document->GetEditor().WillReapplyEditing(*this))
     {
       return;
@@ -398,8 +402,6 @@ namespace krys::boo
     return GetDocument().GetEditor().WillApplyEditing(*this, TargetRangesForBindings());
   }
 
-  // FIXME: Stopping scrolling as content size changes during the command
-  // (prohibitScrollingWhenChangingContentSize).
   void CompositeEditCommand::Apply() noexcept
   {
     if (!EndingSelection().IsContentRichlyEditable())
@@ -443,6 +445,8 @@ namespace krys::boo
     Ref<dom::Document> document = ShareRef(GetDocument());
     document->UpdateLayoutIgnorePendingStylesheets();
 
+    auto prohibitScrollingForScope =
+      document->View() ? document->View()->ProhibitScrollingWhileContentSizeChanges() : nullptr;
     if (!WillApplyCommand())
     {
       return;

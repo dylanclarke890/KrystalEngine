@@ -38,6 +38,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::url
 {
@@ -75,6 +76,7 @@ namespace krys::boo
   class IntRect;
   class LocalFrame;
   class Pasteboard;
+  class ProhibitScrollingWhenChangingContentSizeForScope;
   class VisibleSelection;
   struct ScrollAlignment;
   enum class FrameSelectionSetSelectionOption : uint8;
@@ -156,6 +158,10 @@ namespace krys::boo
   private:
     dom::Document &_document;
     RefPtr<CompositeEditCommand> _lastEditCommand;
+    // While typing, the page doesn't scroll as the text changes its size, until the typing command is
+    // applied.
+    UniquePtr<ProhibitScrollingWhenChangingContentSizeForScope>
+      _prohibitScrollingDueToContentSizeChangesWhileTyping;
     EditorParagraphSeparator _defaultParagraphSeparator {EditorParagraphSeparator::div};
     bool _copyingFromMenuOrKeyBinding {false};
     bool _pastingFromMenuOrKeyBinding {false};

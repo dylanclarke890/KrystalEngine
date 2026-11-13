@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/Editing/Commands/TypingCommand.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 
 namespace krys::boo::tests
 {
@@ -203,6 +206,34 @@ namespace krys::boo::tests
       CHECK(fixture.Run(u8"InsertParagraph"));
       CHECK(fixture.Run(u8"DeleteBackward"));
       CHECK(Narrow(fixture.InnerHTML(root)) == "<div id=\"a\">abc</div>");
+    }
+
+    SECTION("The view's scrollbars follow the text once each typing step is done")
+    {
+      REQUIRE_FALSE(root.SetAttribute(u8"style", u8"font-size:100px;line-height:100px").HasException());
+      (void)fixture.Document->UpdateLayout();
+      auto &view = *fixture.Frame->View();
+      // Three 100 pixel lines fill the 300 pixel view; the step that makes a fourth shows the scrollbar.
+      CHECK(fixture.Run(u8"InsertParagraph"));
+      CHECK(fixture.Run(u8"InsertParagraph"));
+      (void)fixture.Document->UpdateLayout();
+      REQUIRE_FALSE(view.VerticalScrollbar());
+      CHECK(fixture.Run(u8"InsertParagraph"));
+      (void)fixture.Document->UpdateLayout();
+      CHECK(view.VerticalScrollbar());
+    }
+
+    SECTION("A cancelled typing step doesn't keep the view from following its contents")
+    {
+      auto cancel =
+        root.AddEventListener(dom::DOMStringAtom(u8"beforeinput"),
+                              Func<void(dom::Event &)>([](dom::Event &event) { event.PreventDefault(); }));
+      (void)fixture.Run(u8"InsertParagraph");
+      CHECK(Narrow(fixture.InnerHTML(root)) == "<div id=\"a\">abc</div>");
+
+      REQUIRE_FALSE(root.SetAttribute(u8"style", u8"height:400px").HasException());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(fixture.Frame->View()->VerticalScrollbar());
     }
   }
 

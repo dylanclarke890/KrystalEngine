@@ -71,6 +71,7 @@
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
@@ -757,8 +758,7 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Stopping scrolling as content grows while typing. (There are no Writing Tools to suppress editing;
-  // see DIFFERENCES.md.)
+  // There are no Writing Tools to suppress editing; see DIFFERENCES.md.
   bool Editor::WillApplyEditing(CompositeEditCommand &command,
                                 List<RefPtr<dom::StaticRange>> &&targetRanges) noexcept
   {
@@ -773,13 +773,28 @@ namespace krys::boo
       return true;
     }
 
+    if (command.IsTopLevelCommand() && command.IsTypingCommand())
+    {
+      if (auto *view = _document.View())
+      {
+        _prohibitScrollingDueToContentSizeChangesWhileTyping =
+          view->ProhibitScrollingWhileContentSizeChanges();
+      }
+    }
+
     auto isInputMethodComposing =
       command.IsInputMethodComposing() ? dom::IsInputMethodComposing::Yes : dom::IsInputMethodComposing::No;
-    return DispatchBeforeInputEvents(ShareRefPtr(composition->StartingRootEditableElement()),
-                                     ShareRefPtr(composition->EndingRootEditableElement()),
-                                     command.InputEventTypeName(), isInputMethodComposing,
-                                     InputEventData(command), command.InputEventDataTransfer(), targetRanges,
-                                     command.IsBeforeInputEventCancelable());
+    bool proceed = DispatchBeforeInputEvents(ShareRefPtr(composition->StartingRootEditableElement()),
+                                             ShareRefPtr(composition->EndingRootEditableElement()),
+                                             command.InputEventTypeName(), isInputMethodComposing,
+                                             InputEventData(command), command.InputEventDataTransfer(),
+                                             targetRanges, command.IsBeforeInputEventCancelable());
+    // A cancelled step isn't applied, so it doesn't keep prohibiting scrolling (WebKit's waits for the next).
+    if (!proceed && command.IsTypingCommand())
+    {
+      _prohibitScrollingDueToContentSizeChangesWhileTyping = nullptr;
+    }
+    return proceed;
   }
 
   namespace
@@ -864,6 +879,11 @@ namespace krys::boo
         }
       }
       RespondToChangedContents(newSelection);
+
+      if (command.IsTypingCommand())
+      {
+        _prohibitScrollingDueToContentSizeChangesWhileTyping = nullptr;
+      }
     }
   }
 

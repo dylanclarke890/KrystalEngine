@@ -48,6 +48,7 @@
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
@@ -55,7 +56,23 @@ namespace krys::boo
   class GraphicsContext;
   class GraphicsLayer;
   class LocalFrame;
+  class LocalFrameView;
   class RenderView;
+
+  /// @brief While it lives, changes to a view's contents size don't scroll it or change its scrollbars, as
+  /// while an edit command runs; they catch up when the last such scope ends.
+  class ProhibitScrollingWhenChangingContentSizeForScope
+  {
+    KRYS_NON_COPY_MOVABLE(ProhibitScrollingWhenChangingContentSizeForScope);
+
+  private:
+    // Through its scrollable area, as the view itself has two weak pointer bases.
+    WeakPtr<ScrollableArea> _view;
+
+  public:
+    explicit ProhibitScrollingWhenChangingContentSizeForScope(LocalFrameView &view) noexcept;
+    ~ProhibitScrollingWhenChangingContentSizeForScope() noexcept;
+  };
 
   /// @brief The view a frame's document is laid out in: its frame rect, the size content is laid out at, the
   /// media type, the sizes viewport units resolve against, the layout context, and its scroll
@@ -75,6 +92,7 @@ namespace krys::boo
                                public CanMakeWeakPtr<LocalFrameView>,
                                public ScrollableArea
   {
+    friend class ProhibitScrollingWhenChangingContentSizeForScope;
     KRYS_NON_COPY_MOVABLE(LocalFrameView);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LocalFrameView);
 
@@ -140,6 +158,9 @@ namespace krys::boo
     bool _wasEverScrolledExplicitlyByUser {false};
     IntSize _contentsSize;
     bool _inUpdateScrollbars {false};
+    uint32 _prohibitsScrollingWhenChangingContentSizeCount {0};
+    // The scrollbars catch up after the next layout (a prohibiting scope ended while one was due).
+    bool _needsDeferredScrollbarsUpdate {false};
     /// @brief Whether the scrollbars are kept as they are, unpainted, while a document loads.
     bool _scrollbarsSuppressed {false};
     /// @brief The boxes' and list boxes' scrollable areas that can scroll or have scrollbars.
@@ -400,8 +421,14 @@ namespace krys::boo
       return _contentsSize;
     }
 
-    /// @brief Sets the size of the document, and moves the scroll position back within it.
+    /// @brief Sets the size of the document, and moves the scroll position back within it (unless scrolling
+    /// is prohibited while the contents size changes).
     void SetContentsSize(const IntSize &newSize) noexcept;
+    /// @brief Prohibits scrolling as the contents size changes until the result goes.
+    KRYS_NODISCARD UniquePtr<boo::ProhibitScrollingWhenChangingContentSizeForScope>
+      ProhibitScrollingWhileContentSizeChanges() noexcept;
+    /// @brief Updates the scrollbars after a layout, if a prohibiting scope ended while one was due.
+    void HandleDeferredScrollbarsUpdate() noexcept;
 
     /// @brief Fits the contents size and the scroll origin to the document's rect, after a layout.
     void AdjustViewSize() noexcept;

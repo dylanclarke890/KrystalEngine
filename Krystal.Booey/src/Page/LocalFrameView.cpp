@@ -2270,6 +2270,62 @@ namespace krys::boo
       return;
     }
     _contentsSize = newSize;
+    if (!_prohibitsScrollingWhenChangingContentSizeCount)
+    {
+      UpdateScrollbars(GetScrollPosition());
+    }
+  }
+
+  ProhibitScrollingWhenChangingContentSizeForScope::ProhibitScrollingWhenChangingContentSizeForScope(
+    LocalFrameView &view) noexcept
+      : _view(CreateWeakPtr(static_cast<ScrollableArea *>(&view)))
+  {
+    ++view._prohibitsScrollingWhenChangingContentSizeCount;
+  }
+
+  ProhibitScrollingWhenChangingContentSizeForScope::
+    ~ProhibitScrollingWhenChangingContentSizeForScope() noexcept
+  {
+    auto *view = static_cast<LocalFrameView *>(_view.get());
+    if (!view)
+    {
+      return;
+    }
+    krys_debug_assert(view->_prohibitsScrollingWhenChangingContentSizeCount);
+    if (!view->_prohibitsScrollingWhenChangingContentSizeCount
+        || --view->_prohibitsScrollingWhenChangingContentSizeCount)
+    {
+      return;
+    }
+
+    // The contents size may have changed meanwhile: the scrollbars catch up now, or after the layout that's
+    // due.
+    if (auto *document = view->Frame().Document())
+    {
+      if (!document->NeedsStyleRecalc() && !view->LayoutContext().NeedsLayout()
+          && !view->LayoutContext().IsInLayout())
+      {
+        view->UpdateScrollbars(view->GetScrollPosition());
+      }
+      else
+      {
+        view->_needsDeferredScrollbarsUpdate = true;
+      }
+    }
+  }
+
+  UniquePtr<ProhibitScrollingWhenChangingContentSizeForScope>
+    LocalFrameView::ProhibitScrollingWhileContentSizeChanges() noexcept
+  {
+    return CreateUnique<ProhibitScrollingWhenChangingContentSizeForScope>(*this);
+  }
+
+  void LocalFrameView::HandleDeferredScrollbarsUpdate() noexcept
+  {
+    if (!std::exchange(_needsDeferredScrollbarsUpdate, false))
+    {
+      return;
+    }
     UpdateScrollbars(GetScrollPosition());
   }
 
@@ -2348,7 +2404,6 @@ namespace krys::boo
     }
 
     // ScrollView::setScrollPosition.
-    // FIXME: Prohibiting scrolling, once something can.
     bool stoppedAnimation = StopAnimatedScroll();
     auto newScrollPosition =
       options.Clamping == ScrollClamping::Clamped ? AdjustScrollPositionWithinRange(position) : position;
@@ -2371,7 +2426,6 @@ namespace krys::boo
 
   void LocalFrameView::UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept
   {
-    // FIXME: Prohibiting scrolling, once something can.
     if (_inUpdateScrollbars)
     {
       return;
