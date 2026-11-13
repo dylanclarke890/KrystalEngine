@@ -640,6 +640,13 @@ namespace krys::boo
       {
         _markup.append(u8" shadowrootclonable=\"\"");
       }
+      // Escaped as attribute values are, which the specification's steps leave out.
+      if (auto &referenceTarget = shadowRoot->ReferenceTarget())
+      {
+        _markup.append(u8" shadowrootreferencetarget=\"");
+        AppendAttributeValue(_markup, *referenceTarget);
+        _markup.push_back(u8'"');
+      }
       _markup.push_back(u8'>');
     }
     else

@@ -101,6 +101,14 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootserializable
     void ShadowRootSerialisable(bool value) noexcept;
 
+    /// @brief The `shadowrootreferencetarget` attribute: the reference target of the declarative shadow root
+    /// the template makes, or null without one.
+    /// @see https://html.spec.whatwg.org/#dom-template-shadowrootreferencetarget
+    KRYS_NODISCARD Maybe<dom::DOMString> ShadowRootReferenceTarget() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-template-shadowrootreferencetarget
+    void ShadowRootReferenceTarget(Maybe<dom::DOMString> value) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootcustomelementregistry
     KRYS_NODISCARD dom::DOMString ShadowRootCustomElementRegistry() const noexcept;
 

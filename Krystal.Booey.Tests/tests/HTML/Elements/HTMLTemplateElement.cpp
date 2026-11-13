@@ -163,4 +163,19 @@ namespace krys::boo::html::tests
     CHECK(templateElement.GetAttribute(u8"for") == u8"marker");
     CHECK(templateElement.HtmlFor() == u8"marker");
   }
+
+  TEST_CASE("HTMLTemplateElement: shadowRootReferenceTarget reflects the attribute, null without it",
+            "[HTML][HTMLTemplateElement][html:dom-template-shadowrootreferencetarget]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto element = document->CreateElement(u8"template").ReleaseValue();
+    auto &templateElement = Downcast<HTMLTemplateElement>(*element);
+
+    CHECK_FALSE(templateElement.ShadowRootReferenceTarget());
+    templateElement.ShadowRootReferenceTarget(dom::DOMString(u8"inner"));
+    CHECK(templateElement.GetAttribute(u8"shadowrootreferencetarget") == u8"inner");
+    CHECK(templateElement.ShadowRootReferenceTarget() == dom::DOMString(u8"inner"));
+    templateElement.ShadowRootReferenceTarget(null);
+    CHECK_FALSE(templateElement.HasAttribute(u8"shadowrootreferencetarget"));
+  }
 }

@@ -467,12 +467,15 @@ namespace krys::boo::dom::tests
                                       .DelegatesFocus = DelegatesFocus(true),
                                       .SlotAssignment = SlotAssignmentMode::Manual,
                                       .Clonable = Clonable(true),
-                                      .Serialisable = Serialisable(true)})
+                                      .Serialisable = Serialisable(true),
+                                      .ReferenceTarget = DOMString(u8"in\"ner")})
                       .ReleaseValue();
+      // The reference target is escaped as an attribute value.
       CHECK(
         MarkupText(host->GetHTML({.SerializableShadowRoots = true}))
         == "<template shadowrootmode=\"closed\" shadowrootdelegatesfocus=\"\" shadowrootserializable=\"\" "
-           "shadowrootslotassignment=\"manual\" shadowrootclonable=\"\"></template>");
+           "shadowrootslotassignment=\"manual\" shadowrootclonable=\"\" "
+           "shadowrootreferencetarget=\"in&quot;ner\"></template>");
     }
   }
 
@@ -691,16 +694,29 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(div
                       .SetHTMLUnsafe(u8"<p><template shadowrootmode=OPEN shadowrootdelegatesfocus "
                                      u8"shadowrootclonable shadowrootserializable "
-                                     u8"shadowrootslotassignment=manual></template></p>")
+                                     u8"shadowrootslotassignment=manual shadowrootreferencetarget=inner>"
+                                     u8"</template></p>")
                       .HasException());
       auto shadow = div.FirstElementChild()->ShadowRoot();
       REQUIRE(shadow);
+      CHECK(shadow->ReferenceTarget() == DOMString(u8"inner"));
       CHECK(shadow->Mode() == ShadowRootMode::Open);
       CHECK(shadow->DelegatesFocus());
       CHECK(shadow->Clonable());
       CHECK(shadow->Serialisable());
       CHECK(shadow->SlotAssignment() == SlotAssignmentMode::Manual);
       CHECK(shadow->IsAvailableToElementInternals());
+    }
+
+    SECTION("without shadowrootreferencetarget, the reference target is null; with an empty one, empty")
+    {
+      REQUIRE_FALSE(
+        div
+          .SetHTMLUnsafe(u8"<p><template shadowrootmode=open></template></p>"
+                         u8"<p><template shadowrootmode=open shadowrootreferencetarget></template></p>")
+          .HasException());
+      CHECK_FALSE(div.FirstElementChild()->ShadowRoot()->ReferenceTarget());
+      CHECK(div.LastElementChild()->ShadowRoot()->ReferenceTarget() == DOMString());
     }
 
     SECTION("a host's second template stays a template")

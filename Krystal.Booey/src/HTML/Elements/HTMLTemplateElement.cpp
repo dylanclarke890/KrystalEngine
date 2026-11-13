@@ -312,6 +312,16 @@ namespace krys::boo::html
     Reflect<bool>(*this, u8"shadowrootserializable", krys::move(value));
   }
 
+  Maybe<dom::DOMString> HTMLTemplateElement::ShadowRootReferenceTarget() const noexcept
+  {
+    return Reflect<Maybe<dom::DOMString>>(*this, u8"shadowrootreferencetarget");
+  }
+
+  void HTMLTemplateElement::ShadowRootReferenceTarget(Maybe<dom::DOMString> value) noexcept
+  {
+    Reflect<Maybe<dom::DOMString>>(*this, u8"shadowrootreferencetarget", krys::move(value));
+  }
+
   dom::DOMString HTMLTemplateElement::ShadowRootCustomElementRegistry() const noexcept
   {
     return Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry").value_or(u8"");

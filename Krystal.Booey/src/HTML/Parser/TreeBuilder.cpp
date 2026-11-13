@@ -4230,7 +4230,11 @@ namespace krys::boo::html
     // 13a.vii. Let clonable be true if template has a shadowrootclonable attribute; otherwise false.
     dom::Clonable clonable(templateElement.HasAttribute(u8"shadowrootclonable"));
 
-    // 13a.viii. If declarativeShadowHostElement is a shadow host, then insert an element at the adjusted
+    // 13a.viii. Let referenceTarget be the value of template's shadowrootreferencetarget attribute if it has
+    //           one; otherwise null.
+    auto referenceTarget = templateElement.GetAttribute(u8"shadowrootreferencetarget");
+
+    // 13a.ix. If declarativeShadowHostElement is a shadow host, then insert an element at the adjusted
     //           insertion location with template, insertionLocation, and true.
     if (dom::TreeQueries::IsShadowHost(*declarativeShadowHostElement))
     {
@@ -4238,38 +4242,39 @@ namespace krys::boo::html
       return;
     }
 
-    // 13a.ix.1. Let registry be null if template has a shadowrootcustomelementregistry attribute; otherwise
+    // 13a.x.1. Let registry be null if template has a shadowrootcustomelementregistry attribute; otherwise
     //           declarativeShadowHostElement's node document's custom element registry.
     bool keepRegistryNull = templateElement.HasAttribute(u8"shadowrootcustomelementregistry");
     RefPtr<CustomElementRegistry> registry =
       keepRegistryNull ? nullptr : declarativeShadowHostElement->NodeDocument().CustomElementRegistry();
 
-    // 13a.ix.2. Attach a shadow root with declarativeShadowHostElement, mode, delegatesFocus, serializable,
-    //           slotAssignment, clonable, and registry. If an exception is thrown, then catch it and: insert
-    //           an element at the adjusted insertion location with template, insertionLocation, and true; the
-    //           user agent may report an error to the developer console; return.
+    // 13a.x.2. Attach a shadow root with declarativeShadowHostElement, mode, delegatesFocus, serializable,
+    //           slotAssignment, clonable, referenceTarget, and registry. If an exception is thrown, then
+    //           catch it and: insert an element at the adjusted insertion location with template,
+    //           insertionLocation, and true; the user agent may report an error to the developer console;
+    //           return.
     if (auto result = dom::ElementAlgorithms::AttachShadowRoot(*declarativeShadowHostElement, *mode, clonable,
                                                                serializable, delegatesFocus, slotAssignment,
-                                                               null, registry.get());
+                                                               krys::move(referenceTarget), registry.get());
         result.HasException())
     {
       InsertElementAtAdjustedInsertionLocation(templateElement, insertionLocation, true);
       return;
     }
 
-    // 13a.ix.3. Let shadow be declarativeShadowHostElement's shadow root.
+    // 13a.x.3. Let shadow be declarativeShadowHostElement's shadow root.
     auto *shadow = dom::TreeQueries::GetShadowRoot(*declarativeShadowHostElement);
 
-    // 13a.ix.4. Set shadow's available to element internals to true.
+    // 13a.x.4. Set shadow's available to element internals to true.
     shadow->_availableToElementInternals = true;
 
-    // 13a.ix.5. Set shadow's declarative to true.
+    // 13a.x.5. Set shadow's declarative to true.
     shadow->_declarative = true;
 
-    // 13a.ix.6. Set template's template contents to shadow.
+    // 13a.x.6. Set template's template contents to shadow.
     templateElement.SetTemplateContents(*shadow);
 
-    // 13a.ix.7. If template has a shadowrootcustomelementregistry attribute, then set shadow's keep custom
+    // 13a.x.7. If template has a shadowrootcustomelementregistry attribute, then set shadow's keep custom
     //           element registry null to true.
     //           (Attributes on template were sanitized when the element was created from the token.)
     if (keepRegistryNull)
