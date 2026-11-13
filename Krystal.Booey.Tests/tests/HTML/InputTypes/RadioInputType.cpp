@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
 
 namespace krys::boo::tests
 {
@@ -17,7 +18,10 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<style>body{margin:0}</style><input type=radio name=r id=a>"
                           u8"<div style='height:2000px'></div><input type=radio name=r id=b>");
     (void)fixture.Document->UpdateLayout();
-    fixture.Document->GetSettings().ScrollAnimatorEnabled = false;
+    // The settings are shared, so they're put back.
+    auto &settings = fixture.Document->GetSettings();
+    settings.ScrollAnimatorEnabled = false;
+    auto restoreSettings = MakeScopeExit([&] { settings.ScrollAnimatorEnabled = true; });
     auto &first = Downcast<html::HTMLInputElement>(fixture.ById(u8"a"));
     auto &second = Downcast<html::HTMLInputElement>(fixture.ById(u8"b"));
     first.Focus();
