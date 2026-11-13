@@ -47,8 +47,9 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-label-form
     KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
 
+    /// @brief The labeled control's form owner, retargeted against the label.
     /// @see https://html.spec.whatwg.org/#dom-label-form
-    KRYS_NODISCARD RefPtr<HTMLFormElement> FormForBindings() const noexcept;
+    KRYS_NODISCARD RefPtr<dom::Element> FormForBindings() const noexcept;
 
     /// @brief The labeled control: the element the `for` attribute names, or the first labelable
     /// descendant.
@@ -58,6 +59,8 @@ namespace krys::boo::html
     /// @brief Runs the labeled control's access key action, if it has one.
     bool AccessKeyAction(bool sendMouseEvents) noexcept override;
 
+    /// @brief The labeled control, retargeted against the label: a control in a shadow tree shows as its
+    /// host.
     /// @see https://html.spec.whatwg.org/#dom-label-control
     KRYS_NODISCARD RefPtr<HTMLElement> ControlForBindings() const noexcept;
 

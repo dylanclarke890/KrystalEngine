@@ -47,9 +47,11 @@ namespace krys::boo::html
     }
   }
 
-  RefPtr<HTMLFormElement> FormAssociatedElement::FormForBindings() const noexcept
+  RefPtr<dom::Element> FormAssociatedElement::FormForBindings() const noexcept
   {
-    return ShareRefPtr(Form());
+    // The getter steps are to return the result of retargeting this's form owner against this, if this's form
+    // owner is non-null; otherwise null.
+    return AsHTMLElement().RetargetForBindings(Form());
   }
 
   void FormAssociatedElement::SetFormSetByParser(HTMLFormElement *form) noexcept

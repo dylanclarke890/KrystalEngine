@@ -8,6 +8,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOutputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 
@@ -83,7 +85,8 @@ namespace krys::boo::html::tests
   TEST_CASE("Form owners: a form attribute naming a shadow host reaches the form its reference target names",
             "[HTML][Forms][html:reset-the-form-owner][html:attr-fae-form][html:resolve-the-reference-target]")
   {
-    FormFixture fixture(u8R"(<input id=before form=h><x-host id=h></x-host><input id=a form=h>)");
+    FormFixture fixture(u8R"(<input id=before form=h><x-host id=h></x-host><input id=a form=h>
+      <fieldset form=h><legend id=legend></legend></fieldset><select id=s form=h><option id=o></select>)");
     // A shadow root on the element with ID @p id, its reference target @p target, holding @p markup.
     auto attach = [&](dom::DOMStringView id, const char8_t *target, const char8_t *markup)
     {
@@ -98,11 +101,29 @@ namespace krys::boo::html::tests
     CHECK(a.Form() == &form);
     CHECK(before.Form() == &form);
 
+    SECTION("the form IDL attributes show the host, as the form is in its shadow tree")
+    {
+      auto &host = fixture.ById(u8"h");
+      CHECK(a.FormForBindings().get() == &host);
+      CHECK(fixture.Get<HTMLLegendElement>(u8"legend").FormForBindings().get() == &host);
+      CHECK(fixture.Get<HTMLOptionElement>(u8"o").FormForBindings().get() == &host);
+
+      // A form in the control's own tree is itself.
+      shadow->SetReferenceTarget(null);
+      REQUIRE_FALSE(host.SetAttribute(u8"id", u8"other").HasException());
+      auto outerElement = fixture.Document->CreateElement(u8"form").ReleaseValue();
+      auto &outer = Downcast<HTMLFormElement>(*outerElement);
+      REQUIRE_FALSE(outer.SetAttribute(u8"id", u8"h").HasException());
+      REQUIRE_FALSE(fixture.Document->Body()->AppendChild(outer).HasException());
+      CHECK(a.FormForBindings().get() == &outer);
+    }
+
     SECTION("in tree order, placed where the host is")
     {
-      REQUIRE(form.Length() == 2);
+      REQUIRE(form.Length() == 4);
       CHECK(form.Item(0).get() == &before);
       CHECK(form.Item(1).get() == &a);
+      CHECK(form.Item(3).get() == &fixture.Get<HTMLSelectElement>(u8"s"));
     }
 
     SECTION("changing the reference target changes it")

@@ -2051,6 +2051,14 @@ namespace krys::boo::html
     return DynamicDowncast<HTMLDataListElement>(ResolvedElementForAttribute(u8"list"));
   }
 
+  RefPtr<dom::Element> HTMLInputElement::ListForBindings() const noexcept
+  {
+    // The getter steps are to return the result of retargeting this's suggestions source element against
+    // this, if there is one; otherwise null.
+    auto list = List();
+    return RetargetForBindings(list.get());
+  }
+
   void HTMLInputElement::DataListMayHaveChanged() noexcept
   {
     Ref<InputType> protectedInputType = ShareRef(*_inputType);

@@ -51,8 +51,9 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-legend-form
     KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
 
+    /// @brief The fieldset's form, retargeted against the legend.
     /// @see https://html.spec.whatwg.org/#dom-legend-form
-    KRYS_NODISCARD RefPtr<HTMLFormElement> FormForBindings() const noexcept;
+    KRYS_NODISCARD RefPtr<dom::Element> FormForBindings() const noexcept;
 
 #pragma endregion
 

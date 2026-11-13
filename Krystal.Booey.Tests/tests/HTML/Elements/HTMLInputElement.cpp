@@ -532,6 +532,8 @@ namespace krys::boo::html::tests
     auto shadow = attach(u8"h", u8"d", u8"<datalist id=d><option value=x></datalist>");
     auto &input = fixture.Get<HTMLInputElement>(u8"i");
     CHECK(input.List().get() == shadow->GetElementById(u8"d").get());
+    // The IDL attribute shows the host.
+    CHECK(input.ListForBindings().get() == &fixture.ById(u8"h"));
     shadow->SetReferenceTarget(null);
     CHECK_FALSE(input.List());
   }

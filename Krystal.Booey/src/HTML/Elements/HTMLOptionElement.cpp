@@ -39,6 +39,7 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
@@ -183,6 +184,11 @@ namespace krys::boo::html
       return select->Form();
     }
     return nullptr;
+  }
+
+  RefPtr<dom::Element> HTMLOptionElement::FormForBindings() const noexcept
+  {
+    return RetargetForBindings(Form());
   }
 
   // https://html.spec.whatwg.org/#dom-option-label

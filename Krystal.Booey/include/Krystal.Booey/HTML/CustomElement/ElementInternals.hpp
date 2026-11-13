@@ -96,7 +96,7 @@ namespace krys::boo::html
     KRYS_NODISCARD RefPtr<dom::ShadowRoot> ShadowRoot() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-form
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<HTMLFormElement>> Form() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<RefPtr<dom::Element>> Form() const noexcept;
 
     /// @brief Sets the value the element submits with its form, and the state it restores (by default its
     /// value).

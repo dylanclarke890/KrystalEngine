@@ -60,9 +60,10 @@ namespace krys::boo::html
 
     KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
 
-    /// @brief The form owner, as the `form` IDL attribute exposes it.
-    // FIXME: Retargeting against the element's tree, once there are reference targets.
-    KRYS_NODISCARD virtual RefPtr<HTMLFormElement> FormForBindings() const noexcept;
+    /// @brief The form owner, as the `form` IDL attribute exposes it: retargeted against the element, so a
+    /// form in a shadow tree it reaches through a reference target shows as that tree's host.
+    /// @see https://html.spec.whatwg.org/#dom-fae-form
+    KRYS_NODISCARD virtual RefPtr<dom::Element> FormForBindings() const noexcept;
 
     void SetForm(HTMLFormElement *newForm) noexcept;
 

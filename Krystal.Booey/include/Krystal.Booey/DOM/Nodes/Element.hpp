@@ -1532,6 +1532,11 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#get-the-resolved-attribute-target-element
     KRYS_NODISCARD RefPtr<Element> ResolvedElementForAttribute(DOMStringAtom attributeName) const noexcept;
 
+    /// @brief @p element as an IDL attribute of this one exposes it: retargeted against this, so an element
+    /// in a shadow tree this element isn't in shows as the host holding it.
+    /// @see https://dom.spec.whatwg.org/#retarget
+    KRYS_NODISCARD RefPtr<Element> RetargetForBindings(Element *element) const noexcept;
+
     /// @brief The element a reference to this one targets: this, or, through its shadow root's reference
     /// target, the element in its shadow tree with that ID (resolved in turn); null if there's no such
     /// element.

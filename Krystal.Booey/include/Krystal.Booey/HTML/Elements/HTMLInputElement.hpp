@@ -235,10 +235,15 @@ namespace krys::boo::html
 
     void SetIndeterminate(bool newValue) noexcept;
 
-    /// @brief The datalist giving the input's suggestions: the first element in its tree with the `list`
-    /// attribute's ID, if that's a datalist and the attribute applies to the input's type.
-    /// @see https://html.spec.whatwg.org/#dom-input-list
+    /// @brief The datalist giving the input's suggestions (its suggestions source element): the `list`
+    /// attribute's resolved target, if that's a datalist and the attribute applies to the input's type.
+    /// @see https://html.spec.whatwg.org/#concept-input-list
     KRYS_NODISCARD RefPtr<HTMLDataListElement> List() const noexcept;
+
+    /// @brief The suggestions source element retargeted against the input: a datalist in a shadow tree shows
+    /// as its host.
+    /// @see https://html.spec.whatwg.org/#dom-input-list
+    KRYS_NODISCARD RefPtr<dom::Element> ListForBindings() const noexcept;
 
     /// @brief The input's datalist (its `list`) or its suggestions may have changed.
     void DataListMayHaveChanged() noexcept;

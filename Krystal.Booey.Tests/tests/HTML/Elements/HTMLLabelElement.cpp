@@ -62,6 +62,12 @@ namespace krys::boo::html::tests
     CHECK(l2.Control().get() == shadow2->GetElementById(u8"j").get());
     CHECK(l1.Form() == shadow1->GetElementById(u8"f").get());
 
+    // The IDL attributes show the hosts, as the control and its form are in their shadow trees.
+    CHECK(l1.ControlForBindings().get() == &fixture.ById(u8"h1"));
+    CHECK(l1.FormForBindings().get() == &fixture.ById(u8"h1"));
+    CHECK(l2.ControlForBindings().get() == &fixture.ById(u8"h2"));
+    CHECK_FALSE(l2.FormForBindings());
+
     // A host whose reference target names nothing isn't a control, nor labelable itself.
     shadow1->SetReferenceTarget(dom::DOMString(u8"missing"));
     CHECK_FALSE(l1.Control());

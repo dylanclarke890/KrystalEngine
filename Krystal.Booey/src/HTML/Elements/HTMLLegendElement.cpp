@@ -117,10 +117,9 @@ namespace krys::boo::html
     return fieldset ? fieldset->Form() : nullptr;
   }
 
-  RefPtr<HTMLFormElement> HTMLLegendElement::FormForBindings() const noexcept
+  RefPtr<dom::Element> HTMLLegendElement::FormForBindings() const noexcept
   {
-    // FIXME: Retargeting against the legend's tree, once there are reference targets.
-    return ShareRefPtr(Form());
+    return RetargetForBindings(Form());
   }
 
 #pragma endregion

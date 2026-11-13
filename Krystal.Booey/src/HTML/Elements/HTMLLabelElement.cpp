@@ -122,8 +122,12 @@ namespace krys::boo::html
 
   RefPtr<HTMLElement> HTMLLabelElement::ControlForBindings() const noexcept
   {
-    // FIXME: Retargeting against the label's tree, once there are reference targets.
-    return Control();
+    // 1. Let control be this's labeled control.
+    // 2. If control is null, then return null.
+    // 3. Return the result of retargeting control against this.
+    // (A shadow host is an HTML element.)
+    auto control = Control();
+    return Downcast<HTMLElement>(RetargetForBindings(control.get()));
   }
 
   HTMLFormElement *HTMLLabelElement::Form() const noexcept
@@ -142,10 +146,14 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  RefPtr<HTMLFormElement> HTMLLabelElement::FormForBindings() const noexcept
+  RefPtr<dom::Element> HTMLLabelElement::FormForBindings() const noexcept
   {
-    // FIXME: Retargeting against the label's tree, once there are reference targets.
-    return ShareRefPtr(Form());
+    // 1. Let control be this's labeled control.
+    // 2. If control is null, then return null.
+    // 3. If control is not a form-associated element, then return null.
+    // 4. If control's form owner is null, then return null.
+    // 5. Return the result of retargeting control's form owner against this.
+    return RetargetForBindings(Form());
   }
 
 #pragma endregion

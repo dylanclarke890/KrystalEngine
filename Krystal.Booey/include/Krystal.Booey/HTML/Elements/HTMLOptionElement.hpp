@@ -87,8 +87,12 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-option-disabled
     void Disabled(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-form
+    /// @brief The form owner of the option's select, if it has one.
     KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
+
+    /// @brief The form owner of the option's select, retargeted against the option.
+    /// @see https://html.spec.whatwg.org/#dom-option-form
+    KRYS_NODISCARD RefPtr<dom::Element> FormForBindings() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-option-label
     KRYS_NODISCARD dom::DOMString Label() const noexcept;

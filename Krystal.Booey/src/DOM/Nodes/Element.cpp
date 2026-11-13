@@ -35,6 +35,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
@@ -3510,6 +3511,17 @@ namespace krys::boo::dom
     }
     // 3. Return the result of resolving the reference target on unresolvedTarget.
     return unresolvedTarget->ResolveReferenceTarget();
+  }
+
+  RefPtr<Element> Element::RetargetForBindings(Element *element) const noexcept
+  {
+    if (!element)
+    {
+      return nullptr;
+    }
+    // Retargeting an element gives it or a shadow host, an element either way.
+    auto *retargeted = EventTargetAlgorithms::Retarget(element, const_cast<Element &>(*this));
+    return ShareRefPtr(&Downcast<Element>(Downcast<Node>(*retargeted)));
   }
 
   RefPtr<Element> Element::ResolveReferenceTarget() noexcept

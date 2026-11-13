@@ -65,13 +65,18 @@ namespace krys::boo::html
     return ShareRefPtr(shadowRoot);
   }
 
-  dom::ExceptionOr<RefPtr<HTMLFormElement>> ElementInternals::Form() const noexcept
+  dom::ExceptionOr<RefPtr<dom::Element>> ElementInternals::Form() const noexcept
   {
-    if (auto *element = ElementAsFormAssociatedCustom())
+    // 1. Let element be this's target element.
+    // 2. If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException.
+    auto *element = ElementAsFormAssociatedCustom();
+    if (!element)
     {
-      return element->FormForBindings();
+      return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
-    return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    // 3. If element's form owner is null, then return null.
+    // 4. Return the result of retargeting element's form owner against element.
+    return element->FormForBindings();
   }
 
   // https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
