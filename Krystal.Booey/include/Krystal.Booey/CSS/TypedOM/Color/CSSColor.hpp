@@ -45,7 +45,8 @@ namespace krys::boo::css
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSColor>>
       Create(CSSKeywordish colorSpace, List<CSSColorPercent> channels, CSSNumberish alpha = 1.0) noexcept;
 
-    KRYS_NODISCARD Ref<CSSKeywordValue> ColorSpace() const noexcept final;
+    /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-colorspace
+    KRYS_NODISCARD Ref<CSSKeywordValue> ColorSpace() const noexcept;
     void SetColorSpace(CSSKeywordish colorSpace) noexcept;
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-channels
     KRYS_NODISCARD List<CSSColorPercent> Channels() const noexcept;
@@ -57,6 +58,8 @@ namespace krys::boo::css
     {
       _alpha = krys::move(alpha);
     }
+
+    KRYS_NODISCARD CSSOMString ColorFunctionText() const noexcept final;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {

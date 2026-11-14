@@ -68,7 +68,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static dom::ExceptionOr<RectifiedCSSColorComponent>
       RectifyCSSColorRGBComp(CSSColorRGBComp component) noexcept;
 
-    KRYS_NODISCARD Ref<CSSKeywordValue> ColorSpace() const noexcept final;
+    KRYS_NODISCARD CSSOMString ColorFunctionText() const noexcept final;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {

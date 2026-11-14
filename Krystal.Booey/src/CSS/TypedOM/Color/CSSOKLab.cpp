@@ -125,8 +125,9 @@ namespace krys::boo::css
     return {};
   }
 
-  Ref<CSSKeywordValue> CSSOKLab::ColorSpace() const noexcept
+  CSSOMString CSSOKLab::ColorFunctionText() const noexcept
   {
-    return ColorSpaceKeyword(u8"oklab");
+    const CSSColorPercent components[] {L(), A(), B()};
+    return FunctionText(u8"oklab", components, Alpha());
   }
 }

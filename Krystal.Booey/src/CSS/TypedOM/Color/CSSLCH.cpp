@@ -126,8 +126,9 @@ namespace krys::boo::css
     return {};
   }
 
-  Ref<CSSKeywordValue> CSSLCH::ColorSpace() const noexcept
+  CSSOMString CSSLCH::ColorFunctionText() const noexcept
   {
-    return ColorSpaceKeyword(u8"lch");
+    const CSSColorPercent components[] {L(), C(), H()};
+    return FunctionText(u8"lch", components, Alpha());
   }
 }

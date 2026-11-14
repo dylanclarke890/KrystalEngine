@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/TypedOM/Color/CSSRGB.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnparsedValue.hpp"
@@ -78,6 +79,12 @@ namespace krys::boo::css::tests
 
       REQUIRE_FALSE(map.Set(u8"height", Values(CSSNumericFactory::Px(30))).HasException());
       CHECK(Get(map, u8"height") == "30px");
+
+      // A colour value is set as the colour its function makes; it isn't a length.
+      auto red = CSSRGB::Create(1.0, 0.0, 0.0).ReleaseValue();
+      REQUIRE_FALSE(map.Set(u8"color", Values(red)).HasException());
+      CHECK(Get(map, u8"color") == "rgb(255, 0, 0)");
+      CHECK(map.Set(u8"height", Values(red)).GetException().Code() == dom::ExceptionCode::TypeError);
 
       // A number isn't a length, and a single-valued property takes one value.
       CHECK(map.Set(u8"height", Values(CSSNumericFactory::Number(3))).GetException().Code()

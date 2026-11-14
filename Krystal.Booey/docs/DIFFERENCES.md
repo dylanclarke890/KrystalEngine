@@ -148,6 +148,8 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Style sheets from `<link>`, `@import` and processing instructions are always strict about their type: they must be `text/css` or have no type, where the specifications take a same-origin sheet of any type in quirks mode.
 - The Typed OM's numeric factory functions (`CSS.px()` and the rest) are `CSSNumericFactory`'s static functions (`CSSNumericFactory::Px(10)`), not members of the `CSS` namespace (`DOMCSSNamespace`).
 - A Typed OM property map parses and reifies values in its document: a `styleMap` whose rule is in no document's style sheet reads as empty, and setting or appending to it throws a `TypeError`.
+- A Typed OM colour value serialises, and is set in a style, as the colour function its components make (`rgb(50% 255 none / 100%)`); the specification gives colour values no serialisation yet ("TODO add stringifiers"), nor says how they match a property's grammar.
+- `CSSColorValue.parse()` gives a plain `CSSStyleValue` for a colour function whose components its colour value can't hold, where the specification reifies every colour function as one: a relative colour, `none` in `hwb()`, and a calculation of numbers (`calc(255 / 2)`, as `CSSNumericValue.parse()` only takes lengths and percentages here). A number given for a percentage component, or a percentage for a number, is converted with CSS Color's reference range (`lch(50% 75 30)` reifies its chroma as 50%).
 - `StylePropertyMap::Set()` throws a `NotSupportedError` for a value that becomes a pair whose two values are equal, and a `TypeError` for a quad that would coalesce, as WebKit does, as their serialisation wouldn't represent them.
 
 ## Style (cascade and computed values)

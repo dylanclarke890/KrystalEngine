@@ -59,7 +59,7 @@ namespace krys::boo::css
     /// @return A `SyntaxError` if @p alpha isn't a percentage or `none`.
     dom::ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
 
-    KRYS_NODISCARD Ref<CSSKeywordValue> ColorSpace() const noexcept final;
+    KRYS_NODISCARD CSSOMString ColorFunctionText() const noexcept final;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {

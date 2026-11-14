@@ -29,7 +29,13 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+
+namespace krys::boo::dom
+{
+  class Document;
+}
 
 namespace krys::boo::css
 {
@@ -46,14 +52,22 @@ namespace krys::boo::css
   using RectifiedCSSColorComponent = Variant<RefPtr<CSSNumericValue>, RefPtr<CSSKeywordValue>>;
 
   /// @brief A colour value.
+  /// @note It serialises, and becomes a CSS value, as the colour function its components make; the
+  /// specification hasn't given colour values stringifiers yet.
   /// @see https://drafts.css-houdini.org/css-typed-om/#csscolorvalue
-  // FIXME: Converting between colour spaces (`to()`), parsing (`parse()`), serialisation and conversion to
-  // CSS values.
   class CSSColorValue : public CSSStyleValue
   {
   public:
-    /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolorvalue-colorspace
-    KRYS_NODISCARD virtual Ref<CSSKeywordValue> ColorSpace() const noexcept = 0;
+    /// @brief @p cssText parsed as a `<color>`, reified: a colour value, a keyword (`currentcolor` and
+    /// system colours), or a plain style value for colours the colour values can't hold (`color-mix()`,
+    /// relative colours, and components of other types).
+    /// @return A `SyntaxError` if @p cssText isn't a `<color>`.
+    /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolorvalue-parse
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>> Parse(dom::Document &document,
+                                                                     CSSOMStringView cssText) noexcept;
+
+    /// @brief The colour as the CSS function its components make (`rgb(50% 255 none / 100%)`).
+    KRYS_NODISCARD virtual CSSOMString ColorFunctionText() const noexcept = 0;
 
     /// @return A `SyntaxError` if @p percent is neither a percentage nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorpercent
@@ -74,12 +88,16 @@ namespace krys::boo::css
     KRYS_NODISCARD static CSSColorPercent ToCSSColorPercent(const CSSNumberish &numberish) noexcept;
 
     KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+    void Serialise(StringBuilder &builder,
+                   EnumSet<SerialisationArguments> arguments = {}) const noexcept final;
 
   protected:
     CSSColorValue() noexcept = default;
 
-    /// @brief The keyword value @p colorSpace.
-    KRYS_NODISCARD static Ref<CSSKeywordValue> ColorSpaceKeyword(utf8_stringview colorSpace) noexcept;
+    /// @brief The function @p name of @p components, then @p alpha after a slash.
+    KRYS_NODISCARD static CSSOMString FunctionText(utf8_stringview name,
+                                                   Span<const CSSColorPercent> components,
+                                                   const CSSColorPercent &alpha) noexcept;
   };
 }
 

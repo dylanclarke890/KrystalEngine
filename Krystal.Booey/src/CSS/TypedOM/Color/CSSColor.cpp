@@ -62,6 +62,16 @@ namespace krys::boo::css
     _colorSpace = CSSKeywordValue::RectifyKeywordish(krys::move(colorSpace));
   }
 
+  CSSOMString CSSColor::ColorFunctionText() const noexcept
+  {
+    List<CSSColorPercent> components {CSSColorPercent {RefPtr<CSSKeywordValue>(_colorSpace)}};
+    for (const auto &channel : _channels)
+    {
+      components.push_back(ToCSSColorComponent(channel));
+    }
+    return FunctionText(u8"color", components, ToCSSColorPercent(_alpha));
+  }
+
   List<CSSColorPercent> CSSColor::Channels() const noexcept
   {
     List<CSSColorPercent> channels;

@@ -147,8 +147,10 @@ namespace krys::boo::css
     return {};
   }
 
-  Ref<CSSKeywordValue> CSSHWB::ColorSpace() const noexcept
+  CSSOMString CSSHWB::ColorFunctionText() const noexcept
   {
-    return ColorSpaceKeyword(u8"hwb");
+    const CSSColorPercent components[] {CSSColorPercent {RefPtr<CSSNumericValue>(_hue)},
+                                        ToCSSColorPercent(W()), ToCSSColorPercent(B())};
+    return FunctionText(u8"hwb", components, ToCSSColorPercent(Alpha()));
   }
 }

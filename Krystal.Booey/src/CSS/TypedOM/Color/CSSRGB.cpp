@@ -145,8 +145,9 @@ namespace krys::boo::css
     return RectifyCSSColorPercent(krys::move(component));
   }
 
-  Ref<CSSKeywordValue> CSSRGB::ColorSpace() const noexcept
+  CSSOMString CSSRGB::ColorFunctionText() const noexcept
   {
-    return ColorSpaceKeyword(u8"srgb");
+    const CSSColorPercent components[] {R(), G(), B()};
+    return FunctionText(u8"rgb", components, Alpha());
   }
 }
