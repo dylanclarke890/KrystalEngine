@@ -86,6 +86,9 @@ namespace krys::boo
     }
 
     constexpr int ExifMarker = JPEG_APP0 + 1;
+    constexpr int ICCMarker = JPEG_APP0 + 2;
+    // An ICC APP2 block is "ICC_PROFILE\0", then its sequence number and the number of blocks.
+    constexpr size_t ICCHeaderSize = 14;
 
     struct DecoderErrorManager
     {
@@ -128,6 +131,47 @@ namespace krys::boo
                                   size);
       }
       return {};
+    }
+
+    /// @brief The ICC profile split across the image's ICC APP2 blocks, joined in their sequence; empty if
+    /// there's none, or the blocks don't make a whole profile.
+    KRYS_NODISCARD List<uint8> ReadICCProfile(jpeg_decompress_struct *info) noexcept
+    {
+      List<jpeg_saved_marker_ptr> blocks;
+      uint32 blockCount = 0;
+      for (jpeg_saved_marker_ptr marker = info->marker_list; marker; marker = marker->next)
+      {
+        if (marker->marker != ICCMarker || marker->data_length < ICCHeaderSize
+            || std::memcmp(marker->data, "ICC_PROFILE\0", 12) != 0)
+        {
+          continue;
+        }
+        const uint32 count = marker->data[13];
+        if (!count || (blockCount && count != blockCount))
+        {
+          return {};
+        }
+        blockCount = count;
+        blocks.push_back(marker);
+      }
+      if (blocks.size() != blockCount)
+      {
+        return {};
+      }
+
+      List<uint8> profile;
+      for (uint32 sequenceNumber = 1; sequenceNumber <= blockCount; ++sequenceNumber)
+      {
+        auto block = std::ranges::find_if(blocks, [&](jpeg_saved_marker_ptr marker)
+                                          { return marker->data[12] == sequenceNumber; });
+        if (block == blocks.end())
+        {
+          return {};
+        }
+        const uint8 *data = reinterpret_cast<const uint8 *>((*block)->data);
+        profile.insert(profile.end(), data + ICCHeaderSize, data + (*block)->data_length);
+      }
+      return profile;
     }
   }
 
@@ -185,6 +229,11 @@ namespace krys::boo
 
       // Keep APP1 blocks, for obtaining exif data.
       jpeg_save_markers(&_info, ExifMarker, 0xFFFF);
+      // Keep APP2 blocks, for obtaining ICC profiles.
+      if (!_decoder->IgnoresGammaAndColorProfile())
+      {
+        jpeg_save_markers(&_info, ICCMarker, 0xFFFF);
+      }
     }
 
     ~JPEGImageReader() noexcept
@@ -273,6 +322,13 @@ namespace krys::boo
 
           _decoder->SetEXIFMetadata(ReadEXIFMetadata(
             Info(), IntSize(static_cast<int32>(_info.image_width), static_cast<int32>(_info.image_height))));
+
+          if (!_decoder->IgnoresGammaAndColorProfile())
+          {
+            _decoder->SetICCProfile(ReadICCProfile(Info()), _info.out_color_space == JCS_CMYK
+                                                              ? ICCProfileTransform::PixelLayout::InvertedCMYK
+                                                              : ICCProfileTransform::PixelLayout::BGRA);
+          }
 
           // Don't allocate a giant and superfluous memory buffer when the
           // image is a sequential JPEG.
@@ -561,6 +617,18 @@ namespace krys::boo
       }
 
       auto *currentAddress = buffer.BackingStore()->PixelsStartingAt(0, sourceY);
+      if (TColorSpace == JCS_CMYK && _iccTransform)
+      {
+        // The profile converts the CMYK samples to RGB.
+        _transformedRow.resize(static_cast<size_t>(width) * 3u);
+        _iccTransform.Transform(*samples, _transformedRow.data(), static_cast<uint32>(width));
+        const uint8 *rgb = _transformedRow.data();
+        for (int x = 0; x < width; ++x, ++currentAddress, rgb += 3)
+        {
+          buffer.BackingStore()->SetPixel(*currentAddress, rgb[0], rgb[1], rgb[2], 0xFF);
+        }
+        continue;
+      }
       for (int x = 0; x < width; ++x, ++currentAddress)
       {
         SetPixel<TColorSpace>(buffer, *currentAddress, samples, x);
@@ -602,6 +670,7 @@ namespace krys::boo
         {
           return false;
         }
+        _iccTransform.Transform(row, row, info->output_width);
       }
       return true;
     }
@@ -618,6 +687,15 @@ namespace krys::boo
     }
 
     return SetFailed();
+  }
+
+  void JPEGImageDecoder::SetICCProfile(Span<const uint8> profile,
+                                       ICCProfileTransform::PixelLayout layout) noexcept
+  {
+    _iccTransform = ICCProfileTransform::Create(profile, layout,
+                                                layout == ICCProfileTransform::PixelLayout::InvertedCMYK
+                                                  ? ICCProfileTransform::PixelLayout::RGB
+                                                  : ICCProfileTransform::PixelLayout::BGRA);
   }
 
   void JPEGImageDecoder::JpegComplete()

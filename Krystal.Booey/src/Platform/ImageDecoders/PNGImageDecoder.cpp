@@ -419,9 +419,28 @@ namespace krys::boo
       png_set_gray_to_rgb(png);
     }
 
-    // Deal with gamma and keep it under our control.
+    // An iCCP profile describes the colour space; it takes the place of gAMA.
+    _iccTransform = {};
+    Span<const uint8> iccProfile;
+    bool hasICCProfile = false;
+    if (!_ignoreGammaAndColorProfile)
+    {
+      png_charp iccProfileName;
+      int iccCompressionType;
+      png_bytep iccProfileData;
+      png_uint_32 iccProfileDataSize;
+      if (png_get_iCCP(png, info, &iccProfileName, &iccCompressionType, &iccProfileData, &iccProfileDataSize))
+      {
+        iccProfile = Span<const uint8>(iccProfileData, iccProfileDataSize);
+        hasICCProfile = ICCProfileTransform::DescribesPixels(iccProfile, ICCProfileTransform::PixelLayout::RGB);
+        _iccTransform = ICCProfileTransform::Create(iccProfile, ICCProfileTransform::PixelLayout::RGB,
+                                                    ICCProfileTransform::PixelLayout::RGB);
+      }
+    }
+
+    // Deal with gamma and keep it under our control; the profile's transfer curves stand in for it.
     double gamma;
-    if (!_ignoreGammaAndColorProfile && png_get_gAMA(png, info, &gamma))
+    if (!hasICCProfile && !_ignoreGammaAndColorProfile && png_get_gAMA(png, info, &gamma))
     {
       if ((gamma <= 0.0) || (gamma > MaxGamma))
       {
@@ -431,12 +450,10 @@ namespace krys::boo
       png_set_gamma(png, DefaultGamma, gamma);
       _gamma = static_cast<int32>(gamma * 100'000);
     }
-    else
+    else if (!hasICCProfile)
     {
       png_set_gamma(png, DefaultGamma, InverseGamma);
     }
-
-    // FIXME: ICC colour profiles (LCMS), once there's colour management.
 
     // Tell libpng to send us rows for interlaced pngs.
     if (interlaceType == PNG_INTERLACE_ADAM7)
@@ -450,6 +467,11 @@ namespace krys::boo
     krys_debug_assert(channels == 3 || channels == 4);
 
     _reader->SetHasAlpha(channels == 4);
+    if (_iccTransform && channels == 4)
+    {
+      _iccTransform = ICCProfileTransform::Create(iccProfile, ICCProfileTransform::PixelLayout::RGBA,
+                                                  ICCProfileTransform::PixelLayout::RGBA);
+    }
 
     if (_reader->DecodingSizeOnly())
     {
@@ -567,7 +589,7 @@ namespace krys::boo
     int32 width = Size().Width();
     unsigned char nonTrivialAlphaMask = 0;
 
-    png_bytep pixel = row;
+    png_bytep pixel = ColorManagedRow(row, static_cast<uint32>(width));
     if (hasAlpha)
     {
       for (int32 x = 0; x < width; ++x, pixel += 4, ++address)
@@ -590,6 +612,21 @@ namespace krys::boo
     {
       buffer.SetHasAlpha(true);
     }
+  }
+
+  unsigned char *PNGImageDecoder::ColorManagedRow(unsigned char *row, uint32 pixelCount) noexcept
+  {
+    if (!_iccTransform)
+    {
+      return row;
+    }
+    const size_t size = static_cast<size_t>(pixelCount) * (_reader->HasAlpha() ? 4u : 3u);
+    if (_transformedRow.size() < size)
+    {
+      _transformedRow.resize(size);
+    }
+    _iccTransform.Transform(row, _transformedRow.data(), pixelCount);
+    return _transformedRow.data();
   }
 
   void PNGImageDecoder::PngComplete()
@@ -972,7 +1009,7 @@ namespace krys::boo
       for (int32 y = rect.Y(); y < rect.MaxY();
            ++y, row += static_cast<size_t>(colorChannels) * Size().Width())
       {
-        png_bytep pixel = row;
+        png_bytep pixel = ColorManagedRow(row, static_cast<uint32>(rect.Width()));
         auto *address = buffer.BackingStore()->PixelsStartingAt(rect.X(), y);
         for (int32 x = rect.X(); x < rect.MaxX(); ++x, pixel += colorChannels)
         {

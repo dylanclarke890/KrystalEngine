@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp"
+#include "Krystal.Booey.Tests/Platform/ImageDecoders/ICCImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
@@ -18,10 +19,11 @@ namespace krys::boo::tests
     constexpr uint32 Black = 0xFF'00'00'00u;
 
     KRYS_NODISCARD RefPtr<ScalableImageDecoder>
-      Decode(Span<const uint8> bytes, AlphaOption alpha = AlphaOption::Premultiplied) noexcept
+      Decode(Span<const uint8> bytes, AlphaOption alpha = AlphaOption::Premultiplied,
+             GammaAndColorProfileOption profile = GammaAndColorProfileOption::Applied) noexcept
     {
       auto data = SharedBuffer::Create(bytes);
-      auto decoder = ScalableImageDecoder::Create(*data, alpha, GammaAndColorProfileOption::Applied);
+      auto decoder = ScalableImageDecoder::Create(*data, alpha, profile);
       if (decoder)
       {
         decoder->SetData(*data, true);
@@ -254,5 +256,93 @@ namespace krys::boo::tests
     REQUIRE(once);
     CHECK(once->FrameCount() == 2u);
     CHECK(once->GetRepetitionCount() == RepetitionCountOnce);
+  }
+
+  // The rotated profile's red is sRGB's green, its green sRGB's blue and its blue sRGB's red.
+  TEST_CASE("ScalableImageDecoder: pixels are converted from an embedded ICC profile to sRGB",
+            "[Platform][ImageDecoders][ColorManagement]")
+  {
+    SECTION("A PNG's iCCP profile, before alpha is premultiplied")
+    {
+      auto decoder = Decode(images::RotatedProfilePNG, AlphaOption::NotPremultiplied);
+      REQUIRE(decoder);
+      CHECK(Pixels(*decoder) == List<uint32> {Green, Blue, Red, White, Black, 0x80'00'FF'00u});
+
+      auto premultiplied = Decode(images::RotatedProfilePNG);
+      REQUIRE(premultiplied);
+      CHECK(Pixels(*premultiplied) == List<uint32> {Green, Blue, Red, White, Black, 0x80'00'80'00u});
+    }
+
+    SECTION("A PNG arriving in parts")
+    {
+      auto all = SharedBuffer::Create(images::RotatedProfilePNG);
+      auto decoder = ScalableImageDecoder::Create(*all, AlphaOption::NotPremultiplied,
+                                                  GammaAndColorProfileOption::Applied);
+      REQUIRE(decoder);
+      auto part =
+        SharedBuffer::Create(images::RotatedProfilePNG.first(images::RotatedProfilePNG.size() - 16));
+      decoder->SetData(*part, false);
+      decoder->SetData(*all, true);
+      CHECK(Pixels(*decoder) == List<uint32> {Green, Blue, Red, White, Black, 0x80'00'FF'00u});
+    }
+
+    SECTION("sRGB's own profile changes nothing")
+    {
+      auto decoder = Decode(images::SRGBProfilePNG, AlphaOption::NotPremultiplied);
+      REQUIRE(decoder);
+      CHECK(Pixels(*decoder) == List<uint32> {Red, Green, Blue, White, Black, 0x80'FF'00'00u});
+    }
+
+    SECTION("A PNG's profile takes the place of its gAMA")
+    {
+      auto decoder = Decode(images::SRGBProfileLinearGammaPNG);
+      REQUIRE(decoder);
+      CHECK(Pixels(*decoder) == List<uint32> {0xFF'80'80'80u});
+      // Without the profile, the gamma applies.
+      auto withoutProfile = Decode(images::LinearGammaPNG);
+      REQUIRE(withoutProfile);
+      CHECK(Near(Pixels(*withoutProfile).at(0), 0xFF'BA'BA'BAu, 2));
+    }
+
+    SECTION("A WebP's ICCP chunk")
+    {
+      auto decoder = Decode(images::RotatedProfileWebP, AlphaOption::NotPremultiplied);
+      REQUIRE(decoder);
+      CHECK(decoder->Size() == IntSize(3, 2));
+      CHECK(Pixels(*decoder) == List<uint32> {Green, Blue, Red, White, Black, 0x80'00'FF'00u});
+    }
+
+    SECTION("A JPEG's ICC APP2 blocks, whole or split")
+    {
+      for (auto bytes : {images::RotatedProfileJPEG, images::SplitRotatedProfileJPEG})
+      {
+        auto decoder = Decode(bytes);
+        REQUIRE(decoder);
+        auto pixels = Pixels(*decoder);
+        REQUIRE(pixels.size() == 16u * 8u);
+        CHECK(Near(pixels[3 * 16 + 2], Green));
+        CHECK(Near(pixels[3 * 16 + 13], Red));
+      }
+    }
+
+    SECTION("Not when the decoder ignores colour profiles")
+    {
+      auto png =
+        Decode(images::RotatedProfilePNG, AlphaOption::NotPremultiplied, GammaAndColorProfileOption::Ignored);
+      REQUIRE(png);
+      CHECK(Pixels(*png) == List<uint32> {Red, Green, Blue, White, Black, 0x80'FF'00'00u});
+
+      auto jpeg =
+        Decode(images::RotatedProfileJPEG, AlphaOption::Premultiplied, GammaAndColorProfileOption::Ignored);
+      REQUIRE(jpeg);
+      auto pixels = Pixels(*jpeg);
+      REQUIRE(pixels.size() == 16u * 8u);
+      CHECK(Near(pixels[3 * 16 + 2], Red));
+
+      auto webp = Decode(images::RotatedProfileWebP, AlphaOption::NotPremultiplied,
+                         GammaAndColorProfileOption::Ignored);
+      REQUIRE(webp);
+      CHECK(Pixels(*webp) == List<uint32> {Red, Green, Blue, White, Black, 0x80'FF'00'00u});
+    }
   }
 }

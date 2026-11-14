@@ -25,7 +25,9 @@
 
 #pragma once
 
+#include "Krystal.Booey/Platform/ImageDecoders/ICCProfileTransform.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <array>
 
@@ -40,7 +42,6 @@ namespace krys::boo
   // This class decodes the PNG image format.
   // @note libpng reports errors with longjmp, which on Windows unwinds as an exception would, so the
   // functions its callbacks run through (the callbacks themselves and what they call) can't be noexcept.
-  // FIXME: ICC colour profiles (LCMS), once there's colour management.
   class PNGImageDecoder final : public ScalableImageDecoder
   {
     friend class PNGImageReader;
@@ -56,6 +57,9 @@ namespace krys::boo
     bool _frameIsHidden {false};
     bool _hasInfo {false};
     int32 _gamma {45'455};
+    // The conversion from the colour space of the image's iCCP profile, and a row converted with it.
+    ICCProfileTransform _iccTransform;
+    List<uint8> _transformedRow;
     size_t _frameCount {1};
     size_t _decodedPixelCount {0};
     uint32 _playCount {0};
@@ -106,6 +110,10 @@ namespace krys::boo
     void PngComplete();
     void ReadChunks(png_unknown_chunk_t *chunk);
     void FrameHeader();
+
+    /// @brief @p row of @p pixelCount decoded pixels, converted from the image's colour profile if it has
+    /// one (into a row of its own, so that interlaced rows libpng combines stay as decoded).
+    KRYS_NODISCARD unsigned char *ColorManagedRow(unsigned char *row, uint32 pixelCount) noexcept;
 
     void Init() noexcept;
     void ClearFrameBufferCache(size_t clearBeforeFrame) noexcept override;

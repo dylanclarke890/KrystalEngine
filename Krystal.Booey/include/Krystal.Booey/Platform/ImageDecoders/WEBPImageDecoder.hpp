@@ -28,7 +28,9 @@
 
 #pragma once
 
+#include "Krystal.Booey/Platform/ImageDecoders/ICCProfileTransform.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
+#include "Krystal.Core/Types/List.hpp"
 
 struct WebPDemuxer;
 struct WebPIterator;
@@ -45,6 +47,11 @@ namespace krys::boo
     size_t _frameCount {0};
     int32 _formatFlags {0};
     bool _headerParsed {false};
+    // The conversion from the colour space of the image's ICCP profile (read with the first frame it
+    // decodes, since the profile comes before them), and a row converted with it.
+    bool _iccProfileRead {false};
+    ICCProfileTransform _iccTransform;
+    List<uint8> _transformedRow;
 
   public:
     KRYS_NODISCARD static Ref<ScalableImageDecoder>
@@ -77,6 +84,7 @@ namespace krys::boo
     void Decode(size_t frameIndex, bool allDataReceived) noexcept;
     void DecodeFrame(size_t frameIndex, WebPDemuxer *demuxer) noexcept;
     void ParseHeader() noexcept;
+    void ReadICCProfile(WebPDemuxer *demuxer) noexcept;
     bool InitFrameBuffer(size_t frameIndex, const WebPIterator *webpFrame) noexcept;
     void ApplyPostProcessing(size_t frameIndex, WebPIDecoder *decoder, WebPDecBuffer &decoderBuffer,
                              bool blend) noexcept;

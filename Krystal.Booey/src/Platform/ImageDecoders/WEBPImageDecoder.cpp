@@ -204,6 +204,7 @@ namespace krys::boo
     {
       return;
     }
+    ReadICCProfile(demuxer);
 
     const uint8 *dataBytes = webpFrame.fragment.bytes;
     size_t dataSize = webpFrame.fragment.size;
@@ -329,15 +330,27 @@ namespace krys::boo
     const int left = frameRect.X();
     const int top = frameRect.Y();
 
+    if (_iccTransform)
+    {
+      _transformedRow.resize(static_cast<size_t>(decodedWidth) * sizeof(uint32));
+    }
     for (int y = 0; y < decodedHeight; y++)
     {
       const int canvasY = top + y;
+      // Rows are converted from the image's colour profile as they're copied, leaving the decoded ones
+      // as they are for the next pass over a partly decoded frame.
+      uint8 *sourceRow =
+        decoderBuffer.u.RGBA.rgba + static_cast<size_t>(y) * frameRect.Width() * sizeof(uint32);
+      if (_iccTransform)
+      {
+        _iccTransform.Transform(sourceRow, _transformedRow.data(), static_cast<uint32>(decodedWidth));
+        sourceRow = _transformedRow.data();
+      }
       for (int x = 0; x < decodedWidth; x++)
       {
         const int canvasX = left + x;
         auto &destinationPixel = buffer.BackingStore()->PixelAt(canvasX, canvasY);
-        uint8 *sourcePixels =
-          decoderBuffer.u.RGBA.rgba + (static_cast<size_t>(y) * frameRect.Width() + x) * sizeof(uint32);
+        uint8 *sourcePixels = sourceRow + static_cast<size_t>(x) * sizeof(uint32);
         if (blend && (sourcePixels[3] < 255))
         {
           buffer.BackingStore()->BlendPixel(destinationPixel, sourcePixels[0], sourcePixels[1],
@@ -349,6 +362,27 @@ namespace krys::boo
                                           sourcePixels[3]);
         }
       }
+    }
+  }
+
+  void WEBPImageDecoder::ReadICCProfile(WebPDemuxer *demuxer) noexcept
+  {
+    if (_iccProfileRead)
+    {
+      return;
+    }
+    _iccProfileRead = true;
+    if (IgnoresGammaAndColorProfile() || !(_formatFlags & ICCP_FLAG))
+    {
+      return;
+    }
+    WebPChunkIterator chunk;
+    if (WebPDemuxGetChunk(demuxer, "ICCP", 1, &chunk))
+    {
+      _iccTransform = ICCProfileTransform::Create(Span<const uint8>(chunk.chunk.bytes, chunk.chunk.size),
+                                                  ICCProfileTransform::PixelLayout::RGBA,
+                                                  ICCProfileTransform::PixelLayout::RGBA);
+      WebPDemuxReleaseChunkIterator(&chunk);
     }
   }
 

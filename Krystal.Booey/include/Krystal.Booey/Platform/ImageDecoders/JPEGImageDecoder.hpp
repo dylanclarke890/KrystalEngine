@@ -26,7 +26,9 @@
 
 #pragma once
 
+#include "Krystal.Booey/Platform/ImageDecoders/ICCProfileTransform.hpp"
 #include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
@@ -36,11 +38,13 @@ namespace krys::boo
   // This class decodes the JPEG image format.
   // @note libjpeg reports errors with longjmp, which on Windows unwinds as an exception would, so the
   // functions between the reader's setjmp and libjpeg's calls (writing scanlines) can't be noexcept.
-  // FIXME: ICC colour profiles (LCMS), once there's colour management.
   class JPEGImageDecoder final : public ScalableImageDecoder
   {
   private:
     UniquePtr<JPEGImageReader> _reader;
+    // The conversion from the colour space of the image's ICC profile, and a CMYK row converted with it.
+    ICCProfileTransform _iccTransform;
+    List<uint8> _transformedRow;
 
   public:
     KRYS_NODISCARD static Ref<ScalableImageDecoder>
@@ -63,6 +67,9 @@ namespace krys::boo
     bool SetFailed() noexcept override;
 
     bool OutputScanlines();
+    /// @brief Converts what's decoded from the colour space @p profile describes, laid out as @p layout
+    /// (RGB rows are written as BGRA, and CMYK ones as inverted CMYK).
+    void SetICCProfile(Span<const uint8> profile, ICCProfileTransform::PixelLayout layout) noexcept;
     void JpegComplete();
 
   private:

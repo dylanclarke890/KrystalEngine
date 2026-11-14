@@ -8,6 +8,7 @@
     "brigand",
     "harfbuzz",
     "icu",
+    "lcms",
     "libjpeg-turbo",
     {
       "name": "libxml2",

@@ -54,6 +54,10 @@ find_package(JPEG REQUIRED)
 find_package(WebP CONFIG REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE PNG::PNG JPEG::JPEG WebP::webp WebP::webpdemux)
 
+# Third-party - colour management (ICC profiles in images)
+find_package(lcms2 CONFIG REQUIRED)
+target_link_libraries(Krystal.Booey PRIVATE lcms2::lcms2)
+
 # XML documents and SVG images: libxml2, without encodings of its own (documents arrive decoded) or compression.
 find_package(LibXml2 REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE LibXml2::LibXml2)
@@ -2638,6 +2642,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/ImageDecoders/EXIFMetadata.hpp
   include/Krystal.Booey/Platform/ImageDecoders/GIFImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/GIFImageReader.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/ICCProfileTransform.hpp
   include/Krystal.Booey/Platform/ImageDecoders/ICOImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/JPEGImageDecoder.hpp
   include/Krystal.Booey/Platform/ImageDecoders/PNGImageDecoder.hpp
@@ -2694,6 +2699,7 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/ImageDecoders/EXIFMetadata.cpp
   src/Platform/ImageDecoders/GIFImageDecoder.cpp
   src/Platform/ImageDecoders/GIFImageReader.cpp
+  src/Platform/ImageDecoders/ICCProfileTransform.cpp
   src/Platform/ImageDecoders/ICOImageDecoder.cpp
   src/Platform/ImageDecoders/JPEGImageDecoder.cpp
   src/Platform/ImageDecoders/PNGImageDecoder.cpp
