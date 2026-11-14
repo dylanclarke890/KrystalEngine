@@ -46,6 +46,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
@@ -53,6 +54,7 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
@@ -438,6 +440,23 @@ namespace krys::boo
       }
     }
     return nullptr;
+  }
+
+  ScrollAnchoringController *
+    RenderObject::SearchParentChainForScrollAnchoringController(const RenderObject &renderer) noexcept
+  {
+    for (auto *layer = renderer.EnclosingLayer(); layer; layer = layer->Parent())
+    {
+      if (auto *scrollableArea = layer->GetScrollableArea())
+      {
+        auto *controller = scrollableArea->GetScrollAnchoringController();
+        if (controller && controller->AnchorElement())
+        {
+          return controller;
+        }
+      }
+    }
+    return renderer.View().FrameView().GetScrollAnchoringController();
   }
 
   bool RenderObject::IsComposited() const noexcept

@@ -51,6 +51,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
@@ -88,6 +89,7 @@ namespace krys::boo
       : _frame(CreateWeakPtr(&frame)), _mediaType(css::mq::ScreenAtom()), _layoutContext(*this),
         _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired)
   {
+    _scrollAnchoringController = CreateUnique<ScrollAnchoringController>(*this);
   }
 
   LocalFrameView::~LocalFrameView() noexcept = default;
@@ -1452,6 +1454,39 @@ namespace krys::boo
   void LocalFrameView::InvalidateScrollbarsForAllScrollableAreas() noexcept
   {
     ForEachScrollableArea([](ScrollableArea &area) { area.ScrollbarAppearanceChanged(); });
+  }
+
+  void LocalFrameView::QueueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept
+  {
+    _scrollableAreasNeedingScrollAnchoringUpdate.insert(&scrollableArea);
+  }
+
+  void LocalFrameView::DequeueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept
+  {
+    _scrollableAreasNeedingScrollAnchoringUpdate.erase(&scrollableArea);
+  }
+
+  void LocalFrameView::UpdateScrollAnchoringElementsForScrollableAreas() noexcept
+  {
+    ForEachScrollableArea([](ScrollableArea &area) { area.UpdateScrollAnchoringElement(); });
+  }
+
+  void LocalFrameView::UpdateScrollAnchoringPositionForScrollableAreas() noexcept
+  {
+    // Adjusting queues the areas again, for the layout after this one.
+    List<WeakPtr<ScrollableArea>> areas;
+    areas.reserve(_scrollableAreasNeedingScrollAnchoringUpdate.size());
+    for (auto *area : std::exchange(_scrollableAreasNeedingScrollAnchoringUpdate, {}))
+    {
+      areas.push_back(CreateWeakPtr(area));
+    }
+    for (auto &area : areas)
+    {
+      if (area)
+      {
+        area->UpdateScrollPositionForScrollAnchoringController();
+      }
+    }
   }
 
   OverscrollBehavior LocalFrameView::HorizontalOverscrollBehavior() const noexcept
@@ -3245,6 +3280,8 @@ namespace krys::boo
       return;
     }
 
+    InvalidateScrollAnchoringElement();
+    UpdateScrollAnchoringElement();
     Frame().Document()->SetNeedsDOMWindowResizeEvent();
   }
 

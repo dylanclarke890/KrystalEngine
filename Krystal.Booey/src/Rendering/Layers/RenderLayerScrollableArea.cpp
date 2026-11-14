@@ -48,11 +48,14 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
@@ -79,13 +82,23 @@ namespace krys::boo
 {
   RenderLayerScrollableArea::RenderLayerScrollableArea(RenderLayer &layer) noexcept : _layer(layer)
   {
-    // FIXME: The scroll anchoring controller (cssScrollAnchoringEnabled), once there's scroll anchoring.
+    // The root's and body's scrolling is the frame view's, which anchors itself.
+    auto *element = layer.Renderer().GetElement();
+    if (!Is<html::HTMLHtmlElement>(element) && !Is<html::HTMLBodyElement>(element))
+    {
+      _scrollAnchoringController = CreateUnique<ScrollAnchoringController>(*this);
+    }
   }
 
   RenderLayerScrollableArea::~RenderLayerScrollableArea() noexcept = default;
 
   void RenderLayerScrollableArea::Clear() noexcept
   {
+    if (_scrollAnchoringController)
+    {
+      _scrollAnchoringController->InvalidateAnchorElement();
+      _scrollAnchoringController = nullptr;
+    }
     if (_registeredScrollableArea)
     {
       (void)_layer.Renderer().View().FrameView().RemoveScrollableArea(*this);

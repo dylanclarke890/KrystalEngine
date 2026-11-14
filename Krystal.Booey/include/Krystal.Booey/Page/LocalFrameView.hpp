@@ -165,6 +165,9 @@ namespace krys::boo
     bool _scrollbarsSuppressed {false};
     /// @brief The boxes' and list boxes' scrollable areas that can scroll or have scrollbars.
     HashSet<ScrollableArea *> _scrollableAreas;
+    /// @brief The scrollable areas whose scroll anchors are adjusted for after the next layout.
+    HashSet<ScrollableArea *> _scrollableAreasNeedingScrollAnchoringUpdate;
+    UniquePtr<ScrollAnchoringController> _scrollAnchoringController;
     RefPtr<Scrollbar> _horizontalScrollbar;
     RefPtr<Scrollbar> _verticalScrollbar;
     ScrollbarMode _horizontalScrollbarMode {ScrollbarMode::Auto};
@@ -601,6 +604,18 @@ namespace krys::boo
     /// @brief Repaints the scrollbars of the view and of every scroller and list box in it, for a change in
     /// the page's dark appearance.
     void InvalidateScrollbarsForAllScrollableAreas() noexcept;
+
+    KRYS_NODISCARD ScrollAnchoringController *GetScrollAnchoringController() const noexcept override
+    {
+      return _scrollAnchoringController.get();
+    }
+    void QueueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept;
+    void DequeueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept;
+    /// @brief Chooses the scroll anchors of the view and its scrollers that have none.
+    void UpdateScrollAnchoringElementsForScrollableAreas() noexcept;
+    /// @brief Adjusts the queued scrollable areas for how far their scroll anchors moved.
+    /// @see https://drafts.csswg.org/css-scroll-anchoring/#scroll-adjustment
+    void UpdateScrollAnchoringPositionForScrollableAreas() noexcept;
     KRYS_NODISCARD OverscrollBehavior HorizontalOverscrollBehavior() const noexcept override;
     KRYS_NODISCARD OverscrollBehavior VerticalOverscrollBehavior() const noexcept override;
 
@@ -980,3 +995,10 @@ namespace krys::boo
     void ScrollToAnchor() noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LocalFrameView)
+  KRYS_NODISCARD static bool IsType(const krys::boo::ScrollableArea &area) noexcept
+  {
+    return area.IsScrollView();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

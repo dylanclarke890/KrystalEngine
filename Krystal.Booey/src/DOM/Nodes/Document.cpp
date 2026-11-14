@@ -2582,8 +2582,6 @@ namespace krys::boo::dom
       frameView->ServiceScrollAnimations(html::EventLoop::Current().Now());
     }
 
-    // FIXME: Scroll anchoring, once there is any.
-
     // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/66.
     auto currentTargets = std::exchange(_pendingScrollEventTargets, {});
     for (auto &[target, type] : currentTargets)

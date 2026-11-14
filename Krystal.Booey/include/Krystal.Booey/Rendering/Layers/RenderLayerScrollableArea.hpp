@@ -52,6 +52,7 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {
@@ -59,7 +60,7 @@ namespace krys::boo
 
   /// @brief The scrollable area of a layer whose box can scroll its overflow: its scroll position and
   /// extents, and its scrollbars.
-  // FIXME: Marquees, touch, wheel and keyboard scrolling, scroll anchoring,
+  // FIXME: Marquees, touch, wheel and keyboard scrolling,
   // composited scrolling, painting and hit testing of the overflow
   // controls, scroll events and scrolling into view come with input, animations, compositing and painting.
   class RenderLayerScrollableArea final : public ScrollableArea
@@ -91,6 +92,8 @@ namespace krys::boo
     // For layers with overflow, we have a pair of scrollbars.
     RefPtr<Scrollbar> _hBar;
     RefPtr<Scrollbar> _vBar;
+
+    UniquePtr<ScrollAnchoringController> _scrollAnchoringController;
 
   public:
     explicit RenderLayerScrollableArea(RenderLayer &layer) noexcept;
@@ -222,6 +225,10 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderLayer() const noexcept final
     {
       return true;
+    }
+    KRYS_NODISCARD ScrollAnchoringController *GetScrollAnchoringController() const noexcept final
+    {
+      return _scrollAnchoringController.get();
     }
     KRYS_NODISCARD bool IsScrollCornerVisible() const noexcept final;
     KRYS_NODISCARD IntRect ScrollCornerRect() const noexcept final;

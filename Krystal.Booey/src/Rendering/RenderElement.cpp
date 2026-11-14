@@ -42,6 +42,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
@@ -1426,7 +1427,19 @@ namespace krys::boo
                                                 : oldStyle->OutlineSize());
     }
 
-    // FIXME: Scroll anchoring, once there is any.
+    // A suppression trigger on the anchor node or its ancestors, or something becoming or no longer being
+    // out of flow anywhere in the scroller, stops the next adjustment.
+    bool shouldCheckIfInAncestorChain = false;
+    if (Style().OutOfFlowPositionStyleDidChange(oldStyle)
+        || (shouldCheckIfInAncestorChain = Style().ScrollAnchoringSuppressionStyleDidChange(oldStyle)))
+    {
+      auto *controller = SearchParentChainForScrollAnchoringController(*this);
+      if (controller
+          && (!shouldCheckIfInAncestorChain || controller->IsInScrollAnchoringAncestorChain(*this)))
+      {
+        controller->NotifyChildHadSuppressingStyleChange();
+      }
+    }
 
     // FIXME: First line change on the block comes in as equal on inline boxes.
     auto needsLayoutBoxStyleUpdate =
