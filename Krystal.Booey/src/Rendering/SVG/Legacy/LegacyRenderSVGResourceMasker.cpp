@@ -19,6 +19,7 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
+#include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -90,15 +91,18 @@ namespace krys::boo
 
     if (!maskerData->MaskImage && !decoratedBounds.IsEmpty())
     {
-      // FIXME: A mask image in linear sRGB for `color-interpolation: linearRGB`, once image buffers have
-      // colour spaces.
+      // The content is drawn in sRGB; with `color-interpolation: linearRGB`, a luminance mask's luminance
+      // is of its colours in linear light.
+      const auto &drawColorSpace = Style().GetColorInterpolation() == ColorInterpolation::LinearRGB
+                                     ? DestinationColorSpace::LinearSRGB()
+                                     : DestinationColorSpace::SRGB();
       maskerData->MaskImage = context->CreateScaledImageBuffer(decoratedBounds, scale);
       if (!maskerData->MaskImage)
       {
         return {};
       }
 
-      if (!DrawContentIntoMaskImage(maskerData, &renderer))
+      if (!DrawContentIntoMaskImage(maskerData, drawColorSpace, &renderer))
       {
         maskerData->MaskImage = nullptr;
       }
@@ -115,6 +119,7 @@ namespace krys::boo
   }
 
   bool LegacyRenderSVGResourceMasker::DrawContentIntoMaskImage(MaskerData *maskerData,
+                                                               const DestinationColorSpace &colorSpace,
                                                                RenderObject *object) noexcept
   {
     RefPtr<ImageBuffer> maskImage = maskerData->MaskImage;
@@ -129,7 +134,7 @@ namespace krys::boo
     // Create the luminance mask.
     if (Style().GetMaskType() == MaskType::Luminance)
     {
-      maskImage->ConvertToLuminanceMask();
+      maskImage->ConvertToLuminanceMask(colorSpace);
     }
 
     return true;

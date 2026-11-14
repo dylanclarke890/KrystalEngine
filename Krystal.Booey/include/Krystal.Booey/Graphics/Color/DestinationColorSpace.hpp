@@ -42,7 +42,8 @@ namespace krys::boo
     enum class Space : uint8
     {
       SRGB,
-      LinearSRGB
+      LinearSRGB,
+      DisplayP3
     };
 
   private:
@@ -51,6 +52,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static const DestinationColorSpace &SRGB() noexcept;
     KRYS_NODISCARD static const DestinationColorSpace &LinearSRGB() noexcept;
+    KRYS_NODISCARD static const DestinationColorSpace &DisplayP3() noexcept;
 
     constexpr explicit DestinationColorSpace(Space space) noexcept : _space(space)
     {

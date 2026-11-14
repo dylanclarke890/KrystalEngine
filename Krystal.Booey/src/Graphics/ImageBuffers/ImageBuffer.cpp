@@ -170,12 +170,17 @@ namespace krys::boo
     return _backend ? _backend->LayerContentsDisplayDelegate() : nullptr;
   }
 
-  void ImageBuffer::ConvertToLuminanceMask() noexcept
+  void ImageBuffer::ConvertToLuminanceMask(const DestinationColorSpace &colorSpace) noexcept
   {
     if (_backend)
     {
-      _backend->ConvertToLuminanceMask();
+      _backend->ConvertToLuminanceMask(colorSpace);
     }
+  }
+
+  void ImageBuffer::ConvertToLuminanceMask() noexcept
+  {
+    ConvertToLuminanceMask(DestinationColorSpace::SRGB());
   }
 
   IntSize ImageBuffer::BackendSize() const noexcept

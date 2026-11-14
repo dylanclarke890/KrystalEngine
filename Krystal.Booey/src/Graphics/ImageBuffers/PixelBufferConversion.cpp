@@ -25,6 +25,11 @@
 
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferConversion.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
+#include "Krystal.Core/Colour/ColourConversion.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 
 namespace krys::boo
@@ -156,6 +161,98 @@ namespace krys::boo
       }
     }
 
+    /// @brief The components of @p colour, converted to @p destination.
+    template <typename TColour>
+    KRYS_NODISCARD Array<float, 3> ConvertFrom(const TColour &colour,
+                                               DestinationColorSpace::Space destination) noexcept
+    {
+      auto components = [](const auto &converted)
+      {
+        auto [red, green, blue, alpha] = converted.Resolved();
+        (void)alpha;
+        return Array<float, 3> {red, green, blue};
+      };
+      switch (destination)
+      {
+        case DestinationColorSpace::Space::SRGB: return components(ConvertColour<SRGBA<float>>(colour));
+        case DestinationColorSpace::Space::LinearSRGB:
+          return components(ConvertColour<LinearSRGBA<float>>(colour));
+        case DestinationColorSpace::Space::DisplayP3:
+          return components(ConvertColour<DisplayP3<float>>(colour));
+      }
+      return components(ConvertColour<SRGBA<float>>(colour));
+    }
+
+    /// @brief @p rgb, a straight colour in @p source, in @p destination.
+    KRYS_NODISCARD Array<float, 3> ConvertColorSpace(Array<float, 3> rgb, DestinationColorSpace::Space source,
+                                                     DestinationColorSpace::Space destination) noexcept
+    {
+      switch (source)
+      {
+        case DestinationColorSpace::Space::SRGB:
+          return ConvertFrom(SRGBA<float> {rgb[0], rgb[1], rgb[2], 1.f}, destination);
+        case DestinationColorSpace::Space::LinearSRGB:
+          return ConvertFrom(LinearSRGBA<float> {rgb[0], rgb[1], rgb[2], 1.f}, destination);
+        case DestinationColorSpace::Space::DisplayP3:
+          return ConvertFrom(DisplayP3<float> {rgb[0], rgb[1], rgb[2], 1.f}, destination);
+      }
+      return rgb;
+    }
+
+    /// @brief Converts pixels between colour spaces: each is unpremultiplied, converted with the
+    /// 'relative-colorimetric' intent (colours outside the destination's gamut are clipped to it), and
+    /// premultiplied again if the destination is.
+    void ConvertImagePixelsBetweenColorSpaces(const ConstPixelBufferConversionView &source,
+                                              const PixelBufferConversionView &destination,
+                                              const IntSize &destinationSize) noexcept
+    {
+      const bool sourceIsBGR = source.Format.Format != PixelFormat::RGBA8;
+      const bool destinationIsBGR = destination.Format.Format != PixelFormat::RGBA8;
+      const bool sourceIsOpaque = source.Format.Format == PixelFormat::BGRX8;
+      const bool destinationIsOpaque = destination.Format.Format == PixelFormat::BGRX8;
+      const bool sourceIsPremultiplied = source.Format.AlphaFormat == AlphaPremultiplication::Premultiplied;
+      const bool destinationIsPremultiplied =
+        destination.Format.AlphaFormat == AlphaPremultiplication::Premultiplied;
+      const auto sourceSpace = source.Format.ColorSpace.GetSpace();
+      const auto destinationSpace = destination.Format.ColorSpace.GetSpace();
+
+      for (int32 y = 0; y < destinationSize.Height(); ++y)
+      {
+        auto sourceRow = source.Rows.subspan(static_cast<size_t>(source.BytesPerRow) * y);
+        auto destinationRow = destination.Rows.subspan(static_cast<size_t>(destination.BytesPerRow) * y);
+        for (int32 x = 0; x < destinationSize.Width(); ++x)
+        {
+          const uint8 *in = sourceRow.data() + static_cast<size_t>(x) * 4u;
+          uint8 *out = destinationRow.data() + static_cast<size_t>(x) * 4u;
+          const uint8 alpha = sourceIsOpaque ? 255 : in[3];
+          if (!alpha)
+          {
+            std::memset(out, 0, 4);
+            if (destinationIsOpaque)
+            {
+              out[3] = 255;
+            }
+            continue;
+          }
+          const float scale = sourceIsPremultiplied ? 1.f / alpha : 1.f / 255.f;
+          Array<float, 3> rgb {in[sourceIsBGR ? 2 : 0] * scale, in[1] * scale,
+                               in[sourceIsBGR ? 0 : 2] * scale};
+          rgb = ConvertColorSpace(rgb, sourceSpace, destinationSpace);
+
+          const uint8 outAlpha = destinationIsOpaque ? 255 : alpha;
+          const float outScale = destinationIsPremultiplied ? static_cast<float>(outAlpha) : 255.f;
+          auto encode = [&](float component)
+          {
+            return static_cast<uint8>(std::lround(std::clamp(component, 0.f, 1.f) * outScale));
+          };
+          out[destinationIsBGR ? 2 : 0] = encode(rgb[0]);
+          out[1] = encode(rgb[1]);
+          out[destinationIsBGR ? 0 : 2] = encode(rgb[2]);
+          out[3] = outAlpha;
+        }
+      }
+    }
+
     void CopyImagePixels(const ConstPixelBufferConversionView &source,
                          const PixelBufferConversionView &destination,
                          const IntSize &destinationSize) noexcept
@@ -200,9 +297,11 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: We don't currently support converting pixel data between different color spaces in the
-    // non-accelerated path. This could be added using conversion functions from ColorConversion.hpp.
-    krys_debug_assert(source.Format.ColorSpace == destination.Format.ColorSpace);
+    if (source.Format.ColorSpace != destination.Format.ColorSpace)
+    {
+      ConvertImagePixelsBetweenColorSpaces(source, destination, destinationSize);
+      return;
+    }
 
     using enum PixelFormatConversion;
     if (source.Format.AlphaFormat == destination.Format.AlphaFormat)

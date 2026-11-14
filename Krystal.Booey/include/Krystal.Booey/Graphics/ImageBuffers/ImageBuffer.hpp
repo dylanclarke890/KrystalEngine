@@ -162,6 +162,9 @@ namespace krys::boo
                         AlphaPremultiplication destFormat = AlphaPremultiplication::Premultiplied) noexcept;
 
     /// @brief Turns what's drawn into a luminance mask (for `mask-mode: luminance`).
+    /// @brief Turns what's drawn into a luminance mask: alpha is the luminance of the colours, converted to
+    /// @p colorSpace (linear sRGB for SVG's `color-interpolation: linearRGB`), times the alpha.
+    void ConvertToLuminanceMask(const DestinationColorSpace &colorSpace) noexcept;
     void ConvertToLuminanceMask() noexcept;
 
     KRYS_NODISCARD RenderingResourceIdentifier GetRenderingResourceIdentifier() const noexcept

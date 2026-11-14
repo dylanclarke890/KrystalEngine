@@ -35,6 +35,7 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
+  class DestinationColorSpace;
   class ImageBuffer;
 
   /// @brief The mask image a mask drew for one client.
@@ -84,7 +85,8 @@ namespace krys::boo
       return u8"RenderSVGResourceMasker";
     }
 
-    KRYS_NODISCARD bool DrawContentIntoMaskImage(MaskerData *, RenderObject *) noexcept;
+    KRYS_NODISCARD bool DrawContentIntoMaskImage(MaskerData *, const DestinationColorSpace &,
+                                                 RenderObject *) noexcept;
     void CalculateMaskContentRepaintRect(RepaintRectCalculation) noexcept;
   };
 }

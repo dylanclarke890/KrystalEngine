@@ -279,6 +279,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `arcTo()` with a negative radius throws before it ensures there's a subpath, so the path is unchanged, and `createPattern()` checks its repetition before the image's usability, so an unusable image with a bad repetition throws rather than returning null.
 - There's no `toBlob()`: `toDataURL()` encodes the pixels synchronously.
 - A canvas always gets a `RenderHTMLCanvas` and is always replaced, so its fallback content is never rendered; the specification renders the fallback content when scripting is disabled, which it always is here.
+- A `display-p3` canvas draws in sRGB, as painting has no wide gamut colours yet: colours outside sRGB are clipped as they're drawn, so its image data (converted to Display P3) never holds them. Image data is converted between sRGB and Display P3 when it's read and written, as the specification has it.
 
 ### From Chrome
 

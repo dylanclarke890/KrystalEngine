@@ -417,4 +417,61 @@ namespace krys::ui::tests
     CHECK((darkBlue >> 24) == 255u);
     CHECK(std::abs(static_cast<int32>(darkBlue & 0xFFu) - 128) <= 6);
   }
+
+  TEST_CASE("Canvas 2D: image data is converted between colour spaces", "[UI][GPU][Canvas][ColorManagement]")
+  {
+    using boo::html::PredefinedColorSpace;
+    Canvas2DFixture fixture(u8"<canvas id=p3 width=100 height=50></canvas>");
+    fixture.GetView().SetDevice(fixture.Paint().Device());
+    auto &context = fixture.Context();
+
+    auto read = [](boo::html::CanvasRenderingContext2D &from, int32 x, int32 y,
+                   Maybe<PredefinedColorSpace> colorSpace) -> Pixel
+    {
+      auto imageData = from.GetImageData(x, y, 1, 1, boo::html::ImageDataSettings {.ColorSpace = colorSpace});
+      REQUIRE_FALSE(imageData.HasException());
+      if (colorSpace)
+      {
+        CHECK(imageData.Value()->ColorSpace() == *colorSpace);
+      }
+      auto bytes = imageData.Value()->Data().AsUint8ClampedArray();
+      return {bytes->Item(0), bytes->Item(1), bytes->Item(2), bytes->Item(3)};
+    };
+    auto put = [](boo::html::CanvasRenderingContext2D &into, const Pixel &pixel, int32 x, int32 y)
+    {
+      auto imageData = into.CreateImageData(
+        1, 1, boo::html::ImageDataSettings {.ColorSpace = PredefinedColorSpace::DisplayP3});
+      REQUIRE_FALSE(imageData.HasException());
+      auto bytes = imageData.Value()->Data().AsUint8ClampedArray();
+      for (size_t channel = 0; channel < 4u; ++channel)
+      {
+        bytes->Set(channel, pixel[channel]);
+      }
+      REQUIRE_FALSE(into.PutImageData(*imageData.Value(), x, y).HasException());
+    };
+
+    SECTION("An sRGB canvas, read and written in Display P3")
+    {
+      context.SetFillStyle(boo::dom::DOMString(u8"red"));
+      context.FillRect(0, 0, 100, 50);
+      CheckRead(read(context, 5, 5, null), Red);
+      CheckRead(read(context, 5, 5, PredefinedColorSpace::DisplayP3), {234, 51, 35, 255});
+
+      // Display P3's red is outside sRGB's gamut, so it's clipped to sRGB's red.
+      put(context, {255, 0, 0, 255}, 10, 10);
+      put(context, {0, 255, 0, 128}, 11, 10);
+      CheckRead(read(context, 10, 10, null), Red);
+      CheckRead(read(context, 11, 10, null), {0, 255, 0, 128});
+    }
+
+    SECTION("A Display P3 canvas's image data is in Display P3")
+    {
+      auto p3 = fixture.Canvas(u8"p3").GetContext2d({.ColorSpace = PredefinedColorSpace::DisplayP3});
+      REQUIRE(p3);
+      p3->SetFillStyle(boo::dom::DOMString(u8"red"));
+      p3->FillRect(0, 0, 100, 50);
+      CheckRead(read(*p3, 5, 5, null), {234, 51, 35, 255});
+      CheckRead(read(*p3, 5, 5, PredefinedColorSpace::SRGB), Red);
+    }
+  }
 }

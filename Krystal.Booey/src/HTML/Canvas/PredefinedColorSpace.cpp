@@ -33,10 +33,8 @@ namespace krys::boo::html
   {
     switch (colorSpace)
     {
-      case PredefinedColorSpace::SRGB: return DestinationColorSpace::SRGB();
-      case PredefinedColorSpace::DisplayP3:
-        // FIXME: Display P3 destinations; canvases draw in sRGB until there are.
-        return DestinationColorSpace::SRGB();
+      case PredefinedColorSpace::SRGB:      return DestinationColorSpace::SRGB();
+      case PredefinedColorSpace::DisplayP3: return DestinationColorSpace::DisplayP3();
     }
     krys_debug_assert(false);
     return DestinationColorSpace::SRGB();
@@ -47,6 +45,10 @@ namespace krys::boo::html
     if (colorSpace == DestinationColorSpace::SRGB())
     {
       return PredefinedColorSpace::SRGB;
+    }
+    if (colorSpace == DestinationColorSpace::DisplayP3())
+    {
+      return PredefinedColorSpace::DisplayP3;
     }
     return null;
   }

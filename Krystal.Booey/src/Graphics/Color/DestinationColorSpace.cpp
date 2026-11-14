@@ -40,6 +40,12 @@ namespace krys::boo
     return linearSRGB;
   }
 
+  const DestinationColorSpace &DestinationColorSpace::DisplayP3() noexcept
+  {
+    static constexpr DestinationColorSpace displayP3(Space::DisplayP3);
+    return displayP3;
+  }
+
   TextStream &operator<<(TextStream &ts, const DestinationColorSpace &colorSpace) noexcept
   {
     if (colorSpace == DestinationColorSpace::SRGB())
@@ -49,6 +55,10 @@ namespace krys::boo
     else if (colorSpace == DestinationColorSpace::LinearSRGB())
     {
       ts << u8"LinearSRGB";
+    }
+    else if (colorSpace == DestinationColorSpace::DisplayP3())
+    {
+      ts << u8"DisplayP3";
     }
     return ts;
   }

@@ -48,6 +48,7 @@ target_sources(Krystal.UI.Tests
     tests/Benchmark.cpp
     tests/BidiEditing.cpp
     tests/Canvas2D.cpp
+    tests/ColorSpaces.cpp
     tests/Compositing.cpp
     tests/DragAndDrop.cpp
     tests/InputMethod.cpp

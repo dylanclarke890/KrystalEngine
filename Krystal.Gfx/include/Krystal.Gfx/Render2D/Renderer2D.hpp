@@ -16,6 +16,7 @@
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Formats.hpp"
 #include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Render2D/FilterGraph2D.hpp"
 #include "Krystal.Gfx/Render2D/FontFace2D.hpp"
 #include "Krystal.Gfx/Render2D/GlyphAtlas.hpp"
 #include "Krystal.Gfx/Render2D/Gradient2D.hpp"
@@ -114,6 +115,9 @@ namespace krys::gfx
                              0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f};
     /// @brief For `Blur`: twice the standard deviation, as CSS's blur radius is, in target pixels.
     bool MatrixOnPremultiplied {false};
+    /// @brief For `ColourMatrix`: the colour space the matrix applies in. In linear sRGB, the colours are
+    /// converted to linear light first, and the matrix's result is kept as it is.
+    FilterColourSpace2D MatrixColourSpace {FilterColourSpace2D::SRGB};
     float BlurRadius {0.f};
     /// @brief For `Blur`: what it reads past the edges of the layer, which are its clip when it has one.
     EdgeMode2D BlurEdgeMode {EdgeMode2D::None};
@@ -125,13 +129,16 @@ namespace krys::gfx
       return {.Type = Kind::ColourMatrix, .Matrix = matrix};
     }
     /// @brief A luminance mask: alpha is the luminance of the premultiplied colour (so the luminance times
-    /// the alpha), and the colour is black, as Skia's luma colour filter.
-    KRYS_NODISCARD static LayerFilter2D LuminanceToAlpha() noexcept
+    /// the alpha), and the colour is black, as Skia's luma colour filter. The luminance is of the colour in
+    /// @p colourSpace: linear sRGB for SVG's `color-interpolation: linearRGB`.
+    KRYS_NODISCARD static LayerFilter2D
+      LuminanceToAlpha(FilterColourSpace2D colourSpace = FilterColourSpace2D::SRGB) noexcept
     {
       return {.Type = Kind::ColourMatrix,
               .Matrix = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f,     0.f,     0.f,     0.f, 0.f,
                          0.f, 0.f, 0.f, 0.f, 0.f, 0.2125f, 0.7154f, 0.0721f, 0.f, 0.f},
-              .MatrixOnPremultiplied = true};
+              .MatrixOnPremultiplied = true,
+              .MatrixColourSpace = colourSpace};
     }
     KRYS_NODISCARD static LayerFilter2D Blur(float blurRadius,
                                              EdgeMode2D edgeMode = EdgeMode2D::None) noexcept
@@ -261,6 +268,8 @@ namespace krys::gfx
       ColourMatrixFilter = 1u << 14u,
       /// @brief The colour matrix applies to the premultiplied texel.
       PremultipliedMatrix = 1u << 15u,
+      /// @brief The texel's colour is converted from sRGB to linear light before the colour matrix.
+      LinearMatrix = 1u << 16u,
     };
     /// @brief The instance's `BlendMode` is in the flags from this bit, for five bits.
     constexpr static uint32 BlendModeShift = 8u;

@@ -77,7 +77,11 @@ namespace krys::ui
     // A luminance mask's drawing goes through a layer that turns its luminance into alpha.
     if (backend->IsLuminanceMask())
     {
-      renderer->BeginLayer(1.f, BlendMode::Normal, gfx::LayerFilter2D::LuminanceToAlpha());
+      renderer->BeginLayer(1.f, BlendMode::Normal,
+                           gfx::LayerFilter2D::LuminanceToAlpha(
+                             backend->LuminanceMaskColorSpace() == boo::DestinationColorSpace::LinearSRGB()
+                               ? gfx::FilterColourSpace2D::LinearSRGB
+                               : gfx::FilterColourSpace2D::SRGB));
     }
     {
       GraphicsContextRender2D context(

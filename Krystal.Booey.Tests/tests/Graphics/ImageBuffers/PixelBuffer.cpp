@@ -92,6 +92,37 @@ namespace krys::boo::tests
     CHECK(shared->CreateScratchPixelBuffer(IntSize(4, 4))->Size() == IntSize(4, 4));
   }
 
+  TEST_CASE("PixelBufferConversion: converting between colour spaces",
+            "[Graphics][PixelBuffer][ColorManagement]")
+  {
+    auto format =
+      [](AlphaPremultiplication alpha, PixelFormat pixelFormat, const DestinationColorSpace &colorSpace)
+    {
+      return PixelBufferFormat {alpha, pixelFormat, colorSpace};
+    };
+    const auto srgb =
+      format(AlphaPremultiplication::Unpremultiplied, PixelFormat::RGBA8, DestinationColorSpace::SRGB());
+    const auto p3 =
+      format(AlphaPremultiplication::Unpremultiplied, PixelFormat::RGBA8, DestinationColorSpace::DisplayP3());
+    const auto linear = format(AlphaPremultiplication::Unpremultiplied, PixelFormat::RGBA8,
+                               DestinationColorSpace::LinearSRGB());
+
+    // sRGB's red is inside Display P3's gamut; Display P3's red is outside sRGB's, so it's clipped.
+    CHECK(Convert({255, 0, 0, 255}, srgb, p3) == Pixel {234, 51, 35, 255});
+    CHECK(Convert({255, 0, 0, 255}, p3, srgb) == Pixel {255, 0, 0, 255});
+    CHECK(Convert({234, 51, 35, 255}, p3, srgb) == Pixel {255, 0, 0, 255});
+    // Mid grey is about a fifth of white's light.
+    CHECK(Convert({128, 128, 128, 255}, srgb, linear) == Pixel {55, 55, 55, 255});
+    CHECK(Convert({55, 55, 55, 255}, linear, srgb) == Pixel {128, 128, 128, 255});
+
+    // Colours are converted unpremultiplied, whatever the alpha formats and channel orders.
+    const auto premultipliedBGRAP3 =
+      format(AlphaPremultiplication::Premultiplied, PixelFormat::BGRA8, DestinationColorSpace::DisplayP3());
+    CHECK(Convert({255, 0, 0, 128}, srgb, premultipliedBGRAP3) == Pixel {18, 26, 117, 128});
+    CHECK(Convert({0, 0, 128, 128}, premultipliedBGRAP3, srgb) == Pixel {255, 0, 0, 128});
+    CHECK(Convert({255, 0, 0, 0}, srgb, premultipliedBGRAP3) == Pixel {0, 0, 0, 0});
+  }
+
   TEST_CASE("PixelBufferConversion: premultiplying, unpremultiplying and swapping channels",
             "[Graphics][PixelBuffer]")
   {

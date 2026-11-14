@@ -71,6 +71,7 @@ namespace krys::boo
   protected:
     Parameters _parameters;
     bool _isLuminanceMask {false};
+    DestinationColorSpace _luminanceMaskColorSpace {DestinationColorSpace::Space::SRGB};
 
   public:
     virtual ~ImageBufferBackend() noexcept;
@@ -128,15 +129,22 @@ namespace krys::boo
       return _parameters;
     }
 
-    /// @brief Turns what's drawn into a luminance mask: alpha is the luminance times the alpha, the colour
-    /// black. The drawing backend applies it when it renders the buffer.
-    void ConvertToLuminanceMask() noexcept
+    /// @brief Turns what's drawn into a luminance mask: alpha is the luminance (of the colours converted to
+    /// @p colorSpace) times the alpha, the colour black. The drawing backend applies it when it renders the
+    /// buffer.
+    void ConvertToLuminanceMask(const DestinationColorSpace &colorSpace) noexcept
     {
       _isLuminanceMask = true;
+      _luminanceMaskColorSpace = colorSpace;
     }
     KRYS_NODISCARD bool IsLuminanceMask() const noexcept
     {
       return _isLuminanceMask;
+    }
+    /// @brief The colour space a luminance mask's luminance is of.
+    KRYS_NODISCARD const DestinationColorSpace &LuminanceMaskColorSpace() const noexcept
+    {
+      return _luminanceMaskColorSpace;
     }
 
   protected:

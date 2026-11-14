@@ -168,6 +168,7 @@ const uint AlphaMask = 128u;
 const uint PatternPaint = 8192u;
 const uint ColourMatrixFilter = 16384u;
 const uint PremultipliedMatrix = 32768u;
+const uint LinearMatrix = 65536u;
 const uint BlendModeShift = 8u;
 
 const uint LinearShape = 1u;
@@ -196,6 +197,11 @@ const uint BlendLuminosity = 16u;
 vec3 LinearToSrgb(vec3 c)
 {
   return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, greaterThan(c, vec3(0.0031308)));
+}
+
+vec3 SrgbToLinear(vec3 c)
+{
+  return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), greaterThan(c, vec3(0.04045)));
 }
 
 // How much of a pixel an edge covers, from the pixel's distance past the edge in local units and the
@@ -620,6 +626,11 @@ void main()
   if ((v_Flags & Textured) != 0u)
   {
     vec4 texel = SampleTexture(dx, dy);
+    if ((v_Flags & LinearMatrix) != 0u && texel.a > 0.0)
+    {
+      // The straight colour in linear light, premultiplied again.
+      texel.rgb = SrgbToLinear(clamp(texel.rgb / texel.a, 0.0, 1.0)) * texel.a;
+    }
     if ((v_Flags & ColourMatrixFilter) != 0u && (v_Flags & PremultipliedMatrix) != 0u)
     {
       vec4 filtered = clamp(u_ColourMatrix * texel + u_ColourMatrixOffset, 0.0, 1.0);
@@ -2495,6 +2506,10 @@ void main()
       if (layer.Filter->MatrixOnPremultiplied)
       {
         instance.Flags |= PremultipliedMatrix;
+      }
+      if (layer.Filter->MatrixColourSpace == FilterColourSpace2D::LinearSRGB)
+      {
+        instance.Flags |= LinearMatrix;
       }
     }
 

@@ -50,8 +50,8 @@ namespace krys::boo
   };
 
   /// @brief Converts @p destinationSize pixels from @p source's format to @p destination's: premultiplying or
-  /// unpremultiplying their alpha and swapping red and blue as needed.
-  /// FIXME: Converting between colour spaces; both views must be in the same one.
+  /// unpremultiplying their alpha, swapping red and blue, and converting between colour spaces (clipping to
+  /// the destination's gamut) as needed.
   void ConvertImagePixels(const ConstPixelBufferConversionView &source,
                           const PixelBufferConversionView &destination,
                           const IntSize &destinationSize) noexcept;

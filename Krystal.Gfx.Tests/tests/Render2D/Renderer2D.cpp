@@ -1544,6 +1544,27 @@ namespace krys::gfx::tests
     CHECK(Near(At(pixels, 1u, 0u), {0, 0, 0, 182}));
   }
 
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: a luminance mask layer in linear light",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(2u, 1u);
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.BeginLayer(1.f, BlendMode::Normal,
+                            LayerFilter2D::LuminanceToAlpha(FilterColourSpace2D::LinearSRGB));
+        renderer.FillRect({0.f, 0.f, 1.f, 1.f}, SRGBA<uint8> {128, 128, 128});
+        renderer.FillRect({1.f, 0.f, 1.f, 1.f}, SRGBA<uint8> {128, 128, 128, 128});
+        renderer.EndLayer();
+      });
+
+    // Mid grey is about a fifth of white's light (0.216), where its sRGB value is half; half-transparent, the
+    // luminance is halved again.
+    auto pixels = Read();
+    CHECK(Near(At(pixels, 0u, 0u), {0, 0, 0, 55}));
+    CHECK(Near(At(pixels, 1u, 0u), {0, 0, 0, 28}));
+  }
+
   TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: blurs a layer with duplicated edges",
                    "[Gfx][Render2D][GPU]")
   {
