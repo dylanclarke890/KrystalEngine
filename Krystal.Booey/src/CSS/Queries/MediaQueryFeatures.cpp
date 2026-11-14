@@ -296,11 +296,14 @@ namespace krys::boo::css::mq::Features
       u8"color-gamut", FixedVector {ValueId::SRGB, ValueId::P3, ValueId::Rec2020}, Dependency::None,
       [](auto &context)
       {
-        // FIXME: At some point we should start detecting displays that support more colors.
         MatchingIdentifiers identifiers {ValueId::SRGB};
         if (ChromeOf(context).ScreenSupportsExtendedColor())
         {
           identifiers.push_back(ValueId::P3);
+        }
+        if (ChromeOf(context).ScreenSupportsRec2020Color())
+        {
+          identifiers.push_back(ValueId::Rec2020);
         }
         return identifiers;
       }};

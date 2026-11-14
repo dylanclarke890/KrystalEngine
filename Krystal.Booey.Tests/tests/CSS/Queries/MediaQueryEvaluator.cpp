@@ -338,6 +338,10 @@ namespace krys::boo::css::tests
       CHECK(fixture.Matches(u8"(color-gamut: p3)"));
       CHECK_FALSE(fixture.Matches(u8"(color-gamut: rec2020)"));
       CHECK(fixture.Matches(u8"(dynamic-range: high)"));
+
+      fixture.Chrome.Rec2020Color = true;
+      CHECK(fixture.Matches(u8"(color-gamut: p3)"));
+      CHECK(fixture.Matches(u8"(color-gamut: rec2020)"));
     }
 
     SECTION("grid and scan")

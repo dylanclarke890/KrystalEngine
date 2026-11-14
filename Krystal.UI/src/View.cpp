@@ -87,6 +87,24 @@ namespace krys::ui
       _focusRequestHandler = krys::move(handler);
     }
 
+    // The display's colours, as the host says.
+    KRYS_NODISCARD int32 ScreenDepthPerComponent() const noexcept override
+    {
+      return _view ? static_cast<int32>(_view->_displayColour.BitsPerComponent) : 8;
+    }
+    KRYS_NODISCARD bool ScreenSupportsExtendedColor() const noexcept override
+    {
+      return _view && _view->_displayColour.Gamut != pal::DisplayGamut::SRGB;
+    }
+    KRYS_NODISCARD bool ScreenSupportsRec2020Color() const noexcept override
+    {
+      return _view && _view->_displayColour.Gamut == pal::DisplayGamut::Rec2020;
+    }
+    KRYS_NODISCARD bool ScreenSupportsHighDynamicRange() const noexcept override
+    {
+      return _view && _view->_displayColour.HighDynamicRange;
+    }
+
     void RunOpenPanel(boo::LocalFrame &, boo::FileChooser &chooser) noexcept override
     {
       if (_fileChooserHandler)
@@ -2386,6 +2404,16 @@ namespace krys::ui
   bool View::IsVisible() const noexcept
   {
     return _page->IsVisible();
+  }
+
+  void View::SetDisplayColour(const pal::DisplayColour &colour) noexcept
+  {
+    if (_displayColour == colour)
+    {
+      return;
+    }
+    _displayColour = colour;
+    _page->ScreenPropertiesDidChange();
   }
 
   void View::SetFramesPerSecond(uint32 framesPerSecond) noexcept

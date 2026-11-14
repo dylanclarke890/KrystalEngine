@@ -293,6 +293,9 @@ namespace krys::boo
     /// @brief Restyles every document after something their styles depend on outside the style sheets
     /// changed, and evaluates their media queries at the next rendering update.
     void UpdateStyleAfterChangeInEnvironment() noexcept;
+    /// @brief Restyles the page's documents after what the chrome client says of the screen (its colours,
+    /// depth and the like) changed, so their media queries are evaluated again.
+    void ScreenPropertiesDidChange() noexcept;
     /// @brief How the page's filters are applied when drawn into @p context: through the graphics context
     /// (there's no software or accelerated filter rendering).
     KRYS_NODISCARD EnumSet<FilterRenderingMode>

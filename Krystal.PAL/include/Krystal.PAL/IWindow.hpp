@@ -10,6 +10,7 @@
 #include "Krystal.Core/Utils/NativeHandle.hpp"
 #include "Krystal.PAL/Accessibility.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
+#include "Krystal.PAL/Display.hpp"
 #include "Krystal.PAL/DragAndDrop.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
@@ -95,6 +96,7 @@ namespace krys::pal
     using RestoreHandler = Func<void(WindowHandle)>;
     using DPIChangeHandler = Func<void(WindowHandle, int)>;
     using FocusChangeHandler = Func<void(WindowHandle, bool)>;
+    using DisplayChangeHandler = Func<void(WindowHandle)>;
     /// @brief A drag from another application over the window.
     using DragHandler = Func<void(WindowHandle, const DragInput &)>;
 
@@ -120,6 +122,9 @@ namespace krys::pal
     DPIChangeHandler OnDPIChange = nullptr;
     /// @brief Called when the window gains (true) or loses (false) keyboard focus.
     FocusChangeHandler OnFocusChange = nullptr;
+    /// @brief Called when the window moves to another display, or its display's settings change: what
+    /// `IWindow::DisplayRefreshRate()` and `IWindow::GetDisplayColour()` say may have changed.
+    DisplayChangeHandler OnDisplayChange = nullptr;
     /// @brief Called as drags from other applications come over the window, move, leave and drop; the host
     /// answers with `IWindow::SetDropOperation()`. Without it, the window takes no drops.
     DragHandler OnDrag = nullptr;
@@ -148,6 +153,10 @@ namespace krys::pal
 
     /// @brief The refresh rate of the display the window is on, in hertz, or null if the system doesn't say.
     KRYS_NODISCARD virtual Maybe<uint32> DisplayRefreshRate() const noexcept = 0;
+
+    /// @brief What colours the display the window is on shows: its gamut and whether it's showing high
+    /// dynamic range.
+    KRYS_NODISCARD virtual DisplayColour GetDisplayColour() const noexcept = 0;
 
     virtual void Show() noexcept = 0;
 

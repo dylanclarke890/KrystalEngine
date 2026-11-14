@@ -5,6 +5,7 @@
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/Platform.hpp"
 #include "Krystal.PAL/Win32/DirectManipulationPan.hpp"
+#include "Krystal.PAL/Win32/DisplayColour.hpp"
 #include "Krystal.PAL/Win32/DropTarget.hpp"
 #include "Krystal.PAL/Win32/UIAutomation.hpp"
 #include "Krystal.PAL/Win32/Utils.hpp"
@@ -1090,8 +1091,13 @@ namespace krys::pal
 #pragma endregion
         case WM_DISPLAYCHANGE:
         {
-          // The display's mode changed: its refresh rate is read again.
+          // The display's mode changed: its refresh rate and colours are read again.
           _refreshRateMonitor = nullptr;
+          _colourMonitor = nullptr;
+          if (_callbacks.OnDisplayChange)
+          {
+            _callbacks.OnDisplayChange(handle);
+          }
           break;
         }
         case WM_MOVE:
@@ -1099,6 +1105,16 @@ namespace krys::pal
           if (_pointerLock)
           {
             ConfinePointer();
+          }
+          // Moving onto another display changes what it shows.
+          if (auto *monitor = ::MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST); monitor != _monitor)
+          {
+            const bool moved = _monitor != nullptr;
+            _monitor = monitor;
+            if (moved && _callbacks.OnDisplayChange)
+            {
+              _callbacks.OnDisplayChange(handle);
+            }
           }
           break;
         }
@@ -1235,6 +1251,17 @@ namespace krys::pal
         _refreshRate = static_cast<uint32>(mode.dmDisplayFrequency);
       }
       return _refreshRate;
+    }
+
+    DisplayColour Win32Window::GetDisplayColour() const noexcept
+    {
+      auto *monitor = ::MonitorFromWindow(_handle, MONITOR_DEFAULTTONEAREST);
+      if (monitor != _colourMonitor)
+      {
+        _colourMonitor = monitor;
+        _colour = win32::ReadDisplayColour(monitor);
+      }
+      return _colour;
     }
 
     void Win32Window::Show() noexcept

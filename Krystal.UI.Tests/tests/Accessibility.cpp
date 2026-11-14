@@ -64,6 +64,10 @@ namespace krys::ui::tests
       {
         return null;
       }
+      KRYS_NODISCARD pal::DisplayColour GetDisplayColour() const noexcept override
+      {
+        return {};
+      }
       void Show() noexcept override
       {
       }

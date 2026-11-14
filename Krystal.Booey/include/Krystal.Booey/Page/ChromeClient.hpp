@@ -338,6 +338,12 @@ namespace krys::boo
       return false;
     }
 
+    /// @brief Whether the screen shows (about) Rec. 2020's gamut (`color-gamut: rec2020`).
+    KRYS_NODISCARD virtual bool ScreenSupportsRec2020Color() const noexcept
+    {
+      return false;
+    }
+
     /// @brief Whether the screen supports high dynamic range (`dynamic-range`).
     KRYS_NODISCARD virtual bool ScreenSupportsHighDynamicRange() const noexcept
     {

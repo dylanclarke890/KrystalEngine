@@ -29,6 +29,7 @@ target_sources(Krystal.PAL
     FILES
       include/Krystal.PAL/Accessibility.hpp
       include/Krystal.PAL/CursorShapes.hpp
+      include/Krystal.PAL/Display.hpp
       include/Krystal.PAL/DragAndDrop.hpp
       include/Krystal.PAL/KeyModifiers.hpp
       include/Krystal.PAL/Events.hpp
@@ -55,11 +56,13 @@ if(WIN32)
   target_sources(Krystal.PAL
     PRIVATE
       include/Krystal.PAL/Win32/DirectManipulationPan.hpp
+      include/Krystal.PAL/Win32/DisplayColour.hpp
       include/Krystal.PAL/Win32/DropTarget.hpp
       include/Krystal.PAL/Win32/UIAutomation.hpp
       include/Krystal.PAL/Win32/Utils.hpp
       include/Krystal.PAL/Win32/Win32Window.hpp
       src/Win32/DirectManipulationPan.cpp
+      src/Win32/DisplayColour.cpp
       src/Win32/DropTarget.cpp
       src/Win32/Platform.cpp
       src/Win32/UIAutomation.cpp

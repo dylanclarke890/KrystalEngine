@@ -666,6 +666,11 @@ namespace krys::boo
     }
   }
 
+  void Page::ScreenPropertiesDidChange() noexcept
+  {
+    UpdateStyleAfterChangeInEnvironment();
+  }
+
   void Page::SetUseDarkAppearance(bool useDarkAppearance) noexcept
   {
     if (_useDarkAppearance == useDarkAppearance)

@@ -61,6 +61,11 @@ namespace krys::pal::win32
     /// @brief The display the refresh rate was last read for, and its rate; a display change clears them.
     mutable HMONITOR _refreshRateMonitor {nullptr};
     mutable Maybe<uint32> _refreshRate;
+    /// @brief The display the colours were last read for, and what it shows; a display change clears them.
+    mutable HMONITOR _colourMonitor {nullptr};
+    mutable DisplayColour _colour;
+    /// @brief The display the window was on when it last moved, to tell when it moves to another.
+    mutable HMONITOR _monitor {nullptr};
     /// @brief Exposes the host's accessibility tree to UI Automation, while the host gives one.
     UniquePtr<UIAutomation> _uiAutomation;
 
@@ -80,6 +85,8 @@ namespace krys::pal::win32
     KRYS_NODISCARD WindowPosition ClientOriginOnScreen() const noexcept override;
 
     KRYS_NODISCARD Maybe<uint32> DisplayRefreshRate() const noexcept override;
+
+    KRYS_NODISCARD DisplayColour GetDisplayColour() const noexcept override;
 
     void Show() noexcept override;
 

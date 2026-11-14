@@ -517,6 +517,8 @@ namespace krys
           settings.WindowSettings.VSync
             ? _context->Window->DisplayRefreshRate().value_or(settings.RenderFramerate)
             : settings.RenderFramerate);
+        // The page's media features follow the colours of the display the window is on.
+        _pageView->SetDisplayColour(_context->Window->GetDisplayColour());
         // The page view sits below the header, wherever the window is on the screen.
         auto origin = _context->Window->ClientOriginOnScreen();
         _pageView->SetScreenOrigin(boo::IntPoint(origin.X, origin.Y + static_cast<int32>(HeaderHeight)));

@@ -30,6 +30,7 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
+#include "Krystal.PAL/Display.hpp"
 #include "Krystal.PAL/DragAndDrop.hpp"
 #include "Krystal.PAL/Gamepad.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
@@ -194,6 +195,7 @@ namespace krys::ui
     pal::PointingDevices _pointingDevices;
     /// @brief Where the view's top-left corner is on the screen, as the host last said.
     boo::IntPoint _screenOrigin;
+    pal::DisplayColour _displayColour;
     /// @brief Locks the pointer (true) or unlocks it (false) for the page, returning whether it did.
     Func<bool(bool)> _pointerLockHandler;
     /// @brief Whether the host has locked the pointer for the page.
@@ -517,6 +519,16 @@ namespace krys::ui
     KRYS_NODISCARD const boo::IntPoint &ScreenOrigin() const noexcept
     {
       return _screenOrigin;
+    }
+
+    /// @brief Tells the page what colours the display it's shown on shows (`IWindow::GetDisplayColour()`),
+    /// for its media features (`color-gamut`, `dynamic-range` and `color`). Until the host does, it's sRGB at
+    /// 8 bits a component.
+    void SetDisplayColour(const pal::DisplayColour &colour) noexcept;
+    /// @brief What colours the display shows, as the host last said.
+    KRYS_NODISCARD const pal::DisplayColour &GetDisplayColour() const noexcept
+    {
+      return _displayColour;
     }
 
     /// @brief The cursor the page wants over it, as of the last mouse move (none while the pointer is

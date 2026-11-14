@@ -19,6 +19,7 @@ namespace krys::boo::css::tests
     int32 DepthPerComponent {8};
     bool Monochrome {false};
     bool ExtendedColor {false};
+    bool Rec2020Color {false};
     bool HighDynamicRange {false};
     bool Inverted {false};
     bool PrefersContrast {false};
@@ -59,6 +60,10 @@ namespace krys::boo::css::tests
     KRYS_NODISCARD bool ScreenSupportsExtendedColor() const noexcept override
     {
       return ExtendedColor;
+    }
+    KRYS_NODISCARD bool ScreenSupportsRec2020Color() const noexcept override
+    {
+      return Rec2020Color;
     }
     KRYS_NODISCARD bool ScreenSupportsHighDynamicRange() const noexcept override
     {
