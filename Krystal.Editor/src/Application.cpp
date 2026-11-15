@@ -163,10 +163,12 @@ namespace krys
     }
     _context->Device = krys::move(device.value());
 
+    // The window's size in pixels, which its monitor's DPI scales.
+    auto windowSize = _context->Window->GetSize();
     auto swapchain = _context->Device->CreateSwapchain({
       .Window = _context->Window->GetWindowHandle(),
-      .Width = _context->Settings.WindowSettings.Size.Width,
-      .Height = _context->Settings.WindowSettings.Size.Height,
+      .Width = windowSize.Width,
+      .Height = windowSize.Height,
       .Format = gfx::TextureFormat::RGBA8Unorm,
       .VSync = _context->Settings.WindowSettings.VSync,
     });

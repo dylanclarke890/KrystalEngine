@@ -562,6 +562,21 @@ namespace krys::pal
                                   CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, instance, this);
       if (!_handle)
         throw std::runtime_error("Failed to create window: " + win32::GetLastErrorAsString());
+
+      // The size is at 96 DPI; the window's monitor, known once it's made, may have another.
+      UINT dpi = ::GetDpiForWindow(_handle);
+      if (dpi && dpi != USER_DEFAULT_SCREEN_DPI)
+      {
+        RECT scaled = {
+          0, 0,
+          ::MulDiv(static_cast<int>(_settings.Size.Width), static_cast<int>(dpi), USER_DEFAULT_SCREEN_DPI),
+          ::MulDiv(static_cast<int>(_settings.Size.Height), static_cast<int>(dpi), USER_DEFAULT_SCREEN_DPI)};
+        if (::AdjustWindowRectExForDpi(&scaled, static_cast<DWORD>(styles), FALSE, 0, dpi))
+        {
+          ::SetWindowPos(_handle, nullptr, 0, 0, scaled.right - scaled.left, scaled.bottom - scaled.top,
+                         SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+      }
     }
 
     void Win32Window::RegisterRawInput() const
