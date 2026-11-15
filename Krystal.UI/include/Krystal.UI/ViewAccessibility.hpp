@@ -9,9 +9,9 @@ namespace krys::pal
   class IWindow;
 }
 
-namespace krys::boo::ax
+namespace krys::boo
 {
-  class AccessibilityObject;
+  class AXObject;
   class AXObjectCache;
   enum class AXNotification : uint8;
   enum class AXTextChange : uint8;
@@ -38,9 +38,9 @@ namespace krys::ui
     struct ForeignCache
     {
       WeakPtr<boo::dom::Document> Document;
-      const boo::ax::AXObjectCache *Cache {nullptr};
+      const boo::AXObjectCache *Cache {nullptr};
 
-      KRYS_NODISCARD boo::ax::AXObjectCache *Get() const noexcept;
+      KRYS_NODISCARD boo::AXObjectCache *Get() const noexcept;
     };
 
   private:
@@ -72,11 +72,10 @@ namespace krys::ui
 
     // The page's side, from the view's chrome client.
 
-    void NotificationPosted(boo::ax::AccessibilityObject &object,
-                            boo::ax::AXNotification notification) noexcept;
-    void TextChanged(boo::ax::AccessibilityObject &object, boo::ax::AXTextChange change, uint64 offset,
+    void NotificationPosted(boo::AXObject &object, boo::AXNotification notification) noexcept;
+    void TextChanged(boo::AXObject &object, boo::AXTextChange change, uint64 offset,
                      utf8_stringview text) noexcept;
-    void ObjectDetached(boo::ax::AccessibilityObject &object) noexcept;
+    void ObjectDetached(boo::AXObject &object) noexcept;
     /// @brief The view showed @p overlay: its page's tree joins the view's, and its notifications come here.
     void OverlayShown(Overlay &overlay) noexcept;
     /// @brief The view hid @p overlay.
@@ -107,25 +106,24 @@ namespace krys::ui
 
   private:
     /// @brief The page's accessibility tree, turning accessibility on if it's off.
-    KRYS_NODISCARD boo::ax::AXObjectCache *Cache() noexcept;
+    KRYS_NODISCARD boo::AXObjectCache *Cache() noexcept;
     /// @brief The shown overlay's page's view, if there's an overlay.
     KRYS_NODISCARD View *OverlayView() const noexcept;
     /// @brief The shown overlay's page's accessibility tree, if there's an overlay.
-    KRYS_NODISCARD boo::ax::AXObjectCache *OverlayCache() const noexcept;
+    KRYS_NODISCARD boo::AXObjectCache *OverlayCache() const noexcept;
     /// @brief Forgets @p cache's nodes: its objects' IDs stop resolving, and later ones are new.
-    void ForgetForeignCache(const boo::ax::AXObjectCache &cache) noexcept;
+    void ForgetForeignCache(const boo::AXObjectCache &cache) noexcept;
     /// @brief @p object's node ID (tagged with its cache for an object of another page); 0 for none.
-    KRYS_NODISCARD pal::AccessibilityNodeID ID(const boo::ax::AccessibilityObject *object) const noexcept;
+    KRYS_NODISCARD pal::AccessibilityNodeID ID(const boo::AXObject *object) const noexcept;
     /// @brief The unignored object for @p node; null if it's gone.
-    KRYS_NODISCARD boo::ax::AccessibilityObject *Object(pal::AccessibilityNodeID node) noexcept;
+    KRYS_NODISCARD boo::AXObject *Object(pal::AccessibilityNodeID node) noexcept;
     /// @brief The view @p object's page is in, and its top left in the window's client area.
-    KRYS_NODISCARD Pair<View *, boo::IntPoint>
-      ViewAndOrigin(const boo::ax::AccessibilityObject &object) const noexcept;
+    KRYS_NODISCARD Pair<View *, boo::IntPoint> ViewAndOrigin(const boo::AXObject &object) const noexcept;
     /// @brief @p rect (in the page's coordinates for @p object) in the window's client area.
-    KRYS_NODISCARD pal::AccessibilityRect ToWindow(const boo::ax::AccessibilityObject &object, float x,
-                                                   float y, float width, float height) const noexcept;
+    KRYS_NODISCARD pal::AccessibilityRect ToWindow(const boo::AXObject &object, float x, float y, float width,
+                                                   float height) const noexcept;
     /// @brief The deepest unignored object at @p viewPoint (in @p view's coordinates) in @p cache's tree.
-    KRYS_NODISCARD boo::ax::AccessibilityObject *HitTestIn(boo::ax::AXObjectCache &cache, View &view,
-                                                           const boo::IntPoint &viewPoint) noexcept;
+    KRYS_NODISCARD boo::AXObject *HitTestIn(boo::AXObjectCache &cache, View &view,
+                                            const boo::IntPoint &viewPoint) noexcept;
   };
 }

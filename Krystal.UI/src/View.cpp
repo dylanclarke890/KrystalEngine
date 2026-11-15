@@ -298,8 +298,8 @@ namespace krys::ui
       completionHandler(_view && _view->UnlockPointer());
     }
 
-    void PostAccessibilityNotification(boo::ax::AccessibilityObject &object,
-                                       boo::ax::AXNotification notification) noexcept override
+    void PostAccessibilityNotification(boo::AXObject &object,
+                                       boo::AXNotification notification) noexcept override
     {
       if (auto *accessibility = Accessibility())
       {
@@ -307,8 +307,7 @@ namespace krys::ui
       }
     }
 
-    void AccessibilityObjectDetached(boo::ax::AccessibilityObject &object,
-                                     boo::ax::AccessibilityDetachmentType) noexcept override
+    void AccessibilityObjectDetached(boo::AXObject &object, boo::AXDetachmentType) noexcept override
     {
       if (auto *accessibility = Accessibility())
       {
@@ -316,8 +315,8 @@ namespace krys::ui
       }
     }
 
-    void PostAccessibilityTextChange(boo::ax::AccessibilityObject &object, boo::ax::AXTextChange change,
-                                     uint64 offset, utf8_stringview text) noexcept override
+    void PostAccessibilityTextChange(boo::AXObject &object, boo::AXTextChange change, uint64 offset,
+                                     utf8_stringview text) noexcept override
     {
       if (auto *accessibility = Accessibility())
       {

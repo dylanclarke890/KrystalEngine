@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
+#include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
@@ -33,17 +33,17 @@ namespace krys::boo::ax::tests
   TEST_CASE("AXObjectCache: the root is the document's view, above its web area",
             "[Accessibility][AXObjectCache]")
   {
-    AccessibilityFixture page(u8"<p>Hello</p>");
+    AXFixture page(u8"<p>Hello</p>");
     auto *root = page.Cache().RootObject();
     REQUIRE(root);
-    CHECK(root->Role() == AccessibilityRole::ScrollArea);
+    CHECK(root->Role() == AXRole::ScrollArea);
     CHECK_FALSE(root->IsIgnored());
     CHECK(root->ParentObject() == nullptr);
     CHECK(page.Cache().RootObject() == root);
 
     auto *webArea = page.Cache().Get(*page.Document);
     REQUIRE(webArea);
-    CHECK(webArea->Role() == AccessibilityRole::WebArea);
+    CHECK(webArea->Role() == AXRole::WebArea);
     CHECK(webArea->IsRootWebArea());
     CHECK(webArea->ParentObject() == root);
     REQUIRE_FALSE(root->Children().empty());
@@ -52,7 +52,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXObjectCache: GetOrCreate creates one object per node", "[Accessibility][AXObjectCache]")
   {
-    AccessibilityFixture page(u8"<p id=x>Hello</p>");
+    AXFixture page(u8"<p id=x>Hello</p>");
     auto &object = page.Object(u8"x");
     CHECK(page.Cache().Get(page.ById(u8"x")) == &object);
     CHECK(page.Cache().GetOrCreate(page.ById(u8"x")) == &object);
@@ -63,8 +63,8 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXObjectCache: unrendered nodes get objects only when needed", "[Accessibility][AXObjectCache]")
   {
-    AccessibilityFixture page(u8"<p id=hidden style='display: none'>Hidden</p>"
-                              u8"<nav id=contents style='display: contents'>Links</nav>");
+    AXFixture page(u8"<p id=hidden style='display: none'>Hidden</p>"
+                   u8"<nav id=contents style='display: contents'>Links</nav>");
 
     SECTION("display: none")
     {
@@ -83,14 +83,14 @@ namespace krys::boo::ax::tests
       auto *object = page.Cache().GetOrCreate(page.ById(u8"contents"));
       REQUIRE(object);
       CHECK_FALSE(object->Renderer());
-      CHECK(object->Role() == AccessibilityRole::LandmarkNavigation);
+      CHECK(object->Role() == AXRole::LandmarkNavigation);
       CHECK_FALSE(object->IsIgnored());
     }
   }
 
   TEST_CASE("AXObjectCache: removing a node detaches its object", "[Accessibility][AXObjectCache]")
   {
-    AccessibilityFixture page(u8"<p id=x>Hello</p>");
+    AXFixture page(u8"<p id=x>Hello</p>");
     auto object = ShareRef(page.Object(u8"x"));
     REQUIRE_FALSE(page.ById(u8"x").Remove().HasException());
     CHECK(object->IsDetached());
@@ -100,7 +100,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXObjectCache: clearing the cache detaches its objects", "[Accessibility][AXObjectCache]")
   {
-    AccessibilityFixture page(u8"<p id=x>Hello</p>");
+    AXFixture page(u8"<p id=x>Hello</p>");
     auto object = ShareRef(page.Object(u8"x"));
     page.Document->ClearAXObjectCache();
     CHECK(object->IsDetached());
@@ -109,7 +109,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXObjectCache: a children change rebuilds the children", "[Accessibility][AXObjectCache]")
   {
-    AccessibilityFixture page(u8"<ul id=list><li>One</li></ul>");
+    AXFixture page(u8"<ul id=list><li>One</li></ul>");
     auto &list = page.Object(u8"list");
     CHECK(list.Children().size() == 1);
 
@@ -124,7 +124,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXObjectCache: the focused object", "[Accessibility][AXObjectCache]")
   {
-    AccessibilityFixture page(u8"<button id=button>Go</button>");
+    AXFixture page(u8"<button id=button>Go</button>");
 
     SECTION("the web area while nothing is focused")
     {
@@ -143,7 +143,7 @@ namespace krys::boo::ax::tests
   TEST_CASE("AXObjectCache: ignored states are cached while a tree is built",
             "[Accessibility][AXObjectCache]")
   {
-    AccessibilityFixture page(u8"<div id=outer><p id=paragraph>Text</p></div>");
+    AXFixture page(u8"<div id=outer><p id=paragraph>Text</p></div>");
     auto &cache = page.Cache();
     auto &paragraph = page.Object(u8"paragraph");
     CHECK_FALSE(cache.IsCachingComputedIgnoredStates());

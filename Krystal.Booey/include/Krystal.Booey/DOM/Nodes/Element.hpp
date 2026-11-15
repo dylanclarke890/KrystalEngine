@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Accessibility/ARIAMixin.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
 #include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
@@ -34,6 +33,7 @@
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/DOM/Mixins/ARIAMixin.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Nodes/GetHTMLOptions.hpp"
@@ -178,7 +178,7 @@ namespace krys::boo::dom
   /// @brief A node with a qualified name and attributes.
   /// @see https://dom.spec.whatwg.org/#interface-element
   /// @see https://dom.spec.whatwg.org/#concept-element
-  class KRYS_EMPTY_BASE_CLASS Element : public ContainerNode, public aria::mixins::ARIAMixin<Element>
+  class KRYS_EMPTY_BASE_CLASS Element : public ContainerNode, public dom::mixins::ARIAMixin<Element>
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 

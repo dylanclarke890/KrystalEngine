@@ -27,13 +27,13 @@
  */
 
 #include "Krystal.Booey/Accessibility/AXLogger.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
+#include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include <format>
 
-namespace krys::boo::ax
+namespace krys::boo
 {
   namespace
   {
@@ -61,7 +61,7 @@ namespace krys::boo::ax
       return result;
     }
 
-    void StreamSubtree(utf8_string &stream, AccessibilityObject &object, EnumSet<AXStreamOption> options,
+    void StreamSubtree(utf8_string &stream, AXObject &object, EnumSet<AXStreamOption> options,
                        uint32 depth) noexcept
     {
       stream.append(depth * 2, u8' ');
@@ -74,7 +74,7 @@ namespace krys::boo::ax
     }
   }
 
-  utf8_string AXLogger::ObjectAsText(AccessibilityObject &object, EnumSet<AXStreamOption> options) noexcept
+  utf8_string AXLogger::ObjectAsText(AXObject &object, EnumSet<AXStreamOption> options) noexcept
   {
     utf8_string result;
     auto append = [&result](utf8_stringview text)
@@ -148,7 +148,7 @@ namespace krys::boo::ax
     return result;
   }
 
-  utf8_string AXLogger::TreeAsText(AccessibilityObject &root, EnumSet<AXStreamOption> options) noexcept
+  utf8_string AXLogger::TreeAsText(AXObject &root, EnumSet<AXStreamOption> options) noexcept
   {
     utf8_string stream;
     StreamSubtree(stream, root, options, 0);

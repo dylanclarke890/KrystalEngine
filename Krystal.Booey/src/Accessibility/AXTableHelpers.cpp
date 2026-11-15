@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
+#include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
@@ -44,7 +44,7 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <array>
 
-namespace krys::boo::ax::table_helpers
+namespace krys::boo::ax
 {
   namespace
   {
@@ -59,7 +59,7 @@ namespace krys::boo::ax::table_helpers
 
     KRYS_NODISCARD bool HasAnyRole(const dom::Element &element, Span<const dom::DOMStringView> roles) noexcept
     {
-      auto value = AccessibilityObject::AttributeWithDefaultARIA(element, u8"role");
+      auto value = AXObject::AttributeWithDefaultARIA(element, u8"role");
       for (const auto &name : StringAlgorithms::SplitOnWhitespace(value))
       {
         for (auto role : roles)
@@ -114,7 +114,7 @@ namespace krys::boo::ax::table_helpers
 
   bool HasNoRole(const dom::Element &element) noexcept
   {
-    return AccessibilityObject::AttributeWithDefaultARIA(element, u8"role").empty();
+    return AXObject::AttributeWithDefaultARIA(element, u8"role").empty();
   }
 
   bool HasTableRole(const dom::Element &element) noexcept
@@ -141,14 +141,14 @@ namespace krys::boo::ax::table_helpers
            || HasRole(element, u8"rowgroup");
   }
 
-  bool IsTableRole(AccessibilityRole role) noexcept
+  bool IsTableRole(AXRole role) noexcept
   {
     switch (role)
     {
-      case AccessibilityRole::Table:
-      case AccessibilityRole::Grid:
-      case AccessibilityRole::TreeGrid: return true;
-      default:                          return false;
+      case AXRole::Table:
+      case AXRole::Grid:
+      case AXRole::TreeGrid: return true;
+      default:               return false;
     }
   }
 
@@ -263,7 +263,7 @@ namespace krys::boo::ax::table_helpers
     if (auto *object = cache.GetOrCreate(section))
     {
       auto role = object->Role();
-      if (!object->IsGroup() && role != AccessibilityRole::Unknown && role != AccessibilityRole::Ignored)
+      if (!object->IsGroup() && role != AXRole::Unknown && role != AXRole::Ignored)
       {
         return true;
       }

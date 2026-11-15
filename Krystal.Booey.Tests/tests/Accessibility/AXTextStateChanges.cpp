@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
+#include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -10,8 +10,8 @@ namespace krys::boo::ax::tests
   {
     using TextChanges = List<NotificationRecorder::TextChange>;
 
-    KRYS_NODISCARD bool HasTextChange(const TextChanges &changes, const AccessibilityObject &object,
-                                      AXTextChange change, uint64 offset, utf8_stringview text) noexcept
+    KRYS_NODISCARD bool HasTextChange(const TextChanges &changes, const AXObject &object, AXTextChange change,
+                                      uint64 offset, utf8_stringview text) noexcept
     {
       for (const auto &posted : changes)
       {
@@ -25,7 +25,7 @@ namespace krys::boo::ax::tests
     }
 
     /// @brief Puts the selection over @p range of @p object's text, then forgets what that posted.
-    void Select(AccessibilityFixture &page, AccessibilityObject &object, CharacterRange range) noexcept
+    void Select(AXFixture &page, AXObject &object, CharacterRange range) noexcept
     {
       object.SetSelectedVisiblePositionRange(object.VisiblePositionRangeForRange(range));
       (void)page.TakeNotifications();
@@ -35,7 +35,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXTextStateChanges: typing", "[Accessibility][AXTextStateChanges]")
   {
-    AccessibilityFixture page(u8"<div id=editor contenteditable>Hello</div>");
+    AXFixture page(u8"<div id=editor contenteditable>Hello</div>");
     auto &editor = page.Object(u8"editor");
 
     SECTION("Inserting text")
@@ -74,14 +74,13 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXTextStateChanges: the selection moving", "[Accessibility][AXTextStateChanges]")
   {
-    AccessibilityFixture page(u8"<div id=editor contenteditable>Hello</div><p id=text>Text</p>");
+    AXFixture page(u8"<div id=editor contenteditable>Hello</div><p id=text>Text</p>");
     auto &editor = page.Object(u8"editor");
     Select(page, editor, {0, 0});
 
     editor.SetSelectedVisiblePositionRange(editor.VisiblePositionRangeForRange({1, 2}));
     // The host's next rendering update tells accessibility.
     page.TestPage->UpdateRendering();
-    CHECK(
-      AccessibilityFixture::WasPosted(page.TakeNotifications(), editor, AXNotification::SelectedTextChanged));
+    CHECK(AXFixture::WasPosted(page.TakeNotifications(), editor, AXNotification::SelectedTextChanged));
   }
 }

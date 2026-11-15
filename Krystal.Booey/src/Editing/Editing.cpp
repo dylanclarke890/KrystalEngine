@@ -957,9 +957,9 @@ namespace krys::boo
     auto position = visiblePosition.DeepEquivalent();
     auto &document = *position.GetDocument();
 
-    auto editableRoot = HighestEditableRoot(position, ax::AXObjectCache::AccessibilityEnabled()
-                                                        ? EditableType::HasEditableAXRole
-                                                        : EditableType::ContentIsEditable);
+    auto editableRoot =
+      HighestEditableRoot(position, AXObjectCache::AccessibilityEnabled() ? EditableType::HasEditableAXRole
+                                                                          : EditableType::ContentIsEditable);
     if (editableRoot && !document.InDesignMode())
     {
       scope = editableRoot;

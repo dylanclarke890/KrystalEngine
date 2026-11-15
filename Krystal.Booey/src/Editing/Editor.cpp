@@ -26,7 +26,7 @@
  */
 
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
+#include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
@@ -686,17 +686,17 @@ namespace krys::boo
     if (action == EditorActionSpecifier::CutAction)
     {
       dom::DOMString text;
-      if (ax::AXObjectCache::AccessibilityEnabled())
+      if (AXObjectCache::AccessibilityEnabled())
       {
         const auto &cutSelection = _document.Selection().Selection();
-        text = ax::AccessibilityObject::StringForVisiblePositionRange(
-          {cutSelection.VisibleStart(), cutSelection.VisibleEnd()});
+        text =
+          AXObject::StringForVisiblePositionRange({cutSelection.VisibleStart(), cutSelection.VisibleEnd()});
       }
       DeleteSelectionWithSmartDelete(CanSmartCopyOrDelete(), EditAction::Cut);
       if (auto *cache = text.empty() ? nullptr : _document.ExistingAXObjectCache())
       {
         auto start = _document.Selection().Selection().VisibleStart();
-        cache->PostTextStateChangeNotification(start.DeepEquivalent().AnchorNode(), ax::AXTextChange::Deleted,
+        cache->PostTextStateChangeNotification(start.DeepEquivalent().AnchorNode(), AXTextChange::Deleted,
                                                text, start);
       }
     }
@@ -983,7 +983,7 @@ namespace krys::boo
   // (There are no spelling or grammar markers to update; see DIFFERENCES.md.)
   void Editor::RespondToChangedContents(const VisibleSelection &endingSelection) noexcept
   {
-    if (ax::AXObjectCache::AccessibilityEnabled())
+    if (AXObjectCache::AccessibilityEnabled())
     {
       auto *node = endingSelection.Start().DeprecatedNode();
       if (auto *cache = node ? _document.ExistingAXObjectCache() : nullptr)
@@ -1523,11 +1523,11 @@ namespace krys::boo
       return;
     }
 
-    ax::AccessibilityReplacedText replacedText;
-    if (ax::AXObjectCache::AccessibilityEnabled()
+    AXReplacedText replacedText;
+    if (AXObjectCache::AccessibilityEnabled()
         && (editingAction == EditAction::Paste || editingAction == EditAction::Insert))
     {
-      replacedText = ax::AccessibilityReplacedText(selection);
+      replacedText = AXReplacedText(selection);
     }
 
     EnumSet<ReplaceSelectionCommand::CommandOption> options {
@@ -1552,7 +1552,7 @@ namespace krys::boo
     RevealSelectionAfterEditingOperation();
 
     // Accessibility is told the inserted text (not a password's).
-    if (!ax::AXObjectCache::AccessibilityEnabled() || _document.Selection().Selection().IsInPasswordField())
+    if (!AXObjectCache::AccessibilityEnabled() || _document.Selection().Selection().IsInPasswordField())
     {
       return;
     }
@@ -1560,8 +1560,7 @@ namespace krys::boo
     if (editingAction == EditAction::Paste)
     {
       const auto &inserted = command->VisibleSelectionForInsertedText();
-      text = ax::AccessibilityObject::StringForVisiblePositionRange(
-        {inserted.VisibleStart(), inserted.VisibleEnd()});
+      text = AXObject::StringForVisiblePositionRange({inserted.VisibleStart(), inserted.VisibleEnd()});
     }
     else if (editingAction == EditAction::Insert)
     {

@@ -3745,7 +3745,7 @@ namespace krys::boo::dom
       svgExtensions->StartAnimations();
     }
 
-    if (Frame() && HasLivingRenderTree() && ax::AXObjectCache::AccessibilityEnabled())
+    if (Frame() && HasLivingRenderTree() && AXObjectCache::AccessibilityEnabled())
     {
       if (auto *cache = AxObjectCache())
       {
@@ -4010,9 +4010,9 @@ namespace krys::boo::dom
     ResolveStyle(ResolveStyleType::Rebuild);
   }
 
-  ax::AXObjectCache *Document::AxObjectCache() noexcept
+  AXObjectCache *Document::AxObjectCache() noexcept
   {
-    if (!ax::AXObjectCache::AccessibilityEnabled())
+    if (!AXObjectCache::AccessibilityEnabled())
     {
       return nullptr;
     }
@@ -4022,7 +4022,7 @@ namespace krys::boo::dom
       {
         return nullptr;
       }
-      _axObjectCache = CreateUnique<ax::AXObjectCache>(*this);
+      _axObjectCache = CreateUnique<AXObjectCache>(*this);
     }
     return _axObjectCache.get();
   }

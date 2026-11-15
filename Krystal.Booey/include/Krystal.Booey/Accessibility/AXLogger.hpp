@@ -29,9 +29,9 @@
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
-namespace krys::boo::ax
+namespace krys::boo
 {
-  class AccessibilityObject;
+  class AXObject;
   class AXObjectCache;
 
   /// @brief What a dump of the accessibility tree shows of each object.
@@ -58,7 +58,7 @@ namespace krys::boo::ax
   public:
     /// @brief @p root and its descendants in the tree (unignored objects only), one per line, indented by
     /// depth.
-    KRYS_NODISCARD static utf8_string TreeAsText(AccessibilityObject &root,
+    KRYS_NODISCARD static utf8_string TreeAsText(AXObject &root,
                                                  EnumSet<AXStreamOption> options = {
                                                    AXStreamOption::Role, AXStreamOption::Name}) noexcept;
     /// @brief The tree from @p cache's root.
@@ -66,7 +66,7 @@ namespace krys::boo::ax
                                                  EnumSet<AXStreamOption> options = {
                                                    AXStreamOption::Role, AXStreamOption::Name}) noexcept;
     /// @brief One line describing @p object.
-    KRYS_NODISCARD static utf8_string ObjectAsText(AccessibilityObject &object,
+    KRYS_NODISCARD static utf8_string ObjectAsText(AXObject &object,
                                                    EnumSet<AXStreamOption> options) noexcept;
   };
 }

@@ -27,21 +27,21 @@
  */
 
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityListBoxOption.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityMathMLElement.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityMenuList.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityMenuListOption.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityMenuListPopup.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityProgressIndicator.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityScrollbar.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityScrollView.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilitySlider.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilitySpinButton.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilitySpinButtonPart.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilitySVGObject.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityTableColumn.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp"
+#include "Krystal.Booey/Accessibility/AXListBoxOption.hpp"
+#include "Krystal.Booey/Accessibility/AXMathMLElement.hpp"
+#include "Krystal.Booey/Accessibility/AXMenuList.hpp"
+#include "Krystal.Booey/Accessibility/AXMenuListOption.hpp"
+#include "Krystal.Booey/Accessibility/AXMenuListPopup.hpp"
+#include "Krystal.Booey/Accessibility/AXProgressIndicator.hpp"
+#include "Krystal.Booey/Accessibility/AXRenderObject.hpp"
+#include "Krystal.Booey/Accessibility/AXScrollbar.hpp"
+#include "Krystal.Booey/Accessibility/AXScrollView.hpp"
+#include "Krystal.Booey/Accessibility/AXSlider.hpp"
+#include "Krystal.Booey/Accessibility/AXSpinButton.hpp"
+#include "Krystal.Booey/Accessibility/AXSpinButtonPart.hpp"
+#include "Krystal.Booey/Accessibility/AXSVGObject.hpp"
+#include "Krystal.Booey/Accessibility/AXTableColumn.hpp"
+#include "Krystal.Booey/Accessibility/AXTableHeaderContainer.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
@@ -82,7 +82,7 @@
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <utility>
 
-namespace krys::boo::ax
+namespace krys::boo
 {
   namespace
   {
@@ -184,7 +184,7 @@ namespace krys::boo::ax
     {
       for (auto role : roles)
       {
-        if (table_helpers::HasRole(element, role))
+        if (ax::HasRole(element, role))
         {
           return true;
         }
@@ -208,7 +208,7 @@ namespace krys::boo::ax
     auto objects = std::exchange(_objects, {});
     for (const auto &[id, object] : objects)
     {
-      object->Detach(AccessibilityDetachmentType::CacheDestroyed);
+      object->Detach(AXDetachmentType::CacheDestroyed);
     }
   }
 
@@ -227,7 +227,7 @@ namespace krys::boo::ax
     return gAccessibilityEnabled;
   }
 
-  AccessibilityObject *AXObjectCache::RootObject() noexcept
+  AXObject *AXObjectCache::RootObject() noexcept
   {
     if (!gAccessibilityEnabled)
     {
@@ -240,11 +240,11 @@ namespace krys::boo::ax
     return GetOrCreate(_document.GetRenderView());
   }
 
-  AccessibilityObject *AXObjectCache::GetOrCreate(LocalFrameView &view) noexcept
+  AXObject *AXObjectCache::GetOrCreate(LocalFrameView &view) noexcept
   {
     if (_scrollViewID)
     {
-      auto *existing = DynamicDowncast<AccessibilityScrollView>(ObjectForID(*_scrollViewID));
+      auto *existing = DynamicDowncast<AXScrollView>(ObjectForID(*_scrollViewID));
       if (existing && existing->ScrollView() == &view)
       {
         return existing;
@@ -252,20 +252,20 @@ namespace krys::boo::ax
       // A view that's gone, or another view the document has now.
       Remove(*_scrollViewID);
     }
-    auto object = AccessibilityScrollView::Create(GenerateID(), view, *this);
+    auto object = AXScrollView::Create(GenerateID(), view, *this);
     CacheAndInitializeWrapper(*object, nullptr, nullptr);
     _scrollViewID = object->ObjectID();
     return object.get();
   }
 
-  AccessibilityObject *AXObjectCache::Create(Scrollbar &scrollbar) noexcept
+  AXObject *AXObjectCache::Create(Scrollbar &scrollbar) noexcept
   {
-    auto object = AccessibilityScrollbar::Create(GenerateID(), scrollbar, *this);
+    auto object = AXScrollbar::Create(GenerateID(), scrollbar, *this);
     CacheAndInitializeWrapper(*object, nullptr, nullptr);
     return object.get();
   }
 
-  AccessibilityObject *AXObjectCache::FocusedObject() noexcept
+  AXObject *AXObjectCache::FocusedObject() noexcept
   {
     if (!gAccessibilityEnabled)
     {
@@ -280,7 +280,7 @@ namespace krys::boo::ax
     return FocusedObjectForNode(_document);
   }
 
-  AccessibilityObject *AXObjectCache::FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept
+  AXObject *AXObjectCache::FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept
   {
     auto image = area.ImageElement();
     auto *imageObject = image ? GetOrCreate(*image) : nullptr;
@@ -298,7 +298,7 @@ namespace krys::boo::ax
     return nullptr;
   }
 
-  AccessibilityObject *AXObjectCache::FocusedObjectForNode(dom::Node &node) noexcept
+  AXObject *AXObjectCache::FocusedObjectForNode(dom::Node &node) noexcept
   {
     // A focused area's object is its image's child.
     if (auto *area = DynamicDowncast<html::HTMLAreaElement>(node))
@@ -325,7 +325,7 @@ namespace krys::boo::ax
     return focus;
   }
 
-  AccessibilityObject *AXObjectCache::Get(const dom::Node &node) const noexcept
+  AXObject *AXObjectCache::Get(const dom::Node &node) const noexcept
   {
     if (auto *document = DynamicDowncast<dom::Document>(node)) KRYS_UNLIKELY
     {
@@ -336,7 +336,7 @@ namespace krys::boo::ax
     return found == _nodeIdMapping.end() ? nullptr : ObjectForID(found->second);
   }
 
-  AccessibilityObject *AXObjectCache::Get(const RenderObject &renderer) const noexcept
+  AXObject *AXObjectCache::Get(const RenderObject &renderer) const noexcept
   {
     if (auto *node = renderer.GetNode())
     {
@@ -347,79 +347,69 @@ namespace krys::boo::ax
     return found == _renderObjectIdMapping.end() ? nullptr : ObjectForID(found->second);
   }
 
-  AccessibilityObject *AXObjectCache::ObjectForID(AXID id) const noexcept
+  AXObject *AXObjectCache::ObjectForID(AXId id) const noexcept
   {
     auto found = _objects.find(id);
     return found == _objects.end() ? nullptr : found->second.get();
   }
 
-  Ref<AccessibilityRenderObject> AXObjectCache::CreateObjectFromRenderer(RenderObject &renderer) noexcept
+  Ref<AXRenderObject> AXObjectCache::CreateObjectFromRenderer(RenderObject &renderer) noexcept
   {
     auto *node = renderer.GetNode();
     if (renderer.IsLegacyRenderSVGRoot())
     {
-      return AccessibilitySVGObject::Create(GenerateID(), renderer, *this, true);
+      return AXSVGObject::Create(GenerateID(), renderer, *this, true);
     }
     if (Is<svg::SVGElement>(node) || renderer.IsRenderSVGInlineText())
     {
-      return AccessibilitySVGObject::Create(GenerateID(), renderer, *this);
+      return AXSVGObject::Create(GenerateID(), renderer, *this);
     }
     if (auto *element = DynamicDowncast<dom::Element>(node); element && Is<mathml::MathMLElement>(*element))
     {
-      return AccessibilityMathMLElement::Create(GenerateID(), renderer, *this);
+      return AXMathMLElement::Create(GenerateID(), renderer, *this);
     }
     if (auto *menuList = DynamicDowncast<RenderMenuList>(renderer))
     {
-      return AccessibilityMenuList::Create(GenerateID(), *menuList, *this);
+      return AXMenuList::Create(GenerateID(), *menuList, *this);
     }
     if (Is<RenderProgress>(renderer) || Is<RenderMeter>(renderer) || Is<html::HTMLProgressElement>(node)
         || Is<html::HTMLMeterElement>(node))
     {
-      return AccessibilityProgressIndicator::Create(GenerateID(), renderer, *this);
+      return AXProgressIndicator::Create(GenerateID(), renderer, *this);
     }
     if (Is<RenderSlider>(renderer))
     {
-      return AccessibilitySlider::Create(GenerateID(), renderer, *this);
+      return AXSlider::Create(GenerateID(), renderer, *this);
     }
-    return AccessibilityRenderObject::Create(GenerateID(), renderer, *this);
+    return AXRenderObject::Create(GenerateID(), renderer, *this);
   }
 
-  Ref<AccessibilityNodeObject> AXObjectCache::CreateFromNode(dom::Node &node) noexcept
+  Ref<AXNodeObject> AXObjectCache::CreateFromNode(dom::Node &node) noexcept
   {
     if (auto *element = DynamicDowncast<dom::Element>(node);
         element && (Is<html::HTMLProgressElement>(*element) || Is<html::HTMLMeterElement>(*element)))
     {
-      return AccessibilityProgressIndicator::Create(GenerateID(), *element, *this);
+      return AXProgressIndicator::Create(GenerateID(), *element, *this);
     }
     if (auto *element = DynamicDowncast<dom::Element>(node); element && Is<svg::SVGElement>(*element))
     {
-      return AccessibilitySVGObject::Create(GenerateID(), *element, *this);
+      return AXSVGObject::Create(GenerateID(), *element, *this);
     }
-    return AccessibilityRenderObject::Create(GenerateID(), node, *this);
+    return AXRenderObject::Create(GenerateID(), node, *this);
   }
 
-  AccessibilityObject *AXObjectCache::Create(AccessibilityRole role) noexcept
+  AXObject *AXObjectCache::Create(AXRole role) noexcept
   {
-    RefPtr<AccessibilityObject> object;
+    RefPtr<AXObject> object;
     switch (role)
     {
-      case AccessibilityRole::SliderThumb:
-        object = AccessibilitySliderThumb::Create(GenerateID(), *this);
-        break;
-      case AccessibilityRole::MenuListPopup:
-        object = AccessibilityMenuListPopup::Create(GenerateID(), *this);
-        break;
-      case AccessibilityRole::Column: object = AccessibilityTableColumn::Create(GenerateID(), *this); break;
-      case AccessibilityRole::TableHeaderContainer:
-        object = AccessibilityTableHeaderContainer::Create(GenerateID(), *this);
-        break;
-      case AccessibilityRole::SpinButton:
-        object = AccessibilitySpinButton::Create(GenerateID(), *this);
-        break;
-      case AccessibilityRole::SpinButtonPart:
-        object = AccessibilitySpinButtonPart::Create(GenerateID(), *this);
-        break;
-      default: break;
+      case AXRole::SliderThumb:          object = AXSliderThumb::Create(GenerateID(), *this); break;
+      case AXRole::MenuListPopup:        object = AXMenuListPopup::Create(GenerateID(), *this); break;
+      case AXRole::Column:               object = AXTableColumn::Create(GenerateID(), *this); break;
+      case AXRole::TableHeaderContainer: object = AXTableHeaderContainer::Create(GenerateID(), *this); break;
+      case AXRole::SpinButton:           object = AXSpinButton::Create(GenerateID(), *this); break;
+      case AXRole::SpinButtonPart:       object = AXSpinButtonPart::Create(GenerateID(), *this); break;
+      default:                           break;
     }
     if (!object)
     {
@@ -429,7 +419,7 @@ namespace krys::boo::ax
     return object.get();
   }
 
-  void AXObjectCache::CacheAndInitializeWrapper(AccessibilityObject &object, const dom::Node *node,
+  void AXObjectCache::CacheAndInitializeWrapper(AXObject &object, const dom::Node *node,
                                                 const RenderObject *renderer) noexcept
   {
     auto id = object.ObjectID();
@@ -446,7 +436,7 @@ namespace krys::boo::ax
     object.Init();
   }
 
-  AccessibilityObject *AXObjectCache::GetOrCreate(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept
+  AXObject *AXObjectCache::GetOrCreate(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept
   {
     if (auto *object = Get(node))
     {
@@ -455,8 +445,7 @@ namespace krys::boo::ax
     return GetOrCreateSlow(node, isPartOfRelation);
   }
 
-  AccessibilityObject *AXObjectCache::GetOrCreateSlow(dom::Node &node,
-                                                      IsPartOfRelation isPartOfRelation) noexcept
+  AXObject *AXObjectCache::GetOrCreateSlow(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept
   {
     krys_debug_assert(&node.NodeDocument() == &_document);
 
@@ -471,18 +460,18 @@ namespace krys::boo::ax
       {
         return nullptr;
       }
-      RefPtr<AccessibilityObject> object;
+      RefPtr<AXObject> object;
       if (select->UsesMenuList())
       {
         if (!option || !select->Renderer())
         {
           return nullptr;
         }
-        object = AccessibilityMenuListOption::Create(GenerateID(), *option, *this);
+        object = AXMenuListOption::Create(GenerateID(), *option, *this);
       }
       else
       {
-        object = AccessibilityListBoxOption::Create(GenerateID(), Downcast<html::HTMLElement>(node), *this);
+        object = AXListBoxOption::Create(GenerateID(), Downcast<html::HTMLElement>(node), *this);
       }
       CacheAndInitializeWrapper(*object, &node, nullptr);
       return object.get();
@@ -541,7 +530,7 @@ namespace krys::boo::ax
     return object.get();
   }
 
-  AccessibilityObject *AXObjectCache::GetOrCreate(RenderObject &renderer) noexcept
+  AXObject *AXObjectCache::GetOrCreate(RenderObject &renderer) noexcept
   {
     if (auto *object = Get(renderer))
     {
@@ -567,7 +556,7 @@ namespace krys::boo::ax
     return object.get();
   }
 
-  void AXObjectCache::Remove(AXID id) noexcept
+  void AXObjectCache::Remove(AXId id) noexcept
   {
     StopCachingComputedObjectAttributes();
     auto found = _objects.find(id);
@@ -579,7 +568,7 @@ namespace krys::boo::ax
     _objects.erase(found);
 
     RemoveAllRelations(id);
-    object->Detach(AccessibilityDetachmentType::ElementDestroyed);
+    object->Detach(AXDetachmentType::ElementDestroyed);
     if (_scrollViewID == id)
     {
       _scrollViewID = null;
@@ -596,7 +585,7 @@ namespace krys::boo::ax
     if (auto *node = renderer.GetNode())
     {
       // Objects with nodes are removed when their node is, not their renderer.
-      if (auto *object = DynamicDowncast<AccessibilityRenderObject>(Get(*node)))
+      if (auto *object = DynamicDowncast<AXRenderObject>(Get(*node)))
       {
         if (object->SetRendererIfNeeded(nullptr))
         {
@@ -709,9 +698,9 @@ namespace krys::boo::ax
 
   bool AXObjectCache::IsModalElement(const dom::Element &element) noexcept
   {
-    if ((table_helpers::HasRole(element, u8"dialog") || table_helpers::HasRole(element, u8"alertdialog"))
+    if ((ax::HasRole(element, u8"dialog") || ax::HasRole(element, u8"alertdialog"))
         && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
-          AccessibilityObject::AttributeWithDefaultARIA(element, u8"aria-modal"), u8"true"))
+          AXObject::AttributeWithDefaultARIA(element, u8"aria-modal"), u8"true"))
     {
       return true;
     }
@@ -837,7 +826,7 @@ namespace krys::boo::ax
       }
     }
     return !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
-             AccessibilityObject::AttributeWithDefaultARIA(*element, u8"aria-hidden"), u8"true")
+             AXObject::AttributeWithDefaultARIA(*element, u8"aria-hidden"), u8"true")
            || element->NodeDocument().FocusedElement() == element;
   }
 
@@ -867,7 +856,7 @@ namespace krys::boo::ax
 
   void AXObjectCache::HandleMenuOpened(dom::Element &element) noexcept
   {
-    if (element.Renderer() && table_helpers::HasRole(element, u8"menu"))
+    if (element.Renderer() && ax::HasRole(element, u8"menu"))
     {
       PostNotification(GetOrCreate(element), AXNotification::MenuOpened);
     }
@@ -880,23 +869,22 @@ namespace krys::boo::ax
     {
       return;
     }
-    auto status = AccessibilityObject::AttributeWithDefaultARIA(element, u8"aria-live");
+    auto status = AXObject::AttributeWithDefaultARIA(element, u8"aria-live");
     if (status.empty())
     {
-      auto role = AccessibilityObject::AttributeWithDefaultARIA(element, u8"role");
+      auto role = AXObject::AttributeWithDefaultARIA(element, u8"role");
       if (!role.empty())
       {
-        status =
-          AccessibilityObject::DefaultLiveRegionStatusForRole(AccessibilityObject::AriaRoleToRole(role));
+        status = AXObject::DefaultLiveRegionStatusForRole(AXObject::AriaRoleToRole(role));
       }
     }
-    if (AccessibilityObject::LiveRegionStatusIsEnabled(status))
+    if (AXObject::LiveRegionStatusIsEnabled(status))
     {
       PostNotification(GetOrCreate(element), AXNotification::LiveRegionCreated);
     }
   }
 
-  void AXObjectCache::HandleLabelChanged(AccessibilityObject *object) noexcept
+  void AXObjectCache::HandleLabelChanged(AXObject *object) noexcept
   {
     if (!object)
     {
@@ -913,7 +901,7 @@ namespace krys::boo::ax
     PostNotification(object, AXNotification::LabelChanged);
   }
 
-  void AXObjectCache::PostLiveRegionChangeNotification(AccessibilityObject &object) noexcept
+  void AXObjectCache::PostLiveRegionChangeNotification(AXObject &object) noexcept
   {
     // A region can change many times in one task (each child added, say): it's told once.
     _changedLiveRegions.add(object.ObjectID());
@@ -923,7 +911,7 @@ namespace krys::boo::ax
     }
   }
 
-  Maybe<bool> AXObjectCache::CachedIgnoredState(AXID id) const noexcept
+  Maybe<bool> AXObjectCache::CachedIgnoredState(AXId id) const noexcept
   {
     if (!_computedIgnoredStates)
     {
@@ -933,7 +921,7 @@ namespace krys::boo::ax
     return found != _computedIgnoredStates->end() ? Maybe<bool>(found->second) : null;
   }
 
-  void AXObjectCache::CacheIgnoredState(AXID id, bool ignored) noexcept
+  void AXObjectCache::CacheIgnoredState(AXId id, bool ignored) noexcept
   {
     if (_computedIgnoredStates)
     {
@@ -941,7 +929,7 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::ChildrenChanged(AccessibilityObject *object) noexcept
+  void AXObjectCache::ChildrenChanged(AXObject *object) noexcept
   {
     // The tree is changing: what's cached may be out of date.
     StopCachingComputedObjectAttributes();
@@ -977,7 +965,7 @@ namespace krys::boo::ax
     StartPerformCacheUpdateTimer();
   }
 
-  void AXObjectCache::DeferRecomputeTableCellSlots(AccessibilityNodeObject &table) noexcept
+  void AXObjectCache::DeferRecomputeTableCellSlots(AXNodeObject &table) noexcept
   {
     _deferredRecomputeTableCellSlotsList.add(table.ObjectID());
     StartPerformCacheUpdateTimer();
@@ -991,24 +979,23 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::HandleChildrenChanged(AccessibilityObject &object) noexcept
+  void AXObjectCache::HandleChildrenChanged(AXObject &object) noexcept
   {
     // A menu list's children are its pop-up's.
-    if (auto *menuList = DynamicDowncast<AccessibilityMenuList>(object))
+    if (auto *menuList = DynamicDowncast<AXMenuList>(object))
     {
       HandleChildrenChanged(menuList->Popup());
     }
-    else if (auto *popup = DynamicDowncast<AccessibilityMenuListPopup>(object))
+    else if (auto *popup = DynamicDowncast<AXMenuListPopup>(object))
     {
       popup->HandleChildrenChanged();
       return;
     }
-    else if (auto *nodeObject = DynamicDowncast<AccessibilityNodeObject>(object);
-             nodeObject && nodeObject->IsTable())
+    else if (auto *nodeObject = DynamicDowncast<AXNodeObject>(object); nodeObject && nodeObject->IsTable())
     {
       DeferRecomputeTableCellSlots(*nodeObject);
     }
-    else if (auto *parentTable = DynamicDowncast<AccessibilityNodeObject>(
+    else if (auto *parentTable = DynamicDowncast<AXNodeObject>(
                nodeObject ? nodeObject->ParentTableIfExposedTableRow() : nullptr))
     {
       DeferRecomputeTableCellSlots(*parentTable);
@@ -1042,7 +1029,7 @@ namespace krys::boo::ax
         PostNotification(parent, AXNotification::ValueChanged);
         shouldUpdateParent = false;
       }
-      if (parent->Role() == AccessibilityRole::Label)
+      if (parent->Role() == AXRole::Label)
       {
         HandleLabelChanged(parent);
       }
@@ -1063,7 +1050,7 @@ namespace krys::boo::ax
     }
 
     // A list's role depends on its children.
-    if (auto *nodeObject = DynamicDowncast<AccessibilityNodeObject>(object);
+    if (auto *nodeObject = DynamicDowncast<AXNodeObject>(object);
         nodeObject && nodeObject->IsAccessibilityList())
     {
       object.UpdateRole();
@@ -1077,7 +1064,7 @@ namespace krys::boo::ax
     while (!_deferredChildrenChangedList.isEmpty())
     {
       auto deferred = std::exchange(_deferredChildrenChangedList, {});
-      List<Ref<AccessibilityObject>> objects;
+      List<Ref<AXObject>> objects;
       for (auto id : deferred)
       {
         if (auto *object = ObjectForID(id))
@@ -1096,7 +1083,7 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::HandleRoleChanged(AccessibilityObject &object, AccessibilityRole previousRole) noexcept
+  void AXObjectCache::HandleRoleChanged(AXObject &object, AXRole previousRole) noexcept
   {
     StopCachingComputedObjectAttributes();
     // The new role may change whether the object is ignored and what its parent's children are.
@@ -1217,7 +1204,7 @@ namespace krys::boo::ax
       {
         return;
       }
-      if (auto *parentTable = DynamicDowncast<AccessibilityNodeObject>(object->ParentTable()))
+      if (auto *parentTable = DynamicDowncast<AXNodeObject>(object->ParentTable()))
       {
         if (properties.Contains(TableProperty::Exposed) && !parentTable->IsAriaTable())
         {
@@ -1495,9 +1482,8 @@ namespace krys::boo::ax
     else if (name == u8"aria-multiline")
     {
       // Whether a text control is a text area or a text field depends on it.
-      if (auto object = ShareRefPtr(Get(element)); object
-                                                   && (object->Role() == AccessibilityRole::TextArea
-                                                       || object->Role() == AccessibilityRole::TextField))
+      if (auto object = ShareRefPtr(Get(element));
+          object && (object->Role() == AXRole::TextArea || object->Role() == AXRole::TextField))
       {
         object->UpdateRole();
       }
@@ -1710,8 +1696,8 @@ namespace krys::boo::ax
     return AddRelation(originObject.get(), targetObject.get(), relation);
   }
 
-  bool AXObjectCache::AddRelation(AccessibilityObject *origin, AccessibilityObject *target,
-                                  AXRelation relation, bool addSymmetricRelation) noexcept
+  bool AXObjectCache::AddRelation(AXObject *origin, AXObject *target, AXRelation relation,
+                                  bool addSymmetricRelation) noexcept
   {
     if (!origin || !target || relation == AXRelation::None
         || (origin == target && relation != AXRelation::LabeledBy))
@@ -1922,7 +1908,7 @@ namespace krys::boo::ax
     return removedRelation;
   }
 
-  void AXObjectCache::RemoveAllRelations(AXID id) noexcept
+  void AXObjectCache::RemoveAllRelations(AXId id) noexcept
   {
     auto found = _relations.find(id);
     if (found == _relations.end())
@@ -1943,7 +1929,7 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::RemoveRelationByID(AXID originID, AXID targetID, AXRelation relation) noexcept
+  void AXObjectCache::RemoveRelationByID(AXId originID, AXId targetID, AXRelation relation) noexcept
   {
     auto relations = _relations.find(originID);
     if (relations == _relations.end())
@@ -2042,7 +2028,7 @@ namespace krys::boo::ax
     AddRelation(origin, attribute);
   }
 
-  Maybe<ListHashSet<AXID>> AXObjectCache::RelatedObjectIDsFor(const AccessibilityObject &object,
+  Maybe<ListHashSet<AXId>> AXObjectCache::RelatedObjectIDsFor(const AXObject &object,
                                                               AXRelation relation) noexcept
   {
     UpdateRelationsIfNeeded();
@@ -2111,7 +2097,7 @@ namespace krys::boo::ax
 
     // The object is told, if it can have an active descendant; otherwise the object it controls that has the
     // active descendant.
-    RefPtr<AccessibilityObject> target;
+    RefPtr<AXObject> target;
     if (object->SupportsActiveDescendant())
     {
       target = object;
@@ -2144,20 +2130,20 @@ namespace krys::boo::ax
   void AXObjectCache::HandleTabPanelSelected(dom::Element *oldElement, dom::Element *newElement) noexcept
   {
     // The tabs that control the tab panels the focus left and entered change their selected state.
-    auto tabPanelOf = [this](dom::Element *element) -> AccessibilityObject *
+    auto tabPanelOf = [this](dom::Element *element) -> AXObject *
     {
       auto *object = element ? Get(*element) : nullptr;
       for (auto *ancestor = object ? object->ParentObject() : nullptr; ancestor;
            ancestor = ancestor->ParentObject())
       {
-        if (ancestor->Role() == AccessibilityRole::TabPanel)
+        if (ancestor->Role() == AXRole::TabPanel)
         {
           return ancestor;
         }
       }
       return nullptr;
     };
-    auto updateTabs = [this](AccessibilityObject *tabPanel)
+    auto updateTabs = [this](AXObject *tabPanel)
     {
       if (!tabPanel)
       {
@@ -2229,7 +2215,7 @@ namespace krys::boo::ax
       }
     }
     auto role = object->Role();
-    if (role == AccessibilityRole::Row || role == AccessibilityRole::TreeItem)
+    if (role == AXRole::Row || role == AXRole::TreeItem)
     {
       PostNotification(object.get(),
                        object->IsExpanded() ? AXNotification::RowExpanded : AXNotification::RowCollapsed);
@@ -2240,20 +2226,20 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::HandleRowCountChanged(AccessibilityObject *object) noexcept
+  void AXObjectCache::HandleRowCountChanged(AXObject *object) noexcept
   {
     if (!object)
     {
       return;
     }
-    if (auto *nodeObject = DynamicDowncast<AccessibilityNodeObject>(*object))
+    if (auto *nodeObject = DynamicDowncast<AXNodeObject>(*object))
     {
       nodeObject->RecomputeIsExposableIfNecessary();
     }
     PostNotification(object, AXNotification::RowCountChanged);
   }
 
-  void AXObjectCache::HandleTextChanged(AccessibilityObject *object) noexcept
+  void AXObjectCache::HandleTextChanged(AXObject *object) noexcept
   {
     if (!object)
     {
@@ -2280,8 +2266,7 @@ namespace krys::boo::ax
       }
       // A static text's text changed: so did the name of an ancestor named by the text under it.
       auto role = ancestor->Role();
-      if (ancestor->DependsOnTextUnderElement() || role == AccessibilityRole::Label
-          || role == AccessibilityRole::TextField)
+      if (ancestor->DependsOnTextUnderElement() || role == AXRole::Label || role == AXRole::TextField)
       {
         PostNotification(ancestor, AXNotification::TextUnderElementChanged);
       }
@@ -2323,7 +2308,7 @@ namespace krys::boo::ax
 
   void AXObjectCache::OnSelectedOptionChanged(dom::Element &element) noexcept
   {
-    if (table_helpers::HasCellARIARole(element))
+    if (ax::HasCellARIARole(element))
     {
       PostNotification(&element, AXNotification::SelectedCellsChanged);
     }
@@ -2393,7 +2378,7 @@ namespace krys::boo::ax
 
   void AXObjectCache::OnSelectedOptionChanged(RenderObject &menuList, int32 optionIndex) noexcept
   {
-    if (auto menuListObject = ShareRefPtr(DynamicDowncast<AccessibilityMenuList>(Get(menuList))))
+    if (auto menuListObject = ShareRefPtr(DynamicDowncast<AXMenuList>(Get(menuList))))
     {
       menuListObject->DidUpdateActiveOption(optionIndex);
     }
@@ -2403,7 +2388,7 @@ namespace krys::boo::ax
   {
     // The text control the node is in (an input's inner text, an editable element's text) is the one whose
     // value changed; otherwise the node's (or its nearest ancestor's) object.
-    AccessibilityObject *object = nullptr;
+    AXObject *object = nullptr;
     for (auto *ancestor = &node; ancestor && !object; ancestor = ancestor->ParentInComposedTree())
     {
       object = Get(*ancestor);
@@ -2571,7 +2556,7 @@ namespace krys::boo::ax
     auto recomputeTableIsExposed = std::exchange(_deferredRecomputeTableIsExposedList, {});
     for (auto id : recomputeTableIsExposed)
     {
-      if (auto table = ShareRefPtr(DynamicDowncast<AccessibilityNodeObject>(ObjectForID(id))))
+      if (auto table = ShareRefPtr(DynamicDowncast<AXNodeObject>(ObjectForID(id))))
       {
         table->RecomputeIsExposableIfNecessary();
       }
@@ -2594,7 +2579,7 @@ namespace krys::boo::ax
     auto recomputeTableCellSlots = std::exchange(_deferredRecomputeTableCellSlotsList, {});
     for (auto id : recomputeTableCellSlots)
     {
-      if (auto table = ShareRefPtr(DynamicDowncast<AccessibilityNodeObject>(ObjectForID(id))))
+      if (auto table = ShareRefPtr(DynamicDowncast<AXNodeObject>(ObjectForID(id))))
       {
         table->SetCellSlotsDirty();
       }
@@ -2647,8 +2632,8 @@ namespace krys::boo::ax
     auto modalChanged = std::exchange(_deferredModalChangedList, {});
     for (auto *element : modalChanged)
     {
-      if (!Is<html::HTMLDialogElement>(*element) && !table_helpers::HasRole(*element, u8"dialog")
-          && !table_helpers::HasRole(*element, u8"alertdialog"))
+      if (!Is<html::HTMLDialogElement>(*element) && !ax::HasRole(*element, u8"dialog")
+          && !ax::HasRole(*element, u8"alertdialog"))
       {
         continue;
       }
@@ -2677,7 +2662,7 @@ namespace krys::boo::ax
 
   void AXObjectCache::OnRendererCreated(dom::Node &node) noexcept
   {
-    if (auto *object = DynamicDowncast<AccessibilityRenderObject>(Get(node)))
+    if (auto *object = DynamicDowncast<AXRenderObject>(Get(node)))
     {
       if (object->SetRendererIfNeeded(node.Renderer()))
       {
@@ -2809,7 +2794,7 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::PostNotification(AccessibilityObject *object, AXNotification notification) noexcept
+  void AXObjectCache::PostNotification(AXObject *object, AXNotification notification) noexcept
   {
     StopCachingComputedObjectAttributes();
     if (!object)
@@ -2828,7 +2813,7 @@ namespace krys::boo::ax
     }
   }
 
-  AccessibilityObject *AXObjectCache::ObservableObjectForNode(dom::Node *node) noexcept
+  AXObject *AXObjectCache::ObservableObjectForNode(dom::Node *node) noexcept
   {
     auto *object = node ? GetOrCreate(*node) : nullptr;
     if (auto *observable = object ? object->ObservableObject() : nullptr)
@@ -2957,7 +2942,7 @@ namespace krys::boo::ax
       {
         // Only notify if the object is in fact a menu.
         object->UpdateChildrenIfNecessary();
-        if (object->Role() != AccessibilityRole::Menu)
+        if (object->Role() != AXRole::Menu)
         {
           continue;
         }
@@ -2984,7 +2969,7 @@ namespace krys::boo::ax
     }
   }
 
-  AccessibilityReplacedText::AccessibilityReplacedText(const VisibleSelection &selection) noexcept
+  AXReplacedText::AXReplacedText(const VisibleSelection &selection) noexcept
   {
     if (!AXObjectCache::AccessibilityEnabled())
     {
@@ -2994,8 +2979,8 @@ namespace krys::boo::ax
       IndexForVisiblePosition(selection.VisibleStart(), _replacedRange.StartIndex.Scope);
     if (selection.IsRange())
     {
-      _replacedText = AccessibilityObject::StringForVisiblePositionRange(
-        {selection.VisibleStart(), selection.VisibleEnd()});
+      _replacedText =
+        AXObject::StringForVisiblePositionRange({selection.VisibleStart(), selection.VisibleEnd()});
       _replacedRange.EndIndex.Value =
         IndexForVisiblePosition(selection.VisibleEnd(), _replacedRange.EndIndex.Scope);
     }
@@ -3005,8 +2990,8 @@ namespace krys::boo::ax
     }
   }
 
-  void AccessibilityReplacedText::PostTextStateChangeNotification(
-    AXObjectCache *cache, dom::DOMStringView insertedText, const VisibleSelection &selection) const noexcept
+  void AXReplacedText::PostTextStateChangeNotification(AXObjectCache *cache, dom::DOMStringView insertedText,
+                                                       const VisibleSelection &selection) const noexcept
   {
     if (!cache || !AXObjectCache::AccessibilityEnabled())
     {
@@ -3026,8 +3011,7 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::DetachWrapper(AccessibilityObject &object,
-                                    AccessibilityDetachmentType detachmentType) noexcept
+  void AXObjectCache::DetachWrapper(AXObject &object, AXDetachmentType detachmentType) noexcept
   {
     // The host refers to objects by ID, so it has nothing to make for a new one; it's told when one goes, to
     // let go of what it made for it.
@@ -3037,8 +3021,7 @@ namespace krys::boo::ax
     }
   }
 
-  void AXObjectCache::PostPlatformNotification(AccessibilityObject &object,
-                                               AXNotification notification) noexcept
+  void AXObjectCache::PostPlatformNotification(AXObject &object, AXNotification notification) noexcept
   {
     // The host may ask about the object, which mustn't happen in the middle of a layout or with style out of
     // date.

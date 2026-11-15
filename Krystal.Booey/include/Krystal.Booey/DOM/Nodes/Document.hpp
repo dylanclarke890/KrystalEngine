@@ -77,13 +77,9 @@ namespace krys::text
   class ICodec;
 }
 
-namespace krys::boo::ax
-{
-  class AXObjectCache;
-}
-
 namespace krys::boo
 {
+  class AXObjectCache;
   class AnimationTimelinesController;
   class StyleOriginatedTimelinesController;
   class CachedResourceLoader;
@@ -462,7 +458,7 @@ namespace krys::boo::dom
     RenderPtr<boo::RenderView> _renderView;
     bool _renderTreeBeingDestroyed {false};
     // The accessibility tree, once accessibility is enabled and something asks for it.
-    UniquePtr<ax::AXObjectCache> _axObjectCache;
+    UniquePtr<AXObjectCache> _axObjectCache;
     // Renderer updates (of text) that the next style resolution applies.
     UniquePtr<style::Update> _pendingRenderTreeUpdate;
 
@@ -1678,9 +1674,9 @@ namespace krys::boo::dom
 
     /// @brief The document's accessibility cache, created if accessibility is enabled and the document is in
     /// a frame; null otherwise.
-    KRYS_NODISCARD ax::AXObjectCache *AxObjectCache() noexcept;
+    KRYS_NODISCARD AXObjectCache *AxObjectCache() noexcept;
     /// @brief The document's accessibility cache, if it has created one.
-    KRYS_NODISCARD ax::AXObjectCache *ExistingAXObjectCache() const noexcept
+    KRYS_NODISCARD AXObjectCache *ExistingAXObjectCache() const noexcept
     {
       return _axObjectCache.get();
     }

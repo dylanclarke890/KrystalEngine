@@ -115,8 +115,8 @@ namespace krys::boo
 
     /// @brief Tells accessibility @p text was inserted or deleted at @p position (the selection's start if
     /// it isn't given).
-    void PostTextStateChangeNotification(ax::AXTextChange change, utf8_stringview text) noexcept;
-    void PostTextStateChangeNotification(ax::AXTextChange change, utf8_stringview text,
+    void PostTextStateChangeNotification(AXTextChange change, utf8_stringview text) noexcept;
+    void PostTextStateChangeNotification(AXTextChange change, utf8_stringview text,
                                          const VisiblePosition &position) noexcept;
     KRYS_NODISCARD CompositeEditCommand *Parent() const noexcept
     {

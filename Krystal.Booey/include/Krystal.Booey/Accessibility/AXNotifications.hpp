@@ -143,7 +143,7 @@
   macro(DraggingExitedDropZone)
 // clang-format on
 
-namespace krys::boo::ax
+namespace krys::boo
 {
   /// @brief A change to an accessibility object that assistive technology is told about.
   /// @brief Whether text was inserted or deleted.

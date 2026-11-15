@@ -1867,7 +1867,7 @@ namespace krys::boo
       return;
     }
 
-    if (ax::AXObjectCache::AccessibilityEnabled() && EditingAction() == EditAction::Paste)
+    if (AXObjectCache::AccessibilityEnabled() && EditingAction() == EditAction::Paste)
     {
       _visibleSelectionForInsertedText = VisibleSelection(start, end);
     }
@@ -2099,7 +2099,7 @@ namespace krys::boo
 
     VisibleSelection selectionAfterReplace(_selectReplacement ? start : end, end);
 
-    if (ax::AXObjectCache::AccessibilityEnabled() && EditingAction() == EditAction::Paste)
+    if (AXObjectCache::AccessibilityEnabled() && EditingAction() == EditAction::Paste)
     {
       _visibleSelectionForInsertedText = VisibleSelection(start, end);
     }

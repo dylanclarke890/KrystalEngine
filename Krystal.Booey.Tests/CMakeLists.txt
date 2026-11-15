@@ -83,7 +83,7 @@ target_sources(Krystal.Booey.Tests
     BASE_DIRS
       include
     FILES
-		include/Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp
+		include/Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
 		include/Krystal.Booey.Tests/SVG/AnimationTestUtils.hpp
 		include/Krystal.Booey.Tests/SVG/PropertyTestUtils.hpp
@@ -647,7 +647,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Types.cpp
 
 		# Accessibility
-		tests/Accessibility/ARIAMixin.cpp
+		tests/DOM/Mixins/ARIAMixin.cpp
 		tests/Accessibility/AXActions.cpp
 		tests/Accessibility/AXLiveRegions.cpp
 		tests/Accessibility/AXLogger.cpp
@@ -657,19 +657,19 @@ target_sources(Krystal.Booey.Tests
 		tests/Accessibility/AXRelations.cpp
 		tests/Accessibility/AXTextRanges.cpp
 		tests/Accessibility/AXTextStateChanges.cpp
-		tests/Accessibility/AccessibilityImageMap.cpp
-		tests/Accessibility/AccessibilityListBoxOption.cpp
-		tests/Accessibility/AccessibilityMathMLElement.cpp
-		tests/Accessibility/AccessibilityMenuList.cpp
-		tests/Accessibility/AccessibilityNodeObject.cpp
-		tests/Accessibility/AccessibilityObject.cpp
-		tests/Accessibility/AccessibilityProgressIndicator.cpp
-		tests/Accessibility/AccessibilityRenderObject.cpp
-		tests/Accessibility/AccessibilitySVGObject.cpp
-		tests/Accessibility/AccessibilityScrollView.cpp
-		tests/Accessibility/AccessibilitySlider.cpp
-		tests/Accessibility/AccessibilitySpinButton.cpp
-		tests/Accessibility/AccessibilityTable.cpp
+		tests/Accessibility/AXImageMap.cpp
+		tests/Accessibility/AXListBoxOption.cpp
+		tests/Accessibility/AXMathMLElement.cpp
+		tests/Accessibility/AXMenuList.cpp
+		tests/Accessibility/AXNodeObject.cpp
+		tests/Accessibility/AXObject.cpp
+		tests/Accessibility/AXProgressIndicator.cpp
+		tests/Accessibility/AXRenderObject.cpp
+		tests/Accessibility/AXSVGObject.cpp
+		tests/Accessibility/AXScrollView.cpp
+		tests/Accessibility/AXSlider.cpp
+		tests/Accessibility/AXSpinButton.cpp
+		tests/Accessibility/AXTable.cpp
 
 		# DOM
 		tests/DOM/Algorithms/AbortAlgorithms.cpp

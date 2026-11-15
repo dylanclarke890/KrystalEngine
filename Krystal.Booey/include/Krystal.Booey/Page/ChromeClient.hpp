@@ -47,16 +47,12 @@ namespace krys::boo::svg
   class SVGImageElement;
 }
 
-namespace krys::boo::ax
-{
-  class AccessibilityObject;
-  enum class AXNotification : uint8;
-  enum class AXTextChange : uint8;
-  enum class AccessibilityDetachmentType : uint8;
-}
-
 namespace krys::boo
 {
+  class AXObject;
+  enum class AXNotification : uint8;
+  enum class AXTextChange : uint8;
+  enum class AXDetachmentType : uint8;
   class GraphicsLayer;
   class GraphicsLayerFactory;
   class IntRect;
@@ -105,24 +101,22 @@ namespace krys::boo
 
     /// @brief Called when the page's accessibility tree posts @p notification for @p object, for the host to
     /// pass on to assistive technology.
-    virtual void PostAccessibilityNotification(ax::AccessibilityObject &object,
-                                               ax::AXNotification notification) noexcept
+    virtual void PostAccessibilityNotification(AXObject &object, AXNotification notification) noexcept
     {
       (void)object;
       (void)notification;
     }
     /// @brief Called when @p object leaves the page's accessibility tree (its node or renderer went, or the
     /// tree is being destroyed), for the host to let go of what it made for it.
-    virtual void AccessibilityObjectDetached(ax::AccessibilityObject &object,
-                                             ax::AccessibilityDetachmentType detachmentType) noexcept
+    virtual void AccessibilityObjectDetached(AXObject &object, AXDetachmentType detachmentType) noexcept
     {
       (void)object;
       (void)detachmentType;
     }
     /// @brief Called when @p text was inserted into or deleted from @p object's text (an editable region's,
     /// or the web area's) at @p offset, a byte index in its UTF-8 text.
-    virtual void PostAccessibilityTextChange(ax::AccessibilityObject &object, ax::AXTextChange change,
-                                             uint64 offset, utf8_stringview text) noexcept
+    virtual void PostAccessibilityTextChange(AXObject &object, AXTextChange change, uint64 offset,
+                                             utf8_stringview text) noexcept
     {
       (void)object;
       (void)change;

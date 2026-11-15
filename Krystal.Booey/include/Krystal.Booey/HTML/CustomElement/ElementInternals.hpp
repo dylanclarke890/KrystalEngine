@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Accessibility/ARIAMixin.hpp"
+#include "Krystal.Booey/DOM/Mixins/ARIAMixin.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementFormValue.hpp"
@@ -63,7 +63,7 @@ namespace krys::boo::html
   /// validity and labels.
   /// @see https://html.spec.whatwg.org/#elementinternals
   class KRYS_EMPTY_BASE_CLASS ElementInternals : public RefCounted<ElementInternals>,
-                                                 public aria::mixins::ARIAMixin<ElementInternals>
+                                                 public dom::mixins::ARIAMixin<ElementInternals>
   {
     friend HTMLElement *detail::GetElement(ElementInternals &internals) noexcept;
 

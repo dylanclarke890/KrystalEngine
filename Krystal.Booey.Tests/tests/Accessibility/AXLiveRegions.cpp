@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
+#include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
@@ -9,9 +9,8 @@ namespace krys::boo::ax::tests
 {
   namespace
   {
-    KRYS_NODISCARD size_t
-      CountPosted(const List<Pair<Ref<AccessibilityObject>, AXNotification>> &notifications,
-                  const AccessibilityObject &object, AXNotification notification) noexcept
+    KRYS_NODISCARD size_t CountPosted(const List<Pair<Ref<AXObject>, AXNotification>> &notifications,
+                                      const AXObject &object, AXNotification notification) noexcept
     {
       return static_cast<size_t>(
         std::ranges::count_if(notifications, [&](const auto &posted)
@@ -21,11 +20,11 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXLiveRegions: attributes", "[Accessibility][AXLiveRegions]")
   {
-    AccessibilityFixture page(u8"<div id=polite aria-live=polite aria-relevant=all aria-busy=true>A</div>"
-                              u8"<div id=alert role=alert>B</div>"
-                              u8"<div id=timer role=timer>C</div>"
-                              u8"<div id=status role=status aria-atomic=false>D</div>"
-                              u8"<div id=plain>E</div>");
+    AXFixture page(u8"<div id=polite aria-live=polite aria-relevant=all aria-busy=true>A</div>"
+                   u8"<div id=alert role=alert>B</div>"
+                   u8"<div id=timer role=timer>C</div>"
+                   u8"<div id=status role=status aria-atomic=false>D</div>"
+                   u8"<div id=plain>E</div>");
     auto &polite = page.Object(u8"polite");
     CHECK(polite.SupportsLiveRegion());
     CHECK(polite.LiveRegionStatus() == u8"polite");
@@ -48,7 +47,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXLiveRegions: a region's changes", "[Accessibility][AXLiveRegions]")
   {
-    AccessibilityFixture page(u8"<div id=region aria-live=polite><p id=paragraph>Old</p></div>");
+    AXFixture page(u8"<div id=region aria-live=polite><p id=paragraph>Old</p></div>");
     auto &region = page.Object(u8"region");
     CHECK(page.Object(u8"paragraph").LiveRegionAncestor() == &region);
     (void)page.TakeNotifications();
@@ -71,22 +70,21 @@ namespace krys::boo::ax::tests
       REQUIRE(text);
       REQUIRE_FALSE(text->AppendData(u8" news").HasException());
       (void)page.Document->UpdateLayout();
-      CHECK(
-        AccessibilityFixture::WasPosted(page.TakeNotifications(), region, AXNotification::LiveRegionChanged));
+      CHECK(AXFixture::WasPosted(page.TakeNotifications(), region, AXNotification::LiveRegionChanged));
     }
 
     SECTION("Turned off")
     {
       REQUIRE_FALSE(page.ById(u8"region").SetAttribute(u8"aria-live", u8"off").HasException());
       auto notifications = page.TakeNotifications();
-      CHECK(AccessibilityFixture::WasPosted(notifications, region, AXNotification::LiveRegionStatusChanged));
+      CHECK(AXFixture::WasPosted(notifications, region, AXNotification::LiveRegionStatusChanged));
       CHECK_FALSE(region.SupportsLiveRegion());
     }
   }
 
   TEST_CASE("AXLiveRegions: a region being added", "[Accessibility][AXLiveRegions]")
   {
-    AccessibilityFixture page(u8"<div id=container>Text</div>");
+    AXFixture page(u8"<div id=container>Text</div>");
     (void)page.Object(u8"container");
     (void)page.TakeNotifications();
 
@@ -97,13 +95,12 @@ namespace krys::boo::ax::tests
     REQUIRE_FALSE(page.ById(u8"container").AppendChild(*alert).HasException());
     (void)page.Document->UpdateLayout();
     auto notifications = page.TakeNotifications();
-    CHECK(AccessibilityFixture::WasPosted(notifications, page.Object(u8"alert"),
-                                          AXNotification::LiveRegionCreated));
+    CHECK(AXFixture::WasPosted(notifications, page.Object(u8"alert"), AXNotification::LiveRegionCreated));
   }
 
   TEST_CASE("AXLiveRegions: an editable region's value", "[Accessibility][AXLiveRegions]")
   {
-    AccessibilityFixture page(u8"<div id=editor contenteditable><span id=span>Hi</span></div>");
+    AXFixture page(u8"<div id=editor contenteditable><span id=span>Hi</span></div>");
     auto &editor = page.Object(u8"editor");
     CHECK(editor.IsNonNativeTextControl());
     (void)page.TakeNotifications();
@@ -112,12 +109,12 @@ namespace krys::boo::ax::tests
     REQUIRE(text);
     REQUIRE_FALSE(text->AppendData(u8" there").HasException());
     (void)page.Document->UpdateLayout();
-    CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), editor, AXNotification::ValueChanged));
+    CHECK(AXFixture::WasPosted(page.TakeNotifications(), editor, AXNotification::ValueChanged));
   }
 
   TEST_CASE("AXLiveRegions: a menu appearing", "[Accessibility][AXLiveRegions]")
   {
-    AccessibilityFixture page(u8"<div id=container>Text</div>");
+    AXFixture page(u8"<div id=container>Text</div>");
     (void)page.Object(u8"container");
     (void)page.TakeNotifications();
 
@@ -130,13 +127,12 @@ namespace krys::boo::ax::tests
     REQUIRE_FALSE(menu->AppendChild(*item).HasException());
     REQUIRE_FALSE(page.ById(u8"container").AppendChild(*menu).HasException());
     (void)page.Document->UpdateLayout();
-    CHECK(AccessibilityFixture::WasPosted(page.TakeNotifications(), page.Object(u8"menu"),
-                                          AXNotification::MenuOpened));
+    CHECK(AXFixture::WasPosted(page.TakeNotifications(), page.Object(u8"menu"), AXNotification::MenuOpened));
   }
 
   TEST_CASE("AXLiveRegions: a display: contents region being added", "[Accessibility][AXLiveRegions]")
   {
-    AccessibilityFixture page(u8"<div id=container>Text</div>");
+    AXFixture page(u8"<div id=container>Text</div>");
     (void)page.Object(u8"container");
     (void)page.TakeNotifications();
 
@@ -148,7 +144,6 @@ namespace krys::boo::ax::tests
     REQUIRE_FALSE(page.ById(u8"container").AppendChild(*status).HasException());
     (void)page.Document->UpdateLayout();
     auto notifications = page.TakeNotifications();
-    CHECK(AccessibilityFixture::WasPosted(notifications, page.Object(u8"status"),
-                                          AXNotification::LiveRegionCreated));
+    CHECK(AXFixture::WasPosted(notifications, page.Object(u8"status"), AXNotification::LiveRegionCreated));
   }
 }

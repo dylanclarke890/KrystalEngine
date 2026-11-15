@@ -25,7 +25,7 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
+#include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -169,7 +169,7 @@ namespace krys::boo
     }
 
     _document->GetEditor().UnappliedEditing(*this);
-    if (ax::AXObjectCache::AccessibilityEnabled())
+    if (AXObjectCache::AccessibilityEnabled())
     {
       _replacedText.PostTextStateChangeNotificationForUnapply(_document->ExistingAXObjectCache());
     }
@@ -217,7 +217,7 @@ namespace krys::boo
     }
 
     _document->GetEditor().ReappliedEditing(*this);
-    if (ax::AXObjectCache::AccessibilityEnabled())
+    if (AXObjectCache::AccessibilityEnabled())
     {
       _replacedText.PostTextStateChangeNotificationForReapply(_document->ExistingAXObjectCache());
     }
@@ -245,7 +245,7 @@ namespace krys::boo
   void AccessibilityUndoReplacedText::ConfigureRangeDeletedByReapplyWithStartingSelection(
     const VisibleSelection &selection) noexcept
   {
-    if (!ax::AXObjectCache::AccessibilityEnabled() || selection.IsNone())
+    if (!AXObjectCache::AccessibilityEnabled() || selection.IsNone())
     {
       return;
     }
@@ -259,7 +259,7 @@ namespace krys::boo
   void AccessibilityUndoReplacedText::ConfigureRangeDeletedByReapplyWithEndingSelection(
     const VisibleSelection &selection) noexcept
   {
-    if (!ax::AXObjectCache::AccessibilityEnabled() || selection.IsNone() || selection.End().IsNull())
+    if (!AXObjectCache::AccessibilityEnabled() || selection.IsNone() || selection.End().IsNull())
     {
       return;
     }
@@ -278,7 +278,7 @@ namespace krys::boo
 
   void AccessibilityUndoReplacedText::CaptureTextForUnapply() noexcept
   {
-    if (ax::AXObjectCache::AccessibilityEnabled())
+    if (AXObjectCache::AccessibilityEnabled())
     {
       _replacedText = TextDeletedByReapply();
     }
@@ -286,7 +286,7 @@ namespace krys::boo
 
   void AccessibilityUndoReplacedText::CaptureTextForReapply() noexcept
   {
-    if (ax::AXObjectCache::AccessibilityEnabled())
+    if (AXObjectCache::AccessibilityEnabled())
     {
       _replacedText = TextDeletedByUnapply();
     }
@@ -301,13 +301,13 @@ namespace krys::boo
       {
         return {};
       }
-      return ax::AccessibilityObject::StringForVisiblePositionRange(
+      return AXObject::StringForVisiblePositionRange(
         {VisiblePositionForIndex(range.StartIndex.Value, range.StartIndex.Scope.get()),
          VisiblePositionForIndex(range.EndIndex.Value, range.EndIndex.Scope.get())});
     }
 
     /// @brief An undo or redo at @p position made @p appearedText appear and @p disappearedText disappear.
-    void PostUndoRedoTextChange(ax::AXObjectCache &cache, const VisiblePosition &position,
+    void PostUndoRedoTextChange(AXObjectCache &cache, const VisiblePosition &position,
                                 utf8_stringview appearedText, utf8_stringview disappearedText) noexcept
     {
       auto node = HighestEditableRoot(position.DeepEquivalent(), EditableType::HasEditableAXRole);
@@ -321,34 +321,30 @@ namespace krys::boo
       }
       else if (!appearedText.empty())
       {
-        cache.PostTextStateChangeNotification(node.get(), ax::AXTextChange::Inserted, appearedText, position);
+        cache.PostTextStateChangeNotification(node.get(), AXTextChange::Inserted, appearedText, position);
       }
       else if (!disappearedText.empty())
       {
-        cache.PostTextStateChangeNotification(node.get(), ax::AXTextChange::Deleted, disappearedText,
-                                              position);
+        cache.PostTextStateChangeNotification(node.get(), AXTextChange::Deleted, disappearedText, position);
       }
     }
   }
 
   dom::DOMString AccessibilityUndoReplacedText::TextDeletedByUnapply() const noexcept
   {
-    return ax::AXObjectCache::AccessibilityEnabled()
-             ? StringForVisiblePositionIndexRange(_rangeDeletedByUnapply)
-             : dom::DOMString {};
+    return AXObjectCache::AccessibilityEnabled() ? StringForVisiblePositionIndexRange(_rangeDeletedByUnapply)
+                                                 : dom::DOMString {};
   }
 
   dom::DOMString AccessibilityUndoReplacedText::TextDeletedByReapply() const noexcept
   {
-    return ax::AXObjectCache::AccessibilityEnabled()
-             ? StringForVisiblePositionIndexRange(_rangeDeletedByReapply)
-             : dom::DOMString {};
+    return AXObjectCache::AccessibilityEnabled() ? StringForVisiblePositionIndexRange(_rangeDeletedByReapply)
+                                                 : dom::DOMString {};
   }
 
-  void AccessibilityUndoReplacedText::PostTextStateChangeNotificationForUnapply(
-    ax::AXObjectCache *cache) noexcept
+  void AccessibilityUndoReplacedText::PostTextStateChangeNotificationForUnapply(AXObjectCache *cache) noexcept
   {
-    if (!cache || !ax::AXObjectCache::AccessibilityEnabled() || _rangeDeletedByUnapply.IsNull())
+    if (!cache || !AXObjectCache::AccessibilityEnabled() || _rangeDeletedByUnapply.IsNull())
     {
       return;
     }
@@ -363,10 +359,9 @@ namespace krys::boo
     _replacedText = {};
   }
 
-  void AccessibilityUndoReplacedText::PostTextStateChangeNotificationForReapply(
-    ax::AXObjectCache *cache) noexcept
+  void AccessibilityUndoReplacedText::PostTextStateChangeNotificationForReapply(AXObjectCache *cache) noexcept
   {
-    if (!cache || !ax::AXObjectCache::AccessibilityEnabled() || _rangeDeletedByReapply.IsNull())
+    if (!cache || !AXObjectCache::AccessibilityEnabled() || _rangeDeletedByReapply.IsNull())
     {
       return;
     }

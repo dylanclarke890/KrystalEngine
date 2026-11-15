@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
+#include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
@@ -7,7 +7,7 @@ namespace krys::boo::ax::tests
 {
   TEST_CASE("AXTextRanges: a text field", "[Accessibility][AXTextRanges]")
   {
-    AccessibilityFixture page(u8"<input id=input value='Hello world'>");
+    AXFixture page(u8"<input id=input value='Hello world'>");
     auto &input = page.Object(u8"input");
     CHECK(input.Text() == u8"Hello world");
     CHECK(input.TextLength() == 11);
@@ -26,7 +26,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXTextRanges: a password's text isn't exposed", "[Accessibility][AXTextRanges]")
   {
-    AccessibilityFixture page(u8"<input id=input type=password value=secret>");
+    AXFixture page(u8"<input id=input type=password value=secret>");
     auto &input = page.Object(u8"input");
     CHECK(input.Text().empty());
     input.SetSelectedVisiblePositionRange(input.GetVisiblePositionRange());
@@ -35,7 +35,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXTextRanges: a text area's lines", "[Accessibility][AXTextRanges]")
   {
-    AccessibilityFixture page(u8"<textarea id=area>one\ntwo</textarea>");
+    AXFixture page(u8"<textarea id=area>one\ntwo</textarea>");
     auto &area = page.Object(u8"area");
     CHECK(area.DoAXRangeForLine(0) == CharacterRange {0, 4});
     CHECK(area.DoAXRangeForLine(1) == CharacterRange {4, 3});
@@ -45,8 +45,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXTextRanges: an editable region", "[Accessibility][AXTextRanges]")
   {
-    AccessibilityFixture page(
-      u8"<div id=editor contenteditable role=textbox>Some <b id=bold>bold</b> text</div>");
+    AXFixture page(u8"<div id=editor contenteditable role=textbox>Some <b id=bold>bold</b> text</div>");
     auto &editor = page.Object(u8"editor");
     CHECK(editor.Text() == u8"Some bold text");
     CHECK(editor.StringValue() == u8"Some bold text");
@@ -61,15 +60,15 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXTextRanges: what tells the platform about changes", "[Accessibility][AXTextRanges]")
   {
-    AccessibilityFixture page(u8"<select id=list size=3><option id=option>One</option></select>"
-                              u8"<p id=paragraph>Text</p>");
+    AXFixture page(u8"<select id=list size=3><option id=option>One</option></select>"
+                   u8"<p id=paragraph>Text</p>");
     CHECK(page.Object(u8"list").ObservableObject() == &page.Object(u8"list"));
     CHECK(page.Object(u8"paragraph").ObservableObject() == nullptr);
   }
 
   TEST_CASE("AXTextRanges: an ARIA text box's lines", "[Accessibility][AXTextRanges]")
   {
-    AccessibilityFixture page(u8"<p>Before</p><div id=box role=textbox>one<br>two</div>");
+    AXFixture page(u8"<p>Before</p><div id=box role=textbox>one<br>two</div>");
     auto &box = page.Object(u8"box");
     // The text box is editable to assistive technology, so its lines count from its own first line.
     CHECK(box.LineForPosition(box.VisiblePositionForIndex(5)) == 1);
