@@ -57,8 +57,8 @@ namespace krys::boo::html
 
   private:
     bool _loading {false};
-    dom::DOMStringAtom _contentType {dom::DOMStringAtom::Null()};
-    dom::DOMStringAtom _media {dom::DOMStringAtom::Null()};
+    dom::DOMStringAtom _contentType {null};
+    dom::DOMStringAtom _media {null};
     RefPtr<css::CSSStyleSheet> _sheet;
     WeakPtr<style::Scope> _styleScope;
 

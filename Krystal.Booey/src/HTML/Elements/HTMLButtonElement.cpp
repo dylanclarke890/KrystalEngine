@@ -92,7 +92,7 @@ namespace krys::boo::html
                                              dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }

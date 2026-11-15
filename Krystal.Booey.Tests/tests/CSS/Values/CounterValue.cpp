@@ -61,8 +61,8 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CounterValue serialisation with a null separator",
                    "[CSS][Values][CounterValue]")
   {
-    auto counter = CounterValue::Create(CSSOMStringAtom {u8"item"}, CSSOMStringAtom::Null(),
-                                        PrimitiveValue::Create(ValueId::Decimal));
+    auto counter =
+      CounterValue::Create(CSSOMStringAtom {u8"item"}, null, PrimitiveValue::Create(ValueId::Decimal));
     CHECK(CssText(*counter) == "counter(item)");
   }
 

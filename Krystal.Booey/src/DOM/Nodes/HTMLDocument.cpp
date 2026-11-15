@@ -69,8 +69,8 @@ namespace krys::boo::dom
       u8"type",           u8"valign",    u8"valuetype", u8"vlink",
     };
     auto &prefix = attributeName.NamespacePrefix();
-    auto isPossibleHTMLAttr = (prefix == DOMStringAtom::Null() || prefix.View().empty())
-                              && attributeName.NamespaceURI() == DOMStringAtom::Null();
+    auto isPossibleHTMLAttr =
+      (prefix == null || prefix.View().empty()) && attributeName.NamespaceURI() == null;
     return !isPossibleHTMLAttr
            || std::ranges::find(names, attributeName.LocalName().View()) == std::end(names);
   }

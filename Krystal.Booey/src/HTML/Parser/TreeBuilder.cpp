@@ -766,8 +766,7 @@ namespace krys::boo::html
     }
 
     auto html = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"html",
-                                    TagName::html, Namespace::HTML));
+      _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML));
     _document.AppendChild(*html);
     _openElementStack.Push({TagName::html, Namespace::HTML, *html, {}});
 
@@ -834,9 +833,8 @@ namespace krys::boo::html
       }
     }
 
-    _head = dom::ElementFactory::Create(_document, dom::QualifiedName(infra::Namespaces::HTML,
-                                                                      dom::DOMStringAtom::Null(), u8"head",
-                                                                      TagName::head, Namespace::HTML));
+    _head = dom::ElementFactory::Create(
+      _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"head", TagName::head, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*_head);
     _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
 
@@ -1253,8 +1251,7 @@ namespace krys::boo::html
     }
 
     auto body = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"body",
-                                    TagName::body, Namespace::HTML));
+      _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"body", TagName::body, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*body);
     _openElementStack.Push({TagName::body, Namespace::HTML, *body, {}});
 
@@ -2128,8 +2125,8 @@ namespace krys::boo::html
             {
               ParseError(token);
               auto pElement = dom::ElementFactory::Create(
-                _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"p",
-                                              TagName::p, Namespace::HTML));
+                _document,
+                dom::QualifiedName(infra::Namespaces::HTML, null, u8"p", TagName::p, Namespace::HTML));
               InsertElementAtAdjustedInsertionLocation(*pElement);
               _openElementStack.Push({TagName::p, Namespace::HTML, *pElement, {}});
             }
@@ -2406,8 +2403,8 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableContext();
 
             auto colgroup = dom::ElementFactory::Create(
-              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"colgroup",
-                                            TagName::colgroup, Namespace::HTML));
+              _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"colgroup", TagName::colgroup,
+                                            Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*colgroup);
             _openElementStack.Push({TagName::colgroup, Namespace::HTML, *colgroup, {}});
 
@@ -2433,8 +2430,8 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableContext();
 
             auto tbody = dom::ElementFactory::Create(
-              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"tbody",
-                                            TagName::tbody, Namespace::HTML));
+              _document,
+              dom::QualifiedName(infra::Namespaces::HTML, null, u8"tbody", TagName::tbody, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tbody);
             _openElementStack.Push({TagName::tbody, Namespace::HTML, *tbody, {}});
 
@@ -2844,9 +2841,9 @@ namespace krys::boo::html
 
             _openElementStack.PopUntilTableBodyContext();
 
-            auto tr = dom::ElementFactory::Create(
-              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"tr",
-                                            TagName::tr, Namespace::HTML));
+            auto tr =
+              dom::ElementFactory::Create(_document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"tr",
+                                                                        TagName::tr, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tr);
             _openElementStack.Push({TagName::tr, Namespace::HTML, *tr, {}});
 
@@ -4304,9 +4301,9 @@ namespace krys::boo::html
       // sanitizer config allows an attribute given attribute's name, null, attribute's value, element's local
       // name, element's namespace, and the parser's parser sanitizer configuration is false, then continue.
       if (_sanitizerConfig
-          && !SanitizerAlgorithms::AllowsAttribute(attr.NameView(), dom::DOMStringAtom::Null(),
-                                                   attr.ValueView(), element.LocalName().View(),
-                                                   element.NamespaceURI(), *_sanitizerConfig))
+          && !SanitizerAlgorithms::AllowsAttribute(attr.NameView(), null, attr.ValueView(),
+                                                   element.LocalName().View(), element.NamespaceURI(),
+                                                   *_sanitizerConfig))
       {
         continue;
       }
@@ -4471,18 +4468,17 @@ namespace krys::boo::html
       auto it = std::ranges::find_if(attributes,
                                      [](const ParsedAttribute &attr) { return attr.NameView() == u8"is"; });
 
-      return it != std::ranges::end(attributes) ? dom::DOMStringAtom(it->ValueView())
-                                                : dom::DOMStringAtom::Null();
+      return it != std::ranges::end(attributes) ? dom::DOMStringAtom(it->ValueView()) : null;
     }();
 
     // 9. If is is non-null, sanitizerConfig is non-null, and the result of checking if a sanitizer config
     //    allows an attribute given "is", null, is, localName, namespace, and sanitizerConfig is false, then
     //    set is to null.
-    if (is != dom::DOMStringAtom::Null() && _sanitizerConfig
-        && !SanitizerAlgorithms::AllowsAttribute(u8"is", dom::DOMStringAtom::Null(), is.View(), name.View(),
-                                                 namespaceURI, *_sanitizerConfig))
+    if (is != null && _sanitizerConfig
+        && !SanitizerAlgorithms::AllowsAttribute(u8"is", null, is.View(), name.View(), namespaceURI,
+                                                 *_sanitizerConfig))
     {
-      is = dom::DOMStringAtom::Null();
+      is = null;
     }
 
     // 10. Let registry be the result of looking up a custom element registry given intendedParent.
@@ -4520,8 +4516,8 @@ namespace krys::boo::html
 
     // 15. Let element be the result of creating an element given document, localName, namespace, prefix, is,
     //     willExecuteScript, and creationRegistry.
-    auto element = dom::ElementFactory::Create(document, {namespaceURI, dom::DOMStringAtom::Null(), name}, is,
-                                               willExecuteScript, creationRegistry);
+    auto element = dom::ElementFactory::Create(document, {namespaceURI, null, name}, is, willExecuteScript,
+                                               creationRegistry);
 
     // 16. If sanitizerAction is "Replace with children", then set element's custom element registry to
     //     registry.
@@ -4539,9 +4535,8 @@ namespace krys::boo::html
         //     attribute given attrLocalName, attrNamespace, attribute's value, localName, namespace, and
         //     sanitizerConfig is false, then continue.
         if (_sanitizerConfig
-            && !SanitizerAlgorithms::AllowsAttribute(attr.NameView(), dom::DOMStringAtom::Null(),
-                                                     attr.ValueView(), name.View(), namespaceURI,
-                                                     *_sanitizerConfig))
+            && !SanitizerAlgorithms::AllowsAttribute(attr.NameView(), null, attr.ValueView(), name.View(),
+                                                     namespaceURI, *_sanitizerConfig))
         {
           continue;
         }
@@ -4552,8 +4547,8 @@ namespace krys::boo::html
       }
       else
       {
-        auto namespaceUri = dom::DOMStringAtom::Null();
-        auto prefix = dom::DOMStringAtom::Null();
+        dom::DOMStringAtom namespaceUri = null;
+        dom::DOMStringAtom prefix = null;
         size_t prefixLength = 0uz;
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXML))

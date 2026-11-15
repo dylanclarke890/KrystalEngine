@@ -17,7 +17,7 @@ namespace krys::boo::html::tests
 
   inline utf8_string Text(dom::DOMStringAtom value) noexcept
   {
-    return value == dom::DOMStringAtom::Null() ? utf8_string(u8"null") : utf8_string(value.View());
+    return value == null ? utf8_string(u8"null") : utf8_string(value.View());
   }
 
   /// @brief Logs its callbacks, with the element's id.

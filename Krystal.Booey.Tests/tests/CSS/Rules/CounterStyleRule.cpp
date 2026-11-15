@@ -133,7 +133,7 @@ namespace krys::boo::css::tests
 
     SECTION("SetName ignores null names")
     {
-      descriptors.SetName(CSSOMStringAtom::Null());
+      descriptors.SetName(null);
       CHECK(descriptors.Name == CSSOMStringAtom(u8"foo"));
       descriptors.SetName(CSSOMStringAtom(u8"bar"));
       CHECK(descriptors.Name == CSSOMStringAtom(u8"bar"));

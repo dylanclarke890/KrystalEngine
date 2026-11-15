@@ -35,9 +35,8 @@ namespace krys::boo::dom
 
     // 4. Queue a mutation record of "characterData" for node with null, null, node's data, « », « », null,
     //    and null.
-    MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::CharacterData, ShareRef(node),
-                                                    DOMStringAtom::Null(), DOMStringAtom::Null(), node._data,
-                                                    {}, {}, nullptr, nullptr);
+    MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::CharacterData, ShareRef(node), null,
+                                                    null, node._data, {}, {}, nullptr, nullptr);
     {
       // The change to the parent's children that style invalidation sees.
       auto *parent = node.ParentNode();

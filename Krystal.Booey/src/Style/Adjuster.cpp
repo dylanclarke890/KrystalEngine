@@ -644,7 +644,7 @@ namespace krys::boo::style
 
       // Disallow -internal-user-modify on ::pseudo elements, except if that pseudo-element targets a slot,
       // in which case we want the editability to be passed onto the slotted contents.
-      if (element->IsInUserAgentShadowTree() && element->UserAgentPart() != dom::DOMStringAtom::Null()
+      if (element->IsInUserAgentShadowTree() && element->UserAgentPart() != null
           && !Is<html::HTMLSlotElement>(*element))
       {
         style.SetUserModify(UserModify::ReadOnly);

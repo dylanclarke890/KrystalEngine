@@ -514,7 +514,7 @@ namespace krys::boo::css
         }
       };
 
-      if (selector.Argument() == CSSOMStringAtom::Null())
+      if (selector.Argument() == null)
       {
         return;
       }
@@ -555,7 +555,7 @@ namespace krys::boo::css
 
     if (Match() == SelectorMatch::Type && !HasFlag(_flags, SelectorFlag::TagIsForNamespaceRule))
     {
-      if (const auto &prefix = TagQualifiedName().NamespacePrefix(); prefix != CSSOMStringAtom::Null())
+      if (const auto &prefix = TagQualifiedName().NamespacePrefix(); prefix != null)
       {
         AppendIdentifierOrStar(prefix, builder);
         builder.Append(u8'|');
@@ -747,7 +747,7 @@ namespace krys::boo::css
       {
         builder.Append(u8'[');
         if (const auto &prefix = selector->Attribute().NamespacePrefix();
-            prefix != CSSOMStringAtom::Null() && prefix != CSSOMStringAtom::Empty())
+            prefix != null && prefix != CSSOMStringAtom::Empty())
         {
           AppendIdentifierOrStar(prefix, builder);
           builder.Append(u8'|');

@@ -20,8 +20,7 @@ namespace krys::boo::css::tests
 
     KRYS_NODISCARD Ref<NamespaceRule> Namespace(utf8_stringview prefix, utf8_stringview uri)
     {
-      return NamespaceRule::Create(prefix.empty() ? CSSOMStringAtom::Null() : CSSOMStringAtom(prefix),
-                                   CSSOMStringAtom(uri));
+      return NamespaceRule::Create(prefix.empty() ? null : CSSOMStringAtom(prefix), CSSOMStringAtom(uri));
     }
 
     /// @brief The rule types of `sheet`, in `RuleAt` order.

@@ -37,7 +37,7 @@ namespace krys::boo::html
                                             Maybe<dom::DOMStringView> value,
                                             dom::DOMStringAtom namespaceURI) noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null())
+    if (namespaceURI == null)
     {
       if (localName == u8"start")
       {
@@ -133,7 +133,7 @@ namespace krys::boo::html
   bool HTMLOListElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                             dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"type"))
+    if (namespaceURI == null && (localName == u8"type"))
     {
       return true;
     }
@@ -146,7 +146,7 @@ namespace krys::boo::html
                                                                 css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

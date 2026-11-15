@@ -38,7 +38,7 @@ namespace krys::boo::html
                                                               css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

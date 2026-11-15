@@ -210,13 +210,13 @@ namespace krys::boo::html
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
-    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"label" && _labelElement)
+    if (namespaceURI == null && localName == u8"label" && _labelElement)
     {
       (void)_labelElement->TextContent(dom::DOMString(value.value_or(dom::DOMStringView())));
     }
 
     if (bool newDisabled = value.has_value();
-        namespaceURI == dom::DOMStringAtom::Null() && localName == u8"disabled" && _isDisabled != newDisabled)
+        namespaceURI == null && localName == u8"disabled" && _isDisabled != newDisabled)
     {
       style::PseudoClassChangeInvalidation disabledInvalidation(
         *this, {{css::SelectorPseudoClass::Disabled, newDisabled},

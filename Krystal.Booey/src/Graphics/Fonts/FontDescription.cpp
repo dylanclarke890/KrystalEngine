@@ -53,7 +53,7 @@ namespace krys::boo
     // The first `zh-` language the user prefers, recomputed when the host sets the languages.
     const StringAtom &SpecializedChineseLocale() noexcept
     {
-      static StringAtom locale = StringAtom::Null();
+      static StringAtom locale = null;
       static Maybe<uint32> generation;
       if (generation != UserPreferredLanguagesGeneration())
       {
@@ -74,7 +74,7 @@ namespace krys::boo
   StringAtom FontDescription::PlatformResolveGenericFamily(UScriptCode, const StringAtom &,
                                                            const StringAtom &) noexcept
   {
-    return StringAtom::Null();
+    return null;
   }
 
   float FontDescription::AdjustedSizeForFontFace(float fontFaceSizeAdjust) const noexcept

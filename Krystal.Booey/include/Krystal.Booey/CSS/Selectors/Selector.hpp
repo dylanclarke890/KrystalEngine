@@ -162,14 +162,14 @@ namespace krys::boo::css
 
   struct PossiblyQuotedIdentifier
   {
-    CSSOMStringAtom Identifier {CSSOMStringAtom::Null()};
+    CSSOMStringAtom Identifier {null};
     bool WasQuoted {false};
 
     KRYS_NODISCARD bool operator==(const PossiblyQuotedIdentifier &) const noexcept = default;
 
     KRYS_NODISCARD bool IsNull() const noexcept
     {
-      return Identifier == CSSOMStringAtom::Null();
+      return Identifier == null;
     }
   };
 
@@ -202,8 +202,8 @@ namespace krys::boo::css
       // For quirks mode, class and id are case-insensitive. In the case where uppercase letters are used in
       // quirks mode, |MatchingValue| holds the lowercase class/id and |SerialisingValue| holds the original
       // string.
-      CSSOMStringAtom MatchingValue {CSSOMStringAtom::Null()};
-      CSSOMStringAtom SerialisingValue {CSSOMStringAtom::Null()};
+      CSSOMStringAtom MatchingValue {null};
+      CSSOMStringAtom SerialisingValue {null};
 
       // Used for :nth-*
       int32 NthA {0};
@@ -213,7 +213,7 @@ namespace krys::boo::css
       dom::QualifiedName Attribute;
 
       // Used for :contains and :nth-*
-      CSSOMStringAtom Argument {CSSOMStringAtom::Null()};
+      CSSOMStringAtom Argument {null};
 
       // Used for ::highlight and ::part arguments.
       FixedVector<CSSOMStringAtom> ArgumentList;
@@ -343,9 +343,9 @@ namespace krys::boo::css
     KRYS_NODISCARD const CSSOMStringAtom &SerialisingValue() const noexcept;
     KRYS_NODISCARD const dom::QualifiedName &Attribute() const noexcept;
 
-    KRYS_NODISCARD const CSSOMStringAtom &Argument() const noexcept
+    KRYS_NODISCARD CSSOMStringAtom Argument() const noexcept
     {
-      return HasRareData() ? _data.Rare->Argument : CSSOMStringAtom::Null();
+      return HasRareData() ? _data.Rare->Argument : null;
     }
 
     /// @brief Whether the selector's `s` flag makes it match case-sensitively, whatever the attribute.

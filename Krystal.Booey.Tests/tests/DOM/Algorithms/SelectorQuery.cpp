@@ -138,7 +138,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Elements in no namespace")
     {
-      auto element = document->CreateElementNS(DOMStringAtom::Null(), u8"p").ReleaseValue();
+      auto element = document->CreateElementNS(null, u8"p").ReleaseValue();
       REQUIRE_FALSE(element->SetAttribute(u8"id", u8"nons").HasException());
       REQUIRE_FALSE(ById(*document, u8"f").AppendChild(*element).HasException());
 

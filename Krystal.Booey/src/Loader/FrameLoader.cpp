@@ -121,8 +121,7 @@ namespace krys::boo
       return;
     }
 
-    NavigationAction action(resourceRequest, false, nullptr, dom::DOMStringAtom::Null(),
-                            request.SourceElement());
+    NavigationAction action(resourceRequest, false, nullptr, null, request.SourceElement());
     auto substituteData = request.GetSubstituteData();
     LoadWithNavigationAction(resourceRequest, krys::move(action), FrameLoadType::Standard,
                              krys::move(substituteData));
@@ -447,8 +446,8 @@ namespace krys::boo
 
     // The target is ignored when the download attribute is set, as the link is downloaded rather than
     // followed.
-    bool isDownload = frameRequest.DownloadAttribute() != dom::DOMStringAtom::Null();
-    auto effectiveFrameName = isDownload ? dom::DOMStringAtom::Null() : frameRequest.FrameName();
+    bool isDownload = frameRequest.DownloadAttribute() != null;
+    auto effectiveFrameName = isDownload ? null : frameRequest.FrameName();
     bool targetsThisFrame = FindFrameForNavigation(effectiveFrameName.View()) == &_frame;
 
     const auto &request = frameRequest.GetResourceRequest();
@@ -508,10 +507,10 @@ namespace krys::boo
         }
         auto *form = submission->Form();
         FrameLoadRequest frameLoadRequest(ShareRef(form ? form->NodeDocument() : *document),
-                                          ResourceRequest(), dom::DOMStringAtom::Null());
+                                          ResourceRequest(), null);
         submission->PopulateFrameLoadRequest(frameLoadRequest);
         const auto &request = frameLoadRequest.GetResourceRequest();
-        NavigationAction action(request, true, submission->Event(), dom::DOMStringAtom::Null(), form);
+        NavigationAction action(request, true, submission->Event(), null, form);
         RequestNavigation(action, request, submission.get(), frameLoadRequest.FrameName().View());
       });
   }

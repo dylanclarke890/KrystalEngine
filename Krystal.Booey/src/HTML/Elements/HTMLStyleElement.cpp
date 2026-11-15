@@ -127,7 +127,7 @@ namespace krys::boo::html
                                             dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }
@@ -143,7 +143,7 @@ namespace krys::boo::html
       UnblockRendering();
     }
 
-    auto newValue = value ? dom::DOMStringAtom(*value) : dom::DOMStringAtom::Null();
+    auto newValue = value ? dom::DOMStringAtom(*value) : null;
     if (localName == u8"title")
     {
       if (auto *sheet = Sheet(); sheet && !dom::TreeQueries::IsInShadowTree(*this))

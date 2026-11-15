@@ -55,7 +55,7 @@ namespace krys::boo::html
     HTMLTablePartElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                              dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null()
+    if (namespaceURI == null
         && (localName == u8"bgcolor" || localName == u8"background" || localName == u8"valign"
             || localName == u8"height"))
     {
@@ -69,7 +69,7 @@ namespace krys::boo::html
     css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

@@ -123,8 +123,7 @@ namespace krys::boo::tests
     /// @brief Loads @p markup at @p url, as the host does.
     void LoadMarkup(utf8_string &&markup, utf8_stringview url) noexcept
     {
-      FrameLoadRequest request(ShareRef(Document()), ResourceRequest(url::URL(url)),
-                               dom::DOMStringAtom::Null());
+      FrameLoadRequest request(ShareRef(Document()), ResourceRequest(url::URL(url)), null);
       request.SetSubstituteData(SubstituteData(krys::move(markup), u8"text/html", url::URL(url)));
       Frame().Loader().Load(krys::move(request));
     }
@@ -132,8 +131,7 @@ namespace krys::boo::tests
     /// @brief Loads @p url through the strategy, as the host does.
     void LoadURL(utf8_stringview url) noexcept
     {
-      Frame().Loader().Load(
-        FrameLoadRequest(ShareRef(Document()), ResourceRequest(url::URL(url)), dom::DOMStringAtom::Null()));
+      Frame().Loader().Load(FrameLoadRequest(ShareRef(Document()), ResourceRequest(url::URL(url)), null));
     }
   };
 }

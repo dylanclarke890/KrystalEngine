@@ -113,13 +113,12 @@ namespace krys::boo::style
     }
   }
 
-  const css::CSSOMStringAtom &TextEmphasisStyle::MarkString() const noexcept
+  css::CSSOMStringAtom TextEmphasisStyle::MarkString() const noexcept
   {
     return krys::SwitchOn(
-      Value, [&](const css::keywords::None &) -> const css::CSSOMStringAtom &
-      { return css::CSSOMStringAtom::Null(); },
-      [&](const Shape &shape) -> const css::CSSOMStringAtom & { return MarkStringFromShape(shape); },
-      [&](const css::CSSOMStringAtom &customMark) -> const css::CSSOMStringAtom & { return customMark; });
+      Value, [&](const css::keywords::None &) -> css::CSSOMStringAtom { return null; },
+      [&](const Shape &shape) -> css::CSSOMStringAtom { return MarkStringFromShape(shape); },
+      [&](const css::CSSOMStringAtom &customMark) -> css::CSSOMStringAtom { return customMark; });
   }
 
   // MARK: - Conversion

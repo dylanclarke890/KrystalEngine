@@ -197,7 +197,7 @@ namespace krys::boo::xml
   {
     struct XMLParsingNamespaces
     {
-      dom::DOMStringAtom DefaultNamespace {dom::DOMStringAtom::Null()};
+      dom::DOMStringAtom DefaultNamespace {null};
       HashMap<dom::DOMStringAtom, dom::DOMStringAtom> PrefixNamespaces;
     };
 
@@ -210,7 +210,7 @@ namespace krys::boo::xml
 
       XMLParsingNamespaces result;
 
-      result.DefaultNamespace = contextElement->LookupNamespaceURI(dom::DOMStringAtom::Null());
+      result.DefaultNamespace = contextElement->LookupNamespaceURI(null);
 
       for (auto *element = contextElement; element; element = element->ParentElement())
       {

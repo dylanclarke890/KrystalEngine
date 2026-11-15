@@ -1854,7 +1854,7 @@ namespace krys::boo::html
     Ref<InputType> protectedInputType = ShareRef(*_inputType);
 
     HTMLTextFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }
@@ -2361,7 +2361,7 @@ namespace krys::boo::html
   bool HTMLInputElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                             dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null())
+    if (namespaceURI == null)
     {
       if (localName == u8"vspace" || localName == u8"hspace" || localName == u8"width"
           || localName == u8"height")
@@ -2382,7 +2382,7 @@ namespace krys::boo::html
                                                                 css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLTextFormControlElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value,
                                                                          style);

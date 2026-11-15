@@ -62,7 +62,7 @@ namespace krys::boo::css
   {
     if (!_document || !_document->Frame() || !_document->Frame()->View())
     {
-      return CSSOMStringAtom::Null();
+      return null;
     }
 
     return _document->Frame()->View()->MediaType();

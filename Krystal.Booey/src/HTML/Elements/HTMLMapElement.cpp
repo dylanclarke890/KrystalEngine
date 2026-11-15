@@ -110,8 +110,8 @@ namespace krys::boo::html
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
-    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"id" || localName == u8"name")
-        && oldValue != value && (IsConnected() || IsInShadowTree()))
+    if (namespaceURI == null && (localName == u8"id" || localName == u8"name") && oldValue != value
+        && (IsConnected() || IsInShadowTree()))
     {
       auto &scope = TreeScope();
       if (oldValue && !oldValue->empty())

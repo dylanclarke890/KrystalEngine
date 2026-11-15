@@ -36,8 +36,7 @@ namespace krys::boo::dom
 {
   const QualifiedName &PseudoElementTagName() noexcept
   {
-    static NeverDestroyed<const QualifiedName> name {DOMStringAtom::Null(), DOMStringAtom::Null(),
-                                                     u8"<pseudo>"};
+    static NeverDestroyed<const QualifiedName> name {null, null, u8"<pseudo>"};
     return name;
   }
 

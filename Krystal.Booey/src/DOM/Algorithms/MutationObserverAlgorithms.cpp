@@ -296,8 +296,7 @@ namespace krys::boo::dom
           }
 
           if (options.AttributeFilter.has_value()
-              && (!std::ranges::contains(*options.AttributeFilter, name)
-                  || namespaceURI != DOMStringAtom::Null()))
+              && (!std::ranges::contains(*options.AttributeFilter, name) || namespaceURI != null))
           {
             continue;
           }
@@ -319,7 +318,7 @@ namespace krys::boo::dom
                                        { return interested.Observer.get() == observer.get(); });
         if (it == interestedObservers.end())
         {
-          interestedObservers.push_back({krys::move(observer), DOMStringAtom::Null()});
+          interestedObservers.push_back({krys::move(observer), null});
           it = std::prev(interestedObservers.end());
         }
 
@@ -396,8 +395,8 @@ namespace krys::boo::dom
 
     // 2. Queue a mutation record of "childList" for target with null, null, null, addedNodes, removedNodes,
     //    previousSibling, and nextSibling.
-    QueueMutationRecord(MutationRecordType::ChildList, krys::move(target), DOMStringAtom::Null(),
-                        DOMStringAtom::Null(), DOMStringAtom::Null(), krys::move(addedNodes),
-                        krys::move(removedNodes), krys::move(previousSibling), krys::move(nextSibling));
+    QueueMutationRecord(MutationRecordType::ChildList, krys::move(target), null, null, null,
+                        krys::move(addedNodes), krys::move(removedNodes), krys::move(previousSibling),
+                        krys::move(nextSibling));
   }
 }

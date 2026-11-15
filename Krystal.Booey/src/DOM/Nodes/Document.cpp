@@ -510,7 +510,7 @@ namespace krys::boo::dom
 
     // 4. Let namespace be the HTML namespace, if this is an HTML document or this's content type is
     //    "application/xhtml+xml"; otherwise null.
-    DOMStringAtom namespaceURI = DOMStringAtom::Null();
+    DOMStringAtom namespaceURI = null;
     if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
     {
       namespaceURI = infra::Namespaces::HTML;
@@ -518,8 +518,7 @@ namespace krys::boo::dom
 
     // 5. Return the result of creating an element given this, localName, namespace, null, is, true, and
     // registry.
-    return ElementFactory::Create(*this, {namespaceURI, DOMStringAtom::Null(), localName},
-                                  creationOptions.Value().Is, true,
+    return ElementFactory::Create(*this, {namespaceURI, null, localName}, creationOptions.Value().Is, true,
                                   creationOptions.Value().CustomElementRegistry);
   }
 
@@ -664,7 +663,7 @@ namespace krys::boo::dom
     }
 
     // 3. Return the result of creating an attribute given this and localName.
-    QualifiedName qualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), localName};
+    QualifiedName qualifiedName {null, null, localName};
     return AdoptRef<Attr>(*new Attr(*this, qualifiedName));
   }
 
@@ -962,7 +961,7 @@ namespace krys::boo::dom
       {
         // Let element be the result of creating an element given the document element's node document,
         // "title", and the SVG namespace. Insert element as the first child of the document element.
-        title = ElementFactory::Create(*this, {infra::Namespaces::SVG, DOMStringAtom::Null(), u8"title"});
+        title = ElementFactory::Create(*this, {infra::Namespaces::SVG, null, u8"title"});
 
         if (auto insert =
               MutationAlgorithms::PreInsert(*title, *documentElement, documentElement->FirstChild());
@@ -996,7 +995,7 @@ namespace krys::boo::dom
       {
         // 3a. Let element be the result of creating an element given the document element's node document,
         //     "title", and the HTML namespace.
-        element = ElementFactory::Create(*this, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
+        element = ElementFactory::Create(*this, {infra::Namespaces::HTML, null, u8"title"});
 
         // 3b. Append element to the head element.
         if (auto append = MutationAlgorithms::Append(*element, *head); append.HasException())

@@ -90,16 +90,15 @@ namespace krys::boo::css
     }
 
     dom::MutationObserverAlgorithms::QueueMutationRecord(
-      dom::MutationRecordType::Attributes, _element, u8"style", dom::DOMStringAtom::Null(),
-      _oldValue ? dom::DOMStringAtom(*_oldValue) : dom::DOMStringAtom::Null(), {}, {}, nullptr, nullptr);
+      dom::MutationRecordType::Attributes, _element, u8"style", null,
+      _oldValue ? dom::DOMStringAtom(*_oldValue) : null, {}, {}, nullptr, nullptr);
 
     if (_isCustomElement)
     {
       auto newValue = _element->GetAttribute(u8"style");
       html::CustomElementReactionQueue::EnqueueAttributeChangedCallbackIfNeeded(
-        *_element, dom::QualifiedName(dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(), u8"style"),
-        _oldValue ? dom::DOMStringAtom(*_oldValue) : dom::DOMStringAtom::Null(),
-        newValue ? dom::DOMStringAtom(*newValue) : dom::DOMStringAtom::Null());
+        *_element, dom::QualifiedName(null, null, u8"style"),
+        _oldValue ? dom::DOMStringAtom(*_oldValue) : null, newValue ? dom::DOMStringAtom(*newValue) : null);
     }
   }
 

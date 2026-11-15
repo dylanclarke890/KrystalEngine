@@ -43,7 +43,7 @@ namespace krys::boo::html::tests
       Allows(const SanitizerConfig &config, dom::DOMStringView attribute, dom::DOMStringView value = u8"",
              dom::DOMStringView element = u8"div",
              dom::DOMStringAtom elementNamespace = dom::DOMStringAtom(infra::Namespaces::HTML),
-             dom::DOMStringAtom attributeNamespace = dom::DOMStringAtom::Null()) noexcept
+             dom::DOMStringAtom attributeNamespace = null) noexcept
     {
       return SanitizerAlgorithms::AllowsAttribute(attribute, attributeNamespace, value, element,
                                                   elementNamespace, config);
@@ -106,7 +106,7 @@ namespace krys::boo::html::tests
         }
         else
         {
-          CHECK(attribute.Namespace == dom::DOMStringAtom::Null());
+          CHECK(attribute.Namespace == null);
         }
       }
     }

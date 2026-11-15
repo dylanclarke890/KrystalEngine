@@ -13,7 +13,7 @@ namespace krys::boo::tests
                   dom::DOMStringAtom target = dom::DOMStringAtom::Empty()) noexcept
     {
       fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url), target, nullptr,
-                                             ReferrerPolicy::EmptyString, dom::DOMStringAtom::Null());
+                                             ReferrerPolicy::EmptyString, null);
     }
   }
 

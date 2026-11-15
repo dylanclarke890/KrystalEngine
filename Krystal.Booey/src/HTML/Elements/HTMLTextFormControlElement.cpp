@@ -821,7 +821,7 @@ namespace krys::boo::html
                                                       dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"placeholder")
+    if (namespaceURI == null && localName == u8"placeholder")
     {
       UpdatePlaceholderText();
       UpdatePlaceholderVisibility();

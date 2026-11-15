@@ -8,8 +8,8 @@ namespace krys::boo::css::tests
   /// @brief Builds selectors the way the selector parser does, for tests that run without it.
   struct SelectorBuilder
   {
-    KRYS_NODISCARD static UniquePtr<MutableSelector>
-      Type(CSSOMStringView localName, CSSOMStringAtom prefix = CSSOMStringAtom::Null()) noexcept
+    KRYS_NODISCARD static UniquePtr<MutableSelector> Type(CSSOMStringView localName,
+                                                          CSSOMStringAtom prefix = null) noexcept
     {
       return CreateUnique<MutableSelector>(
         dom::QualifiedName(dom::StarAtom(), prefix, CSSOMStringAtom(localName)));
@@ -43,8 +43,7 @@ namespace krys::boo::css::tests
 
     KRYS_NODISCARD static UniquePtr<MutableSelector>
       Attribute(SelectorMatch match, CSSOMStringView name, CSSOMStringView value = {},
-                IsCaseSensitive caseSensitive = IsCaseSensitive::Yes,
-                CSSOMStringAtom prefix = CSSOMStringAtom::Null()) noexcept
+                IsCaseSensitive caseSensitive = IsCaseSensitive::Yes, CSSOMStringAtom prefix = null) noexcept
     {
       auto selector = CreateUnique<MutableSelector>();
       selector->SetMatch(match);

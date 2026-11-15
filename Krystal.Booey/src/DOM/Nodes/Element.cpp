@@ -2166,8 +2166,7 @@ namespace krys::boo::dom
       //    null, null, and verifiedValue.
       // 7. Append attribute to this.
       auto attr = AdoptRef<Attr>(
-        *new Attr(NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), qualifiedName},
-                  krys::move(value)));
+        *new Attr(NodeDocument(), QualifiedName {null, null, qualifiedName}, krys::move(value)));
       ElementAlgorithms::AppendAttribute(*attr, *this);
     }
 
@@ -2240,8 +2239,8 @@ namespace krys::boo::dom
       //     node document and qualifiedName to this, and then return true.
       if (!force.has_value() || force.value())
       {
-        auto attr = AdoptRef<Attr>(*new Attr(
-          NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), qualifiedName}, u8""));
+        auto attr =
+          AdoptRef<Attr>(*new Attr(NodeDocument(), QualifiedName {null, null, qualifiedName}, u8""));
         ElementAlgorithms::AppendAttribute(*attr, *this);
         return true;
       }
@@ -2281,7 +2280,7 @@ namespace krys::boo::dom
     // 1. If namespace is the empty string, then set it to null.
     if (namespaceURI == DOMStringAtom::Empty())
     {
-      namespaceURI = DOMStringAtom::Null();
+      namespaceURI = null;
     }
 
     // 2. Return true if this has an attribute whose namespace is namespace and local name is localName;
@@ -2401,7 +2400,7 @@ namespace krys::boo::dom
   {
     krys_debug_assert(IsInUserAgentShadowTree());
     auto part = GetAttribute(u8"useragentpart");
-    return part ? DOMStringAtom(*part) : DOMStringAtom::Null();
+    return part ? DOMStringAtom(*part) : null;
   }
 
   void Element::SetUserAgentPart(DOMStringAtom part) noexcept
@@ -2972,18 +2971,17 @@ namespace krys::boo::dom
 
   void Element::SetSynchronizedLazyAttribute(DOMStringAtom localName, DOMString value) noexcept
   {
-    auto it = std::ranges::find_if(
-      _attributes, [&](const Ref<Attr> &attr)
-      { return attr->LocalName() == localName && attr->NamespaceURI() == DOMStringAtom::Null(); });
+    auto it =
+      std::ranges::find_if(_attributes, [&](const Ref<Attr> &attr)
+                           { return attr->LocalName() == localName && attr->NamespaceURI() == null; });
     if (it != _attributes.end())
     {
       (*it)->_value = krys::move(value);
       return;
     }
 
-    auto attr = AdoptRef<Attr>(
-      *new Attr(NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), localName},
-                krys::move(value)));
+    auto attr =
+      AdoptRef<Attr>(*new Attr(NodeDocument(), QualifiedName {null, null, localName}, krys::move(value)));
     attr->_ownerElement = CreateWeakPtr(this);
     _attributes.push_back(krys::move(attr));
   }
@@ -3023,7 +3021,7 @@ namespace krys::boo::dom
   void Element::OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
                                    Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept
   {
-    if (namespaceURI != DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }

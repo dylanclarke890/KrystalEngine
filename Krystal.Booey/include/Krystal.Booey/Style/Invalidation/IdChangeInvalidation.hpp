@@ -42,7 +42,7 @@ namespace krys::boo::style
     const bool _isEnabled;
     const Ref<dom::Element> _element;
 
-    dom::DOMStringAtom _newId {dom::DOMStringAtom::Null()};
+    dom::DOMStringAtom _newId {null};
 
     Invalidator::MatchElementRuleSets _matchElementRuleSets;
 

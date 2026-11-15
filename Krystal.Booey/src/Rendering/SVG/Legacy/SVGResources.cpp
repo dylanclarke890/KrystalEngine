@@ -347,7 +347,7 @@ namespace krys::boo
       if (style.HasFill())
       {
         bool hasPendingResource = false;
-        auto id = dom::DOMStringAtom::Null();
+        dom::DOMStringAtom id = null;
         if (auto *fill = PaintingResourceFromSVGPaint(treeScope, style.Fill(), id, hasPendingResource))
         {
           ensureResources(foundResources).SetFill(fill);
@@ -361,7 +361,7 @@ namespace krys::boo
       if (style.HasStroke())
       {
         bool hasPendingResource = false;
-        auto id = dom::DOMStringAtom::Null();
+        dom::DOMStringAtom id = null;
         if (auto *stroke = PaintingResourceFromSVGPaint(treeScope, style.Stroke(), id, hasPendingResource))
         {
           ensureResources(foundResources).SetStroke(stroke);

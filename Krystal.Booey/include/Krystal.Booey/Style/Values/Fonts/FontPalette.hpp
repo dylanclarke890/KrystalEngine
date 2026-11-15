@@ -35,18 +35,15 @@ namespace krys::boo::style
   // https://drafts.csswg.org/css-fonts/#propdef-font-palette
   struct FontPalette
   {
-    FontPalette(css::keywords::Normal) noexcept
-        : _platform {boo::FontPalette::Type::Normal, css::CSSOMStringAtom::Null()}
+    FontPalette(css::keywords::Normal) noexcept : _platform {boo::FontPalette::Type::Normal, null}
     {
     }
 
-    FontPalette(css::keywords::Light) noexcept
-        : _platform {boo::FontPalette::Type::Light, css::CSSOMStringAtom::Null()}
+    FontPalette(css::keywords::Light) noexcept : _platform {boo::FontPalette::Type::Light, null}
     {
     }
 
-    FontPalette(css::keywords::Dark) noexcept
-        : _platform {boo::FontPalette::Type::Dark, css::CSSOMStringAtom::Null()}
+    FontPalette(css::keywords::Dark) noexcept : _platform {boo::FontPalette::Type::Dark, null}
     {
     }
 

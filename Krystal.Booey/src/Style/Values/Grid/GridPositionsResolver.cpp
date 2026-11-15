@@ -511,11 +511,10 @@ namespace krys::boo::style
     KRYS_NODISCARD bool HasNamedGridLine(const GridPosition &position) noexcept
     {
       return position.SwitchOn([](const GridPosition::Explicit &explicitPosition)
-                               { return explicitPosition.Name.Value != css::CSSOMStringAtom::Null(); },
+                               { return explicitPosition.Name.Value != null; },
                                [](const GridPosition::Span &spanPosition)
-                               { return spanPosition.Name.Value != css::CSSOMStringAtom::Null(); },
-                               [](const css::CustomIdentifier &) { return true; },
-                               [](const css::keywords::Auto &) { return false; });
+                               { return spanPosition.Name.Value != null; }, [](const css::CustomIdentifier &)
+                               { return true; }, [](const css::keywords::Auto &) { return false; });
     }
 
     KRYS_NODISCARD GridPosition SpanPosition(int span) noexcept
@@ -695,7 +694,7 @@ namespace krys::boo::style
         },
         [&](const GridPosition::Span &spanPosition) -> GridSpan
         {
-          if (spanPosition.Name.Value != css::CSSOMStringAtom::Null())
+          if (spanPosition.Name.Value != null)
           {
             // span 2 'c' -> we need to find the appropriate grid line before / after our opposite position.
             return ResolveNamedGridLinePositionAgainstOppositePosition(
@@ -732,7 +731,7 @@ namespace krys::boo::style
         {
           krys_debug_assert(explicitPosition.Position.Value != 0);
 
-          if (explicitPosition.Name.Value != css::CSSOMStringAtom::Null())
+          if (explicitPosition.Name.Value != null)
           {
             return ResolveNamedGridLinePositionFromStyle(gridContainer, explicitPosition.Name,
                                                          explicitPosition.Position.Value, side);

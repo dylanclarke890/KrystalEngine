@@ -1665,7 +1665,7 @@ namespace krys::boo::css::calc
     auto builderState = options.ConversionData->ProtectedStyleBuilderState();
 
     Maybe<style::ScopedName> anchorSizeScopedName;
-    if (anchorSize.ElementName != CSSOMStringAtom::Null())
+    if (anchorSize.ElementName != null)
     {
       anchorSizeScopedName =
         style::ScopedName {.Name = anchorSize.ElementName, .ScopeOrdinal = builderState->StyleScopeOrdinal()};

@@ -352,8 +352,7 @@ namespace krys::boo::html
       if (queue._interface->ObservesAttribute(attribute->LocalName()))
       {
         queue._items.emplace_back(Item::Type::AttributeChanged,
-                                  Item::AttributeChangedPayload {attribute->GetQualifiedName(),
-                                                                 dom::DOMStringAtom::Null(),
+                                  Item::AttributeChangedPayload {attribute->GetQualifiedName(), null,
                                                                  dom::DOMStringAtom(attribute->Value())});
       }
     }

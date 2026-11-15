@@ -220,7 +220,7 @@ namespace krys::boo::html
     //     subject's hyperlink referrer policy, userInvolvement set to userInvolvement, and sourceElement set
     //     to subject.
     auto downloadAttribute = subject.GetAttribute(u8"download");
-    auto download = downloadAttribute ? dom::DOMStringAtom(*downloadAttribute) : dom::DOMStringAtom::Null();
+    auto download = downloadAttribute ? dom::DOMStringAtom(*downloadAttribute) : null;
     frame->Loader().ChangeLocation(urlRecord, targetAttributeValue, &event, HyperlinkReferrerPolicy(subject),
                                    download, &subject);
   }

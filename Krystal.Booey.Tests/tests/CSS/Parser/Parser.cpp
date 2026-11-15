@@ -251,7 +251,7 @@ namespace krys::boo::css::tests
       ParseSheet(u8"@namespace \"http://default\"; @namespace svg url(http://www.w3.org/2000/svg); "
                  u8"svg|a { color: red }");
     REQUIRE(sheet->NamespaceRules().size() == 2);
-    CHECK(sheet->NamespaceRules()[0]->Prefix() == CSSOMStringAtom::Null());
+    CHECK(sheet->NamespaceRules()[0]->Prefix() == null);
     CHECK(sheet->NamespaceRules()[0]->Uri() == u8"http://default");
     CHECK(sheet->NamespaceRules()[1]->Prefix() == u8"svg");
     CHECK(sheet->DefaultNamespace() == u8"http://default");

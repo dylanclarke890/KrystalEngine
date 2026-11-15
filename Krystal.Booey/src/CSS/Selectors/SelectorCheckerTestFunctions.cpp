@@ -308,7 +308,7 @@ namespace krys::boo::css
       if (ancestor->NamespaceURI() == infra::Namespaces::HTML
           || ancestor->NamespaceURI() == infra::Namespaces::SVG)
       {
-        if (auto lang = ancestor->GetAttributeNS(dom::DOMStringAtom::Null(), u8"lang"))
+        if (auto lang = ancestor->GetAttributeNS(null, u8"lang"))
         {
           return *lang;
         }

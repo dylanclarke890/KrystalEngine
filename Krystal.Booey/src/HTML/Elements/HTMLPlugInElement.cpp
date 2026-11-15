@@ -34,7 +34,7 @@ namespace krys::boo::html
   bool HTMLPlugInElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                              dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null()
+    if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"vspace"
             || localName == u8"hspace" || localName == u8"align"))
     {
@@ -49,7 +49,7 @@ namespace krys::boo::html
                                                                  css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

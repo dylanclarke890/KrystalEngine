@@ -53,7 +53,7 @@ namespace krys::boo::dom::tests
     SECTION("skips data attributes with uppercase letters")
     {
       // Only an attribute set with a namespace keeps its case in an HTML document.
-      (void)element->SetAttributeNS(DOMStringAtom::Null(), DOMStringAtom(u8"data-Upper"), u8"1");
+      (void)element->SetAttributeNS(null, DOMStringAtom(u8"data-Upper"), u8"1");
       CHECK(DatasetNames(dataset).empty());
       CHECK_FALSE(dataset.IsSupportedPropertyName(u8"Upper"));
     }

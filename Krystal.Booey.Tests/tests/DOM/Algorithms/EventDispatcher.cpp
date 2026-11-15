@@ -248,13 +248,13 @@ namespace krys::boo::dom::tests
 
     SECTION("A trusted animationend with no listeners of its own reaches webkitAnimationEnd listeners")
     {
-      DOMStringAtom typeInListener = DOMStringAtom::Null();
+      DOMStringAtom typeInListener = null;
       auto legacy = fixture.Child->AddEventListener(DOMStringAtom(EventNames::Legacy::AnimationEnd),
                                                     [&](Event &e) { typeInListener = e.Type(); });
 
       auto untrusted = CreateRef<Event>(DOMStringAtom(EventNames::AnimationEnd));
       REQUIRE_FALSE(fixture.Child->DispatchEvent(*untrusted).HasException());
-      REQUIRE(typeInListener == DOMStringAtom::Null());
+      REQUIRE(typeInListener == null);
 
       auto trusted = Event::Create(DOMStringAtom(EventNames::AnimationEnd), false, false);
       REQUIRE(EventDispatcher::DispatchToTarget(*trusted, fixture.Child.get()));
@@ -263,11 +263,11 @@ namespace krys::boo::dom::tests
 
       SECTION("but not when there is one")
       {
-        typeInListener = DOMStringAtom::Null();
+        typeInListener = null;
         auto own = fixture.Child->AddEventListener(DOMStringAtom(EventNames::AnimationEnd), [](Event &) {});
         auto again = Event::Create(DOMStringAtom(EventNames::AnimationEnd), false, false);
         REQUIRE(EventDispatcher::DispatchToTarget(*again, fixture.Child.get()));
-        REQUIRE(typeInListener == DOMStringAtom::Null());
+        REQUIRE(typeInListener == null);
       }
     }
   }
@@ -367,7 +367,7 @@ namespace krys::boo::dom::tests
       bool trusted = false;
       bool bubbles = false;
       bool cancelable = false;
-      DOMStringAtom type = DOMStringAtom::Null();
+      DOMStringAtom type = null;
       auto listener = fixture.Parent->AddEventListener(EventNames::Click,
                                                        [&](Event &e)
                                                        {

@@ -31,8 +31,7 @@ namespace krys::boo::dom::tests
       List<AttributeChange> Changes;
 
       explicit AttributeChangeRecordingElement(dom::Document &document) noexcept
-          : Element(document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"test-element"},
-                    NodeFlags::None)
+          : Element(document, {infra::Namespaces::HTML, null, u8"test-element"}, NodeFlags::None)
       {
       }
 
@@ -84,7 +83,7 @@ namespace krys::boo::dom::tests
     CHECK(records[0]->Target().get() == element.get());
     CHECK(records[0]->AttributeName() == u8"a");
     CHECK(records[0]->AttributeNamespace() == u8"urn:x");
-    CHECK(records[0]->OldValue() == DOMStringAtom::Null());
+    CHECK(records[0]->OldValue() == null);
 
     REQUIRE(element->Changes.size() == 1uz);
     CHECK(element->Changes[0].LocalName == u8"a");
@@ -199,7 +198,7 @@ namespace krys::boo::dom::tests
     {
       auto document = CreateRef<HTMLDocument>();
       auto element = document->CreateElement(u8"div").ReleaseValue();
-      REQUIRE_FALSE(element->SetAttributeNS(DOMStringAtom::Null(), u8"Mixed", u8"upper").HasException());
+      REQUIRE_FALSE(element->SetAttributeNS(null, u8"Mixed", u8"upper").HasException());
       REQUIRE_FALSE(element->SetAttribute(u8"mixed", u8"lower").HasException());
       auto *attr = ElementAlgorithms::GetAttributeByName(u8"MIXED", *element);
       REQUIRE(attr != nullptr);
@@ -243,8 +242,7 @@ namespace krys::boo::dom::tests
 
     CHECK(ElementAlgorithms::GetAttributeByNamespace(DOMStringAtom::Empty(), u8"a", *element)->Value()
           == u8"none");
-    CHECK(ElementAlgorithms::GetAttributeByNamespace(DOMStringAtom::Null(), u8"a", *element)->Value()
-          == u8"none");
+    CHECK(ElementAlgorithms::GetAttributeByNamespace(null, u8"a", *element)->Value() == u8"none");
     CHECK(ElementAlgorithms::GetAttributeByNamespace(u8"urn:x", u8"a", *element)->Value() == u8"x");
     CHECK(ElementAlgorithms::GetAttributeByNamespace(u8"urn:y", u8"a", *element) == nullptr);
 
@@ -328,7 +326,7 @@ namespace krys::boo::dom::tests
     CHECK(removed->Value() == u8"1");
     CHECK_FALSE(element->HasAttribute(u8"a"));
 
-    CHECK(ElementAlgorithms::RemoveAttributeByNamespace(DOMStringAtom::Null(), u8"b", *element) == nullptr);
+    CHECK(ElementAlgorithms::RemoveAttributeByNamespace(null, u8"b", *element) == nullptr);
     removed = ElementAlgorithms::RemoveAttributeByNamespace(u8"urn:x", u8"b", *element);
     REQUIRE(removed != nullptr);
     CHECK(removed->Value() == u8"2");

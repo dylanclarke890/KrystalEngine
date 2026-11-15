@@ -518,7 +518,7 @@ namespace krys::boo::svg
   bool SVGSvgElement::SelfHasRelativeLengths() const noexcept
   {
     return X().IsRelative() || Y().IsRelative() || Width().IsRelative() || Height().IsRelative()
-           || HasAttributeNS(dom::DOMStringAtom::Null(), SVGNames::ViewBoxAttr().LocalName());
+           || HasAttributeNS(null, SVGNames::ViewBoxAttr().LocalName());
   }
 
   bool SVGSvgElement::HasTransformRelatedAttributes() const noexcept
@@ -529,7 +529,7 @@ namespace krys::boo::svg
     }
 
     // 'x' / 'y' / 'viewBox' lead to a non-identity supplementalLayerTransform in RenderSVGViewportContainer
-    auto noNamespace = dom::DOMStringAtom::Null();
+    dom::DOMStringAtom noNamespace = null;
     return (HasAttributeNS(noNamespace, SVGNames::XAttr().LocalName())
             || HasAttributeNS(noNamespace, SVGNames::YAttr().LocalName()))
            || (HasAttributeNS(noNamespace, SVGNames::ViewBoxAttr().LocalName()) && !HasEmptyViewBox());
@@ -795,7 +795,7 @@ namespace krys::boo::svg
     auto &view = CurrentView();
     _useCurrentView = true;
 
-    auto noNamespace = dom::DOMStringAtom::Null();
+    dom::DOMStringAtom noNamespace = null;
     if (viewElement.HasAttributeNS(noNamespace, SVGNames::ViewBoxAttr().LocalName()))
     {
       view.SetViewBox(viewElement.ViewBox());

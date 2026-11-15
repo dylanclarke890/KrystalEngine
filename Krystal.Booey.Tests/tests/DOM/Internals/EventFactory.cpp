@@ -41,7 +41,7 @@ namespace krys::boo::dom::tests
   {
     auto event = EventFactory::Create<TestEvent>();
     REQUIRE(event->IsTrusted());
-    REQUIRE(event->Type() == DOMStringAtom::Null());
+    REQUIRE(event->Type() == null);
     REQUIRE_FALSE(event->Bubbles());
     REQUIRE_FALSE(event->Cancelable());
     REQUIRE_FALSE(event->Composed());

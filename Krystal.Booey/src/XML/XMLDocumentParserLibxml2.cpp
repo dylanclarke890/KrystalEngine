@@ -103,7 +103,7 @@ namespace krys::boo::xml
     {
       if (!string)
       {
-        return dom::DOMStringAtom::Null();
+        return null;
       }
       return dom::DOMStringAtom(ToStringView(string));
     }
@@ -390,8 +390,8 @@ namespace krys::boo::xml
         auto valueLength = static_cast<size_t>(attribute.End - attribute.Value);
         auto attrValue = ToString(Span<const xmlChar>(attribute.Value, valueLength));
         auto attrPrefix = ToStringView(attribute.Prefix);
-        auto attrURI = attrPrefix.empty() ? dom::DOMStringAtom::Null() : ToAtomString(attribute.URI);
-        auto attrQName = dom::DOMStringAtom::Null();
+        auto attrURI = attrPrefix.empty() ? null : ToAtomString(attribute.URI);
+        dom::DOMStringAtom attrQName = null;
         if (attrPrefix.empty())
         {
           attrQName = ToAtomString(attribute.LocalName);
@@ -446,12 +446,12 @@ namespace krys::boo::xml
     auto uri = ToAtomString(xmlURI);
     auto prefix = ToAtomString(xmlPrefix);
 
-    if (_parsingFragment && uri == dom::DOMStringAtom::Null())
+    if (_parsingFragment && uri == null)
     {
-      if (prefix != dom::DOMStringAtom::Null())
+      if (prefix != null)
       {
         auto it = _prefixToNamespaceMap.find(prefix);
-        uri = it != _prefixToNamespaceMap.end() ? it->second : dom::DOMStringAtom::Null();
+        uri = it != _prefixToNamespaceMap.end() ? it->second : null;
       }
       else if (Is<svg::SVGElement>(_currentNode.get()) || localName == u8"svg")
       {
@@ -487,8 +487,8 @@ namespace krys::boo::xml
                      ? HandleElementAttributes(prefixedAttributes, libxmlAttributes, numAttributes)
                      : false;
 
-    auto newElement = dom::ElementFactory::Create(document, qName, dom::DOMStringAtom::Null(),
-                                                  willConstructCustomElement, registry);
+    auto newElement =
+      dom::ElementFactory::Create(document, qName, null, willConstructCustomElement, registry);
 
     if (!handledAttributes)
     {

@@ -448,7 +448,7 @@ namespace krys::boo::css::calc::tests
       noElement->GetTree().Root, [](const IndirectNode<Anchor> &node) -> const Anchor * { return &*node; },
       [](const auto &) -> const Anchor * { return nullptr; });
     REQUIRE(noElementAnchor);
-    CHECK(noElementAnchor->ElementName == CSSOMStringAtom::Null());
+    CHECK(noElementAnchor->ElementName == null);
     CHECK(noElementAnchor->Fallback);
 
     CHECK_FALSE(ParseValue(u8"anchor(--a)", options));

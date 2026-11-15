@@ -75,7 +75,7 @@ namespace krys::boo
 
     style::WeakStyleable _source;
     ScrollAxis _axis {ScrollAxis::Block};
-    css::CSSOMStringAtom _name {css::CSSOMStringAtom::Null()};
+    css::CSSOMStringAtom _name {null};
     Scroller _scroller {Scroller::Self};
     WeakPtr<dom::Element> _timelineScopeElement;
     CurrentTimeData _cachedCurrentTimeData {};

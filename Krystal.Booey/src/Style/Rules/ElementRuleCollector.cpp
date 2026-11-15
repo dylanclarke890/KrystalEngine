@@ -495,7 +495,7 @@ namespace krys::boo::style
 
     bool isUserAgentPart =
       dom::TreeQueries::ContainingShadowRoot(Element())->Mode() == dom::ShadowRootMode::UserAgent
-      && Element().UserAgentPart() != dom::DOMStringAtom::Null();
+      && Element().UserAgentPart() != null;
 
     auto &partMatchingElement = isUserAgentPart ? *dom::TreeQueries::ShadowHost(Element()) : Element();
     // An element without a part attribute has no part names.

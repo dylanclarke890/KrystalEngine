@@ -211,11 +211,11 @@ namespace krys::boo::css::calc::tests
     CHECK(symbolDependencies.ViewportDimensions);
 
     ComputedStyleDependencies anchorDependencies;
-    auto anchor = CreateTree(CreateChild(AnchorSize {.ElementName = CSSOMStringAtom::Null(),
-                                                     .Dimension = style::AnchorSizeDimension::Width,
-                                                     .Fallback = Em(1.0)},
-                                         Type::CreateLength()),
-                             Type::CreateLength());
+    auto anchor = CreateTree(
+      CreateChild(
+        AnchorSize {.ElementName = null, .Dimension = style::AnchorSizeDimension::Width, .Fallback = Em(1.0)},
+        Type::CreateLength()),
+      Type::CreateLength());
     CollectComputedStyleDependencies(anchor, anchorDependencies);
     CHECK(anchorDependencies.Anchors);
     CHECK(anchorDependencies.Properties == List<PropertyId> {PropertyId::FontSize});

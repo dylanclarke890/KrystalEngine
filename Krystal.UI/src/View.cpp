@@ -530,7 +530,7 @@ namespace krys::ui
         navigation.AltKey = keys->AltKey;
         navigation.MetaKey = keys->MetaKey;
       }
-      if (action.DownloadAttribute() != boo::dom::DOMStringAtom::Null())
+      if (action.DownloadAttribute() != null)
       {
         navigation.Download = utf8_string(action.DownloadAttribute().View());
       }
@@ -658,8 +658,7 @@ namespace krys::ui
     _frame->SetSubresourceCachePolicy(cachePolicy);
     auto requestURL = url.IsNull() ? boo::url::URL(u8"about:blank") : url;
     boo::FrameLoadRequest request(ShareRef<boo::dom::Document>(Document()),
-                                  boo::ResourceRequest(krys::move(requestURL)),
-                                  boo::dom::DOMStringAtom::Null());
+                                  boo::ResourceRequest(krys::move(requestURL)), null);
     request.SetSubstituteData(boo::SubstituteData(krys::move(markup), u8"text/html", krys::move(url)));
     _frame->Loader().Load(krys::move(request));
   }
@@ -680,7 +679,7 @@ namespace krys::ui
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
     boo::FrameLoadRequest request(ShareRef<boo::dom::Document>(Document()),
-                                  boo::ResourceRequest(krys::move(url)), boo::dom::DOMStringAtom::Null());
+                                  boo::ResourceRequest(krys::move(url)), null);
     _frame->Loader().Load(krys::move(request));
   }
 

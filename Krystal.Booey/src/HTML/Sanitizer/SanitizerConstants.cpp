@@ -357,7 +357,7 @@ namespace krys::boo::html
   bool SanitizerConstants::IsNavigatingURLAttribute(const SanitizerElementNamespace &element,
                                                     const SanitizerAttributeNamespace &attribute) noexcept
   {
-    auto none = dom::DOMStringAtom::Null();
+    dom::DOMStringAtom none = null;
     auto xlink = dom::DOMStringAtom(infra::Namespaces::XLink);
     using infra::Namespaces::HTML;
     using infra::Namespaces::SVG;
@@ -377,7 +377,7 @@ namespace krys::boo::html
   bool SanitizerConstants::IsAnimatingURLAttribute(const SanitizerElementNamespace &element,
                                                    const SanitizerAttributeNamespace &attribute) noexcept
   {
-    auto none = dom::DOMStringAtom::Null();
+    dom::DOMStringAtom none = null;
     using infra::Namespaces::SVG;
     return IsSanitizerPair(element, attribute, u8"animate", SVG, u8"attributeName", none)
            || IsSanitizerPair(element, attribute, u8"animateTransform", SVG, u8"attributeName", none)

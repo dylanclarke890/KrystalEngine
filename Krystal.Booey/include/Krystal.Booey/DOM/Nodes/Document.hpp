@@ -256,7 +256,7 @@ namespace krys::boo::dom
   struct ElementCreationOptions
   {
     RefPtr<html::CustomElementRegistry> CustomElementRegistry;
-    DOMStringAtom Is {DOMStringAtom::Null()};
+    DOMStringAtom Is {null};
   };
 
   using ElementCreationOptionsOrString = Variant<ElementCreationOptions, DOMString>;

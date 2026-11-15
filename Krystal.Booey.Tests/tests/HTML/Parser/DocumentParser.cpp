@@ -278,10 +278,9 @@ namespace krys::boo::html::tests
         else
         {
           TagName fragmentTagName = ParseTagName(*test.FragmentContext);
-          dom::QualifiedName qName =
-            dom::QualifiedName {infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
-          element = dom::ElementFactory::Create(*document, qName, dom::DOMStringAtom::Null());
+          dom::QualifiedName qName = dom::QualifiedName {
+            infra::Namespaces::HTML, null, test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
+          element = dom::ElementFactory::Create(*document, qName, null);
         }
         auto result = DocumentParser::ParseFragment(*element, test.Input, false,
                                                     test.ScriptingMode.value_or(ParserScriptingMode::Inert));
@@ -728,7 +727,7 @@ namespace krys::boo::html::tests
     // xmlns has no prefix.
     auto xmlns = svg->GetAttributeNodeNS(infra::Namespaces::XMLNS, u8"xmlns");
     REQUIRE(xmlns);
-    CHECK(xmlns->Prefix() == dom::DOMStringAtom::Null());
+    CHECK(xmlns->Prefix() == null);
     CHECK(svg->GetAttribute(u8"xmlns") == dom::DOMString(u8"http://www.w3.org/2000/svg"));
 
     // xmlns:xlink and xlink:href keep their prefixes.

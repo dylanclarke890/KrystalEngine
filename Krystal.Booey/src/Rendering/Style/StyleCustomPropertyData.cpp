@@ -203,7 +203,7 @@ namespace krys::boo::style
   css::CSSOMStringAtom CustomPropertyData::FindKeyAtIndex(uint32 index) const noexcept
   {
     uint32 currentIndex = 0;
-    auto key = css::CSSOMStringAtom::Null();
+    css::CSSOMStringAtom key = null;
     ForEachInternal(
       [&](const Entry &entry)
       {

@@ -218,7 +218,7 @@ namespace krys::boo::css::tests
 
     query = ParseContainerQuery(u8"not (width <= 500px)");
     REQUIRE(query);
-    CHECK(query->Name == CSSOMStringAtom::Null());
+    CHECK(query->Name == null);
     CHECK(query->Condition.LogicalOperator == mq::LogicalOperator::Not);
 
     // A name alone is an empty condition.

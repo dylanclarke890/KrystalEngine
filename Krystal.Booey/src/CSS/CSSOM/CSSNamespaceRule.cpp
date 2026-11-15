@@ -55,7 +55,7 @@ namespace krys::boo::css
   CSSOMString CSSNamespaceRule::CssText() const noexcept
   {
     auto prefix = Prefix();
-    auto prefixIsEmpty = prefix == CSSOMStringAtom::Null() || prefix.View().empty();
+    auto prefixIsEmpty = prefix == null || prefix.View().empty();
 
     StringBuilder result;
     result.Append(u8"@namespace ");

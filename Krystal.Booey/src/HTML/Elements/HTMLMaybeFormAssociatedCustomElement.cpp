@@ -174,7 +174,7 @@ namespace krys::boo::html
                                                                 dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (IsFormAssociatedCustomElement() && namespaceURI == dom::DOMStringAtom::Null())
+    if (IsFormAssociatedCustomElement() && namespaceURI == null)
     {
       _formAssociatedCustomElement->ParseAttribute(localName, value);
     }

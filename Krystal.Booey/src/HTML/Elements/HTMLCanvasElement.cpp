@@ -439,7 +439,7 @@ namespace krys::boo::html
                                              Maybe<dom::DOMStringView> value,
                                              dom::DOMStringAtom namespaceURI) noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"width" || localName == u8"height"))
+    if (namespaceURI == null && (localName == u8"width" || localName == u8"height"))
     {
       DidUpdateSizeProperties();
     }
@@ -470,7 +470,7 @@ namespace krys::boo::html
   bool HTMLCanvasElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                              dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"width" || localName == u8"height"))
+    if (namespaceURI == null && (localName == u8"width" || localName == u8"height"))
     {
       return true;
     }
@@ -483,7 +483,7 @@ namespace krys::boo::html
                                                                  css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

@@ -106,7 +106,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool HasLanguageAttribute(const dom::Element &element) noexcept
     {
       return element.HasAttributeNS(dom::DOMStringAtom(infra::Namespaces::XML), u8"lang")
-             || element.HasAttributeNS(dom::DOMStringAtom::Null(), u8"lang");
+             || element.HasAttributeNS(null, u8"lang");
     }
 
     KRYS_NODISCARD bool HasDirectionality(const dom::Element &element) noexcept
@@ -168,7 +168,7 @@ namespace krys::boo::style
       return;
     }
 
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }

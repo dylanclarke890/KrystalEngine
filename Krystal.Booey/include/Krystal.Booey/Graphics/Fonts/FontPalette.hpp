@@ -44,7 +44,7 @@ namespace krys::boo
     };
 
     Type PaletteType {Type::Normal};
-    StringAtom Identifier {StringAtom::Null()};
+    StringAtom Identifier {null};
 
     KRYS_NODISCARD bool operator==(const FontPalette &other) const noexcept
     {

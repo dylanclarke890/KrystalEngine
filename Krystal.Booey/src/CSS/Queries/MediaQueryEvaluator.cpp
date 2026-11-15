@@ -105,7 +105,7 @@ namespace krys::boo::css::mq
 
   bool MediaQueryEvaluator::EvaluateMediaType(const MediaQuery &query) const noexcept
   {
-    if (query.MediaType == CSSOMStringAtom::Null() || query.MediaType == CSSOMStringAtom::Empty())
+    if (query.MediaType == null || query.MediaType == CSSOMStringAtom::Empty())
     {
       return true;
     }

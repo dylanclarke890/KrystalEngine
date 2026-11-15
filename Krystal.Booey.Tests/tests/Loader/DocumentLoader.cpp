@@ -411,7 +411,7 @@ namespace krys::boo::tests
     {
       fixture.Frame().Loader().ChangeLocation(url::URL(u8"https://example.com/elsewhere.html"),
                                               dom::DOMStringAtom::Empty(), nullptr,
-                                              ReferrerPolicy::EmptyString, dom::DOMStringAtom::Null());
+                                              ReferrerPolicy::EmptyString, null);
     };
     auto pageHide = window->AddEventListener<html::PageTransitionEvent>(u8"pagehide",
                                                                         [&](html::PageTransitionEvent &event)

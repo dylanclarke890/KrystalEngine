@@ -187,7 +187,7 @@ namespace krys::boo::html
                                              dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"rel" && _relList)
+    if (namespaceURI == null && localName == u8"rel" && _relList)
     {
       _relList->AssociatedAttributeValueChanged();
     }

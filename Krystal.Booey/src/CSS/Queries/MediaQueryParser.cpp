@@ -66,7 +66,7 @@ namespace krys::boo::css::mq
       return {};
     }
 
-    return MediaQuery {{}, CSSOMStringAtom::Null(), krys::move(condition)};
+    return MediaQuery {{}, null, krys::move(condition)};
   }
 
   MediaQueryList MediaQueryParser::ConsumeMediaQueryList(TokenRange &tokens,
@@ -127,7 +127,7 @@ namespace krys::boo::css::mq
       {
         return {};
       }
-      return MediaQuery {{}, CSSOMStringAtom::Null(), krys::move(condition)};
+      return MediaQuery {{}, null, krys::move(condition)};
     }
 
     tokens = rangeCopy;
@@ -161,20 +161,20 @@ namespace krys::boo::css::mq
     {
       if (tokens.Peek().Type() != TokenType::Ident)
       {
-        return CSSOMStringAtom::Null();
+        return null;
       }
 
       auto identifier = tokens.Peek().ValueId();
       if (identifier == ValueId::Only || identifier == ValueId::Not || identifier == ValueId::And
           || identifier == ValueId::Or)
       {
-        return CSSOMStringAtom::Null();
+        return null;
       }
 
       auto mediaType = text::ToASCIILower(tokens.ConsumeIncludingWhitespace().IdentCodePoints());
       if (mediaType == u8"layer")
       {
-        return CSSOMStringAtom::Null();
+        return null;
       }
 
       return CSSOMStringAtom(krys::move(mediaType));
@@ -183,7 +183,7 @@ namespace krys::boo::css::mq
     auto prefix = consumePrefix();
     auto mediaType = consumeMediaType();
 
-    if (mediaType == CSSOMStringAtom::Null())
+    if (mediaType == null)
     {
       return {};
     }
@@ -243,8 +243,7 @@ namespace krys::boo::css::mq
       }
     }
 
-    bool hasMediaType =
-      query.MediaType != CSSOMStringAtom::Null() && query.MediaType != CSSOMStringAtom::Empty();
+    bool hasMediaType = query.MediaType != null && query.MediaType != CSSOMStringAtom::Empty();
     if (hasMediaType && (!query.Condition || query.Prefix || query.MediaType != AllAtom()))
     {
       SerialiseIdentifier(CSSOMString(query.MediaType.View()), builder);

@@ -142,10 +142,9 @@ namespace krys::boo::html
 
     // 11. Let root be the result of creating an element given document, "html", the HTML namespace, null,
     //     null, false, and the result of looking up a custom element registry given target.
-    dom::QualifiedName name {infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"html", TagName::html,
-                             Namespace::HTML};
+    dom::QualifiedName name {infra::Namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML};
     auto root =
-      dom::ElementFactory::Create(*document, name, dom::DOMStringAtom::Null(), false,
+      dom::ElementFactory::Create(*document, name, null, false,
                                   ShareRefPtr(CustomElementAlgorithms::LookUpCustomElementRegistry(target)));
 
     // 12. Append root to document.

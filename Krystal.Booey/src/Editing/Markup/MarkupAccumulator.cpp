@@ -442,7 +442,7 @@ namespace krys::boo
       if (auto *element = DynamicDowncast<dom::Element>(targetNode);
           element && root != SerializedNodes::SubtreeIncludingNode)
       {
-        auto defaultNamespace = element->LookupNamespaceURI(dom::DOMStringAtom::Null());
+        auto defaultNamespace = element->LookupNamespaceURI(null);
         if (!defaultNamespace.View().empty())
         {
           namespaceHash.insert_or_assign(EmptyAtom(), defaultNamespace);
@@ -811,8 +811,7 @@ namespace krys::boo
     // If current node's is value is not null, and the element does not have an is content attribute in its
     // attribute list, then append the string " is="", followed by current node's is value escaped as
     // described below in attribute mode, followed by a U+0022 QUOTATION MARK character (").
-    if (!InXMLFragmentSerialization() && element.IsValue() != dom::DOMStringAtom::Null()
-        && !element.HasAttribute(IsAtom()))
+    if (!InXMLFragmentSerialization() && element.IsValue() != null && !element.HasAttribute(IsAtom()))
     {
       result.append(u8" is=\"");
       AppendAttributeValue(result, element.IsValue().View());

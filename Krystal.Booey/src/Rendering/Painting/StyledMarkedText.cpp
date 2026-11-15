@@ -209,8 +209,7 @@ namespace krys::boo
         if (previousStyledMarkedText.HighlightName != text.HighlightName
             && (!previousStyledMarkedText.MarkedStyle.BackgroundColor.IsOpaque()
                 || !text.MarkedStyle.BackgroundColor.IsOpaque()
-                || (text.HighlightName == StringAtom::Null()
-                    && text.MarkedStyle.BackgroundColor.IsVisible())))
+                || (text.HighlightName == null && text.MarkedStyle.BackgroundColor.IsVisible())))
         {
           previousStyledMarkedText.MarkedStyle.BackgroundColor = BlendSourceOver(
             previousStyledMarkedText.MarkedStyle.BackgroundColor, text.MarkedStyle.BackgroundColor);
@@ -222,7 +221,7 @@ namespace krys::boo
           previousStyledMarkedText.MarkedStyle.TextStyles.FillColor = text.MarkedStyle.TextStyles.FillColor;
         }
         // Take the highlightName of the latest StyledMarkedText, regardless of priority.
-        if (text.HighlightName != StringAtom::Null())
+        if (text.HighlightName != null)
         {
           previousStyledMarkedText.HighlightName = text.HighlightName;
         }
@@ -232,7 +231,7 @@ namespace krys::boo
           previousStyledMarkedText.Priority = text.Priority;
           // If highlight, combine textDecorationStyles accordingly.
           // FIXME: Check for taking textDecorationStyles needs to accommodate other MarkedText type.
-          if (text.HighlightName != StringAtom::Null())
+          if (text.HighlightName != null)
           {
             previousStyledMarkedText.MarkedStyle.TextDecorationStyles =
               ComputeStylesForTextDecorations(previousStyledMarkedText.MarkedStyle.TextDecorationStyles,
@@ -277,8 +276,7 @@ namespace krys::boo
     while (index < static_cast<int32>(markedTexts.size() - 1))
     {
       // If two adjacent highlights with same ranges are not in correct priority order, swap them and move on.
-      if (markedTexts[index].HighlightName != StringAtom::Null()
-          && markedTexts[index + 1].HighlightName != StringAtom::Null()
+      if (markedTexts[index].HighlightName != null && markedTexts[index + 1].HighlightName != null
           && priorityOf(markedTexts[index].HighlightName) > priorityOf(markedTexts[index + 1].HighlightName)
           && markedTexts[index].StartOffset == markedTexts[index + 1].StartOffset
           && markedTexts[index].EndOffset == markedTexts[index + 1].EndOffset)
@@ -302,7 +300,7 @@ namespace krys::boo
     ListHashSet<StringAtom> markedTextsNames;
     for (auto &markedText : textsToSubdivide)
     {
-      if (markedText.HighlightName != StringAtom::Null())
+      if (markedText.HighlightName != null)
       {
         markedTextsNames.add(markedText.HighlightName);
       }

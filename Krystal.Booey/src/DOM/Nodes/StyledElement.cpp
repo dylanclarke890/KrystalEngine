@@ -90,7 +90,7 @@ namespace krys::boo::dom
       auto newValue = inlineStyle->AsText(css::DefaultSerialisationContext());
       auto oldValue = GetAttribute(u8"style");
       style::AttributeChangeInvalidation styleInvalidation(
-        *this, QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), DOMStringAtom(u8"style")},
+        *this, QualifiedName {null, null, DOMStringAtom(u8"style")},
         oldValue ? Maybe<DOMStringView>(*oldValue) : null, newValue);
       SetSynchronizedLazyAttribute(u8"style", krys::move(newValue));
     }
@@ -120,7 +120,7 @@ namespace krys::boo::dom
     Element::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (oldValue != value)
     {
-      if (localName == u8"style" && namespaceURI == DOMStringAtom::Null())
+      if (localName == u8"style" && namespaceURI == null)
       {
         StyleAttributeChanged(value);
       }

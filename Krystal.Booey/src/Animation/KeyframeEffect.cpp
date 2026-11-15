@@ -496,8 +496,8 @@ namespace krys::boo
         }
         else
         {
-          propertiesAndValues.push_back(KeyframeEffect::PropertyAndValues {
-            cssPropertyId, css::CSSOMStringAtom::Null(), animationProperty->second});
+          propertiesAndValues.push_back(
+            KeyframeEffect::PropertyAndValues {cssPropertyId, null, animationProperty->second});
         }
       }
 

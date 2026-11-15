@@ -429,11 +429,11 @@ namespace krys::boo::dom::tests
     CHECK(NodeAlgorithms::LocateNamespacePrefix(*element, u8"urn:parent") == u8"p");
 
     // 4. Null.
-    CHECK(NodeAlgorithms::LocateNamespacePrefix(*element, u8"urn:other") == DOMStringAtom::Null());
+    CHECK(NodeAlgorithms::LocateNamespacePrefix(*element, u8"urn:other") == null);
 
     // An element without a prefix doesn't give one.
     auto unprefixed = CreateElementNS(*document, u8"urn:element", u8"element");
-    CHECK(NodeAlgorithms::LocateNamespacePrefix(*unprefixed, u8"urn:element") == DOMStringAtom::Null());
+    CHECK(NodeAlgorithms::LocateNamespacePrefix(*unprefixed, u8"urn:element") == null);
   }
 
   TEST_CASE("Locate a namespace: per interface, from the element, its xmlns attributes and its ancestors",
@@ -459,8 +459,8 @@ namespace krys::boo::dom::tests
       SetAttributeNS(*element, infra::Namespaces::XMLNS, u8"xmlns", u8"urn:default");
       SetAttributeNS(*element, infra::Namespaces::XMLNS, u8"xmlns:p", u8"");
       CHECK(NodeAlgorithms::LocateNamespace(*element, u8"x") == u8"urn:x");
-      CHECK(NodeAlgorithms::LocateNamespace(*element, DOMStringAtom::Null()) == u8"urn:default");
-      CHECK(NodeAlgorithms::LocateNamespace(*element, u8"p") == DOMStringAtom::Null());
+      CHECK(NodeAlgorithms::LocateNamespace(*element, null) == u8"urn:default");
+      CHECK(NodeAlgorithms::LocateNamespace(*element, u8"p") == null);
       CHECK(element->LookupNamespaceURI(DOMStringAtom::Empty()) == u8"urn:default");
       CHECK(element->IsDefaultNamespace(u8"urn:default"));
       CHECK_FALSE(element->IsDefaultNamespace(DOMStringAtom::Empty()));
@@ -469,13 +469,13 @@ namespace krys::boo::dom::tests
       auto child = CreateElementNS(*document, u8"urn:child", u8"child");
       Append(*element, *child);
       CHECK(NodeAlgorithms::LocateNamespace(*child, u8"x") == u8"urn:x");
-      CHECK(NodeAlgorithms::LocateNamespace(*child, u8"other") == DOMStringAtom::Null());
-      CHECK(NodeAlgorithms::LocateNamespace(*child, DOMStringAtom::Null()) == u8"urn:child");
+      CHECK(NodeAlgorithms::LocateNamespace(*child, u8"other") == null);
+      CHECK(NodeAlgorithms::LocateNamespace(*child, null) == u8"urn:child");
     }
 
     SECTION("Document")
     {
-      CHECK(NodeAlgorithms::LocateNamespace(*document, u8"p") == DOMStringAtom::Null());
+      CHECK(NodeAlgorithms::LocateNamespace(*document, u8"p") == null);
       Append(*document, *parent);
       CHECK(NodeAlgorithms::LocateNamespace(*document, u8"p") == u8"urn:parent");
     }
@@ -483,16 +483,16 @@ namespace krys::boo::dom::tests
     SECTION("DocumentType and DocumentFragment")
     {
       auto doctype = document->Implementation().CreateDocumentType(u8"test", u8"", u8"").ReleaseValue();
-      CHECK(NodeAlgorithms::LocateNamespace(*doctype, u8"xml") == DOMStringAtom::Null());
+      CHECK(NodeAlgorithms::LocateNamespace(*doctype, u8"xml") == null);
       auto fragment = document->CreateDocumentFragment();
       Append(*fragment, *parent);
-      CHECK(NodeAlgorithms::LocateNamespace(*fragment, u8"p") == DOMStringAtom::Null());
+      CHECK(NodeAlgorithms::LocateNamespace(*fragment, u8"p") == null);
     }
 
     SECTION("Attr")
     {
       auto attribute = document->CreateAttribute(u8"a").ReleaseValue();
-      CHECK(NodeAlgorithms::LocateNamespace(*attribute, u8"e") == DOMStringAtom::Null());
+      CHECK(NodeAlgorithms::LocateNamespace(*attribute, u8"e") == null);
       REQUIRE_FALSE(element->SetAttributeNode(*attribute).HasException());
       CHECK(NodeAlgorithms::LocateNamespace(*attribute, u8"e") == u8"urn:element");
     }
@@ -500,7 +500,7 @@ namespace krys::boo::dom::tests
     SECTION("Otherwise")
     {
       auto text = document->CreateTextNode(u8"text");
-      CHECK(NodeAlgorithms::LocateNamespace(*text, u8"e") == DOMStringAtom::Null());
+      CHECK(NodeAlgorithms::LocateNamespace(*text, u8"e") == null);
       Append(*element, *text);
       CHECK(NodeAlgorithms::LocateNamespace(*text, u8"e") == u8"urn:element");
     }
@@ -565,7 +565,7 @@ namespace krys::boo::dom::tests
     auto root = CreateElementNS(*document, u8"urn:x", u8"root");
     auto a = CreateElementNS(*document, u8"urn:x", u8"a");
     auto b = CreateElementNS(*document, u8"urn:x", u8"x:b");
-    auto noNamespace = CreateElementNS(*document, DOMStringAtom::Null(), u8"a");
+    auto noNamespace = CreateElementNS(*document, null, u8"a");
     Append(*root, *a);
     Append(*root, *b);
     Append(*root, *noNamespace);
@@ -580,7 +580,7 @@ namespace krys::boo::dom::tests
           == List<const Element *> {b.get()});
     CHECK(Elements(*NodeAlgorithms::GetElementsByTagNameNS(*root, DOMStringAtom::Empty(), u8"a"))
           == List<const Element *> {noNamespace.get()});
-    CHECK(Elements(*NodeAlgorithms::GetElementsByTagNameNS(*root, DOMStringAtom::Null(), u8"*"))
+    CHECK(Elements(*NodeAlgorithms::GetElementsByTagNameNS(*root, null, u8"*"))
           == List<const Element *> {noNamespace.get()});
   }
 

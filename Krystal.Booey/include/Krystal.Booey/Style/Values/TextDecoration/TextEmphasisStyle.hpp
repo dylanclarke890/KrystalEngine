@@ -73,7 +73,7 @@ namespace krys::boo::style
     }
 
     // css::CSSOMString representation of the mark.
-    KRYS_NODISCARD const css::CSSOMStringAtom &MarkString() const noexcept;
+    KRYS_NODISCARD css::CSSOMStringAtom MarkString() const noexcept;
 
     template <typename... F>
     decltype(auto) SwitchOn(F &&...f) const noexcept

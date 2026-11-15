@@ -99,7 +99,7 @@ namespace krys::boo::html
   bool HTMLVideoElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                             dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"width" || localName == u8"height"))
+    if (namespaceURI == null && (localName == u8"width" || localName == u8"height"))
     {
       return true;
     }
@@ -112,7 +112,7 @@ namespace krys::boo::html
                                                                 css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLMediaElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

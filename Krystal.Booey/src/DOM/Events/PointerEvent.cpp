@@ -62,7 +62,7 @@ namespace krys::boo::dom
         case PlatformTouchPoint::TouchStateEnd:   break;
       }
       krys_debug_assert_msg(false, "Not reached.");
-      return DOMStringAtom::Null();
+      return null;
     }
 
     KRYS_NODISCARD UIEventInit TrustedInit(bool canBubble, bool isCancelable, bool isComposed,
@@ -164,7 +164,7 @@ namespace krys::boo::dom
       return DOMStringAtom(EventNames::PointerUp);
     }
 
-    return DOMStringAtom::Null();
+    return null;
   }
 
   bool PointerEvent::TypeRequiresResolvedButton(DOMStringAtom type) noexcept

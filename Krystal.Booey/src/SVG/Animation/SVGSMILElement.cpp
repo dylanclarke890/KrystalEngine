@@ -184,7 +184,7 @@ namespace krys::boo::svg
       return;
     }
 
-    auto id = dom::DOMStringAtom::Null();
+    dom::DOMStringAtom id = null;
     RefPtr<dom::Element> target;
     auto href = AttributeValue(SVGNames::HrefAttr());
     if (!href)
@@ -233,7 +233,7 @@ namespace krys::boo::svg
                                                           dom::DOMStringAtom namespaceURI) const noexcept
   {
     // https://svgwg.org/svg2-draft/styling.html#PresentationAttributes
-    if (localName == SVGNames::FillAttr().LocalName() && namespaceURI == dom::DOMStringAtom::Null())
+    if (localName == SVGNames::FillAttr().LocalName() && namespaceURI == null)
     {
       return false;
     }
@@ -264,7 +264,7 @@ namespace krys::boo::svg
 
     if (prefix.empty())
     {
-      return {dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(), dom::DOMStringAtom(localName)};
+      return {null, null, dom::DOMStringAtom(localName)};
     }
 
     auto namespaceURI = LookupNamespaceURI(dom::DOMStringAtom(prefix));
@@ -273,7 +273,7 @@ namespace krys::boo::svg
       return AnyQName();
     }
 
-    return {namespaceURI, dom::DOMStringAtom::Null(), dom::DOMStringAtom(localName)};
+    return {namespaceURI, null, dom::DOMStringAtom(localName)};
   }
 
   void SVGSMILElement::UpdateAttributeName() noexcept
@@ -499,7 +499,7 @@ namespace krys::boo::svg
       return false;
     }
 
-    auto nameString = dom::DOMStringAtom::Null();
+    dom::DOMStringAtom nameString = null;
     Condition::Type type;
     int32 repeats = -1;
     if (nameView.starts_with(u8"repeat(") && nameView.ends_with(u8')'))

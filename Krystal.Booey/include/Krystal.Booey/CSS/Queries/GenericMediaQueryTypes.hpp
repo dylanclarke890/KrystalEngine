@@ -92,7 +92,7 @@ namespace krys::boo::css::mq
   /// @brief A media or container feature, in boolean, plain (`name: value`) or range syntax.
   struct Feature
   {
-    CSSOMStringAtom Name {CSSOMStringAtom::Null()};
+    CSSOMStringAtom Name {null};
     mq::Syntax Syntax {mq::Syntax::Boolean};
     Maybe<Comparison> LeftComparison;
     Maybe<Comparison> RightComparison;
@@ -112,7 +112,7 @@ namespace krys::boo::css::mq
   /// @brief A value in a style range: a custom property name, or a value to compare against.
   struct StyleRangeValue
   {
-    CSSOMStringAtom CustomPropertyName {CSSOMStringAtom::Null()};
+    CSSOMStringAtom CustomPropertyName {null};
     /// @brief The value, as a `CustomPropertyValue`, when this isn't a custom property name.
     RefPtr<css::Value> Value;
   };
@@ -239,7 +239,7 @@ namespace krys::boo::css::mq
         }
         if (!hasCustomPropertyName)
         {
-          Feature feature {CSSOMStringAtom::Null(), Syntax::Range};
+          Feature feature {null, Syntax::Range};
           feature.Schema = range.Schema;
           function(feature);
         }

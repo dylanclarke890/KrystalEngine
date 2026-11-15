@@ -70,7 +70,7 @@ namespace krys::boo::layout
     boo::OverflowWrap OverflowWrap {boo::OverflowWrap::Normal};
     boo::LineBreak LineBreak {boo::LineBreak::Normal};
     boo::WordBreak WordBreak {boo::WordBreak::Normal};
-    StringAtom Locale {StringAtom::Null()};
+    StringAtom Locale {null};
 
     explicit TextBreakingPositionContext(const RenderStyle &style) noexcept;
     TextBreakingPositionContext() noexcept = default;

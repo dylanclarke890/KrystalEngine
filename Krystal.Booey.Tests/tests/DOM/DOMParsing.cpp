@@ -205,7 +205,7 @@ namespace krys::boo::dom::tests
 
     SECTION("declares the empty default namespace for elements in no namespace")
     {
-      auto child = document->CreateElementNS(DOMStringAtom::Null(), DOMStringAtom(u8"c")).ReleaseValue();
+      auto child = document->CreateElementNS(null, DOMStringAtom(u8"c")).ReleaseValue();
       REQUIRE_FALSE(root->AppendChild(*child).HasException());
       CHECK(MarkupText(root->InnerHTML().ReleaseValue()) == "<c xmlns=\"\"/>");
     }

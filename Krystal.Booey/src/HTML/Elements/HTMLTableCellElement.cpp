@@ -45,7 +45,7 @@ namespace krys::boo::html
                                                 dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLTablePartElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }
@@ -244,7 +244,7 @@ namespace krys::boo::html
     HTMLTableCellElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                              dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null()
+    if (namespaceURI == null
         && (localName == u8"nowrap" || localName == u8"width" || localName == u8"height"))
     {
       return true;
@@ -257,7 +257,7 @@ namespace krys::boo::html
     css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLTablePartElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

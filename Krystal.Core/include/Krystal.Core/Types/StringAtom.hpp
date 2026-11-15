@@ -7,6 +7,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
+#include "Krystal.Core/Types/Null.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <utility>
@@ -133,10 +134,6 @@ namespace krys
   private:
     const StringAtomImpl *_impl {nullptr};
 
-    struct NullTag
-    {
-    };
-
     struct EmptyTag
     {
     };
@@ -144,10 +141,6 @@ namespace krys
     struct AdoptTag
     {
     };
-
-    StringAtom(NullTag) noexcept
-    {
-    }
 
     StringAtom(EmptyTag) noexcept : StringAtom(StringAtomPool::Current().GetOrAdd(utf8_stringview {u8""}))
     {
@@ -191,10 +184,12 @@ namespace krys
     }
 
   public:
-    KRYS_NODISCARD static const StringAtom &Null() noexcept
+    /// @brief The null atom, which has no string.
+    constexpr StringAtom() noexcept = default;
+
+    /// @brief The null atom, which has no string.
+    constexpr StringAtom(null_t) noexcept
     {
-      static const StringAtom nullAtom = StringAtom(NullTag {});
-      return nullAtom;
     }
 
     /// @brief The calling thread's empty atom.
@@ -277,6 +272,12 @@ namespace krys
       return a._impl == b._impl;
     }
 
+    /// @brief Whether the atom is the null atom.
+    KRYS_NODISCARD friend constexpr bool operator==(const StringAtom &atom, null_t) noexcept
+    {
+      return !atom._impl;
+    }
+
     /// @brief Whether the atom's string is @p string, without interning it. The null atom has no string, so
     /// it equals none (not even an empty one).
     KRYS_NODISCARD friend bool operator==(const StringAtom &atom, utf8_stringview string) noexcept
@@ -330,12 +331,12 @@ namespace krys
   {
     KRYS_NODISCARD static bool IsEmptyValue(const StringAtom &atom) noexcept
     {
-      return atom == StringAtom::Null();
+      return atom == null;
     }
 
     KRYS_NODISCARD static StringAtom EmptyValue() noexcept
     {
-      return StringAtom::Null();
+      return null;
     }
   };
 }

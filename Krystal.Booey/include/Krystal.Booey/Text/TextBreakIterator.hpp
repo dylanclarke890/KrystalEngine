@@ -318,7 +318,7 @@ namespace krys::boo
 
   private:
     utf8_stringview _stringView;
-    StringAtom _locale {StringAtom::Null()};
+    StringAtom _locale {null};
     Maybe<CachedTextBreakIterator> _iterator;
     const char8 *_cachedPriorContext {nullptr};
     TextBreakLineBehavior _mode {TextBreakLineBehavior::Default};
@@ -328,8 +328,7 @@ namespace krys::boo
   public:
     CachedLineBreakIteratorFactory() noexcept = default;
 
-    explicit CachedLineBreakIteratorFactory(utf8_stringview stringView,
-                                            const StringAtom &locale = StringAtom::Null(),
+    explicit CachedLineBreakIteratorFactory(utf8_stringview stringView, const StringAtom &locale = null,
                                             TextBreakLineBehavior mode = TextBreakLineBehavior::Default,
                                             TextBreakIterator::ContentAnalysis contentAnalysis =
                                               TextBreakIterator::ContentAnalysis::Mechanical) noexcept

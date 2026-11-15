@@ -67,8 +67,8 @@ namespace krys::boo::dom::tests
       CHECK(record->Type() == u8"characterData");
       CHECK(record->Target().get() == text.get());
       CHECK(record->OldValue() == u8"a");
-      CHECK(record->AttributeName() == DOMStringAtom::Null());
-      CHECK(record->AttributeNamespace() == DOMStringAtom::Null());
+      CHECK(record->AttributeName() == null);
+      CHECK(record->AttributeNamespace() == null);
       CHECK(record->PreviousSibling() == nullptr);
       CHECK(record->NextSibling() == nullptr);
       REQUIRE(record->AddedNodes() != nullptr);
@@ -101,9 +101,9 @@ namespace krys::boo::dom::tests
       CHECK(record->RemovedNodes() == record->RemovedNodes());
       CHECK(record->PreviousSibling().get() == first.get());
       CHECK(record->NextSibling().get() == last.get());
-      CHECK(record->AttributeName() == DOMStringAtom::Null());
-      CHECK(record->AttributeNamespace() == DOMStringAtom::Null());
-      CHECK(record->OldValue() == DOMStringAtom::Null());
+      CHECK(record->AttributeName() == null);
+      CHECK(record->AttributeNamespace() == null);
+      CHECK(record->OldValue() == null);
     }
   }
 }

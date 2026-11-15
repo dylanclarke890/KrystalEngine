@@ -196,8 +196,8 @@ namespace krys::boo
     if (paintStyle.PaintOrder.IsNormal())
     {
       // FIXME: Truncate right-to-left text correctly.
-      PaintTextWithShadows(&shadow, _font, textRun, boxRect, textOrigin, startOffset, endOffset,
-                           StringAtom::Null(), 0, paintStyle.StrokeWidth > 0);
+      PaintTextWithShadows(&shadow, _font, textRun, boxRect, textOrigin, startOffset, endOffset, null, 0,
+                           paintStyle.StrokeWidth > 0);
     }
     else
     {
@@ -214,7 +214,7 @@ namespace krys::boo
             textDrawingModeWithoutStroke.Remove(TextDrawingMode::Stroke);
             _context.SetTextDrawingMode(textDrawingModeWithoutStroke);
             PaintTextWithShadows(shadowToUse, _font, textRun, boxRect, textOrigin, startOffset, endOffset,
-                                 StringAtom::Null(), 0, false);
+                                 null, 0, false);
             shadowToUse = nullptr;
             _context.SetTextDrawingMode(textDrawingMode);
             break;
@@ -225,7 +225,7 @@ namespace krys::boo
             textDrawingModeWithoutFill.Remove(TextDrawingMode::Fill);
             _context.SetTextDrawingMode(textDrawingModeWithoutFill);
             PaintTextWithShadows(shadowToUse, _font, textRun, boxRect, textOrigin, startOffset, endOffset,
-                                 StringAtom::Null(), 0, paintStyle.StrokeWidth > 0);
+                                 null, 0, paintStyle.StrokeWidth > 0);
             shadowToUse = nullptr;
             _context.SetTextDrawingMode(textDrawingMode);
             break;

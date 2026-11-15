@@ -40,7 +40,7 @@ namespace krys::boo::dom
     // An empty namespace is no namespace.
     if (namespaceURI.View().empty())
     {
-      namespaceURI = DOMStringAtom::Null();
+      namespaceURI = null;
     }
     auto it = _cache.find(QualifiedNameCacheKey {namespaceURI, prefix, localName});
     if (it != _cache.end())
@@ -65,7 +65,7 @@ namespace krys::boo::dom
     // An empty namespace is no namespace.
     if (namespaceURI.View().empty())
     {
-      namespaceURI = DOMStringAtom::Null();
+      namespaceURI = null;
     }
     auto it = _cache.find(QualifiedNameCacheKey {namespaceURI, prefix, localName});
     if (it != _cache.end())

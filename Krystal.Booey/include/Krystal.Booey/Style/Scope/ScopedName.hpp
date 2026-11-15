@@ -76,12 +76,12 @@ namespace krys
   {
     KRYS_NODISCARD static bool IsEmptyValue(const boo::style::ScopedName &value) noexcept
     {
-      return value.Name == boo::css::CSSOMStringAtom::Null();
+      return value.Name == null;
     }
 
     KRYS_NODISCARD static boo::style::ScopedName EmptyValue() noexcept
     {
-      return boo::style::ScopedName {boo::css::CSSOMStringAtom::Null()};
+      return boo::style::ScopedName {null};
     }
   };
 }

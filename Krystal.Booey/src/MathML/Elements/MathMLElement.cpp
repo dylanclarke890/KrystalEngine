@@ -96,8 +96,7 @@ namespace krys::boo::mathml
                                          Maybe<dom::DOMStringView> value,
                                          dom::DOMStringAtom namespaceURI) noexcept
   {
-    AttributeChanged(dom::QualifiedName {namespaceURI, dom::DOMStringAtom::Null(), localName}, oldValue,
-                     value);
+    AttributeChanged(dom::QualifiedName {namespaceURI, null, localName}, oldValue, value);
   }
 
   void MathMLElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
@@ -163,7 +162,7 @@ namespace krys::boo::mathml
   bool MathMLElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                          dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null()
+    if (namespaceURI == null
         && (localName == MathMLNames::DirAttr().LocalName()
             || localName == MathMLNames::MathbackgroundAttr().LocalName()
             || localName == MathMLNames::MathcolorAttr().LocalName()
@@ -181,7 +180,7 @@ namespace krys::boo::mathml
                                                              dom::DOMStringView value,
                                                              css::MutableStyleProperties &style) noexcept
   {
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       StyledElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

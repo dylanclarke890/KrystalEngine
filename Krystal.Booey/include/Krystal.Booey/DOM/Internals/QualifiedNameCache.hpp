@@ -38,9 +38,9 @@ namespace krys::boo::dom
 {
   struct QualifiedNameCacheKey
   {
-    DOMStringAtom NamespaceURI {DOMStringAtom::Null()};
-    DOMStringAtom NamespacePrefix {DOMStringAtom::Null()};
-    DOMStringAtom LocalName {DOMStringAtom::Null()};
+    DOMStringAtom NamespaceURI {null};
+    DOMStringAtom NamespacePrefix {null};
+    DOMStringAtom LocalName {null};
 
     bool operator==(const QualifiedNameCacheKey &other) const noexcept
     {

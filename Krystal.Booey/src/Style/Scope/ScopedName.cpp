@@ -38,7 +38,7 @@ namespace krys::boo::style
     if (!primitiveValue.IsCustomIdent())
     {
       state.SetCurrentPropertyInvalidAtComputedValueTime();
-      return ScopedName {css::CSSOMStringAtom::Null()};
+      return ScopedName {null};
     }
 
     return {.Name = css::CSSOMStringAtom {primitiveValue.StringValue()},
@@ -50,7 +50,7 @@ namespace krys::boo::style
     const auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
     if (!primitiveValue)
     {
-      return ScopedName {css::CSSOMStringAtom::Null()};
+      return ScopedName {null};
     }
 
     return (*this)(state, *primitiveValue);

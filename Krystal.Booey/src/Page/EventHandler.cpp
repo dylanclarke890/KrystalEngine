@@ -2863,7 +2863,7 @@ namespace krys::boo
         case PlatformTouchPoint::TouchPressed:   return dom::DOMStringAtom(EventNames::TouchStart);
         case PlatformTouchPoint::TouchMoved:     return dom::DOMStringAtom(EventNames::TouchMove);
         // TouchStationary state is not converted to touch events, so fall through to assert.
-        default:                                 krys_debug_assert_msg(false, "Not reached."); return dom::DOMStringAtom::Null();
+        default:                                 krys_debug_assert_msg(false, "Not reached."); return null;
       }
     }
 

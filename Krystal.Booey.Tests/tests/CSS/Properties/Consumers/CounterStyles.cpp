@@ -38,12 +38,12 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     };
 
     CHECK(prelude(u8"my-style") == CSSOMStringAtom(u8"my-style"));
-    CHECK(prelude(u8"none") == CSSOMStringAtom::Null());
-    CHECK(prelude(u8"my-style extra") == CSSOMStringAtom::Null());
+    CHECK(prelude(u8"none") == null);
+    CHECK(prelude(u8"my-style extra") == null);
 
     // The predefined styles that can't be redefined.
-    CHECK(prelude(u8"decimal") == CSSOMStringAtom::Null());
-    CHECK(prelude(u8"disc") == CSSOMStringAtom::Null());
+    CHECK(prelude(u8"decimal") == null);
+    CHECK(prelude(u8"disc") == null);
 
     // Other predefined styles can be, and their names are lowercased.
     CHECK(prelude(u8"Upper-Roman") == CSSOMStringAtom(u8"upper-roman"));

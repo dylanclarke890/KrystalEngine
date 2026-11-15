@@ -971,7 +971,7 @@ namespace krys::boo::css
 
     if (selector.Match() == SelectorMatch::Id)
     {
-      krys_debug_assert(selector.Value() != CSSOMStringAtom::Null());
+      krys_debug_assert(selector.Value() != null);
       return element.IdForStyleResolution() == selector.Value().View();
     }
 

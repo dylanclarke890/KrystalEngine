@@ -75,12 +75,12 @@ namespace krys::boo
     uint32 StartOffset {0};
     uint32 EndOffset {0};
     Type MarkedType {Type::Unmarked};
-    StringAtom HighlightName {StringAtom::Null()};
+    StringAtom HighlightName {null};
     int32 Priority {0};
 
     MarkedText() noexcept = default;
-    MarkedText(uint32 startOffset, uint32 endOffset, Type type,
-               const StringAtom &highlightName = StringAtom::Null(), int32 priority = 0) noexcept
+    MarkedText(uint32 startOffset, uint32 endOffset, Type type, const StringAtom &highlightName = null,
+               int32 priority = 0) noexcept
         : StartOffset(startOffset), EndOffset(endOffset), MarkedType(type), HighlightName(highlightName),
           Priority(priority)
     {

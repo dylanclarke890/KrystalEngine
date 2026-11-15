@@ -66,9 +66,9 @@ namespace krys::boo::svg
     KRYS_NODISCARD Ref<SVGElement> CreateSVGElement(dom::Document &document, utf8_stringview localName,
                                                     html::TagName tagName) noexcept
     {
-      auto element = dom::ElementFactory::Create(
-        document, dom::QualifiedName(infra::Namespaces::SVG, dom::DOMStringAtom::Null(),
-                                     dom::DOMStringAtom(localName), tagName, html::Namespace::SVG));
+      auto element = dom::ElementFactory::Create(document, dom::QualifiedName(infra::Namespaces::SVG, null,
+                                                                              dom::DOMStringAtom(localName),
+                                                                              tagName, html::Namespace::SVG));
       return Downcast<SVGElement>(krys::move(element));
     }
 
@@ -354,7 +354,7 @@ namespace krys::boo::svg
     }
     NodeDocument().RemoveElementWithPendingUserAgentShadowTreeUpdate(*this);
 
-    auto targetID = dom::DOMStringAtom::Null();
+    dom::DOMStringAtom targetID = null;
     RefPtr<SVGElement> target = FindTarget(&targetID);
     if (!target)
     {
@@ -603,10 +603,9 @@ namespace krys::boo::svg
       // The caller would use the target ID to wait for a pending resource on the wrong document.
       // If we ever want the change that and let the caller to wait on the external document,
       // we should change this function so it returns the appropriate document to go with the ID.
-      if (*targetID != dom::DOMStringAtom::Null()
-          && IsExternalURIReference(original.Href(), original.NodeDocument()))
+      if (*targetID != null && IsExternalURIReference(original.Href(), original.NodeDocument()))
       {
-        *targetID = dom::DOMStringAtom::Null();
+        *targetID = null;
       }
     }
     RefPtr<SVGElement> target = DynamicDowncast<SVGElement>(targetResult.Element);

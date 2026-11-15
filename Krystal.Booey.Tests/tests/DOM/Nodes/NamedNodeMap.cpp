@@ -86,7 +86,7 @@ namespace krys::boo::dom::tests
       CommonTestData data;
       REQUIRE_FALSE(data.Node->SetAttribute(u8"b", u8"").HasException());
       REQUIRE_FALSE(data.Node->SetAttributeNS(u8"urn:a", u8"x:y", u8"").HasException());
-      REQUIRE_FALSE(data.Node->SetAttributeNS(DOMStringAtom::Null(), u8"Upper", u8"").HasException());
+      REQUIRE_FALSE(data.Node->SetAttributeNS(null, u8"Upper", u8"").HasException());
       REQUIRE_FALSE(data.Node->SetAttributeNS(u8"urn:b", u8"x:y", u8"").HasException());
 
       CHECK(data.Attributes().SupportedPropertyNames() == List<DOMString> {u8"b", u8"x:y"});

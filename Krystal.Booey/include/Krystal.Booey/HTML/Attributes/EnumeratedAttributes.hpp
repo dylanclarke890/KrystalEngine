@@ -266,7 +266,7 @@ namespace krys::boo::html
   template <IsEnum TState>
   struct KeywordStateMapping
   {
-    dom::DOMStringAtom Keyword = dom::DOMStringAtom::Null();
+    dom::DOMStringAtom Keyword = null;
     TState State;
   };
 
@@ -327,8 +327,8 @@ namespace krys::boo::html
       ResolveCanonicalKeyword(Maybe<dom::DOMStringView> contentAttributeValue) noexcept
     {
       Maybe<State> state = ResolveState(contentAttributeValue);
-      auto keyword = state ? ResolveCanonicalKeywordForState(*state) : dom::DOMStringAtom::Null();
-      if (keyword == dom::DOMStringAtom::Null())
+      auto keyword = state ? ResolveCanonicalKeywordForState(*state) : null;
+      if (keyword == null)
       {
         return TResult {};
       }
@@ -401,7 +401,7 @@ namespace krys::boo::html
     {
       auto it =
         std::ranges::find_if(Traits::StateMappings, [&](auto &mapping) { return mapping.State == state; });
-      return it != std::ranges::end(Traits::StateMappings) ? it->Keyword : dom::DOMStringAtom::Null();
+      return it != std::ranges::end(Traits::StateMappings) ? it->Keyword : null;
     }
   };
 

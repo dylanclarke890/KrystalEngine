@@ -1272,14 +1272,14 @@ namespace krys::boo
       return current - 1;
     }
 
-    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, StringAtom::Null());
+    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, null);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : current - 1;
   }
 
   int32 RenderText::PreviousOffsetForBackwardDeletion(int32 current) const noexcept
   {
-    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::DeleteMode {}, StringAtom::Null());
+    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::DeleteMode {}, null);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : 0;
   }
@@ -1291,7 +1291,7 @@ namespace krys::boo
       return current + 1;
     }
 
-    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, StringAtom::Null());
+    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, null);
     auto following = iterator.Following(static_cast<uint32>(current));
     return following ? static_cast<int32>(*following) : current + 1;
   }

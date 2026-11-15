@@ -212,7 +212,7 @@ namespace krys::boo::css::tests
     lower->SetMatch(SelectorMatch::Id);
     lower->SetValue(CSSOMStringAtom(u8"foo"), MatchLowercase::Yes);
     CHECK(lower->GetSelector()->Value() == lower->GetSelector()->SerialisingValue());
-    CHECK(lower->GetSelector()->Argument() == CSSOMStringAtom::Null());
+    CHECK(lower->GetSelector()->Argument() == null);
     CHECK(!lower->GetSelector()->ArgumentList());
   }
 

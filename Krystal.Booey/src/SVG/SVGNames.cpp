@@ -5,8 +5,7 @@
 #define KRYS_DEFINE_SVG_ATTRIBUTE_NAME(Name, localName)                                                      \
   const dom::QualifiedName &SVGNames::Name() noexcept                                                        \
   {                                                                                                          \
-    static NeverDestroyed<const dom::QualifiedName> name {dom::DOMStringAtom::Null(),                        \
-                                                          dom::DOMStringAtom::Null(), localName};            \
+    static NeverDestroyed<const dom::QualifiedName> name {null, null, localName};                            \
     return name;                                                                                             \
   }
 

@@ -50,7 +50,7 @@ namespace krys::boo::css
     {
       static MainThreadNeverDestroyed<HashMap<CSSOMStringAtom, PropertyId>> propertyIdCache;
 
-      if (propertyName == CSSOMStringAtom::Null())
+      if (propertyName == null)
       {
         return PropertyId::Invalid;
       }

@@ -70,7 +70,7 @@ namespace krys::boo::html::tests
     {
       fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url),
                                              dom::DOMStringAtom::Empty(), nullptr,
-                                             ReferrerPolicy::EmptyString, dom::DOMStringAtom::Null());
+                                             ReferrerPolicy::EmptyString, null);
       html::EventLoop::Current().RunUntilIdle();
     }
   }

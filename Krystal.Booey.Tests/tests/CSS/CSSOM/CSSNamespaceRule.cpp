@@ -14,7 +14,7 @@ namespace krys::boo::css::tests
     {
       auto &rule = RuleAt<CSSNamespaceRule>(*sheet, 0);
       CHECK(TypeOf(rule) == RuleType::Namespace);
-      CHECK(rule.Prefix() == CSSOMStringAtom::Null());
+      CHECK(rule.Prefix() == null);
       CHECK(ToNarrow(CSSOMString(rule.NamespaceURI().View())) == "http://www.w3.org/1999/xhtml");
       CHECK(RuleText(rule) == "@namespace url(\"http://www.w3.org/1999/xhtml\");");
     }

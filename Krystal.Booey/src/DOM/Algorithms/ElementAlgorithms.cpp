@@ -49,7 +49,7 @@ namespace krys::boo::dom
         auto &name = attribute.GetQualifiedName();
         _attributeInvalidation.emplace(element, name, oldValue, newValue);
 
-        if (name.NamespaceURI() == DOMStringAtom::Null())
+        if (name.NamespaceURI() == null)
         {
           if (name.LocalName().View() == u8"class")
           {
@@ -165,7 +165,7 @@ namespace krys::boo::dom
     //    namespace, oldValue, « », « », null, and null.
     MutationObserverAlgorithms::QueueMutationRecord(
       MutationRecordType::Attributes, ShareRef(element), attribute.LocalName(), attribute.NamespaceURI(),
-      oldValue.has_value() ? DOMStringAtom(*oldValue) : DOMStringAtom::Null(), {}, {}, nullptr, nullptr);
+      oldValue.has_value() ? DOMStringAtom(*oldValue) : null, {}, {}, nullptr, nullptr);
 
     // 2. If element is custom, then enqueue a custom element callback reaction with element, callback name
     //    "attributeChangedCallback", and « attribute's local name, oldValue, newValue, attribute's namespace
@@ -173,8 +173,8 @@ namespace krys::boo::dom
     if (element.IsDefinedCustomElement())
     {
       html::CustomElementReactionQueue::EnqueueAttributeChangedCallbackIfNeeded(
-        element, attribute.GetQualifiedName(), oldValue ? DOMStringAtom(*oldValue) : DOMStringAtom::Null(),
-        newValue ? DOMStringAtom(*newValue) : DOMStringAtom::Null());
+        element, attribute.GetQualifiedName(), oldValue ? DOMStringAtom(*oldValue) : null,
+        newValue ? DOMStringAtom(*newValue) : null);
     }
 
     // 3. Run the attribute change steps with element, attribute's local name, oldValue, newValue, and
@@ -291,7 +291,7 @@ namespace krys::boo::dom
     // 1. If namespace is the empty string, then set it to null.
     if (namespaceURI == DOMStringAtom::Empty())
     {
-      namespaceURI = DOMStringAtom::Null();
+      namespaceURI = null;
     }
 
     // 2. Return the attribute in element's attribute list whose namespace is namespace and local name is

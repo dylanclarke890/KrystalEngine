@@ -188,7 +188,7 @@ namespace krys::boo::html
 
     // https://html.spec.whatwg.org/#the-details-element:concept-element-attributes-change-ext
     // 1. If namespace is not null, then return.
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }

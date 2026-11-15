@@ -139,7 +139,7 @@ namespace krys::boo::style
                             : 0;
     auto gridLineName = uncheckedGridLineName && uncheckedGridLineName->IsCustomIdent()
                           ? css::CSSOMStringAtom {uncheckedGridLineName->StringValue()}
-                          : css::CSSOMStringAtom::Null();
+                          : null;
 
     if (uncheckedSpanValue && uncheckedSpanValue->ValueId() == css::ValueId::Span)
     {

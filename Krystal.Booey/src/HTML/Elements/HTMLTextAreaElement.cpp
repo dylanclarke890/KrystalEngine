@@ -304,7 +304,7 @@ namespace krys::boo::html
                                                dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLTextFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }
@@ -677,7 +677,7 @@ namespace krys::boo::html
   bool HTMLTextAreaElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                                dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null())
+    if (namespaceURI == null)
     {
       if (localName == u8"align")
       {
@@ -697,7 +697,7 @@ namespace krys::boo::html
     css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

@@ -38,18 +38,18 @@ namespace krys::boo::css::cq
   Maybe<ContainerQuery> ContainerQueryParser::ConsumeContainerQuery(TokenRange &tokens,
                                                                     const ParserContext &context) noexcept
   {
-    auto consumeName = [&]
+    auto consumeName = [&]() -> CSSOMStringAtom
     {
       if (tokens.Peek().Type() == TokenType::OpenParen || tokens.Peek().Type() == TokenType::Function)
       {
-        return CSSOMStringAtom::Null();
+        return null;
       }
       auto nameValue = PropertyParsing::ConsumeSingleContainerName(tokens);
       if (auto *namePrimitive = nameValue ? DynamicDowncast<PrimitiveValue>(*nameValue) : nullptr)
       {
         return CSSOMStringAtom(namePrimitive->StringValue());
       }
-      return CSSOMStringAtom::Null();
+      return null;
     };
 
     auto name = consumeName();
@@ -58,7 +58,7 @@ namespace krys::boo::css::cq
 
     if (!condition)
     {
-      if (name == CSSOMStringAtom::Null() || name == CSSOMStringAtom::Empty())
+      if (name == null || name == CSSOMStringAtom::Empty())
       {
         return {};
       }
@@ -168,7 +168,7 @@ namespace krys::boo::css::cq
       {
         return {};
       }
-      return mq::StyleRangeValue {CSSOMStringAtom::Null(), krys::move(value)};
+      return mq::StyleRangeValue {null, krys::move(value)};
     };
 
     mq::StyleRange range;

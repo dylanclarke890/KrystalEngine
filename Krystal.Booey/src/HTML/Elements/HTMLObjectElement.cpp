@@ -83,7 +83,7 @@ namespace krys::boo::html
                                              dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLPlugInElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI == dom::DOMStringAtom::Null())
+    if (namespaceURI == null)
     {
       FormListedElement::ParseAttribute(localName, value);
     }
@@ -261,7 +261,7 @@ namespace krys::boo::html
   bool HTMLObjectElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                              dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"border"))
+    if (namespaceURI == null && (localName == u8"border"))
     {
       return true;
     }
@@ -274,7 +274,7 @@ namespace krys::boo::html
                                                                  css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLPlugInElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

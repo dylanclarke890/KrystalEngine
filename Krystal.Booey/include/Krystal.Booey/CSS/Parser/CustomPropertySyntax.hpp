@@ -69,7 +69,7 @@ namespace krys::boo::css
     {
       CustomPropertySyntax::Type Type;
       CustomPropertySyntax::Multiplier Multiplier {CustomPropertySyntax::Multiplier::Single};
-      CSSOMStringAtom Ident {CSSOMStringAtom::Null()};
+      CSSOMStringAtom Ident {null};
     };
 
     using DefinitionType = List<Component>;

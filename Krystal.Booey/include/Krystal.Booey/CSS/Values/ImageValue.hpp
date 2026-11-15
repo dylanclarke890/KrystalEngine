@@ -51,7 +51,7 @@ namespace krys::boo::css
     CachedResourceHandle<CachedImage> _cachedImage;
     // Set once the image is asked for, even if it couldn't be (a null handle).
     bool _didRequestImage {false};
-    CSSOMStringAtom _initiatorType {CSSOMStringAtom::Null()};
+    CSSOMStringAtom _initiatorType {null};
     RefPtr<ImageValue> _unresolvedValue;
     bool _isInvalid {false};
 
@@ -62,10 +62,10 @@ namespace krys::boo::css
     ~ImageValue() noexcept;
 
     KRYS_NODISCARD static Ref<ImageValue> Create() noexcept;
-    KRYS_NODISCARD static Ref<ImageValue>
-      Create(CSSURL location, CSSOMStringAtom initiatorType = CSSOMStringAtom::Null()) noexcept;
-    KRYS_NODISCARD static Ref<ImageValue>
-      Create(url::URL imageURL, CSSOMStringAtom initiatorType = CSSOMStringAtom::Null()) noexcept;
+    KRYS_NODISCARD static Ref<ImageValue> Create(CSSURL location,
+                                                 CSSOMStringAtom initiatorType = null) noexcept;
+    KRYS_NODISCARD static Ref<ImageValue> Create(url::URL imageURL,
+                                                 CSSOMStringAtom initiatorType = null) noexcept;
 
     KRYS_NODISCARD Ref<ImageValue> CopyForComputedStyle(const CSSURL &resolvedURL) const noexcept;
 

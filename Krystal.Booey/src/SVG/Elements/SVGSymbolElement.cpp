@@ -41,7 +41,7 @@ namespace krys::boo::svg
 
   bool SVGSymbolElement::SelfHasRelativeLengths() const noexcept
   {
-    return HasAttributeNS(dom::DOMStringAtom::Null(), SVGNames::ViewBoxAttr().LocalName());
+    return HasAttributeNS(null, SVGNames::ViewBoxAttr().LocalName());
   }
 
   RenderPtr<RenderElement> SVGSymbolElement::CreateElementRenderer(RenderStyle &&style) noexcept

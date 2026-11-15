@@ -127,8 +127,8 @@ namespace krys::boo::style::tests
         return IterationStatus::Continue;
       });
     CHECK(count == 3);
-    CHECK(child->FindKeyAtIndex(3) == CSSOMStringAtom::Null());
-    CHECK_FALSE(child->FindKeyAtIndex(0) == CSSOMStringAtom::Null());
+    CHECK(child->FindKeyAtIndex(3) == null);
+    CHECK_FALSE(child->FindKeyAtIndex(0) == null);
 
     // Data with equal values under different parents compares equal.
     auto other = CustomPropertyData::Create();

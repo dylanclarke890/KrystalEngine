@@ -184,7 +184,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: - 'font-family'
 
-  const CSSOMStringAtom &GenericFontFamily(ValueId ident) noexcept
+  CSSOMStringAtom GenericFontFamily(ValueId ident) noexcept
   {
     switch (ident)
     {
@@ -218,7 +218,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
       default:
       {
-        return CSSOMStringAtom::Null();
+        return null;
       }
     }
   }
@@ -280,7 +280,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // <family-name> can't contain unquoted generic families
     if (!addedSpace
         && (!IsValidCustomIdentifier(firstToken.ValueId())
-            || GenericFontFamily(firstToken.ValueId()) != CSSOMStringAtom::Null()))
+            || GenericFontFamily(firstToken.ValueId()) != null))
     {
       return null;
     }

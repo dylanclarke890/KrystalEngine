@@ -526,7 +526,7 @@ namespace krys::boo::html
     // https://html.spec.whatwg.org/#the-dialog-element:concept-element-attributes-change-ext
     // 1. If namespace is not null, then return.
     // 2. If localName is not open, then return.
-    if (namespaceURI != dom::DOMStringAtom::Null() || localName != u8"open")
+    if (namespaceURI != null || localName != u8"open")
     {
       return;
     }

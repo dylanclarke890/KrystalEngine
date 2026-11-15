@@ -127,7 +127,7 @@ namespace krys::boo::dom::tests
       CHECK(PointerEvent::TypeFromMouseEventType(DOMStringAtom(u8"click")) == u8"click");
       CHECK(PointerEvent::TypeFromMouseEventType(DOMStringAtom(u8"auxclick")) == u8"auxclick");
       CHECK(PointerEvent::TypeFromMouseEventType(DOMStringAtom(u8"contextmenu")) == u8"contextmenu");
-      CHECK(PointerEvent::TypeFromMouseEventType(DOMStringAtom(u8"dblclick")) == DOMStringAtom::Null());
+      CHECK(PointerEvent::TypeFromMouseEventType(DOMStringAtom(u8"dblclick")) == null);
       CHECK_FALSE(PointerEvent::Create(MouseButton::Left, *mouseEvent(u8"dblclick", MouseButton::Left, 0),
                                        MousePointerID, MousePointerEventType()));
     }

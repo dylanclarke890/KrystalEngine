@@ -77,8 +77,8 @@ namespace krys::boo::dom::tests
     SECTION("The namespace, prefix, local name and registry it's given")
     {
       auto element =
-        ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, u8"h", u8"div"},
-                               DOMStringAtom::Null(), false, RefPtr<html::CustomElementRegistry>(registry));
+        ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, u8"h", u8"div"}, null,
+                               false, RefPtr<html::CustomElementRegistry>(registry));
       CHECK(ElementIs<html::HTMLDivElement, html::HTMLElement>(*element));
       CHECK(element->NamespaceURI() == infra::Namespaces::HTML);
       CHECK(element->Prefix() == u8"h");
@@ -94,33 +94,31 @@ namespace krys::boo::dom::tests
     SECTION("The registry defaults to the document's")
     {
       document->SetCustomElementRegistry(RefPtr<html::CustomElementRegistry>(registry));
-      auto element = ElementFactory::Create(
-        *document, QualifiedName {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"div"});
+      auto element =
+        ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, null, u8"div"});
       CHECK(element->CustomElementRegistry() == registry);
     }
 
     SECTION("A valid custom element name in the HTML namespace is undefined")
     {
-      auto element = ElementFactory::Create(
-        *document, QualifiedName {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"x-a"});
+      auto element =
+        ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, null, u8"x-a"});
       CHECK(element->GetCustomElementState() == CustomElementState::Undefined);
       CHECK_FALSE(ElementAlgorithms::IsDefined(*element));
       CHECK_FALSE(ElementAlgorithms::IsCustom(*element));
 
-      auto svg = ElementFactory::Create(
-        *document, QualifiedName {infra::Namespaces::SVG, DOMStringAtom::Null(), u8"x-a"});
+      auto svg = ElementFactory::Create(*document, QualifiedName {infra::Namespaces::SVG, null, u8"x-a"});
       CHECK(ElementIs<svg::SVGUnknownElement, svg::SVGElement>(*svg));
       CHECK(svg->GetCustomElementState() == CustomElementState::Uncustomized);
     }
 
     SECTION("Unknown names give the namespace's unknown element, or Element")
     {
-      CHECK(ElementIs<html::HTMLUnknownElement, html::HTMLElement>(*ElementFactory::Create(
-        *document, QualifiedName {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"nope"})));
-      CHECK(ElementIs<mathml::MathMLUnknownElement, mathml::MathMLElement>(*ElementFactory::Create(
-        *document, QualifiedName {infra::Namespaces::MathML, DOMStringAtom::Null(), u8"nope"})));
-      auto element =
-        ElementFactory::Create(*document, QualifiedName {u8"urn:x", DOMStringAtom::Null(), u8"nope"});
+      CHECK(ElementIs<html::HTMLUnknownElement, html::HTMLElement>(
+        *ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, null, u8"nope"})));
+      CHECK(ElementIs<mathml::MathMLUnknownElement, mathml::MathMLElement>(
+        *ElementFactory::Create(*document, QualifiedName {infra::Namespaces::MathML, null, u8"nope"})));
+      auto element = ElementFactory::Create(*document, QualifiedName {u8"urn:x", null, u8"nope"});
       CHECK_FALSE(Is<html::HTMLElement>(*element));
       CHECK(element->NamespaceURI() == u8"urn:x");
     }
@@ -133,8 +131,8 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<HTMLDocument>();
     auto create = [&](utf8_stringview localName)
     {
-      return ElementFactory::Create(
-        *document, QualifiedName {infra::Namespaces::HTML, DOMStringAtom::Null(), DOMStringAtom(localName)});
+      return ElementFactory::Create(*document,
+                                    QualifiedName {infra::Namespaces::HTML, null, DOMStringAtom(localName)});
     };
 
     for (auto name :

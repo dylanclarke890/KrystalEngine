@@ -62,7 +62,7 @@ namespace krys::boo::dom::tests
 
     auto div = document->CreateElement(u8"div").ReleaseValue();
     CHECK(div->NamespaceURI() == infra::Namespaces::HTML);
-    CHECK(div->Prefix() == DOMStringAtom::Null());
+    CHECK(div->Prefix() == null);
     CHECK(div->LocalName() == u8"div");
   }
 
@@ -224,8 +224,8 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(data.Node->SetAttribute(u8"x:a", u8"1").HasException());
       auto *attr = data.Node->GetAttributeNode(u8"x:a");
       REQUIRE(attr != nullptr);
-      CHECK(attr->NamespaceURI() == DOMStringAtom::Null());
-      CHECK(attr->Prefix() == DOMStringAtom::Null());
+      CHECK(attr->NamespaceURI() == null);
+      CHECK(attr->Prefix() == null);
       CHECK(attr->LocalName() == u8"x:a");
       CHECK(attr->Value() == u8"1");
     }
@@ -287,7 +287,7 @@ namespace krys::boo::dom::tests
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
 
-      result = data.Node->SetAttributeNS(DOMStringAtom::Null(), u8"x:a", u8"value");
+      result = data.Node->SetAttributeNS(null, u8"x:a", u8"value");
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::NamespaceError);
     }

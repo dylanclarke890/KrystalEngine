@@ -76,11 +76,11 @@ namespace krys::boo::tests
     FontPalette normal;
     FontPalette dark {FontPalette::Type::Dark, StringAtom {u8"ignored"}};
     CHECK(normal == FontPalette {FontPalette::Type::Normal, StringAtom {u8"other"}});
-    CHECK(dark == FontPalette {FontPalette::Type::Dark, StringAtom::Null()});
+    CHECK(dark == FontPalette {FontPalette::Type::Dark, null});
     CHECK(FontPalette {FontPalette::Type::Custom, StringAtom {u8"--a"}}
           != FontPalette {FontPalette::Type::Custom, StringAtom {u8"--b"}});
     CHECK(DefaultHash<FontPalette>::Hash(dark)
-          == DefaultHash<FontPalette>::Hash({FontPalette::Type::Dark, StringAtom::Null()}));
+          == DefaultHash<FontPalette>::Hash({FontPalette::Type::Dark, null}));
   }
 
   TEST_CASE("FontDescription", "[Graphics][FontDescription]")
@@ -90,7 +90,7 @@ namespace krys::boo::tests
     CHECK(description.Width() == NormalWidthValue());
     CHECK_FALSE(description.FontStyleSlope());
     CHECK(description.Script() == USCRIPT_COMMON);
-    CHECK(description.ComputedLocale() == StringAtom::Null());
+    CHECK(description.ComputedLocale() == null);
     CHECK(description.GetFontPalette().PaletteType == FontPalette::Type::Normal);
     CHECK(description.VariantAlternates().IsNormal());
     CHECK(description.VariantSettings().IsAllNormal());
@@ -189,16 +189,14 @@ namespace krys::boo::tests
       CHECK(other.GetTextRenderingMode() == TextRenderingMode::OptimizeLegibility);
     }
 
-    CHECK(
-      FontDescription::PlatformResolveGenericFamily(USCRIPT_LATIN, StringAtom::Null(), StringAtom {u8"serif"})
-      == StringAtom::Null());
+    CHECK(FontDescription::PlatformResolveGenericFamily(USCRIPT_LATIN, null, StringAtom {u8"serif"}) == null);
   }
 
   TEST_CASE("FontCascadeDescription", "[Graphics][FontDescription]")
   {
     FontCascadeDescription description;
     CHECK(description.FamilyCount() == 1);
-    CHECK(description.FirstFamily() == StringAtom::Null());
+    CHECK(description.FirstFamily() == null);
     CHECK(description.KeywordSize() == 0);
     CHECK(description.KeywordSizeAsIdentifier() == css::ValueId::Invalid);
     CHECK(description.GetKerning() == Kerning::Auto);

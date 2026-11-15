@@ -159,7 +159,7 @@ namespace krys::boo::css
     std::ignore = tokenizer.PumpTokenizer();
     auto tokenRange = tokenizer.Tokens();
     auto name = PropertyParserHelpers::ConsumeCounterStyleNameInPrelude(tokenRange);
-    if (name == CSSOMStringAtom::Null())
+    if (name == null)
     {
       return;
     }

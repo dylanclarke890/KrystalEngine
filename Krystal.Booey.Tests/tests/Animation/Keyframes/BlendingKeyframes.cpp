@@ -98,7 +98,7 @@ namespace krys::boo::tests
   {
     BlendingKeyframes keyframes;
     CHECK(std::holds_alternative<uint64>(keyframes.Identifier()));
-    CHECK(keyframes.KeyframesName() == StringAtom::Null());
+    CHECK(keyframes.KeyframesName() == null);
 
     auto keyframe = [](double offset, css::PropertyId property)
     {

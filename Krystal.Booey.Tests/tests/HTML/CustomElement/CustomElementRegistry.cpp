@@ -53,7 +53,7 @@ namespace krys::boo::html::tests
       REQUIRE(definition);
       CHECK(Registry().GetName(*definition) == u8"x-a");
       auto other = CustomElementRegistry::CreateScoped();
-      CHECK(other->GetName(*definition) == dom::DOMStringAtom::Null());
+      CHECK(other->GetName(*definition) == null);
     }
 
     SECTION("whenDefined calls back in a microtask once the name is defined")

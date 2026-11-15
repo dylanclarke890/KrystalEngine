@@ -140,8 +140,7 @@ namespace krys::boo::html
     KRYS_NODISCARD inline Maybe<dom::DOMString> GetContentAttribute(const dom::Element &element,
                                                                     dom::DOMStringAtom name) noexcept
     {
-      auto attribute =
-        dom::ElementAlgorithms::GetAttributeByNamespace(dom::DOMStringAtom::Null(), name, element);
+      auto attribute = dom::ElementAlgorithms::GetAttributeByNamespace(null, name, element);
       if (attribute == nullptr)
       {
         return null;
@@ -160,7 +159,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
     inline void DeleteContentAttribute(dom::Element &element, dom::DOMStringAtom name) noexcept
     {
-      dom::ElementAlgorithms::RemoveAttributeByNamespace(dom::DOMStringAtom::Null(), name, element);
+      dom::ElementAlgorithms::RemoveAttributeByNamespace(null, name, element);
     }
 
 #pragma endregion

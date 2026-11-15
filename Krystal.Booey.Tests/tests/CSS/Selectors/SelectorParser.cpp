@@ -205,7 +205,7 @@ namespace krys::boo::css::tests
     sheet->ParserAddNamespace(CSSOMStringAtom(u8"svg"), CSSOMStringAtom(u8"http://www.w3.org/2000/svg"));
     CHECK(sheet->NamespaceURIFromPrefix(CSSOMStringAtom(u8"svg"))
           == CSSOMStringAtom(u8"http://www.w3.org/2000/svg"));
-    CHECK(sheet->NamespaceURIFromPrefix(CSSOMStringAtom(u8"foo")) == CSSOMStringAtom::Null());
+    CHECK(sheet->NamespaceURIFromPrefix(CSSOMStringAtom(u8"foo")) == null);
     CHECK(sheet->DefaultNamespace() == dom::StarAtom());
 
     CHECK(Parse(u8"svg|rect", {}, sheet.get()) == u8"svg|rect");
@@ -226,7 +226,7 @@ namespace krys::boo::css::tests
           == CSSOMStringAtom(u8"http://www.w3.org/2000/svg"));
 
     // A default namespace adds an implicit, unserialised universal selector.
-    sheet->ParserAddNamespace(CSSOMStringAtom::Null(), CSSOMStringAtom(u8"http://www.w3.org/1999/xhtml"));
+    sheet->ParserAddNamespace(null, CSSOMStringAtom(u8"http://www.w3.org/1999/xhtml"));
     CHECK(sheet->DefaultNamespace() == CSSOMStringAtom(u8"http://www.w3.org/1999/xhtml"));
     auto withDefault = ParseValid(u8".a", {}, sheet.get());
     CHECK(withDefault.ComponentCount() == 2);

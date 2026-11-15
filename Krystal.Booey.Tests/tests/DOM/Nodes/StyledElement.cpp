@@ -280,7 +280,7 @@ namespace krys::boo::dom::tests
 
       auto records = observed.Observer->TakeRecords();
       REQUIRE(records.size() == 1uz);
-      REQUIRE(records[0]->OldValue() == DOMStringAtom::Null());
+      REQUIRE(records[0]->OldValue() == null);
     }
 
     SECTION("No record when nothing changes")

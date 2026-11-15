@@ -81,7 +81,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(GenericFontFamily(ValueId::Serif) == GenericFontFamilyNames::SerifFamily());
     CHECK(GenericFontFamily(ValueId::SansSerif).View() == u8"-internal-sans-serif");
     CHECK(GenericFontFamily(ValueId::Math).View() == u8"-internal-math");
-    CHECK(GenericFontFamily(ValueId::Bold) == CSSOMStringAtom::Null());
+    CHECK(GenericFontFamily(ValueId::Bold) == null);
 
     CHECK(GenericFontFamilyIndex(ValueId::Monospace)
           == GenericFontFamilyNames::FamilyNamesIndex::MonospaceFamily);

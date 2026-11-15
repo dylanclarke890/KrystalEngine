@@ -54,9 +54,22 @@ namespace krys::tests
 
   TEST_CASE("StringAtom - the null atom reads as empty", "[StringAtom]")
   {
-    REQUIRE(StringAtom::Null().View().empty());
-    REQUIRE(StringAtom::Null().Storage() == nullptr);
-    REQUIRE_FALSE(StringAtom::Null() == StringAtom::Empty());
+    REQUIRE(StringAtom {}.View().empty());
+    REQUIRE(StringAtom {}.Storage() == nullptr);
+    REQUIRE_FALSE(null == StringAtom::Empty());
+  }
+
+  TEST_CASE("StringAtom - null makes and compares with the null atom", "[StringAtom]")
+  {
+    StringAtom atom = null;
+    CHECK(atom == null);
+    CHECK(null == atom);
+    CHECK(atom == StringAtom());
+
+    atom = u8"named";
+    CHECK(atom != null);
+    atom = null;
+    CHECK(atom == null);
   }
 
   TEST_CASE("StringAtom - each thread interns into its own pool", "[StringAtom]")
@@ -90,7 +103,7 @@ namespace krys::tests
         StringAtom copy = first;
         StringAtom moved = krys::move(copy);
         CHECK(moved == first);
-        CHECK(copy == StringAtom::Null());
+        CHECK(copy == null);
       }
       CHECK(pool.Size() == before + 1);
     }
@@ -124,7 +137,7 @@ namespace krys::tests
     CHECK(utf8_stringview {u8"other"} != atom);
     CHECK(pool.Size() == before);
 
-    CHECK(StringAtom::Null() != u8"");
+    CHECK(StringAtom() != u8"");
     CHECK(StringAtom::Empty() == u8"");
   }
 }

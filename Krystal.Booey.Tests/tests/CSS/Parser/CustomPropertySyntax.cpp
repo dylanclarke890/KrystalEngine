@@ -82,7 +82,7 @@ namespace krys::boo::css::tests
         REQUIRE(component);
         CHECK(component->Type == expected);
         CHECK(component->Multiplier == Multiplier::Single);
-        CHECK(component->Ident == CSSOMStringAtom::Null());
+        CHECK(component->Ident == null);
       }
     }
 
