@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Core/Types/StringAtom.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Threading/Thread.hpp"
 
 namespace krys::tests
 {
@@ -56,5 +57,25 @@ namespace krys::tests
     REQUIRE(StringAtom::Null().View().empty());
     REQUIRE(StringAtom::Null().Storage() == nullptr);
     REQUIRE_FALSE(StringAtom::Null() == StringAtom::Empty());
+  }
+
+  TEST_CASE("StringAtom - each thread interns into its own pool", "[StringAtom]")
+  {
+    StringAtom mainAtom = u8"per-thread";
+    bool sameOnOtherThread = true;
+    bool equalWithinOtherThread = false;
+    {
+      Thread thread(u8"StringAtom test",
+                    [&]()
+                    {
+                      StringAtom first = u8"per-thread";
+                      StringAtom second = u8"per-thread";
+                      sameOnOtherThread = first.Storage() == mainAtom.Storage();
+                      equalWithinOtherThread = first == second;
+                    });
+    }
+
+    CHECK_FALSE(sameOnOtherThread);
+    CHECK(equalWithinOtherThread);
   }
 }

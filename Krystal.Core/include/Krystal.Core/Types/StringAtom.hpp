@@ -95,10 +95,13 @@ namespace krys
   private:
     StringAtomStorage _ptr {nullptr};
 
+    /// @brief The calling thread's pool. Atoms belong to the thread that made them, as WebKit's do: two
+    /// atoms for the same string made on different threads aren't equal, and an atom shouldn't be used on
+    /// another thread.
     static StringAtomPool &Pool()
     {
-      static StringAtomPool globalPool {};
-      return globalPool;
+      thread_local StringAtomPool pool {};
+      return pool;
     }
 
     struct NullTag
@@ -126,7 +129,7 @@ namespace krys
 
     KRYS_NODISCARD static const StringAtom &Empty() noexcept
     {
-      static StringAtom emptyAtom = StringAtom(EmptyTag {});
+      thread_local StringAtom emptyAtom = StringAtom(EmptyTag {});
       return emptyAtom;
     }
 
