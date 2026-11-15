@@ -42,11 +42,12 @@
 namespace krys::boo
 {
   class PlatformWheelEvent;
+  class ScrollAnchoringController;
   class ScrollAnimator;
   class ScrollbarsController;
   /// @brief Something that scrolls: a scroll position within its contents, its scroll origin, and its
   /// scrollbars, whose overlay scrollbars its scrollbars controller shows and hides.
-  // FIXME: Scroll anchoring and compositing layers.
+  // FIXME: Compositing layers.
   class ScrollableArea : public CanMakeWeakPtr<ScrollableArea>, public CanMakeCheckedPtr<ScrollableArea>
   {
     KRYS_NON_COPY_MOVABLE(ScrollableArea);
@@ -496,6 +497,18 @@ namespace krys::boo
     virtual void UpdateAnchorPositionedAfterScroll() noexcept
     {
     }
+
+    /// @brief The area's scroll anchoring, if it has any.
+    KRYS_NODISCARD virtual ScrollAnchoringController *GetScrollAnchoringController() const noexcept
+    {
+      return nullptr;
+    }
+    /// @brief Chooses the scroll anchor if there's none, and queues the area's adjustment after layout.
+    void UpdateScrollAnchoringElement() noexcept;
+    /// @brief Scrolls by as far as the scroll anchor moved, if the area is queued for that.
+    void UpdateScrollPositionForScrollAnchoringController() noexcept;
+    /// @brief Forgets the scroll anchor.
+    void InvalidateScrollAnchoringElement() noexcept;
 
   protected:
     ScrollableArea() noexcept;

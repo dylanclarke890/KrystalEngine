@@ -30,6 +30,7 @@
  */
 
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -313,7 +314,6 @@ namespace krys::boo
     SetScrollOffset(ScrollOffsetFromPosition(position));
 
     // Tell the scrollbars to update their thumb postions.
-    // FIXME: Scroll anchoring, once there is any.
     if (_scrollAnimator)
     {
       _scrollAnimator->UpdateSnapTargets();
@@ -331,7 +331,33 @@ namespace krys::boo
     {
       // Scrolling shows the overlay scrollbars.
       GetScrollbarsController().NotifyContentAreaScrolled();
+      InvalidateScrollAnchoringElement();
+      UpdateScrollAnchoringElement();
       UpdateAnchorPositionedAfterScroll();
+    }
+  }
+
+  void ScrollableArea::UpdateScrollAnchoringElement() noexcept
+  {
+    if (auto *controller = GetScrollAnchoringController())
+    {
+      controller->UpdateAnchorElement();
+    }
+  }
+
+  void ScrollableArea::UpdateScrollPositionForScrollAnchoringController() noexcept
+  {
+    if (auto *controller = GetScrollAnchoringController())
+    {
+      controller->AdjustScrollPositionForAnchoring();
+    }
+  }
+
+  void ScrollableArea::InvalidateScrollAnchoringElement() noexcept
+  {
+    if (auto *controller = GetScrollAnchoringController())
+    {
+      controller->InvalidateAnchorElement();
     }
   }
 

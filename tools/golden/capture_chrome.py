@@ -3,7 +3,8 @@
 Each scene in <golden>/scenes/<name>.html is rendered by headless Chrome at a device pixel ratio of 1, in sRGB,
 with software rasterisation, into <golden>/<name>.chrome.png. The golden directory is Krystal.Gfx.Tests/golden
 unless --golden names another (Krystal.UI.Tests/golden for the page goldens). The viewport's size comes from
-the scene's <html data-width="..." data-height="...">.
+the scene's <html data-width="..." data-height="...">, in CSS pixels; a scene with data-device-scale="..." is
+rendered at that device pixel ratio instead, into an image that many times the size.
 
 A scene whose script records something when loaded with "?record" (setting data-record-<kind> on its <html>, to
 lines of text) also gets <golden>/<name>.chrome-<kind>.txt for each, read from Chrome's DOM: the client rects
@@ -54,12 +55,19 @@ def scene_size(html):
     return int(width.group(1)), int(height.group(1))
 
 
+def scene_scale(html):
+    scale = re.search(r'data-device-scale="([\d.]+)"', html)
+    return float(scale.group(1)) if scale else 1.0
+
+
 def capture(chrome, golden, scene):
-    width, height = scene_size(scene.read_text(encoding="utf-8-sig"))
+    html = scene.read_text(encoding="utf-8-sig")
+    width, height = scene_size(html)
+    scale = scene_scale(html)
     output = golden / f"{scene.stem}.chrome.png"
     # Through DevTools rather than --screenshot, whose --window-size isn't the viewport: under 516 wide the viewport is
     # 500, above that it's 16 narrower, and it's always about 90 shorter, with the image then cropped or padded to size.
-    browser = cdp.Chrome(chrome, width, height)
+    browser = cdp.Chrome(chrome, width, height, scale)
     try:
         browser.load_settled(scene.as_uri())
         output.write_bytes(browser.screenshot())

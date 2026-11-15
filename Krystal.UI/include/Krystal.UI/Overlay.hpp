@@ -68,6 +68,13 @@ namespace krys::ui
     KRYS_NODISCARD static int32 AlignedLeft(const boo::IntRect &controlRect, int32 width, int32 viewportWidth,
                                             bool rightToLeft) noexcept;
 
+    /// @brief Sizes @p view, an overlay's, to @p size CSS pixels, at @p owner's device scale factor.
+    static void SizeContentView(View &view, const View &owner, const boo::IntSize &size) noexcept;
+    /// @brief The topmost element at @p point (in CSS pixels) in @p view, or null.
+    KRYS_NODISCARD static boo::dom::Element *HitTest(View &view, const boo::IntPoint &point) noexcept;
+    /// @brief Turns the wheel at @p point (in CSS pixels) in @p view, as `View::MouseWheel` does.
+    static bool WheelView(View &view, const boo::IntPoint &point, float notchesX, float notchesY) noexcept;
+
     /// @brief The element at @p point in @p view, or its nearest ancestor, with the attribute @p name.
     KRYS_NODISCARD static boo::dom::Element *ElementWithAttributeAt(View &view, const boo::IntPoint &point,
                                                                     utf8_stringview name) noexcept;

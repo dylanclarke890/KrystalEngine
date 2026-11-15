@@ -403,6 +403,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/TextRuns/WidthIterator.cpp
 		tests/Page/LocalFrameView.cpp
 		tests/Page/LocalFrameViewScrolling.cpp
+		tests/Page/Scrolling/ScrollAnchoringController.cpp
 		tests/Page/Scrolling/ScrollLatchingController.cpp
 		tests/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
 		tests/Platform/Scrolling/ScrollAnimator.cpp

@@ -68,6 +68,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 ### Bugs
 
 - A dashed rounded border with different widths on each side has its dashes drift from Chrome's along the sides, by a few pixels (FIXME in `BorderPainter::DrawBoxSideFromPath`).
+- A diagonal `linear-gradient`'s hard stops fall a device pixel before Chrome's (the `device-scale-images` golden's tiled gradient, and the same at a scale of 1).
 - Dashed collapsed table borders share out the junctions between cells slightly differently from Chrome: an edge after a junction starts a few pixels off, so its gaps differ a little (the `tables` and `dashed-borders` goldens).
 - A mask's `color-interpolation: linearRGB` is drawn in sRGB (`LegacyRenderSVGResourceMasker`, FIXME), because image buffers have no colour space conversion.
 - A composited mask's or clip path's edge pixels (and those of a turned masked layer) can differ slightly from the whole-page repaint.
@@ -85,7 +86,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 
 ### Missing
 
-- There's no scroll anchoring, kinetic scrolling or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `ScrollableArea`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
+- There's no kinetic scrolling or rubber-banding (FIXMEs in `Element`, `LocalFrameView`, `EventHandler`, `Scrollbar`). Scroll positions are whole pixels, so wheel deltas are rounded, and a smooth scroll moves in whole pixels.
 - Scroll snapping for touchpads without phases: a touchpad that isn't a precision one (or a host that doesn't take `OnTouchpadPan`) reports its pans as the wheel's notches, each going to the next snap position, so its small deltas page through a mandatory container.
 - There are no native scrollbars.
 - `VisualViewport` is the layout viewport at the page scale and never scrolls within it, so its `scroll` event never fires (its `resize` does). There are no obscured insets, auto-sizing, base viewport layout size scale factor (FIXME in `VisualViewport.cpp`) or layout viewport separate from the scroll position. Pinch zoom is only the page scale (1 to 5) from the view's gesture recogniser.

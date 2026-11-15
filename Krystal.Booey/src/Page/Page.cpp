@@ -635,6 +635,7 @@ namespace krys::boo
     }
     _deviceScaleFactor = deviceScaleFactor;
     UpdateStyleAfterChangeInEnvironment();
+    _mainFrame->DeviceOrPageScaleFactorChanged();
   }
 
   void Page::RegisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept

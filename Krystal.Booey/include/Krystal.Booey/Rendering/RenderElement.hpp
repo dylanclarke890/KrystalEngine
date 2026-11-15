@@ -477,7 +477,6 @@ namespace krys::boo
     void AdjustFragmentedFlowStateOnContainingBlockChangeIfNeeded(const RenderStyle &oldStyle,
                                                                   const RenderStyle &newStyle) noexcept;
 
-    // FIXME: Scroll anchoring, once there is any.
     virtual void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept;
     virtual void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept;
 

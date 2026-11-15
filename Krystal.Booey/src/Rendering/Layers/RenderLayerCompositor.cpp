@@ -4052,8 +4052,7 @@ namespace krys::boo
 
   float RenderLayerCompositor::DeviceScaleFactor() const noexcept
   {
-    // FIXME: The device scale factor, once pages have one.
-    return 1;
+    return _renderView.GetDocument().DeviceScaleFactor();
   }
 
   float RenderLayerCompositor::PageScaleFactor() const noexcept

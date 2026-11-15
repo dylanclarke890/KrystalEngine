@@ -145,10 +145,7 @@ namespace krys::ui
     {
       _view = CreateUnique<View>(viewport);
     }
-    else
-    {
-      _view->Resize(viewport);
-    }
+    SizeContentView(*_view, *_owner, viewport);
     ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
@@ -180,7 +177,7 @@ namespace krys::ui
       }
     }
     _rect = Place(_client->ElementRectRelativeToRootView(), contentSize, viewport, _rightToLeft);
-    _view->Resize(_rect.Size());
+    SizeContentView(*_view, *_owner, _rect.Size());
 
     auto highlighted = std::exchange(_highlightedIndex, -1);
     Highlight(highlighted < 0 ? 0 : highlighted);

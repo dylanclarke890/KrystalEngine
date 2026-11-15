@@ -226,10 +226,7 @@ namespace krys::ui
     {
       _view = CreateUnique<View>(boo::IntSize(width, viewport.Height()));
     }
-    else
-    {
-      _view->Resize(boo::IntSize(width, viewport.Height()));
-    }
+    SizeContentView(*_view, *_owner, boo::IntSize(width, viewport.Height()));
     ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
@@ -288,7 +285,7 @@ namespace krys::ui
     width = std::min(std::max(contentSize.Width(), width), std::max(viewport.Width(), 1));
     auto x = AlignedLeft(_controlRect, width, viewport.Width(), _rightToLeft);
     _rect = boo::IntRect(x, y, width, std::max(height, 1));
-    _view->Resize(_rect.Size());
+    SizeContentView(*_view, *_owner, _rect.Size());
 
     auto highlighted = _highlightedIndex;
     _highlightedIndex = -1;
@@ -302,7 +299,7 @@ namespace krys::ui
       return -1;
     }
 
-    for (auto *element = _view->HitTest(point); element; element = element->ParentElement())
+    for (auto *element = HitTest(*_view, point); element; element = element->ParentElement())
     {
       for (size_t i = 0; i < _itemElements.size(); ++i)
       {
@@ -335,7 +332,7 @@ namespace krys::ui
 
   bool PopupMenuOverlay::MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept
   {
-    return _view && _view->MouseWheel(point, notchesX, notchesY);
+    return _view && WheelView(*_view, point, notchesX, notchesY);
   }
 
   bool PopupMenuOverlay::KeyPressed(pal::Key key, pal::KeyModifiers) noexcept

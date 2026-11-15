@@ -44,6 +44,7 @@ namespace krys::boo::tests
       List<LayerAnimation> Animations;
       RefPtr<GraphicsLayerContentsDisplayDelegate> Delegate;
       ContentsLayerPurpose Purpose {ContentsLayerPurpose::None};
+      uint32 ScaleChanges {0};
 
       CompositingTestLayer(Type type, GraphicsLayerClient &client) noexcept : GraphicsLayer(type, client)
       {
@@ -62,6 +63,11 @@ namespace krys::boo::tests
       void SetNeedsDisplayInRect(const FloatRect &rect, ShouldClipToLayer) noexcept final
       {
         NeedsDisplayRects.push_back(rect);
+      }
+
+      void DeviceOrPageScaleFactorChanged() noexcept final
+      {
+        ++ScaleChanges;
       }
 
       void SetContentsNeedsDisplay() noexcept final
@@ -398,6 +404,56 @@ namespace krys::boo::tests
     CHECK(backing.ScrollContainerLayer()->BoundsOrigin() == FloatPoint(0, 30));
     CHECK(contents.NeedsDisplayRects.empty());
     CHECK(graphicsLayer.NeedsDisplayRects.empty());
+  }
+
+  TEST_CASE("RenderLayerCompositor: a box's scrolled contents follow its content's layout",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(u8"<div id=scroller style='width:100px;height:40px;overflow:auto'>"
+                               u8"<div id=content style='height:200px'></div></div>");
+    auto &backing = *fixture.LayerOf(u8"scroller").Backing();
+    REQUIRE(backing.ScrolledContentsLayer());
+    CHECK(backing.ScrolledContentsLayer()->Size().Height() == 200);
+
+    REQUIRE_FALSE(fixture.ById(u8"content").SetAttribute(u8"style", u8"height:400px").HasException());
+    fixture.TestPage->UpdateRendering();
+    CHECK(backing.ScrolledContentsLayer()->Size().Height() == 400);
+
+    SECTION("and a scrollbar it comes to need gets a layer")
+    {
+      CHECK_FALSE(backing.LayerForHorizontalScrollbar());
+      REQUIRE_FALSE(
+        fixture.ById(u8"content").SetAttribute(u8"style", u8"height:400px;width:300px").HasException());
+      fixture.TestPage->UpdateRendering();
+      CHECK(backing.LayerForHorizontalScrollbar());
+    }
+  }
+
+  TEST_CASE("RenderLayerCompositor: a box whose content comes to overflow it scrolls on a layer",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(u8"<div id=scroller style='width:100px;height:40px;overflow:auto'>"
+                               u8"<div id=content style='height:10px'></div></div>");
+    CHECK_FALSE(fixture.LayerOf(u8"scroller").IsComposited());
+
+    REQUIRE_FALSE(fixture.ById(u8"content").SetAttribute(u8"style", u8"height:200px").HasException());
+    fixture.TestPage->UpdateRendering();
+    CHECK(fixture.LayerOf(u8"scroller").IsComposited());
+    CHECK(fixture.LayerOf(u8"scroller").UsesCompositedScrolling());
+  }
+
+  TEST_CASE("RenderLayerCompositor: layers draw at the page's device scale factor",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(u8"<div id=box style='width:50px;height:50px;will-change:transform'></div>");
+    auto &layer = fixture.GraphicsLayerOf(u8"box");
+    CHECK(layer.DeviceScaleFactor() == 1);
+
+    fixture.TestPage->SetDeviceScaleFactor(2);
+    CHECK(fixture.Compositor().DeviceScaleFactor() == 2);
+    CHECK(layer.DeviceScaleFactor() == 2);
+    // The layers are told, to draw their contents again at the new scale.
+    CHECK(layer.ScaleChanges == 1);
   }
 
   TEST_CASE("RenderLayerCompositor: fixed elements composite for their position",

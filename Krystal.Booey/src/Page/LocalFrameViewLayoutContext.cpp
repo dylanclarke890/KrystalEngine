@@ -292,9 +292,12 @@ namespace krys::boo
       krys_debug_assert(_percentHeightIgnoreList.empty());
     }
 
-    // The post-layout tasks: the animations layout brought into view resume, the fragment's target is
-    // scrolled back into view, and the window is told if the viewport resized.
+    // The post-layout tasks: the scrollers keep their anchors where they were, the animations layout
+    // brought into view resume, the fragment's target is scrolled back into view, and the window is told if
+    // the viewport resized.
     _frameView.HandleDeferredScrollbarsUpdate();
+    _frameView.UpdateScrollAnchoringPositionForScrollableAreas();
+    _frameView.UpdateScrollAnchoringElementsForScrollableAreas();
     _frameView.ViewportContentsChanged();
     _frameView.ScheduleScrollToAnchor();
     _frameView.ScheduleResizeEventIfNeeded();

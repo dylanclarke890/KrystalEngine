@@ -80,10 +80,7 @@ namespace krys::ui
     {
       _view = CreateUnique<View>(layoutSize);
     }
-    else
-    {
-      _view->Resize(layoutSize);
-    }
+    SizeContentView(*_view, *_owner, layoutSize);
     ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
@@ -96,7 +93,7 @@ namespace krys::ui
       }
     }
     _rect = Place(anchorRect, contentSize, viewport, rightToLeft);
-    _view->Resize(_rect.Size());
+    SizeContentView(*_view, *_owner, _rect.Size());
 
     _hideTimer.StartOneShot(ValidationMessageDuration(message));
     if (!_visible)

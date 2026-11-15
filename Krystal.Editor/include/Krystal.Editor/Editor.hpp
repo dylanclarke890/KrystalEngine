@@ -114,8 +114,8 @@ namespace krys
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
-        : Application(argc, argv, settings), _width(settings.WindowSettings.Size.Width),
-          _height(settings.WindowSettings.Size.Height)
+        : Application(argc, argv, settings), _width(_context->Window->GetSize().Width),
+          _height(_context->Window->GetSize().Height)
     {
     }
 
@@ -311,6 +311,16 @@ namespace krys
               break;
             case CompositionAction::Committed: _pageView->ConfirmComposition(input.Text); break;
             default:                           break;
+          }
+          return true;
+        });
+
+      _context->Events->On<WindowDPIChangeEvent>(
+        [&](const auto &event)
+        {
+          if (_pageView)
+          {
+            _pageView->SetDeviceScaleFactor(static_cast<float>(event.DPI()) / 96.f);
           }
           return true;
         });
@@ -853,6 +863,9 @@ namespace krys
       boo::ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
       (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _pageView = CreateUnique<ui::View>(PageSize());
+      // The page is laid out and painted at the window's DPI, which `WindowDPIChangeEvent` follows.
+      _pageView->SetDeviceScaleFactor(
+        static_cast<float>(pal::GetDPIForWindow(_context->Window->GetWindowHandle())) / 96.f);
       _pageView->SetFocused(_focused);
       _pageView->SetPointingDevices(pal::GetPointingDevices());
       if (_view == EditorView::Page)

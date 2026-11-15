@@ -2576,6 +2576,7 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp
   include/Krystal.Booey/Page/ScrollBehavior.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp
   include/Krystal.Booey/Page/ScrollOptions.hpp
@@ -2604,6 +2605,7 @@ set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/ResizeObserver/ResizeObserver.cpp
   src/Page/ScrollBehavior.cpp
   src/Page/Scrolling/ScrollingConstraints.cpp
+  src/Page/Scrolling/ScrollAnchoringController.cpp
   src/Page/Scrolling/ScrollLatchingController.cpp
   src/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
   src/Page/Settings.cpp

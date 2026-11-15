@@ -90,6 +90,7 @@ namespace krys::boo
   class RenderTreeBuilder;
   class RenderView;
   class LocalFrameViewLayoutContext;
+  class ScrollAnchoringController;
   class ReferencedSVGResources;
   class RenderGeometryMap;
   class TransformState;
@@ -1430,6 +1431,10 @@ namespace krys::boo
     KRYS_NODISCARD bool IsTransformed() const noexcept;
 
     KRYS_NODISCARD RenderLayer *EnclosingLayer() const noexcept;
+    /// @brief The scroll anchoring of the closest scroller around @p renderer (or @p renderer itself) that
+    /// has an anchor, or else the frame view's.
+    KRYS_NODISCARD static ScrollAnchoringController *
+      SearchParentChainForScrollAnchoringController(const RenderObject &renderer) noexcept;
     /// @brief The nearest box that is this renderer or one of its ancestors.
     KRYS_NODISCARD RenderBox &EnclosingBox() const noexcept;
     KRYS_NODISCARD RenderBox *EnclosingScrollableContainer() const noexcept;

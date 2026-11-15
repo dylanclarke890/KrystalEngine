@@ -285,7 +285,7 @@ namespace krys::ui
       {
         return point;
       }
-      return point - boo::IntSize(_view->_screenOrigin.X(), _view->_screenOrigin.Y());
+      return point - boo::ToIntSize(_view->ToPage(_view->_screenOrigin));
     }
 
     void RequestPointerLock(Func<void(boo::PointerLockRequestResult)> &&completionHandler) noexcept override
@@ -615,6 +615,7 @@ namespace krys::ui
     _chromeClient->SetView(this);
     _frameLoaderClient->SetView(this);
     _dragClient->SetView(this);
+    _viewportPixels = viewportSize;
     _frame->CreateView(viewportSize);
     // The frame starts with its initial empty document, at once.
     _frame->Loader().Init();
@@ -799,9 +800,25 @@ namespace krys::ui
     {
       _overlay->Hide();
     }
+    _viewportPixels = viewportSize;
     if (auto *view = _frame->View())
     {
-      view->Resize(viewportSize);
+      // The page lays out over as many CSS pixels as fit, to the nearest.
+      auto scale = DeviceScaleFactor();
+      view->Resize(boo::IntSize(static_cast<int32>(std::lround(viewportSize.Width() / scale)),
+                                static_cast<int32>(std::lround(viewportSize.Height() / scale))));
+    }
+    _needsPaint = true;
+  }
+
+  void View::ResizeToLayoutSize(const boo::IntSize &size) noexcept
+  {
+    auto scale = DeviceScaleFactor();
+    _viewportPixels = boo::IntSize(static_cast<int32>(std::lround(size.Width() * scale)),
+                                   static_cast<int32>(std::lround(size.Height() * scale)));
+    if (auto *view = _frame->View())
+    {
+      view->Resize(size);
     }
     _needsPaint = true;
   }
@@ -810,6 +827,58 @@ namespace krys::ui
   {
     auto *view = _frame->View();
     return view ? boo::IntSize(view->Width(), view->Height()) : boo::IntSize();
+  }
+
+  void View::SetDeviceScaleFactor(float scale) noexcept
+  {
+    if (!std::isfinite(scale) || scale <= 0 || scale == DeviceScaleFactor())
+    {
+      return;
+    }
+    _page->SetDeviceScaleFactor(scale);
+    // The viewport's CSS pixels change with it.
+    Resize(_viewportPixels);
+  }
+
+  float View::DeviceScaleFactor() const noexcept
+  {
+    return _page->DeviceScaleFactor();
+  }
+
+  boo::IntPoint View::ToPage(const boo::IntPoint &point) const noexcept
+  {
+    return boo::FlooredIntPoint(ToPage(boo::DoublePoint(point)));
+  }
+
+  boo::DoublePoint View::ToPage(const boo::DoublePoint &point) const noexcept
+  {
+    double scale = DeviceScaleFactor();
+    return boo::DoublePoint(point.X() / scale, point.Y() / scale);
+  }
+
+  pal::PointerInput View::ToPage(const pal::PointerInput &input) const noexcept
+  {
+    auto scale = DeviceScaleFactor();
+    auto result = input;
+    result.Width /= scale;
+    result.Height /= scale;
+    return result;
+  }
+
+  pal::TouchpadPanInput View::ToPage(const pal::TouchpadPanInput &input) const noexcept
+  {
+    auto scale = DeviceScaleFactor();
+    auto result = input;
+    result.DeltaX /= scale;
+    result.DeltaY /= scale;
+    return result;
+  }
+
+  boo::IntRect View::ToViewPixels(const boo::IntRect &rect) const noexcept
+  {
+    boo::FloatRect scaled(rect);
+    scaled.Scale(DeviceScaleFactor());
+    return boo::EnclosingIntRect(scaled);
   }
 
   bool View::Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget) noexcept
@@ -960,10 +1029,15 @@ namespace krys::ui
     // Layers that animate are composited at the frame's time, and ask for the next frame while they run.
     (void)root->Layer().ApplyAnimationsRecursively(boo::html::EventLoop::Current().Now());
 
+    // The layers are in CSS pixels, and their backing stores are drawn at the scale.
+    renderer.Save();
+    auto scale = DeviceScaleFactor();
+    renderer.Scale(scale, scale);
     _textureMapper->BeginPainting(renderer, boo::IntRect(0, 0, size.Width(), size.Height()));
     root->UpdateBackingStoreIncludingSubLayers(*_textureMapper);
     root->Layer().Paint(*_textureMapper);
     _textureMapper->EndPainting();
+    renderer.Restore();
 
     _needsPaint = root->Layer().DescendantsOrSelfHaveRunningAnimations();
     PaintOverlay(renderer);
@@ -977,10 +1051,13 @@ namespace krys::ui
       return;
     }
 
+    // The overlay's view paints at its own scale, the same as this one's.
+    auto scale = DeviceScaleFactor();
     auto &rect = _overlay->Rect();
     renderer.Save();
-    renderer.Translate(static_cast<float>(rect.X()), static_cast<float>(rect.Y()));
-    renderer.ClipRect({0.f, 0.f, static_cast<float>(rect.Width()), static_cast<float>(rect.Height())});
+    renderer.Translate(static_cast<float>(rect.X()) * scale, static_cast<float>(rect.Y()) * scale);
+    renderer.ClipRect(
+      {0.f, 0.f, static_cast<float>(rect.Width()) * scale, static_cast<float>(rect.Height()) * scale});
     _overlay->ContentView().Paint(renderer);
     renderer.Restore();
   }
@@ -997,7 +1074,11 @@ namespace krys::ui
       boo::FloatSize(static_cast<float>(size.Width()), static_cast<float>(size.Height())));
     DrawDragImage(recorder);
     auto displayList = recorder.TakeDisplayList();
+    renderer.Save();
+    auto scale = DeviceScaleFactor();
+    renderer.Scale(scale, scale);
     Replay(*displayList, renderer);
+    renderer.Restore();
   }
 
   void View::DrawDragImage(boo::GraphicsContext &context) const noexcept
@@ -1074,11 +1155,17 @@ namespace krys::ui
 
   boo::dom::Element *View::HitTest(const boo::IntPoint &point) noexcept
   {
+    return HitTestInPage(ToPage(point));
+  }
+
+  boo::dom::Element *View::HitTestInPage(const boo::IntPoint &point) noexcept
+  {
     return Document().ElementFromPoint(point.X(), point.Y()).get();
   }
 
-  void View::MouseMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers) noexcept
+  void View::MouseMoved(const boo::IntPoint &viewPoint, pal::KeyModifiers modifiers) noexcept
   {
+    auto point = ToPage(viewPoint);
     // Windows reports moves when the mouse hasn't moved (raw input reports presses and releases as moves
     // too), and one while a button is held would start a selection.
     auto lastPosition = std::exchange(_lastMousePosition, point);
@@ -1136,7 +1223,7 @@ namespace krys::ui
     // The mouse stays where it was when the pointer was locked.
     (void)_frame->GetEventHandler().MouseMoved(
       MouseEvent(boo::PlatformEvent::Type::MouseMoved, _lastMousePosition.value_or(boo::IntPoint()),
-                 HeldButton(), 0, input::ToBooey(modifiers), movement, unadjustedMovement));
+                 HeldButton(), 0, input::ToBooey(modifiers), ToPage(movement), unadjustedMovement));
     PerformMicrotaskCheckpoint();
   }
 
@@ -1157,9 +1244,10 @@ namespace krys::ui
     return boo::MouseButton::None;
   }
 
-  void View::MousePressed(const boo::IntPoint &point, pal::MouseButton palButton,
+  void View::MousePressed(const boo::IntPoint &viewPoint, pal::MouseButton palButton,
                           pal::KeyModifiers modifiers) noexcept
   {
+    auto point = ToPage(viewPoint);
     auto button = input::ToBooey(palButton);
     if (button == boo::MouseButton::None)
     {
@@ -1211,9 +1299,10 @@ namespace krys::ui
     PerformMicrotaskCheckpoint();
   }
 
-  void View::MouseReleased(const boo::IntPoint &point, pal::MouseButton palButton,
+  void View::MouseReleased(const boo::IntPoint &viewPoint, pal::MouseButton palButton,
                            pal::KeyModifiers modifiers) noexcept
   {
+    auto point = ToPage(viewPoint);
     auto button = input::ToBooey(palButton);
     if (button == boo::MouseButton::None)
     {
@@ -1264,6 +1353,12 @@ namespace krys::ui
   bool View::MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY,
                         pal::KeyModifiers modifiers, const pal::WheelScrollSettings &settings) noexcept
   {
+    return MouseWheelInPage(ToPage(point), notchesX, notchesY, modifiers, settings);
+  }
+
+  bool View::MouseWheelInPage(const boo::IntPoint &point, float notchesX, float notchesY,
+                              pal::KeyModifiers modifiers, const pal::WheelScrollSettings &settings) noexcept
+  {
     if (!notchesX && !notchesY)
     {
       return false;
@@ -1281,8 +1376,10 @@ namespace krys::ui
     return handled;
   }
 
-  bool View::TouchpadPan(const boo::IntPoint &point, const pal::TouchpadPanInput &input) noexcept
+  bool View::TouchpadPan(const boo::IntPoint &viewPoint, const pal::TouchpadPanInput &viewInput) noexcept
   {
+    auto point = ToPage(viewPoint);
+    auto input = ToPage(viewInput);
     if (_overlay)
     {
       // Overlays take the wheel's notches; the content moving down is the wheel turning away.
@@ -1315,27 +1412,30 @@ namespace krys::ui
     return _clickCount;
   }
 
-  void View::PenInput(const boo::DoublePoint &point, const pal::PointerInput &input) noexcept
+  void View::PenInput(const boo::DoublePoint &viewPoint, const pal::PointerInput &viewInput) noexcept
   {
-    auto intPoint = boo::FlooredIntPoint(point);
-
     // While an overlay is open, the pen is the mouse.
     if (_overlay)
     {
-      switch (input.Action)
+      auto mousePoint = boo::FlooredIntPoint(viewPoint);
+      switch (viewInput.Action)
       {
         case pal::PointerAction::Pressed:
-          MousePressed(intPoint, pal::MouseButton::Left, input.Modifiers);
+          MousePressed(mousePoint, pal::MouseButton::Left, viewInput.Modifiers);
           break;
         case pal::PointerAction::Released:
-          MouseReleased(intPoint, pal::MouseButton::Left, input.Modifiers);
+          MouseReleased(mousePoint, pal::MouseButton::Left, viewInput.Modifiers);
           break;
         case pal::PointerAction::Entered:
-        case pal::PointerAction::Moved:   MouseMoved(intPoint, input.Modifiers); break;
+        case pal::PointerAction::Moved:   MouseMoved(mousePoint, viewInput.Modifiers); break;
         default:                          break;
       }
       return;
     }
+
+    auto point = ToPage(viewPoint);
+    auto input = ToPage(viewInput);
+    auto intPoint = boo::FlooredIntPoint(point);
 
     auto &handler = _frame->GetEventHandler();
     switch (input.Action)
@@ -1395,12 +1495,14 @@ namespace krys::ui
     PerformMicrotaskCheckpoint();
   }
 
-  bool View::TouchInput(const boo::DoublePoint &point, const pal::PointerInput &input) noexcept
+  bool View::TouchInput(const boo::DoublePoint &viewPoint, const pal::PointerInput &viewInput) noexcept
   {
     if (_overlay)
     {
       return false;
     }
+    auto point = ToPage(viewPoint);
+    auto input = ToPage(viewInput);
 
     auto it = std::ranges::find(_touches, input.Id, &ActiveTouch::HostId);
     if (input.Action == pal::PointerAction::Pressed && it == _touches.end())
@@ -1634,7 +1736,7 @@ namespace krys::ui
 
   EnumSet<boo::TouchAction> View::TouchActionsAt(const boo::DoublePoint &point) noexcept
   {
-    auto *element = HitTest(boo::FlooredIntPoint(point));
+    auto *element = HitTestInPage(boo::FlooredIntPoint(point));
     auto *renderer = element ? element->Renderer() : nullptr;
     if (!renderer)
     {
@@ -2091,7 +2193,7 @@ namespace krys::ui
     {
       return null;
     }
-    return view->ContentsToWindow(rect);
+    return ToViewPixels(view->ContentsToWindow(rect));
   }
 
   void View::SetCompositionDiscardedHandler(Func<void()> &&handler) noexcept
@@ -2583,9 +2685,10 @@ namespace krys::ui
                                                 operation);
   }
 
-  Maybe<pal::DropOperation> View::SystemDragInput(const boo::IntPoint &point,
+  Maybe<pal::DropOperation> View::SystemDragInput(const boo::IntPoint &viewPoint,
                                                   const pal::DragInput &input) noexcept
   {
+    auto point = ToPage(viewPoint);
     auto &controller = _page->GetDragController();
     if (input.Action == pal::DragAction::Entered)
     {
