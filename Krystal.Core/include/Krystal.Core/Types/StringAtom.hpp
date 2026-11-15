@@ -277,6 +277,23 @@ namespace krys
       return a._impl == b._impl;
     }
 
+    /// @brief Whether the atom's string is @p string, without interning it. The null atom has no string, so
+    /// it equals none (not even an empty one).
+    KRYS_NODISCARD friend bool operator==(const StringAtom &atom, utf8_stringview string) noexcept
+    {
+      return atom._impl && atom._impl->View() == string;
+    }
+
+    KRYS_NODISCARD friend bool operator==(const StringAtom &atom, const char8 *string) noexcept
+    {
+      return atom == utf8_stringview {string};
+    }
+
+    KRYS_NODISCARD friend bool operator==(const StringAtom &atom, const utf8_string &string) noexcept
+    {
+      return atom == utf8_stringview {string};
+    }
+
     /// @brief The interned string; empty for the null atom.
     KRYS_NODISCARD utf8_stringview View() const noexcept
     {

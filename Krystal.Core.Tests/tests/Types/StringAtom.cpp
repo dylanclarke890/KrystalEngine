@@ -111,4 +111,20 @@ namespace krys::tests
     }
     CHECK(pool.Size() == before);
   }
+
+  TEST_CASE("StringAtom - comparing with a string doesn't intern it", "[StringAtom]")
+  {
+    auto &pool = StringAtomPool::Current();
+    StringAtom atom = u8"compared";
+    auto before = pool.Size();
+
+    CHECK(atom == u8"compared");
+    CHECK(atom != u8"never-interned");
+    CHECK(atom == utf8_string(u8"compared"));
+    CHECK(utf8_stringview {u8"other"} != atom);
+    CHECK(pool.Size() == before);
+
+    CHECK(StringAtom::Null() != u8"");
+    CHECK(StringAtom::Empty() == u8"");
+  }
 }
