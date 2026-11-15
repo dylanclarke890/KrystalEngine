@@ -178,7 +178,7 @@ namespace krys::boo::css
                                                      PropertyParserState &state,
                                                      PropertyParserResult &result) noexcept
   {
-    auto argument = PropertyParserHelpers::ConsumeArgument(range, index);
+    auto argument = parse_property::ConsumeArgument(range, index);
     if (!argument)
     {
       return false;
@@ -206,7 +206,7 @@ namespace krys::boo::css
       return false;
     }
 
-    auto args = PropertyParserHelpers::ConsumeFunction(range);
+    auto args = parse_property::ConsumeFunction(range);
 
     ParsedPropertyList autoProperties;
     PropertyParserResult autoResult {autoProperties};
@@ -537,7 +537,7 @@ namespace krys::boo::css
         }
         case CustomPropertySyntax::Type::CustomIdent:
         {
-          if (RefPtr value = PropertyParserHelpers::ConsumeCustomIdent(range))
+          if (RefPtr value = parse_property::ConsumeCustomIdent(range))
           {
             if (component.Ident == null || value->StringValue() == component.Ident.View())
             {
@@ -573,22 +573,21 @@ namespace krys::boo::css
         }
         case CustomPropertySyntax::Type::Color:
         {
-          return PropertyParserHelpers::ConsumeColor(range, state);
+          return parse_property::ConsumeColor(range, state);
         }
         case CustomPropertySyntax::Type::Image:
         {
-          return PropertyParserHelpers::ConsumeImage(
-            range, state,
-            PropertyParserHelpers::AllowedImageType::URLFunction
-              | PropertyParserHelpers::AllowedImageType::GeneratedImage);
+          return parse_property::ConsumeImage(range, state,
+                                              parse_property::AllowedImageType::URLFunction
+                                                | parse_property::AllowedImageType::GeneratedImage);
         }
         case CustomPropertySyntax::Type::URL:
         {
-          return PropertyParserHelpers::ConsumeURL(range, state, {});
+          return parse_property::ConsumeURL(range, state, {});
         }
         case CustomPropertySyntax::Type::String:
         {
-          return PropertyParserHelpers::ConsumeString(range);
+          return parse_property::ConsumeString(range);
         }
         case CustomPropertySyntax::Type::TransformFunction:
         {
@@ -618,12 +617,12 @@ namespace krys::boo::css
         }
         case CustomPropertySyntax::Multiplier::CommaList:
         {
-          return PropertyParserHelpers::ConsumeListSeparatedBy<',', PropertyParserHelpers::OneOrMore>(
+          return parse_property::ConsumeListSeparatedBy<',', parse_property::OneOrMore>(
             range, [&](auto &range) { return ConsumeSingleValue(range, component); });
         }
         case CustomPropertySyntax::Multiplier::SpaceList:
         {
-          return PropertyParserHelpers::ConsumeListSeparatedBy<' ', PropertyParserHelpers::OneOrMore>(
+          return parse_property::ConsumeListSeparatedBy<' ', parse_property::OneOrMore>(
             range, [&](auto &range) { return ConsumeSingleValue(range, component); });
         }
       }

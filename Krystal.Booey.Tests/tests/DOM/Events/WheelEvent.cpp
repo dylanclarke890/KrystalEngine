@@ -38,7 +38,7 @@ namespace krys::boo::dom::tests
                                      PlatformWheelEventGranularity::ScrollByPixelWheelEvent,
                                      {PlatformEvent::Modifier::ShiftKey}, MonotonicTime::Now());
     Ref<WheelEvent> event = WheelEvent::Create(platformEvent, nullptr);
-    CHECK(event->Type() == EventNames::Wheel);
+    CHECK(event->Type() == event_names::Wheel);
     CHECK(event->IsTrusted());
     CHECK(event->Bubbles());
     CHECK(event->Cancelable());

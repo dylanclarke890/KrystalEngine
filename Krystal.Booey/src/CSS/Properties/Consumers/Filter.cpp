@@ -45,7 +45,7 @@
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   template <ValueId FilterFunction>
   KRYS_NODISCARD static decltype(auto)

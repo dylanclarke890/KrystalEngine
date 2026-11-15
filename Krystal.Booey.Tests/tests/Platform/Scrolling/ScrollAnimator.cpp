@@ -74,8 +74,9 @@ namespace krys::boo::tests
     auto &scroller = fixture.ById(u8"s");
     auto scroll = CreateRef<EventCounter>();
     auto scrollEnd = CreateRef<EventCounter>();
-    scroller.AddEventListener(EventNames::Scroll, ShareRef<dom::EventListenerCallback>(*scroll), false);
-    scroller.AddEventListener(EventNames::ScrollEnd, ShareRef<dom::EventListenerCallback>(*scrollEnd), false);
+    scroller.AddEventListener(event_names::Scroll, ShareRef<dom::EventListenerCallback>(*scroll), false);
+    scroller.AddEventListener(event_names::ScrollEnd, ShareRef<dom::EventListenerCallback>(*scrollEnd),
+                              false);
 
     SECTION("moves over frames, and ends with one scrollend")
     {
@@ -277,7 +278,7 @@ namespace krys::boo::tests
     auto &view = *fixture.Document->View();
     auto &window = *fixture.Document->Window();
     auto scrollEnd = CreateRef<EventCounter>();
-    fixture.Document->AddEventListener(EventNames::ScrollEnd,
+    fixture.Document->AddEventListener(event_names::ScrollEnd,
                                        ShareRef<dom::EventListenerCallback>(*scrollEnd), false);
 
     SECTION("scrollTo with smooth")
@@ -418,7 +419,7 @@ namespace krys::boo::tests
     int32 itemHeight =
       (listBox.ItemBoundingBoxRect({}, 1).Y() - listBox.ItemBoundingBoxRect({}, 0).Y()).ToInt();
     auto scrollEnd = CreateRef<EventCounter>();
-    select.AddEventListener(EventNames::ScrollEnd, ShareRef<dom::EventListenerCallback>(*scrollEnd), false);
+    select.AddEventListener(event_names::ScrollEnd, ShareRef<dom::EventListenerCallback>(*scrollEnd), false);
 
     SECTION("scrollTop, with scroll-behavior: smooth, moves over frames and ends with one scrollend")
     {

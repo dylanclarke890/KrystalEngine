@@ -43,7 +43,7 @@ namespace krys::boo::css
   struct EasingFunction;
   struct PropertyParserState;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // <easing-function> = linear | ease | ease-in | ease-out | ease-in-out | step-start | step-end |
     // <linear()> | <cubic-bezier()> | <steps()> NOTE: also includes non-standard <spring()>.

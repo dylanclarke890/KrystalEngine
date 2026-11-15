@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Krystal.Core/Concepts.hpp"
 #include <algorithm>
-#include <concepts>
 #include <cstddef>
 #include <functional>
 #include <initializer_list>
@@ -10,7 +10,6 @@
 #include <memory>
 #include <ranges>
 #include <span>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -73,7 +72,7 @@ namespace krys
     {
     }
 
-    template <std::invocable<size_t> Generator>
+    template <Callable<size_t> Generator>
     static FixedVector createWithSizeFromGenerator(size_t size, Generator &&generator)
     {
       FixedVector result;
@@ -258,7 +257,7 @@ namespace krys
     template <typename Mapper>
     auto map(Mapper &&mapper) const
     {
-      using Result = std::remove_cvref_t<std::invoke_result_t<Mapper, const T &>>;
+      using Result = remove_cvref_t<invoke_result_t<Mapper, const T &>>;
       std::vector<Result> result;
       result.reserve(_values.size());
       for (const auto &value : _values)

@@ -400,7 +400,7 @@ namespace krys::boo
         default:              break;
       }
 
-      if (css::PropertyParserHelpers::IsSystemFontShorthand(valueID))
+      if (css::parse_property::IsSystemFontShorthand(valueID))
       {
         return false;
       }

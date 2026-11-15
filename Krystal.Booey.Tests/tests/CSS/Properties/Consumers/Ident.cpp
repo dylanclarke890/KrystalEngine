@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   namespace
   {
@@ -19,7 +19,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     };
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeIdentRaw)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeIdentRaw)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"auto  none 5"};
     auto range = tokens.Tokenizer.Tokens();
@@ -30,7 +30,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(range.Peek().Type() == TokenType::Number);
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeIdentRaw predicate)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeIdentRaw predicate)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"top left"};
     auto range = tokens.Tokenizer.Tokens();
@@ -44,7 +44,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(range.IsAtEnd());
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeIdentUsingMapping)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeIdentUsingMapping)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"top left"};
     auto range = tokens.Tokenizer.Tokens();
@@ -63,7 +63,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(range.Peek().ValueId() == ValueId::Left);
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCustomIdentRaw)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCustomIdentRaw)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"Foo inherit default Bar 5"};
     auto range = tokens.Tokenizer.Tokens();
@@ -79,7 +79,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeCustomIdentRaw(range) == null);
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeDashedIdentRaw)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeDashedIdentRaw)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"--a foo 5"};
     auto range = tokens.Tokenizer.Tokens();

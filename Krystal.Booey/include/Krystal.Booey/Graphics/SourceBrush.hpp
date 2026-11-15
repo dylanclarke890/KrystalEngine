@@ -68,7 +68,7 @@ namespace krys::boo
     }
 
     // Packed color accessor takes into account the discrimination between color, gradient, pattern.
-    KRYS_NODISCARD Maybe<PackedColour::RGBA> PackedColor() const noexcept;
+    KRYS_NODISCARD Maybe<packed_colour::RGBA> PackedColor() const noexcept;
 
     KRYS_NODISCARD boo::Gradient *GetGradient() const noexcept;
 
@@ -113,7 +113,7 @@ namespace krys::boo
     }
   };
 
-  inline Maybe<PackedColour::RGBA> SourceBrush::PackedColor() const noexcept
+  inline Maybe<packed_colour::RGBA> SourceBrush::PackedColor() const noexcept
   {
     if (HasPatternOrGradient())
     {

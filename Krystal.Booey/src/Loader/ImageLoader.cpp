@@ -49,13 +49,13 @@ namespace krys::boo
 
     KRYS_NODISCARD const StringAtom &LoadEventName() noexcept
     {
-      static const StringAtom name {EventNames::Load};
+      static const StringAtom name {event_names::Load};
       return name;
     }
 
     KRYS_NODISCARD const StringAtom &ErrorEventName() noexcept
     {
-      static const StringAtom name {EventNames::Error};
+      static const StringAtom name {event_names::Error};
       return name;
     }
 
@@ -640,7 +640,7 @@ namespace krys::boo
     LoadEventSender().CancelEvent(*this, ErrorEventName());
     if (GetDocument().HasLivingRenderTree())
     {
-      (void)dom::EventDispatcher::FireEvent(EventNames::Error, _element);
+      (void)dom::EventDispatcher::FireEvent(event_names::Error, _element);
     }
 
     // Only consider updating the protection ref-count of the Element immediately before returning

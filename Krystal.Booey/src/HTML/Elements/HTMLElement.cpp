@@ -1525,7 +1525,7 @@ namespace krys::boo::html
     // source.
     init.Composed = true;
     init.Source = ShareRefPtr<dom::Element>(source);
-    auto event = dom::ToggleEvent::Create(EventNames::BeforeToggle, init, cancelable);
+    auto event = dom::ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }

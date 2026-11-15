@@ -6,7 +6,7 @@
 #include "Krystal.Booey/CSS/Parser/TokenRangeGuard.hpp"
 #include <string>
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   namespace
   {
@@ -28,7 +28,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     }
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeComma)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeComma)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8",  a"};
     auto range = tokens.Tokenizer.Tokens();
@@ -38,7 +38,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(range.Peek().Type() == TokenType::Ident);
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeSlash)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeSlash)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"/ a * b"};
     auto range = tokens.Tokenizer.Tokens();
@@ -52,7 +52,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(range.Peek().Type() == TokenType::Delim);
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFunction)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFunction)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"calc( 1px + f(2) )  next"};
     auto range = tokens.Tokenizer.Tokens();
@@ -61,7 +61,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(Serialise(range) == "next");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeArgument)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeArgument)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"a b, f(c, d), e"};
     auto range = tokens.Tokenizer.Tokens();

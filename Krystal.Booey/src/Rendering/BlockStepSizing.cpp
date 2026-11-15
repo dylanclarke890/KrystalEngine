@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-namespace krys::boo::BlockStepSizing
+namespace krys::boo::block_step_sizing
 {
   bool ChildHasSupportedStyle(const RenderStyle &childStyle) noexcept
   {

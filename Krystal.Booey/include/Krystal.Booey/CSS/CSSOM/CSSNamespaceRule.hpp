@@ -44,7 +44,7 @@ namespace krys::boo::css
     CSSNamespaceRule(NamespaceRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSNamespaceRule() noexcept;
+    ~CSSNamespaceRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSNamespaceRule> Create(NamespaceRule &rule, CSSStyleSheet *sheet) noexcept;
 

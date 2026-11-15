@@ -407,7 +407,7 @@ namespace krys::boo::css
     auto colorTokens = tokens;
     auto parserContext = ParserContext {document};
     auto parserState = PropertyParserState {.Context = parserContext};
-    auto result = PropertyParserHelpers::ConsumeColor(tokens, parserState);
+    auto result = parse_property::ConsumeColor(tokens, parserState);
     tokens.DiscardWhitespace();
     if (!result || !tokens.IsAtEnd())
     {
@@ -420,7 +420,7 @@ namespace krys::boo::css
     if (first.Type() == TokenType::Hash)
     {
       // 1. (A hex color.)
-      if (auto reified = ReifySRGBColor(PropertyParserHelpers::ParseColorRaw(cssText, parserContext)))
+      if (auto reified = ReifySRGBColor(parse_property::ParseColorRaw(cssText, parserContext)))
       {
         return Ref<CSSStyleValue>(krys::move(reified));
       }
@@ -430,7 +430,7 @@ namespace krys::boo::css
       // 9. If value is a named color or the transparent keyword, return a new CSSRGB with its color.
       if (IsAbsoluteColorKeyword(first.ValueId()))
       {
-        if (auto reified = ReifySRGBColor(PropertyParserHelpers::ParseColorRaw(cssText, parserContext)))
+        if (auto reified = ReifySRGBColor(parse_property::ParseColorRaw(cssText, parserContext)))
         {
           return Ref<CSSStyleValue>(krys::move(reified));
         }
@@ -533,7 +533,7 @@ namespace krys::boo::css
     auto tokens = tokenizer.Tokens();
     auto parserContext = ParserContext {ParserMode::HTMLStandard};
     auto parserState = PropertyParserState {.Context = parserContext};
-    auto value = PropertyParserHelpers::ConsumeColor(tokens, parserState);
+    auto value = parse_property::ConsumeColor(tokens, parserState);
     tokens.DiscardWhitespace();
     return tokens.IsAtEnd() ? value : nullptr;
   }

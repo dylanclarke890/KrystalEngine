@@ -36,7 +36,7 @@ namespace krys::boo::svg
   class SVGTransformable : public SVGLocatable
   {
   public:
-    virtual ~SVGTransformable() noexcept;
+    ~SVGTransformable() noexcept override;
 
     static bool ParseAndReplaceTransform(SVGTransformValue::SVGTransformType, dom::DOMStringView &buffer,
                                          SVGTransform &) noexcept;

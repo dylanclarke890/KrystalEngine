@@ -71,7 +71,7 @@ namespace krys::boo::css
 
   Maybe<size_t> KeyframesRule::FindKeyframeIndex(const CSSOMString &key) const noexcept
   {
-    auto keys = PropertyParserHelpers::ParseKeyframeKeyList(key, StrictParserContext());
+    auto keys = parse_property::ParseKeyframeKeyList(key, StrictParserContext());
     if (keys.empty())
     {
       return {};

@@ -374,10 +374,10 @@ namespace krys::boo
     fixedIndex -= subgridSpanInOuter.StartLine();
 
     auto innerDirection =
-      GridLayoutFunctions::FlowAwareDirectionForGridItem(*parent, subgrid, outer.Direction());
+      grid_layout_functions::FlowAwareDirectionForGridItem(*parent, subgrid, outer.Direction());
     krys_debug_assert(subgrid.IsSubgrid(innerDirection));
 
-    if (GridLayoutFunctions::IsSubgridReversedDirection(*parent, outer.Direction(), subgrid))
+    if (grid_layout_functions::IsSubgridReversedDirection(*parent, outer.Direction(), subgrid))
     {
       uint32 fixedMax = subgrid.CurrentGrid().NumTracks(innerDirection);
       fixedIndex = fixedMax - fixedIndex - 1;

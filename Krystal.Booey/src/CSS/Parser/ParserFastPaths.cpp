@@ -572,11 +572,11 @@ namespace krys::boo::css
         }
         case 6:
         {
-          return AsSRGBA(PackedColour::ARGB {0xFF'00'00'00 | value});
+          return AsSRGBA(packed_colour::ARGB {0xFF'00'00'00 | value});
         }
         case 8:
         {
-          return AsSRGBA(PackedColour::RGBA {value});
+          return AsSRGBA(packed_colour::RGBA {value});
         }
         default:
         {
@@ -844,7 +844,7 @@ namespace krys::boo::css
         return null;
       }
 
-      return AsSRGBA(PackedColour::ARGB {namedColor->ARGBValue});
+      return AsSRGBA(packed_colour::ARGB {namedColor->ARGBValue});
     }
   }
 
@@ -912,7 +912,7 @@ namespace krys::boo::css
       auto valueId = ValueIdFromName(string);
       if (IsColorKeyword(valueId))
       {
-        if (!PropertyParserHelpers::IsColorKeywordAllowed(valueId, context))
+        if (!parse_property::IsColorKeywordAllowed(valueId, context))
         {
           return nullptr;
         }

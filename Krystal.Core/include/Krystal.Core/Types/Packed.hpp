@@ -314,7 +314,7 @@ namespace krys
       a.swap(b);
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static T *unwrap(const StorageType &ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static T *unwrap(const StorageType &ptr) noexcept
     {
       return ptr.get();
     }

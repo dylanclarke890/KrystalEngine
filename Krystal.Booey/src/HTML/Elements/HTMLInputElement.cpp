@@ -1167,7 +1167,7 @@ namespace krys::boo::html
     // Input event is fired by the Node::defaultEventHandler for editable controls.
     if (!IsTextField())
     {
-      dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(EventNames::Input, true, false, true),
+      dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(event_names::Input, true, false, true),
                                              ShareRef(*this));
     }
 
@@ -2160,7 +2160,7 @@ namespace krys::boo::html
     _clickHandlingState = {};
     _clickHandlingState.Trusted = event.IsTrusted();
     auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
-    if (event.Type() == EventNames::Click && mouseEvent && mouseEvent->Button() == 0)
+    if (event.Type() == event_names::Click && mouseEvent && mouseEvent->Button() == 0)
     {
       _inputType->WillDispatchClick(_clickHandlingState);
       _clickHandlingState.Stateful = true;
@@ -2172,7 +2172,7 @@ namespace krys::boo::html
   {
     // A file input's button (its ::file-selector-button) activates the input, so clicking it opens the
     // chooser, as in Chrome.
-    if (IsInUserAgentShadowTree() && UserAgentPart() == css::UserAgentParts::FileSelectorButton())
+    if (IsInUserAgentShadowTree() && UserAgentPart() == css::user_agent_parts::FileSelectorButton())
     {
       if (RefPtr<HTMLInputElement> host =
             ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
@@ -2236,11 +2236,11 @@ namespace krys::boo::html
 
     if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event); mouseEvent && mouseEvent->Button() == 0)
     {
-      if (mouseEvent->Type() == EventNames::Click || mouseEvent->Type() == EventNames::AuxClick)
+      if (mouseEvent->Type() == event_names::Click || mouseEvent->Type() == event_names::AuxClick)
       {
         _inputType->HandleClickEvent(*mouseEvent);
       }
-      else if (mouseEvent->Type() == EventNames::MouseDown)
+      else if (mouseEvent->Type() == event_names::MouseDown)
       {
         _inputType->HandleMouseDownEvent(*mouseEvent);
       }
@@ -2253,7 +2253,7 @@ namespace krys::boo::html
     }
 
     if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
-        keyboardEvent && keyboardEvent->Type() == EventNames::KeyDown)
+        keyboardEvent && keyboardEvent->Type() == event_names::KeyDown)
     {
       auto shouldCallBaseEventHandler = _inputType->HandleKeydownEvent(*keyboardEvent);
       if (event.DefaultHandled() || shouldCallBaseEventHandler == InputType::ShouldCallBaseEventHandler::No)
@@ -2266,7 +2266,7 @@ namespace krys::boo::html
     // Makes editing keyboard handling take precedence over the keydown and keypress handling in this
     // function.
     bool callBaseClassEarly =
-      IsTextField() && (event.Type() == EventNames::KeyDown || event.Type() == EventNames::KeyPress);
+      IsTextField() && (event.Type() == event_names::KeyDown || event.Type() == event_names::KeyPress);
     if (callBaseClassEarly)
     {
       HTMLTextFormControlElement::DefaultEventHandler(event);
@@ -2280,7 +2280,7 @@ namespace krys::boo::html
     // the key press event.
     if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
     {
-      if (keyboardEvent->Type() == EventNames::KeyPress)
+      if (keyboardEvent->Type() == event_names::KeyPress)
       {
         _inputType->HandleKeypressEvent(*keyboardEvent);
         if (keyboardEvent->DefaultHandled())
@@ -2288,7 +2288,7 @@ namespace krys::boo::html
           return;
         }
       }
-      else if (keyboardEvent->Type() == EventNames::KeyUp)
+      else if (keyboardEvent->Type() == event_names::KeyUp)
       {
         _inputType->HandleKeyupEvent(*keyboardEvent);
         if (keyboardEvent->DefaultHandled())

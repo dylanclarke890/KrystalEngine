@@ -187,12 +187,12 @@ namespace krys::boo::display_list
   class SetInlineFillColor
   {
   private:
-    PackedColour::RGBA _colorData;
+    packed_colour::RGBA _colorData;
 
   public:
     constexpr static std::string_view Name = "set-inline-fill-color";
 
-    explicit SetInlineFillColor(PackedColour::RGBA colorData) noexcept : _colorData(colorData)
+    explicit SetInlineFillColor(packed_colour::RGBA colorData) noexcept : _colorData(colorData)
     {
     }
 
@@ -206,7 +206,7 @@ namespace krys::boo::display_list
       return {AsSRGBA(ColorData())};
     }
 
-    KRYS_NODISCARD const PackedColour::RGBA &ColorData() const noexcept
+    KRYS_NODISCARD const packed_colour::RGBA &ColorData() const noexcept
     {
       return _colorData;
     }
@@ -219,13 +219,13 @@ namespace krys::boo::display_list
   class SetInlineStroke
   {
   private:
-    Maybe<PackedColour::RGBA> _colorData;
+    Maybe<packed_colour::RGBA> _colorData;
     Maybe<float> _thickness;
 
   public:
     constexpr static std::string_view Name = "set-inline-stroke";
 
-    SetInlineStroke(Maybe<PackedColour::RGBA> colorData, Maybe<float> thickness = std::nullopt) noexcept
+    SetInlineStroke(Maybe<packed_colour::RGBA> colorData, Maybe<float> thickness = std::nullopt) noexcept
         : _colorData(colorData), _thickness(thickness)
     {
       krys_debug_assert(_colorData || _thickness);
@@ -235,7 +235,7 @@ namespace krys::boo::display_list
     {
     }
 
-    explicit SetInlineStroke(SRGBA<uint8> colorData) noexcept : _colorData(PackedColour::RGBA(colorData))
+    explicit SetInlineStroke(SRGBA<uint8> colorData) noexcept : _colorData(packed_colour::RGBA(colorData))
     {
     }
 
@@ -244,7 +244,7 @@ namespace krys::boo::display_list
       return _colorData ? Maybe<boo::Color>(AsSRGBA(*_colorData)) : std::nullopt;
     }
 
-    KRYS_NODISCARD Maybe<PackedColour::RGBA> ColorData() const noexcept
+    KRYS_NODISCARD Maybe<packed_colour::RGBA> ColorData() const noexcept
     {
       return _colorData;
     }

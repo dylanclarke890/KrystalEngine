@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridTrackSize.hpp"
 
-namespace krys::boo::GridLayoutFunctions
+namespace krys::boo::grid_layout_functions
 {
   using style::GridTrackSizingDirection;
 

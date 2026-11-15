@@ -171,7 +171,7 @@ namespace krys::boo::html
     if (_shouldShrinkImage)
     {
       _clickListener = imageElement->AddEventListener<dom::MouseEvent>(
-        EventNames::Click,
+        event_names::Click,
         [document = CreateWeakPtr(this)](dom::MouseEvent &event)
         {
           if (document && dom::IsAnyClick(event))

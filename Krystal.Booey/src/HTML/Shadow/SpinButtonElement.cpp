@@ -54,7 +54,7 @@ namespace krys::boo::html
                                                    SpinButtonOwner &spinButtonOwner) noexcept
   {
     auto element = CreateRef<SpinButtonElement>(document, spinButtonOwner);
-    element->SetUserAgentPart(css::UserAgentParts::WebkitInnerSpinButton());
+    element->SetUserAgentPart(css::user_agent_parts::WebkitInnerSpinButton());
     return element;
   }
 
@@ -100,7 +100,7 @@ namespace krys::boo::html
       FloatPoint(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
       MapCoordinatesMode::UseTransforms));
     auto type = mouseEvent->Type();
-    if (type == EventNames::MouseDown && mouseEvent->ButtonType() == MouseButton::Left)
+    if (type == event_names::MouseDown && mouseEvent->ButtonType() == MouseButton::Left)
     {
       if (box->BorderBoxRect().Contains(local))
       {
@@ -123,11 +123,11 @@ namespace krys::boo::html
         mouseEvent->SetDefaultHandled();
       }
     }
-    else if (type == EventNames::MouseUp && mouseEvent->ButtonType() == MouseButton::Left)
+    else if (type == event_names::MouseUp && mouseEvent->ButtonType() == MouseButton::Left)
     {
       StopRepeatingTimer();
     }
-    else if (type == EventNames::MouseMove)
+    else if (type == event_names::MouseMove)
     {
       if (box->BorderBoxRect().Contains(local))
       {

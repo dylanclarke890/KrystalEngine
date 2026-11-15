@@ -80,11 +80,11 @@ namespace krys::boo::html
     {
       // The shift key at the press is kept for the drag it may start; a drag comes after the mouse leaves, so
       // it's cleared when the mouse comes over the link again.
-      if (event.Type() == EventNames::MouseDown)
+      if (event.Type() == event_names::MouseDown)
       {
         _wasShiftKeyDownOnMouseDown = IsShiftKeyDown(event);
       }
-      else if (event.Type() == EventNames::MouseOver)
+      else if (event.Type() == event_names::MouseOver)
       {
         _wasShiftKeyDownOnMouseDown = false;
       }
@@ -98,7 +98,7 @@ namespace krys::boo::html
 
       // A click is followed as the activation behaviour; other buttons' clicks (the middle button opening the
       // link elsewhere) are followed here, and the host decides from the button.
-      if (event.Type() == EventNames::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event)
+      if (event.Type() == event_names::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event)
           && TreatLinkAsLive(IsShiftKeyDown(event)))
       {
         HyperlinkAlgorithms::FollowTheHyperlink(*this, event);

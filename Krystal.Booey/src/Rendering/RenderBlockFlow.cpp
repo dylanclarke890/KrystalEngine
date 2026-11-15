@@ -1469,10 +1469,10 @@ namespace krys::boo
   void RenderBlockFlow::PerformBlockStepSizing(RenderBox &child,
                                                LayoutUnit blockStepSizeForChild) const noexcept
   {
-    krys_debug_assert(BlockStepSizing::ChildHasSupportedStyle(child.Style()));
+    krys_debug_assert(block_step_sizing::ChildHasSupportedStyle(child.Style()));
 
     auto extraSpace =
-      BlockStepSizing::ComputeExtraSpace(blockStepSizeForChild, LogicalMarginBoxHeightForChild(child));
+      block_step_sizing::ComputeExtraSpace(blockStepSizeForChild, LogicalMarginBoxHeightForChild(child));
     if (!extraSpace)
     {
       return;
@@ -1481,13 +1481,14 @@ namespace krys::boo
     switch (child.Style().GetBlockStepInsert())
     {
       case BlockStepInsert::MarginBox:
-        BlockStepSizing::DistributeExtraSpaceToChildMargins(child, extraSpace, Style().GetWritingMode());
+        block_step_sizing::DistributeExtraSpaceToChildMargins(child, extraSpace, Style().GetWritingMode());
         break;
       case BlockStepInsert::ContentBox:
-        BlockStepSizing::DistributeExtraSpaceToChildContentArea(child, extraSpace, Style().GetWritingMode());
+        block_step_sizing::DistributeExtraSpaceToChildContentArea(child, extraSpace,
+                                                                  Style().GetWritingMode());
         break;
       case BlockStepInsert::PaddingBox:
-        BlockStepSizing::DistributeExtraSpaceToChildPadding(child, extraSpace, Style().GetWritingMode());
+        block_step_sizing::DistributeExtraSpaceToChildPadding(child, extraSpace, Style().GetWritingMode());
         break;
     }
   }
@@ -1569,7 +1570,7 @@ namespace krys::boo
 
     const auto &childStyle = child.Style();
     if (auto blockStepSizeForChild = childStyle.GetBlockStepSize().TryLength();
-        blockStepSizeForChild && BlockStepSizing::ChildHasSupportedStyle(childStyle))
+        blockStepSizeForChild && block_step_sizing::ChildHasSupportedStyle(childStyle))
     {
       PerformBlockStepSizing(child, LayoutUnit(blockStepSizeForChild->ResolveZoom(style::ZoomNeeded {})));
     }

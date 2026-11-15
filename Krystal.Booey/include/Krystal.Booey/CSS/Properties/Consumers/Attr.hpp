@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     /// @grammar <attr()> consuming
     /// @see https://drafts.csswg.org/css-values-5/#funcdef-attr

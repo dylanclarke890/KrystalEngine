@@ -2101,7 +2101,7 @@ namespace krys::boo::dom
     }
 
     // 7. Fire an event named visibilitychange at document, with its bubbles attribute initialized to true.
-    (void)EventDispatcher::DispatchToTarget(*Event::Create(EventNames::VisibilityChange, true, false), this);
+    (void)EventDispatcher::DispatchToTarget(*Event::Create(event_names::VisibilityChange, true, false), this);
   }
 
   void Document::VisibilityStateChanged() noexcept
@@ -2118,7 +2118,7 @@ namespace krys::boo::dom
       html::TaskSource::UserInteraction, *this,
       [protectedThis = ShareRef(*this)]
       {
-        (void)EventDispatcher::DispatchToTarget(*Event::Create(EventNames::VisibilityChange, true, false),
+        (void)EventDispatcher::DispatchToTarget(*Event::Create(event_names::VisibilityChange, true, false),
                                                 protectedThis.get());
 
         bool pageIsVisible = protectedThis->GetPage() && protectedThis->GetPage()->IsVisible();
@@ -2584,7 +2584,7 @@ namespace krys::boo::dom
     auto currentTargets = std::exchange(_pendingScrollEventTargets, {});
     for (auto &[target, type] : currentTargets)
     {
-      auto eventName = type == ScrollEventType::Scroll ? EventNames::Scroll : EventNames::ScrollEnd;
+      auto eventName = type == ScrollEventType::Scroll ? event_names::Scroll : event_names::ScrollEnd;
       (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(eventName), *target,
                                               EventInit {.Bubbles = Is<Document>(*target)});
     }
@@ -2594,7 +2594,7 @@ namespace krys::boo::dom
       _needsVisualViewportScrollEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(EventNames::Scroll, window->GetVisualViewport());
+        (void)EventDispatcher::FireEvent(event_names::Scroll, window->GetVisualViewport());
       }
     }
   }
@@ -2634,7 +2634,7 @@ namespace krys::boo::dom
       _needsDOMWindowResizeEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(EventNames::Resize, *window);
+        (void)EventDispatcher::FireEvent(event_names::Resize, *window);
       }
     }
     if (_needsVisualViewportResizeEvent)
@@ -2642,7 +2642,7 @@ namespace krys::boo::dom
       _needsVisualViewportResizeEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(EventNames::Resize, window->GetVisualViewport());
+        (void)EventDispatcher::FireEvent(event_names::Resize, window->GetVisualViewport());
       }
     }
   }
@@ -2754,12 +2754,12 @@ namespace krys::boo::dom
       RefPtr<html::HTMLElement> ancestor = TopmostClickedPopover(target);
       // 5. If event's type is "pointerdown": set document's popover pointerdown target to the result of
       //    running topmost clicked popover given target.
-      if (event.Type() == EventNames::PointerDown)
+      if (event.Type() == event_names::PointerDown)
       {
         _popoverPointerDownTarget = CreateWeakPtr(ancestor.get());
       }
       // 6. If event's type is "pointerup":
-      else if (event.Type() == EventNames::PointerUp)
+      else if (event.Type() == event_names::PointerUp)
       {
         // 6a. Let ancestor be the result of running topmost clicked popover given target.
         // 6b. Let sameTarget be true if ancestor is document's popover pointerdown target.
@@ -2826,14 +2826,14 @@ namespace krys::boo::dom
     RefPtr<html::HTMLDialogElement> ancestor = ShareRefPtr(nearestClickedDialog());
 
     // 5. If event's type is "pointerdown", then set document's dialog pointerdown target to ancestor.
-    if (event.Type() == EventNames::PointerDown)
+    if (event.Type() == event_names::PointerDown)
     {
       _dialogPointerDownTarget = CreateWeakPtr(ancestor.get());
       return;
     }
 
     // 6. If event's type is "pointerup":
-    if (event.Type() == EventNames::PointerUp)
+    if (event.Type() == event_names::PointerUp)
     {
       // 6a. Let sameTarget be true if ancestor is document's dialog pointerdown target.
       bool sameTarget = ancestor.get() == _dialogPointerDownTarget.get();
@@ -3525,7 +3525,7 @@ namespace krys::boo::dom
     // A Document's get the parent algorithm, given an event, returns null if event's type attribute value is
     // "load" or the Document does not have a browsing context; otherwise the Document's relevant global
     // object.
-    if (event.Type() == EventNames::Load || !Frame())
+    if (event.Type() == event_names::Load || !Frame())
     {
       return nullptr;
     }
@@ -3668,7 +3668,7 @@ namespace krys::boo::dom
       if (!_loadTiming.DOMContentLoadedEventStartTime)
       {
         _loadTiming.DOMContentLoadedEventStartTime = _domWindow ? _domWindow->NowTimestamp() : 0;
-        auto event = Event::Create(EventNames::DOMContentLoaded, true, false);
+        auto event = Event::Create(event_names::DOMContentLoaded, true, false);
         (void)EventDispatcher::DispatchToTarget(*event, this);
         _loadTiming.DOMContentLoadedEventEndTime = _domWindow ? _domWindow->NowTimestamp() : 0;
       }
@@ -3777,7 +3777,7 @@ namespace krys::boo::dom
     {
       _loadTiming.LoadEventStartTime = window->NowTimestamp();
     }
-    (void)EventDispatcher::FireEvent<Event>(EventNames::Load, *window, {}, true);
+    (void)EventDispatcher::FireEvent<Event>(event_names::Load, *window, {}, true);
     if (!_loadTiming.LoadEventEndTime)
     {
       _loadTiming.LoadEventEndTime = window->NowTimestamp();
@@ -3866,7 +3866,7 @@ namespace krys::boo::dom
     _pageShowing = false;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(EventNames::PageHide, persisted);
+      auto event = html::PageTransitionEvent::Create(event_names::PageHide, persisted);
       (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }
@@ -3882,7 +3882,7 @@ namespace krys::boo::dom
     _pageShowing = true;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(EventNames::PageShow, persisted);
+      auto event = html::PageTransitionEvent::Create(event_names::PageShow, persisted);
       (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }
@@ -4278,27 +4278,27 @@ namespace krys::boo::dom
 
   void Document::AddListenerTypeIfNeeded(DOMStringAtom type) noexcept
   {
-    if (type == EventNames::AnimationIteration)
+    if (type == event_names::AnimationIteration)
     {
       _hasAnimationIterationListener = true;
     }
-    else if (type == EventNames::PointerMove)
+    else if (type == event_names::PointerMove)
     {
       _hasPointerMoveListener = true;
     }
-    else if (type == EventNames::PointerRawUpdate)
+    else if (type == event_names::PointerRawUpdate)
     {
       _hasPointerRawUpdateListener = true;
     }
 
     // Touches dispatch pointer events as well as touch events.
-    if (type == EventNames::TouchStart || type == EventNames::TouchMove || type == EventNames::TouchEnd
-        || type == EventNames::TouchCancel || type == EventNames::PointerDown || type == EventNames::PointerUp
-        || type == EventNames::PointerMove || type == EventNames::PointerRawUpdate
-        || type == EventNames::PointerCancel || type == EventNames::PointerOver
-        || type == EventNames::PointerOut || type == EventNames::PointerEnter
-        || type == EventNames::PointerLeave || type == EventNames::GotPointerCapture
-        || type == EventNames::LostPointerCapture)
+    if (type == event_names::TouchStart || type == event_names::TouchMove || type == event_names::TouchEnd
+        || type == event_names::TouchCancel || type == event_names::PointerDown
+        || type == event_names::PointerUp || type == event_names::PointerMove
+        || type == event_names::PointerRawUpdate || type == event_names::PointerCancel
+        || type == event_names::PointerOver || type == event_names::PointerOut
+        || type == event_names::PointerEnter || type == event_names::PointerLeave
+        || type == event_names::GotPointerCapture || type == event_names::LostPointerCapture)
     {
       _hasTouchRelatedListener = true;
     }
@@ -5337,7 +5337,7 @@ namespace krys::boo::dom
       {
         return null;
       }
-      return css::PropertyParserHelpers::ParseUnresolvedColorScheme(*content, context);
+      return css::parse_property::ParseUnresolvedColorScheme(*content, context);
     };
 
     // 3. Return null.

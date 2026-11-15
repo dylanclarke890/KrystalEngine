@@ -84,7 +84,7 @@ namespace krys::boo::html
     auto legendSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
     _legendSlot = CreateWeakPtr(legendSlot.get());
     auto labelElement = dom::ElementFactory::CreateHTMLElement<HTMLDivElement>(document, u8"div");
-    labelElement->SetUserAgentPart(css::UserAgentParts::InternalOptgroupLabel());
+    labelElement->SetUserAgentPart(css::user_agent_parts::InternalOptgroupLabel());
     _labelElement = CreateWeakPtr<dom::Element>(labelElement.get());
     (void)legendSlot->AppendChild(*labelElement);
     (void)root.AppendChild(*legendSlot);

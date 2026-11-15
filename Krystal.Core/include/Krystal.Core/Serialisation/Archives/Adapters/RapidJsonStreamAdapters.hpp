@@ -6,7 +6,7 @@
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   class RapidJsonStreamWriterAdapter
   {

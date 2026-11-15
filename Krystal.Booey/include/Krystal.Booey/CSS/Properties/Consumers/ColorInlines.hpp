@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   // MARK: <color> parsing (raw)
 

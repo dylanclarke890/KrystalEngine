@@ -8046,6 +8046,9 @@ class GeneratePropertyId:
                 to.write("};")
                 to.newline()
 
+            # gperf's own code isn't ours to lint; NOLINTEND follows the keywords.
+            to.write("// NOLINTBEGIN")
+
     def _generate_gperf_declarations(self, *, to: Writer):
         to.write_block("""\
             %struct-type
@@ -8082,6 +8085,7 @@ class GeneratePropertyId:
         to.write("%%")
         to.write_lines(all_property_names_and_aliases_with_ids)
         to.write("%%")
+        to.write("// NOLINTEND")
 
     def _generate_lookup_functions(self, *, to: Writer):
         to.write_block("""\
@@ -8741,7 +8745,7 @@ class GeneratePropertyParsing:
             )
 
             with writer.namespace(namespace="krys::boo::css"):
-                writer.using_namespace_declarations(namespaces=["PropertyParserHelpers"])
+                writer.using_namespace_declarations(namespaces=["parse_property"])
 
                 self._generate_property_parsing_cpp_property_parsing_functions(to=writer)
 
@@ -9231,7 +9235,7 @@ class GenerateStyleBuilderGenerated:
                 and "Initial" not in property.codegen_properties.style_builder_custom
                 and property.codegen_properties.style_builder_needs_system_font_shorthand_check
             ):
-                to.write("if (css::PropertyParserHelpers::IsSystemFontShorthand(value.ValueId()))")
+                to.write("if (css::parse_property::IsSystemFontShorthand(value.ValueId()))")
                 to.write("{")
                 with to.indent():
                     to.write(f"ApplyInitial{property.id_without_prefix}(builderState);")

@@ -71,8 +71,8 @@ namespace krys::boo::dom
     //   node document's document element is eventTarget, or is a node whose node document's body element is
     //   eventTarget.
     // 2. Return false.
-    if (type != EventNames::TouchStart && type != EventNames::TouchMove && type != EventNames::Wheel
-        && type != EventNames::MouseWheel)
+    if (type != event_names::TouchStart && type != event_names::TouchMove && type != event_names::Wheel
+        && type != event_names::MouseWheel)
     {
       return false;
     }

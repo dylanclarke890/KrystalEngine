@@ -28,7 +28,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   enum class AllowedURLModifiers
   {
@@ -39,7 +39,7 @@ namespace krys::boo::css::PropertyParserHelpers
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::AllowedURLModifiers, 4uz)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::parse_property::AllowedURLModifiers, 4uz)
 
 namespace krys::boo::css
 {
@@ -49,7 +49,7 @@ namespace krys::boo::css
   struct CSSURL;
   struct PropertyParserState;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <url>
     // https://drafts.csswg.org/css-values/#urls

@@ -368,7 +368,7 @@ namespace krys::boo
         {
           if (inner && inner->IsSubgridInParentDirection(GridTrackSizingDirection::Rows))
           {
-            innerAlignmentContextTypes.Add(GridLayoutFunctions::IsOrthogonalGridItem(grid, gridItem)
+            innerAlignmentContextTypes.Add(grid_layout_functions::IsOrthogonalGridItem(grid, gridItem)
                                              ? AlignmentContextType::Columns
                                              : AlignmentContextType::Rows);
           }
@@ -383,7 +383,7 @@ namespace krys::boo
         {
           if (inner && inner->IsSubgridInParentDirection(GridTrackSizingDirection::Columns))
           {
-            innerAlignmentContextTypes.Add(GridLayoutFunctions::IsOrthogonalGridItem(grid, gridItem)
+            innerAlignmentContextTypes.Add(grid_layout_functions::IsOrthogonalGridItem(grid, gridItem)
                                              ? AlignmentContextType::Rows
                                              : AlignmentContextType::Columns);
           }
@@ -397,7 +397,7 @@ namespace krys::boo
         if (inner && cachingRowSubgridsForRootGrid)
         {
           cachingRowSubgridsForRootGrid =
-            GridLayoutFunctions::IsOrthogonalGridItem(*algorithm.GetRenderGrid(), *inner)
+            grid_layout_functions::IsOrthogonalGridItem(*algorithm.GetRenderGrid(), *inner)
               ? inner->IsSubgridColumns()
               : inner->IsSubgridRows();
         }
@@ -437,7 +437,7 @@ namespace krys::boo
     {
       // For a grid item that has an aspect-ratio and block-constraints such as the relative logical height,
       // when the grid width is auto, we may need get the real grid width before laying out the item.
-      if (GridLayoutFunctions::IsAspectRatioBlockSizeDependentGridItem(*gridItem)
+      if (grid_layout_functions::IsAspectRatioBlockSizeDependentGridItem(*gridItem)
           && (Style().LogicalWidth().IsAuto() || Style().LogicalWidth().IsMinContent()
               || Style().LogicalWidth().IsMaxContent()))
       {
@@ -456,9 +456,9 @@ namespace krys::boo
   bool RenderGrid::CanSetColumnAxisStretchRequirementForItem(const RenderBox &gridItem) const noexcept
   {
     auto gridItemBlockFlowDirection =
-      GridLayoutFunctions::FlowAwareDirectionForGridItem(*this, gridItem, GridTrackSizingDirection::Rows);
+      grid_layout_functions::FlowAwareDirectionForGridItem(*this, gridItem, GridTrackSizingDirection::Rows);
     return gridItemBlockFlowDirection == GridTrackSizingDirection::Rows
-           && GridLayoutFunctions::AllowedToStretchGridItemAlongColumnAxis(
+           && grid_layout_functions::AllowedToStretchGridItemAlongColumnAxis(
              gridItem, AlignSelfForGridItem(gridItem).Position(), GetWritingMode());
   }
 
@@ -468,8 +468,8 @@ namespace krys::boo
     for (auto &gridItem : ChildrenOfType<RenderBox>(*this))
     {
       auto gridItemAlignSelf = AlignSelfForGridItem(gridItem).Position();
-      if (GridLayoutFunctions::IsGridItemInlineSizeDependentOnBlockConstraints(gridItem, *this,
-                                                                               gridItemAlignSelf))
+      if (grid_layout_functions::IsGridItemInlineSizeDependentOnBlockConstraints(gridItem, *this,
+                                                                                 gridItemAlignSelf))
       {
         gridLayoutState.SetNeedsSecondTrackSizingPass();
         gridLayoutState.SetLayoutRequirementForGridItem(
@@ -923,7 +923,7 @@ namespace krys::boo
         return 0_lu;
       }
 
-      auto parentDirection = GridLayoutFunctions::FlowAwareDirectionForParent(*this, *Parent(), direction);
+      auto parentDirection = grid_layout_functions::FlowAwareDirectionForParent(*this, *Parent(), direction);
       if (!availableSize)
       {
         return Downcast<RenderGrid>(Parent())->GridGap(parentDirection, null);
@@ -1616,7 +1616,7 @@ namespace krys::boo
       // Orthogonal items should be laid out in order to properly compute content-sized tracks that may depend
       // on item's intrinsic size. We also need to properly estimate its grid area size, since it may affect
       // to the baseline shims if such item participates in baseline alignment.
-      if (GridLayoutFunctions::IsOrthogonalGridItem(*this, *gridItem))
+      if (grid_layout_functions::IsOrthogonalGridItem(*this, *gridItem))
       {
         UpdateGridAreaLogicalSize(
           *gridItem,
@@ -2034,7 +2034,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasRelativeBlockAxisSize(const RenderGrid &grid, const RenderBox &gridItem) noexcept
     {
-      return GridLayoutFunctions::IsOrthogonalGridItem(grid, gridItem)
+      return grid_layout_functions::IsOrthogonalGridItem(grid, gridItem)
                ? gridItem.HasRelativeLogicalWidth() || gridItem.Style().LogicalWidth().IsAuto()
                : gridItem.HasRelativeLogicalHeight();
     }
@@ -2157,7 +2157,7 @@ namespace krys::boo
       gridItem.LayoutIfNeeded();
 
       // We need pending layouts to be done in order to compute auto-margins properly.
-      GridLayoutFunctions::UpdateAutoMarginsIfNeeded(gridItem, GetWritingMode());
+      grid_layout_functions::UpdateAutoMarginsIfNeeded(gridItem, GetWritingMode());
 
       SetLogicalPositionForGridItem(gridItem);
 
@@ -2406,24 +2406,24 @@ namespace krys::boo
     gridItem.ClearOverridingSize();
 
     auto gridItemBlockDirection =
-      GridLayoutFunctions::FlowAwareDirectionForGridItem(*this, gridItem, GridTrackSizingDirection::Rows);
-    auto gridItemInlineDirection =
-      GridLayoutFunctions::FlowAwareDirectionForGridItem(*this, gridItem, GridTrackSizingDirection::Columns);
+      grid_layout_functions::FlowAwareDirectionForGridItem(*this, gridItem, GridTrackSizingDirection::Rows);
+    auto gridItemInlineDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
+      *this, gridItem, GridTrackSizingDirection::Columns);
     bool blockFlowIsColumnAxis = gridItemBlockDirection == GridTrackSizingDirection::Rows;
     bool allowedToStretchGridItemBlockSize =
-      blockFlowIsColumnAxis ? GridLayoutFunctions::AllowedToStretchGridItemAlongColumnAxis(
+      blockFlowIsColumnAxis ? grid_layout_functions::AllowedToStretchGridItemAlongColumnAxis(
                                 gridItem, AlignSelfForGridItem(gridItem).Position(), GetWritingMode())
-                            : GridLayoutFunctions::AllowedToStretchGridItemAlongRowAxis(
+                            : grid_layout_functions::AllowedToStretchGridItemAlongRowAxis(
                                 gridItem, JustifySelfForGridItem(gridItem).Position(), GetWritingMode());
     if (allowedToStretchGridItemBlockSize && !AspectRatioPrefersInline(gridItem, blockFlowIsColumnAxis))
     {
       auto overridingContainingBlockContentSizeForGridItem =
-        GridLayoutFunctions::OverridingContainingBlockContentSizeForGridItem(gridItem,
-                                                                             gridItemBlockDirection);
+        grid_layout_functions::OverridingContainingBlockContentSizeForGridItem(gridItem,
+                                                                               gridItemBlockDirection);
       krys_debug_assert(overridingContainingBlockContentSizeForGridItem
                         && *overridingContainingBlockContentSizeForGridItem);
       LayoutUnit stretchedLogicalHeight =
-        GridLayoutFunctions::AvailableAlignmentSpaceForGridItemBeforeStretching(
+        grid_layout_functions::AvailableAlignmentSpaceForGridItemBeforeStretching(
           *this, overridingContainingBlockContentSizeForGridItem->value(), gridItem,
           GridTrackSizingDirection::Rows);
       LayoutUnit desiredLogicalHeight = gridItem.ConstrainLogicalHeightByMinMax(stretchedLogicalHeight, null);
@@ -2456,16 +2456,16 @@ namespace krys::boo
       }
     }
     else if (!allowedToStretchGridItemBlockSize
-             && GridLayoutFunctions::AllowedToStretchGridItemAlongRowAxis(
+             && grid_layout_functions::AllowedToStretchGridItemAlongRowAxis(
                gridItem, JustifySelfForGridItem(gridItem).Position(), GetWritingMode()))
     {
       auto overridingContainingBlockContentSizeForGridItem =
-        GridLayoutFunctions::OverridingContainingBlockContentSizeForGridItem(gridItem,
-                                                                             gridItemInlineDirection);
+        grid_layout_functions::OverridingContainingBlockContentSizeForGridItem(gridItem,
+                                                                               gridItemInlineDirection);
       krys_debug_assert(overridingContainingBlockContentSizeForGridItem
                         && *overridingContainingBlockContentSizeForGridItem);
       LayoutUnit stretchedLogicalWidth =
-        GridLayoutFunctions::AvailableAlignmentSpaceForGridItemBeforeStretching(
+        grid_layout_functions::AvailableAlignmentSpaceForGridItemBeforeStretching(
           *this, overridingContainingBlockContentSizeForGridItem->value(), gridItem,
           GridTrackSizingDirection::Columns);
       LayoutUnit desiredLogicalWidth =
@@ -2489,13 +2489,13 @@ namespace krys::boo
     if (renderGrid->IsSubgrid(GridTrackSizingDirection::Rows))
     {
       auto gridItemBlockDirection =
-        GridLayoutFunctions::FlowAwareDirectionForGridItem(*this, gridItem, GridTrackSizingDirection::Rows);
+        grid_layout_functions::FlowAwareDirectionForGridItem(*this, gridItem, GridTrackSizingDirection::Rows);
       auto overridingContainingBlockContentSizeForGridItem =
-        GridLayoutFunctions::OverridingContainingBlockContentSizeForGridItem(gridItem,
-                                                                             gridItemBlockDirection);
+        grid_layout_functions::OverridingContainingBlockContentSizeForGridItem(gridItem,
+                                                                               gridItemBlockDirection);
       krys_debug_assert(overridingContainingBlockContentSizeForGridItem
                         && *overridingContainingBlockContentSizeForGridItem);
-      auto stretchedLogicalHeight = GridLayoutFunctions::AvailableAlignmentSpaceForGridItemBeforeStretching(
+      auto stretchedLogicalHeight = grid_layout_functions::AvailableAlignmentSpaceForGridItemBeforeStretching(
         *this, overridingContainingBlockContentSizeForGridItem->value(), gridItem,
         GridTrackSizingDirection::Rows);
       gridItem.SetOverridingBorderBoxLogicalHeight(stretchedLogicalHeight);
@@ -2503,14 +2503,14 @@ namespace krys::boo
 
     if (renderGrid->IsSubgrid(GridTrackSizingDirection::Columns))
     {
-      auto gridItemInlineDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+      auto gridItemInlineDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
         *this, gridItem, GridTrackSizingDirection::Columns);
       auto overridingContainingBlockContentSizeForGridItem =
-        GridLayoutFunctions::OverridingContainingBlockContentSizeForGridItem(gridItem,
-                                                                             gridItemInlineDirection);
+        grid_layout_functions::OverridingContainingBlockContentSizeForGridItem(gridItem,
+                                                                               gridItemInlineDirection);
       krys_debug_assert(overridingContainingBlockContentSizeForGridItem
                         && *overridingContainingBlockContentSizeForGridItem);
-      auto stretchedLogicalWidth = GridLayoutFunctions::AvailableAlignmentSpaceForGridItemBeforeStretching(
+      auto stretchedLogicalWidth = grid_layout_functions::AvailableAlignmentSpaceForGridItemBeforeStretching(
         *this, overridingContainingBlockContentSizeForGridItem->value(), gridItem,
         GridTrackSizingDirection::Columns);
       gridItem.SetOverridingBorderBoxLogicalWidth(stretchedLogicalWidth);
@@ -2557,8 +2557,8 @@ namespace krys::boo
     }
     auto align = SelfAlignmentForGridItem(alignmentContextType, gridItem).Position();
     bool hasAutoMargins = alignmentContextType == GridTrackSizingDirection::Rows
-                            ? GridLayoutFunctions::HasAutoMarginsInColumnAxis(gridItem, GetWritingMode())
-                            : GridLayoutFunctions::HasAutoMarginsInRowAxis(gridItem, GetWritingMode());
+                            ? grid_layout_functions::HasAutoMarginsInColumnAxis(gridItem, GetWritingMode())
+                            : grid_layout_functions::HasAutoMarginsInRowAxis(gridItem, GetWritingMode());
     return IsBaselinePosition(align) && !hasAutoMargins;
   }
 
@@ -2579,7 +2579,7 @@ namespace krys::boo
     }
 
     auto baseline = Maybe<LayoutUnit> {};
-    if (!GridLayoutFunctions::IsOrthogonalGridItem(*this, *baselineGridItem))
+    if (!grid_layout_functions::IsOrthogonalGridItem(*this, *baselineGridItem))
     {
       baseline = baselineGridItem->FirstLineBaseline();
     }
@@ -2612,7 +2612,7 @@ namespace krys::boo
     }
 
     auto baseline = Maybe<LayoutUnit> {};
-    if (!GridLayoutFunctions::IsOrthogonalGridItem(*this, *baselineGridItem))
+    if (!grid_layout_functions::IsOrthogonalGridItem(*this, *baselineGridItem))
     {
       baseline = baselineGridItem->LastLineBaseline();
     }
@@ -2649,7 +2649,7 @@ namespace krys::boo
           auto gridItemAlignment =
             SelfAlignmentForGridItem(GridTrackSizingDirection::Rows, *gridItem).Position();
           if (rowIndexDeterminingBaseline
-              == GridLayoutFunctions::AlignmentContextForBaselineAlignment(
+              == grid_layout_functions::AlignmentContextForBaselineAlignment(
                 GridSpanForGridItem(*gridItem, GridTrackSizingDirection::Rows), gridItemAlignment))
           {
             // FIXME: self-baseline and content-baseline alignment not implemented yet.
@@ -2677,7 +2677,7 @@ namespace krys::boo
     if (IsSubgridRows())
     {
       auto *outer = Downcast<RenderGrid>(Parent());
-      if (GridLayoutFunctions::IsOrthogonalGridItem(*outer, *this))
+      if (grid_layout_functions::IsOrthogonalGridItem(*outer, *this))
       {
         return outer->RowAxisBaselineOffsetForGridItem(gridItem);
       }
@@ -2698,7 +2698,7 @@ namespace krys::boo
     if (IsSubgridColumns())
     {
       auto *outer = Downcast<RenderGrid>(Parent());
-      if (GridLayoutFunctions::IsOrthogonalGridItem(*outer, *this))
+      if (grid_layout_functions::IsOrthogonalGridItem(*outer, *this))
       {
         return outer->ColumnAxisBaselineOffsetForGridItem(gridItem);
       }
@@ -2760,7 +2760,7 @@ namespace krys::boo
           }
           return hasSameDirection ? GridAxisPosition::GridAxisEnd : GridAxisPosition::GridAxisStart;
         };
-        if (GridLayoutFunctions::IsOrthogonalGridItem(*this, gridItem))
+        if (grid_layout_functions::IsOrthogonalGridItem(*this, gridItem))
         {
           return gridItemAlignSelf == ItemPosition::Baseline ? GridAxisPosition::GridAxisStart
                                                              : GridAxisPosition::GridAxisEnd;
@@ -2818,7 +2818,7 @@ namespace krys::boo
       case ItemPosition::Stretch:      return GridAxisPosition::GridAxisStart;
       case ItemPosition::Baseline:
         // FIXME: Handle non-inline matching orthogonal grid items properly.
-        if (GridLayoutFunctions::IsOrthogonalGridItem(*this, gridItem)
+        if (grid_layout_functions::IsOrthogonalGridItem(*this, gridItem)
             && !GetWritingMode().IsInlineMatchingAny(gridItem.GetWritingMode()))
         {
           return GridAxisPosition::GridAxisStart;
@@ -2826,7 +2826,7 @@ namespace krys::boo
         return hasSameDirection ? GridAxisPosition::GridAxisStart : GridAxisPosition::GridAxisEnd;
       case ItemPosition::LastBaseline:
         // FIXME: Handle non-inline matching orthogonal grid items properly.
-        if (GridLayoutFunctions::IsOrthogonalGridItem(*this, gridItem)
+        if (grid_layout_functions::IsOrthogonalGridItem(*this, gridItem)
             && !GetWritingMode().IsInlineMatchingAny(gridItem.GetWritingMode()))
         {
           return GridAxisPosition::GridAxisStart;
@@ -2845,14 +2845,14 @@ namespace krys::boo
   {
     auto [startOfRow, endOfRow] = GridAreaPositionForInFlowGridItem(gridItem, GridTrackSizingDirection::Rows);
     LayoutUnit startPosition = startOfRow + MarginBeforeForChild(gridItem);
-    LayoutUnit columnAxisGridItemSize = GridLayoutFunctions::IsOrthogonalGridItem(*this, gridItem)
+    LayoutUnit columnAxisGridItemSize = grid_layout_functions::IsOrthogonalGridItem(*this, gridItem)
                                           ? gridItem.LogicalWidth() + gridItem.MarginLogicalWidth()
                                           : gridItem.LogicalHeight() + gridItem.MarginLogicalHeight();
     LayoutUnit masonryOffset = AreMasonryRows() ? _masonryLayout.OffsetForGridItem(gridItem) : 0_lu;
     auto overflow = AlignSelfForGridItem(gridItem).Overflow();
     LayoutUnit offsetFromStartPosition =
       ComputeOverflowAlignmentOffset(overflow, endOfRow - startOfRow, columnAxisGridItemSize);
-    if (GridLayoutFunctions::HasAutoMarginsInColumnAxis(gridItem, GetWritingMode()))
+    if (grid_layout_functions::HasAutoMarginsInColumnAxis(gridItem, GetWritingMode()))
     {
       return startPosition;
     }
@@ -2876,11 +2876,11 @@ namespace krys::boo
       GridAreaPositionForInFlowGridItem(gridItem, GridTrackSizingDirection::Columns);
     LayoutUnit startPosition = startOfColumn + MarginStartForChild(gridItem);
     LayoutUnit masonryOffset = AreMasonryColumns() ? _masonryLayout.OffsetForGridItem(gridItem) : 0_lu;
-    if (GridLayoutFunctions::HasAutoMarginsInRowAxis(gridItem, GetWritingMode()))
+    if (grid_layout_functions::HasAutoMarginsInRowAxis(gridItem, GetWritingMode()))
     {
       return startPosition;
     }
-    LayoutUnit rowAxisGridItemSize = GridLayoutFunctions::IsOrthogonalGridItem(*this, gridItem)
+    LayoutUnit rowAxisGridItemSize = grid_layout_functions::IsOrthogonalGridItem(*this, gridItem)
                                        ? gridItem.LogicalHeight() + gridItem.MarginLogicalHeight()
                                        : gridItem.LogicalWidth() + gridItem.MarginLogicalWidth();
     auto overflow = JustifySelfForGridItem(gridItem).Overflow();
@@ -2934,7 +2934,8 @@ namespace krys::boo
     {
       return false;
     }
-    auto direction = GridLayoutFunctions::FlowAwareDirectionForGridItem(*renderGrid, *this, parentDirection);
+    auto direction =
+      grid_layout_functions::FlowAwareDirectionForGridItem(*renderGrid, *this, parentDirection);
     return IsSubgrid(direction);
   }
 
@@ -2950,7 +2951,7 @@ namespace krys::boo
     }
 
     auto &parentGrid = *Downcast<RenderGrid>(Parent());
-    auto parentDirection = GridLayoutFunctions::FlowAwareDirectionForParent(parentGrid, *this, direction);
+    auto parentDirection = grid_layout_functions::FlowAwareDirectionForParent(parentGrid, *this, direction);
     return parentGrid.IsSubgridOf(parentDirection, ancestor);
   }
 
@@ -3195,7 +3196,7 @@ namespace krys::boo
     // take into account the grid item's writing-mode, so the position may need to be transposed.
     LayoutPoint gridItemLocation(LogicalOffsetForGridItem(gridItem, GridTrackSizingDirection::Columns),
                                  LogicalOffsetForGridItem(gridItem, GridTrackSizingDirection::Rows));
-    gridItem.SetLogicalLocation(GridLayoutFunctions::IsOrthogonalGridItem(*this, gridItem)
+    gridItem.SetLogicalLocation(grid_layout_functions::IsOrthogonalGridItem(*this, gridItem)
                                   ? gridItemLocation.TransposedPoint()
                                   : gridItemLocation);
   }
@@ -3214,8 +3215,8 @@ namespace krys::boo
     {
       rowAxisOffset =
         TranslateRTLCoordinate(rowAxisOffset)
-        - (GridLayoutFunctions::IsOrthogonalGridItem(*this, gridItem) ? gridItem.LogicalHeight()
-                                                                      : gridItem.LogicalWidth());
+        - (grid_layout_functions::IsOrthogonalGridItem(*this, gridItem) ? gridItem.LogicalHeight()
+                                                                        : gridItem.LogicalWidth());
     }
     return rowAxisOffset;
   }
@@ -3314,7 +3315,7 @@ namespace krys::boo
     auto *renderGrid = Downcast<RenderGrid>(gridItem.Parent());
     // |direction| is specified relative to this grid, switch it if |gridItem|'s direct parent grid
     // is using a different writing mode.
-    direction = GridLayoutFunctions::FlowAwareDirectionForGridItem(*this, *renderGrid, direction);
+    direction = grid_layout_functions::FlowAwareDirectionForGridItem(*this, *renderGrid, direction);
     GridSpan span = gridItem.IsOutOfFlowPositioned()
                       ? renderGrid->GridSpanForOutOfFlowGridItem(gridItem, direction)
                       : renderGrid->CurrentGrid().GridItemSpan(gridItem, direction);
@@ -3325,7 +3326,7 @@ namespace krys::boo
 
       bool isSubgrid = renderGrid->IsSubgrid(direction);
 
-      direction = GridLayoutFunctions::FlowAwareDirectionForGridItem(*parent, *renderGrid, direction);
+      direction = grid_layout_functions::FlowAwareDirectionForGridItem(*parent, *renderGrid, direction);
 
       GridSpan parentSpan = renderGrid->IsOutOfFlowPositioned()
                               ? parent->GridSpanForOutOfFlowGridItem(*renderGrid, direction)
@@ -3333,7 +3334,7 @@ namespace krys::boo
       if (isSubgrid)
       {
         span.TranslateTo(parentSpan,
-                         GridLayoutFunctions::IsSubgridReversedDirection(*parent, direction, *renderGrid));
+                         grid_layout_functions::IsSubgridReversedDirection(*parent, direction, *renderGrid));
       }
       else
       {
@@ -3431,7 +3432,7 @@ namespace krys::boo
           return false;
         }
 
-        if (renderGrid->IsSubgridColumns() && GridLayoutFunctions::IsOrthogonalGridItem(*this, *renderGrid))
+        if (renderGrid->IsSubgridColumns() && grid_layout_functions::IsOrthogonalGridItem(*this, *renderGrid))
         {
           return false;
         }

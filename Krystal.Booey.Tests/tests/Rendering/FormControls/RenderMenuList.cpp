@@ -138,8 +138,8 @@ layer at (0,0) size 400x23
     auto &select = Downcast<html::HTMLSelectElement>(fixture.ById(u8"s"));
     auto &menuList = Downcast<RenderMenuList>(*select.Renderer());
     auto &handler = fixture.Frame->GetEventHandler();
-    auto inputs = fixture.Listen(EventNames::Input);
-    auto changes = fixture.Listen(EventNames::Change);
+    auto inputs = fixture.Listen(event_names::Input);
+    auto changes = fixture.Listen(event_names::Change);
 
     // Pressing the menu list shows the popup below it, at the selected item.
     (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {5, 5}));

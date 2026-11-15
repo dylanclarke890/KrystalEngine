@@ -124,7 +124,8 @@ namespace krys::ui
 
   utf8_stringview EditorClient::InterpretKeyEvent(const boo::dom::KeyboardEvent &event) noexcept
   {
-    krys_debug_assert(event.Type() == boo::EventNames::KeyDown || event.Type() == boo::EventNames::KeyPress);
+    krys_debug_assert(event.Type() == boo::event_names::KeyDown
+                      || event.Type() == boo::event_names::KeyPress);
 
     uint32 modifiers = 0;
     if (event.ShiftKey())
@@ -140,7 +141,7 @@ namespace krys::ui
       modifiers |= CtrlKey;
     }
 
-    if (event.Type() == boo::EventNames::KeyDown)
+    if (event.Type() == boo::event_names::KeyDown)
     {
       for (const auto &entry : KeyDownEntries)
       {
@@ -176,7 +177,7 @@ namespace krys::ui
       return false;
     }
 
-    if (event.Type() != boo::EventNames::KeyDown && event.Type() != boo::EventNames::KeyPress)
+    if (event.Type() != boo::event_names::KeyDown && event.Type() != boo::event_names::KeyPress)
     {
       return false;
     }

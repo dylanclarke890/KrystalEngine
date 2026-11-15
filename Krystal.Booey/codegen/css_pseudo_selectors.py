@@ -383,7 +383,7 @@ def generate_user_agent_parts(hpp_path, cpp_path, pseudo_elements):
         writer = Writer(output_file)
         writer.hpp_prelude(generator_name=GENERATOR_NAME, headers=["Krystal.Booey/CSS/Types/CSSOMString.hpp"])
 
-        with writer.namespace(namespace=f"{NAMESPACE}::UserAgentParts"):
+        with writer.namespace(namespace=f"{NAMESPACE}::user_agent_parts"):
             for part_name in user_agent_parts:
                 writer.write(f"KRYS_NODISCARD const CSSOMStringAtom &{format_name_for_function(part_name)}() noexcept;")
 
@@ -391,7 +391,7 @@ def generate_user_agent_parts(hpp_path, cpp_path, pseudo_elements):
         writer = Writer(output_file)
         writer.cpp_prelude(generator_name=GENERATOR_NAME, for_header=f"{SELECTORS_DIR}/UserAgentParts.hpp")
 
-        with writer.namespace(namespace=f"{NAMESPACE}::UserAgentParts"):
+        with writer.namespace(namespace=f"{NAMESPACE}::user_agent_parts"):
             for index, part_name in enumerate(user_agent_parts):
                 if index:
                     writer.newline()
@@ -427,6 +427,8 @@ def write_gperf_prelude(writer: Writer, *, entry_struct: str):
         writer.write(f"namespace {NAMESPACE}")
         writer.write("{")
         writer.write_block(entry_struct)
+        # gperf's own code isn't ours to lint; NOLINTEND follows the keywords.
+        writer.write("// NOLINTBEGIN")
 
 
 def write_gperf_definition(writer: Writer, *, initializer_suffix: str, class_name: str, struct_name: str, entries):
@@ -447,6 +449,7 @@ def write_gperf_definition(writer: Writer, *, initializer_suffix: str, class_nam
     writer.write("%%")
     writer.write_lines(entries)
     writer.write("%%")
+    writer.write("// NOLINTEND")
 
 
 def generate_pseudo_class_gperf(pseudo_classes, pseudo_elements):

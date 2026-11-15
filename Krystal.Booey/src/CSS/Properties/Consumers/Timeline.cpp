@@ -38,7 +38,7 @@
 #include "Krystal.Booey/CSS/Values/ViewValue.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   bool IsAnimationRangeKeyword(ValueId id) noexcept
   {

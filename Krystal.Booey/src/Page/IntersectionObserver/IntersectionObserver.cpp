@@ -68,7 +68,7 @@ namespace krys::boo
     dom::ExceptionOr<IntersectionObserverMarginBox> ParseMargin(const dom::DOMString &margin,
                                                                 const utf8_string &marginName) noexcept
     {
-      using namespace css::PropertyParserHelpers;
+      using namespace css::parse_property;
 
       auto parserContext = css::ParserContext {css::ParserMode::HTMLStandard};
       auto parserState = css::PropertyParserState {

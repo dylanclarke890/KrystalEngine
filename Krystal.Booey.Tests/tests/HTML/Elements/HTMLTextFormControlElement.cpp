@@ -66,7 +66,7 @@ namespace krys::boo::tests
       auto *placeholder = field.PlaceholderElement();
       REQUIRE(placeholder);
       CHECK(placeholder->NextSibling() == field.InnerTextElement().get());
-      CHECK(placeholder->UserAgentPart() == css::UserAgentParts::Placeholder());
+      CHECK(placeholder->UserAgentPart() == css::user_agent_parts::Placeholder());
       CHECK_FALSE(field.IsPlaceholderVisible());
       CHECK_FALSE(placeholder->Renderer());
 
@@ -100,11 +100,13 @@ namespace krys::boo::tests
       auto &search = InputById(fixture, u8"search");
       auto *container = search.ContainerElement();
       REQUIRE(container);
-      CHECK(container->UserAgentPart() == css::UserAgentParts::WebkitTextfieldDecorationContainer());
+      CHECK(container->UserAgentPart() == css::user_agent_parts::WebkitTextfieldDecorationContainer());
       REQUIRE(search.ResultsButtonElement());
-      CHECK(search.ResultsButtonElement()->UserAgentPart() == css::UserAgentParts::WebkitSearchDecoration());
+      CHECK(search.ResultsButtonElement()->UserAgentPart()
+            == css::user_agent_parts::WebkitSearchDecoration());
       REQUIRE(search.CancelButtonElement());
-      CHECK(search.CancelButtonElement()->UserAgentPart() == css::UserAgentParts::WebkitSearchCancelButton());
+      CHECK(search.CancelButtonElement()->UserAgentPart()
+            == css::user_agent_parts::WebkitSearchCancelButton());
       CHECK(search.InnerBlockElement()->FirstChild() == search.InnerTextElement().get());
       CHECK((search.Renderer() && search.Renderer()->IsRenderTextControlSingleLine()));
       CHECK((container->Renderer() && container->Renderer()->IsRenderTextControlInnerContainer()));
@@ -159,8 +161,8 @@ namespace krys::boo::tests
       u8"<textarea id=area>xy</textarea><button id=go>Go</button></form>");
     auto &editor = fixture.GetEditor();
     auto &field = InputById(fixture, u8"field");
-    auto inputs = fixture.Listen(EventNames::Input);
-    auto changes = fixture.Listen(EventNames::Change);
+    auto inputs = fixture.Listen(event_names::Input);
+    auto changes = fixture.Listen(event_names::Change);
 
     SECTION("Focusing a field selects its value; typing replaces it and fires input")
     {
@@ -266,7 +268,7 @@ namespace krys::boo::tests
     {
       field.Focus();
       auto submits = fixture.Listen(u8"submit");
-      auto clicks = fixture.Listen(EventNames::Click);
+      auto clicks = fixture.Listen(event_names::Click);
       CHECK(fixture.Run(u8"InsertNewline"));
       CHECK(submits->Count == 1);
       CHECK(clicks->Count == 1);
@@ -284,7 +286,7 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<input id=field value=hello><input id=other><input id=box type=checkbox>");
     auto &field = InputById(fixture, u8"field");
     auto selects = fixture.Listen(u8"select");
-    auto selectionChanges = fixture.Listen(EventNames::SelectionChange);
+    auto selectionChanges = fixture.Listen(event_names::SelectionChange);
 
     SECTION("An unfocused field caches its selection")
     {

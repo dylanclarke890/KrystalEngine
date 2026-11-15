@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     /// @grammar <'align-content'>
     /// @see https://drafts.csswg.org/css-align/#propdef-align-content

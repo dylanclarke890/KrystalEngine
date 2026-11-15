@@ -19,7 +19,7 @@ namespace krys::boo::dom::tests
     class UninitializedEvent : public Event
     {
     public:
-      UninitializedEvent() noexcept : Event(EventNames::Click)
+      UninitializedEvent() noexcept : Event(event_names::Click)
       {
         _initialized = false;
       }
@@ -33,8 +33,8 @@ namespace krys::boo::dom::tests
     REQUIRE(target->EventListeners().empty());
 
     int calls = 0;
-    auto listener = target->AddEventListener(EventNames::Click, [&](Event &) { ++calls; });
-    auto event = CreateRef<Event>(EventNames::Click);
+    auto listener = target->AddEventListener(event_names::Click, [&](Event &) { ++calls; });
+    auto event = CreateRef<Event>(event_names::Click);
     REQUIRE_FALSE(target->DispatchEvent(*event).HasException());
     REQUIRE(calls == 1);
   }
@@ -53,35 +53,35 @@ namespace krys::boo::dom::tests
       options.Capture = true;
       options.Once = true;
       options.Passive = true;
-      target->AddEventListener(EventNames::Click, Ref<EventListenerCallback>(callback), options);
+      target->AddEventListener(event_names::Click, Ref<EventListenerCallback>(callback), options);
       REQUIRE(target->EventListeners().size() == 1);
       auto &listener = *target->EventListeners().front();
       REQUIRE(listener.Capture());
       REQUIRE(listener.Once());
       REQUIRE(listener.Passive() == true);
-      target->RemoveEventListener(EventNames::Click, Ref<EventListenerCallback>(callback), true);
+      target->RemoveEventListener(event_names::Click, Ref<EventListenerCallback>(callback), true);
       REQUIRE(target->EventListeners().empty());
     }
 
     SECTION("Adding the same listener twice adds it once")
     {
-      target->AddEventListener(EventNames::Click, Ref<EventListenerCallback>(callback), false);
-      target->AddEventListener(EventNames::Click, Ref<EventListenerCallback>(callback), false);
-      auto event = CreateRef<Event>(EventNames::Click);
+      target->AddEventListener(event_names::Click, Ref<EventListenerCallback>(callback), false);
+      target->AddEventListener(event_names::Click, Ref<EventListenerCallback>(callback), false);
+      auto event = CreateRef<Event>(event_names::Click);
       REQUIRE_FALSE(target->DispatchEvent(*event).HasException());
       REQUIRE(calls == 1);
     }
 
     SECTION("Removing needs the same type, callback and capture")
     {
-      target->AddEventListener(EventNames::Click, Ref<EventListenerCallback>(callback), true);
-      target->RemoveEventListener(EventNames::Click, Ref<EventListenerCallback>(callback), false);
+      target->AddEventListener(event_names::Click, Ref<EventListenerCallback>(callback), true);
+      target->RemoveEventListener(event_names::Click, Ref<EventListenerCallback>(callback), false);
       target->RemoveEventListener(u8"other", Ref<EventListenerCallback>(callback), true);
-      target->RemoveEventListener(EventNames::Click, CreateRef<FunctionEventListenerCallback>([](Event &) {}),
-                                  true);
+      target->RemoveEventListener(event_names::Click,
+                                  CreateRef<FunctionEventListenerCallback>([](Event &) {}), true);
       REQUIRE(target->EventListeners().size() == 1);
 
-      target->RemoveEventListener(EventNames::Click, Ref<EventListenerCallback>(callback),
+      target->RemoveEventListener(event_names::Click, Ref<EventListenerCallback>(callback),
                                   EventListenerOptions {.Capture = true});
       REQUIRE(target->EventListeners().empty());
     }
@@ -95,9 +95,9 @@ namespace krys::boo::dom::tests
 
     SECTION("An event that's being dispatched")
     {
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto event = CreateRef<Event>(event_names::Click);
       Maybe<ExceptionCode> nested;
-      auto listener = target->AddEventListener(EventNames::Click,
+      auto listener = target->AddEventListener(event_names::Click,
                                                [&](Event &e)
                                                {
                                                  auto result = target->DispatchEvent(e);
@@ -120,9 +120,9 @@ namespace krys::boo::dom::tests
 
     SECTION("A trusted event becomes untrusted, and the result is whether it wasn't canceled")
     {
-      auto event = Event::Create(EventNames::Click, false, true);
+      auto event = Event::Create(event_names::Click, false, true);
       REQUIRE(event->IsTrusted());
-      auto listener = target->AddEventListener(EventNames::Click, [](Event &e) { e.PreventDefault(); });
+      auto listener = target->AddEventListener(event_names::Click, [](Event &e) { e.PreventDefault(); });
       auto result = target->DispatchEvent(*event);
       REQUIRE_FALSE(result.HasException());
       REQUIRE_FALSE(result.Value());
@@ -141,24 +141,24 @@ namespace krys::boo::dom::tests
         [&](Event &event)
         {
           ++calls;
-          CHECK(event.Type() == EventNames::Load);
+          CHECK(event.Type() == event_names::Load);
           CHECK(event.Target() == target.get());
         });
 
-      target->AddEventListener(EventNames::Load, Ref<EventListenerCallback> {imgFetched}, false);
-      REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(EventNames::Load)).HasException());
+      target->AddEventListener(event_names::Load, Ref<EventListenerCallback> {imgFetched}, false);
+      REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(event_names::Load)).HasException());
       CHECK(calls == 1);
 
-      target->RemoveEventListener(EventNames::Load, Ref<EventListenerCallback> {imgFetched}, false);
-      REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(EventNames::Load)).HasException());
+      target->RemoveEventListener(event_names::Load, Ref<EventListenerCallback> {imgFetched}, false);
+      REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(event_names::Load)).HasException());
       CHECK(calls == 1);
 
       AbortController controller;
       AddEventListenerOptions options;
       options.Signal = ShareRefPtr(controller.Signal());
-      target->AddEventListener(EventNames::Load, Ref<EventListenerCallback> {imgFetched}, options);
+      target->AddEventListener(event_names::Load, Ref<EventListenerCallback> {imgFetched}, options);
       controller.Abort();
-      REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(EventNames::Load)).HasException());
+      REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(event_names::Load)).HasException());
       CHECK(calls == 1);
     }
 
@@ -167,17 +167,17 @@ namespace krys::boo::dom::tests
       auto target = CreateRef<EventTarget>();
       Maybe<uint32> detail;
       auto listener =
-        target->AddEventListener(EventNames::Click, [&](Event &event)
+        target->AddEventListener(event_names::Click, [&](Event &event)
                                  { detail = static_cast<CustomEvent<uint32> &>(event).Detail(); });
-      auto event =
-        CreateRef<CustomEvent<uint32>>(EventNames::Click, CustomEventInit<uint32> {{.Cancelable = true}, 7u});
+      auto event = CreateRef<CustomEvent<uint32>>(event_names::Click,
+                                                  CustomEventInit<uint32> {{.Cancelable = true}, 7u});
       CHECK(target->DispatchEvent(*event).ReleaseValue());
       CHECK(detail == 7u);
 
       auto canceler =
-        target->AddEventListener(EventNames::Click, [](Event &event) { event.PreventDefault(); });
-      auto canceled =
-        CreateRef<CustomEvent<uint32>>(EventNames::Click, CustomEventInit<uint32> {{.Cancelable = true}, 8u});
+        target->AddEventListener(event_names::Click, [](Event &event) { event.PreventDefault(); });
+      auto canceled = CreateRef<CustomEvent<uint32>>(event_names::Click,
+                                                     CustomEventInit<uint32> {{.Cancelable = true}, 8u});
       CHECK_FALSE(target->DispatchEvent(*canceled).ReleaseValue());
     }
 
@@ -195,20 +195,20 @@ namespace krys::boo::dom::tests
       {
         DOMString name = node == document.get() ? u8"document" : node == div.get() ? u8"div" : u8"b";
         listeners.push_back(node->AddEventListener(
-          EventNames::Click, [&order, name](Event &) { order.push_back(name + u8" capture"); },
+          event_names::Click, [&order, name](Event &) { order.push_back(name + u8" capture"); },
           AddEventListenerOptions {{.Capture = true}}));
-        listeners.push_back(node->AddEventListener(EventNames::Click, [&order, name](Event &)
+        listeners.push_back(node->AddEventListener(event_names::Click, [&order, name](Event &)
                                                    { order.push_back(name + u8" bubble"); }));
       }
 
-      REQUIRE_FALSE(b->DispatchEvent(*Event::Create(EventNames::Click, true, false)).HasException());
+      REQUIRE_FALSE(b->DispatchEvent(*Event::Create(event_names::Click, true, false)).HasException());
       CHECK(order
             == List<DOMString> {u8"document capture", u8"div capture", u8"b capture", u8"b bubble",
                                 u8"div bubble", u8"document bubble"});
 
       // Without bubbles, only the capturing listeners and the target's.
       order.clear();
-      REQUIRE_FALSE(b->DispatchEvent(*Event::Create(EventNames::Click, false, false)).HasException());
+      REQUIRE_FALSE(b->DispatchEvent(*Event::Create(event_names::Click, false, false)).HasException());
       CHECK(order == List<DOMString> {u8"document capture", u8"div capture", u8"b capture", u8"b bubble"});
     }
   }

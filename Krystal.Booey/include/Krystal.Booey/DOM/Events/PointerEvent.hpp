@@ -336,7 +336,7 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD static bool TypeIsCancelable(DOMStringAtom type) noexcept
     {
-      return !TypeIsEnterOrLeave(type) && type != EventNames::PointerRawUpdate;
+      return !TypeIsEnterOrLeave(type) && type != event_names::PointerRawUpdate;
     }
 
     KRYS_NODISCARD static bool TypeIsComposed(DOMStringAtom type) noexcept
@@ -352,15 +352,15 @@ namespace krys::boo::dom
   private:
     KRYS_NODISCARD static bool TypeIsEnterOrLeave(DOMStringAtom type) noexcept
     {
-      return type == EventNames::PointerEnter || type == EventNames::PointerLeave;
+      return type == event_names::PointerEnter || type == event_names::PointerLeave;
     }
 
     KRYS_NODISCARD static uint16 ButtonsForType(DOMStringAtom type) noexcept
     {
       // We have contact with the touch surface for most events except when we've released the touch or
       // canceled it.
-      return (type == EventNames::PointerUp || type == EventNames::PointerOut
-              || type == EventNames::PointerLeave || type == EventNames::PointerCancel)
+      return (type == event_names::PointerUp || type == event_names::PointerOut
+              || type == event_names::PointerLeave || type == event_names::PointerCancel)
                ? 0
                : 1;
     }

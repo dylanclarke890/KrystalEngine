@@ -36,7 +36,7 @@ namespace krys::boo::css
   struct PropertyParserState;
   struct Ratio;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // https://drafts.csswg.org/css-values-4/#ratio-value
 

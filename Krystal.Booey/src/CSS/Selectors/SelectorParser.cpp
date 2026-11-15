@@ -613,8 +613,8 @@ namespace krys::boo::css
                                               const MutableSelector &compoundPseudoElement) noexcept
     {
       if (compoundPseudoElement.PseudoElement() == SelectorPseudoElement::UserAgentPart
-          && (compoundPseudoElement.Value() == UserAgentParts::DetailsContent()
-              || compoundPseudoElement.Value() == UserAgentParts::InternalSelectPicker()))
+          && (compoundPseudoElement.Value() == user_agent_parts::DetailsContent()
+              || compoundPseudoElement.Value() == user_agent_parts::InternalSelectPicker()))
       {
         if (simpleSelector.Match() == SelectorMatch::PseudoElement)
         {
@@ -623,7 +623,7 @@ namespace krys::boo::css
       }
       // The picker is an element as a part is: it has its states, such as :popover-open.
       if (compoundPseudoElement.PseudoElement() == SelectorPseudoElement::UserAgentPart
-          && compoundPseudoElement.Value() == UserAgentParts::InternalSelectPicker()
+          && compoundPseudoElement.Value() == user_agent_parts::InternalSelectPicker()
           && simpleSelector.Match() == SelectorMatch::PseudoClass)
       {
         return !IsTreeStructuralPseudoClass(simpleSelector.PseudoClass());
@@ -1186,7 +1186,7 @@ namespace krys::boo::css
             return nullptr;
           }
           selector->SetPseudoElement(SelectorPseudoElement::UserAgentPart);
-          selector->SetValue(UserAgentParts::InternalSelectPicker());
+          selector->SetValue(user_agent_parts::InternalSelectPicker());
           return selector;
         }
         case SelectorPseudoElement::Highlight:

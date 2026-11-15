@@ -63,7 +63,7 @@ namespace krys::boo::svg
 
   Color SVGPropertyTraits<Color>::FromString(SVGElement &targetElement, dom::DOMStringView string) noexcept
   {
-    using namespace css::PropertyParserHelpers;
+    using namespace css::parse_property;
 
     Ref document = ShareRef(targetElement.NodeDocument());
     auto &cssParserContext = document->CssParserContext();

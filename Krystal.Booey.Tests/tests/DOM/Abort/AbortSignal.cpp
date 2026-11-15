@@ -101,7 +101,7 @@ namespace krys::boo::dom::tests
     {
       auto signal = AbortSignal::Any({ShareRef(*first.Signal()), ShareRef(*first.Signal())});
       int aborts = 0;
-      auto listener = signal->AddEventListener(EventNames::Abort, [&](Event &) { ++aborts; });
+      auto listener = signal->AddEventListener(event_names::Abort, [&](Event &) { ++aborts; });
       first.Abort();
       CHECK(aborts == 1);
     }
@@ -157,7 +157,7 @@ namespace krys::boo::dom::tests
       [&](Event &event)
       {
         ++calls;
-        CHECK(event.Type() == EventNames::Abort);
+        CHECK(event.Type() == event_names::Abort);
         CHECK(event.IsTrusted());
         CHECK_FALSE(event.Bubbles());
         CHECK_FALSE(event.Cancelable());
@@ -183,7 +183,7 @@ namespace krys::boo::dom::tests
       {
         auto dependent = AbortSignal::Any({ShareRef(source)});
         weakDependent = CreateWeakPtr(dependent.get());
-        handle = dependent->AddEventListener(EventNames::Abort, [&](Event &) { aborted = true; });
+        handle = dependent->AddEventListener(event_names::Abort, [&](Event &) { aborted = true; });
       }
       REQUIRE(weakDependent);
       controller.Abort();
@@ -246,7 +246,7 @@ namespace krys::boo::dom::tests
         AbortController other;
         auto dependent = AbortSignal::Any({ShareRef(*other.Signal())});
         weakDependent = CreateWeakPtr(dependent.get());
-        handle = dependent->AddEventListener(EventNames::Abort, [](Event &) {});
+        handle = dependent->AddEventListener(event_names::Abort, [](Event &) {});
       }
       html::EventLoop::Current().RunUntilIdle();
       CHECK_FALSE(weakDependent);
@@ -271,7 +271,7 @@ namespace krys::boo::dom::tests
       {
         auto dependent = AbortSignal::Any({ShareRef(source)});
         weakDependent = CreateWeakPtr(dependent.get());
-        auto handle = dependent->AddEventListener(EventNames::Abort, [](Event &) {});
+        auto handle = dependent->AddEventListener(event_names::Abort, [](Event &) {});
       }
       html::EventLoop::Current().RunUntilIdle();
       CHECK_FALSE(weakDependent);
@@ -290,7 +290,7 @@ namespace krys::boo::dom::tests
       void Start(AbortSignal &signal)
       {
         signal.ThrowIfAborted();
-        Listener = signal.AddEventListener(EventNames::Abort, [this, &signal](Event &)
+        Listener = signal.AddEventListener(event_names::Abort, [this, &signal](Event &)
                                            { RejectedWith = std::any_cast<int>(signal.Reason()); });
       }
     };

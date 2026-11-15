@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::CssText;
   using css::tests::ValueFixture;
@@ -39,7 +39,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     }
   }
 
-  TEST_CASE_METHOD(ValueFixture, "PropertyParserHelpers(ConsumePercentageDividedBy100OrNumber)",
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumePercentageDividedBy100OrNumber)",
                    "[CSS][Properties][Consumers]")
   {
     CHECK(Consume(u8"0.25") == "0.25");
@@ -51,8 +51,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
 
   // A calc() percentage keeps its form (its value isn't known until it's resolved); its users divide it by
   // 100 then.
-  TEST_CASE_METHOD(ValueFixture,
-                   "PropertyParserHelpers(ConsumePercentageDividedBy100OrNumber calc percentage)",
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumePercentageDividedBy100OrNumber calc percentage)",
                    "[CSS][Properties][Consumers]")
   {
     CHECK(Consume(u8"calc(25%)") == "calc(25%)");

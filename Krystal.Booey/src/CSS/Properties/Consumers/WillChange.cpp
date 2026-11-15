@@ -32,7 +32,7 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   KRYS_NODISCARD RefPtr<Value> ConsumeWillChange(TokenRange &tokens, PropertyParserState &state) noexcept
   {

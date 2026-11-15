@@ -111,7 +111,7 @@ namespace krys::boo::css::cq
                                                          const ToLengthConversionData &) const noexcept = 0;
   };
 
-  namespace Features
+  namespace features
   {
     using Dependency = mq::MediaQueryDynamicDependency;
 

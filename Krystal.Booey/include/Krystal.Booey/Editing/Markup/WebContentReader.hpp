@@ -76,7 +76,7 @@ namespace krys::boo
   public:
     WebContentReader(LocalFrame &frame, const dom::SimpleRange &context, bool allowPlainText) noexcept;
 
-    ~WebContentReader() noexcept;
+    ~WebContentReader() noexcept override;
 
     void AddFragment(Ref<dom::DocumentFragment> &&fragment) noexcept;
 

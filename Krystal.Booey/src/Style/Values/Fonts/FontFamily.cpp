@@ -49,17 +49,17 @@ namespace krys::boo::style
       }
 
       auto valueID = primitiveValue->ValueId();
-      if (auto family = css::PropertyParserHelpers::GenericFontFamily(valueID); family != null)
+      if (auto family = css::parse_property::GenericFontFamily(valueID); family != null)
       {
         return {family, FontFamilyKind::Generic};
       }
 
-      if (css::PropertyParserHelpers::IsSystemFontShorthand(valueID))
+      if (css::parse_property::IsSystemFontShorthand(valueID))
       {
         // The host's family for the keyword, or else the standard family.
         const auto &font = state.GetDocument()
                              .GetSettings()
-                             .Values.SystemFonts[css::PropertyParserHelpers::LowerFontShorthand(valueID)];
+                             .Values.SystemFonts[css::parse_property::LowerFontShorthand(valueID)];
         if (font.Family == null || font.Family.View().empty())
         {
           return {css::GenericFontFamilyNames::StandardFamily(), FontFamilyKind::Generic};
@@ -89,7 +89,7 @@ namespace krys::boo::style
         }
 
         auto valueID = contentValue.ValueId();
-        return {css::PropertyParserHelpers::GenericFontFamily(valueID), FontFamilyKind::Generic};
+        return {css::parse_property::GenericFontFamily(valueID), FontFamilyKind::Generic};
       }();
 
       if (family == null)

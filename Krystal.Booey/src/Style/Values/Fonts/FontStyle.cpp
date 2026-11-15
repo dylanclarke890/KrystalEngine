@@ -57,7 +57,7 @@ namespace krys::boo::style
       case css::ValueId::Italic:  return css::keywords::Italic {};
       case css::ValueId::Oblique: return css::keywords::Oblique {};
       default:
-        if (css::PropertyParserHelpers::IsSystemFontShorthand(valueID))
+        if (css::parse_property::IsSystemFontShorthand(valueID))
         {
           return css::keywords::Normal {};
         }

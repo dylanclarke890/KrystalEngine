@@ -27,7 +27,7 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   enum class AllowedImageType
   {
@@ -39,7 +39,7 @@ namespace krys::boo::css::PropertyParserHelpers
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::AllowedImageType, 5uz)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::parse_property::AllowedImageType, 5uz)
 
 namespace krys::boo::css
 {
@@ -47,7 +47,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <image>
     // https://drafts.csswg.org/css-images-4/#image-values

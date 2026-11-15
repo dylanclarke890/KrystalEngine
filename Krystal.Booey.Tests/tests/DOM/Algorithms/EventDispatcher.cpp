@@ -49,7 +49,7 @@ namespace krys::boo::dom::tests
       void Listen(EventTarget &target, std::string name, bool capture)
       {
         Listeners.push_back(target.AddEventListener(
-          EventNames::Click, [this, name](Event &) { Log.push_back(name); }, capture));
+          event_names::Click, [this, name](Event &) { Log.push_back(name); }, capture));
       }
     };
   }
@@ -67,7 +67,7 @@ namespace krys::boo::dom::tests
 
     SECTION("A bubbling event")
     {
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true});
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true});
       REQUIRE(fixture.Child->DispatchEvent(*event).Value());
       REQUIRE(fixture.Log
               == List<std::string> {"root capture", "parent capture", "child capture", "child bubble",
@@ -76,7 +76,7 @@ namespace krys::boo::dom::tests
 
     SECTION("An event that doesn't bubble reaches the target's own listeners only")
     {
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto event = CreateRef<Event>(event_names::Click);
       REQUIRE(fixture.Child->DispatchEvent(*event).Value());
       REQUIRE(fixture.Log
               == List<std::string> {"root capture", "parent capture", "child capture", "child bubble"});
@@ -85,8 +85,8 @@ namespace krys::boo::dom::tests
     SECTION("The result is false once a listener cancels it")
     {
       auto listener =
-        fixture.Parent->AddEventListener(EventNames::Click, [](Event &e) { e.PreventDefault(); });
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true, .Cancelable = true});
+        fixture.Parent->AddEventListener(event_names::Click, [](Event &e) { e.PreventDefault(); });
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true, .Cancelable = true});
       REQUIRE_FALSE(fixture.Child->DispatchEvent(*event).Value());
     }
   }
@@ -104,13 +104,13 @@ namespace krys::boo::dom::tests
     EventTarget *targetAtInner = nullptr;
     EventTarget *targetAtHost = nullptr;
     auto onInner =
-      inner->AddEventListener(EventNames::Click, [&](Event &e) { targetAtInner = e.Target().get(); });
+      inner->AddEventListener(event_names::Click, [&](Event &e) { targetAtInner = e.Target().get(); });
     auto onHost =
-      host->AddEventListener(EventNames::Click, [&](Event &e) { targetAtHost = e.Target().get(); });
+      host->AddEventListener(event_names::Click, [&](Event &e) { targetAtHost = e.Target().get(); });
 
     SECTION("A composed event leaves with the host as its target")
     {
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true, .Composed = true});
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true, .Composed = true});
       REQUIRE_FALSE(inner->DispatchEvent(*event).HasException());
 
       REQUIRE(targetAtInner == inner.get());
@@ -120,7 +120,7 @@ namespace krys::boo::dom::tests
 
     SECTION("An event that stays in the shadow tree has its target cleared")
     {
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true});
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true});
       REQUIRE_FALSE(inner->DispatchEvent(*event).HasException());
 
       REQUIRE(targetAtInner == inner.get());
@@ -143,8 +143,8 @@ namespace krys::boo::dom::tests
 
     bool hostHeard = false;
     EventTarget *relatedAtTo = nullptr;
-    auto onHost = host->AddEventListener(EventNames::MouseOver, [&](Event &) { hostHeard = true; });
-    auto onTo = to->AddEventListener(EventNames::MouseOver, [&](Event &e)
+    auto onHost = host->AddEventListener(event_names::MouseOver, [&](Event &) { hostHeard = true; });
+    auto onTo = to->AddEventListener(event_names::MouseOver, [&](Event &e)
                                      { relatedAtTo = Downcast<MouseEvent>(e).RelatedTarget().get(); });
 
     SECTION("Moving within the shadow tree stops at its root")
@@ -153,7 +153,7 @@ namespace krys::boo::dom::tests
       init.Bubbles = true;
       init.Composed = true;
       init.RelatedTarget = from;
-      auto event = CreateRef<MouseEvent>(EventNames::MouseOver, init);
+      auto event = CreateRef<MouseEvent>(event_names::MouseOver, init);
       REQUIRE_FALSE(to->DispatchEvent(*event).HasException());
 
       REQUIRE(relatedAtTo == from.get());
@@ -167,7 +167,7 @@ namespace krys::boo::dom::tests
       MouseEventInit init;
       init.Bubbles = true;
       init.RelatedTarget = from;
-      auto event = CreateRef<MouseEvent>(EventNames::MouseOver, init);
+      auto event = CreateRef<MouseEvent>(event_names::MouseOver, init);
       REQUIRE(host->DispatchEvent(*event).Value());
       REQUIRE_FALSE(hostHeard);
     }
@@ -184,7 +184,7 @@ namespace krys::boo::dom::tests
 
     bool checkedInListener = false;
     bool cancel = false;
-    auto listener = checkbox->AddEventListener(EventNames::Click,
+    auto listener = checkbox->AddEventListener(event_names::Click,
                                                [&](Event &e)
                                                {
                                                  checkedInListener = checkbox->Checked();
@@ -199,7 +199,7 @@ namespace krys::boo::dom::tests
       MouseEventInit init;
       init.Bubbles = true;
       init.Cancelable = true;
-      auto event = CreateRef<MouseEvent>(EventNames::Click, init);
+      auto event = CreateRef<MouseEvent>(event_names::Click, init);
       REQUIRE_FALSE(checkbox->DispatchEvent(*event).HasException());
       REQUIRE(checkedInListener);
       REQUIRE(checkbox->Checked());
@@ -211,7 +211,7 @@ namespace krys::boo::dom::tests
       MouseEventInit init;
       init.Bubbles = true;
       init.Cancelable = true;
-      auto event = CreateRef<MouseEvent>(EventNames::Click, init);
+      auto event = CreateRef<MouseEvent>(event_names::Click, init);
       REQUIRE_FALSE(checkbox->DispatchEvent(*event).HasException());
       REQUIRE(checkedInListener);
       REQUIRE_FALSE(checkbox->Checked());
@@ -219,7 +219,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Only a MouseEvent is an activation event")
     {
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true});
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true});
       REQUIRE_FALSE(checkbox->DispatchEvent(*event).HasException());
       REQUIRE_FALSE(checkedInListener);
       REQUIRE_FALSE(checkbox->Checked());
@@ -233,7 +233,7 @@ namespace krys::boo::dom::tests
 
     SECTION("stopPropagation() lets the current target's other listeners run")
     {
-      auto stopper = fixture.Child->AddEventListener(EventNames::Click,
+      auto stopper = fixture.Child->AddEventListener(event_names::Click,
                                                      [&](Event &e)
                                                      {
                                                        fixture.Log.push_back("child stops");
@@ -241,7 +241,7 @@ namespace krys::boo::dom::tests
                                                      });
       fixture.Listen(*fixture.Child, "child", false);
       fixture.Listen(*fixture.Parent, "parent", false);
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true});
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true});
       REQUIRE_FALSE(fixture.Child->DispatchEvent(*event).HasException());
       REQUIRE(fixture.Log == List<std::string> {"child stops", "child"});
     }
@@ -249,23 +249,23 @@ namespace krys::boo::dom::tests
     SECTION("A trusted animationend with no listeners of its own reaches webkitAnimationEnd listeners")
     {
       DOMStringAtom typeInListener = null;
-      auto legacy = fixture.Child->AddEventListener(EventNames::Legacy::AnimationEnd,
+      auto legacy = fixture.Child->AddEventListener(event_names::legacy::AnimationEnd,
                                                     [&](Event &e) { typeInListener = e.Type(); });
 
-      auto untrusted = CreateRef<Event>(EventNames::AnimationEnd);
+      auto untrusted = CreateRef<Event>(event_names::AnimationEnd);
       REQUIRE_FALSE(fixture.Child->DispatchEvent(*untrusted).HasException());
       REQUIRE(typeInListener == null);
 
-      auto trusted = Event::Create(EventNames::AnimationEnd, false, false);
+      auto trusted = Event::Create(event_names::AnimationEnd, false, false);
       REQUIRE(EventDispatcher::DispatchToTarget(*trusted, fixture.Child.get()));
-      REQUIRE(typeInListener == EventNames::Legacy::AnimationEnd);
-      REQUIRE(trusted->Type() == EventNames::AnimationEnd);
+      REQUIRE(typeInListener == event_names::legacy::AnimationEnd);
+      REQUIRE(trusted->Type() == event_names::AnimationEnd);
 
       SECTION("but not when there is one")
       {
         typeInListener = null;
-        auto own = fixture.Child->AddEventListener(EventNames::AnimationEnd, [](Event &) {});
-        auto again = Event::Create(EventNames::AnimationEnd, false, false);
+        auto own = fixture.Child->AddEventListener(event_names::AnimationEnd, [](Event &) {});
+        auto again = Event::Create(event_names::AnimationEnd, false, false);
         REQUIRE(EventDispatcher::DispatchToTarget(*again, fixture.Child.get()));
         REQUIRE(typeInListener == null);
       }
@@ -280,14 +280,14 @@ namespace krys::boo::dom::tests
     SECTION("A listener added during dispatch isn't called")
     {
       Maybe<EventListenerHandle> added;
-      auto adder = fixture.Child->AddEventListener(EventNames::Click,
+      auto adder = fixture.Child->AddEventListener(event_names::Click,
                                                    [&](Event &)
                                                    {
                                                      added = fixture.Child->AddEventListener(
-                                                       EventNames::Click,
+                                                       event_names::Click,
                                                        [&](Event &) { fixture.Log.push_back("added"); });
                                                    });
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto event = CreateRef<Event>(event_names::Click);
       REQUIRE_FALSE(fixture.Child->DispatchEvent(*event).HasException());
       REQUIRE(fixture.Log.empty());
     }
@@ -297,10 +297,10 @@ namespace krys::boo::dom::tests
       AddEventListenerOptions once;
       once.Once = true;
       auto listener = fixture.Child->AddEventListener(
-        EventNames::Click, [&](Event &) { fixture.Log.push_back("once"); }, once);
+        event_names::Click, [&](Event &) { fixture.Log.push_back("once"); }, once);
       for (int i = 0; i < 2; ++i)
       {
-        auto event = CreateRef<Event>(EventNames::Click);
+        auto event = CreateRef<Event>(event_names::Click);
         REQUIRE_FALSE(fixture.Child->DispatchEvent(*event).HasException());
       }
       REQUIRE(fixture.Log == List<std::string> {"once"});
@@ -314,20 +314,20 @@ namespace krys::boo::dom::tests
       bool canceledInPassive = true;
       bool canceledAfter = false;
       auto first = fixture.Child->AddEventListener(
-        EventNames::Click,
+        event_names::Click,
         [&](Event &e)
         {
           e.PreventDefault();
           canceledInPassive = e.DefaultPrevented();
         },
         passive);
-      auto second = fixture.Child->AddEventListener(EventNames::Click,
+      auto second = fixture.Child->AddEventListener(event_names::Click,
                                                     [&](Event &e)
                                                     {
                                                       e.PreventDefault();
                                                       canceledAfter = e.DefaultPrevented();
                                                     });
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Cancelable = true});
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Cancelable = true});
       REQUIRE_FALSE(fixture.Child->DispatchEvent(*event).Value());
       REQUIRE_FALSE(canceledInPassive);
       REQUIRE(canceledAfter);
@@ -343,16 +343,16 @@ namespace krys::boo::dom::tests
     REQUIRE(p);
     REQUIRE(old->Window());
     int calls = 0;
-    auto listener = p->AddEventListener(EventNames::Click, [&](Event &) { ++calls; });
+    auto listener = p->AddEventListener(event_names::Click, [&](Event &) { ++calls; });
 
-    auto first = CreateRef<Event>(EventNames::Click);
+    auto first = CreateRef<Event>(event_names::Click);
     REQUIRE_FALSE(p->DispatchEvent(*first).HasException());
     REQUIRE(calls == 1);
 
     fixture.Frame->SetDocument(CreateRef<HTMLDocument>());
     REQUIRE_FALSE(old->IsFullyActive());
     REQUIRE(old->Window());
-    auto second = CreateRef<Event>(EventNames::Click);
+    auto second = CreateRef<Event>(event_names::Click);
     REQUIRE_FALSE(p->DispatchEvent(*second).HasException());
     REQUIRE(calls == 1);
   }
@@ -368,7 +368,7 @@ namespace krys::boo::dom::tests
       bool bubbles = false;
       bool cancelable = false;
       DOMStringAtom type = null;
-      auto listener = fixture.Parent->AddEventListener(EventNames::Click,
+      auto listener = fixture.Parent->AddEventListener(event_names::Click,
                                                        [&](Event &e)
                                                        {
                                                          trusted = e.IsTrusted();
@@ -377,12 +377,12 @@ namespace krys::boo::dom::tests
                                                          type = e.Type();
                                                          e.PreventDefault();
                                                        });
-      bool result = EventDispatcher::FireEvent(EventNames::Click, *fixture.Child,
+      bool result = EventDispatcher::FireEvent(event_names::Click, *fixture.Child,
                                                EventInit {.Bubbles = true, .Cancelable = true});
       REQUIRE(trusted);
       REQUIRE(bubbles);
       REQUIRE(cancelable);
-      REQUIRE(type == EventNames::Click);
+      REQUIRE(type == event_names::Click);
       REQUIRE_FALSE(result);
     }
 
@@ -405,7 +405,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(fixture.Root->AppendChild(input).HasException());
       bool trusted = false;
       bool cancelable = false;
-      auto listener = input.AddEventListener(EventNames::Invalid,
+      auto listener = input.AddEventListener(event_names::Invalid,
                                              [&](Event &e)
                                              {
                                                trusted = e.IsTrusted();
@@ -496,10 +496,10 @@ namespace krys::boo::dom::tests
 
     EventTarget *targetAtHost = nullptr;
     auto onHost =
-      host->AddEventListener(EventNames::Click, [&](Event &e) { targetAtHost = e.Target().get(); });
+      host->AddEventListener(event_names::Click, [&](Event &e) { targetAtHost = e.Target().get(); });
     auto composed = []
     {
-      return CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true, .Composed = true});
+      return CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true, .Composed = true});
     };
 
     SECTION("from outside the shadow tree, it leaves it, retargeted to the host")

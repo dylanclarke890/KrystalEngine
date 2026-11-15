@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <'scroll-snap-type'> consuming
     // https://drafts.csswg.org/css-scroll-snap-1/#scroll-snap-type

@@ -48,12 +48,12 @@ namespace krys
 
   /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates, with the depth range
   /// of the projection matrix.
-  template <FloatingPoint T, Number U, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
+  template <FloatingPoint T, Number U, conventions::DepthRange DepthRange = conventions::DefaultDepthRange>
   KRYS_NODISCARD constexpr Vector<T, 3> Project(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
                                                 const Matrix<T, 4, 4> &proj,
                                                 const Vector<U, 4> &viewport) noexcept
   {
-    if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
+    if constexpr (DepthRange == conventions::DepthRange::ZeroToOne)
     {
       return Project_ZO(obj, model, proj, viewport);
     }

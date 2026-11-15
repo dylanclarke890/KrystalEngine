@@ -35,7 +35,7 @@
 #include "Krystal.Booey/CSS/Values/TextDecoration/TextShadowProperty.hpp"
 #include "Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   KRYS_NODISCARD static Maybe<TextShadow>
     ConsumeSingleUnresolvedTextShadow(TokenRange &tokens, PropertyParserState &state) noexcept

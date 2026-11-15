@@ -37,7 +37,7 @@ namespace krys::boo
 
 /// @brief Block step sizing (`block-step-size`): rounding a block-level box's outer size up to a multiple of
 /// the step.
-namespace krys::boo::BlockStepSizing
+namespace krys::boo::block_step_sizing
 {
   /// @brief Whether the child's block step properties are the ones block layout supports.
   KRYS_NODISCARD bool ChildHasSupportedStyle(const RenderStyle &childStyle) noexcept;

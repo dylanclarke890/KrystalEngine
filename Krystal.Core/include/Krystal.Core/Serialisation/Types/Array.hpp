@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Types/Array.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   template <typename Archive, typename T, size_t N>
   void Save(Archive &archive, const Array<T, N> &arr) noexcept

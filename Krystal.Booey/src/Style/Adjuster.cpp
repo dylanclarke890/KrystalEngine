@@ -669,7 +669,7 @@ namespace krys::boo::style
 
       // The detailsAutoExpandEnabled setting is on by default.
       if (element->IsInUserAgentShadowTree()
-          && element->UserAgentPart() == css::UserAgentParts::DetailsContent())
+          && element->UserAgentPart() == css::user_agent_parts::DetailsContent())
       {
         style.SetAutoRevealsWhenFound();
       }

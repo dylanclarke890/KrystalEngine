@@ -6,11 +6,11 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
 #pragma region NamedField
 
-  namespace Impl
+  namespace detail
   {
     class NamedField
     {
@@ -20,9 +20,9 @@ namespace krys::Serialisation
   /// @brief A wrapper around a field to be serialised, to provide a more readable name for the appropriate
   /// archives to display. Use CreateNamedField() or the KRYS_NAMED_FIELD() macro for convenience.
   template <typename T>
-  class NamedField : public Impl::NamedField
+  class NamedField : public detail::NamedField
   {
-    static_assert(!DerivedFrom<T, Impl::NamedField>, "T must not derive from NamedField");
+    static_assert(!DerivedFrom<T, detail::NamedField>, "T must not derive from NamedField");
 
     // If array   - store as is so we preserve the array type/size.
     // if l-value - take l-value reference.
@@ -53,13 +53,13 @@ namespace krys::Serialisation
     return NamedField<T>(name, std::forward<T>(value));
   }
 
-#define KRYS_NAMED_FIELD(var) ::krys::Serialisation::CreateNamedField(#var, var)
+#define KRYS_NAMED_FIELD(var) ::krys::serialisation::CreateNamedField(#var, var)
 
 #pragma endregion
 
 #pragma region ContainerSize
 
-  namespace Impl
+  namespace detail
   {
     class ContainerSize
     {
@@ -71,7 +71,7 @@ namespace krys::Serialisation
   /// internal state as needed (e.g. start a JSON array) by utilising the
   /// BeforeTransfer/Transfer/AfterTransfer hooks.
   template <typename T>
-  class ContainerSize : public Impl::ContainerSize
+  class ContainerSize : public detail::ContainerSize
   {
     KRYS_NON_COPYABLE(ContainerSize);
 
@@ -92,13 +92,13 @@ namespace krys::Serialisation
     return ContainerSize<T>(std::forward<T>(value));
   }
 
-#define KRYS_CONTAINER_SIZE(var) ::krys::Serialisation::CreateContainerSize(var)
+#define KRYS_CONTAINER_SIZE(var) ::krys::serialisation::CreateContainerSize(var)
 
 #pragma endregion
 
 #pragma region KeyValuePair
 
-  namespace Impl
+  namespace detail
   {
     class KeyValuePair
     {
@@ -106,7 +106,7 @@ namespace krys::Serialisation
   }
 
   template <typename TKey, typename TValue>
-  struct KeyValuePair : public Impl::KeyValuePair
+  struct KeyValuePair : public detail::KeyValuePair
   {
     KRYS_NON_COPYABLE(KeyValuePair);
 
@@ -128,7 +128,7 @@ namespace krys::Serialisation
     return {std::forward<TKey>(key), std::forward<TValue>(value)};
   }
 
-#define KRYS_KEY_VALUE_PAIR(key, value) ::krys::Serialisation::CreateKeyValuePair(key, value)
+#define KRYS_KEY_VALUE_PAIR(key, value) ::krys::serialisation::CreateKeyValuePair(key, value)
 
 #pragma endregion
 
@@ -162,7 +162,7 @@ namespace krys::Serialisation
 
   /// @brief Macro to define a class version inside a class definition.
 #define KRYS_CLASS_VERSION(version)                                                                          \
-  constexpr static krys::Serialisation::Version ClassVersion = krys::Serialisation::Version(version);        \
+  constexpr static krys::serialisation::Version ClassVersion = krys::serialisation::Version(version);        \
   KRYS_NODISCARD constexpr Version GetVersion() const noexcept                                               \
   {                                                                                                          \
     return ClassVersion;                                                                                     \
@@ -171,7 +171,7 @@ namespace krys::Serialisation
   /// @brief Macro to define a trait for a class version outside of a class definition. Must be outside
   /// of any namespace, and the type must be fully qualified.
 #define KRYS_CLASS_VERSION_TRAIT(type, version)                                                              \
-  namespace krys::Serialisation                                                                              \
+  namespace krys::serialisation                                                                              \
   {                                                                                                          \
     template <>                                                                                              \
     struct VersionTraits<type>                                                                               \

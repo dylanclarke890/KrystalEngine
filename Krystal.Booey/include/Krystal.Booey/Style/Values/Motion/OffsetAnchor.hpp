@@ -45,12 +45,12 @@ namespace krys::boo::style
     {
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsAuto() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsAuto() const noexcept
     {
       return HoldsAlternative<css::keywords::Auto>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsPosition() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsPosition() const noexcept
     {
       return HoldsAlternative<Position>();
     }

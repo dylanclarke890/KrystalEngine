@@ -78,7 +78,7 @@ namespace krys::boo::display_list
     {
     }
 
-    virtual ~Recorder() noexcept;
+    ~Recorder() noexcept override;
 
     void AppendDisplayList(const DisplayList &) noexcept;
 

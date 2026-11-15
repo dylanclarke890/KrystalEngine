@@ -36,7 +36,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <position> | <bg-position>
     // https://drafts.csswg.org/css-values/#position

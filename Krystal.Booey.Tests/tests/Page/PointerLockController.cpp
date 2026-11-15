@@ -84,7 +84,7 @@ namespace krys::boo::tests
       void HandleEvent(dom::Event &event) noexcept override
       {
         auto type = std::string(event.Type().View().begin(), event.Type().View().end());
-        if (event.Type() == EventNames::MouseMove)
+        if (event.Type() == event_names::MouseMove)
         {
           auto &mouse = static_cast<dom::MouseEvent &>(event);
           type += "(" + std::to_string(static_cast<int>(mouse.MovementX())) + ","

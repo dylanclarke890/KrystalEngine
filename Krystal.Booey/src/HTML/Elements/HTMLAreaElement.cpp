@@ -64,7 +64,7 @@ namespace krys::boo::html
         return;
       }
 
-      if (event.Type() == EventNames::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event))
+      if (event.Type() == event_names::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event))
       {
         HyperlinkAlgorithms::FollowTheHyperlink(*this, event);
         return;

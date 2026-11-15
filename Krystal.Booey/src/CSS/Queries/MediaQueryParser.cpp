@@ -35,7 +35,7 @@ namespace krys::boo::css::mq
 {
   List<const FeatureSchema *> MediaQueryParser::FeatureSchemas() noexcept
   {
-    return Features::AllSchemas();
+    return features::AllSchemas();
   }
 
   MediaQueryList MediaQueryParser::Parse(CSSOMStringView string, const ParserContext &context) noexcept

@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
@@ -19,7 +19,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     }
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCursor keywords)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCursor keywords)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"auto", Cursor) == "auto");
     CHECK(ConsumeToText(u8"pointer", Cursor) == "pointer");
@@ -36,7 +36,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"hand", Cursor, Context(ParserMode::HTMLQuirks)) == "pointer");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCursor images)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCursor images)", "[CSS][Properties][Consumers]")
   {
     auto context = Context();
 

@@ -309,7 +309,7 @@ namespace krys::boo::html
     (void)shadowRoot.AppendChild(*container);
     (void)container->AppendChild(*track);
 
-    track->SetUserAgentPart(css::UserAgentParts::WebkitSliderRunnableTrack());
+    track->SetUserAgentPart(css::user_agent_parts::WebkitSliderRunnableTrack());
     auto thumb = html::SliderThumbElement::Create(document);
     (void)track->AppendChild(*thumb);
   }

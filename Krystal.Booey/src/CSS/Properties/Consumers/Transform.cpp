@@ -45,7 +45,7 @@
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   RefPtr<Value> ConsumeRotate3dFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {

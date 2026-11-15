@@ -45,7 +45,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::Hidden;
+      return input_type_names::Hidden;
     }
 
     KRYS_NODISCARD bool RendererIsNeeded() noexcept final;

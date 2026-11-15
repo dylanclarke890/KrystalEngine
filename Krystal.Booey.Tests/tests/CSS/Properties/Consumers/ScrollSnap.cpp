@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeScrollSnapType)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeScrollSnapType)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeScrollSnapType) == "none");
     CHECK(ConsumeToText(u8"x", ConsumeScrollSnapType) == "x");

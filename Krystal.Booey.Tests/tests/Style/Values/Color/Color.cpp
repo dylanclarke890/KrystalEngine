@@ -42,7 +42,7 @@ namespace krys::boo::style::tests
       auto tokens = tokenizer.Tokens();
 
       css::PropertyParserState state {.Context = context};
-      auto result = css::PropertyParserHelpers::ConsumeUnresolvedColor(tokens, state);
+      auto result = css::parse_property::ConsumeUnresolvedColor(tokens, state);
       REQUIRE(result);
       REQUIRE(tokens.IsAtEnd());
       return krys::move(*result);

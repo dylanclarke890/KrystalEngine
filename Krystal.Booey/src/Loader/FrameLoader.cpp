@@ -293,7 +293,7 @@ namespace krys::boo
       //     relevant global object, with legacy target override flag set.
       if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document->Window()))
       {
-        auto unloadEvent = dom::Event::Create(EventNames::Unload, false, false);
+        auto unloadEvent = dom::Event::Create(event_names::Unload, false, false);
         (void)dom::EventDispatcher::DispatchToTarget(*unloadEvent, window.get(), true);
       }
       _wasUnloadEventEmitted = true;

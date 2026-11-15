@@ -46,7 +46,7 @@ namespace krys::boo::css
     CSSPositionTryRule(css::PositionTryRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSPositionTryRule() noexcept;
+    ~CSSPositionTryRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSPositionTryRule> Create(css::PositionTryRule &rule,
                                                          CSSStyleSheet *parent) noexcept;

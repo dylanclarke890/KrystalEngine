@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <'paint-order'> consuming
     // https://svgwg.org/svg2-draft/painting.html#PaintOrderProperty

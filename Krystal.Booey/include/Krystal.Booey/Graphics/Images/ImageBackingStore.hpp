@@ -171,7 +171,7 @@ namespace krys::boo
         return;
       }
 
-      auto pixel = AsSRGBA(PackedColour::ARGB {destination});
+      auto pixel = AsSRGBA(packed_colour::ARGB {destination});
       auto [pixelRed, pixelGreen, pixelBlue, pixelAlpha] = pixel.Resolved();
       if (a >= 255 || !pixelAlpha)
       {
@@ -203,7 +203,7 @@ namespace krys::boo
         result = Unpremultiplied(result);
       }
 
-      destination = PackedColour::ARGB {result}.Value;
+      destination = packed_colour::ARGB {result}.Value;
     }
 
     KRYS_NODISCARD static bool IsOverSize(const IntSize &size) noexcept
@@ -252,7 +252,7 @@ namespace krys::boo
         result = PremultipliedFlooring(result);
       }
 
-      return PackedColour::ARGB {result}.Value;
+      return packed_colour::ARGB {result}.Value;
     }
   };
 }

@@ -32,23 +32,23 @@ namespace krys::boo::css::cq
 {
   Axis RequiredAxesForFeature(const mq::Feature &feature) noexcept
   {
-    if (feature.Schema == &Features::Width())
+    if (feature.Schema == &features::Width())
     {
       return Axis::Width;
     }
-    if (feature.Schema == &Features::Height())
+    if (feature.Schema == &features::Height())
     {
       return Axis::Height;
     }
-    if (feature.Schema == &Features::InlineSize())
+    if (feature.Schema == &features::InlineSize())
     {
       return Axis::Inline;
     }
-    if (feature.Schema == &Features::BlockSize())
+    if (feature.Schema == &features::BlockSize())
     {
       return Axis::Block;
     }
-    if (feature.Schema == &Features::AspectRatio() || feature.Schema == &Features::Orientation())
+    if (feature.Schema == &features::AspectRatio() || feature.Schema == &features::Orientation())
     {
       return Axis::Inline | Axis::Block;
     }

@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   // Keep in sync with the single keyword value fast path of CSSParserFastPaths's parseDisplay.
   RefPtr<Value> ConsumeDisplay(TokenRange &range, PropertyParserState &state) noexcept

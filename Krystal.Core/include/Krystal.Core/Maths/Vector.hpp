@@ -8,7 +8,6 @@
 #include "Krystal.Core/Numeric.hpp"
 #include <cmath>
 #include <compare>
-#include <type_traits>
 
 #pragma region Helper Macros
 
@@ -353,7 +352,7 @@ namespace krys
   {
     static_assert(N > 0 && N < 5, "Unsupported vector length");
 
-    using U = std::invoke_result_t<F, T>;
+    using U = invoke_result_t<F, T>;
     using Vec = Vector<U, N>;
 
     if constexpr (N == 1)
@@ -428,7 +427,7 @@ namespace krys
   {
     static_assert(N > 0 && N < 5, "Unsupported vector length");
 
-    using U = std::invoke_result_t<F, T, T>;
+    using U = invoke_result_t<F, T, T>;
     using Vec = Vector<U, N>;
 
     if constexpr (N == 1)
@@ -470,7 +469,7 @@ namespace krys
   {
     static_assert(N > 0 && N < 5, "Unsupported vector length");
 
-    using U = std::invoke_result_t<F, T, T, T>;
+    using U = invoke_result_t<F, T, T, T>;
     using Vec = Vector<U, N>;
 
     if constexpr (N == 1)
@@ -518,7 +517,7 @@ namespace krys
   template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T> F>
   KRYS_NODISCARD constexpr auto Sum(const VECTOR_TYPE &v, const F &func) noexcept
   {
-    using U = std::invoke_result_t<F, T>;
+    using U = invoke_result_t<F, T>;
 
     U sum = U(0);
     ForEach(v, [&sum, &func](auto val) { sum += func(val); });

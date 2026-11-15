@@ -87,7 +87,7 @@ layer at (0,0) size 800x38
 )");
     auto &button = ButtonOf(one);
     CHECK(button.FormControlType() == u8"button");
-    CHECK(button.UserAgentPart() == css::UserAgentParts::FileSelectorButton());
+    CHECK(button.UserAgentPart() == css::user_agent_parts::FileSelectorButton());
     auto &control = Downcast<RenderFileUploadControl>(*one.Renderer());
     CHECK(control.ButtonValue() == u8"Choose File");
 

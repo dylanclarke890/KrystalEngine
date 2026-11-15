@@ -90,7 +90,7 @@ layer at (0,0) size 400x37
     CHECK(listBox.ListIndexAtOffset(LayoutSize(item.X() + 1_lu, item.Y() + 1_lu)) == 1);
     int32 itemHeight = (item.Y() - listBox.ItemBoundingBoxRect({}, 0).Y()).ToInt();
 
-    auto changes = fixture.Listen(EventNames::Change);
+    auto changes = fixture.Listen(event_names::Change);
 
     SECTION("Clicking selects the item under the mouse")
     {

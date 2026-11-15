@@ -67,7 +67,7 @@ namespace krys::boo
       auto *nextAncestor = RenderTraversal::FindAncestorOfType<RenderGrid>(*_currentAncestorSubgrid);
       _currentAncestorSubgrid =
         (nextAncestor
-         && nextAncestor->IsSubgrid(GridLayoutFunctions::FlowAwareDirectionForGridItem(
+         && nextAncestor->IsSubgrid(grid_layout_functions::FlowAwareDirectionForGridItem(
            *nextAncestor, *_firstAncestorSubgrid, *_direction)))
           ? nextAncestor
           : nullptr;

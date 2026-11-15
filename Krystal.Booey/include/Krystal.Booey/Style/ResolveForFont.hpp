@@ -44,7 +44,7 @@ namespace krys::boo::css
   class FontStyleWithAngleValue;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     struct UnresolvedFont;
   }
@@ -76,6 +76,6 @@ namespace krys::boo::style
   /// the fonts of @p document's font selector; empty if it names no families.
   /// @note What the canvas 2D context's `font` is resolved with.
   KRYS_NODISCARD Maybe<FontCascade>
-    ResolveForUnresolvedFont(const css::PropertyParserHelpers::UnresolvedFont &unresolvedFont,
+    ResolveForUnresolvedFont(const css::parse_property::UnresolvedFont &unresolvedFont,
                              FontCascadeDescription &&fontDescription, dom::Document &document) noexcept;
 }

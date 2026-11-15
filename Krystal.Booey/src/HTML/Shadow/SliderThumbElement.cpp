@@ -193,7 +193,7 @@ namespace krys::boo::html
   Ref<SliderThumbElement> SliderThumbElement::Create(dom::Document &document) noexcept
   {
     auto element = CreateRef<SliderThumbElement>(document);
-    element->SetUserAgentPart(css::UserAgentParts::WebkitSliderThumb());
+    element->SetUserAgentPart(css::user_agent_parts::WebkitSliderThumb());
     return element;
   }
 
@@ -387,18 +387,18 @@ namespace krys::boo::html
 
     // We intentionally do not call event->SetDefaultHandled() here because other handlers want to see these
     // mouse events.
-    if (eventType == EventNames::MouseDown && isLeftButton)
+    if (eventType == event_names::MouseDown && isLeftButton)
     {
       StartDragging();
       return;
     }
-    if (eventType == EventNames::MouseUp && isLeftButton)
+    if (eventType == event_names::MouseUp && isLeftButton)
     {
       input->DispatchFormControlChangeEvent();
       StopDragging();
       return;
     }
-    if (eventType == EventNames::MouseMove)
+    if (eventType == event_names::MouseMove)
     {
       if (_inDragMode)
       {
@@ -459,13 +459,13 @@ namespace krys::boo::html
       : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
     // The container takes touches, which are only dispatched in documents with listeners for them.
-    document.AddListenerTypeIfNeeded(EventNames::TouchStart);
+    document.AddListenerTypeIfNeeded(event_names::TouchStart);
   }
 
   void SliderContainerElement::OnAdopt(dom::Document &oldDocument) noexcept
   {
     HTMLDivElement::OnAdopt(oldDocument);
-    NodeDocument().AddListenerTypeIfNeeded(EventNames::TouchStart);
+    NodeDocument().AddListenerTypeIfNeeded(event_names::TouchStart);
   }
 
   void SliderContainerElement::DefaultEventHandler(dom::Event &event) noexcept
@@ -490,7 +490,7 @@ namespace krys::boo::html
     }
 
     auto type = event.Type();
-    if (type == EventNames::TouchEnd)
+    if (type == event_names::TouchEnd)
     {
       // The value the touch slid to is committed as it lifts.
       if (std::exchange(_touchStarted, false))
@@ -501,7 +501,7 @@ namespace krys::boo::html
       _slidingDirection = SlidingDirection::NoMove;
       return;
     }
-    if (type == EventNames::TouchCancel)
+    if (type == event_names::TouchCancel)
     {
       _touchStarted = false;
       _slidingDirection = SlidingDirection::NoMove;
@@ -523,7 +523,7 @@ namespace krys::boo::html
 
     auto point = touches->Item(0)->AbsoluteLocation();
     auto layoutPoint = LayoutPoint(FloatPoint(static_cast<float>(point.X()), static_cast<float>(point.Y())));
-    if (type == EventNames::TouchStart)
+    if (type == event_names::TouchStart)
     {
       _touchStartPoint = point;
       _slidingDirection = SlidingDirection::NoMove;
@@ -531,7 +531,7 @@ namespace krys::boo::html
       thumb->SetPositionFromPoint(layoutPoint);
       return;
     }
-    if (type != EventNames::TouchMove || !_touchStarted)
+    if (type != event_names::TouchMove || !_touchStarted)
     {
       return;
     }
@@ -575,7 +575,7 @@ namespace krys::boo::html
   Ref<SliderContainerElement> SliderContainerElement::Create(dom::Document &document) noexcept
   {
     auto element = CreateRef<SliderContainerElement>(document);
-    element->SetUserAgentPart(css::UserAgentParts::WebkitSliderContainer());
+    element->SetUserAgentPart(css::user_agent_parts::WebkitSliderContainer());
     return element;
   }
 

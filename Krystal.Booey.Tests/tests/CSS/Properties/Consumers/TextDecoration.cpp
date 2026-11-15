@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeTextShadow)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeTextShadow)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeTextShadow) == "none");
     CHECK(ConsumeToText(u8"1px 2px", ConsumeTextShadow) == "1px 2px");

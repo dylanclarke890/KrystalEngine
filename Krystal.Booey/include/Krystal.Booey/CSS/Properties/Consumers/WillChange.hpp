@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <'will-change'> consuming
     // https://drafts.csswg.org/css-will-change/#propdef-will-change

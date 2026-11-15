@@ -53,7 +53,7 @@ namespace krys::boo::style
       {
         case css::ValueId::Normal: return css::keywords::Normal {};
         default:
-          if (css::PropertyParserHelpers::IsSystemFontShorthand(valueID))
+          if (css::parse_property::IsSystemFontShorthand(valueID))
           {
             return css::keywords::Normal {};
           }

@@ -53,7 +53,7 @@ namespace krys::boo::dom
 
   bool IsAnyClick(DOMStringAtom eventType) noexcept
   {
-    return eventType == EventNames::Click || eventType == EventNames::AuxClick;
+    return eventType == event_names::Click || eventType == event_names::AuxClick;
   }
 
   bool IsAnyClick(const Event &event) noexcept
@@ -94,7 +94,7 @@ namespace krys::boo::dom
                                      const List<Ref<MouseEvent>> &predictedEvents, int32 detail,
                                      Node *relatedTarget) noexcept
   {
-    bool isMouseEnterOrLeave = eventType == EventNames::MouseEnter || eventType == EventNames::MouseLeave;
+    bool isMouseEnterOrLeave = eventType == event_names::MouseEnter || eventType == event_names::MouseLeave;
 
     UIEventInit init;
     init.Bubbles = !isMouseEnterOrLeave;
@@ -230,7 +230,7 @@ namespace krys::boo::dom
   RefPtr<Node> MouseEvent::ToElement() const noexcept
   {
     // MSIE extension - "the object toward which the user is moving the mouse pointer"
-    if (Type() == EventNames::MouseOut || Type() == EventNames::MouseLeave)
+    if (Type() == event_names::MouseOut || Type() == event_names::MouseLeave)
     {
       return AsNode(RelatedTarget());
     }
@@ -240,7 +240,7 @@ namespace krys::boo::dom
   RefPtr<Node> MouseEvent::FromElement() const noexcept
   {
     // MSIE extension - "object from which activation or the mouse pointer is exiting during the event" (huh?)
-    if (Type() == EventNames::MouseOut || Type() == EventNames::MouseLeave)
+    if (Type() == event_names::MouseOut || Type() == event_names::MouseLeave)
     {
       return AsNode(Target());
     }

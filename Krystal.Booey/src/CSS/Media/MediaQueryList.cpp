@@ -72,7 +72,7 @@ namespace krys::boo::css
     }
 
     Ref<dom::EventListenerCallback> callback = krys::move(listener);
-    AddEventListener(EventNames::Change, krys::move(callback), false);
+    AddEventListener(event_names::Change, krys::move(callback), false);
   }
 
   void MediaQueryList::RemoveListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept
@@ -83,7 +83,7 @@ namespace krys::boo::css
     }
 
     Ref<dom::EventListenerCallback> callback = krys::move(listener);
-    RemoveEventListener(EventNames::Change, krys::move(callback), false);
+    RemoveEventListener(event_names::Change, krys::move(callback), false);
   }
 
   void MediaQueryList::Evaluate(mq::MediaQueryEvaluator &evaluator,
@@ -106,7 +106,7 @@ namespace krys::boo::css
     MediaQueryListEventInit attributes;
     attributes.Media = Media();
     attributes.Matches = Matches();
-    dom::EventDispatcher::FireEvent<MediaQueryListEvent>(EventNames::Change, *this, attributes);
+    dom::EventDispatcher::FireEvent<MediaQueryListEvent>(event_names::Change, *this, attributes);
     _needsNotification = false;
   }
 

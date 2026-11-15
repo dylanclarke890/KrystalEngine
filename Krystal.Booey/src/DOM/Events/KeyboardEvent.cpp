@@ -48,16 +48,16 @@ namespace krys::boo::dom
     {
       switch (type)
       {
-        case PlatformEvent::Type::KeyUp:      return EventNames::KeyUp;
-        case PlatformEvent::Type::RawKeyDown: return EventNames::KeyDown;
-        case PlatformEvent::Type::Char:       return EventNames::KeyPress;
+        case PlatformEvent::Type::KeyUp:      return event_names::KeyUp;
+        case PlatformEvent::Type::RawKeyDown: return event_names::KeyDown;
+        case PlatformEvent::Type::Char:       return event_names::KeyPress;
         case PlatformEvent::Type::KeyDown:
           // The caller should disambiguate the combined event into RawKeyDown or Char events.
           break;
         default: break;
       }
       krys_debug_assert(false);
-      return EventNames::KeyDown;
+      return event_names::KeyDown;
     }
 
     KRYS_NODISCARD int32 WindowsVirtualKeyCodeWithoutLocation(int32 keycode) noexcept
@@ -170,7 +170,7 @@ namespace krys::boo::dom
     {
       return 0;
     }
-    if (Type() == EventNames::KeyDown || Type() == EventNames::KeyUp)
+    if (Type() == event_names::KeyDown || Type() == event_names::KeyUp)
     {
       return WindowsVirtualKeyCodeWithoutLocation(_underlyingPlatformEvent->WindowsVirtualKeyCode());
     }
@@ -180,7 +180,7 @@ namespace krys::boo::dom
 
   int32 KeyboardEvent::KeyCodeForKeyDown() const noexcept
   {
-    krys_debug_assert(Type() == EventNames::KeyPress);
+    krys_debug_assert(Type() == event_names::KeyPress);
     if (_keyCode)
     {
       return static_cast<int32>(*_keyCode);
@@ -207,7 +207,7 @@ namespace krys::boo::dom
     // We match Firefox.
     // FIXME: The backward compatibility mode (needsKeyboardEventDisambiguationQuirks), where the character
     // code is always returned, if it's ever needed.
-    if (!_underlyingPlatformEvent || Type() != EventNames::KeyPress
+    if (!_underlyingPlatformEvent || Type() != event_names::KeyPress
         || _underlyingPlatformEvent->Text().empty())
     {
       return 0;

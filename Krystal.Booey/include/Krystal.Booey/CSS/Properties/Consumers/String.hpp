@@ -36,7 +36,7 @@ namespace krys::boo::css
   // MARK: <string>
   // https://drafts.csswg.org/css-values/#strings
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     KRYS_NODISCARD CSSOMStringView ConsumeStringRaw(TokenRange &tokens) noexcept;
 

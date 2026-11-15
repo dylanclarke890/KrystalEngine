@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeKeyframesName)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeKeyframesName)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"foo", ConsumeKeyframesName) == "foo");
     CHECK(ConsumeToText(u8"none", ConsumeKeyframesName) == "none");
@@ -22,7 +22,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"10px", ConsumeKeyframesName) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ParseKeyframeKeyList)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ParseKeyframeKeyList)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
 

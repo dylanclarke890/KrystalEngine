@@ -52,7 +52,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // https://drafts.fxtf.org/filter-effects/#FilterProperty
 

@@ -116,7 +116,7 @@
 
 namespace krys::boo::css
 {
-  using namespace PropertyParserHelpers;
+  using namespace parse_property;
 
   struct BorderShorthandComponents
   {

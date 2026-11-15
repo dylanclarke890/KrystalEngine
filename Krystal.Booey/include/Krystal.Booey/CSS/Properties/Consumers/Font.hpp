@@ -61,7 +61,7 @@ namespace krys::boo::css
     enum class FamilyNamesIndex : uint8;
   }
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: - Font
 

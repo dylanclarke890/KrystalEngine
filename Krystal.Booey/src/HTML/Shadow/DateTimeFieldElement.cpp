@@ -91,7 +91,7 @@ namespace krys::boo::html
 
   void DateTimeFieldElement::DefaultEventHandler(dom::Event &event) noexcept
   {
-    if (event.Type() == EventNames::Blur)
+    if (event.Type() == event_names::Blur)
     {
       HandleBlurEvent(event);
     }
@@ -124,7 +124,7 @@ namespace krys::boo::html
       return;
     }
 
-    if (keyboardEvent.Type() != EventNames::KeyDown)
+    if (keyboardEvent.Type() != event_names::KeyDown)
     {
       return;
     }

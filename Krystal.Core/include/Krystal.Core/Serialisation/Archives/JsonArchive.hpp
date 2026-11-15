@@ -16,7 +16,7 @@
 #include <format>
 #include <memory>
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   class JsonArchiveWriter : public BaseArchiveWriter<JsonArchiveWriter>
   {

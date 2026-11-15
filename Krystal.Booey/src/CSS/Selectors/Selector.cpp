@@ -732,7 +732,7 @@ namespace krys::boo::css
             krys_debug_assert_msg(!PseudoElementMayHaveArgument(selector->PseudoElement()),
                                   "Missing serialisation for pseudo-element argument");
             if (selector->PseudoElement() == SelectorPseudoElement::UserAgentPart
-                && selector->Value() == UserAgentParts::InternalSelectPicker())
+                && selector->Value() == user_agent_parts::InternalSelectPicker())
             {
               builder.Append(u8"::picker(select)");
               break;

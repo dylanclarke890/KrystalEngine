@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   RefPtr<PrimitiveValue> ConsumeIdent(TokenRange &tokens) noexcept
   {

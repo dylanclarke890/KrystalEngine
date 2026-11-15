@@ -291,7 +291,7 @@ namespace krys::boo::css::mq
 
   RefPtr<Value> FeatureParser::ConsumeValue(TokenRange &tokens, const ParserContext &context) noexcept
   {
-    using namespace PropertyParserHelpers;
+    using namespace parse_property;
 
     if (tokens.IsAtEnd())
     {

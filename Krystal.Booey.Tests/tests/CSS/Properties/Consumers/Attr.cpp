@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
@@ -17,7 +17,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     };
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeAttr)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeAttr)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"data-x", Consume) == "attr(data-x)");
     CHECK(ConsumeToText(u8"Data-X", Consume) == "attr(Data-X)");
@@ -30,7 +30,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"a, \"b\" c", Consume) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeAttr HTML document)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeAttr HTML document)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
     context.IsHTMLDocument = true;

@@ -187,47 +187,47 @@ namespace krys::boo
     }
 
     // Derived type.
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsCachedImage() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsCachedImage() const noexcept
     {
       return _type == Type::CachedImage;
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsCursorImage() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsCursorImage() const noexcept
     {
       return _type == Type::CursorImage;
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsImageSet() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsImageSet() const noexcept
     {
       return _type == Type::ImageSet;
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsGeneratedImage() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsGeneratedImage() const noexcept
     {
       return IsFilterImage() || IsCrossfadeImage() || IsGradientImage() || IsPaintImage() || IsInvalidImage();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsFilterImage() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsFilterImage() const noexcept
     {
       return _type == Type::FilterImage;
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsCrossfadeImage() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsCrossfadeImage() const noexcept
     {
       return _type == Type::CrossfadeImage;
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsGradientImage() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsGradientImage() const noexcept
     {
       return _type == Type::GradientImage;
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsPaintImage() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsPaintImage() const noexcept
     {
       return _type == Type::PaintImage;
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsInvalidImage() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsInvalidImage() const noexcept
     {
       return _type == Type::InvalidImage;
     }

@@ -36,7 +36,7 @@ namespace krys::boo::css
 {
   class TokenRange;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     enum class ListOptimization : bool
     {

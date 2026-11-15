@@ -2,12 +2,12 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
   using css::tests::Tokens;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCounterStyle)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCounterStyle)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"decimal", ConsumeCounterStyle) == "decimal");
     CHECK(ConsumeToText(u8"my-style", ConsumeCounterStyle) == "my-style");
@@ -20,7 +20,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"\"x\"", ConsumeCounterStyle) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCounterStyleName)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCounterStyleName)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"decimal", ConsumeCounterStyleName) == "decimal");
     CHECK(ConsumeToText(u8"Decimal", ConsumeCounterStyleName) == "decimal");
@@ -28,7 +28,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"none", ConsumeCounterStyleName) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCounterStyleNameInPrelude)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCounterStyleNameInPrelude)", "[CSS][Properties][Consumers]")
   {
     auto prelude = [](utf8_stringview css)
     {
@@ -49,7 +49,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(prelude(u8"Upper-Roman") == u8"upper-roman");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCounterStyleSystem)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCounterStyleSystem)", "[CSS][Properties][Consumers]")
   {
     for (auto system : {u8"cyclic", u8"fixed", u8"symbolic", u8"additive", u8"alphabetic", u8"numeric"})
     {
@@ -63,7 +63,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"cyclic 3", ConsumeCounterStyleSystem) == "<partial>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCounterStyleRange)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCounterStyleRange)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"auto", ConsumeCounterStyleRange) == "auto");
     CHECK(ConsumeToText(u8"1 5", ConsumeCounterStyleRange) == "1 5");
@@ -75,7 +75,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"1", ConsumeCounterStyleRange) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCounterStyleAdditiveSymbols)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCounterStyleAdditiveSymbols)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"1 a", ConsumeCounterStyleAdditiveSymbols) == "1 a");
     CHECK(ConsumeToText(u8"\"x\" 5", ConsumeCounterStyleAdditiveSymbols) == "5 \"x\"");

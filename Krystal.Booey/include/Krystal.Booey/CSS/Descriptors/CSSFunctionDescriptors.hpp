@@ -41,7 +41,7 @@ namespace krys::boo::css
     CSSFunctionDescriptors(MutableStyleProperties &propertySet, CSSFunctionDeclarations &parentRule) noexcept;
 
   public:
-    ~CSSFunctionDescriptors() noexcept;
+    ~CSSFunctionDescriptors() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSFunctionDescriptors> Create(MutableStyleProperties &propertySet,
                                                              CSSFunctionDeclarations &parentRule) noexcept;

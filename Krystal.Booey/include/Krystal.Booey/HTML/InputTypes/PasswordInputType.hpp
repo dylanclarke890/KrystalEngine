@@ -51,7 +51,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::Password;
+      return input_type_names::Password;
     }
 
     /// @brief Input methods are disabled for the password field because otherwise anyone can access the

@@ -7,7 +7,6 @@
 #include "Krystal.Core/Maths/Traits.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include <type_traits>
 
 #pragma region Helper Macros
 
@@ -400,7 +399,7 @@ namespace krys
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
-    using U = std::invoke_result_t<F, T>;
+    using U = invoke_result_t<F, T>;
     using Mat = Matrix<U, C, R>;
 
     if constexpr (C == 2)
@@ -466,7 +465,7 @@ namespace krys
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
-    using U = std::invoke_result_t<F, T, T>;
+    using U = invoke_result_t<F, T, T>;
     using Mat = Matrix<U, C, R>;
 
     if constexpr (C == 2)
@@ -503,7 +502,7 @@ namespace krys
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
-    using U = std::invoke_result_t<F, T, T, T>;
+    using U = invoke_result_t<F, T, T, T>;
     using Mat = Matrix<U, C, R>;
 
     if constexpr (C == 2)
@@ -546,7 +545,7 @@ namespace krys
   template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T> F>
   KRYS_NODISCARD constexpr auto Sum(const MATRIX_TYPE &m, const F &func) noexcept
   {
-    using U = std::invoke_result_t<F, T>;
+    using U = invoke_result_t<F, T>;
 
     U sum = U(0);
     ForEach(m, [&sum, &func](auto val) { sum += func(val); });

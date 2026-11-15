@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // <'offset-path'> = none | <offset-path> || <coord-box>
     // https://drafts.fxtf.org/motion-1/#propdef-offset-path

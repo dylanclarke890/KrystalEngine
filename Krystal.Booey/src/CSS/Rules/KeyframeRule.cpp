@@ -147,7 +147,7 @@ namespace krys::boo::css
 
   bool KeyframeRule::SetKeyText(const CSSOMString &keyText) noexcept
   {
-    auto keys = PropertyParserHelpers::ParseKeyframeKeyList(keyText, StrictParserContext());
+    auto keys = parse_property::ParseKeyframeKeyList(keyText, StrictParserContext());
     if (keys.empty())
     {
       return false;

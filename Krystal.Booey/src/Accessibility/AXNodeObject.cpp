@@ -2284,9 +2284,9 @@ namespace krys::boo
   {
     auto *element = GetElement();
     return element
-           && (element->HasEventListener(EventNames::Click)
-               || element->HasEventListener(EventNames::MouseDown)
-               || element->HasEventListener(EventNames::MouseUp));
+           && (element->HasEventListener(event_names::Click)
+               || element->HasEventListener(event_names::MouseDown)
+               || element->HasEventListener(event_names::MouseUp));
   }
 
   void AXNodeObject::SetFocused(bool focused) noexcept

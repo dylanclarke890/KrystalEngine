@@ -413,7 +413,7 @@ namespace krys::boo
         return null;
       }();
 
-      animation->EnqueueAnimationPlaybackEvent(EventNames::Remove, animationCurrentTime, scheduledTime);
+      animation->EnqueueAnimationPlaybackEvent(event_names::Remove, animationCurrentTime, scheduledTime);
 
       animationsToRemove.push_back(animation);
     }

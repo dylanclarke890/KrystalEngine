@@ -14,7 +14,7 @@
 #include <format>
 #include <sstream>
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   class XmlArchiveWriter : public BaseArchiveWriter<XmlArchiveWriter>
   {

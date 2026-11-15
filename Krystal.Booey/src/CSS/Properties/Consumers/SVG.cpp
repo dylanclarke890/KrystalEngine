@@ -35,7 +35,7 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   RefPtr<Value> ConsumePaintOrder(TokenRange &range, PropertyParserState &) noexcept
   {

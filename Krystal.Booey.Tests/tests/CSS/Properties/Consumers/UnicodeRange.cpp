@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
@@ -14,7 +14,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     };
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeUnicodeRangeToken)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeUnicodeRangeToken)", "[CSS][Properties][Consumers]")
   {
     // Ranges written with only letters and question marks.
     CHECK(ConsumeToText(u8"U+A", Consume) == "U+a");
@@ -32,7 +32,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"V+A", Consume) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeUnicodeRangeToken leaves the range on failure)",
+  TEST_CASE("parse_property(ConsumeUnicodeRangeToken leaves the range on failure)",
             "[CSS][Properties][Consumers]")
   {
     css::tests::Tokens tokens {u8"U+G"};
@@ -41,7 +41,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(range.Peek().Type() == TokenType::Ident);
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeUnicodeRangeToken numeric)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeUnicodeRangeToken numeric)", "[CSS][Properties][Consumers]")
   {
     // Ranges containing number and dimension tokens, which are read from their original text.
     CHECK(ConsumeToText(u8"U+0025-00FF", Consume) == "U+25-ff");

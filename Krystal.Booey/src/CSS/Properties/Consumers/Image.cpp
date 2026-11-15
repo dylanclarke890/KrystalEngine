@@ -60,7 +60,7 @@
 
 namespace krys::boo::css
 {
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // Used by radial gradient consumers internally.
     enum class ShapeKeyword : bool
@@ -935,12 +935,12 @@ namespace krys::boo::css
   }
 
   template <>
-  struct ConsumerDefinition<PropertyParserHelpers::ImageSetTypeFunction>
+  struct ConsumerDefinition<parse_property::ImageSetTypeFunction>
   {
-    using FunctionToken = PropertyParserHelpers::ImageSetTypeFunctionRawKnownTokenTypeFunctionConsumer;
+    using FunctionToken = parse_property::ImageSetTypeFunctionRawKnownTokenTypeFunctionConsumer;
   };
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: Image Set Resolution + Type Function
 

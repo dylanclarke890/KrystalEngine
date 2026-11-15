@@ -58,7 +58,7 @@ namespace krys::boo::tests
     bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final
     {
       ++KeyEvents;
-      if (event.Type() != EventNames::KeyDown || event.KeyCode() != vk::Right || !event.ShiftKey())
+      if (event.Type() != event_names::KeyDown || event.KeyCode() != vk::Right || !event.ShiftKey())
       {
         return false;
       }

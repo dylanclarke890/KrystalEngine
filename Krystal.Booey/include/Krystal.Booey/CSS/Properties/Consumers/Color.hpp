@@ -48,7 +48,7 @@ namespace krys::boo::css
   struct PlatformColorResolutionState;
   struct PropertyParserState;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // Options to augment color parsing.
     struct ColorParsingOptions

@@ -142,7 +142,7 @@ namespace krys::boo::css
     CSSStyleSheet(Ref<StyleSheetContents> &&contents, dom::Document &document, Init &&options) noexcept;
 
   public:
-    ~CSSStyleSheet() noexcept;
+    ~CSSStyleSheet() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSStyleSheet> Create(Ref<StyleSheetContents> &&contents,
                                                     CSSImportRule *ownerRule = nullptr,

@@ -225,7 +225,7 @@ namespace krys::boo::html
 
   void HTMLTextFormControlElement::ForwardEvent(dom::Event &event) noexcept
   {
-    if (event.Type() == EventNames::Blur || event.Type() == EventNames::Focus)
+    if (event.Type() == event_names::Blur || event.Type() == event_names::Focus)
     {
       return;
     }
@@ -778,7 +778,7 @@ namespace krys::boo::html
 
     if (shouldFireSelectEvent && _cachedSelectionStart != _cachedSelectionEnd)
     {
-      auto event = dom::Event::Create(EventNames::Select, true, false);
+      auto event = dom::Event::Create(event_names::Select, true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, this);
     }
 
@@ -798,7 +798,7 @@ namespace krys::boo::html
                                    {
                                      textControl->_hasScheduledSelectionChangeEvent = false;
                                      auto event =
-                                       dom::Event::Create(EventNames::SelectionChange, true, false);
+                                       dom::Event::Create(event_names::SelectionChange, true, false);
                                      (void)dom::EventDispatcher::DispatchToTarget(*event, textControl.get());
                                    });
   }
@@ -808,7 +808,7 @@ namespace krys::boo::html
     EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
                                    [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
                                    {
-                                     auto event = dom::Event::Create(EventNames::Select, true, false);
+                                     auto event = dom::Event::Create(event_names::Select, true, false);
                                      (void)dom::EventDispatcher::DispatchToTarget(*event, textControl.get());
                                    });
     ScheduleSelectionChangeEvent();

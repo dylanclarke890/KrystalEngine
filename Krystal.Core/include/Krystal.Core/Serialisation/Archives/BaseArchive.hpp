@@ -35,7 +35,7 @@
 ///   2b. void Load(Archive& ar, T& value) noexcept;
 ///
 /// NOTE: If T is versioned, the version is always passed as the last argument to the above methods.
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   /// @brief Hook called before serialisation or deserialisation of a value. No-op by default.
   template <typename Archive, typename T>

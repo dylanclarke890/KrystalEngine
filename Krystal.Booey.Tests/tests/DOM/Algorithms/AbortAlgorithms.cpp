@@ -86,9 +86,9 @@ namespace krys::boo::dom::tests
         signal);
       AbortAlgorithms::Add([&](const Any &) { log.push_back("dependent algorithm"); }, *dependent);
       auto signalListener =
-        signal.AddEventListener(EventNames::Abort, [&](Event &) { log.push_back("signal event"); });
+        signal.AddEventListener(event_names::Abort, [&](Event &) { log.push_back("signal event"); });
       auto dependentListener =
-        dependent->AddEventListener(EventNames::Abort, [&](Event &) { log.push_back("dependent event"); });
+        dependent->AddEventListener(event_names::Abort, [&](Event &) { log.push_back("dependent event"); });
 
       AbortAlgorithms::SignalAbort(signal, Any(7));
       CHECK(
@@ -114,7 +114,7 @@ namespace krys::boo::dom::tests
         },
         signal);
       AbortAlgorithms::Add([&](const Any &) { log.push_back("second"); }, signal);
-      auto listener = signal.AddEventListener(EventNames::Abort, [&](Event &) { log.push_back("event"); });
+      auto listener = signal.AddEventListener(event_names::Abort, [&](Event &) { log.push_back("event"); });
 
       controller.Abort(Any(4));
       CHECK(log == List<std::string> {"first", "second", "event"});

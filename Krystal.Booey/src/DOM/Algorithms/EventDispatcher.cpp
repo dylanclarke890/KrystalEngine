@@ -118,7 +118,7 @@ namespace krys::boo::dom
 
       // 6d. Let isActivationEvent be true, if event is a MouseEvent object and event's type attribute is
       // "click"; otherwise false.
-      bool isActivationEvent = event.IsMouseEvent() && event.Type() == EventNames::Click;
+      bool isActivationEvent = event.IsMouseEvent() && event.Type() == event_names::Click;
 
       // 6e. If isActivationEvent is true and target has activation behavior, then set activationTarget to
       // target.
@@ -486,21 +486,21 @@ namespace krys::boo::dom
       // 11b. If event's type attribute value is a match for any of the strings in the first column in the
       // following table, set event's type attribute value to the string in the second column on the same row
       // as the matching string, and return otherwise.
-      if (event.Type() == EventNames::AnimationEnd)
+      if (event.Type() == event_names::AnimationEnd)
       {
-        event._type = EventNames::Legacy::AnimationEnd;
+        event._type = event_names::legacy::AnimationEnd;
       }
-      else if (event.Type() == EventNames::AnimationIteration)
+      else if (event.Type() == event_names::AnimationIteration)
       {
-        event._type = EventNames::Legacy::AnimationIteration;
+        event._type = event_names::legacy::AnimationIteration;
       }
-      else if (event.Type() == EventNames::AnimationStart)
+      else if (event.Type() == event_names::AnimationStart)
       {
-        event._type = EventNames::Legacy::AnimationStart;
+        event._type = event_names::legacy::AnimationStart;
       }
-      else if (event.Type() == EventNames::TransitionEnd)
+      else if (event.Type() == event_names::TransitionEnd)
       {
-        event._type = EventNames::Legacy::TransitionEnd;
+        event._type = event_names::legacy::TransitionEnd;
       }
       else
       {

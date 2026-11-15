@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCounterReset)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCounterReset)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeCounterReset) == "none");
     CHECK(ConsumeToText(u8"chapter", ConsumeCounterReset) == "chapter 0");
@@ -21,8 +21,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"none chapter", ConsumeCounterReset) == "<partial>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeCounterIncrement and ConsumeCounterSet)",
-            "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeCounterIncrement and ConsumeCounterSet)", "[CSS][Properties][Consumers]")
   {
     // counter-increment defaults to 1; counter-set to 0.
     CHECK(ConsumeToText(u8"chapter", ConsumeCounterIncrement) == "chapter 1");

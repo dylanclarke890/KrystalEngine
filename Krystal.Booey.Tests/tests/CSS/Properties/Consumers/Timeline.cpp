@@ -3,12 +3,12 @@
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
   using css::tests::CssText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeAnimationTimelineScroll)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeAnimationTimelineScroll)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"scroll()", ConsumeAnimationTimelineScroll) == "scroll()");
     CHECK(ConsumeToText(u8"scroll(root)", ConsumeAnimationTimelineScroll) == "scroll(root)");
@@ -21,7 +21,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"scroll(1px)", ConsumeAnimationTimelineScroll) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeAnimationTimelineView)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeAnimationTimelineView)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"view()", ConsumeAnimationTimelineView) == "view()");
     CHECK(ConsumeToText(u8"view(x)", ConsumeAnimationTimelineView) == "view(x)");
@@ -33,7 +33,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"view(red)", ConsumeAnimationTimelineView) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeSingleViewTimelineInsetItem)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeSingleViewTimelineInsetItem)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"auto", ConsumeSingleViewTimelineInsetItem) == "auto");
     CHECK(ConsumeToText(u8"10px", ConsumeSingleViewTimelineInsetItem) == "10px");
@@ -48,7 +48,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK_FALSE(ParseSingleViewTimelineInsetItem(CSSOMString(u8"10px red"), context));
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeSingleAnimationRange)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeSingleAnimationRange)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"normal", ConsumeSingleAnimationRangeStart) == "normal");
     CHECK(ConsumeToText(u8"cover", ConsumeSingleAnimationRangeStart) == "cover");
@@ -74,7 +74,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
       ParseSingleAnimationRange(CSSOMString(u8"cover red"), context, style::SingleAnimationRangeType::End));
   }
 
-  TEST_CASE("PropertyParserHelpers(IsAnimationRangeKeyword)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(IsAnimationRangeKeyword)", "[CSS][Properties][Consumers]")
   {
     CHECK(IsAnimationRangeKeyword(ValueId::Cover));
     CHECK(IsAnimationRangeKeyword(ValueId::EntryCrossing));

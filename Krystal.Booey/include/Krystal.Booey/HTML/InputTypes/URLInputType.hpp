@@ -45,7 +45,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::URL;
+      return input_type_names::URL;
     }
 
     KRYS_NODISCARD bool TypeMismatchFor(dom::DOMStringView value) const noexcept final;

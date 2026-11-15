@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   bool ConsumeComma(TokenRange &tokens) noexcept
   {

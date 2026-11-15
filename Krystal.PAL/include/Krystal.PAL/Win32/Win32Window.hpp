@@ -80,7 +80,7 @@ namespace krys::pal::win32
 
     KRYS_NODISCARD const string &GetTitle() const noexcept override;
 
-    KRYS_NODISCARD virtual WindowSize GetSize() const noexcept override;
+    KRYS_NODISCARD WindowSize GetSize() const noexcept override;
 
     KRYS_NODISCARD WindowPosition ClientOriginOnScreen() const noexcept override;
 

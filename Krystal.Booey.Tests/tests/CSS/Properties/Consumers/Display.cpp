@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeDisplay)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeDisplay)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeDisplay) == "none");
     CHECK(ConsumeToText(u8"table-cell", ConsumeDisplay) == "table-cell");
@@ -30,7 +30,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"foo", ConsumeDisplay) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeDisplay ruby)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeDisplay ruby)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"ruby", ConsumeDisplay) == "<null>");
     CHECK(ConsumeToText(u8"ruby-text", ConsumeDisplay) == "<null>");
@@ -42,7 +42,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"ruby-base", ConsumeDisplay, context) == "ruby-base");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeDisplay grid-lanes)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeDisplay grid-lanes)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
 

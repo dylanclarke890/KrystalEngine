@@ -63,7 +63,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   KRYS_NODISCARD static Ref<PrimitiveValue> ResolveToPrimitiveValue(Numeric auto &&primitive) noexcept
   {

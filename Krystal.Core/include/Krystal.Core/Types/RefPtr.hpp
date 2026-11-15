@@ -40,7 +40,7 @@ namespace krys
     }
 
     template <typename T>
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static T *ValidateGetAccess(T *ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static T *ValidateGetAccess(T *ptr) noexcept
     {
       static_assert(IsTypeComplete<T>, "T is an incomplete type.");
 
@@ -48,7 +48,7 @@ namespace krys
     }
 
     template <typename T>
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static bool IsValid(T *ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static bool IsValid(T *ptr) noexcept
     {
       static_assert(IsTypeComplete<T>, "T is an incomplete type.");
 

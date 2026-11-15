@@ -24,7 +24,7 @@
 
 /// @brief The input types, as the `type` attribute names them.
 /// @see https://html.spec.whatwg.org/#attr-input-type
-namespace krys::boo::html::InputTypeNames
+namespace krys::boo::html::input_type_names
 {
   constexpr dom::DOMStringView Button = u8"button";
   constexpr dom::DOMStringView Checkbox = u8"checkbox";

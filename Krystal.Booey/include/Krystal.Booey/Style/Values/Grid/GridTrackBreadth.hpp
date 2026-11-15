@@ -47,17 +47,17 @@ namespace krys::boo::style
   {
     using Base::Base;
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsMinContent() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsMinContent() const noexcept
     {
       return HoldsAlternative<css::keywords::MinContent>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsMaxContent() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsMaxContent() const noexcept
     {
       return HoldsAlternative<css::keywords::MaxContent>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsAuto() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsAuto() const noexcept
     {
       return HoldsAlternative<css::keywords::Auto>();
     }

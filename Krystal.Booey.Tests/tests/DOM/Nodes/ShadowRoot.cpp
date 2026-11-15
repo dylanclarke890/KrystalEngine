@@ -192,7 +192,7 @@ namespace krys::boo::dom::tests
       [&](Event &event)
       {
         ++calls;
-        CHECK(event.Type() == EventNames::SlotChange);
+        CHECK(event.Type() == event_names::SlotChange);
         CHECK(event.Target() == slot.get());
         CHECK(event.Bubbles());
       });

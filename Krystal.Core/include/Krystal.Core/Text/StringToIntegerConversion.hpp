@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include <algorithm>
-#include <concepts>
 #include <limits>
 
 namespace krys::text
@@ -26,7 +26,7 @@ namespace krys::text
     Allow,
   };
 
-  template <std::integral TIntegral>
+  template <Integral TIntegral>
   KRYS_NODISCARD constexpr Maybe<TIntegral>
     ParseInteger(utf8_stringview data, uint8 base, TrailingJunkPolicy policy,
                  ParseIntegerWhitespacePolicy whitespacePolicy = ParseIntegerWhitespacePolicy::Allow) noexcept
@@ -45,7 +45,7 @@ namespace krys::text
     }
 
     bool isNegative = false;
-    if (std::is_signed_v<TIntegral> && !data.empty() && data.front() == u8'-')
+    if (Signed<TIntegral> && !data.empty() && data.front() == u8'-')
     {
       isNegative = true;
       data.remove_prefix(1);
@@ -123,7 +123,7 @@ namespace krys::text
     return value;
   }
 
-  template <std::integral TIntegral>
+  template <Integral TIntegral>
   KRYS_NODISCARD constexpr Maybe<TIntegral>
     ParseInteger(utf8_stringview data, uint8 base = 10,
                  ParseIntegerWhitespacePolicy whitespacePolicy = ParseIntegerWhitespacePolicy::Allow) noexcept
@@ -131,7 +131,7 @@ namespace krys::text
     return ParseInteger<TIntegral>(data, base, TrailingJunkPolicy::Disallow, whitespacePolicy);
   }
 
-  template <std::integral TIntegral>
+  template <Integral TIntegral>
   KRYS_NODISCARD constexpr Maybe<TIntegral> ParseIntegerAllowingTrailingJunk(utf8_stringview data,
                                                                              uint8 base = 10) noexcept
   {

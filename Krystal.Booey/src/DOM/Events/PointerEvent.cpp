@@ -54,11 +54,11 @@ namespace krys::boo::dom
     {
       switch (state)
       {
-        case PlatformTouchPoint::TouchPressed:    return EventNames::PointerDown;
-        case PlatformTouchPoint::TouchMoved:      return EventNames::PointerMove;
-        case PlatformTouchPoint::TouchStationary: return EventNames::PointerMove;
-        case PlatformTouchPoint::TouchReleased:   return EventNames::PointerUp;
-        case PlatformTouchPoint::TouchCancelled:  return EventNames::PointerCancel;
+        case PlatformTouchPoint::TouchPressed:    return event_names::PointerDown;
+        case PlatformTouchPoint::TouchMoved:      return event_names::PointerMove;
+        case PlatformTouchPoint::TouchStationary: return event_names::PointerMove;
+        case PlatformTouchPoint::TouchReleased:   return event_names::PointerUp;
+        case PlatformTouchPoint::TouchCancelled:  return event_names::PointerCancel;
         case PlatformTouchPoint::TouchStateEnd:   break;
       }
       krys_debug_assert_msg(false, "Not reached.");
@@ -80,7 +80,7 @@ namespace krys::boo::dom
       CreateCoalescedPointerEvents(DOMStringAtom type, MouseButton button, const MouseEvent &mouseEvent,
                                    PointerID pointerId, const DOMString &pointerType) noexcept
     {
-      if (type != EventNames::PointerMove && type != EventNames::PointerRawUpdate)
+      if (type != event_names::PointerMove && type != event_names::PointerRawUpdate)
       {
         return {};
       }
@@ -102,7 +102,7 @@ namespace krys::boo::dom
       CreatePredictedPointerEvents(DOMStringAtom type, MouseButton button, const MouseEvent &mouseEvent,
                                    PointerID pointerId, const DOMString &pointerType) noexcept
     {
-      if (type != EventNames::PointerMove)
+      if (type != event_names::PointerMove)
       {
         return {};
       }
@@ -123,45 +123,45 @@ namespace krys::boo::dom
 
   DOMStringAtom PointerEvent::TypeFromMouseEventType(DOMStringAtom mouseEventType) noexcept
   {
-    if (mouseEventType == EventNames::AuxClick)
+    if (mouseEventType == event_names::AuxClick)
     {
-      return EventNames::AuxClick;
+      return event_names::AuxClick;
     }
-    if (mouseEventType == EventNames::Click)
+    if (mouseEventType == event_names::Click)
     {
-      return EventNames::Click;
+      return event_names::Click;
     }
-    if (mouseEventType == EventNames::ContextMenu)
+    if (mouseEventType == event_names::ContextMenu)
     {
-      return EventNames::ContextMenu;
+      return event_names::ContextMenu;
     }
-    if (mouseEventType == EventNames::MouseDown)
+    if (mouseEventType == event_names::MouseDown)
     {
-      return EventNames::PointerDown;
+      return event_names::PointerDown;
     }
-    if (mouseEventType == EventNames::MouseOver)
+    if (mouseEventType == event_names::MouseOver)
     {
-      return EventNames::PointerOver;
+      return event_names::PointerOver;
     }
-    if (mouseEventType == EventNames::MouseEnter)
+    if (mouseEventType == event_names::MouseEnter)
     {
-      return EventNames::PointerEnter;
+      return event_names::PointerEnter;
     }
-    if (mouseEventType == EventNames::MouseMove)
+    if (mouseEventType == event_names::MouseMove)
     {
-      return EventNames::PointerMove;
+      return event_names::PointerMove;
     }
-    if (mouseEventType == EventNames::MouseLeave)
+    if (mouseEventType == event_names::MouseLeave)
     {
-      return EventNames::PointerLeave;
+      return event_names::PointerLeave;
     }
-    if (mouseEventType == EventNames::MouseOut)
+    if (mouseEventType == event_names::MouseOut)
     {
-      return EventNames::PointerOut;
+      return event_names::PointerOut;
     }
-    if (mouseEventType == EventNames::MouseUp)
+    if (mouseEventType == event_names::MouseUp)
     {
-      return EventNames::PointerUp;
+      return event_names::PointerUp;
     }
 
     return null;
@@ -169,8 +169,8 @@ namespace krys::boo::dom
 
   bool PointerEvent::TypeRequiresResolvedButton(DOMStringAtom type) noexcept
   {
-    return type == EventNames::PointerUp || type == EventNames::PointerDown || type == EventNames::Click
-           || type == EventNames::AuxClick || type == EventNames::ContextMenu;
+    return type == event_names::PointerUp || type == event_names::PointerDown || type == event_names::Click
+           || type == event_names::AuxClick || type == event_names::ContextMenu;
   }
 
   Ref<PointerEvent> PointerEvent::CreateForPointerCapture(DOMStringAtom type, LocalDOMWindow *view,
@@ -450,7 +450,7 @@ namespace krys::boo::dom
 #if KRYS_DEBUG
     if (IsTrusted())
     {
-      if (Type() == EventNames::PointerMove || Type() == EventNames::PointerRawUpdate)
+      if (Type() == event_names::PointerMove || Type() == event_names::PointerRawUpdate)
       {
         krys_debug_assert_msg(
           !_coalescedEvents.empty(),
@@ -484,7 +484,7 @@ namespace krys::boo::dom
 #if KRYS_DEBUG
     if (IsTrusted())
     {
-      if (Type() != EventNames::PointerMove)
+      if (Type() != event_names::PointerMove)
       {
         krys_debug_assert_msg(_predictedEvents.empty(),
                               "Trusted non-pointermove events must have zero predicted events.");
@@ -535,7 +535,7 @@ namespace krys::boo::dom
 
   bool PointerEvent::FractionalCoordinatesAllowedForType(DOMStringAtom type) noexcept
   {
-    return !(type == EventNames::AuxClick || type == EventNames::Click || type == EventNames::ContextMenu);
+    return !(type == event_names::AuxClick || type == event_names::Click || type == event_names::ContextMenu);
   }
 
   double PointerEvent::AdjustedCoordinateForType(double coordinate) const noexcept

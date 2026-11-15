@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
   using css::tests::Tokens;
@@ -32,14 +32,14 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     }
   }
 
-  TEST_CASE("PropertyParserHelpers(IsGridBreadthIdent)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(IsGridBreadthIdent)", "[CSS][Properties][Consumers]")
   {
     CHECK(IsGridBreadthIdent(ValueId::MinContent));
     CHECK(IsGridBreadthIdent(ValueId::Auto));
     CHECK_FALSE(IsGridBreadthIdent(ValueId::FitContent));
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeGridLine)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeGridLine)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"auto", ConsumeGridLine) == "auto");
     CHECK(ConsumeToText(u8"foo", ConsumeGridLine) == "foo");
@@ -59,7 +59,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"span auto", ConsumeGridLine) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeGridTrackSize)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeGridTrackSize)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"auto", ConsumeGridTrackSize) == "auto");
     CHECK(ConsumeToText(u8"min-content", ConsumeGridTrackSize) == "min-content");
@@ -79,7 +79,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"none", ConsumeGridTrackSize) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeGridLineNames)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeGridLineNames)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"[a b]", ConsumeLineNames<AllowEmpty::No>) == "[a b]");
     CHECK(ConsumeToText(u8"[]", ConsumeLineNames<AllowEmpty::No>) == "<null>");
@@ -89,7 +89,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"a", ConsumeLineNames<AllowEmpty::No>) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeGridTrackList)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeGridTrackList)", "[CSS][Properties][Consumers]")
   {
     auto consume = ConsumeTrackList<TrackListType::GridTemplate>;
     CHECK(ConsumeToText(u8"10px 1fr", consume) == "10px 1fr");
@@ -120,14 +120,14 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"subgrid", ConsumeTrackList<TrackListType::GridAuto>) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeGridTrackList repeat clamping)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeGridTrackList repeat clamping)", "[CSS][Properties][Consumers]")
   {
     // Integer repetitions are clamped so the total number of tracks stays within the grid's limit.
     CHECK(ConsumeToText(u8"repeat(99999999, 10px 20px)", ConsumeTrackList<TrackListType::GridTemplate>)
           == "repeat(500000, 10px 20px)");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeGridTrackList subgrid)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeGridTrackList subgrid)", "[CSS][Properties][Consumers]")
   {
     auto consume = ConsumeTrackList<TrackListType::GridTemplate>;
     CHECK(ConsumeToText(u8"subgrid", consume) == "subgrid");
@@ -140,7 +140,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"subgrid 10px", consume) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeGridTemplatesRowsOrColumns)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeGridTemplatesRowsOrColumns)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeGridTemplatesRowsOrColumns) == "none");
     CHECK(ConsumeToText(u8"100px repeat(2, 1fr)", ConsumeGridTemplatesRowsOrColumns)
@@ -148,7 +148,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"none 10px", ConsumeGridTemplatesRowsOrColumns) == "<partial>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeUnresolvedGridTemplateAreasRow)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeUnresolvedGridTemplateAreasRow)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeRow(u8"\"a b\"") == GridNamedAreaMapRow {u8"a", u8"b"});
     CHECK(ConsumeRow(u8"\"  head   head \"") == GridNamedAreaMapRow {u8"head", u8"head"});
@@ -162,7 +162,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK_FALSE(ConsumeRow(u8"a"));
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeGridTemplateAreas)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeGridTemplateAreas)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeGridTemplateAreas) == "none");
     CHECK(ConsumeToText(u8"\"a b\" \"c d\"", ConsumeGridTemplateAreas) == "\"a b\" \"c d\"");
@@ -176,7 +176,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"\"\"", ConsumeGridTemplateAreas) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeGridAutoFlow)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeGridAutoFlow)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"row", ConsumeGridAutoFlow) == "row");
     CHECK(ConsumeToText(u8"column", ConsumeGridAutoFlow) == "column");

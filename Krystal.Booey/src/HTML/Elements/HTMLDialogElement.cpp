@@ -334,7 +334,7 @@ namespace krys::boo::html
     EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
                                    [protectedThis]
                                    {
-                                     auto event = dom::Event::Create(EventNames::Close, false, false);
+                                     auto event = dom::Event::Create(event_names::Close, false, false);
                                      (void)dom::EventDispatcher::DispatchToTarget(*event,
                                                                                   protectedThis.get());
                                    });
@@ -595,7 +595,7 @@ namespace krys::boo::html
     // source.
     init.Composed = true;
     init.Source = ShareRefPtr(source);
-    auto event = dom::ToggleEvent::Create(EventNames::BeforeToggle, init, cancelable);
+    auto event = dom::ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }
@@ -663,7 +663,7 @@ namespace krys::boo::html
         {
           return true;
         }
-        auto event = dom::Event::Create(EventNames::Cancel, false, canPreventClose);
+        auto event = dom::Event::Create(event_names::Cancel, false, canPreventClose);
         (void)dom::EventDispatcher::DispatchToTarget(*event, dialog.get());
         return !event->DefaultPrevented();
       },

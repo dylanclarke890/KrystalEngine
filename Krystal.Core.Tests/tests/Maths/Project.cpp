@@ -37,13 +37,13 @@ namespace krys::tests
     constexpr Vec3 obj {0.5f, -0.5f, 0.5f};
 
     // The default depth range is the default convention's.
-    STATIC_CHECK(Conventions::DefaultDepthRange == Conventions::DepthRange::NegativeOneToOne);
+    STATIC_CHECK(conventions::DefaultDepthRange == conventions::DepthRange::NegativeOneToOne);
     STATIC_CHECK(Project(obj, identity, identity, viewport) == Project_NO(obj, identity, identity, viewport));
 
-    STATIC_CHECK(Project<float, float, Conventions::DepthRange::ZeroToOne>(obj, identity, identity, viewport)
+    STATIC_CHECK(Project<float, float, conventions::DepthRange::ZeroToOne>(obj, identity, identity, viewport)
                  == Project_ZO(obj, identity, identity, viewport));
     STATIC_CHECK(
-      Project<float, float, Conventions::DepthRange::NegativeOneToOne>(obj, identity, identity, viewport)
+      Project<float, float, conventions::DepthRange::NegativeOneToOne>(obj, identity, identity, viewport)
       == Project_NO(obj, identity, identity, viewport));
   }
 }

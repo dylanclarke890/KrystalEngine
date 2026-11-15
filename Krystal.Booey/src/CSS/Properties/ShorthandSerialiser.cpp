@@ -1231,7 +1231,7 @@ namespace krys::boo::css
       for (auto &longhandValue : LonghandValues())
       {
         auto keyword = GetValueId(longhandValue);
-        if (!PropertyParserHelpers::IsSystemFontShorthand(keyword))
+        if (!parse_property::IsSystemFontShorthand(keyword))
         {
           allSpecialKeywords = false;
         }
@@ -1367,7 +1367,7 @@ namespace krys::boo::css
     {
       for (auto &value : LonghandValues())
       {
-        if (PropertyParserHelpers::IsSystemFontShorthand(GetValueId(value)))
+        if (parse_property::IsSystemFontShorthand(GetValueId(value)))
         {
           return null;
         }
@@ -1563,8 +1563,8 @@ namespace krys::boo::css
       auto isValidTrackSize = [&](const Value &value)
       {
         auto valueId = value.ValueId();
-        if (PropertyParserHelpers::IdentMatches<ValueId::FitContent, ValueId::Minmax>(valueId)
-            || PropertyParserHelpers::IsGridBreadthIdent(valueId))
+        if (parse_property::IdentMatches<ValueId::FitContent, ValueId::Minmax>(valueId)
+            || parse_property::IsGridBreadthIdent(valueId))
         {
           return true;
         }

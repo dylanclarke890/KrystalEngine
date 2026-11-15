@@ -187,7 +187,7 @@ namespace krys::boo
     explicit LocalFrameView(LocalFrame &frame) noexcept;
 
   public:
-    ~LocalFrameView() noexcept;
+    ~LocalFrameView() noexcept override;
 
     KRYS_NODISCARD static Ref<LocalFrameView> Create(LocalFrame &frame) noexcept;
 

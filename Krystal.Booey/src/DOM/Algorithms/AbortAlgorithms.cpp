@@ -101,7 +101,7 @@ namespace krys::boo::dom
     }
 
     // 3. Fire an event named abort at signal.
-    EventDispatcher::FireEvent(EventNames::Abort, signal);
+    EventDispatcher::FireEvent(event_names::Abort, signal);
   }
 
   Ref<AbortSignal> AbortAlgorithms::CreateDependentAbortSignal(const List<Ref<AbortSignal>> &signals) noexcept

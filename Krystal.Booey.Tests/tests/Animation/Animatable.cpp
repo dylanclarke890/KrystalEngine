@@ -9,7 +9,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
-#include <type_traits>
+#include "Krystal.Core/Concepts.hpp"
 
 namespace krys::boo::tests
 {
@@ -264,6 +264,6 @@ namespace krys::boo::tests
 
   TEST_CASE("Animatable: DOMHighResTimeStamp is a double", "[Animation][Animatable]")
   {
-    CHECK(std::is_floating_point_v<dom::DOMHighResTimeStamp>);
+    CHECK(FloatingPoint<dom::DOMHighResTimeStamp>);
   }
 }

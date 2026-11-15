@@ -170,6 +170,6 @@ namespace krys::boo::svg
     }
     html::EventLoop::Current().QueueTask(html::TaskSource::Networking, NodeDocument(),
                                          [element = ShareRef(*this)]
-                                         { dom::EventDispatcher::FireEvent(EventNames::Error, *element); });
+                                         { dom::EventDispatcher::FireEvent(event_names::Error, *element); });
   }
 }

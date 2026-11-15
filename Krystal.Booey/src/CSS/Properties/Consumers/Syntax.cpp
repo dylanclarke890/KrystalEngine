@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   RefPtr<Value> ConsumeDeclarationValue(TokenRange &tokens, PropertyParserState &state) noexcept
   {

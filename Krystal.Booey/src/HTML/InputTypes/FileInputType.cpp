@@ -191,8 +191,8 @@ namespace krys::boo::html
     Ref<HTMLInputElement> element = ShareRef(*Element());
     auto button =
       dom::ElementFactory::CreateHTMLElement<HTMLInputElement>(element->NodeDocument(), u8"input");
-    (void)button->SetAttribute(u8"type", dom::DOMString(InputTypeNames::Button));
-    button->SetUserAgentPart(css::UserAgentParts::FileSelectorButton());
+    (void)button->SetAttribute(u8"type", dom::DOMString(input_type_names::Button));
+    button->SetUserAgentPart(css::user_agent_parts::FileSelectorButton());
     (void)button->SetValue(element->Multiple() ? FileButtonChooseMultipleFilesLabel()
                                                : FileButtonChooseFileLabel());
     (void)element->UserAgentShadowRoot()->AppendChild(*button);
@@ -390,7 +390,7 @@ namespace krys::boo::html
     if (pathsChanged)
     {
       // This may destroy this input type; the element is kept alive.
-      auto event = dom::Event::Create(EventNames::Input, true, false, true);
+      auto event = dom::Event::Create(event_names::Input, true, false, true);
       (void)dom::EventDispatcher::DispatchToTarget(*event, element.get());
       element->DispatchChangeEvent();
     }

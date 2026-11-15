@@ -11,7 +11,7 @@
 
 namespace krys::boo::css::tests
 {
-  using namespace PropertyParserHelpers;
+  using namespace parse_property;
 
   namespace
   {

@@ -47,7 +47,7 @@ namespace krys::boo::css
     CSSImportRule(ImportRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSImportRule() noexcept;
+    ~CSSImportRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSImportRule> Create(ImportRule &rule, CSSStyleSheet *sheet) noexcept;
 

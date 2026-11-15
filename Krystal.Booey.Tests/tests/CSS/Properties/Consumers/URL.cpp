@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
@@ -18,7 +18,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
       AllowedURLModifiers::CrossOrigin | AllowedURLModifiers::Integrity | AllowedURLModifiers::ReferrerPolicy;
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeURL)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeURL)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/dir/")};
     auto consume = Consume<AllowedURLModifiers::None>;
@@ -36,7 +36,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"src(\"a.png\")", consume, context) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeURL modifiers)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeURL modifiers)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/")};
 

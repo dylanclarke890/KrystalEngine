@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
-namespace krys::boo::css::mq::Features
+namespace krys::boo::css::mq::features
 {
   using Dependency = MediaQueryDynamicDependency;
 

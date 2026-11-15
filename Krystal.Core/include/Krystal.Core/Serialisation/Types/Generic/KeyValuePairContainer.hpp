@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Serialisation/Builtins.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   /// @brief Saving for std-like pair associative containers.
   template <typename Archive, template <typename...> typename TMap, typename... Args,

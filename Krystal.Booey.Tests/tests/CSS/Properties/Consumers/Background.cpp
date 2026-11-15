@@ -4,11 +4,11 @@
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeBorderImageSlice)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeBorderImageSlice)", "[CSS][Properties][Consumers]")
   {
     auto slice = [](TokenRange &tokens, PropertyParserState &state)
     {
@@ -24,7 +24,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"1 2 3 4 5", slice) == "<partial>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeBorderImageWidth)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeBorderImageWidth)", "[CSS][Properties][Consumers]")
   {
     auto width = [](TokenRange &tokens, PropertyParserState &state)
     {
@@ -38,7 +38,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"-1px", width) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeBorderImageComponents)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeBorderImageComponents)", "[CSS][Properties][Consumers]")
   {
     auto components = [](TokenRange &tokens, PropertyParserState &state) -> RefPtr<Value>
     {
@@ -60,7 +60,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"url(a.png) url(b.png)", components) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeSingleBackgroundSize)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeSingleBackgroundSize)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"cover", ConsumeSingleBackgroundSize) == "cover");
     CHECK(ConsumeToText(u8"contain", ConsumeSingleBackgroundSize) == "contain");
@@ -80,7 +80,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"10px 20px", ConsumeSingleMaskSize) == "10px 20px");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeRepeatStyle)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeRepeatStyle)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"repeat-x", ConsumeRepeatStyle) == "repeat-x");
     CHECK(ConsumeToText(u8"repeat-y", ConsumeRepeatStyle) == "repeat-y");
@@ -90,7 +90,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"repeat-x repeat", ConsumeRepeatStyle) == "<partial>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeBoxShadow)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeBoxShadow)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeBoxShadow) == "none");
     CHECK(ConsumeToText(u8"1px 2px", ConsumeBoxShadow) == "1px 2px");

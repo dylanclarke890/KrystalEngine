@@ -81,7 +81,7 @@ namespace krys::boo::html
 
   bool HyperlinkAlgorithms::IsEnterKeyKeydownEvent(const dom::Event &event) noexcept
   {
-    if (event.Type() != EventNames::KeyDown)
+    if (event.Type() != event_names::KeyDown)
     {
       return false;
     }

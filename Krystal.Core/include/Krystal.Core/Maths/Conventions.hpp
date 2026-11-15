@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace krys::Conventions
+namespace krys::conventions
 {
   enum class Handedness
   {

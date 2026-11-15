@@ -37,7 +37,7 @@
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   RefPtr<Value> ConsumeCursor(TokenRange &tokens, PropertyParserState &state) noexcept
   {

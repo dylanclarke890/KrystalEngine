@@ -44,7 +44,7 @@ namespace krys::boo::dom
       // https://w3c.github.io/touch-events/#list-of-touchevent-types
       UIEventInit init;
       init.Bubbles = true;
-      init.Cancelable = type != EventNames::TouchCancel;
+      init.Cancelable = type != event_names::TouchCancel;
       init.Composed = true;
       return init;
     }

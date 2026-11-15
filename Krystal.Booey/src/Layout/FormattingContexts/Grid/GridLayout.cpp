@@ -406,17 +406,17 @@ namespace krys::boo::layout
 
     const auto &formattingContext = FormattingContext();
     const auto &integrationUtils = formattingContext.GetIntegrationUtils();
-    auto columnsGap = GridLayoutUtils::ComputeGapValue(formattingContext.Root().Style().ColumnGap());
+    auto columnsGap = grid_layout_utils::ComputeGapValue(formattingContext.Root().Style().ColumnGap());
     for (const auto &gridItem : placedGridItems)
     {
       const auto &gridItemBoxGeometry = formattingContext.GeometryForGridItem(gridItem.LayoutBox());
 
-      auto usedInlineSizeForGridItem = GridLayoutUtils::UsedInlineSizeForGridItem(
+      auto usedInlineSizeForGridItem = grid_layout_utils::UsedInlineSizeForGridItem(
         gridItem, gridItemBoxGeometry.HorizontalBorderAndPadding(), usedTrackSizes.ColumnSizes, columnsGap);
       usedInlineSizes.push_back(usedInlineSizeForGridItem);
 
-      auto usedBlockSizeForGridItem =
-        GridLayoutUtils::UsedBlockSizeForGridItem(gridItem) + gridItemBoxGeometry.VerticalBorderAndPadding();
+      auto usedBlockSizeForGridItem = grid_layout_utils::UsedBlockSizeForGridItem(gridItem)
+                                      + gridItemBoxGeometry.VerticalBorderAndPadding();
       usedBlockSizes.push_back(usedBlockSizeForGridItem);
 
       integrationUtils.LayoutWithFormattingContextForBox(gridItem.LayoutBox(), usedInlineSizeForGridItem,

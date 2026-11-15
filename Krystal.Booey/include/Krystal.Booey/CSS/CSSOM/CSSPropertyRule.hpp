@@ -45,7 +45,7 @@ namespace krys::boo::css
     CSSPropertyRule(css::PropertyRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSPropertyRule() noexcept;
+    ~CSSPropertyRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSPropertyRule> Create(css::PropertyRule &rule,
                                                       CSSStyleSheet *parent) noexcept;

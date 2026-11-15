@@ -134,7 +134,7 @@ namespace krys::boo::html
 
       void DefaultEventHandler(dom::Event &event) noexcept final
       {
-        if (event.Type() == EventNames::MouseDown)
+        if (event.Type() == event_names::MouseDown)
         {
           event.SetDefaultHandled();
           return;
@@ -164,7 +164,7 @@ namespace krys::boo::html
     (void)root.AppendChild(*selectButtonSlot);
 
     auto selectPopover = CreateRef<SelectPopoverElement>(document);
-    selectPopover->SetUserAgentPart(css::UserAgentParts::InternalSelectPicker());
+    selectPopover->SetUserAgentPart(css::user_agent_parts::InternalSelectPicker());
     // As an auto popover but without the attribute, whose styles would reach the options of a native select.
     selectPopover->EnsurePopoverData().SetPopoverState(dom::PopoverState::Auto);
     _selectPopover = CreateWeakPtr<HTMLElement>(selectPopover.get());
@@ -386,7 +386,7 @@ namespace krys::boo::html
 
   void HTMLSelectElement::BaseAppearanceDefaultEventHandler(dom::Event &event) noexcept
   {
-    if (event.Type() == EventNames::MouseDown)
+    if (event.Type() == event_names::MouseDown)
     {
       auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
       if (!mouseEvent || mouseEvent->Button() != 0)
@@ -405,7 +405,7 @@ namespace krys::boo::html
       return;
     }
 
-    if (event.Type() != EventNames::KeyDown)
+    if (event.Type() != event_names::KeyDown)
     {
       return;
     }
@@ -1855,7 +1855,7 @@ namespace krys::boo::html
 
   void HTMLSelectElement::MenuListDefaultEventHandler(dom::Event &event) noexcept
   {
-    if (event.Type() == EventNames::KeyDown)
+    if (event.Type() == event_names::KeyDown)
     {
       auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
       if (!keyboardEvent)
@@ -1937,7 +1937,7 @@ namespace krys::boo::html
 
     // Use key press event here since sending simulated mouse events on key down blocks the proper sending of
     // the key press event.
-    if (event.Type() == EventNames::KeyPress)
+    if (event.Type() == event_names::KeyPress)
     {
       auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
       if (!keyboardEvent)
@@ -2015,7 +2015,7 @@ namespace krys::boo::html
     }
 
     if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
-        mouseEvent && event.Type() == EventNames::MouseDown && mouseEvent->Button() == 0)
+        mouseEvent && event.Type() == event_names::MouseDown && mouseEvent->Button() == 0)
     {
       Focus();
       NodeDocument().UpdateStyleIfNeeded();
@@ -2030,7 +2030,7 @@ namespace krys::boo::html
       event.SetDefaultHandled();
     }
 
-    if (event.Type() == EventNames::Blur && !Focused())
+    if (event.Type() == event_names::Blur && !Focused())
     {
       auto &menuList = Downcast<RenderMenuList>(*Renderer());
       if (menuList.PopupIsVisible())
@@ -2120,7 +2120,7 @@ namespace krys::boo::html
     KRYS_MAYBE_UNUSED auto &listItems = ListItems();
 
     auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
-    if (event.Type() == EventNames::MouseDown && mouseEvent && mouseEvent->Button() == 0)
+    if (event.Type() == event_names::MouseDown && mouseEvent && mouseEvent->Button() == 0)
     {
       Focus();
       NodeDocument().UpdateStyleIfNeeded();
@@ -2153,7 +2153,7 @@ namespace krys::boo::html
         mouseEvent->SetDefaultHandled();
       }
     }
-    else if (event.Type() == EventNames::MouseMove && mouseEvent)
+    else if (event.Type() == event_names::MouseMove && mouseEvent)
     {
       auto &renderListBox = Downcast<RenderListBox>(*Renderer());
       if (renderListBox.CanBeScrolledAndHasScrollableArea())
@@ -2196,7 +2196,7 @@ namespace krys::boo::html
         mouseEvent->SetDefaultHandled();
       }
     }
-    else if (event.Type() == EventNames::MouseUp && mouseEvent && mouseEvent->Button() == 0
+    else if (event.Type() == event_names::MouseUp && mouseEvent && mouseEvent->Button() == 0
              && NodeDocument().Frame()
              && NodeDocument().Frame()->GetEventHandler().AutoscrollRenderer() != Renderer())
     {
@@ -2209,7 +2209,7 @@ namespace krys::boo::html
       // onChange will fire when the autoscroll timer stops.
       ListBoxOnChange();
     }
-    else if (event.Type() == EventNames::KeyDown)
+    else if (event.Type() == event_names::KeyDown)
     {
       auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
       if (!keyboardEvent)
@@ -2353,7 +2353,7 @@ namespace krys::boo::html
         keyboardEvent->SetDefaultHandled();
       }
     }
-    else if (event.Type() == EventNames::KeyPress)
+    else if (event.Type() == event_names::KeyPress)
     {
       auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
       if (!keyboardEvent)
@@ -2414,7 +2414,7 @@ namespace krys::boo::html
       return;
     }
 
-    if (event.Type() == EventNames::KeyPress)
+    if (event.Type() == event_names::KeyPress)
     {
       if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
       {

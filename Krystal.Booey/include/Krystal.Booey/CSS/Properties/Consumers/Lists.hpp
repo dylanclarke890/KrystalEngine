@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     KRYS_NODISCARD RefPtr<Value> ConsumeCounterReset(TokenRange &tokens, PropertyParserState &state) noexcept;
 

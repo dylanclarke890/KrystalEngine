@@ -3,12 +3,12 @@
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Ratio.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
   using css::tests::Tokens;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeRatio)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeRatio)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"16 / 9", ConsumeRatio) == "16 / 9");
     CHECK(ConsumeToText(u8"16/9", ConsumeRatio) == "16 / 9");
@@ -22,14 +22,13 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"1px", ConsumeRatio) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeRatioWithBothNumeratorAndDenominator)",
-            "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeRatioWithBothNumeratorAndDenominator)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"4 / 3", ConsumeRatioWithBothNumeratorAndDenominator) == "4 / 3");
     CHECK(ConsumeToText(u8"4", ConsumeRatioWithBothNumeratorAndDenominator) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeUnresolvedRatio)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeUnresolvedRatio)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
     PropertyParserState state {.Context = context};

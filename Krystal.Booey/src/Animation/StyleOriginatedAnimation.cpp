@@ -231,11 +231,11 @@ namespace krys::boo
     {
       if (IsCSSAnimation())
       {
-        EnqueueDOMEvent(EventNames::AnimationCancel, cancelationTime, cancelationTime);
+        EnqueueDOMEvent(event_names::AnimationCancel, cancelationTime, cancelationTime);
       }
       else if (IsCSSTransition())
       {
-        EnqueueDOMEvent(EventNames::TransitionCancel, cancelationTime, cancelationTime);
+        EnqueueDOMEvent(event_names::TransitionCancel, cancelationTime, cancelationTime);
       }
     }
 
@@ -383,16 +383,16 @@ namespace krys::boo
       // https://drafts.csswg.org/css-animations-2/#events
       if ((wasIdle || wasBefore) && isActive)
       {
-        EnqueueDOMEvent(EventNames::AnimationStart, intervalStart, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::AnimationStart, intervalStart, EffectTimeAtStart());
       }
       else if ((wasIdle || wasBefore) && isAfter)
       {
-        EnqueueDOMEvent(EventNames::AnimationStart, intervalStart, EffectTimeAtStart());
-        EnqueueDOMEvent(EventNames::AnimationEnd, intervalEnd, EffectTimeAtEnd());
+        EnqueueDOMEvent(event_names::AnimationStart, intervalStart, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::AnimationEnd, intervalEnd, EffectTimeAtEnd());
       }
       else if (wasActive && isBefore)
       {
-        EnqueueDOMEvent(EventNames::AnimationEnd, intervalStart, EffectTimeAtEnd());
+        EnqueueDOMEvent(event_names::AnimationEnd, intervalStart, EffectTimeAtEnd());
       }
       else if (wasActive && isActive && _previousIteration != iteration)
       {
@@ -404,24 +404,24 @@ namespace krys::boo
         auto elapsedTime = animationEffect ? animationEffect->IterationDuration()
                                                * (iterationBoundary - animationEffect->IterationStart())
                                            : ZeroTime();
-        EnqueueDOMEvent(EventNames::AnimationIteration, elapsedTime, EffectTimeAtIteration(iteration));
+        EnqueueDOMEvent(event_names::AnimationIteration, elapsedTime, EffectTimeAtIteration(iteration));
       }
       else if (wasActive && isAfter)
       {
-        EnqueueDOMEvent(EventNames::AnimationEnd, intervalEnd, EffectTimeAtEnd());
+        EnqueueDOMEvent(event_names::AnimationEnd, intervalEnd, EffectTimeAtEnd());
       }
       else if (wasAfter && isActive)
       {
-        EnqueueDOMEvent(EventNames::AnimationStart, intervalEnd, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::AnimationStart, intervalEnd, EffectTimeAtStart());
       }
       else if (wasAfter && isBefore)
       {
-        EnqueueDOMEvent(EventNames::AnimationStart, intervalEnd, EffectTimeAtStart());
-        EnqueueDOMEvent(EventNames::AnimationEnd, intervalStart, EffectTimeAtEnd());
+        EnqueueDOMEvent(event_names::AnimationStart, intervalEnd, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::AnimationEnd, intervalStart, EffectTimeAtEnd());
       }
       else if ((!wasIdle && !wasAfter) && isIdle)
       {
-        EnqueueDOMEvent(EventNames::AnimationCancel, cancelationTime, cancelationTime);
+        EnqueueDOMEvent(event_names::AnimationCancel, cancelationTime, cancelationTime);
       }
     }
     else if (IsCSSTransition())
@@ -429,49 +429,49 @@ namespace krys::boo
       // https://drafts.csswg.org/css-transitions-2/#transition-events
       if (wasIdle && (isPending || isBefore))
       {
-        EnqueueDOMEvent(EventNames::TransitionRun, intervalStart, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::TransitionRun, intervalStart, EffectTimeAtStart());
       }
       else if (wasIdle && isActive)
       {
         auto scheduledEffectTime = EffectTimeAtStart();
-        EnqueueDOMEvent(EventNames::TransitionRun, intervalStart, scheduledEffectTime);
-        EnqueueDOMEvent(EventNames::TransitionStart, intervalStart, scheduledEffectTime);
+        EnqueueDOMEvent(event_names::TransitionRun, intervalStart, scheduledEffectTime);
+        EnqueueDOMEvent(event_names::TransitionStart, intervalStart, scheduledEffectTime);
       }
       else if (wasIdle && isAfter)
       {
-        EnqueueDOMEvent(EventNames::TransitionRun, intervalStart, EffectTimeAtStart());
-        EnqueueDOMEvent(EventNames::TransitionStart, intervalStart, EffectTimeAtStart());
-        EnqueueDOMEvent(EventNames::TransitionEnd, intervalEnd, EffectTimeAtEnd());
+        EnqueueDOMEvent(event_names::TransitionRun, intervalStart, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::TransitionStart, intervalStart, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::TransitionEnd, intervalEnd, EffectTimeAtEnd());
       }
       else if ((_wasPending || wasBefore) && isActive)
       {
-        EnqueueDOMEvent(EventNames::TransitionStart, intervalStart, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::TransitionStart, intervalStart, EffectTimeAtStart());
       }
       else if ((_wasPending || wasBefore) && isAfter)
       {
-        EnqueueDOMEvent(EventNames::TransitionStart, intervalStart, EffectTimeAtStart());
-        EnqueueDOMEvent(EventNames::TransitionEnd, intervalEnd, EffectTimeAtEnd());
+        EnqueueDOMEvent(event_names::TransitionStart, intervalStart, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::TransitionEnd, intervalEnd, EffectTimeAtEnd());
       }
       else if (wasActive && isAfter)
       {
-        EnqueueDOMEvent(EventNames::TransitionEnd, intervalEnd, EffectTimeAtEnd());
+        EnqueueDOMEvent(event_names::TransitionEnd, intervalEnd, EffectTimeAtEnd());
       }
       else if (wasActive && isBefore)
       {
-        EnqueueDOMEvent(EventNames::TransitionEnd, intervalStart, EffectTimeAtEnd());
+        EnqueueDOMEvent(event_names::TransitionEnd, intervalStart, EffectTimeAtEnd());
       }
       else if (wasAfter && isActive)
       {
-        EnqueueDOMEvent(EventNames::TransitionStart, intervalEnd, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::TransitionStart, intervalEnd, EffectTimeAtStart());
       }
       else if (wasAfter && isBefore)
       {
-        EnqueueDOMEvent(EventNames::TransitionStart, intervalEnd, EffectTimeAtStart());
-        EnqueueDOMEvent(EventNames::TransitionEnd, intervalStart, EffectTimeAtEnd());
+        EnqueueDOMEvent(event_names::TransitionStart, intervalEnd, EffectTimeAtStart());
+        EnqueueDOMEvent(event_names::TransitionEnd, intervalStart, EffectTimeAtEnd());
       }
       else if ((!wasIdle && !wasAfter) && isIdle)
       {
-        EnqueueDOMEvent(EventNames::TransitionCancel, cancelationTime, cancelationTime);
+        EnqueueDOMEvent(event_names::TransitionCancel, cancelationTime, cancelationTime);
       }
     }
 

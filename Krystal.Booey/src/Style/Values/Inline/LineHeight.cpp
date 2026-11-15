@@ -55,7 +55,7 @@ namespace krys::boo::style
                                                         float multiplier) noexcept
   {
     auto valueID = primitiveValue.ValueId();
-    if (valueID == css::ValueId::Normal || css::PropertyParserHelpers::IsSystemFontShorthand(valueID))
+    if (valueID == css::ValueId::Normal || css::parse_property::IsSystemFontShorthand(valueID))
     {
       return css::keywords::Normal {};
     }

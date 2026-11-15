@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <declaration-value> consuming
     // https://drafts.csswg.org/css-syntax-3/#typedef-declaration-value

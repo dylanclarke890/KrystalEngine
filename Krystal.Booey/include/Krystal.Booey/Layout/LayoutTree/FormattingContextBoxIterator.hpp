@@ -47,7 +47,7 @@ namespace krys::boo::layout
     };
 
     FormattingContextBoxIterator(const ElementBox &root, FirstTag) noexcept
-        : LayoutDescendantIterator<Box>(root, Traversal::FirstWithin<Box>(root))
+        : LayoutDescendantIterator<Box>(root, traversal::FirstWithin<Box>(root))
     {
     }
 

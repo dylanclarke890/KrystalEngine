@@ -38,7 +38,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     /// @grammar <keyframe-selector>
     /// @see https://drafts.csswg.org/css-animations-1/#typedef-keyframe-selector

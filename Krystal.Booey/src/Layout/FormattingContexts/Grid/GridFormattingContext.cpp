@@ -110,16 +110,16 @@ namespace krys::boo::layout
       // For now, we handle fixed gaps only (not percentages or calc).
       const auto &gridStyle = Root().Style();
 
-      auto columnGap = GridLayoutUtils::ComputeGapValue(gridStyle.ColumnGap());
-      auto rowGap = GridLayoutUtils::ComputeGapValue(gridStyle.RowGap());
+      auto columnGap = grid_layout_utils::ComputeGapValue(gridStyle.ColumnGap());
+      auto rowGap = grid_layout_utils::ComputeGapValue(gridStyle.RowGap());
 
       for (auto &gridItemRect : gridItemRects)
       {
         const auto &lineNumbersForGridArea = gridItemRect.LineNumbersForGridArea;
-        auto columnPosition = GridLayoutUtils::ComputeGridLinePosition(lineNumbersForGridArea.ColumnStartLine,
-                                                                       usedTrackSizes.ColumnSizes, columnGap);
-        auto rowPosition = GridLayoutUtils::ComputeGridLinePosition(lineNumbersForGridArea.RowStartLine,
-                                                                    usedTrackSizes.RowSizes, rowGap);
+        auto columnPosition = grid_layout_utils::ComputeGridLinePosition(
+          lineNumbersForGridArea.ColumnStartLine, usedTrackSizes.ColumnSizes, columnGap);
+        auto rowPosition = grid_layout_utils::ComputeGridLinePosition(lineNumbersForGridArea.RowStartLine,
+                                                                      usedTrackSizes.RowSizes, rowGap);
 
         gridItemRect.BorderBoxRect.MoveBy({columnPosition, rowPosition});
       }

@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <'cursor'> consuming
     // https://drafts.csswg.org/css-ui/#propdef-cursor

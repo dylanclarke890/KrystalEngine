@@ -56,12 +56,12 @@ namespace krys::log
       _settings.Level = level;
     }
 
-    KRYS_NODISCARD Level GetLevel() const noexcept
+    KRYS_NODISCARD Level GetLevel() const noexcept override
     {
       return _settings.Level;
     }
 
-    void Flush() noexcept
+    void Flush() noexcept override
     {
       _logger.flush();
     }

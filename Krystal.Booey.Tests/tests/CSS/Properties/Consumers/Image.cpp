@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
@@ -30,7 +30,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     }
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeImage linear-gradient)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeImage linear-gradient)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"linear-gradient(red, blue)", Image) == "linear-gradient(red, blue)");
     CHECK(ConsumeToText(u8"linear-gradient(red)", Image) == "linear-gradient(red)");
@@ -67,8 +67,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"linear-gradient(red, blue,)", Image) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeImage gradient colour interpolation)",
-            "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeImage gradient colour interpolation)", "[CSS][Properties][Consumers]")
   {
     // Legacy (8-bit sRGB) stops default to sRGB, others to OKLab; the default isn't serialised.
     CHECK(ConsumeToText(u8"linear-gradient(in srgb, red, blue)", Image) == "linear-gradient(red, blue)");
@@ -89,7 +88,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"linear-gradient(in srgb 90deg in srgb, red, blue)", Image) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeImage radial-gradient)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeImage radial-gradient)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"radial-gradient(red, blue)", Image) == "radial-gradient(red, blue)");
     CHECK(ConsumeToText(u8"radial-gradient(ellipse farthest-corner, red, blue)", Image)
@@ -124,7 +123,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"radial-gradient(at, red, blue)", Image) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeImage conic-gradient)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeImage conic-gradient)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"conic-gradient(red, blue)", Image) == "conic-gradient(red, blue)");
     CHECK(ConsumeToText(u8"conic-gradient(from 90deg, red, blue)", Image)
@@ -140,7 +139,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"conic-gradient(at left top from 90deg, red, blue)", Image) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeImage url and image-set)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeImage url and image-set)", "[CSS][Properties][Consumers]")
   {
     auto context = Context();
 
@@ -166,7 +165,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"image-set()", Image, context) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeImage allowed types)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeImage allowed types)", "[CSS][Properties][Consumers]")
   {
     auto context = Context();
     constexpr auto urlOnly = ImageAllowing<AllowedImageType::URLFunction>;
@@ -178,7 +177,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
           == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeImage generated images)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeImage generated images)", "[CSS][Properties][Consumers]")
   {
     auto context = Context();
 

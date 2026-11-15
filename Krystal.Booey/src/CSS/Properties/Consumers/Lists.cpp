@@ -35,7 +35,7 @@
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   KRYS_NODISCARD static RefPtr<Value> ConsumeCounter(TokenRange &range, PropertyParserState &state,
                                                      int defaultValue) noexcept

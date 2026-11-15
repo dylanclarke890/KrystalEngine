@@ -32,7 +32,7 @@ namespace krys::boo::css::cq
 {
   List<const mq::FeatureSchema *> ContainerQueryParser::FeatureSchemas() noexcept
   {
-    return Features::AllSchemas();
+    return features::AllSchemas();
   }
 
   Maybe<ContainerQuery> ContainerQueryParser::ConsumeContainerQuery(TokenRange &tokens,
@@ -220,7 +220,7 @@ namespace krys::boo::css::cq
       }
     }
 
-    range.Schema = &Features::Style();
+    range.Schema = &features::Style();
     return range;
   }
 
@@ -230,7 +230,7 @@ namespace krys::boo::css::cq
   {
     if (state.InFunctionId == ValueId::Style)
     {
-      return &Features::Style();
+      return &features::Style();
     }
 
     return GenericMediaQueryParser<ContainerQueryParser>::SchemaForFeatureName(name, context, state);

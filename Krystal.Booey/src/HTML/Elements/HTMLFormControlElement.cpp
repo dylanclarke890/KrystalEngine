@@ -205,13 +205,13 @@ namespace krys::boo::html
 
   void HTMLFormControlElement::DispatchChangeEvent() noexcept
   {
-    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(EventNames::Change, true, false),
+    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(event_names::Change, true, false),
                                            ShareRef(*this));
   }
 
   void HTMLFormControlElement::DispatchCancelEvent() noexcept
   {
-    auto event = dom::Event::Create(EventNames::Cancel, true, false);
+    auto event = dom::Event::Create(event_names::Cancel, true, false);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
   }
 
@@ -225,7 +225,7 @@ namespace krys::boo::html
   void HTMLFormControlElement::DispatchFormControlInputEvent() noexcept
   {
     SetChangedSinceLastFormControlChangeEvent(true);
-    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(EventNames::Input, true, false, true),
+    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(event_names::Input, true, false, true),
                                            ShareRef(*this));
   }
 

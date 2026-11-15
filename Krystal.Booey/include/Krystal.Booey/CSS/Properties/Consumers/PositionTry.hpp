@@ -32,7 +32,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <'position-try-fallbacks'>
     // https://drafts.csswg.org/css-anchor-position-1/#propdef-position-try-fallbacks

@@ -48,7 +48,7 @@ namespace krys::boo::css
     CSSGroupingRule(css::GroupRule &groupRule, CSSStyleSheet *parent) noexcept;
 
   public:
-    virtual ~CSSGroupingRule() noexcept;
+    ~CSSGroupingRule() noexcept override;
 
     KRYS_NODISCARD CSSRuleList &CssRules() const noexcept;
 

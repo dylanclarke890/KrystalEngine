@@ -2766,7 +2766,7 @@ namespace krys::boo
       // This is a temporary solution to prevent regressions.
       auto *renderGrid = Downcast<RenderGrid>(Parent());
       return (renderGrid->AreMasonryColumns()
-              && !GridLayoutFunctions::IsOrthogonalGridItem(*renderGrid, *this))
+              && !grid_layout_functions::IsOrthogonalGridItem(*renderGrid, *this))
              || !HasStretchedLogicalWidth();
     }
 

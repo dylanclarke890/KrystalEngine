@@ -2,13 +2,13 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
   using css::tests::CssText;
   using css::tests::ValueFixture;
 
-  TEST_CASE("PropertyParserHelpers(ConsumePositionArea)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumePositionArea)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumePositionArea) == "none");
     CHECK(ConsumeToText(u8"top", ConsumePositionArea) == "top");
@@ -27,8 +27,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"5", ConsumePositionArea) == "<null>");
   }
 
-  TEST_CASE_METHOD(ValueFixture, "PropertyParserHelpers(ValueForPositionArea)",
-                   "[CSS][Properties][Consumers]")
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ValueForPositionArea)", "[CSS][Properties][Consumers]")
   {
     auto specified = ValueForPositionArea(ValueId::BlockStart, ValueId::InlineEnd, ValueType::Specified);
     REQUIRE(specified);

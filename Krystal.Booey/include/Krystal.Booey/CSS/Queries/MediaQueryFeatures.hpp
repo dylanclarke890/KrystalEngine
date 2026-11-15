@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 
-namespace krys::boo::css::mq::Features
+namespace krys::boo::css::mq::features
 {
   KRYS_NODISCARD const FeatureSchema &AnyHover() noexcept;
 

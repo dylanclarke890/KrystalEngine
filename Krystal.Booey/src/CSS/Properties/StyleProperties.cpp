@@ -111,7 +111,7 @@ namespace krys::boo::css
     }
 
     auto serialisationString = css::SerialiseLonghandValue(DefaultSerialisationContext(), property, *value);
-    return PropertyParserHelpers::DeprecatedParseColorRawWithoutContext(serialisationString);
+    return parse_property::DeprecatedParseColorRawWithoutContext(serialisationString);
   }
 
   Maybe<ValueId> StyleProperties::PropertyAsValueId(PropertyId property) const noexcept
@@ -143,7 +143,7 @@ namespace krys::boo::css
     // serialize as the empty string. It might be better to implement this as a special CSSValue type instead
     // of turning them into null here.
     if (reference.ShorthandId() == PropertyId::Font
-        && PropertyParserHelpers::IsSystemFontShorthand(GetValueId(value)))
+        && parse_property::IsSystemFontShorthand(GetValueId(value)))
     {
       return nullptr;
     }

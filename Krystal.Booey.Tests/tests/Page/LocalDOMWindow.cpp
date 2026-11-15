@@ -154,7 +154,7 @@ namespace krys::boo::tests
         fixture.Document->AddEventListener(u8"load", [&](dom::Event &) { documentHeard = true; });
       auto windowLoad = window.AddEventListener(u8"load", [&](dom::Event &) { windowHeard = true; });
 
-      auto load = dom::Event::Create(EventNames::Load, true, false);
+      auto load = dom::Event::Create(event_names::Load, true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*load, &button);
       CHECK(documentHeard);
       CHECK_FALSE(windowHeard);
@@ -171,7 +171,7 @@ namespace krys::boo::tests
                                                   CHECK(event.CurrentTarget().get() == &window);
                                                   CHECK(event.Target().get() == fixture.Document.get());
                                                 });
-      (void)dom::EventDispatcher::FireEvent<dom::Event>(EventNames::Load, window, {}, true);
+      (void)dom::EventDispatcher::FireEvent<dom::Event>(event_names::Load, window, {}, true);
       CHECK(windowHeard);
     }
 
@@ -180,7 +180,7 @@ namespace krys::boo::tests
       // Its window's document isn't fully active, so inner invoke skips the listeners.
       fixture.TestPage->MainFrame().SetDocument(nullptr);
       order.clear();
-      auto event = dom::Event::Create(EventNames::Click, true, false);
+      auto event = dom::Event::Create(event_names::Click, true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &button);
       CHECK(order.empty());
     }
@@ -567,7 +567,7 @@ namespace krys::boo::tests
     SECTION("a handler cancels by preventing the default")
     {
       button.SetOnClick([](dom::Event &event) { event.PreventDefault(); });
-      auto click = dom::Event::Create(EventNames::Click, true, true);
+      auto click = dom::Event::Create(event_names::Click, true, true);
       CHECK_FALSE(dom::EventDispatcher::DispatchToTarget(*click, &button));
     }
 
@@ -604,11 +604,11 @@ namespace krys::boo::tests
       button.SetOnTouchMove(count);
       button.SetOnTouchStart(count);
       for (dom::DOMStringAtom type :
-           {EventNames::GotPointerCapture, EventNames::LostPointerCapture, EventNames::PointerCancel,
-            EventNames::PointerDown, EventNames::PointerEnter, EventNames::PointerLeave,
-            EventNames::PointerMove, EventNames::PointerOut, EventNames::PointerOver, u8"pointerrawupdate",
-            EventNames::PointerUp, EventNames::TouchCancel, EventNames::TouchEnd, EventNames::TouchMove,
-            EventNames::TouchStart})
+           {event_names::GotPointerCapture, event_names::LostPointerCapture, event_names::PointerCancel,
+            event_names::PointerDown, event_names::PointerEnter, event_names::PointerLeave,
+            event_names::PointerMove, event_names::PointerOut, event_names::PointerOver, u8"pointerrawupdate",
+            event_names::PointerUp, event_names::TouchCancel, event_names::TouchEnd, event_names::TouchMove,
+            event_names::TouchStart})
       {
         dom::EventDispatcher::FireEvent(type, button);
       }
@@ -626,7 +626,7 @@ namespace krys::boo::tests
       fixture.Document->SetOnPointerLockChange(count);
       fixture.Document->SetOnPointerLockError(count);
       for (auto type :
-           {EventNames::ReadyStateChange, EventNames::PointerLockChange, EventNames::PointerLockError})
+           {event_names::ReadyStateChange, event_names::PointerLockChange, event_names::PointerLockError})
       {
         dom::EventDispatcher::FireEvent(type, *fixture.Document);
       }

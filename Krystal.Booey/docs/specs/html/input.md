@@ -61,7 +61,7 @@ Status: reviewed (2026-11-01)
 ##### [4.10.5.1 States of the type attribute](https://html.spec.whatwg.org/#states-of-the-type-attribute)
 
 Status: reviewed (2026-11-01)
-> `InputTypeNames` and the `InputType` subclasses.
+> `input_type_names` and the `InputType` subclasses.
 
 ###### [4.10.5.1.1 Hidden state (type=hidden)](https://html.spec.whatwg.org/#hidden-state-%28type=hidden%29)
 

@@ -387,7 +387,7 @@ namespace krys::boo::html
     // https://html.spec.whatwg.org/#concept-form-reset
     // 1. Let reset be the result of firing an event named reset at form, with the bubbles and cancelable
     //    attributes initialized to true.
-    auto event = dom::Event::Create(EventNames::Reset, true, true);
+    auto event = dom::Event::Create(event_names::Reset, true, true);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
 
     // 2. If reset is true, then invoke the reset algorithm of each resettable element whose form owner is
@@ -1331,7 +1331,7 @@ namespace krys::boo::html
     // 7. Fire an event named formdata at form using FormDataEvent, with the formData attribute initialized to
     //    form data and the bubbles attribute initialized to true.
     auto event =
-      dom::FormDataEvent::Create(EventNames::FormData, true, false, false, Ref<DOMFormData>(domFormData));
+      dom::FormDataEvent::Create(event_names::FormData, true, false, false, Ref<DOMFormData>(domFormData));
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
 
     if (submitter)

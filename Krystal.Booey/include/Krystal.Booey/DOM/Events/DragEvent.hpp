@@ -28,7 +28,7 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-dragevent-dragevent
     DragEvent(DOMStringAtom type, const DragEventInit &eventInitDict = {}) noexcept;
 
-    ~DragEvent() noexcept;
+    ~DragEvent() noexcept override;
 
     /// @brief A trusted drag event from its parts.
     KRYS_NODISCARD static Ref<DragEvent>

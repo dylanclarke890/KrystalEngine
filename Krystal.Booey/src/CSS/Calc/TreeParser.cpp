@@ -132,7 +132,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    auto tokens = PropertyParserHelpers::ConsumeFunction(range);
+    auto tokens = parse_property::ConsumeFunction(range);
 
     // -- Parsing --
 
@@ -236,7 +236,7 @@ namespace krys::boo::css::calc
     while (!tokens.IsAtEnd())
     {
       tokens.DiscardWhitespace();
-      if (requireComma && !PropertyParserHelpers::ConsumeComma(tokens))
+      if (requireComma && !parse_property::ConsumeComma(tokens))
       {
         return null;
       }
@@ -301,7 +301,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -363,7 +363,7 @@ namespace krys::boo::css::calc
       return SimplifyOrCreateChild(Op {krys::move(sumA->Child), null}, *outputType, state);
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -435,7 +435,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -446,7 +446,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -527,7 +527,7 @@ namespace krys::boo::css::calc
       return SimplifyOrCreateChild(Op {krys::move(sumA->Child), null}, *outputType, state);
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -564,14 +564,13 @@ namespace krys::boo::css::calc
     // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum>? )
 
     auto roundingStrategy =
-      PropertyParserHelpers::ConsumeIdentRaw<ValueId::Nearest, ValueId::ToZero, ValueId::Up, ValueId::Down>(
-        tokens);
+      parse_property::ConsumeIdentRaw<ValueId::Nearest, ValueId::ToZero, ValueId::Up, ValueId::Down>(tokens);
     if (!roundingStrategy)
     {
       return ConsumeRoundArguments<RoundNearest>(tokens, depth, state);
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -752,7 +751,7 @@ namespace krys::boo::css::calc
     Maybe<Random::SharingType> sharing;
     if (auto optionalSharing = ConsumeOptionalRandomSharing(tokens, state))
     {
-      if (!PropertyParserHelpers::ConsumeComma(tokens))
+      if (!parse_property::ConsumeComma(tokens))
       {
         return null;
       }
@@ -777,7 +776,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -822,7 +821,7 @@ namespace krys::boo::css::calc
         Op {krys::move(*sharing), krys::move(min->Child), krys::move(max->Child), null}, *outputType, state);
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -885,7 +884,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -896,7 +895,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    if (!PropertyParserHelpers::ConsumeComma(tokens))
+    if (!parse_property::ConsumeComma(tokens))
     {
       return null;
     }
@@ -1005,16 +1004,16 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    auto anchorElement = PropertyParserHelpers::ConsumeDashedIdentRaw(tokens);
+    auto anchorElement = parse_property::ConsumeDashedIdentRaw(tokens);
 
     // <anchor-side> = inside | outside | top | left | right | bottom | start | end | self-start | self-end |
     // <percentage> | center
     auto anchorSide = [&]() -> Maybe<AnchorSide>
     {
       auto sideIdent =
-        PropertyParserHelpers::ConsumeIdentRaw<ValueId::Inside, ValueId::Outside, ValueId::Top, ValueId::Left,
-                                               ValueId::Right, ValueId::Bottom, ValueId::Start, ValueId::End,
-                                               ValueId::SelfStart, ValueId::SelfEnd, ValueId::Center>(tokens);
+        parse_property::ConsumeIdentRaw<ValueId::Inside, ValueId::Outside, ValueId::Top, ValueId::Left,
+                                        ValueId::Right, ValueId::Bottom, ValueId::Start, ValueId::End,
+                                        ValueId::SelfStart, ValueId::SelfEnd, ValueId::Center>(tokens);
       if (sideIdent)
       {
         return AnchorSide {*sideIdent};
@@ -1054,13 +1053,13 @@ namespace krys::boo::css::calc
 
     if (!anchorElement)
     {
-      anchorElement = PropertyParserHelpers::ConsumeDashedIdentRaw(tokens);
+      anchorElement = parse_property::ConsumeDashedIdentRaw(tokens);
     }
 
     auto type = Type::CreateLength();
     Maybe<Child> fallback;
 
-    if (PropertyParserHelpers::ConsumeComma(tokens))
+    if (parse_property::ConsumeComma(tokens))
     {
       auto typedFallback = ConsumeValueWithoutSimplifyingCalc(tokens, depth, state);
       if (!typedFallback)
@@ -1121,18 +1120,18 @@ namespace krys::boo::css::calc
     }
 
     // parse <anchor-element>
-    auto maybeAnchorElement = PropertyParserHelpers::ConsumeDashedIdentRaw(tokens);
+    auto maybeAnchorElement = parse_property::ConsumeDashedIdentRaw(tokens);
 
     // then parse <anchor-size>
     auto maybeAnchorSize =
-      PropertyParserHelpers::ConsumeIdentRaw<ValueId::Width, ValueId::Height, ValueId::Block, ValueId::Inline,
-                                             ValueId::SelfBlock, ValueId::SelfInline>(tokens);
+      parse_property::ConsumeIdentRaw<ValueId::Width, ValueId::Height, ValueId::Block, ValueId::Inline,
+                                      ValueId::SelfBlock, ValueId::SelfInline>(tokens);
 
     // if we could parse <anchor-size> but not <anchor-element>, it's possible <anchor-element> is specified
     // after <anchor-size>, so re-parse <anchor-element>
     if (maybeAnchorSize && !maybeAnchorElement)
     {
-      maybeAnchorElement = PropertyParserHelpers::ConsumeDashedIdentRaw(tokens);
+      maybeAnchorElement = parse_property::ConsumeDashedIdentRaw(tokens);
     }
 
     Maybe<TypedChild> fallback;
@@ -1141,7 +1140,7 @@ namespace krys::boo::css::calc
     if (maybeAnchorSize || maybeAnchorElement)
     {
       // if a comma follows...
-      if (PropertyParserHelpers::ConsumeComma(tokens))
+      if (parse_property::ConsumeComma(tokens))
       {
         // it must be followed by the fallback value.
         fallback = ConsumeValueWithoutSimplifyingCalc(tokens, depth, state);

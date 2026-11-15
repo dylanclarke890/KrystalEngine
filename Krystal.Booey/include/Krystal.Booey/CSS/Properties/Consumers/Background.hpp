@@ -38,7 +38,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // Default value of the `fill` parameter for `border-image-slice`.
     enum class BorderImageSliceFillDefault : bool

@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <single-transition-property-or-none> consuming
     // https://drafts.csswg.org/css-transitions/#single-transition-property

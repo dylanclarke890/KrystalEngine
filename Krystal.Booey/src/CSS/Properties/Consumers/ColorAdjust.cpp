@@ -33,7 +33,7 @@
 #include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
 #include "Krystal.Booey/CSS/Values/ColorSchemeValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   Maybe<ColorScheme> ConsumeUnresolvedColorScheme(TokenRange &tokens, PropertyParserState &) noexcept
   {

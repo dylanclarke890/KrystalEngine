@@ -32,7 +32,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/RatioValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   Maybe<Ratio> ConsumeUnresolvedRatio(TokenRange &tokens, PropertyParserState &state) noexcept
   {

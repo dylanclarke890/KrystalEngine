@@ -34,7 +34,7 @@ namespace krys::boo::style
   {
     using Base::Base;
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsNormal() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsNormal() const noexcept
     {
       return HoldsAlternative<css::keywords::Normal>();
     }

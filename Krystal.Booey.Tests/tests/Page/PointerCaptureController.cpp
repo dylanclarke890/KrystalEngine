@@ -223,7 +223,7 @@ namespace krys::boo::tests
       CHECK(rawUpdate.ClientX() == 10);
       auto coalesced = rawUpdate.GetCoalescedEvents();
       REQUIRE(coalesced.size() == 1uz);
-      CHECK(coalesced[0]->Type() == EventNames::PointerRawUpdate);
+      CHECK(coalesced[0]->Type() == event_names::PointerRawUpdate);
       CHECK(rawUpdate.GetPredictedEvents().empty());
 
       // Pressing and releasing the only button have none; a chorded button is a move, and has one.

@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumePaintOrder)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumePaintOrder)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"normal", ConsumePaintOrder) == "normal");
     CHECK(ConsumeToText(u8"fill", ConsumePaintOrder) == "fill");
@@ -25,7 +25,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"auto", ConsumePaintOrder) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeStrokeDasharray)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeStrokeDasharray)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeStrokeDasharray) == "none");
     CHECK(ConsumeToText(u8"5px", ConsumeStrokeDasharray) == "5px");
@@ -42,7 +42,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"1 none", ConsumeStrokeDasharray) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeStrokeDasharray SVG attribute)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeStrokeDasharray SVG attribute)", "[CSS][Properties][Consumers]")
   {
     // The length is parsed in standard mode even in an SVG attribute, so a unitless number is a number.
     ParserContext context {ParserMode::SVGAttribute};

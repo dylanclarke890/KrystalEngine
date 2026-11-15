@@ -260,7 +260,7 @@ namespace krys::boo::dom
     }
 
     // 4. Fire an event named readystatechange at document.
-    EventDispatcher::FireEvent(EventNames::ReadyStateChange, document);
+    EventDispatcher::FireEvent(event_names::ReadyStateChange, document);
   }
 
   bool DocumentAlgorithms::IsIFrameSrcdocDocument(const Document &document) noexcept

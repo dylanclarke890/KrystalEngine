@@ -880,7 +880,7 @@ namespace krys::ui::tests
       auto id = element ? element->GetAttribute(u8"id").value_or(boo::dom::DOMString())
                         : boo::dom::DOMString(u8"document");
       std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
-      if (event.Type() == boo::EventNames::MouseMove)
+      if (event.Type() == boo::event_names::MouseMove)
       {
         auto &mouse = static_cast<boo::dom::MouseEvent &>(event);
         text += "/" + std::to_string(static_cast<int>(mouse.MovementX())) + ","
@@ -2848,8 +2848,8 @@ namespace krys::ui::tests
     CHECK_FALSE(view.Document().Hidden());
 
     uint32 changes = 0;
-    auto handle = view.Document().AddEventListener(boo::dom::DOMStringAtom(boo::EventNames::VisibilityChange),
-                                                   [&](boo::dom::Event &) { ++changes; });
+    auto handle = view.Document().AddEventListener(
+      boo::dom::DOMStringAtom(boo::event_names::VisibilityChange), [&](boo::dom::Event &) { ++changes; });
     view.SetVisible(false);
     CHECK_FALSE(view.IsVisible());
     CHECK(view.Document().Hidden());

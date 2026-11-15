@@ -2,14 +2,13 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/StringAtom.hpp"
-#include <concepts>
 #include <limits>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 namespace krys
@@ -20,7 +19,7 @@ namespace krys
   /// numbers (formatted numbers, separated lists, and so on).
   template <typename T>
   concept StringBuilderWriter = requires(const T &value, StringBuilder &builder) {
-    { value.WriteTo(builder) } -> std::same_as<void>;
+    { value.WriteTo(builder) } -> SameType<void>;
   };
 
   /// @brief Builds a UTF-8 string by appending strings, characters and numbers to it.
@@ -156,53 +155,53 @@ namespace krys
     template <typename T>
     void AppendOne(const T &value) noexcept
     {
-      using U = std::remove_cvref_t<T>;
-      if constexpr (std::same_as<U, StringBuilder>)
+      using U = remove_cvref_t<T>;
+      if constexpr (SameType<U, StringBuilder>)
       {
         _buffer.append(value._buffer);
       }
-      else if constexpr (std::same_as<U, StringAtom>)
+      else if constexpr (SameType<U, StringAtom>)
       {
         _buffer.append(value.View());
       }
-      else if constexpr (std::convertible_to<const T &, utf8_stringview>)
+      else if constexpr (ConvertibleTo<const T &, utf8_stringview>)
       {
         _buffer.append(utf8_stringview {value});
       }
-      else if constexpr (std::convertible_to<const T &, std::string_view>)
+      else if constexpr (ConvertibleTo<const T &, std::string_view>)
       {
         AppendASCII(std::string_view {value});
       }
-      else if constexpr (std::same_as<U, char8>)
+      else if constexpr (SameType<U, char8>)
       {
         _buffer.push_back(value);
       }
-      else if constexpr (std::same_as<U, char32>)
+      else if constexpr (SameType<U, char32>)
       {
         AppendCodePoint(value);
       }
-      else if constexpr (std::same_as<U, char>)
+      else if constexpr (SameType<U, char>)
       {
         krys_debug_assert(static_cast<unsigned char>(value) < 0x80);
         _buffer.push_back(static_cast<char8>(value));
       }
-      else if constexpr (std::same_as<U, bool> || std::same_as<U, char16_t> || std::same_as<U, wchar_t>)
+      else if constexpr (SameType<U, bool> || SameType<U, char16_t> || SameType<U, wchar_t>)
       {
         static_assert(sizeof(T) == 0, "Append a bool or a UTF-16 character explicitly.");
       }
-      else if constexpr (std::is_enum_v<U>)
+      else if constexpr (IsEnum<U>)
       {
-        AppendInteger(static_cast<std::underlying_type_t<U>>(value));
+        AppendInteger(static_cast<underlying_t<U>>(value));
       }
-      else if constexpr (std::integral<U>)
+      else if constexpr (Integral<U>)
       {
         AppendInteger(value);
       }
-      else if constexpr (std::same_as<U, float>)
+      else if constexpr (SameType<U, float>)
       {
         AppendNumber(value);
       }
-      else if constexpr (std::floating_point<U>)
+      else if constexpr (FloatingPoint<U>)
       {
         AppendNumber(static_cast<double>(value));
       }
@@ -228,10 +227,10 @@ namespace krys
 
     void AppendNumber(double number) noexcept;
 
-    template <std::integral T>
+    template <Integral T>
     void AppendInteger(T number) noexcept
     {
-      if constexpr (std::is_signed_v<T>)
+      if constexpr (Signed<T>)
       {
         AppendInteger(static_cast<int64>(number));
       }

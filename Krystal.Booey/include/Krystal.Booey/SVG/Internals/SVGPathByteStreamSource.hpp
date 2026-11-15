@@ -22,9 +22,9 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSource.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include <cstring>
-#include <type_traits>
 
 namespace krys::boo::svg
 {
@@ -76,7 +76,7 @@ namespace krys::boo::svg
     template <typename TData>
     KRYS_NODISCARD TData ReadType() noexcept
     {
-      static_assert(std::is_trivially_copyable_v<TData>);
+      static_assert(TriviallyCopyable<TData>);
       krys_assert(_streamCurrent.size() >= sizeof(TData));
 
       TData data;
@@ -97,7 +97,7 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD SVGPathSegType ReadSVGSegmentType() noexcept
     {
-      static_assert(std::is_same_v<std::underlying_type_t<SVGPathSegType>, uint8>);
+      static_assert(SameType<underlying_t<SVGPathSegType>, uint8>);
       return static_cast<SVGPathSegType>(ReadType<uint8>());
     }
 

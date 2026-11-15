@@ -117,8 +117,8 @@ namespace krys::boo
       {
         return dom::Exception {dom::ExceptionCode::TypeError};
       }
-      auto consumedInset = css::PropertyParserHelpers::ParseSingleViewTimelineInsetItem(
-        *insetString, document.CssParserContext());
+      auto consumedInset =
+        css::parse_property::ParseSingleViewTimelineInsetItem(*insetString, document.CssParserContext());
       if (!consumedInset)
       {
         return dom::Exception {dom::ExceptionCode::TypeError};

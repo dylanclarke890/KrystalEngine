@@ -994,7 +994,7 @@ namespace krys
 
   // Packed Color Formats
 
-  namespace PackedColour
+  namespace packed_colour
   {
     struct RGBA
     {
@@ -1033,13 +1033,13 @@ namespace krys
     };
   }
 
-  KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(PackedColour::RGBA color) noexcept
+  KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(packed_colour::RGBA color) noexcept
   {
     return {static_cast<uint8>(color.Value >> 24), static_cast<uint8>(color.Value >> 16),
             static_cast<uint8>(color.Value >> 8), static_cast<uint8>(color.Value)};
   }
 
-  KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(PackedColour::ARGB color) noexcept
+  KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(packed_colour::ARGB color) noexcept
   {
     return {static_cast<uint8>(color.Value >> 16), static_cast<uint8>(color.Value >> 8),
             static_cast<uint8>(color.Value), static_cast<uint8>(color.Value >> 24)};

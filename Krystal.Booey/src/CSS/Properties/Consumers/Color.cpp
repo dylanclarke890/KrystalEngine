@@ -70,7 +70,7 @@
 #include <brigand/algorithms/wrap.hpp>
 #include <string>
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   namespace
   {

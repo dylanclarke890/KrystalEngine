@@ -157,7 +157,7 @@ namespace krys::boo::html
 
         auto &document = _editElement->NodeDocument();
         auto element = CreateRef<HTMLDivElement>(document);
-        element->SetUserAgentPart(css::UserAgentParts::WebkitDatetimeEditText());
+        element->SetUserAgentPart(css::user_agent_parts::WebkitDatetimeEditText());
 
         // If the literal begins/ends with a space, the gap between two fields will appear exaggerated due to
         // the presence of a 1px padding around each field. This can make spaces appear up to 2px larger
@@ -199,7 +199,7 @@ namespace krys::boo::html
                                 DateTimeEditElementEditControlOwner &editControlOwner) noexcept
   {
     auto element = CreateRef<DateTimeEditElement>(document, editControlOwner);
-    element->SetUserAgentPart(css::UserAgentParts::WebkitDatetimeEdit());
+    element->SetUserAgentPart(css::user_agent_parts::WebkitDatetimeEdit());
     return element;
   }
 
@@ -255,7 +255,7 @@ namespace krys::boo::html
     {
       auto element = CreateRef<HTMLDivElement>(NodeDocument());
       (void)AppendChild(*element);
-      element->SetUserAgentPart(css::UserAgentParts::WebkitDatetimeEditFieldsWrapper());
+      element->SetUserAgentPart(css::user_agent_parts::WebkitDatetimeEditFieldsWrapper());
     }
 
     Ref<dom::Element> fieldsWrapper = ShareRef(FieldsWrapperElement());

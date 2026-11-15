@@ -50,7 +50,7 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   template <typename ElementType>
   static void Complete4Sides(Array<ElementType, 4uz> &sides) noexcept

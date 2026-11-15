@@ -174,7 +174,7 @@ namespace krys::boo::css::tests
     REQUIRE(feature);
     CHECK(ToNarrow(feature->Name.View()) == "width");
     CHECK(feature->Syntax == mq::Syntax::Plain);
-    CHECK(feature->Schema == &mq::Features::Width());
+    CHECK(feature->Schema == &mq::features::Width());
     CHECK_FALSE(feature->LeftComparison);
     REQUIRE(feature->RightComparison);
     CHECK(feature->RightComparison->Op == mq::ComparisonOperator::GreaterThanOrEqual);
@@ -186,7 +186,7 @@ namespace krys::boo::css::tests
     feature = SingleFeature(u8"(hover)");
     REQUIRE(feature);
     CHECK(feature->Syntax == mq::Syntax::Boolean);
-    CHECK(feature->Schema == &mq::Features::Hover());
+    CHECK(feature->Schema == &mq::features::Hover());
     CHECK_FALSE(feature->RightComparison);
   }
 
@@ -204,7 +204,7 @@ namespace krys::boo::css::tests
     auto feature = SingleFeature(u8"(100px < width <= 200px)");
     REQUIRE(feature);
     CHECK(feature->Syntax == mq::Syntax::Range);
-    CHECK(feature->Schema == &mq::Features::Width());
+    CHECK(feature->Schema == &mq::features::Width());
     REQUIRE(feature->LeftComparison);
     REQUIRE(feature->RightComparison);
     CHECK(feature->LeftComparison->Op == mq::ComparisonOperator::LessThan);
@@ -262,7 +262,7 @@ namespace krys::boo::css::tests
     // A number for a ratio feature becomes `<number> / 1`.
     auto feature = SingleFeature(u8"(aspect-ratio: 2)");
     REQUIRE(feature);
-    CHECK(feature->Schema == &mq::Features::AspectRatio());
+    CHECK(feature->Schema == &mq::features::AspectRatio());
     CHECK(Is<RatioValue>(*feature->RightComparison->Value));
     CHECK(Roundtrip(u8"(aspect-ratio: 2)") == "(aspect-ratio: 2 / 1)");
 
@@ -315,7 +315,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("MediaQueryFeatures: AllSchemas", "[CSS][Queries][MediaQueryFeatures]")
   {
-    auto schemas = mq::Features::AllSchemas();
+    auto schemas = mq::features::AllSchemas();
     CHECK(schemas.size() == 29);
 
     auto findSchema = [&](utf8_stringview name) -> const mq::FeatureSchema *
@@ -335,17 +335,17 @@ namespace krys::boo::css::tests
       CHECK(findSchema(schema->Name.View()) == schema);
     }
 
-    CHECK(findSchema(u8"width") == &mq::Features::Width());
-    CHECK(findSchema(u8"display-mode") == &mq::Features::DisplayMode());
+    CHECK(findSchema(u8"width") == &mq::features::Width());
+    CHECK(findSchema(u8"display-mode") == &mq::features::DisplayMode());
     CHECK_FALSE(findSchema(u8"-webkit-device-pixel-ratio"));
     CHECK_FALSE(findSchema(u8"prefers-dark-interface"));
 
-    auto &width = mq::Features::Width();
+    auto &width = mq::features::Width();
     CHECK(width.FeatureType == mq::FeatureSchema::Type::Range);
     CHECK(width.FeatureValueType == mq::FeatureSchema::ValueType::Length);
     CHECK(width.Dependencies == mq::MediaQueryDynamicDependency::Viewport);
 
-    auto &colorScheme = mq::Features::PrefersColorScheme();
+    auto &colorScheme = mq::features::PrefersColorScheme();
     CHECK(colorScheme.FeatureType == mq::FeatureSchema::Type::Discrete);
     CHECK(colorScheme.Dependencies == mq::MediaQueryDynamicDependency::Appearance);
     CHECK(colorScheme.ValueIdentifiers.contains(ValueId::Dark));

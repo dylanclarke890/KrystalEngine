@@ -53,7 +53,7 @@ namespace krys::boo::css
     CSSStyleRule(StyleRuleWithNesting &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSStyleRule() noexcept;
+    ~CSSStyleRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSStyleRule> Create(StyleRule &rule, CSSStyleSheet *sheet) noexcept;
 

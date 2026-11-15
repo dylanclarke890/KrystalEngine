@@ -180,7 +180,7 @@ namespace krys::boo
       }
 
       css::ParserContext parserContext(document);
-      auto offsets = css::PropertyParserHelpers::ParseKeyframeKeyList(offsetString, parserContext);
+      auto offsets = css::parse_property::ParseKeyframeKeyList(offsetString, parserContext);
       if (offsets.size() != 1)
       {
         return null;
@@ -1456,7 +1456,7 @@ namespace krys::boo
       // FIXME: Determine the how calc() and relative units should be resolved and switch to the
       // non-deprecated parsing function.
       auto timingFunctionResult =
-        css::PropertyParserHelpers::ParseEasingFunctionDeprecated(keyframe.Easing, parserContext);
+        css::parse_property::ParseEasingFunctionDeprecated(keyframe.Easing, parserContext);
       if (!timingFunctionResult)
       {
         return dom::Exception {dom::ExceptionCode::TypeError};
@@ -1471,7 +1471,7 @@ namespace krys::boo
     {
       // FIXME: Determine the how calc() and relative units should be resolved and switch to the
       // non-deprecated parsing function.
-      if (!css::PropertyParserHelpers::ParseEasingFunctionDeprecated(easing, parserContext))
+      if (!css::parse_property::ParseEasingFunctionDeprecated(easing, parserContext))
       {
         return dom::Exception {dom::ExceptionCode::TypeError};
       }

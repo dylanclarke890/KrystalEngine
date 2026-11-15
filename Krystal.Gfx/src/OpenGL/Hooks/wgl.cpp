@@ -48,7 +48,7 @@ namespace
   static void *GetFunctionAddress(const char *name, const char *fallbackModule = "opengl32.dll") noexcept
   {
     void *p = (void *)::wglGetProcAddress(name);
-    if (p == 0 || (p == (void *)0x1) || (p == (void *)0x2) || (p == (void *)0x3) || (p == (void *)-1))
+    if (p == nullptr || (p == (void *)0x1) || (p == (void *)0x2) || (p == (void *)0x3) || (p == (void *)-1))
     {
       HMODULE module = LoadLibraryA(fallbackModule);
       if (module)

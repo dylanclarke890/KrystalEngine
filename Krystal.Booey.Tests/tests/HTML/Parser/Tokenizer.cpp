@@ -5,7 +5,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::html::Tests
+namespace krys::boo::html::tests
 {
   namespace
   {
@@ -122,17 +122,17 @@ namespace krys::boo::html::Tests
         }
         else if (sectionName == u8"data")
         {
-          tests::NormaliseData(data);
+          krys::boo::tests::NormaliseData(data);
           currentTest.Html = krys::move(data);
         }
         else if (sectionName == u8"tokens")
         {
-          tests::NormaliseData(data);
+          krys::boo::tests::NormaliseData(data);
           currentTest.Tokens = krys::move(data);
         }
         else if (sectionName == u8"initial-state")
         {
-          tests::NormaliseData(data);
+          krys::boo::tests::NormaliseData(data);
 
           auto state = magic_enum::enum_cast<TokenizerState>(
             stringview(reinterpret_cast<const char *>(data.data()), data.size()),
@@ -144,7 +144,7 @@ namespace krys::boo::html::Tests
         }
         else if (sectionName == u8"expected-state")
         {
-          tests::NormaliseData(data);
+          krys::boo::tests::NormaliseData(data);
 
           auto state = magic_enum::enum_cast<TokenizerState>(
             stringview(reinterpret_cast<const char *>(data.data()), data.size()),
@@ -164,7 +164,7 @@ namespace krys::boo::html::Tests
         }
         else if (sectionName == u8"errors")
         {
-          auto lines = tests::SplitStringByNewline(data);
+          auto lines = krys::boo::tests::SplitStringByNewline(data);
 
           for (const auto &line : lines)
           {
@@ -199,7 +199,7 @@ namespace krys::boo::html::Tests
         }
       };
 
-      tests::ParseTestData(stream, "#", ::krys::move(parse));
+      krys::boo::tests::ParseTestData(stream, "#", ::krys::move(parse));
       if (!currentTest.Html.empty())
       {
         tests.push_back(krys::move(currentTest));
@@ -233,10 +233,11 @@ namespace krys::boo::html::Tests
         SerialiseHTMLToken(*token, tokens);
       }
 
-      tests::NormaliseData(tokens);
+      krys::boo::tests::NormaliseData(tokens);
 
-      utf8_string str = u8"--- TEST " + tests::ToUTF8(number + 1uz) + u8" OF " + tests::ToUTF8(total)
-                        + u8" ---\n" + tests::ToUTF8(test.Name.empty() ? "Unnamed Test" : test.Name);
+      utf8_string str = u8"--- TEST " + krys::boo::tests::ToUTF8(number + 1uz) + u8" OF "
+                        + krys::boo::tests::ToUTF8(total) + u8" ---\n"
+                        + krys::boo::tests::ToUTF8(test.Name.empty() ? "Unnamed Test" : test.Name);
       UTF8_INFO(str);
 
       str = u8"\n--- INPUT ---\n" + test.Html;
@@ -249,10 +250,10 @@ namespace krys::boo::html::Tests
       UTF8_INFO(str);
 
       auto initialState = string(magic_enum::enum_name(test.InitialState));
-      str = u8"\n--- INITIAL STATE ---\n" + tests::ToUTF8(initialState);
+      str = u8"\n--- INITIAL STATE ---\n" + krys::boo::tests::ToUTF8(initialState);
 
       auto expectedState = string(magic_enum::enum_name(test.ExpectedState));
-      str = u8"\n--- EXPECTED STATE ---\n" + tests::ToUTF8(expectedState);
+      str = u8"\n--- EXPECTED STATE ---\n" + krys::boo::tests::ToUTF8(expectedState);
 
       CHECK(tokenizer.State() == test.ExpectedState);
 
@@ -279,13 +280,13 @@ namespace krys::boo::html::Tests
     {
       static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/html-tokenizer/";
 
-      auto file = tests::OpenTestDataFile(basedir + filename);
+      auto file = krys::boo::tests::OpenTestDataFile(basedir + filename);
       REQUIRE(file.has_value());
 
       auto tests = ParseHTMLTokenizerTests(*file);
       REQUIRE(!tests.empty());
 
-      tests::ExecuteTests(tests, ExecuteHTMLTokenizerTest);
+      krys::boo::tests::ExecuteTests(tests, ExecuteHTMLTokenizerTest);
     }
   }
 

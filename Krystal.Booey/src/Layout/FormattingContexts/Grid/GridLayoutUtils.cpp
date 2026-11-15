@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace krys::boo::layout::GridLayoutUtils
+namespace krys::boo::layout::grid_layout_utils
 {
   LayoutUnit ComputeGapValue(const style::GapGutter &gap) noexcept
   {

@@ -61,7 +61,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::Color;
+      return input_type_names::Color;
     }
 
     KRYS_NODISCARD bool SupportsRequired() const noexcept final;

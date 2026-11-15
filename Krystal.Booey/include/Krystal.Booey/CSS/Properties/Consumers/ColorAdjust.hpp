@@ -38,7 +38,7 @@ namespace krys::boo::css
   struct ParserContext;
   struct PropertyParserState;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // <'color-scheme'> = normal | [ light | dark | <custom-ident> ]+ && only?
     // https://drafts.csswg.org/css-color-adjust/#propdef-color-scheme

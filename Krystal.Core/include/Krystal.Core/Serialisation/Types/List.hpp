@@ -3,7 +3,7 @@
 #include "Krystal.Core/Serialisation/Builtins.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   template <typename Archive, typename T>
   void Save(Archive &archive, const List<T> &value) noexcept

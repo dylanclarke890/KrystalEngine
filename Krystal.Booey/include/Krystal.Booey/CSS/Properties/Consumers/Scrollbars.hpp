@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <'scrollbar-color'> consuming
     // https://drafts.csswg.org/css-scrollbars/#propdef-scrollbar-color

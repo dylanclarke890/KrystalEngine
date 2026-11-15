@@ -35,7 +35,7 @@
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   namespace
   {
