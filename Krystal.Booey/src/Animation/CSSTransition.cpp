@@ -95,7 +95,7 @@ namespace krys::boo
                                const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
   {
     return CreateRef<CSSTransitionEvent>(eventType, this, scheduledTime, elapsedTime, pseudoElementIdentifier,
-                                         css::CSSOMString {TransitionProperty().View()});
+                                         TransitionProperty().ToString());
   }
 
   css::CSSOMStringAtom CSSTransition::TransitionProperty() const noexcept

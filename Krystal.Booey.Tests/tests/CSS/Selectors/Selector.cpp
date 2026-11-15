@@ -388,7 +388,7 @@ namespace krys::boo::css::tests
     complex.FirstSelectorComponent()->VisitSimpleSelectors(
       [&](const Selector &selector)
       {
-        visited.push_back(CSSOMString(selector.Value().View()));
+        visited.push_back(selector.Value().ToString());
         return false;
       },
       Selector::VisitFunctionalPseudoClasses::No, Selector::VisitOnlySubject::Yes);

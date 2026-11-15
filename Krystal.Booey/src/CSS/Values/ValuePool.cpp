@@ -123,8 +123,8 @@ namespace krys::boo::css
       return it->second;
     }
 
-    auto value = PropertyParser::ParseStylePropertyLonghand(
-      PropertyId::FontFamily, CSSOMString {string.View()}, StrictParserContext());
+    auto value = PropertyParser::ParseStylePropertyLonghand(PropertyId::FontFamily, string.ToString(),
+                                                            StrictParserContext());
     auto *list = DynamicDowncast<ValueList>(value.get());
     return _fontFaceValueCache.emplace(string, ShareRefPtr(list)).first->second;
   }
@@ -138,7 +138,7 @@ namespace krys::boo::css
     {
       return it->second;
     }
-    auto value = PrimitiveValue::CreateFontFamily(CSSOMString {familyName.View()});
+    auto value = PrimitiveValue::CreateFontFamily(familyName.ToString());
     return _fontFamilyValueCache.emplace(familyName, krys::move(value)).first->second;
   }
 

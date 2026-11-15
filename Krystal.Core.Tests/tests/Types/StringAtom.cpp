@@ -42,6 +42,13 @@ namespace krys::tests
     REQUIRE(atomStr.View() == text);
   }
 
+  TEST_CASE("StringAtom - ToString copies the string", "[StringAtom]")
+  {
+    StringAtom atom = u8"copied";
+    CHECK(atom.ToString() == u8"copied");
+    CHECK(StringAtom().ToString().empty());
+  }
+
   TEST_CASE("StringAtom - incrementally created string compares equal", "[StringAtom]")
   {
     utf8_string original = u8"incremental";

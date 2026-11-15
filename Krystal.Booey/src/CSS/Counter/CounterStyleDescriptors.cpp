@@ -42,7 +42,7 @@ namespace krys::boo::css
   {
     KRYS_NODISCARD CSSOMString NameText(const CounterStyleName &name) noexcept
     {
-      return name == null ? CSSOMString() : CSSOMString(name.View());
+      return name == null ? CSSOMString() : name.ToString();
     }
 
     KRYS_NODISCARD CounterStyleRanges RangeFromStyleProperties(const StyleProperties &properties) noexcept

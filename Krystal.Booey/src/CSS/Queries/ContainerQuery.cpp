@@ -59,7 +59,7 @@ namespace krys::boo::css::cq
   {
     if (query.Name != null && query.Name != CSSOMStringAtom::Empty())
     {
-      SerialiseIdentifier(CSSOMString(query.Name.View()), builder);
+      SerialiseIdentifier(query.Name.ToString(), builder);
       if (!query.Condition.Queries.empty())
       {
         builder.Append(u8' ');

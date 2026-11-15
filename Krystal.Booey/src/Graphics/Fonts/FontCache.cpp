@@ -307,7 +307,7 @@ namespace krys::boo
         _familiesUsingBackslashAsYenSign.insert(name);
       }
     }
-    return _familiesUsingBackslashAsYenSign.contains(utf8_string {family.View()});
+    return _familiesUsingBackslashAsYenSign.contains(family.ToString());
   }
 
   // MARK: - Platform

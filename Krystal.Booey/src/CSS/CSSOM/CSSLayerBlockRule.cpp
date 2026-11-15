@@ -74,7 +74,7 @@ namespace krys::boo::css
     StringBuilder result;
     for (const auto &segment : name)
     {
-      SerialiseIdentifier(CSSOMString(segment.View()), result);
+      SerialiseIdentifier(segment.ToString(), result);
       if (&segment != &name.back())
       {
         result.Append(u8'.');

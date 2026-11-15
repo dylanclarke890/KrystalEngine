@@ -148,7 +148,7 @@ namespace krys::boo::html
     {
       if (auto *sheet = Sheet(); sheet && !dom::TreeQueries::IsInShadowTree(*this))
       {
-        sheet->SetTitle(css::CSSOMString(newValue.View()));
+        sheet->SetTitle(newValue.ToString());
       }
     }
     else if (localName == u8"media")

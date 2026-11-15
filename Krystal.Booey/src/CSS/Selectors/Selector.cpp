@@ -411,7 +411,7 @@ namespace krys::boo::css
   {
     void AppendIdentifier(const CSSOMStringAtom &identifier, StringBuilder &builder) noexcept
     {
-      SerialiseIdentifier(CSSOMString(identifier.View()), builder);
+      SerialiseIdentifier(identifier.ToString(), builder);
     }
 
     void AppendIdentifierOrStar(const CSSOMStringAtom &identifier, StringBuilder &builder) noexcept
@@ -455,7 +455,7 @@ namespace krys::boo::css
       }
       else
       {
-        SerialiseString(CSSOMString(identifier.Identifier.View()), builder);
+        SerialiseString(identifier.Identifier.ToString(), builder);
       }
     }
 
@@ -798,7 +798,7 @@ namespace krys::boo::css
         }
         if (selector->Match() != SelectorMatch::AttributeExists)
         {
-          SerialiseString(CSSOMString(selector->SerialisingValue().View()), builder);
+          SerialiseString(selector->SerialisingValue().ToString(), builder);
           if (selector->IsAttributeValueMatchingCaseInsensitive())
           {
             builder.Append(u8" i]");

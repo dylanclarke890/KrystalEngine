@@ -171,7 +171,7 @@ namespace krys::ui
       result.FontName = style.GetFontCascade().PrimaryFont()->PlatformData().FamilyName();
       if (result.FontName.empty() && font.FamilyCount())
       {
-        result.FontName = utf8_string(font.FirstFamily().View());
+        result.FontName = font.FirstFamily().ToString();
       }
       result.FontSize = style.ComputedFontSize();
       result.FontWeight = static_cast<uint16>(static_cast<float>(font.Weight()));

@@ -59,7 +59,7 @@ namespace krys::boo::css
 
   CSSOMString CSSCounterStyleRule::Name() const noexcept
   {
-    return CSSOMString(_counterStyleRule->Name().View());
+    return _counterStyleRule->Name().ToString();
   }
 
   CSSOMString CSSCounterStyleRule::System() const noexcept

@@ -151,7 +151,7 @@ namespace krys::boo::tests
                          DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(event.Target().get()));
                        utf8_string id =
                          element ? element->GetAttribute(u8"id").value_or(dom::DOMString()) : utf8_string();
-                       Log.push_back(utf8_string(event.Type().View()) + u8"@" + id);
+                       Log.push_back(event.Type().ToString() + u8"@" + id);
                      });
         }
       }

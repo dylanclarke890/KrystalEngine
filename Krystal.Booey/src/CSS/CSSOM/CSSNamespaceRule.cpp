@@ -61,10 +61,10 @@ namespace krys::boo::css
     result.Append(u8"@namespace ");
     if (!prefixIsEmpty)
     {
-      SerialiseIdentifier(CSSOMString(prefix.View()), result);
+      SerialiseIdentifier(prefix.ToString(), result);
     }
     result.Append(prefixIsEmpty ? u8"" : u8" ", u8"url(");
-    result.Append(SerialiseString(CSSOMString(NamespaceURI().View())), u8");");
+    result.Append(SerialiseString(NamespaceURI().ToString()), u8");");
     return krys::move(result).ToString();
   }
 

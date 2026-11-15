@@ -109,11 +109,11 @@ namespace krys::boo::dom
     {
       if (NamespacePrefix() == null)
       {
-        return DOMString(LocalName().View());
+        return LocalName().ToString();
       }
       else
       {
-        return DOMString {NamespacePrefix().View()} + u8":" + DOMString {LocalName().View()};
+        return NamespacePrefix().ToString() + u8":" + LocalName().ToString();
       }
     }
 

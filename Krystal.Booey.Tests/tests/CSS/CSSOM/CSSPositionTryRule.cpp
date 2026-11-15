@@ -11,7 +11,7 @@ namespace krys::boo::css::tests
     auto &rule = RuleAt<CSSPositionTryRule>(*sheet, 0);
 
     CHECK(rule.StyleRuleType() == RuleType::PositionTry);
-    CHECK(ToNarrow(CSSOMString(rule.Name().View())) == "--a");
+    CHECK(ToNarrow(rule.Name().ToString()) == "--a");
     CHECK(RuleText(rule) == "@position-try --a { top: 1px; margin: 2px; }");
     CHECK(RuleText(*sheet->Item(1)) == "@position-try --b { }");
 

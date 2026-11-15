@@ -301,6 +301,12 @@ namespace krys
       return _impl ? _impl->View() : utf8_stringview {};
     }
 
+    /// @brief A copy of the interned string; empty for the null atom.
+    KRYS_NODISCARD utf8_string ToString() const noexcept
+    {
+      return utf8_string(View());
+    }
+
     /// @brief A hash of the string's contents (zero for the null atom). Unlike the atom's address, it's the
     /// same for every atom made from the string, even after the string has left the pool and come back.
     KRYS_NODISCARD size_t ExistingHash() const noexcept

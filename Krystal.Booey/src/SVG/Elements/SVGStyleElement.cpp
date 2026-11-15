@@ -97,7 +97,7 @@ namespace krys::boo::svg
     {
       if (auto *sheet = Sheet(); sheet && !dom::TreeQueries::IsInShadowTree(*this))
       {
-        sheet->SetTitle(css::CSSOMString(newValue.View()));
+        sheet->SetTitle(newValue.ToString());
       }
     }
     else if (name == SVGNames::TypeAttr())

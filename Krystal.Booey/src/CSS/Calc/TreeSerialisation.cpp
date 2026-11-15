@@ -90,7 +90,7 @@ namespace krys::boo::css::calc
 
     void AppendIdentifier(StringBuilder &builder, const CSSOMStringAtom &atom) noexcept
     {
-      SerialiseIdentifier(CSSOMString {atom.View()}, builder);
+      SerialiseIdentifier(atom.ToString(), builder);
     }
   }
 

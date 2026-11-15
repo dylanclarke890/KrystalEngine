@@ -472,7 +472,7 @@ namespace krys::boo::css
   {
     if (Id() == PropertyId::Custom)
     {
-      return CSSOMString(Downcast<CustomPropertyValue>(*Value()).Name().View());
+      return Downcast<CustomPropertyValue>(*Value()).Name().ToString();
     }
 
     return CSSOMString(ToString(Id()));

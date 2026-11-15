@@ -350,7 +350,7 @@ namespace krys::boo::dom
                                                    css::IsImportant important) noexcept
   {
     bool changes = EnsureMutableInlineStyle()->SetCustomProperty(
-      css::CSSOMString(property.View()), value, css::ParserContext(NodeDocument()), important);
+      property.ToString(), value, css::ParserContext(NodeDocument()), important);
     if (changes)
     {
       InlineStyleChanged();

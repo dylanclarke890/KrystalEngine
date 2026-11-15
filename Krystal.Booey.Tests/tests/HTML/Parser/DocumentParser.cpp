@@ -43,7 +43,7 @@ namespace krys::boo::html::tests
 
           krys::boo::tests::Indent(output, depth);
 
-          auto localName = dom::DOMString(element.LocalName().View());
+          auto localName = element.LocalName().ToString();
           auto namespaceName = [&] -> dom::DOMString
           {
             if (element.NamespaceURI() == infra::Namespaces::HTML)
@@ -70,7 +70,7 @@ namespace krys::boo::html::tests
           for (size_t i = 0; i < element.Attributes().Length(); ++i)
           {
             auto attr = element.Attributes().Item(i);
-            auto attrLocalName = dom::DOMString(attr->LocalName().View());
+            auto attrLocalName = attr->LocalName().ToString();
             auto attrNamespaceName = [&] -> dom::DOMString
             {
               if (attr->NamespaceURI() == infra::Namespaces::HTML)

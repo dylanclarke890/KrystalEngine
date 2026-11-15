@@ -84,7 +84,7 @@ namespace krys::boo::css
       StringBuilder name;
       if (query.Name != null && !query.Name.View().empty())
       {
-        SerialiseIdentifier(CSSOMString(query.Name.View()), name);
+        SerialiseIdentifier(query.Name.ToString(), name);
       }
       StringBuilder condition;
       mq::Serialise(condition, query.Condition);

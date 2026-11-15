@@ -15,14 +15,14 @@ namespace krys::boo::css::tests
       auto &rule = RuleAt<CSSNamespaceRule>(*sheet, 0);
       CHECK(TypeOf(rule) == RuleType::Namespace);
       CHECK(rule.Prefix() == null);
-      CHECK(ToNarrow(CSSOMString(rule.NamespaceURI().View())) == "http://www.w3.org/1999/xhtml");
+      CHECK(ToNarrow(rule.NamespaceURI().ToString()) == "http://www.w3.org/1999/xhtml");
       CHECK(RuleText(rule) == "@namespace url(\"http://www.w3.org/1999/xhtml\");");
     }
 
     SECTION("prefixed")
     {
       auto &rule = RuleAt<CSSNamespaceRule>(*sheet, 1);
-      CHECK(ToNarrow(CSSOMString(rule.Prefix().View())) == "svg");
+      CHECK(ToNarrow(rule.Prefix().ToString()) == "svg");
       CHECK(RuleText(rule) == "@namespace svg url(\"http://www.w3.org/2000/svg\");");
     }
 

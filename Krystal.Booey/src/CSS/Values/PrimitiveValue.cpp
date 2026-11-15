@@ -221,7 +221,7 @@ namespace krys::boo::css
 
   Ref<PrimitiveValue> PrimitiveValue::Create(const CSSOMStringAtom &value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(CSSOMString(value.View()), UnitType::String));
+    return AdoptRef(*new PrimitiveValue(value.ToString(), UnitType::String));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::Create(Ref<calc::Value> value) noexcept
@@ -241,7 +241,7 @@ namespace krys::boo::css
 
   Ref<PrimitiveValue> PrimitiveValue::CreateCustomIdent(const CSSOMStringAtom &value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(CSSOMString(value.View()), UnitType::CustomIdent));
+    return AdoptRef(*new PrimitiveValue(value.ToString(), UnitType::CustomIdent));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::CreateFontFamily(const CSSOMString &value) noexcept

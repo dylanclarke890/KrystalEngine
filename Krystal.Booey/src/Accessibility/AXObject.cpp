@@ -354,7 +354,7 @@ namespace krys::boo
     description += u8", ID " + utf8_string(id.begin(), id.end());
     if (auto *element = GetElement())
     {
-      description += u8", " + utf8_string(element->LocalName().View());
+      description += u8", " + element->LocalName().ToString();
     }
     else if (auto *node = GetNode())
     {

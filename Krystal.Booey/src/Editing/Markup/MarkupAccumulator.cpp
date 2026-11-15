@@ -144,7 +144,7 @@ namespace krys::boo
           && (namespaceURI == infra::Namespaces::HTML || namespaceURI == infra::Namespaces::MathML
               || namespaceURI == infra::Namespaces::SVG))
       {
-        return utf8_string(element.LocalName().View());
+        return element.LocalName().ToString();
       }
       return element.TagQualifiedName().Name();
     }
@@ -155,7 +155,7 @@ namespace krys::boo
       auto namespaceURI = attribute.NamespaceURI().View();
       if (namespaceURI.empty())
       {
-        return utf8_string(attribute.LocalName().View());
+        return attribute.LocalName().ToString();
       }
 
       utf8_stringview prefix;
@@ -926,7 +926,7 @@ namespace krys::boo
 
     if (prefix.View().empty())
     {
-      return utf8_string(attribute.LocalName().View());
+      return attribute.LocalName().ToString();
     }
     utf8_string name(prefix.View());
     name.push_back(u8':');

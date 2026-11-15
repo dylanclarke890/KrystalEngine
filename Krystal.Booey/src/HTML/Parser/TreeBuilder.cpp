@@ -650,7 +650,7 @@ namespace krys::boo::html
       {
         auto &docTypeData = *token.DOCTYPEData();
 
-        auto name = dom::DOMString(token.Name().View());
+        auto name = token.Name().ToString();
         if (name != u8"html")
         {
           ParseError(token);
@@ -4398,7 +4398,7 @@ namespace krys::boo::html
     // 5. Let pi be the result of creating a processing instruction node given targetParent's node document,
     //    piTarget, and data.
     // (The tokenizer only makes targets that are XML names, and data without "?>", so this can't throw.)
-    auto pi = dom::ProcessingInstruction::Create(parent->NodeDocument(), dom::DOMString(piTarget.View()),
+    auto pi = dom::ProcessingInstruction::Create(parent->NodeDocument(), piTarget.ToString(),
                                                  dom::DOMString(token.ProcessingInstructionData()))
                 .ReleaseValue();
 

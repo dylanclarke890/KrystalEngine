@@ -66,7 +66,7 @@ namespace krys::boo::css
       return krys::move(result).ToString();
     }
     result.Append(u8"counters(", _identifier, u8", ");
-    SerialiseString(CSSOMString(_separator.View()), result);
+    SerialiseString(_separator.ToString(), result);
     result.Append(styleSeparator, styleLiteral, u8')');
     return krys::move(result).ToString();
   }

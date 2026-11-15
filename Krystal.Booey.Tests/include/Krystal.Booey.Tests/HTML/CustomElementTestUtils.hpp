@@ -17,7 +17,7 @@ namespace krys::boo::html::tests
 
   inline utf8_string Text(dom::DOMStringAtom value) noexcept
   {
-    return value == null ? utf8_string(u8"null") : utf8_string(value.View());
+    return value == null ? utf8_string(u8"null") : value.ToString();
   }
 
   /// @brief Logs its callbacks, with the element's id.
@@ -55,8 +55,7 @@ namespace krys::boo::html::tests
     void AttributeChangedCallback(dom::DOMStringAtom localName, dom::DOMStringAtom oldValue,
                                   dom::DOMStringAtom newValue, dom::DOMStringAtom) noexcept override
     {
-      _log.push_back(u8"attribute " + utf8_string(localName.View()) + u8" " + Text(oldValue) + u8" "
-                     + Text(newValue));
+      _log.push_back(u8"attribute " + localName.ToString() + u8" " + Text(oldValue) + u8" " + Text(newValue));
     }
 
   private:

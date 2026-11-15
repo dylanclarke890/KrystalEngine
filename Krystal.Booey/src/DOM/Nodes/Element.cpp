@@ -2407,7 +2407,7 @@ namespace krys::boo::dom
   {
     // We may set the useragentpart attribute on elements before appending them to the shadow tree.
     krys_debug_assert(!IsConnected() || IsInUserAgentShadowTree());
-    (void)SetAttribute(u8"useragentpart", DOMString(part.View()));
+    (void)SetAttribute(u8"useragentpart", part.ToString());
   }
 
   ExceptionOr<RefPtr<Element>> Element::Closest(DOMStringView selectors) noexcept

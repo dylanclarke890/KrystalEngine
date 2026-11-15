@@ -100,7 +100,7 @@ namespace krys::boo::css::mq
       }
       else
       {
-        SerialiseIdentifier(CSSOMString {value.CustomPropertyName.View()}, builder);
+        SerialiseIdentifier(value.CustomPropertyName.ToString(), builder);
       }
     }
   }

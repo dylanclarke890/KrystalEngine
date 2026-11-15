@@ -296,7 +296,7 @@ namespace krys::boo::css
 
       if (component.Ident != null)
       {
-        SerialiseIdentifier(CSSOMString(component.Ident.View()), builder);
+        SerialiseIdentifier(component.Ident.ToString(), builder);
       }
       else
       {

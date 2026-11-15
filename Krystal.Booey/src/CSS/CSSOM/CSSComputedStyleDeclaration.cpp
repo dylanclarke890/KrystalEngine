@@ -149,13 +149,12 @@ namespace krys::boo::css
 
     if (i < exposedCount + inheritedCustomProperties.Size())
     {
-      return CSSOMString(inheritedCustomProperties.FindKeyAtIndex(i - exposedCount).View());
+      return inheritedCustomProperties.FindKeyAtIndex(i - exposedCount).ToString();
     }
 
     const auto &nonInheritedCustomProperties = style->NonInheritedCustomProperties();
-    return CSSOMString(
-      nonInheritedCustomProperties.FindKeyAtIndex(i - inheritedCustomProperties.Size() - exposedCount)
-        .View());
+    return nonInheritedCustomProperties.FindKeyAtIndex(i - inheritedCustomProperties.Size() - exposedCount)
+      .ToString();
   }
 
   CSSRule *CSSComputedStyleDeclaration::ParentRule() const noexcept

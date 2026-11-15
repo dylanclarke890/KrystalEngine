@@ -2221,8 +2221,7 @@ namespace krys::boo
             *animatedStyle, customProperty, css::DefaultSerialisationContext());
           if (!string.empty())
           {
-            return inlineStyle->SetCustomProperty(css::CSSOMString(customProperty.View()), string,
-                                                  parserContext);
+            return inlineStyle->SetCustomProperty(customProperty.ToString(), string, parserContext);
           }
           return false;
         });
@@ -2253,7 +2252,7 @@ namespace krys::boo
     {
       (void)styledElement->SetAttribute(
         dom::DOMStringAtom(u8"style"),
-        dom::DOMString(inlineStyle->AsTextAtom(css::DefaultSerialisationContext()).View()));
+        inlineStyle->AsTextAtom(css::DefaultSerialisationContext()).ToString());
     }
 
     return {};

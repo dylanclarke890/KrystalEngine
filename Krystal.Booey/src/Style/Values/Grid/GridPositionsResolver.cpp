@@ -626,7 +626,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD css::CSSOMString NameOf(const css::CustomIdentifier &name) noexcept
     {
-      return css::CSSOMString {name.Value.View()};
+      return name.Value.ToString();
     }
 
     KRYS_NODISCARD int ResolveNamedGridLinePositionFromStyle(const RenderGrid &gridContainer,

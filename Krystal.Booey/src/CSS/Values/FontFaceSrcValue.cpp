@@ -49,7 +49,7 @@ namespace krys::boo::css
   {
     StringBuilder result;
     result.Append(u8"local(");
-    SerialiseString(CSSOMString(_fontFaceName.View()), result);
+    SerialiseString(_fontFaceName.ToString(), result);
     result.Append(u8')');
     return krys::move(result).ToString();
   }

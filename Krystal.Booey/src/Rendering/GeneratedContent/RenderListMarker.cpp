@@ -440,7 +440,7 @@ namespace krys::boo
       [&](const css::CSSOMStringAtom &identifier)
       {
         _textContent = {
-          .TextWithSuffix = utf8_string(identifier.View()),
+          .TextWithSuffix = identifier.ToString(),
           .TextWithoutSuffixLength = identifier.View().size(),
           .TextDirection = ContentTextDirection(identifier.View()),
         };

@@ -532,7 +532,7 @@ namespace krys::ui
       }
       if (action.DownloadAttribute() != null)
       {
-        navigation.Download = utf8_string(action.DownloadAttribute().View());
+        navigation.Download = action.DownloadAttribute().ToString();
       }
       navigation.Method = request.HTTPMethod();
       if (formSubmission)

@@ -511,8 +511,7 @@ namespace krys::boo
     {
       if (property.Property == css::PropertyId::Custom)
       {
-        if (keyframe.Style->SetCustomProperty(css::CSSOMString(property.CustomProperty.View()), value,
-                                              parserContext))
+        if (keyframe.Style->SetCustomProperty(property.CustomProperty.ToString(), value, parserContext))
         {
           keyframe.CustomStyleStrings.insert_or_assign(property.CustomProperty, value);
         }

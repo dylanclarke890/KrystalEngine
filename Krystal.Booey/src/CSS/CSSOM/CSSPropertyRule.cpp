@@ -45,7 +45,7 @@ namespace krys::boo::css
 
   CSSOMString CSSPropertyRule::Name() const noexcept
   {
-    return CSSOMString(_propertyRule->GetDescriptor().Name.View());
+    return _propertyRule->GetDescriptor().Name.ToString();
   }
 
   CSSOMString CSSPropertyRule::Syntax() const noexcept
@@ -73,7 +73,7 @@ namespace krys::boo::css
     const auto &descriptor = _propertyRule->GetDescriptor();
 
     builder.Append(u8"@property ");
-    SerialiseIdentifier(CSSOMString(descriptor.Name.View()), builder);
+    SerialiseIdentifier(descriptor.Name.ToString(), builder);
     builder.Append(u8" { ");
 
     if (!descriptor.Syntax.empty())

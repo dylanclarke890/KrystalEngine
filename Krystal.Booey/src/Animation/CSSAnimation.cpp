@@ -470,6 +470,6 @@ namespace krys::boo
                               const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
   {
     return CreateRef<CSSAnimationEvent>(eventType, this, scheduledTime, elapsedTime, pseudoElementIdentifier,
-                                        css::CSSOMString {_animationName.Name.View()});
+                                        _animationName.Name.ToString());
   }
 }

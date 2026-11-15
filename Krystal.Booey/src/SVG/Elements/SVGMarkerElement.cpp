@@ -163,7 +163,7 @@ namespace krys::boo::svg
 
   void SVGMarkerElement::SetOrient(const dom::DOMStringAtom &orient) noexcept
   {
-    (void)SetAttribute(SVGNames::OrientAttr().LocalName(), dom::DOMString(orient.View()));
+    (void)SetAttribute(SVGNames::OrientAttr().LocalName(), orient.ToString());
   }
 
   void SVGMarkerElement::SetOrientToAuto() noexcept

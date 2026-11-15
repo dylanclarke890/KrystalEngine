@@ -246,7 +246,7 @@ namespace krys::boo::css::mq
     bool hasMediaType = query.MediaType != null && query.MediaType != CSSOMStringAtom::Empty();
     if (hasMediaType && (!query.Condition || query.Prefix || query.MediaType != AllAtom()))
     {
-      SerialiseIdentifier(CSSOMString(query.MediaType.View()), builder);
+      SerialiseIdentifier(query.MediaType.ToString(), builder);
       if (query.Condition)
       {
         builder.Append(u8" and ");
