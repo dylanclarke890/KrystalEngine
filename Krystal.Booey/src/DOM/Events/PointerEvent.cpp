@@ -54,11 +54,11 @@ namespace krys::boo::dom
     {
       switch (state)
       {
-        case PlatformTouchPoint::TouchPressed:    return DOMStringAtom(EventNames::PointerDown);
-        case PlatformTouchPoint::TouchMoved:      return DOMStringAtom(EventNames::PointerMove);
-        case PlatformTouchPoint::TouchStationary: return DOMStringAtom(EventNames::PointerMove);
-        case PlatformTouchPoint::TouchReleased:   return DOMStringAtom(EventNames::PointerUp);
-        case PlatformTouchPoint::TouchCancelled:  return DOMStringAtom(EventNames::PointerCancel);
+        case PlatformTouchPoint::TouchPressed:    return EventNames::PointerDown;
+        case PlatformTouchPoint::TouchMoved:      return EventNames::PointerMove;
+        case PlatformTouchPoint::TouchStationary: return EventNames::PointerMove;
+        case PlatformTouchPoint::TouchReleased:   return EventNames::PointerUp;
+        case PlatformTouchPoint::TouchCancelled:  return EventNames::PointerCancel;
         case PlatformTouchPoint::TouchStateEnd:   break;
       }
       krys_debug_assert_msg(false, "Not reached.");
@@ -125,43 +125,43 @@ namespace krys::boo::dom
   {
     if (mouseEventType == EventNames::AuxClick)
     {
-      return DOMStringAtom(EventNames::AuxClick);
+      return EventNames::AuxClick;
     }
     if (mouseEventType == EventNames::Click)
     {
-      return DOMStringAtom(EventNames::Click);
+      return EventNames::Click;
     }
     if (mouseEventType == EventNames::ContextMenu)
     {
-      return DOMStringAtom(EventNames::ContextMenu);
+      return EventNames::ContextMenu;
     }
     if (mouseEventType == EventNames::MouseDown)
     {
-      return DOMStringAtom(EventNames::PointerDown);
+      return EventNames::PointerDown;
     }
     if (mouseEventType == EventNames::MouseOver)
     {
-      return DOMStringAtom(EventNames::PointerOver);
+      return EventNames::PointerOver;
     }
     if (mouseEventType == EventNames::MouseEnter)
     {
-      return DOMStringAtom(EventNames::PointerEnter);
+      return EventNames::PointerEnter;
     }
     if (mouseEventType == EventNames::MouseMove)
     {
-      return DOMStringAtom(EventNames::PointerMove);
+      return EventNames::PointerMove;
     }
     if (mouseEventType == EventNames::MouseLeave)
     {
-      return DOMStringAtom(EventNames::PointerLeave);
+      return EventNames::PointerLeave;
     }
     if (mouseEventType == EventNames::MouseOut)
     {
-      return DOMStringAtom(EventNames::PointerOut);
+      return EventNames::PointerOut;
     }
     if (mouseEventType == EventNames::MouseUp)
     {
-      return DOMStringAtom(EventNames::PointerUp);
+      return EventNames::PointerUp;
     }
 
     return null;

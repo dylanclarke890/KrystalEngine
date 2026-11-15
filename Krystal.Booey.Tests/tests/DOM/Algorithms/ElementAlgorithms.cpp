@@ -214,8 +214,8 @@ namespace krys::boo::dom::tests
         CHECK(ElementAlgorithms::GetAttributeByName(u8"viewbox", *element) == nullptr);
         CHECK(ElementAlgorithms::GetAttributeByName(u8"viewBox", *element) != nullptr);
       };
-      check(*CreateRef<HTMLDocument>(), DOMStringAtom(infra::Namespaces::SVG));
-      check(*CreateRef<XMLDocument>(), DOMStringAtom(infra::Namespaces::HTML));
+      check(*CreateRef<HTMLDocument>(), infra::Namespaces::SVG);
+      check(*CreateRef<XMLDocument>(), infra::Namespaces::HTML);
     }
 
     SECTION("The first with the qualified name")
@@ -349,8 +349,7 @@ namespace krys::boo::dom::tests
       CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);
     };
 
-    requireNotSupported(
-      attach(*document->CreateElementNS(DOMStringAtom(infra::Namespaces::SVG), u8"div").ReleaseValue()));
+    requireNotSupported(attach(*document->CreateElementNS(infra::Namespaces::SVG, u8"div").ReleaseValue()));
     requireNotSupported(attach(*document->CreateElement(u8"img").ReleaseValue()));
     requireNotSupported(attach(*document->CreateElement(u8"input").ReleaseValue()));
 

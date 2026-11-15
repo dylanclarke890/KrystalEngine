@@ -28,7 +28,7 @@ namespace krys::boo::tests
     auto &input = Downcast<html::HTMLInputElement>(fixture.ById(u8"range"));
     auto &handler = fixture.Frame->GetEventHandler();
     auto moves = CreateRef<CountingListener>();
-    fixture.ById(u8"other").AddEventListener(dom::DOMStringAtom(EventNames::MouseMove), moves, false);
+    fixture.ById(u8"other").AddEventListener(EventNames::MouseMove, moves, false);
 
     // Pressing on the thumb starts a drag, which captures the mouse.
     (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {64, 10}));

@@ -732,8 +732,7 @@ namespace krys::boo
 
     float emphasisMarkOffset = 0;
     auto emphasisExistsAndIsAbove = EmphasisMarkExistsAndIsAbove(_renderer, _style);
-    StringAtom emphasisMark =
-      emphasisExistsAndIsAbove ? StringAtom(_style.GetTextEmphasisStyle().MarkString()) : null;
+    StringAtom emphasisMark = emphasisExistsAndIsAbove ? _style.GetTextEmphasisStyle().MarkString() : null;
     if (!emphasisMark.View().empty())
     {
       emphasisMarkOffset =

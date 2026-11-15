@@ -29,8 +29,7 @@
 namespace krys::boo::dom
 {
   BeforeTextInsertedEvent::BeforeTextInsertedEvent(DOMStringView text) noexcept
-      : Event(DOMStringAtom(EventNames::WebkitBeforeTextInserted), {.Bubbles = false, .Cancelable = true}),
-        _text(text)
+      : Event(EventNames::WebkitBeforeTextInserted, {.Bubbles = false, .Cancelable = true}), _text(text)
   {
   }
 

@@ -64,7 +64,7 @@ namespace krys::boo::style
         {
           return {css::GenericFontFamilyNames::StandardFamily(), FontFamilyKind::Generic};
         }
-        return {css::CSSOMStringAtom {font.Family}, FontFamilyKind::Specified};
+        return {font.Family, FontFamilyKind::Specified};
       }
 
       state.SetCurrentPropertyInvalidAtComputedValueTime();

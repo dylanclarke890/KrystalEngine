@@ -434,8 +434,8 @@ namespace krys::boo
       // Make sure xml prefix and namespace are always known to uphold the constraints listed at
       // http://www.w3.org/TR/xml-names11/#xmlReserved.
       Namespaces namespaceHash;
-      namespaceHash.insert_or_assign(XMLAtom(), dom::DOMStringAtom(infra::Namespaces::XML));
-      namespaceHash.insert_or_assign(dom::DOMStringAtom(infra::Namespaces::XML), XMLAtom());
+      namespaceHash.insert_or_assign(XMLAtom(), infra::Namespaces::XML);
+      namespaceHash.insert_or_assign(infra::Namespaces::XML, XMLAtom());
 
       // An element's children are serialized in the default namespace in scope on it, so that children in no
       // namespace declare the empty default namespace.

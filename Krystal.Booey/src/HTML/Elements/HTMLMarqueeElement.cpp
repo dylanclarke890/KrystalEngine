@@ -107,8 +107,7 @@ namespace krys::boo::html
   void HTMLMarqueeElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
   {
     auto &document = NodeDocument();
-    auto style =
-      document.CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), u8"style").ReleaseValue();
+    auto style = document.CreateElementNS(infra::Namespaces::HTML, u8"style").ReleaseValue();
     (void)style->TextContent(dom::DOMString(css::MarqueeElementShadowUserAgentStyleSheet));
     (void)root.AppendChild(*style);
 

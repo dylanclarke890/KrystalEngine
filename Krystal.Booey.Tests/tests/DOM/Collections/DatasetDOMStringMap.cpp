@@ -116,7 +116,7 @@ namespace krys::boo::dom::tests
 
     SECTION("works on SVG elements")
     {
-      auto svg = document->CreateElementNS(DOMStringAtom(infra::Namespaces::SVG), u8"svg").ReleaseValue();
+      auto svg = document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
       REQUIRE_FALSE(svg->Dataset().SetNamedItem(u8"shape", u8"round").HasException());
       CHECK(svg->GetAttribute(u8"data-shape") == u8"round");
     }

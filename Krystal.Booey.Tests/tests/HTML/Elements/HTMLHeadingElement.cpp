@@ -12,7 +12,7 @@ namespace krys::boo::html::tests
                                                 utf8_stringview attribute = {},
                                                 utf8_stringview value = {}) noexcept
     {
-      auto element = document.CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
+      auto element = document.CreateElement(localName).ReleaseValue();
       if (!attribute.empty())
       {
         REQUIRE_FALSE(

@@ -269,8 +269,7 @@ namespace krys::boo::html
     krys_debug_assert(!_valueElement);
 
     auto &document = NodeDocument();
-    auto style =
-      document.CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), u8"style").ReleaseValue();
+    auto style = document.CreateElementNS(infra::Namespaces::HTML, u8"style").ReleaseValue();
     (void)style->TextContent(dom::DOMString(css::MeterElementShadowUserAgentStyleSheet));
     (void)root.AppendChild(*style);
 

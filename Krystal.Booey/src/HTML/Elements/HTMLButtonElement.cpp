@@ -393,7 +393,7 @@ namespace krys::boo::html
     init.Source = ShareRefPtr<dom::Element>(this);
     init.Command = commandRaw.value_or(dom::DOMString());
 
-    auto event = dom::CommandEvent::Create(dom::DOMStringAtom(EventNames::Command), init, true);
+    auto event = dom::CommandEvent::Create(EventNames::Command, init, true);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *invokee, this);
 
     // 5e. If continue is false, then return.

@@ -1167,8 +1167,8 @@ namespace krys::boo::html
     // Input event is fired by the Node::defaultEventHandler for editable controls.
     if (!IsTextField())
     {
-      dom::ScopedEventQueue::DispatchOrQueue(
-        dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true), ShareRef(*this));
+      dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(EventNames::Input, true, false, true),
+                                             ShareRef(*this));
     }
 
     UpdateValidity();

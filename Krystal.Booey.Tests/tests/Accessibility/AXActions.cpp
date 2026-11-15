@@ -30,8 +30,7 @@ namespace krys::boo::ax::tests
                     Func<void(dom::Event &)> &&function) noexcept
     {
       element.AddEventListener(
-        dom::DOMStringAtom(type),
-        Ref<dom::EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))), false);
+        type, Ref<dom::EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))), false);
     }
   }
 

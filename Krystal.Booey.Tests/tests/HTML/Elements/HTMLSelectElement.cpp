@@ -498,10 +498,8 @@ namespace krys::boo::tests
     auto &select = SelectById(fixture, u8"s");
     auto input = CreateRef<EventCounter>();
     auto change = CreateRef<EventCounter>();
-    select.AddEventListener(dom::DOMStringAtom(EventNames::Input),
-                            ShareRef<dom::EventListenerCallback>(*input), false);
-    select.AddEventListener(dom::DOMStringAtom(EventNames::Change),
-                            ShareRef<dom::EventListenerCallback>(*change), false);
+    select.AddEventListener(EventNames::Input, ShareRef<dom::EventListenerCallback>(*input), false);
+    select.AddEventListener(EventNames::Change, ShareRef<dom::EventListenerCallback>(*change), false);
     select.Focus();
     REQUIRE(fixture.Document->FocusedElement() == &select);
 
@@ -706,8 +704,7 @@ namespace krys::boo::tests
       SECTION("clicking an option picks it, firing events and closing")
       {
         auto counter = CreateRef<EventCounter>();
-        select.AddEventListener(dom::DOMStringAtom(EventNames::Change),
-                                ShareRef<dom::EventListenerCallback>(*counter), false);
+        select.AddEventListener(EventNames::Change, ShareRef<dom::EventListenerCallback>(*counter), false);
         ClickElement(fixture, d);
         html::EventLoop::Current().RunUntilIdle();
         CHECK(select.SelectedIndex() == 3);

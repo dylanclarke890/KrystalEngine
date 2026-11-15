@@ -321,26 +321,29 @@ namespace krys::boo::html
 
   const SanitizerConfig &SanitizerConstants::BuiltInSafeBaselineConfiguration() noexcept
   {
-    static NeverDestroyed<SanitizerConfig> configuration {
-      []
-      {
-        // Its removeElements list consists of all HTML elements normatively marked as Unsafe within
-        // their individual definitions, along with the obsolete frame element, and the SVG script and SVG use
-        // elements, and its removeAttributes list is empty.
-        SanitizerConfig config;
-        config.RemoveElements = List<SanitizerElementNamespace> {
-          u8"base",
-          u8"embed",
-          u8"frame",
-          u8"iframe",
-          u8"object",
-          u8"script",
-          {u8"script", dom::DOMStringAtom(infra::Namespaces::SVG)},
-          {u8"use", dom::DOMStringAtom(infra::Namespaces::SVG)},
-        };
-        config.RemoveAttributes.emplace();
-        return config;
-      }()};
+    static NeverDestroyed<SanitizerConfig> configuration {[]
+                                                          {
+                                                            // Its removeElements list consists of all HTML
+                                                            // elements normatively marked as Unsafe within
+                                                            // their individual definitions, along with the
+                                                            // obsolete frame element, and the SVG script and
+                                                            // SVG use elements, and its removeAttributes list
+                                                            // is empty.
+                                                            SanitizerConfig config;
+                                                            config.RemoveElements =
+                                                              List<SanitizerElementNamespace> {
+                                                                u8"base",
+                                                                u8"embed",
+                                                                u8"frame",
+                                                                u8"iframe",
+                                                                u8"object",
+                                                                u8"script",
+                                                                {u8"script", infra::Namespaces::SVG},
+                                                                {u8"use", infra::Namespaces::SVG},
+                                                              };
+                                                            config.RemoveAttributes.emplace();
+                                                            return config;
+                                                          }()};
     return configuration.get();
   }
 
@@ -348,8 +351,8 @@ namespace krys::boo::html
   {
     static NeverDestroyed<List<SanitizerElementNamespace>> elements {List<SanitizerElementNamespace> {
       u8"html",
-      {u8"svg", dom::DOMStringAtom(infra::Namespaces::SVG)},
-      {u8"math", dom::DOMStringAtom(infra::Namespaces::MathML)},
+      {u8"svg", infra::Namespaces::SVG},
+      {u8"math", infra::Namespaces::MathML},
     }};
     return elements.get();
   }

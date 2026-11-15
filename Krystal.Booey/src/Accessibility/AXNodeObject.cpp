@@ -581,7 +581,7 @@ namespace krys::boo
         {
           return nullptr;
         }
-        auto href = element.GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"href");
+        auto href = element.GetAttributeNS(infra::Namespaces::XLink, u8"href");
         if (!href || href->empty())
         {
           href = element.GetAttribute(u8"href");
@@ -605,7 +605,7 @@ namespace krys::boo
         }
         if (element.LocalName() == u8"a")
         {
-          if (auto title = element.GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"title");
+          if (auto title = element.GetAttributeNS(infra::Namespaces::XLink, u8"title");
               title && !title->empty())
           {
             return *title;
@@ -2284,9 +2284,9 @@ namespace krys::boo
   {
     auto *element = GetElement();
     return element
-           && (element->HasEventListener(dom::DOMStringAtom(EventNames::Click))
-               || element->HasEventListener(dom::DOMStringAtom(EventNames::MouseDown))
-               || element->HasEventListener(dom::DOMStringAtom(EventNames::MouseUp)));
+           && (element->HasEventListener(EventNames::Click)
+               || element->HasEventListener(EventNames::MouseDown)
+               || element->HasEventListener(EventNames::MouseUp));
   }
 
   void AXNodeObject::SetFocused(bool focused) noexcept

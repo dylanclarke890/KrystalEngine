@@ -640,7 +640,7 @@ namespace krys::boo
     LoadEventSender().CancelEvent(*this, ErrorEventName());
     if (GetDocument().HasLivingRenderTree())
     {
-      (void)dom::EventDispatcher::FireEvent(dom::DOMStringAtom(EventNames::Error), _element);
+      (void)dom::EventDispatcher::FireEvent(EventNames::Error, _element);
     }
 
     // Only consider updating the protection ref-count of the Element immediately before returning

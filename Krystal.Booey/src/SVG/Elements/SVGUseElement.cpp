@@ -807,7 +807,7 @@ namespace krys::boo::svg
     if (resource.ErrorOccurred())
     {
       SetErrorOccurred(true);
-      auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Error), false, false);
+      auto event = dom::Event::Create(EventNames::Error, false, false);
       (void)DispatchEvent(*event);
     }
     else if (!resource.GetResourceError().IsCancellation())

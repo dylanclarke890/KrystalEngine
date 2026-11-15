@@ -833,7 +833,7 @@ namespace krys::boo::dom
       linkAttribute = GetAttribute(u8"href");
       if (!linkAttribute)
       {
-        linkAttribute = GetAttributeNS(DOMStringAtom(infra::Namespaces::XLink), u8"href");
+        linkAttribute = GetAttributeNS(infra::Namespaces::XLink, u8"href");
       }
     }
     else
@@ -1203,12 +1203,12 @@ namespace krys::boo::dom
       // Special case: If it's a double click event, we also send the dblclick event. This is not part
       // of the DOM specs, but is used for compatibility with the ondblclick="" attribute. This is treated
       // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
-      Ref<MouseEvent> doubleClickEvent = MouseEvent::Create(
-        DOMStringAtom(EventNames::DblClick), mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
-        html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
-        mouseEvent->ScreenX(), mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(),
-        mouseEvent->ModifierKeys(), mouseEvent->ButtonType(), mouseEvent->Buttons(),
-        mouseEvent->GetSyntheticClickType(), relatedTarget);
+      Ref<MouseEvent> doubleClickEvent =
+        MouseEvent::Create(EventNames::DblClick, mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
+                           html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
+                           mouseEvent->ScreenX(), mouseEvent->ScreenY(), mouseEvent->ClientX(),
+                           mouseEvent->ClientY(), mouseEvent->ModifierKeys(), mouseEvent->ButtonType(),
+                           mouseEvent->Buttons(), mouseEvent->GetSyntheticClickType(), relatedTarget);
 
       if (mouseEvent->DefaultHandled())
       {

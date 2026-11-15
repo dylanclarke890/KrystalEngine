@@ -18,8 +18,8 @@ namespace krys::boo::html
     /// @brief The namespace; null (`null`) for no namespace.
     dom::DOMStringAtom Namespace;
 
-    SanitizerElementNamespace(dom::DOMString name, dom::DOMStringAtom namespaceURI =
-                                                     dom::DOMStringAtom(infra::Namespaces::HTML)) noexcept
+    SanitizerElementNamespace(dom::DOMString name,
+                              dom::DOMStringAtom namespaceURI = infra::Namespaces::HTML) noexcept
         : Name(krys::move(name)), Namespace(namespaceURI)
     {
     }

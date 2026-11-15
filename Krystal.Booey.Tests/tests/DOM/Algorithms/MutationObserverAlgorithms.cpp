@@ -46,7 +46,7 @@ namespace krys::boo::dom::tests
 
     KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringAtom name) noexcept
     {
-      return document.CreateElement(DOMStringAtom(name)).ReleaseValue();
+      return document.CreateElement(name).ReleaseValue();
     }
   }
 

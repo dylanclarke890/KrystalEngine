@@ -266,8 +266,8 @@ namespace krys::boo::tests
 
     auto beforeInput = CreateRef<InputTypeListener>();
     auto input = CreateRef<InputTypeListener>();
-    fixture.Document->AddEventListener(dom::DOMStringAtom(EventNames::BeforeInput), beforeInput, true);
-    fixture.Document->AddEventListener(dom::DOMStringAtom(EventNames::Input), input, true);
+    fixture.Document->AddEventListener(EventNames::BeforeInput, beforeInput, true);
+    fixture.Document->AddEventListener(EventNames::Input, input, true);
     auto textInput = fixture.Listen(EventNames::TextInput);
 
     SECTION("Typing fires textInput, beforeinput and input")
@@ -292,7 +292,7 @@ namespace krys::boo::tests
 
       // Each line of the text is added to the open command in turn.
       List<std::string> htmlAtInput;
-      auto handle = root.AddEventListener(dom::DOMStringAtom(EventNames::Input), [&](dom::Event &)
+      auto handle = root.AddEventListener(EventNames::Input, [&](dom::Event &)
                                           { htmlAtInput.push_back(Narrow(fixture.InnerHTML(root))); });
       (void)editor.InsertText(u8"e\nf", nullptr);
 

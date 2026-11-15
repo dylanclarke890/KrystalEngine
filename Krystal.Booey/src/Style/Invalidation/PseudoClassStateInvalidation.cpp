@@ -105,7 +105,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool HasLanguageAttribute(const dom::Element &element) noexcept
     {
-      return element.HasAttributeNS(dom::DOMStringAtom(infra::Namespaces::XML), u8"lang")
+      return element.HasAttributeNS(infra::Namespaces::XML, u8"lang")
              || element.HasAttributeNS(null, u8"lang");
     }
 

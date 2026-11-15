@@ -390,7 +390,7 @@ namespace krys::boo::html
     if (pathsChanged)
     {
       // This may destroy this input type; the element is kept alive.
-      auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true);
+      auto event = dom::Event::Create(EventNames::Input, true, false, true);
       (void)dom::EventDispatcher::DispatchToTarget(*event, element.get());
       element->DispatchChangeEvent();
     }

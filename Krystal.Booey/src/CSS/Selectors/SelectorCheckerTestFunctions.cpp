@@ -95,8 +95,7 @@ namespace krys::boo::css
     }
     if (element.NamespaceURI().View() == infra::Namespaces::SVG && element.LocalName().View() == u8"a")
     {
-      return (element.HasAttribute(u8"href")
-              || element.HasAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"href"))
+      return (element.HasAttribute(u8"href") || element.HasAttributeNS(infra::Namespaces::XLink, u8"href"))
              && !svg::IsInSVGImage(&element);
     }
     return false;

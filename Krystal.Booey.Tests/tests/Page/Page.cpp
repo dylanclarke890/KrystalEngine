@@ -594,7 +594,7 @@ namespace krys::boo::tests
     CHECK_FALSE(document.Hidden());
 
     List<bool> events;
-    auto handle = document.AddEventListener(dom::DOMStringAtom(EventNames::VisibilityChange),
+    auto handle = document.AddEventListener(EventNames::VisibilityChange,
                                             [&](dom::Event &event) { events.push_back(event.Bubbles()); });
 
     SECTION("Hiding and showing the page fire visibilitychange in a task")

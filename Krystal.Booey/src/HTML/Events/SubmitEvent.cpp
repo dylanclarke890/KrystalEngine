@@ -16,7 +16,7 @@ namespace krys::boo::html
     init.Cancelable = true;
     init.Composed = true;
     init.Submitter = krys::move(submitter);
-    auto event = CreateRef<SubmitEvent>(dom::DOMStringAtom(EventNames::Submit), init);
+    auto event = CreateRef<SubmitEvent>(EventNames::Submit, init);
     event->_isTrusted = true;
     return event;
   }

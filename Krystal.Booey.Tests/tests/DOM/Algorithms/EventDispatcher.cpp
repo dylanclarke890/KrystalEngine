@@ -249,14 +249,14 @@ namespace krys::boo::dom::tests
     SECTION("A trusted animationend with no listeners of its own reaches webkitAnimationEnd listeners")
     {
       DOMStringAtom typeInListener = null;
-      auto legacy = fixture.Child->AddEventListener(DOMStringAtom(EventNames::Legacy::AnimationEnd),
+      auto legacy = fixture.Child->AddEventListener(EventNames::Legacy::AnimationEnd,
                                                     [&](Event &e) { typeInListener = e.Type(); });
 
-      auto untrusted = CreateRef<Event>(DOMStringAtom(EventNames::AnimationEnd));
+      auto untrusted = CreateRef<Event>(EventNames::AnimationEnd);
       REQUIRE_FALSE(fixture.Child->DispatchEvent(*untrusted).HasException());
       REQUIRE(typeInListener == null);
 
-      auto trusted = Event::Create(DOMStringAtom(EventNames::AnimationEnd), false, false);
+      auto trusted = Event::Create(EventNames::AnimationEnd, false, false);
       REQUIRE(EventDispatcher::DispatchToTarget(*trusted, fixture.Child.get()));
       REQUIRE(typeInListener == EventNames::Legacy::AnimationEnd);
       REQUIRE(trusted->Type() == EventNames::AnimationEnd);
@@ -264,8 +264,8 @@ namespace krys::boo::dom::tests
       SECTION("but not when there is one")
       {
         typeInListener = null;
-        auto own = fixture.Child->AddEventListener(DOMStringAtom(EventNames::AnimationEnd), [](Event &) {});
-        auto again = Event::Create(DOMStringAtom(EventNames::AnimationEnd), false, false);
+        auto own = fixture.Child->AddEventListener(EventNames::AnimationEnd, [](Event &) {});
+        auto again = Event::Create(EventNames::AnimationEnd, false, false);
         REQUIRE(EventDispatcher::DispatchToTarget(*again, fixture.Child.get()));
         REQUIRE(typeInListener == null);
       }
@@ -405,7 +405,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(fixture.Root->AppendChild(input).HasException());
       bool trusted = false;
       bool cancelable = false;
-      auto listener = input.AddEventListener(DOMStringAtom(EventNames::Invalid),
+      auto listener = input.AddEventListener(EventNames::Invalid,
                                              [&](Event &e)
                                              {
                                                trusted = e.IsTrusted();

@@ -357,9 +357,8 @@ namespace krys::boo::xml
           namespaceQName = dom::DOMStringAtom(qualifiedName);
         }
 
-        auto result =
-          dom::NameValidation::ValidateAndExtract(dom::DOMStringAtom(infra::Namespaces::XMLNS),
-                                                  namespaceQName, dom::ValidateAndExtractContext::Attribute);
+        auto result = dom::NameValidation::ValidateAndExtract(infra::Namespaces::XMLNS, namespaceQName,
+                                                              dom::ValidateAndExtractContext::Attribute);
         if (result.HasException())
         {
           return false;
@@ -455,7 +454,7 @@ namespace krys::boo::xml
       }
       else if (Is<svg::SVGElement>(_currentNode.get()) || localName == u8"svg")
       {
-        uri = dom::DOMStringAtom(infra::Namespaces::SVG);
+        uri = infra::Namespaces::SVG;
       }
       else
       {

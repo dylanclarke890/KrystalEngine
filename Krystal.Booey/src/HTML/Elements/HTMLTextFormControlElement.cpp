@@ -778,7 +778,7 @@ namespace krys::boo::html
 
     if (shouldFireSelectEvent && _cachedSelectionStart != _cachedSelectionEnd)
     {
-      auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Select), true, false);
+      auto event = dom::Event::Create(EventNames::Select, true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, this);
     }
 
@@ -797,8 +797,8 @@ namespace krys::boo::html
                                    [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
                                    {
                                      textControl->_hasScheduledSelectionChangeEvent = false;
-                                     auto event = dom::Event::Create(
-                                       dom::DOMStringAtom(EventNames::SelectionChange), true, false);
+                                     auto event =
+                                       dom::Event::Create(EventNames::SelectionChange, true, false);
                                      (void)dom::EventDispatcher::DispatchToTarget(*event, textControl.get());
                                    });
   }
@@ -808,8 +808,7 @@ namespace krys::boo::html
     EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
                                    [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
                                    {
-                                     auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Select),
-                                                                     true, false);
+                                     auto event = dom::Event::Create(EventNames::Select, true, false);
                                      (void)dom::EventDispatcher::DispatchToTarget(*event, textControl.get());
                                    });
     ScheduleSelectionChangeEvent();

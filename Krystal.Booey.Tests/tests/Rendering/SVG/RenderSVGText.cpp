@@ -112,8 +112,7 @@ namespace krys::boo::tests
 
     // Once an element takes the id, the text path finds it.
     auto *svg = fixture.Document->QuerySelector(u8"svg").ReleaseValue().get();
-    auto path =
-      fixture.Document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::SVG), u8"path").ReleaseValue();
+    auto path = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"path").ReleaseValue();
     REQUIRE(!path->SetAttribute(u8"id", u8"later").HasException());
     REQUIRE(!path->SetAttribute(u8"d", u8"M 0 50 L 200 50").HasException());
     REQUIRE(!svg->AppendChild(*path).HasException());

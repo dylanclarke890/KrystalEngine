@@ -183,8 +183,7 @@ namespace krys::boo::dom::tests
       {
         auto dependent = AbortSignal::Any({ShareRef(source)});
         weakDependent = CreateWeakPtr(dependent.get());
-        handle =
-          dependent->AddEventListener(DOMStringAtom(EventNames::Abort), [&](Event &) { aborted = true; });
+        handle = dependent->AddEventListener(EventNames::Abort, [&](Event &) { aborted = true; });
       }
       REQUIRE(weakDependent);
       controller.Abort();
@@ -247,7 +246,7 @@ namespace krys::boo::dom::tests
         AbortController other;
         auto dependent = AbortSignal::Any({ShareRef(*other.Signal())});
         weakDependent = CreateWeakPtr(dependent.get());
-        handle = dependent->AddEventListener(DOMStringAtom(EventNames::Abort), [](Event &) {});
+        handle = dependent->AddEventListener(EventNames::Abort, [](Event &) {});
       }
       html::EventLoop::Current().RunUntilIdle();
       CHECK_FALSE(weakDependent);
@@ -272,7 +271,7 @@ namespace krys::boo::dom::tests
       {
         auto dependent = AbortSignal::Any({ShareRef(source)});
         weakDependent = CreateWeakPtr(dependent.get());
-        auto handle = dependent->AddEventListener(DOMStringAtom(EventNames::Abort), [](Event &) {});
+        auto handle = dependent->AddEventListener(EventNames::Abort, [](Event &) {});
       }
       html::EventLoop::Current().RunUntilIdle();
       CHECK_FALSE(weakDependent);

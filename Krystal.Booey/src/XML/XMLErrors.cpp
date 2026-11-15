@@ -44,9 +44,8 @@ namespace krys::boo::xml
     KRYS_NODISCARD Ref<dom::Element> CreateHTMLElement(dom::Document &document, utf8_stringview localName,
                                                        utf8_stringview style = {}) noexcept
     {
-      auto element =
-        dom::ElementFactory::Create(document, dom::QualifiedName(dom::DOMStringAtom(infra::Namespaces::HTML),
-                                                                 null, dom::DOMStringAtom(localName)));
+      auto element = dom::ElementFactory::Create(
+        document, dom::QualifiedName(infra::Namespaces::HTML, null, dom::DOMStringAtom(localName)));
       if (!style.empty())
       {
         dom::ElementAlgorithms::SetAttributeValue(*element, u8"style", dom::DOMString(style));

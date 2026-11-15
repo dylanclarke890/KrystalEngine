@@ -205,13 +205,13 @@ namespace krys::boo::html
 
   void HTMLFormControlElement::DispatchChangeEvent() noexcept
   {
-    dom::ScopedEventQueue::DispatchOrQueue(
-      dom::Event::Create(dom::DOMStringAtom(EventNames::Change), true, false), ShareRef(*this));
+    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(EventNames::Change, true, false),
+                                           ShareRef(*this));
   }
 
   void HTMLFormControlElement::DispatchCancelEvent() noexcept
   {
-    auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Cancel), true, false);
+    auto event = dom::Event::Create(EventNames::Cancel, true, false);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
   }
 
@@ -225,8 +225,8 @@ namespace krys::boo::html
   void HTMLFormControlElement::DispatchFormControlInputEvent() noexcept
   {
     SetChangedSinceLastFormControlChangeEvent(true);
-    dom::ScopedEventQueue::DispatchOrQueue(
-      dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true), ShareRef(*this));
+    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(EventNames::Input, true, false, true),
+                                           ShareRef(*this));
   }
 
   Maybe<dom::DOMString> HTMLFormControlElement::ResultForDialogSubmit() const noexcept

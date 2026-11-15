@@ -331,13 +331,13 @@ namespace krys::boo::html
     // 13. Queue an element task on the user interaction task source given the subject element to fire an
     // event
     //     named close at subject.
-    EventLoop::Current().QueueTask(
-      TaskSource::UserInteraction, NodeDocument(),
-      [protectedThis]
-      {
-        auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Close), false, false);
-        (void)dom::EventDispatcher::DispatchToTarget(*event, protectedThis.get());
-      });
+    EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
+                                   [protectedThis]
+                                   {
+                                     auto event = dom::Event::Create(EventNames::Close, false, false);
+                                     (void)dom::EventDispatcher::DispatchToTarget(*event,
+                                                                                  protectedThis.get());
+                                   });
   }
 
   // https://html.spec.whatwg.org/#dialog-request-close
@@ -595,7 +595,7 @@ namespace krys::boo::html
     // source.
     init.Composed = true;
     init.Source = ShareRefPtr(source);
-    auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(EventNames::BeforeToggle), init, cancelable);
+    auto event = dom::ToggleEvent::Create(EventNames::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }
@@ -663,7 +663,7 @@ namespace krys::boo::html
         {
           return true;
         }
-        auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Cancel), false, canPreventClose);
+        auto event = dom::Event::Create(EventNames::Cancel, false, canPreventClose);
         (void)dom::EventDispatcher::DispatchToTarget(*event, dialog.get());
         return !event->DefaultPrevented();
       },

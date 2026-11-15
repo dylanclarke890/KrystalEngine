@@ -177,8 +177,8 @@ namespace krys::boo::dom
         {
           ContentVisibilityAutoStateChangeEventInit init;
           init.Skipped = isSkippedContent == IsSkippedContent::Yes;
-          auto event = ContentVisibilityAutoStateChangeEvent::Create(
-            DOMStringAtom(EventNames::ContentVisibilityAutoStateChange), init);
+          auto event =
+            ContentVisibilityAutoStateChangeEvent::Create(EventNames::ContentVisibilityAutoStateChange, init);
           (void)EventDispatcher::DispatchToTarget(*event, protectedTarget.get());
         }
       });

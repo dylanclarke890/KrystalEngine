@@ -460,7 +460,7 @@ namespace krys::boo::svg
       return;
     }
 
-    auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Load), false, false);
+    auto event = dom::Event::Create(EventNames::Load, false, false);
     (void)DispatchEvent(*event);
   }
 

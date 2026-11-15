@@ -2101,8 +2101,7 @@ namespace krys::boo::dom
     }
 
     // 7. Fire an event named visibilitychange at document, with its bubbles attribute initialized to true.
-    (void)EventDispatcher::DispatchToTarget(
-      *Event::Create(DOMStringAtom(EventNames::VisibilityChange), true, false), this);
+    (void)EventDispatcher::DispatchToTarget(*Event::Create(EventNames::VisibilityChange, true, false), this);
   }
 
   void Document::VisibilityStateChanged() noexcept
@@ -2119,8 +2118,8 @@ namespace krys::boo::dom
       html::TaskSource::UserInteraction, *this,
       [protectedThis = ShareRef(*this)]
       {
-        (void)EventDispatcher::DispatchToTarget(
-          *Event::Create(DOMStringAtom(EventNames::VisibilityChange), true, false), protectedThis.get());
+        (void)EventDispatcher::DispatchToTarget(*Event::Create(EventNames::VisibilityChange, true, false),
+                                                protectedThis.get());
 
         bool pageIsVisible = protectedThis->GetPage() && protectedThis->GetPage()->IsVisible();
         if (!pageIsVisible)
@@ -2595,7 +2594,7 @@ namespace krys::boo::dom
       _needsVisualViewportScrollEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(DOMStringAtom(EventNames::Scroll), window->GetVisualViewport());
+        (void)EventDispatcher::FireEvent(EventNames::Scroll, window->GetVisualViewport());
       }
     }
   }
@@ -2635,7 +2634,7 @@ namespace krys::boo::dom
       _needsDOMWindowResizeEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(DOMStringAtom(EventNames::Resize), *window);
+        (void)EventDispatcher::FireEvent(EventNames::Resize, *window);
       }
     }
     if (_needsVisualViewportResizeEvent)
@@ -2643,7 +2642,7 @@ namespace krys::boo::dom
       _needsVisualViewportResizeEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(DOMStringAtom(EventNames::Resize), window->GetVisualViewport());
+        (void)EventDispatcher::FireEvent(EventNames::Resize, window->GetVisualViewport());
       }
     }
   }
@@ -3669,7 +3668,7 @@ namespace krys::boo::dom
       if (!_loadTiming.DOMContentLoadedEventStartTime)
       {
         _loadTiming.DOMContentLoadedEventStartTime = _domWindow ? _domWindow->NowTimestamp() : 0;
-        auto event = Event::Create(DOMStringAtom(EventNames::DOMContentLoaded), true, false);
+        auto event = Event::Create(EventNames::DOMContentLoaded, true, false);
         (void)EventDispatcher::DispatchToTarget(*event, this);
         _loadTiming.DOMContentLoadedEventEndTime = _domWindow ? _domWindow->NowTimestamp() : 0;
       }
@@ -3778,7 +3777,7 @@ namespace krys::boo::dom
     {
       _loadTiming.LoadEventStartTime = window->NowTimestamp();
     }
-    (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(EventNames::Load), *window, {}, true);
+    (void)EventDispatcher::FireEvent<Event>(EventNames::Load, *window, {}, true);
     if (!_loadTiming.LoadEventEndTime)
     {
       _loadTiming.LoadEventEndTime = window->NowTimestamp();
@@ -3867,7 +3866,7 @@ namespace krys::boo::dom
     _pageShowing = false;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(DOMStringAtom(EventNames::PageHide), persisted);
+      auto event = html::PageTransitionEvent::Create(EventNames::PageHide, persisted);
       (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }
@@ -3883,7 +3882,7 @@ namespace krys::boo::dom
     _pageShowing = true;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(DOMStringAtom(EventNames::PageShow), persisted);
+      auto event = html::PageTransitionEvent::Create(EventNames::PageShow, persisted);
       (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }

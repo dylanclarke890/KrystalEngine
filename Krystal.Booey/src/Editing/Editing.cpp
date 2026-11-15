@@ -1231,8 +1231,7 @@ namespace krys::boo
 
   Ref<dom::Element> CreateHTMLElement(dom::Document &document, dom::DOMStringView localName) noexcept
   {
-    auto element =
-      document.CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom(localName));
+    auto element = document.CreateElementNS(infra::Namespaces::HTML, dom::DOMStringAtom(localName));
     krys_debug_assert(!element.HasException());
     return element.ReleaseValue();
   }

@@ -192,9 +192,9 @@ namespace krys::boo::svg
 #define KRYS_DEFINE_XLINK_ATTRIBUTE_NAME(Name, localName)                                                    \
   const dom::QualifiedName &XLinkNames::Name() noexcept                                                      \
   {                                                                                                          \
-    static NeverDestroyed<const dom::QualifiedName> name {                                                   \
-      dom::DOMStringAtom(infra::Namespaces::XLink), dom::DOMStringAtom(infra::NamespacePrefixes::XLink),     \
-      dom::DOMStringAtom(localName)};                                                                        \
+    static NeverDestroyed<const dom::QualifiedName> name {dom::DOMStringAtom(infra::Namespaces::XLink),      \
+                                                          infra::NamespacePrefixes::XLink,                   \
+                                                          dom::DOMStringAtom(localName)};                    \
     return name;                                                                                             \
   }
 

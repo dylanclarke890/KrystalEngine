@@ -48,16 +48,16 @@ namespace krys::boo::dom
     {
       switch (type)
       {
-        case PlatformEvent::Type::KeyUp:      return DOMStringAtom(EventNames::KeyUp);
-        case PlatformEvent::Type::RawKeyDown: return DOMStringAtom(EventNames::KeyDown);
-        case PlatformEvent::Type::Char:       return DOMStringAtom(EventNames::KeyPress);
+        case PlatformEvent::Type::KeyUp:      return EventNames::KeyUp;
+        case PlatformEvent::Type::RawKeyDown: return EventNames::KeyDown;
+        case PlatformEvent::Type::Char:       return EventNames::KeyPress;
         case PlatformEvent::Type::KeyDown:
           // The caller should disambiguate the combined event into RawKeyDown or Char events.
           break;
         default: break;
       }
       krys_debug_assert(false);
-      return DOMStringAtom(EventNames::KeyDown);
+      return EventNames::KeyDown;
     }
 
     KRYS_NODISCARD int32 WindowsVirtualKeyCodeWithoutLocation(int32 keycode) noexcept

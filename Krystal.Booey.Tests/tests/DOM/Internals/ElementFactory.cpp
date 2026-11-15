@@ -36,7 +36,7 @@ namespace krys::boo::dom::tests
 
     SECTION("An uppercase name in the HTML namespace is unknown")
     {
-      auto element = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"DIV");
+      auto element = document->CreateElementNS(infra::Namespaces::HTML, u8"DIV");
       REQUIRE_FALSE(element.HasException());
       auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element.Value());
       REQUIRE(htmlElement != nullptr);
@@ -45,7 +45,7 @@ namespace krys::boo::dom::tests
 
     SECTION("A lowercase name in the HTML namespace is its element")
     {
-      auto element = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"div");
+      auto element = document->CreateElementNS(infra::Namespaces::HTML, u8"div");
       REQUIRE_FALSE(element.HasException());
       auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element.Value());
       REQUIRE(htmlElement != nullptr);
@@ -129,8 +129,7 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<HTMLDocument>();
     auto create = [&](dom::DOMStringAtom localName)
     {
-      return ElementFactory::Create(*document,
-                                    QualifiedName {infra::Namespaces::HTML, null, DOMStringAtom(localName)});
+      return ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, null, localName});
     };
 
     for (auto name :

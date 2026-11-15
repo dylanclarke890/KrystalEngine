@@ -89,8 +89,7 @@ namespace krys::boo::html
   HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface,
                            dom::DOMStringAtom localName, HTMLElementFlags flags,
                            dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document,
-                      dom::QualifiedName(dom::DOMStringAtom(infra::Namespaces::HTML), null, localName),
+      : StyledElement(document, dom::QualifiedName(infra::Namespaces::HTML, null, localName),
                       nodeFlags | dom::NodeFlags::IsHTMLElement),
         _flags(flags), _interface(interface)
   {
@@ -1526,7 +1525,7 @@ namespace krys::boo::html
     // source.
     init.Composed = true;
     init.Source = ShareRefPtr<dom::Element>(source);
-    auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(EventNames::BeforeToggle), init, cancelable);
+    auto event = dom::ToggleEvent::Create(EventNames::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }
@@ -1865,7 +1864,7 @@ namespace krys::boo::html
     else if (localName == u8"lang")
     {
       // xml:lang has a higher priority than lang.
-      if (!HasAttributeNS(dom::DOMStringAtom(infra::Namespaces::XML), u8"lang"))
+      if (!HasAttributeNS(infra::Namespaces::XML, u8"lang"))
       {
         MapLanguageAttributeToLocale(value, style);
       }
