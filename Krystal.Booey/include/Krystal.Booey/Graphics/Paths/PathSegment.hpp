@@ -41,16 +41,11 @@ namespace krys::boo
   class PathSegment
   {
   public:
-    using Data = Variant<PathMoveTo,
+    using Data =
+      Variant<PathMoveTo, PathLineTo, PathQuadCurveTo, PathBezierCurveTo, PathArcTo, PathArc, PathClosedArc,
+              PathEllipse, PathEllipseInRect, PathRect, PathRoundedRect, PathContinuousRoundedRect,
 
-                         PathLineTo, PathQuadCurveTo, PathBezierCurveTo, PathArcTo,
-
-                         PathArc, PathClosedArc, PathEllipse, PathEllipseInRect, PathRect, PathRoundedRect,
-                         PathContinuousRoundedRect,
-
-                         PathDataLine, PathDataQuadCurve, PathDataBezierCurve, PathDataArc,
-
-                         PathCloseSubpath>;
+              PathDataLine, PathDataQuadCurve, PathDataBezierCurve, PathDataArc, PathCloseSubpath>;
 
     PathSegment(Data &&) noexcept;
 
@@ -60,10 +55,12 @@ namespace krys::boo
     {
       return _data;
     }
+
     KRYS_NODISCARD Data &&GetData() && noexcept
     {
       return krys::move(_data);
     }
+
     KRYS_NODISCARD bool ClosesSubpath() const noexcept
     {
       return std::holds_alternative<PathCloseSubpath>(_data) || std::holds_alternative<PathClosedArc>(_data);
@@ -71,18 +68,23 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     KRYS_NODISCARD FloatRect FastBoundingRect() const noexcept;
+
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
     KRYS_NODISCARD bool CanApplyElements() const noexcept;
+
     KRYS_NODISCARD bool ApplyElements(const PathElementApplier &) const noexcept;
 
     KRYS_NODISCARD bool CanTransform() const noexcept;
+
     KRYS_NODISCARD bool Transform(const AffineTransform &) noexcept;
 
   private:

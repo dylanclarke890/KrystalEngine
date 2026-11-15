@@ -51,12 +51,14 @@ namespace krys::boo::dom
     {
       return false;
     }
+
     KRYS_NODISCARD bool CanStartSelection() const noexcept override
     {
       return false;
     }
 
     PseudoElement(Element &host, PseudoElementType pseudoElementType) noexcept;
+
     ~PseudoElement() noexcept override;
 
     KRYS_NODISCARD static Ref<PseudoElement> Create(Element &host,

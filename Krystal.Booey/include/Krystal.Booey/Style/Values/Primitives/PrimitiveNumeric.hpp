@@ -534,7 +534,7 @@ namespace krys::boo::style
   };
 
   template <typename T>
-  KRYS_NODISCARD T get(DimensionPercentageNumeric auto const &dimensionPercentage) noexcept
+  KRYS_NODISCARD T get(const DimensionPercentageNumeric auto &dimensionPercentage) noexcept
   {
     return dimensionPercentage.template get<T>();
   }

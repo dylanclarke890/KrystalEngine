@@ -45,10 +45,12 @@ namespace krys::boo::style
     {
       return _value.Name == null;
     }
+
     KRYS_NODISCARD bool IsKeyframesName() const noexcept
     {
       return _value.Name != null;
     }
+
     KRYS_NODISCARD Maybe<ScopedName> TryKeyframesName() const noexcept
     {
       return IsKeyframesName() ? Maybe<ScopedName> {_value} : std::nullopt;

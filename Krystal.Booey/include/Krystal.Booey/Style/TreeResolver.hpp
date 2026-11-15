@@ -60,7 +60,7 @@ namespace krys::boo::style
   enum class IsInDisplayNoneTree : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Resolves the styles of a document's elements that need resolving, walking the composed tree.
@@ -76,13 +76,13 @@ namespace krys::boo::style
       AnimationOnly,
       FastPathInherit,
       FullWithMatchResultCache,
-      Full
+      Full,
     };
 
     enum class LayoutInterleavingAction : uint8
     {
       None,
-      SkipDescendants
+      SkipDescendants,
     };
 
     enum class DescendantsToResolve : uint8
@@ -91,7 +91,7 @@ namespace krys::boo::style
       RebuildAllUsingExisting,
       ChildrenWithExplicitInherit,
       Children,
-      All
+      All,
     };
 
     struct Scope : RefCounted<Scope>
@@ -102,7 +102,9 @@ namespace krys::boo::style
       RefPtr<Scope> EnclosingScope;
 
       Scope(dom::Document &document, Update &update) noexcept;
+
       Scope(dom::ShadowRoot &shadowRoot, Scope &enclosingScope) noexcept;
+
       ~Scope() noexcept;
     };
 
@@ -118,6 +120,7 @@ namespace krys::boo::style
       style::IsInDisplayNoneTree IsInDisplayNoneTree {style::IsInDisplayNoneTree::No};
 
       explicit Parent(dom::Document &document) noexcept;
+
       Parent(dom::Element &element, const RenderStyle &style, EnumSet<Change> changes,
              TreeResolver::DescendantsToResolve descendantsToResolve,
              style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept;
@@ -161,6 +164,7 @@ namespace krys::boo::style
       bool IsFirstTry {true};
 
       KRYS_NODISCARD const RenderStyle &OriginalStyle() const noexcept;
+
       KRYS_NODISCARD UniquePtr<RenderStyle> CurrentOption() const noexcept;
     };
 
@@ -192,6 +196,7 @@ namespace krys::boo::style
 
   public:
     explicit TreeResolver(dom::Document &document, UniquePtr<Update> update = {}) noexcept;
+
     ~TreeResolver() noexcept;
 
     /// @brief Resolves the styles that need resolving.
@@ -214,15 +219,19 @@ namespace krys::boo::style
 
     KRYS_NODISCARD LayoutInterleavingAction UpdateStateForQueryContainer(
       dom::Element &element, const RenderStyle *style, DescendantsToResolve &descendantsToResolve) noexcept;
+
     KRYS_NODISCARD LayoutInterleavingAction UpdateAnchorPositioningState(dom::Element &element,
                                                                          const RenderStyle *style) noexcept;
 
     void GeneratePositionOptionsIfNeeded(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
                                          const ResolutionContext &resolutionContext) noexcept;
+
     KRYS_NODISCARD UniquePtr<RenderStyle>
       GeneratePositionOption(const PositionTryFallback &fallback, const ResolvedStyle &resolvedStyle,
                              const Styleable &styleable, const ResolutionContext &resolutionContext) noexcept;
+
     void SortPositionOptionsIfNeeded(PositionOptions &options, const Styleable &styleable) noexcept;
+
     KRYS_NODISCARD Maybe<ResolvedStyle>
       TryChoosePositionOption(const Styleable &styleable,
                               const ResolutionContext &resolutionContext) noexcept;
@@ -236,6 +245,7 @@ namespace krys::boo::style
     // relevant to which descendants should be resolved.
     void DeferDescendantResolution(dom::Element &element, EnumSet<Change> changes,
                                    DescendantsToResolve descendantsToResolve) noexcept;
+
     // When descendant resolution can be resumed, resumeDescendantResolutionIfNeeded
     // restores the previously saved state (if there is)
     void ResumeDescendantResolutionIfNeeded(dom::Element &element, EnumSet<Change> &changes,
@@ -253,18 +263,22 @@ namespace krys::boo::style
     KRYS_NODISCARD UniquePtr<RenderStyle>
       ResolveStartingStyle(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
                            const ResolutionContext &resolutionContext) noexcept;
+
     KRYS_NODISCARD UniquePtr<RenderStyle>
       ResolveAfterChangeStyleForNonAnimated(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
                                             const ResolutionContext &resolutionContext) noexcept;
+
     KRYS_NODISCARD UniquePtr<RenderStyle>
       ResolveAgainInDifferentContext(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
                                      const RenderStyle &parentStyle,
                                      EnumSet<PropertyCascade::PropertyType> properties,
                                      Maybe<BuilderPositionTryFallback> &&positionTryFallback,
                                      const ResolutionContext &resolutionContext) noexcept;
+
     KRYS_NODISCARD const RenderStyle &
       ParentAfterChangeStyle(const Styleable &styleable,
                              const ResolutionContext &resolutionContext) const noexcept;
+
     KRYS_NODISCARD HashSet<AnimatableCSSProperty> ApplyCascadeAfterAnimation(
       RenderStyle &animatedStyle, const AnimatableCSSPropertySet &animatedProperties,
       const AnimatableCSSPropertySet &transitioningProperties, const MatchResult &matchResult,
@@ -274,13 +288,16 @@ namespace krys::boo::style
       ResolvePseudoElement(dom::Element &element, const PseudoElementIdentifier &pseudoElementIdentifier,
                            const ElementUpdate &elementUpdate, style::IsInDisplayNoneTree isInDisplayNoneTree,
                            const RenderStyle *existingStyle) noexcept;
+
     KRYS_NODISCARD Maybe<ElementUpdate>
       ResolveAncestorPseudoElement(dom::Element &element,
                                    const PseudoElementIdentifier &pseudoElementIdentifier,
                                    const ElementUpdate &elementUpdate) noexcept;
+
     KRYS_NODISCARD Maybe<ResolvedStyle>
       ResolveAncestorFirstLinePseudoElement(dom::Element &element,
                                             const ElementUpdate &elementUpdate) noexcept;
+
     KRYS_NODISCARD Maybe<ResolvedStyle>
       ResolveAncestorFirstLetterPseudoElement(dom::Element &element, const ElementUpdate &elementUpdate,
                                               ResolutionContext &resolutionContext) noexcept;
@@ -308,35 +325,47 @@ namespace krys::boo::style
     }
 
     void PushScope(dom::ShadowRoot &shadowRoot) noexcept;
+
     void PushEnclosingScope() noexcept;
+
     void PopScope() noexcept;
 
     void PushParent(dom::Element &element, const RenderStyle &style, EnumSet<Change> changes,
                     DescendantsToResolve descendantsToResolve,
                     style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept;
+
     void PopParent() noexcept;
+
     void PopParentsToDepth(uint32 depth) noexcept;
 
     KRYS_NODISCARD DescendantsToResolve ComputeDescendantsToResolve(const ElementUpdate &update,
                                                                     const RenderStyle *existingStyle,
                                                                     Validity validity) const noexcept;
+
     KRYS_NODISCARD static Maybe<ResolutionType>
       DetermineResolutionType(const dom::Element &element, const RenderStyle *existingStyle,
                               DescendantsToResolve parentDescendantsToResolve,
                               EnumSet<Change> parentChanges) noexcept;
+
     static void ResetDescendantStyleRelations(dom::Element &element,
                                               DescendantsToResolve descendantsToResolve) noexcept;
 
     KRYS_NODISCARD ResolutionContext MakeResolutionContext() noexcept;
+
     KRYS_NODISCARD ResolutionContext MakeResolutionContextForPseudoElement(
       const ElementUpdate &elementUpdate, const PseudoElementIdentifier &pseudoElementIdentifier) noexcept;
+
     KRYS_NODISCARD Maybe<ResolutionContext>
       MakeResolutionContextForInheritedFirstLine(const ElementUpdate &elementUpdate,
                                                  const RenderStyle &inheritStyle) noexcept;
+
     KRYS_NODISCARD const Parent *BoxGeneratingParent() const noexcept;
+
     KRYS_NODISCARD const RenderStyle *ParentBoxStyle() const noexcept;
+
     KRYS_NODISCARD const RenderStyle *
       ParentBoxStyleForPseudoElement(const ElementUpdate &elementUpdate) const noexcept;
+
     KRYS_NODISCARD const RenderStyle *DocumentElementStyle() const noexcept;
 
     // This returns the style that was in effect (applied to the render tree) before we started the style
@@ -344,9 +373,11 @@ namespace krys::boo::style
     KRYS_NODISCARD const RenderStyle *
       BeforeResolutionStyle(const dom::Element &element,
                             const Maybe<PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     void SaveBeforeResolutionStyleForInterleaving(const dom::Element &element) noexcept;
 
     KRYS_NODISCARD bool HasUnresolvedAnchorPosition(const Styleable &styleable) const noexcept;
+
     KRYS_NODISCARD bool HasResolvedAnchorPosition(const Styleable &styleable) const noexcept;
 
     void CollectChangedAnchorNames(const RenderStyle &newStyle, const RenderStyle *currentStyle) noexcept;
@@ -354,6 +385,7 @@ namespace krys::boo::style
 
   // Integrate with the HTML5 event loop instead, see EventLoop.cpp and consumers.
   void DeprecatedQueuePostResolutionCallback(Func<void()> &&callback) noexcept;
+
   KRYS_NODISCARD bool PostResolutionCallbacksAreSuspended() noexcept;
 
   KRYS_NODISCARD inline bool SupportsFirstLineAndLetterPseudoElement(const RenderStyle &style) noexcept
@@ -374,7 +406,7 @@ namespace krys::boo::style
     enum class DrainCallbacks : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -383,6 +415,7 @@ namespace krys::boo::style
   public:
     explicit PostResolutionCallbackDisabler(dom::Document &document,
                                             DrainCallbacks drainCallbacks = DrainCallbacks::Yes) noexcept;
+
     ~PostResolutionCallbackDisabler() noexcept;
   };
 }

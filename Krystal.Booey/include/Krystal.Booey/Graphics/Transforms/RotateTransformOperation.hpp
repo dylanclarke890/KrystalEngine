@@ -52,14 +52,17 @@ namespace krys::boo
     {
       return _x;
     }
+
     KRYS_NODISCARD double Y() const noexcept
     {
       return _y;
     }
+
     KRYS_NODISCARD double Z() const noexcept
     {
       return _z;
     }
+
     KRYS_NODISCARD double GetAngle() const noexcept
     {
       return _angle;

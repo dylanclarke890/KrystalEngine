@@ -60,6 +60,7 @@ namespace krys::boo::css
     KRYS_NODISCARD css::ValueId AutoRepeatID() const noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const GridAutoRepeatValue &other) const noexcept;
   };
 }

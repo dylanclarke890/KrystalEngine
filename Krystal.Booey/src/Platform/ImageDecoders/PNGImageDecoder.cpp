@@ -202,6 +202,7 @@ namespace krys::boo
     {
       return _png;
     }
+
     KRYS_NODISCARD png_infop InfoPtr() const noexcept
     {
       return _info;
@@ -211,18 +212,22 @@ namespace krys::boo
     {
       _readOffset = offset;
     }
+
     KRYS_NODISCARD uint32 CurrentBufferSize() const noexcept
     {
       return _currentBufferSize;
     }
+
     KRYS_NODISCARD bool DecodingSizeOnly() const noexcept
     {
       return _decodingSizeOnly;
     }
+
     void SetHasAlpha(bool hasAlpha) noexcept
     {
       _hasAlpha = hasAlpha;
     }
+
     KRYS_NODISCARD bool HasAlpha() const noexcept
     {
       return _hasAlpha;
@@ -232,6 +237,7 @@ namespace krys::boo
     {
       return _interlaceBuffer.get();
     }
+
     void CreateInterlaceBuffer(size_t size) noexcept
     {
       _interlaceBuffer = UniquePtr<png_byte[]>(new png_byte[size]);
@@ -432,7 +438,8 @@ namespace krys::boo
       if (png_get_iCCP(png, info, &iccProfileName, &iccCompressionType, &iccProfileData, &iccProfileDataSize))
       {
         iccProfile = Span<const uint8>(iccProfileData, iccProfileDataSize);
-        hasICCProfile = ICCProfileTransform::DescribesPixels(iccProfile, ICCProfileTransform::PixelLayout::RGB);
+        hasICCProfile =
+          ICCProfileTransform::DescribesPixels(iccProfile, ICCProfileTransform::PixelLayout::RGB);
         _iccTransform = ICCProfileTransform::Create(iccProfile, ICCProfileTransform::PixelLayout::RGB,
                                                     ICCProfileTransform::PixelLayout::RGB);
       }

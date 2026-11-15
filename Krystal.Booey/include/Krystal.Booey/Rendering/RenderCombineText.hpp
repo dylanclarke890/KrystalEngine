@@ -45,10 +45,12 @@ namespace krys::boo
 
   public:
     RenderCombineText(dom::Text &textNode, utf8_string text) noexcept;
+
     ~RenderCombineText() noexcept override;
 
     /// @brief Combines the text again if its font or text changed since it last did.
     void CombineTextIfNeeded() noexcept;
+
     /// @brief Where to draw the combined text so it's centred in @p boxRect, if it's combined.
     KRYS_NODISCARD Maybe<FloatPoint> ComputeTextOrigin(const FloatRect &boxRect) const noexcept;
 
@@ -56,20 +58,24 @@ namespace krys::boo
     {
       return _isCombined;
     }
+
     /// @brief How much the combined text is compressed horizontally to fit one em (1 if it isn't).
     KRYS_NODISCARD float HorizontalScale() const noexcept
     {
       return _horizontalScale;
     }
+
     /// @brief Combined text takes one em.
     KRYS_NODISCARD float CombinedTextWidth(const FontCascade &font) const noexcept
     {
       return font.Size();
     }
+
     KRYS_NODISCARD const FontCascade &OriginalFont() const noexcept
     {
       return Parent()->Style().GetFontCascade();
     }
+
     /// @brief The font the combined text is drawn with: horizontal, with narrower glyphs if they fit.
     KRYS_NODISCARD const FontCascade &TextCombineFont() const noexcept
     {

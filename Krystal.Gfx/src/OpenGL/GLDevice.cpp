@@ -859,7 +859,7 @@ namespace krys::gfx::opengl
     for (uint32 i = 0u; i < key.Textures.size(); ++i)
     {
       size_t value = (size_t(key.Textures[i]) << 32u) ^ (size_t(key.MipLevels[i]) << 16u) ^ key.Layers[i];
-      seed ^= value + 0x9e'37'79'b9'7f'4a'7c'55 + (seed << 6) + (seed >> 2);
+      seed ^= value + 0x9E'37'79'B9'7F'4A'7C'55 + (seed << 6) + (seed >> 2);
     }
     return seed;
   }

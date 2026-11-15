@@ -500,6 +500,7 @@ namespace krys::boo::tests
     CHECK(fixture.Document().ContentLanguage() == u8"de");
     CHECK(paragraph->Matches(u8":lang(de)").Value());
   }
+
   TEST_CASE("A document's lastModified is its response's Last-Modified date, in local time",
             "[Loader][DocumentLoader][html:dom-document-lastmodified]")
   {
@@ -533,6 +534,7 @@ namespace krys::boo::tests
         (value == localText(before) || value == localText(before - 1s) || value == localText(before + 1s)));
     }
   }
+
   TEST_CASE("A document's language falls back to its Content-Language header's first language",
             "[Loader][DocumentLoader][html:pragma-set-default-language]")
   {

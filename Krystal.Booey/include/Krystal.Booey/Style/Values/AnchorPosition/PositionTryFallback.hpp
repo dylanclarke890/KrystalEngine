@@ -68,6 +68,7 @@ namespace krys::boo::style
     {
       return !!PositionAreaFallback.Properties;
     }
+
     KRYS_NODISCARD bool IsRuleAndTactics() const noexcept
     {
       return !PositionAreaFallback.Properties;
@@ -108,6 +109,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD PositionTryFallback operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   // `PositionTryFallback::PositionArea` is special-cased to handle `ImmutableStyleProperties`.
   template <>
   struct CSSValueCreation<PositionTryFallback::PositionArea>

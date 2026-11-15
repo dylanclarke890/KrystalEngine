@@ -37,7 +37,7 @@ namespace krys::boo::svg
     enum class ListReplacement : bool
     {
       Append,
-      Replace
+      Replace,
     };
 
   public:
@@ -67,9 +67,11 @@ namespace krys::boo::svg
     }
 
     dom::ExceptionOr<RefPtr<SVGTransform>> Consolidate() noexcept;
+
     KRYS_NODISCARD AffineTransform Concatenate() const noexcept;
 
     void Parse(dom::DOMStringView) noexcept;
+
     KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override;
 
   private:

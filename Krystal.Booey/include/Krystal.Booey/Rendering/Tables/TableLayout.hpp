@@ -33,7 +33,7 @@ namespace krys::boo
   enum class TableIntrinsics : uint8
   {
     ForLayout,
-    ForKeyword
+    ForKeyword,
   };
 
   /// @brief The algorithm that computes a table's intrinsic widths and the positions of its columns.
@@ -52,16 +52,20 @@ namespace krys::boo
     explicit TableLayout(RenderTable *table) noexcept : _table(table)
     {
     }
+
     virtual ~TableLayout() noexcept = default;
 
     virtual void ComputeIntrinsicLogicalWidths(LayoutUnit &minWidth, LayoutUnit &maxWidth,
                                                TableIntrinsics intrinsics) noexcept = 0;
+
     KRYS_NODISCARD virtual LayoutUnit ScaledWidthFromPercentColumns() const noexcept
     {
       return 0_lu;
     }
+
     virtual void ApplyPreferredLogicalWidthQuirks(LayoutUnit &minWidth,
                                                   LayoutUnit &maxWidth) const noexcept = 0;
+
     virtual void Layout() noexcept = 0;
   };
 }

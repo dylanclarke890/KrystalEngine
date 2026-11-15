@@ -16,7 +16,7 @@ namespace krys::boo::tests
     display_list::RecorderImpl _recorder;
 
   public:
-    static constexpr RenderingMode BackendRenderingMode = RenderingMode::Accelerated;
+    constexpr static RenderingMode BackendRenderingMode = RenderingMode::Accelerated;
 
     int32 Flushes {0};
     int32 Preparations {0};
@@ -35,10 +35,12 @@ namespace krys::boo::tests
     {
       return _recorder;
     }
+
     void FlushContext() noexcept override
     {
       ++Flushes;
     }
+
     void PrepareForDisplay() noexcept override
     {
       ++Preparations;

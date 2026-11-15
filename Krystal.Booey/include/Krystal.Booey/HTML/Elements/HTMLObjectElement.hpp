@@ -38,6 +38,7 @@ namespace krys::boo::html
     // contain range end points), once there's fallback content.
 
     HTMLObjectElement(dom::Document &document) noexcept;
+
     ~HTMLObjectElement() noexcept override;
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
@@ -215,10 +216,15 @@ namespace krys::boo::html
 
   protected:
     void OnInsert() noexcept override;
+
     void OnPostConnection() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnAdopt(dom::Document &oldDocument) noexcept override;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
@@ -226,6 +232,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;

@@ -81,6 +81,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD WeakPtr<NodeList> &LabelsNodeList() noexcept;
 
     void AddLiveCollectionCache(LiveCollection &collection) noexcept;
+
     void RemoveLiveCollectionCache(LiveCollection &collection) noexcept;
 
     /// @brief Clears the caches of the live collections rooted at the node.

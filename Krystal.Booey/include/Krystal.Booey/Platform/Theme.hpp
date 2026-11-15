@@ -50,6 +50,7 @@ namespace krys::boo
 
   protected:
     Theme() noexcept = default;
+
     virtual ~Theme() noexcept = default;
   };
 }

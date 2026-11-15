@@ -94,8 +94,12 @@ namespace krys::boo
   }
 
   NavigationAction::~NavigationAction() noexcept = default;
+
   NavigationAction::NavigationAction(const NavigationAction &) noexcept = default;
+
   NavigationAction &NavigationAction::operator=(const NavigationAction &) noexcept = default;
+
   NavigationAction::NavigationAction(NavigationAction &&) noexcept = default;
+
   NavigationAction &NavigationAction::operator=(NavigationAction &&) noexcept = default;
 }

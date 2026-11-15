@@ -128,8 +128,10 @@ namespace krys::detail
 
 /// @note KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in the most derived subclass.
 #define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                                      \
+                                                                                                             \
 public:                                                                                                      \
   KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(ClassName)                                                       \
+                                                                                                             \
 private:                                                                                                     \
   using _forceSemicolonAfterKrysOverrideDeleteCheckedPtr = int
 
@@ -154,7 +156,9 @@ namespace krys
 
   public:
     virtual void AddRefChecked() const noexcept = 0;
+
     virtual void SubRefChecked() const noexcept = 0;
+
     KRYS_NODISCARD virtual uint32 GetRefCountChecked() const noexcept = 0;
   };
 }

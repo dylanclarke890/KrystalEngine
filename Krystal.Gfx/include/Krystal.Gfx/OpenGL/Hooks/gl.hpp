@@ -275,6 +275,7 @@ namespace krys::gfx::opengl
 #pragma endregion
 
 #pragma region 1.3
+
   void glActiveTexture(GLenum texture) noexcept;
 
   void glSampleCoverage(GLfloat value, GLboolean invert) noexcept;

@@ -16,12 +16,13 @@ namespace krys::boo::html
     RefPtr<EngineTexture> _texture;
 
   public:
-    static constexpr utf8_stringview ContextType = u8"krystal-texture";
+    constexpr static utf8_stringview ContextType = u8"krystal-texture";
 
     explicit EngineTextureRenderingContext(CanvasBase &canvas) noexcept;
 
     /// @brief Shows @p texture, or nothing if it's null.
     void SetTexture(RefPtr<EngineTexture> texture) noexcept;
+
     KRYS_NODISCARD EngineTexture *Texture() const noexcept
     {
       return _texture.get();
@@ -35,7 +36,9 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD RefPtr<NativeImage> SurfaceBufferToNativeImage(SurfaceBuffer) noexcept override;
+
     KRYS_NODISCARD bool IsSurfaceBufferTransparentBlack(SurfaceBuffer) const noexcept override;
+
     KRYS_NODISCARD RefPtr<GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() noexcept override;
   };

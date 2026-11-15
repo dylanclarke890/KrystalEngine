@@ -70,7 +70,7 @@ namespace krys::boo
   enum class TextDirection : bool
   {
     LTR = 0,
-    RTL = 1
+    RTL = 1,
   };
 
   enum class TextOrientation : uint8
@@ -138,6 +138,7 @@ namespace krys::boo
       _bits &= ~WritingModeFlags::WritingModeMask;
       _bits |= static_cast<Data>(writingMode);
     }
+
     constexpr void SetTextOrientation(TextOrientation verticalOrientation) noexcept
     {
       _bits &= ~WritingModeFlags::OrientationMask;

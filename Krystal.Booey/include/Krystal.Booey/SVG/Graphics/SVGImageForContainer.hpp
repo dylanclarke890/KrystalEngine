@@ -64,14 +64,17 @@ namespace krys::boo::svg
     {
       return _image->UsesContainerSize();
     }
+
     KRYS_NODISCARD bool HasRelativeWidth() const noexcept final
     {
       return _image->HasRelativeWidth();
     }
+
     KRYS_NODISCARD bool HasRelativeHeight() const noexcept final
     {
       return _image->HasRelativeHeight();
     }
+
     void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
                                     FloatSize &intrinsicRatio) noexcept final
     {
@@ -90,6 +93,7 @@ namespace krys::boo::svg
     {
       return false;
     }
+
     KRYS_NODISCARD bool CurrentFrameIsComplete() const noexcept final
     {
       return static_cast<bool>(_image);

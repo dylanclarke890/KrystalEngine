@@ -67,7 +67,7 @@ namespace krys::boo::layout_integration
     {
       Floor,
       Ceil,
-      Round
+      Round,
     };
 
     KRYS_NODISCARD LayoutUnit SnapToInt(LayoutUnit value,

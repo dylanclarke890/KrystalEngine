@@ -67,8 +67,11 @@ namespace krys::boo
 
     // Out of line and inline colors will always be non-equal.
     friend bool operator==(const Color &a, const Color &b) noexcept;
+
     friend bool EqualIgnoringSemanticColor(const Color &a, const Color &b) noexcept;
+
     friend bool OutOfLineComponentsEqual(const Color &, const Color &) noexcept;
+
     friend bool OutOfLineComponentsEqualIgnoringSemanticColor(const Color &, const Color &) noexcept;
 
     class OutOfLineComponents : public ThreadSafeRefCounted<OutOfLineComponents>
@@ -110,7 +113,7 @@ namespace krys::boo
 
   private:
     constexpr static uint64 maxNumberOfBitsInPointer = 48;
-    constexpr static uint64 colorValueMask = (1ULL << maxNumberOfBitsInPointer) - 1;
+    constexpr static uint64 colorValueMask = (1ull << maxNumberOfBitsInPointer) - 1;
     constexpr static uint64 flagsSize = sizeof(ColorFlagsIncludingPrivate) * 8;
     constexpr static uint64 flagsShift = maxNumberOfBitsInPointer;
     constexpr static uint64 colorSpaceSize = sizeof(ColourSpace) * 8;

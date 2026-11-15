@@ -72,6 +72,7 @@ namespace krys::boo::dom
     ~ProcessingInstruction() noexcept override;
 
 #pragma region ProcessingInstruction - https://dom.spec.whatwg.org/#processinginstruction
+
     /// @brief Creates a processing instruction node in @p document; throws an "InvalidCharacterError" if the
     /// target isn't an XML name or the data contains `?>`.
     /// @see https://dom.spec.whatwg.org/#create-a-processing-instruction-node
@@ -110,19 +111,24 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#dom-processinginstruction-hasattribute
     KRYS_NODISCARD bool HasAttribute(DOMStringView name) const noexcept;
+
 #pragma endregion
 
 #pragma region LinkStyle - https://drafts.csswg.org/cssom/#the-linkstyle-interface
+
     /// @see https://drafts.csswg.org/cssom/#dom-linkstyle-sheet
     KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;
+
 #pragma endregion
 
 #pragma region Node
+
     /// @see - https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
       return _target;
     }
+
 #pragma endregion
 
     void SetCreatedByParser(bool createdByParser) noexcept
@@ -147,7 +153,9 @@ namespace krys::boo::dom
 
   protected:
     void OnInsert() noexcept override;
+
     void OnPostConnection() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
 
   private:
@@ -161,6 +169,7 @@ namespace krys::boo::dom
                           const CachedCSSStyleSheet *) noexcept override;
 
     KRYS_NODISCARD bool IsLoading() const noexcept;
+
     bool SheetLoaded() noexcept override;
 
     void ParseStyleSheet(const utf8_string &sheet) noexcept;

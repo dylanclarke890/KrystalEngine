@@ -47,8 +47,8 @@ namespace krys::boo::layout
 namespace krys::boo
 {
   class RenderInline;
-  struct WordTrailingSpace;
   class RenderStyle;
+  struct WordTrailingSpace;
 
   /// @brief Renders a text node (or anonymous text, such as generated content): its text, after the style's
   /// text transform and text security.
@@ -90,7 +90,9 @@ namespace krys::boo
 
   public:
     RenderText(Type type, dom::Text &textNode, utf8_string text) noexcept;
+
     RenderText(Type type, dom::Document &document, utf8_string text) noexcept;
+
     ~RenderText() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
@@ -98,10 +100,12 @@ namespace krys::boo
     KRYS_NODISCARD dom::Text *TextNode() const noexcept;
 
     KRYS_NODISCARD layout::InlineTextBox *LayoutBox() noexcept;
+
     KRYS_NODISCARD const layout::InlineTextBox *LayoutBox() const noexcept;
 
     /// @brief The bounding box of the text's line boxes.
     KRYS_NODISCARD virtual IntRect LinesBoundingBox() const noexcept;
+
     /// @brief The location of the text's first text box.
     KRYS_NODISCARD IntPoint FirstRunLocation() const noexcept;
 
@@ -121,16 +125,23 @@ namespace krys::boo
       bool HasBreak {false};
       bool EndsWithBreak {false};
     };
+
     KRYS_NODISCARD Widths TrimmedPreferredWidths(float leadWidth, bool &stripFrontSpaces) noexcept;
 
     KRYS_NODISCARD float HangablePunctuationStartWidth(size_t index) const noexcept;
+
     KRYS_NODISCARD float HangablePunctuationEndWidth(size_t index) const noexcept;
+
     KRYS_NODISCARD size_t FirstCharacterIndexStrippingSpaces() const noexcept;
+
     KRYS_NODISCARD size_t LastCharacterIndexStrippingSpaces() const noexcept;
+
     KRYS_NODISCARD static bool IsHangableStopOrComma(char32 c) noexcept;
 
     KRYS_NODISCARD float MinLogicalWidth() const noexcept;
+
     KRYS_NODISCARD float MaxLogicalWidth() const noexcept;
+
     void ResetMinMaxWidth() noexcept
     {
       _minWidth = null;
@@ -141,6 +152,7 @@ namespace krys::boo
     KRYS_NODISCARD float Width(size_t from, size_t length, float xPos, bool firstLine = false,
                                HashSet<RefPtr<const Font>> *fallbackFonts = nullptr,
                                GlyphOverflow *glyphOverflow = nullptr) const noexcept;
+
     KRYS_NODISCARD float Width(size_t from, size_t length, const FontCascade &fontCascade, float xPos,
                                HashSet<RefPtr<const Font>> *fallbackFonts = nullptr,
                                GlyphOverflow *glyphOverflow = nullptr) const noexcept;
@@ -166,6 +178,7 @@ namespace krys::boo
     }
 
     void SetText(utf8_string newContent, bool force = false) noexcept;
+
     void SetTextWithOffset(utf8_string newText, uint32 offset) noexcept;
 
     KRYS_NODISCARD bool ContainsOnlyCollapsibleWhitespace() const noexcept;
@@ -178,22 +191,32 @@ namespace krys::boo
                        const RenderFragmentContainer *fragment = nullptr) noexcept override;
 
     KRYS_NODISCARD int32 CaretMinOffset() const noexcept final;
+
     KRYS_NODISCARD int32 CaretMaxOffset() const noexcept final;
+
     /// @brief The number of rendered (not collapsed) bytes before @p offset.
     KRYS_NODISCARD uint32 CountRenderedCharacterOffsetsUntil(uint32 offset) const noexcept;
+
     KRYS_NODISCARD bool ContainsRenderedCharacterOffset(uint32 offset) const noexcept;
+
     /// @brief Whether a caret can be at @p offset: in a text box, and not inside a character.
     KRYS_NODISCARD bool ContainsCaretOffset(uint32 offset) const noexcept;
 
     // Return before/after offset for the next grapheme cluster (character), which is not always one byte.
     KRYS_NODISCARD int32 PreviousOffset(int32 current) const noexcept final;
+
     KRYS_NODISCARD int32 PreviousOffsetForBackwardDeletion(int32 current) const noexcept final;
+
     KRYS_NODISCARD int32 NextOffset(int32 current) const noexcept final;
 
     KRYS_NODISCARD Color SelectionBackgroundColor() const noexcept;
+
     KRYS_NODISCARD Color SelectionForegroundColor() const noexcept;
+
     KRYS_NODISCARD Color SelectionEmphasisMarkColor() const noexcept;
+
     KRYS_NODISCARD UniquePtr<RenderStyle> SelectionPseudoStyle() const noexcept;
+
     /// @brief The `::target-text` style of the text's nearest element.
     KRYS_NODISCARD const RenderStyle *TargetTextPseudoStyle() const noexcept;
 
@@ -201,9 +224,12 @@ namespace krys::boo
     {
       return true;
     }
+
     void SetSelectionState(HighlightState state) noexcept final;
+
     KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
                                                       bool clipToVisibleContent = true) noexcept final;
+
     /// @brief The selected part of the text's boxes (with their ellipses), in @p repaintContainer's
     /// coordinates, adding each box's quad to @p quads.
     LayoutRect CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
@@ -220,10 +246,12 @@ namespace krys::boo
     {
       return _fontCodePath;
     }
+
     KRYS_NODISCARD bool CanUseSimpleFontCodePath() const noexcept
     {
       return FontCodePath() == FontCascade::CodePath::Simple;
     }
+
     KRYS_NODISCARD bool ShouldUseSimpleGlyphOverflowCodePath() const noexcept
     {
       return FontCodePath() == FontCascade::CodePath::SimpleWithGlyphOverflow;
@@ -233,6 +261,7 @@ namespace krys::boo
     {
       return _needsVisualReordering;
     }
+
     void SetNeedsVisualReordering() noexcept
     {
       _needsVisualReordering = true;
@@ -242,26 +271,32 @@ namespace krys::boo
     {
       _canUseSimplifiedTextMeasuring = canUseSimplifiedTextMeasuring;
     }
+
     KRYS_NODISCARD Maybe<bool> CanUseSimplifiedTextMeasuring() const noexcept
     {
       return _canUseSimplifiedTextMeasuring;
     }
+
     void SetHasPositionDependentContentWidth(bool hasPositionDependentContentWidth) noexcept
     {
       _hasPositionDependentContentWidth = hasPositionDependentContentWidth;
     }
+
     KRYS_NODISCARD Maybe<bool> HasPositionDependentContentWidth() const noexcept
     {
       return _hasPositionDependentContentWidth;
     }
+
     void SetHasStrongDirectionalityContent(bool hasStrongDirectionalityContent) noexcept
     {
       _hasStrongDirectionalityContent = hasStrongDirectionalityContent;
     }
+
     KRYS_NODISCARD Maybe<bool> HasStrongDirectionalityContent() const noexcept
     {
       return _hasStrongDirectionalityContent;
     }
+
     KRYS_NODISCARD bool ContainsOnlyCSSWhitespace(size_t from, size_t length) const noexcept;
 
     /// @brief The rendered text, but with backslashes rather than yen signs.
@@ -274,6 +309,7 @@ namespace krys::boo
     {
       return _inlineWrapperForDisplayContents;
     }
+
     void SetInlineWrapperForDisplayContents(RenderInline *wrapper) noexcept;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept final
@@ -286,7 +322,9 @@ namespace krys::boo
     KRYS_NODISCARD virtual utf8_string PreviousCharacter() const noexcept;
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+
     /// @brief The quads, in absolute coordinates, of the text from @p start to @p end, one per text box (or
     /// one per character, with `ComputeIndividualCharacterRects`).
     KRYS_NODISCARD List<FloatQuad> AbsoluteQuadsForRange(uint32 start, uint32 end,
@@ -301,19 +339,25 @@ namespace krys::boo
     void WillBeDestroyed() noexcept override;
 
     virtual void SetRenderedText(utf8_string newText) noexcept;
+
     virtual void SetTextInternal(utf8_string text, bool force) noexcept;
 
   private:
     KRYS_NODISCARD bool ComputeUseBackslashAsYenSymbol() const noexcept;
+
     void ComputeFontCodePath() noexcept;
+
     void InitiateFontLoadingByAccessingGlyphDataAndComputeCanUseSimplifiedTextMeasuring(
       utf8_stringview textContent) noexcept;
+
     void SecureText(char32 maskingCharacter) noexcept;
 
     void ComputePreferredLogicalWidths(float leadWidth, bool forcedMinMaxWidthComputation = false) noexcept;
+
     void ComputePreferredLogicalWidths(float leadWidth, HashSet<RefPtr<const Font>> &fallbackFonts,
                                        GlyphOverflow &glyphOverflow,
                                        bool forcedMinMaxWidthComputation = false) noexcept;
+
     KRYS_NODISCARD float MaxWordFragmentWidth(const RenderStyle &style, const FontCascade &font,
                                               utf8_stringview word, size_t minimumPrefixLength,
                                               size_t minimumSuffixLength, bool currentCharacterIsSpace,
@@ -321,10 +365,12 @@ namespace krys::boo
                                               WordTrailingSpace &wordTrailingSpace,
                                               HashSet<RefPtr<const Font>> &fallbackFonts,
                                               GlyphOverflow &glyphOverflow) noexcept;
+
     KRYS_NODISCARD float WidthFromCache(const FontCascade &fontCascade, size_t start, size_t length,
                                         float xPos, HashSet<RefPtr<const Font>> *fallbackFonts,
                                         GlyphOverflow *glyphOverflow,
                                         const RenderStyle &style) const noexcept;
+
     KRYS_NODISCARD float WidthFromCacheConsideringPossibleTrailingSpace(
       const RenderStyle &style, const FontCascade &font, size_t startIndex, size_t wordLength, float xPos,
       bool currentCharacterIsSpace, WordTrailingSpace &wordTrailingSpace,

@@ -38,7 +38,7 @@ namespace krys::boo
   enum class RotationDirection : bool
   {
     Counterclockwise,
-    Clockwise
+    Clockwise,
   };
 }
 

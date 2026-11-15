@@ -40,9 +40,10 @@ namespace krys::boo::html
   enum class PredefinedColorSpace : uint8
   {
     SRGB,
-    DisplayP3
+    DisplayP3,
   };
 
   KRYS_NODISCARD DestinationColorSpace ToDestinationColorSpace(PredefinedColorSpace) noexcept;
+
   KRYS_NODISCARD Maybe<PredefinedColorSpace> ToPredefinedColorSpace(const DestinationColorSpace &) noexcept;
 }

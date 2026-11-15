@@ -47,14 +47,14 @@ namespace krys::boo
     {
       NewXOROld,
       NewMinusOld,
-      Nothing
+      Nothing,
     };
 
   private:
     enum class ClipToVisibleContent : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     const RenderView &_renderView;
@@ -64,13 +64,16 @@ namespace krys::boo
     explicit RenderSelection(RenderView &view) noexcept;
 
     void Set(const RenderRange &selection, RepaintMode blockRepaintMode = RepaintMode::NewXOROld) noexcept;
+
     void Clear() noexcept;
+
     void Repaint() const noexcept;
 
     KRYS_NODISCARD IntRect Bounds() const noexcept
     {
       return CollectBounds(ClipToVisibleContent::No);
     }
+
     KRYS_NODISCARD IntRect BoundsClippedToVisibleContent() const noexcept
     {
       return CollectBounds(ClipToVisibleContent::Yes);
@@ -78,6 +81,7 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD IntRect CollectBounds(ClipToVisibleContent clipToVisibleContent) const noexcept;
+
     void Apply(const RenderRange &newSelection, RepaintMode blockRepaintMode) noexcept;
   };
 }

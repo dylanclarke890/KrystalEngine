@@ -61,14 +61,17 @@ namespace krys::ui::tests
       {
         return _view;
       }
+
       KRYS_NODISCARD RepaintFixture &Paint() noexcept
       {
         return _paint;
       }
+
       KRYS_NODISCARD boo::html::HTMLCanvasElement &Canvas(boo::dom::DOMStringView id = u8"canvas") noexcept
       {
         return Downcast<boo::html::HTMLCanvasElement>(*_view.Document().GetElementById(id));
       }
+
       KRYS_NODISCARD boo::html::CanvasRenderingContext2D &Context() noexcept
       {
         return *_context;

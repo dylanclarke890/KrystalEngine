@@ -44,12 +44,14 @@ namespace krys::boo
     {
       return _specularConstant;
     }
+
     bool SetSpecularConstant(float specularConstant) noexcept;
 
     KRYS_NODISCARD float SpecularExponent() const noexcept
     {
       return _specularExponent;
     }
+
     bool SetSpecularExponent(float specularExponent) noexcept;
 
     TextStream &ExternalRepresentation(TextStream &ts,

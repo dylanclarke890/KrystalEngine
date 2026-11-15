@@ -50,11 +50,14 @@ namespace krys::boo
     /// @brief The file at @p path, named @p nameOverride if it isn't empty (or else by the path's last
     /// part), typed by its extension.
     KRYS_NODISCARD static Ref<File> Create(utf8_stringview path, utf8_stringview nameOverride = {}) noexcept;
+
     /// @see https://w3c.github.io/FileAPI/#file-constructor
     KRYS_NODISCARD static Ref<File> Create(List<BlobPartVariant> &&blobPartVariants, utf8_stringview filename,
                                            const PropertyBag &propertyBag) noexcept;
+
     /// @brief A file with @p blob's bytes and type, named @p name.
     KRYS_NODISCARD static Ref<File> Create(const Blob &blob, utf8_stringview name) noexcept;
+
     /// @brief A copy of @p existingFile, named @p name if given.
     KRYS_NODISCARD static Ref<File> Create(const File &existingFile, Maybe<utf8_stringview> name) noexcept;
 
@@ -79,6 +82,7 @@ namespace krys::boo
     /// (or now, if it can't be read).
     /// @see https://w3c.github.io/FileAPI/#dfn-lastModified
     KRYS_NODISCARD int64 LastModified() const noexcept;
+
     KRYS_NODISCARD const Maybe<int64> &LastModifiedOverride() const noexcept
     {
       return _lastModifiedDateOverride;
@@ -91,9 +95,12 @@ namespace krys::boo
 
   private:
     File(Ref<BlobData> &&data, utf8_stringview type, utf8_string path, utf8_string name) noexcept;
+
     File(List<BlobPartVariant> &&blobPartVariants, utf8_stringview filename,
          const PropertyBag &propertyBag) noexcept;
+
     File(const Blob &blob, utf8_stringview name) noexcept;
+
     File(const File &file, Maybe<utf8_stringview> name) noexcept;
 
     static void ComputeNameAndContentType(utf8_stringview path, utf8_stringview nameOverride,

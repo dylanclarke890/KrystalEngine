@@ -11,7 +11,9 @@ namespace krys::Serialisation
     archive(size);
 
     for (const auto &item : arr)
+    {
       archive(item);
+    }
   }
 
   template <typename Archive, typename T, size_t N>
@@ -21,6 +23,8 @@ namespace krys::Serialisation
     archive(size);
 
     for (auto &item : arr)
+    {
       archive(item);
+    }
   }
 }

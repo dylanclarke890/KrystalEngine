@@ -13,6 +13,7 @@ namespace krys::ui
     void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,
                               const boo::TransformationMatrix &modelViewMatrix,
                               float opacity) noexcept override = 0;
+
     virtual void DrawRepaintCounter(TextureMapper &, int32, const boo::Color &, const boo::FloatRect &,
                                     const boo::TransformationMatrix &) noexcept
     {

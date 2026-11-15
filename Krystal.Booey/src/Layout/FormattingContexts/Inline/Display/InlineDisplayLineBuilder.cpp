@@ -340,7 +340,6 @@ namespace krys::boo::layout
       }
       return FloatRect {rootInlineBox.Left(), ellipsisStart, rootInlineBox.Width(), ellipsisWidth};
     }
-
   }
 
   InlineDisplayLineBuilder::InlineDisplayLineBuilder(InlineFormattingContext &inlineFormattingContext,

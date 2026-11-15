@@ -60,6 +60,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGRoot(svg::SVGSvgElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGRoot() noexcept override;
 
     KRYS_NODISCARD svg::SVGSvgElement &SvgSvgElement() const noexcept;
@@ -67,21 +68,26 @@ namespace krys::boo
     KRYS_NODISCARD bool IsEmbeddedThroughSVGImage() const noexcept;
 
     KRYS_NODISCARD FloatSize ComputeIntrinsicSize() const noexcept final;
+
     KRYS_NODISCARD FloatSize PreferredAspectRatio() const noexcept final;
+
     KRYS_NODISCARD bool HasIntrinsicAspectRatio() const noexcept final;
 
     KRYS_NODISCARD bool IsLayoutSizeChanged() const noexcept
     {
       return _isLayoutSizeChanged;
     }
+
     KRYS_NODISCARD bool IsInLayout() const noexcept
     {
       return _inLayout;
     }
+
     void SetNeedsBoundariesUpdate() noexcept override
     {
       _needsBoundariesOrTransformUpdate = true;
     }
+
     void SetNeedsTransformUpdate() noexcept override
     {
       _needsBoundariesOrTransformUpdate = true;
@@ -91,6 +97,7 @@ namespace krys::boo
     {
       return _containerSize;
     }
+
     void SetContainerSize(const IntSize &containerSize) noexcept
     {
       _containerSize = containerSize;
@@ -117,14 +124,18 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit ComputeReplacedLogicalWidth(
       ShouldComputePreferred = ShouldComputePreferred::ComputeActual) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       ComputeReplacedLogicalHeight(Maybe<LayoutUnit> estimatedUsedWidth = null) const noexcept override;
+
     void Layout() noexcept override;
+
     void PaintReplaced(PaintInfo &, const LayoutPoint &) noexcept override;
 
     void WillBeDestroyed() noexcept override;
 
     void InsertedIntoTree() noexcept override;
+
     void WillBeRemovedFromTree() noexcept override;
 
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept override;
@@ -135,9 +146,12 @@ namespace krys::boo
     {
       return _objectBoundingBox.value_or(FloatRect());
     }
+
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept override;
+
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept override;
+
     KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept override;
 
     bool NodeAtPoint(const HitTestRequest &, HitTestResult &, const HitTestLocation &locationInContainer,
@@ -145,6 +159,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                   VisibleRectContext) const noexcept override;
+
     KRYS_NODISCARD RepaintRects RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
                                                               RepaintOutlineBounds) const noexcept override;
 
@@ -158,6 +173,7 @@ namespace krys::boo
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &,
                              EnumSet<MapCoordinatesMode>, bool *wasFixed) const noexcept override;
+
     const RenderElement *PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
                                                 RenderGeometryMap &) const noexcept override;
 
@@ -165,13 +181,16 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
       return true;
     }
 
     KRYS_NODISCARD bool ShouldApplyViewportClip() const noexcept;
+
     void UpdateCachedBoundaries() noexcept;
+
     void BuildLocalToBorderBoxTransform() noexcept;
   };
 }

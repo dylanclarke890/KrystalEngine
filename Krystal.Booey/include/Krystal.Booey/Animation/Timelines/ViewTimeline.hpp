@@ -56,7 +56,7 @@ namespace krys::boo
       DuringEntry,
       WhileContained,
       DuringExit,
-      AfterExit
+      AfterExit,
     };
 
     float StickyTopOrLeftAdjustment {0};
@@ -67,8 +67,11 @@ namespace krys::boo
     KRYS_NODISCARD bool operator==(const StickinessAdjustmentData &other) const noexcept = default;
 
     KRYS_NODISCARD float EntryDistanceAdjustment() const noexcept;
+
     KRYS_NODISCARD float ExitDistanceAdjustment() const noexcept;
+
     KRYS_NODISCARD float RangeStartAdjustment() const noexcept;
+
     KRYS_NODISCARD float RangeEndAdjustment() const noexcept;
 
     KRYS_NODISCARD static StickinessAdjustmentData
@@ -110,22 +113,27 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-viewtimeline
     KRYS_NODISCARD static dom::ExceptionOr<Ref<ViewTimeline>>
       Create(dom::Document &document, ViewTimelineOptions &&options = {}) noexcept;
+
     KRYS_NODISCARD static Ref<ViewTimeline> Create(const css::CSSOMStringAtom &name, ScrollAxis axis,
                                                    const style::ViewTimelineInsetItem &insets) noexcept;
 
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-subject
     KRYS_NODISCARD const dom::Element *Subject() const noexcept;
+
     KRYS_NODISCARD const style::WeakStyleable &SubjectStyleable() const noexcept
     {
       return _subject;
     }
+
     void SetSubject(dom::Element *subject) noexcept;
+
     void SetSubject(const style::Styleable &styleable) noexcept;
 
     KRYS_NODISCARD const style::ViewTimelineInsetItem &Insets() const noexcept
     {
       return _insets;
     }
+
     void SetInsets(const style::ViewTimelineInsetItem &insets) noexcept
     {
       _insets = insets;
@@ -133,38 +141,49 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-startoffset
     KRYS_NODISCARD Ref<css::CSSNumericValue> StartOffset() const noexcept;
+
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-endoffset
     KRYS_NODISCARD Ref<css::CSSNumericValue> EndOffset() const noexcept;
 
     KRYS_NODISCARD ShouldUpdateAnimationsAndSendEvents
       DocumentWillUpdateAnimationsAndSendEvents() noexcept override;
+
     KRYS_NODISCARD AnimationTimelinesController *Controller() const noexcept override;
 
     KRYS_NODISCARD const RenderBox *SourceScrollerRenderer() const noexcept;
+
     KRYS_NODISCARD const RenderElement *StickyContainer() const noexcept;
+
     KRYS_NODISCARD RefPtr<dom::Element> BindingsSource() const noexcept override;
+
     KRYS_NODISCARD RefPtr<dom::Element> Source() const noexcept override;
+
     KRYS_NODISCARD style::SingleAnimationRange DefaultRange() const noexcept final;
 
     KRYS_NODISCARD Pair<WebAnimationTime, WebAnimationTime>
       IntervalForAttachmentRange(const style::SingleAnimationRange &attachmentRange) const noexcept final;
+
     /// @brief The start and end of @p attachmentRange, as offsets (0 to 1) of this timeline.
     KRYS_NODISCARD Pair<double, double>
       OffsetIntervalForAttachmentRange(const style::SingleAnimationRange &attachmentRange) const noexcept;
+
     /// @brief The start and end of the named timeline range @p name, as offsets (0 to 1) of this timeline.
     KRYS_NODISCARD Pair<double, double>
       OffsetIntervalForTimelineRangeName(style::SingleAnimationRangeName name) const noexcept;
 
   private:
     explicit ViewTimeline(ScrollAxis axis) noexcept;
+
     ViewTimeline(const css::CSSOMStringAtom &name, ScrollAxis axis,
                  const style::ViewTimelineInsetItem &insets) noexcept;
 
     KRYS_NODISCARD ScrollTimeline::Data ComputeTimelineData(
       UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept final;
+
     KRYS_NODISCARD Pair<double, double>
       IntervalForTimelineRangeName(const ScrollTimeline::Data &data,
                                    style::SingleAnimationRangeName name) const noexcept;
+
     template <typename F>
     KRYS_NODISCARD double MapOffsetToTimelineRange(const ScrollTimeline::Data &data,
                                                    style::SingleAnimationRangeName name,

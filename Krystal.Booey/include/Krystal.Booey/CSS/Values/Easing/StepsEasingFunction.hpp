@@ -47,7 +47,7 @@ namespace krys::boo::css
     enum class ShouldSerialiseKeyword : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     template <typename T, typename TKeyword, auto TShouldSerialiseKeyword = ShouldSerialiseKeyword::Yes>

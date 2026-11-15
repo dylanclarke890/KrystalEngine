@@ -76,8 +76,11 @@ namespace krys::boo::dom
     explicit SelectorDataList(const css::SelectorList &selectorList) noexcept;
 
     KRYS_NODISCARD bool Matches(const Element &element) const noexcept;
+
     KRYS_NODISCARD Element *Closest(Element &element) const noexcept;
+
     KRYS_NODISCARD Ref<NodeList> QueryAll(ContainerNode &rootNode) const noexcept;
+
     KRYS_NODISCARD Element *QueryFirst(ContainerNode &rootNode) const noexcept;
 
   private:
@@ -86,16 +89,20 @@ namespace krys::boo::dom
 
     template <typename TOutput>
     void Execute(ContainerNode &rootNode, TOutput &output) const noexcept;
+
     template <typename TOutput>
     void ExecuteSingleTagNameSelectorData(const ContainerNode &rootNode, const SelectorData &selectorData,
                                           TOutput &output) const noexcept;
+
     template <typename TOutput>
     void ExecuteSingleClassNameSelectorData(const ContainerNode &rootNode, const SelectorData &selectorData,
                                             TOutput &output) const noexcept;
+
     template <typename TOutput>
     void ExecuteSingleAttributeExactSelectorData(const ContainerNode &rootNode,
                                                  const SelectorData &selectorData,
                                                  TOutput &output) const noexcept;
+
     /// @brief Finds what the selector matches through the ID in its rightmost compound selector, if there's
     /// one, and at most one element has it.
     /// @return Whether it did.
@@ -103,13 +110,16 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool ExecuteRightmostIdSelectorData(const ContainerNode &rootNode,
                                                        const SelectorData &selectorData,
                                                        TOutput &output) const noexcept;
+
     /// @brief The narrowest subtree of @p rootNode that holds what the selector can match, going by an ID in
     /// it that only one element has.
     KRYS_NODISCARD const ContainerNode &
       SearchRootForAncestorId(const ContainerNode &rootNode, const SelectorData &selectorData) const noexcept;
+
     template <typename TOutput>
     void ExecuteSingleSelectorData(const ContainerNode &rootNode, const ContainerNode &searchRootNode,
                                    const SelectorData &selectorData, TOutput &output) const noexcept;
+
     template <typename TOutput>
     void ExecuteSingleMultiSelectorData(const ContainerNode &rootNode, TOutput &output) const noexcept;
   };

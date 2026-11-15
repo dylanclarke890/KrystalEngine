@@ -42,14 +42,14 @@ namespace krys::boo::style
   enum class FromStyleAttribute : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class IsCacheable : uint8
   {
     No,
     Partially,
-    Yes
+    Yes,
   };
 
   /// @brief A declaration block that applies to an element, with where it came from.

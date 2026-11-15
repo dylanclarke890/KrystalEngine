@@ -27,8 +27,8 @@
 namespace krys::boo
 {
   class LegacyRenderSVGResourceClipper;
-  class LegacyRenderSVGResourceFilter;
   class LegacyRenderSVGResourceContainer;
+  class LegacyRenderSVGResourceFilter;
   class LegacyRenderSVGResourceMarker;
   class LegacyRenderSVGResourceMasker;
   class RenderElement;
@@ -87,21 +87,27 @@ namespace krys::boo
 
     KRYS_NODISCARD static UniquePtr<SVGResources> BuildCachedResources(const RenderElement &,
                                                                        const RenderStyle &) noexcept;
+
     void LayoutDifferentRootIfNeeded(const RenderElement &resourcesClient) noexcept;
 
     KRYS_NODISCARD bool MarkerReverseStart() const noexcept;
 
     // Ordinary resources
     KRYS_NODISCARD LegacyRenderSVGResourceClipper *Clipper() const noexcept;
+
     KRYS_NODISCARD LegacyRenderSVGResourceMasker *Masker() const noexcept;
+
     KRYS_NODISCARD LegacyRenderSVGResourceFilter *Filter() const noexcept;
 
     KRYS_NODISCARD LegacyRenderSVGResourceMarker *MarkerStart() const noexcept;
+
     KRYS_NODISCARD LegacyRenderSVGResourceMarker *MarkerMid() const noexcept;
+
     KRYS_NODISCARD LegacyRenderSVGResourceMarker *MarkerEnd() const noexcept;
 
     // Paint servers
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *Fill() const noexcept;
+
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *Stroke() const noexcept;
 
     // Chainable resources - linked through xlink:href
@@ -112,29 +118,46 @@ namespace krys::boo
     // Methods operating on all cached resources
     void RemoveClientFromCacheAndMarkForInvalidation(RenderElement &,
                                                      bool markForInvalidation = true) const noexcept;
+
     // Returns true if the resource-to-be-destroyed is one of our resources.
     bool ResourceDestroyed(LegacyRenderSVGResourceContainer &) noexcept;
 
   private:
     // Only used by SVGResourcesCache cycle detection logic
     void ResetClipper() noexcept;
+
     void ResetFilter() noexcept;
+
     void ResetMarkerStart() noexcept;
+
     void ResetMarkerMid() noexcept;
+
     void ResetMarkerEnd() noexcept;
+
     void ResetMasker() noexcept;
+
     void ResetFill() noexcept;
+
     void ResetStroke() noexcept;
+
     void ResetLinkedResource() noexcept;
 
     bool SetClipper(LegacyRenderSVGResourceClipper *) noexcept;
+
     bool SetFilter(LegacyRenderSVGResourceFilter *) noexcept;
+
     bool SetMarkerStart(LegacyRenderSVGResourceMarker *) noexcept;
+
     bool SetMarkerMid(LegacyRenderSVGResourceMarker *) noexcept;
+
     bool SetMarkerEnd(LegacyRenderSVGResourceMarker *) noexcept;
+
     bool SetMasker(LegacyRenderSVGResourceMasker *) noexcept;
+
     bool SetFill(LegacyRenderSVGResourceContainer *) noexcept;
+
     bool SetStroke(LegacyRenderSVGResourceContainer *) noexcept;
+
     bool SetLinkedResource(LegacyRenderSVGResourceContainer *) noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept;

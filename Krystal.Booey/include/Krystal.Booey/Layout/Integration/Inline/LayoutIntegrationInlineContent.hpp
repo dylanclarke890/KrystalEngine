@@ -85,22 +85,26 @@ namespace krys::boo::layout_integration
     {
       return _displayContent;
     }
+
     KRYS_NODISCARD const inline_display::Content &DisplayContent() const noexcept
     {
       return _displayContent;
     }
 
     KRYS_NODISCARD bool HasContentfulInFlowBox() const noexcept;
+
     KRYS_NODISCARD bool HasContentfulInlineLevelBox() const noexcept;
 
     KRYS_NODISCARD FloatRect ScrollableOverflow() const noexcept
     {
       return _scrollableOverflow;
     }
+
     KRYS_NODISCARD FloatRect InkOverflow() const noexcept
     {
       return _inkOverflow;
     }
+
     KRYS_NODISCARD bool HasInkOverflow() const noexcept
     {
       return InkOverflow() != ScrollableOverflow();
@@ -110,14 +114,17 @@ namespace krys::boo::layout_integration
     {
       return _firstLinePaginationOffset.has_value();
     }
+
     KRYS_NODISCARD float FirstLinePaginationOffset() const noexcept
     {
       return _firstLinePaginationOffset.value_or(0.f);
     }
+
     KRYS_NODISCARD float ClearBeforeAfterGaps() const noexcept
     {
       return _clearGapBeforeFirstLine + _clearGapAfterLastLine;
     }
+
     KRYS_NODISCARD float ClearGapBeforeFirstLine() const noexcept
     {
       return _clearGapBeforeFirstLine;
@@ -127,6 +134,7 @@ namespace krys::boo::layout_integration
     {
       return _hasBlockLevelBoxes;
     }
+
     KRYS_NODISCARD bool HasPaintedInlineLevelBoxes() const noexcept
     {
       return _hasPaintedInlineLevelBoxes;
@@ -138,15 +146,18 @@ namespace krys::boo::layout_integration
     {
       return DisplayContent().LineList[box.LineIndex()];
     }
+
     KRYS_NODISCARD size_t IndexForBox(const inline_display::Box &box) const noexcept;
 
     KRYS_NODISCARD const inline_display::Box *
       FirstBoxForLayoutBox(const layout::Box &layoutBox) const noexcept;
+
     KRYS_NODISCARD Maybe<size_t> FirstBoxIndexForLayoutBox(const layout::Box &layoutBox) const noexcept;
 
     /// @brief The block level box of the line, if the line is for block-in-inline.
     KRYS_NODISCARD const inline_display::Box *
       BlockLevelBoxForLine(const inline_display::Line &line) const noexcept;
+
     KRYS_NODISCARD bool IsInlineBoxWrapperForBlockLevelBox(const inline_display::Box &box) const noexcept;
 
     template <typename TFunction>
@@ -164,12 +175,14 @@ namespace krys::boo::layout_integration
     }
 
     KRYS_NODISCARD const List<SVGTextFragment> &SvgTextFragments(size_t boxIndex) const noexcept;
+
     KRYS_NODISCARD List<List<SVGTextFragment>> &SvgTextFragmentsForBoxes() noexcept
     {
       return _svgTextFragmentsForBoxes;
     }
 
     void ShrinkToFit() noexcept;
+
     void ReleaseCaches() noexcept;
 
   private:
@@ -177,30 +190,37 @@ namespace krys::boo::layout_integration
     {
       _inkOverflow = inkOverflow;
     }
+
     void SetScrollableOverflow(const FloatRect &scrollableOverflow) noexcept
     {
       _scrollableOverflow = scrollableOverflow;
     }
+
     void SetHasMultilinePaintOverlap() noexcept
     {
       _hasMultilinePaintOverlap = true;
     }
+
     void SetClearGapBeforeFirstLine(float clearGapBeforeFirstLine) noexcept
     {
       _clearGapBeforeFirstLine = clearGapBeforeFirstLine;
     }
+
     void SetClearGapAfterLastLine(float clearGapAfterLastLine) noexcept
     {
       _clearGapAfterLastLine = clearGapAfterLastLine;
     }
+
     void SetFirstLinePaginationOffset(float firstLinePaginationOffset) noexcept
     {
       _firstLinePaginationOffset = firstLinePaginationOffset;
     }
+
     void SetHasBlockLevelBoxes() noexcept
     {
       _hasBlockLevelBoxes = true;
     }
+
     void SetHasPaintedInlineLevelBoxes() noexcept
     {
       _hasPaintedInlineLevelBoxes = true;

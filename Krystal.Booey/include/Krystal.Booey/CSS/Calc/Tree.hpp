@@ -50,37 +50,37 @@ namespace krys::boo::css
 namespace krys::boo::css::calc
 {
   // Math Operators.
-  struct Sum;
-  struct Product;
-  struct Negate;
   struct Invert;
+  struct Negate;
+  struct Product;
+  struct Sum;
 
   // Math Functions.
-  struct Min;
-  struct Max;
-  struct Clamp;
-  struct RoundNearest;
-  struct RoundUp;
-  struct RoundDown;
-  struct RoundToZero;
-  struct Mod;
-  struct Rem;
-  struct Sin;
-  struct Cos;
-  struct Tan;
-  struct Asin;
+  struct Abs;
   struct Acos;
+  struct Asin;
   struct Atan;
   struct Atan2;
-  struct Pow;
-  struct Sqrt;
+  struct Clamp;
+  struct Cos;
+  struct Exp;
   struct Hypot;
   struct Log;
-  struct Exp;
-  struct Abs;
-  struct Sign;
-  struct Random;
+  struct Max;
+  struct Min;
+  struct Mod;
+  struct Pow;
   struct Progress;
+  struct Random;
+  struct Rem;
+  struct RoundDown;
+  struct RoundNearest;
+  struct RoundToZero;
+  struct RoundUp;
+  struct Sign;
+  struct Sin;
+  struct Sqrt;
+  struct Tan;
 
   // CSS Anchor Positioning functions.
   struct Anchor;
@@ -121,7 +121,7 @@ namespace krys::boo::css::calc
     Time,
     Frequency,
     Resolution,
-    Flex
+    Flex,
   };
 
   struct CanonicalDimension
@@ -254,6 +254,7 @@ namespace krys::boo::css::calc
     Variant<Child, keywords::None> Value;
 
     ChildOrNone(Child &&) noexcept;
+
     ChildOrNone(keywords::None) noexcept;
 
     KRYS_FORWARD_VARIANT_FUNCTIONS(ChildOrNone, Value)
@@ -272,24 +273,35 @@ namespace krys::boo::css::calc
     List<Child> Value;
 
     Children(Children &&) noexcept;
+
     Children(List<Child> &&) noexcept;
+
     Children &operator=(Children &&) noexcept;
+
     Children &operator=(List<Child> &&) noexcept;
 
     KRYS_NODISCARD iterator begin() noexcept;
+
     KRYS_NODISCARD iterator end() noexcept;
+
     KRYS_NODISCARD reverse_iterator rbegin() noexcept;
+
     KRYS_NODISCARD reverse_iterator rend() noexcept;
 
     KRYS_NODISCARD const_iterator begin() const noexcept;
+
     KRYS_NODISCARD const_iterator end() const noexcept;
+
     KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept;
+
     KRYS_NODISCARD const_reverse_iterator rend() const noexcept;
 
     KRYS_NODISCARD bool empty() const noexcept;
+
     KRYS_NODISCARD size_t size() const noexcept;
 
     Child &operator[](size_t i) noexcept;
+
     const Child &operator[](size_t i) const noexcept;
 
     bool operator==(const Children &) const noexcept = default;
@@ -298,7 +310,7 @@ namespace krys::boo::css::calc
   enum class Stage : bool
   {
     Specified,
-    Computed
+    Computed,
   };
 
   struct Tree
@@ -827,6 +839,7 @@ namespace krys::boo::css::calc
     Variant<ValueId, Child> Value;
 
     AnchorSide(ValueId) noexcept;
+
     AnchorSide(Child &&) noexcept;
 
     KRYS_FORWARD_VARIANT_FUNCTIONS(AnchorSide, Value)
@@ -919,11 +932,17 @@ namespace krys::boo::css::calc
 
   // Gets the type of the leaf node.
   KRYS_NODISCARD Type GetType(const Number &) noexcept;
+
   KRYS_NODISCARD Type GetType(const Percentage &) noexcept;
+
   KRYS_NODISCARD Type GetType(const NonCanonicalDimension &) noexcept;
+
   KRYS_NODISCARD Type GetType(const CanonicalDimension &) noexcept;
+
   KRYS_NODISCARD Type GetType(const Symbol &) noexcept;
+
   KRYS_NODISCARD Type GetType(const SiblingCount &) noexcept;
+
   KRYS_NODISCARD Type GetType(const SiblingIndex &) noexcept;
 
   // Gets the type of the child node.
@@ -931,33 +950,61 @@ namespace krys::boo::css::calc
 
   // Constructs the nodes's type from it the types of its arguments. Returns `null` on failure.
   KRYS_NODISCARD Maybe<Type> ToType(const Sum &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Product &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Negate &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Invert &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Min &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Max &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Clamp &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const RoundNearest &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const RoundUp &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const RoundDown &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const RoundToZero &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Mod &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Rem &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Sin &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Cos &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Tan &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Asin &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Acos &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Atan &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Atan2 &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Pow &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Sqrt &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Hypot &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Log &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Exp &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Abs &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Sign &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Random &) noexcept;
+
   KRYS_NODISCARD Maybe<Type> ToType(const Progress &) noexcept;
 
   // MARK: UnitType Evaluation
@@ -1470,7 +1517,6 @@ namespace krys::boo::css::calc
 
 namespace std
 {
-
 #define OP_TUPLE_LIKE_CONFORMANCE(Op, numberOfArguments)                                                     \
   template <>                                                                                                \
   class tuple_size<krys::boo::css::calc::Op> : public std::integral_constant<size_t, numberOfArguments>      \

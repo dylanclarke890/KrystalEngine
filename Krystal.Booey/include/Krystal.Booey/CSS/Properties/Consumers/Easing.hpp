@@ -40,8 +40,8 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  struct PropertyParserState;
   struct EasingFunction;
+  struct PropertyParserState;
 
   namespace PropertyParserHelpers
   {

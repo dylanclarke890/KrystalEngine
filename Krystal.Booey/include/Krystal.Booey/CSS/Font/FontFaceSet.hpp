@@ -44,7 +44,7 @@ namespace krys::boo::css
     enum class Status : uint8
     {
       Loading,
-      Loaded
+      Loaded,
     };
 
   private:
@@ -89,10 +89,12 @@ namespace krys::boo::css
     {
       RefCounted::AddRef();
     }
+
     void SubRef() const noexcept final
     {
       RefCounted::SubRef();
     }
+
     KRYS_NODISCARD uint32 GetRefCount() const noexcept final
     {
       return RefCounted::GetRefCount();
@@ -102,15 +104,22 @@ namespace krys::boo::css
     void UpdateStyleIfNeeded() noexcept;
 
     KRYS_NODISCARD bool HasFace(const CSSFontFace &face) const noexcept;
+
     KRYS_NODISCARD size_t FaceCount() const noexcept
     {
       return _faces.size();
     }
+
     void Add(CSSFontFace &face) noexcept;
+
     void Remove(const CSSFontFace &face) noexcept;
+
     void Purge() noexcept;
+
     void EmptyCaches() noexcept;
+
     void Clear() noexcept;
+
     KRYS_NODISCARD CSSFontFace &operator[](size_t i) noexcept;
 
     KRYS_NODISCARD CSSFontFace *LookUpByCSSConnection(FontFaceRule &target) noexcept;
@@ -123,6 +132,7 @@ namespace krys::boo::css
     {
       return _status;
     }
+
     KRYS_NODISCARD bool HasActiveFontFaces() const noexcept
     {
       return GetStatus() == Status::Loading;
@@ -140,16 +150,20 @@ namespace krys::boo::css
 
   private:
     void RemoveFromFacesLookupTable(const CSSFontFace &face, const Value &familyToSearchFor) noexcept;
+
     void AddToFacesLookupTable(CSSFontFace &face) noexcept;
 
     void IncrementActiveCount() noexcept;
+
     void DecrementActiveCount() noexcept;
 
     void FontStateChanged(CSSFontFace &face, CSSFontFace::Status oldState,
                           CSSFontFace::Status newState) noexcept final;
+
     void FontPropertyChanged(CSSFontFace &face, Value *oldFamily = nullptr) noexcept final;
 
     void EnsureLocalFontFacesForFamilyRegistered(const StringAtom &familyName) noexcept;
+
     void NotifyFontModified() noexcept;
 
     KRYS_NODISCARD static StringAtom FamilyNameFromPrimitive(const PrimitiveValue &value) noexcept;

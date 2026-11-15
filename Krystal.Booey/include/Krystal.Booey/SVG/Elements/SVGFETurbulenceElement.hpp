@@ -30,7 +30,7 @@ namespace krys::boo::svg
   {
     SVG_STITCHTYPE_UNKNOWN = 0,
     SVG_STITCHTYPE_STITCH = 1,
-    SVG_STITCHTYPE_NOSTITCH = 2
+    SVG_STITCHTYPE_NOSTITCH = 2,
   };
 
   template <>
@@ -109,7 +109,7 @@ namespace krys::boo::svg
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGFETurbulenceElement);
 
-    static constexpr int32 InitialOctavesValue = 1;
+    constexpr static int32 InitialOctavesValue = 1;
 
   private:
     Ref<SVGAnimatedNumber> _baseFrequencyX;
@@ -126,22 +126,27 @@ namespace krys::boo::svg
     {
       return _baseFrequencyX->CurrentValue();
     }
+
     KRYS_NODISCARD float BaseFrequencyY() const noexcept
     {
       return _baseFrequencyY->CurrentValue();
     }
+
     KRYS_NODISCARD int32 NumOctaves() const noexcept
     {
       return _numOctaves->CurrentValue();
     }
+
     KRYS_NODISCARD float Seed() const noexcept
     {
       return _seed->CurrentValue();
     }
+
     KRYS_NODISCARD SVGStitchOptions StitchTiles() const noexcept
     {
       return _stitchTiles->CurrentValue<SVGStitchOptions>();
     }
+
     KRYS_NODISCARD TurbulenceType GetType() const noexcept
     {
       return _type->CurrentValue<TurbulenceType>();
@@ -151,22 +156,27 @@ namespace krys::boo::svg
     {
       return *_baseFrequencyX;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &BaseFrequencyYAnimated() noexcept
     {
       return *_baseFrequencyY;
     }
+
     KRYS_NODISCARD SVGAnimatedInteger &NumOctavesAnimated() noexcept
     {
       return *_numOctaves;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &SeedAnimated() noexcept
     {
       return *_seed;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &StitchTilesAnimated() noexcept
     {
       return *_stitchTiles;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &TypeAnimated() noexcept
     {
       return *_type;
@@ -178,10 +188,12 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     bool SetFilterEffectAttribute(FilterEffect &effect,
                                   const dom::QualifiedName &attributeName) noexcept final;
+
     KRYS_NODISCARD RefPtr<FilterEffect>
       CreateFilterEffect(const FilterEffectVector &inputs,
                          const GraphicsContext &destinationContext) const noexcept final;

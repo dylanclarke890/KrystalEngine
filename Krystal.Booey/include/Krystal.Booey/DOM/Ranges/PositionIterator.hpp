@@ -43,24 +43,31 @@ namespace krys::boo::dom
 
   public:
     PositionIterator(const Position &position) noexcept;
+
     operator Position() const noexcept;
 
     void Increment() noexcept;
+
     void Decrement() noexcept;
 
     KRYS_NODISCARD Node *GetNode() const noexcept
     {
       return _anchorNode.get();
     }
+
     KRYS_NODISCARD int32 OffsetInLeafNode() const noexcept
     {
       return _offsetInAnchor;
     }
 
     KRYS_NODISCARD bool AtStart() const noexcept;
+
     KRYS_NODISCARD bool AtEnd() const noexcept;
+
     KRYS_NODISCARD bool AtStartOfNode() const noexcept;
+
     KRYS_NODISCARD bool AtEndOfNode() const noexcept;
+
     KRYS_NODISCARD bool IsCandidate() const noexcept;
   };
 }

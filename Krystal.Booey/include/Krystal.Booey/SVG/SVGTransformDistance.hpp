@@ -37,10 +37,12 @@ namespace krys::boo::svg
 
   public:
     SVGTransformDistance() noexcept = default;
+
     SVGTransformDistance(const SVGTransformValue &fromTransform,
                          const SVGTransformValue &toTransform) noexcept;
 
     KRYS_NODISCARD SVGTransformDistance ScaledDistance(float scaleFactor) const noexcept;
+
     KRYS_NODISCARD SVGTransformValue AddToSVGTransform(const SVGTransformValue &) const noexcept;
 
     KRYS_NODISCARD static SVGTransformValue

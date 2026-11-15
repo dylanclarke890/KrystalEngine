@@ -48,35 +48,45 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override
     {
       return _parent.get();
     }
+
     void SetParent(AXObject *parent) noexcept
     {
       _parent = CreateWeakPtr(parent);
     }
+
     void DetachFromParent() noexcept override
     {
       _parent = nullptr;
     }
+
     void AddChildren() noexcept override
     {
       _childrenInitialized = true;
     }
+
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
       return false;
     }
 
     KRYS_NODISCARD bool IsEnabled() const noexcept override;
+
     KRYS_NODISCARD bool IsSelected() const noexcept override;
+
     KRYS_NODISCARD bool CanSetSelectedAttribute() const noexcept override
     {
       return IsEnabled();
     }
+
     KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
+
     void SetSelected(bool selected) noexcept override;
+
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
   private:
@@ -86,10 +96,12 @@ namespace krys::boo
     {
       return AXRole::MenuListOption;
     }
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override
     {
       return IsIgnoredByDefault();
     }
+
     KRYS_NODISCARD html::HTMLOptionElement *OptionElement() const noexcept;
   };
 }

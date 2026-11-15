@@ -140,8 +140,8 @@ namespace krys::boo
     Ref<FontCascadeFonts> fonts = FontCascadeFonts::Create();
     _entries.emplace(krys::move(key), fonts);
 
-    static constexpr uint32 UnreferencedPruneInterval = 1'000;
-    static constexpr size_t MaximumEntries = 5'000;
+    constexpr static uint32 UnreferencedPruneInterval = 1'000;
+    constexpr static size_t MaximumEntries = 5'000;
 
     // Referenced FontCascadeFonts would exist anyway so pruning them saves little memory.
     if (!(++_pruneCounter % UnreferencedPruneInterval))

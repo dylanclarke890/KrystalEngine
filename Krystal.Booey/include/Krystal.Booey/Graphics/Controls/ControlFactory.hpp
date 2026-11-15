@@ -35,9 +35,9 @@ namespace krys::boo
   class ButtonPart;
   class ColorWellPart;
   class InnerSpinButtonPart;
-  class MeterPart;
   class MenuListButtonPart;
   class MenuListPart;
+  class MeterPart;
   class PlatformControl;
   class ProgressBarPart;
   class SearchFieldCancelButtonPart;
@@ -60,28 +60,42 @@ namespace krys::boo
     virtual ~ControlFactory() noexcept = default;
 
     KRYS_NODISCARD static Ref<ControlFactory> Create() noexcept;
+
     KRYS_NODISCARD static ControlFactory &Singleton() noexcept;
 
     KRYS_NODISCARD virtual UniquePtr<PlatformControl> CreatePlatformButton(ButtonPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl> CreatePlatformColorWell(ColorWellPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformInnerSpinButton(InnerSpinButtonPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl> CreatePlatformMenuList(MenuListPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformMenuListButton(MenuListButtonPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl> CreatePlatformMeter(MeterPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformProgressBar(ProgressBarPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformSearchField(SearchFieldPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformSearchFieldCancelButton(SearchFieldCancelButtonPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformSliderThumb(SliderThumbPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformSliderTrack(SliderTrackPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl> CreatePlatformTextArea(TextAreaPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl> CreatePlatformTextField(TextFieldPart &) noexcept = 0;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl>
       CreatePlatformToggleButton(ToggleButtonPart &) noexcept = 0;
 

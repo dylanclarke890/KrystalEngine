@@ -48,13 +48,13 @@
 
 namespace krys::boo
 {
-  class RenderBox;
-  class RenderElement;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
-  class RenderInline;
   struct PaintInfo;
+  class RenderBox;
+  class RenderElement;
+  class RenderInline;
   class RenderObject;
   class RenderText;
   class RenderView;
@@ -88,7 +88,7 @@ namespace krys::boo::layout_integration
     enum class ForceFullLayout : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -104,34 +104,47 @@ namespace krys::boo::layout_integration
 
   public:
     explicit LineLayout(RenderBlockFlow &flow) noexcept;
+
     ~LineLayout() noexcept;
 
     KRYS_NODISCARD static RenderBlockFlow *BlockContainer(const RenderObject &renderer) noexcept;
+
     KRYS_NODISCARD static LineLayout *Containing(RenderObject &renderer) noexcept;
+
     KRYS_NODISCARD static const LineLayout *Containing(const RenderObject &renderer) noexcept;
 
     KRYS_NODISCARD static bool CanUseFor(const RenderBlockFlow &flow) noexcept;
+
     KRYS_NODISCARD static bool CanUseForPreferredWidthComputation(const RenderBlockFlow &flow) noexcept;
+
     KRYS_NODISCARD static bool
       ShouldInvalidateLineLayoutAfterContentChange(const RenderBlockFlow &parent,
                                                    const RenderObject &rendererWithNewContent,
                                                    const LineLayout &lineLayout) noexcept;
+
     KRYS_NODISCARD static bool ShouldInvalidateLineLayoutAfterTreeMutation(const RenderBlockFlow &parent,
                                                                            const RenderObject &renderer,
                                                                            const LineLayout &lineLayout,
                                                                            bool isRemoval) noexcept;
 
     void UpdateFormattingContexGeometries(LayoutUnit availableLogicalWidth) noexcept;
+
     void UpdateOverflow() noexcept;
+
     static void UpdateStyle(const RenderObject &renderer) noexcept;
 
     // Partial invalidation.
     bool InsertedIntoTree(const RenderElement &parent, RenderObject &child) noexcept;
+
     bool RemovedFromTree(const RenderElement &parent, RenderObject &child) noexcept;
+
     bool UpdateTextContent(const RenderText &textRenderer, Maybe<size_t> offset, size_t oldLength) noexcept;
+
     bool RootStyleWillChange(const RenderBlockFlow &root, const RenderStyle &newStyle) noexcept;
+
     bool StyleWillChange(const RenderElement &renderer, const RenderStyle &newStyle,
                          style::Difference diff) noexcept;
+
     bool BoxContentWillChange(const RenderBox &renderer) noexcept;
 
     KRYS_NODISCARD std::pair<LayoutUnit, LayoutUnit> ComputeIntrinsicWidthConstraints() noexcept;
@@ -140,6 +153,7 @@ namespace krys::boo::layout_integration
     /// @param layerRenderer The inline box whose layer is being painted, if any: only its content is painted.
     void Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
                const RenderInline *layerRenderer = nullptr) noexcept;
+
     /// @brief Hit tests the inline content for @p hitTestAction, the last box first.
     /// @param layerRenderer The inline box whose layer is being hit tested, if any: only its content is
     /// tested.
@@ -153,49 +167,69 @@ namespace krys::boo::layout_integration
     void ShiftLinesBy(LayoutUnit blockShift) noexcept;
 
     void CollectOverflow() noexcept;
+
     KRYS_NODISCARD LayoutRect InkOverflowBoundingBoxRectFor(const RenderInline &renderInline) const noexcept;
+
     KRYS_NODISCARD List<FloatRect> CollectInlineBoxRects(const RenderInline &renderInline) const noexcept;
 
     KRYS_NODISCARD LayoutUnit ContentLogicalHeight() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> ClampedContentLogicalHeight() const noexcept;
+
     KRYS_NODISCARD bool HasEllipsisInBlockDirectionOnLastFormattedLine() const noexcept;
 
     KRYS_NODISCARD bool Contains(const RenderElement &renderer) const noexcept;
 
     KRYS_NODISCARD bool IsPaginated() const noexcept;
+
     KRYS_NODISCARD bool IsDamaged() const noexcept
     {
       return static_cast<bool>(_lineDamage);
     }
+
     KRYS_NODISCARD const layout::InlineDamage *Damage() const noexcept
     {
       return _lineDamage.get();
     }
+
     KRYS_NODISCARD bool HasDetachedContent() const noexcept
     {
       return _lineDamage && _lineDamage->HasDetachedContent();
     }
+
     KRYS_NODISCARD size_t LineCount() const noexcept;
+
     KRYS_NODISCARD bool HasContentfulInlineOrBlockLine() const noexcept;
+
     KRYS_NODISCARD bool HasContentfulInlineLine() const noexcept;
+
     KRYS_NODISCARD bool IsSelfCollapsingContent() const noexcept;
+
     KRYS_NODISCARD bool HasInkOverflow() const noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> LastLineBaseline() const noexcept;
 
     KRYS_NODISCARD LayoutRect FirstInlineBoxRect(const RenderInline &renderInline) const noexcept;
+
     KRYS_NODISCARD LayoutRect EnclosingBorderBoxRectFor(const RenderInline &renderInline) const noexcept;
 
     KRYS_NODISCARD inline_iterator::TextBoxIterator TextBoxesFor(const RenderText &renderText) const noexcept;
+
     KRYS_NODISCARD inline_iterator::LeafBoxIterator BoxFor(const RenderElement &renderElement) const noexcept;
+
     KRYS_NODISCARD inline_iterator::InlineBoxIterator
       FirstInlineBoxFor(const RenderInline &renderInline) const noexcept;
+
     KRYS_NODISCARD inline_iterator::InlineBoxIterator FirstRootInlineBox() const noexcept;
+
     KRYS_NODISCARD inline_iterator::LineBoxIterator FirstLineBox() const noexcept;
+
     KRYS_NODISCARD inline_iterator::LineBoxIterator LastLineBox() const noexcept;
 
     KRYS_NODISCARD const RenderBlockFlow &Flow() const noexcept;
+
     KRYS_NODISCARD RenderBlockFlow &Flow() noexcept;
 
     static void ReleaseCaches(RenderView &view) noexcept;
@@ -209,12 +243,16 @@ namespace krys::boo::layout_integration
 
   private:
     KRYS_NODISCARD bool IsContentConsideredStale() const noexcept;
+
     void PreparePlacedFloats() noexcept;
+
     FloatRect ConstructContent(const layout::InlineLayoutState &inlineLayoutState,
                                layout::InlineLayoutResult &&layoutResult) noexcept;
+
     void UpdateRenderTreePositions(const List<LineAdjustment> &lineAdjustments,
                                    const layout::InlineLayoutState &inlineLayoutState,
                                    bool didDiscardContent) noexcept;
+
     /// @brief Moves the lines down to fit in their columns, and whether layout must restart for widows.
     List<LineAdjustment> AdjustContentForPagination(bool isPartialLayout) noexcept;
 
@@ -224,6 +262,7 @@ namespace krys::boo::layout_integration
     {
       return *_layoutState;
     }
+
     KRYS_NODISCARD const layout::LayoutState &GetLayoutState() const noexcept
     {
       return *_layoutState;
@@ -233,12 +272,14 @@ namespace krys::boo::layout_integration
     {
       return *_rootLayoutBox;
     }
+
     KRYS_NODISCARD layout::ElementBox &RootLayoutBox() noexcept
     {
       return *_rootLayoutBox;
     }
 
     void ClearInlineContent() noexcept;
+
     void ReleaseCachesAndResetDamage() noexcept;
 
     layout::InlineDamage &EnsureLineDamage() noexcept;

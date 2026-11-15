@@ -55,6 +55,7 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-length
     dom::ExceptionOr<void> Length(uint32 length) noexcept;
+
     using LiveHTMLCollection::Length;
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-setter

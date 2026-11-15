@@ -46,12 +46,15 @@ namespace krys::boo::style
   };
 
   KRYS_NODISCARD Color ToStyleColor(const css::ColorLayers &unresolved, ColorResolutionState &state) noexcept;
+
   KRYS_NODISCARD boo::Color ResolveColor(const ColorLayers &colorLayers,
                                          const boo::Color &currentColor) noexcept;
+
   KRYS_NODISCARD bool ContainsCurrentColor(const ColorLayers &colorLayers) noexcept;
 
   void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ColorLayers &value) noexcept;
+
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const ColorLayers &value) noexcept;
 }

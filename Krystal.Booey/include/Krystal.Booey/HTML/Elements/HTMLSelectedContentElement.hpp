@@ -29,7 +29,9 @@ namespace krys::boo::html
 #pragma region Extension Hooks
 
     void OnInsert() noexcept override;
+
     void OnPostConnection() noexcept override;
+
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
 #pragma endregion

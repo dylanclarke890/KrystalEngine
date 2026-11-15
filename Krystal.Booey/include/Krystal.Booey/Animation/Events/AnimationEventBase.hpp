@@ -45,6 +45,7 @@ namespace krys::boo
     /// @brief A trusted event, fired by the user agent, that bubbles and isn't cancelable.
     AnimationEventBase(dom::DOMStringAtom type, WebAnimation *animation,
                        Maybe<Seconds> scheduledTime) noexcept;
+
     AnimationEventBase(dom::DOMStringAtom type, const dom::EventInit &eventInitDict) noexcept;
 
   public:
@@ -59,10 +60,12 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsCSSAnimationEvent() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsCSSTransitionEvent() const noexcept
     {
       return false;
@@ -72,6 +75,7 @@ namespace krys::boo
     {
       return _animation.get();
     }
+
     KRYS_NODISCARD Maybe<Seconds> ScheduledTime() const noexcept
     {
       return _scheduledTime;

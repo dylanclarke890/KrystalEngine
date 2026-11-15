@@ -82,8 +82,11 @@ namespace krys::boo::css
                    DisallowPseudoElements disallowPseudoElements = DisallowPseudoElements::No) noexcept;
 
     KRYS_NODISCARD MutableSelectorList ConsumeComplexSelectorList(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD MutableSelectorList ConsumeNestedSelectorList(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD MutableSelectorList ConsumeComplexForgivingSelectorList(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD MutableSelectorList ConsumeNestedComplexForgivingSelectorList(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD static Maybe<SelectorList> ParseSelectorList(CSSOMStringView string,
@@ -110,17 +113,23 @@ namespace krys::boo::css
     template <typename TConsumeSelector>
     KRYS_NODISCARD MutableSelectorList ConsumeSelectorList(TokenRange &tokens,
                                                            TConsumeSelector &&consumeSelector) noexcept;
+
     template <typename TConsumeSelector>
     KRYS_NODISCARD MutableSelectorList
       ConsumeForgivingSelectorList(TokenRange &tokens, TConsumeSelector &&consumeSelector) noexcept;
 
     KRYS_NODISCARD MutableSelectorList ConsumeCompoundSelectorList(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD MutableSelectorList ConsumeRelativeSelectorList(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeComplexSelector(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeNestedComplexSelector(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeCompoundSelector(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeRelativeScopeSelector(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeRelativeNestedSelector(TokenRange &tokens) noexcept;
 
     /// @note This doesn't include element names, since they're handled specially.
@@ -131,20 +140,29 @@ namespace krys::boo::css
 
     // These will return nullptr when the selector is invalid.
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeId(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeClass(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumePseudo(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeAttribute(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeNesting(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD SelectorRelation ConsumeCombinator(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD SelectorMatch ConsumeAttributeMatch(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD AttributeCaseFlag ConsumeAttributeFlags(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &DefaultNamespace() const noexcept;
+
     KRYS_NODISCARD CSSOMStringAtom DetermineNamespace(const CSSOMStringAtom &prefix) const noexcept;
+
     void PrependTypeSelectorIfNeeded(const CSSOMStringAtom &namespacePrefix,
                                      const CSSOMStringAtom &elementName,
                                      MutableSelector &compoundSelector) noexcept;
+
     KRYS_NODISCARD static UniquePtr<MutableSelector>
       SplitCompoundAtImplicitShadowCrossingCombinator(UniquePtr<MutableSelector> compoundSelector,
                                                       const SelectorParserContext &context) noexcept;

@@ -45,7 +45,9 @@ namespace krys::boo::html
     virtual ~TypeAheadDataSource() noexcept = default;
 
     KRYS_NODISCARD virtual int32 IndexOfSelectedOption() const noexcept = 0;
+
     KRYS_NODISCARD virtual int32 OptionCount() const noexcept = 0;
+
     KRYS_NODISCARD virtual dom::DOMString OptionAtIndex(int32 index) const noexcept = 0;
   };
 

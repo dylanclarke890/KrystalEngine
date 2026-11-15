@@ -43,13 +43,13 @@ namespace krys::boo::dom
 namespace krys::boo::style
 {
   struct PreferredSize;
+  struct StrokeWidth;
   struct SVGCenterCoordinateComponent;
   struct SVGCoordinateComponent;
   struct SVGRadius;
   struct SVGRadiusComponent;
   struct SVGStrokeDasharrayValue;
   struct SVGStrokeDashoffset;
-  struct StrokeWidth;
   struct ZoomFactor;
   struct ZoomNeeded;
 }
@@ -66,6 +66,7 @@ namespace krys::boo::svg
 
   public:
     explicit SVGLengthContext(const SVGElement *, const Maybe<FloatSize> &viewportSize = {}) noexcept;
+
     ~SVGLengthContext() noexcept;
 
     template <typename T>
@@ -88,30 +89,40 @@ namespace krys::boo::svg
                                                      const FloatRect &viewport, const SVGLengthValue &x,
                                                      const SVGLengthValue &y, const SVGLengthValue &width,
                                                      const SVGLengthValue &height) noexcept;
+
     KRYS_NODISCARD static FloatPoint ResolvePoint(const SVGElement *, SVGUnitTypes::SVGUnitType,
                                                   const SVGLengthValue &x, const SVGLengthValue &y) noexcept;
+
     KRYS_NODISCARD static float ResolveLength(const SVGElement *, SVGUnitTypes::SVGUnitType,
                                               const SVGLengthValue &) noexcept;
 
     KRYS_NODISCARD float ValueForLength(const style::PreferredSize &, style::ZoomFactor usedZoom,
                                         SVGLengthMode = SVGLengthMode::Other) noexcept;
+
     KRYS_NODISCARD float ValueForLength(const style::SVGCenterCoordinateComponent &, style::ZoomNeeded,
                                         SVGLengthMode = SVGLengthMode::Other) noexcept;
+
     KRYS_NODISCARD float ValueForLength(const style::SVGCoordinateComponent &, style::ZoomNeeded,
                                         SVGLengthMode = SVGLengthMode::Other) noexcept;
+
     KRYS_NODISCARD float ValueForLength(const style::SVGRadius &, style::ZoomNeeded,
                                         SVGLengthMode = SVGLengthMode::Other) noexcept;
+
     KRYS_NODISCARD float ValueForLength(const style::SVGRadiusComponent &, style::ZoomNeeded,
                                         SVGLengthMode = SVGLengthMode::Other) noexcept;
+
     KRYS_NODISCARD float ValueForLength(const style::SVGStrokeDasharrayValue &, style::ZoomNeeded,
                                         SVGLengthMode = SVGLengthMode::Other) noexcept;
+
     KRYS_NODISCARD float ValueForLength(const style::SVGStrokeDashoffset &, style::ZoomNeeded,
                                         SVGLengthMode = SVGLengthMode::Other) noexcept;
+
     KRYS_NODISCARD float ValueForLength(const style::StrokeWidth &, style::ZoomNeeded,
                                         SVGLengthMode = SVGLengthMode::Other) noexcept;
 
     KRYS_NODISCARD dom::ExceptionOr<float> ResolveValueToUserUnits(float, const css::LengthPercentageUnit &,
                                                                    SVGLengthMode) const noexcept;
+
     KRYS_NODISCARD dom::ExceptionOr<css::LengthPercentage<>>
       ResolveValueFromUserUnits(float, const css::LengthPercentageUnit &, SVGLengthMode) const noexcept;
 
@@ -120,20 +131,26 @@ namespace krys::boo::svg
   private:
     KRYS_NODISCARD dom::ExceptionOr<float>
       ConvertValueFromUserUnitsToPercentage(float value, SVGLengthMode) const noexcept;
+
     KRYS_NODISCARD dom::ExceptionOr<float>
       ConvertValueFromPercentageToUserUnits(float value, SVGLengthMode) const noexcept;
+
     KRYS_NODISCARD static float ConvertValueFromPercentageToUserUnits(float value, SVGLengthMode,
                                                                       FloatSize) noexcept;
 
     KRYS_NODISCARD dom::ExceptionOr<float> ConvertValueFromUserUnitsToEXS(float) const noexcept;
+
     KRYS_NODISCARD dom::ExceptionOr<float> ConvertValueFromEXSToUserUnits(float) const noexcept;
 
     KRYS_NODISCARD Maybe<FloatSize> ComputeViewportSize() const noexcept;
+
     KRYS_NODISCARD float ComputeNonCalcLength(float, css::LengthUnit) const noexcept;
+
     KRYS_NODISCARD float RemoveZoomFromFontOrRootFontRelativeLength(float value,
                                                                     css::LengthUnit) const noexcept;
 
     KRYS_NODISCARD Maybe<css::ToLengthConversionData> CssConversionData() const noexcept;
+
     KRYS_NODISCARD RefPtr<const SVGElement> ProtectedContext() const noexcept;
 
     template <typename TSize>
@@ -141,6 +158,7 @@ namespace krys::boo::svg
                                           SVGLengthMode = SVGLengthMode::Other) noexcept
     requires(TSize::Fixed::Range.ZoomOptions == css::RangeZoomOptions::Unzoomed
              || TSize::Calc::Range.ZoomOptions == css::RangeZoomOptions::Unzoomed);
+
     template <typename TSize>
     KRYS_NODISCARD float ValueForSizeType(const TSize &, style::ZoomNeeded,
                                           SVGLengthMode = SVGLengthMode::Other) noexcept;

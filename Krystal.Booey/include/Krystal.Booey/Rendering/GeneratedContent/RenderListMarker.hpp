@@ -84,6 +84,7 @@ namespace krys::boo
     void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
 
     RenderListMarker(RenderListItem &listItem, RenderStyle &&style) noexcept;
+
     ~RenderListMarker() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
@@ -95,22 +96,26 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
                                                       bool clipToVisibleContent) noexcept final;
+
     KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept final
     {
       return true;
     }
+
     KRYS_NODISCARD LayoutRect LocalSelectionRect() const noexcept;
 
     KRYS_NODISCARD utf8_string TextWithoutSuffix() const noexcept
     {
       return utf8_string(_textContent.TextWithoutSuffix());
     }
+
     KRYS_NODISCARD utf8_string TextWithSuffix() const noexcept
     {
       return _textContent.TextWithSuffix;
     }
 
     KRYS_NODISCARD bool IsInside() const noexcept;
+
     KRYS_NODISCARD bool IsDisclosureMarker() const noexcept;
 
     /// @brief Updates the marker's text from its list item's value and its style.
@@ -125,6 +130,7 @@ namespace krys::boo
     {
       return _lineLogicalOffsetForListItem;
     }
+
     KRYS_NODISCARD const RenderListItem *ListItem() const noexcept;
 
     /// @brief The marker's ascent and descent on its line.
@@ -137,24 +143,33 @@ namespace krys::boo
     void WillBeDestroyed() noexcept final;
 
     void ComputePreferredLogicalWidths() noexcept final;
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
     {
       krys_debug_assert(false);
     }
+
     KRYS_NODISCARD bool CanHaveChildren() const noexcept final
     {
       return false;
     }
+
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept final;
+
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept final;
+
     void Layout() noexcept final;
+
     KRYS_NODISCARD Pair<float, float> LayoutBoundForTextContent(utf8_stringview text) const noexcept;
 
     void UpdateInlineMargins() noexcept;
+
     void UpdateContent() noexcept;
+
     KRYS_NODISCARD RenderBox *ParentBox(RenderBox &box) noexcept;
 
     KRYS_NODISCARD RefPtr<css::CounterStyle> GetCounterStyle() const noexcept;
+
     KRYS_NODISCARD bool WidthUsesMetricsOfPrimaryFont() const noexcept;
   };
 }

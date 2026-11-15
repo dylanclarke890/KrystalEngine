@@ -158,6 +158,7 @@ namespace krys::boo::dom
     Touch(LocalFrame *frame, EventTarget *target, int32 identifier, const DoublePoint &screenPosition,
           const DoublePoint &pagePosition, const DoubleSize &radius, float rotationAngle, double twist,
           float force) noexcept;
+
     Touch(EventTarget *target, int32 identifier, const DoublePoint &clientPosition,
           const DoublePoint &screenPosition, const DoublePoint &pagePosition, const DoubleSize &radius,
           float rotationAngle, double twist, float force, const DoublePoint &absoluteLocation) noexcept;

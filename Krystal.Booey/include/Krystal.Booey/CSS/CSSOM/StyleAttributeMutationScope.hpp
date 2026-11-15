@@ -53,6 +53,7 @@ namespace krys::boo::css
 
   public:
     explicit StyleAttributeMutationScope(dom::Element *element) noexcept;
+
     ~StyleAttributeMutationScope() noexcept;
 
     /// @brief Queues the record when the outermost scope ends.

@@ -52,6 +52,7 @@ namespace krys::boo
 
   public:
     constexpr FloatSize() noexcept = default;
+
     constexpr FloatSize(float width, float height) noexcept : _width(width), _height(height)
     {
     }

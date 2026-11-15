@@ -40,6 +40,7 @@ namespace krys::boo
 
   private:
     void UpdateAnimationProperties() noexcept final;
+
     void Start() noexcept final;
 
     void SetVisible(bool visible) noexcept final

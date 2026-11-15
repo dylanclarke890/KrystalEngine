@@ -66,24 +66,31 @@ namespace krys::boo
 
   public:
     explicit ImageFrameAnimator(BitmapImageSource &source) noexcept;
+
     ~ImageFrameAnimator() noexcept;
 
     bool ImageFrameDecodeAtIndexHasFinished(uint32 index, ImageAnimatingState, DecodingStatus) noexcept;
 
     bool StartAnimation(SubsamplingLevel, const DecodingOptions &) noexcept;
+
     void AdvanceAnimation() noexcept;
+
     void StopAnimation() noexcept;
+
     void ResetAnimation() noexcept;
+
     KRYS_NODISCARD bool IsAnimating() const noexcept
     {
       return static_cast<bool>(_frameTimer);
     }
+
     KRYS_NODISCARD bool IsAnimationAllowed() const noexcept;
 
     KRYS_NODISCARD bool HasEverAnimated() const noexcept
     {
       return _desiredFrameStartTime.has_value();
     }
+
     KRYS_NODISCARD uint32 CurrentFrameIndex() const noexcept
     {
       return _currentFrameIndex;
@@ -95,7 +102,9 @@ namespace krys::boo
     void DestroyDecodedData(bool destroyAll) noexcept;
 
     void StartTimer(MonotonicTime::duration delay) noexcept;
+
     void ClearTimer() noexcept;
+
     void TimerFired() noexcept;
 
     KRYS_NODISCARD uint32 NextFrameIndex() const noexcept

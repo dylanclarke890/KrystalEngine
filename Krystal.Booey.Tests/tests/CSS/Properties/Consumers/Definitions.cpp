@@ -17,7 +17,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-
     /// @brief Consumes a single `T` from `css`, requiring the whole input to be consumed on success.
     template <typename T>
     Maybe<T> ConsumeAll(utf8_stringview css, ParserMode mode = ParserMode::HTMLStandard,

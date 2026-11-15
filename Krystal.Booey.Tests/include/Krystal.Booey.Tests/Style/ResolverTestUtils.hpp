@@ -24,7 +24,7 @@ namespace krys::boo::style::tests
   enum class WithView : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Fixture for tests that resolve the styles of a parsed document's elements. The document is shown

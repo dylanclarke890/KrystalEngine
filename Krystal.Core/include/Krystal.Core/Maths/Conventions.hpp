@@ -5,13 +5,13 @@ namespace krys::Conventions
   enum class Handedness
   {
     Left,
-    Right
+    Right,
   };
 
   enum class DepthRange
   {
     ZeroToOne,
-    NegativeOneToOne
+    NegativeOneToOne,
   };
 
   constexpr Handedness DefaultHandedness = Handedness::Right;

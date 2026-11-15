@@ -58,8 +58,11 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool TypeMismatchFor(dom::DOMStringView value) const noexcept final;
+
     KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+
     KRYS_NODISCARD bool TypeMismatch() const noexcept final;
+
     KRYS_NODISCARD bool HasBadInput() const noexcept final;
 
   protected:
@@ -83,10 +86,13 @@ namespace krys::boo::html
 
     KRYS_NODISCARD Decimal ParseToNumber(dom::DOMStringView source,
                                          const Decimal &defaultValue) const noexcept override;
+
     KRYS_NODISCARD dom::DOMString Serialize(const Decimal &value) const noexcept final;
+
     KRYS_NODISCARD dom::DOMString SerializeWithComponents(const DateComponents &date) const noexcept;
 
     KRYS_NODISCARD bool ShouldHaveSecondField(const DateComponents &date) const noexcept;
+
     KRYS_NODISCARD bool ShouldHaveMillisecondField(const DateComponents &date) const noexcept;
 
     /// @brief @p value in decimal, zero padded to @p width digits.
@@ -116,47 +122,74 @@ namespace krys::boo::html
 
     KRYS_NODISCARD virtual Maybe<DateComponents>
       ParseToDateComponents(dom::DOMStringView source) const noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<DateComponents>
       SetMillisecondToDateComponents(double value) const noexcept = 0;
+
     virtual void SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,
                                        const DateComponents &date) const noexcept = 0;
+
     KRYS_NODISCARD virtual bool
       IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept = 0;
+
     KRYS_NODISCARD virtual dom::DOMString SerializeWithMilliseconds(double value) const noexcept;
 
     // InputType functions:
     KRYS_NODISCARD dom::DOMString VisibleValue() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept override;
+
     void SetValue(dom::DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
+
     KRYS_NODISCARD double ValueAsDate() const noexcept override;
+
     dom::ExceptionOr<void> SetValueAsDate(double value) const noexcept override;
+
     KRYS_NODISCARD double ValueAsDouble() const noexcept final;
+
     dom::ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
                                              TextFieldEventBehavior eventBehavior) const noexcept final;
+
     KRYS_NODISCARD Decimal DefaultValueForStepUp() const noexcept override;
+
     KRYS_NODISCARD dom::DOMString LocalizeValue(dom::DOMStringView proposedValue) const noexcept final;
+
     KRYS_NODISCARD bool SupportsReadOnly() const noexcept final;
 
     void HandleActivationBehavior(dom::Event &event) noexcept override;
+
     void CreateShadowSubtree() noexcept final;
+
     void RemoveShadowSubtree() noexcept final;
+
     void UpdateInnerTextValue() noexcept final;
+
     void AttributeChanged(dom::DOMStringAtom name) noexcept final;
+
     KRYS_NODISCARD bool IsPresentingAttachedView() const noexcept final;
+
     void ElementDidBlur() noexcept final;
+
     void Detach() noexcept final;
 
     ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+
     void HandleKeypressEvent(dom::KeyboardEvent &event) noexcept final;
+
     void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept final;
 
     // DateTimeEditElementEditControlOwner functions:
     void DidBlurFromControl() noexcept final;
+
     void DidChangeValueFromControl() noexcept final;
+
     void DidReceiveSpaceKeyFromControl() noexcept final;
+
     KRYS_NODISCARD bool IsEditControlOwnerDisabled() const noexcept final;
+
     KRYS_NODISCARD bool IsEditControlOwnerReadOnly() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString LocaleIdentifier() const noexcept final;
 
     // DateTimeChooserClient functions:
@@ -165,6 +198,7 @@ namespace krys::boo::html
     void DidEndChooser() noexcept final;
 
     bool SetupDateTimeChooserParameters(DateTimeChooserParameters &parameters) noexcept;
+
     void CloseDateTimeChooser() noexcept;
   };
 }

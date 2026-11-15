@@ -70,14 +70,17 @@ namespace krys::boo::dom
     {
       return AdoptRef(*new DOMPointReadOnly(x, y, z, w));
     }
+
     KRYS_NODISCARD static Ref<DOMPointReadOnly> Create(const DOMPointInit &init) noexcept
     {
       return Create(init.X, init.Y, init.Z, init.W);
     }
+
     KRYS_NODISCARD static Ref<DOMPointReadOnly> FromPoint(const DOMPointInit &init) noexcept
     {
       return Create(init.X, init.Y, init.Z, init.W);
     }
+
     KRYS_NODISCARD static Ref<DOMPointReadOnly> FromFloatPoint(const FloatPoint3D &p) noexcept
     {
       return Create(p.X(), p.Y(), p.Z(), 1);
@@ -87,14 +90,17 @@ namespace krys::boo::dom
     {
       return _x;
     }
+
     KRYS_NODISCARD double Y() const noexcept
     {
       return _y;
     }
+
     KRYS_NODISCARD double Z() const noexcept
     {
       return _z;
     }
+
     KRYS_NODISCARD double W() const noexcept
     {
       return _w;

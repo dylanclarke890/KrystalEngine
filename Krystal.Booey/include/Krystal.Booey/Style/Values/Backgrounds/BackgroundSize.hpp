@@ -79,10 +79,12 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<css::keywords::Cover>(_value);
     }
+
     KRYS_NODISCARD bool IsContain() const noexcept
     {
       return krys::HoldsAlternative<css::keywords::Contain>(_value);
     }
+
     KRYS_NODISCARD bool IsLengthSize() const noexcept
     {
       return krys::HoldsAlternative<LengthSize>(_value);
@@ -149,6 +151,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD BackgroundSize operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<BackgroundSize>
   {
@@ -171,6 +174,7 @@ namespace krys::boo::style
   struct Blending<BackgroundSize>
   {
     KRYS_NODISCARD bool CanBlend(const BackgroundSize &, const BackgroundSize &) noexcept;
+
     KRYS_NODISCARD BackgroundSize Blend(const BackgroundSize &, const BackgroundSize &,
                                         const BlendingContext &) noexcept;
   };

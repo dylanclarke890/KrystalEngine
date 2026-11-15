@@ -45,12 +45,17 @@ namespace krys::boo::html
 
   public:
     CanvasStyle(Color) noexcept;
+
     CanvasStyle(Ref<CanvasGradient> &&) noexcept;
+
     CanvasStyle(Ref<CanvasPattern> &&) noexcept;
 
     KRYS_NODISCARD Color GetColor() const noexcept;
+
     KRYS_NODISCARD dom::DOMString ColorString() const noexcept;
+
     KRYS_NODISCARD RefPtr<CanvasGradient> GetCanvasGradient() const noexcept;
+
     KRYS_NODISCARD RefPtr<CanvasPattern> GetCanvasPattern() const noexcept;
 
     /// @brief Calls the visitor with the colour serialised, or with the gradient or pattern.

@@ -51,6 +51,7 @@ namespace krys::boo
     {
       return _indexOfFirstMismatch.has_value();
     }
+
     KRYS_NODISCARD const List<PrimitiveType> &Primitives() const noexcept
     {
       return _primitives;

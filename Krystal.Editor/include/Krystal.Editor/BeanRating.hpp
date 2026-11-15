@@ -25,7 +25,7 @@ namespace krys
   /// the custom state `rated`, which the page styles with `:state(rated)`.
   class BeanRating final : public boo::html::CustomElement
   {
-    static constexpr int32 MaxRating = 5;
+    constexpr static int32 MaxRating = 5;
 
   private:
     RefPtr<boo::html::ElementInternals> _internals;
@@ -107,7 +107,7 @@ namespace krys
     }
 
   private:
-    static constexpr utf8_stringview Styles = u8R"(
+    constexpr static utf8_stringview Styles = u8R"(
       :host { display: inline-flex; gap: 5px; align-items: center; padding: 3px 6px; border-radius: 6px;
               cursor: pointer; }
       :host(:focus-visible) { outline: 2px solid #4f6df5; }

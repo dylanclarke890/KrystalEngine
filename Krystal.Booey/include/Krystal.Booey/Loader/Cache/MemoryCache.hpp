@@ -75,9 +75,11 @@ namespace krys::boo
     KRYS_NODISCARD CachedResource *ResourceForRequest(const ResourceRequest &) noexcept;
 
     bool Add(CachedResource &) noexcept;
+
     void Remove(CachedResource &) noexcept;
 
     KRYS_NODISCARD static bool ShouldRemoveFragmentIdentifier(const url::URL &) noexcept;
+
     KRYS_NODISCARD static url::URL RemoveFragmentIdentifierIfNeeded(const url::URL &) noexcept;
 
     void ForEachResource(KRYS_NOESCAPE const Func<void(CachedResource &)> &) noexcept;
@@ -96,6 +98,7 @@ namespace krys::boo
     // Turn the cache on and off.  Disabling the cache will remove all resources from the cache.  They may
     // still live on if they are referenced by some Web page though.
     void SetDisabled(bool) noexcept;
+
     KRYS_NODISCARD bool Disabled() const noexcept
     {
       return _disabled;
@@ -104,15 +107,19 @@ namespace krys::boo
     void EvictResources() noexcept;
 
     void Prune() noexcept;
+
     void PruneSoon() noexcept;
+
     KRYS_NODISCARD uint32 Size() const noexcept
     {
       return _liveSize + _deadSize;
     }
+
     KRYS_NODISCARD uint32 LiveSize() const noexcept
     {
       return _liveSize;
     }
+
     KRYS_NODISCARD uint32 DeadSize() const noexcept
     {
       return _deadSize;
@@ -122,6 +129,7 @@ namespace krys::boo
     {
       _deadDecodedDataDeletionInterval = interval;
     }
+
     KRYS_NODISCARD MonotonicTime::duration DeadDecodedDataDeletionInterval() const noexcept
     {
       return _deadDecodedDataDeletionInterval;
@@ -131,6 +139,7 @@ namespace krys::boo
     void AdjustSize(bool live, int64 delta) noexcept;
 
     void AddToLiveResourcesSize(CachedResource &) noexcept;
+
     void RemoveFromLiveResourcesSize(CachedResource &) noexcept;
 
     void ResourceAccessed(CachedResource &) noexcept;
@@ -138,8 +147,11 @@ namespace krys::boo
     // pruneDead*() - Flush decoded and encoded data from resources not referenced by Web pages.
     // pruneLive*() - Flush decoded data from resources still referenced by Web pages.
     void PruneDeadResources() noexcept; // Automatically decide how much to prune.
+
     void PruneLiveResources(bool shouldDestroyDecodedDataForAllLiveResources = false) noexcept;
+
     void PruneDeadResourcesToSize(uint32 targetSize) noexcept;
+
     void PruneLiveResourcesToSize(uint32 targetSize,
                                   bool shouldDestroyDecodedDataForAllLiveResources = false) noexcept;
 
@@ -147,7 +159,9 @@ namespace krys::boo
     MemoryCache() noexcept;
 
     KRYS_NODISCARD uint32 LiveCapacity() const noexcept;
+
     KRYS_NODISCARD uint32 DeadCapacity() const noexcept;
+
     KRYS_NODISCARD bool NeedsPruning() const noexcept;
 
     void RemoveFromLRUList(CachedResource &) noexcept;

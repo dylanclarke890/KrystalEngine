@@ -34,6 +34,6 @@ namespace krys::boo
   enum class WindRule : bool
   {
     NonZero,
-    EvenOdd
+    EvenOdd,
   };
 }

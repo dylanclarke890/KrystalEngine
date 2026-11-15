@@ -109,6 +109,7 @@ namespace krys::boo
     }
 
     void DeterminePaintsBoxDecorations() noexcept;
+
     KRYS_NODISCARD bool PaintsBoxDecorations() noexcept
     {
       DeterminePaintsBoxDecorations();
@@ -122,6 +123,7 @@ namespace krys::boo
     }
 
     void DeterminePaintsContent() noexcept;
+
     KRYS_NODISCARD bool PaintsContent() noexcept
     {
       DeterminePaintsContent();
@@ -134,6 +136,7 @@ namespace krys::boo
     }
 
     void DetermineContentsType() noexcept;
+
     KRYS_NODISCARD bool IsSimpleContainer() noexcept
     {
       DetermineContentsType();
@@ -3050,7 +3053,7 @@ namespace krys::boo
     enum class LayerTraversal : bool
     {
       Continue,
-      Stop
+      Stop,
     };
 
     LayerTraversal TraverseVisibleNonCompositedDescendantLayers(

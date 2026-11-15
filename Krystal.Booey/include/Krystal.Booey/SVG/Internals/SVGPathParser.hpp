@@ -54,6 +54,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD static bool ParseToByteStream(SVGPathSource &source, SVGPathByteStream &byteStream,
                                                  PathParsingMode mode = PathParsingMode::NormalisedParsing,
                                                  bool checkForInitialMoveTo = true) noexcept;
+
     KRYS_NODISCARD static bool ParseToString(SVGPathSource &source, dom::DOMString &result,
                                              PathParsingMode mode = PathParsingMode::NormalisedParsing,
                                              bool checkForInitialMoveTo = true) noexcept;
@@ -66,15 +67,25 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool DecomposeArcToCubic(float angle, float rx, float ry, const FloatPoint &start,
                                             const FloatPoint &end, bool largeArcFlag,
                                             bool sweepFlag) noexcept;
+
     void ParseClosePathSegment() noexcept;
+
     KRYS_NODISCARD bool ParseMoveToSegment() noexcept;
+
     KRYS_NODISCARD bool ParseLineToSegment() noexcept;
+
     KRYS_NODISCARD bool ParseLineToHorizontalSegment() noexcept;
+
     KRYS_NODISCARD bool ParseLineToVerticalSegment() noexcept;
+
     KRYS_NODISCARD bool ParseCurveToCubicSegment() noexcept;
+
     KRYS_NODISCARD bool ParseCurveToCubicSmoothSegment() noexcept;
+
     KRYS_NODISCARD bool ParseCurveToQuadraticSegment() noexcept;
+
     KRYS_NODISCARD bool ParseCurveToQuadraticSmoothSegment() noexcept;
+
     KRYS_NODISCARD bool ParseArcToSegment() noexcept;
   };
 }

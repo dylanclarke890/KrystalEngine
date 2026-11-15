@@ -84,46 +84,58 @@ namespace krys::boo::style
     uint8 _origin : FillBoxBitWidth;
     uint8 _blendMode : 5;
     mutable uint8 _clipMax : FillBoxBitWidth; // maximum _clip value from this to bottom layer
+
     KRYS_FOR_EACH_BACKGROUND_LAYER_PROPERTY(KRYS_DECLARE_COORDINATED_VALUE_LIST_IS_SET_AND_IS_FILLED_MEMBERS)
 
   public:
     BackgroundLayer() noexcept;
+
     BackgroundLayer(css::keywords::None) noexcept;
+
     BackgroundLayer(ImageOrNone &&) noexcept;
+
     BackgroundLayer(RefPtr<StyleImage> &&) noexcept;
 
     KRYS_NODISCARD const ImageOrNone &GetImage() const noexcept
     {
       return _image;
     }
+
     KRYS_NODISCARD const PositionX &GetPositionX() const noexcept
     {
       return _positionX;
     }
+
     KRYS_NODISCARD const PositionY &GetPositionY() const noexcept
     {
       return _positionY;
     }
+
     KRYS_NODISCARD const BackgroundSize &GetSize() const noexcept
     {
       return _size;
     }
+
     KRYS_NODISCARD const RepeatStyle &GetRepeat() const noexcept
     {
       return _repeat;
     }
+
     KRYS_NODISCARD FillAttachment GetAttachment() const noexcept
     {
       return static_cast<boo::FillAttachment>(_attachment);
     }
+
     KRYS_NODISCARD FillBox GetClip() const noexcept
     {
       return static_cast<FillBox>(_clip);
     }
+
     KRYS_NODISCARD FillBox GetOrigin() const noexcept
     {
       return static_cast<FillBox>(_origin);
     }
+
     KRYS_NODISCARD BlendMode GetBlendMode() const noexcept
     {
       return static_cast<BlendMode>(_blendMode);
@@ -133,6 +145,7 @@ namespace krys::boo::style
     {
       return CompositeOperator::SourceOver;
     }
+
     KRYS_NODISCARD constexpr static MaskMode GetMaskMode() noexcept
     {
       return MaskMode::MatchSource;
@@ -147,36 +160,44 @@ namespace krys::boo::style
     {
       return css::keywords::None {};
     }
+
     KRYS_NODISCARD static PositionX InitialPositionX() noexcept
     {
       using namespace css::Literals;
       return 0_css_percentage;
     }
+
     KRYS_NODISCARD static PositionY InitialPositionY() noexcept
     {
       using namespace css::Literals;
       return 0_css_percentage;
     }
+
     KRYS_NODISCARD static BackgroundSize InitialSize() noexcept
     {
       return css::keywords::Auto {};
     }
+
     KRYS_NODISCARD constexpr static RepeatStyle InitialRepeat() noexcept
     {
       return {.Values {boo::FillRepeat::Repeat, boo::FillRepeat::Repeat}};
     }
+
     KRYS_NODISCARD constexpr static FillAttachment InitialAttachment() noexcept
     {
       return boo::FillAttachment::ScrollBackground;
     }
+
     KRYS_NODISCARD constexpr static FillBox InitialClip() noexcept
     {
       return FillBox::BorderBox;
     }
+
     KRYS_NODISCARD constexpr static FillBox InitialOrigin() noexcept
     {
       return FillBox::PaddingBox;
     }
+
     KRYS_NODISCARD constexpr static BlendMode InitialBlendMode() noexcept
     {
       return BlendMode::Normal;
@@ -186,6 +207,7 @@ namespace krys::boo::style
     {
       return _image.IsImage();
     }
+
     /// @brief Whether the layer has an image known to cover what it paints.
     KRYS_NODISCARD bool HasOpaqueImage(const RenderElement &) const noexcept;
 
@@ -198,6 +220,7 @@ namespace krys::boo::style
     {
       return _clip == _clipMax;
     }
+
     void SetClipMax(FillBox clipMax) const noexcept
     {
       _clipMax = static_cast<uint8>(clipMax);
@@ -213,33 +236,40 @@ namespace krys::boo::style
     {
       return {InitialPositionX(), InitialPositionY()};
     }
+
     KRYS_NODISCARD Position GetPosition() const noexcept
     {
       return {_positionX, _positionY};
     }
+
     void SetPosition(Position &&position) noexcept
     {
       SetPositionX(krys::move(position.X));
       SetPositionY(krys::move(position.Y));
     }
+
     void FillPosition(Position &&position) noexcept
     {
       FillPositionX(krys::move(position.X));
       FillPositionY(krys::move(position.Y));
     }
+
     void ClearPosition() noexcept
     {
       ClearPositionX();
       ClearPositionY();
     }
+
     KRYS_NODISCARD bool IsPositionUnset() const noexcept
     {
       return IsPositionXUnset() && IsPositionYUnset();
     }
+
     KRYS_NODISCARD bool IsPositionSet() const noexcept
     {
       return IsPositionXSet() || IsPositionYSet();
     }
+
     KRYS_NODISCARD bool IsPositionFilled() const noexcept
     {
       return IsPositionXFilled() || IsPositionYFilled();
@@ -267,6 +297,7 @@ namespace krys::boo::style
     {
       return *this;
     }
+
     KRYS_NODISCARD const BackgroundLayer &Data() const noexcept
     {
       return *this;

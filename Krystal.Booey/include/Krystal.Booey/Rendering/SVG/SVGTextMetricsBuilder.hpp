@@ -29,10 +29,10 @@
 namespace krys::boo
 {
   class ComplexTextController;
+  struct MeasureTextData;
   class RenderElement;
   class RenderSVGInlineText;
   class RenderSVGText;
-  struct MeasureTextData;
   struct WidthIterator;
 
   /// @brief Measures the characters of SVG text renderers, and maps the positioning data of the whole text
@@ -58,19 +58,25 @@ namespace krys::boo
     SVGTextMetricsBuilder() noexcept;
 
     void MeasureTextRenderer(RenderSVGText &, RenderSVGInlineText *stopAtLeaf) noexcept;
+
     void BuildMetricsAndLayoutAttributes(RenderSVGText &, RenderSVGInlineText *stopAtLeaf,
                                          SVGCharacterDataMap &allCharactersMap) noexcept;
 
   private:
     template <typename TIterator>
     bool Advance(TIterator &) noexcept;
+
     void AdvanceIterator(WidthIterator &) noexcept;
+
     void AdvanceIterator(ComplexTextController &) noexcept;
+
     /// @brief The length in bytes of the character at the current position.
     KRYS_NODISCARD uint32 CurrentCharacterLength() const noexcept;
 
     void InitializeMeasurementWithTextRenderer(RenderSVGInlineText &) noexcept;
+
     void WalkTree(RenderElement &, RenderSVGInlineText *stopAtLeaf, MeasureTextData &) noexcept;
+
     std::tuple<uint32, char32> MeasureTextRenderer(RenderSVGInlineText &, const MeasureTextData &,
                                                    std::tuple<uint32, char32>) noexcept;
 

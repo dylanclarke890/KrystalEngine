@@ -57,7 +57,7 @@ namespace krys::boo
       Reference,
       Shape,
       Box,
-      Ray
+      Ray,
     };
 
   protected:
@@ -73,17 +73,20 @@ namespace krys::boo
     {
       return Equals(other);
     }
+
     KRYS_NODISCARD virtual bool Equals(const PathOperation &) const noexcept = 0;
 
     KRYS_NODISCARD virtual bool CanBlend(const PathOperation &) const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual RefPtr<PathOperation> Blend(const PathOperation *,
                                                        const BlendingContext &) const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual Maybe<Path> GetPath(const TransformOperationData &) const noexcept = 0;
 
     KRYS_NODISCARD Type GetType() const noexcept
@@ -95,6 +98,7 @@ namespace krys::boo
     {
       _referenceBox = type;
     }
+
     KRYS_NODISCARD CSSBoxType ReferenceBox() const noexcept
     {
       return _referenceBox;
@@ -123,6 +127,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<ReferencePathOperation>
       Create(const style::URL &, const css::CSSOMStringAtom &fragment, const svg::SVGElement *) noexcept;
+
     KRYS_NODISCARD static Ref<ReferencePathOperation> Create(Maybe<Path> &&) noexcept;
 
     KRYS_NODISCARD Ref<PathOperation> Clone() const noexcept override;
@@ -131,6 +136,7 @@ namespace krys::boo
     {
       return _url;
     }
+
     KRYS_NODISCARD const css::CSSOMStringAtom &Fragment() const noexcept
     {
       return _fragment;
@@ -140,6 +146,7 @@ namespace krys::boo
     {
       return _path;
     }
+
     KRYS_NODISCARD const Maybe<Path> &GetPath() const noexcept
     {
       return _path;
@@ -150,6 +157,7 @@ namespace krys::boo
   private:
     ReferencePathOperation(const style::URL &, const css::CSSOMStringAtom &fragment,
                            const svg::SVGElement *) noexcept;
+
     explicit ReferencePathOperation(Maybe<Path> &&) noexcept;
   };
 
@@ -166,6 +174,7 @@ namespace krys::boo
     KRYS_NODISCARD Ref<PathOperation> Clone() const noexcept override;
 
     KRYS_NODISCARD bool CanBlend(const PathOperation &) const noexcept override;
+
     KRYS_NODISCARD RefPtr<PathOperation> Blend(const PathOperation *,
                                                const BlendingContext &) const noexcept override;
 
@@ -173,10 +182,12 @@ namespace krys::boo
     {
       return _shape;
     }
+
     KRYS_NODISCARD WindRule GetWindRule() const noexcept
     {
       return style::ComputeWindRule(_shape);
     }
+
     KRYS_NODISCARD Path PathForReferenceRect(const FloatRect &boundingRect) const noexcept
     {
       return style::ComputePath(_shape, boundingRect);
@@ -223,6 +234,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<RayPathOperation> Create(style::RayFunction &&,
                                                        CSSBoxType = CSSBoxType::BoxMissing) noexcept;
+
     KRYS_NODISCARD static Ref<RayPathOperation> Create(const style::RayFunction &,
                                                        CSSBoxType = CSSBoxType::BoxMissing) noexcept;
 
@@ -234,6 +246,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool CanBlend(const PathOperation &) const noexcept override;
+
     KRYS_NODISCARD RefPtr<PathOperation> Blend(const PathOperation *,
                                                const BlendingContext &) const noexcept override;
 

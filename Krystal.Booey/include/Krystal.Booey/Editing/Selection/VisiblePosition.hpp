@@ -53,7 +53,7 @@ namespace krys::boo
   public:
     // VisiblePosition default affinity is downstream for callers that do not really care because it is more
     // efficient than upstream.
-    static constexpr auto DefaultAffinity = Affinity::Downstream;
+    constexpr static auto DefaultAffinity = Affinity::Downstream;
 
     VisiblePosition() noexcept = default;
 
@@ -64,10 +64,12 @@ namespace krys::boo
     {
       return _deepPosition.IsNull();
     }
+
     KRYS_NODISCARD bool IsNotNull() const noexcept
     {
       return _deepPosition.IsNotNull();
     }
+
     KRYS_NODISCARD bool IsOrphan() const noexcept
     {
       return _deepPosition.IsOrphan();
@@ -77,10 +79,12 @@ namespace krys::boo
     {
       return _deepPosition;
     }
+
     KRYS_NODISCARD Affinity GetAffinity() const noexcept
     {
       return _affinity;
     }
+
     void SetAffinity(Affinity affinity) noexcept
     {
       _affinity = affinity;
@@ -92,20 +96,25 @@ namespace krys::boo
     KRYS_NODISCARD VisiblePosition
       Next(EditingBoundaryCrossingRule rule = EditingBoundaryCrossingRule::CanCrossEditingBoundary,
            bool *reachedBoundary = nullptr) const noexcept;
+
     KRYS_NODISCARD VisiblePosition
       Previous(EditingBoundaryCrossingRule rule = EditingBoundaryCrossingRule::CanCrossEditingBoundary,
                bool *reachedBoundary = nullptr) const noexcept;
+
     KRYS_NODISCARD VisiblePosition HonorEditingBoundaryAtOrBefore(
       const VisiblePosition &position, bool *reachedBoundary = nullptr) const noexcept;
+
     KRYS_NODISCARD VisiblePosition HonorEditingBoundaryAtOrAfter(
       const VisiblePosition &position, bool *reachedBoundary = nullptr) const noexcept;
 
     KRYS_NODISCARD VisiblePosition Left(bool stayInEditableContent = false,
                                         bool *reachedBoundary = nullptr) const noexcept;
+
     KRYS_NODISCARD VisiblePosition Right(bool stayInEditableContent = false,
                                          bool *reachedBoundary = nullptr) const noexcept;
 
     KRYS_NODISCARD char32 CharacterAfter() const noexcept;
+
     KRYS_NODISCARD char32 CharacterBefore() const noexcept
     {
       return Previous().CharacterAfter();
@@ -118,6 +127,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset() const noexcept;
+
     KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset(TextDirection primaryDirection) const noexcept;
 
     struct LocalCaretRectResult
@@ -127,8 +137,10 @@ namespace krys::boo
     };
 
     KRYS_NODISCARD LocalCaretRectResult LocalCaretRect() const noexcept;
+
     // Bounds of (possibly transformed) caret in absolute coords.
     KRYS_NODISCARD IntRect AbsoluteCaretBounds(bool *insideFixed = nullptr) const noexcept;
+
     // Abs x/y position of the caret ignoring transforms.
     // FIXME: navigation with transforms should be smarter.
     KRYS_NODISCARD int32 LineDirectionPointForBlockDirectionNavigation() const noexcept;
@@ -147,7 +159,9 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD static dom::Position CanonicalPosition(const dom::Position &position) noexcept;
+
     KRYS_NODISCARD dom::Position LeftVisuallyDistinctCandidate() const noexcept;
+
     KRYS_NODISCARD dom::Position RightVisuallyDistinctCandidate() const noexcept;
   };
 
@@ -160,6 +174,7 @@ namespace krys::boo
 
   KRYS_NODISCARD bool IsFirstVisiblePositionInNode(const VisiblePosition &visiblePosition,
                                                    const dom::Node *node) noexcept;
+
   KRYS_NODISCARD bool IsLastVisiblePositionInNode(const VisiblePosition &visiblePosition,
                                                   const dom::Node *node) noexcept;
 
@@ -201,12 +216,17 @@ namespace krys::boo
   };
 
   KRYS_NODISCARD Maybe<dom::SimpleRange> MakeSimpleRange(const VisiblePositionRange &range) noexcept;
+
   KRYS_NODISCARD VisiblePositionRange MakeVisiblePositionRange(const Maybe<dom::SimpleRange> &range) noexcept;
 
   KRYS_NODISCARD dom::Node *CommonInclusiveAncestor(const VisiblePositionRange &range) noexcept;
+
   KRYS_NODISCARD bool Intersects(const VisiblePositionRange &a, const VisiblePositionRange &b) noexcept;
+
   KRYS_NODISCARD bool Contains(const VisiblePositionRange &range, const VisiblePosition &point) noexcept;
+
   KRYS_NODISCARD VisiblePositionRange Intersection(const VisiblePositionRange &a,
                                                    const VisiblePositionRange &b) noexcept;
+
   KRYS_NODISCARD VisiblePosition Midpoint(const VisiblePositionRange &range) noexcept;
 }

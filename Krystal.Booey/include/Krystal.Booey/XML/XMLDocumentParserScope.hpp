@@ -29,8 +29,8 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-struct _xmlParserInput;
 struct _xmlParserCtxt;
+struct _xmlParserInput;
 
 namespace krys::boo
 {
@@ -52,7 +52,9 @@ namespace krys::boo::xml
 
   public:
     XMLDocumentParserScope() = delete;
+
     explicit XMLDocumentParserScope(CachedResourceLoader *) noexcept;
+
     ~XMLDocumentParserScope() noexcept;
 
     KRYS_NODISCARD static WeakPtr<CachedResourceLoader> &CurrentCachedResourceLoader() noexcept;

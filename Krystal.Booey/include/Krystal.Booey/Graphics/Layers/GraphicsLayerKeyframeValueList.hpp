@@ -53,6 +53,7 @@ namespace krys::boo
         _values.push_back(value->Clone());
       }
     }
+
     GraphicsLayerKeyframeValueList(GraphicsLayerKeyframeValueList &&) noexcept = default;
 
     GraphicsLayerKeyframeValueList &operator=(const GraphicsLayerKeyframeValueList &other) noexcept
@@ -61,6 +62,7 @@ namespace krys::boo
       Swap(copy);
       return *this;
     }
+
     GraphicsLayerKeyframeValueList &operator=(GraphicsLayerKeyframeValueList &&) noexcept = default;
 
     void Swap(GraphicsLayerKeyframeValueList &other) noexcept
@@ -78,6 +80,7 @@ namespace krys::boo
     {
       return _values.size();
     }
+
     KRYS_NODISCARD const GraphicsLayerAnimationValue &At(size_t i) const noexcept
     {
       return *_values.at(i);

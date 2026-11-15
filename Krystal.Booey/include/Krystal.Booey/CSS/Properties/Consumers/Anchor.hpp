@@ -31,16 +31,16 @@
 
 namespace krys::boo::css
 {
+  struct PropertyParserState;
   class TokenRange;
   class Value;
-  struct PropertyParserState;
 
   namespace PropertyParserHelpers
   {
     enum class ValueType
     {
       Specified,
-      Computed
+      Computed,
     };
 
     // Take two keywords that make up a <position-area> and build a Value that

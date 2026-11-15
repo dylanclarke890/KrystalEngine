@@ -83,8 +83,9 @@ namespace krys::boo
     {
       Floor,
       Ceil,
-      Round
+      Round,
     };
+
     KRYS_NODISCARD float Snap(float value, SnapDirection direction = SnapDirection::Round) noexcept
     {
       switch (direction)

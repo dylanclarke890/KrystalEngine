@@ -400,6 +400,7 @@ namespace krys::boo::tests
           Records.push_back("window:" + type + (isRight ? "" : "(wrong)"));
         }
       };
+
       auto *window = fixture.Document->Window();
       Ref<dom::EventListenerCallback> windowRecorder = CreateRef<WindowRecorder>(fixture.Records, window);
       for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})

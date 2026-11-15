@@ -25,7 +25,6 @@
 
 namespace krys::boo
 {
-
   StyleInheritedData::StyleInheritedData() noexcept
       : BorderSpacing(style::ComputedStyle::InitialBorderSpacing()),
         LineHeight(style::ComputedStyle::InitialLineHeight()), FontData(StyleFontData::Create()),

@@ -39,6 +39,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleTransformData);
     }
+
     KRYS_NODISCARD Ref<StyleTransformData> Copy() const noexcept;
 
     bool operator==(const StyleTransformData &) const noexcept;
@@ -54,6 +55,7 @@ namespace krys::boo
 
   private:
     StyleTransformData() noexcept;
+
     StyleTransformData(const StyleTransformData &) noexcept;
   };
 }

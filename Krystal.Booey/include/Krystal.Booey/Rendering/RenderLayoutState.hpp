@@ -89,9 +89,11 @@ namespace krys::boo
 
   public:
     RenderLayoutState() noexcept = default;
+
     RenderLayoutState(const LocalFrameViewLayoutContext::LayoutStateStack &layoutStateStack,
                       RenderBox &renderer, const LayoutSize &offset, LayoutUnit pageLogicalHeight,
                       bool pageLogicalHeightChanged, Maybe<LineClamp> lineClamp) noexcept;
+
     explicit RenderLayoutState(RenderElement &renderer) noexcept;
 
     KRYS_NODISCARD bool IsPaginated() const noexcept
@@ -108,6 +110,7 @@ namespace krys::boo
     {
       return _pageLogicalHeight;
     }
+
     KRYS_NODISCARD bool PageLogicalHeightChanged() const noexcept
     {
       return _pageLogicalHeightChanged;
@@ -117,6 +120,7 @@ namespace krys::boo
     {
       return _paintOffset;
     }
+
     KRYS_NODISCARD LayoutSize LayoutOffset() const noexcept
     {
       return _layoutOffset;
@@ -142,12 +146,14 @@ namespace krys::boo
     {
       return _clipRect;
     }
+
     KRYS_NODISCARD bool IsClipped() const noexcept
     {
       return _clipped;
     }
 
     void AddLayoutDelta(LayoutSize delta) noexcept;
+
     KRYS_NODISCARD LayoutSize LayoutDelta() const noexcept
     {
       return _layoutDelta;
@@ -160,6 +166,7 @@ namespace krys::boo
     {
       _lineClamp = lineClamp;
     }
+
     KRYS_NODISCARD Maybe<LineClamp> GetLineClamp() const noexcept
     {
       return _lineClamp;
@@ -169,6 +176,7 @@ namespace krys::boo
     {
       _marginTrimBlockStart = marginTrimBlockStart;
     }
+
     KRYS_NODISCARD bool MarginTrimBlockStart() const noexcept
     {
       return _marginTrimBlockStart;
@@ -176,7 +184,9 @@ namespace krys::boo
 
   private:
     void ComputeOffsets(const RenderLayoutState &ancestor, RenderBox &renderer, LayoutSize offset) noexcept;
+
     void ComputeClipRect(const RenderLayoutState &ancestor, RenderBox &renderer) noexcept;
+
     // FIXME: webkit.org/b/179440 these functions should be part of the pagination
     // code/LocalFrameViewLayoutContext.
     void ComputePaginationInformation(const LocalFrameViewLayoutContext::LayoutStateStack &layoutStateStack,
@@ -197,6 +207,7 @@ namespace krys::boo
   public:
     explicit LayoutStateMaintainer(RenderBox &root, LayoutSize offset, bool disablePaintOffsetCache = false,
                                    LayoutUnit pageHeight = 0_lu, bool pageHeightChanged = false) noexcept;
+
     ~LayoutStateMaintainer() noexcept;
   };
 
@@ -211,6 +222,7 @@ namespace krys::boo
 
   public:
     explicit SubtreeLayoutStateMaintainer(RenderElement *subtreeLayoutRoot) noexcept;
+
     ~SubtreeLayoutStateMaintainer() noexcept;
   };
 
@@ -224,6 +236,7 @@ namespace krys::boo
 
   public:
     explicit LayoutStateDisabler(LocalFrameViewLayoutContext &context) noexcept;
+
     ~LayoutStateDisabler() noexcept;
   };
 
@@ -239,6 +252,7 @@ namespace krys::boo
   public:
     FlexPercentResolveDisabler(LocalFrameViewLayoutContext &layoutContext,
                                const RenderBox &flexItem) noexcept;
+
     ~FlexPercentResolveDisabler() noexcept;
   };
 
@@ -253,7 +267,7 @@ namespace krys::boo
     {
       Hidden,
       Auto,
-      RevealedWhenFound
+      RevealedWhenFound,
     };
 
   private:
@@ -262,6 +276,7 @@ namespace krys::boo
   public:
     ContentVisibilityOverrideScope(LocalFrameViewLayoutContext &layoutContext,
                                    EnumSet<OverrideType> overrideTypes) noexcept;
+
     ~ContentVisibilityOverrideScope() noexcept;
   };
 }

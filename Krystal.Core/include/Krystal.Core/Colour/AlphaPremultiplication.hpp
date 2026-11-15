@@ -7,7 +7,7 @@ namespace krys
   enum class AlphaPremultiplication : uint8
   {
     Premultiplied,
-    Unpremultiplied
+    Unpremultiplied,
   };
 }
 

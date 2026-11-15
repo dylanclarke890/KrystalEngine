@@ -54,28 +54,36 @@ namespace krys::boo
     KRYS_NODISCARD RenderElement &FindOrCreateParentForChild(RenderTableRow &parent,
                                                              const RenderObject &child,
                                                              RenderObject *&beforeChild) noexcept;
+
     KRYS_NODISCARD RenderElement &FindOrCreateParentForChild(RenderTableSection &parent,
                                                              const RenderObject &child,
                                                              RenderObject *&beforeChild) noexcept;
+
     KRYS_NODISCARD RenderElement &FindOrCreateParentForChild(RenderTable &parent, const RenderObject &child,
                                                              RenderObject *&beforeChild) noexcept;
 
     void Attach(RenderTable &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
+
     void Attach(RenderTableSection &parent, RenderPtr<RenderObject> child,
                 RenderObject *beforeChild) noexcept;
+
     void Attach(RenderTableRow &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
 
     KRYS_NODISCARD bool ChildRequiresTable(const RenderElement &parent, const RenderObject &child) noexcept;
 
     void CollapseAndDestroyAnonymousSiblingCells(const RenderTableCell &willBeDestroyed) noexcept;
+
     void CollapseAndDestroyAnonymousSiblingRows(const RenderTableRow &willBeDestroyed) noexcept;
 
     KRYS_NODISCARD static RenderPtr<RenderTable>
       CreateAnonymousTableWithStyle(dom::Document &document, const RenderStyle &style) noexcept;
+
     KRYS_NODISCARD static RenderPtr<RenderTableSection>
       CreateAnonymousTableSectionWithStyle(dom::Document &document, const RenderStyle &style) noexcept;
+
     KRYS_NODISCARD static RenderPtr<RenderTableRow>
       CreateAnonymousTableRowWithStyle(dom::Document &document, const RenderStyle &style) noexcept;
+
     KRYS_NODISCARD static RenderPtr<RenderTableCell>
       CreateAnonymousTableCellWithStyle(dom::Document &document, const RenderStyle &style) noexcept;
 

@@ -28,7 +28,7 @@ namespace std
       {
         return krys::Hash::Combine(v.x, v.y, v.z, v.w);
       }
-    };
+    }
   };
 
   template <MATRIX_TEMPLATE_PARAMS>
@@ -38,10 +38,14 @@ namespace std
     {
       size_t hash = 0;
       for (size_t i = 0; i < R; i++)
+      {
         for (size_t j = 0; j < C; j++)
+        {
           hash = krys::Hash::Combine(hash, m[i][j]);
+        }
+      }
 
       return hash;
-    };
+    }
   };
 }

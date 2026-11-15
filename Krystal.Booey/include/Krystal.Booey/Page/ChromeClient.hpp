@@ -49,18 +49,18 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
-  class AXObject;
-  enum class AXNotification : uint8;
-  enum class AXTextChange : uint8;
   enum class AXDetachmentType : uint8;
-  class GraphicsLayer;
-  class GraphicsLayerFactory;
-  class IntRect;
-  class LocalFrame;
+  enum class AXNotification : uint8;
+  class AXObject;
+  enum class AXTextChange : uint8;
   class Color;
   class ColorChooserClient;
   class DataListSuggestionsClient;
   class DateTimeChooserClient;
+  class GraphicsLayer;
+  class GraphicsLayerFactory;
+  class IntRect;
+  class LocalFrame;
   class PopupMenuClient;
 
   /// @brief What a page asks of its host: the window's side of the page, and its graphics.
@@ -73,6 +73,7 @@ namespace krys::boo
 
   public:
     ChromeClient() noexcept = default;
+
     virtual ~ChromeClient() noexcept = default;
 
     /// @brief The page asks to be brought to the front (`window.focus()`); the host decides whether it is.
@@ -106,6 +107,7 @@ namespace krys::boo
       (void)object;
       (void)notification;
     }
+
     /// @brief Called when @p object leaves the page's accessibility tree (its node or renderer went, or the
     /// tree is being destroyed), for the host to let go of what it made for it.
     virtual void AccessibilityObjectDetached(AXObject &object, AXDetachmentType detachmentType) noexcept
@@ -113,6 +115,7 @@ namespace krys::boo
       (void)object;
       (void)detachmentType;
     }
+
     /// @brief Called when @p text was inserted into or deleted from @p object's text (an editable region's,
     /// or the web area's) at @p offset, a byte index in its UTF-8 text.
     virtual void PostAccessibilityTextChange(AXObject &object, AXTextChange change, uint64 offset,
@@ -290,11 +293,13 @@ namespace krys::boo
     {
       return point;
     }
+
     /// @brief Where @p rect, in the root view's coordinates, is on the screen.
     KRYS_NODISCARD virtual IntRect RootViewToScreen(const IntRect &rect) const noexcept
     {
       return IntRect(RootViewToScreen(rect.Location()), rect.Size());
     }
+
     /// @brief Where @p point, on the screen, is in the root view's coordinates.
     KRYS_NODISCARD virtual IntPoint ScreenToRootView(const IntPoint &point) const noexcept
     {

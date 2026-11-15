@@ -175,6 +175,7 @@ namespace krys::boo::style
     {
       return Offset.has_value();
     }
+
     KRYS_NODISCARD bool IsMidpoint() const noexcept
     {
       return !Color.IsValid();
@@ -329,6 +330,7 @@ namespace krys::boo::style
     {
       return 1;
     }
+
     KRYS_NODISCARD constexpr static float MaxExtent(float) noexcept
     {
       return 1;
@@ -772,7 +774,7 @@ namespace krys::boo::style
     return GradientColorStops::Sorted {krys::move(result)};
   }
 
-  KRYS_NODISCARD static inline float PositionFromValue(LengthWrapperBaseDerived auto const &coordinate,
+  KRYS_NODISCARD static inline float PositionFromValue(const LengthWrapperBaseDerived auto &coordinate,
                                                        float widthOrHeight) noexcept
   {
     return Evaluate<float>(coordinate, widthOrHeight, style::ZoomNeeded {});

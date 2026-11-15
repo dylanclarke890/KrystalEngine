@@ -54,7 +54,7 @@ namespace krys::boo
     XOR,
     PlusDarker,
     PlusLighter,
-    Difference
+    Difference,
   };
 
   using krys::BlendMode;
@@ -73,7 +73,7 @@ namespace krys::boo
     Spelling,
     Grammar,
     AutocorrectionReplacement,
-    DictationAlternatives
+    DictationAlternatives,
   };
 
   struct DocumentMarkerLineStyle
@@ -102,28 +102,28 @@ namespace krys::boo
     DoNotInterpolate,
     Low,
     Medium,
-    High
+    High,
   };
 
   enum class LineCap : uint8
   {
     Butt,
     Round,
-    Square
+    Square,
   };
 
   enum class LineJoin : uint8
   {
     Miter,
     Round,
-    Bevel
+    Bevel,
   };
 
   enum HorizontalAlignment
   {
     AlignLeft,
     AlignRight,
-    AlignHCenter
+    AlignHCenter,
   };
 
   enum class StrokeStyle : uint8
@@ -156,7 +156,7 @@ namespace krys::boo
     MiddleTextBaseline,
     BottomTextBaseline,
     IdeographicTextBaseline,
-    HangingTextBaseline
+    HangingTextBaseline,
   };
 
   enum TextAlign
@@ -165,7 +165,7 @@ namespace krys::boo
     EndTextAlign,
     LeftTextAlign,
     CenterTextAlign,
-    RightTextAlign
+    RightTextAlign,
   };
 
   /// @brief The name of @p op, or of @p blendOp when it isn't `normal`.
@@ -185,11 +185,18 @@ namespace krys::boo
 namespace krys::boo
 {
   TextStream &operator<<(TextStream &ts, CompositeOperator op) noexcept;
+
   TextStream &operator<<(TextStream &ts, CompositeMode compositeMode) noexcept;
+
   TextStream &operator<<(TextStream &ts, InterpolationQuality interpolationQuality) noexcept;
+
   TextStream &operator<<(TextStream &ts, WindRule rule) noexcept;
+
   TextStream &operator<<(TextStream &ts, LineCap capStyle) noexcept;
+
   TextStream &operator<<(TextStream &ts, LineJoin joinStyle) noexcept;
+
   TextStream &operator<<(TextStream &ts, StrokeStyle strokeStyle) noexcept;
+
   TextStream &operator<<(TextStream &ts, TextDrawingMode textDrawingMode) noexcept;
 }

@@ -29,14 +29,14 @@ namespace krys::boo::svg
   {
     SVGTextPathMethodUnknown = 0,
     SVGTextPathMethodAlign,
-    SVGTextPathMethodStretch
+    SVGTextPathMethodStretch,
   };
 
   enum SVGTextPathSpacingType : uint8
   {
     SVGTextPathSpacingUnknown = 0,
     SVGTextPathSpacingAuto,
-    SVGTextPathSpacingExact
+    SVGTextPathSpacingExact,
   };
 
   template <>
@@ -147,20 +147,23 @@ namespace krys::boo::svg
       TEXTPATH_METHODTYPE_STRETCH = SVGTextPathMethodStretch,
       TEXTPATH_SPACINGTYPE_UNKNOWN = SVGTextPathSpacingUnknown,
       TEXTPATH_SPACINGTYPE_AUTO = SVGTextPathSpacingAuto,
-      TEXTPATH_SPACINGTYPE_EXACT = SVGTextPathSpacingExact
+      TEXTPATH_SPACINGTYPE_EXACT = SVGTextPathSpacingExact,
     };
 
     explicit SVGTextPathElement(dom::Document &) noexcept;
+
     ~SVGTextPathElement() noexcept override;
 
     KRYS_NODISCARD const SVGLengthValue &StartOffset() const noexcept
     {
       return _startOffset->CurrentValue();
     }
+
     KRYS_NODISCARD SVGTextPathMethodType Method() const noexcept
     {
       return _method->CurrentValue<SVGTextPathMethodType>();
     }
+
     KRYS_NODISCARD SVGTextPathSpacingType Spacing() const noexcept
     {
       return _spacing->CurrentValue<SVGTextPathSpacingType>();
@@ -170,10 +173,12 @@ namespace krys::boo::svg
     {
       return *_startOffset;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &MethodAnimated() noexcept
     {
       return *_method;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &SpacingAnimated() noexcept
     {
       return *_spacing;
@@ -187,13 +192,17 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept final;
+
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final;
 
     void ClearResourceReferences() noexcept;
+
     void BuildPendingResource() noexcept override;
 
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;

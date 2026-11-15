@@ -69,6 +69,7 @@ namespace krys::boo
     void CancelFromStyle(WebAnimation::Silently silently = WebAnimation::Silently::No) noexcept;
 
     void SetTimeline(RefPtr<AnimationTimeline> &&newTimeline) noexcept final;
+
     void Cancel(WebAnimation::Silently silently = WebAnimation::Silently::No) noexcept final;
 
     void Tick() noexcept override;
@@ -77,39 +78,57 @@ namespace krys::boo
 
     // The Web Animations interface brings the animation up to date with its style first.
     KRYS_NODISCARD Maybe<WebAnimationTime> BindingsStartTime() const noexcept final;
+
     KRYS_NODISCARD Maybe<WebAnimationTime> BindingsCurrentTime() const noexcept final;
+
     KRYS_NODISCARD WebAnimation::PlayState BindingsPlayState() const noexcept final;
+
     KRYS_NODISCARD WebAnimation::ReplaceState BindingsReplaceState() const noexcept final;
+
     KRYS_NODISCARD bool BindingsPending() const noexcept final;
+
     void BindingsWhenReady(ReadyCallback onReady, ErrorCallback onError = nullptr) noexcept final;
+
     void BindingsWhenFinished(ReadyCallback onFinished, ErrorCallback onError = nullptr) noexcept final;
+
     dom::ExceptionOr<void> BindingsPlay() noexcept override;
+
     dom::ExceptionOr<void> BindingsPause() noexcept override;
 
     /// @brief Brings the animation up to date with the owning element's style.
     void FlushPendingStyleChanges() const noexcept;
 
     KRYS_NODISCARD virtual AnimationPlayState BackingAnimationPlayState() const noexcept = 0;
+
     KRYS_NODISCARD virtual boo::TimingFunction *BackingAnimationTimingFunction() const noexcept = 0;
 
   protected:
     void Initialize(const RenderStyle *oldStyle, const RenderStyle &newStyle,
                     const style::ResolutionContext &resolutionContext) noexcept;
+
     virtual void SyncPropertiesWithBackingAnimation() noexcept;
+
     KRYS_NODISCARD virtual Ref<StyleOriginatedAnimationEvent>
       CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                   const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept = 0;
 
   private:
     void DisassociateFromOwningElement() noexcept;
+
     KRYS_NODISCARD AnimationEffectPhase PhaseWithoutEffect() const noexcept;
+
     /// @see https://drafts.csswg.org/css-transitions-2/#transition-events
     void InvalidateDOMEvents(WebAnimationTime cancelationTime = Seconds {0}) noexcept;
+
     void EnqueueDOMEvent(dom::DOMStringAtom eventType, WebAnimationTime elapsedTime,
                          WebAnimationTime scheduledEffectTime) noexcept;
+
     KRYS_NODISCARD WebAnimationTime ComputeCancelationTime() const noexcept;
+
     KRYS_NODISCARD WebAnimationTime EffectTimeAtStart() const noexcept;
+
     KRYS_NODISCARD WebAnimationTime EffectTimeAtIteration(double iteration) const noexcept;
+
     KRYS_NODISCARD WebAnimationTime EffectTimeAtEnd() const noexcept;
   };
 }

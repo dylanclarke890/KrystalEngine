@@ -46,6 +46,7 @@ namespace krys::boo::style
     MaskBorderRepeat Repeat;
 
     MaskBorder() noexcept;
+
     MaskBorder(MaskBorderSource &&, MaskBorderSlice &&, MaskBorderWidth &&, MaskBorderOutset &&,
                MaskBorderRepeat &&) noexcept;
 
@@ -57,7 +58,7 @@ namespace krys::boo::style
   enum class MaskBorderSliceOverride : bool
   {
     None,
-    AlwaysFill
+    AlwaysFill,
   };
 
   template <>

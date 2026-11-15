@@ -532,9 +532,13 @@ namespace krys::boo::display_list
   }
 
   DrawControlPart::DrawControlPart(const DrawControlPart &) noexcept = default;
+
   DrawControlPart::DrawControlPart(DrawControlPart &&) noexcept = default;
+
   DrawControlPart &DrawControlPart::operator=(const DrawControlPart &) noexcept = default;
+
   DrawControlPart &DrawControlPart::operator=(DrawControlPart &&) noexcept = default;
+
   DrawControlPart::~DrawControlPart() noexcept = default;
 
   ControlPart &DrawControlPart::Part() const noexcept
@@ -553,9 +557,13 @@ namespace krys::boo::display_list
   }
 
   DrawDisplayList::DrawDisplayList(const DrawDisplayList &) noexcept = default;
+
   DrawDisplayList::DrawDisplayList(DrawDisplayList &&) noexcept = default;
+
   DrawDisplayList &DrawDisplayList::operator=(const DrawDisplayList &) noexcept = default;
+
   DrawDisplayList &DrawDisplayList::operator=(DrawDisplayList &&) noexcept = default;
+
   DrawDisplayList::~DrawDisplayList() noexcept = default;
 
   Ref<const boo::display_list::DisplayList> DrawDisplayList::GetDisplayList() const noexcept
@@ -569,9 +577,13 @@ namespace krys::boo::display_list
   }
 
   ClipToImageBuffer::ClipToImageBuffer(const ClipToImageBuffer &) noexcept = default;
+
   ClipToImageBuffer::ClipToImageBuffer(ClipToImageBuffer &&) noexcept = default;
+
   ClipToImageBuffer &ClipToImageBuffer::operator=(const ClipToImageBuffer &) noexcept = default;
+
   ClipToImageBuffer &ClipToImageBuffer::operator=(ClipToImageBuffer &&) noexcept = default;
+
   ClipToImageBuffer::~ClipToImageBuffer() noexcept = default;
 
   ImageBuffer &ClipToImageBuffer::GetImageBuffer() const noexcept
@@ -600,10 +612,14 @@ namespace krys::boo::display_list
   }
 
   DrawFilteredImageBuffer::DrawFilteredImageBuffer(const DrawFilteredImageBuffer &) noexcept = default;
+
   DrawFilteredImageBuffer::DrawFilteredImageBuffer(DrawFilteredImageBuffer &&) noexcept = default;
+
   DrawFilteredImageBuffer &
     DrawFilteredImageBuffer::operator=(const DrawFilteredImageBuffer &) noexcept = default;
+
   DrawFilteredImageBuffer &DrawFilteredImageBuffer::operator=(DrawFilteredImageBuffer &&) noexcept = default;
+
   DrawFilteredImageBuffer::~DrawFilteredImageBuffer() noexcept = default;
 
   ImageBuffer *DrawFilteredImageBuffer::SourceImage() const noexcept
@@ -641,9 +657,13 @@ namespace krys::boo::display_list
   }
 
   DrawImageBuffer::DrawImageBuffer(const DrawImageBuffer &) noexcept = default;
+
   DrawImageBuffer::DrawImageBuffer(DrawImageBuffer &&) noexcept = default;
+
   DrawImageBuffer &DrawImageBuffer::operator=(const DrawImageBuffer &) noexcept = default;
+
   DrawImageBuffer &DrawImageBuffer::operator=(DrawImageBuffer &&) noexcept = default;
+
   DrawImageBuffer::~DrawImageBuffer() noexcept = default;
 
   ImageBuffer &DrawImageBuffer::GetImageBuffer() const noexcept
@@ -673,9 +693,13 @@ namespace krys::boo::display_list
   }
 
   DrawNativeImage::DrawNativeImage(const DrawNativeImage &) noexcept = default;
+
   DrawNativeImage::DrawNativeImage(DrawNativeImage &&) noexcept = default;
+
   DrawNativeImage &DrawNativeImage::operator=(const DrawNativeImage &) noexcept = default;
+
   DrawNativeImage &DrawNativeImage::operator=(DrawNativeImage &&) noexcept = default;
+
   DrawNativeImage::~DrawNativeImage() noexcept = default;
 
   NativeImage &DrawNativeImage::GetNativeImage() const noexcept
@@ -709,10 +733,14 @@ namespace krys::boo::display_list
   }
 
   DrawPatternNativeImage::DrawPatternNativeImage(const DrawPatternNativeImage &) noexcept = default;
+
   DrawPatternNativeImage::DrawPatternNativeImage(DrawPatternNativeImage &&) noexcept = default;
+
   DrawPatternNativeImage &
     DrawPatternNativeImage::operator=(const DrawPatternNativeImage &) noexcept = default;
+
   DrawPatternNativeImage &DrawPatternNativeImage::operator=(DrawPatternNativeImage &&) noexcept = default;
+
   DrawPatternNativeImage::~DrawPatternNativeImage() noexcept = default;
 
   NativeImage &DrawPatternNativeImage::GetNativeImage() const noexcept
@@ -749,10 +777,14 @@ namespace krys::boo::display_list
   }
 
   DrawPatternImageBuffer::DrawPatternImageBuffer(const DrawPatternImageBuffer &) noexcept = default;
+
   DrawPatternImageBuffer::DrawPatternImageBuffer(DrawPatternImageBuffer &&) noexcept = default;
+
   DrawPatternImageBuffer &
     DrawPatternImageBuffer::operator=(const DrawPatternImageBuffer &) noexcept = default;
+
   DrawPatternImageBuffer &DrawPatternImageBuffer::operator=(DrawPatternImageBuffer &&) noexcept = default;
+
   DrawPatternImageBuffer::~DrawPatternImageBuffer() noexcept = default;
 
   ImageBuffer &DrawPatternImageBuffer::GetImageBuffer() const noexcept

@@ -110,7 +110,7 @@ namespace krys::boo::style
       Auto,
       Explicit,
       Span,
-      NamedGridArea
+      NamedGridArea,
     };
 
     GridPositionType _type {GridPositionType::Auto};
@@ -123,7 +123,9 @@ namespace krys::boo::style
     }
 
     GridPosition(Explicit explicitPosition) noexcept;
+
     GridPosition(Span spanPosition) noexcept;
+
     GridPosition(css::CustomIdentifier namedGridAreaPosition) noexcept;
 
     KRYS_NODISCARD bool IsAuto() const noexcept
@@ -147,7 +149,9 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD int ExplicitPosition() const noexcept;
+
     KRYS_NODISCARD int SpanPosition() const noexcept;
+
     KRYS_NODISCARD css::CSSOMString NamedGridLine() const noexcept;
 
     KRYS_NODISCARD bool ShouldBeResolvedAgainstOppositePosition() const noexcept
@@ -158,6 +162,7 @@ namespace krys::boo::style
     // Note that grid line 1 is internally represented by the index 0, that's why the max value for
     // a position is gridMaxTracks instead of gridMaxTracks + 1.
     KRYS_NODISCARD static int Max() noexcept;
+
     KRYS_NODISCARD static int Min() noexcept;
 
     template <typename... F>

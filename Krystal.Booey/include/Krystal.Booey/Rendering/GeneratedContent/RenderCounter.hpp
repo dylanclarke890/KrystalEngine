@@ -53,20 +53,25 @@ namespace krys::boo
 
   public:
     RenderCounter(dom::Document &document, const style::Content::Counter &counter) noexcept;
+
     ~RenderCounter() noexcept override;
 
     static void DestroyCounterNodes(RenderElement &owner) noexcept;
+
     static void DestroyCounterNode(RenderElement &owner, const css::CSSOMStringAtom &identifier) noexcept;
+
     static void RendererStyleChanged(RenderElement &renderer, const RenderStyle *oldStyle,
                                      const RenderStyle &newStyle) noexcept;
 
     void UpdateCounter() noexcept;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
+
     KRYS_NODISCARD utf8_string OriginalText() const noexcept override;
 
   private:
     void WillBeDestroyed() noexcept override;
+
     static void RendererStyleChangedSlowCase(RenderElement &renderer, const RenderStyle *oldStyle,
                                              const RenderStyle &newStyle) noexcept;
 

@@ -31,5 +31,5 @@ namespace krys::boo::style
 {
   using GridNamedAreaMap = css::GridNamedAreaMap;
   template <>
-  inline constexpr bool TreatAsNonConverting<GridNamedAreaMap> = true;
+  constexpr inline bool TreatAsNonConverting<GridNamedAreaMap> = true;
 }

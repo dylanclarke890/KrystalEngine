@@ -36,7 +36,7 @@ namespace krys::boo::style
   enum class BaselineAlignmentPreferenceKind : bool
   {
     First,
-    Last
+    Last,
   };
 
   KRYS_NODISCARD constexpr BaselineAlignmentPreferenceKind

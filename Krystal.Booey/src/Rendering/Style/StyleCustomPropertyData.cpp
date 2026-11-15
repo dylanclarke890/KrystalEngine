@@ -28,7 +28,7 @@
 
 namespace krys::boo::style
 {
-  static constexpr auto MaximumAncestorCount = 4;
+  constexpr static auto MaximumAncestorCount = 4;
 
   CustomPropertyData::CustomPropertyData(const CustomPropertyData &other) noexcept
       : _size(other._size), _mayHaveAnimatableProperties(other._mayHaveAnimatableProperties)
@@ -49,7 +49,7 @@ namespace krys::boo::style
 
       // If the number of properties is small we just copy them to avoid creating unnecessarily long linked
       // lists.
-      static constexpr auto parentReferencePropertyCountThreshold = 8;
+      constexpr static auto parentReferencePropertyCountThreshold = 8;
       return other._ownValues.size() > parentReferencePropertyCountThreshold;
     }();
 

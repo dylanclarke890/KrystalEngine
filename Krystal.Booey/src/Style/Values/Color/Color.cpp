@@ -204,7 +204,9 @@ namespace krys::boo::style
   }
 
   Color::Color(Color &&) noexcept = default;
+
   Color &Color::operator=(Color &&) noexcept = default;
+
   Color::~Color() noexcept = default;
 
   bool Color::operator==(const Color &other) const noexcept

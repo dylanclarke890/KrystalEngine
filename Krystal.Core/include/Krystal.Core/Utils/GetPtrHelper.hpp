@@ -48,5 +48,4 @@ namespace krys
   {
     return GetPtrHelper<T>::get(p);
   }
-
 }

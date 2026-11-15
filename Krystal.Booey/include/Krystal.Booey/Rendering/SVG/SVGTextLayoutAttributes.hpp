@@ -65,6 +65,7 @@ namespace krys::boo
     {
       return std::numeric_limits<float>::quiet_NaN();
     }
+
     KRYS_NODISCARD static bool IsEmptyValue(float value) noexcept
     {
       return std::isnan(value);
@@ -74,6 +75,7 @@ namespace krys::boo
     {
       return _context;
     }
+
     KRYS_NODISCARD const RenderSVGInlineText &Context() const noexcept
     {
       return _context;
@@ -83,6 +85,7 @@ namespace krys::boo
     {
       return _characterDataMap;
     }
+
     KRYS_NODISCARD const SVGCharacterDataMap &CharacterDataMap() const noexcept
     {
       return _characterDataMap;
@@ -92,6 +95,7 @@ namespace krys::boo
     {
       return _textMetricsValues;
     }
+
     KRYS_NODISCARD const List<SVGTextMetrics> &TextMetricsValues() const noexcept
     {
       return _textMetricsValues;

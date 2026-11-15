@@ -33,14 +33,14 @@ namespace krys::ui::input
     // Digits and letters.
     if (key >= Key::Num0 && key <= Key::Num9)
     {
-      static constexpr utf8_stringview codes[] {u8"Digit0", u8"Digit1", u8"Digit2", u8"Digit3", u8"Digit4",
+      constexpr static utf8_stringview codes[] {u8"Digit0", u8"Digit1", u8"Digit2", u8"Digit3", u8"Digit4",
                                                 u8"Digit5", u8"Digit6", u8"Digit7", u8"Digit8", u8"Digit9"};
       auto index = static_cast<int32>(key) - static_cast<int32>(Key::Num0);
       return {.Code = codes[index], .WindowsVirtualKeyCode = '0' + index};
     }
     if (key >= Key::A && key <= Key::Z)
     {
-      static constexpr utf8_stringview codes[] {
+      constexpr static utf8_stringview codes[] {
         u8"KeyA", u8"KeyB", u8"KeyC", u8"KeyD", u8"KeyE", u8"KeyF", u8"KeyG", u8"KeyH", u8"KeyI",
         u8"KeyJ", u8"KeyK", u8"KeyL", u8"KeyM", u8"KeyN", u8"KeyO", u8"KeyP", u8"KeyQ", u8"KeyR",
         u8"KeyS", u8"KeyT", u8"KeyU", u8"KeyV", u8"KeyW", u8"KeyX", u8"KeyY", u8"KeyZ"};
@@ -49,7 +49,7 @@ namespace krys::ui::input
     }
     if (key >= Key::Keypad0 && key <= Key::Keypad9)
     {
-      static constexpr utf8_stringview codes[] {u8"Numpad0", u8"Numpad1", u8"Numpad2", u8"Numpad3",
+      constexpr static utf8_stringview codes[] {u8"Numpad0", u8"Numpad1", u8"Numpad2", u8"Numpad3",
                                                 u8"Numpad4", u8"Numpad5", u8"Numpad6", u8"Numpad7",
                                                 u8"Numpad8", u8"Numpad9"};
       auto index = static_cast<int32>(key) - static_cast<int32>(Key::Keypad0);
@@ -57,7 +57,7 @@ namespace krys::ui::input
     }
     if (key >= Key::F1 && key <= Key::F20)
     {
-      static constexpr utf8_stringview names[] {u8"F1",  u8"F2",  u8"F3",  u8"F4",  u8"F5",  u8"F6",  u8"F7",
+      constexpr static utf8_stringview names[] {u8"F1",  u8"F2",  u8"F3",  u8"F4",  u8"F5",  u8"F6",  u8"F7",
                                                 u8"F8",  u8"F9",  u8"F10", u8"F11", u8"F12", u8"F13", u8"F14",
                                                 u8"F15", u8"F16", u8"F17", u8"F18", u8"F19", u8"F20"};
       auto index = static_cast<int32>(key) - static_cast<int32>(Key::F1);

@@ -59,7 +59,7 @@ namespace krys::boo
     No,
     NoExcludingURLsForPrivacy,
     Yes,
-    YesExcludingURLsForPrivacy
+    YesExcludingURLsForPrivacy,
   };
 
   /// @brief Whether nodes, and everything under them, are `user-select: none`, remembered as nodes are asked
@@ -71,7 +71,7 @@ namespace krys::boo
     {
       NotUserSelectNone,
       Mixed,
-      OnlyUserSelectNone
+      OnlyUserSelectNone,
     };
 
     HashMap<const dom::Node *, State> _cache;
@@ -87,7 +87,9 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD dom::ContainerNode *ParentNode(dom::Node &node) noexcept;
+
     KRYS_NODISCARD dom::Node *FirstChild(dom::Node &node) noexcept;
+
     KRYS_NODISCARD dom::Node *NextSibling(dom::Node &node) noexcept;
 
     KRYS_NODISCARD State ComputeState(dom::Node &targetNode) noexcept;
@@ -97,10 +99,12 @@ namespace krys::boo
   /// spans, that it would be pasted as at @p context.
   KRYS_NODISCARD Ref<dom::DocumentFragment> CreateFragmentFromText(const dom::SimpleRange &context,
                                                                    utf8_stringview text) noexcept;
+
   /// @brief The markup, parsed as if it were in a `body`.
   KRYS_NODISCARD Ref<dom::DocumentFragment> CreateFragmentFromMarkup(dom::Document &document,
                                                                      utf8_stringview markup,
                                                                      utf8_stringview baseURL) noexcept;
+
   /// @brief The markup, parsed as the children of @p contextElement, for `innerHTML`, `outerHTML`,
   /// `insertAdjacentHTML()` and `setHTMLUnsafe()`: as HTML in an HTML document or when the policy says to,
   /// and as XML otherwise, which throws a `SyntaxError` if it isn't well formed.
@@ -108,6 +112,7 @@ namespace krys::boo
   KRYS_NODISCARD dom::ExceptionOr<Ref<dom::DocumentFragment>>
     CreateFragmentForInnerOuterHTML(dom::Element &contextElement, utf8_stringview markup,
                                     EnumSet<dom::ParserContentPolicy> parserContentPolicy = {}) noexcept;
+
   /// @see https://w3c.github.io/DOM-Parsing/#dom-range-createcontextualfragment
   KRYS_NODISCARD dom::ExceptionOr<Ref<dom::DocumentFragment>>
     CreateContextualFragment(dom::Element &element, utf8_stringview markup) noexcept;
@@ -121,31 +126,31 @@ namespace krys::boo
   enum class ConvertBlocksToInlines : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class SerializeComposedTree : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class IgnoreUserSelectNone : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class PreserveBaseElement : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class PreserveDirectionForInlineText : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief The range's markup, with the styles that make it look as it does inlined, so it looks the same
@@ -155,6 +160,7 @@ namespace krys::boo
     AnnotateForInterchange annotate = AnnotateForInterchange::No,
     ConvertBlocksToInlines convertBlocksToInlines = ConvertBlocksToInlines::No,
     ResolveURLs resolveURLs = ResolveURLs::No) noexcept;
+
   KRYS_NODISCARD utf8_string SerializePreservingVisualAppearance(
     const VisibleSelection &selection, ResolveURLs resolveURLs = ResolveURLs::No,
     SerializeComposedTree serializeComposedTree = SerializeComposedTree::No,
@@ -166,27 +172,27 @@ namespace krys::boo
   enum class SerializedNodes : uint8
   {
     SubtreeIncludingNode,
-    SubtreesOfChildren
+    SubtreesOfChildren,
   };
 
   enum class SerializationSyntax : uint8
   {
     HTML,
     XML,
-    HTMLLegacyAttributeValue
+    HTMLLegacyAttributeValue,
   };
 
   enum class SerializeShadowRoots : uint8
   {
     Explicit,
     Serializable,
-    AllForInterchange
+    AllForInterchange,
   };
 
   enum class RequireWellFormed : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @see https://html.spec.whatwg.org/#serialising-html-fragments
@@ -212,7 +218,7 @@ namespace krys::boo
   enum class MSOListQuirks : bool
   {
     CheckIfNeeded,
-    Disabled
+    Disabled,
   };
 
   /// @brief @p rawHTML parsed in a staging page and serialised again with its styles inlined, which leaves
@@ -223,6 +229,7 @@ namespace krys::boo
     SanitizeMarkup(utf8_stringview rawHTML, dom::Document *destinationDocument,
                    MSOListQuirks msoListQuirks = MSOListQuirks::Disabled,
                    const Func<void(dom::DocumentFragment &)> &fragmentSanitizer = {}) noexcept;
+
   KRYS_NODISCARD utf8_string SanitizedMarkupForFragmentInDocument(Ref<dom::DocumentFragment> &&fragment,
                                                                   dom::Document &document,
                                                                   MSOListQuirks msoListQuirks,

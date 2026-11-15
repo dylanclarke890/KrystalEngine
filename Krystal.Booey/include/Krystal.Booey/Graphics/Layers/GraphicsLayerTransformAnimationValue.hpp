@@ -54,6 +54,7 @@ namespace krys::boo
         : GraphicsLayerAnimationValue(other), _value(other._value.Clone())
     {
     }
+
     GraphicsLayerTransformAnimationValue(GraphicsLayerTransformAnimationValue &&) noexcept = default;
 
     KRYS_NODISCARD UniquePtr<GraphicsLayerAnimationValue> Clone() const noexcept override

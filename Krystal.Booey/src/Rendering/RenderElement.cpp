@@ -529,7 +529,7 @@ namespace krys::boo
     {
       None,
       RendererOnly,
-      RendererAndDescendantsRenderersWithLayers
+      RendererAndDescendantsRenderersWithLayers,
     };
     auto shouldRepaintBeforeStyleChange = [&]() -> RequiredRepaint
     {

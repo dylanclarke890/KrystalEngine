@@ -17,13 +17,13 @@ namespace krys::text
   enum class ParseIntegerWhitespacePolicy : bool
   {
     Disallow,
-    Allow
+    Allow,
   };
 
   enum class TrailingJunkPolicy : bool
   {
     Disallow,
-    Allow
+    Allow,
   };
 
   template <std::integral TIntegral>

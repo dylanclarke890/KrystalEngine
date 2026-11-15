@@ -108,7 +108,7 @@ namespace krys::boo::css::PropertyParserHelpers
       SelfAmbiguous,
 
       // <axisless-keyword>
-      Axisless
+      Axisless,
     };
 
     KRYS_NODISCARD Maybe<KeywordType> GetKeywordType(ValueId id) noexcept

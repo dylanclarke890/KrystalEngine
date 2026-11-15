@@ -43,9 +43,12 @@ namespace krys::boo
     }
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
+
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *,
                                                   VisibleRectContext) const noexcept final;
+
     void AbsoluteQuads(List<FloatQuad> &, bool *wasFixed) const noexcept final;
+
     bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
                           HitTestAction) noexcept final;
   };

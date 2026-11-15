@@ -40,13 +40,17 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGResourceRadialGradient(svg::SVGRadialGradientElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGResourceRadialGradient() noexcept override;
 
     KRYS_NODISCARD svg::SVGRadialGradientElement &RadialGradientElement() const noexcept;
 
     KRYS_NODISCARD FloatPoint CenterPoint(const svg::RadialGradientAttributes &) const noexcept;
+
     KRYS_NODISCARD FloatPoint FocalPoint(const svg::RadialGradientAttributes &) const noexcept;
+
     KRYS_NODISCARD float Radius(const svg::RadialGradientAttributes &) const noexcept;
+
     KRYS_NODISCARD float FocalRadius(const svg::RadialGradientAttributes &) const noexcept;
 
   private:
@@ -59,10 +63,12 @@ namespace krys::boo
     {
       return _attributes.GradientUnits();
     }
+
     KRYS_NODISCARD AffineTransform GradientTransform() const noexcept final
     {
       return _attributes.GradientTransform();
     }
+
     KRYS_NODISCARD Ref<Gradient> BuildGradient() const noexcept final;
 
     void GradientElement() const = delete;
@@ -71,6 +77,7 @@ namespace krys::boo
     {
       return u8"RenderSVGResourceRadialGradient";
     }
+
     bool CollectGradientAttributes() noexcept final;
   };
 }

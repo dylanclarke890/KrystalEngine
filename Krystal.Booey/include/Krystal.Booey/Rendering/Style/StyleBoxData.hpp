@@ -43,6 +43,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleBoxData);
     }
+
     KRYS_NODISCARD Ref<StyleBoxData> Copy() const noexcept;
 
     bool operator==(const StyleBoxData &) const noexcept;
@@ -70,6 +71,7 @@ namespace krys::boo
     {
       return {static_cast<bool>(HasAutoSpecifiedZIndex), SpecifiedZIndexValue};
     }
+
     KRYS_NODISCARD style::ZIndex UsedZIndex() const noexcept
     {
       return {static_cast<bool>(HasAutoUsedZIndex), UsedZIndexValue};
@@ -77,6 +79,7 @@ namespace krys::boo
 
   private:
     StyleBoxData() noexcept;
+
     StyleBoxData(const StyleBoxData &) noexcept;
   };
 }

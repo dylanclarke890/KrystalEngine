@@ -89,6 +89,7 @@ namespace krys::boo
     {
       return _size;
     }
+
     KRYS_NODISCARD const IntRect &FrameRect() const noexcept
     {
       return _frameRect;

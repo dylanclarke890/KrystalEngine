@@ -34,7 +34,6 @@
 
 namespace krys::boo
 {
-
   StyleMiscNonInheritedData::StyleMiscNonInheritedData() noexcept
       : Opacity(style::ComputedStyle::InitialOpacity()), FlexibleBox(StyleFlexibleBoxData::Create()),
         MultiCol(StyleMultiColData::Create()), Filter(StyleFilterData::Create()),

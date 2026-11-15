@@ -14,7 +14,7 @@ namespace krys::gfx
   enum class FilterColourSpace2D : uint8
   {
     SRGB,
-    LinearSRGB
+    LinearSRGB,
   };
 
   /// @brief What a filter node reads past the edges of its region.
@@ -25,7 +25,7 @@ namespace krys::gfx
     /// @brief The nearest pixel of the region.
     Duplicate,
     /// @brief The region repeated.
-    Wrap
+    Wrap,
   };
 
   /// @brief A colour channel, as a displacement map selects one.
@@ -34,7 +34,7 @@ namespace krys::gfx
     Red,
     Green,
     Blue,
-    Alpha
+    Alpha,
   };
 
   /// @brief How two filter inputs combine, as SVG's `feComposite` operators: the first input is the source
@@ -48,7 +48,7 @@ namespace krys::gfx
     Xor,
     Lighter,
     /// @brief k1 * i1 * i2 + k2 * i1 + k3 * i2 + k4, with `FilterNode2D::K`.
-    Arithmetic
+    Arithmetic,
   };
 
   /// @brief What a filter node reads: one of the graph's sources, or an earlier node's result.
@@ -58,7 +58,7 @@ namespace krys::gfx
     {
       None,
       Source,
-      Node
+      Node,
     };
 
     Kind Type {Kind::None};
@@ -68,6 +68,7 @@ namespace krys::gfx
     {
       return {.Type = Kind::Source, .Index = index};
     }
+
     KRYS_NODISCARD static constexpr FilterInput2D Node(uint32 index) noexcept
     {
       return {.Type = Kind::Node, .Index = index};
@@ -93,7 +94,7 @@ namespace krys::gfx
     {
       Distant,
       Point,
-      Spot
+      Spot,
     };
 
     Kind Type {Kind::Distant};
@@ -143,7 +144,7 @@ namespace krys::gfx
       /// @brief Perlin noise, as `feTurbulence`.
       Turbulence,
       /// @brief The input's `TileRect` repeated, as `feTile`.
-      Tile
+      Tile,
     };
 
     Kind Type {Kind::Offset};

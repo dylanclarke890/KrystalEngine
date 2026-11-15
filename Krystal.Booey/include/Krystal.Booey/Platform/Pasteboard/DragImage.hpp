@@ -63,12 +63,17 @@ namespace krys::boo
   // the input image ref will still be valid after they have been called.
   KRYS_NODISCARD DragImageRef FitDragImageToMaxSize(DragImageRef image, const IntSize &srcSize,
                                                     const IntSize &dstSize) noexcept;
+
   KRYS_NODISCARD DragImageRef ScaleDragImage(DragImageRef image, FloatSize scale) noexcept;
+
   KRYS_NODISCARD DragImageRef PlatformAdjustDragImageForDeviceScaleFactor(DragImageRef image,
                                                                           float deviceScaleFactor) noexcept;
+
   KRYS_NODISCARD DragImageRef DissolveDragImageToFraction(DragImageRef image, float delta) noexcept;
+
   /// @brief A drag image of @p image at its size, oriented by @p orientation; null if it has no size.
   KRYS_NODISCARD DragImageRef CreateDragImageFromImage(Image *image, ImageOrientation orientation) noexcept;
+
   /// @brief The icon for a dragged image's file, which the host doesn't give: null.
   KRYS_NODISCARD DragImageRef CreateDragImageIconForCachedImageFilename(utf8_stringview filename) noexcept;
 
@@ -81,9 +86,11 @@ namespace krys::boo
 
   /// @brief A snapshot of @p node, as it's painted when dragged.
   KRYS_NODISCARD DragImageRef CreateDragImageForNode(LocalFrame &frame, dom::Node &node) noexcept;
+
   /// @brief A snapshot of the frame's selection.
   KRYS_NODISCARD DragImageData CreateDragImageForSelection(LocalFrame &frame,
                                                            bool forceBlackText = false) noexcept;
+
   /// @brief A label for a dragged link: its text in bold over its URL, or the URL alone if there's no text.
   KRYS_NODISCARD DragImageData CreateDragImageForLink(dom::Element &element, url::URL &url,
                                                       utf8_stringview label,
@@ -91,6 +98,7 @@ namespace krys::boo
 
   /// @brief Where a link's drag image goes relative to the cursor.
   KRYS_NODISCARD IntPoint DragOffsetForLinkDragImage(const DragImageRef &dragImage) noexcept;
+
   /// @brief The point of a link's drag image that's under the cursor, as fractions of its size.
   KRYS_NODISCARD FloatPoint AnchorPointForLinkDragImage(const DragImageRef &dragImage) noexcept;
 
@@ -105,10 +113,13 @@ namespace krys::boo
 
   public:
     DragImage() noexcept = default;
+
     explicit DragImage(DragImageRef dragImageRef) noexcept : _dragImageRef(krys::move(dragImageRef))
     {
     }
+
     DragImage(DragImage &&) noexcept = default;
+
     DragImage &operator=(DragImage &&) noexcept = default;
 
     explicit operator bool() const noexcept

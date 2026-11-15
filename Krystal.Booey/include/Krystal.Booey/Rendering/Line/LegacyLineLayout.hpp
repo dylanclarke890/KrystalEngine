@@ -53,18 +53,22 @@ namespace krys::boo
 
   public:
     explicit LegacyLineLayout(RenderBlockFlow &) noexcept;
+
     ~LegacyLineLayout() noexcept;
 
     KRYS_NODISCARD LegacyRootInlineBox *LegacyRootBox() const noexcept
     {
       return _legacyRootInlineBox.get();
     }
+
     void DeleteLegacyRootBox(bool runCleanup = false) noexcept;
 
     void LayoutLineBoxes() noexcept;
+
     void ShiftLineBy(LayoutUnit shiftX, LayoutUnit shiftY) noexcept;
 
     LegacyRootInlineBox *ConstructLine(BidiRunList<BidiRun> &, const LineInfo &) noexcept;
+
     void AddOverflowFromInlineChildren() noexcept;
 
     KRYS_NODISCARD size_t LineCount() const noexcept;
@@ -76,17 +80,26 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD UniquePtr<LegacyRootInlineBox> CreateRootInlineBox() noexcept;
+
     LegacyRootInlineBox *CreateAndAppendRootInlineBox() noexcept;
+
     LegacyInlineBox *CreateInlineBoxForRenderer(RenderObject *) noexcept;
+
     LegacyInlineFlowBox *CreateLineBoxes(RenderObject *, const LineInfo &, LegacyInlineBox *) noexcept;
+
     void RemoveInlineBox(BidiRun &, const LegacyRootInlineBox &) const noexcept;
+
     void RemoveEmptyTextBoxesAndUpdateVisualReordering(LegacyRootInlineBox *, BidiRun *firstRun) noexcept;
+
     LegacyRootInlineBox *CreateLineBoxesFromBidiRuns(uint32 bidiLevel, BidiRunList<BidiRun> &bidiRuns,
                                                      const LegacyInlineIterator &end, LineInfo &) noexcept;
+
     void LayoutRunsAndFloats(bool hasInlineChild) noexcept;
+
     void LayoutRunsAndFloatsInRange(InlineBidiResolver &) noexcept;
 
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
+
     KRYS_NODISCARD const LocalFrameViewLayoutContext &LayoutContext() const noexcept;
   };
 }

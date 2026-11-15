@@ -50,18 +50,21 @@ namespace krys::boo::style
     {
       NoPreference,
       Left,
-      Right
+      Right,
     };
 
     constexpr TextUnderlinePosition(css::keywords::Auto) noexcept : _value {}
     {
     }
+
     constexpr TextUnderlinePosition(EnumSet &&set) noexcept : _value {krys::move(set)}
     {
     }
+
     constexpr TextUnderlinePosition(value_type value) noexcept : TextUnderlinePosition {EnumSet {value}}
     {
     }
+
     constexpr TextUnderlinePosition(std::initializer_list<value_type> initializerList) noexcept
         : TextUnderlinePosition {EnumSet {initializerList}}
     {
@@ -71,6 +74,7 @@ namespace krys::boo::style
     {
       return EnumSet::FromRaw(rawValue);
     }
+
     KRYS_NODISCARD constexpr EnumSet::StorageType ToRaw() const noexcept
     {
       return _value.ToRaw();
@@ -80,14 +84,17 @@ namespace krys::boo::style
     {
       return _value.Contains(e);
     }
+
     KRYS_NODISCARD constexpr bool ContainsAny(EnumSet other) const noexcept
     {
       return _value.ContainsAny(other.Value);
     }
+
     KRYS_NODISCARD constexpr bool ContainsAll(EnumSet other) const noexcept
     {
       return _value.ContainsAll(other.Value);
     }
+
     KRYS_NODISCARD constexpr bool ContainsOnly(EnumSet other) const noexcept
     {
       return _value.ContainsOnly(other.Value);
@@ -97,10 +104,12 @@ namespace krys::boo::style
     {
       return _value.IsEmpty();
     }
+
     KRYS_NODISCARD constexpr bool IsFromFont() const noexcept
     {
       return Contains(TextUnderlinePositionValue::FromFont);
     }
+
     KRYS_NODISCARD constexpr bool IsUnder() const noexcept
     {
       return Contains(TextUnderlinePositionValue::Under);

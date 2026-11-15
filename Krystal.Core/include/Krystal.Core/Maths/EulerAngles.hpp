@@ -17,10 +17,14 @@ namespace krys::Impl
     if (m[0][0] < One<T>())
     {
       if (m[0][0] > -One<T>())
+      {
         return {std::acos(m[0][0]), std::atan2(m[1][0], -m[2][0]), std::atan2(m[0][1], m[0][2])};
+      }
       else
+      {
         // Not a unique solution.
         return {Pi<T>(), -std::atan2(-m[1][2], m[1][1]), Zero<T>()};
+      }
     }
 
     return {Zero<T>(), std::atan2(-m[1][2], m[1][1]), Zero<T>()};
@@ -32,9 +36,13 @@ namespace krys::Impl
     if (m[0][0] < One<T>())
     {
       if (m[0][0] > -One<T>())
+      {
         return {std::acos(m[0][0]), std::atan2(m[2][0], m[1][0]), std::atan2(m[0][2], -m[0][1])};
+      }
       else
+      {
         return {Pi<T>(), -std::atan2(m[2][1], m[2][2]), Zero<T>()};
+      }
     }
 
     return {Zero<T>(), std::atan2(m[2][1], m[2][2]), Zero<T>()};
@@ -46,10 +54,14 @@ namespace krys::Impl
     if (m[0][2] < One<T>())
     {
       if (m[0][2] > -One<T>())
+      {
         return {std::std::asin(m[0][2]), std::atan2(-m[1][2], m[2][2]), std::atan2(-m[0][1], m[0][0])};
+      }
       else
+      {
         // Not a unique solution: z - x = atan2(m[1][0], m[1][1]);
         return {-HalfPi<T>(), -std::atan2(m[1][0], m[1][1]), Zero<T>()};
+      }
     }
 
     return {HalfPi<T>(), std::atan2(m[1][0], m[1][1]), Zero<T>()};
@@ -61,10 +73,14 @@ namespace krys::Impl
     if (m[1][1] < One<T>())
     {
       if (m[1][1] > -One<T>())
+      {
         return {std::acos(m[1][1]), std::atan2(m[0][1], m[2][1]), std::atan2(m[1][0], -m[1][2])};
+      }
       else
+      {
         // Not a unique solution.
         return {Pi<T>(), -std::atan2(m[0][2], m[0][0]), Zero<T>()};
+      }
     }
 
     // Not a unique solution.
@@ -77,9 +93,13 @@ namespace krys::Impl
     if (m[1][1] < One<T>())
     {
       if (m[1][1] > -One<T>())
+      {
         return {std::acos(m[1][1]), std::atan2(m[2][1], -m[0][1]), std::atan2(m[1][2], m[1][0])};
+      }
       else
+      {
         return {Pi<T>(), -std::atan2(-m[2][0], m[2][2]), Zero<T>()};
+      }
     }
 
     // Not a unique solution.
@@ -92,9 +112,13 @@ namespace krys::Impl
     if (m[2][2] < One<T>())
     {
       if (m[2][2] > -One<T>())
+      {
         return {std::acos(m[2][2]), std::atan2(m[0][2], -m[1][2]), std::atan2(m[2][0], m[2][1])};
+      }
       else
+      {
         return {Pi<T>(), -std::atan2(-m[0][1], m[0][0]), Zero<T>()};
+      }
     }
 
     return {Zero<T>(), std::atan2(-m[0][1], m[0][0]), Zero<T>()};
@@ -106,9 +130,13 @@ namespace krys::Impl
     if (m[2][2] < One<T>())
     {
       if (m[2][2] > -One<T>())
+      {
         return {std::acos(m[2][2]), std::atan2(m[1][2], m[0][2]), std::atan2(m[2][1], -m[2][0])};
+      }
       else
+      {
         return {Pi<T>(), -std::atan2(m[1][0], m[1][1]), Zero<T>()};
+      }
     }
 
     return {Zero<T>(), std::atan2(m[1][0], m[1][1]), Zero<T>()};
@@ -120,10 +148,14 @@ namespace krys::Impl
     if (m[0][1] < One<T>())
     {
       if (m[0][1] > -One<T>())
+      {
         return {std::asin(-m[0][1]), std::atan2(m[2][1], m[1][1]), std::atan2(m[0][2], m[0][0])};
+      }
       else
+      {
         // Not a unique solution: y - x = atan2(-m[2][0], m[2][2]);
         return {HalfPi<T>(), -std::atan2(-m[2][0], m[2][2]), Zero<T>()};
+      }
     }
 
     // Not a unique solution: y + x = atan2(-m[2][0], m[2][2]);
@@ -140,7 +172,9 @@ namespace krys::Impl
         return {std::asin(-m[1][2]), std::atan2(m[0][2], m[2][2]), std::atan2(m[1][0], m[1][1])};
       }
       else
+      {
         return {HalfPi<T>(), -std::atan2(-m[0][1], m[0][0]), Zero<T>()};
+      }
     }
 
     return {-HalfPi<T>(), std::atan2(-m[0][1], m[0][0]), Zero<T>()};
@@ -152,9 +186,13 @@ namespace krys::Impl
     if (m[1][0] < One<T>())
     {
       if (m[1][0] > -One<T>())
+      {
         return {std::asin(m[1][0]), std::atan2(-m[2][0], m[0][0]), std::atan2(-m[1][2], m[1][1])};
+      }
       else
+      {
         return {-HalfPi<T>(), -std::atan2(m[2][1], m[2][2]), Zero<T>()};
+      }
     }
 
     return {HalfPi<T>(), std::atan2(m[2][1], m[2][2]), Zero<T>()};
@@ -166,9 +204,13 @@ namespace krys::Impl
     if (m[2][1] < One<T>())
     {
       if (m[2][1] > -One<T>())
+      {
         return {std::asin(m[2][1]), std::atan2(-m[0][1], m[1][1]), std::atan2(-m[2][0], m[2][2])};
+      }
       else
+      {
         return {-HalfPi<T>(), -std::atan2(m[0][2], m[0][0]), Zero<T>()};
+      }
     }
 
     return {HalfPi<T>(), std::atan2(m[0][2], m[0][0]), Zero<T>()};
@@ -180,9 +222,13 @@ namespace krys::Impl
     if (m[2][0] < One<T>())
     {
       if (m[2][0] > -One<T>())
+      {
         return {std::asin(-m[2][0]), std::atan2(m[1][0], m[0][0]), std::atan2(m[2][1], m[2][2])};
+      }
       else
+      {
         return {HalfPi<T>(), -std::atan2(-m[1][2], m[1][1]), Zero<T>()};
+      }
     }
 
     return {-HalfPi<T>(), std::atan2(-m[1][2], m[1][1]), Zero<T>()};

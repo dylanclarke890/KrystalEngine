@@ -40,42 +40,70 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<AXMathMLElement> Create(AXId id, RenderObject &renderer,
                                                       AXObjectCache &cache) noexcept;
+
     ~AXMathMLElement() noexcept override;
 
     KRYS_NODISCARD bool IsMathElement() const noexcept final
     {
       return true;
     }
+
     KRYS_NODISCARD bool IsIgnoredElementWithinMathTree() const noexcept final;
 
     KRYS_NODISCARD bool IsMathFraction() const noexcept final;
+
     KRYS_NODISCARD bool IsMathSubscriptSuperscript() const noexcept final;
+
     KRYS_NODISCARD bool IsMathRow() const noexcept final;
+
     KRYS_NODISCARD bool IsMathUnderOver() const noexcept final;
+
     KRYS_NODISCARD bool IsMathRoot() const noexcept final;
+
     KRYS_NODISCARD bool IsMathSquareRoot() const noexcept final;
+
     KRYS_NODISCARD bool IsMathToken() const noexcept final;
+
     KRYS_NODISCARD bool IsMathOperator() const noexcept final;
+
     KRYS_NODISCARD bool IsMathFenceOperator() const noexcept final;
+
     KRYS_NODISCARD bool IsMathSeparatorOperator() const noexcept final;
+
     KRYS_NODISCARD bool IsMathText() const noexcept final;
+
     KRYS_NODISCARD bool IsMathNumber() const noexcept final;
+
     KRYS_NODISCARD bool IsMathIdentifier() const noexcept final;
+
     KRYS_NODISCARD bool IsMathMultiscript() const noexcept final;
+
     KRYS_NODISCARD bool IsMathTable() const noexcept final;
+
     KRYS_NODISCARD bool IsMathTableRow() const noexcept final;
+
     KRYS_NODISCARD bool IsMathTableCell() const noexcept final;
 
     KRYS_NODISCARD Maybe<AXChildrenVector> MathRadicand() noexcept final;
+
     KRYS_NODISCARD AXObject *MathRootIndexObject() noexcept final;
+
     KRYS_NODISCARD AXObject *MathNumeratorObject() noexcept final;
+
     KRYS_NODISCARD AXObject *MathDenominatorObject() noexcept final;
+
     KRYS_NODISCARD AXObject *MathUnderObject() noexcept final;
+
     KRYS_NODISCARD AXObject *MathOverObject() noexcept final;
+
     KRYS_NODISCARD AXObject *MathBaseObject() noexcept final;
+
     KRYS_NODISCARD AXObject *MathSubscriptObject() noexcept final;
+
     KRYS_NODISCARD AXObject *MathSuperscriptObject() noexcept final;
+
     KRYS_NODISCARD AXMathMultiscriptPairs MathPrescripts() noexcept final;
+
     KRYS_NODISCARD AXMathMultiscriptPairs MathPostscripts() noexcept final;
 
   protected:

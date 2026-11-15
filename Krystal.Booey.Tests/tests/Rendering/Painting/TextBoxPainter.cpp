@@ -4,7 +4,6 @@
 
 namespace krys::boo::tests
 {
-
   TEST_CASE("TextBoxPainter: draws text runs on the baseline in the text colour",
             "[Rendering][TextBoxPainter]")
   {

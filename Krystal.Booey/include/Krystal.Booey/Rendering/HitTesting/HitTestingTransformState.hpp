@@ -60,12 +60,17 @@ namespace krys::boo
     }
 
     void Translate(int32 x, int32 y) noexcept;
+
     void ApplyTransform(const TransformationMatrix &transformFromContainer) noexcept;
 
     KRYS_NODISCARD FloatPoint MappedPoint() const noexcept;
+
     KRYS_NODISCARD FloatQuad MappedQuad() const noexcept;
+
     KRYS_NODISCARD FloatQuad MappedArea() const noexcept;
+
     KRYS_NODISCARD LayoutRect BoundsOfMappedArea() const noexcept;
+
     KRYS_NODISCARD LayoutRect BoundsOfMappedQuad() const noexcept;
 
     void Flatten() noexcept;

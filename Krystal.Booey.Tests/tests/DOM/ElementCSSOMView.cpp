@@ -254,6 +254,7 @@ namespace krys::boo::dom::tests
       CHECK(s.ScrollLeft() == 0);
     }
   }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Element: CSSOM View scrolling right to left",
                    "[DOM][Element][CSSOMView]")
   {

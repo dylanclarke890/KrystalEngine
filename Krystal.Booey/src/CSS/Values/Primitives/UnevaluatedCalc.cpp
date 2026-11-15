@@ -47,8 +47,11 @@ namespace krys::boo::css
   }
 
   UnevaluatedCalcBase::UnevaluatedCalcBase(const UnevaluatedCalcBase &) noexcept = default;
+
   UnevaluatedCalcBase::UnevaluatedCalcBase(UnevaluatedCalcBase &&) noexcept = default;
+
   UnevaluatedCalcBase &UnevaluatedCalcBase::operator=(const UnevaluatedCalcBase &) noexcept = default;
+
   UnevaluatedCalcBase &UnevaluatedCalcBase::operator=(UnevaluatedCalcBase &&) noexcept = default;
 
   UnevaluatedCalcBase::~UnevaluatedCalcBase() noexcept = default;

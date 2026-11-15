@@ -50,7 +50,7 @@ namespace krys::boo
     using GradientColorInterpolationMethod = css::GradientColorInterpolationMethod;
 
     template <>
-    inline constexpr bool TreatAsNonConverting<GradientColorInterpolationMethod> = true;
+    constexpr inline bool TreatAsNonConverting<GradientColorInterpolationMethod> = true;
 
     // MARK: - Gradient Color Stop Definitions.
 
@@ -69,6 +69,7 @@ namespace krys::boo
 
       KRYS_NODISCARD bool operator==(const GradientColorStop<C, P> &) const noexcept = default;
     };
+
     template <typename C, typename P>
     GradientColorStop(C color, P position) -> GradientColorStop<C, P>;
 
@@ -103,6 +104,7 @@ namespace krys::boo
       KRYS_NODISCARD css::GradientAngularColorStop operator()(const GradientAngularColorStop &,
                                                               const RenderStyle &) noexcept;
     };
+
     template <>
     struct ToCSS<GradientLinearColorStop>
     {
@@ -116,6 +118,7 @@ namespace krys::boo
       KRYS_NODISCARD GradientAngularColorStop operator()(const css::GradientAngularColorStop &,
                                                          const BuilderState &) noexcept;
     };
+
     template <>
     struct ToStyle<css::GradientLinearColorStop>
     {
@@ -161,20 +164,25 @@ namespace krys::boo
     struct RadialGradient
     {
       using Extent = css::RadialGradient::Extent;
+
       struct Ellipse
       {
         using SizeType = css::SpaceSeparatedArray<LengthPercentage<css::NonNegative>, 2>;
         Variant<SizeType, Extent> Size;
         Maybe<style::Position> Position;
+
         KRYS_NODISCARD bool operator==(const Ellipse &) const noexcept = default;
       };
+
       struct Circle
       {
         using Length = style::Length<css::NonNegative>;
         Variant<Length, Extent> Size;
         Maybe<style::Position> Position;
+
         KRYS_NODISCARD bool operator==(const Circle &) const noexcept = default;
       };
+
       using GradientBoxType = Variant<Ellipse, Circle>;
 
       GradientColorInterpolationMethod ColourInterpolationMethod;
@@ -307,7 +315,6 @@ namespace krys::boo
 
     // Returns whether the gradient is opaque.
     KRYS_NODISCARD bool IsOpaque(const Gradient &, const RenderStyle &) noexcept;
-
   }
 }
 
@@ -327,6 +334,7 @@ namespace std
   class tuple_size<krys::boo::style::GradientColorStop<C, P>> : public std::integral_constant<size_t, 2>
   {
   };
+
   template <size_t I, typename C, typename P>
   class tuple_element<I, krys::boo::style::GradientColorStop<C, P>>
   {
@@ -334,5 +342,4 @@ namespace std
     using type =
       decltype(krys::boo::style::get<I>(std::declval<krys::boo::style::GradientColorStop<C, P>>()));
   };
-
 }

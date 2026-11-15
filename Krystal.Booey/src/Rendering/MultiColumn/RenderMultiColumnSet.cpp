@@ -841,7 +841,7 @@ namespace krys::boo
                                                    const LayoutRect &layerBoundingBox,
                                                    const LayoutRect &dirtyRect) const noexcept
   {
-    static constexpr uint64 MaximumNumberOfFragments = 2'500'000;
+    constexpr static uint64 MaximumNumberOfFragments = 2'500'000;
     // Let's start by introducing the different coordinate systems involved here. They are different
     // in how they deal with writing modes and columns. RenderLayer rectangles tend to be more
     // physical than the rectangles used in RenderObject & co.

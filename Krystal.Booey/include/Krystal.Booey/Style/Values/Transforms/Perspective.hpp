@@ -44,11 +44,13 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsLength() const noexcept
     {
       return IsValue();
     }
   };
+
   static_assert(sizeof(Perspective) == sizeof(float));
 
   // MARK: - Conversion
@@ -65,6 +67,7 @@ namespace krys::boo::style
   struct Blending<Perspective>
   {
     KRYS_NODISCARD bool CanBlend(const Perspective &, const Perspective &) noexcept;
+
     KRYS_NODISCARD Perspective Blend(const Perspective &, const Perspective &,
                                      const BlendingContext &) noexcept;
   };

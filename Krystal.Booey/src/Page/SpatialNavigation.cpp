@@ -47,14 +47,20 @@ namespace krys::boo
   namespace
   {
     bool AreRectsFullyAligned(dom::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
+
     bool AreRectsPartiallyAligned(dom::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
+
     bool AreRectsMoreThanFullScreenApart(dom::FocusDirection, const LayoutRect &curRect,
                                          const LayoutRect &targetRect, const LayoutSize &viewSize) noexcept;
+
     bool IsRectInDirection(dom::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
+
     void DeflateIfOverlapped(LayoutRect &, LayoutRect &) noexcept;
+
     void EntryAndExitPointsForDirection(dom::FocusDirection, const LayoutRect &startingRect,
                                         const LayoutRect &potentialRect, LayoutPoint &exitPoint,
                                         LayoutPoint &entryPoint) noexcept;
+
     bool IsScrollableNode(const dom::ContainerNode &) noexcept;
 
     RectsAlignment AlignmentForRects(dom::FocusDirection direction, const LayoutRect &curRect,

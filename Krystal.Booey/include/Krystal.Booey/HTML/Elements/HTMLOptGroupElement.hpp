@@ -47,6 +47,7 @@ namespace krys::boo::html
 
   public:
     explicit HTMLOptGroupElement(dom::Document &document) noexcept;
+
     KRYS_NODISCARD static Ref<HTMLOptGroupElement> Create(dom::Document &document) noexcept;
 
     /// @brief The slot of the shadow tree that takes @p child: a first child element that's a legend takes
@@ -90,11 +91,17 @@ namespace krys::boo::html
 #pragma region Extension Hooks
 
     void OnInsert() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnChildrenChanged() noexcept override;
+
     void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
@@ -103,6 +110,7 @@ namespace krys::boo::html
 
   private:
     void UpdateOwnerSelect() noexcept;
+
     void RecalcSelectOptions() noexcept;
   };
 }

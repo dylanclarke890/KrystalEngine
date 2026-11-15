@@ -36,7 +36,7 @@ namespace krys::boo
     FECOLORMATRIX_TYPE_MATRIX = 1,
     FECOLORMATRIX_TYPE_SATURATE = 2,
     FECOLORMATRIX_TYPE_HUEROTATE = 3,
-    FECOLORMATRIX_TYPE_LUMINANCETOALPHA = 4
+    FECOLORMATRIX_TYPE_LUMINANCETOALPHA = 4,
   };
 
   /// @brief The colour matrix filter effect: a matrix applied to each pixel's straight-alpha colour.
@@ -55,16 +55,20 @@ namespace krys::boo
     {
       return _type;
     }
+
     bool SetType(ColorMatrixType type) noexcept;
 
     KRYS_NODISCARD const List<float> &Values() const noexcept
     {
       return _values;
     }
+
     bool SetValues(const List<float> &values) noexcept;
 
     static void CalculateSaturateComponents(Span<float, 9> components, float value) noexcept;
+
     static void CalculateHueRotateComponents(Span<float, 9> components, float value) noexcept;
+
     KRYS_NODISCARD static List<float> NormalizedFloats(const List<float> &values) noexcept;
 
   private:

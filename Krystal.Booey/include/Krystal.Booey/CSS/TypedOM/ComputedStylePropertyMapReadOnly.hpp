@@ -51,8 +51,10 @@ namespace krys::boo::css
     {
       return Type::Computed;
     }
+
     /// @brief The number of exposed properties, then of the element's custom properties.
     KRYS_NODISCARD size_t Size() const noexcept final;
+
     /// @brief The exposed properties, then the custom properties, sorted as the specification says.
     KRYS_NODISCARD List<Entry> Entries() const noexcept final;
 
@@ -60,8 +62,11 @@ namespace krys::boo::css
     explicit ComputedStylePropertyMapReadOnly(dom::Element &element) noexcept;
 
     KRYS_NODISCARD dom::Document *Document() const noexcept final;
+
     KRYS_NODISCARD RefPtr<Value> PropertyValue(PropertyId property) const noexcept final;
+
     KRYS_NODISCARD CSSOMString ShorthandPropertySerialisation(PropertyId property) const noexcept final;
+
     KRYS_NODISCARD RefPtr<Value> CustomPropertyValue(const CSSOMStringAtom &property) const noexcept final;
   };
 }

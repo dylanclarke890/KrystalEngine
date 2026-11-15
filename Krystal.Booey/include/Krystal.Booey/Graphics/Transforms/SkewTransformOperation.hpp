@@ -46,6 +46,7 @@ namespace krys::boo
     {
       return _angleX;
     }
+
     KRYS_NODISCARD double AngleY() const noexcept
     {
       return _angleY;

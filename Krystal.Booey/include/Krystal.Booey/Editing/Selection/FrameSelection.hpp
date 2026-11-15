@@ -62,13 +62,13 @@ namespace krys::boo
   enum class UserTriggered : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class CaretVisibility : bool
   {
     Visible,
-    Hidden
+    Hidden,
   };
 
   enum class CaretVisibilitySuppressionReason : uint8
@@ -80,13 +80,13 @@ namespace krys::boo
   enum class RevealExtentOption : bool
   {
     RevealExtent,
-    DoNotRevealExtent
+    DoNotRevealExtent,
   };
 
   enum class ForceCenterScroll : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   struct RevealSelectionOptions
@@ -116,7 +116,7 @@ namespace krys::boo
     ForBindings,
     DoNotNotifyEditorClients,
     MaintainLiveRange,
-    OnlyAllowForwardScrolling
+    OnlyAllowForwardScrolling,
   };
 }
 
@@ -154,9 +154,13 @@ namespace krys::boo
 
     void InvalidateCaretRect(dom::Node *node, bool caretRectChanged = false,
                              CaretAnimator *caretAnimator = nullptr) noexcept;
+
     void ClearCaretRect() noexcept;
+
     bool UpdateCaretRect(dom::Document &document, const VisiblePosition &caretPosition) noexcept;
+
     KRYS_NODISCARD bool ShouldRepaintCaret(const RenderView *view, bool isContentEditable) const noexcept;
+
     void PaintCaret(const dom::Node &node, GraphicsContext &context, const LayoutPoint &paintOffset,
                     CaretAnimator *caretAnimator) const noexcept;
 
@@ -169,6 +173,7 @@ namespace krys::boo
     {
       return _caretRectNeedsUpdate;
     }
+
     void SetCaretRectNeedsUpdate() noexcept
     {
       _caretRectNeedsUpdate = true;
@@ -178,10 +183,12 @@ namespace krys::boo
     {
       _caretVisibility = visibility;
     }
+
     KRYS_NODISCARD bool CaretIsVisible() const noexcept
     {
       return _caretVisibility == CaretVisibility::Visible;
     }
+
     KRYS_NODISCARD CaretVisibility GetCaretVisibility() const noexcept
     {
       return _caretVisibility;
@@ -203,18 +210,23 @@ namespace krys::boo
     DragCaretController() noexcept;
 
     KRYS_NODISCARD RenderBlock *CaretRenderer() const noexcept;
+
     void PaintDragCaret(LocalFrame *frame, GraphicsContext &context,
                         const LayoutPoint &paintOffset) const noexcept;
 
     KRYS_NODISCARD bool IsContentEditable() const noexcept;
+
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
 
     KRYS_NODISCARD bool HasCaret() const noexcept;
+
     KRYS_NODISCARD const VisiblePosition &CaretPosition() const noexcept
     {
       return _position;
     }
+
     void SetCaretPosition(const VisiblePosition &position) noexcept;
+
     void Clear() noexcept;
 
     void NodeWillBeRemoved(dom::Node &node) noexcept;
@@ -241,43 +253,43 @@ namespace krys::boo
     enum class CursorAlignOnScroll : bool
     {
       IfNeeded,
-      Always
+      Always,
     };
 
     enum class EndPointsAdjustmentMode : bool
     {
       DoNotAdjust,
-      AdjustAtBidiBoundary
+      AdjustAtBidiBoundary,
     };
 
     enum class ShouldCloseTyping : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class ClipToVisibleContent : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class Alteration : bool
     {
       Move,
-      Extend
+      Extend,
     };
 
     enum class VerticalDirection : bool
     {
       Up,
-      Down
+      Down,
     };
 
     enum class ShouldUpdateAppearance : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -285,7 +297,7 @@ namespace krys::boo
     {
       Start,
       End,
-      Extent
+      Extent,
     };
 
   private:
@@ -314,6 +326,7 @@ namespace krys::boo
 
   public:
     explicit FrameSelection(dom::Document *document = nullptr) noexcept;
+
     ~FrameSelection() noexcept override;
 
     KRYS_NODISCARD static constexpr EnumSet<SetSelectionOption>
@@ -333,12 +346,16 @@ namespace krys::boo
 
     void MoveTo(const VisiblePosition &position, UserTriggered userTriggered = UserTriggered::No,
                 CursorAlignOnScroll align = CursorAlignOnScroll::IfNeeded) noexcept;
+
     void MoveTo(const VisiblePosition &base, const VisiblePosition &extent,
                 UserTriggered userTriggered = UserTriggered::No) noexcept;
+
     void MoveTo(const dom::Position &position, Affinity affinity,
                 UserTriggered userTriggered = UserTriggered::No) noexcept;
+
     void MoveTo(const dom::Position &base, const dom::Position &extent, Affinity affinity,
                 UserTriggered userTriggered = UserTriggered::No) noexcept;
+
     void MoveWithoutValidationTo(const dom::Position &base, const dom::Position &extent,
                                  bool selectionHasDirection,
                                  EnumSet<SetSelectionOption> options = DefaultSetSelectionOptions()) noexcept;
@@ -347,6 +364,7 @@ namespace krys::boo
     {
       return _selection;
     }
+
     void SetSelection(const VisibleSelection &selection,
                       EnumSet<SetSelectionOption> options = DefaultSetSelectionOptions(),
                       CursorAlignOnScroll align = CursorAlignOnScroll::IfNeeded,
@@ -355,16 +373,20 @@ namespace krys::boo
     bool SetSelectedRange(const Maybe<dom::SimpleRange> &range, Affinity affinity,
                           ShouldCloseTyping closeTyping,
                           UserTriggered userTriggered = UserTriggered::No) noexcept;
+
     void SelectAll() noexcept;
+
     void Clear() noexcept;
 
     bool Modify(Alteration alter, SelectionDirection direction, TextGranularity granularity,
                 UserTriggered userTriggered = UserTriggered::No) noexcept;
+
     bool Modify(Alteration alter, uint32 verticalDistance, VerticalDirection direction,
                 UserTriggered userTriggered = UserTriggered::No,
                 CursorAlignOnScroll align = CursorAlignOnScroll::IfNeeded) noexcept;
 
     void WillBeModified(Alteration alter, SelectionDirection direction) noexcept;
+
     void WillBeRemovedFromFrame() noexcept;
 
     /// @brief Brings the render tree's selection up to date, once the rendering is.
@@ -382,12 +404,16 @@ namespace krys::boo
     }
 
     void SetStart(const VisiblePosition &position, UserTriggered trigger = UserTriggered::No) noexcept;
+
     void SetEnd(const VisiblePosition &position, UserTriggered trigger = UserTriggered::No) noexcept;
 
     void SetBase(const VisiblePosition &position, UserTriggered userTriggered = UserTriggered::No) noexcept;
+
     void SetBase(const dom::Position &position, Affinity affinity,
                  UserTriggered userTriggered = UserTriggered::No) noexcept;
+
     void SetExtent(const VisiblePosition &position, UserTriggered userTriggered = UserTriggered::No) noexcept;
+
     void SetExtent(const dom::Position &position, Affinity affinity,
                    UserTriggered userTriggered = UserTriggered::No) noexcept;
 
@@ -395,18 +421,22 @@ namespace krys::boo
     {
       return _selection.IsNone();
     }
+
     KRYS_NODISCARD bool IsCaret() const noexcept
     {
       return _selection.IsCaret();
     }
+
     KRYS_NODISCARD bool IsRange() const noexcept
     {
       return _selection.IsRange();
     }
+
     KRYS_NODISCARD bool IsCaretOrRange() const noexcept
     {
       return _selection.IsCaretOrRange();
     }
+
     KRYS_NODISCARD bool IsAll(EditingBoundaryCrossingRule rule =
                                 EditingBoundaryCrossingRule::CannotCrossEditingBoundary) const noexcept
     {
@@ -415,15 +445,18 @@ namespace krys::boo
 
     /// @brief Moves the selection's end points out of @p node before it's removed.
     void NodeWillBeRemoved(dom::Node &node) noexcept;
+
     /// @brief Adjusts the selection's end points in @p node for its data replaced at @p offset.
     void TextWasReplaced(dom::CharacterData &node, uint32 offset, uint32 oldLength,
                          uint32 newLength) noexcept;
 
     void SetFocused(bool isFocused) noexcept;
+
     KRYS_NODISCARD bool IsFocused() const noexcept
     {
       return _focused;
     }
+
     KRYS_NODISCARD bool IsFocusedAndActive() const noexcept;
 
     /// @brief Sets the render tree's selection from the selection.
@@ -440,9 +473,13 @@ namespace krys::boo
 
     /// @brief The style typing applies next, set by styling a caret.
     KRYS_NODISCARD EditingStyle *TypingStyle() const noexcept;
+
     KRYS_NODISCARD RefPtr<css::MutableStyleProperties> CopyTypingStyle() const noexcept;
+
     void SetTypingStyle(RefPtr<EditingStyle> &&style) noexcept;
+
     void ClearTypingStyle() noexcept;
+
     void SetCaretRectNeedsUpdate() noexcept
     {
       CaretBase::SetCaretRectNeedsUpdate();
@@ -451,6 +488,7 @@ namespace krys::boo
     void AddCaretVisibilitySuppressionReason(
       CaretVisibilitySuppressionReason reason,
       ShouldUpdateAppearance doAppearanceUpdate = ShouldUpdateAppearance::Yes) noexcept;
+
     void RemoveCaretVisibilitySuppressionReason(
       CaretVisibilitySuppressionReason reason,
       ShouldUpdateAppearance doAppearanceUpdate = ShouldUpdateAppearance::Yes) noexcept;
@@ -459,16 +497,19 @@ namespace krys::boo
     {
       return CaretBase::CaretIsVisible();
     }
+
     void PaintCaret(GraphicsContext &context, const LayoutPoint &paintOffset) noexcept;
 
     /// @brief Used to suspend caret blinking while the mouse is down.
     void SetCaretBlinkingSuspended(bool suspended) noexcept;
+
     KRYS_NODISCARD bool IsCaretBlinkingSuspended() const noexcept;
 
     KRYS_NODISCARD CaretAnimator &GetCaretAnimator() noexcept
     {
       return *_caretAnimator;
     }
+
     KRYS_NODISCARD const CaretAnimator &GetCaretAnimator() const noexcept
     {
       return *_caretAnimator;
@@ -477,6 +518,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::Document *GetDocument() noexcept override;
 
     KRYS_NODISCARD bool ShouldChangeSelection(const VisibleSelection &newSelection) const noexcept;
+
     KRYS_NODISCARD bool ShouldDeleteSelection(const VisibleSelection &selection) const noexcept;
 
     void SetSelectionByMouseIfDifferent(
@@ -495,22 +537,31 @@ namespace krys::boo
 
     /// @brief The live range the DOM's Selection gives out for the selection, made when it's first asked for.
     KRYS_NODISCARD RefPtr<dom::Range> AssociatedLiveRange() noexcept;
+
     void AssociateLiveRange(dom::Range &liveRange) noexcept;
+
     void DisassociateLiveRange() noexcept;
+
     /// @brief Sets the selection from the associated live range, after its boundary points changed.
     void UpdateFromAssociatedLiveRange() noexcept;
+
     void UpdateOrDisassociateLiveRange(bool shouldMaintainLiveRange) noexcept;
 
     KRYS_NODISCARD bool IsInDocumentTree() const noexcept;
+
     KRYS_NODISCARD bool IsConnectedToDocument() const noexcept;
 
   private:
     void UpdateCaretVisibility(ShouldUpdateAppearance doAppearanceUpdate) noexcept;
+
     bool RecomputeCaretRect() noexcept;
+
     void InvalidateCaretRect() noexcept;
 
     void CaretAnimationDidUpdate(CaretAnimator &animator) noexcept override;
+
     KRYS_NODISCARD dom::Node *CaretNode() noexcept override;
+
     KRYS_NODISCARD LayoutRect LocalCaretRect() const noexcept override
     {
       return LocalCaretRectWithoutUpdate();
@@ -519,39 +570,53 @@ namespace krys::boo
     void SetFocusedElementIfNeeded(EnumSet<SetSelectionOption> options) noexcept;
 
     void UpdateSelectionAppearanceNow() noexcept;
+
     void UpdateAndRevealSelection(
       ScrollBehavior scrollBehavior = ScrollBehavior::Instant,
       RevealExtentOption revealExtent = RevealExtentOption::RevealExtent,
       ForceCenterScroll forceCenterScroll = ForceCenterScroll::No,
       OnlyAllowForwardScrolling onlyAllowForwardScrolling = OnlyAllowForwardScrolling::No) noexcept;
+
     /// @brief Tells accessibility the selection changed.
     void NotifyAccessibilityForSelectionChange() noexcept;
 
     KRYS_NODISCARD TextDirection DirectionOfEnclosingBlock() noexcept;
+
     KRYS_NODISCARD TextDirection DirectionOfSelection() noexcept;
 
     KRYS_NODISCARD VisiblePosition PositionForPlatform(bool isGetStart) const noexcept;
+
     KRYS_NODISCARD VisiblePosition StartForPlatform() const noexcept;
+
     KRYS_NODISCARD VisiblePosition EndForPlatform() const noexcept;
+
     KRYS_NODISCARD VisiblePosition
       NextWordPositionForPlatform(const VisiblePosition &originalPosition) noexcept;
 
     KRYS_NODISCARD VisiblePosition ModifyExtendingRight(TextGranularity granularity,
                                                         UserTriggered userTriggered) noexcept;
+
     KRYS_NODISCARD VisiblePosition ModifyExtendingForward(TextGranularity granularity,
                                                           UserTriggered userTriggered) noexcept;
+
     KRYS_NODISCARD VisiblePosition ModifyMovingRight(TextGranularity granularity,
                                                      bool *reachedBoundary = nullptr) noexcept;
+
     KRYS_NODISCARD VisiblePosition ModifyMovingForward(TextGranularity granularity,
                                                        bool *reachedBoundary = nullptr) noexcept;
+
     KRYS_NODISCARD VisiblePosition ModifyExtendingLeft(TextGranularity granularity,
                                                        UserTriggered userTriggered) noexcept;
+
     KRYS_NODISCARD VisiblePosition ModifyExtendingBackward(TextGranularity granularity,
                                                            UserTriggered userTriggered) noexcept;
+
     KRYS_NODISCARD VisiblePosition ModifyMovingLeft(TextGranularity granularity,
                                                     bool *reachedBoundary = nullptr) noexcept;
+
     KRYS_NODISCARD VisiblePosition ModifyMovingBackward(TextGranularity granularity,
                                                         bool *reachedBoundary = nullptr) noexcept;
+
     void AdjustSelectionExtentIfNeeded(VisiblePosition &extent, bool isForward,
                                        UserTriggered userTriggered) noexcept;
 
@@ -562,6 +627,7 @@ namespace krys::boo
     bool SetSelectionWithoutUpdatingAppearance(const VisibleSelection &newSelectionPossiblyWithoutDirection,
                                                EnumSet<SetSelectionOption> options, CursorAlignOnScroll align,
                                                TextGranularity granularity) noexcept;
+
     void SetNodeFlags(VisibleSelection &selection, bool value) noexcept;
 
     void RespondToNodeModification(dom::Node &node, bool anchorRemoved, bool focusRemoved, bool baseRemoved,

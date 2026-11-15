@@ -74,6 +74,7 @@ namespace krys::boo::html
 
     void SetActive(bool down,
                    style::InvalidationScope invalidationScope = style::InvalidationScope::All) noexcept final;
+
     void SetHovered(bool over, style::InvalidationScope invalidationScope = style::InvalidationScope::All,
                     HitTestRequest request = {}) noexcept final;
 

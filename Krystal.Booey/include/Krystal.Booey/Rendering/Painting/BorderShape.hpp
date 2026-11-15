@@ -56,6 +56,7 @@ namespace krys::boo
     KRYS_NODISCARD static BorderShape ShapeForBorderRect(const RenderStyle &style,
                                                          const LayoutRect &borderRect,
                                                          RectEdges<bool> closedEdges = {true}) noexcept;
+
     /// @param overrideBorderWidths Custom insets from the border box, used instead of the border widths from
     /// the style.
     KRYS_NODISCARD static BorderShape ShapeForBorderRect(const RenderStyle &style,
@@ -78,6 +79,7 @@ namespace krys::boo
                                                         const LayoutRect &insetRect) noexcept;
 
     BorderShape(const LayoutRect &borderRect, const RectEdges<LayoutUnit> &borderWidths) noexcept;
+
     BorderShape(const LayoutRect &borderRect, const RectEdges<LayoutUnit> &borderWidths,
                 const LayoutRoundedRectRadii &radii) noexcept;
 
@@ -88,6 +90,7 @@ namespace krys::boo
     {
       return _borderRect.Rect();
     }
+
     KRYS_NODISCARD LayoutRect InnerEdgeRect() const noexcept
     {
       return _innerEdgeRect.Rect();
@@ -100,19 +103,24 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutRoundedRect DeprecatedRoundedRect() const noexcept;
+
     KRYS_NODISCARD LayoutRoundedRect DeprecatedInnerRoundedRect() const noexcept;
+
     KRYS_NODISCARD FloatRoundedRect DeprecatedPixelSnappedRoundedRect(float deviceScaleFactor) const noexcept;
+
     KRYS_NODISCARD FloatRoundedRect
       DeprecatedPixelSnappedInnerRoundedRect(float deviceScaleFactor) const noexcept;
 
     /// @brief Whether @p rect is entirely inside the shape, without impinging on any of the corners.
     KRYS_NODISCARD bool InnerShapeContains(const LayoutRect &rect) const noexcept;
+
     KRYS_NODISCARD bool OuterShapeContains(const LayoutRect &rect) const noexcept;
 
     KRYS_NODISCARD const LayoutRoundedRectRadii &Radii() const noexcept
     {
       return _borderRect.GetRadii();
     }
+
     void SetRadii(const LayoutRoundedRectRadii &radii) noexcept
     {
       _borderRect.SetRadii(radii);
@@ -126,6 +134,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatRect SnappedOuterRect(float deviceScaleFactor) const noexcept;
+
     KRYS_NODISCARD FloatRect SnappedInnerRect(float deviceScaleFactor) const noexcept;
 
     KRYS_NODISCARD bool IsRounded() const noexcept
@@ -134,6 +143,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool OuterShapeIsRectangular() const noexcept;
+
     KRYS_NODISCARD bool InnerShapeIsRectangular() const noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
@@ -148,20 +158,25 @@ namespace krys::boo
     void Inflate(LayoutUnit amount) noexcept;
 
     KRYS_NODISCARD Path PathForOuterShape(float deviceScaleFactor) const noexcept;
+
     KRYS_NODISCARD Path PathForInnerShape(float deviceScaleFactor) const noexcept;
 
     void AddOuterShapeToPath(Path &, float deviceScaleFactor) const noexcept;
+
     void AddInnerShapeToPath(Path &, float deviceScaleFactor) const noexcept;
 
     KRYS_NODISCARD Path PathForBorderArea(float deviceScaleFactor) const noexcept;
 
     void ClipToOuterShape(GraphicsContext &, float deviceScaleFactor) const noexcept;
+
     void ClipToInnerShape(GraphicsContext &, float deviceScaleFactor) const noexcept;
 
     void ClipOutOuterShape(GraphicsContext &, float deviceScaleFactor) const noexcept;
+
     void ClipOutInnerShape(GraphicsContext &, float deviceScaleFactor) const noexcept;
 
     void FillOuterShape(GraphicsContext &, const Color &, float deviceScaleFactor) const noexcept;
+
     void FillInnerShape(GraphicsContext &, const Color &, float deviceScaleFactor) const noexcept;
 
     void FillRectWithInnerHoleShape(GraphicsContext &, const LayoutRect &outerRect, const Color &,

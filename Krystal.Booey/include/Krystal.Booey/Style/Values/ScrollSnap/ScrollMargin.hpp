@@ -44,6 +44,7 @@ namespace krys::boo
       ScrollMarginEdge(Fixed &&fixed) noexcept : _value(fixed)
       {
       }
+
       ScrollMarginEdge(const Fixed &fixed) noexcept : _value(fixed)
       {
       }
@@ -56,10 +57,12 @@ namespace krys::boo
       {
         return _value.IsZero();
       }
+
       KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsPositive() const noexcept
       {
         return _value.IsPositive();
       }
+
       KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsNegative() const noexcept
       {
         return _value.IsNegative();
@@ -101,19 +104,21 @@ namespace krys::boo
     {
       KRYS_NODISCARD LayoutUnit operator()(const ScrollMarginEdge &, LayoutUnit referenceLength,
                                            ZoomNeeded) noexcept;
+
       KRYS_NODISCARD LayoutUnit operator()(const ScrollMarginEdge &, ZoomNeeded) noexcept;
     };
+
     template <>
     struct Evaluation<ScrollMarginEdge, float>
     {
       KRYS_NODISCARD float operator()(const ScrollMarginEdge &, float referenceLength, ZoomNeeded) noexcept;
+
       KRYS_NODISCARD float operator()(const ScrollMarginEdge &, ZoomNeeded) noexcept;
     };
 
     // MARK: - Extent
 
     KRYS_NODISCARD LayoutBoxExtent ExtentForRect(const ScrollMarginBox &, const LayoutRect &) noexcept;
-
   }
 }
 

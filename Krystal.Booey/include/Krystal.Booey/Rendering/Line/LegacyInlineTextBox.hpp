@@ -53,23 +53,28 @@ namespace krys::boo
 
   public:
     explicit LegacyInlineTextBox(RenderSVGInlineText &) noexcept;
+
     ~LegacyInlineTextBox() noexcept override;
 
     KRYS_NODISCARD RenderSVGInlineText &Renderer() const noexcept;
+
     KRYS_NODISCARD const RenderStyle &LineStyle() const noexcept;
 
     KRYS_NODISCARD LegacyInlineTextBox *PrevTextBox() const noexcept
     {
       return _prevTextBox;
     }
+
     KRYS_NODISCARD LegacyInlineTextBox *NextTextBox() const noexcept
     {
       return _nextTextBox;
     }
+
     void SetNextTextBox(LegacyInlineTextBox *n) noexcept
     {
       _nextTextBox = n;
     }
+
     void SetPreviousTextBox(LegacyInlineTextBox *p) noexcept
     {
       _prevTextBox = p;
@@ -81,10 +86,12 @@ namespace krys::boo
     {
       return _start;
     }
+
     KRYS_NODISCARD uint32 End() const noexcept
     {
       return _start + _len;
     }
+
     KRYS_NODISCARD uint32 Len() const noexcept
     {
       return _len;
@@ -94,6 +101,7 @@ namespace krys::boo
     {
       _start = start;
     }
+
     void SetLen(uint32 len) noexcept
     {
       _len = len;
@@ -118,6 +126,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual LayoutRect LocalSelectionRect(uint32 startPos, uint32 endPos) const noexcept;
+
     KRYS_NODISCARD std::pair<uint32, uint32> SelectionStartEnd() const noexcept;
 
     KRYS_NODISCARD RenderObject::HighlightState SelectionState() const noexcept final;
@@ -125,13 +134,16 @@ namespace krys::boo
     KRYS_NODISCARD bool IsLineBreak() const noexcept final;
 
     KRYS_NODISCARD int32 CaretMinOffset() const noexcept final;
+
     KRYS_NODISCARD int32 CaretMaxOffset() const noexcept final;
 
     KRYS_NODISCARD bool HasMarkers() const noexcept;
 
   private:
     KRYS_NODISCARD LayoutUnit SelectionTop() const noexcept;
+
     KRYS_NODISCARD LayoutUnit SelectionBottom() const noexcept;
+
     KRYS_NODISCARD LayoutUnit SelectionHeight() const noexcept;
 
     void DeleteLine() noexcept final;
@@ -148,6 +160,7 @@ namespace krys::boo
 
     /// @brief The effective text for the run.
     KRYS_NODISCARD utf8_stringview Text() const noexcept;
+
     KRYS_NODISCARD TextRun CreateTextRun() const noexcept;
   };
 

@@ -42,23 +42,33 @@ namespace krys::boo::css
     css::ValueId _name {};
 
     FunctionValue(css::ValueId name, ValueListBuilder arguments) noexcept;
+
     explicit FunctionValue(css::ValueId name) noexcept;
+
     FunctionValue(css::ValueId name, Ref<Value> argument) noexcept;
+
     FunctionValue(css::ValueId name, Ref<Value> argument1, Ref<Value> argument2) noexcept;
+
     FunctionValue(css::ValueId name, Ref<Value> argument1, Ref<Value> argument2,
                   Ref<Value> argument3) noexcept;
+
     FunctionValue(css::ValueId name, Ref<Value> argument1, Ref<Value> argument2, Ref<Value> argument3,
                   Ref<Value> argument4) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<FunctionValue> Create(css::ValueId name, ValueListBuilder arguments) noexcept;
+
     KRYS_NODISCARD static Ref<FunctionValue> Create(css::ValueId name) noexcept;
+
     KRYS_NODISCARD static Ref<FunctionValue> Create(css::ValueId name, Ref<Value> argument) noexcept;
+
     KRYS_NODISCARD static Ref<FunctionValue> Create(css::ValueId name, Ref<Value> firstArgument,
                                                     Ref<Value> secondArgument) noexcept;
+
     KRYS_NODISCARD static Ref<FunctionValue> Create(css::ValueId name, Ref<Value> firstArgument,
                                                     Ref<Value> secondArgument,
                                                     Ref<Value> thirdArgument) noexcept;
+
     KRYS_NODISCARD static Ref<FunctionValue> Create(css::ValueId name, Ref<Value> firstArgument,
                                                     Ref<Value> secondArgument, Ref<Value> thirdArgument,
                                                     Ref<Value> fourthArgument) noexcept;

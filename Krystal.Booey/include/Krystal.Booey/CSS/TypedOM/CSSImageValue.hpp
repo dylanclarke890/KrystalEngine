@@ -60,6 +60,7 @@ namespace krys::boo::css
 
     /// @brief The image, once it has started loading.
     KRYS_NODISCARD CachedImage *Image() const noexcept;
+
     KRYS_NODISCARD dom::Document *Document() const noexcept;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final

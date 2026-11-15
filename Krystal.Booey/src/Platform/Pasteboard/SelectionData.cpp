@@ -25,7 +25,7 @@ namespace krys::boo
   {
     KRYS_NODISCARD utf8_string ReplaceNonBreakingSpaceWithSpace(utf8_stringview string) noexcept
     {
-      static constexpr utf8_stringview noBreakSpace {u8" "};
+      constexpr static utf8_stringview noBreakSpace {u8" "};
       utf8_string result;
       result.reserve(string.size());
       for (size_t i = 0; i < string.size();)

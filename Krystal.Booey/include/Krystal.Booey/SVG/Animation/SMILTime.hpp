@@ -38,10 +38,10 @@ namespace krys::boo::svg
   class SMILTime
   {
   private:
-    static constexpr double UnresolvedValue = DBL_MAX;
+    constexpr static double UnresolvedValue = DBL_MAX;
     // Just a big value smaller than DBL_MAX. Our times are relative to 0, we don't really need the full
     // range.
-    static constexpr double IndefiniteValue = FLT_MAX;
+    constexpr static double IndefiniteValue = FLT_MAX;
 
     double _time {0};
 
@@ -107,7 +107,7 @@ namespace krys::boo::svg
     enum class Origin : bool
     {
       Parser,
-      Script
+      Script,
     };
 
   private:
@@ -139,7 +139,9 @@ namespace krys::boo::svg
   };
 
   KRYS_NODISCARD SMILTime operator+(const SMILTime &, const SMILTime &) noexcept;
+
   KRYS_NODISCARD SMILTime operator-(const SMILTime &, const SMILTime &) noexcept;
+
   // So multiplying times does not make too much sense but SMIL defines it for duration * repeatCount
   KRYS_NODISCARD SMILTime operator*(const SMILTime &, const SMILTime &) noexcept;
 }

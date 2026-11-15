@@ -38,14 +38,14 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTextAreaElement);
 
   private:
-    static constexpr uint32 DefaultRows = 2;
-    static constexpr uint32 DefaultCols = 20;
+    constexpr static uint32 DefaultRows = 2;
+    constexpr static uint32 DefaultCols = 20;
 
     enum WrapMethod : uint8
     {
       NoWrap,
       SoftWrap,
-      HardWrap
+      HardWrap,
     };
 
     mutable dom::DOMString _value;
@@ -189,15 +189,19 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept final;
+
     RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept final;
+
     KRYS_NODISCARD RenderStyle CreateInnerTextStyle(const RenderStyle &style) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+
     /// @brief Focuses the text area, without clicking it.
     bool AccessKeyAction(bool sendMouseEvents) noexcept override;
 
     void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept final;
+
     void DefaultEventHandler(dom::Event &event) noexcept final;
 
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final
@@ -241,13 +245,16 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool ValueMissing() const noexcept final;
+
     KRYS_NODISCARD bool TooShort() const noexcept final;
+
     KRYS_NODISCARD bool TooLong() const noexcept final;
 
     /// @brief Whether @p candidate would be a valid value.
     KRYS_NODISCARD bool IsValidValue(dom::DOMStringView candidate) const noexcept;
 
     bool AppendFormData(DOMFormData &formData) noexcept final;
+
     void Reset() noexcept final;
 
   protected:
@@ -257,17 +264,22 @@ namespace krys::boo::html
     }
 
     void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept final;
+
     void UpdatePlaceholderText() noexcept final;
+
     void SubtreeHasChanged() noexcept final;
 
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+
     void OnChildrenChanged() noexcept final;
+
     void OnClone(dom::Node &copy, bool subtree) noexcept final;
 
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
@@ -277,15 +289,19 @@ namespace krys::boo::html
     void UpdateValue() const noexcept;
 
     void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) const noexcept;
+
     KRYS_NODISCARD static dom::DOMString SanitizeUserInputValue(dom::DOMStringView proposedValue,
                                                                 size_t maxLength) noexcept;
 
     void SetNonDirtyValue(dom::DOMStringView value, TextControlSetValueSelection selection) noexcept;
+
     void SetValueCommon(dom::DOMStringView newValue, TextFieldEventBehavior eventBehavior,
                         TextControlSetValueSelection selection) noexcept;
 
     KRYS_NODISCARD bool ValueMissing(Maybe<dom::DOMStringView> value) const noexcept;
+
     KRYS_NODISCARD bool TooShort(Maybe<dom::DOMStringView> value, NeedsToCheckDirtyFlag check) const noexcept;
+
     KRYS_NODISCARD bool TooLong(Maybe<dom::DOMStringView> value, NeedsToCheckDirtyFlag check) const noexcept;
   };
 }

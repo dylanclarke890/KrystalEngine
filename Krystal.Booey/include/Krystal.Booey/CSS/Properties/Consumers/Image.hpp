@@ -35,7 +35,7 @@ namespace krys::boo::css::PropertyParserHelpers
     URLFunction = 1 << 0,
     RawStringAsURL = 1 << 1,
     ImageSet = 1 << 2,
-    GeneratedImage = 1 << 3
+    GeneratedImage = 1 << 3,
   };
 }
 
@@ -43,9 +43,9 @@ KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::AllowedImag
 
 namespace krys::boo::css
 {
-  class Value;
-  class TokenRange;
   struct PropertyParserState;
+  class TokenRange;
+  class Value;
 
   namespace PropertyParserHelpers
   {

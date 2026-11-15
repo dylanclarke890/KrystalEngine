@@ -33,8 +33,8 @@ namespace krys::boo
   using PointerID = uint32;
 
   /// @brief The mouse's pointer.
-  static constexpr PointerID MousePointerID = 1;
+  constexpr static PointerID MousePointerID = 1;
 
   /// @brief The pen's pointer.
-  static constexpr PointerID PenPointerID = 2;
+  constexpr static PointerID PenPointerID = 2;
 }

@@ -73,6 +73,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD css::TextShadow operator()(const TextShadow &, const RenderStyle &) noexcept;
   };
+
   template <>
   struct ToStyle<css::TextShadow>
   {
@@ -86,6 +87,7 @@ namespace krys::boo::style
     KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &,
                                               const TextShadowList &) noexcept;
   };
+
   template <>
   struct CSSValueConversion<TextShadows>
   {
@@ -114,11 +116,13 @@ namespace krys::boo::style
   struct Blending<TextShadows>
   {
     KRYS_NODISCARD bool CanBlend(const TextShadows &, const TextShadows &, CompositeOperation) noexcept;
+
     KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const TextShadows &,
                                                                                 const TextShadows &) noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD TextShadows Blend(const TextShadows &, const TextShadows &, const RenderStyle &,
                                      const RenderStyle &, const BlendingContext &) noexcept;
   };

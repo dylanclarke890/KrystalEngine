@@ -38,7 +38,7 @@ namespace krys::boo
     Level2,
     Level3,
     Last = Level3,
-    Max
+    Max,
   };
 
   using RepetitionCount = int32;
@@ -53,19 +53,19 @@ namespace krys::boo
   enum class AlphaOption : uint8
   {
     Premultiplied,
-    NotPremultiplied
+    NotPremultiplied,
   };
 
   enum class GammaAndColorProfileOption : uint8
   {
     Applied,
-    Ignored
+    Ignored,
   };
 
   enum class ImageAnimatingState : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class EncodedDataStatus : uint8
@@ -74,7 +74,7 @@ namespace krys::boo
     Unknown,
     TypeAvailable,
     SizeAvailable,
-    Complete
+    Complete,
   };
 
   enum class DecodingStatus : uint8
@@ -82,18 +82,18 @@ namespace krys::boo
     Invalid,
     Partial,
     Complete,
-    Decoding
+    Decoding,
   };
 
   enum class ShowDebugBackground : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class AllowImageSubsampling : bool
   {
     No,
-    Yes
+    Yes,
   };
 }

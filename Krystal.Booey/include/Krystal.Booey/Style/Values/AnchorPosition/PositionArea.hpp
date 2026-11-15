@@ -30,10 +30,10 @@
 
 namespace krys::boo
 {
-  class WritingMode;
   enum class BoxAxis : uint8;
   enum class ItemPosition : uint8;
   enum class LogicalBoxAxis : uint8;
+  class WritingMode;
 
   namespace style
   {
@@ -50,6 +50,7 @@ namespace krys::boo
       {
         return _blockOrXAxis;
       }
+
       KRYS_NODISCARD constexpr PositionAreaSpan InlineOrYAxis() const noexcept
       {
         return _inlineOrYAxis;
@@ -57,6 +58,7 @@ namespace krys::boo
 
       KRYS_NODISCARD PositionAreaSpan SpanForAxis(BoxAxis physicalAxis, WritingMode containerWritingMode,
                                                   WritingMode selfWritingMode) const noexcept;
+
       KRYS_NODISCARD PositionAreaSpan SpanForAxis(LogicalBoxAxis logicalAxis,
                                                   WritingMode containerWritingMode,
                                                   WritingMode selfWritingMode) const noexcept;
@@ -80,6 +82,7 @@ namespace krys::boo
       PositionArea(css::keywords::None) noexcept : _value {}
       {
       }
+
       PositionArea(PositionAreaValue value) noexcept : _value {value}
       {
       }
@@ -88,10 +91,12 @@ namespace krys::boo
       {
         return !_value;
       }
+
       KRYS_NODISCARD bool IsValue() const noexcept
       {
         return !!_value;
       }
+
       KRYS_NODISCARD Maybe<PositionAreaValue> TryValue() const noexcept
       {
         return _value;
@@ -121,6 +126,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD PositionArea operator()(BuilderState &, const css::Value &) noexcept;
     };
+
     template <>
     struct CSSValueCreation<PositionAreaValue>
     {
@@ -136,7 +142,6 @@ namespace krys::boo
       void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                       const PositionAreaValue &) noexcept;
     };
-
   }
 }
 

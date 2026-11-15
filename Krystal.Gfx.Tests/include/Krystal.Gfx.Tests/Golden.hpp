@@ -32,17 +32,21 @@ namespace krys::gfx::tests
 
   /// @brief Where the goldens are kept, in the source tree.
   KRYS_NODISCARD std::filesystem::path GoldenDirectory();
+
   /// @brief Where actual and difference images are written, in the build tree.
   KRYS_NODISCARD std::filesystem::path GoldenOutputDirectory();
+
   /// @brief Whether `KRYS_UPDATE_GOLDENS=1` asks for Render2D's goldens to be written rather than checked.
   KRYS_NODISCARD bool UpdatingGoldens();
 
   KRYS_NODISCARD Maybe<GoldenImage> LoadPng(const std::filesystem::path &path);
+
   bool SavePng(const std::filesystem::path &path, const GoldenImage &image);
 
   /// @brief Compares two images channel by channel.
   KRYS_NODISCARD GoldenComparison CompareImages(const GoldenImage &actual, const GoldenImage &expected,
                                                 uint32 tolerance);
+
   /// @brief The difference between two images of one size, scaled up so small differences show, on black.
   KRYS_NODISCARD GoldenImage DifferenceImage(const GoldenImage &actual, const GoldenImage &expected);
 }

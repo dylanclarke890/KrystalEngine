@@ -42,7 +42,7 @@ namespace krys::boo
   enum class ShadowRadiusMode : bool
   {
     Default,
-    Legacy
+    Legacy,
   };
 
   /// @brief A shadow cast by what's drawn: offset, blurred and coloured.
@@ -58,10 +58,12 @@ namespace krys::boo
     {
       return Color.IsVisible();
     }
+
     KRYS_NODISCARD bool IsBlurred() const noexcept
     {
       return IsVisible() && Radius;
     }
+
     KRYS_NODISCARD bool HasOutsets() const noexcept
     {
       return IsBlurred() || (IsVisible() && !Offset.IsZero());
@@ -93,7 +95,10 @@ namespace krys::boo
   using GraphicsStyle = Variant<GraphicsDropShadow, GraphicsGaussianBlur, GraphicsColorMatrix>;
 
   TextStream &operator<<(TextStream &ts, const GraphicsDropShadow &dropShadow) noexcept;
+
   TextStream &operator<<(TextStream &ts, const GraphicsGaussianBlur &gaussianBlur) noexcept;
+
   TextStream &operator<<(TextStream &ts, const GraphicsColorMatrix &colorMatrix) noexcept;
+
   TextStream &operator<<(TextStream &ts, const GraphicsStyle &style) noexcept;
 }

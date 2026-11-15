@@ -46,10 +46,10 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  struct PropertyParserState;
   struct ComputedStyleDependencies;
   struct CustomPropertySyntax;
   struct ParserContext;
+  struct PropertyParserState;
 
   enum class GlobalKeyword : uint8;
   enum class RuleType : uint8;

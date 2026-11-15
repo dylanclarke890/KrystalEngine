@@ -63,6 +63,7 @@ namespace krys::boo::dom
     {
       return _startPosition;
     }
+
     void SetStartPosition(Position &&startPosition) noexcept
     {
       _startPosition = krys::move(startPosition);
@@ -72,6 +73,7 @@ namespace krys::boo::dom
     {
       return _endPosition;
     }
+
     void SetEndPosition(Position &&endPosition) noexcept
     {
       _endPosition = krys::move(endPosition);
@@ -89,7 +91,7 @@ namespace krys::boo::dom
     {
       Highlight,
       SpellingError,
-      GrammarError
+      GrammarError,
     };
 
   private:
@@ -131,6 +133,7 @@ namespace krys::boo::dom
     {
       return _type;
     }
+
     void SetType(Type type) noexcept
     {
       _type = type;
@@ -142,6 +145,7 @@ namespace krys::boo::dom
     {
       return _priority;
     }
+
     void SetPriority(int32 priority) noexcept;
 
     void Repaint() noexcept;

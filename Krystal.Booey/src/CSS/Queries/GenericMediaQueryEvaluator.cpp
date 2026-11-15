@@ -73,7 +73,7 @@ namespace krys::boo::css::mq
   enum class Side : uint8
   {
     Left,
-    Right
+    Right,
   };
 
   KRYS_NODISCARD static EvaluationResult

@@ -62,32 +62,51 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD double ValueAsDouble() const noexcept final;
+
     dom::ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
                                              TextFieldEventBehavior eventBehavior) const noexcept final;
+
     KRYS_NODISCARD bool TypeMismatchFor(dom::DOMStringView value) const noexcept final;
+
     KRYS_NODISCARD bool SupportsRequired() const noexcept final;
+
     KRYS_NODISCARD StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept final;
+
     ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+
     KRYS_NODISCARD Decimal ParseToNumber(dom::DOMStringView string,
                                          const Decimal &defaultValue) const noexcept final;
+
     KRYS_NODISCARD dom::DOMString Serialize(const Decimal &value) const noexcept final;
+
     void AttributeChanged(dom::DOMStringAtom localName) noexcept final;
+
     void SetValue(dom::DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
+
     KRYS_NODISCARD Maybe<dom::DOMString> FallbackValue() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept final;
 
     void HandleMouseDownEvent(dom::MouseEvent &event) noexcept final;
+
     void DisabledStateChanged() noexcept final;
+
     void CreateShadowSubtree() noexcept final;
+
     KRYS_NODISCARD HTMLElement *SliderThumbElement() const noexcept final;
+
     KRYS_NODISCARD HTMLElement *SliderTrackElement() const noexcept final;
+
     KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept final;
+
     void DataListMayHaveChanged() noexcept final;
+
     KRYS_NODISCARD Maybe<Decimal> FindClosestTickMarkValue(const Decimal &value) noexcept final;
 
   private:
     void UpdateTickMarkValues() noexcept;
+
     KRYS_NODISCARD html::SliderThumbElement &TypedSliderThumbElement() const noexcept;
   };
 }

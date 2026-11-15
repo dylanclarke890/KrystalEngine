@@ -29,7 +29,6 @@
 
 namespace krys::boo
 {
-
   StyleRareInheritedData::StyleRareInheritedData() noexcept
       : UsedZoom(style::Evaluate<float>(style::ComputedStyle::InitialZoom())), DeviceScaleFactor(1.0f),
         TextEmphasisColor(style::ComputedStyle::InitialTextEmphasisColor()),

@@ -49,8 +49,10 @@ namespace krys::boo
 
       inline void SetBlock(RenderBlock *block, const LogicalSelectionOffsetCaches *cache,
                            bool parentCacheHasFloatsOrFragmentedFlows = false) noexcept;
+
       KRYS_NODISCARD inline LayoutUnit LogicalLeftSelectionOffset(RenderBlock &rootBlock,
                                                                   LayoutUnit position) const noexcept;
+
       KRYS_NODISCARD inline LayoutUnit LogicalRightSelectionOffset(RenderBlock &rootBlock,
                                                                    LayoutUnit position) const noexcept;
 
@@ -58,10 +60,12 @@ namespace krys::boo
       {
         return _block;
       }
+
       KRYS_NODISCARD const LogicalSelectionOffsetCaches *Cache() const noexcept
       {
         return _cache;
       }
+
       KRYS_NODISCARD bool HasFloatsOrFragmentedFlows() const noexcept
       {
         return _hasFloatsOrFragmentedFlows;
@@ -75,6 +79,7 @@ namespace krys::boo
 
   public:
     inline explicit LogicalSelectionOffsetCaches(RenderBlock &rootBlock) noexcept;
+
     inline LogicalSelectionOffsetCaches(RenderBlock &block,
                                         const LogicalSelectionOffsetCaches &cache) noexcept;
 

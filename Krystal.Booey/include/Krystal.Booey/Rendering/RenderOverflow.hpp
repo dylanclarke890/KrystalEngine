@@ -62,6 +62,7 @@ namespace krys::boo
     {
       return _layoutOverflow;
     }
+
     KRYS_NODISCARD LayoutRect VisualOverflowRect() const noexcept
     {
       return _visualOverflow;
@@ -101,6 +102,7 @@ namespace krys::boo
     {
       _layoutOverflow = rect;
     }
+
     void SetVisualOverflow(const LayoutRect &rect) noexcept
     {
       _visualOverflow = rect;
@@ -110,6 +112,7 @@ namespace krys::boo
     {
       return _layoutClientAfterEdge;
     }
+
     void SetLayoutClientAfterEdge(LayoutUnit clientAfterEdge) noexcept
     {
       _layoutClientAfterEdge = clientAfterEdge;

@@ -43,8 +43,8 @@ namespace krys::boo::layout
     KRYS_NON_COPY_MOVABLE(TextBreakingPositionCache);
 
   public:
-    static constexpr size_t MinimumRequiredTextLengthForContentBreakCache = 5;
-    static constexpr size_t MinimumRequiredContentBreaks = 3;
+    constexpr static size_t MinimumRequiredTextLengthForContentBreakCache = 5;
+    constexpr static size_t MinimumRequiredContentBreaks = 3;
 
     struct Key
     {
@@ -53,6 +53,7 @@ namespace krys::boo::layout
 
       KRYS_NODISCARD friend bool operator==(const Key &, const Key &) noexcept = default;
     };
+
     using List = SmallList<size_t, 8>;
 
   private:
@@ -71,6 +72,7 @@ namespace krys::boo::layout
     TextBreakingPositionCache() noexcept = default;
 
     void Set(const Key &key, List &&breakingPositionList) noexcept;
+
     KRYS_NODISCARD const List *Get(const Key &key) const noexcept;
 
     void Clear() noexcept;

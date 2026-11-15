@@ -65,7 +65,6 @@ namespace krys::boo
       }
       return 1;
     }
-
   }
 
   namespace
@@ -77,7 +76,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsTextDocumentMIMEType(utf8_stringview mimeType) noexcept
     {
       // https://mimesniff.spec.whatwg.org/#javascript-mime-type
-      static constexpr utf8_stringview TextTypes[] = {u8"application/ecmascript",
+      constexpr static utf8_stringview TextTypes[] = {u8"application/ecmascript",
                                                       u8"application/javascript",
                                                       u8"application/x-ecmascript",
                                                       u8"application/x-javascript",
@@ -113,6 +112,7 @@ namespace krys::boo
   }
 
   DocumentWriter::DocumentWriter() noexcept = default;
+
   DocumentWriter::~DocumentWriter() noexcept
   {
     // A parser is detached before its last reference goes.

@@ -64,13 +64,18 @@ namespace krys::boo
     {
       return _currentChild;
     }
+
     RenderBox *First() noexcept;
+
     RenderBox *Next() noexcept;
+
     KRYS_NODISCARD OrderIterator Reverse() const noexcept;
+
     KRYS_NODISCARD bool ShouldSkipChild(const RenderObject &child) const noexcept;
 
   private:
     void Reset() noexcept;
+
     KRYS_NODISCARD int32 CurrentOrderValue() const noexcept;
   };
 
@@ -83,6 +88,7 @@ namespace krys::boo
 
   public:
     explicit OrderIteratorPopulator(OrderIterator &iterator) noexcept;
+
     ~OrderIteratorPopulator() noexcept;
 
     /// @return Whether @p child takes part in the container's layout (it isn't skipped).

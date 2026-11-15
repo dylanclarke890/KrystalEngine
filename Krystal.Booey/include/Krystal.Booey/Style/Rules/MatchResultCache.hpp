@@ -69,20 +69,26 @@ namespace krys::boo::style
 
   public:
     MatchResultCache() noexcept;
+
     ~MatchResultCache() noexcept;
 
     KRYS_NODISCARD Maybe<CachedMatchResult> ResultWithCurrentInlineStyle(const dom::Element &) noexcept;
+
     static void Update(CachedMatchResult &, const RenderStyle &) noexcept;
+
     void UpdateForFastPathInherit(const dom::Element &, const RenderStyle &parentStyle) noexcept;
+
     void Set(const dom::Element &, const UnadjustedStyle &) noexcept;
 
   private:
     KRYS_NODISCARD Entry *Find(const dom::Element &) noexcept;
+
     void PruneDeadEntries() noexcept;
 
     KRYS_NODISCARD static bool
       IsUsableAfterInlineStyleChange(const MatchResultCache::Entry &,
                                      const css::StyleProperties &inlineStyle) noexcept;
+
     KRYS_NODISCARD static PropertyCascade::IncludedProperties
       ComputeAndUpdateChangedProperties(MatchResultCache::Entry &) noexcept;
   };

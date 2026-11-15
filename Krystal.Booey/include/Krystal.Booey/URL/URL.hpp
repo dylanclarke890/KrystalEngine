@@ -94,8 +94,11 @@ namespace krys::boo::url
     explicit URL(utf8_stringview absoluteURL) noexcept;
 
     URL(const URL &) = default;
+
     URL &operator=(const URL &) = default;
+
     URL(URL &&other) noexcept;
+
     URL &operator=(URL &&other) noexcept;
 
     KRYS_NODISCARD static URL FileURLWithFileSystemPath(utf8_stringview path) noexcept;
@@ -108,8 +111,10 @@ namespace krys::boo::url
 
     /// @brief The URL without credentials or fragment, for use as a `Referer`.
     KRYS_NODISCARD StripResult StrippedForUseAsReferrer() const noexcept;
+
     /// @brief Like `StrippedForUseAsReferrer`, but with the scheme's default port made explicit.
     KRYS_NODISCARD StripResult StrippedForUseAsReferrerWithExplicitPort() const noexcept;
+
     /// @brief Like `StrippedForUseAsReferrer`, but without the query either.
     KRYS_NODISCARD utf8_string StrippedForUseAsReport() const noexcept;
 
@@ -145,26 +150,42 @@ namespace krys::boo::url
     // This is necessary for accurate round-tripping, because encoding doesn't encode '%' characters.
 
     KRYS_NODISCARD utf8_stringview Protocol() const noexcept KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD utf8_stringview EncodedUser() const noexcept KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD utf8_stringview EncodedPassword() const noexcept KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD utf8_stringview Host() const noexcept KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD Maybe<uint16> Port() const noexcept;
+
     KRYS_NODISCARD utf8_stringview Path() const noexcept KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD utf8_stringview LastPathComponent() const noexcept KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD utf8_stringview Query() const noexcept KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD utf8_stringview FragmentIdentifier() const noexcept KRYS_LIFETIME_BOUND;
 
     KRYS_NODISCARD utf8_stringview QueryWithLeadingQuestionMark() const noexcept KRYS_LIFETIME_BOUND;
-    KRYS_NODISCARD utf8_stringview
-      FragmentIdentifierWithLeadingNumberSign() const noexcept KRYS_LIFETIME_BOUND;
+
+    KRYS_NODISCARD utf8_stringview FragmentIdentifierWithLeadingNumberSign() const noexcept
+      KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD utf8_stringview ViewWithoutQueryOrFragmentIdentifier() const noexcept KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD utf8_stringview ViewWithoutFragmentIdentifier() const noexcept KRYS_LIFETIME_BOUND;
+
     KRYS_NODISCARD utf8_string StringWithoutFragmentIdentifier() const noexcept;
 
     KRYS_NODISCARD utf8_string ProtocolHostAndPort() const noexcept;
+
     KRYS_NODISCARD utf8_string HostAndPort() const noexcept;
+
     KRYS_NODISCARD utf8_string User() const noexcept;
+
     KRYS_NODISCARD utf8_string Password() const noexcept;
+
     KRYS_NODISCARD utf8_string FileSystemPath() const noexcept;
 
     /// @brief The URL up to and including the last slash of its path.
@@ -236,6 +257,7 @@ namespace krys::boo::url
     /// has no host, username or password.
     /// @see https://html.spec.whatwg.org/#matches-about:blank
     KRYS_NODISCARD bool IsAboutBlank() const noexcept;
+
     /// @brief Whether the URL is `about:srcdoc`, with any fragment but no query.
     /// @see https://html.spec.whatwg.org/#matches-about:srcdoc
     KRYS_NODISCARD bool IsAboutSrcDoc() const noexcept;
@@ -245,6 +267,7 @@ namespace krys::boo::url
     /// @return False if `newProtocol` isn't a valid scheme; true otherwise, even if the scheme wasn't
     /// changed.
     bool SetProtocol(utf8_stringview newProtocol) noexcept;
+
     /// @return Whether the URL is valid after the change.
     bool SetHost(utf8_stringview newHost) noexcept;
 
@@ -252,10 +275,13 @@ namespace krys::boo::url
 
     /// @param hostAndPort E.g. `foo.com` or `foo.com:8000`.
     void SetHostAndPort(utf8_stringview hostAndPort) noexcept;
+
     void RemoveHostAndPort() noexcept;
 
     void SetUser(utf8_stringview newUser) noexcept;
+
     void SetPassword(utf8_stringview newPassword) noexcept;
+
     void RemoveCredentials() noexcept;
 
     /// @brief If you pass an empty path for HTTP or HTTPS URLs, the resulting path will be "/".
@@ -267,10 +293,13 @@ namespace krys::boo::url
     void SetQuery(utf8_stringview newQuery) noexcept;
 
     void SetFragmentIdentifier(utf8_stringview identifier) noexcept;
+
     void RemoveFragmentIdentifier() noexcept;
+
     void RemoveQueryAndFragmentIdentifier() noexcept;
 
     KRYS_NODISCARD static bool HostIsIPAddress(utf8_stringview host) noexcept;
+
     KRYS_NODISCARD static bool IsIPv6Address(utf8_stringview address) noexcept;
 
     KRYS_NODISCARD uint32 PathStart() const noexcept;
@@ -286,17 +315,24 @@ namespace krys::boo::url
     }
 
     KRYS_NODISCARD bool HasSpecialScheme() const noexcept;
+
     KRYS_NODISCARD bool HasLocalScheme() const noexcept;
+
     KRYS_NODISCARD bool HasFetchScheme() const noexcept;
 
     KRYS_NODISCARD friend bool ProtocolHostAndPortAreEqual(const URL &a, const URL &b) noexcept;
 
   private:
     void Invalidate() noexcept;
+
     KRYS_NODISCARD uint32 HostStart() const noexcept;
+
     KRYS_NODISCARD uint32 CredentialsEnd() const noexcept;
+
     void Remove(uint32 start, uint32 length) noexcept;
+
     void Parse(utf8_stringview string) noexcept;
+
     void ParseAllowingC0AtEnd(utf8_stringview string) noexcept;
   };
 
@@ -311,14 +347,19 @@ namespace krys::boo::url
   }
 
   KRYS_NODISCARD bool EqualIgnoringFragmentIdentifier(const URL &a, const URL &b) noexcept;
+
   KRYS_NODISCARD bool ProtocolHostAndPortAreEqual(const URL &a, const URL &b) noexcept;
+
   KRYS_NODISCARD List<KeyValuePair> DifferingQueryParameters(const URL &a, const URL &b) noexcept;
+
   KRYS_NODISCARD List<KeyValuePair> QueryParameters(const URL &url) noexcept;
+
   KRYS_NODISCARD bool IsEqualIgnoringQueryAndFragments(const URL &a, const URL &b) noexcept;
 
   /// @return The parameters that were removed (including duplicates), in the order that they appear in the
   /// URL.
   List<utf8_string> RemoveQueryParameters(URL &url, const HashSet<utf8_string> &keysToRemove) noexcept;
+
   /// @return The parameters that were removed (including duplicates), in the order that they appear in the
   /// URL.
   List<utf8_string> RemoveQueryParameters(
@@ -326,6 +367,7 @@ namespace krys::boo::url
     KRYS_NOESCAPE const Func<bool(const utf8_string &, const utf8_string &)> &shouldRemove) noexcept;
 
   KRYS_NODISCARD const URL &AboutBlankURL() noexcept;
+
   KRYS_NODISCARD const URL &AboutSrcDocURL() noexcept;
 
   // Functions to do URL operations on strings.
@@ -336,11 +378,15 @@ namespace krys::boo::url
 
   /// @param protocol Lowercase ASCII.
   KRYS_NODISCARD bool ProtocolIs(utf8_stringview url, utf8_stringview protocol) noexcept;
+
   KRYS_NODISCARD bool ProtocolIsJavaScript(utf8_stringview url) noexcept;
+
   KRYS_NODISCARD bool ProtocolIsInHTTPFamily(utf8_stringview url) noexcept;
 
   KRYS_NODISCARD Maybe<uint16> DefaultPortForProtocol(utf8_stringview protocol) noexcept;
+
   KRYS_NODISCARD bool IsDefaultPortForProtocol(uint16 port, utf8_stringview protocol) noexcept;
+
   /// @brief Disallows ports that should never be used for web resources.
   /// @see https://fetch.spec.whatwg.org/#port-blocking
   KRYS_NODISCARD bool PortAllowed(const URL &url) noexcept;

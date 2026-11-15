@@ -51,7 +51,7 @@ namespace krys::boo::style
     enum class Type : uint8
     {
       Children,
-      Descendants
+      Descendants,
     };
 
     using Key = uint32;

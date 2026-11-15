@@ -69,6 +69,7 @@ namespace krys::boo::dom
     TreeScopeOrderedMap() noexcept = default;
 
     void Add(DOMStringAtom key, Element &element) noexcept;
+
     void Remove(DOMStringAtom key, Element &element) noexcept;
 
     /// @brief Forgets the order of the elements with @p key, as it's changed.

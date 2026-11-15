@@ -9,9 +9,9 @@ namespace krys::tests
     REQUIRE_FALSE(filter.MayContain(0x12'34'56'78u));
 
     filter.Add(0x12'34'56'78u);
-    filter.Add(0x9a'bc'de'f0u);
+    filter.Add(0x9A'BC'DE'F0u);
     REQUIRE(filter.MayContain(0x12'34'56'78u));
-    REQUIRE(filter.MayContain(0x9a'bc'de'f0u));
+    REQUIRE(filter.MayContain(0x9A'BC'DE'F0u));
 
     // Both halves of the hash must be set.
     REQUIRE_FALSE(filter.MayContain(0x12'34'00'01u));
@@ -35,18 +35,18 @@ namespace krys::tests
 
     filter.Add(0x12'34'56'78u);
     filter.Add(0x12'34'56'78u);
-    filter.Add(0x9a'bc'de'f0u);
+    filter.Add(0x9A'BC'DE'F0u);
     REQUIRE(filter.MayContain(0x12'34'56'78u));
-    REQUIRE(filter.MayContain(0x9a'bc'de'f0u));
+    REQUIRE(filter.MayContain(0x9A'BC'DE'F0u));
     REQUIRE_FALSE(filter.LikelyEmpty());
 
     filter.Remove(0x12'34'56'78u);
     REQUIRE(filter.MayContain(0x12'34'56'78u));
     filter.Remove(0x12'34'56'78u);
     REQUIRE_FALSE(filter.MayContain(0x12'34'56'78u));
-    REQUIRE(filter.MayContain(0x9a'bc'de'f0u));
+    REQUIRE(filter.MayContain(0x9A'BC'DE'F0u));
 
-    filter.Remove(0x9a'bc'de'f0u);
+    filter.Remove(0x9A'BC'DE'F0u);
     REQUIRE(filter.IsClear());
     REQUIRE(filter.LikelyEmpty());
   }

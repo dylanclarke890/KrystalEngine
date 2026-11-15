@@ -27,18 +27,22 @@ namespace krys::gfx::opengl
     KRYS_NODISCARD static Expected<UniquePtr<GLContext>> Create(bool debug) noexcept;
 
     GLContext() noexcept = default;
+
     ~GLContext() noexcept;
 
     /// @brief Prepares a window for presenting and returns its drawing surface (an `HDC`).
     KRYS_NODISCARD Expected<NativeHandle> AttachWindow(NativeHandle window) noexcept;
+
     /// @brief Releases a surface from `AttachWindow`.
     void DetachWindow(NativeHandle window, NativeHandle surface) noexcept;
 
     /// @brief Makes the context current on a window's surface, or on the hidden window's if null.
     void MakeCurrent(NativeHandle surface) noexcept;
+
     /// @brief Sets a window surface's swap interval: 0 presents immediately, 1 waits for vertical sync.
     /// @note The interval applies to the surface, not the context, on some drivers; set it per window.
     void SetSwapInterval(NativeHandle surface, int interval) noexcept;
+
     /// @brief Presents a window's surface.
     void SwapBuffers(NativeHandle surface) noexcept;
 

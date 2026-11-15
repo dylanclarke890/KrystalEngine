@@ -50,7 +50,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_document_fragment
     SHOW_DOCUMENT_FRAGMENT = 0x00'00'04'00,
     // Legacy.
-    SHOW_NOTATION = 0x00'00'08'00
+    SHOW_NOTATION = 0x00'00'08'00,
   };
 }
 

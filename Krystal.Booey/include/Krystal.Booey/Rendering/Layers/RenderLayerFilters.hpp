@@ -80,6 +80,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<RenderLayerFilters> Create(RenderLayer &layer, FloatSize scale) noexcept;
+
     ~RenderLayerFilters() noexcept;
 
     void DetachFromLayer() noexcept
@@ -91,6 +92,7 @@ namespace krys::boo
     {
       return _dirtySourceRect;
     }
+
     void ExpandDirtySourceRect(const LayoutRect &rect) noexcept
     {
       _dirtySourceRect.Unite(rect);
@@ -100,16 +102,21 @@ namespace krys::boo
     {
       return _filter.get();
     }
+
     void ClearFilter() noexcept;
 
     KRYS_NODISCARD bool HasFilterThatMovesPixels() const noexcept;
+
     KRYS_NODISCARD bool HasFilterThatShouldBeRestrictedBySecurityOrigin() const noexcept;
+
     KRYS_NODISCARD bool HasSourceImage() const noexcept;
 
     void UpdateReferenceFilterClients(const style::Filter &filter) noexcept;
+
     void RemoveReferenceFilterClients() noexcept;
 
     KRYS_NODISCARD static bool IsIdentity(RenderElement &renderer) noexcept;
+
     KRYS_NODISCARD static IntOutsets CalculateOutsets(RenderElement &renderer,
                                                       const FloatRect &targetBoundingBox) noexcept;
 
@@ -125,6 +132,7 @@ namespace krys::boo
                                        const LayoutRect &filterBoxRect, const LayoutRect &dirtyRect,
                                        const LayoutRect &layerRepaintRect,
                                        const LayoutRect &clipRect) noexcept;
+
     /// @brief Finishes drawing through the filter, into @p destinationContext.
     void ApplyFilterEffect(GraphicsContext &destinationContext) noexcept;
 

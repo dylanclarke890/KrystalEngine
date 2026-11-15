@@ -130,6 +130,7 @@ namespace krys::boo::css
     }
 
     void RequestStyleSheet() noexcept;
+
     KRYS_NODISCARD const CachedCSSStyleSheet *CachedStyleSheet() const noexcept
     {
       return _cachedSheet.get();

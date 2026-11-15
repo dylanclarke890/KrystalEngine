@@ -8,7 +8,7 @@ namespace krys::io
   enum class ImageDataType : uint8
   {
     UnsignedByte,
-    Float
+    Float,
   };
 
   /// @brief Represents an image.

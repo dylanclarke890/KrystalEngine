@@ -36,7 +36,7 @@ namespace krys::boo
     CHANNEL_R = 1,
     CHANNEL_G = 2,
     CHANNEL_B = 3,
-    CHANNEL_A = 4
+    CHANNEL_A = 4,
   };
 
   /// @brief The displacement map filter effect: its first input's pixels moved by its second's channels.
@@ -58,18 +58,21 @@ namespace krys::boo
     {
       return _xChannelSelector;
     }
+
     bool SetXChannelSelector(ChannelSelectorType xChannelSelector) noexcept;
 
     KRYS_NODISCARD ChannelSelectorType YChannelSelector() const noexcept
     {
       return _yChannelSelector;
     }
+
     bool SetYChannelSelector(ChannelSelectorType yChannelSelector) noexcept;
 
     KRYS_NODISCARD float Scale() const noexcept
     {
       return _scale;
     }
+
     bool SetScale(float scale) noexcept;
 
     KRYS_NODISCARD static IntOutsets CalculateOutsets(const FloatSize &maxDisplacement) noexcept;
@@ -93,6 +96,7 @@ namespace krys::boo
 
     KRYS_NODISCARD const DestinationColorSpace &
       ResultColorSpace(Span<const Ref<FilterImage>> inputs) const noexcept override;
+
     void TransformInputsColorSpace(Span<const Ref<FilterImage>> inputs) const noexcept override;
 
     TextStream &ExternalRepresentation(TextStream &ts,

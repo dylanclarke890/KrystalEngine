@@ -48,7 +48,7 @@ namespace krys::boo::css
     {
       Unsupported = false,
       Supported = true,
-      Invalid
+      Invalid,
     };
 
     enum class ParsingMode : uint8
@@ -71,20 +71,26 @@ namespace krys::boo::css
   public:
     KRYS_NODISCARD static SupportsResult SupportsCondition(TokenRange tokens, Parser &parser,
                                                            ParsingMode mode) noexcept;
+
     KRYS_NODISCARD static SupportsResult
       SupportsCondition(CSSOMStringView condition, const ParserContext &context, ParsingMode mode) noexcept;
 
   private:
     KRYS_NODISCARD SupportsResult ConsumeCondition(TokenRange tokens) noexcept;
+
     KRYS_NODISCARD SupportsResult ConsumeNegation(TokenRange tokens) noexcept;
+
     KRYS_NODISCARD SupportsResult ConsumeSupportsFunction(TokenRange &tokens) noexcept;
+
     KRYS_NODISCARD SupportsResult ConsumeSupportsFeatureOrGeneralEnclosed(TokenRange &tokens) noexcept;
+
     // https://drafts.csswg.org/css-conditional-4/#typedef-supports-selector-fn
     // <supports-selector-fn> = selector( <complex-selector> );
     KRYS_NODISCARD SupportsResult ConsumeSupportsSelectorFunction(TokenRange &tokens) noexcept;
 
     // https://drafts.csswg.org/css-conditional-5/#typedef-supports-font-format-fn
     KRYS_NODISCARD SupportsResult ConsumeSupportsFontFormatFunction(TokenRange &tokens) noexcept;
+
     // https://drafts.csswg.org/css-conditional-5/#typedef-supports-font-tech-fn
     KRYS_NODISCARD SupportsResult ConsumeSupportsFontTechFunction(TokenRange &tokens) noexcept;
 

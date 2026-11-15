@@ -48,7 +48,7 @@ namespace krys::boo::css
     {
       ConsumedValue,
       DisallowedValue,
-      UnknownValue
+      UnknownValue,
     };
 
     FontVariantNumericParser() noexcept = default;

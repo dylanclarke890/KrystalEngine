@@ -31,15 +31,17 @@
 
 namespace krys::boo
 {
-  class StyleBoxData;
   class StyleBackgroundData;
-  class StyleSurroundData;
+  class StyleBoxData;
   class StyleMiscNonInheritedData;
   class StyleRareNonInheritedData;
+  class StyleSurroundData;
+
   class StyleNonInheritedData : public RefCounted<StyleNonInheritedData>
   {
   public:
     KRYS_NODISCARD static Ref<StyleNonInheritedData> Create() noexcept;
+
     KRYS_NODISCARD Ref<StyleNonInheritedData> Copy() const noexcept;
 
     bool operator==(const StyleNonInheritedData &) const noexcept;
@@ -52,6 +54,7 @@ namespace krys::boo
 
   private:
     StyleNonInheritedData() noexcept;
+
     StyleNonInheritedData(const StyleNonInheritedData &) noexcept;
   };
 }

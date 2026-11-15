@@ -63,6 +63,7 @@ namespace krys::boo
     ~DocumentTimeline() noexcept override;
 
     KRYS_NODISCARD static Ref<DocumentTimeline> Create(dom::Document &document) noexcept;
+
     /// @brief The `DocumentTimeline(options)` constructor: a timeline whose zero time is the options' origin
     /// time.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-documenttimeline-documenttimeline
@@ -78,28 +79,38 @@ namespace krys::boo
       CurrentTime(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) noexcept override;
 
     void AnimationTimingDidChange(WebAnimation &animation) noexcept override;
+
     void RemoveAnimation(WebAnimation &animation) noexcept override;
+
     void TransitionDidComplete(Ref<CSSTransition> &&transition) noexcept;
+
     void AnimationAcceleratedRunningStateDidChange(WebAnimation &animation) noexcept;
 
     void DetachFromDocument() noexcept override;
 
     void EnqueueAnimationEvent(AnimationEventBase &event) noexcept;
+
     KRYS_NODISCARD bool HasPendingAnimationEventForAnimation(const WebAnimation &animation) const noexcept;
 
     KRYS_NODISCARD ShouldUpdateAnimationsAndSendEvents
       DocumentWillUpdateAnimationsAndSendEvents() noexcept override;
+
     /// @see https://drafts.csswg.org/web-animations/#removing-replaced-animations
     void RemoveReplacedAnimations() noexcept;
+
     KRYS_NODISCARD AnimationEvents PrepareForPendingAnimationEventsDispatch() noexcept;
+
     void DocumentDidUpdateAnimationsAndSendEvents() noexcept;
+
     void StyleOriginatedAnimationsWereCreated() noexcept;
+
     void PendingStartTimeWasSetOnAnimation() noexcept;
 
     /// @brief The interval between the document's rendering updates.
     KRYS_NODISCARD Seconds AnimationInterval() const noexcept;
 
     void SuspendAnimations() noexcept override;
+
     void ResumeAnimations() noexcept override;
 
     /// @see https://drafts.csswg.org/web-animations-1/#ref-for-timeline-time-to-origin-relative-time
@@ -110,13 +121,19 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD AnimationTimelinesController *Controller() const noexcept override;
 
     void ScheduleAnimationResolution() noexcept;
+
     void ClearTickScheduleTimer() noexcept;
+
     void ScheduleNextTick() noexcept;
+
     void ApplyPendingAcceleratedAnimations() noexcept;
+
     KRYS_NODISCARD bool AnimationCanBeRemoved(WebAnimation &animation) noexcept;
+
     KRYS_NODISCARD bool ShouldRunUpdateAnimationsAndSendEventsIgnoringSuspensionState() const noexcept;
   };
 }

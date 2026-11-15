@@ -43,14 +43,17 @@ namespace krys::boo::svg
     {
       return _x->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Y() const noexcept
     {
       return _y->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Width() const noexcept
     {
       return _width->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Height() const noexcept
     {
       return _height->CurrentValue();
@@ -60,14 +63,17 @@ namespace krys::boo::svg
     {
       return *_x;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &YAnimated() noexcept
     {
       return *_y;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &WidthAnimated() noexcept
     {
       return *_width;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &HeightAnimated() noexcept
     {
       return *_height;
@@ -78,16 +84,20 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final;
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept final;
+
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
     KRYS_NODISCARD bool IsValid() const noexcept final
     {
       return SVGTests::IsValid();
     }
+
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept final
     {
       return true;

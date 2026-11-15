@@ -49,11 +49,13 @@ namespace krys::boo::inline_iterator
     List<TextBoxIterator> Boxes;
     size_t Index {0};
   };
+
   using TextLogicalOrderCache = UniquePtr<TextLogicalOrderCacheData>;
 
   /// @brief The first of a text renderer's boxes in logical order, and the cache to walk the rest with.
   KRYS_NODISCARD std::pair<TextBoxIterator, TextLogicalOrderCache>
     FirstTextBoxInLogicalOrderFor(const RenderText &text) noexcept;
+
   KRYS_NODISCARD TextBoxIterator NextTextBoxInLogicalOrder(const TextBoxIterator &textBox,
                                                            TextLogicalOrderCache &cache) noexcept;
 
@@ -64,19 +66,24 @@ namespace krys::boo::inline_iterator
     List<LeafBoxIterator> Boxes;
     size_t Index {0};
   };
+
   using LineLogicalOrderCache = UniquePtr<LineLogicalOrderCacheData>;
 
   KRYS_NODISCARD LeafBoxIterator FirstLeafOnLineInLogicalOrder(const LineBoxIterator &lineBox,
                                                                LineLogicalOrderCache &cache) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator LastLeafOnLineInLogicalOrder(const LineBoxIterator &lineBox,
                                                               LineLogicalOrderCache &cache) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator NextLeafOnLineInLogicalOrder(const LeafBoxIterator &box,
                                                               LineLogicalOrderCache &cache) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator PreviousLeafOnLineInLogicalOrder(const LeafBoxIterator &box,
                                                                   LineLogicalOrderCache &cache) noexcept;
 
   KRYS_NODISCARD LeafBoxIterator FirstLeafOnLineInLogicalOrderWithNode(const LineBoxIterator &lineBox,
                                                                        LineLogicalOrderCache &cache) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator LastLeafOnLineInLogicalOrderWithNode(const LineBoxIterator &lineBox,
                                                                       LineLogicalOrderCache &cache) noexcept;
 

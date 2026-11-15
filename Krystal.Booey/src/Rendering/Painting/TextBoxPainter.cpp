@@ -952,8 +952,9 @@ namespace krys::boo
     enum UseOverriderDecorationStyle : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     auto appendIfIsDecoratingBoxForBackground = [&](const inline_iterator::InlineBoxIterator &inlineBox,
                                                     UseOverriderDecorationStyle useOverriderDecorationStyle)
     {

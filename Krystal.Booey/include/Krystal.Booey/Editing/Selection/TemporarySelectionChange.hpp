@@ -53,7 +53,7 @@ namespace krys::boo
     RevealSelectionBounds,
     UserTriggered,
     ForceCenterScroll,
-    OnlyAllowForwardScrolling
+    OnlyAllowForwardScrolling,
   };
 }
 
@@ -70,7 +70,7 @@ namespace krys::boo
     enum class IsTemporarySelection : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     RefPtr<dom::Document> _document;
@@ -82,6 +82,7 @@ namespace krys::boo
     explicit TemporarySelectionChange(dom::Document &document,
                                       Maybe<VisibleSelection> temporarySelection = std::nullopt,
                                       EnumSet<TemporarySelectionOption> options = {}) noexcept;
+
     ~TemporarySelectionChange() noexcept;
 
     /// @brief Keeps the temporary selection: nothing is restored.

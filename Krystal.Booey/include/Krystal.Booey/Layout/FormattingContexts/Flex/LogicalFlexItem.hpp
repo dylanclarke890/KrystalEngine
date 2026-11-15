@@ -61,6 +61,7 @@ namespace krys::boo::layout
       {
         return MarginStart.value_or(0_lu) + MarginEnd.value_or(0_lu);
       }
+
       KRYS_NODISCARD bool HasNonAutoMargins() const noexcept
       {
         return MarginStart && MarginEnd;
@@ -91,12 +92,14 @@ namespace krys::boo::layout
           _crossAxisGeometry(crossGeometry), _hasAspectRatio(hasAspectRatio), _isOrthogonal(isOrthogonal)
     {
     }
+
     LogicalFlexItem() noexcept = default;
 
     KRYS_NODISCARD const MainAxisGeometry &MainAxis() const noexcept
     {
       return _mainAxisGeometry;
     }
+
     KRYS_NODISCARD const CrossAxisGeometry &CrossAxis() const noexcept
     {
       return _crossAxisGeometry;
@@ -106,6 +109,7 @@ namespace krys::boo::layout
     {
       return Style().GetFlexGrow().Value;
     }
+
     KRYS_NODISCARD float ShrinkFactor() const noexcept
     {
       return Style().GetFlexShrink().Value;
@@ -115,18 +119,22 @@ namespace krys::boo::layout
     {
       return Style().GetFlexBasis().IsContent();
     }
+
     KRYS_NODISCARD bool HasAvailableSpaceDependentFlexBasis() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD bool HasAspectRatio() const noexcept
     {
       return _hasAspectRatio;
     }
+
     KRYS_NODISCARD bool IsOrthogonal() const noexcept
     {
       return _isOrthogonal;
     }
+
     KRYS_NODISCARD bool IsContentBoxBased() const noexcept
     {
       return Style().GetBoxSizing() == BoxSizing::ContentBox;
@@ -136,10 +144,12 @@ namespace krys::boo::layout
     {
       return *_layoutBox;
     }
+
     KRYS_NODISCARD const RenderStyle &Style() const noexcept
     {
       return LayoutBox().Style();
     }
+
     KRYS_NODISCARD boo::WritingMode GetWritingMode() const noexcept
     {
       return Style().GetWritingMode();

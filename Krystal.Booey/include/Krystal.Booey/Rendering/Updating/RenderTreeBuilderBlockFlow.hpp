@@ -43,6 +43,7 @@ namespace krys::boo
     explicit BlockFlow(RenderTreeBuilder &builder) noexcept;
 
     void Attach(RenderBlockFlow &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
+
     void MoveAllChildrenIncludingFloats(RenderBlockFlow &from, RenderBlock &to,
                                         NormalizeAfterInsertion normalizeAfterInsertion) noexcept;
   };

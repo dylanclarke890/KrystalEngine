@@ -201,6 +201,7 @@ namespace krys::boo::svg::tests
     auto painted = fixture.Painted();
     CHECK(Contains(painted, u8"(color #008000)"));
   }
+
   TEST_CASE("SVGImage: an SVG image takes its loader's settings and the dark appearance of what shows it",
             "[SVG][SVGImage]")
   {

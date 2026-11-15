@@ -55,7 +55,7 @@ namespace krys::boo::css::mq
   {
     And,
     Or,
-    Not
+    Not,
   };
 
   enum class ComparisonOperator : uint8
@@ -64,14 +64,14 @@ namespace krys::boo::css::mq
     LessThanOrEqual,
     Equal,
     GreaterThan,
-    GreaterThanOrEqual
+    GreaterThanOrEqual,
   };
 
   enum class Syntax : uint8
   {
     Boolean,
     Plain,
-    Range
+    Range,
   };
 
   struct Condition;
@@ -145,7 +145,7 @@ namespace krys::boo::css::mq
   {
     False,
     True,
-    Unknown
+    Unknown,
   };
 
   enum class MediaQueryDynamicDependency : uint8
@@ -171,7 +171,7 @@ namespace krys::boo::css::mq
     enum class Type : uint8
     {
       Discrete,
-      Range
+      Range,
     };
 
     enum class ValueType : uint8
@@ -182,7 +182,7 @@ namespace krys::boo::css::mq
       Ratio,
       Resolution,
       Identifier,
-      CustomProperty
+      CustomProperty,
     };
 
     CSSOMStringAtom Name;

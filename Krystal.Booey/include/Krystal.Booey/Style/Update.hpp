@@ -90,6 +90,7 @@ namespace krys::boo::style
 
   public:
     explicit Update(dom::Document &document) noexcept;
+
     ~Update() noexcept;
 
     KRYS_NODISCARD const ListHashSet<RefPtr<dom::ContainerNode>> &Roots() const noexcept
@@ -103,6 +104,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD const ElementUpdate *GetElementUpdate(const dom::Element &element) const noexcept;
+
     KRYS_NODISCARD ElementUpdate *GetElementUpdate(const dom::Element &element) noexcept;
 
     KRYS_NODISCARD const TextUpdate *GetTextUpdate(const dom::Text &text) const noexcept;
@@ -114,6 +116,7 @@ namespace krys::boo::style
 
     /// @brief The element's new style, or else the style it's rendered with.
     KRYS_NODISCARD const RenderStyle *ElementStyle(const dom::Element &element) const noexcept;
+
     KRYS_NODISCARD RenderStyle *ElementStyle(const dom::Element &element) noexcept;
 
     KRYS_NODISCARD const dom::Document &Document() const noexcept
@@ -132,13 +135,18 @@ namespace krys::boo::style
     }
 
     void AddElement(dom::Element &element, dom::Element *parent, ElementUpdate &&elementUpdate) noexcept;
+
     void AddText(dom::Text &text, dom::Element *parent, TextUpdate &&textUpdate) noexcept;
+
     void AddText(dom::Text &text, TextUpdate &&textUpdate) noexcept;
+
     void AddSVGRendererUpdate(svg::SVGElement &element) noexcept;
+
     void AddInitialContainingBlockUpdate(UniquePtr<RenderStyle> style) noexcept;
 
   private:
     void AddPossibleRoot(dom::Element *element) noexcept;
+
     void AddPossibleRebuildRoot(dom::Element &element, dom::Element *parent) noexcept;
   };
 }

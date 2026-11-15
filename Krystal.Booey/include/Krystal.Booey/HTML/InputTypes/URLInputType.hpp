@@ -49,8 +49,11 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool TypeMismatchFor(dom::DOMStringView value) const noexcept final;
+
     KRYS_NODISCARD bool TypeMismatch() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString TypeMismatchText() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept final;
   };
 }

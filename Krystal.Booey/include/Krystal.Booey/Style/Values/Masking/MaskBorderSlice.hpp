@@ -38,13 +38,16 @@ namespace krys::boo::style
     constexpr MaskBorderSliceValue(Number number) noexcept : _value {number}
     {
     }
+
     constexpr MaskBorderSliceValue(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept
         : _value {Number {literal}}
     {
     }
+
     constexpr MaskBorderSliceValue(Percentage percentage) noexcept : _value {percentage}
     {
     }
+
     constexpr MaskBorderSliceValue(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept
         : _value {Percentage {literal}}
     {
@@ -54,6 +57,7 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<Number>(_value);
     }
+
     KRYS_NODISCARD constexpr bool IsPercentage() const noexcept
     {
       return krys::HoldsAlternative<Percentage>(_value);
@@ -92,27 +96,33 @@ namespace krys::boo::style
         : Values {krys::move(values)}, Fill {fill}
     {
     }
+
     MaskBorderSlice(Value top, Value right, Value bottom, Value left,
                     Maybe<css::keywords::Fill> fill = {}) noexcept
         : Values {top, right, bottom, left}, Fill {fill}
     {
     }
+
     MaskBorderSlice(Value value, Maybe<css::keywords::Fill> fill = {}) noexcept : Values {value}, Fill {fill}
     {
     }
+
     MaskBorderSlice(Value::Number number, Maybe<css::keywords::Fill> fill = {}) noexcept
         : Values {number}, Fill {fill}
     {
     }
+
     MaskBorderSlice(css::ValueLiteral<css::NumberUnit::Number> literal,
                     Maybe<css::keywords::Fill> fill = {}) noexcept
         : Values {Value::Number {literal}}, Fill {fill}
     {
     }
+
     MaskBorderSlice(Value::Percentage percentage, Maybe<css::keywords::Fill> fill = {}) noexcept
         : Values {percentage}, Fill {fill}
     {
     }
+
     MaskBorderSlice(css::ValueLiteral<css::PercentageUnit::Percentage> literal,
                     Maybe<css::keywords::Fill> fill = {}) noexcept
         : Values {Value::Percentage {literal}}, Fill {fill}
@@ -121,6 +131,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const MaskBorderSlice &) const noexcept = default;
   };
+
   template <size_t I>
   const auto &get(const MaskBorderSlice &value)
   {
@@ -141,6 +152,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD MaskBorderSlice operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<MaskBorderSlice>
   {
@@ -154,8 +166,10 @@ namespace krys::boo::style
   struct Blending<MaskBorderSliceValue>
   {
     KRYS_NODISCARD bool CanBlend(const MaskBorderSliceValue &, const MaskBorderSliceValue &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderSliceValue &,
                                                                       const MaskBorderSliceValue &) noexcept;
+
     KRYS_NODISCARD MaskBorderSliceValue Blend(const MaskBorderSliceValue &, const MaskBorderSliceValue &,
                                               const BlendingContext &) noexcept;
   };
@@ -164,8 +178,10 @@ namespace krys::boo::style
   struct Blending<MaskBorderSlice>
   {
     KRYS_NODISCARD bool CanBlend(const MaskBorderSlice &, const MaskBorderSlice &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderSlice &,
                                                                       const MaskBorderSlice &) noexcept;
+
     KRYS_NODISCARD MaskBorderSlice Blend(const MaskBorderSlice &, const MaskBorderSlice &,
                                          const BlendingContext &) noexcept;
   };

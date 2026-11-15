@@ -35,9 +35,9 @@
 namespace krys::boo
 {
   class GraphicsContext;
+  struct PaintInfo;
   class RenderStyle;
   class RenderText;
-  struct PaintInfo;
 
   /// @brief The colours and stroke text is painted with.
   struct TextPaintStyle
@@ -53,6 +53,7 @@ namespace krys::boo
     float MiterLimit {DefaultMiterLimit};
 
     TextPaintStyle() noexcept = default;
+
     explicit TextPaintStyle(const Color &color) noexcept;
 
     KRYS_NODISCARD bool operator==(const TextPaintStyle &other) const noexcept;
@@ -61,10 +62,12 @@ namespace krys::boo
   /// @brief Whether @p textColor reads against @p backgroundColor (a contrast ratio of 4.5:1 or more).
   KRYS_NODISCARD bool TextColorIsLegibleAgainstBackgroundColor(const Color &textColor,
                                                                const Color &backgroundColor) noexcept;
+
   /// @brief How @p renderer's text is painted on a line styled @p lineStyle.
   KRYS_NODISCARD TextPaintStyle ComputeTextPaintStyle(const RenderText &renderer,
                                                       const RenderStyle &lineStyle,
                                                       const PaintInfo &paintInfo) noexcept;
+
   /// @brief How the selected part of @p renderer's text is painted: @p textPaintStyle with the selection's
   /// colours, stroke and (into @p selectionShadow) shadow.
   KRYS_NODISCARD TextPaintStyle ComputeTextSelectionPaintStyle(const TextPaintStyle &textPaintStyle,
@@ -76,8 +79,9 @@ namespace krys::boo
   enum FillColorType
   {
     UseNormalFillColor,
-    UseEmphasisMarkColor
+    UseEmphasisMarkColor,
   };
+
   /// @brief Sets @p context's text drawing mode, fill and stroke to paint with @p paintStyle.
   void UpdateGraphicsContext(GraphicsContext &context, const TextPaintStyle &paintStyle,
                              FillColorType fillColorType = UseNormalFillColor) noexcept;

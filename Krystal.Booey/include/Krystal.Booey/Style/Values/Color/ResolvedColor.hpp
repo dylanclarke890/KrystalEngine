@@ -66,6 +66,7 @@ namespace krys::boo::style
 
   void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ResolvedColor &value) noexcept;
+
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const ResolvedColor &value) noexcept;
 }

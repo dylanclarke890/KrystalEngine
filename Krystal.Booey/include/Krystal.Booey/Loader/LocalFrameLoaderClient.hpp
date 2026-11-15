@@ -52,6 +52,7 @@ namespace krys::boo
 
   public:
     LocalFrameLoaderClient() noexcept = default;
+
     virtual ~LocalFrameLoaderClient() noexcept = default;
 
     /// @brief The page asks the frame to navigate to @p request (a link followed or a form submitted), which

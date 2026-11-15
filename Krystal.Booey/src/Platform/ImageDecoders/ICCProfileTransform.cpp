@@ -2,8 +2,8 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <array>
 #include <cstring>
-#include <utility>
 #include <lcms2.h>
+#include <utility>
 
 namespace krys::boo
 {
@@ -16,6 +16,7 @@ namespace krys::boo
         cmsCloseProfile(profile);
       }
     };
+
     using LCMSProfilePtr = UniquePtr<void, LCMSProfileDeleter>;
 
     KRYS_NODISCARD cmsUInt32Number LCMSFormat(ICCProfileTransform::PixelLayout layout) noexcept

@@ -39,10 +39,10 @@
 
 namespace krys::boo::html
 {
-  class RadioButtonGroups;
   class CustomElementAlgorithms;
-  class HTMLMapElement;
   class CustomElementRegistry;
+  class HTMLMapElement;
+  class RadioButtonGroups;
 }
 
 namespace krys::boo::css
@@ -72,9 +72,9 @@ namespace krys::boo::dom
   class DocumentAlgorithms;
   class Element;
   class IdTargetObserverRegistry;
-  class TreeScopeOrderedMap;
   class NodeAlgorithms;
   struct SVGResourcesMap;
+  class TreeScopeOrderedMap;
 
   template <typename>
   class ExceptionOr;
@@ -110,6 +110,7 @@ namespace krys::boo::dom
     /// @param rootNode The document or shadow root itself.
     explicit DocumentOrShadowRoot(ContainerNode &rootNode,
                                   RefPtr<html::CustomElementRegistry> &&registry = nullptr) noexcept;
+
     ~DocumentOrShadowRoot() noexcept;
 
   public:
@@ -197,24 +198,31 @@ namespace krys::boo::dom
 
     /// @brief Notes that @p element, in this tree, has @p id.
     void AddElementById(DOMStringAtom id, Element &element) noexcept;
+
     /// @brief Notes that @p element no longer has @p id, or has left this tree.
     void RemoveElementById(DOMStringAtom id, Element &element) noexcept;
+
     /// @brief Notes that the elements with @p id may be in a different order, as one has moved.
     void ElementsWithIdChangedOrder(DOMStringAtom id) noexcept;
 
     /// @brief How many elements in this tree have @p id.
     KRYS_NODISCARD uint32 ElementCountWithId(DOMStringView id) const noexcept;
+
     /// @brief The first element in this tree with @p id, or null if there's none.
     KRYS_NODISCARD Element *FirstElementWithId(DOMStringView id) const noexcept;
+
     /// @brief The elements in this tree with @p id, in tree order; valid until the tree next changes.
     KRYS_NODISCARD Span<Element *const> AllElementsWithId(DOMStringView id) const noexcept;
 
     /// @brief Notes that @p map, in this tree, goes by @p name, its ID or name.
     void AddImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept;
+
     /// @brief Notes that @p map no longer goes by @p name, or has left this tree.
     void RemoveImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept;
+
     /// @brief Notes that the maps going by @p name may be in a different order, as one has moved.
     void ImageMapsChangedOrder(DOMStringAtom name) noexcept;
+
     /// @brief The first map in this tree with @p name as its ID or name, or null if there's none.
     KRYS_NODISCARD html::HTMLMapElement *FirstImageMap(DOMStringView name) const noexcept;
 
@@ -236,18 +244,27 @@ namespace krys::boo::dom
     // when an element takes the id, the waiting elements are rebuilt (SVGElement::BuildPendingResource).
 
     void AddSVGResource(const DOMStringAtom &id, LegacyRenderSVGResourceContainer &) noexcept;
+
     void RemoveSVGResource(const DOMStringAtom &id) noexcept;
+
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
       LookupLegacySVGResourceById(const DOMStringAtom &id) const noexcept;
 
     void AddPendingSVGResource(const DOMStringAtom &id, svg::SVGElement &element) noexcept;
+
     KRYS_NODISCARD bool IsIdOfPendingSVGResource(const DOMStringAtom &id) const noexcept;
+
     KRYS_NODISCARD bool IsPendingSVGResource(svg::SVGElement &element,
                                              const DOMStringAtom &id) const noexcept;
+
     void ClearHasPendingSVGResourcesIfPossible(svg::SVGElement &element) noexcept;
+
     void RemoveElementFromPendingSVGResources(svg::SVGElement &element) noexcept;
+
     List<WeakPtr<svg::SVGElement>> RemovePendingSVGResource(const DOMStringAtom &id) noexcept;
+
     void MarkPendingSVGResourcesForRemoval(const DOMStringAtom &id) noexcept;
+
     KRYS_NODISCARD RefPtr<svg::SVGElement>
       TakeElementFromPendingSVGResourcesForRemovalMap(const DOMStringAtom &id) noexcept;
 
@@ -255,6 +272,7 @@ namespace krys::boo::dom
 
   private:
     KRYS_NODISCARD SVGResourcesMap &GetSVGResourcesMap() const noexcept;
+
     KRYS_NODISCARD bool IsElementWithPendingSVGResources(svg::SVGElement &element) const noexcept;
   };
 }

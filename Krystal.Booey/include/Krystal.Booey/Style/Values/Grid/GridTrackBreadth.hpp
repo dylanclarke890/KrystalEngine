@@ -51,10 +51,12 @@ namespace krys::boo::style
     {
       return HoldsAlternative<css::keywords::MinContent>();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsMaxContent() const noexcept
     {
       return HoldsAlternative<css::keywords::MaxContent>();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsAuto() const noexcept
     {
       return HoldsAlternative<css::keywords::Auto>();
@@ -124,6 +126,7 @@ namespace krys::boo::style
     {
       return _type == GridTrackBreadthType::Length;
     }
+
     KRYS_NODISCARD bool IsFlex() const noexcept
     {
       return _type == GridTrackBreadthType::Flex;
@@ -134,6 +137,7 @@ namespace krys::boo::style
       krys_debug_assert(IsLength());
       return _length;
     }
+
     KRYS_NODISCARD Flex GetFlex() const noexcept
     {
       krys_debug_assert(IsFlex());
@@ -144,11 +148,13 @@ namespace krys::boo::style
     {
       return _type == GridTrackBreadthType::Length && _length.IsPercentOrCalculated();
     }
+
     KRYS_NODISCARD bool IsContentSized() const noexcept
     {
       return _type == GridTrackBreadthType::Length
              && (_length.IsAuto() || _length.IsMinContent() || _length.IsMaxContent());
     }
+
     KRYS_NODISCARD bool IsAuto() const noexcept
     {
       return _type == GridTrackBreadthType::Length && _length.IsAuto();
@@ -175,8 +181,9 @@ namespace krys::boo::style
     enum class GridTrackBreadthType : bool
     {
       Length,
-      Flex
+      Flex,
     };
+
     GridTrackBreadthType _type;
   };
 

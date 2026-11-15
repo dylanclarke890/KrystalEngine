@@ -35,6 +35,7 @@ namespace krys::boo::dom
   class DOMRect : public DOMRectReadOnly
   {
     DOMRect() noexcept = default;
+
     DOMRect(double x, double y, double width, double height) noexcept : DOMRectReadOnly(x, y, width, height)
     {
     }
@@ -44,18 +45,22 @@ namespace krys::boo::dom
     {
       return AdoptRef(*new DOMRect());
     }
+
     KRYS_NODISCARD static Ref<DOMRect> Create(double x, double y, double width, double height) noexcept
     {
       return AdoptRef(*new DOMRect(x, y, width, height));
     }
+
     KRYS_NODISCARD static Ref<DOMRect> Create(const FloatRect &rect) noexcept
     {
       return AdoptRef(*new DOMRect(rect.X(), rect.Y(), rect.Width(), rect.Height()));
     }
+
     KRYS_NODISCARD static Ref<DOMRect> Create(const IntRect &rect) noexcept
     {
       return AdoptRef(*new DOMRect(rect.X(), rect.Y(), rect.Width(), rect.Height()));
     }
+
     KRYS_NODISCARD static Ref<DOMRect> FromRect(const DOMRectInit &init) noexcept
     {
       return Create(init.X, init.Y, init.Width, init.Height);
@@ -65,14 +70,17 @@ namespace krys::boo::dom
     {
       _x = x;
     }
+
     void SetY(double y) noexcept
     {
       _y = y;
     }
+
     void SetWidth(double width) noexcept
     {
       _width = width;
     }
+
     void SetHeight(double height) noexcept
     {
       _height = height;

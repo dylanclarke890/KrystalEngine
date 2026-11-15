@@ -77,22 +77,27 @@ namespace krys::boo::style
 
   public:
     explicit MatchedDeclarationsCache(const Resolver &) noexcept;
+
     ~MatchedDeclarationsCache() noexcept;
 
     KRYS_NODISCARD static bool IsCacheable(const dom::Element &, const RenderStyle &,
                                            const RenderStyle &parentStyle) noexcept;
+
     KRYS_NODISCARD static uint32 ComputeHash(const MatchResult &,
                                              const CustomPropertyData &inheritedCustomProperties) noexcept;
 
     KRYS_NODISCARD Maybe<Result> Find(uint32 hash, const MatchResult &,
                                       const CustomPropertyData &inheritedCustomProperties,
                                       const RenderStyle &) noexcept;
+
     void Add(const RenderStyle &, const RenderStyle &parentStyle, uint32 hash, const MatchResult &) noexcept;
+
     void Remove(uint32 hash) noexcept;
 
     // Every N additions to the matched declaration cache trigger a sweep where entries holding
     // the last reference to a style declaration are garbage collected.
     void Invalidate() noexcept;
+
     void ClearEntriesAffectedByViewportUnits() noexcept;
 
   private:

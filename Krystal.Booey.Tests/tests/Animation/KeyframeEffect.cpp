@@ -260,6 +260,7 @@ namespace krys::boo::tests
     CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.75f));
     animation->Cancel(WebAnimation::Silently::Yes);
   }
+
   TEST_CASE_METHOD(css::tests::ValueFixture,
                    "KeyframeEffect: registering a custom property recomputes the keyframes that animate it",
                    "[Animation][KeyframeEffect]")

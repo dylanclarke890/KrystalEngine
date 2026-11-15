@@ -57,6 +57,7 @@ namespace krys::boo
     }
 
     RectEdges(const RectEdges &) noexcept = default;
+
     RectEdges &operator=(const RectEdges &) noexcept = default;
 
     template <typename U>

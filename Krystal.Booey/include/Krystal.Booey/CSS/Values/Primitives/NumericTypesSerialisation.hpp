@@ -43,11 +43,13 @@ namespace krys::boo::css
   /// @brief Appends a non-finite number as `infinity`, `-infinity` or `NaN`, multiplied by 1 of the suffix's
   /// unit if there is one (e.g. `infinity * 1px`).
   void FormatNonfiniteCSSNumberValue(StringBuilder &builder, const SerialisableNumber &number) noexcept;
+
   KRYS_NODISCARD CSSOMString FormatNonfiniteCSSNumberValue(const SerialisableNumber &number) noexcept;
 
   /// @brief Appends a number rounded to at most 6 decimal places, without trailing zeros, followed by its
   /// suffix.
   void FormatCSSNumberValue(StringBuilder &builder, const SerialisableNumber &number) noexcept;
+
   KRYS_NODISCARD CSSOMString FormatCSSNumberValue(const SerialisableNumber &number) noexcept;
 
   template <>

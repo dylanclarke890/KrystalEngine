@@ -61,12 +61,12 @@
 
 namespace krys::boo
 {
-  enum class PseudoElementType : uint8;
+  struct IntersectionObserverData;
   class Locale;
+  enum class PseudoElementType : uint8;
   class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
-  struct IntersectionObserverData;
   struct ResizeObserverData;
 }
 
@@ -109,8 +109,8 @@ namespace krys::boo::html
   class CustomStateSet;
   class HTMLButtonElement;
   class HTMLElement;
-  class OpenElementStack;
   class HTMLSlotElement;
+  class OpenElementStack;
   class TreeBuilder;
 }
 
@@ -122,6 +122,7 @@ namespace krys::boo::xml
 namespace krys::boo::dom
 {
   enum class PopoverState : uint8;
+
   /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
   enum class CustomElementState : uint8
   {
@@ -129,7 +130,7 @@ namespace krys::boo::dom
     Failed,
     Uncustomized,
     Precustomized,
-    Custom
+    Custom,
   };
 
   /// @brief The state of a button's `command` attribute: the command it sends its `commandfor` element.
@@ -147,7 +148,7 @@ namespace krys::boo::dom
 
     ShowModal,
     Close,
-    RequestClose
+    RequestClose,
   };
 
   /// @see https://dom.spec.whatwg.org/#insert-adjacent
@@ -156,7 +157,7 @@ namespace krys::boo::dom
     BeforeBegin,
     AfterBegin,
     BeforeEnd,
-    AfterEnd
+    AfterEnd,
   };
 }
 
@@ -494,6 +495,7 @@ namespace krys::boo::dom
     /// as well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
     KRYS_NODISCARD ExceptionOr<DOMString> InnerHTML() const noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
     ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
 
@@ -501,6 +503,7 @@ namespace krys::boo::dom
     /// well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
     KRYS_NODISCARD ExceptionOr<DOMString> OuterHTML() const noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
     ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
 
@@ -513,8 +516,10 @@ namespace krys::boo::dom
 
     /// @see https://w3c.github.io/pointerevents/#dom-element-setpointercapture
     ExceptionOr<void> SetPointerCapture(int32 pointerId) noexcept;
+
     /// @see https://w3c.github.io/pointerevents/#dom-element-releasepointercapture
     ExceptionOr<void> ReleasePointerCapture(int32 pointerId) noexcept;
+
     /// @see https://w3c.github.io/pointerevents/#dom-element-haspointercapture
     KRYS_NODISCARD bool HasPointerCapture(int32 pointerId) noexcept;
 
@@ -536,51 +541,76 @@ namespace krys::boo::dom
 
     /// @brief The bounding boxes of the element's boxes, in client coordinates.
     KRYS_NODISCARD Ref<DOMRectList> GetClientRects() noexcept;
+
     /// @brief The union of the element's boxes, in client coordinates.
     KRYS_NODISCARD Ref<DOMRect> GetBoundingClientRect() noexcept;
+
     KRYS_NODISCARD FloatRect BoundingClientRect() noexcept;
+
     /// @brief Where the element's renderer's bounding box is on the screen; empty without a renderer.
     KRYS_NODISCARD IntRect ScreenRect() const noexcept;
+
     /// @brief The element's renderer and the union of its boxes in absolute coordinates, without updating
     /// layout; null if it has no boxes.
     KRYS_NODISCARD Maybe<Pair<RenderElement *, FloatRect>> BoundingAbsoluteRectWithoutLayout() const noexcept;
 
     /// @brief Scrolls the element's ancestors so the element is aligned as @p options ask.
     void ScrollIntoView(const ScrollIntoViewOptions &options = {}) noexcept;
+
     /// @brief Scrolls the element's ancestors so its start (or, if @p alignToTop is false, its end) is
     /// aligned with theirs.
     void ScrollIntoView(bool alignToTop) noexcept;
+
     /// @brief Scrolls the element's ancestors so the element is visible, if it isn't: centred in them if
     /// @p centerIfNotVisible, otherwise to their nearest edge.
     void ScrollIntoViewIfNotVisible(bool centerIfNotVisible = true) noexcept;
 
     void Scroll(const ScrollToOptions &options = {}) noexcept;
+
     void Scroll(double x, double y) noexcept;
+
     void ScrollTo(const ScrollToOptions &options = {}) noexcept;
+
     void ScrollTo(double x, double y) noexcept;
+
     void ScrollBy(const ScrollToOptions &options = {}) noexcept;
+
     void ScrollBy(double x, double y) noexcept;
 
     KRYS_NODISCARD int32 ScrollTop() noexcept;
+
     void SetScrollTop(int32 newTop) noexcept;
+
     KRYS_NODISCARD int32 ScrollLeft() noexcept;
+
     void SetScrollLeft(int32 newLeft) noexcept;
+
     KRYS_NODISCARD int32 ScrollWidth() noexcept;
+
     KRYS_NODISCARD int32 ScrollHeight() noexcept;
+
     KRYS_NODISCARD int32 ClientTop() noexcept;
+
     KRYS_NODISCARD int32 ClientLeft() noexcept;
+
     KRYS_NODISCARD int32 ClientWidth() noexcept;
+
     KRYS_NODISCARD int32 ClientHeight() noexcept;
 
     /// @brief The nearest positioned (or table) ancestor the offset values are relative to, retargeted out of
     /// shadow trees the element isn't in.
     /// @see https://drafts.csswg.org/cssom-view/#extensions-to-the-htmlelement-interface
     KRYS_NODISCARD Element *OffsetParent() noexcept;
+
     /// @brief The offset parent, without retargeting it out of shadow trees.
     KRYS_NODISCARD Element *OffsetParentIgnoringShadowTrees() noexcept;
+
     KRYS_NODISCARD int32 OffsetTop() noexcept;
+
     KRYS_NODISCARD int32 OffsetLeft() noexcept;
+
     KRYS_NODISCARD int32 OffsetWidth() noexcept;
+
     KRYS_NODISCARD int32 OffsetHeight() noexcept;
 
 #pragma endregion
@@ -791,13 +821,21 @@ namespace krys::boo::dom
     KRYS_NODISCARD html::CustomElementReactionQueue *ReactionQueue() const noexcept;
 
     void SetIsDefinedCustomElement(html::CustomElementInterface &elementInterface) noexcept;
+
     void SetIsFailedCustomElement() noexcept;
+
     void SetIsFailedCustomElementWithoutClearingReactionQueue() noexcept;
+
     void SetIsPrecustomizedCustomElement() noexcept;
+
     void ClearReactionQueueFromFailedCustomElement() noexcept;
+
     void SetIsCustomElementUpgradeCandidate() noexcept;
+
     void EnqueueToUpgrade(html::CustomElementInterface &elementInterface) noexcept;
+
     void SetCustomElement(UniquePtr<html::CustomElement> &&customElement) noexcept;
+
     void SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept;
 
     /// @brief Whether the element's custom states include @p state, as `:state()` matches.
@@ -923,6 +961,7 @@ namespace krys::boo::dom
 
     /// @brief Why the element is relevant to the user, once its relevancy has been determined.
     KRYS_NODISCARD Maybe<EnumSet<ContentRelevancy>> GetContentRelevancy() const noexcept;
+
     void SetContentRelevancy(EnumSet<ContentRelevancy> contentRelevancy) noexcept;
 
     /// @brief The base value of a `random()` of the element (or of one of its pseudo-elements) that isn't
@@ -939,7 +978,7 @@ namespace krys::boo::dom
     {
       Normal,
       RenderedOnly,
-      Editability
+      Editability,
     };
 
     using Node::ComputedStyle;
@@ -961,18 +1000,25 @@ namespace krys::boo::dom
 
     /// @brief The style the element is rendered with, including with `display: contents`.
     KRYS_NODISCARD const RenderStyle *RenderOrDisplayContentsStyle() const noexcept;
+
     KRYS_NODISCARD const RenderStyle *RenderOrDisplayContentsStyle(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
     /// @brief Drops the computed styles of the element and its descendants.
     void ResetComputedStyle() noexcept;
+
     void ResetStyleRelations() noexcept;
+
     void ResetChildStyleRelations() noexcept;
+
     void ResetAllDescendantStyleRelations() noexcept;
 
     KRYS_NODISCARD bool HasDisplayContents() const noexcept;
+
     KRYS_NODISCARD bool HasDisplayNone() const noexcept;
+
     void StoreDisplayContentsOrNoneStyle(UniquePtr<RenderStyle> style) noexcept;
+
     void ClearDisplayContentsOrNoneStyle() noexcept;
 
     /// @brief The renderer the element gets with @p style, or null if it gets none.
@@ -1030,6 +1076,7 @@ namespace krys::boo::dom
 
     /// @brief Called around the element's style resolution, for elements with custom style resolve callbacks.
     virtual void WillRecalcStyle(EnumSet<style::Change>) noexcept;
+
     virtual void DidRecalcStyle(EnumSet<style::Change>) noexcept;
 
     /// @brief Whether the element is a text field: a text area, or an input whose type is text-like.
@@ -1093,6 +1140,7 @@ namespace krys::boo::dom
     virtual void DidBlur() noexcept
     {
     }
+
     /// @brief Shows that the element is focused: places a caret at the start of an editing host (unless the
     /// selection is already in it), and scrolls the element (or the caret) into view.
     virtual void UpdateFocusAppearance(SelectionRestorationMode restorationMode,
@@ -1116,6 +1164,7 @@ namespace krys::boo::dom
 
     /// @brief The scroll position of the element's layer, kept while the element has no renderer.
     KRYS_NODISCARD IntPoint SavedLayerScrollPosition() const noexcept;
+
     void SetSavedLayerScrollPosition(const IntPoint &position) noexcept;
 
     /// @brief The element's `::after` pseudo-element, or null if it has none.
@@ -1127,22 +1176,34 @@ namespace krys::boo::dom
     /// @brief The pseudo-element @p pseudoElementIdentifier if it's a `::before` or `::after` that exists.
     KRYS_NODISCARD RefPtr<PseudoElement>
       PseudoElementIfExists(const style::PseudoElementIdentifier &pseudoElementIdentifier) noexcept;
+
     KRYS_NODISCARD RefPtr<const PseudoElement>
       PseudoElementIfExists(const style::PseudoElementIdentifier &pseudoElementIdentifier) const noexcept;
 
     void ClearBeforePseudoElement() noexcept;
+
     void ClearAfterPseudoElement() noexcept;
 
     void InvalidateStyle() noexcept;
+
     void InvalidateStyleAndLayerComposition() noexcept;
+
     void InvalidateStyleForSubtree() noexcept;
+
     void InvalidateStyleAndRenderersForSubtree() noexcept;
+
     void InvalidateRenderer() noexcept;
+
     void InvalidateStyleInternal() noexcept;
+
     void InvalidateStyleForSubtreeInternal() noexcept;
+
     void InvalidateForQueryContainerSizeChange() noexcept;
+
     void InvalidateForResumingQueryContainerResolution() noexcept;
+
     void InvalidateForAnchorRectChange() noexcept;
+
     void InvalidateForResumingAnchorPositionedElementResolution() noexcept;
 
     /// @brief Whether a change to the element needs to invalidate style: false when the element isn't
@@ -1293,6 +1354,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>>
       Animate(boo::KeyframesInput &&keyframes,
               Maybe<Variant<double, KeyframeAnimationOptions>> &&options = null) noexcept;
+
     /// @brief The relevant animations whose effects target the element (or, with `subtree`, its descendants
     /// too), in composite order.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animatable-getanimations
@@ -1301,58 +1363,75 @@ namespace krys::boo::dom
 
     /// @brief Whether the element, or one of its pseudo-elements, may have keyframe effects.
     KRYS_NODISCARD bool MayHaveKeyframeEffects() const noexcept;
+
     KRYS_NODISCARD ElementAnimationRareData *
       AnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     KRYS_NODISCARD ElementAnimationRareData &
       EnsureAnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
     KRYS_NODISCARD boo::KeyframeEffectStack *GetKeyframeEffectStack(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     KRYS_NODISCARD boo::KeyframeEffectStack &EnsureKeyframeEffectStack(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
     KRYS_NODISCARD bool
       HasKeyframeEffects(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
     KRYS_NODISCARD const AnimationCollection *
       Animations(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     KRYS_NODISCARD AnimationCollection &
       EnsureAnimations(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
     KRYS_NODISCARD bool
       HasCompletedTransitionForProperty(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                         const AnimatableCSSProperty &property) const noexcept;
+
     KRYS_NODISCARD bool
       HasRunningTransitionForProperty(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                       const AnimatableCSSProperty &property) const noexcept;
+
     KRYS_NODISCARD bool HasRunningTransitions(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     KRYS_NODISCARD const AnimatableCSSPropertyToTransitionMap *CompletedTransitionsByProperty(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     KRYS_NODISCARD const AnimatableCSSPropertyToTransitionMap *RunningTransitionsByProperty(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &EnsureCompletedTransitionsByProperty(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
     KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &EnsureRunningTransitionsByProperty(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
     KRYS_NODISCARD const RenderStyle *LastStyleChangeEventStyle(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     void SetLastStyleChangeEventStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                       UniquePtr<const RenderStyle> &&style) noexcept;
 
     KRYS_NODISCARD bool HasPropertiesOverridenAfterAnimation(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     void SetHasPropertiesOverridenAfterAnimation(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier, bool value) noexcept;
 
     KRYS_NODISCARD CSSAnimationCollection &AnimationsCreatedByMarkup(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
     void SetAnimationsCreatedByMarkup(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                       CSSAnimationCollection &&animations) noexcept;
+
     void
       CSSAnimationsDidUpdate(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
     void
       KeyframesRuleDidChange(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
     KRYS_NODISCARD bool HasPendingKeyframesUpdate(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
@@ -1366,13 +1445,13 @@ namespace krys::boo::dom
     enum class EventIsDispatched : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class EventIsDefaultPrevented : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     struct DispatchMouseEventResult
@@ -1459,17 +1538,21 @@ namespace krys::boo::dom
 
     /// @brief The element's popover state, if it has a `popover` attribute.
     KRYS_NODISCARD PopoverData *GetPopoverData() const noexcept;
+
     PopoverData &EnsurePopoverData() noexcept;
+
     void ClearPopoverData() noexcept;
 
     /// @brief Whether the element is in the popover showing state.
     /// @see https://html.spec.whatwg.org/#popover-showing-state
     KRYS_NODISCARD bool IsPopoverShowing() const noexcept;
+
     /// @brief The state of the element's `popover` attribute.
     KRYS_NODISCARD PopoverState GetPopoverState() const noexcept;
 
     /// @brief The popover the element (a button) showed and is still the popover trigger of, if any.
     KRYS_NODISCARD Element *InvokedPopover() const noexcept;
+
     void SetInvokedPopover(Element *element) noexcept;
 
     /// @brief The topmost showing auto or hint popover that's a flat tree ancestor of the element, or (if
@@ -1486,6 +1569,7 @@ namespace krys::boo::dom
 
     /// @brief The intersection observers whose root the element is, and those observing it.
     IntersectionObserverData &EnsureIntersectionObserverData() noexcept;
+
     KRYS_NODISCARD IntersectionObserverData *IntersectionObserverDataIfExists() const noexcept;
 
 #pragma endregion
@@ -1494,15 +1578,21 @@ namespace krys::boo::dom
 
     /// @brief The resize observers observing the element.
     ResizeObserverData &EnsureResizeObserverData() noexcept;
+
     KRYS_NODISCARD ResizeObserverData *ResizeObserverDataIfExists() const noexcept;
 
     /// @brief The element's last remembered size in each axis, for `contain-intrinsic-size: auto`.
     /// @see https://drafts.csswg.org/css-sizing-4/#last-remembered
     KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalWidth() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalHeight() const noexcept;
+
     void SetLastRememberedLogicalWidth(LayoutUnit width) noexcept;
+
     void ClearLastRememberedLogicalWidth() noexcept;
+
     void SetLastRememberedLogicalHeight(LayoutUnit height) noexcept;
+
     void ClearLastRememberedLogicalHeight() noexcept;
 
 #pragma endregion
@@ -1634,13 +1724,18 @@ namespace krys::boo::dom
     virtual void
       SetActive(bool value,
                 style::InvalidationScope invalidationScope = style::InvalidationScope::All) noexcept;
+
     virtual void SetHovered(bool value,
                             style::InvalidationScope invalidationScope = style::InvalidationScope::All,
                             HitTestRequest request = {}) noexcept;
+
     /// @brief Sets the element's focus, and the focus within of its ancestors in the composed tree.
     virtual void SetFocus(bool value, FocusVisibility visibility = FocusVisibility::Invisible) noexcept;
+
     void SetHasFocusVisible(bool value) noexcept;
+
     void SetHasFocusWithin(bool value) noexcept;
+
     /// @brief Gives the element's composed tree ancestors focus within while its focusability is checked.
     void SetHasTentativeFocus(bool value) noexcept;
 
@@ -1662,13 +1757,19 @@ namespace krys::boo::dom
     void SetCustomElementState(CustomElementState state) noexcept;
 
     void DisconnectFromIntersectionObservers() noexcept;
+
     void DisconnectFromResizeObservers() noexcept;
 
     KRYS_NODISCARD bool IsUserActionElementInActiveChain() const noexcept;
+
     KRYS_NODISCARD bool IsUserActionElementActive() const noexcept;
+
     KRYS_NODISCARD bool IsUserActionElementFocused() const noexcept;
+
     KRYS_NODISCARD bool IsUserActionElementHovered() const noexcept;
+
     KRYS_NODISCARD bool IsUserActionElementHasFocusVisible() const noexcept;
+
     KRYS_NODISCARD bool IsUserActionElementHasFocusWithin() const noexcept;
 
     KRYS_NODISCARD const RenderStyle &
@@ -1685,6 +1786,7 @@ namespace krys::boo::dom
 
     /// @brief The inline style's property map (`attributeStyleMap`), once it's been asked for.
     KRYS_NODISCARD css::StylePropertyMap *ExistingAttributeStyleMap() const noexcept;
+
     void SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept;
 
 #pragma region Parser Hooks
@@ -1721,6 +1823,7 @@ namespace krys::boo::dom
 
   private:
     void SynchronizeStyleAttribute() const noexcept;
+
     void SynchronizeAnimatedSVGAttributes() const noexcept;
 
     /// @brief Replaces the element's children (a template's content's) with @p markup parsed in its context.

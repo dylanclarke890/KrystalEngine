@@ -52,6 +52,7 @@ namespace krys::boo
 
   public:
     BorderEdge() noexcept = default;
+
     BorderEdge(float edgeWidth, boo::Color edgeColor, BorderStyle edgeStyle, bool edgeIsTransparent,
                bool edgeIsPresent, float devicePixelRatio) noexcept;
 
@@ -59,18 +60,22 @@ namespace krys::boo
     {
       return _style;
     }
+
     KRYS_NODISCARD LayoutUnit Width() const noexcept
     {
       return _width;
     }
+
     KRYS_NODISCARD const boo::Color &GetColor() const noexcept
     {
       return _color;
     }
+
     KRYS_NODISCARD bool IsTransparent() const noexcept
     {
       return _isTransparent;
     }
+
     KRYS_NODISCARD bool IsPresent() const noexcept
     {
       return _isPresent;
@@ -80,21 +85,26 @@ namespace krys::boo
     {
       return _style > BorderStyle::Hidden && !_isTransparent;
     }
+
     KRYS_NODISCARD bool ShouldRender() const noexcept
     {
       return _isPresent && WidthForPainting() && HasVisibleColorAndStyle();
     }
+
     KRYS_NODISCARD bool PresentButInvisible() const noexcept
     {
       return WidthForPainting() && !HasVisibleColorAndStyle();
     }
+
     KRYS_NODISCARD float WidthForPainting() const noexcept
     {
       return _isPresent ? _flooredToDevicePixelWidth : 0;
     }
 
     void GetDoubleBorderStripeWidths(LayoutUnit &outerWidth, LayoutUnit &innerWidth) const noexcept;
+
     KRYS_NODISCARD bool ObscuresBackgroundEdge(float scale) const noexcept;
+
     KRYS_NODISCARD bool ObscuresBackground() const noexcept;
 
   private:
@@ -111,6 +121,7 @@ namespace krys::boo
                                             RectEdges<bool> closedEdges = RectEdges<bool> {true},
                                             LayoutSize inflation = {},
                                             bool setColorsToBlack = false) noexcept;
+
   KRYS_NODISCARD BorderEdges GetBorderEdgesForOutline(const RenderStyle &, BorderStyle,
                                                       float deviceScaleFactor) noexcept;
 

@@ -36,7 +36,9 @@ namespace krys::Serialisation
         size_t length = value.length();
         (*this)(length);
         if (length == 0)
+        {
           return *this;
+        }
         auto *data = std::bit_cast<const byte *>(value.data());
         _stream.Write(Span(data, length));
       }
@@ -75,7 +77,9 @@ namespace krys::Serialisation
         (*this)(length);
 
         if (length == 0)
+        {
           return *this;
+        }
 
         value.resize(length);
         auto *data = std::bit_cast<byte *>(value.data());

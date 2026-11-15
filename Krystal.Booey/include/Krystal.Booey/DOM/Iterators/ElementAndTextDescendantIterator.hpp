@@ -52,7 +52,7 @@ namespace krys::boo::dom
   public:
     enum FirstChildTag
     {
-      FirstChild
+      FirstChild,
     };
 
     ElementAndTextDescendantIterator() noexcept = default;

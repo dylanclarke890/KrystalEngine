@@ -34,7 +34,7 @@ namespace krys::boo
   {
     Unknown,
     FractalNoise,
-    Turbulence
+    Turbulence,
   };
 
   /// @brief The turbulence filter effect: Perlin noise.
@@ -60,36 +60,42 @@ namespace krys::boo
     {
       return _type;
     }
+
     bool SetType(TurbulenceType type) noexcept;
 
     KRYS_NODISCARD float BaseFrequencyX() const noexcept
     {
       return _baseFrequencyX;
     }
+
     bool SetBaseFrequencyX(float baseFrequencyX) noexcept;
 
     KRYS_NODISCARD float BaseFrequencyY() const noexcept
     {
       return _baseFrequencyY;
     }
+
     bool SetBaseFrequencyY(float baseFrequencyY) noexcept;
 
     KRYS_NODISCARD float Seed() const noexcept
     {
       return _seed;
     }
+
     bool SetSeed(float seed) noexcept;
 
     KRYS_NODISCARD int32 NumOctaves() const noexcept
     {
       return _numOctaves;
     }
+
     bool SetNumOctaves(int32 numOctaves) noexcept;
 
     KRYS_NODISCARD bool StitchTiles() const noexcept
     {
       return _stitchTiles;
     }
+
     bool SetStitchTiles(bool stitch) noexcept;
 
   private:

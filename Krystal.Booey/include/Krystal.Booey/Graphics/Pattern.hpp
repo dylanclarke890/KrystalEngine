@@ -58,12 +58,15 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<Pattern> Create(SourceImage &&tileImage, const Parameters & = {}) noexcept;
+
     ~Pattern() noexcept;
 
     KRYS_NODISCARD const SourceImage &TileImage() const noexcept;
+
     void SetTileImage(SourceImage &&) noexcept;
 
     KRYS_NODISCARD RefPtr<NativeImage> TileNativeImage() const noexcept;
+
     KRYS_NODISCARD RefPtr<ImageBuffer> TileImageBuffer() const noexcept;
 
     KRYS_NODISCARD const Parameters &GetParameters() const noexcept
@@ -77,10 +80,12 @@ namespace krys::boo
     {
       return _parameters.PatternSpaceTransform;
     }
+
     KRYS_NODISCARD bool RepeatX() const noexcept
     {
       return _parameters.RepeatX;
     }
+
     KRYS_NODISCARD bool RepeatY() const noexcept
     {
       return _parameters.RepeatY;

@@ -62,7 +62,7 @@ namespace krys::boo
       AlignBottom,
       AlignLeft,
       AlignRight,
-      AlignToClosestEdge
+      AlignToClosestEdge,
     };
 
     Behavior RectVisible;
@@ -74,10 +74,12 @@ namespace krys::boo
     {
       return RectVisible;
     }
+
     KRYS_NODISCARD Behavior GetPartialBehavior() const noexcept
     {
       return RectPartial;
     }
+
     KRYS_NODISCARD Behavior GetHiddenBehavior() const noexcept
     {
       return RectHidden;
@@ -87,6 +89,7 @@ namespace krys::boo
     {
       EnableLegacyHorizontalVisibilityThreshold = false;
     }
+
     KRYS_NODISCARD bool LegacyHorizontalVisibilityThresholdEnabled() const noexcept
     {
       return EnableLegacyHorizontalVisibilityThreshold;

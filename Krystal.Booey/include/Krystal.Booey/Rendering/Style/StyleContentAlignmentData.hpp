@@ -49,10 +49,12 @@ namespace krys::boo
     {
       _position = ToUnderlying(position);
     }
+
     void SetDistribution(ContentDistribution distribution) noexcept
     {
       _distribution = ToUnderlying(distribution);
     }
+
     void SetOverflow(OverflowAlignment overflow) noexcept
     {
       _overflow = ToUnderlying(overflow);
@@ -62,23 +64,29 @@ namespace krys::boo
     {
       return static_cast<ContentPosition>(_position);
     }
+
     KRYS_NODISCARD ContentDistribution Distribution() const noexcept
     {
       return static_cast<ContentDistribution>(_distribution);
     }
+
     KRYS_NODISCARD OverflowAlignment Overflow() const noexcept
     {
       return static_cast<OverflowAlignment>(_overflow);
     }
+
     KRYS_NODISCARD bool IsNormal() const noexcept
     {
       return ContentPosition::Normal == static_cast<ContentPosition>(_position)
              && ContentDistribution::Default == static_cast<ContentDistribution>(_distribution);
     }
+
     KRYS_NODISCARD bool IsStartward(Maybe<TextDirection> leftRightAxisDirection = null,
                                     bool isFlexReverse = false) const noexcept;
+
     KRYS_NODISCARD bool IsEndward(Maybe<TextDirection> leftRightAxisDirection = null,
                                   bool isFlexReverse = false) const noexcept;
+
     // leftRightAxisDirection is only needed for justify-content (invalid for align-content).
     // Pass null if neither the inline axis nor the physical left-right axis matches the justify-content axis
     // (e.g. in flexbox).

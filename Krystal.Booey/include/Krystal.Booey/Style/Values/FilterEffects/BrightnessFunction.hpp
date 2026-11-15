@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::Brightness ToCSSBrightness(const BasicComponentTransferFilterOperation &,
                                                    const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::Brightness &,
                                                               const BuilderState &) noexcept;
   }

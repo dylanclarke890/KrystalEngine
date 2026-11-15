@@ -37,6 +37,7 @@ namespace krys::boo
     KRYS_NODISCARD static bool ResourceContainsCycles(LegacyRenderSVGResourceContainer &,
                                                       SVGResources::ResourceSet &activeResources,
                                                       SVGResources::ResourceSet &acyclicResources) noexcept;
+
     static void BreakCycle(LegacyRenderSVGResourceContainer &, SVGResources &) noexcept;
   };
 }

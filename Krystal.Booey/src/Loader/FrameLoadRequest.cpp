@@ -35,10 +35,15 @@
 namespace krys::boo
 {
   FrameLoadRequestBase::FrameLoadRequestBase() noexcept = default;
+
   FrameLoadRequestBase::FrameLoadRequestBase(const FrameLoadRequestBase &) noexcept = default;
+
   FrameLoadRequestBase &FrameLoadRequestBase::operator=(const FrameLoadRequestBase &) noexcept = default;
+
   FrameLoadRequestBase::FrameLoadRequestBase(FrameLoadRequestBase &&) noexcept = default;
+
   FrameLoadRequestBase &FrameLoadRequestBase::operator=(FrameLoadRequestBase &&) noexcept = default;
+
   FrameLoadRequestBase::~FrameLoadRequestBase() noexcept = default;
 
   void FrameLoadRequestBase::SetSourceElement(dom::Element *sourceElement) noexcept
@@ -56,8 +61,12 @@ namespace krys::boo
   }
 
   FrameLoadRequest::~FrameLoadRequest() noexcept = default;
+
   FrameLoadRequest::FrameLoadRequest(const FrameLoadRequest &) noexcept = default;
+
   FrameLoadRequest &FrameLoadRequest::operator=(const FrameLoadRequest &) noexcept = default;
+
   FrameLoadRequest::FrameLoadRequest(FrameLoadRequest &&) noexcept = default;
+
   FrameLoadRequest &FrameLoadRequest::operator=(FrameLoadRequest &&) noexcept = default;
 }

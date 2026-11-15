@@ -48,7 +48,7 @@ namespace krys::boo::style
     {
       None,
       All,
-      Ident
+      Ident,
     };
 
     NameScope(css::keywords::None) noexcept

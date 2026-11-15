@@ -235,7 +235,7 @@ namespace krys::boo::style
     Ref<Resolver> sharedResolver = _resolver;
     sharedShadowTreeResolvers.emplace(krys::move(key), krys::move(sharedResolver));
 
-    static constexpr auto maximimumSharedResolverCount = 256;
+    constexpr static auto maximimumSharedResolverCount = 256;
     if (sharedShadowTreeResolvers.size() > maximimumSharedResolverCount)
     {
       sharedShadowTreeResolvers.erase(sharedShadowTreeResolvers.begin());

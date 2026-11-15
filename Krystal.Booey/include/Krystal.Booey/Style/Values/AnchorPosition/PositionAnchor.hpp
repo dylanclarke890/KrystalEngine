@@ -39,10 +39,12 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsName() const noexcept
     {
       return IsValue();
     }
+
     KRYS_NODISCARD Maybe<AnchorName> TryName() const noexcept
     {
       return TryValue();

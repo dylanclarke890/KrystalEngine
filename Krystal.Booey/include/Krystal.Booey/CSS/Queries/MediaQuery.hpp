@@ -31,7 +31,7 @@ namespace krys::boo::css::mq
   enum class Prefix : bool
   {
     Not,
-    Only
+    Only,
   };
 
   /// @brief The `all` media type.

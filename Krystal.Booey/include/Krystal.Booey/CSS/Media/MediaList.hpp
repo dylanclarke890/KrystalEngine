@@ -50,12 +50,14 @@ namespace krys::boo::css
     Maybe<mq::MediaQueryList> _detachedMediaQueries;
 
     explicit MediaList(CSSStyleSheet *parentSheet) noexcept;
+
     explicit MediaList(CSSRule *parentRule) noexcept;
 
   public:
     ~MediaList() noexcept;
 
     KRYS_NODISCARD static Ref<MediaList> Create(CSSStyleSheet *parentSheet) noexcept;
+
     KRYS_NODISCARD static Ref<MediaList> Create(CSSRule *parentRule) noexcept;
 
     KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept
@@ -64,14 +66,19 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD uint32 Length() const noexcept;
+
     KRYS_NODISCARD CSSOMString Item(uint32 index) const noexcept;
+
     dom::ExceptionOr<void> DeleteMedium(const CSSOMString &oldMedium) noexcept;
+
     void AppendMedium(const CSSOMString &newMedium) noexcept;
 
     KRYS_NODISCARD CSSOMString MediaText() const noexcept;
+
     void SetMediaText(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSRule *ParentRule() const noexcept;
+
     KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept;
 
     /// @brief Keeps a copy of the media queries, so the list still works once its owner has gone.

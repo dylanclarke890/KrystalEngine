@@ -158,6 +158,7 @@ namespace krys::boo
       BITMAPARRAY = 0x4241,  // "BA"
       */
     };
+
     return (fileType == BMAP) || SetFailed();
   }
 }

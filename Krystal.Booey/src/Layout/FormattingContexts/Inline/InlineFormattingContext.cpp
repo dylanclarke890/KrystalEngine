@@ -55,7 +55,7 @@ namespace krys::boo::layout
         return 2;
       }
       // Let's try not to overwhelm the list's initial reserve.
-      static constexpr size_t MaximumEstimatedDisplayBoxSize = 1'000;
+      constexpr static size_t MaximumEstimatedDisplayBoxSize = 1'000;
       // This value represents a simple average derived from typical web page content.
       return std::min<size_t>(MaximumEstimatedDisplayBoxSize, static_cast<size_t>(inlineItemSize * 0.6));
     }

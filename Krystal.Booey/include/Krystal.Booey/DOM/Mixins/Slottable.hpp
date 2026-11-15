@@ -5,8 +5,8 @@
 
 namespace krys::boo::dom
 {
-  class Text;
   class Element;
+  class Text;
 }
 
 namespace krys::boo::html

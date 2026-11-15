@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     AncestorSubgridIterator() noexcept = default;
+
     AncestorSubgridIterator(const RenderGrid *firstAncestorSubgrid,
                             style::GridTrackSizingDirection direction) noexcept;
 
@@ -53,7 +54,9 @@ namespace krys::boo
     KRYS_NODISCARD bool operator==(const AncestorSubgridIterator &other) const noexcept;
 
     AncestorSubgridIterator &operator++() noexcept;
+
     KRYS_NODISCARD AncestorSubgridIterator begin() const noexcept;
+
     KRYS_NODISCARD AncestorSubgridIterator end() const noexcept;
 
   private:

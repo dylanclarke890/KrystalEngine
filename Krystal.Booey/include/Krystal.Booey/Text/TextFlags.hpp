@@ -50,7 +50,7 @@ namespace krys::boo
     Auto,
     OptimizeSpeed,
     OptimizeLegibility,
-    GeometricPrecision
+    GeometricPrecision,
   };
 
   enum class FontSmoothingMode : uint8
@@ -58,19 +58,19 @@ namespace krys::boo
     Auto,
     None,
     Antialiased,
-    SubpixelAntialiased
+    SubpixelAntialiased,
   };
 
   enum class FontOrientation : bool
   {
     Horizontal,
-    Vertical
+    Vertical,
   };
 
   enum class NonCJKGlyphOrientation : bool
   {
     Mixed,
-    Upright
+    Upright,
   };
 
   struct ExpansionBehavior
@@ -79,7 +79,7 @@ namespace krys::boo
     {
       Forbid,
       Allow,
-      Force
+      Force,
     };
 
     constexpr static uint32 BitsOfKind = 2;
@@ -125,21 +125,21 @@ namespace krys::boo
   enum class FontSynthesisLonghandValue : bool
   {
     None,
-    Auto
+    Auto,
   };
 
   enum class FontVariantLigatures : uint8
   {
     Normal,
     Yes,
-    No
+    No,
   };
 
   enum class FontVariantPosition : uint8
   {
     Normal,
     Subscript,
-    Superscript
+    Superscript,
   };
 
   enum class FontVariantCaps : uint8
@@ -150,40 +150,40 @@ namespace krys::boo
     Petite,
     AllPetite,
     Unicase,
-    Titling
+    Titling,
   };
 
   enum class FontVariantNumericFigure : uint8
   {
     Normal,
     LiningNumbers,
-    OldStyleNumbers
+    OldStyleNumbers,
   };
 
   enum class FontVariantNumericSpacing : uint8
   {
     Normal,
     ProportionalNumbers,
-    TabularNumbers
+    TabularNumbers,
   };
 
   enum class FontVariantNumericFraction : uint8
   {
     Normal,
     DiagonalFractions,
-    StackedFractions
+    StackedFractions,
   };
 
   enum class FontVariantNumericOrdinal : bool
   {
     Normal,
-    Yes
+    Yes,
   };
 
   enum class FontVariantNumericSlashedZero : bool
   {
     Normal,
-    Yes
+    Yes,
   };
 
   struct FontVariantAlternatesValues
@@ -278,20 +278,20 @@ namespace krys::boo
     Jis90,
     Jis04,
     Simplified,
-    Traditional
+    Traditional,
   };
 
   enum class FontVariantEastAsianWidth : uint8
   {
     Normal,
     Full,
-    Proportional
+    Proportional,
   };
 
   enum class FontVariantEastAsianRuby : uint8
   {
     Normal,
-    Yes
+    Yes,
   };
 
   enum class FontVariantEmoji : uint8
@@ -377,7 +377,7 @@ namespace krys::boo
     HalfWidth,
     ThirdWidth,
     QuarterWidth,
-    LastFontWidthVariant = QuarterWidth
+    LastFontWidthVariant = QuarterWidth,
   };
 
   constexpr uint32 FontWidthVariantWidth = 2;
@@ -389,26 +389,26 @@ namespace krys::boo
   {
     Auto,
     Normal,
-    NoShift
+    NoShift,
   };
 
   enum class FontOpticalSizing : bool
   {
     None,
-    Auto
+    Auto,
   };
 
   // https://www.microsoft.com/typography/otspec/fvar.htm#VAT
   enum class FontStyleAxis : uint8
   {
     slnt,
-    ital
+    ital,
   };
 
   enum class AllowUserInstalledFonts : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   using FeaturesMap = HashMap<FontTag, int, FourCharacterTagHash>;

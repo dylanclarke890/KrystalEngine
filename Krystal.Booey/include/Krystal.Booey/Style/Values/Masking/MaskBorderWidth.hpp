@@ -43,20 +43,25 @@ namespace krys::boo::style
     MaskBorderWidthValue(css::keywords::Auto keyword) noexcept : _value {keyword}
     {
     }
+
     MaskBorderWidthValue(LengthPercentage &&length) noexcept : _value {krys::move(length)}
     {
     }
+
     MaskBorderWidthValue(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept
         : _value {LengthPercentage {literal}}
     {
     }
+
     MaskBorderWidthValue(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept
         : _value {LengthPercentage {literal}}
     {
     }
+
     MaskBorderWidthValue(Number number) noexcept : _value {number}
     {
     }
+
     MaskBorderWidthValue(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept
         : _value {Number {literal}}
     {
@@ -66,10 +71,12 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<css::keywords::Auto>(_value);
     }
+
     KRYS_NODISCARD bool IsLengthPercentage() const noexcept
     {
       return krys::HoldsAlternative<LengthPercentage>(_value);
     }
+
     KRYS_NODISCARD bool IsNumber() const noexcept
     {
       return krys::HoldsAlternative<Number>(_value);
@@ -133,35 +140,44 @@ namespace krys::boo::style
     MaskBorderWidth(Edges values) noexcept : Values {krys::move(values)}
     {
     }
+
     MaskBorderWidth(Value top, Value right, Value bottom, Value left) noexcept
         : Values {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)}
     {
     }
+
     MaskBorderWidth(Value value) noexcept : Values {krys::move(value)}
     {
     }
+
     MaskBorderWidth(css::keywords::Auto keyword) noexcept : Values {keyword}
     {
     }
+
     MaskBorderWidth(Value::LengthPercentage &&lengthPercentage) noexcept
         : Values {krys::move(lengthPercentage)}
     {
     }
+
     MaskBorderWidth(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept : Values {literal}
     {
     }
+
     MaskBorderWidth(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept : Values {literal}
     {
     }
+
     MaskBorderWidth(Value::Number number) noexcept : Values {number}
     {
     }
+
     MaskBorderWidth(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept : Values {literal}
     {
     }
 
     KRYS_NODISCARD bool operator==(const MaskBorderWidth &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(MaskBorderWidth, Values);
 
   // MARK: - Conversion
@@ -171,6 +187,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD MaskBorderWidth operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<MaskBorderWidth>
   {
@@ -184,8 +201,10 @@ namespace krys::boo::style
   struct Blending<MaskBorderWidthValue>
   {
     KRYS_NODISCARD bool CanBlend(const MaskBorderWidthValue &, const MaskBorderWidthValue &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderWidthValue &,
                                                                       const MaskBorderWidthValue &) noexcept;
+
     KRYS_NODISCARD MaskBorderWidthValue Blend(const MaskBorderWidthValue &, const MaskBorderWidthValue &,
                                               const BlendingContext &) noexcept;
   };
@@ -194,8 +213,10 @@ namespace krys::boo::style
   struct Blending<MaskBorderWidth>
   {
     KRYS_NODISCARD bool CanBlend(const MaskBorderWidth &, const MaskBorderWidth &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderWidth &,
                                                                       const MaskBorderWidth &) noexcept;
+
     KRYS_NODISCARD MaskBorderWidth Blend(const MaskBorderWidth &, const MaskBorderWidth &,
                                          const BlendingContext &) noexcept;
   };

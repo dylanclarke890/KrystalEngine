@@ -44,9 +44,11 @@ namespace krys::boo::style
     Rotate(css::keywords::None) noexcept : _value {nullptr}
     {
     }
+
     Rotate(Function &&value) noexcept : _value {krys::move(value.Value)}
     {
     }
+
     Rotate(Ref<const RotateTransformFunction> &&value) noexcept : _value {krys::move(value)}
     {
     }
@@ -55,10 +57,12 @@ namespace krys::boo::style
     {
       return _value && !_value->IsIdentity();
     }
+
     KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept
     {
       return !_value || _value->IsRepresentableIn2D();
     }
+
     KRYS_NODISCARD bool Is3DOperation() const noexcept
     {
       return _value && _value->Is3DOperation();
@@ -70,6 +74,7 @@ namespace krys::boo::style
     {
       return !_value;
     }
+
     KRYS_NODISCARD bool IsFunction() const noexcept
     {
       return !!_value;
@@ -77,6 +82,7 @@ namespace krys::boo::style
 
     template <typename>
     KRYS_NODISCARD bool HoldsAlternative() const noexcept;
+
     template <typename... F>
     decltype(auto) SwitchOn(F &&...) const;
 

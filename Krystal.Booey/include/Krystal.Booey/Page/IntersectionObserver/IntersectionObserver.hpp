@@ -72,7 +72,7 @@ namespace krys::boo
   enum class IncludeObscuredInsets : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Reports changes in how much of the elements it observes intersect its root (an element, a
@@ -97,7 +97,7 @@ namespace krys::boo
     enum class NeedNotify : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -117,7 +117,7 @@ namespace krys::boo
     enum class ApplyRootMargin : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     WeakPtr<dom::Document> _document;
@@ -155,37 +155,47 @@ namespace krys::boo
     {
       return _root.get();
     }
+
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-rootmargin
     KRYS_NODISCARD dom::DOMString RootMargin() const noexcept;
+
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-scrollmargin
     KRYS_NODISCARD dom::DOMString ScrollMargin() const noexcept;
+
     KRYS_NODISCARD const IntersectionObserverMarginBox &RootMarginBox() const noexcept
     {
       return _rootMargin;
     }
+
     KRYS_NODISCARD const IntersectionObserverMarginBox &ScrollMarginBox() const noexcept
     {
       return _scrollMargin;
     }
+
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-thresholds
     KRYS_NODISCARD const List<double> &Thresholds() const noexcept
     {
       return _thresholds;
     }
+
     KRYS_NODISCARD const List<WeakPtr<dom::Element>> &ObservationTargets() const noexcept
     {
       return _observationTargets;
     }
+
     KRYS_NODISCARD bool HasObservationTargets() const noexcept
     {
       return !_observationTargets.empty();
     }
+
     KRYS_NODISCARD bool IsObserving(const dom::Element &element) const noexcept;
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-observe
     void Observe(dom::Element &target) noexcept;
+
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-unobserve
     void Unobserve(dom::Element &target) noexcept;
+
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-disconnect
     void Disconnect() noexcept;
 
@@ -194,6 +204,7 @@ namespace krys::boo
 
     /// @brief An observed element is being destroyed.
     void TargetDestroyed(dom::Element &target) noexcept;
+
     /// @brief The root is being destroyed.
     void RootDestroyed() noexcept;
 
@@ -205,12 +216,14 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<double> NowTimestamp() const noexcept;
 
     void AppendQueuedEntry(Ref<IntersectionObserverEntry> &&entry) noexcept;
+
     /// @brief Calls the callback with the queued entries.
     /// @see https://w3c.github.io/IntersectionObserver/#notify-intersection-observers-algo
     void Notify() noexcept;
 
   private:
     bool RemoveTargetRegistration(dom::Element &target) noexcept;
+
     void RemoveAllTargets() noexcept;
 
     KRYS_NODISCARD IntersectionObservationState ComputeIntersectionState(

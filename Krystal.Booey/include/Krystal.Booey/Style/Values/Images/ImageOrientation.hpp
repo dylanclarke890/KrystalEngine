@@ -48,6 +48,5 @@ namespace krys::boo
     {
       KRYS_NODISCARD boo::ImageOrientation operator()(ImageOrientation) noexcept;
     };
-
   }
 }

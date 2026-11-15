@@ -39,13 +39,16 @@ namespace krys::boo
     uint8 Style : 4 {static_cast<uint8>(BorderStyle::None)};
 
     KRYS_NODISCARD bool IsVisible() const noexcept;
+
     KRYS_NODISCARD bool NonZero() const noexcept;
+
     KRYS_NODISCARD bool IsTransparent() const noexcept;
 
     KRYS_NODISCARD bool HasHiddenStyle() const noexcept
     {
       return static_cast<BorderStyle>(Style) == BorderStyle::Hidden;
     }
+
     KRYS_NODISCARD bool HasVisibleStyle() const noexcept
     {
       return static_cast<BorderStyle>(Style) > BorderStyle::Hidden;

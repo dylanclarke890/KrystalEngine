@@ -45,6 +45,7 @@ namespace krys::boo::css
     virtual ~CSSRuleList() noexcept;
 
     KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;
+
     KRYS_NODISCARD virtual CSSRule *Item(uint32 index) const noexcept = 0;
 
     KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept

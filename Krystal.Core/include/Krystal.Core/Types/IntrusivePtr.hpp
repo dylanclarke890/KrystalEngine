@@ -291,6 +291,7 @@ namespace krys
   {
     return lhs.get() == rhs.get();
   }
+
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   constexpr bool operator!=(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
                             std::nullptr_t) noexcept
@@ -465,6 +466,7 @@ namespace std
   {
     using argument_type = krys::IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>;
     using result_type = size_t;
+
     constexpr result_type operator()(const argument_type &ptr) const noexcept
     {
       return krys::Hash::Combine(ptr.get());

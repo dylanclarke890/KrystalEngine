@@ -104,7 +104,7 @@ namespace krys::boo::style
     enum class UpdateType : uint8
     {
       ActiveSet,
-      ContentsOrInterpretation
+      ContentsOrInterpretation,
     };
 
     struct ActiveStyleSheetCollection
@@ -117,7 +117,7 @@ namespace krys::boo::style
     {
       Reconstruct,
       Reset,
-      Additive
+      Additive,
     };
 
     struct StyleSheetChange
@@ -196,6 +196,7 @@ namespace krys::boo::style
 
       KRYS_NODISCARD bool operator==(const AnchorPosition &) const noexcept = default;
     };
+
     // Keyed by address, like the query containers' dimensions.
     HashMap<const RenderBoxModelObject *, Pair<WeakPtr<const RenderObject>, AnchorPosition>>
       _anchorPositionsOnLastUpdate;
@@ -211,7 +212,9 @@ namespace krys::boo::style
     };
 
     explicit Scope(dom::Document &document) noexcept;
+
     explicit Scope(dom::ShadowRoot &shadowRoot) noexcept;
+
     ~Scope() noexcept;
 
     KRYS_NODISCARD const List<RefPtr<css::CSSStyleSheet>> &ActiveStyleSheets() const noexcept
@@ -222,19 +225,29 @@ namespace krys::boo::style
     KRYS_NODISCARD const List<RefPtr<css::StyleSheet>> &StyleSheetsForStyleSheetList() noexcept;
 
     void AddStyleSheetCandidateNode(dom::Node &node, bool createdByParser) noexcept;
+
     void RemoveStyleSheetCandidateNode(dom::Node &node) noexcept;
 
     void SetPreferredStylesheetSetName(const dom::DOMString &name) noexcept;
 
     void AddPendingSheet(const dom::Element &element) noexcept;
+
     void RemovePendingSheet(const dom::Element &element) noexcept;
+
     void AddPendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept;
+
     void RemovePendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept;
+
     KRYS_NODISCARD bool HasPendingSheets() const noexcept;
+
     KRYS_NODISCARD bool HasPendingSheetsBeforeBody() const noexcept;
+
     KRYS_NODISCARD bool HasPendingSheetsInBody() const noexcept;
+
     KRYS_NODISCARD bool HasPendingSheet(const dom::Element &element) const noexcept;
+
     KRYS_NODISCARD bool HasPendingSheetInBody(const dom::Element &element) const noexcept;
+
     KRYS_NODISCARD bool
       HasPendingSheet(const dom::ProcessingInstruction &processingInstruction) const noexcept;
 
@@ -242,8 +255,10 @@ namespace krys::boo::style
 
     /// @brief Called when some stylesheet becomes newly enabled or disabled.
     void DidChangeActiveStyleSheetCandidates() noexcept;
+
     /// @brief Called when contents of a stylesheet is mutated.
     void DidChangeStyleSheetContents() noexcept;
+
     /// @brief Called when the environment where we interpret the stylesheets changes (for example switching
     /// to printing). The change is assumed to potentially affect all author and user stylesheets including
     /// shadow roots.
@@ -252,7 +267,9 @@ namespace krys::boo::style
     /// @brief Re-evaluates the media queries of the style sheets after the viewport changed, and invalidates
     /// the styles whose rules started or stopped applying.
     void EvaluateMediaQueriesForViewportChange() noexcept;
+
     void EvaluateMediaQueriesForAccessibilitySettingsChange() noexcept;
+
     void EvaluateMediaQueriesForAppearanceChange() noexcept;
 
     /// @brief Invalidates the styles that use viewport units, after the viewport changed size.
@@ -283,6 +300,7 @@ namespace krys::boo::style
 
     /// @brief The style resolver, if one has been created.
     KRYS_NODISCARD Resolver *ResolverIfExists() noexcept;
+
     KRYS_NODISCARD const Resolver *ResolverIfExists() const noexcept;
 
     void ClearResolver() noexcept;
@@ -345,10 +363,13 @@ namespace krys::boo::style
 
     /// @brief The scope of the shadow root `node` is in, or else of its document.
     KRYS_NODISCARD static Scope &ForNode(dom::Node &node) noexcept;
+
     KRYS_NODISCARD static const Scope &ForNode(const dom::Node &node) noexcept;
+
     /// @brief The scope @p ordinal names from @p element (its own, its shadow root's, a host's or a slot's),
     /// if any.
     KRYS_NODISCARD static Scope *ForOrdinal(dom::Element &element, ScopeOrdinal ordinal) noexcept;
+
     KRYS_NODISCARD static const Scope *ForOrdinal(const dom::Element &element, ScopeOrdinal ordinal) noexcept;
 
     /// @brief Dereferences the tree-scoped name @p reference: calls @p function with the scope it's from,
@@ -368,45 +389,63 @@ namespace krys::boo::style
     {
       return _anchorPositionedToAnchorMap;
     }
+
     KRYS_NODISCARD const style::AnchorPositionedToAnchorMap &AnchorPositionedToAnchorMap() const noexcept
     {
       return _anchorPositionedToAnchorMap;
     }
+
     void UpdateAnchorPositioningStateAfterStyleResolution() noexcept;
 
     /// @brief The index of the position option @p styleable last chose, from the last rendering update.
     /// @see https://drafts.csswg.org/css-anchor-position-1/#last-successful-position-option
     KRYS_NODISCARD Maybe<size_t>
       LastSuccessfulPositionOptionIndexFor(const Styleable &styleable) const noexcept;
+
     void SetLastSuccessfulPositionOptionIndexMap(
       HashMap<AnchorPositionedKey, size_t, AnchorPositionedKeyHash> &&map) noexcept;
+
     void ForgetLastSuccessfulPositionOptionIndex(const Styleable &styleable) noexcept;
 
   private:
     bool InvalidateForContainerDependencies(LayoutDependencyUpdateContext &context) noexcept;
+
     bool InvalidateForAnchorDependencies(LayoutDependencyUpdateContext &context) noexcept;
+
     bool InvalidateForPositionTryFallbacks(LayoutDependencyUpdateContext &context) noexcept;
 
     KRYS_NODISCARD Scope &DocumentScope() noexcept;
+
     KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScope() noexcept;
 
     void DidRemovePendingStylesheet() noexcept;
 
     void UpdateActiveStyleSheets(UpdateType updateType) noexcept;
+
     KRYS_NODISCARD StyleSheetChange
       AnalyzeStyleSheetChange(const List<RefPtr<css::CSSStyleSheet>> &newStylesheets) noexcept;
+
     void InvalidateStyleAfterStyleSheetChange(const StyleSheetChange &styleSheetChange) noexcept;
+
     void UpdateResolver(Span<const RefPtr<css::CSSStyleSheet>> activeStyleSheets,
                         ResolverUpdateType updateType) noexcept;
+
     void CreateDocumentResolver() noexcept;
+
     void CreateOrFindSharedShadowTreeResolver() noexcept;
+
     void UnshareShadowTreeResolverBeforeMutation() noexcept;
+
     KRYS_NODISCARD ResolverSharingKey MakeResolverSharingKey() noexcept;
+
     KRYS_NODISCARD bool IsForUserAgentShadowTree() const noexcept;
+
     void ScheduleUpdate(UpdateType update) noexcept;
 
     void FlushPendingSelfUpdate() noexcept;
+
     void FlushPendingDescendantUpdates() noexcept;
+
     void ClearPendingUpdate() noexcept;
 
     KRYS_NODISCARD ActiveStyleSheetCollection CollectActiveStyleSheets() noexcept;

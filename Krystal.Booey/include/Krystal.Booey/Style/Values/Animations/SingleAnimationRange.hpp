@@ -39,7 +39,7 @@ namespace krys::boo::style
   enum class SingleAnimationRangeType : bool
   {
     Start,
-    End
+    End,
   };
 
   struct SingleAnimationRangeLength : LengthWrapperBase<LengthPercentage<>>
@@ -47,6 +47,7 @@ namespace krys::boo::style
     using Base::Base;
 
     KRYS_NODISCARD static SingleAnimationRangeLength DefaultValue(SingleAnimationRangeType) noexcept;
+
     KRYS_NODISCARD bool IsDefault(SingleAnimationRangeType) const noexcept;
   };
 
@@ -61,30 +62,37 @@ namespace krys::boo::style
         : SingleAnimationRangeEdge {Name::Omitted, krys::move(offset)}
     {
     }
+
     SingleAnimationRangeEdge(css::keywords::Normal) noexcept
         : SingleAnimationRangeEdge {Name::Normal, Maybe<Offset> {}}
     {
     }
+
     SingleAnimationRangeEdge(css::keywords::Cover, Maybe<Offset> &&offset = std::nullopt) noexcept
         : SingleAnimationRangeEdge {Name::Cover, krys::move(offset)}
     {
     }
+
     SingleAnimationRangeEdge(css::keywords::Contain, Maybe<Offset> &&offset = std::nullopt) noexcept
         : SingleAnimationRangeEdge {Name::Contain, krys::move(offset)}
     {
     }
+
     SingleAnimationRangeEdge(css::keywords::Entry, Maybe<Offset> &&offset = std::nullopt) noexcept
         : SingleAnimationRangeEdge {Name::Entry, krys::move(offset)}
     {
     }
+
     SingleAnimationRangeEdge(css::keywords::Exit, Maybe<Offset> &&offset = std::nullopt) noexcept
         : SingleAnimationRangeEdge {Name::Exit, krys::move(offset)}
     {
     }
+
     SingleAnimationRangeEdge(css::keywords::EntryCrossing, Maybe<Offset> &&offset = std::nullopt) noexcept
         : SingleAnimationRangeEdge {Name::EntryCrossing, krys::move(offset)}
     {
     }
+
     SingleAnimationRangeEdge(css::keywords::ExitCrossing, Maybe<Offset> &&offset = std::nullopt) noexcept
         : SingleAnimationRangeEdge {Name::ExitCrossing, krys::move(offset)}
     {
@@ -127,6 +135,7 @@ namespace krys::boo::style
     {
       return _name;
     }
+
     KRYS_NODISCARD const Offset &GetOffset() const noexcept
     {
       return _offset;
@@ -175,6 +184,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const SingleAnimationRange &) const noexcept = default;
 
     KRYS_NODISCARD static SingleAnimationRange DefaultForScrollTimeline() noexcept;
+
     KRYS_NODISCARD static SingleAnimationRange DefaultForViewTimeline() noexcept;
 
     KRYS_NODISCARD bool IsDefault() const noexcept
@@ -190,6 +200,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD SingleAnimationRangeStart operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueConversion<SingleAnimationRangeEnd>
   {
@@ -202,6 +213,7 @@ namespace krys::boo::style
     KRYS_NODISCARD Maybe<SingleAnimationRangeStart> operator()(const RefPtr<dom::Element> &,
                                                                const css::Value &) noexcept;
   };
+
   template <>
   struct DeprecatedCSSValueConversion<SingleAnimationRangeEnd>
   {

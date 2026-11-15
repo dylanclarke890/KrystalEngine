@@ -51,32 +51,36 @@ namespace krys::boo
       LinearFunction,
       CubicBezierFunction,
       StepsFunction,
-      SpringFunction
+      SpringFunction,
     };
 
     enum class Before : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     virtual ~TimingFunction() noexcept = default;
 
     KRYS_NODISCARD virtual Ref<TimingFunction> Clone() const noexcept = 0;
+
     KRYS_NODISCARD virtual Type GetType() const noexcept = 0;
 
     KRYS_NODISCARD bool IsLinearTimingFunction() const noexcept
     {
       return GetType() == Type::LinearFunction;
     }
+
     KRYS_NODISCARD bool IsCubicBezierTimingFunction() const noexcept
     {
       return GetType() == Type::CubicBezierFunction;
     }
+
     KRYS_NODISCARD bool IsStepsTimingFunction() const noexcept
     {
       return GetType() == Type::StepsFunction;
     }
+
     KRYS_NODISCARD bool IsSpringTimingFunction() const noexcept
     {
       return GetType() == Type::SpringFunction;
@@ -86,10 +90,12 @@ namespace krys::boo
     {
       return Equals(other);
     }
+
     KRYS_NODISCARD virtual bool Equals(const TimingFunction &) const noexcept = 0;
 
     KRYS_NODISCARD double TransformProgress(double progress, double duration,
                                             Before = Before::No) const noexcept;
+
     KRYS_NODISCARD utf8_string CssText() const noexcept;
   };
 
@@ -141,6 +147,7 @@ namespace krys::boo
     {
       return Type::LinearFunction;
     }
+
     KRYS_NODISCARD Ref<TimingFunction> Clone() const noexcept final
     {
       return AdoptRef(*new LinearTimingFunction(_points));
@@ -156,7 +163,7 @@ namespace krys::boo
       EaseIn,
       EaseOut,
       EaseInOut,
-      Custom
+      Custom,
     };
 
   private:
@@ -192,14 +199,17 @@ namespace krys::boo
     {
       return _x1;
     }
+
     KRYS_NODISCARD double Y1() const noexcept
     {
       return _y1;
     }
+
     KRYS_NODISCARD double X2() const noexcept
     {
       return _x2;
     }
+
     KRYS_NODISCARD double Y2() const noexcept
     {
       return _y2;
@@ -209,6 +219,7 @@ namespace krys::boo
     {
       return _timingFunctionPreset;
     }
+
     void SetTimingFunctionPreset(TimingFunctionPreset preset) noexcept
     {
       _timingFunctionPreset = preset;
@@ -242,6 +253,7 @@ namespace krys::boo
     {
       return Type::CubicBezierFunction;
     }
+
     KRYS_NODISCARD Ref<TimingFunction> Clone() const noexcept final
     {
       return AdoptRef(*new CubicBezierTimingFunction(_timingFunctionPreset, _x1, _y1, _x2, _y2));
@@ -271,6 +283,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StepsTimingFunction(steps, stepPosition));
     }
+
     KRYS_NODISCARD static Ref<StepsTimingFunction> Create() noexcept
     {
       return AdoptRef(*new StepsTimingFunction(1, StepPosition::End));
@@ -298,6 +311,7 @@ namespace krys::boo
     {
       return Type::StepsFunction;
     }
+
     KRYS_NODISCARD Ref<TimingFunction> Clone() const noexcept final
     {
       return AdoptRef(*new StepsTimingFunction(_steps, _stepPosition));
@@ -325,14 +339,17 @@ namespace krys::boo
     {
       return _mass;
     }
+
     KRYS_NODISCARD double Stiffness() const noexcept
     {
       return _stiffness;
     }
+
     KRYS_NODISCARD double Damping() const noexcept
     {
       return _damping;
     }
+
     KRYS_NODISCARD double InitialVelocity() const noexcept
     {
       return _initialVelocity;
@@ -349,6 +366,7 @@ namespace krys::boo
     {
       return Type::SpringFunction;
     }
+
     KRYS_NODISCARD Ref<TimingFunction> Clone() const noexcept final
     {
       return AdoptRef(*new SpringTimingFunction(_mass, _stiffness, _damping, _initialVelocity));

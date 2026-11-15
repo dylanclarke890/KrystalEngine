@@ -28,11 +28,13 @@ namespace krys::boo::dom
     {
       return AdoptRef(*new Uint8ClampedArray(List<uint8>(length, uint8 {0})));
     }
+
     /// @brief A copy of @p bytes.
     KRYS_NODISCARD static Ref<Uint8ClampedArray> Create(Span<const uint8> bytes) noexcept
     {
       return AdoptRef(*new Uint8ClampedArray(List<uint8>(bytes.begin(), bytes.end())));
     }
+
     KRYS_NODISCARD static Ref<Uint8ClampedArray> Create(List<uint8> &&bytes) noexcept
     {
       return AdoptRef(*new Uint8ClampedArray(krys::move(bytes)));
@@ -42,6 +44,7 @@ namespace krys::boo::dom
     {
       return _bytes.size();
     }
+
     KRYS_NODISCARD size_t ByteLength() const noexcept
     {
       return _bytes.size();
@@ -51,6 +54,7 @@ namespace krys::boo::dom
     {
       return {_bytes.data(), _bytes.size()};
     }
+
     KRYS_NODISCARD Span<uint8> MutableSpan() noexcept
     {
       return {_bytes.data(), _bytes.size()};
@@ -61,6 +65,7 @@ namespace krys::boo::dom
       krys_assert(index < _bytes.size());
       return _bytes[index];
     }
+
     /// @brief Sets the byte at @p index to @p value, clamped and rounded.
     void Set(size_t index, double value) noexcept
     {

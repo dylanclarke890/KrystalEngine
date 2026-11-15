@@ -57,5 +57,6 @@ namespace krys::boo
   };
 
   TextStream &operator<<(TextStream &, RenderingPurpose) noexcept;
+
   TextStream &operator<<(TextStream &, RenderingMode) noexcept;
 }

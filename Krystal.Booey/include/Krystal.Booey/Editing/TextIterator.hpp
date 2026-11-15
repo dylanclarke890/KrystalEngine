@@ -52,14 +52,18 @@ namespace krys::boo
   // Character ranges based on characters from the text iterator. Characters are bytes of its UTF-8 text.
   KRYS_NODISCARD uint64 CharacterCount(const dom::SimpleRange &range,
                                        TextIteratorBehaviors behaviors = {}) noexcept;
+
   KRYS_NODISCARD CharacterRange GetCharacterRange(const dom::BoundaryPoint &start,
                                                   const dom::SimpleRange &range,
                                                   TextIteratorBehaviors behaviors = {}) noexcept;
+
   KRYS_NODISCARD CharacterRange GetCharacterRange(const dom::SimpleRange &scope,
                                                   const dom::SimpleRange &range,
                                                   TextIteratorBehaviors behaviors = {}) noexcept;
+
   KRYS_NODISCARD dom::BoundaryPoint ResolveCharacterLocation(const dom::SimpleRange &scope, uint64 location,
                                                              TextIteratorBehaviors behaviors = {}) noexcept;
+
   KRYS_NODISCARD dom::SimpleRange ResolveCharacterRange(const dom::SimpleRange &scope, CharacterRange range,
                                                         TextIteratorBehaviors behaviors = {}) noexcept;
 
@@ -70,12 +74,13 @@ namespace krys::boo
   enum class IgnoreCollapsedRanges : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   KRYS_NODISCARD bool
     HasAnyPlainText(const dom::SimpleRange &range, TextIteratorBehaviors behaviors = {},
                     IgnoreCollapsedRanges ignoreCollapsedRanges = IgnoreCollapsedRanges::No) noexcept;
+
   KRYS_NODISCARD utf8_string PlainTextReplacingNoBreakSpace(const dom::SimpleRange &range,
                                                             TextIteratorBehaviors behaviors = {},
                                                             bool isDisplayString = false) noexcept;
@@ -96,7 +101,9 @@ namespace krys::boo
 
   public:
     void Push(bool bit) noexcept;
+
     void Pop() noexcept;
+
     KRYS_NODISCARD bool Top() const noexcept;
   };
 
@@ -121,9 +128,13 @@ namespace krys::boo
     }
 
     void AppendToString(utf8_string &builder) const noexcept;
+
     void Reset() noexcept;
+
     void Set(utf8_string string) noexcept;
+
     void Set(utf8_string string, uint32 offset, uint32 length) noexcept;
+
     void Set(char32 singleCharacter) noexcept;
   };
 
@@ -186,12 +197,14 @@ namespace krys::boo
 
   public:
     explicit TextIterator(const dom::SimpleRange &range, TextIteratorBehaviors behaviors = {}) noexcept;
+
     ~TextIterator() noexcept;
 
     KRYS_NODISCARD bool AtEnd() const noexcept
     {
       return !_positionNode;
     }
+
     void Advance() noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
@@ -199,7 +212,9 @@ namespace krys::boo
       krys_debug_assert(!AtEnd());
       return _text;
     }
+
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
+
     KRYS_NODISCARD dom::Node *GetNode() const noexcept;
 
     KRYS_NODISCARD const TextIteratorCopyableText &CopyableText() const noexcept
@@ -207,6 +222,7 @@ namespace krys::boo
       krys_debug_assert(!AtEnd());
       return _copyableText;
     }
+
     void AppendTextToString(utf8_string &builder) const noexcept
     {
       CopyableText().AppendToString(builder);
@@ -216,20 +232,32 @@ namespace krys::boo
 
   private:
     void Init() noexcept;
+
     void ExitNode(dom::Node *exitedNode) noexcept;
+
     KRYS_NODISCARD bool ShouldRepresentNodeOffsetZero() noexcept;
+
     KRYS_NODISCARD bool ShouldEmitSpaceBeforeAndAfterNode(dom::Node &node) noexcept;
+
     void RepresentNodeOffsetZero() noexcept;
+
     KRYS_NODISCARD bool HandleTextNode() noexcept;
+
     KRYS_NODISCARD bool HandleReplacedElement() noexcept;
+
     KRYS_NODISCARD bool HandleNonTextNode() noexcept;
+
     void HandleTextRun() noexcept;
+
     void HandleTextNodeFirstLetter(RenderTextFragment &renderer) noexcept;
+
     void EmitCharacter(char32 character, RefPtr<dom::Node> &&characterNode,
                        RefPtr<dom::Node> &&offsetBaseNode, int32 textStartOffset,
                        int32 textEndOffset) noexcept;
+
     void EmitText(dom::Text &textNode, const RenderText &renderer, int32 textStartOffset,
                   int32 textEndOffset) noexcept;
+
     void RevertToRemainingTextRun() noexcept;
   };
 
@@ -279,6 +307,7 @@ namespace krys::boo
     {
       return !_positionNode;
     }
+
     void Advance() noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
@@ -286,7 +315,9 @@ namespace krys::boo
       krys_debug_assert(!AtEnd());
       return _text;
     }
+
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
+
     KRYS_NODISCARD dom::Node *GetNode() const noexcept
     {
       krys_debug_assert(!AtEnd());
@@ -295,12 +326,18 @@ namespace krys::boo
 
   private:
     void ExitNode() noexcept;
+
     KRYS_NODISCARD bool HandleTextNode() noexcept;
+
     KRYS_NODISCARD const RenderText *HandleFirstLetter(int32 &startOffset, int32 &offsetInNode) noexcept;
+
     KRYS_NODISCARD bool HandleReplacedElement() noexcept;
+
     KRYS_NODISCARD bool HandleNonTextNode() noexcept;
+
     void EmitCharacter(char32 character, RefPtr<dom::Node> &&node, int32 startOffset,
                        int32 endOffset) noexcept;
+
     KRYS_NODISCARD bool AdvanceRespectingRange(dom::Node *next) noexcept;
   };
 
@@ -321,18 +358,21 @@ namespace krys::boo
     {
       return _underlyingIterator.AtEnd();
     }
+
     void Advance(int32 numCharacters) noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
     {
       return _underlyingIterator.Text().substr(_runOffset);
     }
+
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
 
     KRYS_NODISCARD bool AtBreak() const noexcept
     {
       return _atBreak;
     }
+
     KRYS_NODISCARD uint32 CharacterOffset() const noexcept
     {
       return _offset;
@@ -354,12 +394,14 @@ namespace krys::boo
     {
       return _underlyingIterator.AtEnd();
     }
+
     void Advance(int32 numCharacters) noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
     {
       return _underlyingIterator.Text().substr(0, _underlyingIterator.Text().size() - _runOffset);
     }
+
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
   };
 
@@ -383,7 +425,9 @@ namespace krys::boo
     {
       return !_didLookAhead && _underlyingIterator.AtEnd();
     }
+
     void Advance() noexcept;
+
     KRYS_NODISCARD utf8_stringview Text() const noexcept;
   };
 

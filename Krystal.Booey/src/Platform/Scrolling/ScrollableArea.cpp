@@ -144,6 +144,7 @@ namespace krys::boo
   }
 
   ScrollableArea::ScrollableArea() noexcept = default;
+
   ScrollableArea::~ScrollableArea() noexcept = default;
 
   ScrollAnimator &ScrollableArea::GetScrollAnimator() noexcept

@@ -59,7 +59,7 @@ namespace krys::boo
   {
     // Animated images over a certain size are considered large enough that we'll
     // only hang on to one frame at a time.
-    static constexpr uint32 LargeAnimationCutoff = 30 * 1'024 * 1'024;
+    constexpr static uint32 LargeAnimationCutoff = 30 * 1'024 * 1'024;
 
     if (_source.DecodedSize() < LargeAnimationCutoff)
     {

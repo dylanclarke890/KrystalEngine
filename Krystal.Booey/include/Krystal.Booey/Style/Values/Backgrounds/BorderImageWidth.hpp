@@ -43,20 +43,25 @@ namespace krys::boo::style
     BorderImageWidthValue(css::keywords::Auto keyword) noexcept : _value {keyword}
     {
     }
+
     BorderImageWidthValue(LengthPercentage &&length) noexcept : _value {krys::move(length)}
     {
     }
+
     BorderImageWidthValue(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept
         : _value {LengthPercentage {literal}}
     {
     }
+
     BorderImageWidthValue(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept
         : _value {LengthPercentage {literal}}
     {
     }
+
     BorderImageWidthValue(Number number) noexcept : _value {number}
     {
     }
+
     BorderImageWidthValue(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept
         : _value {Number {literal}}
     {
@@ -66,10 +71,12 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<css::keywords::Auto>(_value);
     }
+
     KRYS_NODISCARD bool IsLengthPercentage() const noexcept
     {
       return krys::HoldsAlternative<LengthPercentage>(_value);
     }
+
     KRYS_NODISCARD bool IsNumber() const noexcept
     {
       return krys::HoldsAlternative<Number>(_value);
@@ -135,39 +142,47 @@ namespace krys::boo::style
         : Values {krys::move(values)}, LegacyWebkitBorderImage {legacyWebkitBorderImage}
     {
     }
+
     BorderImageWidth(Value top, Value right, Value bottom, Value left,
                      bool legacyWebkitBorderImage = false) noexcept
         : Values {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)},
           LegacyWebkitBorderImage {legacyWebkitBorderImage}
     {
     }
+
     BorderImageWidth(Value value, bool legacyWebkitBorderImage = false) noexcept
         : Values {krys::move(value)}, LegacyWebkitBorderImage {legacyWebkitBorderImage}
     {
     }
+
     BorderImageWidth(css::keywords::Auto keyword, bool legacyWebkitBorderImage = false) noexcept
         : Values {keyword}, LegacyWebkitBorderImage {legacyWebkitBorderImage}
     {
     }
+
     BorderImageWidth(Value::LengthPercentage &&lengthPercentage,
                      bool legacyWebkitBorderImage = false) noexcept
         : Values {krys::move(lengthPercentage)}, LegacyWebkitBorderImage {legacyWebkitBorderImage}
     {
     }
+
     BorderImageWidth(css::ValueLiteral<css::LengthUnit::Px> literal,
                      bool legacyWebkitBorderImage = false) noexcept
         : Values {literal}, LegacyWebkitBorderImage {legacyWebkitBorderImage}
     {
     }
+
     BorderImageWidth(css::ValueLiteral<css::PercentageUnit::Percentage> literal,
                      bool legacyWebkitBorderImage = false) noexcept
         : Values {literal}, LegacyWebkitBorderImage {legacyWebkitBorderImage}
     {
     }
+
     BorderImageWidth(Value::Number number, bool legacyWebkitBorderImage = false) noexcept
         : Values {number}, LegacyWebkitBorderImage {legacyWebkitBorderImage}
     {
     }
+
     BorderImageWidth(css::ValueLiteral<css::NumberUnit::Number> literal,
                      bool legacyWebkitBorderImage = false) noexcept
         : Values {literal}, LegacyWebkitBorderImage {legacyWebkitBorderImage}
@@ -181,6 +196,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const BorderImageWidth &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(BorderImageWidth, Values);
 
   // MARK: - Conversion
@@ -190,6 +206,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD BorderImageWidth operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<BorderImageWidth>
   {
@@ -203,8 +220,10 @@ namespace krys::boo::style
   struct Blending<BorderImageWidthValue>
   {
     KRYS_NODISCARD bool CanBlend(const BorderImageWidthValue &, const BorderImageWidthValue &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BorderImageWidthValue &,
                                                                       const BorderImageWidthValue &) noexcept;
+
     KRYS_NODISCARD BorderImageWidthValue Blend(const BorderImageWidthValue &, const BorderImageWidthValue &,
                                                const BlendingContext &) noexcept;
   };
@@ -213,8 +232,10 @@ namespace krys::boo::style
   struct Blending<BorderImageWidth>
   {
     KRYS_NODISCARD bool CanBlend(const BorderImageWidth &, const BorderImageWidth &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BorderImageWidth &,
                                                                       const BorderImageWidth &) noexcept;
+
     KRYS_NODISCARD BorderImageWidth Blend(const BorderImageWidth &, const BorderImageWidth &,
                                           const BlendingContext &) noexcept;
   };

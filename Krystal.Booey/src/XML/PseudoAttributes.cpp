@@ -27,7 +27,7 @@ namespace krys::boo::xml
     KRYS_NODISCARD bool ConsumePseudoAttributeReference(dom::DOMStringView &rest,
                                                         dom::DOMString &value) noexcept
     {
-      static constexpr std::pair<dom::DOMStringView, char8> PredefinedEntities[] {
+      constexpr static std::pair<dom::DOMStringView, char8> PredefinedEntities[] {
         {u8"&amp;", u8'&'}, {u8"&lt;", u8'<'}, {u8"&gt;", u8'>'}, {u8"&quot;", u8'"'}, {u8"&apos;", u8'\''}};
       for (auto [entity, character] : PredefinedEntities)
       {

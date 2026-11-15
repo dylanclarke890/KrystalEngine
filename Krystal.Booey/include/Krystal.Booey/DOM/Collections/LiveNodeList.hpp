@@ -29,9 +29,11 @@ namespace krys::boo::dom
                  LiveCollectionTraversal traversal = LiveCollectionTraversal::Descendants) noexcept;
 
     KRYS_NODISCARD RefPtr<Node> Item(size_t index) noexcept override;
+
     KRYS_NODISCARD RefPtr<const Node> Item(size_t index) const noexcept override;
 
     KRYS_NODISCARD RefPtr<Node> operator[](size_t index) noexcept override;
+
     KRYS_NODISCARD RefPtr<const Node> operator[](size_t index) const noexcept override;
 
     KRYS_NODISCARD size_t Length() const noexcept override;
@@ -46,7 +48,9 @@ namespace krys::boo::dom
 
   private:
     void WillValidateIndexCache() const noexcept;
+
     KRYS_NODISCARD Node *CollectionBegin() const noexcept;
+
     KRYS_NODISCARD Node *CollectionNext(Node &node) const noexcept;
 
     /// @brief The first node to match the filter from @p node on, if any.

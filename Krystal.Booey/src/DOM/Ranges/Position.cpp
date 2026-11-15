@@ -1942,6 +1942,7 @@ namespace krys::boo::dom
 
   template std::partial_ordering TreeOrder<TreeType::ComposedTree>(const Position &,
                                                                    const Position &) noexcept;
+
   template std::partial_ordering TreeOrder<TreeType::ShadowIncludingTree>(const Position &,
                                                                           const Position &) noexcept;
 }

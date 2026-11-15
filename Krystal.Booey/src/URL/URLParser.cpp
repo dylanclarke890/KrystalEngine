@@ -219,7 +219,7 @@ namespace krys::boo::url
       FTP,
       HTTP,
       HTTPS,
-      NonSpecial
+      NonSpecial,
     };
 
     KRYS_ALWAYS_INLINE Scheme SchemeOf(utf8_stringview scheme) noexcept
@@ -2710,7 +2710,7 @@ namespace krys::boo::url
   bool URLParser::NeedsNonSpecialDotSlash() const noexcept
   {
     auto pathStart = _url._hostEnd + _url._portLength;
-    return !_urlIsSpecial && pathStart == _url._schemeEnd + 1U && pathStart + 1 < _url._string.size()
+    return !_urlIsSpecial && pathStart == _url._schemeEnd + 1u && pathStart + 1 < _url._string.size()
            && _url._string[pathStart] == '/' && _url._string[pathStart + 1] == '/';
   }
 

@@ -40,10 +40,12 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsLength() const noexcept
     {
       return IsValue();
     }
+
     KRYS_NODISCARD Maybe<Length> TryLength() const noexcept
     {
       return TryValue();
@@ -56,8 +58,10 @@ namespace krys::boo::style
   struct Blending<BlockStepSize>
   {
     KRYS_NODISCARD bool CanBlend(const BlockStepSize &, const BlockStepSize &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BlockStepSize &,
                                                                       const BlockStepSize &) noexcept;
+
     KRYS_NODISCARD BlockStepSize Blend(const BlockStepSize &, const BlockStepSize &,
                                        const BlendingContext &) noexcept;
   };

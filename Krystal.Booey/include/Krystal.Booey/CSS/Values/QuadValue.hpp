@@ -74,6 +74,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const QuadValue &other) const noexcept;
 
     /// @brief Whether the value coalesces identical values and all four sides are equal.

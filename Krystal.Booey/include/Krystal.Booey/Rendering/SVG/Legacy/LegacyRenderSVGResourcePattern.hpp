@@ -55,19 +55,24 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGResourcePattern(svg::SVGPatternElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGResourcePattern() noexcept override;
 
     KRYS_NODISCARD svg::SVGPatternElement &PatternElement() const noexcept;
 
     void RemoveAllClientsFromCache() noexcept override;
+
     void RemoveAllClientsFromCacheAndMarkForInvalidationIfNeeded(
       bool markForInvalidation, VisitedRenderers *visitedRenderers) noexcept override;
+
     void RemoveClientFromCache(RenderElement &) noexcept override;
 
     EnumSet<ApplyResult> ApplyResource(RenderElement &, const RenderStyle &, GraphicsContext *&,
                                        EnumSet<RenderSVGResourceMode>) noexcept override;
+
     void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>, const Path *,
                            const RenderElement *) noexcept override;
+
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
                                                  RepaintRectCalculation) noexcept override
     {
@@ -83,6 +88,7 @@ namespace krys::boo
 
   private:
     void GetElement() const = delete;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGResourcePattern";

@@ -28,13 +28,13 @@ namespace krys::boo::html
   enum class AnyStepHandling : bool
   {
     Reject,
-    Default
+    Default,
   };
 
   enum class RangeLimitations : bool
   {
     Valid,
-    Invalid
+    Invalid,
   };
 
   /// @brief The range and step of a number-like input: its minimum, maximum, step and step base.
@@ -64,7 +64,7 @@ namespace krys::boo::html
     enum class IsReversible : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -79,13 +79,16 @@ namespace krys::boo::html
 
   public:
     StepRange() noexcept = default;
+
     StepRange(const Decimal &stepBase, RangeLimitations rangeLimitations, const Decimal &minimum,
               const Decimal &maximum, const Decimal &step, const StepDescription &stepDescription,
               IsReversible isReversible = IsReversible::No) noexcept;
 
     KRYS_NODISCARD Decimal AcceptableError() const noexcept;
+
     KRYS_NODISCARD Decimal AlignValueForStep(const Decimal &currentValue,
                                              const Decimal &newValue) const noexcept;
+
     KRYS_NODISCARD Decimal ClampValue(const Decimal &value) const noexcept;
 
     KRYS_NODISCARD bool HasStep() const noexcept

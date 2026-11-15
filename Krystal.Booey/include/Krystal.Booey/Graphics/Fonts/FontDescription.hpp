@@ -105,65 +105,80 @@ namespace krys::boo
     {
       return _computedSize;
     }
+
     KRYS_NODISCARD float UsedZoomFactor() const noexcept
     {
       return _usedZoomFactor;
     }
+
     KRYS_NODISCARD float ComputedSizeForRangeZoomOption(css::RangeZoomOptions option) const noexcept
     {
       return (EvaluationTimeZoomEnabled() && option == css::RangeZoomOptions::Unzoomed)
                ? UnzoomedComputedSize()
                : ComputedSize();
     }
+
     KRYS_NODISCARD float UnzoomedComputedSize() const noexcept
     {
       return _computedSize / _usedZoomFactor;
     }
+
     /// @brief Adjusted size regarding @font-face size-adjust but not regarding font-size-adjust. The latter
     /// adjustment is done with FontPlatformData::UpdateSizeWithFontSizeAdjust() after the font's creation.
     KRYS_NODISCARD float AdjustedSizeForFontFace(float) const noexcept;
+
     KRYS_NODISCARD Maybe<FontSelectionValue> FontStyleSlope() const noexcept
     {
       return _fontSelectionRequest.Slope;
     }
+
     KRYS_NODISCARD FontSelectionValue Width() const noexcept
     {
       return _fontSelectionRequest.Width;
     }
+
     KRYS_NODISCARD FontSelectionValue Weight() const noexcept
     {
       return _fontSelectionRequest.Weight;
     }
+
     KRYS_NODISCARD const boo::FontSelectionRequest &GetFontSelectionRequest() const noexcept
     {
       return _fontSelectionRequest;
     }
+
     KRYS_NODISCARD boo::TextRenderingMode GetTextRenderingMode() const noexcept
     {
       return static_cast<boo::TextRenderingMode>(_textRendering);
     }
+
     KRYS_NODISCARD boo::TextSpacingTrim GetTextSpacingTrim() const noexcept
     {
       return _textSpacingTrim;
     }
+
     KRYS_NODISCARD boo::TextAutospace GetTextAutospace() const noexcept
     {
       return _textAutospace;
     }
+
     KRYS_NODISCARD UScriptCode Script() const noexcept
     {
       return static_cast<UScriptCode>(_script);
     }
+
     /// @brief What you should be using for things like text shaping and font fallback.
     KRYS_NODISCARD const StringAtom &ComputedLocale() const noexcept
     {
       return _locale;
     }
+
     /// @brief What you should be using for web-exposed things like `-webkit-locale`.
     KRYS_NODISCARD const StringAtom &SpecifiedLocale() const noexcept
     {
       return _specifiedLocale;
     }
+
     KRYS_NODISCARD bool EvaluationTimeZoomEnabled() const noexcept
     {
       return _evaluationTimeZoomEnabled;
@@ -173,134 +188,170 @@ namespace krys::boo
     {
       return static_cast<FontOrientation>(_orientation);
     }
+
     KRYS_NODISCARD boo::NonCJKGlyphOrientation GetNonCJKGlyphOrientation() const noexcept
     {
       return static_cast<boo::NonCJKGlyphOrientation>(_nonCJKGlyphOrientation);
     }
+
     KRYS_NODISCARD FontWidthVariant WidthVariant() const noexcept
     {
       return static_cast<FontWidthVariant>(_widthVariant);
     }
+
     KRYS_NODISCARD const FontFeatureSettings &FeatureSettings() const noexcept
     {
       return _featureSettings;
     }
+
     KRYS_NODISCARD const FontVariationSettings &VariationSettings() const noexcept
     {
       return _variationSettings;
     }
+
     KRYS_NODISCARD FontSynthesisLonghandValue FontSynthesisWeight() const noexcept
     {
       return static_cast<FontSynthesisLonghandValue>(_fontSynthesisWeight);
     }
+
     KRYS_NODISCARD FontSynthesisLonghandValue FontSynthesisStyle() const noexcept
     {
       return static_cast<FontSynthesisLonghandValue>(_fontSynthesisStyle);
     }
+
     KRYS_NODISCARD FontSynthesisLonghandValue FontSynthesisSmallCaps() const noexcept
     {
       return static_cast<FontSynthesisLonghandValue>(_fontSynthesisCaps);
     }
+
     KRYS_NODISCARD bool HasAutoFontSynthesisWeight() const noexcept
     {
       return FontSynthesisWeight() == FontSynthesisLonghandValue::Auto;
     }
+
     KRYS_NODISCARD bool HasAutoFontSynthesisStyle() const noexcept
     {
       return FontSynthesisStyle() == FontSynthesisLonghandValue::Auto;
     }
+
     KRYS_NODISCARD bool HasAutoFontSynthesisSmallCaps() const noexcept
     {
       return FontSynthesisSmallCaps() == FontSynthesisLonghandValue::Auto;
     }
+
     KRYS_NODISCARD FontVariantLigatures VariantCommonLigatures() const noexcept
     {
       return static_cast<FontVariantLigatures>(_variantCommonLigatures);
     }
+
     KRYS_NODISCARD FontVariantLigatures VariantDiscretionaryLigatures() const noexcept
     {
       return static_cast<FontVariantLigatures>(_variantDiscretionaryLigatures);
     }
+
     KRYS_NODISCARD FontVariantLigatures VariantHistoricalLigatures() const noexcept
     {
       return static_cast<FontVariantLigatures>(_variantHistoricalLigatures);
     }
+
     KRYS_NODISCARD FontVariantLigatures VariantContextualAlternates() const noexcept
     {
       return static_cast<FontVariantLigatures>(_variantContextualAlternates);
     }
+
     KRYS_NODISCARD FontVariantPosition VariantPosition() const noexcept
     {
       return static_cast<FontVariantPosition>(_variantPosition);
     }
+
     KRYS_NODISCARD FontVariantCaps VariantCaps() const noexcept
     {
       return static_cast<FontVariantCaps>(_variantCaps);
     }
+
     KRYS_NODISCARD FontVariantNumericFigure VariantNumericFigure() const noexcept
     {
       return static_cast<FontVariantNumericFigure>(_variantNumericFigure);
     }
+
     KRYS_NODISCARD FontVariantNumericSpacing VariantNumericSpacing() const noexcept
     {
       return static_cast<FontVariantNumericSpacing>(_variantNumericSpacing);
     }
+
     KRYS_NODISCARD FontVariantNumericFraction VariantNumericFraction() const noexcept
     {
       return static_cast<FontVariantNumericFraction>(_variantNumericFraction);
     }
+
     KRYS_NODISCARD FontVariantNumericOrdinal VariantNumericOrdinal() const noexcept
     {
       return static_cast<FontVariantNumericOrdinal>(_variantNumericOrdinal);
     }
+
     KRYS_NODISCARD FontVariantNumericSlashedZero VariantNumericSlashedZero() const noexcept
     {
       return static_cast<FontVariantNumericSlashedZero>(_variantNumericSlashedZero);
     }
+
     KRYS_NODISCARD const FontVariantAlternates &VariantAlternates() const noexcept
     {
       return _variantAlternates;
     }
+
     KRYS_NODISCARD FontVariantEastAsianVariant VariantEastAsianVariant() const noexcept
     {
       return static_cast<FontVariantEastAsianVariant>(_variantEastAsianVariant);
     }
+
     KRYS_NODISCARD FontVariantEastAsianWidth VariantEastAsianWidth() const noexcept
     {
       return static_cast<FontVariantEastAsianWidth>(_variantEastAsianWidth);
     }
+
     KRYS_NODISCARD FontVariantEastAsianRuby VariantEastAsianRuby() const noexcept
     {
       return static_cast<FontVariantEastAsianRuby>(_variantEastAsianRuby);
     }
+
     KRYS_NODISCARD FontVariantEmoji VariantEmoji() const noexcept
     {
       return static_cast<FontVariantEmoji>(_variantEmoji);
     }
+
     KRYS_NODISCARD FontVariantEastAsianValues VariantEastAsian() const noexcept;
+
     KRYS_NODISCARD FontVariantNumericValues VariantNumeric() const noexcept;
+
     KRYS_NODISCARD FontVariantLigaturesValues VariantLigatures() const noexcept;
+
     KRYS_NODISCARD FontVariantSettings VariantSettings() const noexcept;
+
     KRYS_NODISCARD FontOpticalSizing OpticalSizing() const noexcept
     {
       return static_cast<FontOpticalSizing>(_opticalSizing);
     }
+
     KRYS_NODISCARD boo::FontStyleAxis GetFontStyleAxis() const noexcept
     {
       return static_cast<boo::FontStyleAxis>(_fontStyleAxis);
     }
+
     KRYS_NODISCARD AllowUserInstalledFonts ShouldAllowUserInstalledFonts() const noexcept
     {
       return static_cast<AllowUserInstalledFonts>(_shouldAllowUserInstalledFonts);
     }
+
     KRYS_NODISCARD bool ShouldDisableLigaturesForSpacing() const noexcept
     {
       return _shouldDisableLigaturesForSpacing;
     }
+
     KRYS_NODISCARD const boo::FontPalette &GetFontPalette() const noexcept
     {
       return _fontPalette;
     }
+
     KRYS_NODISCARD boo::FontSizeAdjust GetFontSizeAdjust() const noexcept
     {
       return _sizeAdjust;
@@ -311,163 +362,206 @@ namespace krys::boo
       _computedSize = ClampTo<float>(s);
       _usedZoomFactor = zoom;
     }
+
     void SetTextSpacingTrim(boo::TextSpacingTrim v) noexcept
     {
       _textSpacingTrim = v;
     }
+
     void SetTextAutospace(boo::TextAutospace v) noexcept
     {
       _textAutospace = v;
     }
+
     void SetFontStyleAxis(boo::FontStyleAxis axis) noexcept
     {
       _fontStyleAxis = ToUnderlying(axis);
     }
+
     void SetFontStyleSlope(Maybe<FontSelectionValue> slope) noexcept
     {
       _fontSelectionRequest.Slope = slope;
     }
+
     void SetIsItalic(bool isItalic) noexcept
     {
       SetFontStyleSlope(isItalic ? Maybe<FontSelectionValue> {ItalicValue()} : Maybe<FontSelectionValue> {});
     }
+
     void SetWeight(FontSelectionValue weight) noexcept
     {
       _fontSelectionRequest.Weight = weight;
     }
+
     void SetWidth(FontSelectionValue width) noexcept
     {
       _fontSelectionRequest.Width = width;
     }
+
     void SetTextRenderingMode(boo::TextRenderingMode rendering) noexcept
     {
       _textRendering = ToUnderlying(rendering);
     }
+
     void SetOrientation(FontOrientation orientation) noexcept
     {
       _orientation = ToUnderlying(orientation);
     }
+
     void SetNonCJKGlyphOrientation(boo::NonCJKGlyphOrientation orientation) noexcept
     {
       _nonCJKGlyphOrientation = ToUnderlying(orientation);
     }
+
     /// @note Make sure new callers of this sync with FontPlatformData::isForTextCombine()!
     void SetWidthVariant(FontWidthVariant widthVariant) noexcept
     {
       _widthVariant = ToUnderlying(widthVariant);
     }
+
     void SetSpecifiedLocale(const StringAtom &) noexcept;
+
     void SetFeatureSettings(FontFeatureSettings &&settings) noexcept
     {
       _featureSettings = krys::move(settings);
     }
+
     void SetVariationSettings(FontVariationSettings &&settings) noexcept
     {
       _variationSettings = krys::move(settings);
     }
+
     void SetFontSynthesisWeight(FontSynthesisLonghandValue value) noexcept
     {
       _fontSynthesisWeight = ToUnderlying(value);
     }
+
     void SetFontSynthesisStyle(FontSynthesisLonghandValue value) noexcept
     {
       _fontSynthesisStyle = ToUnderlying(value);
     }
+
     void SetFontSynthesisSmallCaps(FontSynthesisLonghandValue value) noexcept
     {
       _fontSynthesisCaps = ToUnderlying(value);
     }
+
     void SetVariantCommonLigatures(FontVariantLigatures variant) noexcept
     {
       _variantCommonLigatures = ToUnderlying(variant);
     }
+
     void SetVariantDiscretionaryLigatures(FontVariantLigatures variant) noexcept
     {
       _variantDiscretionaryLigatures = ToUnderlying(variant);
     }
+
     void SetVariantHistoricalLigatures(FontVariantLigatures variant) noexcept
     {
       _variantHistoricalLigatures = ToUnderlying(variant);
     }
+
     void SetVariantContextualAlternates(FontVariantLigatures variant) noexcept
     {
       _variantContextualAlternates = ToUnderlying(variant);
     }
+
     void SetVariantPosition(FontVariantPosition variant) noexcept
     {
       _variantPosition = ToUnderlying(variant);
     }
+
     void SetVariantCaps(FontVariantCaps variant) noexcept
     {
       _variantCaps = ToUnderlying(variant);
     }
+
     void SetVariantNumericFigure(FontVariantNumericFigure variant) noexcept
     {
       _variantNumericFigure = ToUnderlying(variant);
     }
+
     void SetVariantNumericSpacing(FontVariantNumericSpacing variant) noexcept
     {
       _variantNumericSpacing = ToUnderlying(variant);
     }
+
     void SetVariantNumericFraction(FontVariantNumericFraction variant) noexcept
     {
       _variantNumericFraction = ToUnderlying(variant);
     }
+
     void SetVariantNumericOrdinal(FontVariantNumericOrdinal variant) noexcept
     {
       _variantNumericOrdinal = ToUnderlying(variant);
     }
+
     void SetVariantNumericSlashedZero(FontVariantNumericSlashedZero variant) noexcept
     {
       _variantNumericSlashedZero = ToUnderlying(variant);
     }
+
     void SetVariantAlternates(const FontVariantAlternates &variant) noexcept
     {
       _variantAlternates = variant;
     }
+
     void SetVariantAlternates(FontVariantAlternates &&variant) noexcept
     {
       _variantAlternates = krys::move(variant);
     }
+
     void SetVariantEastAsianVariant(FontVariantEastAsianVariant variant) noexcept
     {
       _variantEastAsianVariant = ToUnderlying(variant);
     }
+
     void SetVariantEastAsianWidth(FontVariantEastAsianWidth variant) noexcept
     {
       _variantEastAsianWidth = ToUnderlying(variant);
     }
+
     void SetVariantEastAsianRuby(FontVariantEastAsianRuby variant) noexcept
     {
       _variantEastAsianRuby = ToUnderlying(variant);
     }
+
     void SetVariantEmoji(FontVariantEmoji variant) noexcept
     {
       _variantEmoji = ToUnderlying(variant);
     }
+
     void SetVariantEastAsian(FontVariantEastAsianValues) noexcept;
+
     void SetVariantNumeric(FontVariantNumericValues) noexcept;
+
     void SetVariantLigatures(FontVariantLigaturesValues) noexcept;
+
     void SetOpticalSizing(FontOpticalSizing sizing) noexcept
     {
       _opticalSizing = ToUnderlying(sizing);
     }
+
     void SetShouldAllowUserInstalledFonts(AllowUserInstalledFonts shouldAllowUserInstalledFonts) noexcept
     {
       _shouldAllowUserInstalledFonts = ToUnderlying(shouldAllowUserInstalledFonts);
     }
+
     void SetShouldDisableLigaturesForSpacing(bool shouldDisableLigaturesForSpacing) noexcept
     {
       _shouldDisableLigaturesForSpacing = shouldDisableLigaturesForSpacing;
     }
+
     void SetFontPalette(const boo::FontPalette &fontPalette) noexcept
     {
       _fontPalette = fontPalette;
     }
+
     void SetFontSizeAdjust(boo::FontSizeAdjust fontSizeAdjust) noexcept
     {
       _sizeAdjust = fontSizeAdjust;
     }
+
     void SetEvaluationTimeZoomEnabled(bool evaluationTimeZoomEnabled) noexcept
     {
       _evaluationTimeZoomEnabled = evaluationTimeZoomEnabled;

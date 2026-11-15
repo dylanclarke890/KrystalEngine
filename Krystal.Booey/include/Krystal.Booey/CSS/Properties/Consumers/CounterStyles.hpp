@@ -31,9 +31,9 @@
 
 namespace krys::boo::css
 {
+  struct PropertyParserState;
   class TokenRange;
   class Value;
-  struct PropertyParserState;
 
   namespace PropertyParserHelpers
   {
@@ -49,10 +49,13 @@ namespace krys::boo::css
     // MARK: @counter-style descriptor consumers
     KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleName(TokenRange &tokens,
                                                          PropertyParserState &state) noexcept;
+
     KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleSystem(TokenRange &tokens,
                                                            PropertyParserState &state) noexcept;
+
     KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleRange(TokenRange &tokens,
                                                           PropertyParserState &state) noexcept;
+
     KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens,
                                                                     PropertyParserState &state) noexcept;
   }

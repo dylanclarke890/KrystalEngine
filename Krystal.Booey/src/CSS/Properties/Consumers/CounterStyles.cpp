@@ -286,5 +286,4 @@ namespace krys::boo::css::PropertyParserHelpers
 
     return values;
   }
-
 }

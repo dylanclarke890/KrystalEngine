@@ -11,7 +11,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-
     KRYS_NODISCARD List<Token> Tokenize(utf8_stringview css) noexcept
     {
       InputStream inputStream {utf8_string(css)};

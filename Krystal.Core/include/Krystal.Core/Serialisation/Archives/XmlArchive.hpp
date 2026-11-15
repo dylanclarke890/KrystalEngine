@@ -68,19 +68,23 @@ namespace krys::Serialisation
           s->Write(data);
           return *this;
         }
+
         StreamOutIt &operator*()
         {
           return *this;
         }
+
         StreamOutIt &operator++()
         {
           return *this;
         }
+
         StreamOutIt operator++(int)
         {
           return *this;
         }
       };
+
       rapidxml::print(StreamOutIt {&_stream}, _document, 0);
       _document.clear();
     }
@@ -367,8 +371,10 @@ namespace krys::Serialisation
         next = _nodes.top().Search(expectedName);
 
         if (next == nullptr)
+        {
           throw std::runtime_error(
             std::format("XML Parsing failed - provided NVP ({}) not found", expectedName));
+        }
       }
 
       if (next != nullptr)

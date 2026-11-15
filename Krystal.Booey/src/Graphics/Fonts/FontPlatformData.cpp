@@ -49,7 +49,9 @@ namespace krys::boo
   }
 
   FontPlatformData::FontPlatformData(const FontPlatformData &) noexcept = default;
+
   FontPlatformData &FontPlatformData::operator=(const FontPlatformData &) noexcept = default;
+
   FontPlatformData::~FontPlatformData() noexcept = default;
 
   FontPlatformData FontPlatformData::CloneWithOrientation(const FontPlatformData &source,

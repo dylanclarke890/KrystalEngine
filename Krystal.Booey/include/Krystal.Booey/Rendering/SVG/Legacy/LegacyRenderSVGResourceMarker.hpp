@@ -41,6 +41,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGResourceMarker(svg::SVGMarkerElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGResourceMarker() noexcept override;
 
     KRYS_NODISCARD svg::SVGMarkerElement &MarkerElement() const noexcept;
@@ -48,6 +49,7 @@ namespace krys::boo
     void RemoveAllClientsFromCache() noexcept override
     {
     }
+
     void RemoveClientFromCache(RenderElement &) noexcept override
     {
     }
@@ -59,10 +61,13 @@ namespace krys::boo
                                               const AffineTransform &markerTransformation) const noexcept;
 
     void ApplyViewportClip(PaintInfo &) noexcept override;
+
     void Layout() noexcept override;
+
     void CalcViewport() noexcept override;
 
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override;
+
     KRYS_NODISCARD AffineTransform MarkerTransformation(const FloatPoint &origin, float angle,
                                                         float strokeWidth) const noexcept;
 
@@ -71,6 +76,7 @@ namespace krys::boo
     {
       return {};
     }
+
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
                                                  RepaintRectCalculation) noexcept override
     {
@@ -78,7 +84,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatPoint ReferencePoint() const noexcept;
+
     KRYS_NODISCARD Maybe<float> Angle() const noexcept;
+
     KRYS_NODISCARD svg::SVGMarkerUnitsType MarkerUnits() const noexcept;
 
     KRYS_NODISCARD RenderSVGResourceType ResourceType() const noexcept override
@@ -88,6 +96,7 @@ namespace krys::boo
 
   private:
     void GetElement() const = delete;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGResourceMarker";

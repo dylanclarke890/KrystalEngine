@@ -108,26 +108,32 @@ namespace krys::boo::svg
     {
       return _in1->CurrentValue();
     }
+
     KRYS_NODISCARD dom::DOMString In2() const noexcept
     {
       return _in2->CurrentValue();
     }
+
     KRYS_NODISCARD CompositeOperationType SVGOperator() const noexcept
     {
       return _svgOperator->CurrentValue<CompositeOperationType>();
     }
+
     KRYS_NODISCARD float K1() const noexcept
     {
       return _k1->CurrentValue();
     }
+
     KRYS_NODISCARD float K2() const noexcept
     {
       return _k2->CurrentValue();
     }
+
     KRYS_NODISCARD float K3() const noexcept
     {
       return _k3->CurrentValue();
     }
+
     KRYS_NODISCARD float K4() const noexcept
     {
       return _k4->CurrentValue();
@@ -137,26 +143,32 @@ namespace krys::boo::svg
     {
       return *_in1;
     }
+
     KRYS_NODISCARD SVGAnimatedString &In2Animated() noexcept
     {
       return *_in2;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &SVGOperatorAnimated() noexcept
     {
       return *_svgOperator;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &K1Animated() noexcept
     {
       return *_k1;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &K2Animated() noexcept
     {
       return *_k2;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &K3Animated() noexcept
     {
       return *_k3;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &K4Animated() noexcept
     {
       return *_k4;
@@ -168,14 +180,17 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     bool SetFilterEffectAttribute(FilterEffect &effect,
                                   const dom::QualifiedName &attributeName) noexcept final;
+
     KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
       return {dom::DOMStringAtom(In1()), dom::DOMStringAtom(In2())};
     }
+
     KRYS_NODISCARD RefPtr<FilterEffect>
       CreateFilterEffect(const FilterEffectVector &inputs,
                          const GraphicsContext &destinationContext) const noexcept final;

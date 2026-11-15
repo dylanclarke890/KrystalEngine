@@ -61,6 +61,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     void Reattach(Rule &rule) noexcept final;
   };
 
@@ -83,6 +84,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     void Reattach(Rule &rule) noexcept final;
   };
 }

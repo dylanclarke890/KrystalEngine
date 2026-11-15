@@ -62,7 +62,7 @@ namespace krys::boo::layout
     enum class IsInlineLevelBoxAlignment : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -77,24 +77,32 @@ namespace krys::boo::layout
     KRYS_NODISCARD InlineLayoutUnit SimplifiedVerticalAlignment(LineBox &lineBox) const noexcept;
 
     KRYS_NODISCARD LineBoxAlignmentContent ComputeLineBoxLogicalHeight(LineBox &lineBox) const noexcept;
+
     void ComputeRootInlineBoxVerticalPosition(
       LineBox &lineBox, const LineBoxAlignmentContent &lineBoxAlignmentContent) const noexcept;
+
     void AlignInlineLevelBoxes(LineBox &lineBox, InlineLayoutUnit lineBoxLogicalHeight) const noexcept;
+
     KRYS_NODISCARD InlineLayoutUnit
       AdjustForAnnotationIfNeeded(LineBox &lineBox, InlineLayoutUnit lineBoxHeight) const noexcept;
+
     KRYS_NODISCARD Maybe<InlineLevelBox::AscentAndDescent>
       LayoutBoundsForInlineBoxSubtree(const LineBox::InlineLevelBoxList &nonRootInlineLevelBoxes,
                                       size_t inlineBoxIndex) const noexcept;
+
     KRYS_NODISCARD InlineLayoutUnit LogicalTopOffsetFromParentBaseline(
       const InlineLevelBox &inlineLevelBox, const InlineLevelBox &parentInlineBox,
       IsInlineLevelBoxAlignment isInlineLevelBoxAlignment = IsInlineLevelBoxAlignment::No) const noexcept;
 
     KRYS_NODISCARD const InlineFormattingUtils &FormattingUtils() const noexcept;
+
     KRYS_NODISCARD const InlineFormattingContext &GetFormattingContext() const noexcept
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const ElementBox &RootBox() const noexcept;
+
     KRYS_NODISCARD const InlineLayoutState &GetLayoutState() const noexcept;
   };
 }

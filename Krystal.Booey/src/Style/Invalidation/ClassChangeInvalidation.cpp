@@ -35,7 +35,7 @@ namespace krys::boo::style
     enum class ClassChangeType : bool
     {
       Add,
-      Remove
+      Remove,
     };
 
     struct ClassChange

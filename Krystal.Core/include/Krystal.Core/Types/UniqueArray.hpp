@@ -80,13 +80,14 @@ namespace krys
         void operator()(T *pointer) noexcept
         {
           delete[] std::bit_cast<UniqueArrayElement *>(pointer);
-        };
+        }
       };
 
       UniqueArrayElement() noexcept = default;
 
       T Value {};
     };
+
     static_assert(sizeof(T) == sizeof(UniqueArrayElement));
 
     using ResultType = typename UniquePtr<T[], typename UniqueArrayElement::Deleter>;

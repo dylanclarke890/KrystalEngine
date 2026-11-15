@@ -37,6 +37,7 @@ namespace krys::boo::html
       : HTMLElement(document, HTMLElementInterface::Source)
   {
   }
+
 #pragma region HTMLSourceElement
 
   dom::USVString HTMLSourceElement::Src() const noexcept

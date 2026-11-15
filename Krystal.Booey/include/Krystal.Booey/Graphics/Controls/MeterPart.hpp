@@ -37,7 +37,7 @@ namespace krys::boo
     {
       Optimum,
       Suboptimal,
-      EvenLessGood
+      EvenLessGood,
     };
 
   private:
@@ -48,6 +48,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<MeterPart> Create() noexcept;
+
     KRYS_NODISCARD static Ref<MeterPart> Create(GaugeRegion, double value, double minimum,
                                                 double maximum) noexcept;
 

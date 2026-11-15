@@ -24,6 +24,7 @@ namespace krys
     ManualWorkQueue() noexcept = default;
 
     using WorkQueue::Dispatch;
+
     /// @brief Keeps @p job to run when told; whether it may block changes nothing, as it runs on the thread
     /// that tells it to.
     void Dispatch(MoveOnlyFunc<void()> job, JobTraits traits = {}) noexcept override;

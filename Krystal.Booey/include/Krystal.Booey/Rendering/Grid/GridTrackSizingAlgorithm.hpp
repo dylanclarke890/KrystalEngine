@@ -50,12 +50,12 @@ namespace krys::boo
   class RenderBox;
   class RenderGrid;
 
-  inline constexpr int infinity = -1;
+  constexpr inline int infinity = -1;
 
   enum class SizingOperation : uint8
   {
     TrackSizing,
-    IntrinsicSizeComputation
+    IntrinsicSizeComputation,
   };
 
   enum class TrackSizeComputationVariant : uint8
@@ -80,8 +80,8 @@ namespace krys::boo
     BeyondGrowthLimit,
   };
 
-  class GridTrackSizingAlgorithmStrategy;
   class GridItemWithSpan;
+  class GridTrackSizingAlgorithmStrategy;
 
   /// @brief A grid track being sized: its base size, growth limit and the sizes the algorithm plans for it.
   class GridTrack final
@@ -99,26 +99,32 @@ namespace krys::boo
     GridTrack() noexcept = default;
 
     KRYS_NODISCARD LayoutUnit BaseSize() const noexcept;
+
     KRYS_NODISCARD LayoutUnit UnclampedBaseSize() const noexcept;
+
     void SetBaseSize(LayoutUnit baseSize) noexcept;
 
     KRYS_NODISCARD const LayoutUnit &GrowthLimit() const noexcept;
+
     KRYS_NODISCARD bool GrowthLimitIsInfinite() const noexcept
     {
       return _growthLimit == infinity;
     }
+
     void SetGrowthLimit(LayoutUnit growthLimit) noexcept;
 
     KRYS_NODISCARD bool InfiniteGrowthPotential() const noexcept
     {
       return GrowthLimitIsInfinite() || _infinitelyGrowable;
     }
+
     KRYS_NODISCARD LayoutUnit GrowthLimitIfNotInfinite() const noexcept;
 
     KRYS_NODISCARD const LayoutUnit &PlannedSize() const noexcept
     {
       return _plannedSize;
     }
+
     void SetPlannedSize(LayoutUnit plannedSize) noexcept
     {
       _plannedSize = plannedSize;
@@ -128,25 +134,30 @@ namespace krys::boo
     {
       return _tempSize;
     }
+
     void SetTempSize(const LayoutUnit &tempSize) noexcept;
+
     void GrowTempSize(const LayoutUnit &tempSize) noexcept;
 
     KRYS_NODISCARD bool InfinitelyGrowable() const noexcept
     {
       return _infinitelyGrowable;
     }
+
     void SetInfinitelyGrowable(bool infinitelyGrowable) noexcept
     {
       _infinitelyGrowable = infinitelyGrowable;
     }
 
     void SetGrowthLimitCap(Maybe<LayoutUnit> growthLimitCap) noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> GrowthLimitCap() const noexcept
     {
       return _growthLimitCap;
     }
 
     KRYS_NODISCARD const style::GridTrackSize &CachedTrackSize() const noexcept;
+
     void SetCachedTrackSize(const style::GridTrackSize &cachedTrackSize) noexcept;
 
   private:
@@ -191,7 +202,7 @@ namespace krys::boo
       RowSizingFirstIteration,
       RowSizingExtraIterationForSizeContainment,
       ColumnSizingSecondIteration,
-      RowSizingSecondIteration
+      RowSizingSecondIteration,
     };
 
     // Keyed by address: the caches are cleared at the end of each layout of the grid.
@@ -211,6 +222,7 @@ namespace krys::boo
 
     public:
       explicit StateMachine(GridTrackSizingAlgorithm &algorithm) noexcept;
+
       ~StateMachine() noexcept;
     };
 
@@ -261,10 +273,12 @@ namespace krys::boo
 
   public:
     GridTrackSizingAlgorithm(const RenderGrid *renderGrid, Grid &grid) noexcept;
+
     ~GridTrackSizingAlgorithm() noexcept;
 
     void Run(style::GridTrackSizingDirection direction, uint32 numTracks, SizingOperation sizingOperation,
              Maybe<LayoutUnit> availableSpace, GridLayoutState &gridLayoutState) noexcept;
+
     void Reset() noexcept;
 
     // Required by RenderGrid. Try to minimize the exposed surface.
@@ -282,6 +296,7 @@ namespace krys::boo
     {
       return _minContentSize;
     }
+
     KRYS_NODISCARD LayoutUnit MaxContentSize() const noexcept
     {
       return _maxContentSize;
@@ -295,20 +310,24 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<LayoutUnit>
       GridAreaBreadthForGridItem(const RenderBox &gridItem,
                                  style::GridTrackSizingDirection direction) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       EstimatedGridAreaBreadthForGridItem(const RenderBox &gridItem,
                                           style::GridTrackSizingDirection direction) const noexcept;
 
     void CacheBaselineAlignedItem(const RenderBox &item, style::GridTrackSizingDirection alignmentContextType,
                                   bool cachingRowSubgridsForRootGrid) noexcept;
+
     void CopyBaselineItemsCache(const GridTrackSizingAlgorithm &source,
                                 style::GridTrackSizingDirection alignmentContextType) noexcept;
+
     void ClearBaselineItemsCache() noexcept;
 
     KRYS_NODISCARD Tracks &GetTracks(style::GridTrackSizingDirection direction) noexcept
     {
       return direction == style::GridTrackSizingDirection::Columns ? _columns : _rows;
     }
+
     KRYS_NODISCARD const Tracks &GetTracks(style::GridTrackSizingDirection direction) const noexcept
     {
       return direction == style::GridTrackSizingDirection::Columns ? _columns : _rows;
@@ -318,6 +337,7 @@ namespace krys::boo
     {
       return direction == style::GridTrackSizingDirection::Columns ? _freeSpaceColumns : _freeSpaceRows;
     }
+
     void SetFreeSpace(style::GridTrackSizingDirection direction, Maybe<LayoutUnit> freeSpace) noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> AvailableSpace(style::GridTrackSizingDirection direction) const noexcept
@@ -325,20 +345,24 @@ namespace krys::boo
       return direction == style::GridTrackSizingDirection::Columns ? _availableSpaceColumns
                                                                    : _availableSpaceRows;
     }
+
     void SetAvailableSpace(style::GridTrackSizingDirection direction,
                            Maybe<LayoutUnit> availableSpace) noexcept;
 
     KRYS_NODISCARD LayoutUnit ComputeTrackBasedSize() const noexcept;
 
     KRYS_NODISCARD bool HasAllLengthRowSizes() const noexcept;
+
     KRYS_NODISCARD bool HasAnyPercentSizedRowsIndefiniteHeight() const noexcept
     {
       return _hasPercentSizedRowsIndefiniteHeight;
     }
+
     KRYS_NODISCARD bool HasAnyFlexibleMaxTrackBreadth() const noexcept
     {
       return _hasFlexibleMaxTrackBreadth;
     }
+
     KRYS_NODISCARD bool HasAnyBaselineAlignmentItem() const noexcept
     {
       return !_baselineAlignmentItemsForRows.empty() || !_baselineAlignmentItemsForColumns.empty();
@@ -353,19 +377,23 @@ namespace krys::boo
                Maybe<LayoutUnit> availableSpace) noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> AvailableSpace() const noexcept;
+
     KRYS_NODISCARD style::GridTrackSize CalculateGridTrackSize(style::GridTrackSizingDirection direction,
                                                                uint32 translatedIndex) const noexcept;
+
     KRYS_NODISCARD const style::GridTrackSize &RawGridTrackSize(style::GridTrackSizingDirection direction,
                                                                 uint32 translatedIndex) const noexcept;
 
     // Helper methods for step 1. initializeTrackSizes().
     KRYS_NODISCARD LayoutUnit InitialBaseSize(const style::GridTrackSize &trackSize) const noexcept;
+
     KRYS_NODISCARD LayoutUnit InitialGrowthLimit(const style::GridTrackSize &trackSize,
                                                  LayoutUnit baseSize) const noexcept;
 
     // Helper methods for step 2. resolveIntrinsicTrackSizes().
     void SizeTrackToFitNonSpanningItem(const GridSpan &span, RenderBox &gridItem, GridTrack &track,
                                        GridLayoutState &gridLayoutState) noexcept;
+
     void SizeTrackToFitSingleSpanMasonryGroup(const GridSpan &span,
                                               MasonryMinMaxTrackSize &masonryIndefiniteItems,
                                               GridTrack &track) noexcept;
@@ -373,9 +401,11 @@ namespace krys::boo
     KRYS_NODISCARD bool SpanningItemCrossesFlexibleSizedTracks(const GridSpan &itemSpan) const noexcept;
 
     using GridItemsSpanGroupRange = Span<GridItemWithSpan>;
+
     template <TrackSizeComputationVariant variant, TrackSizeComputationPhase phase>
     void IncreaseSizesToAccommodateSpanningItems(GridItemsSpanGroupRange gridItemsWithSpan,
                                                  GridLayoutState &gridLayoutState) noexcept;
+
     template <TrackSizeComputationVariant variant>
     void IncreaseSizesToAccommodateSpanningItems(GridItemsSpanGroupRange gridItemsWithSpan,
                                                  GridLayoutState &gridLayoutState) noexcept;
@@ -427,6 +457,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit ItemSizeForTrackSizeComputationPhase(
       TrackSizeComputationPhase phase, RenderBox &gridItem, GridLayoutState &gridLayoutState) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ItemSizeForTrackSizeComputationPhaseMasonry(
       TrackSizeComputationPhase phase, const MasonryMinMaxTrackSize &trackSize) const noexcept;
 
@@ -435,11 +466,14 @@ namespace krys::boo
                                  LayoutUnit &freeSpace) const noexcept;
 
     void ComputeBaselineAlignmentContext() noexcept;
+
     void UpdateBaselineAlignmentContext(const RenderBox &gridItem,
                                         style::GridTrackSizingDirection alignmentContextType) noexcept;
+
     KRYS_NODISCARD bool
       CanParticipateInBaselineAlignment(const RenderBox &gridItem,
                                         style::GridTrackSizingDirection alignmentContextType) const noexcept;
+
     KRYS_NODISCARD bool
       ParticipateInBaselineAlignment(const RenderBox &gridItem,
                                      style::GridTrackSizingDirection alignmentContextType) const noexcept;
@@ -447,6 +481,7 @@ namespace krys::boo
     KRYS_NODISCARD bool
       IsIntrinsicSizedGridArea(const RenderBox &gridItem,
                                style::GridTrackSizingDirection gridAreaDirection) const noexcept;
+
     void ComputeGridContainerIntrinsicSizes() noexcept;
 
     // Helper methods for step 4. Stretch flexible tracks.
@@ -454,8 +489,10 @@ namespace krys::boo
       ComputeFlexFactorUnitSize(const Tracks &tracks, double flexFactorSum, LayoutUnit &leftOverSpace,
                                 const List<uint32> &flexibleTracksIndexes,
                                 UniquePtr<TrackIndexSet> tracksToTreatAsInflexible = nullptr) const noexcept;
+
     void ComputeFlexSizedTracksGrowth(double flexFraction, List<LayoutUnit> &increments,
                                       LayoutUnit &totalGrowth) const noexcept;
+
     KRYS_NODISCARD double FindFrUnitSize(const GridSpan &tracksSpan, LayoutUnit leftOverSpace) const noexcept;
 
     void HandleInfinityGrowthLimit() noexcept;
@@ -468,13 +505,16 @@ namespace krys::boo
       std::map<SpanLength, List<MasonryMinMaxTrackSizeWithGridSpan>> &definiteItemSizes,
       List<MasonryMinMaxTrackSizeWithGridSpan> &definiteItemSizesSpanFlexTrack,
       GridLayoutState &gridLayoutState) noexcept;
+
     KRYS_NODISCARD bool ShouldExcludeGridItemForMasonryTrackSizing(const RenderBox &gridItem,
                                                                    uint32 trackIndex,
                                                                    GridSpan itemSpan) const noexcept;
+
     // Track sizing algorithm steps. Note that the "Maximize Tracks" step is done
     // entirely inside the strategies, that's why we don't need an additional
     // method at this level.
     void InitializeTrackSizes() noexcept;
+
     void ResolveIntrinsicTrackSizes(GridLayoutState &gridLayoutState) noexcept;
 
     // Masonry Implementation of https://drafts.csswg.org/css-grid-2/#algo-content.
@@ -488,7 +528,9 @@ namespace krys::boo
     // Further details on the optimization can be found at
     // https://fantasai.inkedblade.net/style/specs/masonry/performance.
     void ResolveIntrinsicTrackSizesMasonry(GridLayoutState &gridLayoutState) noexcept;
+
     void StretchFlexibleTracks(Maybe<LayoutUnit> freeSpace, GridLayoutState &gridLayoutState) noexcept;
+
     void StretchAutoTracks() noexcept;
 
     void AccumulateIntrinsicSizesForTrack(GridTrack &track, uint32 trackIndex, GridIterator &iterator,
@@ -502,6 +544,7 @@ namespace krys::boo
 
     // State machine.
     void AdvanceNextState() noexcept;
+
     KRYS_NODISCARD bool IsValidTransition() const noexcept;
 
     KRYS_NODISCARD bool IsDirectionInMasonryDirection() const noexcept;
@@ -526,22 +569,30 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual LayoutUnit
       MinContentContributionForGridItem(RenderBox &gridItem, GridLayoutState &gridLayoutState) const noexcept;
+
     KRYS_NODISCARD LayoutUnit
       MaxContentContributionForGridItem(RenderBox &gridItem, GridLayoutState &gridLayoutState) const noexcept;
+
     KRYS_NODISCARD LayoutUnit MinContributionForGridItem(RenderBox &gridItem,
                                                          GridLayoutState &gridLayoutState) const noexcept;
 
     virtual void MaximizeTracks(GridTrackSizingAlgorithm::Tracks &tracks,
                                 Maybe<LayoutUnit> &freeSpace) noexcept = 0;
+
     KRYS_NODISCARD virtual double FindUsedFlexFraction(List<uint32> &flexibleSizedTracksIndex,
                                                        style::GridTrackSizingDirection direction,
                                                        Maybe<LayoutUnit> initialFreeSpace,
                                                        GridLayoutState &gridLayoutState) const noexcept = 0;
+
     virtual bool RecomputeUsedFlexFractionIfNeeded(double &flexFraction,
                                                    LayoutUnit &totalGrowth) const noexcept = 0;
+
     KRYS_NODISCARD virtual LayoutUnit FreeSpaceForStretchAutoTracksStep() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsComputingSizeContainment() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsComputingInlineSizeContainment() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsComputingSizeOrInlineSizeContainment() const noexcept = 0;
 
   protected:
@@ -553,11 +604,13 @@ namespace krys::boo
     KRYS_NODISCARD virtual LayoutUnit
       MinLogicalSizeForGridItem(RenderBox &gridItem, const style::MinimumSize &gridItemMinSize,
                                 Maybe<LayoutUnit> availableSize) const noexcept;
+
     virtual void LayoutGridItemForMinSizeComputation(RenderBox &gridItem,
                                                      bool overrideSizeHasChanged) const noexcept = 0;
 
     KRYS_NODISCARD LayoutUnit LogicalHeightForGridItem(RenderBox &gridItem,
                                                        GridLayoutState &gridLayoutState) const noexcept;
+
     bool UpdateOverridingContainingBlockContentSizeForGridItem(
       RenderBox &gridItem, style::GridTrackSizingDirection direction,
       Maybe<LayoutUnit> overrideSize = null) const noexcept;
@@ -567,28 +620,34 @@ namespace krys::boo
     {
       return _algorithm.ComputeTrackBasedSize();
     }
+
     KRYS_NODISCARD style::GridTrackSizingDirection Direction() const noexcept
     {
       return _algorithm._direction;
     }
+
     KRYS_NODISCARD GridTrackSizingAlgorithm::SizingState GetSizingState() const noexcept
     {
       return _algorithm._sizingState;
     }
+
     KRYS_NODISCARD double FindFrUnitSize(const GridSpan &tracksSpan, LayoutUnit leftOverSpace) const noexcept
     {
       return _algorithm.FindFrUnitSize(tracksSpan, leftOverSpace);
     }
+
     void DistributeSpaceToTracks(List<GridTrack *> &tracks, LayoutUnit &availableLogicalSpace) const noexcept
     {
       _algorithm.DistributeSpaceToTracks<TrackSizeComputationVariant::NotCrossingFlexibleTracks,
                                          TrackSizeComputationPhase::MaximizeTracks>(tracks, nullptr,
                                                                                     availableLogicalSpace);
     }
+
     KRYS_NODISCARD const RenderGrid *GetRenderGrid() const noexcept
     {
       return _algorithm._renderGrid;
     }
+
     KRYS_NODISCARD Maybe<LayoutUnit> AvailableSpace() const noexcept
     {
       return _algorithm.AvailableSpace();

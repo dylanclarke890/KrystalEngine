@@ -113,7 +113,9 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleRareNonInheritedData);
     }
+
     KRYS_NODISCARD Ref<StyleRareNonInheritedData> Copy() const noexcept;
+
     ~StyleRareNonInheritedData() noexcept;
 
     bool operator==(const StyleRareNonInheritedData &) const noexcept;
@@ -246,6 +248,7 @@ namespace krys::boo
 
   private:
     StyleRareNonInheritedData() noexcept;
+
     StyleRareNonInheritedData(const StyleRareNonInheritedData &) noexcept;
   };
 }

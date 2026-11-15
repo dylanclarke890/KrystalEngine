@@ -65,13 +65,16 @@ namespace krys::boo
   /// compare.
   KRYS_NODISCARD utf8_string ExternalRepresentation(LocalFrame *frame,
                                                     EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
+
   /// @brief The render tree and layer tree under @p element's box, laid out, as text.
   KRYS_NODISCARD utf8_string ExternalRepresentation(dom::Element *element,
                                                     EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
+
   void ExternalRepresentationForLocalFrame(TextStream &ts, LocalFrame &frame,
                                            EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 
   void Write(TextStream &ts, const RenderObject &renderer, EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
+
   void WriteDebugInfo(TextStream &ts, const RenderObject &object,
                       EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 
@@ -80,6 +83,7 @@ namespace krys::boo
     // FIXME: This is a cheesy hack to allow easy access to RenderStyle colors.  It won't be needed if we
     // convert it to use visitedDependentColor instead. (This just involves rebaselining many results though,
     // so for now it's not being done).
+
   public:
     static void WriteRenderObject(TextStream &ts, const RenderObject &o,
                                   EnumSet<RenderAsTextFlag> behavior) noexcept;
@@ -89,5 +93,6 @@ namespace krys::boo
   KRYS_NODISCARD utf8_string QuoteAndEscapeNonPrintables(utf8_stringview s) noexcept;
 
   KRYS_NODISCARD utf8_string CounterValueForElement(dom::Element *element) noexcept;
+
   KRYS_NODISCARD utf8_string MarkerTextForListItem(dom::Element *element) noexcept;
 }

@@ -47,6 +47,7 @@ namespace krys::boo
       constexpr LineWidth(Length length) noexcept : Value {length}
       {
       }
+
       constexpr LineWidth(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept : Value {literal}
       {
       }
@@ -55,6 +56,7 @@ namespace krys::boo
       {
         return Value.IsZero();
       }
+
       KRYS_NODISCARD constexpr bool IsPositive() const noexcept
       {
         return Value.IsPositive();
@@ -66,8 +68,10 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD constexpr bool operator==(const LineWidth &) const noexcept = default;
+
       KRYS_NODISCARD constexpr auto operator<=>(const LineWidth &) const noexcept = default;
     };
+
     DEFINE_TYPE_WRAPPER_GET(LineWidth, Value);
 
     using LineWidthBox = css::MinimallySerialisingSpaceSeparatedRectEdges<style::LineWidth>;
@@ -96,12 +100,12 @@ namespace krys::boo
     {
       KRYS_NODISCARD FloatBoxExtent operator()(const LineWidthBox &, ZoomNeeded) noexcept;
     };
+
     template <>
     struct Evaluation<LineWidthBox, LayoutBoxExtent>
     {
       KRYS_NODISCARD LayoutBoxExtent operator()(const LineWidthBox &, ZoomNeeded) noexcept;
     };
-
   }
 }
 

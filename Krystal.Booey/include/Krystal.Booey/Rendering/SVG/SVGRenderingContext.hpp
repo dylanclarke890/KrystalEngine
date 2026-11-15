@@ -40,9 +40,9 @@ namespace krys::boo
   class GraphicsContext;
   class ImageBuffer;
   class LegacyRenderSVGResourceFilter;
+  struct PaintInfo;
   class RenderElement;
   class RenderObject;
-  struct PaintInfo;
 
   /// @brief The steps `SVGRenderingContext` has taken, so that its destructor can undo them.
   enum class SVGRenderingContextFlag : uint8
@@ -52,7 +52,7 @@ namespace krys::boo
     EndOpacityLayer,
     EndFilterLayer,
     EndCSSFilterLayer,
-    PrepareToRenderSVGContentWasCalled
+    PrepareToRenderSVGContentWasCalled,
   };
 }
 
@@ -70,7 +70,7 @@ namespace krys::boo
     enum class NeedsGraphicsContextSave : bool
     {
       SaveGraphicsContext,
-      DontSaveGraphicsContext
+      DontSaveGraphicsContext,
     };
 
   private:
@@ -114,6 +114,7 @@ namespace krys::boo
     void PrepareToRenderSVGContent(
       RenderElement &, PaintInfo &,
       NeedsGraphicsContextSave = NeedsGraphicsContextSave::DontSaveGraphicsContext) noexcept;
+
     KRYS_NODISCARD bool IsRenderingPrepared() const noexcept
     {
       return _renderingFlags.Contains(RenderingFlag::RenderingPrepared);
@@ -134,6 +135,7 @@ namespace krys::boo
                                   RefPtr<ImageBuffer> &, bool safeToClear) noexcept;
 
     KRYS_NODISCARD static float CalculateScreenFontSizeScalingFactor(const RenderObject &) noexcept;
+
     KRYS_NODISCARD static AffineTransform
       CalculateTransformationToOutermostCoordinateSystem(const RenderObject &) noexcept;
 

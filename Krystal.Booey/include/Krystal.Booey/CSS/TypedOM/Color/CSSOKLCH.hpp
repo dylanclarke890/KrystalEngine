@@ -47,15 +47,22 @@ namespace krys::boo::css
                                                                  CSSColorPercent alpha = 1.0) noexcept;
 
     KRYS_NODISCARD CSSColorPercent L() const noexcept;
+
     /// @return A `SyntaxError` if @p lightness isn't a percentage or `none`.
     dom::ExceptionOr<void> SetL(CSSColorPercent lightness) noexcept;
+
     KRYS_NODISCARD CSSColorPercent C() const noexcept;
+
     /// @return A `SyntaxError` if @p chroma isn't a percentage or `none`.
     dom::ExceptionOr<void> SetC(CSSColorPercent chroma) noexcept;
+
     KRYS_NODISCARD CSSColorAngle H() const noexcept;
+
     /// @return A `SyntaxError` if @p hue isn't an angle or `none`.
     dom::ExceptionOr<void> SetH(CSSColorAngle hue) noexcept;
+
     KRYS_NODISCARD CSSColorPercent Alpha() const noexcept;
+
     /// @return A `SyntaxError` if @p alpha isn't a percentage or `none`.
     dom::ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
 

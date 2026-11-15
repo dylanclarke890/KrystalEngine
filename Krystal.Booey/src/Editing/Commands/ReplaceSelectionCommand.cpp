@@ -383,6 +383,7 @@ namespace krys::boo
     {
       return _fragment ? _fragment->FirstChild() : nullptr;
     }
+
     KRYS_NODISCARD dom::Node *LastChild() const noexcept
     {
       return _fragment ? _fragment->LastChild() : nullptr;
@@ -398,16 +399,19 @@ namespace krys::boo
     {
       return _hasInterchangeNewlineAtStart;
     }
+
     KRYS_NODISCARD bool HasInterchangeNewlineAtEnd() const noexcept
     {
       return _hasInterchangeNewlineAtEnd;
     }
 
     void RemoveNode(dom::Node &node) noexcept;
+
     void RemoveNodePreservingChildren(dom::Node &node) noexcept;
 
   private:
     void RemoveContentsWithSideEffects() noexcept;
+
     void RemoveInterchangeNodes(dom::Node *container) noexcept;
 
     void InsertNodeBefore(dom::Node &node, dom::Node &refNode) noexcept;

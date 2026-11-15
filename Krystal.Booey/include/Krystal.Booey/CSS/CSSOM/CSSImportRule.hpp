@@ -52,14 +52,17 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<CSSImportRule> Create(ImportRule &rule, CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSOMString Href() const noexcept;
+
     KRYS_NODISCARD MediaList &Media() const noexcept;
 
     /// @brief The imported style sheet, or null if it hasn't loaded.
     KRYS_NODISCARD CSSStyleSheet *GetStyleSheet() const noexcept;
+
     KRYS_NODISCARD RefPtr<CSSStyleSheet> ProtectedStyleSheet() const noexcept;
 
     /// @brief The layer the sheet is imported into: empty for an anonymous layer, null for none.
     KRYS_NODISCARD Maybe<CSSOMString> LayerName() const noexcept;
+
     KRYS_NODISCARD CSSOMString SupportsText() const noexcept;
 
   private:
@@ -69,12 +72,15 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     void Reattach(Rule &rule) noexcept final;
+
     void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept final;
 
     KRYS_NODISCARD CSSOMString CssTextInternal(const CSSOMString &urlString) const noexcept;
 
     KRYS_NODISCARD const mq::MediaQueryList &MediaQueries() const noexcept;
+
     void SetMediaQueries(mq::MediaQueryList &&queries) noexcept;
   };
 }

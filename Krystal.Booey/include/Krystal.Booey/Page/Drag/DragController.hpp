@@ -52,6 +52,7 @@ namespace krys::boo::html
 namespace krys::boo
 {
   class DragData;
+  struct DragState;
   class FrameSelection;
   class HitTestResult;
   class Image;
@@ -59,7 +60,6 @@ namespace krys::boo
   class LocalFrame;
   class Page;
   class PlatformMouseEvent;
-  struct DragState;
 
   /// @brief A page's drags and drops: which element a press may drag, starting a drag through the host's
   /// drag client, and what a drag over the page and its drop do: the page's drag events, then by default
@@ -93,6 +93,7 @@ namespace krys::boo
 
   public:
     DragController(Page &page, UniquePtr<DragClient> &&client) noexcept;
+
     ~DragController() noexcept;
 
     KRYS_NODISCARD static DragOperation PlatformGenericDragOperation() noexcept;
@@ -100,13 +101,16 @@ namespace krys::boo
     /// @brief A drag entered or moved over @p frame.
     /// @return The operation a drop there would do, if any.
     Maybe<DragOperation> DragEnteredOrUpdated(LocalFrame &frame, DragData &&dragData) noexcept;
+
     /// @brief A drag left @p frame.
     void DragExited(LocalFrame &frame, DragData &&dragData) noexcept;
+
     /// @brief Drops the drag where it is.
     /// @return Whether the drop was handled.
     bool PerformDragOperation(DragData &&dragData) noexcept;
 
     KRYS_NODISCARD bool MouseIsOverFileInput() const noexcept;
+
     KRYS_NODISCARD uint32 NumberOfItemsToBeAccepted() const noexcept
     {
       return _numberOfItemsToBeAccepted;
@@ -118,38 +122,47 @@ namespace krys::boo
     {
       _didInitiateDrag = initiated;
     }
+
     KRYS_NODISCARD bool DidInitiateDrag() const noexcept
     {
       return _didInitiateDrag;
     }
+
     KRYS_NODISCARD EnumSet<DragOperation> SourceDragOperationMask() const noexcept
     {
       return _sourceDragOperationMask;
     }
+
     KRYS_NODISCARD const url::URL &DraggingImageURL() const noexcept
     {
       return _draggingImageURL;
     }
+
     void SetDragOffset(const IntPoint &offset) noexcept
     {
       _dragOffset = offset;
     }
+
     KRYS_NODISCARD const IntPoint &DragOffset() const noexcept
     {
       return _dragOffset;
     }
+
     KRYS_NODISCARD EnumSet<boo::DragSourceAction> GetDragSourceAction() const noexcept
     {
       return _dragSourceAction;
     }
+
     KRYS_NODISCARD DragHandlingMethod GetDragHandlingMethod() const noexcept
     {
       return _dragHandlingMethod;
     }
+
     KRYS_NODISCARD dom::Document *DocumentUnderMouse() const noexcept
     {
       return _documentUnderMouse.get();
     }
+
     KRYS_NODISCARD EnumSet<DragDestinationAction> DragDestinationActionMask() const noexcept
     {
       return _dragDestinationActionMask;
@@ -164,6 +177,7 @@ namespace krys::boo
                                                          DragState &state) const noexcept;
 
     void DragEnded() noexcept;
+
     /// @brief Puts the drag caret at @p windowPoint, as a host controlling the drag itself does.
     void PlaceDragCaret(const IntPoint &windowPoint) noexcept;
 
@@ -172,31 +186,40 @@ namespace krys::boo
     void PrepareForDragStart(LocalFrame &sourceFrame, EnumSet<DragSourceAction> actionMask,
                              dom::Element &sourceElement, dom::DataTransfer &dataTransfer,
                              const IntPoint &dragOrigin) const noexcept;
+
     /// @brief Starts the drag @p state describes, handing it to the client.
     /// @return Whether it started.
     bool StartDrag(LocalFrame &src, const DragState &state, EnumSet<DragOperation> sourceOperationMask,
                    const PlatformMouseEvent &dragEvent, const IntPoint &dragOrigin,
                    HasNonDefaultPasteboardData hasData) noexcept;
+
     /// @brief The largest an image's drag image is, in CSS pixels.
     KRYS_NODISCARD static const IntSize &MaxDragImageSize() noexcept;
 
     // FIXME: These values are straight out of DragControllerMac, so probably have
     // little correlation with Gdk standards...
-    static constexpr int32 MaxOriginalImageArea = 1'500 * 1'500;
-    static constexpr int32 DragIconRightInset = 7;
-    static constexpr int32 DragIconBottomInset = 3;
-    static constexpr float DragImageAlpha = 0.75f;
+    constexpr static int32 MaxOriginalImageArea = 1'500 * 1'500;
+    constexpr static int32 DragIconRightInset = 7;
+    constexpr static int32 DragIconBottomInset = 3;
+    constexpr static float DragImageAlpha = 0.75f;
 
   private:
     bool DispatchTextInputEventFor(LocalFrame *innerFrame, const DragData &dragData) noexcept;
+
     bool CanProcessDrag(const DragData &dragData) noexcept;
+
     bool ConcludeEditDrag(const DragData &dragData) noexcept;
+
     DragHandlingMethod TryDocumentDrag(LocalFrame &frame, const DragData &dragData,
                                        EnumSet<DragDestinationAction> destinationActionMask,
                                        Maybe<DragOperation> &dragOperation) noexcept;
+
     bool TryDHTMLDrag(LocalFrame &frame, const DragData &dragData, Maybe<DragOperation> &operation) noexcept;
+
     void ClearDragCaret() noexcept;
+
     bool DragIsMove(FrameSelection &selection, const DragData &dragData) noexcept;
+
     bool IsCopyKeyDown(const DragData &dragData) noexcept;
 
     void MouseMovedIntoDocument(RefPtr<dom::Document> &&newDocument) noexcept;
@@ -210,6 +233,7 @@ namespace krys::boo
 
     void DoImageDrag(dom::Element &element, const IntPoint &dragOrigin, const IntRect &layoutRect,
                      LocalFrame &frame, IntPoint &dragImageOffset, const DragState &state) noexcept;
+
     void DoSystemDrag(DragImage image, const IntPoint &dragLoc, const IntPoint &eventPos, LocalFrame &frame,
                       const DragState &state) noexcept;
 

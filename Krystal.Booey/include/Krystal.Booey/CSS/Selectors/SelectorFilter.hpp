@@ -66,7 +66,7 @@ namespace krys::boo::css
     enum class IncludeRightmost : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     struct ParentStackFrame
@@ -78,13 +78,16 @@ namespace krys::boo::css
     List<ParentStackFrame> _parentStack;
 
     // With 100 unique strings in the filter, 2^12 slot table has false positive rate of ~0.2%.
-    static constexpr uint32 BloomFilterKeyBits = 12;
+    constexpr static uint32 BloomFilterKeyBits = 12;
     CountingBloomFilter<BloomFilterKeyBits> _ancestorIdentifierFilter;
 
   public:
     void PushParent(const dom::Element *parent) noexcept;
+
     void PushParentInitializingIfNeeded(const dom::Element &parent) noexcept;
+
     void PopParent() noexcept;
+
     void PopParentsUntil(const dom::Element *parent) noexcept;
 
     KRYS_NODISCARD bool ParentStackIsEmpty() const noexcept
@@ -102,8 +105,10 @@ namespace krys::boo::css
     KRYS_NODISCARD bool FastRejectSelector(const Hashes &hashes) const noexcept;
 
     KRYS_NODISCARD static Hashes CollectHashes(const Selector &selector) noexcept;
+
     static void CollectElementIdentifierHashes(const dom::Element &element,
                                                SmallList<uint32, 4> &identifierHashes) noexcept;
+
     static void CollectSimpleSelectorHash(CollectedSelectorHashes &collectedHashes,
                                           const Selector &selector) noexcept;
 
@@ -113,6 +118,7 @@ namespace krys::boo::css
     static void CollectSelectorHashes(CollectedSelectorHashes &collectedHashes,
                                       const Selector &rightmostSelector,
                                       IncludeRightmost includeRightmost) noexcept;
+
     KRYS_NODISCARD static Hashes
       ChooseSelectorHashesForFilter(const CollectedSelectorHashes &collectedSelectorHashes) noexcept;
   };

@@ -48,7 +48,8 @@ namespace krys::boo::style
       return PathComputation<StyleType> {}(value, reference);
     }
   };
-  inline constexpr PathComputationInvoker ComputePath {};
+
+  constexpr inline PathComputationInvoker ComputePath {};
 
   // Specialization for `css::FunctionNotation`.
   template <css::ValueId Name, typename StyleType>

@@ -89,40 +89,48 @@ namespace krys::ui::tests
         }
         return types;
       }
+
       KRYS_NODISCARD utf8_string ReadTextFromClipboard(utf8_stringview,
                                                        utf8_stringview type) noexcept override
       {
         return type.starts_with(u8"text/plain") ? Text : type == u8"text/html" ? Markup : utf8_string();
       }
+
       KRYS_NODISCARD List<utf8_string> ReadFilePathsFromClipboard(utf8_stringview) noexcept override
       {
         return {};
       }
+
       KRYS_NODISCARD RefPtr<boo::SharedBuffer> ReadBufferFromClipboard(utf8_stringview,
                                                                        utf8_stringview) noexcept override
       {
         return nullptr;
       }
+
       void WriteToClipboard(utf8_stringview, boo::SelectionData &&selectionData) noexcept override
       {
         ++Writes;
         Text = selectionData.Text();
         Markup = selectionData.Markup();
       }
+
       void ClearClipboard(utf8_stringview) noexcept override
       {
         Text.clear();
         Markup.clear();
       }
+
       KRYS_NODISCARD int64 ChangeCount(utf8_stringview) noexcept override
       {
         return Writes;
       }
+
       KRYS_NODISCARD List<utf8_string> TypesSafeForDOMToReadAndWrite(utf8_stringview name,
                                                                      utf8_stringview) noexcept override
       {
         return Types(name);
       }
+
       int64 WriteCustomData(const List<boo::PasteboardCustomData> &, utf8_stringview) noexcept override
       {
         return Writes;
@@ -1756,6 +1764,7 @@ namespace krys::ui::tests
         event.PreventDefault();
       }
     };
+
     view.Document().AddEventListener(u8"keydown", CreateRef<Canceller>(), false);
     CHECK(view.KeyPressed(pal::Key::B, {}, {u8"b", u8"b"}));
     CHECK(records == List<std::string> {"keydown:b/KeyB/66/0/0"});
@@ -1836,6 +1845,7 @@ namespace krys::ui::tests
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 }</style><div style='height: 500px'></div>");
     WaitForLoad(view);
     view.UpdateRendering();
+
     struct ScrollCounter : boo::dom::EventListenerCallback
     {
       int32 Count {0};
@@ -1845,6 +1855,7 @@ namespace krys::ui::tests
         ++Count;
       }
     };
+
     Ref<ScrollCounter> counter = CreateRef<ScrollCounter>();
     view.Document().AddEventListener(u8"scroll", counter, false);
 
@@ -1962,6 +1973,7 @@ namespace krys::ui::tests
         boo::html::EventLoop::Current().QueueMicrotask([this] { ++Ran; });
       }
     };
+
     int32 ran = 0;
     view.Document().AddEventListener(
       u8"mousedown", Ref<boo::dom::EventListenerCallback> {CreateRef<MicrotaskQueuer>(ran)}, false);
@@ -2171,17 +2183,21 @@ namespace krys::ui::tests
     auto box = select.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = 0;
+
     struct Counter : public boo::dom::EventListenerCallback
     {
       int32 &Count;
+
       explicit Counter(int32 &count) noexcept : Count(count)
       {
       }
+
       void HandleEvent(boo::dom::Event &) noexcept override
       {
         ++Count;
       }
     };
+
     select.AddEventListener(u8"change", CreateRef<Counter>(changes), false);
 
     // Pressing the drop-down opens its popup below it, with the selected item highlighted; its release goes
@@ -2853,6 +2869,7 @@ namespace krys::ui::tests
     CHECK(view.Update(now));
     CHECK_FALSE(view.GetPage().IsRenderingUpdateScheduled());
   }
+
   TEST_CASE("View: hands the host the icons the page names", "[UI]")
   {
     View view({400, 300});

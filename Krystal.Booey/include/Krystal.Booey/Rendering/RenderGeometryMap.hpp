@@ -68,7 +68,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(RenderGeometryMap);
 
   private:
-    static constexpr size_t notFound = static_cast<size_t>(-1);
+    constexpr static size_t notFound = static_cast<size_t>(-1);
 
     size_t _insertionPosition {notFound};
     int32 _nonUniformStepsCount {0};
@@ -81,6 +81,7 @@ namespace krys::boo
   public:
     explicit RenderGeometryMap(EnumSet<MapCoordinatesMode> flags = {
                                  MapCoordinatesMode::UseTransforms}) noexcept;
+
     ~RenderGeometryMap() noexcept;
 
     KRYS_NODISCARD EnumSet<MapCoordinatesMode> MapCoordinatesFlags() const noexcept
@@ -98,15 +99,19 @@ namespace krys::boo
     // scroll offset is applied, but not the scale.
     KRYS_NODISCARD FloatPoint MapToContainer(const FloatPoint &p,
                                              const RenderLayerModelObject *container) const noexcept;
+
     KRYS_NODISCARD FloatQuad MapToContainer(const FloatRect &rect,
                                             const RenderLayerModelObject *container) const noexcept;
 
     // Called by code walking the renderer or layer trees.
     void PushMappingsToAncestor(const RenderLayer *layer, const RenderLayer *ancestorLayer,
                                 bool respectTransforms = true) noexcept;
+
     void PopMappingsToAncestor(const RenderLayer *ancestorLayer) noexcept;
+
     void PushMappingsToAncestor(const RenderElement *renderer,
                                 const RenderLayerModelObject *ancestorRenderer) noexcept;
+
     void PopMappingsToAncestor(const RenderLayerModelObject *ancestorRenderer) noexcept;
 
     // The following methods should only be called by renderers inside a call to pushMappingsToAncestor().
@@ -116,6 +121,7 @@ namespace krys::boo
     void Push(const RenderObject *renderer, const LayoutSize &offsetFromContainer,
               bool accumulatingTransform = false, bool isNonUniform = false, bool isFixedPosition = false,
               bool hasTransform = false) noexcept;
+
     void Push(const RenderObject *renderer, const TransformationMatrix &t, bool accumulatingTransform = false,
               bool isNonUniform = false, bool isFixedPosition = false, bool hasTransform = false) noexcept;
 
@@ -127,17 +133,21 @@ namespace krys::boo
   private:
     void MapToContainer(TransformState &transformState,
                         const RenderLayerModelObject *container = nullptr) const noexcept;
+
     void StepInserted(const RenderGeometryMapStep &step) noexcept;
+
     void StepRemoved(const RenderGeometryMapStep &step) noexcept;
 
     KRYS_NODISCARD bool HasNonUniformStep() const noexcept
     {
       return _nonUniformStepsCount;
     }
+
     KRYS_NODISCARD bool HasTransformStep() const noexcept
     {
       return _transformedStepsCount;
     }
+
     KRYS_NODISCARD bool HasFixedPositionStep() const noexcept
     {
       return _fixedStepsCount;

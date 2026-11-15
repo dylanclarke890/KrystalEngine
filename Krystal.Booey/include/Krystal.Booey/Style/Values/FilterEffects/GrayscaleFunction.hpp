@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::Grayscale ToCSSGrayscale(const BasicColorMatrixFilterOperation &,
                                                  const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::Grayscale &,
                                                               const BuilderState &) noexcept;
   }

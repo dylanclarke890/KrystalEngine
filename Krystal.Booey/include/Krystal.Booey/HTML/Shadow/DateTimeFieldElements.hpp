@@ -38,12 +38,14 @@ namespace krys::boo::html
 
   public:
     DateTimeDayFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeDayFieldElement>
       Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };
@@ -56,6 +58,7 @@ namespace krys::boo::html
   public:
     DateTimeHourFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner, int minimum,
                              int maximum) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeHourFieldElement> Create(dom::Document &document,
                                                                DateTimeFieldElementFieldOwner &fieldOwner,
                                                                int minimum, int maximum) noexcept;
@@ -63,6 +66,7 @@ namespace krys::boo::html
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };
@@ -75,6 +79,7 @@ namespace krys::boo::html
   public:
     DateTimeMeridiemFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
                                  const List<utf8_string> &labels) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeMeridiemFieldElement> Create(dom::Document &document,
                                                                    DateTimeFieldElementFieldOwner &fieldOwner,
                                                                    const List<utf8_string> &labels) noexcept;
@@ -82,6 +87,7 @@ namespace krys::boo::html
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };
@@ -94,12 +100,14 @@ namespace krys::boo::html
   public:
     DateTimeMillisecondFieldElement(dom::Document &document,
                                     DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeMillisecondFieldElement>
       Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };
@@ -111,12 +119,14 @@ namespace krys::boo::html
 
   public:
     DateTimeMinuteFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeMinuteFieldElement>
       Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };
@@ -128,12 +138,14 @@ namespace krys::boo::html
 
   public:
     DateTimeMonthFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeMonthFieldElement>
       Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };
@@ -145,12 +157,14 @@ namespace krys::boo::html
 
   public:
     DateTimeSecondFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeSecondFieldElement>
       Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };
@@ -163,6 +177,7 @@ namespace krys::boo::html
   public:
     DateTimeSymbolicMonthFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
                                       const List<utf8_string> &labels) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeSymbolicMonthFieldElement>
       Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,
              const List<utf8_string> &labels) noexcept;
@@ -170,6 +185,7 @@ namespace krys::boo::html
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };
@@ -181,12 +197,14 @@ namespace krys::boo::html
 
   public:
     DateTimeWeekFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeWeekFieldElement>
       Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };
@@ -198,15 +216,18 @@ namespace krys::boo::html
 
   public:
     DateTimeYearFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
+
     KRYS_NODISCARD static Ref<DateTimeYearFieldElement>
       Create(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner) noexcept;
 
     void StepDown() noexcept final;
+
     void StepUp() noexcept final;
 
   private:
     // DateTimeFieldElement functions:
     void SetValueAsDate(const DateComponents &date) noexcept final;
+
     void PopulateDateTimeFieldsState(DateTimeFieldsState &state,
                                      DateTimePlaceholderIfNoValue placeholderIfNoValue) noexcept final;
   };

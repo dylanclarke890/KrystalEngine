@@ -56,20 +56,25 @@ namespace krys::boo::layout
     enum class LineSpanningInlineBox : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     KRYS_NODISCARD static InlineLevelBox
       CreateInlineBox(const Box &layoutBox, const RenderStyle &style, InlineLayoutUnit logicalLeft,
                       InlineLayoutUnit logicalWidth,
                       LineSpanningInlineBox isLineSpanning = LineSpanningInlineBox::No) noexcept;
+
     KRYS_NODISCARD static InlineLevelBox CreateRootInlineBox(const Box &layoutBox, const RenderStyle &style,
                                                              InlineLayoutUnit logicalLeft,
                                                              InlineLayoutUnit logicalWidth) noexcept;
+
     KRYS_NODISCARD static InlineLevelBox CreateAtomicInlineBox(const Box &layoutBox, const RenderStyle &style,
                                                                InlineLayoutUnit logicalLeft,
                                                                InlineLayoutUnit logicalWidth) noexcept;
+
     KRYS_NODISCARD static InlineLevelBox CreateLineBreakBox(const Box &layoutBox, const RenderStyle &style,
                                                             InlineLayoutUnit logicalLeft) noexcept;
+
     KRYS_NODISCARD static InlineLevelBox CreateGenericInlineLevelBox(const Box &layoutBox,
                                                                      const RenderStyle &style,
                                                                      InlineLayoutUnit logicalLeft) noexcept;
@@ -83,6 +88,7 @@ namespace krys::boo::layout
       {
         return Ascent + Descent;
       }
+
       KRYS_NODISCARD friend bool operator==(const AscentAndDescent &,
                                             const AscentAndDescent &) noexcept = default;
     };
@@ -99,7 +105,7 @@ namespace krys::boo::layout
       RootInlineBox,
       AtomicInlineBox,
       LineBreakBox,
-      GenericInlineLevelBox
+      GenericInlineLevelBox,
     };
 
   private:
@@ -113,7 +119,7 @@ namespace krys::boo::layout
     enum class PositionWithinLayoutBox : bool
     {
       First,
-      Last
+      Last,
     };
 
     struct StyleData
@@ -157,10 +163,12 @@ namespace krys::boo::layout
     {
       return _ascentAndDescent.Ascent;
     }
+
     KRYS_NODISCARD InlineLayoutUnit Descent() const noexcept
     {
       return _ascentAndDescent.Descent;
     }
+
     // See https://www.w3.org/TR/css-inline-3/#layout-bounds
     KRYS_NODISCARD AscentAndDescent LayoutBounds() const noexcept
     {
@@ -171,6 +179,7 @@ namespace krys::boo::layout
     {
       return _hasContent;
     }
+
     void SetHasContent() noexcept
     {
       krys_debug_assert(IsInlineBox());
@@ -181,6 +190,7 @@ namespace krys::boo::layout
     {
       return _style.VerticalAlignmentValue;
     }
+
     KRYS_NODISCARD bool HasLineBoxRelativeAlignment() const noexcept
     {
       return HoldsAlternative<css::keywords::Top>(_style.VerticalAlignmentValue)
@@ -188,6 +198,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD InlineLayoutUnit PreferredLineHeight() const noexcept;
+
     KRYS_NODISCARD bool IsPreferredLineHeightFontMetricsBased() const noexcept
     {
       return _style.LineHeight->IsNormal();
@@ -199,6 +210,7 @@ namespace krys::boo::layout
     {
       return *_style.PrimaryFontMetrics;
     }
+
     KRYS_NODISCARD InlineLayoutUnit FontSize() const noexcept
     {
       return _style.PrimaryFontSize;
@@ -208,14 +220,17 @@ namespace krys::boo::layout
     {
       return _style.TextBoxTrim;
     }
+
     KRYS_NODISCARD style::TextBoxEdge GetTextBoxEdge() const noexcept
     {
       return _style.TextBoxEdge;
     }
+
     KRYS_NODISCARD style::LineFitEdge GetLineFitEdge() const noexcept
     {
       return _style.LineFitEdge;
     }
+
     KRYS_NODISCARD InlineLayoutUnit InlineBoxContentOffsetForTextBoxTrim() const noexcept
     {
       return _inlineBoxContentOffsetForTextBoxTrim;
@@ -225,10 +240,12 @@ namespace krys::boo::layout
     {
       return (HasContent() || IsAtomicInlineBox()) && _textEmphasis.has_value();
     }
+
     KRYS_NODISCARD Maybe<InlineLayoutUnit> TextEmphasisAbove() const noexcept
     {
       return HasTextEmphasis() ? Maybe<InlineLayoutUnit> {_textEmphasis->Above} : null;
     }
+
     KRYS_NODISCARD Maybe<InlineLayoutUnit> TextEmphasisBelow() const noexcept
     {
       return HasTextEmphasis() ? Maybe<InlineLayoutUnit> {_textEmphasis->Below} : null;
@@ -238,22 +255,27 @@ namespace krys::boo::layout
     {
       return _type == Type::InlineBox || IsRootInlineBox() || IsLineSpanningInlineBox();
     }
+
     KRYS_NODISCARD bool IsRootInlineBox() const noexcept
     {
       return _type == Type::RootInlineBox;
     }
+
     KRYS_NODISCARD bool IsLineSpanningInlineBox() const noexcept
     {
       return _type == Type::LineSpanningInlineBox;
     }
+
     KRYS_NODISCARD bool IsAtomicInlineBox() const noexcept
     {
       return _type == Type::AtomicInlineBox;
     }
+
     KRYS_NODISCARD bool IsListMarker() const noexcept
     {
       return IsAtomicInlineBox() && LayoutBox().IsListMarkerBox();
     }
+
     KRYS_NODISCARD bool IsLineBreakBox() const noexcept
     {
       return _type == Type::LineBreakBox;
@@ -273,6 +295,7 @@ namespace krys::boo::layout
     {
       return _isFirstWithinLayoutBox;
     }
+
     KRYS_NODISCARD bool IsLastBox() const noexcept
     {
       return _isLastWithinLayoutBox;
@@ -288,26 +311,32 @@ namespace krys::boo::layout
     {
       return _logicalRect;
     }
+
     KRYS_NODISCARD InlineLayoutUnit LogicalTop() const noexcept
     {
       return _logicalRect.Top();
     }
+
     KRYS_NODISCARD InlineLayoutUnit LogicalBottom() const noexcept
     {
       return _logicalRect.Bottom();
     }
+
     KRYS_NODISCARD InlineLayoutUnit LogicalLeft() const noexcept
     {
       return _logicalRect.Left();
     }
+
     KRYS_NODISCARD InlineLayoutUnit LogicalRight() const noexcept
     {
       return _logicalRect.Right();
     }
+
     KRYS_NODISCARD InlineLayoutUnit LogicalWidth() const noexcept
     {
       return _logicalRect.Width();
     }
+
     KRYS_NODISCARD InlineLayoutUnit LogicalHeight() const noexcept
     {
       return _logicalRect.Height();
@@ -318,26 +347,32 @@ namespace krys::boo::layout
     {
       _logicalRect.SetWidth(logicalWidth);
     }
+
     void SetLogicalHeight(InlineLayoutUnit logicalHeight) noexcept
     {
       _logicalRect.SetHeight(logicalHeight);
     }
+
     void SetLogicalTop(InlineLayoutUnit logicalTop) noexcept
     {
       _logicalRect.SetTop(logicalTop);
     }
+
     void SetLogicalLeft(InlineLayoutUnit logicalLeft) noexcept
     {
       _logicalRect.SetLeft(logicalLeft);
     }
+
     void SetAscentAndDescent(AscentAndDescent ascentAndDescent) noexcept
     {
       _ascentAndDescent = ascentAndDescent;
     }
+
     void SetLayoutBounds(const AscentAndDescent &layoutBounds) noexcept
     {
       _layoutBounds = layoutBounds;
     }
+
     void SetInlineBoxContentOffsetForTextBoxTrim(InlineLayoutUnit offset) noexcept
     {
       _inlineBoxContentOffsetForTextBoxTrim = offset;
@@ -347,6 +382,7 @@ namespace krys::boo::layout
     {
       _isFirstWithinLayoutBox = true;
     }
+
     void SetIsLastBox() noexcept
     {
       _isLastWithinLayoutBox = true;

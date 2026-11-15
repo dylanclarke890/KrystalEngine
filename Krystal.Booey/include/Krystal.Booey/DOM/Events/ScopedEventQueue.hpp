@@ -26,6 +26,7 @@ namespace krys::boo::dom
 
   public:
     EventQueueScope() noexcept;
+
     ~EventQueueScope() noexcept;
   };
 }

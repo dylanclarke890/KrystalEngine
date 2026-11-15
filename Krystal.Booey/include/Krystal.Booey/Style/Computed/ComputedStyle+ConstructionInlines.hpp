@@ -32,6 +32,7 @@
 namespace krys::boo::style
 {
   inline ComputedStyle::ComputedStyle(ComputedStyle &&) noexcept = default;
+
   inline ComputedStyle &ComputedStyle::operator=(ComputedStyle &&) noexcept = default;
 
   inline ComputedStyle::ComputedStyle(CreateDefaultStyleTag tag) noexcept : ComputedStyleProperties {tag}

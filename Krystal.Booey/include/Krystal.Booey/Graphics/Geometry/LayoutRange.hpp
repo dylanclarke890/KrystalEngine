@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     constexpr LayoutRange() noexcept = default;
+
     constexpr LayoutRange(LayoutUnit location, LayoutUnit size) noexcept : _location(location), _size(size)
     {
     }
@@ -53,10 +54,12 @@ namespace krys::boo
     {
       return _location;
     }
+
     KRYS_NODISCARD constexpr LayoutUnit Max() const noexcept
     {
       return _location + _size;
     }
+
     KRYS_NODISCARD constexpr LayoutUnit Size() const noexcept
     {
       return _size;
@@ -67,6 +70,7 @@ namespace krys::boo
       _location = location;
       _size = size;
     }
+
     constexpr void Reset(LayoutUnit size = 0_lu) noexcept
     {
       _location = 0_lu;
@@ -77,6 +81,7 @@ namespace krys::boo
     {
       _location += shift;
     }
+
     constexpr void MoveTo(LayoutUnit target) noexcept
     {
       _location = target;
@@ -87,14 +92,17 @@ namespace krys::boo
       _location += shift;
       _size -= shift;
     }
+
     constexpr void ShiftMaxEdgeBy(LayoutUnit shift) noexcept
     {
       _size += shift;
     }
+
     constexpr void ShiftMinEdgeTo(LayoutUnit target) noexcept
     {
       ShiftMinEdgeBy(target - Min());
     }
+
     constexpr void ShiftMaxEdgeTo(LayoutUnit target) noexcept
     {
       ShiftMaxEdgeBy(target - Max());
@@ -104,6 +112,7 @@ namespace krys::boo
     {
       _size = size;
     }
+
     constexpr void SizeFromMaxEdge(LayoutUnit size = 0_lu) noexcept
     {
       _location -= size - _size;
@@ -118,6 +127,7 @@ namespace krys::boo
         ShiftMinEdgeTo(target);
       }
     }
+
     /// @brief Moves the max edge up to @p target, if it's below it.
     constexpr void FloorMaxEdgeTo(LayoutUnit target) noexcept
     {
@@ -126,6 +136,7 @@ namespace krys::boo
         ShiftMaxEdgeTo(target);
       }
     }
+
     /// @brief Moves the min edge down to @p target, if it's above it.
     constexpr void CapMinEdgeTo(LayoutUnit target) noexcept
     {
@@ -134,6 +145,7 @@ namespace krys::boo
         ShiftMinEdgeTo(target);
       }
     }
+
     /// @brief Moves the max edge down to @p target, if it's above it.
     constexpr void CapMaxEdgeTo(LayoutUnit target) noexcept
     {
@@ -147,6 +159,7 @@ namespace krys::boo
     {
       _size = std::max(_size, size);
     }
+
     constexpr void FloorSizeFromMaxEdge(LayoutUnit size = 0_lu) noexcept
     {
       if (size > _size)

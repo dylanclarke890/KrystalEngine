@@ -57,10 +57,12 @@ namespace krys::boo::html
     {
       return _density >= 0;
     }
+
     KRYS_NODISCARD bool HasWidth() const noexcept
     {
       return _resourceWidth >= 0;
     }
+
     KRYS_NODISCARD bool HasHeight() const noexcept
     {
       return _resourceHeight >= 0;
@@ -71,11 +73,13 @@ namespace krys::boo::html
       krys_debug_assert(HasDensity());
       return _density;
     }
+
     KRYS_NODISCARD uint32 ResourceWidth() const noexcept
     {
       krys_debug_assert(HasWidth());
       return static_cast<uint32>(_resourceWidth);
     }
+
     KRYS_NODISCARD uint32 ResourceHeight() const noexcept
     {
       krys_debug_assert(HasHeight());
@@ -87,11 +91,13 @@ namespace krys::boo::html
       krys_debug_assert(width >= 0);
       _resourceWidth = width;
     }
+
     void SetResourceHeight(int32 height) noexcept
     {
       krys_debug_assert(height >= 0);
       _resourceHeight = height;
     }
+
     void SetDensity(float density) noexcept
     {
       krys_debug_assert(density >= 0);
@@ -106,7 +112,7 @@ namespace krys::boo::html
     enum class OriginAttribute : bool
     {
       Srcset,
-      Src
+      Src,
     };
 
     dom::DOMString String;
@@ -115,6 +121,7 @@ namespace krys::boo::html
     OriginAttribute Origin {OriginAttribute::Srcset};
 
     ImageCandidate() noexcept = default;
+
     ImageCandidate(dom::DOMString source, const DescriptorParsingResult &result,
                    OriginAttribute origin) noexcept
         : String(krys::move(source)),

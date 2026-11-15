@@ -44,12 +44,13 @@ namespace krys::boo
     enum class CheckForRepaint : uint8
     {
       No,
-      Yes
+      Yes,
     };
+
     enum class ShouldAlwaysIssueFullRepaint : uint8
     {
       No,
-      Yes
+      Yes,
     };
 
   private:

@@ -37,7 +37,7 @@ namespace krys::boo::style
     Degrees0,
     Degrees90,
     Degrees180,
-    Degrees270
+    Degrees270,
   };
 
   // MARK: - Value Representation

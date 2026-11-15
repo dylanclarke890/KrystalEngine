@@ -50,6 +50,7 @@ namespace krys::boo
 
   public:
     constexpr IntPoint() noexcept = default;
+
     constexpr IntPoint(int32 x, int32 y) noexcept : _x(x), _y(y)
     {
     }

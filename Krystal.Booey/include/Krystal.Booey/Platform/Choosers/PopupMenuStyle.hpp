@@ -39,13 +39,13 @@ namespace krys::boo
     enum class PopupMenuType : uint8
     {
       SelectPopup,
-      AutofillPopup
+      AutofillPopup,
     };
 
     enum class BackgroundColorType : uint8
     {
       DefaultBackgroundColor,
-      CustomBackgroundColor
+      CustomBackgroundColor,
     };
 
     enum class Size : uint8

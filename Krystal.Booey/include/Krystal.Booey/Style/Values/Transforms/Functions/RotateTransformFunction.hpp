@@ -46,24 +46,29 @@ namespace krys::boo::style
   public:
     KRYS_NODISCARD static Ref<const RotateTransformFunction> Create(Angle<>,
                                                                     TransformFunctionBase::Type) noexcept;
+
     KRYS_NODISCARD static Ref<const RotateTransformFunction> Create(Number<>, Number<>, Number<>, Angle<>,
                                                                     TransformFunctionBase::Type) noexcept;
 
     KRYS_NODISCARD Ref<const TransformFunctionBase> Clone() const noexcept override;
+
     KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const FloatSize &) const noexcept override;
 
     KRYS_NODISCARD Number<> X() const noexcept
     {
       return _x;
     }
+
     KRYS_NODISCARD Number<> Y() const noexcept
     {
       return _y;
     }
+
     KRYS_NODISCARD Number<> Z() const noexcept
     {
       return _z;
     }
+
     KRYS_NODISCARD Angle<> GetAngle() const noexcept
     {
       return _angle;
@@ -80,10 +85,12 @@ namespace krys::boo::style
     {
       return _angle.IsZero();
     }
+
     KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept override
     {
       return (_x.IsZero() && _y.IsZero()) || _angle.IsZero();
     }
+
     KRYS_NODISCARD bool IsAffectedByTransformOrigin() const noexcept override
     {
       return !IsIdentity();

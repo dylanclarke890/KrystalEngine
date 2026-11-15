@@ -381,7 +381,7 @@ namespace krys::boo
     enum class WriteIndentOrNot : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     void WriteStandardPrefix(TextStream &ts, const RenderObject &object, EnumSet<RenderAsTextFlag> behavior,

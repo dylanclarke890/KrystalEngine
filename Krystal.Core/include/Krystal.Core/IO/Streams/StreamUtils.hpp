@@ -18,6 +18,7 @@ namespace krys::io
     KRYS_NON_COPY_MOVABLE(StreamUtils);
 
     StreamUtils() = delete;
+
     ~StreamUtils() = delete;
 
   public:

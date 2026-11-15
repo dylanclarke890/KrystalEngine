@@ -72,5 +72,4 @@ namespace krys::boo
                                                boo::Blend(fromY, Y(), context),
                                                boo::Blend(fromZ, Z(), context), *outputType);
   }
-
 }

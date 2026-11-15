@@ -31,13 +31,13 @@ namespace krys::boo::svg
   enum class SVGPropertyAccess : uint8
   {
     ReadWrite,
-    ReadOnly
+    ReadOnly,
   };
 
   enum class SVGPropertyState : uint8
   {
     Clean,
-    Dirty
+    Dirty,
   };
 
   /// @brief A value the SVG DOM exposes (`SVGLength`, `SVGNumberList`, ...), attached to the owner whose

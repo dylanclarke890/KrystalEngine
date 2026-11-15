@@ -47,6 +47,7 @@ namespace krys::boo
 
   public:
     constexpr IntSize() noexcept = default;
+
     constexpr IntSize(int32 width, int32 height) noexcept : _width(width), _height(height)
     {
     }

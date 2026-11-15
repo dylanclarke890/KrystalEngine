@@ -72,19 +72,25 @@ namespace krys::boo
 
   public:
     RenderMultiColumnFlow(dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderMultiColumnFlow() noexcept override;
 
     /// @brief The multi-column container.
     KRYS_NODISCARD RenderBlockFlow *MultiColumnBlockFlow() const noexcept;
 
     KRYS_NODISCARD RenderMultiColumnSet *FirstMultiColumnSet() const noexcept;
+
     KRYS_NODISCARD RenderMultiColumnSet *LastMultiColumnSet() const noexcept;
+
     KRYS_NODISCARD RenderBox *FirstColumnSetOrSpanner() const noexcept;
+
     KRYS_NODISCARD bool HasColumnSpanner() const noexcept
     {
       return !_spannerMap.empty();
     }
+
     KRYS_NODISCARD static RenderBox *NextColumnSetOrSpannerSiblingOf(const RenderBox *child) noexcept;
+
     KRYS_NODISCARD static RenderBox *PreviousColumnSetOrSpannerSiblingOf(const RenderBox *child) noexcept;
 
     KRYS_NODISCARD RenderMultiColumnSpannerPlaceholder *
@@ -96,30 +102,37 @@ namespace krys::boo
     {
       return _columnCount;
     }
+
     KRYS_NODISCARD LayoutUnit ColumnWidth() const noexcept
     {
       return _columnWidth;
     }
+
     KRYS_NODISCARD LayoutUnit ColumnHeightAvailable() const noexcept
     {
       return _columnHeightAvailable;
     }
+
     void SetColumnHeightAvailable(LayoutUnit available) noexcept
     {
       _columnHeightAvailable = available;
     }
+
     KRYS_NODISCARD bool InBalancingPass() const noexcept
     {
       return _inBalancingPass;
     }
+
     void SetInBalancingPass(bool balancing) noexcept
     {
       _inBalancingPass = balancing;
     }
+
     KRYS_NODISCARD bool NeedsHeightsRecalculation() const noexcept
     {
       return _needsHeightsRecalculation;
     }
+
     void SetNeedsHeightsRecalculation(bool recalculate) noexcept
     {
       _needsHeightsRecalculation = recalculate;
@@ -156,6 +169,7 @@ namespace krys::boo
 
     void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
                                  TransformState &transformState) const noexcept override;
+
     KRYS_NODISCARD LayoutSize
       OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
                           bool *offsetDependsOnPoint = nullptr) const noexcept override;
@@ -175,25 +189,37 @@ namespace krys::boo
     {
       return u8"RenderMultiColumnFlowThread";
     }
+
     void AddFragmentToThread(RenderFragmentContainer *fragmentContainer) noexcept override;
+
     void WillBeRemovedFromTree() noexcept override;
+
     void FragmentedFlowDescendantBoxLaidOut(RenderBox *descendant) noexcept override;
+
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit InitialLogicalWidth() const noexcept override;
+
     void SetPageBreak(const RenderBlock *block, LayoutUnit offset,
                       LayoutUnit spaceShortage) noexcept override;
+
     void UpdateMinimumPageHeight(const RenderBlock *block, LayoutUnit offset,
                                  LayoutUnit minHeight) noexcept override;
+
     void UpdateSpaceShortageForSizeContainment(const RenderBlock *block, LayoutUnit offset,
                                                LayoutUnit shortage) noexcept override;
+
     KRYS_NODISCARD RenderFragmentContainer *
       FragmentAtBlockOffset(const RenderBox *box, LayoutUnit offset,
                             bool extendLastFragment = false) const noexcept override;
+
     void SetFragmentRangeForBox(const RenderBox &box, RenderFragmentContainer *startFragment,
                                 RenderFragmentContainer *endFragment) noexcept override;
+
     bool AddForcedFragmentBreak(const RenderBlock *block, LayoutUnit offset, RenderBox *breakChild,
                                 bool isBefore, LayoutUnit *offsetBreakAdjustment = nullptr) noexcept override;
+
     KRYS_NODISCARD bool IsPageLogicalHeightKnown() const noexcept override;
   };
 }

@@ -61,6 +61,7 @@ namespace krys::boo::style
     {
       return _name;
     }
+
     KRYS_NODISCARD ScopeIdentifier GetScopeIdentifier() const noexcept
     {
       return _scopeIdentifier;

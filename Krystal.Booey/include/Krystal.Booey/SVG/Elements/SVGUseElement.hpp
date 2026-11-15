@@ -56,26 +56,32 @@ namespace krys::boo::svg
 
   public:
     explicit SVGUseElement(dom::Document &document) noexcept;
+
     ~SVGUseElement() noexcept override;
 
     void InvalidateShadowTree() noexcept;
+
     void UpdateUserAgentShadowTree() noexcept final;
 
     KRYS_NODISCARD RefPtr<SVGElement> ClipChild() const noexcept;
+
     KRYS_NODISCARD RenderElement *RendererClipChild() const noexcept;
 
     KRYS_NODISCARD const SVGLengthValue &X() const noexcept
     {
       return _x->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Y() const noexcept
     {
       return _y->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Width() const noexcept
     {
       return _width->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Height() const noexcept
     {
       return _height->CurrentValue();
@@ -85,14 +91,17 @@ namespace krys::boo::svg
     {
       return *_x;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &YAnimated() noexcept
     {
       return *_y;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &WidthAnimated() noexcept
     {
       return *_width;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &HeightAnimated() noexcept
     {
       return *_height;
@@ -102,20 +111,28 @@ namespace krys::boo::svg
 
   private:
     void OnInsert() noexcept final;
+
     void OnPostConnection() noexcept final;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+
     void BuildPendingResource() noexcept final;
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
+
     KRYS_NODISCARD Path ToClipPath() noexcept final;
+
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept final;
 
     void NotifyFinished(CachedResource &) noexcept final;
+
     KRYS_NODISCARD dom::Document *ExternalDocument() const noexcept;
+
     void UpdateExternalDocument() noexcept;
 
     KRYS_NODISCARD FloatRect GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept final;
@@ -123,32 +140,41 @@ namespace krys::boo::svg
     KRYS_NODISCARD RefPtr<SVGElement> FindTarget(dom::DOMStringAtom *targetID = nullptr) const noexcept;
 
     void CloneTarget(dom::ContainerNode &container, SVGElement &target) const noexcept;
+
     KRYS_NODISCARD RefPtr<SVGElement> TargetClone() const noexcept;
 
     void ExpandUseElementsInShadowTree() const noexcept;
+
     void ExpandSymbolElementsInShadowTree() const noexcept;
+
     void TransferEventListenersToShadowTree() const noexcept;
+
     void TransferSizeAttributesToTargetClone(SVGElement &shadowElement) const noexcept;
 
     void ClearShadowTree() noexcept;
+
     void InvalidateDependentShadowTrees() noexcept;
 
     KRYS_NODISCARD bool HaveLoadedRequiredResources() noexcept final
     {
       return SVGURIReference::HaveLoadedRequiredResources();
     }
+
     void SetHaveFiredLoadEvent(bool haveFiredLoadEvent) noexcept final
     {
       _haveFiredLoadEvent = haveFiredLoadEvent;
     }
+
     KRYS_NODISCARD bool HaveFiredLoadEvent() const noexcept final
     {
       return _haveFiredLoadEvent;
     }
+
     void SetErrorOccurred(bool errorOccurred) noexcept final
     {
       _errorOccurred = errorOccurred;
     }
+
     KRYS_NODISCARD bool ErrorOccurred() const noexcept final
     {
       return _errorOccurred;

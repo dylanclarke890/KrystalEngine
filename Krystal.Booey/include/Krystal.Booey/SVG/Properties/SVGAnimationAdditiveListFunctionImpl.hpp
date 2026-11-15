@@ -278,7 +278,7 @@ namespace krys::boo::svg
 
       auto fromItemsSize = fromItems.size();
 
-      static constexpr AffineTransform zerosAffineTransform = {0, 0, 0, 0, 0, 0};
+      constexpr static AffineTransform zerosAffineTransform = {0, 0, 0, 0, 0, 0};
       const SVGTransformValue &to = toItems[0]->Value();
       const SVGTransformValue zerosTransform = SVGTransformValue(to.Type(), zerosAffineTransform);
 

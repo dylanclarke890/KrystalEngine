@@ -40,7 +40,7 @@ namespace krys::boo::html
     enum class Type : bool
     {
       Percentage,
-      Pixel
+      Pixel,
     };
 
     double Number;
@@ -55,7 +55,7 @@ namespace krys::boo::html
     enum class IsMultiLength : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   public:

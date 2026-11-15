@@ -47,6 +47,7 @@ namespace krys::boo::html
 
   public:
     explicit CustomStateSet(dom::Element &element) noexcept;
+
     ~CustomStateSet() noexcept;
 
     KRYS_NODISCARD static Ref<CustomStateSet> Create(dom::Element &element) noexcept

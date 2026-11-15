@@ -33,15 +33,17 @@ namespace krys::boo
   class StyleInvalidImage final : public StyleGeneratedImage
   {
   public:
-    static constexpr bool IsFixedSize = true;
+    constexpr static bool IsFixedSize = true;
 
     KRYS_NODISCARD static Ref<StyleInvalidImage> Create() noexcept;
+
     ~StyleInvalidImage() noexcept override;
 
     KRYS_NODISCARD bool Equals(const StyleImage &) const noexcept final
     {
       return false;
     }
+
     KRYS_NODISCARD bool Equals(const StyleInvalidImage &) const noexcept
     {
       return false;
@@ -53,11 +55,14 @@ namespace krys::boo
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final
     {
     }
+
     KRYS_NODISCARD bool IsPending() const noexcept final
     {
       return false;
     }
+
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
+
     KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final
     {
       return {};

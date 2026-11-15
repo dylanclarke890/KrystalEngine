@@ -32,13 +32,13 @@
 
 namespace krys::boo::style
 {
-  struct OffsetPath;
   struct ClipPath;
+  struct OffsetPath;
 
   enum class SupportRayPathOperation : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   // <ray-path> = <ray()> || <coord-box>
@@ -47,6 +47,7 @@ namespace krys::boo::style
     explicit RayPath(Ref<RayPathOperation> &&operation) noexcept : _operation {krys::move(operation)}
     {
     }
+
     explicit RayPath(const Ref<RayPathOperation> &operation) noexcept : _operation {operation}
     {
     }
@@ -55,6 +56,7 @@ namespace krys::boo::style
     {
       return _operation->Ray();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD CSSBoxType ReferenceBox() const noexcept
     {
       return _operation->ReferenceBox();
@@ -80,6 +82,7 @@ namespace krys::boo::style
   private:
     friend ClipPath;
     friend OffsetPath;
+
     friend Maybe<boo::Path> TryPath(const RayPath &, const TransformOperationData &) noexcept;
 
     Ref<RayPathOperation> _operation;
@@ -92,6 +95,7 @@ namespace krys::boo::style
         : _operation {krys::move(operation)}
     {
     }
+
     explicit ReferencePath(const Ref<ReferencePathOperation> &operation) noexcept : _operation {operation}
     {
     }
@@ -100,10 +104,12 @@ namespace krys::boo::style
     {
       return _operation->Url();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD const css::CSSOMStringAtom &Fragment() const noexcept
     {
       return _operation->Fragment();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD CSSBoxType ReferenceBox() const noexcept
     {
       return _operation->ReferenceBox();
@@ -129,6 +135,7 @@ namespace krys::boo::style
   private:
     friend ClipPath;
     friend OffsetPath;
+
     friend Maybe<boo::Path> TryPath(const ReferencePath &, const TransformOperationData &) noexcept;
 
     Ref<ReferencePathOperation> _operation;
@@ -140,6 +147,7 @@ namespace krys::boo::style
     explicit BasicShapePath(Ref<ShapePathOperation> &&operation) noexcept : _operation {krys::move(operation)}
     {
     }
+
     explicit BasicShapePath(const Ref<ShapePathOperation> &operation) noexcept : _operation {operation}
     {
     }
@@ -148,6 +156,7 @@ namespace krys::boo::style
     {
       return _operation->GetShape();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD CSSBoxType ReferenceBox() const noexcept
     {
       return _operation->ReferenceBox();
@@ -173,6 +182,7 @@ namespace krys::boo::style
   private:
     friend ClipPath;
     friend OffsetPath;
+
     friend Maybe<boo::Path> TryPath(const BasicShapePath &, const TransformOperationData &) noexcept;
 
     Ref<ShapePathOperation> _operation;
@@ -184,6 +194,7 @@ namespace krys::boo::style
     explicit BoxPath(Ref<BoxPathOperation> &&operation) noexcept : _operation {krys::move(operation)}
     {
     }
+
     explicit BoxPath(const Ref<BoxPathOperation> &operation) noexcept : _operation {operation}
     {
     }
@@ -208,6 +219,7 @@ namespace krys::boo::style
   private:
     friend ClipPath;
     friend OffsetPath;
+
     friend Maybe<boo::Path> TryPath(const BoxPath &, const TransformOperationData &) noexcept;
 
     Ref<BoxPathOperation> _operation;

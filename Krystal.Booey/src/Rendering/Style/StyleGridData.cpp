@@ -29,7 +29,6 @@
 
 namespace krys::boo
 {
-
   StyleGridData::StyleGridData() noexcept
       : GridAutoFlow(style::ComputedStyle::InitialGridAutoFlow()),
         GridAutoColumns(style::ComputedStyle::InitialGridAutoColumns()),

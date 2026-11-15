@@ -341,7 +341,7 @@ namespace krys::boo
     enum class AlignmentContextType : uint8
     {
       Columns,
-      Rows
+      Rows,
     };
 
     template <typename F>
@@ -3460,6 +3460,7 @@ namespace krys::boo
   {
     _sizes.erase(&gridItem);
   }
+
   void RenderGrid::PaintChildren(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
                                  PaintInfo &forChild) noexcept
   {

@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013 Apple Inc. All rights
+ * reserved.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -82,8 +83,8 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
-  class BuilderState;
   struct BuilderContext;
+  class BuilderState;
   struct CachedMatchResult;
   struct ResolvedStyle;
   struct SelectorMatchingState;
@@ -116,7 +117,7 @@ namespace krys::boo::style
     enum class ScopeType : bool
     {
       Document,
-      ShadowTree
+      ShadowTree,
     };
 
     // These methods will give back the set of rules that matched for a given element (or a pseudo-element).
@@ -157,6 +158,7 @@ namespace krys::boo::style
     KRYS_NODISCARD UnadjustedStyle
       UnadjustedStyleForElement(dom::Element &element, const ResolutionContext &context,
                                 RuleMatchingBehavior = RuleMatchingBehavior::MatchAllRules) noexcept;
+
     KRYS_NODISCARD UnadjustedStyle UnadjustedStyleForCachedMatchResult(
       dom::Element &element, const ResolutionContext &context, CachedMatchResult &&cachedResult) noexcept;
 
@@ -169,6 +171,7 @@ namespace krys::boo::style
                             const ResolutionContext &context) noexcept;
 
     KRYS_NODISCARD dom::Document &Document() noexcept;
+
     KRYS_NODISCARD const dom::Document &Document() const noexcept;
 
     KRYS_NODISCARD ScopeType GetScopeType() const noexcept
@@ -200,6 +203,7 @@ namespace krys::boo::style
     bool KeyframeStylesForAnimation(dom::Element &element, const RenderStyle &elementStyle,
                                     const ResolutionContext &context, BlendingKeyframes &list,
                                     const TimingFunction *defaultTimingFunction) const noexcept;
+
     /// @brief The style of @p elementStyle with @p keyframe's declarations applied; adds the properties it
     /// animates to @p blendingKeyframe.
     KRYS_NODISCARD UniquePtr<RenderStyle> StyleForKeyframe(dom::Element &element,
@@ -210,21 +214,27 @@ namespace krys::boo::style
 
     KRYS_NODISCARD List<RefPtr<const css::StyleRule>>
       StyleRulesForElement(const dom::Element *element, uint32 rulesToInclude = AllButEmptyCSSRules) noexcept;
+
     KRYS_NODISCARD List<RefPtr<const css::StyleRule>>
       PseudoStyleRulesForElement(const dom::Element *element,
                                  const Maybe<PseudoElementRequest> &pseudoElementIdentifier,
                                  uint32 rulesToInclude = AllButEmptyCSSRules) noexcept;
 
     KRYS_NODISCARD bool HasSelectorForId(const css::CSSOMStringAtom &idValue) const noexcept;
+
     KRYS_NODISCARD bool HasSelectorForAttribute(const dom::Element &element,
                                                 const css::CSSOMStringAtom &attributeName) const noexcept;
 
     KRYS_NODISCARD bool HasViewportDependentMediaQueries() const noexcept;
+
     KRYS_NODISCARD Maybe<DynamicMediaQueryEvaluationChanges> EvaluateDynamicMediaQueries() noexcept;
 
     KRYS_NODISCARD static KeyframesRuleMap &UserAgentKeyframes() noexcept;
+
     static void AddUserAgentKeyframeStyle(Ref<css::KeyframesRule> &&rule) noexcept;
+
     void AddKeyframeStyle(Ref<css::KeyframesRule> &&rule) noexcept;
+
     KRYS_NODISCARD List<Ref<css::KeyframeRule>>
       KeyframeRulesForName(const css::CSSOMStringAtom &animationName,
                            const TimingFunction *defaultTimingFunction) const noexcept;
@@ -250,6 +260,7 @@ namespace krys::boo::style
     }
 
     void InvalidateMatchedDeclarationsCache() noexcept;
+
     void ClearCachedDeclarationsAffectedByViewportUnits() noexcept;
 
     KRYS_NODISCARD bool IsSharedBetweenShadowTrees() const noexcept
@@ -273,10 +284,12 @@ namespace krys::boo::style
     KRYS_NODISCARD State InitializeStateAndStyle(const dom::Element &element,
                                                  const ResolutionContext &context,
                                                  UniquePtr<RenderStyle> &&initialStyle = {}) noexcept;
+
     KRYS_NODISCARD BuilderContext GetBuilderContext(State &state) const noexcept;
 
     void ApplyMatchedProperties(State &state, const MatchResult &matchResult,
                                 PropertyCascade::IncludedProperties &&includedProperties) noexcept;
+
     void SetGlobalStateAfterApplyingProperties(const BuilderState &builderState) noexcept;
   };
 }

@@ -18,6 +18,7 @@ namespace krys::ui
       virtual ~Client() noexcept = default;
 
       virtual void PlatformLayerWillBeDestroyed() noexcept = 0;
+
       virtual void SetPlatformLayerNeedsDisplay() noexcept = 0;
     };
 
@@ -26,11 +27,13 @@ namespace krys::ui
 
   public:
     TextureMapperPlatformLayer() noexcept = default;
+
     virtual ~TextureMapperPlatformLayer() noexcept = default;
 
     virtual void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,
                                       const boo::TransformationMatrix &modelViewMatrix = {},
                                       float opacity = 1.0) noexcept = 0;
+
     virtual void DrawBorder(TextureMapper &textureMapper, const boo::Color &color, float borderWidth,
                             const boo::FloatRect &targetRect,
                             const boo::TransformationMatrix &transform) noexcept;

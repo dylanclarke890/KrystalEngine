@@ -44,7 +44,6 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
-
   /// @brief The style sheet of an element whose sheet is its own text (a `style` element): creates the sheet
   /// from the element's child text and keeps it, and the element's place among its scope's style sheet
   /// candidates, up to date.
@@ -64,6 +63,7 @@ namespace krys::boo::html
 
   public:
     InlineStyleSheetOwner() noexcept;
+
     ~InlineStyleSheetOwner() noexcept;
 
     void SetContentType(dom::DOMStringAtom contentType) noexcept
@@ -79,20 +79,28 @@ namespace krys::boo::html
     KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;
 
     KRYS_NODISCARD bool IsLoading() const noexcept;
+
     bool SheetLoaded(dom::Element &element) noexcept;
+
     void StartLoadingDynamicSheet(dom::Element &element) noexcept;
 
     void InsertedIntoDocument(dom::Element &element) noexcept;
+
     void RemovedFromDocument(dom::Element &element) noexcept;
+
     void ClearDocumentData(dom::Element &element) noexcept;
+
     void ChildrenChanged(dom::Element &element) noexcept;
+
     void FinishParsingChildren(dom::Element &element) noexcept;
 
     KRYS_NODISCARD style::Scope *StyleScope() noexcept;
 
   private:
     void CreateSheet(dom::Element &element, const dom::DOMString &text) noexcept;
+
     void CreateSheetFromTextContents(dom::Element &element) noexcept;
+
     void ClearSheet() noexcept;
   };
 }

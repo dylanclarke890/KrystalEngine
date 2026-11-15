@@ -53,7 +53,7 @@ namespace krys::boo
   {
     Success,
     Failure,
-    Unsupported
+    Unsupported,
   };
 
   /// @brief The promise `requestPointerLock()` returns, as a callback: called once, as a microtask, with
@@ -82,6 +82,7 @@ namespace krys::boo
 
   public:
     explicit PointerLockController(Page &page) noexcept;
+
     ~PointerLockController() noexcept;
 
     /// @brief Asks to lock the pointer to @p target (or moves the lock there, if the pointer is locked to an
@@ -92,6 +93,7 @@ namespace krys::boo
 
     /// @brief Asks the host to unlock the pointer, if it's locked.
     void RequestPointerUnlock() noexcept;
+
     /// @brief Asks the host to unlock the pointer, as the user does (Escape): the document must have a user
     /// gesture to lock it again.
     void RequestPointerUnlockAndForceCursorVisible() noexcept;
@@ -110,31 +112,42 @@ namespace krys::boo
 
     /// @brief Whether the pointer is locked to an element (and the host has said so).
     KRYS_NODISCARD bool IsLocked() const noexcept;
+
     /// @brief Whether a lock is waiting for the host's answer.
     KRYS_NODISCARD bool LockPending() const noexcept;
+
     /// @brief The element the pointer is locked (or being locked) to.
     KRYS_NODISCARD dom::Element *GetElement() const noexcept;
 
     /// @brief The host has locked the pointer.
     void DidAcquirePointerLock() noexcept;
+
     /// @brief The host didn't lock the pointer (or didn't unlock it).
     void DidNotAcquirePointerLock() noexcept;
+
     /// @brief The host has unlocked the pointer (or lost it, as the window lost focus).
     void DidLosePointerLock() noexcept;
 
     /// @brief Dispatches the mouse event of type @p eventType from @p event at the locked element (and a
     /// `click` after a `mouseup`).
     void DispatchLockedMouseEvent(const PlatformMouseEvent &event, dom::DOMStringAtom eventType) noexcept;
+
     /// @brief Dispatches the `wheel` event from @p event at the locked element.
     void DispatchLockedWheelEvent(const PlatformWheelEvent &event) noexcept;
 
   private:
     void ClearElement() noexcept;
+
     void EnqueueEvent(dom::DOMStringAtom type, dom::Element *element) noexcept;
+
     void EnqueueEvent(dom::DOMStringAtom type, dom::Document *document) noexcept;
+
     void ResolvePromises() noexcept;
+
     void RejectPromises(dom::ExceptionCode code, utf8_stringview reason) noexcept;
+
     void ElementWasRemovedInternal() noexcept;
+
     KRYS_NODISCARD bool SupportsUnadjustedMovement() const noexcept;
   };
 }

@@ -75,8 +75,9 @@ namespace krys::boo::layout_integration
     {
       NodeInsertion,
       NodeRemoval,
-      NodeMutation
+      NodeMutation,
     };
+
     KRYS_NODISCARD bool CanUseForLineLayout(const RenderBlockFlow &) noexcept;
 
     KRYS_NODISCARD bool
@@ -1286,6 +1287,7 @@ namespace krys::boo::layout_integration
       size_t Index;
       FloatRect Boundaries;
     };
+
     SmallList<Parent, 8> parentStack;
 
     auto popParent = [&](const layout::Box *parent)

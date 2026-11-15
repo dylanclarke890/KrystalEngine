@@ -39,10 +39,12 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsURL() const noexcept
     {
       return IsValue();
     }
+
     KRYS_NODISCARD Maybe<URL> TryURL() const noexcept
     {
       return TryValue();

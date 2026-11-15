@@ -55,22 +55,28 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGResourceMasker(svg::SVGMaskElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGResourceMasker() noexcept override;
 
     KRYS_NODISCARD svg::SVGMaskElement &MaskElement() const noexcept;
 
     void RemoveAllClientsFromCache() noexcept override;
+
     void RemoveClientFromCache(RenderElement &) noexcept override;
+
     EnumSet<ApplyResult> ApplyResource(RenderElement &, const RenderStyle &, GraphicsContext *&,
                                        EnumSet<RenderSVGResourceMode>) noexcept override;
 
     bool DrawContentIntoContext(GraphicsContext &, const FloatRect &objectBoundingBox) noexcept;
+
     bool DrawContentIntoContext(GraphicsContext &, const FloatRect &destinationRect,
                                 const FloatRect &sourceRect, ImagePaintingOptions) noexcept;
+
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
                                                  RepaintRectCalculation) noexcept override;
 
     KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType MaskUnits() const noexcept;
+
     KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType MaskContentUnits() const noexcept;
 
     KRYS_NODISCARD RenderSVGResourceType ResourceType() const noexcept override
@@ -80,6 +86,7 @@ namespace krys::boo
 
   private:
     void GetElement() const = delete;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGResourceMasker";
@@ -87,6 +94,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool DrawContentIntoMaskImage(MaskerData *, const DestinationColorSpace &,
                                                  RenderObject *) noexcept;
+
     void CalculateMaskContentRepaintRect(RepaintRectCalculation) noexcept;
   };
 }

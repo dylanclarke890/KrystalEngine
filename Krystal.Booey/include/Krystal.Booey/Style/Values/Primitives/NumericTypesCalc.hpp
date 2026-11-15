@@ -39,7 +39,7 @@ namespace krys::boo::style
     return value->CopyRoot();
   }
 
-  KRYS_NODISCARD inline calc::Child CopyCalculation(Calc auto const &value) noexcept
+  KRYS_NODISCARD inline calc::Child CopyCalculation(const Calc auto &value) noexcept
   {
     return value.ProtectedCalculation()->CopyRoot();
   }
@@ -62,12 +62,12 @@ namespace krys::boo::style
     return calc::CreateDimension(value.UnresolvedValue());
   }
 
-  KRYS_NODISCARD inline calc::Child CopyCalculation(Numeric auto const &value) noexcept
+  KRYS_NODISCARD inline calc::Child CopyCalculation(const Numeric auto &value) noexcept
   {
     return calc::CreateDimension(value.Value);
   }
 
-  KRYS_NODISCARD inline calc::Child CopyCalculation(DimensionPercentageNumeric auto const &value) noexcept
+  KRYS_NODISCARD inline calc::Child CopyCalculation(const DimensionPercentageNumeric auto &value) noexcept
   {
     return krys::SwitchOn(value, [](const auto &alternative) { return CopyCalculation(alternative); });
   }

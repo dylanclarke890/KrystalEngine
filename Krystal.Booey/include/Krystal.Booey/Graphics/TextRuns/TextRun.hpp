@@ -69,6 +69,7 @@ namespace krys::boo
     }
 
     TextRun(const TextRun &) noexcept = default;
+
     TextRun &operator=(const TextRun &) noexcept = default;
 
     KRYS_NODISCARD bool operator==(const TextRun &other) const noexcept;
@@ -103,6 +104,7 @@ namespace krys::boo
     {
       return _horizontalGlyphStretch;
     }
+
     void SetHorizontalGlyphStretch(float scale) noexcept
     {
       _horizontalGlyphStretch = scale;
@@ -112,10 +114,12 @@ namespace krys::boo
     {
       return _allowTabs;
     }
+
     KRYS_NODISCARD const boo::TabSize &TabSize() const noexcept
     {
       return _tabSize;
     }
+
     void SetTabSize(bool allow, const boo::TabSize &size) noexcept
     {
       _allowTabs = allow;
@@ -126,38 +130,47 @@ namespace krys::boo
     {
       return _xpos;
     }
+
     void SetXPos(float xPos) noexcept
     {
       _xpos = xPos;
     }
+
     KRYS_NODISCARD float Expansion() const noexcept
     {
       return _expansion;
     }
+
     KRYS_NODISCARD boo::ExpansionBehavior ExpansionBehavior() const noexcept
     {
       return _expansionBehavior;
     }
+
     KRYS_NODISCARD TextDirection Direction() const noexcept
     {
       return _direction;
     }
+
     KRYS_NODISCARD bool Rtl() const noexcept
     {
       return _direction == TextDirection::RTL;
     }
+
     KRYS_NODISCARD bool Ltr() const noexcept
     {
       return _direction == TextDirection::LTR;
     }
+
     KRYS_NODISCARD bool DirectionalOverride() const noexcept
     {
       return _directionalOverride;
     }
+
     KRYS_NODISCARD bool CharacterScanForCodePath() const noexcept
     {
       return _characterScanForCodePath;
     }
+
     KRYS_NODISCARD bool SpacingDisabled() const noexcept
     {
       return _disableSpacing;
@@ -167,14 +180,17 @@ namespace krys::boo
     {
       _disableSpacing = true;
     }
+
     void SetDirection(TextDirection direction) noexcept
     {
       _direction = direction;
     }
+
     void SetDirectionalOverride(bool override) noexcept
     {
       _directionalOverride = override;
     }
+
     void SetCharacterScanForCodePath(bool scan) noexcept
     {
       _characterScanForCodePath = scan;
@@ -189,6 +205,7 @@ namespace krys::boo
     {
       _textSpacingState = spacingState;
     }
+
     KRYS_NODISCARD text_spacing::SpacingState TextSpacingState() const noexcept
     {
       return _textSpacingState;

@@ -62,7 +62,7 @@ namespace krys::boo
     IgnoresFullSizeKana,
     // Used when we want to make 'content-visibility: auto', auto-expanding `<details>` or
     // `hidden=until-found` content discoverable.
-    EntersSkippedContentRelevantToUser
+    EntersSkippedContentRelevantToUser,
   };
 
   using TextIteratorBehaviors = EnumSet<TextIteratorBehavior>;

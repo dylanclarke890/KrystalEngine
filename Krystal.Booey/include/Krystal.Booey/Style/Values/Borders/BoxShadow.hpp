@@ -84,6 +84,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD css::BoxShadow operator()(const BoxShadow &, const RenderStyle &) noexcept;
   };
+
   template <>
   struct ToStyle<css::BoxShadow>
   {
@@ -97,6 +98,7 @@ namespace krys::boo::style
     KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &,
                                               const BoxShadowList &) noexcept;
   };
+
   template <>
   struct CSSValueConversion<BoxShadows>
   {
@@ -125,11 +127,13 @@ namespace krys::boo::style
   struct Blending<BoxShadows>
   {
     KRYS_NODISCARD bool CanBlend(const BoxShadows &, const BoxShadows &, CompositeOperation) noexcept;
+
     KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const BoxShadows &,
                                                                                 const BoxShadows &) noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD BoxShadows Blend(const BoxShadows &, const BoxShadows &, const RenderStyle &,
                                     const RenderStyle &, const BlendingContext &) noexcept;
   };

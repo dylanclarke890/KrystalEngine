@@ -45,6 +45,7 @@ namespace krys::boo
     KRYS_NODISCARD RenderElement &
       FindOrCreateParentForStyleBasedRubyChild(RenderElement &parent, const RenderObject &child,
                                                RenderObject *&beforeChild) noexcept;
+
     void AttachForStyleBasedRuby(RenderElement &parent, RenderPtr<RenderObject> child,
                                  RenderObject *beforeChild) noexcept;
   };

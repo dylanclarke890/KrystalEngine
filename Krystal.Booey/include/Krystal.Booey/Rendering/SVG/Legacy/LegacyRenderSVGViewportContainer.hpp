@@ -47,6 +47,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGViewportContainer(svg::SVGSvgElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGViewportContainer() noexcept override;
 
     KRYS_NODISCARD svg::SVGSvgElement &SvgSvgElement() const noexcept;
@@ -60,34 +61,42 @@ namespace krys::boo
     {
       return _isLayoutSizeChanged;
     }
+
     KRYS_NODISCARD bool DidTransformToRootUpdate() noexcept override
     {
       return _didTransformToRootUpdate;
     }
+
     void DetermineIfLayoutSizeChanged() noexcept override;
+
     void SetNeedsTransformUpdate() noexcept override
     {
       _needsTransformUpdate = true;
     }
+
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
 
   private:
     void GetElement() const = delete;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGViewportContainer";
     }
 
     KRYS_NODISCARD AffineTransform ViewportTransform() const noexcept;
+
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override
     {
       return _localToParentTransform;
     }
 
     void CalcViewport() noexcept override;
+
     bool CalculateLocalTransform() noexcept override;
 
     void ApplyViewportClip(PaintInfo &) noexcept override;
+
     KRYS_NODISCARD bool PointIsInsideViewportClip(const FloatPoint &pointInParent) noexcept override;
   };
 }

@@ -37,7 +37,7 @@ namespace krys::boo
     FECOMPOSITE_OPERATOR_ATOP = 4,
     FECOMPOSITE_OPERATOR_XOR = 5,
     FECOMPOSITE_OPERATOR_ARITHMETIC = 6,
-    FECOMPOSITE_OPERATOR_LIGHTER = 7
+    FECOMPOSITE_OPERATOR_LIGHTER = 7,
   };
 
   /// @brief The composite filter effect: its inputs combined by a Porter-Duff operator, or arithmetically.
@@ -61,30 +61,35 @@ namespace krys::boo
     {
       return _type;
     }
+
     bool SetOperation(CompositeOperationType type) noexcept;
 
     KRYS_NODISCARD float K1() const noexcept
     {
       return _k1;
     }
+
     bool SetK1(float k1) noexcept;
 
     KRYS_NODISCARD float K2() const noexcept
     {
       return _k2;
     }
+
     bool SetK2(float k2) noexcept;
 
     KRYS_NODISCARD float K3() const noexcept
     {
       return _k3;
     }
+
     bool SetK3(float k3) noexcept;
 
     KRYS_NODISCARD float K4() const noexcept
     {
       return _k4;
     }
+
     bool SetK4(float k4) noexcept;
 
   private:

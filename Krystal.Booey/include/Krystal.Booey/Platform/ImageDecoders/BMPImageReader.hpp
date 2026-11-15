@@ -75,12 +75,14 @@ namespace krys::boo
       HUFFMAN1D, // Stored in file as 3
       RLE24,     // Stored in file as 4
     };
+
     enum AndMaskState : uint8
     {
       None,
       NotYetDecoded,
       Decoding,
     };
+
     enum ProcessingResult : uint8
     {
       Success,
@@ -99,6 +101,7 @@ namespace krys::boo
       CompressionType BiCompression;
       uint32 BiClrUsed;
     };
+
     struct RGBTriple
     {
       uint8 RgbBlue;
@@ -195,6 +198,7 @@ namespace krys::boo
     {
       _buffer = buffer;
     }
+
     void SetData(const SharedBuffer &data) noexcept
     {
       _data = ShareRefPtr(&data);
@@ -312,7 +316,7 @@ namespace krys::boo
     KRYS_NODISCARD unsigned GetAlpha(uint32 pixel) const noexcept
     {
       // For images without alpha, return alpha of 0xff.
-      return _bitMasks[3] ? GetComponent(pixel, 3) : 0xff;
+      return _bitMasks[3] ? GetComponent(pixel, 3) : 0xFF;
     }
 
     // Sets the current pixel to the color given by |colorIndex|. This also
@@ -321,7 +325,7 @@ namespace krys::boo
     void SetI(size_t colorIndex) noexcept
     {
       SetPixel(_colorTable[colorIndex].RgbRed, _colorTable[colorIndex].RgbGreen,
-               _colorTable[colorIndex].RgbBlue, 0xff);
+               _colorTable[colorIndex].RgbBlue, 0xFF);
     }
 
     // Like setI(), but with the individual component values specified.

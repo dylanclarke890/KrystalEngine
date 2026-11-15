@@ -55,6 +55,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD float VirtualLogicalHeight() const noexcept override
     {
       return _logicalHeight;

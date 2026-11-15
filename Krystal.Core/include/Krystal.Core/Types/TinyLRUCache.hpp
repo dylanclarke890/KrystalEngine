@@ -16,14 +16,17 @@ namespace krys
     {
       return false;
     }
+
     KRYS_NODISCARD static TValue CreateValueForNullKey() noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD static TValue CreateValueForKey(const TKey &) noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD static TKey CreateKeyForStorage(const TKey &key) noexcept
     {
       return key;

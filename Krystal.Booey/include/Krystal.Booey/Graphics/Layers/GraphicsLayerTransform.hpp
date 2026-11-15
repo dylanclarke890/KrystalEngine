@@ -46,13 +46,19 @@ namespace krys::boo
     GraphicsLayerTransform() noexcept;
 
     void SetPosition(const FloatPoint &position) noexcept;
+
     void SetSize(const FloatSize &size) noexcept;
+
     void SetAnchorPoint(const FloatPoint3D &anchorPoint) noexcept;
+
     void SetFlattening(bool flattening) noexcept;
+
     void SetLocalTransform(const TransformationMatrix &transform) noexcept;
+
     void SetChildrenTransform(const TransformationMatrix &transform) noexcept;
 
     KRYS_NODISCARD const TransformationMatrix &Combined() const noexcept;
+
     KRYS_NODISCARD const TransformationMatrix &CombinedForChildren() const noexcept;
 
     void CombineTransforms(const TransformationMatrix &parentTransform) noexcept;

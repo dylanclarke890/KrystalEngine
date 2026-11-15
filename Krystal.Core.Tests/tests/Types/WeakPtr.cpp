@@ -9,6 +9,7 @@ namespace krys::tests
   {
   public:
     TestWeakRefCounted() = default;
+
     virtual ~TestWeakRefCounted() = default;
   };
 

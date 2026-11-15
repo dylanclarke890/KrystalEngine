@@ -1068,7 +1068,7 @@ namespace krys::boo::dom
     enum class ShouldIgnoreMouseEvent : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     KRYS_NODISCARD ShouldIgnoreMouseEvent
@@ -1360,7 +1360,7 @@ namespace krys::boo::dom
       }
       // Missing and unknown types are text.
       auto type = text::ToASCIILower(DOMStringView(element.GetAttribute(u8"type").value_or(DOMString())));
-      static constexpr DOMStringView nonTextFieldTypes[] = {
+      constexpr static DOMStringView nonTextFieldTypes[] = {
         u8"hidden",   u8"date",  u8"month", u8"week",   u8"time",  u8"datetime-local", u8"range", u8"color",
         u8"checkbox", u8"radio", u8"file",  u8"submit", u8"image", u8"reset",          u8"button"};
       return std::ranges::find(nonTextFieldTypes, DOMStringView(type)) == std::end(nonTextFieldTypes);
@@ -3900,7 +3900,7 @@ namespace krys::boo::dom
     enum class LegacyCSSOMElementMetricsRoundingStrategy : bool
     {
       Round,
-      Floor
+      Floor,
     };
 
     KRYS_NODISCARD int32

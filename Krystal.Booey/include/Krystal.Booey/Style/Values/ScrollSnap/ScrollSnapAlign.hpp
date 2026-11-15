@@ -36,10 +36,12 @@ namespace krys::boo::style
     constexpr ScrollSnapAlign(css::keywords::None) noexcept
     {
     }
+
     constexpr ScrollSnapAlign(ScrollSnapAxisAlignType bothAxes) noexcept
         : BlockAlign {bothAxes}, InlineAlign {bothAxes}
     {
     }
+
     constexpr ScrollSnapAlign(ScrollSnapAxisAlignType blockAlign,
                               ScrollSnapAxisAlignType inlineAlign) noexcept
         : BlockAlign {blockAlign}, InlineAlign {inlineAlign}

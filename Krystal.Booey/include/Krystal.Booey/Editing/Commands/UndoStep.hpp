@@ -44,9 +44,13 @@ namespace krys::boo
     virtual ~UndoStep() noexcept = default;
 
     virtual void Unapply() noexcept = 0;
+
     virtual void Reapply() noexcept = 0;
+
     KRYS_NODISCARD virtual EditAction EditingAction() const noexcept = 0;
+
     KRYS_NODISCARD virtual utf8_string Label() const noexcept = 0;
+
     virtual void DidRemoveFromUndoManager() noexcept = 0;
   };
 }

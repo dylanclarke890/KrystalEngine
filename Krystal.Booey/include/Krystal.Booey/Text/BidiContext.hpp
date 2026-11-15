@@ -31,7 +31,7 @@ namespace krys::boo
   enum class BidiEmbeddingSource : uint8
   {
     FromStyleOrDOM,
-    FromUnicode
+    FromUnicode,
   };
 
   /// @brief Used to keep track of explicit embeddings.
@@ -54,18 +54,22 @@ namespace krys::boo
     {
       return _parent.get();
     }
+
     KRYS_NODISCARD uint8 Level() const noexcept
     {
       return static_cast<uint8>(_level);
     }
+
     KRYS_NODISCARD UCharDirection Dir() const noexcept
     {
       return static_cast<UCharDirection>(_direction);
     }
+
     KRYS_NODISCARD bool Override() const noexcept
     {
       return _override;
     }
+
     KRYS_NODISCARD BidiEmbeddingSource Source() const noexcept
     {
       return static_cast<BidiEmbeddingSource>(_source);

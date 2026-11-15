@@ -35,8 +35,8 @@
 namespace krys::boo::css
 {
   class CSSStyleSheet;
-  class StyleSheetContents;
   struct ParserContext;
+  class StyleSheetContents;
 }
 
 namespace krys::boo::style
@@ -58,14 +58,14 @@ namespace krys::boo::html
     {
       Unknown,
       Inactive,
-      Active
+      Active,
     };
 
     enum class DisabledState : uint8
     {
       Unset,
       EnabledViaScript,
-      Disabled
+      Disabled,
     };
 
   private:
@@ -91,6 +91,7 @@ namespace krys::boo::html
 
   public:
     HTMLLinkElement(dom::Document &document) noexcept;
+
     ~HTMLLinkElement() noexcept override;
 
 #pragma region HTMLLinkElement - https://html.spec.whatwg.org/#htmllinkelement
@@ -221,12 +222,15 @@ namespace krys::boo::html
     {
       return _disabledState == DisabledState::Disabled;
     }
+
     KRYS_NODISCARD bool IsEnabledViaScript() const noexcept
     {
       return _disabledState == DisabledState::EnabledViaScript;
     }
+
     /// @brief Whether the sheet, or one it imports, is still loading.
     KRYS_NODISCARD bool StyleSheetIsLoading() const noexcept;
+
     /// @brief Whether it's an alternative style sheet that hasn't been explicitly enabled (by removing its
     /// `disabled` attribute).
     /// @see https://html.spec.whatwg.org/#explicitly-enabled
@@ -234,6 +238,7 @@ namespace krys::boo::html
     {
       return _disabledState == DisabledState::Unset && _relIsStyleSheet && _relIsAlternate;
     }
+
     /// @brief Whether it names an icon (its `rel` has `icon`).
     /// @see https://html.spec.whatwg.org/#rel-icon
     KRYS_NODISCARD bool IsIcon() const noexcept
@@ -242,18 +247,24 @@ namespace krys::boo::html
     }
 
     void DispatchPendingEvent(LinkEventSender *eventSender, const StringAtom &eventType) noexcept;
+
     /// @brief Dispatches the `load` and `error` events waiting to be dispatched soon, of every link.
     static void DispatchPendingLoadEvents() noexcept;
 
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
+
     void OnInsert() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void FinishParsingChildren() noexcept override;
 
     bool SheetLoaded() noexcept override;
+
     void NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept override;
+
     void StartLoadingDynamicSheet() noexcept override;
 
   private:
@@ -261,21 +272,33 @@ namespace krys::boo::html
                           const CachedCSSStyleSheet *cachedStyleSheet) noexcept override;
 
     void Process() noexcept;
+
     void ClearSheet() noexcept;
+
     void SetDisabledState(bool disabled) noexcept;
+
     void ParseRel(dom::DOMStringView value) noexcept;
+
     /// @brief Tells the document its icons may have changed.
     void IconMayHaveChanged() noexcept;
+
     KRYS_NODISCARD url::URL NonEmptyHrefURL() const noexcept;
+
     /// @brief Whether the `media` attribute matches the environment (an empty list does).
     /// @see https://html.spec.whatwg.org/#matches-the-environment
     KRYS_NODISCARD bool MediaAttributeMatches() const noexcept;
+
     void InitializeStyleSheet(Ref<css::StyleSheetContents> &&styleSheet,
                               const css::ParserContext &context) noexcept;
+
     void AddPendingSheet(PendingSheetType type) noexcept;
+
     void RemovePendingSheet() noexcept;
+
     void PotentiallyBlockRendering() noexcept;
+
     void UnblockRendering() noexcept;
+
     KRYS_NODISCARD bool IsImplicitlyPotentiallyRenderBlocking() const noexcept;
   };
 }

@@ -494,6 +494,7 @@ namespace krys::boo::css
       // Nothing to do.
     }
   };
+
 #pragma endregion
 
 #pragma region ValueChildrenVisitor
@@ -720,6 +721,7 @@ namespace krys::boo::css
   template <SerialisationSeparatorType>
   KRYS_NODISCARD Ref<Value> CreateCoalescingQuadValue(Ref<Value> &&, Ref<Value> &&, Ref<Value> &&,
                                                       Ref<Value> &&) noexcept;
+
   template <>
   KRYS_NODISCARD Ref<Value>
     CreateCoalescingQuadValue<SerialisationSeparatorType::Space>(Ref<Value> &&, Ref<Value> &&, Ref<Value> &&,

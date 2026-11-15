@@ -75,10 +75,13 @@ namespace krys::boo
                          const StringAtom &locale) noexcept;
 
     TextBreakIteratorICU() = delete;
+
     TextBreakIteratorICU(const TextBreakIteratorICU &) = delete;
+
     TextBreakIteratorICU &operator=(const TextBreakIteratorICU &) = delete;
 
     TextBreakIteratorICU(TextBreakIteratorICU &&other) noexcept;
+
     TextBreakIteratorICU &operator=(TextBreakIteratorICU &&other) noexcept;
 
     ~TextBreakIteratorICU() noexcept;
@@ -87,7 +90,9 @@ namespace krys::boo
     void SetText(utf8_stringview string, utf8_stringview priorContext) noexcept;
 
     KRYS_NODISCARD Maybe<uint32> Preceding(uint32 location) const noexcept;
+
     KRYS_NODISCARD Maybe<uint32> Following(uint32 location) const noexcept;
+
     KRYS_NODISCARD bool IsBoundary(uint32 location) const noexcept;
 
   private:
@@ -108,6 +113,7 @@ namespace krys::boo
     struct LineMode
     {
       TextBreakLineBehavior Behavior;
+
       friend bool operator==(LineMode, LineMode) = default;
     };
 
@@ -146,9 +152,13 @@ namespace krys::boo
 
   public:
     TextBreakIterator() = delete;
+
     TextBreakIterator(const TextBreakIterator &) = delete;
+
     TextBreakIterator(TextBreakIterator &&) noexcept = default;
+
     TextBreakIterator &operator=(const TextBreakIterator &) = delete;
+
     TextBreakIterator &operator=(TextBreakIterator &&) noexcept = default;
 
     KRYS_NODISCARD Maybe<uint32> Preceding(uint32 location) const noexcept
@@ -200,7 +210,7 @@ namespace krys::boo
     friend class CachedTextBreakIterator;
     KRYS_NON_COPY_MOVABLE(TextBreakIteratorCache);
 
-    static constexpr uint32 Capacity = 2;
+    constexpr static uint32 Capacity = 2;
 
     // FIXME: Break this up into different Vectors per mode.
     SmallList<TextBreakIterator, Capacity> _unused;
@@ -215,6 +225,7 @@ namespace krys::boo
                                           TextBreakIterator::Mode mode,
                                           TextBreakIterator::ContentAnalysis contentAnalysis,
                                           const StringAtom &locale) noexcept;
+
     void Put(TextBreakIterator &&iterator) noexcept;
   };
 
@@ -231,10 +242,13 @@ namespace krys::boo
                             TextBreakIterator::Mode mode, const StringAtom &locale,
                             TextBreakIterator::ContentAnalysis contentAnalysis =
                               TextBreakIterator::ContentAnalysis::Mechanical) noexcept;
+
     ~CachedTextBreakIterator() noexcept;
 
     CachedTextBreakIterator() = delete;
+
     CachedTextBreakIterator(CachedTextBreakIterator &&other) noexcept;
+
     CachedTextBreakIterator &operator=(CachedTextBreakIterator &&other) noexcept;
 
     KRYS_NODISCARD Maybe<uint32> Preceding(uint32 location) const noexcept
@@ -255,6 +269,7 @@ namespace krys::boo
 
   // FIXME: Delete this in favor of CachedTextBreakIterator.
   KRYS_NODISCARD UBreakIterator *WordBreakIterator(utf8_stringview string) noexcept;
+
   // FIXME: Delete this in favor of CachedTextBreakIterator.
   KRYS_NODISCARD UBreakIterator *SentenceBreakIterator(utf8_stringview string) noexcept;
 
@@ -268,7 +283,7 @@ namespace krys::boo
     class PriorContext
     {
     public:
-      static constexpr uint32 Length = 2;
+      constexpr static uint32 Length = 2;
 
     private:
       Array<char32, Length> _priorContext;
@@ -295,7 +310,9 @@ namespace krys::boo
       }
 
       void Set(Array<char32, Length> &&newPriorContext) noexcept;
+
       void Update(char32 last) noexcept;
+
       void Reset() noexcept;
 
       /// @brief The number of code points in the prior context.
@@ -381,6 +398,7 @@ namespace krys::boo
 
   public:
     explicit NonSharedCharacterBreakIterator(utf8_stringview string) noexcept;
+
     ~NonSharedCharacterBreakIterator() noexcept;
 
     NonSharedCharacterBreakIterator(NonSharedCharacterBreakIterator &&other) noexcept;
@@ -401,6 +419,7 @@ namespace krys::boo
 
   public:
     explicit NonSharedSentenceBreakIterator(utf8_stringview string) noexcept;
+
     ~NonSharedSentenceBreakIterator() noexcept;
 
     NonSharedSentenceBreakIterator(NonSharedSentenceBreakIterator &&other) noexcept;

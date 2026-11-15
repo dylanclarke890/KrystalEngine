@@ -56,6 +56,7 @@ namespace krys::boo::style
     {
       return _platform;
     }
+
     KRYS_NODISCARD Platform TakePlatform() noexcept
     {
       return krys::move(_platform);
@@ -79,6 +80,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD FontVariantAlternates operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<FontVariantAlternates>
   {

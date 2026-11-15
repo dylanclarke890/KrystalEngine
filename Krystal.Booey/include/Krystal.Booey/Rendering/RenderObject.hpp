@@ -68,16 +68,20 @@ namespace krys::boo::layout
 namespace krys::boo
 {
   class AffineTransform;
+  enum class Affinity : bool;
   class ControlPart;
   class FloatPoint;
+  class FloatQuad;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
-  class FloatQuad;
+  enum class HitTestSource : bool;
   class IntRect;
   class LayoutPoint;
   class LayoutRect;
   class LayoutSize;
+  class LocalFrameViewLayoutContext;
+  class ReferencedSVGResources;
   class RenderBlock;
   class RenderBlockFlow;
   class RenderBox;
@@ -85,19 +89,15 @@ namespace krys::boo
   class RenderElement;
   class RenderFragmentContainer;
   class RenderFragmentedFlow;
+  class RenderGeometryMap;
   class RenderLayer;
   class RenderLayerModelObject;
   class RenderTreeBuilder;
   class RenderView;
-  class LocalFrameViewLayoutContext;
   class ScrollAnchoringController;
-  class ReferencedSVGResources;
-  class RenderGeometryMap;
-  class TransformState;
   class TransformationMatrix;
+  class TransformState;
   class VisiblePosition;
-  enum class Affinity : bool;
-  enum class HitTestSource : bool;
 
   enum class RenderObjectStateFlag : uint8
   {
@@ -121,14 +121,14 @@ namespace krys::boo
     ChildrenInline,
     PaintContainmentApplies,
     WasSkippedDuringLastLayoutDueToContentVisibility,
-    InsideFragmentedFlow
+    InsideFragmentedFlow,
   };
 
   /// @brief Whether a renderer is laid out in a fragmented flow.
   enum class RenderObjectFragmentedFlowState : bool
   {
     NotInsideFlow,
-    InsideFlow
+    InsideFlow,
   };
 
   /// @brief How coordinates are mapped between a renderer and its ancestors.
@@ -137,7 +137,7 @@ namespace krys::boo
     IsFixed,
     UseTransforms,
     ApplyContainerFlip,
-    IgnoreStickyOffsets
+    IgnoreStickyOffsets,
   };
 
   /// @brief Which part of a renderer a hit test looks at: itself, its descendants or both.
@@ -145,7 +145,7 @@ namespace krys::boo
   {
     HitTestAll,
     HitTestSelf,
-    HitTestDescendants
+    HitTestDescendants,
   };
 
   /// @brief The hit testing counterpart of a paint phase: what a renderer is tested for in one pass.
@@ -155,28 +155,28 @@ namespace krys::boo
     HitTestChildBlockBackground,
     HitTestChildBlockBackgrounds,
     HitTestFloat,
-    HitTestForeground
+    HitTestForeground,
   };
 
   /// @brief Whether repaint rects include the outline bounds rect.
   enum class RepaintOutlineBounds : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Whether a repaint after layout repaints the old and new rects whole, rather than what changed.
   enum class RequiresFullRepaint : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Whether marking a renderer as needing layout also marks its containing blocks.
   enum class RenderObjectMarkingBehavior : bool
   {
     MarkOnlyThis,
-    MarkContainingBlockChain
+    MarkContainingBlockChain,
   };
 
   enum class RenderObjectTypeFlag : uint8
@@ -188,7 +188,7 @@ namespace krys::boo
     IsLayerModelObject,
     IsRenderInline,
     IsRenderBlock,
-    IsFlexibleBox
+    IsFlexibleBox,
   };
 
   enum class RenderObjectBlockFlowFlag : uint8
@@ -196,12 +196,12 @@ namespace krys::boo
     IsFragmentContainer,
     IsFragmentedFlow,
     IsTextControl,
-    IsSVGBlock
+    IsSVGBlock,
   };
 
   enum class RenderObjectLineBreakFlag : uint8
   {
-    IsWBR
+    IsWBR,
   };
 
   enum class RenderObjectReplacedFlag : uint8
@@ -209,7 +209,7 @@ namespace krys::boo
     IsImage,
     IsMedia,
     IsWidget,
-    UsesBoundaryCaching
+    UsesBoundaryCaching,
   };
 
   enum class RenderObjectSVGModelObjectFlag : uint8
@@ -219,7 +219,7 @@ namespace krys::boo
     IsHiddenContainer,
     IsResourceContainer,
     IsShape,
-    UsesBoundaryCaching
+    UsesBoundaryCaching,
   };
 
   enum class RenderObjectBoundingRectBehavior : uint8
@@ -357,7 +357,7 @@ namespace krys::boo
       LegacySVGResourceRadialGradient,
       LegacySVGRoot,
       LegacySVGTransformableContainer,
-      LegacySVGViewportContainer
+      LegacySVGViewportContainer,
     };
 
     using TypeFlag = RenderObjectTypeFlag;
@@ -378,7 +378,7 @@ namespace krys::boo
         BlockFlow,
         LineBreak,
         Replaced,
-        SVGModelObject
+        SVGModelObject,
       };
 
     private:
@@ -417,14 +417,17 @@ namespace krys::boo
       {
         return EnumSet<BlockFlowFlag>::FromRaw(ValueForKind(Kind::BlockFlow));
       }
+
       KRYS_NODISCARD constexpr EnumSet<LineBreakFlag> LineBreakFlags() const noexcept
       {
         return EnumSet<LineBreakFlag>::FromRaw(ValueForKind(Kind::LineBreak));
       }
+
       KRYS_NODISCARD constexpr EnumSet<ReplacedFlag> ReplacedFlags() const noexcept
       {
         return EnumSet<ReplacedFlag>::FromRaw(ValueForKind(Kind::Replaced));
       }
+
       KRYS_NODISCARD constexpr EnumSet<SVGModelObjectFlag> SVGFlags() const noexcept
       {
         return EnumSet<SVGModelObjectFlag>::FromRaw(ValueForKind(Kind::SVGModelObject));
@@ -452,32 +455,41 @@ namespace krys::boo
     virtual void NotifyFinished(CachedResource &) noexcept
     {
     }
+
     virtual void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool AllowsAnimation() const noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD virtual bool CanDestroyDecodedData() const noexcept
     {
       return true;
     }
+
     virtual VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                        const IntRect *) noexcept;
+
     KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const dom::Document &) const noexcept
     {
       return VisibleInViewportState::No;
     }
+
     virtual void DidRemoveCachedImageClient(CachedImage &) noexcept
     {
     }
+
     virtual void ImageContentChanged(CachedImage &) noexcept
     {
     }
+
     /// @brief Schedules the page's rendering update for @p image's own, as an SVG image's page is updated
     /// with the page that shows it.
     virtual void ScheduleRenderingUpdateForImage(CachedImage &image) noexcept;
+
     /// @brief The client the renderer is to the cached images it uses.
     KRYS_NODISCARD CachedImageClient &GetCachedImageClient() const noexcept;
 
@@ -492,9 +504,11 @@ namespace krys::boo
       bool FullRepaintIsScheduled {false};
       const RenderLayerModelObject *Renderer {nullptr};
     };
+
     /// @brief The renderer whose coordinates the renderer's repaints are in: null for the render view.
     // FIXME: Compositing layers and filter layers, once there are any.
     KRYS_NODISCARD RepaintContainerStatus ContainerForRepaint() const noexcept;
+
     /// @brief Repaints @p rect, in @p repaintContainer's coordinates (the render view's if null).
     void RepaintUsingContainer(const RenderLayerModelObject *repaintContainer, const LayoutRect &rect,
                                bool shouldClipToLayer = true) const noexcept;
@@ -502,20 +516,24 @@ namespace krys::boo
     enum class ForceRepaint : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     /// @brief Repaints the renderer: its clipped overflow rect.
     void Repaint(ForceRepaint forceRepaint = ForceRepaint::No) const noexcept;
 
     enum class ClipRepaintToLayer : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     /// @brief Repaints @p repaintRect, in the renderer's coordinates.
     void RepaintRectangle(const LayoutRect &repaintRect, bool shouldClipToLayer = true) const noexcept;
+
     /// @brief Repaints a renderer with a fixed background, which moves against the contents when they scroll.
     void RepaintSlowRepaintObject() const noexcept;
+
     void RepaintRectangle(const LayoutRect &repaintRect, ClipRepaintToLayer shouldClipToLayer,
                           ForceRepaint forceRepaint,
                           Maybe<LayoutBoxExtent> additionalRepaintOutsets = null) const noexcept;
@@ -531,6 +549,7 @@ namespace krys::boo
       Maybe<LayoutRect> OutlineBoundsRect;
 
       RepaintRects() noexcept = default;
+
       explicit RepaintRects(const LayoutRect &rect, const Maybe<LayoutRect> &outlineBounds = null) noexcept
           : ClippedOverflowRect(rect), OutlineBoundsRect(outlineBounds)
       {
@@ -592,25 +611,32 @@ namespace krys::boo
       }
 
       void Transform(const TransformationMatrix &matrix) noexcept;
+
       void Transform(const TransformationMatrix &matrix, float deviceScaleFactor) noexcept;
     };
 
     /// @brief The rect to repaint whenever the renderer changes, in the view's coordinates: its overflow and
     /// outlines.
     KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForRepaint() const noexcept;
+
     /// @brief The renderer's clipped overflow rect in the view's coordinates, clipped as composited, as
     /// spatial navigation tests whether it's on screen.
     KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForSpatialNavigation() const noexcept;
+
     KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForRenderTreeAsText() const noexcept;
+
     KRYS_NODISCARD IntRect PixelSnappedAbsoluteClippedOverflowRect() const noexcept;
 
     KRYS_NODISCARD virtual LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                           VisibleRectContext context) const noexcept;
+
     KRYS_NODISCARD LayoutRect
       ClippedOverflowRectForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept;
+
     KRYS_NODISCARD virtual LayoutRect
       RectWithOutlineForRepaint(const RenderLayerModelObject *repaintContainer,
                                 LayoutUnit outlineWidth) const noexcept;
+
     KRYS_NODISCARD virtual LayoutRect
       OutlineBoundsForRepaint(const RenderLayerModelObject * /*repaintContainer*/) const noexcept;
 
@@ -618,8 +644,10 @@ namespace krys::boo
     KRYS_NODISCARD RepaintRects ComputeRects(const RepaintRects &rects,
                                              const RenderLayerModelObject *repaintContainer,
                                              VisibleRectContext context) const noexcept;
+
     KRYS_NODISCARD LayoutRect ComputeRectForRepaint(
       const LayoutRect &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
+
     KRYS_NODISCARD FloatRect ComputeFloatRectForRepaint(
       const FloatRect &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
 
@@ -633,23 +661,28 @@ namespace krys::boo
     KRYS_NODISCARD virtual Maybe<RepaintRects>
       ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
                                      VisibleRectContext context) const noexcept;
+
     /// @brief `ComputeVisibleRectsInContainer` for SVG renderers, which map float rects.
     KRYS_NODISCARD virtual Maybe<FloatRect>
       ComputeFloatVisibleRectInContainer(const FloatRect &rect, const RenderLayerModelObject *container,
                                          VisibleRectContext context) const noexcept;
 
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForRepaint() noexcept;
+
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForSpatialNavigation() noexcept;
+
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForRenderTreeAsText() noexcept;
 
     /// @brief Whether the renderer has a layer that paints itself.
     KRYS_NODISCARD bool HasSelfPaintingLayer() const noexcept;
 
     KRYS_NODISCARD bool HasOutlineAutoAncestor() const noexcept;
+
     void SetHasOutlineAutoAncestor(bool hasOutlineAutoAncestor = true) noexcept;
 
     /// @brief Marks the enclosing layer as needing a full repaint after layout.
     void SetLayerNeedsFullRepaint() noexcept;
+
     void SetLayerNeedsFullRepaintForOutOfFlowMovementLayout() noexcept;
 
   protected:
@@ -689,15 +722,23 @@ namespace krys::boo
 
       // CachedImageClient.
       void ImageChanged(CachedImage *, const IntRect * = nullptr) noexcept final;
+
       KRYS_NODISCARD bool AllowsAnimation() const noexcept final;
+
       KRYS_NODISCARD bool CanDestroyDecodedData() const noexcept final;
+
       VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                  const IntRect *) noexcept final;
+
       KRYS_NODISCARD VisibleInViewportState
         ImageVisibleInViewport(const dom::Document &) const noexcept final;
+
       void DidRemoveCachedImageClient(CachedImage &) noexcept final;
+
       void ImageContentChanged(CachedImage &) noexcept final;
+
       void ScheduleRenderingUpdateForImage(CachedImage &) noexcept final;
+
       KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept final;
     };
 
@@ -708,7 +749,7 @@ namespace krys::boo
       IsStaticallyPositioned = 0,
       IsRelativelyPositioned = 1,
       IsOutOfFlowPositioned = 2,
-      IsStickilyPositioned = 3
+      IsStickilyPositioned = 3,
     };
 
     dom::Node &_node;
@@ -731,6 +772,7 @@ namespace krys::boo
     /// marked as anonymous in the constructor.
     RenderObject(Type type, dom::Node &node, EnumSet<TypeFlag> typeFlags,
                  TypeSpecificFlags typeSpecificFlags) noexcept;
+
     virtual ~RenderObject() noexcept;
 
     KRYS_NODISCARD Type GetType() const noexcept
@@ -751,12 +793,14 @@ namespace krys::boo
     {
       return _previous;
     }
+
     KRYS_NODISCARD RenderObject *NextSibling() const noexcept
     {
       return _next;
     }
 
     KRYS_NODISCARD RenderObject *PreviousInFlowSibling() const noexcept;
+
     KRYS_NODISCARD RenderObject *NextInFlowSibling() const noexcept;
 
     // Use RenderElement versions instead.
@@ -764,36 +808,50 @@ namespace krys::boo
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual RenderObject *LastChildSlow() const noexcept
     {
       return nullptr;
     }
 
     KRYS_NODISCARD RenderObject *NextInPreOrder() const noexcept;
+
     KRYS_NODISCARD RenderObject *NextInPreOrder(const RenderObject *stayWithin) const noexcept;
+
     KRYS_NODISCARD RenderObject *NextInPreOrderAfterChildren() const noexcept;
+
     KRYS_NODISCARD RenderObject *NextInPreOrderAfterChildren(const RenderObject *stayWithin) const noexcept;
+
     KRYS_NODISCARD RenderObject *PreviousInPreOrder() const noexcept;
+
     KRYS_NODISCARD RenderObject *PreviousInPreOrder(const RenderObject *stayWithin) const noexcept;
+
     KRYS_NODISCARD RenderObject *ChildAt(uint32 index) const noexcept;
 
     KRYS_NODISCARD RenderObject *FirstLeafChild() const noexcept;
+
     KRYS_NODISCARD RenderObject *LastLeafChild() const noexcept;
 
     KRYS_NODISCARD virtual bool CanHaveChildren() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool CreatesAnonymousWrapper() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool CanHaveGeneratedChildren() const noexcept;
 
     /// @brief The render tree's root.
     KRYS_NODISCARD RenderView &View() const noexcept;
+
     KRYS_NODISCARD LocalFrameViewLayoutContext &LayoutContext() const noexcept;
 
     KRYS_NODISCARD layout::Box *LayoutBox() noexcept;
+
     KRYS_NODISCARD const layout::Box *LayoutBox() const noexcept;
+
     void SetLayoutBox(layout::Box &box) noexcept;
+
     void ClearLayoutBox() noexcept;
 
     KRYS_NODISCARD RenderElement *FirstNonAnonymousAncestor() const noexcept;
@@ -812,6 +870,7 @@ namespace krys::boo
     void Destroy() noexcept;
 
     virtual void InsertedIntoTree() noexcept;
+
     virtual void WillBeRemovedFromTree() noexcept;
 
 #pragma region Fragmentation
@@ -824,6 +883,7 @@ namespace krys::boo
       return _stateFlags.Contains(StateFlag::InsideFragmentedFlow) ? FragmentedFlowState::InsideFlow
                                                                    : FragmentedFlowState::NotInsideFlow;
     }
+
     void SetFragmentedFlowState(FragmentedFlowState state) noexcept
     {
       _stateFlags.Set(StateFlag::InsideFragmentedFlow, state == FragmentedFlowState::InsideFlow);
@@ -833,8 +893,9 @@ namespace krys::boo
     enum class SkipDescendentFragmentedFlow : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     void SetFragmentedFlowStateIncludingDescendants(
       FragmentedFlowState state,
       SkipDescendentFragmentedFlow skipDescendentFragmentedFlow = SkipDescendentFragmentedFlow::Yes) noexcept;
@@ -851,6 +912,7 @@ namespace krys::boo
 
     /// @brief Sets the state of an object just inserted from its new container's.
     void InitializeFragmentedFlowStateOnInsertion() noexcept;
+
     /// @brief Takes an object being removed out of its fragmented flow.
     void ResetFragmentedFlowStateOnRemoval() noexcept;
 
@@ -860,208 +922,258 @@ namespace krys::boo
     {
       return !IsRenderText();
     }
+
     KRYS_NODISCARD bool IsRenderText() const noexcept
     {
       return _typeFlags.Contains(TypeFlag::IsText);
     }
+
     KRYS_NODISCARD bool IsRenderBoxModelObject() const noexcept
     {
       return _typeFlags.Contains(TypeFlag::IsBoxModelObject);
     }
+
     KRYS_NODISCARD bool IsRenderBlock() const noexcept
     {
       return _typeFlags.Contains(TypeFlag::IsRenderBlock);
     }
+
     KRYS_NODISCARD bool IsRenderInline() const noexcept
     {
       return _typeFlags.Contains(TypeFlag::IsRenderInline);
     }
+
     KRYS_NODISCARD bool IsRenderBox() const noexcept
     {
       return _typeFlags.Contains(TypeFlag::IsBox);
     }
+
     KRYS_NODISCARD bool IsRenderGrid() const noexcept
     {
       return _type == Type::Grid;
     }
+
     KRYS_NODISCARD bool IsRenderButton() const noexcept
     {
       return _type == Type::Button;
     }
+
     KRYS_NODISCARD bool IsRenderSlider() const noexcept
     {
       return _type == Type::Slider;
     }
+
     KRYS_NODISCARD bool IsRenderFileUploadControl() const noexcept
     {
       return _type == Type::FileUploadControl;
     }
+
     KRYS_NODISCARD bool IsRenderMenuList() const noexcept
     {
       return _type == Type::MenuList;
     }
+
     KRYS_NODISCARD bool IsRenderListBox() const noexcept
     {
       return _type == Type::ListBox;
     }
+
     KRYS_NODISCARD bool IsRenderProgress() const noexcept
     {
       return _type == Type::Progress;
     }
+
     KRYS_NODISCARD bool IsRenderMeter() const noexcept
     {
       return _type == Type::Meter;
     }
+
     KRYS_NODISCARD bool IsRenderFrameSet() const noexcept
     {
       return _type == Type::FrameSet;
     }
+
     KRYS_NODISCARD bool IsRenderLayerModelObject() const noexcept
     {
       return _typeFlags.Contains(TypeFlag::IsLayerModelObject);
     }
+
     KRYS_NODISCARD bool IsRenderReplaced() const noexcept
     {
       return _typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::Replaced;
     }
+
     KRYS_NODISCARD bool IsRenderImage() const noexcept
     {
       return IsRenderReplaced() && _typeSpecificFlags.ReplacedFlags().Contains(ReplacedFlag::IsImage);
     }
+
     KRYS_NODISCARD bool IsRenderBlockFlow() const noexcept
     {
       return _typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::BlockFlow;
     }
+
     KRYS_NODISCARD bool IsRenderFlexibleBox() const noexcept
     {
       return _typeFlags.Contains(TypeFlag::IsFlexibleBox);
     }
+
     KRYS_NODISCARD bool IsRenderListItem() const noexcept
     {
       return _type == Type::ListItem;
     }
+
     KRYS_NODISCARD bool IsRenderListMarker() const noexcept
     {
       return _type == Type::ListMarker;
     }
+
     KRYS_NODISCARD bool IsRenderLineBreak() const noexcept
     {
       return _type == Type::LineBreak;
     }
+
     /// @brief Whether this is the line break of a `<br>`.
     KRYS_NODISCARD bool IsBR() const noexcept
     {
       return IsRenderLineBreak() && !HasWBRLineBreakFlag();
     }
+
     /// @brief Whether this is the line break opportunity of a `<wbr>`.
     KRYS_NODISCARD bool IsWBR() const noexcept
     {
       return IsRenderLineBreak() && HasWBRLineBreakFlag();
     }
+
     KRYS_NODISCARD bool IsLineBreakOpportunity() const noexcept
     {
       return IsRenderLineBreak() && IsWBR();
     }
+
     KRYS_NODISCARD bool IsRenderTextOrLineBreak() const noexcept
     {
       return IsRenderText() || IsRenderLineBreak();
     }
+
     KRYS_NODISCARD bool IsRenderTable() const noexcept
     {
       return _type == Type::Table || _type == Type::MathMLTable;
     }
+
     KRYS_NODISCARD bool IsRenderTableCell() const noexcept
     {
       return _type == Type::TableCell;
     }
+
     KRYS_NODISCARD bool IsRenderTableCol() const noexcept
     {
       return _type == Type::TableCol;
     }
+
     KRYS_NODISCARD bool IsRenderTableCaption() const noexcept
     {
       return _type == Type::TableCaption;
     }
+
     KRYS_NODISCARD bool IsRenderTableSection() const noexcept
     {
       return _type == Type::TableSection;
     }
+
     KRYS_NODISCARD bool IsRenderTableRow() const noexcept
     {
       return _type == Type::TableRow;
     }
+
     KRYS_NODISCARD bool IsRenderHTMLCanvas() const noexcept
     {
       return _type == Type::HTMLCanvas;
     }
+
     KRYS_NODISCARD bool IsTablePart() const noexcept
     {
       return IsRenderTableCell() || IsRenderTableCol() || IsRenderTableCaption() || IsRenderTableRow()
              || IsRenderTableSection();
     }
+
     KRYS_NODISCARD bool IsRenderFragmentedFlow() const noexcept
     {
       return IsRenderBlockFlow()
              && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsFragmentedFlow);
     }
+
     KRYS_NODISCARD bool IsRenderFragmentContainer() const noexcept
     {
       return IsRenderBlockFlow()
              && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsFragmentContainer);
     }
+
     KRYS_NODISCARD bool IsRenderMultiColumnFlow() const noexcept
     {
       return _type == Type::MultiColumnFlow;
     }
+
     KRYS_NODISCARD bool IsRenderMultiColumnSet() const noexcept
     {
       return _type == Type::MultiColumnSet;
     }
+
     KRYS_NODISCARD bool IsRenderMultiColumnSpannerPlaceholder() const noexcept
     {
       return _type == Type::MultiColumnSpannerPlaceholder;
     }
+
     KRYS_NODISCARD bool IsRenderTextControl() const noexcept
     {
       return IsRenderBlockFlow()
              && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsTextControl);
     }
+
     KRYS_NODISCARD bool IsRenderTextControlSingleLine() const noexcept
     {
       return IsRenderTextControl() && _type != Type::TextControlMultiLine;
     }
+
     KRYS_NODISCARD bool IsRenderTextControlMultiLine() const noexcept
     {
       return _type == Type::TextControlMultiLine;
     }
+
     KRYS_NODISCARD bool IsRenderTextControlInnerBlock() const noexcept
     {
       return _type == Type::TextControlInnerBlock;
     }
+
     KRYS_NODISCARD bool IsRenderTextControlInnerContainer() const noexcept
     {
       return _type == Type::TextControlInnerContainer;
     }
+
     KRYS_NODISCARD bool IsRenderSearchField() const noexcept
     {
       return _type == Type::SearchField;
     }
+
     KRYS_NODISCARD bool IsRenderView() const noexcept
     {
       return _type == Type::View;
     }
+
     KRYS_NODISCARD bool IsRenderTextFragment() const noexcept
     {
       return _type == Type::TextFragment;
     }
+
     KRYS_NODISCARD bool IsRenderCounter() const noexcept
     {
       return _type == Type::Counter;
     }
+
     KRYS_NODISCARD bool IsRenderQuote() const noexcept
     {
       return _type == Type::Quote;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLBlock() const noexcept
     {
       switch (_type)
@@ -1081,10 +1193,12 @@ namespace krys::boo
         default:                    return false;
       }
     }
+
     KRYS_NODISCARD bool IsRenderMathMLTable() const noexcept
     {
       return _type == Type::MathMLTable;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLRow() const noexcept
     {
       switch (_type)
@@ -1100,160 +1214,198 @@ namespace krys::boo
         default:                    return false;
       }
     }
+
     KRYS_NODISCARD bool IsRenderMathMLFraction() const noexcept
     {
       return _type == Type::MathMLFraction;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLMath() const noexcept
     {
       return _type == Type::MathMLMath;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLMenclose() const noexcept
     {
       return _type == Type::MathMLMenclose;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLOperator() const noexcept
     {
       return _type == Type::MathMLOperator;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLPadded() const noexcept
     {
       return _type == Type::MathMLPadded;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLRoot() const noexcept
     {
       return _type == Type::MathMLRoot;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLScripts() const noexcept
     {
       return _type == Type::MathMLScripts;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLSpace() const noexcept
     {
       return _type == Type::MathMLSpace;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLToken() const noexcept
     {
       return _type == Type::MathMLToken || _type == Type::MathMLOperator;
     }
+
     KRYS_NODISCARD bool IsRenderMathMLUnderOver() const noexcept
     {
       return _type == Type::MathMLUnderOver;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGModelObject() const noexcept
     {
       return _typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::SVGModelObject
              && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsLegacy);
     }
+
     KRYS_NODISCARD bool IsRenderSVGModelObject() const noexcept
     {
       return _typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::SVGModelObject
              && !_typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsLegacy);
     }
+
     KRYS_NODISCARD bool IsRenderOrLegacyRenderSVGModelObject() const noexcept
     {
       return IsRenderSVGModelObject() || IsLegacyRenderSVGModelObject();
     }
+
     KRYS_NODISCARD bool IsRenderSVGBlock() const noexcept
     {
       return IsRenderBlockFlow() && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsSVGBlock);
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGRoot() const noexcept
     {
       return _type == Type::LegacySVGRoot;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGContainer() const noexcept
     {
       return IsLegacyRenderSVGModelObject()
              && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsContainer);
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGTransformableContainer() const noexcept
     {
       return _type == Type::LegacySVGTransformableContainer;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGViewportContainer() const noexcept
     {
       return _type == Type::LegacySVGViewportContainer;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGHiddenContainer() const noexcept
     {
       return IsLegacyRenderSVGModelObject()
              && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsHiddenContainer);
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGPath() const noexcept
     {
       return _type == Type::LegacySVGPath;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGShape() const noexcept
     {
       return IsLegacyRenderSVGModelObject()
              && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsShape);
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGRect() const noexcept
     {
       return _type == Type::LegacySVGRect;
     }
+
     KRYS_NODISCARD bool IsRenderSVGText() const noexcept
     {
       return _type == Type::SVGText;
     }
+
     KRYS_NODISCARD bool IsRenderSVGTextPath() const noexcept
     {
       return _type == Type::SVGTextPath;
     }
+
     KRYS_NODISCARD bool IsRenderSVGTSpan() const noexcept
     {
       return _type == Type::SVGTSpan;
     }
+
     KRYS_NODISCARD bool IsRenderSVGInline() const noexcept
     {
       return _type == Type::SVGInline || _type == Type::SVGTSpan || _type == Type::SVGTextPath;
     }
+
     KRYS_NODISCARD bool IsRenderCombineText() const noexcept
     {
       return _type == Type::CombineText;
     }
+
     KRYS_NODISCARD bool IsRenderSVGInlineText() const noexcept
     {
       return _type == Type::SVGInlineText;
     }
+
     KRYS_NODISCARD bool IsRenderSVGGradientStop() const noexcept
     {
       return _type == Type::SVGGradientStop;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGImage() const noexcept
     {
       return _type == Type::LegacySVGImage;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGForeignObject() const noexcept
     {
       return _type == Type::LegacySVGForeignObject;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGResourceContainer() const noexcept
     {
       return IsLegacyRenderSVGModelObject()
              && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsResourceContainer);
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGResourceFilter() const noexcept
     {
       return _type == Type::LegacySVGResourceFilter;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGResourceClipper() const noexcept
     {
       return _type == Type::LegacySVGResourceClipper;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGResourceMarker() const noexcept
     {
       return _type == Type::LegacySVGResourceMarker;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGResourceMasker() const noexcept
     {
       return _type == Type::LegacySVGResourceMasker;
     }
+
     KRYS_NODISCARD bool IsLegacyRenderSVGResourceFilterPrimitive() const noexcept
     {
       return _type == Type::LegacySVGResourceFilterPrimitive;
     }
+
     KRYS_NODISCARD bool IsSVGRenderer() const noexcept
     {
       return IsLegacyRenderSVGRoot() || IsLegacyRenderSVGModelObject() || IsRenderSVGBlock()
@@ -1264,8 +1416,11 @@ namespace krys::boo
     // Unfortunately we don't have such a class yet, because it's not possible for all renderers
     // to inherit from RenderSVGObject -> RenderObject (some need RenderBlock inheritance for instance)
     void InvalidateCachedBoundaries() noexcept;
+
     KRYS_NODISCARD bool UsesBoundaryCaching() const noexcept;
+
     virtual void SetNeedsBoundariesUpdate() noexcept;
+
     virtual void SetNeedsTransformUpdate() noexcept
     {
     }
@@ -1277,6 +1432,7 @@ namespace krys::boo
     // objectBoundingBox is returned local coordinates.
     // The name objectBoundingBox is taken from the SVG 1.1 spec.
     KRYS_NODISCARD virtual FloatRect ObjectBoundingBox() const noexcept;
+
     KRYS_NODISCARD virtual FloatRect StrokeBoundingBox() const noexcept;
 
     // The objectBoundingBox of a SVG container is affected by the transformations applied on its children --
@@ -1335,19 +1491,23 @@ namespace krys::boo
     {
       return _positionedState != PositionedState::IsStaticallyPositioned;
     }
+
     KRYS_NODISCARD bool IsInFlowPositioned() const noexcept
     {
       return IsRelativelyPositioned() || IsStickilyPositioned();
     }
+
     // absolute or fixed positioning
     KRYS_NODISCARD bool IsOutOfFlowPositioned() const noexcept
     {
       return _positionedState == PositionedState::IsOutOfFlowPositioned;
     }
+
     KRYS_NODISCARD bool IsRelativelyPositioned() const noexcept
     {
       return _positionedState == PositionedState::IsRelativelyPositioned;
     }
+
     KRYS_NODISCARD bool IsStickilyPositioned() const noexcept
     {
       return _positionedState == PositionedState::IsStickilyPositioned;
@@ -1357,6 +1517,7 @@ namespace krys::boo
     {
       return IsFloating() || IsOutOfFlowPositioned();
     }
+
     KRYS_NODISCARD bool IsInFlow() const noexcept
     {
       return !IsFloatingOrOutOfFlowPositioned();
@@ -1367,10 +1528,12 @@ namespace krys::boo
     {
       return !_stateFlags.Contains(StateFlag::IsBlock);
     }
+
     KRYS_NODISCARD bool IsBlockLevelReplacedOrAtomicInline() const noexcept
     {
       return _stateFlags.Contains(StateFlag::IsBlockLevelReplacedOrAtomicInline);
     }
+
     KRYS_NODISCARD bool IsHorizontalWritingMode() const noexcept
     {
       return !_stateFlags.Contains(StateFlag::VerticalWritingMode);
@@ -1378,16 +1541,19 @@ namespace krys::boo
 
     /// @brief Whether the renderer is drawn in the dark appearance (its style's colour scheme).
     KRYS_NODISCARD bool UseDarkAppearance() const noexcept;
+
     /// @brief The options its system colours are resolved with.
     KRYS_NODISCARD style::ColorOptions StyleColorOptions() const noexcept;
 
     KRYS_NODISCARD bool IsAtomicInlineLevelBox() const noexcept;
+
     KRYS_NODISCARD bool IsNonReplacedAtomicInlineLevelBox() const noexcept;
 
     KRYS_NODISCARD bool IsExcludedFromNormalLayout() const noexcept
     {
       return _stateFlags.Contains(StateFlag::IsExcludedFromNormalLayout);
     }
+
     void SetIsExcludedFromNormalLayout(bool excluded) noexcept
     {
       _stateFlags.Set(StateFlag::IsExcludedFromNormalLayout, excluded);
@@ -1397,6 +1563,7 @@ namespace krys::boo
     {
       return _stateFlags.Contains(StateFlag::ChildrenInline);
     }
+
     virtual void SetChildrenInline(bool b) noexcept
     {
       _stateFlags.Set(StateFlag::ChildrenInline, b);
@@ -1413,6 +1580,7 @@ namespace krys::boo
     {
       return _boxDecorationState;
     }
+
     KRYS_NODISCARD bool HasVisibleBoxDecorations() const noexcept
     {
       return _boxDecorationState != BoxDecorationState::None;
@@ -1428,15 +1596,19 @@ namespace krys::boo
     {
       return _stateFlags.Contains(StateFlag::HasTransformRelatedProperty);
     }
+
     KRYS_NODISCARD bool IsTransformed() const noexcept;
 
     KRYS_NODISCARD RenderLayer *EnclosingLayer() const noexcept;
+
     /// @brief The scroll anchoring of the closest scroller around @p renderer (or @p renderer itself) that
     /// has an anchor, or else the frame view's.
     KRYS_NODISCARD static ScrollAnchoringController *
       SearchParentChainForScrollAnchoringController(const RenderObject &renderer) noexcept;
+
     /// @brief The nearest box that is this renderer or one of its ancestors.
     KRYS_NODISCARD RenderBox &EnclosingBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *EnclosingScrollableContainer() const noexcept;
 
     KRYS_NODISCARD bool IsSkippedContent() const noexcept;
@@ -1446,18 +1618,22 @@ namespace krys::boo
     bool HitTest(const HitTestRequest &request, HitTestResult &result,
                  const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                  HitTestFilter hitTestFilter = HitTestAll) noexcept;
+
     /// @brief Whether @p locationInContainer hits the renderer (or its descendants) in @p hitTestAction,
     /// setting
     /// @p result's inner node when it does.
     virtual bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                              const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                              HitTestAction hitTestAction) noexcept;
+
     /// @brief Sets @p result's inner node to this renderer's node (if it has none yet), @p point being the
     /// hit point in the renderer's coordinates.
     virtual void UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept;
+
     /// @brief The node hit testing reports for the renderer: its node, or for anonymous renderers in
     /// generated content, the pseudo-element's.
     KRYS_NODISCARD virtual dom::Node *NodeForHitTest() const noexcept;
+
     KRYS_NODISCARD bool HasTransformOrPerspective() const noexcept;
 
     KRYS_NODISCARD bool PaintContainmentApplies() const noexcept
@@ -1466,8 +1642,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsDocumentElementRenderer() const noexcept;
+
     KRYS_NODISCARD bool IsFieldset() const noexcept;
+
     KRYS_NODISCARD bool IsLegend() const noexcept;
+
     KRYS_NODISCARD bool IsExcludedAndPlacedInBorder() const noexcept
     {
       return IsExcludedFromNormalLayout() && IsLegend();
@@ -1483,12 +1662,16 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept;
+
     KRYS_NODISCARD virtual const RenderStyle &OutlineStyleForRepaint() const noexcept;
+
     KRYS_NODISCARD bool IsBody() const noexcept;
+
     KRYS_NODISCARD bool IsPseudoElement() const noexcept;
 
     // Returns the object containing this one. Can be different from parent for positioned elements.
     KRYS_NODISCARD RenderElement *Container() const noexcept;
+
     /// @brief The object containing this one, and whether @p repaintContainer was skipped to reach it.
     KRYS_NODISCARD RenderElement *Container(const RenderLayerModelObject *repaintContainer,
                                             bool &repaintContainerSkipped) const noexcept;
@@ -1499,10 +1682,13 @@ namespace krys::boo
     KRYS_NODISCARD FloatPoint LocalToAbsolute(const FloatPoint &localPoint,
                                               EnumSet<MapCoordinatesMode> mode = {},
                                               bool *wasFixed = nullptr) const noexcept;
+
     KRYS_NODISCARD FloatPoint LocalToAbsolute() const noexcept;
+
     /// @brief Converts an absolute point to this renderer's coordinates.
     KRYS_NODISCARD FloatPoint AbsoluteToLocal(const FloatPoint &containerPoint,
                                               EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
+
     KRYS_NODISCARD FloatQuad AbsoluteToLocalQuad(const FloatQuad &quad,
                                                  EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
 
@@ -1510,11 +1696,13 @@ namespace krys::boo
     KRYS_NODISCARD FloatQuad LocalToAbsoluteQuad(
       const FloatQuad &quad, EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
       bool *wasFixed = nullptr) const noexcept;
+
     /// @brief Converts a quad in this renderer's coordinates to @p container's (absolute if null).
     KRYS_NODISCARD FloatQuad
       LocalToContainerQuad(const FloatQuad &localQuad, const RenderLayerModelObject *container,
                            EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
                            bool *wasFixed = nullptr) const noexcept;
+
     KRYS_NODISCARD FloatPoint
       LocalToContainerPoint(const FloatPoint &localPoint, const RenderLayerModelObject *container,
                             EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
@@ -1525,6 +1713,7 @@ namespace krys::boo
     virtual void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer,
                                      TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
                                      bool *wasFixed) const noexcept;
+
     /// @brief Maps the coordinates in @p transformState from absolute coordinates to this renderer's.
     virtual void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
                                          TransformState &transformState) const noexcept;
@@ -1533,6 +1722,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual LayoutSize
       OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
                           bool *offsetDependsOnPoint = nullptr) const noexcept;
+
     /// @brief The offset from an ancestor @p container, without transforms, to this renderer.
     KRYS_NODISCARD LayoutSize OffsetFromAncestorContainer(const RenderElement &container) const noexcept;
 
@@ -1540,6 +1730,7 @@ namespace krys::boo
     virtual void BoundingRects(List<LayoutRect> &, const LayoutPoint & /* offsetFromRoot */) const noexcept
     {
     }
+
     /// @brief Appends the renderer's border boxes, or line boxes, in absolute coordinates.
     virtual void AbsoluteQuads(List<FloatQuad> &, bool * /*wasFixed*/ = nullptr) const noexcept
     {
@@ -1548,11 +1739,13 @@ namespace krys::boo
     /// @brief The quads, in absolute coordinates, of the text and line breaks @p range covers.
     KRYS_NODISCARD static List<FloatQuad>
       AbsoluteTextQuads(const dom::SimpleRange &range, EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
+
     /// @brief The border boxes of the elements @p range wholly selects (outermost only) and the rects of the
     /// text it covers, in absolute coordinates.
     KRYS_NODISCARD static List<FloatRect>
       AbsoluteBorderAndTextRects(const dom::SimpleRange &range,
                                  EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
+
     /// @brief `AbsoluteBorderAndTextRects` in client coordinates, as `Range`'s `getClientRects()` returns
     /// them.
     KRYS_NODISCARD static List<FloatRect> ClientBorderAndTextRects(const dom::SimpleRange &range) noexcept;
@@ -1560,6 +1753,7 @@ namespace krys::boo
     /// @brief The bounding box of the renderer in absolute coordinates.
     KRYS_NODISCARD IntRect AbsoluteBoundingBoxRect(bool useTransforms = true,
                                                    bool *wasFixed = nullptr) const noexcept;
+
     KRYS_NODISCARD IntRect AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept;
 
     /// @brief The absolute rect painting the renderer's subtree covers: its bounding box with its
@@ -1567,20 +1761,25 @@ namespace krys::boo
     /// @param topLevelRect Set to the renderer's own bounding box.
     // FIXME: change this to use the subtreePaint terminology
     KRYS_NODISCARD LayoutRect PaintingRootRect(LayoutRect &topLevelRect) noexcept;
+
     void AddAbsoluteRectForLayer(LayoutRect &result) noexcept;
 
     KRYS_NODISCARD bool ShouldUseTransformFromContainer(const RenderElement *containerObject) const noexcept;
+
     void GetTransformFromContainer(const LayoutSize &offsetInContainer,
                                    TransformationMatrix &transform) const noexcept;
+
     void PushOntoTransformState(TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
                                 const RenderLayerModelObject *repaintContainer,
                                 const RenderElement *container, const LayoutSize &offsetInContainer,
                                 bool containerSkipped) const noexcept;
+
     KRYS_NODISCARD bool ParticipatesInPreserve3D() const noexcept;
 
 #pragma endregion
 
     KRYS_NODISCARD RenderBlock *ContainingBlock() const noexcept;
+
     KRYS_NODISCARD static RenderBlock *ContainingBlockForPositionType(PositionType positionType,
                                                                       const RenderObject &renderer) noexcept;
 
@@ -1602,13 +1801,16 @@ namespace krys::boo
 
     /// @brief The node rendered, or null for an anonymous object or a pseudo-element.
     KRYS_NODISCARD dom::Node *NonPseudoNode() const noexcept;
+
     KRYS_NODISCARD dom::Element *NonPseudoElement() const noexcept;
 
     KRYS_NODISCARD dom::Document &GetDocument() const noexcept;
+
     KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
     /// @brief The style the object is rendered with: an element's own, or a text's parent's.
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
+
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
 
 #pragma region Editing
@@ -1617,23 +1819,29 @@ namespace krys::boo
     KRYS_NODISCARD virtual dom::PositionWithAffinity
       PositionForPoint(const LayoutPoint &point, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept;
+
     KRYS_NODISCARD VisiblePosition
       VisiblePositionForPoint(const LayoutPoint &point, HitTestSource source,
                               const RenderFragmentContainer *fragment = nullptr) noexcept;
+
     /// @brief The position at @p offset in this renderer's node, or near it if the renderer is anonymous; a
     /// visually equivalent editable position is preferred.
     KRYS_NODISCARD dom::PositionWithAffinity CreatePositionWithAffinity(int32 offset,
                                                                         Affinity affinity) const noexcept;
+
     KRYS_NODISCARD dom::PositionWithAffinity
       CreatePositionWithAffinity(const dom::Position &position) const noexcept;
 
     KRYS_NODISCARD bool IsHR() const noexcept;
 
     KRYS_NODISCARD virtual int32 CaretMinOffset() const noexcept;
+
     KRYS_NODISCARD virtual int32 CaretMaxOffset() const noexcept;
 
     KRYS_NODISCARD virtual int32 PreviousOffset(int32 current) const noexcept;
+
     KRYS_NODISCARD virtual int32 PreviousOffsetForBackwardDeletion(int32 current) const noexcept;
+
     KRYS_NODISCARD virtual int32 NextOffset(int32 current) const noexcept;
 
 #pragma endregion
@@ -1649,7 +1857,9 @@ namespace krys::boo
     {
       return _selectionState;
     }
+
     virtual void SetSelectionState(HighlightState state) noexcept;
+
     void SetSelectionStateIfNeeded(HighlightState state) noexcept
     {
       if (SelectionState() == state)
@@ -1659,6 +1869,7 @@ namespace krys::boo
 
       SetSelectionState(state);
     }
+
     KRYS_NODISCARD bool CanUpdateSelectionOnRootLineBoxes() const noexcept;
 
     // A single rectangle that encompasses all of the selected objects within this object. Used to determine
@@ -1692,16 +1903,18 @@ namespace krys::boo
 #pragma region Layout bits
 
     using MarkingBehavior = RenderObjectMarkingBehavior;
+
     enum class HadSkippedLayout : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     KRYS_NODISCARD bool EverHadLayout() const noexcept
     {
       return _stateFlags.Contains(StateFlag::EverHadLayout);
     }
+
     KRYS_NODISCARD Maybe<bool> WasSkippedDuringLastLayoutDueToContentVisibility() const noexcept
     {
       return EverHadLayout() ? Maybe<bool> {_stateFlags.Contains(
@@ -1714,6 +1927,7 @@ namespace krys::boo
       return SelfNeedsLayout() || NormalChildNeedsLayout() || OutOfFlowChildNeedsLayout()
              || NeedsSimplifiedNormalFlowLayout() || NeedsOutOfFlowMovementLayout();
     }
+
     KRYS_NODISCARD bool NeedsPreferredLogicalWidthsUpdate() const noexcept
     {
       return _stateFlags.Contains(StateFlag::PreferredLogicalWidthsNeedUpdate);
@@ -1723,10 +1937,12 @@ namespace krys::boo
     {
       return _stateFlags.Contains(StateFlag::NeedsLayout);
     }
+
     KRYS_NODISCARD bool NeedsOutOfFlowMovementLayout() const noexcept
     {
       return _stateFlags.Contains(StateFlag::NeedsOutOfFlowMovementLayout);
     }
+
     KRYS_NODISCARD bool NeedsOutOfFlowMovementLayoutOnly() const noexcept
     {
       return NeedsOutOfFlowMovementLayout() && !SelfNeedsLayout() && !NormalChildNeedsLayout()
@@ -1737,24 +1953,29 @@ namespace krys::boo
     {
       return _stateFlags.Contains(StateFlag::OutOfFlowChildNeedsLayout);
     }
+
     KRYS_NODISCARD bool NeedsSimplifiedNormalFlowLayout() const noexcept
     {
       return _stateFlags.Contains(StateFlag::NeedsSimplifiedNormalFlowLayout);
     }
+
     KRYS_NODISCARD bool NeedsSimplifiedNormalFlowLayoutOnly() const noexcept
     {
       return NeedsSimplifiedNormalFlowLayout() && !SelfNeedsLayout() && !NormalChildNeedsLayout()
              && !OutOfFlowChildNeedsLayout() && !NeedsOutOfFlowMovementLayout();
     }
+
     KRYS_NODISCARD bool NeedsNormalChildOrSimplifiedLayoutOnly() const noexcept
     {
       return (NormalChildNeedsLayout() || NeedsSimplifiedNormalFlowLayout()) && !SelfNeedsLayout()
              && !OutOfFlowChildNeedsLayout() && !NeedsOutOfFlowMovementLayout();
     }
+
     KRYS_NODISCARD bool NormalChildNeedsLayout() const noexcept
     {
       return _stateFlags.Contains(StateFlag::NormalChildNeedsLayout);
     }
+
     KRYS_NODISCARD bool OutOfFlowChildNeedsStaticPositionLayout() const noexcept
     {
       return _stateFlags.Contains(StateFlag::OutOfFlowChildNeedsStaticPositionLayout);
@@ -1764,14 +1985,19 @@ namespace krys::boo
     /// @p layoutRoot or the first layout boundary.
     /// @return The renderer to lay out from, or null if the chain was already marked or isn't rooted.
     RenderElement *MarkContainingBlocksForLayout(RenderElement *layoutRoot = nullptr) noexcept;
+
     void SetNeedsLayout(MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
+
     void ClearNeedsLayout(HadSkippedLayout hadSkippedLayout = HadSkippedLayout::No) noexcept;
+
     void SetNeedsPreferredWidthsUpdate(
       MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
+
     void ClearNeedsPreferredWidthsUpdate() noexcept
     {
       _stateFlags.Remove(StateFlag::PreferredLogicalWidthsNeedUpdate);
     }
+
     void SetNeedsLayoutAndPreferredWidthsUpdate() noexcept
     {
       SetNeedsLayout();
@@ -1790,8 +2016,10 @@ namespace krys::boo
     public:
       explicit SetLayoutNeededForbiddenScope(const RenderObject &renderObject,
                                              bool isForbidden = true) noexcept;
+
       ~SetLayoutNeededForbiddenScope() noexcept;
     };
+
     KRYS_NODISCARD bool IsSetNeedsLayoutForbidden() const noexcept
     {
       return _setNeedsLayoutForbidden;
@@ -1804,6 +2032,7 @@ namespace krys::boo
 
     /// @brief Finds the fragmented flow the object is laid out in, through its containing blocks.
     KRYS_NODISCARD virtual RenderFragmentedFlow *LocateEnclosingFragmentedFlow() const noexcept;
+
     /// @brief The state @p renderer should have in its current place in the tree.
     KRYS_NODISCARD static FragmentedFlowState
       ComputedFragmentedFlowState(const RenderObject &renderer) noexcept;
@@ -1812,30 +2041,37 @@ namespace krys::boo
     {
       _stateFlags.Set(StateFlag::NeedsOutOfFlowMovementLayout, b);
     }
+
     void SetNormalChildNeedsLayoutBit(bool b) noexcept
     {
       _stateFlags.Set(StateFlag::NormalChildNeedsLayout, b);
     }
+
     void SetOutOfFlowChildNeedsLayoutBit(bool b) noexcept
     {
       _stateFlags.Set(StateFlag::OutOfFlowChildNeedsLayout, b);
     }
+
     void SetNeedsSimplifiedNormalFlowLayoutBit(bool b) noexcept
     {
       _stateFlags.Set(StateFlag::NeedsSimplifiedNormalFlowLayout, b);
     }
+
     void SetOutOfFlowChildNeedsStaticPositionLayoutBit(bool b) noexcept
     {
       _stateFlags.Set(StateFlag::OutOfFlowChildNeedsStaticPositionLayout, b);
     }
+
     void SetEverHadLayout() noexcept
     {
       _stateFlags.Add(StateFlag::EverHadLayout);
     }
+
     void SetHadSkippedLayout(bool b) noexcept
     {
       _stateFlags.Set(StateFlag::WasSkippedDuringLastLayoutDueToContentVisibility, b);
     }
+
     void InvalidateContainerPreferredLogicalWidths() noexcept;
 
     void SetNeedsLayoutIsForbidden(bool flag) const noexcept
@@ -1863,17 +2099,22 @@ namespace krys::boo
       LayoutUnit PaginationStrut;
       LayoutUnit PageLogicalOffset;
     };
+
     KRYS_NODISCARD bool HasRareData() const noexcept
     {
       return _stateFlags.Contains(StateFlag::HasRareData);
     }
+
     KRYS_NODISCARD const RareData &GetRareData() const noexcept;
+
     KRYS_NODISCARD RareData &EnsureRareData() noexcept;
+
     void RemoveRareData() noexcept;
 
   private:
     // Entries are removed when their renderer is destroyed.
     using RareDataMap = HashMap<const RenderObject *, UniquePtr<RareData>>;
+
     KRYS_NODISCARD static RareDataMap &GetRareDataMap() noexcept;
 
   protected:
@@ -1881,10 +2122,12 @@ namespace krys::boo
     {
       _previous = previous;
     }
+
     void SetNextSibling(RenderObject *next) noexcept
     {
       _next = next;
     }
+
     void SetParent(RenderElement *parent) noexcept;
 
     KRYS_NODISCARD bool HasWBRLineBreakFlag() const noexcept
@@ -1895,6 +2138,7 @@ namespace krys::boo
     virtual void WillBeDestroyed() noexcept;
 
     void SetPositionState(PositionType position) noexcept;
+
     void ClearPositionedState() noexcept
     {
       _positionedState = PositionedState::IsStaticallyPositioned;
@@ -1904,6 +2148,7 @@ namespace krys::boo
     {
       _stateFlags.Set(StateFlag::Floating, b);
     }
+
     void SetInline(bool b) noexcept
     {
       _stateFlags.Set(StateFlag::IsBlock, !b);
@@ -1915,22 +2160,27 @@ namespace krys::boo
     {
       _stateFlags.Set(StateFlag::IsBlockLevelReplacedOrAtomicInline, b);
     }
+
     void SetHorizontalWritingMode(bool b = true) noexcept
     {
       _stateFlags.Set(StateFlag::VerticalWritingMode, !b);
     }
+
     void SetHasNonVisibleOverflow(bool b = true) noexcept
     {
       _stateFlags.Set(StateFlag::HasNonVisibleOverflow, b);
     }
+
     void SetHasLayer(bool b = true) noexcept
     {
       _stateFlags.Set(StateFlag::HasLayer, b);
     }
+
     void SetHasTransformRelatedProperty(bool b = true) noexcept
     {
       _stateFlags.Set(StateFlag::HasTransformRelatedProperty, b);
     }
+
     void SetPaintContainmentApplies(bool value = true) noexcept
     {
       _stateFlags.Set(StateFlag::PaintContainmentApplies, value);
@@ -1940,6 +2190,7 @@ namespace krys::boo
     {
       return _typeFlags;
     }
+
     KRYS_NODISCARD TypeSpecificFlags GetTypeSpecificFlags() const noexcept
     {
       return _typeSpecificFlags;

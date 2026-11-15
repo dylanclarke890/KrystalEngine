@@ -47,6 +47,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<CSSLayerBlockRule> Create(LayerRule &rule, CSSStyleSheet *parent) noexcept;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     KRYS_NODISCARD CSSOMString Name() const noexcept;
 
   private:

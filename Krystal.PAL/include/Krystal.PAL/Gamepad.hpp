@@ -43,7 +43,7 @@ namespace krys::pal
     DPadLeft,
     DPadRight,
     /// @brief The middle button of the centre cluster (the Xbox button).
-    Guide
+    Guide,
   };
 
   /// @brief A gamepad's axes, in the order of the standard gamepad layout.
@@ -52,18 +52,18 @@ namespace krys::pal
     LeftX,
     LeftY,
     RightX,
-    RightY
+    RightY,
   };
 
   /// @brief The state of a gamepad's button.
   enum class GamepadButtonState : uint8
   {
     Pressed,
-    Released
+    Released,
   };
 
-  inline constexpr size_t GamepadButtonCount = 17;
-  inline constexpr size_t GamepadAxisCount = 4;
+  constexpr inline size_t GamepadButtonCount = 17;
+  constexpr inline size_t GamepadAxisCount = 4;
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::pal::GamepadButton, 17uz)

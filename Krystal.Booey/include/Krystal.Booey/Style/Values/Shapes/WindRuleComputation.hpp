@@ -47,7 +47,8 @@ namespace krys::boo::style
       return WindRuleComputation<StyleType> {}(value);
     }
   };
-  inline constexpr WindRuleComputationInvoker ComputeWindRule {};
+
+  constexpr inline WindRuleComputationInvoker ComputeWindRule {};
 
   // Specialization for `css::FunctionNotation`.
   template <css::ValueId Name, typename StyleType>

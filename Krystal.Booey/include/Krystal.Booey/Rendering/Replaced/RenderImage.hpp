@@ -37,13 +37,13 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
-  class StyleImage;
   enum class ImageDrawResult : uint8;
+  class StyleImage;
 
   enum class ImageSizeChangeType : bool
   {
     None,
-    ForAltText
+    ForAltText,
   };
 
   /// @brief The renderer of an image: an `<img>`, or generated content (`content: url(...)`).
@@ -67,18 +67,22 @@ namespace krys::boo
   public:
     RenderImage(Type type, dom::Element &element, RenderStyle &&style, StyleImage *styleImage = nullptr,
                 float imageDevicePixelRatio = 1.0f) noexcept;
+
     RenderImage(Type type, dom::Document &document, RenderStyle &&style,
                 StyleImage *styleImage = nullptr) noexcept;
+
     ~RenderImage() noexcept override;
 
     KRYS_NODISCARD RenderImageResource &ImageResource() noexcept
     {
       return *_imageResource;
     }
+
     KRYS_NODISCARD const RenderImageResource &ImageResource() const noexcept
     {
       return *_imageResource;
     }
+
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept
     {
       return ImageResource().GetCachedImage();
@@ -95,6 +99,7 @@ namespace krys::boo
     {
       _isGeneratedContent = generated;
     }
+
     KRYS_NODISCARD bool IsGeneratedContent() const noexcept
     {
       return _isGeneratedContent;
@@ -104,18 +109,21 @@ namespace krys::boo
     {
       return _altText;
     }
+
     void SetAltText(utf8_string altText) noexcept
     {
       _altText = krys::move(altText);
     }
 
     void SetImageDevicePixelRatio(float factor) noexcept;
+
     KRYS_NODISCARD float ImageDevicePixelRatio() const noexcept
     {
       return _imageDevicePixelRatio;
     }
 
     KRYS_NODISCARD bool IsShowingMissingOrImageError() const noexcept;
+
     KRYS_NODISCARD bool IsShowingAltText() const noexcept;
 
     KRYS_NODISCARD virtual bool ShouldDisplayBrokenImageIcon() const noexcept;
@@ -125,6 +133,7 @@ namespace krys::boo
 
     /// @brief The image map the image uses, if any.
     KRYS_NODISCARD html::HTMLMapElement *ImageMap() const noexcept;
+
     KRYS_NODISCARD bool ShouldRespectZeroIntrinsicWidth() const noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
@@ -136,16 +145,21 @@ namespace krys::boo
     void WillBeDestroyed() noexcept override;
 
     KRYS_NODISCARD bool ShouldInvalidatePreferredWidths() const noexcept final;
+
     KRYS_NODISCARD RenderBox *EmbeddedContentBox() const noexcept final;
+
     KRYS_NODISCARD FloatSize ComputeIntrinsicSize() const noexcept final;
+
     KRYS_NODISCARD FloatSize PreferredAspectRatio() const noexcept final;
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
+
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
 
     void ImageChanged(WrappedImagePtr newImage, const IntRect *rect = nullptr) noexcept override;
 
     ImageDrawResult PaintIntoRect(PaintInfo &paintInfo, const FloatRect &rect) noexcept;
+
     void Layout() noexcept override;
 
     void IntrinsicSizeChanged() noexcept override
@@ -160,12 +174,15 @@ namespace krys::boo
     }
 
     void Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept override;
+
     void PaintReplaced(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept override;
+
     void PaintAreaElementFocusRing(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
 
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction action) noexcept override;
+
     void PaintIncompleteImageOutline(PaintInfo &paintInfo, LayoutPoint paintOffset,
                                      LayoutUnit borderWidth) const noexcept;
 
@@ -174,8 +191,11 @@ namespace krys::boo
     void NotifyFinished(CachedResource &newImage) noexcept final;
 
     KRYS_NODISCARD IntSize ImageSizeForError(CachedImage *newImage) const noexcept;
+
     void RepaintOrMarkForLayout(ImageSizeChangeType imageSizeChange, const IntRect *rect = nullptr) noexcept;
+
     void UpdateIntrinsicSizeIfNeeded(const LayoutSize &newSize) noexcept;
+
     // Update the size of the image to be rendered. Object-fit may cause this to be different from the CSS
     // box's content rect.
     void UpdateInnerContentRect() noexcept;
@@ -183,6 +203,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit
       ComputeReplacedLogicalWidth(ShouldComputePreferred shouldComputePreferred =
                                     ShouldComputePreferred::ComputeActual) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       ComputeReplacedLogicalHeight(Maybe<LayoutUnit> estimatedUsedWidth = null) const noexcept override;
 

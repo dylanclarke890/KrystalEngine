@@ -63,6 +63,7 @@ namespace krys::boo::mathml
     explicit MathMLOperatorElement(dom::Document &document) noexcept;
 
     KRYS_NODISCARD static OperatorChar ParseOperatorChar(dom::DOMStringView string) noexcept;
+
     KRYS_NODISCARD const OperatorChar &GetOperatorChar() noexcept;
 
     void SetOperatorFormDirty() noexcept
@@ -76,22 +77,33 @@ namespace krys::boo::mathml
     }
 
     KRYS_NODISCARD bool HasProperty(MathMLOperatorDictionary::Flag flag) noexcept;
+
     KRYS_NODISCARD Length DefaultLeadingSpace() noexcept;
+
     KRYS_NODISCARD Length DefaultTrailingSpace() noexcept;
+
     KRYS_NODISCARD const Length &LeadingSpace() noexcept;
+
     KRYS_NODISCARD const Length &TrailingSpace() noexcept;
+
     KRYS_NODISCARD const Length &MinSize() noexcept;
+
     KRYS_NODISCARD const Length &MaxSize() noexcept;
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+
     void OnChildrenChanged() noexcept final;
+
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
 
     KRYS_NODISCARD MathMLOperatorDictionary::Property ComputeDictionaryProperty() noexcept;
+
     KRYS_NODISCARD const MathMLOperatorDictionary::Property &DictionaryProperty() noexcept;
+
     void ComputeOperatorFlag(MathMLOperatorDictionary::Flag flag) noexcept;
+
     void UpdateRendererFromElement() noexcept;
   };
 }

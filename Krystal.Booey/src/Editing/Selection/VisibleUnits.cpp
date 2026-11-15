@@ -419,7 +419,7 @@ namespace krys::boo
     enum class CursorMovementDirection : bool
     {
       MoveLeft,
-      MoveRight
+      MoveRight,
     };
 
     KRYS_NODISCARD VisiblePosition VisualWordPosition(const VisiblePosition &visiblePosition,
@@ -722,7 +722,7 @@ namespace krys::boo
     enum class NeedsContextAtParagraphStart : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     KRYS_NODISCARD VisiblePosition PreviousBoundary(
@@ -997,7 +997,7 @@ namespace krys::boo
     enum class LineEndpointComputationMode : bool
     {
       UseLogicalOrdering,
-      UseInlineBoxOrdering
+      UseInlineBoxOrdering,
     };
 
     KRYS_NODISCARD VisiblePosition StartPositionForLine(const VisiblePosition &c,

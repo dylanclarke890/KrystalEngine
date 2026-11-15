@@ -13,8 +13,8 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
-  enum class MutationRecordType : uint8;
   class MutationObserver;
+  enum class MutationRecordType : uint8;
   class Node;
   class RegisteredObserver;
 

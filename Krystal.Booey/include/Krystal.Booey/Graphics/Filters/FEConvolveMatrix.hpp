@@ -39,7 +39,7 @@ namespace krys::boo
     Unknown,
     Duplicate,
     Wrap,
-    None
+    None,
   };
 
   /// @brief The convolve matrix filter effect: a kernel convolved with its input.
@@ -68,48 +68,56 @@ namespace krys::boo
     {
       return _kernelSize;
     }
+
     void SetKernelSize(const IntSize &kernelSize) noexcept;
 
     KRYS_NODISCARD const List<float> &Kernel() const noexcept
     {
       return _kernelMatrix;
     }
+
     void SetKernel(const List<float> &kernel) noexcept;
 
     KRYS_NODISCARD float Divisor() const noexcept
     {
       return _divisor;
     }
+
     bool SetDivisor(float divisor) noexcept;
 
     KRYS_NODISCARD float Bias() const noexcept
     {
       return _bias;
     }
+
     bool SetBias(float bias) noexcept;
 
     KRYS_NODISCARD IntPoint TargetOffset() const noexcept
     {
       return _targetOffset;
     }
+
     bool SetTargetOffset(const IntPoint &targetOffset) noexcept;
 
     KRYS_NODISCARD EdgeModeType EdgeMode() const noexcept
     {
       return _edgeMode;
     }
+
     bool SetEdgeMode(EdgeModeType edgeMode) noexcept;
 
     KRYS_NODISCARD FloatPoint KernelUnitLength() const noexcept
     {
       return _kernelUnitLength;
     }
+
     bool SetKernelUnitLength(const FloatPoint &kernelUnitLength) noexcept;
 
     KRYS_NODISCARD bool PreserveAlpha() const noexcept
     {
       return _preserveAlpha;
     }
+
     bool SetPreserveAlpha(bool preserveAlpha) noexcept;
 
   private:

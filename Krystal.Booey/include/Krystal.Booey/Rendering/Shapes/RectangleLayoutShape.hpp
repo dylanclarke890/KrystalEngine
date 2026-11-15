@@ -53,10 +53,12 @@ namespace krys::boo
     {
       return LayoutRect(ShapeMarginBounds());
     }
+
     KRYS_NODISCARD bool IsEmpty() const noexcept override
     {
       return _bounds.IsEmpty();
     }
+
     KRYS_NODISCARD LineSegment GetExcludedInterval(LayoutUnit logicalTop,
                                                    LayoutUnit logicalHeight) const noexcept override;
 
@@ -67,22 +69,27 @@ namespace krys::boo
     {
       return _radii.Width();
     }
+
     KRYS_NODISCARD float Ry() const noexcept
     {
       return _radii.Height();
     }
+
     KRYS_NODISCARD float X() const noexcept
     {
       return _bounds.X();
     }
+
     KRYS_NODISCARD float Y() const noexcept
     {
       return _bounds.Y();
     }
+
     KRYS_NODISCARD float Width() const noexcept
     {
       return _bounds.Width();
     }
+
     KRYS_NODISCARD float Height() const noexcept
     {
       return _bounds.Height();

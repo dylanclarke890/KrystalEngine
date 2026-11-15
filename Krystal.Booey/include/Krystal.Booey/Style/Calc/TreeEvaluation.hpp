@@ -39,5 +39,6 @@ namespace krys::boo::style::calc
   // MARK: Evaluation.
 
   KRYS_NODISCARD double Evaluate(const Tree &, double percentResolutionLength, const ZoomFactor &) noexcept;
+
   KRYS_NODISCARD double Evaluate(const Tree &, double percentResolutionLength, const ZoomNeeded &) noexcept;
 }

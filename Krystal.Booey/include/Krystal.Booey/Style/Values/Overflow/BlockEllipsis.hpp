@@ -51,10 +51,12 @@ namespace krys::boo::style
     {
       return _type == Type::None;
     }
+
     KRYS_NODISCARD bool IsAuto() const noexcept
     {
       return _type == Type::Auto;
     }
+
     KRYS_NODISCARD bool IsString() const noexcept
     {
       return _type == Type::String;
@@ -81,7 +83,7 @@ namespace krys::boo::style
     {
       None,
       Auto,
-      String
+      String,
     };
 
     Type _type {Type::None};

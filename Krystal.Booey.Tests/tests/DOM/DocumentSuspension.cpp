@@ -200,5 +200,4 @@ namespace krys::boo::tests
     fixture.TestPage->UpdateRendering();
     CHECK(frames == 1);
   }
-
 }

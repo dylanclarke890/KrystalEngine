@@ -43,7 +43,9 @@ namespace krys::boo::css
 
   KRYS_NODISCARD boo::Color CreateColor(const ColorLayers &value,
                                         PlatformColorResolutionState &state) noexcept;
+
   KRYS_NODISCARD bool ContainsCurrentColor(const ColorLayers &value) noexcept;
+
   KRYS_NODISCARD bool ContainsColorSchemeDependentColor(const ColorLayers &value) noexcept;
 
   template <>

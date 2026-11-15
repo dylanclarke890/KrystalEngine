@@ -392,6 +392,7 @@ namespace krys::boo::layout_integration
     }
     boxes[lastRootInlineBoxIndex].SetIsLastForLayoutBox();
   }
+
   FloatRect InlineContentBuilder::HandlePartialDisplayContentUpdate(
     layout::InlineLayoutResult &&layoutResult, InlineContent &inlineContent,
     const layout::InlineDamage *lineDamage) const noexcept

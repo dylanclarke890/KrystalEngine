@@ -59,14 +59,22 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD bool NeedsContainer() const noexcept final;
+
     void CreateShadowSubtree() noexcept final;
+
     void RemoveShadowSubtree() noexcept final;
+
     KRYS_NODISCARD HTMLElement *ResultsButtonElement() const noexcept final;
+
     KRYS_NODISCARD HTMLElement *CancelButtonElement() const noexcept final;
+
     void DidSetValueByUserEdit() noexcept final;
+
     KRYS_NODISCARD bool SizeShouldIncludeDecoration(int32 defaultSize,
                                                     int32 &preferredSize) const noexcept final;
+
     KRYS_NODISCARD float DecorationWidth(float inputWidth) const noexcept final;
+
     void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
   };

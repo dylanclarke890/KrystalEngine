@@ -88,6 +88,7 @@ namespace krys::boo
       SetOffset(0);
       SetNextBreakablePosition(std::numeric_limits<uint32>::max());
     }
+
     void MoveToStartOf(RenderObject &object) noexcept
     {
       MoveTo(object, 0);
@@ -104,35 +105,43 @@ namespace krys::boo
     {
       return _renderer;
     }
+
     void SetRenderer(RenderObject *renderer) noexcept
     {
       _renderer = renderer;
     }
+
     KRYS_NODISCARD uint32 Offset() const noexcept
     {
       return _pos;
     }
+
     void SetOffset(uint32 position) noexcept
     {
       krys_debug_assert(position <= std::numeric_limits<uint32>::max() - 10); // Sanity check
       _pos = position;
     }
+
     KRYS_NODISCARD RenderElement *Root() const noexcept
     {
       return _root;
     }
+
     KRYS_NODISCARD Maybe<uint32> NextBreakablePosition() const noexcept
     {
       return _nextBreakablePosition;
     }
+
     void SetNextBreakablePosition(Maybe<uint32> position) noexcept
     {
       _nextBreakablePosition = position;
     }
+
     KRYS_NODISCARD bool RefersToEndOfPreviousNode() const noexcept
     {
       return _refersToEndOfPreviousNode;
     }
+
     void SetRefersToEndOfPreviousNode() noexcept
     {
       krys_debug_assert(!_pos);
@@ -152,13 +161,16 @@ namespace krys::boo
         ++_pos;
       }
     }
+
     void IncrementByCodePointInTextNode() noexcept
     {
       krys_debug_assert(_renderer);
       krys_debug_assert(_pos < Downcast<RenderText>(*_renderer).Text().length());
       FastIncrementInTextNode();
     }
+
     void Increment(InlineBidiResolver * = nullptr) noexcept;
+
     /// @brief Moves back one byte: a whitespace collapsing transition that starts ignoring spaces at this
     /// offset ends its run just past it.
     void FastDecrement() noexcept
@@ -173,6 +185,7 @@ namespace krys::boo
         SetRefersToEndOfPreviousNode();
       }
     }
+
     KRYS_NODISCARD bool AtEnd() const noexcept
     {
       return !_renderer;
@@ -199,6 +212,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool AtParagraphSeparator() const noexcept
     {
       return (_renderer && _renderer->IsBR()) || AtTextParagraphSeparator();
@@ -208,6 +222,7 @@ namespace krys::boo
     {
       return CharacterAt(_pos);
     }
+
     KRYS_NODISCARD char32 PreviousInSameNode() const noexcept
     {
       auto *textRenderer = DynamicDowncast<RenderText>(_renderer);
@@ -217,6 +232,7 @@ namespace krys::boo
       }
       return CharacterAt(static_cast<uint32>(text::PreviousCodePointStart(textRenderer->Text(), _pos)));
     }
+
     KRYS_NODISCARD UCharDirection Direction() const noexcept
     {
       if (!_renderer) KRYS_UNLIKELY
@@ -508,6 +524,7 @@ namespace krys::boo
     {
       _nestedIsolateCount++;
     }
+
     void ExitIsolate() noexcept
     {
       krys_debug_assert(_nestedIsolateCount >= 1);
@@ -517,6 +534,7 @@ namespace krys::boo
         _haveAddedFakeRunForRootIsolate = false;
       }
     }
+
     KRYS_NODISCARD bool InIsolate() const noexcept
     {
       return _nestedIsolateCount;
@@ -526,6 +544,7 @@ namespace krys::boo
     void Embed(UCharDirection, BidiEmbeddingSource) noexcept
     {
     }
+
     void CommitExplicitEmbedding() noexcept
     {
     }

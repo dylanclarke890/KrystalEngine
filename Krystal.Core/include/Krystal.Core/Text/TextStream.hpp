@@ -40,7 +40,7 @@ namespace krys
     enum class LineMode : bool
     {
       SingleLine,
-      MultipleLine
+      MultipleLine,
     };
 
     struct Repeat
@@ -110,6 +110,7 @@ namespace krys
     }
 
     TextStream(TextStream &&) noexcept = default;
+
     TextStream &operator=(TextStream &&) noexcept = default;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
@@ -118,22 +119,39 @@ namespace krys
     }
 
     TextStream &operator<<(bool b) noexcept;
+
     TextStream &operator<<(char c) noexcept;
+
     TextStream &operator<<(char8 c) noexcept;
+
     TextStream &operator<<(int32 i) noexcept;
+
     TextStream &operator<<(uint32 i) noexcept;
+
     TextStream &operator<<(long i) noexcept;
+
     TextStream &operator<<(unsigned long i) noexcept;
+
     TextStream &operator<<(long long i) noexcept;
+
     TextStream &operator<<(unsigned long long i) noexcept;
+
     TextStream &operator<<(float f) noexcept;
+
     TextStream &operator<<(double d) noexcept;
+
     TextStream &operator<<(const char *string) noexcept;
+
     TextStream &operator<<(std::string_view string) noexcept;
+
     TextStream &operator<<(const char8 *string) noexcept;
+
     TextStream &operator<<(utf8_stringview string) noexcept;
+
     TextStream &operator<<(const utf8_string &string) noexcept;
+
     TextStream &operator<<(const void *p) noexcept;
+
     // Deprecated. Use the NumberRespectingIntegers FormattingFlag instead.
     TextStream &operator<<(const FormatNumberRespectingIntegers &numberToFormat) noexcept;
 
@@ -141,10 +159,12 @@ namespace krys
     {
       return _formattingFlags;
     }
+
     void SetFormattingFlags(EnumSet<Formatting> flags) noexcept
     {
       _formattingFlags = flags;
     }
+
     KRYS_NODISCARD bool HasFormattingFlag(Formatting flag) const noexcept
     {
       return _formattingFlags.Contains(flag);
@@ -162,7 +182,9 @@ namespace krys
     KRYS_NODISCARD utf8_string Release() noexcept;
 
     void StartGroup() noexcept;
+
     void EndGroup() noexcept;
+
     // Output newline and indent.
     void NextLine() noexcept;
 
@@ -170,14 +192,17 @@ namespace krys
     {
       return _indent;
     }
+
     void SetIndent(int32 indent) noexcept
     {
       _indent = indent;
     }
+
     void IncreaseIndent(int32 amount = 1) noexcept
     {
       _indent += amount;
     }
+
     void DecreaseIndent(int32 amount = 1) noexcept
     {
       _indent -= amount;

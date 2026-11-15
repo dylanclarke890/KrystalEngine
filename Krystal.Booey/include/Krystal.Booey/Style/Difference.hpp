@@ -60,7 +60,7 @@ namespace krys::boo::style
     Overflow,
     OverflowAndOutOfFlowMovement,
     Layout,
-    NewStyle
+    NewStyle,
   };
 
   // When some style properties change, different amounts of work have to be done depending on
@@ -74,7 +74,7 @@ namespace krys::boo::style
     Filter,
     ClipRect,
     ClipPath,
-    WillChange
+    WillChange,
   };
 }
 
@@ -89,6 +89,7 @@ namespace krys::boo::style
     EnumSet<DifferenceContextSensitiveProperty> ContextSensitiveProperties {};
 
     constexpr Difference() noexcept = default;
+
     constexpr Difference(DifferenceResult result,
                          EnumSet<DifferenceContextSensitiveProperty> contextSensitiveProperties = {}) noexcept
         : Result(result), ContextSensitiveProperties(contextSensitiveProperties)
@@ -96,6 +97,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD constexpr bool operator==(const Difference &) const noexcept = default;
+
     KRYS_NODISCARD constexpr bool operator==(DifferenceResult other) const noexcept
     {
       return Result == other;
@@ -105,6 +107,7 @@ namespace krys::boo::style
     {
       return Result <=> other.Result;
     }
+
     KRYS_NODISCARD constexpr std::strong_ordering operator<=>(DifferenceResult other) const noexcept
     {
       return Result <=> other;

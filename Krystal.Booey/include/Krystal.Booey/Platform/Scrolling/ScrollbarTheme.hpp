@@ -49,6 +49,7 @@ namespace krys::boo
 
   public:
     ScrollbarTheme() noexcept = default;
+
     virtual ~ScrollbarTheme() noexcept = default;
 
     KRYS_NODISCARD static ScrollbarTheme &Theme() noexcept;
@@ -96,6 +97,7 @@ namespace krys::boo
     {
       return std::chrono::milliseconds(250);
     }
+
     KRYS_NODISCARD virtual MonotonicTime::duration AutoscrollTimerDelay() const noexcept
     {
       return std::chrono::milliseconds(50);

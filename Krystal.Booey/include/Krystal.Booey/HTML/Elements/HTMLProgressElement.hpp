@@ -38,8 +38,8 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLProgressElement);
 
   public:
-    static constexpr double IndeterminatePosition = -1;
-    static constexpr double InvalidPosition = -2;
+    constexpr static double IndeterminatePosition = -1;
+    constexpr static double InvalidPosition = -2;
 
   private:
     WeakPtr<ProgressValueElement> _valueElement;
@@ -52,6 +52,7 @@ namespace krys::boo::html
     }
 
     explicit HTMLProgressElement(dom::Document &document) noexcept;
+
     ~HTMLProgressElement() noexcept override;
 
     KRYS_NODISCARD static Ref<HTMLProgressElement> Create(dom::Document &document) noexcept;
@@ -92,11 +93,15 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+
     void DidAttachRenderers() noexcept override;
+
     void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
 
     void UpdateDeterminateState() noexcept;
+
     void DidElementStateChange() noexcept;
+
     KRYS_NODISCARD RenderProgress *GetRenderProgress() const noexcept;
   };
 }

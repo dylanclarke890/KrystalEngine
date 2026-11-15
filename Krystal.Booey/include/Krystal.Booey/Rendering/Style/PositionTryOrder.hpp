@@ -37,7 +37,7 @@ namespace krys::boo::style
     MostWidth,
     MostHeight,
     MostBlockSize,
-    MostInlineSize
+    MostInlineSize,
   };
 
   KRYS_NODISCARD LogicalBoxAxis BoxAxisForPositionTryOrder(PositionTryOrder, WritingMode) noexcept;

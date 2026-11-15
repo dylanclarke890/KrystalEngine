@@ -59,10 +59,12 @@ namespace krys::boo
     {
       return _size;
     }
+
     KRYS_NODISCARD GeneratedImage &Image() const noexcept
     {
       return *_image;
     }
+
     void PuntEvictionTimer() noexcept
     {
       _evictionTimer.StartOneShot(TimeToKeepCachedGeneratedImages);

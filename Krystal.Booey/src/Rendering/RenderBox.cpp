@@ -104,29 +104,34 @@ namespace krys::boo
       static OverrideMap<LayoutUnit> map;
       return map;
     }
+
     KRYS_NODISCARD OverrideMap<LayoutUnit> &OverridingLogicalWidthMap() noexcept
     {
       static OverrideMap<LayoutUnit> map;
       return map;
     }
+
     KRYS_NODISCARD OverrideMap<style::PreferredSize> &
       OverridingLogicalHeightMapForFlexBasisComputation() noexcept
     {
       static OverrideMap<style::PreferredSize> map;
       return map;
     }
+
     KRYS_NODISCARD OverrideMap<style::PreferredSize> &
       OverridingLogicalWidthMapForFlexBasisComputation() noexcept
     {
       static OverrideMap<style::PreferredSize> map;
       return map;
     }
+
     // FIXME: We should store these based on physical direction.
     KRYS_NODISCARD OverrideMap<RenderBox::GridAreaSize> &GridAreaContentLogicalHeightMap() noexcept
     {
       static OverrideMap<RenderBox::GridAreaSize> map;
       return map;
     }
+
     KRYS_NODISCARD OverrideMap<RenderBox::GridAreaSize> &GridAreaContentLogicalWidthMap() noexcept
     {
       static OverrideMap<RenderBox::GridAreaSize> map;
@@ -5411,6 +5416,7 @@ namespace krys::boo
       rect.SetX(Width() - rect.MaxX());
     }
   }
+
   void RenderBox::FlipForWritingMode(FloatRect &rect) const noexcept
   {
     if (!Style().GetWritingMode().IsBlockFlipped())
@@ -6288,6 +6294,7 @@ namespace krys::boo
         return clipRect;
       });
   }
+
 #pragma region Painting
 
   BleedAvoidance RenderBox::DetermineBleedAvoidance(GraphicsContext &context) const noexcept

@@ -61,8 +61,11 @@ namespace krys::boo::css
     SelectorList &operator=(SelectorList &&) noexcept = default;
 
     KRYS_NODISCARD static SelectorList CopySimple(const Selector &simpleSelector) noexcept;
+
     KRYS_NODISCARD static SelectorList CopyComplex(const Selector &complexSelector) noexcept;
+
     KRYS_NODISCARD static SelectorList Join(const SelectorList &a, const SelectorList &b) noexcept;
+
     KRYS_NODISCARD static SelectorList Join(const List<const SelectorList *> &lists) noexcept;
 
     KRYS_NODISCARD bool operator==(const SelectorList &other) const noexcept;
@@ -164,7 +167,7 @@ namespace krys::boo::css
     KRYS_NODISCARD const_iterator begin() const noexcept
     {
       return {FirstSelectorComponent()};
-    };
+    }
 
     KRYS_NODISCARD const_iterator end() const noexcept
     {

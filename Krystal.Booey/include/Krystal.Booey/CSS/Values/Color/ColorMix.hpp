@@ -60,7 +60,9 @@ namespace krys::boo::css
 
   KRYS_NODISCARD boo::Color CreateColor(const ColorMix &unresolved,
                                         PlatformColorResolutionState &state) noexcept;
+
   KRYS_NODISCARD bool ContainsCurrentColor(const ColorMix &unresolved) noexcept;
+
   KRYS_NODISCARD bool ContainsColorSchemeDependentColor(const ColorMix &unresolved) noexcept;
 
   template <>

@@ -581,7 +581,7 @@ namespace krys::boo
     {
       LayerPaintPhaseAll = 0,
       LayerPaintPhaseBackground = -1,
-      LayerPaintPhaseForeground = 1
+      LayerPaintPhaseForeground = 1,
     };
 
     template <typename TDumpRect>

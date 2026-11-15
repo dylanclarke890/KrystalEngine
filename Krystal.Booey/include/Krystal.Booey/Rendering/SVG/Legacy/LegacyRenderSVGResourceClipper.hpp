@@ -68,15 +68,18 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGResourceClipper(svg::SVGClipPathElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGResourceClipper() noexcept override;
 
     KRYS_NODISCARD svg::SVGClipPathElement &ClipPathElement() const noexcept;
 
     void RemoveAllClientsFromCache() noexcept override;
+
     void RemoveClientFromCache(RenderElement &) noexcept override;
 
     EnumSet<ApplyResult> ApplyResource(RenderElement &, const RenderStyle &, GraphicsContext *&,
                                        EnumSet<RenderSVGResourceMode>) noexcept override;
+
     // clipPath can be clipped too, but don't have a boundingBox or repaintRect. So we can't call
     // applyResource directly and use the rects from the object, since they are empty for RenderSVGResources
     // FIXME: We made applyClippingToContext public because we cannot call applyResource on HTML elements (it
@@ -87,6 +90,7 @@ namespace krys::boo
                                                 const FloatRect &objectBoundingBox,
                                                 const FloatRect &clippedContentBounds,
                                                 float usedZoom = 1) noexcept;
+
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
                                                  RepaintRectCalculation) noexcept override;
 
@@ -106,6 +110,7 @@ namespace krys::boo
     }
 
     void GetElement() const = delete;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGResourceClipper";
@@ -115,11 +120,14 @@ namespace krys::boo
                                                      const FloatRect &objectBoundingBox,
                                                      const FloatRect &clippedContentBounds,
                                                      float usedZoom) noexcept;
+
     KRYS_NODISCARD EnumSet<ApplyResult> PathOnlyClipping(GraphicsContext &, const RenderElement &,
                                                          const AffineTransform &, const FloatRect &,
                                                          float usedZoom) noexcept;
+
     KRYS_NODISCARD bool DrawContentIntoMaskImage(ImageBuffer &, const FloatRect &objectBoundingBox,
                                                  float usedZoom) noexcept;
+
     void CalculateClipContentRepaintRect(RepaintRectCalculation) noexcept;
   };
 }

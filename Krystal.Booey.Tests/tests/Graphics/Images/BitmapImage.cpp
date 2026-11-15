@@ -27,26 +27,32 @@ namespace krys::boo::tests
       {
         return {};
       }
+
       KRYS_NODISCARD utf8_string MimeType() const noexcept override
       {
         return u8"image/png";
       }
+
       KRYS_NODISCARD int64 ExpectedContentLength() const noexcept override
       {
         return 0;
       }
+
       void EncodedDataStatusChanged(const Image &, EncodedDataStatus status) noexcept override
       {
         Statuses.push_back(status);
       }
+
       void DecodedSizeChanged(const Image &, int64 delta) noexcept override
       {
         DecodedSize += delta;
       }
+
       void DidDraw(const Image &) noexcept override
       {
         ++Draws;
       }
+
       void ImageFrameAvailable(const Image &, ImageAnimatingState state, const IntRect *,
                                DecodingStatus) noexcept override
       {
@@ -55,12 +61,15 @@ namespace krys::boo::tests
           ++FramesAvailable;
         }
       }
+
       void ChangedInRect(const Image &, const IntRect *) noexcept override
       {
       }
+
       void ImageContentChanged(const Image &) noexcept override
       {
       }
+
       void ScheduleRenderingUpdate(const Image &) noexcept override
       {
       }

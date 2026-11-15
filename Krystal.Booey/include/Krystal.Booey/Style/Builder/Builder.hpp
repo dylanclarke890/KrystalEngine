@@ -40,8 +40,8 @@
 namespace krys::boo::css
 {
   class CustomPropertyValue;
-  class Value;
   enum class GlobalKeyword : uint8;
+  class Value;
 }
 
 namespace krys::boo::style
@@ -75,7 +75,7 @@ namespace krys::boo::style
     enum class CustomPropertyCycleTracking : bool
     {
       Enabled,
-      Disabled
+      Disabled,
     };
 
   private:
@@ -90,18 +90,24 @@ namespace krys::boo::style
             PropertyCascade::IncludedProperties &&includedProperties = PropertyCascade::NormalProperties(),
             const HashSet<AnimatableCSSProperty> *animatedProperties = nullptr,
             const HashSet<AnimatableCSSProperty> *transitioningProperties = nullptr) noexcept;
+
     ~Builder() noexcept;
 
     void ApplyAllProperties() noexcept;
+
     void ApplyTopPriorityProperties() noexcept;
+
     void ApplyHighPriorityProperties() noexcept;
+
     void ApplyNonHighPriorityProperties() noexcept;
+
     void AdjustAfterApplying() noexcept;
 
     void ApplyProperty(css::PropertyId id) noexcept
     {
       ApplyProperties(id, id);
     }
+
     void ApplyCustomProperty(const css::CSSOMStringAtom &name) noexcept;
 
     KRYS_NODISCARD RefPtr<const CustomProperty>
@@ -119,25 +125,36 @@ namespace krys::boo::style
 
   private:
     void ApplyProperties(css::PropertyId firstProperty, css::PropertyId lastProperty) noexcept;
+
     void ApplyLogicalGroupProperties() noexcept;
+
     void ApplyCustomProperties() noexcept;
+
     void ApplyCustomPropertyImpl(const css::CSSOMStringAtom &, const PropertyCascade::Property &) noexcept;
 
     template <CustomPropertyCycleTracking trackCycles>
     void ApplyPropertiesImpl(css::PropertyId firstProperty, css::PropertyId lastProperty) noexcept;
+
     void ApplyCascadeProperty(const PropertyCascade::Property &) noexcept;
+
     KRYS_NODISCARD bool ApplyRollbackCascadeProperty(const PropertyCascade &, css::PropertyId) noexcept;
+
     KRYS_NODISCARD bool ApplyRollbackCascadeCustomProperty(const PropertyCascade &,
                                                            const css::CSSOMStringAtom &) noexcept;
+
     void ApplyProperty(css::PropertyId, css::Value &, PropertyCascade::Origin) noexcept;
+
     void ApplyCustomProperty(const css::CSSOMStringAtom &name, ResolvedCustomProperty &&) noexcept;
 
     KRYS_NODISCARD Ref<css::Value> ResolveInternalAutoBaseFunction(css::Value &) noexcept;
+
     KRYS_NODISCARD Ref<css::Value> ResolveVariableReferences(css::PropertyId, css::Value &) noexcept;
+
     KRYS_NODISCARD Maybe<ResolvedCustomProperty>
       ResolveCustomPropertyValue(css::CustomPropertyValue &) noexcept;
 
     KRYS_NODISCARD const PropertyCascade *EnsureRollbackCascadeForRevert() noexcept;
+
     KRYS_NODISCARD const PropertyCascade *EnsureRollbackCascadeForRevertLayer() noexcept;
 
     KRYS_NODISCARD static RollbackCascadeKey MakeRollbackCascadeKey(PropertyCascade::Origin,

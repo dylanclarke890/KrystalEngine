@@ -88,6 +88,7 @@ namespace krys::boo
     }
 
     virtual void AdjustPosition(float dx, float dy) noexcept;
+
     void AdjustLogicalPosition(float deltaLogicalLeft, float deltaLogicalTop) noexcept
     {
       if (IsHorizontal())
@@ -99,6 +100,7 @@ namespace krys::boo
         AdjustPosition(deltaLogicalTop, deltaLogicalLeft);
       }
     }
+
     void AdjustLineDirectionPosition(float delta) noexcept
     {
       if (IsHorizontal())
@@ -110,6 +112,7 @@ namespace krys::boo
         AdjustPosition(0, delta);
       }
     }
+
     void AdjustBlockDirectionPosition(float delta) noexcept
     {
       if (IsHorizontal())
@@ -126,22 +129,27 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsInlineTextBox() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsRootInlineBox() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsSVGInlineTextBox() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsSVGInlineFlowBox() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsSVGRootInlineBox() const noexcept
     {
       return false;
@@ -151,10 +159,12 @@ namespace krys::boo
     {
       return _hasVirtualLogicalHeight;
     }
+
     void SetHasVirtualLogicalHeight() noexcept
     {
       _hasVirtualLogicalHeight = true;
     }
+
     KRYS_NODISCARD virtual float VirtualLogicalHeight() const noexcept
     {
       krys_debug_assert(false);
@@ -165,6 +175,7 @@ namespace krys::boo
     {
       return _isHorizontal;
     }
+
     void SetIsHorizontal(bool isHorizontal) noexcept
     {
       _isHorizontal = isHorizontal;
@@ -174,6 +185,7 @@ namespace krys::boo
     {
       return _constructed;
     }
+
     virtual void SetConstructed() noexcept
     {
       _constructed = true;
@@ -188,6 +200,7 @@ namespace krys::boo
     {
       _firstLine = firstLine;
     }
+
     KRYS_NODISCARD bool IsFirstLine() const noexcept
     {
       return _firstLine;
@@ -199,21 +212,26 @@ namespace krys::boo
     {
       return _nextOnLine;
     }
+
     KRYS_NODISCARD LegacyInlineBox *PreviousOnLine() const noexcept
     {
       return _previousOnLine;
     }
+
     void SetNextOnLine(LegacyInlineBox *next) noexcept
     {
       krys_debug_assert(_parent || !next);
       _nextOnLine = next;
     }
+
     void SetPreviousOnLine(LegacyInlineBox *previous) noexcept
     {
       krys_debug_assert(_parent || !previous);
       _previousOnLine = previous;
     }
+
     KRYS_NODISCARD bool NextOnLineExists() const noexcept;
+
     KRYS_NODISCARD bool PreviousOnLineExists() const noexcept;
 
     KRYS_NODISCARD virtual bool IsLeaf() const noexcept
@@ -222,6 +240,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LegacyInlineBox *NextLeafOnLine() const noexcept;
+
     KRYS_NODISCARD LegacyInlineBox *PreviousLeafOnLine() const noexcept;
 
     // FIXME: Hide this once all callers are using tighter types.
@@ -234,12 +253,14 @@ namespace krys::boo
     {
       return _parent;
     }
+
     void SetParent(LegacyInlineFlowBox *parent) noexcept
     {
       _parent = parent;
     }
 
     KRYS_NODISCARD const LegacyRootInlineBox &Root() const noexcept;
+
     KRYS_NODISCARD LegacyRootInlineBox &Root() noexcept;
 
     /// @brief The left side of the box in the containing block's coordinate system.
@@ -247,10 +268,12 @@ namespace krys::boo
     {
       _topLeft.SetX(x);
     }
+
     KRYS_NODISCARD float X() const noexcept
     {
       return _topLeft.X();
     }
+
     KRYS_NODISCARD float Left() const noexcept
     {
       return _topLeft.X();
@@ -261,10 +284,12 @@ namespace krys::boo
     {
       _topLeft.SetY(y);
     }
+
     KRYS_NODISCARD float Y() const noexcept
     {
       return _topLeft.Y();
     }
+
     KRYS_NODISCARD float Top() const noexcept
     {
       return _topLeft.Y();
@@ -279,18 +304,22 @@ namespace krys::boo
     {
       return IsHorizontal() ? LogicalWidth() : LogicalHeight();
     }
+
     KRYS_NODISCARD float Height() const noexcept
     {
       return IsHorizontal() ? LogicalHeight() : LogicalWidth();
     }
+
     KRYS_NODISCARD FloatSize Size() const noexcept
     {
       return FloatSize(Width(), Height());
     }
+
     KRYS_NODISCARD float Right() const noexcept
     {
       return Left() + Width();
     }
+
     KRYS_NODISCARD float Bottom() const noexcept
     {
       return Top() + Height();
@@ -301,10 +330,12 @@ namespace krys::boo
     {
       return IsHorizontal() ? _topLeft.X() : _topLeft.Y();
     }
+
     KRYS_NODISCARD float LogicalRight() const noexcept
     {
       return LogicalLeft() + LogicalWidth();
     }
+
     void SetLogicalLeft(float left) noexcept
     {
       if (IsHorizontal())
@@ -322,10 +353,12 @@ namespace krys::boo
     {
       return IsHorizontal() ? _topLeft.Y() : _topLeft.X();
     }
+
     KRYS_NODISCARD float LogicalBottom() const noexcept
     {
       return LogicalTop() + LogicalHeight();
     }
+
     void SetLogicalTop(float top) noexcept
     {
       if (IsHorizontal())
@@ -344,6 +377,7 @@ namespace krys::boo
     {
       _logicalWidth = w;
     }
+
     KRYS_NODISCARD float LogicalWidth() const noexcept
     {
       return _logicalWidth;
@@ -358,34 +392,41 @@ namespace krys::boo
       return IsHorizontal() ? FloatRect(_topLeft.X(), _topLeft.Y(), _logicalWidth, LogicalHeight())
                             : FloatRect(_topLeft.Y(), _topLeft.X(), _logicalWidth, LogicalHeight());
     }
+
     KRYS_NODISCARD FloatRect FrameRect() const noexcept
     {
       return FloatRect(TopLeft(), Size());
     }
 
     KRYS_NODISCARD virtual int32 CaretMinOffset() const noexcept;
+
     KRYS_NODISCARD virtual int32 CaretMaxOffset() const noexcept;
 
     KRYS_NODISCARD uint8 BidiLevel() const noexcept
     {
       return static_cast<uint8>(_bidiEmbeddingLevel);
     }
+
     void SetBidiLevel(uint8 level) noexcept
     {
       _bidiEmbeddingLevel = level;
     }
+
     KRYS_NODISCARD TextDirection Direction() const noexcept
     {
       return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
     }
+
     KRYS_NODISCARD bool IsLeftToRightDirection() const noexcept
     {
       return Direction() == TextDirection::LTR;
     }
+
     KRYS_NODISCARD int32 CaretLeftmostOffset() const noexcept
     {
       return IsLeftToRightDirection() ? CaretMinOffset() : CaretMaxOffset();
     }
+
     KRYS_NODISCARD int32 CaretRightmostOffset() const noexcept
     {
       return IsLeftToRightDirection() ? CaretMaxOffset() : CaretMinOffset();
@@ -395,6 +436,7 @@ namespace krys::boo
     {
       return _dirty;
     }
+
     virtual void MarkDirty(bool dirty = true) noexcept
     {
       _dirty = dirty;
@@ -412,15 +454,20 @@ namespace krys::boo
     KRYS_NODISCARD RenderBoxModelObject *BoxModelObject() const noexcept;
 
     KRYS_NODISCARD FloatPoint LocationIncludingFlipping() const noexcept;
+
     void FlipForWritingMode(FloatRect &) const noexcept;
+
     KRYS_NODISCARD FloatPoint FlipForWritingMode(const FloatPoint &) const noexcept;
+
     void FlipForWritingMode(LayoutRect &) const noexcept;
+
     KRYS_NODISCARD LayoutPoint FlipForWritingMode(const LayoutPoint &) const noexcept;
 
     KRYS_NODISCARD bool KnownToHaveNoOverflow() const noexcept
     {
       return _knownToHaveNoOverflow;
     }
+
     void ClearKnownToHaveNoOverflow() noexcept;
 
   protected:
@@ -431,6 +478,7 @@ namespace krys::boo
     {
       return _endsWithBreak;
     }
+
     void SetEndsWithBreak(bool endsWithBreak) noexcept
     {
       _endsWithBreak = endsWithBreak;

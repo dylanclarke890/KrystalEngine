@@ -28,7 +28,9 @@ namespace krys
       {
         const bool handled = func(event);
         if (handled)
+        {
           break;
+        }
       }
     }
   }

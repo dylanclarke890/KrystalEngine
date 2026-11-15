@@ -54,6 +54,7 @@ namespace krys::boo::dom
     double _height {0}; // Can be negative.
 
     DOMRectReadOnly() noexcept = default;
+
     DOMRectReadOnly(double x, double y, double width, double height) noexcept
         : _x(x), _y(y), _width(width), _height(height)
     {
@@ -75,14 +76,17 @@ namespace krys::boo::dom
     {
       return _x;
     }
+
     KRYS_NODISCARD double Y() const noexcept
     {
       return _y;
     }
+
     KRYS_NODISCARD double Width() const noexcept
     {
       return _width;
     }
+
     KRYS_NODISCARD double Height() const noexcept
     {
       return _height;
@@ -93,14 +97,17 @@ namespace krys::boo::dom
     {
       return NanPropagatingMin(_y, _y + _height);
     }
+
     KRYS_NODISCARD double Right() const noexcept
     {
       return NanPropagatingMax(_x, _x + _width);
     }
+
     KRYS_NODISCARD double Bottom() const noexcept
     {
       return NanPropagatingMax(_y, _y + _height);
     }
+
     KRYS_NODISCARD double Left() const noexcept
     {
       return NanPropagatingMin(_x, _x + _width);

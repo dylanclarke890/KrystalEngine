@@ -33,6 +33,7 @@
 
 namespace krys::boo
 {
+  struct PaintInfo;
   class RenderBlock;
   class RenderBlockFlow;
   class RenderBox;
@@ -40,7 +41,6 @@ namespace krys::boo
   class RenderInline;
   class RenderLayerModelObject;
   class RenderListBox;
-  struct PaintInfo;
 
   /// @brief Paints a box's outline (`outline`), or its focus ring for `outline-style: auto`.
   class OutlinePainter
@@ -52,6 +52,7 @@ namespace krys::boo
     explicit OutlinePainter(const PaintInfo &) noexcept;
 
     void PaintOutline(const RenderElement &, const LayoutRect &paintRect) const noexcept;
+
     /// @brief Paints an inline's outline around its line boxes, shrink-wrapped into one shape where they
     /// touch.
     void PaintOutline(const RenderInline &, const LayoutPoint &paintOffset) const noexcept;
@@ -70,20 +71,26 @@ namespace krys::boo
   private:
     void PaintOutlineWithLineRects(const RenderInline &, const LayoutPoint &paintOffset,
                                    const List<LayoutRect> &lineRects) const noexcept;
+
     void PaintFocusRing(const RenderElement &, const List<LayoutRect> &) const noexcept;
 
     static void CollectFocusRingRects(const RenderElement &, List<LayoutRect> &,
                                       const LayoutPoint &additionalOffset,
                                       const RenderLayerModelObject *paintContainer) noexcept;
+
     static void CollectFocusRingRectsForInline(const RenderInline &, List<LayoutRect> &, const LayoutPoint &,
                                                const RenderLayerModelObject *) noexcept;
+
     static void CollectFocusRingRectsForInlineChildren(const RenderBlockFlow &, List<LayoutRect> &,
                                                        const LayoutPoint &,
                                                        const RenderLayerModelObject *) noexcept;
+
     static bool CollectFocusRingRectsForBlock(const RenderBlock &, List<LayoutRect> &, const LayoutPoint &,
                                               const RenderLayerModelObject *) noexcept;
+
     static bool CollectFocusRingRectsForListBox(const RenderListBox &, List<LayoutRect> &,
                                                 const LayoutPoint &, const RenderLayerModelObject *) noexcept;
+
     static void CollectFocusRingRectsForChildBox(const RenderBox &, List<LayoutRect> &, const LayoutPoint &,
                                                  const RenderLayerModelObject *) noexcept;
   };

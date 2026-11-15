@@ -31,12 +31,16 @@ namespace krys
     if (std::is_constant_evaluated())
     {
       if (static_cast<long long>(x) == x)
+      {
         return x;
+      }
 
       return static_cast<long long>(x) + ((x < T(0)) ? T(0) : T(1));
     }
     else
+    {
       return std::ceil(x);
+    }
   }
 
   template <FloatingPoint T>
@@ -45,30 +49,44 @@ namespace krys
     if (std::is_constant_evaluated())
     {
       if (static_cast<long long>(x) == x)
+      {
         return x;
+      }
       else
-        return static_cast<T>(static_cast<long long>(x) - ((x < T(0)) ? 1LL : 0LL));
+      {
+        return static_cast<T>(static_cast<long long>(x) - ((x < T(0)) ? 1ll : 0ll));
+      }
     }
     else
+    {
       return std::floor(x);
+    }
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T Round(T x) noexcept
   {
     if (std::is_constant_evaluated())
+    {
       return T(static_cast<long long>(x + (x > T(0) ? T(0.5) : T(-0.5))));
+    }
     else
+    {
       return std::round(x);
+    }
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T Trunc(T x) noexcept
   {
     if (std::is_constant_evaluated())
+    {
       return T(static_cast<long long>(x));
+    }
     else
+    {
       return std::trunc(x);
+    }
   }
 
   VECTOR_ROUND_FUNC(Ceil);

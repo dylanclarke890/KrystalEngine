@@ -43,7 +43,7 @@ namespace krys::boo::layout
 
     enum FirstTag
     {
-      First
+      First,
     };
 
     FormattingContextBoxIterator(const ElementBox &root, FirstTag) noexcept
@@ -80,6 +80,7 @@ namespace krys::boo::layout
     {
       return {_root, FormattingContextBoxIterator::First};
     }
+
     KRYS_NODISCARD FormattingContextBoxIterator end() const noexcept
     {
       return FormattingContextBoxIterator(_root);

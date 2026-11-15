@@ -40,6 +40,7 @@ namespace krys::boo::layout
 
   public:
     LayoutContainingBlockChainIterator() noexcept = default;
+
     explicit LayoutContainingBlockChainIterator(const ElementBox *current) noexcept : _current(current)
     {
     }
@@ -48,6 +49,7 @@ namespace krys::boo::layout
     {
       return *_current;
     }
+
     KRYS_NODISCARD const ElementBox *operator->() const noexcept
     {
       return _current;
@@ -83,6 +85,7 @@ namespace krys::boo::layout
     {
       return LayoutContainingBlockChainIterator(&_containingBlock);
     }
+
     KRYS_NODISCARD LayoutContainingBlockChainIterator end() const noexcept
     {
       return LayoutContainingBlockChainIterator(_stayWithin);

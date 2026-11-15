@@ -702,6 +702,7 @@ void main()
       Array<Array<float, 4>, 5> Matrix;
       Array<Array<float, 4>, 256> Table;
     };
+
     static_assert(sizeof(FilterUniforms) == 16u * (11u + 5u + 256u),
                   "FilterUniforms mirrors the shaders' block.");
 
@@ -867,6 +868,7 @@ void main()
       PixelRect2D Region {};
       FilterColourSpace2D ColourSpace {FilterColourSpace2D::SRGB};
     };
+
     List<NodeResult> results(graph.Nodes.size());
 
     // What an input reads: its texture, region, and how it's read in the node's colour space.
@@ -876,6 +878,7 @@ void main()
       PixelRect2D Region {};
       uint32 Flags {0u};
     };
+
     auto readOf = [&](const FilterInput2D &input, FilterColourSpace2D space) -> Read
     {
       switch (input.Type)

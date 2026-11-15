@@ -41,9 +41,11 @@ namespace krys::boo::style
     FontVariationSettings(css::keywords::Normal) noexcept : _platform {}
     {
     }
+
     FontVariationSettings(boo::FontVariationSettings &&platform) noexcept : _platform {krys::move(platform)}
     {
     }
+
     FontVariationSettings(const boo::FontVariationSettings &platform) noexcept : _platform {platform}
     {
     }
@@ -52,6 +54,7 @@ namespace krys::boo::style
     {
       return _platform;
     }
+
     KRYS_NODISCARD boo::FontVariationSettings TakePlatform() noexcept
     {
       return krys::move(_platform);
@@ -70,6 +73,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD FontVariationSettings operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<FontVariationSettings>
   {
@@ -92,6 +96,7 @@ namespace krys::boo::style
   struct Blending<FontVariationSettings>
   {
     KRYS_NODISCARD bool CanBlend(const FontVariationSettings &, const FontVariationSettings &) noexcept;
+
     KRYS_NODISCARD FontVariationSettings Blend(const FontVariationSettings &, const FontVariationSettings &,
                                                const BlendingContext &) noexcept;
   };

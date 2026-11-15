@@ -41,11 +41,11 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   class CSSStyleSheet;
+  struct ParserContext;
   class Rule;
+  struct SerialisationContext;
   class StyleRule;
   class StyleRuleWithNesting;
-  struct ParserContext;
-  struct SerialisationContext;
 
   /// @brief The base of the rules exposed to scripts. Each wraps a rule of the internal rule model.
   /// @see https://drafts.csswg.org/cssom/#the-cssrule-interface
@@ -54,6 +54,7 @@ namespace krys::boo::css
   private:
     mutable bool _hasCachedSelectorText : 1 {false};
     bool _parentIsRule : 1 {false};
+
     union
     {
       CSSRule *_parentRule;

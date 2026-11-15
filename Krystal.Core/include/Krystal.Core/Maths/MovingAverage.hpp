@@ -25,9 +25,13 @@ namespace krys
     constexpr void Add(T sample) noexcept
     {
       if (_sampleCount == MaxSamples)
+      {
         _sum -= _samples[_currentSample];
+      }
       else
+      {
         _sampleCount++;
+      }
 
       _samples[_currentSample] = sample;
       _sum += sample;
@@ -38,7 +42,9 @@ namespace krys
     KRYS_NODISCARD constexpr T GetAverage() const noexcept
     {
       if (_sampleCount == 0)
+      {
         return static_cast<T>(0);
+      }
       return _sum / static_cast<T>(_sampleCount);
     }
   };

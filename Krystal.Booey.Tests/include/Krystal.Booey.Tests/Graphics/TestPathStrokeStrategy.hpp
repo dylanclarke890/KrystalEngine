@@ -121,11 +121,14 @@ namespace krys::boo::tests
     {
       PlatformStrategies::Singleton().SetPathStrokeStrategy(&Strategy);
     }
+
     ~PathStrokeStrategyScope() noexcept
     {
       PlatformStrategies::Singleton().SetPathStrokeStrategy(Previous);
     }
+
     PathStrokeStrategyScope(const PathStrokeStrategyScope &) = delete;
+
     PathStrokeStrategyScope &operator=(const PathStrokeStrategyScope &) = delete;
   };
 }

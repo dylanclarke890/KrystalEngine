@@ -59,12 +59,14 @@ namespace krys::boo::style
 
       KRYS_NODISCARD bool operator==(const Text &) const noexcept = default;
     };
+
     struct Image
     {
       ImageWrapper Value;
 
       KRYS_NODISCARD bool operator==(const Image &) const noexcept = default;
     };
+
     struct Counter
     {
       css::CSSOMStringAtom Identifier;
@@ -76,12 +78,14 @@ namespace krys::boo::style
 
       KRYS_NODISCARD bool operator==(const Counter &) const noexcept = default;
     };
+
     struct Quote
     {
       QuoteType Value;
 
       KRYS_NODISCARD bool operator==(const Quote &) const noexcept = default;
     };
+
     using ListItem = Variant<Text, Image, Counter, Quote>;
     using ListType = css::SpaceSeparatedFixedList<ListItem>;
 
@@ -110,10 +114,12 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<css::keywords::None>(_value);
     }
+
     KRYS_NODISCARD bool IsNormal() const noexcept
     {
       return krys::HoldsAlternative<css::keywords::Normal>(_value);
     }
+
     KRYS_NODISCARD bool IsData() const noexcept
     {
       return krys::HoldsAlternative<Data>(_value);

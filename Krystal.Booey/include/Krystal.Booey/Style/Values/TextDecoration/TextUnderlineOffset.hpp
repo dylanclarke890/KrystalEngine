@@ -49,6 +49,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool CanBlend(const TextUnderlineOffset &, const TextUnderlineOffset &,
                                  const RenderStyle &, const RenderStyle &) noexcept;
+
     KRYS_NODISCARD TextUnderlineOffset Blend(const TextUnderlineOffset &, const TextUnderlineOffset &,
                                              const RenderStyle &, const RenderStyle &,
                                              const BlendingContext &) noexcept;

@@ -28,17 +28,22 @@ namespace krys::ui
 
   public:
     explicit TextureMapperTile(const boo::FloatRect &rect) noexcept;
+
     virtual ~TextureMapperTile() noexcept;
 
     TextureMapperTile(TextureMapperTile &&) noexcept = default;
+
     TextureMapperTile &operator=(TextureMapperTile &&) noexcept = default;
 
     KRYS_NODISCARD RefPtr<BitmapTexture> Texture() const noexcept;
+
     KRYS_NODISCARD boo::FloatRect Rect() const noexcept
     {
       return _rect;
     }
+
     void SetTexture(BitmapTexture *texture) noexcept;
+
     void SetRect(const boo::FloatRect &rect) noexcept
     {
       _rect = rect;
@@ -48,6 +53,7 @@ namespace krys::ui
     {
       return _dirtyRect;
     }
+
     void AddDirtyRect(const boo::IntRect &rect) noexcept
     {
       _dirtyRect.Unite(rect);
@@ -55,8 +61,10 @@ namespace krys::ui
 
     void UpdateContents(TextureMapper &textureMapper, boo::Image &image,
                         const boo::IntRect &dirtyRect) noexcept;
+
     void UpdateContents(TextureMapper &textureMapper, const boo::GraphicsLayer &sourceLayer,
                         const boo::IntRect &dirtyRect, float scale = 1) noexcept;
+
     virtual void Paint(TextureMapper &textureMapper, const boo::TransformationMatrix &transform,
                        float opacity, bool allEdgesExposed) noexcept;
   };

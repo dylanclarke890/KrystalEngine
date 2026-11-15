@@ -114,6 +114,7 @@ namespace krys::boo
 
   private:
     uint32 AddFontFileData(Ref<text::FontFileData> &&data) noexcept;
+
     void AddFace(Ref<text::FreeTypeFace> &&face) noexcept;
   };
 }

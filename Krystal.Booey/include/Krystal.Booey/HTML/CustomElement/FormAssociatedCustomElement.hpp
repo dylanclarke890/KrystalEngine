@@ -51,6 +51,7 @@ namespace krys::boo::html
 
   public:
     explicit FormAssociatedCustomElement(HTMLMaybeFormAssociatedCustomElement &element) noexcept;
+
     ~FormAssociatedCustomElement() noexcept override;
 
     KRYS_NODISCARD bool IsFormListedElement() const noexcept final
@@ -79,9 +80,11 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD HTMLElement &AsHTMLElement() noexcept final;
+
     KRYS_NODISCARD const HTMLElement &AsHTMLElement() const noexcept final;
 
     void Reset() noexcept final;
+
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
@@ -95,10 +98,12 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString ValidationMessage() const noexcept final;
 
     KRYS_NODISCARD bool ComputeValidity() const noexcept final;
+
     bool AppendFormData(DOMFormData &formData) noexcept final;
 
     /// @brief The element is about to be upgraded by a form-associated definition.
     void WillUpgrade() noexcept;
+
     /// @brief The element was upgraded: it takes its form owner and disabled state from its attributes.
     void DidUpgrade() noexcept;
 
@@ -121,6 +126,7 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD HTMLElement *ValidationAnchorElement() noexcept final;
+
     void DidChangeForm() noexcept final;
 
     KRYS_NODISCARD bool CustomError() const noexcept final

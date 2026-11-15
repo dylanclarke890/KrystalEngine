@@ -65,8 +65,10 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD static dom::DOMStringAtom
       FragmentIdentifierFromIRIString(dom::DOMStringView url, const dom::Document &document) noexcept;
+
     KRYS_NODISCARD static dom::DOMStringAtom
       FragmentIdentifierFromIRIString(const style::URL &url, const dom::Document &document) noexcept;
+
     KRYS_NODISCARD static dom::DOMStringAtom
       FragmentIdentifierFromIRIString(const style::SVGMarkerResource &markerResource,
                                       const dom::Document &document) noexcept;
@@ -80,6 +82,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD static TargetElementResult
       TargetElementFromIRIString(dom::DOMStringView iri, const dom::DocumentOrShadowRoot &treeScope,
                                  RefPtr<dom::Document> externalDocument = nullptr) noexcept;
+
     KRYS_NODISCARD static TargetElementResult
       TargetElementFromIRIString(const style::URL &iri, const dom::DocumentOrShadowRoot &treeScope,
                                  RefPtr<dom::Document> externalDocument = nullptr) noexcept;
@@ -123,6 +126,7 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD bool HaveLoadedRequiredResources() const noexcept;
+
     void DispatchLoadEvent() noexcept;
 
   private:

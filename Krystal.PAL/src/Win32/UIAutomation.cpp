@@ -341,7 +341,7 @@ namespace krys::pal::win32
     /// @brief Identifies Krystal's text ranges, so a range passed back can be read.
     // {6E3A1F2C-8B4D-4C1E-9F27-3D5A0B7C9E11}
     constexpr GUID IID_KrystalTextRange = {
-      0x6e'3a'1f'2c, 0x8b4d, 0x4c1e, {0x9f, 0x27, 0x3d, 0x5a, 0x0b, 0x7c, 0x9e, 0x11}};
+      0x6E'3A'1F'2C, 0x8B4D, 0x4C1E, {0x9F, 0x27, 0x3D, 0x5A, 0x0B, 0x7C, 0x9E, 0x11}};
   }
 
   /// @brief A node's (or the window's) element, with the patterns its node supports.
@@ -370,6 +370,7 @@ namespace krys::pal::win32
     UIAElement(UIAutomation &owner, AccessibilityNodeID node) noexcept : _owner(&owner), _node(node)
     {
     }
+
     virtual ~UIAElement() noexcept = default;
 
     void Disconnect() noexcept
@@ -1181,6 +1182,7 @@ namespace krys::pal::win32
     {
       _element->AddRef();
     }
+
     ~UIATextRange() noexcept
     {
       _element->Release();
@@ -1718,6 +1720,7 @@ namespace krys::pal::win32
     {
       _element->AddRef();
     }
+
     ~UIATextProvider() noexcept
     {
       _element->Release();

@@ -41,6 +41,7 @@ namespace krys::boo
 
   public:
     constexpr DoubleSize() noexcept = default;
+
     constexpr DoubleSize(double width, double height) noexcept : _width(width), _height(height)
     {
     }

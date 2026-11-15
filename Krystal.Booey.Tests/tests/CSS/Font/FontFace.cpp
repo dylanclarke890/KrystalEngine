@@ -364,6 +364,7 @@ namespace krys::boo::css::tests
 
     constexpr utf8_stringview ranged =
       u8"font-weight:100 900;font-width:50% 200%;font-style:oblique -90deg 90deg";
+
     struct Case
     {
       utf8_stringview Descriptors;
@@ -372,6 +373,7 @@ namespace krys::boo::css::tests
       int32 Width;
       bool SyntheticBold;
     };
+
     auto testCase = GENERATE_COPY(values<Case>({
       {u8"", u8"", 140, false},
       {u8"", u8"font-weight:700", 170, false},
@@ -432,6 +434,7 @@ namespace krys::boo::css::tests
       utf8_stringview Style;
       int32 Width;
     };
+
     const List<Case> cases {
       {u8"F", u8"", 10},
       {u8"F1", u8"", 20},
@@ -489,6 +492,7 @@ namespace krys::boo::css::tests
       uint32 Palette;
       List<FontPaletteValues::OverriddenColor> Overrides;
     };
+
     const List<Case> cases {
       {u8"", 0, {}},
       {u8"font-palette: light", 1, {}},

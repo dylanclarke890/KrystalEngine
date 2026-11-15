@@ -39,7 +39,9 @@ namespace krys::boo
 
   private:
     void DoApply() noexcept override;
+
     KRYS_NODISCARD bool PreservesTypingStyle() const noexcept override;
+
     KRYS_NODISCARD bool ShouldUseBreakElement(const dom::Position &position) noexcept;
   };
 }

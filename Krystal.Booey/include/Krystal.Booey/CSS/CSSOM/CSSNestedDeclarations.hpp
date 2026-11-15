@@ -50,6 +50,7 @@ namespace krys::boo::css
 
   private:
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     void Reattach(Rule &rule) noexcept final;
 
     KRYS_NODISCARD RuleType StyleRuleType() const noexcept final

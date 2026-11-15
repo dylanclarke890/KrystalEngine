@@ -457,6 +457,7 @@ namespace krys::boo::css
   {
     uint32 Bitfield;
   };
+
   static_assert(sizeof(StyleProperties) == sizeof(SameSizeAsStyleProperties),
                 "style property set should stay small");
 

@@ -40,9 +40,9 @@ namespace krys::boo
 {
   enum class SecondFormat : uint8
   {
-    None,       // Suppress the second part and the millisecond part if they are 0.
-    Second,     // Always show the second part, and suppress the millisecond part if it is 0.
-    Millisecond // Always show the second part and the millisecond part.
+    None,        // Suppress the second part and the millisecond part if they are 0.
+    Second,      // Always show the second part, and suppress the millisecond part if it is 0.
+    Millisecond, // Always show the second part and the millisecond part.
   };
 
   enum class DateComponentsType : uint8
@@ -154,31 +154,40 @@ namespace krys::boo
     /// @brief Sets year and month.
     /// @see https://html.spec.whatwg.org/#parse-a-month-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingMonth(utf8_stringview source) noexcept;
+
     /// @brief Sets year, month and monthDay.
     /// @see https://html.spec.whatwg.org/#parse-a-date-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingDate(utf8_stringview source) noexcept;
+
     /// @brief Sets year and week.
     /// @see https://html.spec.whatwg.org/#parse-a-week-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingWeek(utf8_stringview source) noexcept;
+
     /// @brief Sets hour, minute, second and millisecond.
     /// @see https://html.spec.whatwg.org/#parse-a-time-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingTime(utf8_stringview source) noexcept;
+
     /// @brief Sets year, month, monthDay, hour, minute, second and millisecond.
     /// @see https://html.spec.whatwg.org/#parse-a-local-date-and-time-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingDateTimeLocal(utf8_stringview source) noexcept;
 
     /// @brief For the Date type: sets the year, month and monthDay.
     KRYS_NODISCARD static Maybe<DateComponents> FromMillisecondsSinceEpochForDate(double ms) noexcept;
+
     /// @brief For the DateTimeLocal type: sets the year, month, monthDay, hour, minute, second and
     /// millisecond.
     KRYS_NODISCARD static Maybe<DateComponents>
       FromMillisecondsSinceEpochForDateTimeLocal(double ms) noexcept;
+
     /// @brief For the Month type: sets the year and month.
     KRYS_NODISCARD static Maybe<DateComponents> FromMillisecondsSinceEpochForMonth(double ms) noexcept;
+
     /// @brief For the Week type: sets the year and week.
     KRYS_NODISCARD static Maybe<DateComponents> FromMillisecondsSinceEpochForWeek(double ms) noexcept;
+
     /// @brief For the Time type: sets the hour, minute, second and millisecond.
     KRYS_NODISCARD static Maybe<DateComponents> FromMillisecondsSinceMidnight(double ms) noexcept;
+
     /// @brief For the Month type: sets the year and month.
     KRYS_NODISCARD static Maybe<DateComponents> FromMonthsSinceEpoch(double months) noexcept;
 
@@ -259,25 +268,38 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD bool ParseYear(detail::DateParsingBuffer &buffer) noexcept;
+
     KRYS_NODISCARD bool ParseTimeZone(detail::DateParsingBuffer &buffer) noexcept;
+
     /// @see https://html.spec.whatwg.org/#parse-a-month-component
     KRYS_NODISCARD bool ParseMonth(detail::DateParsingBuffer &buffer) noexcept;
+
     /// @see https://html.spec.whatwg.org/#parse-a-date-component
     KRYS_NODISCARD bool ParseDate(detail::DateParsingBuffer &buffer) noexcept;
+
     KRYS_NODISCARD bool ParseWeek(detail::DateParsingBuffer &buffer) noexcept;
+
     /// @see https://html.spec.whatwg.org/#parse-a-time-component
     KRYS_NODISCARD bool ParseTime(detail::DateParsingBuffer &buffer) noexcept;
+
     KRYS_NODISCARD bool ParseDateTimeLocal(detail::DateParsingBuffer &buffer) noexcept;
 
     // These take the number of milliseconds since 1970-01-01 00:00:00.000 UTC and update every field of their
     // type, returning whether they succeeded.
     KRYS_NODISCARD bool SetMillisecondsSinceEpochForDate(double ms) noexcept;
+
     KRYS_NODISCARD bool SetMillisecondsSinceEpochForDateTimeLocal(double ms) noexcept;
+
     KRYS_NODISCARD bool SetMillisecondsSinceEpochForMonth(double ms) noexcept;
+
     KRYS_NODISCARD bool SetMillisecondsSinceEpochForWeek(double ms) noexcept;
+
     KRYS_NODISCARD bool SetMillisecondsSinceMidnight(double ms) noexcept;
+
     KRYS_NODISCARD bool SetMonthsSinceEpoch(double months) noexcept;
+
     KRYS_NODISCARD bool SetMillisecondsSinceEpochForDateInternal(double ms) noexcept;
+
     void SetMillisecondsSinceMidnightInternal(double msInDay) noexcept;
 
     /// @brief The maximum week number in the year: 52 or 53.
@@ -285,9 +307,11 @@ namespace krys::boo
     KRYS_NODISCARD int MaxWeekNumberInYear() const noexcept;
 
     KRYS_NODISCARD bool AddDay(int dayDiff) noexcept;
+
     KRYS_NODISCARD bool AddMinute(int minute) noexcept;
 
     KRYS_NODISCARD double MillisecondsSinceEpochForTime() const noexcept;
+
     KRYS_NODISCARD utf8_string ToStringForTime(SecondFormat format) const noexcept;
   };
 }

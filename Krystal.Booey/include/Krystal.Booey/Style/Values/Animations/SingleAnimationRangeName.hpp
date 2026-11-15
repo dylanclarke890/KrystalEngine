@@ -54,14 +54,16 @@ namespace krys::boo
       Entry,
       Exit,
       EntryCrossing,
-      ExitCrossing
+      ExitCrossing,
     };
 
     KRYS_NODISCARD css::ValueId ConvertSingleAnimationRangeNameToValueId(SingleAnimationRangeName) noexcept;
+
     KRYS_NODISCARD SingleAnimationRangeName ConvertValueIdToSingleAnimationRangeName(css::ValueId) noexcept;
 
     KRYS_NODISCARD css::CSSOMString
       ConvertSingleAnimationRangeNameToRangeString(SingleAnimationRangeName) noexcept;
+
     KRYS_NODISCARD SingleAnimationRangeName
       ConvertRangeStringToSingleTimelineRangeName(const css::CSSOMString &) noexcept;
   }

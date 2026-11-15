@@ -49,6 +49,7 @@ namespace krys::boo::inline_iterator
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.HasHyphen(); });
     }
+
     KRYS_NODISCARD utf8_stringview OriginalText() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.OriginalText(); });
@@ -58,10 +59,12 @@ namespace krys::boo::inline_iterator
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.Start(); });
     }
+
     KRYS_NODISCARD uint32 End() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.End(); });
     }
+
     KRYS_NODISCARD uint32 Length() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.Length(); });
@@ -75,6 +78,7 @@ namespace krys::boo::inline_iterator
     }
 
     KRYS_NODISCARD const FontCascade &GetFontCascade() const noexcept;
+
     KRYS_NODISCARD TextRun GetTextRun(TextRunMode mode = TextRunMode::Painting) const noexcept
     {
       return SwitchOn(_pathVariant,
@@ -98,9 +102,11 @@ namespace krys::boo::inline_iterator
   {
   public:
     TextBoxIterator() noexcept = default;
+
     explicit TextBoxIterator(Box::PathVariant &&path) noexcept : LeafBoxIterator(krys::move(path))
     {
     }
+
     explicit TextBoxIterator(const Box &box) noexcept : LeafBoxIterator(box)
     {
     }
@@ -114,6 +120,7 @@ namespace krys::boo::inline_iterator
     {
       return Get();
     }
+
     KRYS_NODISCARD const TextBox *operator->() const noexcept
     {
       return &Get();
@@ -124,8 +131,11 @@ namespace krys::boo::inline_iterator
 
   private:
     BoxIterator &TraverseLineRightwardOnLine() = delete;
+
     BoxIterator &TraverseLineLeftwardOnLine() = delete;
+
     BoxIterator &TraverseLineRightwardOnLineIgnoringLineBreak() = delete;
+
     BoxIterator &TraverseLineLeftwardOnLineIgnoringLineBreak() = delete;
 
     KRYS_NODISCARD const TextBox &Get() const noexcept
@@ -135,11 +145,15 @@ namespace krys::boo::inline_iterator
   };
 
   KRYS_NODISCARD TextBoxIterator LineLeftmostTextBoxFor(const RenderText &text) noexcept;
+
   KRYS_NODISCARD TextBoxIterator TextBoxFor(const LegacyInlineTextBox *legacyInlineTextBox) noexcept;
+
   KRYS_NODISCARD TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content,
                                             const inline_display::Box &box) noexcept;
+
   KRYS_NODISCARD TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content,
                                             size_t boxIndex) noexcept;
+
   KRYS_NODISCARD BoxRange<TextBoxIterator> TextBoxesFor(const RenderText &text) noexcept;
 }
 

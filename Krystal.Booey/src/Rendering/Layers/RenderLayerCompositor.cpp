@@ -293,7 +293,9 @@ namespace krys::boo
     Provider *BackingProviderCandidateForLayer(const RenderLayer &layer,
                                                const RenderLayerCompositor &compositor,
                                                LayerOverlapMap &overlapMap, OverlapExtent &overlap) noexcept;
+
     Provider *ExistingBackingProviderCandidateForLayer(const RenderLayer &layer) noexcept;
+
     Provider *BackingProviderForLayer(const RenderLayer &layer) noexcept;
 
     // Add a layer that would repaint into a layer in m_backingSharingLayers. That repaint has to wait until
@@ -306,11 +308,14 @@ namespace krys::boo
     void AddBackingSharingCandidate(RenderLayer &candidateLayer, LayoutRect candidateAbsoluteBounds,
                                     RenderLayer &candidateStackingContext,
                                     const Maybe<BackingSharingSnapshot> &backingSharingSnapshot) noexcept;
+
     KRYS_NODISCARD bool IsAdditionalProviderCandidate(RenderLayer &candidateLayer,
                                                       LayoutRect candidateAbsoluteBounds,
                                                       RenderLayer *stackingContextAncestor) const noexcept;
+
     void StartBackingSharingSequence(RenderLayer &candidateLayer, LayoutRect candidateAbsoluteBounds,
                                      RenderLayer &candidateStackingContext) noexcept;
+
     void EndBackingSharingSequence(RenderLayer &endLayer) noexcept;
 
     KRYS_NODISCARD Maybe<BackingSharingSnapshot> Snapshot() const noexcept
@@ -321,6 +326,7 @@ namespace krys::boo
       }
       return BackingSharingSnapshot {_sequenceIdentifier, _backingProviderCandidates.size()};
     }
+
     KRYS_NODISCARD uint64 SequenceIdentifier() const noexcept
     {
       return _sequenceIdentifier;
@@ -2399,7 +2405,7 @@ namespace krys::boo
     enum class AncestorTraversal : bool
     {
       Continue,
-      Stop
+      Stop,
     };
 
     // This is a simplified version of containing block walking that only handles absolute and fixed position.

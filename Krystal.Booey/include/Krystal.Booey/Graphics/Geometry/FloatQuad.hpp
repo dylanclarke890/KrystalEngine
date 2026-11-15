@@ -133,6 +133,7 @@ namespace krys::boo
     // Test whether any part of the circle/ellipse intersects with this quad.
     // Note that these two functions only work for convex quads.
     KRYS_NODISCARD bool IntersectsCircle(const FloatPoint &center, float radius) const noexcept;
+
     KRYS_NODISCARD bool IntersectsEllipse(const FloatPoint &center, const FloatSize &radii) const noexcept;
 
     // The center of the quad. If the quad is the result of a affine-transformed rectangle this is the same as
@@ -199,5 +200,6 @@ namespace krys::boo
   }
 
   KRYS_NODISCARD List<FloatRect> BoundingBoxes(Span<const FloatQuad> quads);
+
   KRYS_NODISCARD FloatRect UnitedBoundingBoxes(Span<const FloatQuad> quads) noexcept;
 }

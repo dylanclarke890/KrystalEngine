@@ -47,7 +47,7 @@ namespace krys::boo::css
     {
       NoChanges,
       StyleAttributeChanged,
-      PropertyChanged
+      PropertyChanged,
     };
 
     WeakPtr<CSSRule> _parentRule;
@@ -86,31 +86,44 @@ namespace krys::boo::css
 
   protected:
     KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept final;
+
     KRYS_NODISCARD CSSRule *ParentRule() const noexcept final;
 
     KRYS_NODISCARD uint32 Length() const noexcept final;
+
     KRYS_NODISCARD CSSOMString Item(uint32 index) const noexcept final;
+
     KRYS_NODISCARD CSSOMString GetPropertyValue(const CSSOMString &propertyName) noexcept final;
+
     KRYS_NODISCARD CSSOMString GetPropertyPriority(const CSSOMString &propertyName) noexcept final;
+
     KRYS_NODISCARD CSSOMString GetPropertyShorthand(const CSSOMString &propertyName) noexcept final;
+
     KRYS_NODISCARD bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept final;
+
     dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
                                        const CSSOMString &priority) noexcept final;
+
     dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
+
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept final;
 
     KRYS_NODISCARD bool IsExposed(PropertyId property) const noexcept;
 
     KRYS_NODISCARD bool WillMutate() noexcept;
+
     void DidMutate(MutationType type) noexcept;
 
     // PropertyId versions of the CSSOM functions to support bindings.
     KRYS_NODISCARD CSSOMString GetPropertyValueInternal(PropertyId property) const noexcept;
+
     virtual dom::ExceptionOr<void> SetPropertyInternal(PropertyId property, const CSSOMString &value,
                                                        IsImportant important) noexcept;
 
     KRYS_NODISCARD ParserContext CssParserContext() const noexcept;
+
     KRYS_NODISCARD Ref<MutableStyleProperties> ProtectedPropertySet() const noexcept;
   };
 }

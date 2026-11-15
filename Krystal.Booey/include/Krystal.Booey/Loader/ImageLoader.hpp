@@ -51,7 +51,7 @@ namespace krys::boo
   enum class RelevantMutation : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class LazyImageLoadState : uint8
@@ -59,7 +59,7 @@ namespace krys::boo
     None,
     Deferred,
     LoadImmediately,
-    FullImage
+    FullImage,
   };
 
   /// @brief Loads the image of an element (`<img>`, `<input type=image>`, and later video posters and
@@ -116,6 +116,7 @@ namespace krys::boo
     {
       return _element;
     }
+
     KRYS_NODISCARD const dom::Element &GetElement() const noexcept
     {
       return _element;
@@ -168,16 +169,20 @@ namespace krys::boo
     virtual void DispatchLoadEvent() noexcept = 0;
 
     void UpdatedHasPendingEvent() noexcept;
+
     void DidUpdateCachedImage(RelevantMutation relevantMutation,
                               CachedResourceHandle<CachedImage> &&newImage) noexcept;
 
     void DispatchPendingLoadEvent() noexcept;
+
     void DispatchPendingErrorEvent() noexcept;
 
     KRYS_NODISCARD RenderImageResource *GetRenderImageResource() noexcept;
+
     void UpdateRenderer() noexcept;
 
     void ClearImageWithoutConsideringPendingLoadEvent() noexcept;
+
     void ClearFailedLoadURL() noexcept;
 
     void TimerFired() noexcept;
@@ -188,7 +193,9 @@ namespace krys::boo
 
     /// @brief Decodes the loaded image for the waiting `decode()` promises, settling them once it's decoded.
     void DecodeImage() noexcept;
+
     void ResolveDecodePromises() noexcept;
+
     void RejectDecodePromises(utf8_stringview message) noexcept;
   };
 }

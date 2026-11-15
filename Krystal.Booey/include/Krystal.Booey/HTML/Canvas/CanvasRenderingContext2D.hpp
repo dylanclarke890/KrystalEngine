@@ -49,6 +49,7 @@ namespace krys::boo::html
 
     CanvasRenderingContext2D(CanvasBase &, CanvasRenderingContext2DSettings &&,
                              bool usesCSSCompatibilityParseMode) noexcept;
+
     ~CanvasRenderingContext2D() noexcept override;
 
     KRYS_NODISCARD HTMLCanvasElement &Canvas() const noexcept;
@@ -61,6 +62,7 @@ namespace krys::boo::html
     /// content, has the focus.
     /// @see https://html.spec.whatwg.org/#dom-context-2d-drawfocusifneeded
     void DrawFocusIfNeeded(dom::Element &element) noexcept;
+
     /// @brief Draws a focus ring along @p path if @p element, which must be the canvas's fallback content,
     /// has the focus.
     void DrawFocusIfNeeded(Path2D &path, dom::Element &element) noexcept;
@@ -70,8 +72,10 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-filltext
     void FillText(dom::DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-context-2d-stroketext
     void StrokeText(dom::DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-context-2d-measuretext
     KRYS_NODISCARD Ref<TextMetrics> MeasureText(dom::DOMStringView text) noexcept;
 
@@ -80,8 +84,11 @@ namespace krys::boo::html
 
     KRYS_NODISCARD Maybe<style::Filter>
       SetFilterStringWithoutUpdatingStyle(dom::DOMStringView) noexcept override;
+
     KRYS_NODISCARD RefPtr<boo::Filter> CreateFilter(const FloatRect &bounds) const noexcept override;
+
     KRYS_NODISCARD IntOutsets CalculateFilterOutsets(const FloatRect &bounds) const noexcept override;
+
     KRYS_NODISCARD StringAtom InheritedLanguage() const noexcept final;
 
     void SetFontWithoutUpdatingStyle(dom::DOMStringView) noexcept;

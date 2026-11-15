@@ -48,26 +48,31 @@ namespace krys::boo::style
     using EnumSet = ContainValueEnumSet;
     using value_type = ContainValueEnumSet::value_type;
 
-    static constexpr ContainValueEnumSet strict {ContainValue::Size, ContainValue::Layout,
+    constexpr static ContainValueEnumSet strict {ContainValue::Size, ContainValue::Layout,
                                                  ContainValue::Style, ContainValue::Paint};
-    static constexpr ContainValueEnumSet content {ContainValue::Layout, ContainValue::Style,
+    constexpr static ContainValueEnumSet content {ContainValue::Layout, ContainValue::Style,
                                                   ContainValue::Paint};
 
     constexpr Contain(css::keywords::None) noexcept : _value {}
     {
     }
+
     constexpr Contain(css::keywords::Strict) noexcept : _value {strict}
     {
     }
+
     constexpr Contain(css::keywords::Content) noexcept : _value {content}
     {
     }
+
     constexpr Contain(EnumSet &&set) noexcept : _value {krys::move(set)}
     {
     }
+
     constexpr Contain(value_type value) noexcept : Contain {EnumSet {value}}
     {
     }
+
     constexpr Contain(std::initializer_list<value_type> initializerList) noexcept
         : Contain {EnumSet {initializerList}}
     {
@@ -81,6 +86,7 @@ namespace krys::boo::style
       }
       return EnumSet::FromRaw(rawValue);
     }
+
     KRYS_NODISCARD constexpr EnumSet::StorageType ToRaw() const noexcept
     {
       return _value.ToRaw();
@@ -90,18 +96,22 @@ namespace krys::boo::style
     {
       return _value.Contains(e);
     }
+
     KRYS_NODISCARD constexpr bool ContainsAny(EnumSet other) const noexcept
     {
       return _value.ContainsAny(other.Value);
     }
+
     KRYS_NODISCARD constexpr bool ContainsAll(EnumSet other) const noexcept
     {
       return _value.ContainsAll(other.Value);
     }
+
     KRYS_NODISCARD constexpr bool ContainsOnly(EnumSet other) const noexcept
     {
       return _value.ContainsOnly(other.Value);
     }
+
     constexpr void Add(EnumSet other) noexcept
     {
       _value.Value.Add(other.Value);

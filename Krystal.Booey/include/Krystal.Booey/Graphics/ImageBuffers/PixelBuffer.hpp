@@ -46,7 +46,7 @@ namespace krys::boo
     enum class Type : uint8
     {
       ByteArray,
-      Other
+      Other,
     };
 
   protected:
@@ -61,10 +61,12 @@ namespace krys::boo
     {
       return 1;
     }
+
     KRYS_NODISCARD static constexpr uint32 ComponentsPerPixel(PixelFormat) noexcept
     {
       return 4;
     }
+
     KRYS_NODISCARD static constexpr uint32 BytesPerPixel(PixelFormat pixelFormat) noexcept
     {
       return BytesPerPixelComponent(pixelFormat) * ComponentsPerPixel(pixelFormat);
@@ -72,20 +74,25 @@ namespace krys::boo
 
     /// @brief The pixels in @p size; empty if they don't fit in an `int32`.
     KRYS_NODISCARD static Maybe<uint32> ComputePixelCount(const IntSize &size) noexcept;
+
     /// @brief The channels in @p size's pixels; empty if they don't fit in an `int32`.
     KRYS_NODISCARD static Maybe<uint32> ComputePixelComponentCount(PixelFormat, const IntSize &size) noexcept;
+
     /// @brief The bytes in @p size's pixels; empty if they don't fit in an `int32`.
     KRYS_NODISCARD static Maybe<uint32> ComputeBufferSize(PixelFormat, const IntSize &size) noexcept;
+
     KRYS_NODISCARD static bool SupportedPixelFormat(PixelFormat) noexcept;
 
     KRYS_NODISCARD const PixelBufferFormat &Format() const noexcept
     {
       return _format;
     }
+
     KRYS_NODISCARD const IntSize &Size() const noexcept
     {
       return _size;
     }
+
     KRYS_NODISCARD Span<uint8> Bytes() const noexcept
     {
       return _bytes;
@@ -95,16 +102,20 @@ namespace krys::boo
     {
       return Type::Other;
     }
+
     KRYS_NODISCARD virtual RefPtr<PixelBuffer> CreateScratchPixelBuffer(const IntSize &) const noexcept = 0;
 
     bool SetRange(Span<const uint8> data, size_t byteOffset) noexcept;
+
     bool ZeroRange(size_t byteOffset, size_t rangeByteLength) noexcept;
+
     void ZeroFill() noexcept
     {
       ZeroRange(0, Bytes().size());
     }
 
     KRYS_NODISCARD uint8 Item(size_t index) const noexcept;
+
     void Set(size_t index, double value) noexcept;
 
   protected:
@@ -122,6 +133,7 @@ namespace krys::boo
 
   public:
     PixelBufferSourceView() = delete;
+
     PixelBufferSourceView(const PixelBuffer &pixelBuffer) noexcept
         : PixelBufferSourceView(pixelBuffer.Format(), pixelBuffer.Size(), pixelBuffer.Bytes())
     {
@@ -148,10 +160,12 @@ namespace krys::boo
     {
       return _format;
     }
+
     KRYS_NODISCARD IntSize Size() const noexcept
     {
       return _size;
     }
+
     KRYS_NODISCARD Span<const uint8> Bytes() const noexcept
     {
       return _bytes;

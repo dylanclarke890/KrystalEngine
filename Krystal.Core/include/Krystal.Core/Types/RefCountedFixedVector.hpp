@@ -49,14 +49,17 @@ namespace krys
     {
       return _values.begin();
     }
+
     KRYS_NODISCARD const_iterator end() const noexcept KRYS_LIFETIME_BOUND
     {
       return _values.end();
     }
+
     KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept KRYS_LIFETIME_BOUND
     {
       return _values.rbegin();
     }
+
     KRYS_NODISCARD const_reverse_iterator rend() const noexcept KRYS_LIFETIME_BOUND
     {
       return _values.rend();
@@ -66,18 +69,22 @@ namespace krys
     {
       return _values.isEmpty();
     }
+
     KRYS_NODISCARD size_t size() const noexcept
     {
       return _values.size();
     }
+
     KRYS_NODISCARD const T &operator[](size_t index) const noexcept KRYS_LIFETIME_BOUND
     {
       return _values[index];
     }
+
     KRYS_NODISCARD const T &first() const noexcept KRYS_LIFETIME_BOUND
     {
       return _values.first();
     }
+
     KRYS_NODISCARD const T &last() const noexcept KRYS_LIFETIME_BOUND
     {
       return _values.last();

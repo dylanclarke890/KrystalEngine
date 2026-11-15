@@ -83,6 +83,7 @@ namespace krys::boo
 
   public:
     DocumentWriter() noexcept;
+
     ~DocumentWriter() noexcept;
 
     void SetFrame(LocalFrame &frame) noexcept;

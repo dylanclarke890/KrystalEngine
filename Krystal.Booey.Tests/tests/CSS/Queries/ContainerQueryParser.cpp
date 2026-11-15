@@ -59,7 +59,7 @@ namespace krys::boo::css::tests
     {
       Invalid,
       Known,
-      Unknown
+      Unknown,
     };
 
     /// @brief Classifies `condition` as WPT's `test_cq_condition_*` helpers do (with a `name` prefix).

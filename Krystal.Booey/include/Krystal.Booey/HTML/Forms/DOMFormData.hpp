@@ -79,6 +79,7 @@ namespace krys::boo::html
 
     /// @see https://xhr.spec.whatwg.org/#dom-formdata-append
     void Append(dom::DOMStringView name, dom::DOMStringView value) noexcept;
+
     /// @brief Appends @p blob as a file named @p filename (if given; else a file keeps its name, and other
     /// blobs are named "blob").
     /// @see https://xhr.spec.whatwg.org/#dom-formdata-append-blob
@@ -99,6 +100,7 @@ namespace krys::boo::html
 
     /// @see https://xhr.spec.whatwg.org/#dom-formdata-set
     void Set(dom::DOMStringView name, dom::DOMStringView value) noexcept;
+
     /// @see https://xhr.spec.whatwg.org/#dom-formdata-set-blob
     void Set(dom::DOMStringView name, Blob &blob, Maybe<dom::DOMStringView> filename = std::nullopt) noexcept;
 

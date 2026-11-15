@@ -35,6 +35,6 @@ namespace krys::boo::style
     No,
 
     // Use the writing mode of the element itself.
-    Yes
+    Yes,
   };
 }

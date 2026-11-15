@@ -62,7 +62,7 @@ namespace krys::boo::layout
     enum class MayBeAboveLastFloat : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -84,6 +84,7 @@ namespace krys::boo::layout
     KRYS_NODISCARD LayoutPoint
       PositionForFloat(const Box &layoutBox, const BoxGeometry &boxGeometry,
                        const HorizontalConstraints &horizontalConstraints) const noexcept;
+
     KRYS_NODISCARD LayoutPoint
       PositionForNonFloatingFloatAvoider(const Box &layoutBox, const BoxGeometry &boxGeometry) const noexcept;
 
@@ -106,6 +107,7 @@ namespace krys::boo::layout
   private:
     KRYS_NODISCARD bool
       IsFloatingCandidateStartPositionedInBlockFormattingContext(const Box &floatBox) const noexcept;
+
     KRYS_NODISCARD boo::Clear ClearInBlockFormattingContext(const Box &clearBox) const noexcept;
 
     KRYS_NODISCARD const ElementBox &Root() const noexcept
@@ -121,8 +123,10 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD AbsoluteCoordinateValuesForFloatAvoider
       AbsoluteCoordinates(const Box &floatAvoider, LayoutPoint borderBoxTopLeft) const noexcept;
+
     KRYS_NODISCARD LayoutPoint MapTopLeftToBlockFormattingContextRoot(
       const Box &layoutBox, LayoutPoint borderBoxTopLeft) const noexcept;
+
     KRYS_NODISCARD Point
       MapPointFromFloatingContextRootToBlockFormattingContextRoot(Point position) const noexcept;
   };

@@ -42,6 +42,7 @@ namespace krys::boo
 
   public:
     constexpr DoublePoint() noexcept = default;
+
     constexpr DoublePoint(double x, double y) noexcept : _x(x), _y(y)
     {
     }

@@ -65,6 +65,7 @@ namespace krys::gfx
 
   public:
     AtlasPages(Device &device, const AtlasPagesDesc &desc) noexcept;
+
     ~AtlasPages() noexcept;
 
     /// @brief Space for a `width` by `height` rect, on a page with room, a new page, or the least recently
@@ -72,8 +73,10 @@ namespace krys::gfx
     /// forgotten. Nothing when the rect is larger than a page, or every page was drawn from this frame.
     KRYS_NODISCARD Maybe<AtlasSlot> Allocate(uint32 width, uint32 height,
                                              const Func<void(uint32)> &evicted) noexcept;
+
     /// @brief Marks a page as drawn from this frame, so it isn't cleared before the frame is submitted.
     void MarkUsed(uint32 page) noexcept;
+
     /// @brief Writes texels into a slot, rows from the top, tightly packed.
     void Write(const AtlasSlot &slot, Span<const byte> texels) noexcept;
 

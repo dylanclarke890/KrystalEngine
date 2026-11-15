@@ -82,18 +82,22 @@ namespace krys::boo
     // It stores an alignment subject(if not already present) and update the max_ascent
     // associated to this baseline-sharing group.
     void Update(const RenderBox &alignmentSubject, LayoutUnit ascent) noexcept;
+
     KRYS_NODISCARD LayoutUnit MaxAscent() const noexcept
     {
       return _maxAscent;
     }
+
     KRYS_NODISCARD size_t ComputeSize() const noexcept
     {
       return _alignmentSubjects.size();
     }
+
     KRYS_NODISCARD auto begin() const noexcept
     {
       return _alignmentSubjects.begin();
     }
+
     KRYS_NODISCARD auto end() const noexcept
     {
       return _alignmentSubjects.end();
@@ -143,21 +147,25 @@ namespace krys::boo
     BaselineAlignmentState(const RenderBox &alignmentSubject, ItemPosition preference, LayoutUnit ascent,
                            LogicalBoxAxis alignmentContextAxis,
                            WritingMode alignmentContainerWritingMode) noexcept;
+
     KRYS_NODISCARD const BaselineGroup &SharedGroup(const RenderBox &alignmentSubject,
                                                     ItemPosition preference) const noexcept;
 
     void UpdateSharedGroup(const RenderBox &alignmentSubject, ItemPosition preference,
                            LayoutUnit ascent) noexcept;
+
     KRYS_NODISCARD List<BaselineGroup> &SharedGroups() noexcept
     {
       return _sharedGroups;
     }
 
     KRYS_NODISCARD static FontBaseline DominantBaseline(WritingMode writingMode) noexcept;
+
     KRYS_NODISCARD static WritingMode
       UsedWritingModeForBaselineAlignment(LogicalBoxAxis alignmentContextAxis,
                                           WritingMode alignmentContainerWritingMode,
                                           WritingMode alignmentSubjectWritingMode) noexcept;
+
     KRYS_NODISCARD static LayoutUnit SynthesizedBaseline(const RenderBox &box, FontBaseline baselineType,
                                                          WritingMode writingModeForSynthesis,
                                                          LineDirection lineDirection,

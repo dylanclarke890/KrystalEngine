@@ -12,13 +12,14 @@ namespace krys
   enum class TransferFunctionMode : uint8
   {
     Clamped,
-    Unclamped
+    Unclamped,
   };
 
   template <typename T, TransferFunctionMode mode>
   struct A98RGBTransferFunction
   {
     KRYS_NODISCARD static T ToGammaEncoded(T) noexcept;
+
     KRYS_NODISCARD static T ToLinear(T) noexcept;
   };
 
@@ -28,6 +29,7 @@ namespace krys
     constexpr static T Gamma = static_cast<T>(1.8);
 
     KRYS_NODISCARD static T ToGammaEncoded(T) noexcept;
+
     KRYS_NODISCARD static T ToLinear(T) noexcept;
   };
 
@@ -39,6 +41,7 @@ namespace krys
     constexpr static T Gamma = static_cast<T>(0.45);
 
     KRYS_NODISCARD static T ToGammaEncoded(T) noexcept;
+
     KRYS_NODISCARD static T ToLinear(T) noexcept;
   };
 
@@ -46,6 +49,7 @@ namespace krys
   struct SRGBTransferFunction
   {
     KRYS_NODISCARD static T ToGammaEncoded(T) noexcept;
+
     KRYS_NODISCARD static T ToLinear(T) noexcept;
   };
 

@@ -56,18 +56,20 @@ namespace krys::boo::layout
     enum class IsIntrinsicWidthMode : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     enum class LineEndsWithLineBreak : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     enum class SnapDirection : uint8
     {
       Floor,
       Ceil,
-      Round
+      Round,
     };
 
   private:
@@ -130,16 +132,19 @@ namespace krys::boo::layout
     KRYS_NODISCARD static InlineLayoutUnit SnapToInt(InlineLayoutUnit value,
                                                      const InlineLevelBox &inlineLevelBox,
                                                      SnapDirection direction = SnapDirection::Round) noexcept;
+
     KRYS_NODISCARD static InlineLayoutUnit SnapToInt(InlineLayoutUnit value, const Box &layoutBox,
                                                      SnapDirection direction = SnapDirection::Round) noexcept;
 
     KRYS_NODISCARD static InlineLayoutUnit Ascent(const FontMetrics &fontMetrics, FontBaseline fontBaseline,
                                                   const InlineLevelBox &inlineLevelBox) noexcept;
+
     KRYS_NODISCARD static InlineLayoutUnit Descent(const FontMetrics &fontMetrics, FontBaseline fontBaseline,
                                                    const InlineLevelBox &inlineLevelBox) noexcept;
 
     KRYS_NODISCARD static InlineLayoutUnit Ascent(const FontMetrics &fontMetrics, FontBaseline fontBaseline,
                                                   const Box &layoutBox) noexcept;
+
     KRYS_NODISCARD static InlineLayoutUnit Descent(const FontMetrics &fontMetrics, FontBaseline fontBaseline,
                                                    const Box &layoutBox) noexcept;
 

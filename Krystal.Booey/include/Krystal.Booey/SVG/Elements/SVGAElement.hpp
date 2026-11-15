@@ -59,6 +59,7 @@ namespace krys::boo::svg
 
   public:
     explicit SVGAElement(dom::Document &document) noexcept;
+
     ~SVGAElement() noexcept override;
 
     /// @see https://svgwg.org/svg2-draft/linking.html#__svg__SVGAElement__target
@@ -66,6 +67,7 @@ namespace krys::boo::svg
     {
       return dom::DOMStringAtom {_target->CurrentValue()};
     }
+
     KRYS_NODISCARD Ref<SVGAnimatedString> &TargetAnimated() noexcept
     {
       return _target;
@@ -79,16 +81,20 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept final;
 
     KRYS_NODISCARD bool IsValid() const noexcept final
     {
       return SVGTests::IsValid();
     }
+
     void ActivationBehavior(dom::Event &event) noexcept final;
+
     void DefaultEventHandler(dom::Event &event) noexcept final;
 
     KRYS_NODISCARD bool HasRel(SVGALinkRelation) const noexcept;

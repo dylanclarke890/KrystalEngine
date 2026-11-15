@@ -87,7 +87,7 @@ namespace krys::gfx
     {
       auto mix = [](size_t seed, size_t value)
       {
-        return seed ^ (value + 0x9e'37'79'b9'7f'4a'7c'55 + (seed << 6) + (seed >> 2));
+        return seed ^ (value + 0x9E'37'79'B9'7F'4A'7C'55 + (seed << 6) + (seed >> 2));
       };
       size_t seed = 0u;
       seed = mix(seed, static_cast<size_t>(desc.MinFilter));

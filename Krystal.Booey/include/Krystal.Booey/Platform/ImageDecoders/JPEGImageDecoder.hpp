@@ -60,20 +60,25 @@ namespace krys::boo
     {
       return u8"jpg";
     }
+
     ScalableImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept override;
+
     // CAUTION: setFailed() deletes |m_reader|.  Be careful to avoid
     // accessing deleted memory, especially when calling this from inside
     // JPEGImageReader!
     bool SetFailed() noexcept override;
 
     bool OutputScanlines();
+
     /// @brief Converts what's decoded from the colour space @p profile describes, laid out as @p layout
     /// (RGB rows are written as BGRA, and CMYK ones as inverted CMYK).
     void SetICCProfile(Span<const uint8> profile, ICCProfileTransform::PixelLayout layout) noexcept;
+
     void JpegComplete();
 
   private:
     JPEGImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
+
     void TryDecodeSize(bool allDataReceived) noexcept override
     {
       Decode(true, allDataReceived);

@@ -63,13 +63,13 @@ namespace krys::boo
     {
       Background,
       Foreground,
-      Decoration
+      Decoration,
     };
 
     enum class OverlapStrategy
     {
       None,
-      Frontmost
+      Frontmost,
     };
 
     uint32 StartOffset {0};
@@ -79,6 +79,7 @@ namespace krys::boo
     int32 Priority {0};
 
     MarkedText() noexcept = default;
+
     MarkedText(uint32 startOffset, uint32 endOffset, Type type, const StringAtom &highlightName = null,
                int32 priority = 0) noexcept
         : StartOffset(startOffset), EndOffset(endOffset), MarkedType(type), HighlightName(highlightName),

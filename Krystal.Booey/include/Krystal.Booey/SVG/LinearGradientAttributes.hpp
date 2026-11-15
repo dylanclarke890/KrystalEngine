@@ -45,14 +45,17 @@ namespace krys::boo::svg
     {
       return _x1;
     }
+
     KRYS_NODISCARD SVGLengthValue Y1() const noexcept
     {
       return _y1;
     }
+
     KRYS_NODISCARD SVGLengthValue X2() const noexcept
     {
       return _x2;
     }
+
     KRYS_NODISCARD SVGLengthValue Y2() const noexcept
     {
       return _y2;
@@ -63,16 +66,19 @@ namespace krys::boo::svg
       _x1 = value;
       _x1Set = true;
     }
+
     void SetY1(SVGLengthValue value) noexcept
     {
       _y1 = value;
       _y1Set = true;
     }
+
     void SetX2(SVGLengthValue value) noexcept
     {
       _x2 = value;
       _x2Set = true;
     }
+
     void SetY2(SVGLengthValue value) noexcept
     {
       _y2 = value;
@@ -83,14 +89,17 @@ namespace krys::boo::svg
     {
       return _x1Set;
     }
+
     KRYS_NODISCARD bool HasY1() const noexcept
     {
       return _y1Set;
     }
+
     KRYS_NODISCARD bool HasX2() const noexcept
     {
       return _x2Set;
     }
+
     KRYS_NODISCARD bool HasY2() const noexcept
     {
       return _y2Set;

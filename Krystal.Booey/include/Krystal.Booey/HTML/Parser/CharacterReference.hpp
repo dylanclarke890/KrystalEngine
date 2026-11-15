@@ -31,7 +31,7 @@ namespace krys::boo::html
 
   /// @brief The replacements for the C1 control code points in the numeric character reference end state.
   /// @see https://html.spec.whatwg.org/#numeric-character-reference-end-state
-  inline constexpr NumericCharacterReferenceEntry NumericCharacterReferences[] = {
+  constexpr inline NumericCharacterReferenceEntry NumericCharacterReferences[] = {
     {0x80, 0x20AC}, // EURO SIGN (€)
     {0x82, 0x201A}, // SINGLE LOW-9 QUOTATION MARK (‚)
     {0x83, 0x0192}, // LATIN SMALL LETTER F WITH HOOK (ƒ)
@@ -63,7 +63,7 @@ namespace krys::boo::html
 
   /// @brief Every named character reference, sorted by name for searching.
   /// @see https://html.spec.whatwg.org/#named-character-references
-  inline constexpr NamedCharacterReferenceEntry NamedCharacterReferences[] = {
+  constexpr inline NamedCharacterReferenceEntry NamedCharacterReferences[] = {
     {"&AElig", 0xC6},
     {"&AElig;", 0xC6},
     {"&AMP", 0x26},

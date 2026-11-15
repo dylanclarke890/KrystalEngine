@@ -47,7 +47,7 @@ namespace krys::boo
       FontType,
       StyleSheetType,
       SVGDocumentType,
-      RawResourceType
+      RawResourceType,
     };
 
     virtual ~CachedResourceClient() noexcept = default;
@@ -60,10 +60,12 @@ namespace krys::boo
     {
       return BaseResourceType;
     }
+
     KRYS_NODISCARD virtual CachedResourceClientType ResourceClientType() const noexcept
     {
       return ExpectedType();
     }
+
     KRYS_NODISCARD virtual bool ShouldMarkAsReferenced() const noexcept
     {
       return true;

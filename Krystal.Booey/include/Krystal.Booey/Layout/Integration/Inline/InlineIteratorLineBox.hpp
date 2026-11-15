@@ -45,6 +45,7 @@ namespace krys::boo::inline_iterator
   public:
     /// @brief An iterator at the end, with no content.
     LineBoxIteratorModernPath() noexcept = default;
+
     LineBoxIteratorModernPath(const layout_integration::InlineContent &inlineContent,
                               size_t lineIndex) noexcept
         : _inlineContent(CreateWeakPtr(&inlineContent)), _lineIndex(lineIndex)
@@ -56,34 +57,42 @@ namespace krys::boo::inline_iterator
     {
       return GetLine().EnclosingContentLogicalTop();
     }
+
     KRYS_NODISCARD float ContentLogicalBottom() const noexcept
     {
       return GetLine().EnclosingContentLogicalBottom();
     }
+
     KRYS_NODISCARD float LogicalTop() const noexcept
     {
       return GetLine().LineBoxLogicalRect().Y();
     }
+
     KRYS_NODISCARD float LogicalBottom() const noexcept
     {
       return GetLine().LineBoxLogicalRect().MaxY();
     }
+
     KRYS_NODISCARD float LogicalWidth() const noexcept
     {
       return GetLine().LineBoxLogicalRect().Width();
     }
+
     KRYS_NODISCARD float InkOverflowLogicalTop() const noexcept
     {
       return GetLine().IsHorizontal() ? GetLine().InkOverflow().Y() : GetLine().InkOverflow().X();
     }
+
     KRYS_NODISCARD float InkOverflowLogicalBottom() const noexcept
     {
       return GetLine().IsHorizontal() ? GetLine().InkOverflow().MaxY() : GetLine().InkOverflow().MaxX();
     }
+
     KRYS_NODISCARD float ScrollableOverflowTop() const noexcept
     {
       return GetLine().ScrollableOverflow().Y();
     }
+
     KRYS_NODISCARD float ScrollableOverflowBottom() const noexcept
     {
       return GetLine().ScrollableOverflow().MaxY();
@@ -93,18 +102,23 @@ namespace krys::boo::inline_iterator
     {
       return GetLine().HasEllipsis();
     }
+
     KRYS_NODISCARD FloatRect EllipsisVisualRectIgnoringBlockDirection() const noexcept
     {
       return GetLine().GetEllipsis()->VisualRect;
     }
+
     KRYS_NODISCARD TextRun EllipsisText() const noexcept
     {
       return TextRun {GetLine().GetEllipsis()->Text.View()};
     }
 
     KRYS_NODISCARD float ContentLogicalTopAdjustedForPrecedingLineBox() const noexcept;
+
     KRYS_NODISCARD float ContentLogicalBottomAdjustedForFollowingLineBox() const noexcept;
+
     KRYS_NODISCARD float ContentLogicalLeft() const noexcept;
+
     KRYS_NODISCARD float ContentLogicalRight() const noexcept
     {
       return ContentLogicalLeft() + GetLine().ContentLogicalWidth();
@@ -114,6 +128,7 @@ namespace krys::boo::inline_iterator
     {
       return GetLine().IsHorizontal();
     }
+
     KRYS_NODISCARD FontBaseline BaselineType() const noexcept
     {
       return GetLine().BaselineType();
@@ -128,6 +143,7 @@ namespace krys::boo::inline_iterator
     {
       return GetLine().IsFirstAfterPageBreak();
     }
+
     KRYS_NODISCARD bool HasBlockLevelBox() const noexcept
     {
       return GetLine().HasBlockLevelBox();
@@ -167,6 +183,7 @@ namespace krys::boo::inline_iterator
     }
 
     KRYS_NODISCARD BoxModernPath FirstLeafBox() const noexcept;
+
     KRYS_NODISCARD BoxModernPath LastLeafBox() const noexcept;
 
   private:
@@ -179,6 +196,7 @@ namespace krys::boo::inline_iterator
     {
       return _inlineContent->DisplayContent().LineList;
     }
+
     KRYS_NODISCARD const inline_display::Line &GetLine() const noexcept
     {
       return Lines()[_lineIndex];
@@ -205,14 +223,17 @@ namespace krys::boo::inline_iterator
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.LogicalTop(); });
     }
+
     KRYS_NODISCARD float LogicalBottom() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.LogicalBottom(); });
     }
+
     KRYS_NODISCARD float LogicalHeight() const noexcept
     {
       return LogicalBottom() - LogicalTop();
     }
+
     KRYS_NODISCARD float LogicalWidth() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.LogicalWidth(); });
@@ -223,25 +244,30 @@ namespace krys::boo::inline_iterator
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.ContentLogicalTop(); });
     }
+
     KRYS_NODISCARD float ContentLogicalBottom() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.ContentLogicalBottom(); });
     }
+
     KRYS_NODISCARD float ContentLogicalLeft() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.ContentLogicalLeft(); });
     }
+
     KRYS_NODISCARD float ContentLogicalRight() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.ContentLogicalRight(); });
     }
+
     KRYS_NODISCARD float ContentLogicalWidth() const noexcept
     {
       return ContentLogicalRight() - ContentLogicalLeft();
     }
+
     KRYS_NODISCARD float ContentLogicalHeight() const noexcept
     {
       return ContentLogicalBottom() - ContentLogicalTop();
@@ -252,6 +278,7 @@ namespace krys::boo::inline_iterator
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto)
                       { return path.ContentLogicalTopAdjustedForPrecedingLineBox(); });
     }
+
     KRYS_NODISCARD float ContentLogicalBottomAdjustedForFollowingLineBox() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto)
@@ -263,16 +290,19 @@ namespace krys::boo::inline_iterator
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.InkOverflowLogicalTop(); });
     }
+
     KRYS_NODISCARD float InkOverflowLogicalBottom() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.InkOverflowLogicalBottom(); });
     }
+
     KRYS_NODISCARD float ScrollableOverflowTop() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.ScrollableOverflowTop(); });
     }
+
     KRYS_NODISCARD float ScrollableOverflowBottom() const noexcept
     {
       return SwitchOn(_pathVariant,
@@ -285,16 +315,20 @@ namespace krys::boo::inline_iterator
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.HasEllipsis(); });
     }
+
     enum class AdjustedForSelection : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     /// @brief The ellipsis' rect; adjusted for selection, it spans the line's selection height.
     KRYS_NODISCARD FloatRect
       EllipsisVisualRect(AdjustedForSelection adjustedForSelection = AdjustedForSelection::No) const noexcept;
+
     /// @brief Whether the selection covers the ellipsis' truncation point.
     KRYS_NODISCARD RenderObjectHighlightState EllipsisSelectionState() const noexcept;
+
     KRYS_NODISCARD TextRun EllipsisText() const noexcept
     {
       krys_debug_assert(HasEllipsis());
@@ -311,33 +345,40 @@ namespace krys::boo::inline_iterator
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.IsHorizontal(); });
     }
+
     KRYS_NODISCARD FontBaseline BaselineType() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.BaselineType(); });
     }
 
     KRYS_NODISCARD bool IsFirst() const noexcept;
+
     KRYS_NODISCARD bool IsFirstAfterPageBreak() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.IsFirstAfterPageBreak(); });
     }
+
     KRYS_NODISCARD bool HasBlockContent() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.HasBlockLevelBox(); });
     }
+
     KRYS_NODISCARD LeafBoxIterator BlockLevelBox() const noexcept;
 
     // Text-relative left/right
     KRYS_NODISCARD LeafBoxIterator LineLeftmostLeafBox() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator LineRightmostLeafBox() const noexcept;
 
     // Coordinate-relative left/right
     KRYS_NODISCARD LeafBoxIterator LogicalLeftmostLeafBox() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator LogicalRightmostLeafBox() const noexcept;
 
     KRYS_NODISCARD LineBoxIterator Next() const noexcept;
+
     KRYS_NODISCARD LineBoxIterator Previous() const noexcept;
 
     KRYS_NODISCARD size_t LineIndex() const noexcept
@@ -361,9 +402,11 @@ namespace krys::boo::inline_iterator
     LineBoxIterator() noexcept : _lineBox(LineBoxIteratorLegacyPath {nullptr})
     {
     }
+
     explicit LineBoxIterator(LineBox::PathVariant &&path) noexcept : _lineBox(krys::move(path))
     {
     }
+
     explicit LineBoxIterator(const LineBox &lineBox) noexcept : _lineBox(lineBox)
     {
     }
@@ -372,12 +415,14 @@ namespace krys::boo::inline_iterator
     {
       return TraverseNext();
     }
+
     LineBoxIterator &operator--() noexcept
     {
       return TraversePrevious();
     }
 
     LineBoxIterator &TraverseNext() noexcept;
+
     LineBoxIterator &TraversePrevious() noexcept;
 
     KRYS_NODISCARD explicit operator bool() const noexcept
@@ -389,6 +434,7 @@ namespace krys::boo::inline_iterator
     {
       return _lineBox._pathVariant == other._lineBox._pathVariant;
     }
+
     KRYS_NODISCARD bool operator==(EndLineBoxIterator) const noexcept
     {
       return AtEnd();
@@ -398,6 +444,7 @@ namespace krys::boo::inline_iterator
     {
       return _lineBox;
     }
+
     KRYS_NODISCARD const LineBox *operator->() const noexcept
     {
       return &_lineBox;
@@ -410,11 +457,14 @@ namespace krys::boo::inline_iterator
   };
 
   KRYS_NODISCARD LineBoxIterator FirstLineBoxFor(const RenderBlockFlow &flow) noexcept;
+
   KRYS_NODISCARD LineBoxIterator LastLineBoxFor(const RenderBlockFlow &flow) noexcept;
+
   KRYS_NODISCARD LineBoxIterator LineBoxFor(const layout_integration::InlineContent &inlineContent,
                                             size_t lineIndex) noexcept;
 
   KRYS_NODISCARD float PreviousLineBoxContentBottomOrBorderAndPadding(const LineBox &lineBox) noexcept;
+
   KRYS_NODISCARD float ContentStartInBlockDirection(const LineBox &lineBox) noexcept;
 
   /// @brief The leaf box on @p lineBox nearest @p horizontalPosition (logical, in the formatting context

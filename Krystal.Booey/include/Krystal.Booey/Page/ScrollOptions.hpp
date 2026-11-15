@@ -21,6 +21,7 @@ namespace krys::boo
     Maybe<double> Top;
 
     ScrollToOptions() noexcept = default;
+
     ScrollToOptions(double x, double y) noexcept : Left(x), Top(y)
     {
     }
@@ -49,7 +50,7 @@ namespace krys::boo
     Start,
     Center,
     End,
-    Nearest
+    Nearest,
   };
 
   /// @see https://drafts.csswg.org/cssom-view/#dictdef-scrollintoviewoptions

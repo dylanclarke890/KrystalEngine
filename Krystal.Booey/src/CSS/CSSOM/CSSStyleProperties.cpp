@@ -125,7 +125,7 @@ namespace krys::boo::css
     enum class PropertyLookupMode : uint8
     {
       ConvertUsingNoDashPrefix,
-      NoConversion
+      NoConversion,
     };
 
     template <PropertyLookupMode Mode>

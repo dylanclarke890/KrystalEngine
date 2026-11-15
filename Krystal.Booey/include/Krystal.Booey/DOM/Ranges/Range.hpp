@@ -173,10 +173,12 @@ namespace krys::boo::dom
     {
       return _isAssociatedWithSelection;
     }
+
     void DidAssociateWithSelection() noexcept
     {
       _isAssociatedWithSelection = true;
     }
+
     void DidDisassociateFromSelection() noexcept
     {
       _isAssociatedWithSelection = false;
@@ -189,18 +191,22 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#concept-range-bp-set
     KRYS_NODISCARD ExceptionOr<void> SetStartBoundaryPoint(Node &node, uint64 offset) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#concept-range-bp-set
     KRYS_NODISCARD ExceptionOr<void> SetEndBoundaryPoint(Node &node, uint64 offset) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#contained
     KRYS_NODISCARD bool IsContained(Node &node) const noexcept;
+
     /// @see https://dom.spec.whatwg.org/#partially-contained
     KRYS_NODISCARD bool IsPartiallyContained(const Node &node) const noexcept;
 
     KRYS_NODISCARD Node *FirstPartiallyContainedChild(Node &commonAncestor, Node &startContainer,
                                                       Node &endContainer) const noexcept;
+
     KRYS_NODISCARD Node *LastPartiallyContainedChild(Node &commonAncestor, Node &startContainer,
                                                      Node &endContainer) const noexcept;
+
     KRYS_NODISCARD ExceptionOr<SmallNodeList> GetContainedChildren(Node *commonAncestor) const noexcept;
 
     KRYS_NODISCARD ExceptionOr<void>

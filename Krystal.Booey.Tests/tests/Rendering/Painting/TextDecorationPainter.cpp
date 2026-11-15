@@ -4,7 +4,6 @@
 
 namespace krys::boo::tests
 {
-
   TEST_CASE(
     "TextDecorationPainter: draws underlines, overlines and line-throughs in their colour and thickness",
     "[Rendering][TextDecorationPainter]")

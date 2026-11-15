@@ -42,7 +42,7 @@ namespace krys::boo
     enum class WordTrailingSpaceState : bool
     {
       Uninitialized,
-      Initialized
+      Initialized,
     };
 
     const RenderStyle *_style;

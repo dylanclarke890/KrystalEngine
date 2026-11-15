@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
 #include <memory>
+
 namespace krys::boo
 {
   FontSelectionAlgorithm::FontSelectionAlgorithm(FontSelectionRequest request,

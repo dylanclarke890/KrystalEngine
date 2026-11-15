@@ -84,6 +84,7 @@ namespace krys::boo::style
     GridTemplateList(css::keywords::None) noexcept
     {
     }
+
     GridTemplateList(GridTrackList &&entries) noexcept;
 
     KRYS_NODISCARD bool IsNone() const noexcept
@@ -113,6 +114,7 @@ namespace krys::boo::style
   struct Blending<GridTemplateList>
   {
     KRYS_NODISCARD bool CanBlend(const GridTemplateList &, const GridTemplateList &) noexcept;
+
     KRYS_NODISCARD GridTemplateList Blend(const GridTemplateList &, const GridTemplateList &,
                                           const BlendingContext &) noexcept;
   };

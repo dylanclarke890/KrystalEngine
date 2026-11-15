@@ -55,7 +55,7 @@ namespace krys::boo::html
     enum class ExcludeOptGroup : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -75,12 +75,13 @@ namespace krys::boo::html
       MakeOptionDirty,
       UserDriven,
     };
+
     using SelectOptionFlags = EnumSet<SelectOptionFlag>;
 
     enum class SkipDirection : int8
     {
       Backwards = -1,
-      Forwards = 1
+      Forwards = 1,
     };
 
     /// @brief The options, optgroups and hrs of the select, in order.
@@ -103,6 +104,7 @@ namespace krys::boo::html
 
   public:
     explicit HTMLSelectElement(dom::Document &document) noexcept;
+
     KRYS_NODISCARD static Ref<HTMLSelectElement> Create(dom::Document &document) noexcept;
 
     /// @brief The select whose list of options a child of @p startNode would be in, if any.
@@ -244,6 +246,7 @@ namespace krys::boo::html
     {
       return _contentsUseBaseAppearance;
     }
+
     /// @return Whether it changed.
     bool SetContentsUseBaseAppearance(bool value) noexcept;
 
@@ -263,6 +266,7 @@ namespace krys::boo::html
     /// @brief Sets the text the select shows without a button of its own to its selected option's label.
     /// @see https://html.spec.whatwg.org/#clone-selected-option-into-select-button
     void CloneSelectedOptionIntoSelectButton() noexcept;
+
     void SetRecalcListItems() noexcept;
 
     /// @brief Runs the selectedness setting algorithm, then updates the selectedcontent elements if it or
@@ -271,6 +275,7 @@ namespace krys::boo::html
     void ResetSelectedness(bool hasChanged) noexcept;
 
     void InvalidateSelectedItems() noexcept;
+
     void UpdateListItemSelectedStates(
       AllowStyleInvalidation allowStyleInvalidation = AllowStyleInvalidation::Yes) noexcept;
 
@@ -281,20 +286,30 @@ namespace krys::boo::html
     void OptGroupInserted(HTMLOptGroupElement &optGroup) noexcept;
 
     void AccessKeySetSelectedIndex(int32 index) noexcept;
+
     void ScrollToSelection() noexcept;
 
     void ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
                            bool fireOnChangeNow = true) noexcept;
 
     KRYS_NODISCARD bool CanSelectAll() const noexcept;
+
     void SelectAll() noexcept;
+
     KRYS_NODISCARD int32 ListToOptionIndex(int32 listIndex) const noexcept;
+
     void ListBoxOnChange() noexcept;
+
     KRYS_NODISCARD int32 OptionToListIndex(int32 optionIndex) const noexcept;
+
     KRYS_NODISCARD int32 ActiveSelectionStartListIndex() const noexcept;
+
     KRYS_NODISCARD int32 ActiveSelectionEndListIndex() const noexcept;
+
     void SetActiveSelectionAnchorIndex(int32 index) noexcept;
+
     void SetActiveSelectionEndIndex(int32 index) noexcept;
+
     void UpdateListBoxSelection(bool deselectOtherOptions) noexcept;
 
     /// @brief Called by an option when its selectedness is set.
@@ -341,23 +356,36 @@ namespace krys::boo::html
 
   protected:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept final;
+
     void DidRecalcStyle(EnumSet<style::Change> styleChange) noexcept final;
+
     void DefaultEventHandler(dom::Event &event) noexcept final;
+
     void DispatchFocusEvent(dom::EventTarget *relatedTarget, const dom::FocusOptions &options) noexcept final;
+
     void DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept final;
+
     void OnChildrenChanged() noexcept final;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+
     void DisabledStateChanged() noexcept final;
+
     void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept final;
 
   private:
     void BaseAppearanceDefaultEventHandler(dom::Event &event) noexcept;
+
     /// @see https://html.spec.whatwg.org/#select-open-picker
     void OpenPicker(bool byKeyboard) noexcept;
+
     void ClosePicker() noexcept;
+
     void ReassignSlots() noexcept;
+
     /// @brief Moves the focus between the selectable options for an arrow, Home, End or page key.
     /// @see https://html.spec.whatwg.org/#focus-another-option
     void FocusOptionForKey(dom::DOMStringView keyIdentifier) noexcept;
@@ -372,35 +400,54 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLOptionElement *FirstSelectedOption() const noexcept;
 
     void DispatchChangeEventForMenuList() noexcept;
+
     void RecalcListItems(bool updateSelectedStates = true, AllowStyleInvalidation allowStyleInvalidation =
                                                              AllowStyleInvalidation::Yes) const noexcept;
+
     void TypeAheadFind(dom::KeyboardEvent &event) noexcept;
+
     void SaveLastSelection() noexcept;
+
     void SelectOption(int32 optionIndex, SelectOptionFlags flags = {}) noexcept;
+
     void DeselectItemsWithoutValidation(HTMLElement *elementToExclude = nullptr) noexcept;
+
     void ParseMultipleAttribute(bool present) noexcept;
+
     KRYS_NODISCARD int32 LastSelectedListIndex() const noexcept;
+
     void UpdateSelectedState(int32 listIndex, bool multi, bool shift) noexcept;
+
     void MenuListDefaultEventHandler(dom::Event &event) noexcept;
+
     bool PlatformHandleKeydownEvent(dom::KeyboardEvent &event) noexcept;
+
     void ListBoxDefaultEventHandler(dom::Event &event) noexcept;
+
     void SetOptionsChangedOnRenderer() noexcept;
 
     /// @brief Shows the menu list's popup, if the select is drawn as a menu list.
     void ShowPopup() noexcept;
 
     KRYS_NODISCARD int32 NextValidIndex(int32 listIndex, SkipDirection direction, int32 skip) const noexcept;
+
     KRYS_NODISCARD int32 NextSelectableListIndex(int32 startIndex) const noexcept;
+
     KRYS_NODISCARD int32 PreviousSelectableListIndex(int32 startIndex) const noexcept;
+
     KRYS_NODISCARD int32 FirstSelectableListIndex() const noexcept;
+
     KRYS_NODISCARD int32 LastSelectableListIndex() const noexcept;
+
     KRYS_NODISCARD int32 NextSelectableListIndexPageAway(int32 startIndex,
                                                          SkipDirection direction) const noexcept;
 
 #pragma region TypeAheadDataSource
 
     KRYS_NODISCARD int32 IndexOfSelectedOption() const noexcept final;
+
     KRYS_NODISCARD int32 OptionCount() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString OptionAtIndex(int32 index) const noexcept final;
 
 #pragma endregion

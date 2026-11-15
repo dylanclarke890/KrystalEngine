@@ -41,9 +41,11 @@ namespace krys::boo
 
   public:
     RenderFileUploadControl(html::HTMLInputElement &, RenderStyle &&) noexcept;
+
     ~RenderFileUploadControl() noexcept override;
 
     KRYS_NODISCARD dom::DOMString ButtonValue() const noexcept;
+
     /// @brief The text drawn after the button: the files' names (or how many there are), or that none is
     /// chosen, truncated to fit.
     KRYS_NODISCARD utf8_string FileTextValue() const noexcept;
@@ -57,10 +59,14 @@ namespace krys::boo
     }
 
     void UpdateFromElement() noexcept override;
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
+
     void ComputePreferredLogicalWidths() noexcept override;
+
     void PaintObject(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void PaintControl(PaintInfo &, const LayoutPoint &) noexcept;
 
     KRYS_NODISCARD int32 MaxFilenameLogicalWidth() const noexcept;

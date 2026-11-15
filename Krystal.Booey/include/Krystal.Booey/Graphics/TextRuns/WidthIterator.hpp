@@ -32,15 +32,15 @@
 
 namespace krys::boo
 {
+  struct AdvanceInternalState;
+  class Font;
   class FontCascade;
   class FontCascadeDescription;
-  class Font;
-  class TextRun;
   struct GlyphData;
   struct GlyphIndexRange;
   struct OriginalAdvancesForCharacterTreatedAsSpace;
-  struct AdvanceInternalState;
   struct SmallCapsState;
+  class TextRun;
   class Utf8TextIterator;
 
   using CharactersTreatedAsSpace = SmallList<OriginalAdvancesForCharacterTreatedAsSpace, 64>;
@@ -56,7 +56,9 @@ namespace krys::boo
 
     /// @brief Lays out the run up to byte offset @p to.
     void Advance(uint32 to, GlyphBuffer &glyphBuffer) noexcept;
+
     KRYS_NODISCARD bool AdvanceOneCharacter(float &width, GlyphBuffer &glyphBuffer) noexcept;
+
     void Finalize(GlyphBuffer &buffer) noexcept;
 
     KRYS_NODISCARD float MaxGlyphBoundingBoxY() const noexcept
@@ -64,16 +66,19 @@ namespace krys::boo
       krys_debug_assert(_accountForGlyphBounds);
       return _maxGlyphBoundingBoxY;
     }
+
     KRYS_NODISCARD float MinGlyphBoundingBoxY() const noexcept
     {
       krys_debug_assert(_accountForGlyphBounds);
       return _minGlyphBoundingBoxY;
     }
+
     KRYS_NODISCARD float FirstGlyphOverflow() const noexcept
     {
       krys_debug_assert(_accountForGlyphBounds);
       return _firstGlyphOverflow;
     }
+
     KRYS_NODISCARD float LastGlyphOverflow() const noexcept
     {
       krys_debug_assert(_accountForGlyphBounds);
@@ -84,10 +89,12 @@ namespace krys::boo
     {
       return _run;
     }
+
     KRYS_NODISCARD float RunWidthSoFar() const noexcept
     {
       return _runWidthSoFar;
     }
+
     KRYS_NODISCARD uint32 CurrentCharacterIndex() const noexcept
     {
       return _currentCharacterIndex;
@@ -138,16 +145,21 @@ namespace krys::boo
     KRYS_NODISCARD ApplyFontTransformsResult
       ApplyFontTransforms(GlyphBuffer &glyphBuffer, uint32 lastGlyphCount, const Font &font,
                           CharactersTreatedAsSpace &charactersTreatedAsSpace) noexcept;
+
     void CommitCurrentFontRange(AdvanceInternalState &advanceInternalState) noexcept;
+
     void StartNewFontRangeIfNeeded(AdvanceInternalState &advanceInternalState, SmallCapsState &smallCapsState,
                                    const FontCascadeDescription &fontDescription) noexcept;
+
     void ApplyInitialAdvance(GlyphBuffer &glyphBuffer, GlyphBufferAdvance initialAdvance,
                              uint32 lastGlyphCount) noexcept;
 
     KRYS_NODISCARD bool HasExtraSpacing() const noexcept;
+
     void ApplyExtraSpacingAfterShaping(GlyphBuffer &glyphBuffer, uint32 characterStartIndex,
                                        uint32 glyphBufferStartIndex, uint32 characterDestinationIndex,
                                        float startingRunWidth) noexcept;
+
     void ApplyCSSVisibilityRules(GlyphBuffer &glyphBuffer, uint32 glyphBufferStartIndex) noexcept;
 
     KRYS_NODISCARD AdditionalWidth CalculateAdditionalWidth(GlyphBuffer &glyphBuffer,
@@ -155,6 +167,7 @@ namespace krys::boo
                                                             uint32 leadingGlyphIndex,
                                                             uint32 trailingGlyphIndex,
                                                             float position) const noexcept;
+
     void ApplyAdditionalWidth(GlyphBuffer &glyphBuffer, GlyphIndexRange glyphIndexRange,
                               float leftAdditionalWidth, float rightAdditionalWidth,
                               float leftExpansionAdditionalWidth,
@@ -164,10 +177,12 @@ namespace krys::boo
     {
       return _direction;
     }
+
     KRYS_NODISCARD bool Rtl() const noexcept
     {
       return _direction == TextDirection::RTL;
     }
+
     KRYS_NODISCARD bool Ltr() const noexcept
     {
       return _direction == TextDirection::LTR;

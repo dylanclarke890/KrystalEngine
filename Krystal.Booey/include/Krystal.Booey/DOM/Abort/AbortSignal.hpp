@@ -45,8 +45,11 @@ namespace krys::boo::dom
     }
 
     AbortAlgorithmCallback(const AbortAlgorithmCallback &other) noexcept = default;
+
     AbortAlgorithmCallback(AbortAlgorithmCallback &&other) noexcept = default;
+
     AbortAlgorithmCallback &operator=(const AbortAlgorithmCallback &other) noexcept = default;
+
     AbortAlgorithmCallback &operator=(AbortAlgorithmCallback &&other) noexcept = default;
 
     void operator()(const Any &reason) const noexcept
@@ -138,6 +141,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD static krys::Any ReasonOrAbortError(Maybe<krys::Any> &&reason) noexcept;
 
     void DidAddEventListener(const EventListener &listener) noexcept final;
+
     void DidRemoveEventListener(const EventListener &listener) noexcept final;
 
     /// @brief Has the signal's sources hold it strongly while it must stay alive for them to abort it, and

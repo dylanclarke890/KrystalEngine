@@ -42,6 +42,7 @@ namespace krys::boo::html
 
   public:
     HTMLTableElement(dom::Document &document) noexcept;
+
     ~HTMLTableElement() noexcept override;
 
 #pragma region HTMLTableElement - https://html.spec.whatwg.org/#htmltableelement
@@ -185,9 +186,11 @@ namespace krys::boo::html
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
@@ -202,7 +205,7 @@ namespace krys::boo::html
       Groups,
       Rows,
       Cols,
-      All
+      All,
     };
 
     enum class CellBorders : uint8
@@ -211,10 +214,11 @@ namespace krys::boo::html
       Inset,
       Solid,
       SolidColsOnly,
-      SolidRowsOnly
+      SolidRowsOnly,
     };
 
     KRYS_NODISCARD CellBorders GetCellBorders() const noexcept;
+
     KRYS_NODISCARD Ref<css::MutableStyleProperties> CreateSharedCellStyle() const noexcept;
 
     uint32 _borderAttr {0};  // Sets a precise border width and creates an outset border for the table and for

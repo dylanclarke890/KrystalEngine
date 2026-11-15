@@ -40,7 +40,7 @@ namespace krys::boo::svg
   {
     RegularPropertyValue,
     CurrentColorValue,
-    InheritValue
+    InheritValue,
   };
 
   /// @brief An animation element: a SMIL timed element that interpolates between values over its interval.
@@ -54,7 +54,7 @@ namespace krys::boo::svg
     {
       CSS,
       XML,
-      Auto
+      Auto,
     };
 
   protected:
@@ -80,8 +80,10 @@ namespace krys::boo::svg
 
     /// @see https://svgwg.org/specs/animations/#__svg__SVGAnimationElement__getStartTime
     KRYS_NODISCARD dom::ExceptionOr<float> GetStartTime() const noexcept;
+
     /// @see https://svgwg.org/specs/animations/#__svg__SVGAnimationElement__getCurrentTime
     KRYS_NODISCARD float GetCurrentTime() const noexcept;
+
     /// @see https://svgwg.org/specs/animations/#__svg__SVGAnimationElement__getSimpleDuration
     KRYS_NODISCARD dom::ExceptionOr<float> GetSimpleDuration() const noexcept;
 
@@ -116,6 +118,7 @@ namespace krys::boo::svg
                                                             const dom::QualifiedName &) noexcept;
 
     KRYS_NODISCARD bool IsAdditive() const noexcept override;
+
     KRYS_NODISCARD bool IsAccumulated() const noexcept;
 
     KRYS_NODISCARD AnimationMode GetAnimationMode() const noexcept
@@ -179,16 +182,21 @@ namespace krys::boo::svg
     virtual void ResetAnimation() noexcept;
 
     KRYS_NODISCARD static bool IsSupportedAttribute(const dom::QualifiedName &) noexcept;
+
     void AttributeChanged(const dom::QualifiedName &, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &) noexcept override;
 
     KRYS_NODISCARD dom::DOMString ToValue() const noexcept;
+
     KRYS_NODISCARD dom::DOMString ByValue() const noexcept;
+
     KRYS_NODISCARD dom::DOMString FromValue() const noexcept;
 
     // from SVGSMILElement
     void StartedActiveInterval() noexcept override;
+
     void UpdateAnimation(float percent, uint32 repeat) noexcept override;
 
     void SetAttributeName(const dom::QualifiedName &) noexcept override
@@ -209,6 +217,7 @@ namespace krys::boo::svg
 
   private:
     void AnimationAttributeChanged() noexcept override;
+
     void SetAttributeType(dom::DOMStringView) noexcept;
 
     KRYS_NODISCARD bool IsSVGAnimationElement() const noexcept final
@@ -217,21 +226,32 @@ namespace krys::boo::svg
     }
 
     virtual bool SetFromAndToValues(dom::DOMStringView fromString, dom::DOMStringView toString) noexcept = 0;
+
     virtual bool SetFromAndByValues(dom::DOMStringView fromString, dom::DOMStringView byString) noexcept = 0;
+
     virtual bool SetToAtEndOfDurationValue(dom::DOMStringView toAtEndOfDurationString) noexcept = 0;
+
     virtual void CalculateAnimatedValue(float percent, uint32 repeatCount) noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<float> CalculateDistance(dom::DOMStringView fromString,
                                                           dom::DOMStringView toString) noexcept = 0;
 
     KRYS_NODISCARD const List<float> &KeyTimes() const noexcept;
+
     void CurrentValuesForValuesAnimation(float percent, float &effectivePercent, dom::DOMString &from,
                                          dom::DOMString &to) noexcept;
+
     void CalculateKeyTimesForCalcModePaced() noexcept;
+
     KRYS_NODISCARD float CalculatePercentFromKeyPoints(float percent) const noexcept;
+
     void CurrentValuesFromKeyPoints(float percent, float &effectivePercent, dom::DOMString &from,
                                     dom::DOMString &to) const noexcept;
+
     KRYS_NODISCARD float CalculatePercentForSpline(float percent, uint32 splineIndex) const noexcept;
+
     KRYS_NODISCARD float CalculatePercentForFromTo(float percent) const noexcept;
+
     KRYS_NODISCARD uint32 CalculateKeyTimesIndex(float percent) const noexcept;
 
     void SetCalcMode(dom::DOMStringView) noexcept;

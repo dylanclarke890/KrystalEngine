@@ -35,9 +35,9 @@ namespace krys::boo
   /// @brief The initiator types a load can report.
   struct CachedResourceRequestInitiatorTypes
   {
-    static constexpr utf8_stringview CSS = u8"css";
-    static constexpr utf8_stringview Icon = u8"icon";
-    static constexpr utf8_stringview XMLHTTPRequest = u8"xmlhttprequest";
+    constexpr static utf8_stringview CSS = u8"css";
+    constexpr static utf8_stringview Icon = u8"icon";
+    constexpr static utf8_stringview XMLHTTPRequest = u8"xmlhttprequest";
   };
 
   /// @brief A request for a cached resource: the resource request, how to load it and who asked.
@@ -61,10 +61,12 @@ namespace krys::boo
     {
       return _resourceRequest;
     }
+
     KRYS_NODISCARD ResourceRequest &GetResourceRequest() noexcept
     {
       return _resourceRequest;
     }
+
     KRYS_NODISCARD ResourceRequest &&ReleaseResourceRequest() noexcept
     {
       return krys::move(_resourceRequest);
@@ -74,6 +76,7 @@ namespace krys::boo
     {
       return _options;
     }
+
     KRYS_NODISCARD bool AllowsCaching() const noexcept
     {
       return _options.Caching == CachingPolicy::AllowCaching
@@ -84,6 +87,7 @@ namespace krys::boo
     {
       return _initiatorType;
     }
+
     void SetInitiatorType(utf8_stringview initiatorType) noexcept
     {
       _initiatorType = utf8_string(initiatorType);
@@ -94,6 +98,7 @@ namespace krys::boo
     {
       return _charset;
     }
+
     void SetCharset(utf8_string charset) noexcept
     {
       _charset = krys::move(charset);
@@ -103,6 +108,7 @@ namespace krys::boo
     {
       return _ignoreForRequestCount;
     }
+
     void SetIgnoreForRequestCount(bool ignoreForRequestCount) noexcept
     {
       _ignoreForRequestCount = ignoreForRequestCount;

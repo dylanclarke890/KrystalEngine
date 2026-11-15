@@ -51,82 +51,159 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString Margin() const noexcept;
+
     dom::ExceptionOr<void> SetMargin(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginTop() const noexcept;
+
     dom::ExceptionOr<void> SetMarginTop(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginRight() const noexcept;
+
     dom::ExceptionOr<void> SetMarginRight(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginBottom() const noexcept;
+
     dom::ExceptionOr<void> SetMarginBottom(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginLeft() const noexcept;
+
     dom::ExceptionOr<void> SetMarginLeft(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginBlock() const noexcept;
+
     dom::ExceptionOr<void> SetMarginBlock(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginBlockStart() const noexcept;
+
     dom::ExceptionOr<void> SetMarginBlockStart(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginBlockEnd() const noexcept;
+
     dom::ExceptionOr<void> SetMarginBlockEnd(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginInline() const noexcept;
+
     dom::ExceptionOr<void> SetMarginInline(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginInlineStart() const noexcept;
+
     dom::ExceptionOr<void> SetMarginInlineStart(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MarginInlineEnd() const noexcept;
+
     dom::ExceptionOr<void> SetMarginInlineEnd(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString Inset() const noexcept;
+
     dom::ExceptionOr<void> SetInset(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString InsetBlock() const noexcept;
+
     dom::ExceptionOr<void> SetInsetBlock(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString InsetBlockStart() const noexcept;
+
     dom::ExceptionOr<void> SetInsetBlockStart(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString InsetBlockEnd() const noexcept;
+
     dom::ExceptionOr<void> SetInsetBlockEnd(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString InsetInline() const noexcept;
+
     dom::ExceptionOr<void> SetInsetInline(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString InsetInlineStart() const noexcept;
+
     dom::ExceptionOr<void> SetInsetInlineStart(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString InsetInlineEnd() const noexcept;
+
     dom::ExceptionOr<void> SetInsetInlineEnd(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString Top() const noexcept;
+
     dom::ExceptionOr<void> SetTop(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString Left() const noexcept;
+
     dom::ExceptionOr<void> SetLeft(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString Right() const noexcept;
+
     dom::ExceptionOr<void> SetRight(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString Bottom() const noexcept;
+
     dom::ExceptionOr<void> SetBottom(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString Width() const noexcept;
+
     dom::ExceptionOr<void> SetWidth(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MinWidth() const noexcept;
+
     dom::ExceptionOr<void> SetMinWidth(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MaxWidth() const noexcept;
+
     dom::ExceptionOr<void> SetMaxWidth(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString Height() const noexcept;
+
     dom::ExceptionOr<void> SetHeight(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MinHeight() const noexcept;
+
     dom::ExceptionOr<void> SetMinHeight(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MaxHeight() const noexcept;
+
     dom::ExceptionOr<void> SetMaxHeight(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString BlockSize() const noexcept;
+
     dom::ExceptionOr<void> SetBlockSize(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MinBlockSize() const noexcept;
+
     dom::ExceptionOr<void> SetMinBlockSize(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MaxBlockSize() const noexcept;
+
     dom::ExceptionOr<void> SetMaxBlockSize(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString InlineSize() const noexcept;
+
     dom::ExceptionOr<void> SetInlineSize(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MinInlineSize() const noexcept;
+
     dom::ExceptionOr<void> SetMinInlineSize(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString MaxInlineSize() const noexcept;
+
     dom::ExceptionOr<void> SetMaxInlineSize(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString PlaceSelf() const noexcept;
+
     dom::ExceptionOr<void> SetPlaceSelf(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString AlignSelf() const noexcept;
+
     dom::ExceptionOr<void> SetAlignSelf(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString JustifySelf() const noexcept;
+
     dom::ExceptionOr<void> SetJustifySelf(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString PositionAnchor() const noexcept;
+
     dom::ExceptionOr<void> SetPositionAnchor(const CSSOMString &value) noexcept;
+
     KRYS_NODISCARD CSSOMString PositionArea() const noexcept;
+
     dom::ExceptionOr<void> SetPositionArea(const CSSOMString &value) noexcept;
 
   private:

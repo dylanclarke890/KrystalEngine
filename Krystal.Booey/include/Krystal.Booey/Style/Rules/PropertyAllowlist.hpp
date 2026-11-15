@@ -45,7 +45,10 @@ namespace krys::boo::style
   KRYS_NODISCARD PropertyAllowlist PropertyAllowlistForPseudoElement(PseudoElementType type) noexcept;
 
   KRYS_NODISCARD bool IsValidMarkerStyleProperty(css::PropertyId id) noexcept;
+
   KRYS_NODISCARD bool IsValidCueStyleProperty(css::PropertyId id) noexcept;
+
   KRYS_NODISCARD bool IsValidCueSelectorStyleProperty(css::PropertyId id) noexcept;
+
   KRYS_NODISCARD bool IsValidCueBackgroundStyleProperty(css::PropertyId id) noexcept;
 }

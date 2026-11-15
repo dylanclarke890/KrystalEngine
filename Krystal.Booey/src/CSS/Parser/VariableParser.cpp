@@ -60,8 +60,10 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsValidVariableReference(TokenRange range,
                                                  const ParserContext &parserContext) noexcept;
+
     KRYS_NODISCARD bool IsValidConstantReference(TokenRange range,
                                                  const ParserContext &parserContext) noexcept;
+
     KRYS_NODISCARD bool IsValidDashedFunction(TokenRange range, const ParserContext &parserContext) noexcept;
 
     struct ClassifyBlockResult

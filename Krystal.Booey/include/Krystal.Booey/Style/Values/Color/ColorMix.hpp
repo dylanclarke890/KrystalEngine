@@ -59,11 +59,14 @@ namespace krys::boo::style
   };
 
   KRYS_NODISCARD Color ToStyleColor(const css::ColorMix &unresolved, ColorResolutionState &state) noexcept;
+
   KRYS_NODISCARD boo::Color ResolveColor(const ColorMix &colorMix, const boo::Color &currentColor) noexcept;
+
   KRYS_NODISCARD bool ContainsCurrentColor(const ColorMix &colorMix) noexcept;
 
   void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ColorMix &value) noexcept;
+
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const ColorMix &value) noexcept;
 }

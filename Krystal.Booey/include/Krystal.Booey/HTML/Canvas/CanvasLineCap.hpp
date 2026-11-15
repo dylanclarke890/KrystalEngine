@@ -9,6 +9,6 @@ namespace krys::boo::html
   {
     Butt,
     Round,
-    Square
+    Square,
   };
 }

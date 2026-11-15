@@ -49,10 +49,10 @@ namespace krys::boo
   class Decimal
   {
   public:
-    static constexpr int ExponentMax = 1'023;
-    static constexpr int ExponentMin = -1'023;
-    static constexpr int Precision = 18;
-    static constexpr uint64 MaxCoefficient = 0xD'E0'B6'B3'A7'63'FF'FFull; // 999999999999999999 == 18 9's
+    constexpr static int ExponentMax = 1'023;
+    constexpr static int ExponentMin = -1'023;
+    constexpr static int Precision = 18;
+    constexpr static uint64 MaxCoefficient = 0xD'E0'B6'B3'A7'63'FF'FFull; // 999999999999999999 == 18 9's
 
     enum Sign
     {
@@ -151,6 +151,7 @@ namespace krys::boo
 
   public:
     constexpr Decimal(int32 i32 = 0) noexcept;
+
     constexpr Decimal(Sign sign, int exponent, uint64 coefficient) noexcept;
 
     /// @brief Only tests should use this.
@@ -159,19 +160,28 @@ namespace krys::boo
     }
 
     Decimal &operator+=(const Decimal &other) noexcept;
+
     Decimal &operator-=(const Decimal &other) noexcept;
+
     Decimal &operator*=(const Decimal &other) noexcept;
+
     Decimal &operator/=(const Decimal &other) noexcept;
 
     KRYS_NODISCARD Decimal operator-() const noexcept;
+
     KRYS_NODISCARD Decimal operator+(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD Decimal operator-(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD Decimal operator*(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD Decimal operator/(const Decimal &rhs) const noexcept;
 
     KRYS_NODISCARD friend bool operator==(const Decimal &a, const Decimal &b) noexcept;
+
     /// @note False when either is NaN, as is `==`.
     KRYS_NODISCARD friend bool operator!=(const Decimal &a, const Decimal &b) noexcept;
+
     KRYS_NODISCARD friend std::partial_ordering operator<=>(const Decimal &a, const Decimal &b) noexcept;
 
     KRYS_NODISCARD int Exponent() const noexcept
@@ -216,9 +226,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Decimal Abs() const noexcept;
+
     KRYS_NODISCARD Decimal Ceil() const noexcept;
+
     KRYS_NODISCARD Decimal Floor() const noexcept;
+
     KRYS_NODISCARD Decimal Remainder(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD Decimal Round() const noexcept;
 
     KRYS_NODISCARD double ToDouble() const noexcept;
@@ -239,8 +253,11 @@ namespace krys::boo
     KRYS_NODISCARD static Decimal FromString(utf8_stringview string) noexcept;
 
     KRYS_NODISCARD static constexpr Decimal Infinity(Sign sign) noexcept;
+
     KRYS_NODISCARD static constexpr Decimal NaN() noexcept;
+
     KRYS_NODISCARD static constexpr Decimal Zero(Sign sign) noexcept;
+
     KRYS_NODISCARD static constexpr Decimal DoubleMax() noexcept;
 
     /// @brief Only tests should use this.
@@ -251,6 +268,7 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD Decimal CompareTo(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD static AlignedOperands AlignOperands(const Decimal &lhs, const Decimal &rhs) noexcept;
 
     KRYS_NODISCARD static Sign InvertSign(Sign sign) noexcept
@@ -264,12 +282,12 @@ namespace krys::boo
     }
   };
 
-  inline constexpr Decimal::EncodedData::EncodedData(Sign sign, FormatClass formatClass) noexcept
+  constexpr inline Decimal::EncodedData::EncodedData(Sign sign, FormatClass formatClass) noexcept
       : _coefficient(0), _exponent(0), _formatClass(formatClass), _sign(sign)
   {
   }
 
-  inline constexpr Decimal::EncodedData::EncodedData(Sign sign, int exponent, uint64 coefficient) noexcept
+  constexpr inline Decimal::EncodedData::EncodedData(Sign sign, int exponent, uint64 coefficient) noexcept
       : _formatClass(coefficient ? ClassNormal : ClassZero), _sign(sign)
   {
     if (exponent >= ExponentMin && exponent <= ExponentMax)
@@ -301,13 +319,13 @@ namespace krys::boo
     _exponent = static_cast<int16>(exponent);
   }
 
-  inline constexpr Decimal::Decimal(int32 i32) noexcept
+  constexpr inline Decimal::Decimal(int32 i32) noexcept
       : _data(i32 < 0 ? Negative : Positive, 0,
               i32 < 0 ? static_cast<uint64>(-static_cast<int64>(i32)) : static_cast<uint64>(i32))
   {
   }
 
-  inline constexpr Decimal::Decimal(Sign sign, int exponent, uint64 coefficient) noexcept
+  constexpr inline Decimal::Decimal(Sign sign, int exponent, uint64 coefficient) noexcept
       : _data(sign, exponent, coefficient)
   {
   }
@@ -345,22 +363,22 @@ namespace krys::boo
     return result.IsNegative() ? std::partial_ordering::less : std::partial_ordering::greater;
   }
 
-  inline constexpr Decimal Decimal::Infinity(Sign sign) noexcept
+  constexpr inline Decimal Decimal::Infinity(Sign sign) noexcept
   {
     return Decimal(EncodedData(sign, EncodedData::ClassInfinity));
   }
 
-  inline constexpr Decimal Decimal::NaN() noexcept
+  constexpr inline Decimal Decimal::NaN() noexcept
   {
     return Decimal(EncodedData(Positive, EncodedData::ClassNaN));
   }
 
-  inline constexpr Decimal Decimal::Zero(Sign sign) noexcept
+  constexpr inline Decimal Decimal::Zero(Sign sign) noexcept
   {
     return Decimal(EncodedData(sign, EncodedData::ClassZero));
   }
 
-  inline constexpr Decimal Decimal::DoubleMax() noexcept
+  constexpr inline Decimal Decimal::DoubleMax() noexcept
   {
     return Decimal(EncodedData(Sign::Positive, 292, 17'976'931'348'623'157));
   }

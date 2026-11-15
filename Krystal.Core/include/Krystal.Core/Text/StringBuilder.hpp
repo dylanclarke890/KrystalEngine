@@ -42,7 +42,9 @@ namespace krys
 
   public:
     StringBuilder() noexcept = default;
+
     StringBuilder(StringBuilder &&) noexcept = default;
+
     StringBuilder &operator=(StringBuilder &&) noexcept = default;
 
     void Clear() noexcept
@@ -215,10 +217,15 @@ namespace krys
     }
 
     void AppendASCII(std::string_view string) noexcept;
+
     void AppendCodePoint(char32 codePoint) noexcept;
+
     void AppendInteger(int64 number) noexcept;
+
     void AppendInteger(uint64 number) noexcept;
+
     void AppendNumber(float number) noexcept;
+
     void AppendNumber(double number) noexcept;
 
     template <std::integral T>

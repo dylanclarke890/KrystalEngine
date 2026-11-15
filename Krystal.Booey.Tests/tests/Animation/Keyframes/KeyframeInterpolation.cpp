@@ -23,10 +23,12 @@ namespace krys::boo::tests
       {
         return KeyOffset;
       }
+
       KRYS_NODISCARD Maybe<boo::CompositeOperation> CompositeOperation() const noexcept override
       {
         return Operation;
       }
+
       KRYS_NODISCARD bool AnimatesProperty(KeyframeInterpolation::Property) const noexcept override
       {
         return Animates;
@@ -43,18 +45,22 @@ namespace krys::boo::tests
       {
         return Operation;
       }
+
       KRYS_NODISCARD bool IsPropertyAdditiveOrCumulative(Property) const noexcept override
       {
         return true;
       }
+
       KRYS_NODISCARD const Keyframe &KeyframeAtIndex(size_t index) const noexcept override
       {
         return *Keyframes[index];
       }
+
       KRYS_NODISCARD size_t NumberOfKeyframes() const noexcept override
       {
         return Keyframes.size();
       }
+
       KRYS_NODISCARD const TimingFunction *TimingFunctionForKeyframe(const Keyframe &) const noexcept override
       {
         return Timing.get();

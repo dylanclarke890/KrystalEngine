@@ -103,7 +103,7 @@ namespace krys::boo::css::calc
     KHZ,
     X,
     DPI,
-    DPCM
+    DPCM,
   };
 
   constexpr uint8 NumberOfNumericIdentityTypes = static_cast<uint8>(NumericIdentity::DPCM) + 1;

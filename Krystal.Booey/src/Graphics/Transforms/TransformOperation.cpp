@@ -29,7 +29,6 @@
 
 namespace krys::boo
 {
-
   Maybe<TransformOperation::Type> TransformOperation::SharedPrimitiveType(Type other) const noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#interpolation-of-transform-functions
@@ -41,7 +40,7 @@ namespace krys::boo
     {
       return type;
     }
-    static constexpr std::array sharedPrimitives {std::array {Type::Rotate, Type::Rotate3D},
+    constexpr static std::array sharedPrimitives {std::array {Type::Rotate, Type::Rotate3D},
                                                   std::array {Type::Scale, Type::Scale3D},
                                                   std::array {Type::Translate, Type::Translate3D}};
     for (auto typePair : sharedPrimitives)

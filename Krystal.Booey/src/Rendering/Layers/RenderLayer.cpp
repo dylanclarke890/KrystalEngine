@@ -133,6 +133,7 @@ namespace krys::boo
     {
       return _overflowClipRect;
     }
+
     void SetOverflowClipRect(const ClipRect &clipRect) noexcept
     {
       _overflowClipRect = clipRect;
@@ -142,6 +143,7 @@ namespace krys::boo
     {
       return _fixedClipRect;
     }
+
     void SetFixedClipRect(const ClipRect &clipRect) noexcept
     {
       _fixedClipRect = clipRect;
@@ -151,6 +153,7 @@ namespace krys::boo
     {
       return _posClipRect;
     }
+
     void SetPosClipRect(const ClipRect &clipRect) noexcept
     {
       _posClipRect = clipRect;
@@ -160,6 +163,7 @@ namespace krys::boo
     {
       return _fixed;
     }
+
     void SetFixed(bool fixed) noexcept
     {
       _fixed = fixed;
@@ -546,7 +550,7 @@ namespace krys::boo
                                                     RenderLayer::PaintedContentRequest &request) noexcept
     {
       // Constrain the depth and breadth of the search for performance.
-      static constexpr uint32 maxRendererTraversalCount = 200;
+      constexpr static uint32 maxRendererTraversalCount = 200;
 
       for (const auto &child : ChildrenOfType<RenderObject>(renderer))
       {
@@ -5081,6 +5085,7 @@ namespace krys::boo
     return box.HasPotentiallyScrollableOverflow()
            && (box.HasHorizontalOverflow() || box.HasVerticalOverflow());
   }
+
 #pragma region Painting
 
   namespace
@@ -5093,13 +5098,13 @@ namespace krys::boo
     enum TransparencyClipBoxBehavior
     {
       PaintingTransparencyClipBox,
-      HitTestingTransparencyClipBox
+      HitTestingTransparencyClipBox,
     };
 
     enum TransparencyClipBoxMode
     {
       DescendantsOfTransparencyClipBox,
-      RootOfTransparencyClipBox
+      RootOfTransparencyClipBox,
     };
 
     KRYS_NODISCARD LayoutRect TransparencyClipBox(const RenderLayer &, const RenderLayer *rootLayer,
@@ -5983,7 +5988,7 @@ namespace krys::boo
 
     auto paintBehavior = [&]()
     {
-      static constexpr EnumSet<PaintBehavior> flagsToCopy {
+      constexpr static EnumSet<PaintBehavior> flagsToCopy {
         PaintBehavior::FlattenCompositingLayers,
         PaintBehavior::Snapshotting,
         PaintBehavior::ExcludeSelection,
@@ -6616,7 +6621,7 @@ namespace krys::boo
     }
 
     // FIXME: It's unclear if this flag copying is necessary.
-    static constexpr EnumSet<PaintBehavior> flagsToCopy {
+    constexpr static EnumSet<PaintBehavior> flagsToCopy {
       PaintBehavior::ExcludeSelection,
       PaintBehavior::Snapshotting,
       PaintBehavior::DefaultAsynchronousImageDecode,

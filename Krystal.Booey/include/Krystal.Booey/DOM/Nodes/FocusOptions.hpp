@@ -41,7 +41,7 @@ namespace krys::boo::dom
   enum class FocusRemovalEventsMode : bool
   {
     Dispatch,
-    DoNotDispatch
+    DoNotDispatch,
   };
 
   /// @brief What caused a focus change.
@@ -49,7 +49,7 @@ namespace krys::boo::dom
   {
     Other,
     Click,
-    Bindings
+    Bindings,
   };
 
   /// @brief Which way focus moves: sequentially (Tab and Shift+Tab) or spatially.
@@ -61,7 +61,7 @@ namespace krys::boo::dom
     Up,
     Down,
     Left,
-    Right
+    Right,
   };
 
   /// @brief Whether a focused element matches `:focus-visible`.
@@ -69,7 +69,7 @@ namespace krys::boo::dom
   {
     Invisible,
     Visible,
-    ForceInvisible
+    ForceInvisible,
   };
 
   /// @brief Where the sequential focus navigation starting point is relative to its node.
@@ -80,7 +80,7 @@ namespace krys::boo::dom
     /// @brief Just after the node and its descendants (where a removed next sibling was).
     After,
     /// @brief At the start of the node's children (where a removed first child was).
-    Inside
+    Inside,
   };
 
   /// @brief How to focus an element: the `FocusOptions` dictionary and the engine's own options.

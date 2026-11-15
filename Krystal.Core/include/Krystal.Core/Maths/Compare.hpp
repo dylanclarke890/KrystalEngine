@@ -6,7 +6,6 @@
 
 namespace krys
 {
-
 #pragma region Helper Macros
 
 #define COMPARISON_FUNC(Type, FuncName, OP, TemplateParams)                                                  \

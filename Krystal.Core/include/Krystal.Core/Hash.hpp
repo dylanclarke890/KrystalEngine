@@ -52,13 +52,13 @@ namespace krys
   }
 
   /// @brief FNV-1a 32bit hashing algorithm.
-  KRYS_NODISCARD constexpr uint32 fnv1a32(char const *s, size_t count) noexcept
+  KRYS_NODISCARD constexpr uint32 fnv1a32(const char *s, size_t count) noexcept
   {
     return ((count ? fnv1a32(s, count - 1) : 2'166'136'261u) ^ s[count]) * 16'777'619u;
   }
 
   /// @brief FNV-1a 32bit hashing algorithm.
-  KRYS_NODISCARD constexpr uint32 fnv1a32(char8 const *s, size_t count) noexcept
+  KRYS_NODISCARD constexpr uint32 fnv1a32(const char8 *s, size_t count) noexcept
   {
     return ((count ? fnv1a32(s, count - 1) : 2'166'136'261u) ^ s[count]) * 16'777'619u;
   }
@@ -103,7 +103,7 @@ namespace krys
   {
     uint32 shortRandom1 = 277'951'225;            // A random 32-bit value.
     uint32 shortRandom2 = 95'187'966;             // A random 32-bit value.
-    uint64 longRandom = 19'248'658'165'952'622LL; // A random 64-bit value.
+    uint64 longRandom = 19'248'658'165'952'622ll; // A random 64-bit value.
 
     uint64 product = longRandom * (shortRandom1 * key1 + shortRandom2 * key2);
     uint32 highBits = static_cast<uint32>(product >> (sizeof(uint64) - sizeof(uint32)));
@@ -733,7 +733,7 @@ namespace krys
     constexpr static void CombineInto(size_t &seed, const Head &head, Tail... tail) noexcept
     {
       // this algorithm is based on boost::combine_hash and is designed to mix/smear around values
-      seed ^= DefaultHash<Head>::Hash(head) + 0x9e'37'79'b9'7f'4a'7c'55 + (seed << 6) + (seed >> 2);
+      seed ^= DefaultHash<Head>::Hash(head) + 0x9E'37'79'B9'7F'4A'7C'55 + (seed << 6) + (seed >> 2);
       (CombineInto(seed, tail), ...);
     }
   };

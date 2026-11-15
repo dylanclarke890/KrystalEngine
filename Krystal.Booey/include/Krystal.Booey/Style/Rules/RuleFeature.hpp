@@ -77,7 +77,7 @@ namespace krys::boo::style
     // FIXME: This is a catch-all for cases where :has() contains a scope breaking sub-selector.
     HasScopeBreaking, // :has(:is(.changed .a))
     Host,             // :host(.changed) .subject
-    HostChild         // ::slotted(.changed)
+    HostChild,        // ::slotted(.changed)
   };
 
   constexpr uint32 MatchElementCount = static_cast<uint32>(MatchElement::HostChild) + 1;
@@ -85,7 +85,7 @@ namespace krys::boo::style
   enum class IsNegation : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   // Are we inside a logical combination pseudo-class like :is() or :not(), which if we were inside a :has(),
@@ -93,7 +93,7 @@ namespace krys::boo::style
   enum class CanBreakScope : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   // Did we find a logical combination pseudo-class like :is() or :not() with selector combinators that do
@@ -101,11 +101,12 @@ namespace krys::boo::style
   enum class DoesBreakScope : bool
   {
     No,
-    Yes
+    Yes,
   };
 
 // For MSVC.
 #pragma pack(push, 4)
+
   /// @brief A complex selector of a style rule, by its index in the rule's selector list.
   struct RuleAndSelector
   {
@@ -137,6 +138,7 @@ namespace krys::boo::style
                                         style::IsNegation isNegation,
                                         css::SelectorList &&invalidationSelector) noexcept;
   };
+
 #pragma pack(pop)
 
   using PseudoClassInvalidationKey = std::tuple<uint32, uint8, css::CSSOMStringAtom>;
@@ -222,11 +224,14 @@ namespace krys::boo::style
 
   public:
     void Add(const RuleFeatureSet &other) noexcept;
+
     void Clear() noexcept;
+
     void ShrinkToFit() noexcept;
 
     void CollectFeatures(CollectionContext &collectionContext, const RuleData &ruleData,
                          const List<Ref<const css::ScopeRule>> &scopeRules = {}) noexcept;
+
     void RegisterContentAttribute(const css::CSSOMStringAtom &attributeName) noexcept;
 
     KRYS_NODISCARD bool UsesHasPseudoClass() const noexcept;
@@ -247,6 +252,7 @@ namespace krys::boo::style
       style::MatchElement matchElement = style::MatchElement::Subject,
       style::IsNegation isNegation = style::IsNegation::No,
       style::CanBreakScope allComponentsCanBreakScope = style::CanBreakScope::No) noexcept;
+
     void CollectPseudoElementFeatures(const RuleData &ruleData) noexcept;
   };
 
@@ -261,12 +267,13 @@ namespace krys::boo::style
     Class,
     Id,
     Attribute,
-    Tag
+    Tag,
   };
 
   KRYS_NODISCARD PseudoClassInvalidationKey
     MakePseudoClassInvalidationKey(css::SelectorPseudoClass pseudoClass, InvalidationKeyType keyType,
                                    const css::CSSOMStringAtom &keyString) noexcept;
+
   KRYS_NODISCARD PseudoClassInvalidationKey MakePseudoClassInvalidationKey(
     css::SelectorPseudoClass pseudoClass, InvalidationKeyType keyType) noexcept;
 

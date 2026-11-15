@@ -34,7 +34,7 @@ namespace krys::boo
   {
     CanCrossEditingBoundary,
     CannotCrossEditingBoundary,
-    CanSkipOverEditingBoundary
+    CanSkipOverEditingBoundary,
   };
 
   /// @brief What makes a node count as editable.
@@ -44,6 +44,6 @@ namespace krys::boo
     ContentIsEditable,
     /// @brief Editable content, or content in a text control assistive technology sees (including ARIA text
     /// boxes), as the accessibility cache decides.
-    HasEditableAXRole
+    HasEditableAXRole,
   };
 }

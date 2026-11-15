@@ -95,10 +95,12 @@ namespace krys::boo::html
       // 3. Return 1.
       return 1;
     }
+
     KRYS_NODISCARD bool IsReversed() const noexcept
     {
       return _isReversed;
     }
+
     void ItemCountChanged() noexcept
     {
       _itemCount = null;
@@ -112,6 +114,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;

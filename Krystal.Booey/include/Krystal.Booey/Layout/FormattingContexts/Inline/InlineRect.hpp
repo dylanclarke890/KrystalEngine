@@ -298,10 +298,12 @@ namespace krys::boo::layout
     {
       return _hasValidTop && _hasValidLeft;
     }
+
     KRYS_NODISCARD bool HasValidSize() const noexcept
     {
       return _hasValidWidth && _hasValidHeight;
     }
+
     KRYS_NODISCARD bool HasValidGeometry() const noexcept
     {
       return HasValidPosition() && HasValidSize();

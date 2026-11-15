@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     RenderProgress(html::HTMLElement &, RenderStyle &&) noexcept;
+
     ~RenderProgress() noexcept override;
 
     KRYS_NODISCARD double Position() const noexcept
@@ -60,6 +61,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsDeterminate() const noexcept;
+
     void UpdateFromElement() noexcept override;
 
     KRYS_NODISCARD html::HTMLProgressElement *ProgressElement() const noexcept;
@@ -72,9 +74,11 @@ namespace krys::boo
 
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
+
     void WillBeDestroyed() noexcept final;
 
     void AnimationTimerFired() noexcept;
+
     void UpdateAnimationState() noexcept;
   };
 }

@@ -36,7 +36,7 @@ namespace krys::boo::style
   {
     Auto,
     Thin,
-    None
+    None,
   };
 
   // MARK: - Conversion

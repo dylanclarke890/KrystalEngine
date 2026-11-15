@@ -36,8 +36,8 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
   enum class CompositeOperation : uint8;
+  class RenderStyle;
 }
 
 namespace krys::boo::style::interpolation
@@ -56,6 +56,7 @@ namespace krys::boo::style::interpolation
     explicit WrapperBase(css::PropertyId property) noexcept : _property(property)
     {
     }
+
     virtual ~WrapperBase() noexcept = default;
 
     KRYS_NODISCARD css::PropertyId Property() const noexcept
@@ -64,16 +65,19 @@ namespace krys::boo::style::interpolation
     }
 
     KRYS_NODISCARD virtual bool Equals(const RenderStyle &, const RenderStyle &) const noexcept = 0;
+
     KRYS_NODISCARD virtual bool CanInterpolate(const RenderStyle &, const RenderStyle &,
                                                CompositeOperation) const noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD virtual bool
       RequiresInterpolationForAccumulativeIteration(const RenderStyle &, const RenderStyle &) const noexcept
     {
       return false;
     }
+
     virtual void Interpolate(RenderStyle &, const RenderStyle &, const RenderStyle &,
                              const Context &) const noexcept = 0;
   };

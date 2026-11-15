@@ -39,7 +39,7 @@ namespace krys::boo::style
     Left,
     Right,
     Center,
-    Justify
+    Justify,
   };
 
   // MARK: - Conversion

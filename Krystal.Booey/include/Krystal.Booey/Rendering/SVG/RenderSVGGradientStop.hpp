@@ -38,6 +38,7 @@ namespace krys::boo
 
   public:
     RenderSVGGradientStop(svg::SVGStopElement &, RenderStyle &&) noexcept;
+
     ~RenderSVGGradientStop() noexcept override;
 
     KRYS_NODISCARD svg::SVGStopElement &GetElement() const noexcept;
@@ -54,18 +55,22 @@ namespace krys::boo
     {
       return {};
     }
+
     KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
     {
       return {};
     }
+
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept override
     {
       return {};
     }
+
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(RepaintRectCalculation) const noexcept override
     {
       return {};
     }
+
     bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &,
                           HitTestAction) noexcept override
     {
@@ -81,6 +86,7 @@ namespace krys::boo
     {
       return false;
     }
+
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override
     {
     }

@@ -45,7 +45,7 @@ namespace krys::boo
     OriginWhenCrossOrigin,
     StrictOriginWhenCrossOrigin,
     UnsafeUrl,
-    Default = StrictOriginWhenCrossOrigin
+    Default = StrictOriginWhenCrossOrigin,
   };
 
   /// @brief A fetch's options, as the Fetch specification's request has them: only those that apply without a

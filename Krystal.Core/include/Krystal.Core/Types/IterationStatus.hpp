@@ -6,6 +6,6 @@ namespace krys
   enum class IterationStatus : bool
   {
     Continue,
-    Done
+    Done,
   };
 }

@@ -43,7 +43,7 @@ namespace krys::boo::svg
       SVG_ANGLETYPE_DEG = 2,
       SVG_ANGLETYPE_RAD = 3,
       SVG_ANGLETYPE_GRAD = 4,
-      SVG_ANGLETYPE_TURN = 5
+      SVG_ANGLETYPE_TURN = 5,
     };
 
   private:
@@ -57,21 +57,25 @@ namespace krys::boo::svg
     }
 
     void SetValue(float) noexcept;
+
     KRYS_NODISCARD float Value() const noexcept;
 
     void SetValueInSpecifiedUnits(float valueInSpecifiedUnits) noexcept
     {
       _valueInSpecifiedUnits = valueInSpecifiedUnits;
     }
+
     KRYS_NODISCARD float ValueInSpecifiedUnits() const noexcept
     {
       return _valueInSpecifiedUnits;
     }
 
     dom::ExceptionOr<void> SetValueAsString(dom::DOMStringView) noexcept;
+
     KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept;
 
     dom::ExceptionOr<void> NewValueSpecifiedUnits(uint16 unitType, float valueInSpecifiedUnits) noexcept;
+
     dom::ExceptionOr<void> ConvertToSpecifiedUnits(uint16 unitType) noexcept;
   };
 }

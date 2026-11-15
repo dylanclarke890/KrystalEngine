@@ -56,7 +56,7 @@ namespace krys::boo::style
     {
       Element,
       PseudoElement,
-      PartPseudoElement
+      PartPseudoElement,
     };
 
   private:

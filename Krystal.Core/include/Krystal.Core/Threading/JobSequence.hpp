@@ -37,9 +37,11 @@ namespace krys
   public:
     /// @brief A sequence of jobs that run on @p queue, with @p traits.
     explicit JobSequence(WorkQueue &queue, JobTraits traits = {}) noexcept;
+
     ~JobSequence() noexcept override;
 
     using WorkQueue::Dispatch;
+
     /// @brief Runs @p job after the jobs dispatched before it, with the sequence's traits.
     void Dispatch(MoveOnlyFunc<void()> job, JobTraits traits = {}) noexcept override;
 

@@ -49,8 +49,8 @@ namespace krys::boo::html
   };
 
   class HTMLDataListElement;
-  class HTMLOptionElement;
   class HTMLImageLoader;
+  class HTMLOptionElement;
   class ListAttributeTargetObserver;
 
   /// @see https://html.spec.whatwg.org/#htmlinputelement
@@ -60,16 +60,16 @@ namespace krys::boo::html
 
   public:
     /// @brief The longest value a text field holds; longer values are truncated.
-    static constexpr uint32 MaxEffectiveLength = 524'288;
+    constexpr static uint32 MaxEffectiveLength = 524'288;
 
   private:
-    static constexpr int32 DefaultSize = 20;
+    constexpr static int32 DefaultSize = 20;
 
     enum AutoCompleteSetting : uint8
     {
       Uninitialized,
       On,
-      Off
+      Off,
     };
 
     dom::DOMString _name;
@@ -95,6 +95,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool CanStartSelection() const noexcept final;
 
     HTMLInputElement(dom::Document &document) noexcept;
+
     ~HTMLInputElement() noexcept override;
 
 #pragma region HTMLInputElement - https://html.spec.whatwg.org/#htmlinputelement
@@ -177,12 +178,15 @@ namespace krys::boo::html
     /// @brief Takes a file input's files from @p dragData, dropped on it.
     /// @return Whether it took any.
     bool ReceiveDroppedFiles(const DragData &dragData) noexcept;
+
     /// @brief Whether a drag over the input carries files it would take.
     KRYS_NODISCARD bool CanReceiveDroppedFiles() const noexcept
     {
       return _canReceiveDroppedFiles;
     }
+
     void SetCanReceiveDroppedFiles(bool canReceiveDroppedFiles) noexcept;
+
     /// @brief A file input's text for its files, given with them by the host's chooser.
     KRYS_NODISCARD dom::DOMString DisplayString() const noexcept;
 
@@ -439,14 +443,23 @@ namespace krys::boo::html
 
     // For ValidityState
     KRYS_NODISCARD bool HasBadInput() const noexcept final;
+
     KRYS_NODISCARD bool PatternMismatch() const noexcept final;
+
     KRYS_NODISCARD bool RangeUnderflow() const noexcept final;
+
     KRYS_NODISCARD bool RangeOverflow() const noexcept final;
+
     KRYS_NODISCARD bool StepMismatch() const noexcept final;
+
     KRYS_NODISCARD bool TooShort() const noexcept final;
+
     KRYS_NODISCARD bool TooLong() const noexcept final;
+
     KRYS_NODISCARD bool TypeMismatch() const noexcept final;
+
     KRYS_NODISCARD bool ValueMissing() const noexcept final;
+
     KRYS_NODISCARD bool ComputeValidity() const noexcept final;
 
     /// @brief The minimum of a date, number or range input.
@@ -457,6 +470,7 @@ namespace krys::boo::html
 
     /// @brief Sets @p step to the allowed value step, if there is one.
     KRYS_NODISCARD bool GetAllowedValueStep(Decimal *step) const noexcept;
+
     KRYS_NODISCARD StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept;
 
     KRYS_NODISCARD InputType &GetInputType() const noexcept
@@ -470,21 +484,37 @@ namespace krys::boo::html
     bool AccessKeyAction(bool sendMouseEvents) noexcept override;
 
     KRYS_NODISCARD bool IsSteppable() const noexcept;
+
     KRYS_NODISCARD bool IsTextButton() const noexcept;
+
     KRYS_NODISCARD bool IsRadioButton() const noexcept;
+
     KRYS_NODISCARD bool IsTextField() const noexcept final;
+
     KRYS_NODISCARD bool ShouldUseInputMethod() noexcept final;
+
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
+
     KRYS_NODISCARD bool IsSearchField() const noexcept;
+
     KRYS_NODISCARD bool IsInputTypeHidden() const noexcept;
+
     KRYS_NODISCARD bool IsPasswordField() const noexcept;
+
     KRYS_NODISCARD bool IsCheckbox() const noexcept;
+
     KRYS_NODISCARD bool IsRangeControl() const noexcept;
+
     KRYS_NODISCARD bool IsColorControl() const noexcept;
+
     KRYS_NODISCARD bool IsText() const noexcept;
+
     KRYS_NODISCARD bool IsTextType() const noexcept;
+
     KRYS_NODISCARD bool IsEmailField() const noexcept;
+
     KRYS_NODISCARD bool IsFileUpload() const noexcept;
+
     KRYS_NODISCARD bool IsImageButton() const noexcept;
 
     /// @brief The loader of an image button's image, if the element has been one.
@@ -498,19 +528,31 @@ namespace krys::boo::html
     /// @brief An image button's label when it shows no image: the `alt` attribute, or else the `title` or
     /// `value` attribute, or else a default.
     KRYS_NODISCARD dom::DOMString AltText() const noexcept;
+
     KRYS_NODISCARD bool IsNumberField() const noexcept;
+
     KRYS_NODISCARD bool IsSubmitButton() const noexcept final;
+
     KRYS_NODISCARD bool IsTelephoneField() const noexcept;
+
     KRYS_NODISCARD bool IsURLField() const noexcept;
+
     KRYS_NODISCARD bool IsDateField() const noexcept;
+
     KRYS_NODISCARD bool IsDateTimeLocalField() const noexcept;
+
     KRYS_NODISCARD bool IsMonthField() const noexcept;
+
     KRYS_NODISCARD bool IsTimeField() const noexcept;
+
     KRYS_NODISCARD bool IsWeekField() const noexcept;
+
     KRYS_NODISCARD DateComponentsType DateType() const noexcept;
 
     KRYS_NODISCARD bool MatchesCheckedPseudoClass() const noexcept;
+
     KRYS_NODISCARD bool MatchesIndeterminatePseudoClass() const noexcept final;
+
     void SetDefaultCheckedState(bool isDefaultChecked) noexcept;
 
     /// @brief Whether @p value would be a valid value; not for types without a string value (checkboxes and
@@ -531,12 +573,14 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString ValueWithDefault() const noexcept;
 
     KRYS_NODISCARD bool IsActivatedSubmit() const noexcept final;
+
     void SetActivatedSubmit(bool flag) noexcept final;
 
     KRYS_NODISCARD uint32 EffectiveMaxLength() const noexcept;
 
     /// @brief The radio buttons in this one's group, in tree order.
     KRYS_NODISCARD krys::List<Ref<HTMLInputElement>> RadioButtonGroup() const noexcept;
+
     KRYS_NODISCARD RefPtr<HTMLInputElement> CheckedRadioButtonForGroup() const noexcept;
 
     /// @brief The groups this radio button is in: its form's, or its tree's; null if it isn't a radio button
@@ -562,17 +606,28 @@ namespace krys::boo::html
     void UpdateUserAgentShadowTree() noexcept override;
 
     KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept;
+
     KRYS_NODISCARD HTMLElement *InnerBlockElement() const noexcept;
+
     KRYS_NODISCARD HTMLElement *InnerSpinButtonElement() const noexcept;
+
     /// @brief The list button of a text field with a datalist.
     KRYS_NODISCARD HTMLElement *DataListButtonElement() const noexcept;
+
     KRYS_NODISCARD HTMLElement *SliderThumbElement() const noexcept;
+
     KRYS_NODISCARD HTMLElement *SliderTrackElement() const noexcept;
+
     KRYS_NODISCARD HTMLElement *ResultsButtonElement() const noexcept;
+
     KRYS_NODISCARD HTMLElement *CancelButtonElement() const noexcept;
+
     KRYS_NODISCARD HTMLElement *PlaceholderElement() const noexcept final;
+
     KRYS_NODISCARD RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept final;
+
     RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept final;
+
     KRYS_NODISCARD RenderStyle CreateInnerTextStyle(const RenderStyle &style) noexcept final;
 
     /// @brief Whether the field's text ends in an ellipsis: when `text-overflow` says so and it isn't
@@ -582,6 +637,7 @@ namespace krys::boo::html
     /// @brief Sets @p preferredSize to the field's size in characters.
     /// @return Whether the size includes the field's decorations.
     KRYS_NODISCARD bool SizeShouldIncludeDecoration(int32 &preferredSize) const noexcept;
+
     KRYS_NODISCARD float DecorationWidth(float inputWidth) const noexcept;
 
     KRYS_NODISCARD bool CanHaveSelection() const noexcept
@@ -590,13 +646,18 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+
     void DidAttachRenderers() noexcept final;
+
     void DidDetachRenderers() noexcept final;
+
     void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept final;
+
     void DidBlur() noexcept final;
 
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept final;
+
     KRYS_NODISCARD Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept final;
 
     KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
@@ -607,15 +668,25 @@ namespace krys::boo::html
     }
 
     bool AppendFormData(DOMFormData &formData) noexcept final;
+
     KRYS_NODISCARD bool IsSuccessfulSubmitButton() const noexcept final;
+
     KRYS_NODISCARD bool MatchesDefaultPseudoClass() const noexcept final;
+
     void Reset() noexcept final;
+
     KRYS_NODISCARD bool IsInRange() const noexcept final;
+
     KRYS_NODISCARD bool IsOutOfRange() const noexcept final;
+
     KRYS_NODISCARD bool SupportsReadOnly() const noexcept final;
+
     KRYS_NODISCARD bool SupportsPlaceholder() const noexcept final;
+
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final;
+
     KRYS_NODISCARD bool IsLabelable() const noexcept final;
+
     KRYS_NODISCARD bool IsInteractiveContent() const noexcept final;
 
     KRYS_NODISCARD bool IsOptionalFormControl() const noexcept final
@@ -630,8 +701,11 @@ namespace krys::boo::html
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &style) noexcept final;
 
     void LegacyPreActivationBehavior(dom::Event &event) noexcept final;
+
     void ActivationBehavior(dom::Event &event) noexcept final;
+
     void LegacyCanceledActivationBehavior(dom::Event &event) noexcept final;
+
     void DefaultEventHandler(dom::Event &event) noexcept final;
 
 #pragma region HTMLInputElement Obsolete members - https://html.spec.whatwg.org/#HTMLInputElement-partial
@@ -654,29 +728,44 @@ namespace krys::boo::html
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
     void OnInsert() noexcept final;
+
     void OnPostConnection() noexcept final;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+
     void OnAdopt(dom::Document &oldDocument) noexcept final;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+
     void OnClone(dom::Node &copy, bool subtree) noexcept final;
 
     KRYS_NODISCARD bool IsEmptyValue() const noexcept final;
+
     void UpdatePlaceholderText() noexcept final;
+
     void SubtreeHasChanged() noexcept final;
+
     void HandleFocusEvent(dom::Node *oldFocusedNode) noexcept final;
+
     void HandleBlurEvent() noexcept final;
 
     void WillChangeForm() noexcept final;
+
     void DidChangeForm() noexcept final;
+
     KRYS_NODISCARD bool ComputeWillValidate() const noexcept final;
+
     void RequiredStateChanged() noexcept final;
+
     void DisabledStateChanged() noexcept final;
+
     void ReadOnlyStateChanged() noexcept final;
 
   private:
@@ -694,19 +783,29 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool TooShort(dom::DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept;
+
     KRYS_NODISCARD bool TooLong(dom::DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept;
 
     void UpdateType(dom::DOMStringView typeAttributeValue) noexcept;
+
     void RunPostTypeUpdateTasks() noexcept;
+
     void SetDefaultSelectionAfterFocus(dom::SelectionRestorationMode restorationMode,
                                        SelectionRevealMode revealMode) noexcept;
+
     void InvalidateStyleOnFocusChangeIfNeeded() noexcept;
+
     void MaxLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept;
+
     void MinLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept;
+
     void UpdateValueIfNeeded() noexcept;
+
     void AddToRadioButtonGroup() noexcept;
+
     /// @brief Watches the element the `list` attribute names, while the input is connected.
     void ResetListAttributeTargetObserver() noexcept;
+
     void RemoveFromRadioButtonGroup() noexcept;
   };
 }

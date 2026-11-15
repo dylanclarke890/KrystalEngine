@@ -52,14 +52,17 @@ namespace krys::boo
     void SetContainerSize(const FloatSize &) noexcept override
     {
     }
+
     KRYS_NODISCARD bool UsesContainerSize() const noexcept override
     {
       return false;
     }
+
     KRYS_NODISCARD bool HasRelativeWidth() const noexcept override
     {
       return false;
     }
+
     KRYS_NODISCARD bool HasRelativeHeight() const noexcept override
     {
       return false;
@@ -77,6 +80,7 @@ namespace krys::boo
 
     ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
                          ImagePaintingOptions = {}) noexcept override;
+
     void DrawPattern(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
                      const AffineTransform &patternTransform, const FloatPoint &phase,
                      const FloatSize &spacing, ImagePaintingOptions = {}) noexcept override;

@@ -421,7 +421,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD static const MathFontList &GetMathFontList() noexcept
   {
-    static constexpr MathFontList list = {
+    constexpr static MathFontList list = {
       // This font has Computer Modern style and is provided with most TeX & Linux distributions.
       // We put it as the default because its style is familiar to TeX, Wikipedia and math people.
       u8"Latin Modern Math",

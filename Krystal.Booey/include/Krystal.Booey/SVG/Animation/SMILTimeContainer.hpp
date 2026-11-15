@@ -73,22 +73,29 @@ namespace krys::boo::svg
     }
 
     void Schedule(SVGSMILElement *, SVGElement *, const dom::QualifiedName &) noexcept;
+
     void Unschedule(SVGSMILElement *, SVGElement *, const dom::QualifiedName &) noexcept;
+
     void NotifyIntervalsChanged() noexcept;
 
     /// @brief The time between frames: the document timeline's animation interval.
     KRYS_NODISCARD Seconds AnimationFrameDelay() const noexcept;
+
     /// @brief Samples the animations, if this rendering update was asked for.
     void ServiceAnimations() noexcept;
 
     KRYS_NODISCARD SMILTime Elapsed() const noexcept;
 
     KRYS_NODISCARD bool IsActive() const noexcept;
+
     KRYS_NODISCARD bool IsPaused() const noexcept;
 
     void Begin() noexcept;
+
     void Pause() noexcept;
+
     void Resume() noexcept;
+
     void SetElapsed(SMILTime) noexcept;
 
     void SetDocumentOrderIndexesDirty() noexcept
@@ -100,16 +107,22 @@ namespace krys::boo::svg
     explicit SMILTimeContainer(SVGSvgElement &owner) noexcept;
 
     KRYS_NODISCARD bool IsStarted() const noexcept;
+
     void TimerFired() noexcept;
+
     /// @brief Samples the animations at @p fireTime: in the next rendering update if that's within a frame,
     /// or else a frame before it.
     void ScheduleUpdate(SMILTime elapsed, SMILTime fireTime) noexcept;
+
     void ScheduleAnimationFrame() noexcept;
+
     void UpdateAnimations(SMILTime elapsed, bool seekToTime = false) noexcept;
 
     template <typename TFunction>
     void ProcessScheduledAnimations(const TFunction &callback) noexcept;
+
     void UpdateDocumentOrderIndexes() noexcept;
+
     void SortByPriority(AnimationsVector &smilElements, SMILTime elapsed) noexcept;
 
     KRYS_NODISCARD MonotonicTime::duration LastResumeTime() const noexcept

@@ -41,14 +41,14 @@ namespace krys::boo
   enum class ScrollType : bool
   {
     User,
-    Programmatic
+    Programmatic,
   };
 
   enum class OverscrollBehavior : uint8
   {
     Auto,
     Contain,
-    None
+    None,
   };
 
   enum class ScrollDirection : uint8
@@ -56,7 +56,7 @@ namespace krys::boo
     ScrollUp,
     ScrollDown,
     ScrollLeft,
-    ScrollRight
+    ScrollRight,
   };
 
   enum class ScrollAnimationStatus : uint8
@@ -68,13 +68,13 @@ namespace krys::boo
   enum class ScrollIsAnimated : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class OverflowAnchor : bool
   {
     Auto,
-    None
+    None,
   };
 
   enum class ScrollGranularity : uint8
@@ -82,27 +82,27 @@ namespace krys::boo
     Line,
     Page,
     Document,
-    Pixel
+    Pixel,
   };
 
   enum class ScrollElasticity : uint8
   {
     Automatic,
     None,
-    Allowed
+    Allowed,
   };
 
   enum class ScrollbarOrientation : uint8
   {
     Horizontal,
-    Vertical
+    Vertical,
   };
 
   enum class ScrollbarWidth : uint8
   {
     Auto,
     Thin,
-    None
+    None,
   };
 
   /// @brief The colours `scrollbar-color` gives a scrollbar's thumb and track.
@@ -118,26 +118,26 @@ namespace krys::boo
   enum class NativeScrollbarVisibility : uint8
   {
     Visible,
-    HiddenByStyle
+    HiddenByStyle,
   };
 
   enum class OverlayScrollbarSizeRelevancy : bool
   {
     IgnoreOverlayScrollbarSize,
-    IncludeOverlayScrollbarSize
+    IncludeOverlayScrollbarSize,
   };
 
   enum class ScrollbarOverlayStyle : uint8
   {
     Default,
     Dark,
-    Light
+    Light,
   };
 
   enum class ScrollClamping : bool
   {
     Unclamped,
-    Clamped
+    Clamped,
   };
 
   // This value controls the method used to select snap points during scrolling. This may either
@@ -156,7 +156,7 @@ namespace krys::boo
   {
     Auto,
     AlwaysOff,
-    AlwaysOn
+    AlwaysOn,
   };
 
   /// @brief Whether scrolling something into view scrolls, and how far up the frames it goes.
@@ -165,13 +165,13 @@ namespace krys::boo
     Reveal,
     RevealUpToMainFrame,
     DelegateMainFrameScroll,
-    DoNotReveal
+    DoNotReveal,
   };
 
   enum class AllowScrollingOverflowHidden : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   struct ScrollPositionChangeOptions
@@ -222,7 +222,7 @@ namespace krys::boo
     ScrollBlockDirectionBackward,
     ScrollBlockDirectionForward,
     ScrollInlineDirectionBackward,
-    ScrollInlineDirectionForward
+    ScrollInlineDirectionForward,
   };
 
   KRYS_NODISCARD constexpr ScrollDirection LogicalToPhysical(ScrollLogicalDirection direction,
@@ -269,7 +269,7 @@ namespace krys::boo
   enum class ScrollEventAxis : uint8
   {
     Horizontal,
-    Vertical
+    Vertical,
   };
 
   KRYS_NODISCARD constexpr ScrollEventAxis AxisFromDirection(ScrollDirection direction) noexcept
@@ -297,7 +297,7 @@ namespace krys::boo
     ForwardButtonEndPart = 1 << 6,
     ScrollbarBGPart = 1 << 7,
     TrackBGPart = 1 << 8,
-    AllParts = 0xff'ff'ff'ff
+    AllParts = 0xFF'FF'FF'FF,
   };
 
   using ScrollbarControlPartMask = uint32;
@@ -308,7 +308,7 @@ namespace krys::boo
     ScrollbarButtonsSingle,
     ScrollbarButtonsDoubleStart,
     ScrollbarButtonsDoubleEnd,
-    ScrollbarButtonsDoubleBoth
+    ScrollbarButtonsDoubleBoth,
   };
 
   /// @brief What pressing a scrollbar part does.
@@ -317,7 +317,7 @@ namespace krys::boo
     None,
     CenterOnThumb,
     StartDrag,
-    Scroll
+    Scroll,
   };
 
   /// @brief How a composited layer moves when an ancestor scroller scrolls.
@@ -325,6 +325,6 @@ namespace krys::boo
   {
     None,
     Moves,
-    Stationary
+    Stationary,
   };
 }

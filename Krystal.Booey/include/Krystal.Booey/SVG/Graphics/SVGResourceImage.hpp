@@ -47,6 +47,7 @@ namespace krys::boo::svg
   public:
     KRYS_NODISCARD static Ref<SVGResourceImage> Create(LegacyRenderSVGResourceContainer &,
                                                        const style::URL &) noexcept;
+
     ~SVGResourceImage() noexcept override;
 
   private:
@@ -54,6 +55,7 @@ namespace krys::boo::svg
 
     ImageDrawResult Draw(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &sourceRect,
                          ImagePaintingOptions = {}) noexcept final;
+
     void DrawPattern(GraphicsContext &, const FloatRect &destRect, const FloatRect &srcRect,
                      const AffineTransform &patternTransform, const FloatPoint &phase,
                      const FloatSize &spacing, ImagePaintingOptions = {}) noexcept final;

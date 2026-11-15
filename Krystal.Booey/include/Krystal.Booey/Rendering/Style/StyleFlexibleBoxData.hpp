@@ -42,6 +42,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleFlexibleBoxData);
     }
+
     KRYS_NODISCARD Ref<StyleFlexibleBoxData> Copy() const noexcept;
 
     bool operator==(const StyleFlexibleBoxData &) const noexcept;
@@ -55,6 +56,7 @@ namespace krys::boo
 
   private:
     StyleFlexibleBoxData() noexcept;
+
     StyleFlexibleBoxData(const StyleFlexibleBoxData &) noexcept;
   };
 }

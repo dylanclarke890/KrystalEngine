@@ -34,7 +34,6 @@
 
 namespace krys::boo
 {
-
   StyleGridItemData::StyleGridItemData() noexcept
       : GridItemColumnStart(style::ComputedStyle::InitialGridItemColumnStart()),
         GridItemColumnEnd(style::ComputedStyle::InitialGridItemColumnEnd()),

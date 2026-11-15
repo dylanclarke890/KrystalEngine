@@ -51,12 +51,16 @@ namespace krys::boo::style
   {
   public:
     KRYS_NODISCARD static GridPositionSide InitialPositionSide(GridTrackSizingDirection direction) noexcept;
+
     KRYS_NODISCARD static GridPositionSide FinalPositionSide(GridTrackSizingDirection direction) noexcept;
+
     KRYS_NODISCARD static uint32 SpanSizeForAutoPlacedItem(const RenderBox &gridItem,
                                                            GridTrackSizingDirection direction) noexcept;
+
     KRYS_NODISCARD static GridSpan ResolveGridPositionsFromStyle(const RenderGrid &gridContainer,
                                                                  const RenderBox &gridItem,
                                                                  GridTrackSizingDirection direction) noexcept;
+
     KRYS_NODISCARD static uint32 ExplicitGridCount(const RenderGrid &gridContainer,
                                                    GridTrackSizingDirection direction) noexcept;
   };

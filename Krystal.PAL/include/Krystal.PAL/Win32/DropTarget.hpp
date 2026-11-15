@@ -39,19 +39,25 @@ namespace krys::pal::win32
   public:
     /// @param handler Called with each of the drags' input.
     DropTarget(HWND window, Func<void(const DragInput &)> &&handler) noexcept;
+
     ~DropTarget() noexcept;
 
     /// @brief Sets what a drop where the cursor is would do, as the host answered the drag's last input.
     void SetOperation(Maybe<DropOperation> operation) noexcept;
 
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID id, void **object) noexcept override;
+
     ULONG STDMETHODCALLTYPE AddRef() noexcept override;
+
     ULONG STDMETHODCALLTYPE Release() noexcept override;
 
     HRESULT STDMETHODCALLTYPE DragEnter(IDataObject *data, DWORD keys, POINTL point,
                                         DWORD *effect) noexcept override;
+
     HRESULT STDMETHODCALLTYPE DragOver(DWORD keys, POINTL point, DWORD *effect) noexcept override;
+
     HRESULT STDMETHODCALLTYPE DragLeave() noexcept override;
+
     HRESULT STDMETHODCALLTYPE Drop(IDataObject *data, DWORD keys, POINTL point,
                                    DWORD *effect) noexcept override;
 
@@ -59,6 +65,7 @@ namespace krys::pal::win32
     /// @brief The drag's input for @p action, at @p point on the screen, with @p keys (`MK_*` flags) held
     /// and @p allowed (`DROPEFFECT_*` flags) allowed by the source.
     KRYS_NODISCARD DragInput Input(DragAction action, DWORD keys, POINTL point, DWORD allowed) const noexcept;
+
     /// @brief The effect the source is told: what the host said a drop would do, if the source allows it.
     KRYS_NODISCARD DWORD Effect(DWORD allowed) const noexcept;
   };

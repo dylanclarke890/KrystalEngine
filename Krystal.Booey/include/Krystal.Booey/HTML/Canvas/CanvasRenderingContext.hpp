@@ -68,10 +68,12 @@ namespace krys::boo::html
     {
       _canvas.AddRef();
     }
+
     void SubRef() const noexcept
     {
       _canvas.SubRef();
     }
+
     KRYS_NODISCARD uint32 GetRefCount() const noexcept
     {
       return _canvas.GetRefCount();
@@ -86,10 +88,12 @@ namespace krys::boo::html
     {
       return _type == Type::CanvasElement2D;
     }
+
     KRYS_NODISCARD bool IsEngineTexture() const noexcept
     {
       return _type == Type::EngineTexture;
     }
+
     /// @brief Whether the context draws on the GPU, into a surface the compositor shows as is.
     KRYS_NODISCARD bool IsGPUBased() const noexcept
     {
@@ -104,7 +108,7 @@ namespace krys::boo::html
     enum class SurfaceBuffer : uint8
     {
       DrawingBuffer,
-      DisplayBuffer
+      DisplayBuffer,
     };
 
     /// @brief Forgets the area drawn since the canvas was last painted.
@@ -114,13 +118,16 @@ namespace krys::boo::html
 
     /// @brief The image buffer holding @p buffer's pixels: the canvas's, unless the context keeps its own.
     KRYS_NODISCARD virtual RefPtr<ImageBuffer> SurfaceBufferToImageBuffer(SurfaceBuffer) noexcept;
+
     /// @brief The pixels of @p buffer, as an image, or null if there are none.
     KRYS_NODISCARD virtual RefPtr<NativeImage> SurfaceBufferToNativeImage(SurfaceBuffer) noexcept;
+
     KRYS_NODISCARD virtual bool IsSurfaceBufferTransparentBlack(SurfaceBuffer) const noexcept;
 
     /// @brief What shows the context's pixels as a layer's contents.
     KRYS_NODISCARD virtual RefPtr<GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() noexcept;
+
     virtual void SetContentsToLayer(GraphicsLayer &layer) noexcept;
 
     /// @brief Whether drawing waits to be flushed in the rendering update.
@@ -128,6 +135,7 @@ namespace krys::boo::html
     {
       return false;
     }
+
     virtual void FlushDeferredOperations() noexcept
     {
     }
@@ -136,12 +144,14 @@ namespace krys::boo::html
     {
       return false;
     }
+
     /// @brief Whether the context has work to do after the rendering update and before its pixels are
     /// composited.
     KRYS_NODISCARD virtual bool NeedsPreparationForDisplay() const noexcept
     {
       return false;
     }
+
     virtual void PrepareForDisplay() noexcept
     {
     }
@@ -150,6 +160,7 @@ namespace krys::boo::html
     {
       _isInPreparationForDisplayOrFlush = flag;
     }
+
     KRYS_NODISCARD bool IsInPreparationForDisplayOrFlush() const noexcept
     {
       return _isInPreparationForDisplayOrFlush;
@@ -157,6 +168,7 @@ namespace krys::boo::html
 
     // FIXME: The pixel format (sRGB, 8 bits a channel).
     KRYS_NODISCARD virtual DestinationColorSpace ColorSpace() const noexcept;
+
     KRYS_NODISCARD virtual bool WillReadFrequently() const noexcept;
 
   protected:

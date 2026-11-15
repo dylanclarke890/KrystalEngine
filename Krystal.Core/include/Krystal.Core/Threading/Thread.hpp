@@ -21,6 +21,7 @@ namespace krys
   public:
     /// @brief Starts a thread named @p name that runs @p body.
     Thread(utf8_string name, MoveOnlyFunc<void()> body) noexcept;
+
     /// @brief Waits for the body to return.
     ~Thread() noexcept;
 

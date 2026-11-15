@@ -63,6 +63,7 @@ namespace krys::boo
     {
       return _currentTime;
     }
+
     void SetCurrentTime(MonotonicTime::duration now) noexcept;
 
     /// @brief Fires the timers that are due at the current time, soonest first. Timers started while they
@@ -80,9 +81,13 @@ namespace krys::boo
     void SetNextFireTime(TimerBase &timer, MonotonicTime::duration fireTime, bool active) noexcept;
 
     KRYS_NODISCARD static bool FiresBefore(const TimerBase &a, const TimerBase &b) noexcept;
+
     void HeapSwap(size_t a, size_t b) noexcept;
+
     void HeapUp(size_t index) noexcept;
+
     void HeapDown(size_t index) noexcept;
+
     void HeapRemove(TimerBase &timer) noexcept;
   };
 }

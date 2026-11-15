@@ -40,7 +40,7 @@ namespace krys::boo
     display_list::RecorderImpl _drawingContext;
 
   public:
-    static constexpr RenderingMode BackendRenderingMode = RenderingMode::DisplayList;
+    constexpr static RenderingMode BackendRenderingMode = RenderingMode::DisplayList;
 
     KRYS_NODISCARD static UniquePtr<ImageBufferDisplayListBackend> Create(const Parameters &) noexcept;
 

@@ -79,6 +79,7 @@ namespace krys::boo
     KRYS_NODISCARD static AffineTransform CalculateBaseTransform(const Parameters &) noexcept;
 
     KRYS_NODISCARD virtual GraphicsContext &Context() noexcept = 0;
+
     virtual void FlushContext() noexcept
     {
     }
@@ -87,15 +88,18 @@ namespace krys::boo
     virtual void PrepareForDisplay() noexcept
     {
     }
+
     /// @brief What shows the buffer as a layer's contents; null when it's painted instead.
     KRYS_NODISCARD virtual RefPtr<GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() const noexcept;
 
     /// @brief An immutable copy of what's been drawn; null if the backend can't make one.
     KRYS_NODISCARD virtual RefPtr<NativeImage> CopyNativeImage() noexcept;
+
     /// @brief An image of what's been drawn that may follow later drawing; for uses that end before the next
     /// draw.
     KRYS_NODISCARD virtual RefPtr<NativeImage> CreateNativeImageReference() noexcept;
+
     /// @brief An image of what's been drawn, as the buffer goes.
     KRYS_NODISCARD virtual RefPtr<NativeImage> SinkIntoNativeImage() noexcept;
 
@@ -103,6 +107,7 @@ namespace krys::boo
     /// outside the backend is transparent black.
     /// @note What's drawn can't be read back from a display list, so it reads transparent black.
     virtual void GetPixelBuffer(const IntRect &srcRect, PixelBuffer &destination) noexcept;
+
     /// @brief Writes @p srcRect of @p source at @p destPoint, replacing what's there, ignoring the context's
     /// state (its transform, clip, alpha, shadow and compositing).
     /// @note It's drawn into the context as an image, in order with what's drawn before and after.
@@ -110,7 +115,9 @@ namespace krys::boo
                                 const IntPoint &destPoint, AlphaPremultiplication destFormat) noexcept;
 
     KRYS_NODISCARD virtual uint32 BytesPerRow() const noexcept;
+
     KRYS_NODISCARD const DestinationColorSpace &ColorSpace() const noexcept;
+
     KRYS_NODISCARD PixelFormat GetPixelFormat() const noexcept
     {
       return PixelFormat::RGBA8;
@@ -120,10 +127,12 @@ namespace krys::boo
     {
       return _parameters.BackendSize;
     }
+
     KRYS_NODISCARD float ResolutionScale() const noexcept
     {
       return _parameters.ResolutionScale;
     }
+
     KRYS_NODISCARD const Parameters &GetParameters() const noexcept
     {
       return _parameters;
@@ -137,10 +146,12 @@ namespace krys::boo
       _isLuminanceMask = true;
       _luminanceMaskColorSpace = colorSpace;
     }
+
     KRYS_NODISCARD bool IsLuminanceMask() const noexcept
     {
       return _isLuminanceMask;
     }
+
     /// @brief The colour space a luminance mask's luminance is of.
     KRYS_NODISCARD const DestinationColorSpace &LuminanceMaskColorSpace() const noexcept
     {
@@ -153,6 +164,7 @@ namespace krys::boo
     /// @brief Reads @p srcRect of @p sourceData, the backend's pixels, into @p destination.
     void GetPixelBuffer(const IntRect &srcRect, Span<const uint8> sourceData,
                         PixelBuffer &destination) noexcept;
+
     /// @brief Writes @p srcRect of @p source at @p destPoint into @p destinationData, the backend's pixels.
     void PutPixelBuffer(const PixelBufferSourceView &source, const IntRect &srcRect,
                         const IntPoint &destPoint, AlphaPremultiplication destFormat,

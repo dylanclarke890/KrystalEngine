@@ -33,6 +33,7 @@
 namespace krys::boo
 {
   class Scrollbar;
+
   /// @brief One of a view's scroll bars, its value the scroll position as a fraction of the most it can
   /// scroll.
   class AXScrollbar final : public AXMockObject
@@ -43,6 +44,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<AXScrollbar> Create(AXId id, Scrollbar &scrollbar,
                                                   AXObjectCache &cache) noexcept;
+
     ~AXScrollbar() noexcept override;
 
     KRYS_NODISCARD Scrollbar &GetScrollbar() const noexcept
@@ -51,20 +53,28 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD dom::Document *GetDocument() const noexcept override;
+
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
+
     KRYS_NODISCARD Maybe<AXOrientation> ExplicitOrientation() const noexcept override;
+
     KRYS_NODISCARD bool IsEnabled() const noexcept override;
+
     KRYS_NODISCARD float ValueForRange() const noexcept override;
+
     KRYS_NODISCARD float MaxValueForRange() const noexcept override
     {
       return 1;
     }
+
     /// @brief Scrolls to @p value, a fraction of the most the view can scroll.
     KRYS_NODISCARD bool CanSetValueAttribute() const noexcept override
     {
       return true;
     }
+
     using AXMockObject::SetValue;
+
     bool SetValue(float value) noexcept override;
 
   private:

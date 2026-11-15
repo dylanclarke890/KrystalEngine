@@ -39,13 +39,13 @@
 
 namespace krys::boo
 {
-  class FontCascade;
-  class RenderStyle;
   struct CompositionUnderline;
-  class RenderText;
-  class TextPainter;
+  class FontCascade;
   struct PaintInfo;
+  class RenderStyle;
+  class RenderText;
   struct StyledMarkedText;
+  class TextPainter;
 
   namespace dom
   {
@@ -92,6 +92,7 @@ namespace krys::boo
   public:
     TextBoxPainter(const layout_integration::InlineContent &inlineContent, const inline_display::Box &box,
                    const RenderStyle &style, PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+
     ~TextBoxPainter() noexcept;
 
     void Paint() noexcept;
@@ -106,40 +107,59 @@ namespace krys::boo
     {
       return _textBox;
     }
+
     KRYS_NODISCARD inline_iterator::TextBoxIterator MakeIterator() const noexcept;
 
     void PaintBackgroundFill() noexcept;
+
     void PaintForegroundAndDecorations() noexcept;
+
     void PaintCompositionUnderlines() noexcept;
+
     void PaintCompositionUnderline(const CompositionUnderline &underline) noexcept;
+
     void FillCompositionUnderline(float start, float width,
                                   const CompositionUnderline &underline) const noexcept;
+
     /// @brief Where the box starts from its line's content start, as text widths are measured.
     KRYS_NODISCARD float TextPosition() const noexcept;
 
     /// @brief The range of the box's text the selection covers.
     KRYS_NODISCARD std::pair<uint32, uint32> SelectionStartEnd() const noexcept;
+
     KRYS_NODISCARD MarkedText CreateMarkedTextFromSelectionInBox() const noexcept;
+
     /// @brief The rect of the box's text from @p startOffset to @p endOffset, as tall as the line's
     /// selection.
     KRYS_NODISCARD LayoutRect SelectionRectForRange(uint32 startOffset, uint32 endOffset) const noexcept;
+
     void PaintBackgroundFillForRange(uint32 startOffset, uint32 endOffset, const Color &color) noexcept;
+
     KRYS_NODISCARD bool ComputeHaveSelection() const noexcept;
+
     void PaintForeground(const StyledMarkedText &markedText) noexcept;
+
     KRYS_NODISCARD bool PaintForegroundForShapeRange(TextPainter &textPainter) noexcept;
+
     KRYS_NODISCARD TextDecorationPainter CreateDecorationPainter(const StyledMarkedText &markedText,
                                                                  const FloatRect &clipOutRect) noexcept;
+
     void PaintBackgroundDecorations(TextDecorationPainter &decorationPainter,
                                     const StyledMarkedText &markedText,
                                     const FloatRect &textBoxPaintRect) noexcept;
+
     void PaintForegroundDecorations(TextDecorationPainter &decorationPainter,
                                     const StyledMarkedText &markedText,
                                     const FloatRect &textBoxPaintRect) noexcept;
 
     KRYS_NODISCARD FloatRect ComputePaintRect(const LayoutPoint &paintOffset) const noexcept;
+
     KRYS_NODISCARD const FontCascade &GetFontCascade() const noexcept;
+
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
+
     KRYS_NODISCARD FloatPoint TextOriginFromPaintRect(const FloatRect &paintRect) const noexcept;
+
     KRYS_NODISCARD bool IsInsideShapedContent() const noexcept;
 
     struct DecoratingBox
@@ -149,7 +169,9 @@ namespace krys::boo
       TextDecorationPainter::Styles TextDecorationStyles;
       FloatPoint Location;
     };
+
     using DecoratingBoxList = List<DecoratingBox>;
+
     /// @brief The inline boxes whose underlines and overlines @p textBox paints: its parent and the ancestors
     /// that decorate it, innermost first.
     void CollectDecoratingBoxesForBackgroundPainting(

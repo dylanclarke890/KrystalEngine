@@ -496,7 +496,7 @@ namespace krys::boo
       }
       else if (!IsWindowsV4Plus())
       {
-        _bitMasks[3] = static_cast<uint32>(0xff'00'00'00);
+        _bitMasks[3] = static_cast<uint32>(0xFF'00'00'00);
       }
     }
     else if (!IsWindowsV4Plus())
@@ -779,7 +779,7 @@ namespace krys::boo
           }
 
           // One BGR triple that we copy |count| times.
-          FillRGBA(endX, bytes[_decodedOffset + 3], bytes[_decodedOffset + 2], code, 0xff);
+          FillRGBA(endX, bytes[_decodedOffset + 3], bytes[_decodedOffset + 2], code, 0xFF);
           _decodedOffset += 4;
         }
         else
@@ -790,8 +790,8 @@ namespace krys::boo
           std::array<size_t, 2> colorIndexes {code, code};
           if (_infoHeader.BiCompression == RLE4)
           {
-            colorIndexes[0] = (colorIndexes[0] >> 4) & 0xf;
-            colorIndexes[1] &= 0xf;
+            colorIndexes[0] = (colorIndexes[0] >> 4) & 0xF;
+            colorIndexes[1] &= 0xF;
           }
           if ((colorIndexes[0] >= _infoHeader.BiClrUsed) || (colorIndexes[1] >= _infoHeader.BiClrUsed))
           {

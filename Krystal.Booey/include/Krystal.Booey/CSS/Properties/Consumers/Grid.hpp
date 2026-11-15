@@ -33,9 +33,9 @@
 
 namespace krys::boo::css
 {
+  struct PropertyParserState;
   class TokenRange;
   class Value;
-  struct PropertyParserState;
   using GridNamedAreaMapRow = SmallList<CSSOMString, 8uz>;
   class GridLineNamesValue;
 
@@ -46,14 +46,14 @@ namespace krys::boo::css
     enum class AllowEmpty : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum TrackListType : uint8
     {
       GridTemplate,
       GridTemplateNoRepeat,
-      GridAuto
+      GridAuto,
     };
 
     KRYS_NODISCARD bool IsGridBreadthIdent(ValueId) noexcept;

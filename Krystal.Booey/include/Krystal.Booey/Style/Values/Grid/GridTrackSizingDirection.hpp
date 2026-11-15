@@ -31,7 +31,7 @@ namespace krys::boo::style
   enum class GridTrackSizingDirection : bool
   {
     Columns,
-    Rows
+    Rows,
   };
 
   KRYS_NODISCARD constexpr GridTrackSizingDirection

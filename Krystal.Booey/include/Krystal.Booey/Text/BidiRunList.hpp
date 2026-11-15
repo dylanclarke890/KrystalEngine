@@ -55,14 +55,17 @@ namespace krys::boo
     {
       return _firstRun.get();
     }
+
     KRYS_NODISCARD Run *LastRun() const noexcept
     {
       return _lastRun;
     }
+
     KRYS_NODISCARD Run *LogicallyLastRun() const noexcept
     {
       return _logicallyLastRun;
     }
+
     KRYS_NODISCARD uint32 RunCount() const noexcept
     {
       return _runCount;

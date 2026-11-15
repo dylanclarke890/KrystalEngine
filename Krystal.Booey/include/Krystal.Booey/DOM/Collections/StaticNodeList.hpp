@@ -17,9 +17,11 @@ namespace krys::boo::dom
     StaticNodeList(SmallNodeList &&nodes = {}) noexcept;
 
     KRYS_NODISCARD RefPtr<Node> Item(size_t index) noexcept override;
+
     KRYS_NODISCARD RefPtr<const Node> Item(size_t index) const noexcept override;
 
     KRYS_NODISCARD RefPtr<Node> operator[](size_t index) noexcept override;
+
     KRYS_NODISCARD RefPtr<const Node> operator[](size_t index) const noexcept override;
 
     KRYS_NODISCARD size_t Length() const noexcept override;

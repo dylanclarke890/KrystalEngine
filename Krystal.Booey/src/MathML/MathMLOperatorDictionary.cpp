@@ -1183,7 +1183,6 @@ namespace krys::boo::mathml
       0x295B, 0x295E, 0x295F, 0x2B45, 0x2B46, 0xFE35, 0xFE36, 0xFE37, 0xFE38, 0x1EEF0, 0x1EEF1,
     });
     static_assert(std::ranges::is_sorted(HorizontalOperators));
-
   }
 
   Maybe<MathMLOperatorDictionary::Property> MathMLOperatorDictionary::Search(char32 character, Form form,

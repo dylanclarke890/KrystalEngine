@@ -44,6 +44,7 @@ namespace krys::boo
   public:
     ImageBufferContextSwitcher(GraphicsContext &destinationContext, const FloatRect &sourceImageRect,
                                RefPtr<Filter> &&filter = nullptr, FilterResults *results = nullptr) noexcept;
+
     ~ImageBufferContextSwitcher() noexcept override;
 
   private:
@@ -57,11 +58,13 @@ namespace krys::boo
 
     void BeginClipAndDrawSourceImage(GraphicsContext &destinationContext, const FloatRect &repaintRect,
                                      const FloatRect &clipRect) noexcept override;
+
     void EndClipAndDrawSourceImage(GraphicsContext &destinationContext) noexcept override;
 
     void BeginDrawSourceImage(GraphicsContext &, float = 1.f) noexcept override
     {
     }
+
     void EndDrawSourceImage(GraphicsContext &destinationContext) noexcept override;
   };
 }

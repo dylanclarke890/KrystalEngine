@@ -55,6 +55,7 @@ namespace krys::boo
 
   public:
     EditorClient() noexcept = default;
+
     virtual ~EditorClient() noexcept = default;
 
     KRYS_NODISCARD virtual bool ShouldChangeSelectedRange(const Maybe<dom::SimpleRange> &fromRange,
@@ -63,6 +64,7 @@ namespace krys::boo
                                                           bool stillSelecting) noexcept = 0;
 
     KRYS_NODISCARD virtual bool CanCopyCut(LocalFrame *frame, bool defaultValue) const noexcept = 0;
+
     KRYS_NODISCARD virtual bool CanPaste(LocalFrame *frame, bool defaultValue) const noexcept = 0;
 
     /// @brief Runs the editor command a `keydown` or `keypress` is bound to, if any.
@@ -70,17 +72,21 @@ namespace krys::boo
     virtual bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept = 0;
 
     virtual void RespondToChangedContents() noexcept = 0;
+
     /// @brief Called after the selection changed (unless the change asked not to tell the editor's clients).
     virtual void RespondToChangedSelection(LocalFrame *frame) noexcept = 0;
+
     /// @brief Called when the page dropped the input method's composition (confirming or cancelling it), so
     /// the host can tell the input method.
     virtual void DiscardedComposition(const dom::Document &document) noexcept = 0;
+
     /// @brief Called after the composition was set, confirmed or cancelled.
     virtual void DidUpdateComposition() noexcept = 0;
 
     /// @brief Called before a `keydown` is dispatched: marks it handled (its default handled) if an input
     /// method handled the key, so it goes out with key code 229 and no `keypress`.
     virtual void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept = 0;
+
     /// @brief Called after a `keydown` an input method handled was dispatched, to apply what it made of the
     /// key: the composition, or the text it confirmed.
     virtual void DidDispatchInputMethodKeydown(dom::KeyboardEvent &) noexcept
@@ -96,25 +102,35 @@ namespace krys::boo
 
     /// @brief Keeps an edit (or an undone edit that was redone) so it can be undone.
     virtual void RegisterUndoStep(UndoStep &step) noexcept = 0;
+
     /// @brief Keeps an undone edit so it can be redone.
     virtual void RegisterRedoStep(UndoStep &step) noexcept = 0;
+
     virtual void ClearUndoRedoOperations() noexcept = 0;
 
     KRYS_NODISCARD virtual bool CanUndo() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool CanRedo() const noexcept = 0;
+
     virtual void Undo() noexcept = 0;
+
     virtual void Redo() noexcept = 0;
 
     /// @brief Called when a text field is focused, so the host can offer to fill it (autofill).
     virtual void TextFieldDidBeginEditing(dom::Element &element) noexcept = 0;
+
     /// @brief Called when a text field loses the focus.
     virtual void TextFieldDidEndEditing(dom::Element &element) noexcept = 0;
+
     /// @brief Called after the user changed the text of the focused text field.
     virtual void TextDidChangeInTextField(dom::Element &element) noexcept = 0;
+
     /// @brief Lets the host handle a key in a focused text field (to move through its suggestions).
     /// @return Whether the host handled it.
     virtual bool DoTextFieldCommandFromEvent(dom::Element &element, dom::KeyboardEvent *event) noexcept = 0;
+
     virtual void TextWillBeDeletedInTextField(dom::Element &element) noexcept = 0;
+
     /// @brief Called after the user changed the text of the focused text area.
     virtual void TextDidChangeInTextArea(dom::Element &element) noexcept = 0;
   };
@@ -177,9 +193,11 @@ namespace krys::boo
     void RegisterUndoStep(UndoStep &) noexcept final
     {
     }
+
     void RegisterRedoStep(UndoStep &) noexcept final
     {
     }
+
     void ClearUndoRedoOperations() noexcept final
     {
     }
@@ -188,13 +206,16 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool CanRedo() const noexcept final
     {
       return false;
     }
+
     void Undo() noexcept final
     {
     }
+
     void Redo() noexcept final
     {
     }

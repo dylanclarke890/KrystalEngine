@@ -11,6 +11,6 @@ namespace krys::boo
     Normal,
     Reverse,
     Alternate,
-    AlternateReverse
+    AlternateReverse,
   };
 }

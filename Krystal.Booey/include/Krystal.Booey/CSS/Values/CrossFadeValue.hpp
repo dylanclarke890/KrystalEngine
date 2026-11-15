@@ -57,6 +57,7 @@ namespace krys::boo::css
                                                      Ref<PrimitiveValue> &&percentageValue) noexcept;
 
     KRYS_NODISCARD bool Equals(const CrossFadeValue &other) const noexcept;
+
     KRYS_NODISCARD bool EqualInputImages(const CrossFadeValue &other) const noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;

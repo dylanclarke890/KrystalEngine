@@ -59,6 +59,7 @@ namespace krys::gfx
 
     /// @brief Use `Create`.
     explicit FilterRenderer2D(Device &device) noexcept;
+
     ~FilterRenderer2D() noexcept;
 
     /// @brief Records `graph`'s passes into `commands`; nothing when the graph has no nodes or its result is
@@ -67,8 +68,10 @@ namespace krys::gfx
 
   private:
     KRYS_NODISCARD Expected<void> Initialise() noexcept;
+
     /// @brief A texture at least `width` by `height` that this frame hasn't used.
     KRYS_NODISCARD TextureHandle AcquireTexture(uint32 width, uint32 height) noexcept;
+
     /// @brief The lattice and gradients of the turbulence function for `seed` (after the seed's clamping).
     KRYS_NODISCARD TextureHandle TurbulenceTableFor(int32 seed) noexcept;
   };

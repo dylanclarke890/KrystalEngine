@@ -44,22 +44,27 @@ namespace krys::boo
     {
       return !AxObjectCache();
     }
+
     KRYS_NODISCARD bool IsMockObject() const noexcept final
     {
       return true;
     }
+
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override
     {
       return _parent.get();
     }
+
     virtual void SetParent(AXObject *parent) noexcept
     {
       _parent = CreateWeakPtr(parent);
     }
+
     void DetachFromParent() noexcept override
     {
       _parent = nullptr;
     }
+
     KRYS_NODISCARD bool IsEnabled() const noexcept override
     {
       return true;

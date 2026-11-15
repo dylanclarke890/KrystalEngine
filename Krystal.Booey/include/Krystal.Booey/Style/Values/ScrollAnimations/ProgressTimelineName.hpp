@@ -37,6 +37,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const ProgressTimelineName &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(ProgressTimelineName, Value);
 
   // <progress-timeline-name-list> = <single-progress-timeline-name>#

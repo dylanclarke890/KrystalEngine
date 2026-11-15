@@ -29,21 +29,21 @@ namespace krys::editor
     KRYS_NON_COPY_MOVABLE(PageCanvas2D);
 
     /// @brief How many values the chart shows.
-    static constexpr size_t ValueCount = 12u;
+    constexpr static size_t ValueCount = 12u;
     /// @brief The values' range: cups an hour.
-    static constexpr float MaxValue = 100.f;
+    constexpr static float MaxValue = 100.f;
     /// @brief Seconds between new values.
-    static constexpr float SecondsPerValue = 1.f;
+    constexpr static float SecondsPerValue = 1.f;
 
     // The chart's layout, in CSS pixels (its bitmap is twice as big, so it's sharp).
-    static constexpr float ChartWidth = 320.f;
-    static constexpr float ChartHeight = 160.f;
-    static constexpr float PlotLeft = 30.f;
-    static constexpr float PlotTop = 12.f;
-    static constexpr float PlotRight = 270.f;
-    static constexpr float PlotBottom = 140.f;
-    static constexpr float BarLeft = 282.f;
-    static constexpr float BarWidth = 28.f;
+    constexpr static float ChartWidth = 320.f;
+    constexpr static float ChartHeight = 160.f;
+    constexpr static float PlotLeft = 30.f;
+    constexpr static float PlotTop = 12.f;
+    constexpr static float PlotRight = 270.f;
+    constexpr static float PlotBottom = 140.f;
+    constexpr static float BarLeft = 282.f;
+    constexpr static float BarWidth = 28.f;
 
   private:
     WeakPtr<boo::dom::Document> _document;

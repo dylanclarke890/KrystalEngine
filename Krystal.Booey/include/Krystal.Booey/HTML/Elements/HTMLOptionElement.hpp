@@ -35,7 +35,7 @@ namespace krys::boo::html
   enum class AllowStyleInvalidation : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @see https://html.spec.whatwg.org/#htmloptionelement
@@ -77,6 +77,7 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &style) noexcept final;
+
     void DefaultEventHandler(dom::Event &event) noexcept final;
 
 #pragma region HTMLOptionElement - https://html.spec.whatwg.org/#htmloptionelement
@@ -171,13 +172,20 @@ namespace krys::boo::html
 #pragma region Extension Hooks
 
     void OnInsert() noexcept override;
+
     void OnPostConnection() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnChildrenChanged() noexcept override;
+
     /// @brief Tells the datalists the option is in that their suggestions may have changed.
     void NotifyAncestorDataLists() noexcept;
+
     void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
@@ -190,6 +198,7 @@ namespace krys::boo::html
     RefPtr<HTMLSelectElement> UpdateOwnerSelect() noexcept;
 
     KRYS_NODISCARD dom::DOMString CollectOptionInnerText() const noexcept;
+
     KRYS_NODISCARD dom::DOMString CollectOptionInnerTextCollapsingWhitespace() const noexcept;
 
     /// @brief The option's label: its non-empty `label` attribute, or its text.

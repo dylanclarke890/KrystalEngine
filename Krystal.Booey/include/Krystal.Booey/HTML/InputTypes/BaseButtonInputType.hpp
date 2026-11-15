@@ -39,10 +39,14 @@ namespace krys::boo::html
   {
   public:
     bool AppendFormData(DOMFormData &formData) const noexcept override;
+
     KRYS_NODISCARD bool StoresValueSeparateFromAttribute() noexcept override;
+
     void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept override;
+
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept override;
+
     KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept override;
 
   protected:

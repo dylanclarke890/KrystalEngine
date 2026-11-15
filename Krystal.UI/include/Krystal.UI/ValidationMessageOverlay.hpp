@@ -27,6 +27,7 @@ namespace krys::ui
 
   public:
     explicit ValidationMessageOverlay(View &owner) noexcept;
+
     ~ValidationMessageOverlay() noexcept override;
 
     /// @brief Shows @p message at @p anchor, in place of the message shown.
@@ -91,6 +92,7 @@ namespace krys::ui
 
     /// @brief A press on the bubble hides it.
     void MouseReleased(const boo::IntPoint &point) noexcept final;
+
     bool MouseWheel(const boo::IntPoint &, float, float) noexcept final
     {
       return false;

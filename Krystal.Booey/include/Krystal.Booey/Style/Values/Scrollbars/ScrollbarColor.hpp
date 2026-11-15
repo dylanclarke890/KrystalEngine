@@ -39,6 +39,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const ScrollbarColorParts &) const noexcept = default;
   };
+
   template <size_t I>
   KRYS_NODISCARD const auto &get(const ScrollbarColorParts &value) noexcept
   {
@@ -58,6 +59,7 @@ namespace krys::boo::style
     {
       return krys::MarkableTraits<Color>::IsEmptyValue(value.Thumb);
     }
+
     KRYS_NODISCARD static ScrollbarColorParts EmptyValue() noexcept
     {
       return {krys::MarkableTraits<Color>::EmptyValue(), krys::MarkableTraits<Color>::EmptyValue()};
@@ -76,6 +78,7 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsParts() const noexcept
     {
       return IsValue();
@@ -97,7 +100,9 @@ namespace krys::boo::style
   {
     bool Equals(const ScrollbarColor &, const ScrollbarColor &, const RenderStyle &,
                 const RenderStyle &) noexcept;
+
     KRYS_NODISCARD bool CanBlend(const ScrollbarColor &, const ScrollbarColor &) noexcept;
+
     ScrollbarColor Blend(const ScrollbarColor &, const ScrollbarColor &, const RenderStyle &,
                          const RenderStyle &, const BlendingContext &) noexcept;
   };

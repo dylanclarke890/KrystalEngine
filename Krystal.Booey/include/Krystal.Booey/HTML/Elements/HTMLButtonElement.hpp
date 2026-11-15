@@ -38,7 +38,7 @@ namespace krys::boo::html
     {
       Submit,
       Reset,
-      Button
+      Button,
     };
 
     ButtonType _type {ButtonType::Submit};
@@ -141,9 +141,13 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool IsSuccessfulSubmitButton() const noexcept final;
+
     KRYS_NODISCARD bool MatchesDefaultPseudoClass() const noexcept final;
+
     KRYS_NODISCARD bool IsActivatedSubmit() const noexcept final;
+
     void SetActivatedSubmit(bool flag) noexcept final;
+
     KRYS_NODISCARD bool IsSubmitButton() const noexcept final;
 
     /// @brief Whether the button is a submit button because its `type` says so.
@@ -171,7 +175,9 @@ namespace krys::boo::html
 
   private:
     void OnInsert() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
     /// @brief Computes the type again, which in the Auto state depends on the parent.

@@ -30,16 +30,19 @@ namespace krys::ui
   public:
     KRYS_NODISCARD static Ref<BitmapTexture> Create(gfx::Device &device, const boo::IntSize &size,
                                                     EnumSet<Flags> flags = {}) noexcept;
+
     ~BitmapTexture() noexcept;
 
     KRYS_NODISCARD const boo::IntSize &Size() const noexcept
     {
       return _size;
     }
+
     KRYS_NODISCARD EnumSet<Flags> GetFlags() const noexcept
     {
       return _flags;
     }
+
     KRYS_NODISCARD bool IsOpaque() const noexcept
     {
       return !_flags.Contains(Flags::SupportsAlpha);
@@ -62,6 +65,7 @@ namespace krys::ui
     BitmapTexture(gfx::Device &device, const boo::IntSize &size, EnumSet<Flags> flags) noexcept;
 
     void CreateTexture() noexcept;
+
     void DestroyTexture() noexcept;
   };
 }

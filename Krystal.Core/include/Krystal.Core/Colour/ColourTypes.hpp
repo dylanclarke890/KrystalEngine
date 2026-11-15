@@ -11,7 +11,7 @@ namespace krys
   enum class WhitePoint : uint8
   {
     D50,
-    D65
+    D65,
   };
 
   template <typename, typename>
@@ -710,6 +710,7 @@ namespace krys
     {
       return ResolvedColour(*this);
     }
+
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
       return UnresolvedColour(*this);
@@ -754,6 +755,7 @@ namespace krys
     {
       return ResolvedColour(*this);
     }
+
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
       return UnresolvedColour(*this);
@@ -1029,7 +1031,6 @@ namespace krys
       {
       }
     };
-
   }
 
   KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(PackedColour::RGBA color) noexcept

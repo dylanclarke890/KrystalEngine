@@ -39,10 +39,12 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsLength() const noexcept
     {
       return IsValue();
     }
+
     KRYS_NODISCARD Maybe<Length> TryLength() const noexcept
     {
       return TryValue();
@@ -69,6 +71,7 @@ namespace krys::boo::style
     {
       return Value->AllOf([](auto &side) { return side.IsAuto(); });
     }
+
     KRYS_NODISCARD bool IsAnyAuto() const noexcept
     {
       return Value->AnyOf([](auto &side) { return side.IsAuto(); });
@@ -76,6 +79,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const ClipRect &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(ClipRect, Value);
 
   // <'clip'> = <rect()> | auto
@@ -98,6 +102,7 @@ namespace krys::boo::style
     {
       return !_value;
     }
+
     KRYS_NODISCARD bool IsRect() const noexcept
     {
       return !IsAuto();
@@ -145,7 +150,9 @@ namespace krys::boo::style
   struct Blending<Clip>
   {
     KRYS_NODISCARD bool CanBlend(const Clip &, const Clip &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const Clip &, const Clip &) noexcept;
+
     KRYS_NODISCARD Clip Blend(const Clip &, const Clip &, const BlendingContext &) noexcept;
   };
 }

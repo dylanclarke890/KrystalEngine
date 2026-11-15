@@ -81,6 +81,7 @@ namespace krys::boo
 
     Scrollbar(ScrollableArea &scrollableArea, ScrollbarOrientation orientation,
               ScrollbarWidth widthStyle) noexcept;
+
     ~Scrollbar() noexcept;
 
     // Called by the ScrollableArea when the scroll offset changes.
@@ -90,12 +91,14 @@ namespace krys::boo
     {
       return _frameRect;
     }
+
     void SetFrameRect(const IntRect &rect) noexcept;
 
     KRYS_NODISCARD int32 Width() const noexcept
     {
       return _frameRect.Width();
     }
+
     KRYS_NODISCARD int32 Height() const noexcept
     {
       return _frameRect.Height();
@@ -120,12 +123,16 @@ namespace krys::boo
     {
       return 40;
     }
+
     KRYS_NODISCARD static int32 PixelsPerLineStep(int32 viewWidthOrHeight) noexcept;
+
     KRYS_NODISCARD static float MinFractionToStepWhenPaging() noexcept
     {
       return 0.8f;
     }
+
     KRYS_NODISCARD static int32 MaxOverlapBetweenPages() noexcept;
+
     KRYS_NODISCARD static int32 PageStep(int32 viewWidthOrHeight, int32 contentWidthOrHeight) noexcept
     {
       return std::max(
@@ -134,6 +141,7 @@ namespace krys::boo
           std::lround(static_cast<float>(contentWidthOrHeight - Scrollbar::MaxOverlapBetweenPages()))),
         1);
     }
+
     KRYS_NODISCARD static int32 PageStep(int32 viewWidthOrHeight) noexcept
     {
       return PageStep(viewWidthOrHeight, viewWidthOrHeight);
@@ -157,6 +165,7 @@ namespace krys::boo
     {
       return static_cast<int32>(std::lround(_currentPos));
     }
+
     KRYS_NODISCARD float CurrentPos() const noexcept
     {
       return _currentPos;
@@ -166,36 +175,43 @@ namespace krys::boo
     {
       return _visibleSize;
     }
+
     KRYS_NODISCARD int32 TotalSize() const noexcept
     {
       return _totalSize;
     }
+
     KRYS_NODISCARD int32 Maximum() const noexcept
     {
       return _totalSize - _visibleSize;
     }
+
     KRYS_NODISCARD ScrollbarWidth WidthStyle() const noexcept
     {
       return _widthStyle;
     }
 
     KRYS_NODISCARD int32 OccupiedWidth() const noexcept;
+
     KRYS_NODISCARD int32 OccupiedHeight() const noexcept;
 
     KRYS_NODISCARD int32 LineStep() const noexcept
     {
       return _lineStep;
     }
+
     KRYS_NODISCARD int32 PageStep() const noexcept
     {
       return _pageStep;
     }
+
     KRYS_NODISCARD float PixelStep() const noexcept
     {
       return _pixelStep;
     }
 
     void SetSteps(int32 lineStep, int32 pageStep, int32 pixelsPerStep = 1) noexcept;
+
     void SetProportion(int32 visibleSize, int32 totalSize) noexcept;
 
     /// @brief Whether the scrollbar asks its scrollable area to repaint it: not while it's suppressed.
@@ -203,6 +219,7 @@ namespace krys::boo
     {
       return _suppressInvalidation;
     }
+
     void SetSuppressInvalidation(bool suppress) noexcept
     {
       _suppressInvalidation = suppress;
@@ -212,9 +229,11 @@ namespace krys::boo
     {
       return _enabled;
     }
+
     void SetEnabled(bool enabled) noexcept;
 
     KRYS_NODISCARD bool IsOverlayScrollbar() const noexcept;
+
     KRYS_NODISCARD bool ShouldParticipateInHitTesting() const noexcept;
 
     KRYS_NODISCARD ScrollbarTheme &Theme() const noexcept
@@ -262,6 +281,7 @@ namespace krys::boo
     }
 
     void SetHoveredPart(ScrollbarPart part) noexcept;
+
     void SetPressedPart(ScrollbarPart part) noexcept;
 
     /// @brief Paints the scrollbar where it intersects @p damageRect, through its theme.
@@ -271,11 +291,14 @@ namespace krys::boo
     // the mouse went down in a scrollbar, since it is assumed the scrollbar will start grabbing all events in
     // that case anyway.
     bool MouseMoved(const PlatformMouseEvent &event) noexcept;
+
     void MouseEntered() noexcept;
+
     bool MouseExited() noexcept;
 
     // Used by some platform scrollbars to know when they've been released from capture.
     bool MouseUp(const PlatformMouseEvent &event) noexcept;
+
     bool MouseDown(const PlatformMouseEvent &event) noexcept;
 
     /// @brief Moves the thumb by where the mouse is (@p pos, along the scrollbar) from where it was pressed.
@@ -286,6 +309,7 @@ namespace krys::boo
 
     /// @brief Repaints the scrollbar's @p rect.
     void InvalidateRect(const IntRect &rect) noexcept;
+
     void Invalidate() noexcept
     {
       InvalidateRect(IntRect(IntPoint(), _frameRect.Size()));
@@ -295,12 +319,19 @@ namespace krys::boo
 
   private:
     void UpdateThumb() noexcept;
+
     void AutoscrollTimerFired() noexcept;
+
     void AutoscrollPressedPart(MonotonicTime::duration delay) noexcept;
+
     void StartTimerIfNeeded(MonotonicTime::duration delay) noexcept;
+
     void StopTimerIfNeeded() noexcept;
+
     KRYS_NODISCARD ScrollDirection PressedPartScrollDirection() const noexcept;
+
     KRYS_NODISCARD ScrollGranularity PressedPartScrollGranularity() const noexcept;
+
     KRYS_NODISCARD bool ThumbUnderMouse() const noexcept;
   };
 }

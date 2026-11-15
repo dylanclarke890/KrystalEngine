@@ -34,6 +34,6 @@ namespace krys::boo
   enum class Affinity : bool
   {
     Upstream,
-    Downstream
+    Downstream,
   };
 }

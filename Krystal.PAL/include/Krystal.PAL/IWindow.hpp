@@ -21,9 +21,9 @@
 
 namespace krys::pal
 {
-  struct WindowSettings;
-  struct WindowCallbacks;
   class IWindow;
+  struct WindowCallbacks;
+  struct WindowSettings;
 
   Expected<UniquePtr<IWindow>> CreateWindow(const WindowSettings &settings) noexcept;
 

@@ -45,6 +45,7 @@ namespace krys::boo
 
   private:
     void DoApply() noexcept override;
+
     int32 PruneSubsequentAncestorsToRemove(List<Ref<dom::Node>> &nodesToRemove,
                                            size_t startNodeIndex) noexcept;
   };

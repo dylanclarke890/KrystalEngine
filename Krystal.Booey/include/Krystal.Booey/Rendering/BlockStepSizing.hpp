@@ -47,8 +47,10 @@ namespace krys::boo::BlockStepSizing
 
   void DistributeExtraSpaceToChildMargins(RenderBox &child, LayoutUnit extraSpace,
                                           WritingMode containingBlockWritingMode) noexcept;
+
   void DistributeExtraSpaceToChildPadding(RenderBox &child, LayoutUnit extraSpace,
                                           WritingMode containingBlockWritingMode) noexcept;
+
   void DistributeExtraSpaceToChildContentArea(RenderBox &child, LayoutUnit extraSpace,
                                               WritingMode containingBlockWritingMode) noexcept;
 }

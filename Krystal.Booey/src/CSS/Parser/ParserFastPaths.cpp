@@ -154,7 +154,7 @@ namespace krys::boo::css
     enum class RequireUnits : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     KRYS_NODISCARD bool ParseSimpleAngle(CSSOMStringView characters, RequireUnits requireUnits,

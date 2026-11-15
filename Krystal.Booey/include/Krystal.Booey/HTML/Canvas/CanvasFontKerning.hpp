@@ -9,6 +9,6 @@ namespace krys::boo::html
   {
     Auto,
     Normal,
-    None
+    None,
   };
 }

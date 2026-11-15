@@ -90,5 +90,4 @@ namespace krys::boo::style
     return SkewTransformFunction::Create(style::Blend(fromAngleX, _angleX, context),
                                          style::Blend(fromAngleY, _angleY, context), *outputType);
   }
-
 }

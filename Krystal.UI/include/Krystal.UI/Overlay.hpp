@@ -33,10 +33,13 @@ namespace krys::ui
 
     /// @brief The mouse moved over the overlay, to @p point (in the overlay's coordinates).
     virtual void MouseMoved(const boo::IntPoint &point) noexcept = 0;
+
     /// @brief A button was released over the overlay, at @p point (in the overlay's coordinates).
     virtual void MouseReleased(const boo::IntPoint &point) noexcept = 0;
+
     /// @brief The wheel turned over the overlay, at @p point (in the overlay's coordinates).
     virtual bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept = 0;
+
     /// @brief A key was pressed while the overlay was shown.
     virtual bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers) noexcept = 0;
 
@@ -53,6 +56,7 @@ namespace krys::ui
 
     /// @brief Replaces @p view's document with one parsed from @p markup at once: an overlay's content.
     static void ReplaceDocument(View &view, utf8_string &&markup) noexcept;
+
     /// @brief Tells @p owner that @p overlay is hidden.
     static void HiddenFrom(View &owner, Overlay &overlay) noexcept;
 
@@ -62,6 +66,7 @@ namespace krys::ui
     KRYS_NODISCARD static boo::IntRect Place(const boo::IntRect &controlRect, const boo::IntSize &size,
                                              const boo::IntSize &viewportSize,
                                              bool rightToLeft = false) noexcept;
+
     /// @brief The left of an overlay @p width wide for a control at @p controlRect: lined up with the
     /// control's left edge, or its right edge if @p rightToLeft, and kept in a viewport @p viewportWidth
     /// wide.
@@ -70,8 +75,10 @@ namespace krys::ui
 
     /// @brief Sizes @p view, an overlay's, to @p size CSS pixels, at @p owner's device scale factor.
     static void SizeContentView(View &view, const View &owner, const boo::IntSize &size) noexcept;
+
     /// @brief The topmost element at @p point (in CSS pixels) in @p view, or null.
     KRYS_NODISCARD static boo::dom::Element *HitTest(View &view, const boo::IntPoint &point) noexcept;
+
     /// @brief Turns the wheel at @p point (in CSS pixels) in @p view, as `View::MouseWheel` does.
     static bool WheelView(View &view, const boo::IntPoint &point, float notchesX, float notchesY) noexcept;
 

@@ -67,29 +67,44 @@ namespace krys::boo
 
   public:
     explicit LocaleICU(std::string locale) noexcept;
+
     ~LocaleICU() noexcept override;
 
     KRYS_NODISCARD WritingDirection DefaultWritingDirection() const noexcept override;
 
     KRYS_NODISCARD utf8_string DateFormat() noexcept override;
+
     KRYS_NODISCARD utf8_string MonthFormat() noexcept override;
+
     KRYS_NODISCARD utf8_string ShortMonthFormat() noexcept override;
+
     KRYS_NODISCARD utf8_string TimeFormat() noexcept override;
+
     KRYS_NODISCARD utf8_string ShortTimeFormat() noexcept override;
+
     KRYS_NODISCARD utf8_string DateTimeFormatWithSeconds() noexcept override;
+
     KRYS_NODISCARD utf8_string DateTimeFormatWithoutSeconds() noexcept override;
+
     KRYS_NODISCARD const List<utf8_string> &MonthLabels() noexcept override;
+
     KRYS_NODISCARD const List<utf8_string> &ShortMonthLabels() noexcept override;
+
     KRYS_NODISCARD const List<utf8_string> &StandAloneMonthLabels() noexcept override;
+
     KRYS_NODISCARD const List<utf8_string> &ShortStandAloneMonthLabels() noexcept override;
+
     KRYS_NODISCARD const List<utf8_string> &TimeAMPMLabels() noexcept override;
 
   private:
     KRYS_NODISCARD utf8_string DecimalSymbol(UNumberFormatSymbol symbol) const noexcept;
+
     KRYS_NODISCARD utf8_string DecimalTextAttribute(UNumberFormatTextAttribute tag) const noexcept;
+
     void InitializeLocaleData() noexcept override;
 
     bool InitializeShortDateFormat() noexcept;
+
     KRYS_NODISCARD UDateFormat *OpenDateFormat(UDateFormatStyle timeStyle,
                                                UDateFormatStyle dateStyle) const noexcept;
 
@@ -98,6 +113,7 @@ namespace krys::boo
                                                                      UDateFormatSymbolType type,
                                                                      int32_t startIndex,
                                                                      int32_t size) noexcept;
+
     void InitializeDateTimeFormat() noexcept;
   };
 }

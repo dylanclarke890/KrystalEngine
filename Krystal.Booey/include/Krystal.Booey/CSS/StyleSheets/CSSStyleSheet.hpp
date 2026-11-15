@@ -58,10 +58,10 @@ namespace krys::boo::css
   class CSSRule;
   class CSSRuleList;
   class KeyframesRule;
+  struct SerialisationContext;
   class StyleRule;
   class StyleRuleWithNesting;
   class StyleSheetContents;
-  struct SerialisationContext;
 
   /// @brief A CSS style sheet exposed to scripts, wrapping its (possibly shared) parsed contents.
   /// @see https://drafts.csswg.org/cssom/#the-cssstylesheet-interface
@@ -82,13 +82,13 @@ namespace krys::boo::css
       OtherMutation,
       RuleInsertion,
       KeyframesRuleMutation,
-      RuleReplace
+      RuleReplace,
     };
 
     enum class ContentsClonedForMutation : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     /// @brief Notifies the style sheet before and after its rules change.
@@ -107,7 +107,9 @@ namespace krys::boo::css
       explicit RuleMutationScope(CSSStyleSheet *sheet,
                                  RuleMutationType mutationType = RuleMutationType::OtherMutation,
                                  KeyframesRule *insertedKeyframesRule = nullptr) noexcept;
+
       explicit RuleMutationScope(CSSRule *rule) noexcept;
+
       ~RuleMutationScope() noexcept;
     };
 
@@ -133,8 +135,10 @@ namespace krys::boo::css
 
     CSSStyleSheet(Ref<StyleSheetContents> &&contents, CSSImportRule *ownerRule,
                   Maybe<bool> isOriginClean) noexcept;
+
     CSSStyleSheet(Ref<StyleSheetContents> &&contents, dom::Node &ownerNode,
                   Maybe<bool> isOriginClean) noexcept;
+
     CSSStyleSheet(Ref<StyleSheetContents> &&contents, dom::Document &document, Init &&options) noexcept;
 
   public:
@@ -143,6 +147,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<CSSStyleSheet> Create(Ref<StyleSheetContents> &&contents,
                                                     CSSImportRule *ownerRule = nullptr,
                                                     Maybe<bool> isOriginClean = null) noexcept;
+
     KRYS_NODISCARD static Ref<CSSStyleSheet> Create(Ref<StyleSheetContents> &&contents, dom::Node &ownerNode,
                                                     Maybe<bool> isOriginClean = null) noexcept;
 
@@ -156,8 +161,11 @@ namespace krys::boo::css
                                                                       Init &&options) noexcept;
 
     KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept final;
+
     KRYS_NODISCARD dom::Node *OwnerNode() const noexcept final;
+
     KRYS_NODISCARD MediaList *Media() const noexcept final;
+
     KRYS_NODISCARD CSSOMString Href() const noexcept final;
 
     KRYS_NODISCARD CSSOMString Title() const noexcept final
@@ -174,15 +182,20 @@ namespace krys::boo::css
 
     /// @return Null if the rules can't be accessed (a cross-origin sheet).
     KRYS_NODISCARD RefPtr<CSSRuleList> CssRules() noexcept;
+
     KRYS_NODISCARD dom::ExceptionOr<Ref<CSSRuleList>> CssRulesForBindings() noexcept;
 
     KRYS_NODISCARD dom::ExceptionOr<Ref<CSSRuleList>> Rules() noexcept;
 
     dom::ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
+
     dom::ExceptionOr<void> DeleteRule(uint32 index) noexcept;
+
     dom::ExceptionOr<int32> AddRule(const CSSOMString &selector, const CSSOMString &style,
                                     Maybe<uint32> index) noexcept;
+
     dom::ExceptionOr<void> RemoveRule(uint32 index) noexcept;
+
     dom::ExceptionOr<void> ReplaceSync(CSSOMString &&text) noexcept;
 
     KRYS_NODISCARD bool WasMutated() const noexcept
@@ -198,6 +211,7 @@ namespace krys::boo::css
     KRYS_NODISCARD dom::Document *ConstructorDocument() const noexcept;
 
     void RemoveAdoptingTreeScope(dom::ContainerNode &treeScope) noexcept;
+
     void AddAdoptingTreeScope(dom::ContainerNode &treeScope) noexcept;
 
     KRYS_NODISCARD const List<WeakPtr<dom::ContainerNode>> &AdoptingTreeScopes() const noexcept
@@ -207,11 +221,15 @@ namespace krys::boo::css
 
     // For CSSRuleList.
     KRYS_NODISCARD uint32 Length() const noexcept;
+
     KRYS_NODISCARD CSSRule *Item(uint32 index) noexcept;
 
     void ClearOwnerNode() noexcept final;
+
     KRYS_NODISCARD CSSImportRule *OwnerRule() const noexcept final;
+
     KRYS_NODISCARD url::URL BaseURL() const noexcept final;
+
     KRYS_NODISCARD bool IsLoading() const noexcept final;
 
     void ClearOwnerRule() noexcept
@@ -220,8 +238,11 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD dom::Document *OwnerDocument() const noexcept;
+
     KRYS_NODISCARD CSSStyleSheet &RootStyleSheet() noexcept;
+
     KRYS_NODISCARD const CSSStyleSheet &RootStyleSheet() const noexcept;
+
     KRYS_NODISCARD style::Scope *StyleScope() noexcept;
 
     KRYS_NODISCARD const mq::MediaQueryList &MediaQueries() const noexcept
@@ -243,13 +264,17 @@ namespace krys::boo::css
 
     /// @brief Makes the contents safe to change, copying them first if they're shared.
     ContentsClonedForMutation WillMutateRules() noexcept;
+
     void DidMutateRules(RuleMutationType mutationType, ContentsClonedForMutation contentsClonedForMutation,
                         KeyframesRule *insertedKeyframesRule,
                         const CSSOMString &modifiedKeyframesRuleName) noexcept;
+
     void DidMutateRuleFromCSSStyleDeclaration() noexcept;
+
     void DidMutate() noexcept;
 
     void ClearChildRuleCSSOMWrappers() noexcept;
+
     void ReattachChildRuleCSSOMWrappers() noexcept;
 
     KRYS_NODISCARD StyleSheetContents &Contents() noexcept

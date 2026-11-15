@@ -442,6 +442,7 @@ namespace krys::boo::style
       return ToStyle<CSSType> {}(cssType, token, std::forward<Rest>(rest)...);
     }
   };
+
   constexpr ToStyleInvoker ConvertToStyle {};
 
   // Convenience invoker that adds a `NoConversionDataRequiredToken` argument.
@@ -860,7 +861,7 @@ namespace krys::boo::style
     }
 
     template <typename... Rest>
-    KRYS_NODISCARD StyleType operator()(BuilderState &builderState, DerivedFrom<css::Value> auto const &value,
+    KRYS_NODISCARD StyleType operator()(BuilderState &builderState, const DerivedFrom<css::Value> auto &value,
                                         Rest &&...rest) const noexcept
     {
       return CSSValueConversion<StyleType> {}(builderState, value, std::forward<Rest>(rest)...);
@@ -882,7 +883,7 @@ namespace krys::boo::style
 
     template <typename... Rest>
     KRYS_NODISCARD StyleType operator()(const css::ToLengthConversionData &conversionData,
-                                        DerivedFrom<css::Value> auto const &value,
+                                        const DerivedFrom<css::Value> auto &value,
                                         Rest &&...rest) const noexcept
     {
       return CSSValueConversion<StyleType> {}(conversionData, value, std::forward<Rest>(rest)...);
@@ -931,7 +932,7 @@ namespace krys::boo::style
 
     template <typename... Rest>
     KRYS_NODISCARD Maybe<StyleType> operator()(const RefPtr<dom::Element> &element,
-                                               DerivedFrom<css::Value> auto const &value,
+                                               const DerivedFrom<css::Value> auto &value,
                                                Rest &&...rest) const noexcept
     {
       return DeprecatedCSSValueConversion<StyleType> {}(element, value, std::forward<Rest>(rest)...);
@@ -1619,6 +1620,7 @@ namespace krys::boo::style
       }
     }
   };
+
   constexpr BlendInvoker Blend {};
 
   // Utilities for blending
@@ -2149,7 +2151,9 @@ namespace krys::boo::style
       typename css::SpaceSeparatedList<StyleType, InlineCapacity>::Container result;
       result.reserve(size);
       for (size_t i = 0uz; i < size; ++i)
+      {
         result.push_back(krys::boo::style::Blend(a[i], b[i], context));
+      }
       return {krys::move(result)};
     }
 

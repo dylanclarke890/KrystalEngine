@@ -11,7 +11,9 @@ namespace krys::pal::win32
   {
     DWORD errorMessageID = ::GetLastError();
     if (errorMessageID == 0)
+    {
       return string();
+    }
 
     LPSTR messageBuffer = nullptr;
     size_t size = ::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM

@@ -38,6 +38,7 @@ namespace krys::boo
 
   public:
     RenderTextControlMultiLine(html::HTMLTextAreaElement &element, RenderStyle &&style) noexcept;
+
     ~RenderTextControlMultiLine() noexcept override;
 
     KRYS_NODISCARD html::HTMLTextAreaElement &TextAreaElement() const noexcept;
@@ -48,7 +49,9 @@ namespace krys::boo
                      HitTestAction hitTestAction) noexcept override;
 
     KRYS_NODISCARD float GetAverageCharWidth() noexcept override;
+
     KRYS_NODISCARD LayoutUnit PreferredContentLogicalWidth(float charWidth) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       ComputeControlLogicalHeight(LayoutUnit lineHeight, LayoutUnit nonContentHeight) const noexcept override;
 

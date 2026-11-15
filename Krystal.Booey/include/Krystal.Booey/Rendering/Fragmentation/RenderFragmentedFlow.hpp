@@ -64,6 +64,7 @@ namespace krys::boo
 
     public:
       RenderFragmentContainerRange() noexcept = default;
+
       RenderFragmentContainerRange(RenderFragmentContainer *start, RenderFragmentContainer *end) noexcept
       {
         SetRange(start, end);
@@ -72,11 +73,14 @@ namespace krys::boo
       void SetRange(RenderFragmentContainer *start, RenderFragmentContainer *end) noexcept;
 
       KRYS_NODISCARD RenderFragmentContainer *StartFragment() const noexcept;
+
       KRYS_NODISCARD RenderFragmentContainer *EndFragment() const noexcept;
+
       KRYS_NODISCARD bool RangeInvalidated() const noexcept
       {
         return _rangeInvalidated;
       }
+
       void ClearRangeInvalidated() noexcept
       {
         _rangeInvalidated = false;
@@ -115,13 +119,16 @@ namespace krys::boo
     virtual void RemoveFlowChildInfo(RenderElement &child) noexcept;
 
     virtual void AddFragmentToThread(RenderFragmentContainer *fragment) noexcept = 0;
+
     void RemoveFragmentFromThread(RenderFragmentContainer &fragment) noexcept;
+
     KRYS_NODISCARD Span<RenderFragmentContainer *const> RenderFragmentContainerList() const noexcept
     {
       return _fragmentList;
     }
 
     void UpdateLogicalWidth() noexcept final;
+
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
 
@@ -133,13 +140,16 @@ namespace krys::boo
     {
       return !_fragmentList.empty();
     }
+
     virtual void FragmentChangedWritingMode(RenderFragmentContainer *) noexcept
     {
     }
 
     void ValidateFragments() noexcept;
+
     void InvalidateFragments(
       MarkingBehavior markingParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
+
     KRYS_NODISCARD bool HasValidFragmentInfo() const noexcept
     {
       return !_fragmentsInvalidated && !_fragmentList.empty();
@@ -156,8 +166,11 @@ namespace krys::boo
     void RepaintRectangleInFragments(const LayoutRect &repaintRect) const noexcept;
 
     KRYS_NODISCARD LayoutUnit PageLogicalTopForOffset(LayoutUnit offset) const noexcept;
+
     KRYS_NODISCARD LayoutUnit PageLogicalWidthForOffset(LayoutUnit offset) const noexcept;
+
     KRYS_NODISCARD LayoutUnit PageLogicalHeightForOffset(LayoutUnit offset) const noexcept;
+
     KRYS_NODISCARD LayoutUnit PageRemainingLogicalHeightForOffset(
       LayoutUnit offset,
       PageBoundaryRule pageBoundaryRule = PageBoundaryRule::IncludePageBoundary) const noexcept;
@@ -166,10 +179,12 @@ namespace krys::boo
                               LayoutUnit /*spaceShortage*/) noexcept
     {
     }
+
     virtual void UpdateMinimumPageHeight(const RenderBlock *, LayoutUnit /*offset*/,
                                          LayoutUnit /*minHeight*/) noexcept
     {
     }
+
     virtual void UpdateSpaceShortageForSizeContainment(const RenderBlock *, LayoutUnit /*offset*/,
                                                        LayoutUnit /*shortage*/) noexcept
     {
@@ -184,6 +199,7 @@ namespace krys::boo
     {
       return _fragmentsHaveUniformLogicalWidth;
     }
+
     KRYS_NODISCARD bool FragmentsHaveUniformLogicalHeight() const noexcept
     {
       return _fragmentsHaveUniformLogicalHeight;
@@ -196,18 +212,24 @@ namespace krys::boo
                                                 RelayoutChildren &relayoutChildren) noexcept;
 
     KRYS_NODISCARD LayoutUnit ContentLogicalWidthOfFirstFragment() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ContentLogicalHeightOfFirstFragment() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ContentLogicalLeftOfFirstFragment() const noexcept;
 
     KRYS_NODISCARD RenderFragmentContainer *FirstFragment() const noexcept;
+
     KRYS_NODISCARD RenderFragmentContainer *LastFragment() const noexcept;
 
     virtual void SetFragmentRangeForBox(const RenderBox &box, RenderFragmentContainer *startFragment,
                                         RenderFragmentContainer *endFragment) noexcept;
+
     bool GetFragmentRangeForBox(const RenderBox &box, RenderFragmentContainer *&startFragment,
                                 RenderFragmentContainer *&endFragment) const noexcept;
+
     bool ComputedFragmentRangeForBox(const RenderBox &box, RenderFragmentContainer *&startFragment,
                                      RenderFragmentContainer *&endFragment) const noexcept;
+
     KRYS_NODISCARD bool HasCachedFragmentRangeForBox(const RenderBox &box) const noexcept;
 
     /// @brief Whether @p object is in @p fragment, a fragment of the flow.
@@ -222,6 +244,7 @@ namespace krys::boo
     virtual bool AddForcedFragmentBreak(const RenderBlock *block, LayoutUnit offsetBreakInFragmentedFlow,
                                         RenderBox *breakChild, bool isBefore,
                                         LayoutUnit *offsetBreakAdjustment = nullptr) noexcept;
+
     virtual void ApplyBreakAfterContent(LayoutUnit) noexcept
     {
     }
@@ -230,6 +253,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD bool PageLogicalSizeChanged() const noexcept
     {
       return _pageLogicalSizeChanged;
@@ -237,10 +261,12 @@ namespace krys::boo
 
     void CollectLayerFragments(LayerFragments &layerFragments, const LayoutRect &layerBoundingBox,
                                const LayoutRect &dirtyRect) const noexcept;
+
     KRYS_NODISCARD LayoutRect FragmentsBoundingBox(const LayoutRect &layerBoundingBox) const noexcept;
 
     KRYS_NODISCARD LayoutUnit
       OffsetFromLogicalTopOfFirstFragment(const RenderBlock *currentBlock) const noexcept;
+
     void ClearRenderBoxFragmentInfoAndCustomStyle(const RenderBox &box,
                                                   const RenderFragmentContainer *newStartFragment,
                                                   const RenderFragmentContainer *newEndFragment,
@@ -248,15 +274,21 @@ namespace krys::boo
                                                   const RenderFragmentContainer *oldEndFragment) noexcept;
 
     void AddFragmentsVisualEffectOverflow(const RenderBox &box) noexcept;
+
     void AddFragmentsVisualOverflowFromTheme(const RenderBlock &block) noexcept;
+
     void AddFragmentsOverflowFromChild(const RenderBox &box, const RenderBox &child,
                                        const LayoutSize &delta) noexcept;
+
     void AddFragmentsLayoutOverflow(const RenderBox &box, const LayoutRect &layoutOverflow) noexcept;
+
     void AddFragmentsVisualOverflow(const RenderBox &box, const LayoutRect &visualOverflow) noexcept;
+
     void ClearFragmentsOverflow(const RenderBox &box) noexcept;
 
     KRYS_NODISCARD LayoutRect MapFromFragmentedFlowToLocal(const RenderBox *box,
                                                            const LayoutRect &rect) const noexcept;
+
     KRYS_NODISCARD LayoutRect MapFromLocalToFragmentedFlow(const RenderBox *box,
                                                            const LayoutRect &localRect) const noexcept;
 
@@ -283,6 +315,7 @@ namespace krys::boo
     {
       _currentFragmentMaintainer = currentFragmentMaintainer;
     }
+
     KRYS_NODISCARD RenderFragmentContainer *CurrentFragment() const noexcept;
 
     KRYS_NODISCARD bool CachedEnclosingFragmentedFlowNeedsUpdate() const noexcept override
@@ -322,6 +355,7 @@ namespace krys::boo
                              EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept override;
 
     void UpdateFragmentsFragmentedFlowPortionRect() noexcept;
+
     KRYS_NODISCARD bool ShouldRepaint(const LayoutRect &rect) const noexcept;
 
     bool GetFragmentRangeForBoxFromCachedInfo(const RenderBox &box, RenderFragmentContainer *&startFragment,

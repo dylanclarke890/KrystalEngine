@@ -86,6 +86,7 @@ namespace krys::boo::css
   KRYS_NODISCARD static Pair<RefPtr<Value>, CustomPropertySyntax::Type>
     ConsumeCustomPropertyValueWithSyntax(TokenRange &tokens, PropertyParserState &state,
                                          const CustomPropertySyntax &syntax) noexcept;
+
   KRYS_NODISCARD static Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
     ConsumeTypedCustomPropertyValue(TokenRange &tokens, PropertyParserState &state,
                                     const CSSOMStringAtom &name, const CustomPropertySyntax &syntax,
@@ -240,6 +241,7 @@ namespace krys::boo::css
 
     return true;
   }
+
 #pragma endregion
 
 #pragma region Parser entry points

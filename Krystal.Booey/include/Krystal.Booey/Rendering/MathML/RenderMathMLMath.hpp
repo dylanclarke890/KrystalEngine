@@ -40,6 +40,7 @@ namespace krys::boo
 
   public:
     RenderMathMLMath(mathml::MathMLRowElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLMath() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
@@ -49,6 +50,7 @@ namespace krys::boo
 
   private:
     void CenterChildren(LayoutUnit contentWidth) noexcept;
+
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
   };
 }

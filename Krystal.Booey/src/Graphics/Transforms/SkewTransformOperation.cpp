@@ -70,5 +70,4 @@ namespace krys::boo
     return SkewTransformOperation::Create(boo::Blend(fromAngleX, _angleX, context),
                                           boo::Blend(fromAngleY, _angleY, context), *outputType);
   }
-
 }

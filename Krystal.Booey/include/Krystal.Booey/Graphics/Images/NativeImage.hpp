@@ -55,14 +55,18 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static RefPtr<NativeImage> Create(PlatformImagePtr &&platformImage) noexcept;
+
     /// @brief A native image that's drawn once or a few times.
     KRYS_NODISCARD static RefPtr<NativeImage> CreateTransient(PlatformImagePtr &&platformImage) noexcept;
 
     virtual ~NativeImage() noexcept;
 
     KRYS_NODISCARD virtual const PlatformImagePtr &GetPlatformImage() const noexcept;
+
     KRYS_NODISCARD virtual IntSize Size() const noexcept;
+
     KRYS_NODISCARD virtual bool HasAlpha() const noexcept;
+
     /// @brief The colour of a 1x1 image, which can be drawn as a fill.
     KRYS_NODISCARD Maybe<Color> SinglePixelSolidColor() const noexcept;
 

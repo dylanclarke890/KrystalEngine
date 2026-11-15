@@ -71,7 +71,9 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD static bool PropertyCreatesStackingContext(css::PropertyId) noexcept;
+
     KRYS_NODISCARD static bool PropertyTriggersCompositing(css::PropertyId) noexcept;
+
     KRYS_NODISCARD static bool PropertyTriggersCompositingOnBoxesOnly(css::PropertyId) noexcept;
 
     template <typename... F>
@@ -128,9 +130,13 @@ namespace krys::boo::style
       }
 
       KRYS_NODISCARD bool ContainsScrollPosition() const noexcept;
+
       KRYS_NODISCARD bool ContainsContents() const noexcept;
+
       KRYS_NODISCARD bool ContainsProperty(css::PropertyId) const noexcept;
+
       KRYS_NODISCARD bool CreatesContainingBlockForAbsolutelyPositioned(bool isRootElement) const noexcept;
+
       KRYS_NODISCARD bool CreatesContainingBlockForOutOfFlowPositioned(bool isRootElement) const noexcept;
 
       KRYS_NODISCARD bool CanCreateStackingContext() const noexcept

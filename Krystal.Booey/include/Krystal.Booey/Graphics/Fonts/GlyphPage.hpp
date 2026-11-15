@@ -72,7 +72,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(GlyphPage);
 
   public:
-    static constexpr uint32 Size = 16;
+    constexpr static uint32 Size = 16;
 
   private:
     WeakPtr<const Font> _font;

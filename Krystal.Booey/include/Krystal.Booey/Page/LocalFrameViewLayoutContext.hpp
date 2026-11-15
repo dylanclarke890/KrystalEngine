@@ -54,8 +54,8 @@ namespace krys::boo
   class RenderBlock;
   class RenderBlockFlow;
   class RenderBox;
-  class RenderLayoutState;
   class RenderElement;
+  class RenderLayoutState;
   class RenderView;
 
   /// @brief Schedules and runs a view's layout: the style updates layout needs first, then the layout of the
@@ -76,7 +76,7 @@ namespace krys::boo
       InPreLayout,
       InRenderTreeLayout,
       InViewSizeAdjust,
-      InPostLayout
+      InPostLayout,
     };
 
     /// @brief The `text-box-trim` sides in effect for the block container being laid out: whether the first
@@ -101,7 +101,7 @@ namespace krys::boo
     {
       NotInLayout,
       NotNested,
-      Nested
+      Nested,
     };
 
     /// @brief The renderers the render tree builder detached and destroyed, kept until they're deleted
@@ -115,6 +115,7 @@ namespace krys::boo
       /// @brief Keeps @p renderer, or destroys it now (returning false) if its render tree is being torn
       /// down.
       bool Append(RenderPtr<RenderObject> renderer) noexcept;
+
       void Clear() noexcept;
     };
 
@@ -143,15 +144,20 @@ namespace krys::boo
 
   public:
     explicit LocalFrameViewLayoutContext(LocalFrameView &frameView) noexcept;
+
     ~LocalFrameViewLayoutContext() noexcept;
 
     void Layout() noexcept;
+
     /// @brief Lays out between style updates, so container queries can read their containers' sizes.
     void InterleavedLayout() noexcept;
 
     bool UpdateCompositingLayersAfterStyleChange() noexcept;
+
     void UpdateCompositingLayersAfterLayout() noexcept;
+
     bool UpdateCompositingLayersAfterLayoutIfNeeded() noexcept;
+
     KRYS_NODISCARD bool NeedsLayout() const noexcept;
 
     // We rely on the side-effects of layout, like compositing updates, to update state in various subsystems
@@ -159,19 +165,23 @@ namespace krys::boo
     void SetNeedsLayoutAfterViewConfigurationChange() noexcept;
 
     void ScheduleLayout() noexcept;
+
     void UnscheduleLayout() noexcept;
+
     void ScheduleSubtreeLayout(RenderElement &layoutRoot) noexcept;
 
     void SetNeedsFullRepaint() noexcept
     {
       _needsFullRepaint = true;
     }
+
     KRYS_NODISCARD bool NeedsFullRepaint() const noexcept
     {
       return _needsFullRepaint;
     }
 
     KRYS_NODISCARD RenderLayoutState *LayoutState() const noexcept;
+
     // Returns true if layoutState should be used for its cached offset and clip.
     KRYS_NODISCARD bool IsPaintOffsetCacheEnabled() const noexcept
     {
@@ -184,6 +194,7 @@ namespace krys::boo
     // last layout location, in order to repaint correctly.
     // If we're doing a full repaint m_layoutState will be 0, but in that case layoutDelta doesn't matter.
     KRYS_NODISCARD LayoutSize LayoutDelta() const noexcept;
+
     void AddLayoutDelta(const LayoutSize &delta) noexcept;
 #if KRYS_DEBUG
     KRYS_NODISCARD bool LayoutDeltaMatches(const LayoutSize &delta) const noexcept;
@@ -191,12 +202,15 @@ namespace krys::boo
     using LayoutStateStack = List<UniquePtr<RenderLayoutState>>;
 
     void DisablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
+
     void EnablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
+
     KRYS_NODISCARD bool IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept;
 
     /// @brief Updates @p box's transform after @p container's layout, which its offset path depends on.
     void SetBoxNeedsTransformUpdateAfterContainerLayout(RenderBox &box,
                                                         const RenderBlock &container) noexcept;
+
     /// @brief The boxes whose transforms update after @p container's layout, which no longer wait for it.
     KRYS_NODISCARD List<WeakPtr<RenderBox>>
       TakeBoxesNeedingTransformUpdateAfterContainerLayout(const RenderBlock &container) noexcept;
@@ -204,6 +218,7 @@ namespace krys::boo
     /// @brief Whether layout skips @p renderer, which content-visibility skips, unless layout is forced into
     /// skipped content.
     KRYS_NODISCARD bool IsSkippedContentForLayout(const RenderElement &renderer) const noexcept;
+
     /// @brief Whether layout skips the contents of @p renderBox, whose contents content-visibility skips,
     /// unless layout is forced into them.
     KRYS_NODISCARD bool IsSkippedContentRootForLayout(const RenderBox &renderBox) const noexcept;
@@ -212,6 +227,7 @@ namespace krys::boo
     {
       return _textBoxTrim;
     }
+
     void SetTextBoxTrim(Maybe<TextBoxTrim> textBoxTrim) noexcept
     {
       _textBoxTrim = krys::move(textBoxTrim);
@@ -226,6 +242,7 @@ namespace krys::boo
       }
       return *_updateScrollInfoAfterLayoutTransaction;
     }
+
     KRYS_NODISCARD UpdateScrollInfoAfterLayoutTransaction *
       UpdateScrollInfoAfterLayoutTransactionIfExists() noexcept
     {
@@ -234,10 +251,12 @@ namespace krys::boo
 
     /// @brief The renderer the next layout starts from, if it's a subtree layout.
     KRYS_NODISCARD RenderElement *SubtreeLayoutRoot() const noexcept;
+
     void ClearSubtreeLayoutRoot() noexcept
     {
       _subtreeLayoutRoot = nullptr;
     }
+
     void ConvertSubtreeLayoutToFullLayout() noexcept;
 
     KRYS_NODISCARD LayoutPhase GetLayoutPhase() const noexcept
@@ -291,7 +310,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LocalFrame &Frame() const noexcept;
+
     KRYS_NODISCARD dom::Document *Document() const noexcept;
+
     KRYS_NODISCARD RenderView *GetRenderView() const noexcept;
 
     /// @brief Keeps a destroyed renderer until `DeleteDetachedRenderersNow`; returns false if it was deleted
@@ -300,6 +321,7 @@ namespace krys::boo
     {
       return _detachedRendererList.Append(krys::move(renderer));
     }
+
     void DeleteDetachedRenderersNow() const noexcept
     {
       _detachedRendererList.Clear();
@@ -309,11 +331,16 @@ namespace krys::boo
     {
       return _anchorScrollAdjusters;
     }
+
     KRYS_NODISCARD const AnchorScrollAdjuster *
       AnchorScrollAdjusterFor(const RenderBox &anchored) const noexcept;
+
     AnchorScrollAdjuster::Diff RegisterAnchorScrollAdjuster(AnchorScrollAdjuster &&) noexcept;
+
     void UnregisterAnchorScrollAdjusterFor(const RenderBox &anchored) noexcept;
+
     void InvalidateAnchorDependenciesForScroller(const RenderBox &scroller) noexcept;
+
     void RemoveScrollerFromAnchorScrollAdjusters(const RenderBox &scroller) noexcept;
 
   private:
@@ -322,8 +349,10 @@ namespace krys::boo
     // These functions may only be accessed by LayoutStateMaintainer.
     // Subtree push
     void PushLayoutState(RenderElement &root) noexcept;
+
     bool PushLayoutState(RenderBox &renderer, const LayoutSize &offset, LayoutUnit pageHeight = 0_lu,
                          bool pageHeightChanged = false) noexcept;
+
     void PopLayoutState() noexcept;
 
     // Suspends the LayoutState optimization. Used under transforms that cannot be represented by
@@ -335,6 +364,7 @@ namespace krys::boo
     {
       return _visiblityHiddenIsIgnored;
     }
+
     void SetIsVisiblityHiddenIgnored(bool ignored) noexcept
     {
       _visiblityHiddenIsIgnored = ignored;
@@ -344,6 +374,7 @@ namespace krys::boo
     {
       return _visiblityAutoIsIgnored;
     }
+
     void SetIsVisiblityAutoIgnored(bool ignored) noexcept
     {
       _visiblityAutoIsIgnored = ignored;
@@ -353,6 +384,7 @@ namespace krys::boo
     {
       return _revealedWhenFoundIgnored;
     }
+
     void SetIsRevealedWhenFoundIgnored(bool ignored) noexcept
     {
       _revealedWhenFoundIgnored = ignored;
@@ -362,6 +394,7 @@ namespace krys::boo
     {
       _paintOffsetCacheDisableCount++;
     }
+
     void EnablePaintOffsetCache() noexcept
     {
       krys_debug_assert(_paintOffsetCacheDisableCount > 0);
@@ -373,6 +406,7 @@ namespace krys::boo
     KRYS_NODISCARD bool NeedsLayoutInternal() const noexcept;
 
     void PerformLayout() noexcept;
+
     KRYS_NODISCARD bool CanPerformLayout() const noexcept;
 
     KRYS_NODISCARD bool IsLayoutSchedulingEnabled() const noexcept

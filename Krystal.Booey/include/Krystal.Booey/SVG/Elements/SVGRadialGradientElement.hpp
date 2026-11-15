@@ -50,22 +50,27 @@ namespace krys::boo::svg
     {
       return _cx->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Cy() const noexcept
     {
       return _cy->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &R() const noexcept
     {
       return _r->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Fx() const noexcept
     {
       return _fx->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Fy() const noexcept
     {
       return _fy->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Fr() const noexcept
     {
       return _fr->CurrentValue();
@@ -75,22 +80,27 @@ namespace krys::boo::svg
     {
       return *_cx;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &CyAnimated() noexcept
     {
       return *_cy;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &RAnimated() noexcept
     {
       return *_r;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &FxAnimated() noexcept
     {
       return *_fx;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &FyAnimated() noexcept
     {
       return *_fy;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &FrAnimated() noexcept
     {
       return *_fr;
@@ -101,6 +111,7 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;

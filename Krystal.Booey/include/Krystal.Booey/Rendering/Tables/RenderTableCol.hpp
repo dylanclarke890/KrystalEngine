@@ -32,9 +32,9 @@
 
 namespace krys::boo
 {
+  struct BorderValue;
   class RenderTable;
   class RenderTableCell;
-  struct BorderValue;
 
   /// @brief A table column or column group.
   class RenderTableCol final : public RenderBox
@@ -51,7 +51,9 @@ namespace krys::boo
     }
 
     RenderTableCol(dom::Element &element, RenderStyle &&style) noexcept;
+
     RenderTableCol(dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderTableCol() noexcept override;
 
     void ClearNeedsPreferredLogicalWidthsUpdate() noexcept;
@@ -60,6 +62,7 @@ namespace krys::boo
     {
       return _span;
     }
+
     void SetSpan(uint32 span) noexcept
     {
       _span = span;
@@ -69,10 +72,13 @@ namespace krys::boo
     {
       return FirstChild();
     }
+
     KRYS_NODISCARD bool IsTableColumn() const noexcept;
+
     KRYS_NODISCARD bool IsTableColumnGroup() const noexcept;
 
     KRYS_NODISCARD RenderTableCol *EnclosingColumnGroup() const noexcept;
+
     KRYS_NODISCARD RenderTableCol *EnclosingColumnGroupIfAdjacentBefore() const noexcept
     {
       if (PreviousSibling())
@@ -81,6 +87,7 @@ namespace krys::boo
       }
       return EnclosingColumnGroup();
     }
+
     KRYS_NODISCARD RenderTableCol *EnclosingColumnGroupIfAdjacentAfter() const noexcept
     {
       if (NextSibling())
@@ -94,13 +101,19 @@ namespace krys::boo
     KRYS_NODISCARD RenderTableCol *NextColumn() const noexcept;
 
     KRYS_NODISCARD const BorderValue &BorderAdjoiningCellStartBorder() const noexcept;
+
     KRYS_NODISCARD const BorderValue &BorderAdjoiningCellEndBorder() const noexcept;
+
     KRYS_NODISCARD const BorderValue &BorderAdjoiningCellBefore(const RenderTableCell &cell) const noexcept;
+
     KRYS_NODISCARD const BorderValue &BorderAdjoiningCellAfter(const RenderTableCell &cell) const noexcept;
 
     KRYS_NODISCARD LayoutUnit OffsetLeft() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit OffsetTop() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit OffsetWidth() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit OffsetHeight() const noexcept override;
 
     /// @brief Updates the span from the element's span attribute.
@@ -108,6 +121,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsChildAllowed(const RenderObject &child,
                                        const RenderStyle &style) const noexcept override;
+
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
@@ -119,6 +133,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                   VisibleRectContext context) const noexcept override;
+
     KRYS_NODISCARD RepaintRects RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
                                                               RepaintOutlineBounds) const noexcept override;
 
@@ -127,12 +142,14 @@ namespace krys::boo
     {
       krys_debug_assert(false);
     }
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
     {
       krys_debug_assert(false);
     }
 
     void InsertedIntoTree() noexcept override;
+
     void WillBeRemovedFromTree() noexcept override;
 
     KRYS_NODISCARD bool RequiresLayer() const noexcept override

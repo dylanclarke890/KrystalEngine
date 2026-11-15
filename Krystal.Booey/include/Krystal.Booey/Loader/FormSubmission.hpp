@@ -71,7 +71,7 @@ namespace krys::boo
     {
       Get,
       Post,
-      Dialog
+      Dialog,
     };
 
     /// @brief The submission attributes of a form, which a submitter's own attributes override.
@@ -91,7 +91,9 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD static Method ParseMethodType(utf8_stringview type) noexcept;
+
       void UpdateMethodType(utf8_stringview type) noexcept;
+
       KRYS_NODISCARD static utf8_stringview MethodString(Method method) noexcept;
 
       KRYS_NODISCARD const dom::DOMString &Action() const noexcept
@@ -117,6 +119,7 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD static utf8_stringview ParseEncodingType(utf8_stringview type) noexcept;
+
       void UpdateEncodingType(utf8_stringview type) noexcept;
 
       KRYS_NODISCARD const dom::DOMString &AcceptCharset() const noexcept
@@ -152,6 +155,7 @@ namespace krys::boo
     FormSubmission(Method method, const url::URL &action, dom::DOMStringView target,
                    dom::DOMStringView encodingType, Ref<html::DOMFormData> &&entryList,
                    dom::Event *event) noexcept;
+
     ~FormSubmission() noexcept;
 
     KRYS_NODISCARD static Ref<FormSubmission> Create(html::HTMLFormElement &form,

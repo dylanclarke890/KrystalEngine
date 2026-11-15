@@ -39,6 +39,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleFilterData);
     }
+
     KRYS_NODISCARD Ref<StyleFilterData> Copy() const noexcept;
 
     bool operator==(const StyleFilterData &) const noexcept;
@@ -47,6 +48,7 @@ namespace krys::boo
 
   private:
     StyleFilterData() noexcept;
+
     StyleFilterData(const StyleFilterData &) noexcept;
   };
 }

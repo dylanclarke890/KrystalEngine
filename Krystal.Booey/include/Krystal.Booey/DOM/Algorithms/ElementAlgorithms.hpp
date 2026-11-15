@@ -11,12 +11,12 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class Attr;
+  class Element;
   enum class InsertAdjacentWhere : uint8;
+  class Node;
   enum class ShadowRootMode : uint8;
   enum class SlotAssignmentMode : uint8;
-  class Element;
-  class Attr;
-  class Node;
 
   class ElementAlgorithms
   {

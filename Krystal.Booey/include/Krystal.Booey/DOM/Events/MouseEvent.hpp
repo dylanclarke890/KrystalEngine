@@ -45,6 +45,7 @@ namespace krys::boo::dom
 
   /// @brief Whether @p eventType is `click` or `auxclick`.
   KRYS_NODISCARD bool IsAnyClick(DOMStringAtom eventType) noexcept;
+
   KRYS_NODISCARD bool IsAnyClick(const Event &event) noexcept;
 
   /// @see https://w3c.github.io/uievents/#dictdef-mouseeventinit
@@ -167,6 +168,7 @@ namespace krys::boo::dom
 
     /// @note Legacy: the node the pointer moved to.
     KRYS_NODISCARD virtual RefPtr<Node> ToElement() const noexcept;
+
     /// @note Legacy: the node the pointer moved from.
     KRYS_NODISCARD virtual RefPtr<Node> FromElement() const noexcept;
 

@@ -51,15 +51,18 @@ namespace krys::boo
     void UpdateAfterDescendants(RenderElement &renderer) noexcept;
 
     void Attach(RenderButton &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
+
     void Attach(RenderMenuList &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderObject> Detach(RenderMenuList &parent, RenderObject &child,
                                                   WillBeDestroyed willBeDestroyed) noexcept;
+
     KRYS_NODISCARD RenderPtr<RenderObject> Detach(RenderButton &parent, RenderObject &child,
                                                   WillBeDestroyed willBeDestroyed) noexcept;
 
   private:
     KRYS_NODISCARD RenderBlock &FindOrCreateParentForChild(RenderButton &parent) noexcept;
+
     KRYS_NODISCARD RenderBlock &FindOrCreateParentForChild(RenderMenuList &parent) noexcept;
   };
 }

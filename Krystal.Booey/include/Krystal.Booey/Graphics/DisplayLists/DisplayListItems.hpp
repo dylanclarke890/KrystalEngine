@@ -47,9 +47,10 @@ namespace krys::boo::display_list
   class Save
   {
   public:
-    static constexpr std::string_view Name = "save";
+    constexpr static std::string_view Name = "save";
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {
     }
@@ -58,9 +59,10 @@ namespace krys::boo::display_list
   class Restore
   {
   public:
-    static constexpr std::string_view Name = "restore";
+    constexpr static std::string_view Name = "restore";
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {
     }
@@ -73,7 +75,7 @@ namespace krys::boo::display_list
     float _y;
 
   public:
-    static constexpr std::string_view Name = "translate";
+    constexpr static std::string_view Name = "translate";
 
     Translate(float x, float y) noexcept : _x(x), _y(y)
     {
@@ -83,12 +85,14 @@ namespace krys::boo::display_list
     {
       return _x;
     }
+
     KRYS_NODISCARD float Y() const noexcept
     {
       return _y;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -98,7 +102,7 @@ namespace krys::boo::display_list
     float _angle;
 
   public:
-    static constexpr std::string_view Name = "rotate";
+    constexpr static std::string_view Name = "rotate";
 
     explicit Rotate(float angle) noexcept : _angle(angle)
     {
@@ -110,6 +114,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -119,7 +124,7 @@ namespace krys::boo::display_list
     FloatSize _size;
 
   public:
-    static constexpr std::string_view Name = "scale";
+    constexpr static std::string_view Name = "scale";
 
     explicit Scale(const FloatSize &size) noexcept : _size(size)
     {
@@ -131,6 +136,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -140,7 +146,7 @@ namespace krys::boo::display_list
     AffineTransform _transform;
 
   public:
-    static constexpr std::string_view Name = "set-ctm";
+    constexpr static std::string_view Name = "set-ctm";
 
     explicit SetCTM(const AffineTransform &transform) noexcept : _transform(transform)
     {
@@ -152,6 +158,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -161,7 +168,7 @@ namespace krys::boo::display_list
     AffineTransform _transform;
 
   public:
-    static constexpr std::string_view Name = "concatenate-ctm";
+    constexpr static std::string_view Name = "concatenate-ctm";
 
     explicit ConcatenateCTM(const AffineTransform &transform) noexcept : _transform(transform)
     {
@@ -173,6 +180,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -182,11 +190,12 @@ namespace krys::boo::display_list
     PackedColour::RGBA _colorData;
 
   public:
-    static constexpr std::string_view Name = "set-inline-fill-color";
+    constexpr static std::string_view Name = "set-inline-fill-color";
 
     explicit SetInlineFillColor(PackedColour::RGBA colorData) noexcept : _colorData(colorData)
     {
     }
+
     explicit SetInlineFillColor(SRGBA<uint8> colorData) noexcept
         : _colorData(*boo::Color(colorData).TryGetAsPackedInline())
     {
@@ -196,12 +205,14 @@ namespace krys::boo::display_list
     {
       return {AsSRGBA(ColorData())};
     }
+
     KRYS_NODISCARD const PackedColour::RGBA &ColorData() const noexcept
     {
       return _colorData;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -212,16 +223,18 @@ namespace krys::boo::display_list
     Maybe<float> _thickness;
 
   public:
-    static constexpr std::string_view Name = "set-inline-stroke";
+    constexpr static std::string_view Name = "set-inline-stroke";
 
     SetInlineStroke(Maybe<PackedColour::RGBA> colorData, Maybe<float> thickness = std::nullopt) noexcept
         : _colorData(colorData), _thickness(thickness)
     {
       krys_debug_assert(_colorData || _thickness);
     }
+
     explicit SetInlineStroke(float thickness) noexcept : _thickness(thickness)
     {
     }
+
     explicit SetInlineStroke(SRGBA<uint8> colorData) noexcept : _colorData(PackedColour::RGBA(colorData))
     {
     }
@@ -230,16 +243,19 @@ namespace krys::boo::display_list
     {
       return _colorData ? Maybe<boo::Color>(AsSRGBA(*_colorData)) : std::nullopt;
     }
+
     KRYS_NODISCARD Maybe<PackedColour::RGBA> ColorData() const noexcept
     {
       return _colorData;
     }
+
     KRYS_NODISCARD Maybe<float> Thickness() const noexcept
     {
       return _thickness;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -249,7 +265,7 @@ namespace krys::boo::display_list
     GraphicsContextState _state;
 
   public:
-    static constexpr std::string_view Name = "set-state";
+    constexpr static std::string_view Name = "set-state";
 
     explicit SetState(const GraphicsContextState &) noexcept;
 
@@ -257,12 +273,14 @@ namespace krys::boo::display_list
     {
       return _state;
     }
+
     KRYS_NODISCARD const GraphicsContextState &State() const noexcept
     {
       return _state;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -272,7 +290,7 @@ namespace krys::boo::display_list
     LineCap _lineCap;
 
   public:
-    static constexpr std::string_view Name = "set-line-cap";
+    constexpr static std::string_view Name = "set-line-cap";
 
     explicit SetLineCap(LineCap lineCap) noexcept : _lineCap(lineCap)
     {
@@ -284,6 +302,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -294,7 +313,7 @@ namespace krys::boo::display_list
     float _dashOffset;
 
   public:
-    static constexpr std::string_view Name = "set-line-dash";
+    constexpr static std::string_view Name = "set-line-dash";
 
     SetLineDash(const DashArray &dashArray, float dashOffset) noexcept
         : _dashArray(dashArray), _dashOffset(dashOffset)
@@ -305,12 +324,14 @@ namespace krys::boo::display_list
     {
       return _dashArray;
     }
+
     KRYS_NODISCARD float DashOffset() const noexcept
     {
       return _dashOffset;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -320,7 +341,7 @@ namespace krys::boo::display_list
     LineJoin _lineJoin;
 
   public:
-    static constexpr std::string_view Name = "set-line-join";
+    constexpr static std::string_view Name = "set-line-join";
 
     explicit SetLineJoin(LineJoin lineJoin) noexcept : _lineJoin(lineJoin)
     {
@@ -332,6 +353,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -341,7 +363,7 @@ namespace krys::boo::display_list
     float _miterLimit;
 
   public:
-    static constexpr std::string_view Name = "set-miter-limit";
+    constexpr static std::string_view Name = "set-miter-limit";
 
     explicit SetMiterLimit(float miterLimit) noexcept : _miterLimit(miterLimit)
     {
@@ -353,6 +375,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -362,7 +385,7 @@ namespace krys::boo::display_list
     FloatRect _rect;
 
   public:
-    static constexpr std::string_view Name = "clip";
+    constexpr static std::string_view Name = "clip";
 
     explicit Clip(const FloatRect &rect) noexcept : _rect(rect)
     {
@@ -374,6 +397,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -383,7 +407,7 @@ namespace krys::boo::display_list
     FloatRoundedRect _rect;
 
   public:
-    static constexpr std::string_view Name = "clip-rounded-rect";
+    constexpr static std::string_view Name = "clip-rounded-rect";
 
     explicit ClipRoundedRect(const FloatRoundedRect &rect) noexcept : _rect(rect)
     {
@@ -395,6 +419,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -404,7 +429,7 @@ namespace krys::boo::display_list
     FloatRect _rect;
 
   public:
-    static constexpr std::string_view Name = "clip-out";
+    constexpr static std::string_view Name = "clip-out";
 
     explicit ClipOut(const FloatRect &rect) noexcept : _rect(rect)
     {
@@ -416,6 +441,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -425,7 +451,7 @@ namespace krys::boo::display_list
     FloatRoundedRect _rect;
 
   public:
-    static constexpr std::string_view Name = "clip-out-rounded-rect";
+    constexpr static std::string_view Name = "clip-out-rounded-rect";
 
     explicit ClipOutRoundedRect(const FloatRoundedRect &rect) noexcept : _rect(rect)
     {
@@ -437,6 +463,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -446,7 +473,7 @@ namespace krys::boo::display_list
     boo::Path _path;
 
   public:
-    static constexpr std::string_view Name = "clip-out-to-path";
+    constexpr static std::string_view Name = "clip-out-to-path";
 
     explicit ClipOutToPath(const boo::Path &path) noexcept : _path(path)
     {
@@ -458,6 +485,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -468,7 +496,7 @@ namespace krys::boo::display_list
     boo::WindRule _windRule;
 
   public:
-    static constexpr std::string_view Name = "clip-path";
+    constexpr static std::string_view Name = "clip-path";
 
     ClipPath(const boo::Path &path, boo::WindRule windRule) noexcept : _path(path), _windRule(windRule)
     {
@@ -478,21 +506,24 @@ namespace krys::boo::display_list
     {
       return _path;
     }
+
     KRYS_NODISCARD boo::WindRule GetWindRule() const noexcept
     {
       return _windRule;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
   class ResetClip
   {
   public:
-    static constexpr std::string_view Name = "reset-clip";
+    constexpr static std::string_view Name = "reset-clip";
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {
     }
@@ -508,7 +539,7 @@ namespace krys::boo::display_list
     FontSmoothingMode _fontSmoothingMode;
 
   public:
-    static constexpr std::string_view Name = "draw-glyphs";
+    constexpr static std::string_view Name = "draw-glyphs";
 
     DrawGlyphs(Ref<const boo::Font> &&font, List<GlyphBufferGlyph> &&glyphs,
                List<GlyphBufferAdvance> &&advances, const FloatPoint &localAnchor,
@@ -518,28 +549,34 @@ namespace krys::boo::display_list
     {
       return _font;
     }
+
     KRYS_NODISCARD const List<GlyphBufferGlyph> &Glyphs() const noexcept
     {
       return _glyphs;
     }
+
     KRYS_NODISCARD const List<GlyphBufferAdvance> &Advances() const noexcept
     {
       return _advances;
     }
+
     KRYS_NODISCARD size_t Length() const noexcept
     {
       return _glyphs.size();
     }
+
     KRYS_NODISCARD FloatPoint LocalAnchor() const noexcept
     {
       return _localAnchor;
     }
+
     KRYS_NODISCARD FontSmoothingMode GetFontSmoothingMode() const noexcept
     {
       return _fontSmoothingMode;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -552,32 +589,42 @@ namespace krys::boo::display_list
     ControlStyle _style;
 
   public:
-    static constexpr std::string_view Name = "draw-control-part";
+    constexpr static std::string_view Name = "draw-control-part";
 
     DrawControlPart(ControlPart &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
                     const ControlStyle &) noexcept;
+
     DrawControlPart(const DrawControlPart &) noexcept;
+
     DrawControlPart(DrawControlPart &&) noexcept;
+
     DrawControlPart &operator=(const DrawControlPart &) noexcept;
+
     DrawControlPart &operator=(DrawControlPart &&) noexcept;
+
     ~DrawControlPart() noexcept;
 
     KRYS_NODISCARD ControlPart &Part() const noexcept;
+
     KRYS_NODISCARD FloatRoundedRect BorderRect() const noexcept
     {
       return _borderRect;
     }
+
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept
     {
       return _deviceScaleFactor;
     }
+
     KRYS_NODISCARD const ControlStyle &Style() const noexcept
     {
       return _style;
     }
+
     KRYS_NODISCARD StyleAppearance GetType() const noexcept;
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -587,18 +634,24 @@ namespace krys::boo::display_list
     Ref<const boo::display_list::DisplayList> _displayList;
 
   public:
-    static constexpr std::string_view Name = "draw-display-list";
+    constexpr static std::string_view Name = "draw-display-list";
 
     explicit DrawDisplayList(Ref<const boo::display_list::DisplayList> &&) noexcept;
+
     DrawDisplayList(const DrawDisplayList &) noexcept;
+
     DrawDisplayList(DrawDisplayList &&) noexcept;
+
     DrawDisplayList &operator=(const DrawDisplayList &) noexcept;
+
     DrawDisplayList &operator=(DrawDisplayList &&) noexcept;
+
     ~DrawDisplayList() noexcept;
 
     KRYS_NODISCARD Ref<const boo::display_list::DisplayList> GetDisplayList() const noexcept;
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -609,22 +662,29 @@ namespace krys::boo::display_list
     FloatRect _destinationRect;
 
   public:
-    static constexpr std::string_view Name = "clip-to-image-buffer";
+    constexpr static std::string_view Name = "clip-to-image-buffer";
 
     ClipToImageBuffer(ImageBuffer &, const FloatRect &destinationRect) noexcept;
+
     ClipToImageBuffer(const ClipToImageBuffer &) noexcept;
+
     ClipToImageBuffer(ClipToImageBuffer &&) noexcept;
+
     ClipToImageBuffer &operator=(const ClipToImageBuffer &) noexcept;
+
     ClipToImageBuffer &operator=(ClipToImageBuffer &&) noexcept;
+
     ~ClipToImageBuffer() noexcept;
 
     KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
+
     KRYS_NODISCARD FloatRect DestinationRect() const noexcept
     {
       return _destinationRect;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -636,24 +696,32 @@ namespace krys::boo::display_list
     Ref<Filter> _filter;
 
   public:
-    static constexpr std::string_view Name = "draw-filtered-image-buffer";
+    constexpr static std::string_view Name = "draw-filtered-image-buffer";
 
     DrawFilteredImageBuffer(RefPtr<ImageBuffer> &&sourceImage, const FloatRect &sourceImageRect,
                             Filter &filter) noexcept;
+
     DrawFilteredImageBuffer(const DrawFilteredImageBuffer &) noexcept;
+
     DrawFilteredImageBuffer(DrawFilteredImageBuffer &&) noexcept;
+
     DrawFilteredImageBuffer &operator=(const DrawFilteredImageBuffer &) noexcept;
+
     DrawFilteredImageBuffer &operator=(DrawFilteredImageBuffer &&) noexcept;
+
     ~DrawFilteredImageBuffer() noexcept;
 
     KRYS_NODISCARD ImageBuffer *SourceImage() const noexcept;
+
     KRYS_NODISCARD FloatRect SourceImageRect() const noexcept
     {
       return _sourceImageRect;
     }
+
     KRYS_NODISCARD Filter &GetFilter() const noexcept;
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -666,31 +734,40 @@ namespace krys::boo::display_list
     ImagePaintingOptions _options;
 
   public:
-    static constexpr std::string_view Name = "draw-image-buffer";
+    constexpr static std::string_view Name = "draw-image-buffer";
 
     DrawImageBuffer(ImageBuffer &, const FloatRect &destRect, const FloatRect &srcRect,
                     ImagePaintingOptions) noexcept;
+
     DrawImageBuffer(const DrawImageBuffer &) noexcept;
+
     DrawImageBuffer(DrawImageBuffer &&) noexcept;
+
     DrawImageBuffer &operator=(const DrawImageBuffer &) noexcept;
+
     DrawImageBuffer &operator=(DrawImageBuffer &&) noexcept;
+
     ~DrawImageBuffer() noexcept;
 
     KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
+
     KRYS_NODISCARD FloatRect Source() const noexcept
     {
       return _srcRect;
     }
+
     KRYS_NODISCARD FloatRect DestinationRect() const noexcept
     {
       return _destinationRect;
     }
+
     KRYS_NODISCARD ImagePaintingOptions Options() const noexcept
     {
       return _options;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -703,31 +780,40 @@ namespace krys::boo::display_list
     ImagePaintingOptions _options;
 
   public:
-    static constexpr std::string_view Name = "draw-native-image";
+    constexpr static std::string_view Name = "draw-native-image";
 
     DrawNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &srcRect,
                     ImagePaintingOptions) noexcept;
+
     DrawNativeImage(const DrawNativeImage &) noexcept;
+
     DrawNativeImage(DrawNativeImage &&) noexcept;
+
     DrawNativeImage &operator=(const DrawNativeImage &) noexcept;
+
     DrawNativeImage &operator=(DrawNativeImage &&) noexcept;
+
     ~DrawNativeImage() noexcept;
 
     KRYS_NODISCARD NativeImage &GetNativeImage() const noexcept;
+
     KRYS_NODISCARD FloatRect DestinationRect() const noexcept
     {
       return _destinationRect;
     }
+
     KRYS_NODISCARD FloatRect Source() const noexcept
     {
       return _srcRect;
     }
+
     KRYS_NODISCARD ImagePaintingOptions Options() const noexcept
     {
       return _options;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -743,44 +829,56 @@ namespace krys::boo::display_list
     ImagePaintingOptions _options;
 
   public:
-    static constexpr std::string_view Name = "draw-pattern-native-image";
+    constexpr static std::string_view Name = "draw-pattern-native-image";
 
     DrawPatternNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &tileRect,
                            const AffineTransform &patternTransform, const FloatPoint &phase,
                            const FloatSize &spacing, ImagePaintingOptions) noexcept;
+
     DrawPatternNativeImage(const DrawPatternNativeImage &) noexcept;
+
     DrawPatternNativeImage(DrawPatternNativeImage &&) noexcept;
+
     DrawPatternNativeImage &operator=(const DrawPatternNativeImage &) noexcept;
+
     DrawPatternNativeImage &operator=(DrawPatternNativeImage &&) noexcept;
+
     ~DrawPatternNativeImage() noexcept;
 
     KRYS_NODISCARD NativeImage &GetNativeImage() const noexcept;
+
     KRYS_NODISCARD FloatRect DestRect() const noexcept
     {
       return _destination;
     }
+
     KRYS_NODISCARD FloatRect TileRect() const noexcept
     {
       return _tileRect;
     }
+
     KRYS_NODISCARD const AffineTransform &PatternTransform() const noexcept
     {
       return _patternTransform;
     }
+
     KRYS_NODISCARD FloatPoint Phase() const noexcept
     {
       return _phase;
     }
+
     KRYS_NODISCARD FloatSize Spacing() const noexcept
     {
       return _spacing;
     }
+
     KRYS_NODISCARD ImagePaintingOptions Options() const noexcept
     {
       return _options;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -796,44 +894,56 @@ namespace krys::boo::display_list
     ImagePaintingOptions _options;
 
   public:
-    static constexpr std::string_view Name = "draw-pattern-imagebuffer";
+    constexpr static std::string_view Name = "draw-pattern-imagebuffer";
 
     DrawPatternImageBuffer(ImageBuffer &, const FloatRect &destRect, const FloatRect &tileRect,
                            const AffineTransform &patternTransform, const FloatPoint &phase,
                            const FloatSize &spacing, ImagePaintingOptions) noexcept;
+
     DrawPatternImageBuffer(const DrawPatternImageBuffer &) noexcept;
+
     DrawPatternImageBuffer(DrawPatternImageBuffer &&) noexcept;
+
     DrawPatternImageBuffer &operator=(const DrawPatternImageBuffer &) noexcept;
+
     DrawPatternImageBuffer &operator=(DrawPatternImageBuffer &&) noexcept;
+
     ~DrawPatternImageBuffer() noexcept;
 
     KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
+
     KRYS_NODISCARD FloatRect DestRect() const noexcept
     {
       return _destination;
     }
+
     KRYS_NODISCARD FloatRect TileRect() const noexcept
     {
       return _tileRect;
     }
+
     KRYS_NODISCARD const AffineTransform &PatternTransform() const noexcept
     {
       return _patternTransform;
     }
+
     KRYS_NODISCARD FloatPoint Phase() const noexcept
     {
       return _phase;
     }
+
     KRYS_NODISCARD FloatSize Spacing() const noexcept
     {
       return _spacing;
     }
+
     KRYS_NODISCARD ImagePaintingOptions Options() const noexcept
     {
       return _options;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -843,11 +953,12 @@ namespace krys::boo::display_list
     Func<void(GraphicsContext &)> _function;
 
   public:
-    static constexpr std::string_view Name = "draw-placeholder";
+    constexpr static std::string_view Name = "draw-placeholder";
 
     explicit DrawPlaceholder(Func<void(GraphicsContext &)> &&) noexcept;
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -857,7 +968,7 @@ namespace krys::boo::display_list
     float _opacity;
 
   public:
-    static constexpr std::string_view Name = "begin-transparency-layer";
+    constexpr static std::string_view Name = "begin-transparency-layer";
 
     explicit BeginTransparencyLayer(float opacity) noexcept : _opacity(opacity)
     {
@@ -869,6 +980,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -878,7 +990,7 @@ namespace krys::boo::display_list
     boo::CompositeMode _compositeMode;
 
   public:
-    static constexpr std::string_view Name = "begin-transparency-layer-with-composite-mode";
+    constexpr static std::string_view Name = "begin-transparency-layer-with-composite-mode";
 
     explicit BeginTransparencyLayerWithCompositeMode(boo::CompositeMode compositeMode) noexcept
         : _compositeMode(compositeMode)
@@ -891,15 +1003,17 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
   class EndTransparencyLayer
   {
   public:
-    static constexpr std::string_view Name = "end-transparency-layer";
+    constexpr static std::string_view Name = "end-transparency-layer";
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {
     }
@@ -912,7 +1026,7 @@ namespace krys::boo::display_list
     float _borderThickness;
 
   public:
-    static constexpr std::string_view Name = "draw-rect";
+    constexpr static std::string_view Name = "draw-rect";
 
     DrawRect(FloatRect rect, float borderThickness) noexcept : _rect(rect), _borderThickness(borderThickness)
     {
@@ -922,12 +1036,14 @@ namespace krys::boo::display_list
     {
       return _rect;
     }
+
     KRYS_NODISCARD float BorderThickness() const noexcept
     {
       return _borderThickness;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -938,7 +1054,7 @@ namespace krys::boo::display_list
     FloatPoint _point2;
 
   public:
-    static constexpr std::string_view Name = "draw-line";
+    constexpr static std::string_view Name = "draw-line";
 
     DrawLine(FloatPoint point1, FloatPoint point2) noexcept : _point1(point1), _point2(point2)
     {
@@ -948,12 +1064,14 @@ namespace krys::boo::display_list
     {
       return _point1;
     }
+
     KRYS_NODISCARD FloatPoint Point2() const noexcept
     {
       return _point2;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -968,7 +1086,7 @@ namespace krys::boo::display_list
     boo::StrokeStyle _style;
 
   public:
-    static constexpr std::string_view Name = "draw-lines-for-text";
+    constexpr static std::string_view Name = "draw-lines-for-text";
 
     DrawLinesForText(const FloatPoint &, Span<const FloatSegment> lineSegments, float thickness,
                      bool printing, bool doubleLines, boo::StrokeStyle) noexcept;
@@ -977,28 +1095,34 @@ namespace krys::boo::display_list
     {
       return _point;
     }
+
     KRYS_NODISCARD float Thickness() const noexcept
     {
       return _thickness;
     }
+
     KRYS_NODISCARD const List<FloatSegment> &LineSegments() const noexcept
     {
       return _lineSegments;
     }
+
     KRYS_NODISCARD bool IsPrinting() const noexcept
     {
       return _printing;
     }
+
     KRYS_NODISCARD bool DoubleLines() const noexcept
     {
       return _doubleLines;
     }
+
     KRYS_NODISCARD boo::StrokeStyle Style() const noexcept
     {
       return _style;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1009,7 +1133,7 @@ namespace krys::boo::display_list
     DocumentMarkerLineStyle _style;
 
   public:
-    static constexpr std::string_view Name = "draw-dots-for-document-marker";
+    constexpr static std::string_view Name = "draw-dots-for-document-marker";
 
     DrawDotsForDocumentMarker(FloatRect rect, DocumentMarkerLineStyle style) noexcept
         : _rect(rect), _style(style)
@@ -1020,12 +1144,14 @@ namespace krys::boo::display_list
     {
       return _rect;
     }
+
     KRYS_NODISCARD DocumentMarkerLineStyle Style() const noexcept
     {
       return _style;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1035,7 +1161,7 @@ namespace krys::boo::display_list
     FloatRect _rect;
 
   public:
-    static constexpr std::string_view Name = "draw-ellipse";
+    constexpr static std::string_view Name = "draw-ellipse";
 
     explicit DrawEllipse(FloatRect rect) noexcept : _rect(rect)
     {
@@ -1047,6 +1173,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1056,7 +1183,7 @@ namespace krys::boo::display_list
     boo::Path _path;
 
   public:
-    static constexpr std::string_view Name = "draw-path";
+    constexpr static std::string_view Name = "draw-path";
 
     explicit DrawPath(const boo::Path &path) noexcept : _path(path)
     {
@@ -1068,6 +1195,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1079,7 +1207,7 @@ namespace krys::boo::display_list
     boo::Color _color;
 
   public:
-    static constexpr std::string_view Name = "draw-focus-ring-path";
+    constexpr static std::string_view Name = "draw-focus-ring-path";
 
     DrawFocusRingPath(const boo::Path &path, float outlineWidth, const boo::Color &color) noexcept
         : _path(path), _outlineWidth(outlineWidth), _color(color)
@@ -1090,16 +1218,19 @@ namespace krys::boo::display_list
     {
       return _path;
     }
+
     KRYS_NODISCARD float OutlineWidth() const noexcept
     {
       return _outlineWidth;
     }
+
     KRYS_NODISCARD const boo::Color &GetColor() const noexcept
     {
       return _color;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1112,7 +1243,7 @@ namespace krys::boo::display_list
     boo::Color _color;
 
   public:
-    static constexpr std::string_view Name = "draw-focus-ring-rects";
+    constexpr static std::string_view Name = "draw-focus-ring-rects";
 
     DrawFocusRingRects(const List<FloatRect> &rects, float outlineOffset, float outlineWidth,
                        const boo::Color &color) noexcept
@@ -1124,20 +1255,24 @@ namespace krys::boo::display_list
     {
       return _rects;
     }
+
     KRYS_NODISCARD float OutlineOffset() const noexcept
     {
       return _outlineOffset;
     }
+
     KRYS_NODISCARD float OutlineWidth() const noexcept
     {
       return _outlineWidth;
     }
+
     KRYS_NODISCARD const boo::Color &GetColor() const noexcept
     {
       return _color;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1148,7 +1283,7 @@ namespace krys::boo::display_list
     GraphicsContext::RequiresClipToRect _requiresClipToRect;
 
   public:
-    static constexpr std::string_view Name = "fill-rect";
+    constexpr static std::string_view Name = "fill-rect";
 
     FillRect(const FloatRect &rect, GraphicsContext::RequiresClipToRect requiresClipToRect) noexcept
         : _rect(rect), _requiresClipToRect(requiresClipToRect)
@@ -1159,12 +1294,14 @@ namespace krys::boo::display_list
     {
       return _rect;
     }
+
     KRYS_NODISCARD GraphicsContext::RequiresClipToRect GetRequiresClipToRect() const noexcept
     {
       return _requiresClipToRect;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1175,7 +1312,7 @@ namespace krys::boo::display_list
     boo::Color _color;
 
   public:
-    static constexpr std::string_view Name = "fill-rect-with-color";
+    constexpr static std::string_view Name = "fill-rect-with-color";
 
     FillRectWithColor(FloatRect rect, const boo::Color &color) noexcept : _rect(rect), _color(color)
     {
@@ -1185,12 +1322,14 @@ namespace krys::boo::display_list
     {
       return _rect;
     }
+
     KRYS_NODISCARD const boo::Color &GetColor() const noexcept
     {
       return _color;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1201,21 +1340,24 @@ namespace krys::boo::display_list
     const Ref<boo::Gradient> _gradient;
 
   public:
-    static constexpr std::string_view Name = "fill-rect-with-gradient";
+    constexpr static std::string_view Name = "fill-rect-with-gradient";
 
     FillRectWithGradient(const FloatRect &, boo::Gradient &) noexcept;
+
     FillRectWithGradient(FloatRect &&, Ref<boo::Gradient> &&) noexcept;
 
     KRYS_NODISCARD const FloatRect &Rect() const noexcept
     {
       return _rect;
     }
+
     KRYS_NODISCARD const boo::Gradient &GetGradient() const noexcept
     {
       return *_gradient;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1228,10 +1370,11 @@ namespace krys::boo::display_list
     GraphicsContext::RequiresClipToRect _requiresClipToRect;
 
   public:
-    static constexpr std::string_view Name = "fill-rect-with-gradient-and-space-transform";
+    constexpr static std::string_view Name = "fill-rect-with-gradient-and-space-transform";
 
     FillRectWithGradientAndSpaceTransform(const FloatRect &, boo::Gradient &, const AffineTransform &,
                                           GraphicsContext::RequiresClipToRect) noexcept;
+
     FillRectWithGradientAndSpaceTransform(FloatRect &&, Ref<boo::Gradient> &&, AffineTransform &&,
                                           GraphicsContext::RequiresClipToRect) noexcept;
 
@@ -1239,20 +1382,24 @@ namespace krys::boo::display_list
     {
       return _rect;
     }
+
     KRYS_NODISCARD const boo::Gradient &GetGradient() const noexcept
     {
       return *_gradient;
     }
+
     KRYS_NODISCARD const AffineTransform &GradientSpaceTransform() const noexcept
     {
       return _gradientSpaceTransform;
     }
+
     KRYS_NODISCARD GraphicsContext::RequiresClipToRect GetRequiresClipToRect() const noexcept
     {
       return _requiresClipToRect;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1265,7 +1412,7 @@ namespace krys::boo::display_list
     boo::BlendMode _blendMode;
 
   public:
-    static constexpr std::string_view Name = "fill-composited-rect";
+    constexpr static std::string_view Name = "fill-composited-rect";
 
     FillCompositedRect(FloatRect rect, const boo::Color &color, CompositeOperator op,
                        boo::BlendMode blendMode) noexcept
@@ -1277,20 +1424,24 @@ namespace krys::boo::display_list
     {
       return _rect;
     }
+
     KRYS_NODISCARD const boo::Color &GetColor() const noexcept
     {
       return _color;
     }
+
     KRYS_NODISCARD CompositeOperator GetCompositeOperator() const noexcept
     {
       return _op;
     }
+
     KRYS_NODISCARD boo::BlendMode GetBlendMode() const noexcept
     {
       return _blendMode;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1302,7 +1453,7 @@ namespace krys::boo::display_list
     boo::BlendMode _blendMode;
 
   public:
-    static constexpr std::string_view Name = "fill-rounded-rect";
+    constexpr static std::string_view Name = "fill-rounded-rect";
 
     FillRoundedRect(const FloatRoundedRect &rect, const boo::Color &color, boo::BlendMode blendMode) noexcept
         : _rect(rect), _color(color), _blendMode(blendMode)
@@ -1313,16 +1464,19 @@ namespace krys::boo::display_list
     {
       return _rect;
     }
+
     KRYS_NODISCARD const boo::Color &GetColor() const noexcept
     {
       return _color;
     }
+
     KRYS_NODISCARD boo::BlendMode GetBlendMode() const noexcept
     {
       return _blendMode;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1334,7 +1488,7 @@ namespace krys::boo::display_list
     boo::Color _color;
 
   public:
-    static constexpr std::string_view Name = "fill-rect-with-rounded-hole";
+    constexpr static std::string_view Name = "fill-rect-with-rounded-hole";
 
     FillRectWithRoundedHole(const FloatRect &rect, const FloatRoundedRect &roundedHoleRect,
                             const boo::Color &color) noexcept
@@ -1346,16 +1500,19 @@ namespace krys::boo::display_list
     {
       return _rect;
     }
+
     KRYS_NODISCARD const FloatRoundedRect &RoundedHoleRect() const noexcept
     {
       return _roundedHoleRect;
     }
+
     KRYS_NODISCARD const boo::Color &GetColor() const noexcept
     {
       return _color;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1365,7 +1522,7 @@ namespace krys::boo::display_list
     boo::Path _path;
 
   public:
-    static constexpr std::string_view Name = "fill-path";
+    constexpr static std::string_view Name = "fill-path";
 
     explicit FillPath(const boo::Path &path) noexcept : _path(path)
     {
@@ -1377,6 +1534,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1386,7 +1544,7 @@ namespace krys::boo::display_list
     FloatRect _rect;
 
   public:
-    static constexpr std::string_view Name = "fill-ellipse";
+    constexpr static std::string_view Name = "fill-ellipse";
 
     explicit FillEllipse(FloatRect rect) noexcept : _rect(rect)
     {
@@ -1398,6 +1556,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1408,7 +1567,7 @@ namespace krys::boo::display_list
     float _lineWidth;
 
   public:
-    static constexpr std::string_view Name = "stroke-rect";
+    constexpr static std::string_view Name = "stroke-rect";
 
     StrokeRect(FloatRect rect, float lineWidth) noexcept : _rect(rect), _lineWidth(lineWidth)
     {
@@ -1418,12 +1577,14 @@ namespace krys::boo::display_list
     {
       return _rect;
     }
+
     KRYS_NODISCARD float LineWidth() const noexcept
     {
       return _lineWidth;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1433,7 +1594,7 @@ namespace krys::boo::display_list
     boo::Path _path;
 
   public:
-    static constexpr std::string_view Name = "stroke-path";
+    constexpr static std::string_view Name = "stroke-path";
 
     explicit StrokePath(const boo::Path &path) noexcept : _path(path)
     {
@@ -1445,6 +1606,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1454,7 +1616,7 @@ namespace krys::boo::display_list
     FloatRect _rect;
 
   public:
-    static constexpr std::string_view Name = "stroke-ellipse";
+    constexpr static std::string_view Name = "stroke-ellipse";
 
     explicit StrokeEllipse(const FloatRect &rect) noexcept : _rect(rect)
     {
@@ -1466,6 +1628,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1475,7 +1638,7 @@ namespace krys::boo::display_list
     FloatRect _rect;
 
   public:
-    static constexpr std::string_view Name = "clear-rect";
+    constexpr static std::string_view Name = "clear-rect";
 
     explicit ClearRect(const FloatRect &rect) noexcept : _rect(rect)
     {
@@ -1487,6 +1650,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1496,7 +1660,7 @@ namespace krys::boo::display_list
     float _scaleFactor;
 
   public:
-    static constexpr std::string_view Name = "apply-device-scale-factor";
+    constexpr static std::string_view Name = "apply-device-scale-factor";
 
     explicit ApplyDeviceScaleFactor(float scaleFactor) noexcept : _scaleFactor(scaleFactor)
     {
@@ -1508,6 +1672,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1517,7 +1682,7 @@ namespace krys::boo::display_list
     FloatRect _pageRect;
 
   public:
-    static constexpr std::string_view Name = "begin-page";
+    constexpr static std::string_view Name = "begin-page";
 
     explicit BeginPage(const FloatRect &pageRect) noexcept : _pageRect(pageRect)
     {
@@ -1529,15 +1694,17 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
   class EndPage
   {
   public:
-    static constexpr std::string_view Name = "end-page";
+    constexpr static std::string_view Name = "end-page";
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {
     }
@@ -1550,7 +1717,7 @@ namespace krys::boo::display_list
     FloatRect _destRect;
 
   public:
-    static constexpr std::string_view Name = "set-URL-for-rect";
+    constexpr static std::string_view Name = "set-URL-for-rect";
 
     SetURLForRect(const url::URL &link, const FloatRect &destRect) noexcept : _link(link), _destRect(destRect)
     {
@@ -1560,12 +1727,14 @@ namespace krys::boo::display_list
     {
       return _link;
     }
+
     KRYS_NODISCARD const FloatRect &DestRect() const noexcept
     {
       return _destRect;
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 }

@@ -42,6 +42,7 @@ namespace krys::boo
 
   public:
     explicit LayoutScope(RenderElement &renderer) noexcept;
+
     ~LayoutScope() noexcept;
   };
 }

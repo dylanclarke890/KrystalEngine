@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     RenderSVGInlineText(dom::Text &, const utf8_string &) noexcept;
+
     ~RenderSVGInlineText() noexcept override;
 
     KRYS_NODISCARD dom::Text &TextNode() const noexcept
@@ -53,10 +54,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool CharacterStartsNewTextChunk(int32 position) const noexcept;
+
     KRYS_NODISCARD SVGTextLayoutAttributes *LayoutAttributes() noexcept
     {
       return &_layoutAttributes;
     }
+
     KRYS_NODISCARD const SVGTextLayoutAttributes *LayoutAttributes() const noexcept
     {
       return &_layoutAttributes;
@@ -72,11 +75,14 @@ namespace krys::boo
     {
       return _scalingFactor;
     }
+
     KRYS_NODISCARD const FontCascade &ScaledFont() const noexcept
     {
       return _scaledFont;
     }
+
     void UpdateScaledFont() noexcept;
+
     static bool ComputeNewScaledFontForStyle(const RenderObject &, const RenderStyle &, float &scalingFactor,
                                              FontCascade &scaledFont) noexcept;
 
@@ -88,26 +94,33 @@ namespace krys::boo
     {
       _legacyLineBoxes.Remove(box);
     }
+
     LegacyInlineTextBox *CreateInlineTextBox() noexcept
     {
       return _legacyLineBoxes.CreateAndAppendLineBox(*this);
     }
+
     void DeleteLegacyLineBoxes() noexcept;
+
     KRYS_NODISCARD LegacyInlineTextBox *FirstLegacyTextBox() const noexcept
     {
       return _legacyLineBoxes.First();
     }
+
     void RemoveAndDestroyLegacyTextBoxes() noexcept;
+
     KRYS_NODISCARD UniquePtr<LegacyInlineTextBox> CreateTextBox() noexcept;
 
   private:
     void WillBeDestroyed() noexcept final;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGInlineText";
     }
 
     KRYS_NODISCARD utf8_string OriginalText() const noexcept override;
+
     void StyleDidChange(style::Difference, const RenderStyle *) noexcept override;
 
     KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
@@ -118,6 +131,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::PositionWithAffinity
       PositionForPoint(const LayoutPoint &, HitTestSource,
                        const RenderFragmentContainer * = nullptr) noexcept override;
+
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept override;
 
     void SetTextInternal(utf8_string, bool force) noexcept final;

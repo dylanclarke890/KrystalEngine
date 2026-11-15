@@ -46,7 +46,9 @@ namespace krys::boo
 
   public:
     TransformOperations() noexcept = default;
+
     explicit TransformOperations(Ref<TransformOperation> &&) noexcept;
+
     explicit TransformOperations(List<Ref<TransformOperation>> &&) noexcept;
 
     KRYS_NODISCARD bool operator==(const TransformOperations &) const noexcept;
@@ -57,14 +59,17 @@ namespace krys::boo
     {
       return _operations.begin();
     }
+
     KRYS_NODISCARD const_iterator end() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.end();
     }
+
     KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.rbegin();
     }
+
     KRYS_NODISCARD const_reverse_iterator rend() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.rend();
@@ -74,10 +79,12 @@ namespace krys::boo
     {
       return _operations.empty();
     }
+
     KRYS_NODISCARD size_t size() const noexcept
     {
       return _operations.size();
     }
+
     KRYS_NODISCARD const TransformOperation *At(size_t index) const noexcept KRYS_LIFETIME_BOUND
     {
       return index < _operations.size() ? _operations[index].get() : nullptr;
@@ -87,10 +94,12 @@ namespace krys::boo
     {
       return _operations[i];
     }
+
     KRYS_NODISCARD const Ref<TransformOperation> &First() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.front();
     }
+
     KRYS_NODISCARD const Ref<TransformOperation> &Last() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.back();
@@ -105,6 +114,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsInvertible() const noexcept;
+
     KRYS_NODISCARD bool ContainsNonInvertibleMatrix() const noexcept;
   };
 

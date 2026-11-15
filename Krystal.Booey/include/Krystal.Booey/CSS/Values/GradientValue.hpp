@@ -60,6 +60,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const GradientValue &other) const noexcept;
 
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;

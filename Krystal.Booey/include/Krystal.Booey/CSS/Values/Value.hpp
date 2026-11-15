@@ -69,6 +69,7 @@ namespace krys::boo::css
 
   protected:
     ValueType _type : BitCount<ValueType>();
+
     UnitType _unit : BitCount<UnitType>() {UnitType::Unknown};
     ValueSeparator _valueSeparator : BitCount<ValueSeparator>() {ValueSeparator::SpaceSeparator};
     bool _isImplicitInitialValue : 1 {false};
@@ -139,18 +140,22 @@ namespace krys::boo::css
     KRYS_NODISCARD IterationStatus VisitChildren(const Func<IterationStatus(Value &)> &) const noexcept;
 
     KRYS_NODISCARD bool Equals(const Value &other) const noexcept;
+
     KRYS_NODISCARD bool operator==(const Value &other) const noexcept
     {
       return Equals(other);
     }
 
     void CollectComputedStyleDependencies(css::ComputedStyleDependencies &dependencies) const noexcept;
+
     KRYS_NODISCARD css::ComputedStyleDependencies ComputedStyleDependencies() const noexcept;
+
     KRYS_NODISCARD bool CanResolveDependenciesWith(const ToLengthConversionData &) const noexcept;
 
     KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD bool TraverseSubresources(const Func<bool(const CachedResource &)> &func) const noexcept;
+
     KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
 
     /// @brief Returns false if the hash is computed from the Value pointer instead of the underlying values.
@@ -479,21 +484,29 @@ namespace krys::boo::css
 #pragma endregion
 
     KRYS_NODISCARD inline bool IsValueId() const noexcept;
+
     KRYS_NODISCARD inline css::ValueId ValueId() const noexcept;
 
     KRYS_NODISCARD inline bool IsCustomIdent() const noexcept;
+
     KRYS_NODISCARD inline CSSOMString CustomIdent() const noexcept;
 
     KRYS_NODISCARD inline bool IsString() const noexcept;
+
     KRYS_NODISCARD inline CSSOMString String() const noexcept;
 
     KRYS_NODISCARD inline bool IsInteger() const noexcept;
+
     KRYS_NODISCARD inline int64 Integer(const ToLengthConversionData &) const noexcept;
+
     KRYS_NODISCARD inline int64 IntegerDeprecated() const noexcept;
 
-    KRYS_NODISCARD inline const Value &First() const noexcept;  // ValuePair
+    KRYS_NODISCARD inline const Value &First() const noexcept; // ValuePair
+
     KRYS_NODISCARD inline const Value &Second() const noexcept; // ValuePair
+
     KRYS_NODISCARD inline const Quad &GetQuad() const noexcept; // QuadValue
+
     KRYS_NODISCARD inline const Rect &GetRect() const noexcept; // RectValue
 
   protected:

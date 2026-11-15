@@ -174,7 +174,7 @@ namespace krys::boo
 
     float k = i - j;
 
-    static constexpr float epsilon = 0.1f;
+    constexpr static float epsilon = 0.1f;
 
     if (abs(k) < epsilon)
     {
@@ -275,7 +275,7 @@ namespace krys::boo
     float b = 6 * j - 6 * i;
     float c = 3 * i;
 
-    static constexpr float epsilon = 0.1f;
+    constexpr static float epsilon = 0.1f;
 
     // Solve for the linear equation bt + c = 0.
     if (abs(a) < epsilon)

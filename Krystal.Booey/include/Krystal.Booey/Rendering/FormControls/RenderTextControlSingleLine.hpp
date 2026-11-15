@@ -42,6 +42,7 @@ namespace krys::boo
 
   public:
     RenderTextControlSingleLine(Type type, html::HTMLInputElement &element, RenderStyle &&style) noexcept;
+
     ~RenderTextControlSingleLine() noexcept override;
 
     KRYS_NODISCARD RenderTextControlInnerBlock *InnerTextRenderer() const noexcept;
@@ -50,27 +51,38 @@ namespace krys::boo
 
     // Subclassed to forward to our inner div.
     KRYS_NODISCARD int32 ScrollLeft() const noexcept override;
+
     KRYS_NODISCARD int32 ScrollTop() const noexcept override;
+
     KRYS_NODISCARD int32 ScrollWidth() const noexcept override;
+
     KRYS_NODISCARD int32 ScrollHeight() const noexcept override;
+
     void SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options) noexcept override;
+
     void SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &options) noexcept override;
+
     void SetScrollPosition(const ScrollPosition &position,
                            const ScrollPositionChangeOptions &options) noexcept override;
+
     bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
                 dom::Element **stopElement = nullptr,
                 ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept final;
+
     bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
                        dom::Element **stopElement = nullptr,
                        ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept final;
 
   protected:
     KRYS_NODISCARD html::HTMLElement *ContainerElement() const noexcept;
+
     KRYS_NODISCARD html::HTMLElement *InnerBlockElement() const noexcept;
+
     KRYS_NODISCARD html::HTMLInputElement &InputElement() const noexcept;
 
   private:
     KRYS_NODISCARD bool HasControlClip() const noexcept override;
+
     KRYS_NODISCARD LayoutRect ControlClipRect(const LayoutPoint &additionalOffset) const noexcept override;
 
     void Layout() noexcept override;
@@ -82,7 +94,9 @@ namespace krys::boo
     void Autoscroll(const IntPoint &positionInWindow) noexcept override;
 
     KRYS_NODISCARD float GetAverageCharWidth() noexcept override;
+
     KRYS_NODISCARD LayoutUnit PreferredContentLogicalWidth(float charWidth) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       ComputeControlLogicalHeight(LayoutUnit lineHeight, LayoutUnit nonContentHeight) const noexcept override;
 
@@ -99,6 +113,7 @@ namespace krys::boo
 
   public:
     RenderTextControlInnerBlock(dom::Element &element, RenderStyle &&style) noexcept;
+
     ~RenderTextControlInnerBlock() noexcept override;
 
   private:

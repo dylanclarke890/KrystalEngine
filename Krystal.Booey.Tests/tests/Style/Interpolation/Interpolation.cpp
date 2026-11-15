@@ -22,14 +22,17 @@ namespace krys::boo::style::tests
       {
         return TestDocument;
       }
+
       KRYS_NODISCARD RenderElement *Renderer() const noexcept override
       {
         return nullptr;
       }
+
       KRYS_NODISCARD const RenderStyle &CurrentStyle() const noexcept override
       {
         return *Style;
       }
+
       KRYS_NODISCARD Maybe<uint32> TransformFunctionListPrefix() const noexcept override
       {
         return null;

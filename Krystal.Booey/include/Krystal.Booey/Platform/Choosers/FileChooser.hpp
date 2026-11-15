@@ -59,6 +59,7 @@ namespace krys::boo
 
     /// @brief The user chose the files at @p paths, which aren't empty.
     virtual void FilesChosen(const List<utf8_string> &paths) noexcept = 0;
+
     /// @brief The user closed the chooser without choosing.
     virtual void FileChoosingCancelled() noexcept = 0;
   };

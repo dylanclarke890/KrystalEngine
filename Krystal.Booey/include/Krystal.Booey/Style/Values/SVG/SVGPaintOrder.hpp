@@ -33,7 +33,7 @@ namespace krys::boo::style
   {
     Fill,
     Stroke,
-    Markers
+    Markers,
   };
 
   // <'paint-order'> = normal | [ fill || stroke || markers ]
@@ -48,23 +48,29 @@ namespace krys::boo::style
     constexpr SVGPaintOrder(css::keywords::Normal) noexcept
     {
     }
+
     constexpr SVGPaintOrder(css::keywords::Fill) noexcept : _type {Type::FillStrokeMarkers}
     {
     }
+
     constexpr SVGPaintOrder(css::keywords::Fill, css::keywords::Markers) noexcept
         : _type {Type::FillMarkersStroke}
     {
     }
+
     constexpr SVGPaintOrder(css::keywords::Stroke) noexcept : _type {Type::StrokeFillMarkers}
     {
     }
+
     constexpr SVGPaintOrder(css::keywords::Stroke, css::keywords::Markers) noexcept
         : _type {Type::StrokeMarkersFill}
     {
     }
+
     constexpr SVGPaintOrder(css::keywords::Markers) noexcept : _type {Type::MarkersFillStroke}
     {
     }
+
     constexpr SVGPaintOrder(css::keywords::Markers, css::keywords::Stroke) noexcept
         : _type {Type::MarkersStrokeFill}
     {
@@ -102,6 +108,7 @@ namespace krys::boo::style
     {
       return PaintTypes().begin();
     }
+
     KRYS_NODISCARD iterator end() const noexcept
     {
       return PaintTypes().end();
@@ -120,9 +127,11 @@ namespace krys::boo::style
       MarkersFillStroke,
       MarkersStrokeFill,
     };
+
     constexpr SVGPaintOrder(Type type) noexcept : _type {type}
     {
     }
+
     KRYS_NODISCARD constexpr Type GetType() const noexcept
     {
       return _type;
@@ -132,6 +141,7 @@ namespace krys::boo::style
     {
       return SVGPaintOrder {static_cast<Type>(rawValue)};
     }
+
     KRYS_NODISCARD constexpr uint8 ToRaw() const noexcept
     {
       return ToUnderlying(_type);

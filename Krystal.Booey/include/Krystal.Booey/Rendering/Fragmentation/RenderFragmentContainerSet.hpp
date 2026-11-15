@@ -49,6 +49,7 @@ namespace krys::boo
   protected:
     RenderFragmentContainerSet(Type type, dom::Document &document, RenderStyle &&style,
                                RenderFragmentedFlow &fragmentedFlow) noexcept;
+
     ~RenderFragmentContainerSet() noexcept override;
 
   private:

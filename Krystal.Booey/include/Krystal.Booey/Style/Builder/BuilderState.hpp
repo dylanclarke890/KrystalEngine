@@ -74,7 +74,7 @@ namespace krys::boo::style
   {
     Value,
     Initial,
-    Inherit
+    Inherit,
   };
 
   struct BuilderPositionTryFallback
@@ -97,6 +97,7 @@ namespace krys::boo::style
   {
     // See the comment in maybeUpdateFontForLetterSpacingOrWordSpacing() about why this needs to be a friend.
     friend void MaybeUpdateFontForLetterSpacingOrWordSpacing(BuilderState &, css::Value &) noexcept;
+
     friend class Builder;
     KRYS_NON_COPY_MOVABLE(BuilderState);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(BuilderState);
@@ -122,7 +123,9 @@ namespace krys::boo::style
 
   public:
     explicit BuilderState(RenderStyle &) noexcept;
+
     BuilderState(RenderStyle &, BuilderContext &&) noexcept;
+
     ~BuilderState() noexcept;
 
     KRYS_NODISCARD RenderStyle &Style() noexcept
@@ -156,8 +159,11 @@ namespace krys::boo::style
     }
 
     inline void SetZoom(Zoom) noexcept;
+
     inline void SetUsedZoom(float) noexcept;
+
     inline void SetWritingMode(StyleWritingMode) noexcept;
+
     inline void SetTextOrientation(TextOrientation) noexcept;
 
     KRYS_NODISCARD bool FontDirty() const noexcept
@@ -171,11 +177,13 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD inline const FontCascadeDescription &GetFontDescription() const noexcept;
+
     KRYS_NODISCARD inline const FontCascadeDescription &ParentFontDescription() const noexcept;
 
     KRYS_NODISCARD float ZoomWithTextZoomFactor() noexcept;
 
     KRYS_NODISCARD bool UseSVGZoomRules() const noexcept;
+
     KRYS_NODISCARD bool UseSVGZoomRulesForLength() const noexcept;
 
     KRYS_NODISCARD style::ScopeOrdinal StyleScopeOrdinal() const noexcept
@@ -210,9 +218,11 @@ namespace krys::boo::style
     KRYS_NODISCARD css::PropertyId CssPropertyId() const noexcept;
 
     KRYS_NODISCARD bool IsCurrentPropertyInvalidAtComputedValueTime() const noexcept;
+
     void SetCurrentPropertyInvalidAtComputedValueTime() noexcept;
 
     void SetUsesViewportUnits() noexcept;
+
     void SetUsesContainerUnits() noexcept;
 
     KRYS_NODISCARD double LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &,
@@ -220,12 +230,14 @@ namespace krys::boo::style
 
     // Accessors for sibling information used by the sibling-count() and sibling-index() CSS functions.
     KRYS_NODISCARD uint32 SiblingCount() noexcept;
+
     KRYS_NODISCARD uint32 SiblingIndex() noexcept;
 
     KRYS_NODISCARD style::AnchorPositionedStates *AnchorPositionedStates() noexcept
     {
       return _context.TreeResolutionState ? &_context.TreeResolutionState->AnchorPositionedStates : nullptr;
     }
+
     KRYS_NODISCARD const Maybe<BuilderPositionTryFallback> &GetPositionTryFallback() const noexcept
     {
       return _context.PositionTryFallback;
@@ -234,47 +246,87 @@ namespace krys::boo::style
     // FIXME: Copying a FontCascadeDescription is really inefficient. Migrate all callers to
     // setFontDescriptionXXX() variants below, then remove these functions.
     inline void SetFontDescription(FontCascadeDescription &&) noexcept;
+
     void SetFontSize(FontCascadeDescription &, float size) noexcept;
 
     inline void SetFontDescriptionKeywordSizeFromIdentifier(css::ValueId) noexcept;
+
     inline void SetFontDescriptionIsAbsoluteSize(bool) noexcept;
+
     inline void SetFontDescriptionFontSize(float) noexcept;
+
     inline void SetFontDescriptionFamilies(FontFamilies &&) noexcept;
+
     inline void SetFontDescriptionFeatureSettings(FontFeatureSettings &&) noexcept;
+
     inline void SetFontDescriptionFontPalette(FontPalette &&) noexcept;
+
     inline void SetFontDescriptionFontSizeAdjust(FontSizeAdjust) noexcept;
+
     inline void SetFontDescriptionFontStyle(FontStyle) noexcept;
+
     inline void SetFontDescriptionFontSynthesisSmallCaps(FontSynthesisLonghandValue) noexcept;
+
     inline void SetFontDescriptionFontSynthesisStyle(FontSynthesisLonghandValue) noexcept;
+
     inline void SetFontDescriptionFontSynthesisWeight(FontSynthesisLonghandValue) noexcept;
+
     inline void SetFontDescriptionKerning(Kerning) noexcept;
+
     inline void SetFontDescriptionOpticalSizing(FontOpticalSizing) noexcept;
+
     inline void SetFontDescriptionSpecifiedLocale(WebkitLocale &&) noexcept;
+
     inline void SetFontDescriptionTextAutospace(TextAutospace) noexcept;
+
     inline void SetFontDescriptionTextRenderingMode(TextRenderingMode) noexcept;
+
     inline void SetFontDescriptionTextSpacingTrim(TextSpacingTrim) noexcept;
+
     inline void SetFontDescriptionVariantCaps(FontVariantCaps) noexcept;
+
     inline void SetFontDescriptionVariantEmoji(FontVariantEmoji) noexcept;
+
     inline void SetFontDescriptionVariantPosition(FontVariantPosition) noexcept;
+
     inline void SetFontDescriptionVariationSettings(FontVariationSettings &&) noexcept;
+
     inline void SetFontDescriptionWeight(FontWeight) noexcept;
+
     inline void SetFontDescriptionWidth(FontWidth) noexcept;
+
     inline void SetFontDescriptionVariantAlternates(FontVariantAlternates &&) noexcept;
+
     inline void SetFontDescriptionVariantEastAsian(FontVariantEastAsian) noexcept;
+
     inline void SetFontDescriptionVariantEastAsianVariant(FontVariantEastAsianVariant) noexcept;
+
     inline void SetFontDescriptionVariantEastAsianWidth(FontVariantEastAsianWidth) noexcept;
+
     inline void SetFontDescriptionVariantEastAsianRuby(FontVariantEastAsianRuby) noexcept;
+
     inline void SetFontDescriptionKeywordSize(uint32) noexcept;
+
     inline void SetFontDescriptionVariantLigatures(FontVariantLigatures) noexcept;
+
     inline void SetFontDescriptionVariantCommonLigatures(boo::FontVariantLigatures) noexcept;
+
     inline void SetFontDescriptionVariantDiscretionaryLigatures(boo::FontVariantLigatures) noexcept;
+
     inline void SetFontDescriptionVariantHistoricalLigatures(boo::FontVariantLigatures) noexcept;
+
     inline void SetFontDescriptionVariantContextualAlternates(boo::FontVariantLigatures) noexcept;
+
     inline void SetFontDescriptionVariantNumeric(FontVariantNumeric) noexcept;
+
     inline void SetFontDescriptionVariantNumericFigure(FontVariantNumericFigure) noexcept;
+
     inline void SetFontDescriptionVariantNumericSpacing(FontVariantNumericSpacing) noexcept;
+
     inline void SetFontDescriptionVariantNumericFraction(FontVariantNumericFraction) noexcept;
+
     inline void SetFontDescriptionVariantNumericOrdinal(FontVariantNumericOrdinal) noexcept;
+
     inline void SetFontDescriptionVariantNumericSlashedZero(FontVariantNumericSlashedZero) noexcept;
 
     void DisableNativeAppearanceIfNeeded(css::PropertyId, PropertyCascade::Origin) noexcept;
@@ -283,9 +335,13 @@ namespace krys::boo::style
     void AdjustStyleForInterCharacterRuby() noexcept;
 
     void UpdateFont() noexcept;
+
     void UpdateFontForZoomChange() noexcept;
+
     void UpdateFontForGenericFamilyChange() noexcept;
+
     void UpdateFontForOrientationChange() noexcept;
+
     void UpdateFontForSizeChange() noexcept;
   };
 }

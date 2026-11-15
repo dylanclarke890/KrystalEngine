@@ -87,6 +87,7 @@ namespace krys::boo::style
         style::MatchElement MatchElement;
         style::IsNegation IsNegation;
       };
+
       List<Builder> builders;
 
       for (auto &feature : features)

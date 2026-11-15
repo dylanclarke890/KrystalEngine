@@ -36,6 +36,7 @@ namespace krys::boo::dom
 
   public:
     DocumentTimer(Document &document, Func<void()> action, Duration delay, bool repeating) noexcept;
+
     ~DocumentTimer() noexcept;
 
     /// @brief Stops the timer for good, releasing its action.
@@ -43,6 +44,7 @@ namespace krys::boo::dom
 
     /// @brief Stops the timer for now, keeping the time left until it fires: its document is suspended.
     void Suspend() noexcept;
+
     /// @brief Starts the timer again with the time it had left.
     void Resume() noexcept;
 
@@ -72,11 +74,17 @@ namespace krys::boo::dom
   public:
     /// @brief A handle that owns no timer.
     DocumentTimerHandle() noexcept = default;
+
     explicit DocumentTimerHandle(DocumentTimer &timer) noexcept;
+
     DocumentTimerHandle(DocumentTimerHandle &&other) noexcept;
+
     DocumentTimerHandle &operator=(DocumentTimerHandle &&other) noexcept;
+
     DocumentTimerHandle(const DocumentTimerHandle &) = delete;
+
     DocumentTimerHandle &operator=(const DocumentTimerHandle &) = delete;
+
     ~DocumentTimerHandle() noexcept;
 
     /// @brief Stops the timer now, if it's still active; the handle then owns none.

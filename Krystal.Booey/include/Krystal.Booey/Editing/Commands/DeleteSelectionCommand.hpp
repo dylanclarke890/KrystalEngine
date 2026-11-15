@@ -67,15 +67,18 @@ namespace krys::boo
     DeleteSelectionCommand(dom::Document &document, bool smartDelete, bool mergeBlocksAfterDelete,
                            bool replace, bool expandForSpecialElements, bool sanitizeMarkup,
                            EditAction editingAction = EditAction::Delete) noexcept;
+
     DeleteSelectionCommand(const VisibleSelection &selection, bool smartDelete, bool mergeBlocksAfterDelete,
                            bool replace, bool expandForSpecialElements, bool sanitizeMarkup,
                            EditAction editingAction) noexcept;
+
     ~DeleteSelectionCommand() noexcept override;
 
     KRYS_NODISCARD static Ref<DeleteSelectionCommand>
       Create(dom::Document &document, bool smartDelete = false, bool mergeBlocksAfterDelete = true,
              bool replace = false, bool expandForSpecialElements = false, bool sanitizeMarkup = true,
              EditAction editingAction = EditAction::Delete) noexcept;
+
     KRYS_NODISCARD static Ref<DeleteSelectionCommand>
       Create(const VisibleSelection &selection, bool smartDelete = false, bool mergeBlocksAfterDelete = true,
              bool replace = false, bool expandForSpecialElements = false, bool sanitizeMarkup = true,
@@ -85,26 +88,45 @@ namespace krys::boo
     void DoApply() noexcept override;
 
     KRYS_NODISCARD bool PreservesTypingStyle() const noexcept override;
+
     void InitializeStartEnd(dom::Position &start, dom::Position &end) noexcept;
+
     void SetStartingSelectionOnSmartDelete(const dom::Position &start, const dom::Position &end) noexcept;
+
     bool InitializePositionData() noexcept;
+
     void SaveTypingStyleState() noexcept;
+
     bool HandleSpecialCaseBRDelete() noexcept;
+
     void HandleGeneralDelete() noexcept;
+
     void FixupWhitespace() noexcept;
+
     void MergeParagraphs() noexcept;
+
     void RemovePreviouslySelectedEmptyTableRows() noexcept;
+
     void CalculateTypingStyleAfterDelete() noexcept;
+
     void ClearTransientState() noexcept;
+
     void MakeStylingElementsDirectChildrenOfEditableRootToPreventStyleLoss() noexcept;
+
     void RemoveNode(dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
                                        DoNotAssumeContentIsAlwaysEditable) noexcept override;
+
     void DeleteTextFromNode(dom::Text &node, uint32 offset, uint32 count) noexcept override;
+
     void RemoveRedundantBlocks() noexcept;
+
     KRYS_NODISCARD bool ShouldSmartDeleteParagraphSpacers() noexcept;
+
     void SmartDeleteParagraphSpacers() noexcept;
+
     void RemoveNodeUpdatingStates(
       dom::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept;
+
     void InsertBlockPlaceholderForTableCellIfNeeded(dom::Element &element) noexcept;
   };
 }

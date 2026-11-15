@@ -826,7 +826,7 @@ namespace krys::boo
     {
       SkipDescenders,
       SkipGlyph,
-      DrawOverGlyph
+      DrawOverGlyph,
     };
 
     KRYS_NODISCARD GlyphUnderlineType ComputeUnderlineType(const TextRun &textRun,
@@ -1352,7 +1352,7 @@ namespace krys::boo
       return false;
     }
 
-    static constexpr Array<utf8_stringview, 34> Names = {
+    constexpr static Array<utf8_stringview, 34> Names = {
       u8"#GungSeo",
       u8"#HeadLineA",
       u8"#PCMyungjo",

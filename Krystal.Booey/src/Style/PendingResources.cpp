@@ -38,7 +38,7 @@ namespace krys::boo::style
     {
       CORS,
       NoCORS,
-      Anonymous
+      Anonymous,
     };
 
     void LoadPendingImage(dom::Document &document, const StyleImage *styleImage, const dom::Element *,

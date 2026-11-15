@@ -139,6 +139,5 @@ namespace krys::boo
       isNonEmpty = false;
       return nullptr;
     }
-
   }
 }

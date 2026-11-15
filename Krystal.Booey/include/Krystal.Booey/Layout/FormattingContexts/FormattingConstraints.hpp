@@ -59,7 +59,7 @@ namespace krys::boo::layout
       GenericContent,
       InlineContent,
       TableContent,
-      FlexContent
+      FlexContent,
     };
 
   private:
@@ -77,6 +77,7 @@ namespace krys::boo::layout
     {
       return _horizontal;
     }
+
     KRYS_NODISCARD LayoutUnit LogicalTop() const noexcept
     {
       return _logicalTop;
@@ -86,10 +87,12 @@ namespace krys::boo::layout
     {
       return BaseTypeFlags().Contains(InlineContent);
     }
+
     KRYS_NODISCARD bool IsConstraintsForTableContent() const noexcept
     {
       return BaseTypeFlags().Contains(TableContent);
     }
+
     KRYS_NODISCARD bool IsConstraintsForFlexContent() const noexcept
     {
       return BaseTypeFlags().Contains(FlexContent);
@@ -122,7 +125,7 @@ namespace krys::boo::layout
   enum class IntrinsicWidthMode : uint8
   {
     Minimum,
-    Maximum
+    Maximum,
   };
 
   struct IntrinsicWidthConstraints

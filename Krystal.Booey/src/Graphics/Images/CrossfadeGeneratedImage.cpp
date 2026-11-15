@@ -93,8 +93,7 @@ namespace krys::boo
 
     DrawCrossfadeSubimage(context, *_fromImage, CompositeOperator::SourceOver, 1 - _percentage,
                           _crossfadeSize);
-    DrawCrossfadeSubimage(context, *_toImage, CompositeOperator::PlusLighter, _percentage,
-                          _crossfadeSize);
+    DrawCrossfadeSubimage(context, *_toImage, CompositeOperator::PlusLighter, _percentage, _crossfadeSize);
 
     context.EndTransparencyLayer();
   }

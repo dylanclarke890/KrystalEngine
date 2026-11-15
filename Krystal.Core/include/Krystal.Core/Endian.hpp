@@ -10,6 +10,7 @@ namespace krys
   class Endian
   {
     Endian() = delete;
+
     ~Endian() = delete;
 
   public:
@@ -18,7 +19,7 @@ namespace krys
     {
       Little = std::endian::little,
       Big = std::endian::big,
-      System = std::endian::native
+      System = std::endian::native,
     };
 
     /// @brief Checks if the system is big endian.

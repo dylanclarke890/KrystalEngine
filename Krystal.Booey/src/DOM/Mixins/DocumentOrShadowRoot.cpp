@@ -641,7 +641,7 @@ namespace krys::boo::dom
       return elements;
     }
 
-    static constexpr EnumSet<HitTestRequest::Type> hitTypes {
+    constexpr static EnumSet<HitTestRequest::Type> hitTypes {
       HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
       HitTestRequest::Type::DisallowUserAgentShadowContent, HitTestRequest::Type::CollectMultipleElements,
       HitTestRequest::Type::IncludeAllElementsUnderPoint};

@@ -71,6 +71,7 @@ namespace krys::boo::html
 
   public:
     HTMLDialogElement(dom::Document &document) noexcept;
+
     ~HTMLDialogElement() noexcept override;
 
 #pragma region HTMLDialogElement - https://html.spec.whatwg.org/#htmldialogelement
@@ -101,10 +102,13 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-dialog-show
     dom::ExceptionOr<void> Show() noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-dialog-showmodal
     dom::ExceptionOr<void> ShowModal() noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-dialog-close
     void Close(Maybe<dom::DOMString> returnValue = null) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-dialog-requestclose
     void RequestClose(Maybe<dom::DOMString> returnValue = null) noexcept;
 
@@ -128,9 +132,11 @@ namespace krys::boo::html
     /// @brief Shows the dialog modally, invoked by @p source.
     /// @see https://html.spec.whatwg.org/#show-a-modal-dialog
     dom::ExceptionOr<void> ShowModalDialog(dom::Element *source) noexcept;
+
     /// @brief Closes the dialog, setting its return value to @p result if there's one, invoked by @p source.
     /// @see https://html.spec.whatwg.org/#close-the-dialog
     void CloseTheDialog(Maybe<dom::DOMString> result, dom::Element *source) noexcept;
+
     /// @brief Asks the dialog to close (`cancel` can refuse), invoked by @p source.
     /// @see https://html.spec.whatwg.org/#dialog-request-close
     void RequestCloseTheDialog(Maybe<dom::DOMString> returnValue, dom::Element *source) noexcept;
@@ -140,32 +146,41 @@ namespace krys::boo::html
 
     /// @brief The popover commands, and the dialog commands.
     KRYS_NODISCARD bool IsValidCommandType(dom::CommandType command) const noexcept final;
+
     /// @brief Shows the dialog modally or closes it for the dialog commands (unless it's a showing popover),
     /// and shows or hides it for the popover commands.
     bool HandleCommandInternal(HTMLButtonElement &invoker, dom::CommandType command) noexcept final;
 
   protected:
     void OnInsert() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
 
   private:
     void SetIsModal(bool value) noexcept;
+
     /// @see https://html.spec.whatwg.org/#queue-a-dialog-toggle-event-task
     void QueueDialogToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
                                     dom::Element *source) noexcept;
+
     /// @brief Fires `beforetoggle` from @p oldState to @p newState.
     /// @return Whether it wasn't canceled.
     bool FireBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState, bool cancelable,
                                dom::Element *source) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dialog-setup-steps
     void SetupSteps() noexcept;
+
     /// @see https://html.spec.whatwg.org/#dialog-cleanup-steps
     void CleanupSteps() noexcept;
+
     /// @see https://html.spec.whatwg.org/#set-the-dialog-close-watcher
     void SetCloseWatcher() noexcept;
+
     /// @brief Hides the popovers the dialog isn't in, as it shows.
     void HidePopoversOnShow() noexcept;
   };

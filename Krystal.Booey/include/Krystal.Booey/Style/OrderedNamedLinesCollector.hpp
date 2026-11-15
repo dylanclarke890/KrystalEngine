@@ -56,6 +56,7 @@ namespace krys::boo::style
           _orderedNamedAutoRepeatGridLines(tracks.AutoRepeatOrderedNamedLines)
     {
     }
+
     virtual ~OrderedNamedLinesCollector() noexcept = default;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
@@ -64,6 +65,7 @@ namespace krys::boo::style
     }
 
     virtual void CollectLineNamesForIndex(List<css::CSSOMString> &, uint32 index) const noexcept = 0;
+
     KRYS_NODISCARD virtual int32 NamedGridLineCount() const noexcept
     {
       return static_cast<int32>(_orderedNamedGridLines.Map.size());
@@ -73,8 +75,9 @@ namespace krys::boo::style
     enum class NamedLinesType : bool
     {
       NamedLines,
-      AutoRepeatNamedLines
+      AutoRepeatNamedLines,
     };
+
     void AppendLines(List<css::CSSOMString> &, uint32 index, NamedLinesType) const noexcept;
   };
 
@@ -130,6 +133,7 @@ namespace krys::boo::style
     }
 
     void CollectLineNamesForIndex(List<css::CSSOMString> &, uint32 index) const noexcept override;
+
     KRYS_NODISCARD int32 NamedGridLineCount() const noexcept override
     {
       return static_cast<int32>(_totalLines);

@@ -54,6 +54,7 @@ namespace krys::boo::layout
       SuspendedFloatList SuspendedFloats;
       EnumSet<UsedFloat> HasIntrusiveFloat {};
     };
+
     FloatContent Floats {};
 
     struct ContentGeometry
@@ -65,6 +66,7 @@ namespace krys::boo::layout
       InlineLayoutUnit LogicalRightIncludingNegativeMargin {0.f};
       Maybe<InlineLayoutUnit> TrailingOverflowingContentWidth {};
     };
+
     ContentGeometry Content {};
 
     struct LineGeometry
@@ -76,6 +78,7 @@ namespace krys::boo::layout
       InlineLayoutUnit IntrusiveFloatsOffset {0.f};
       Maybe<InlineLayoutUnit> InitialLetterClearGap {};
     };
+
     LineGeometry Geometry {};
 
     struct HangingContent
@@ -84,6 +87,7 @@ namespace krys::boo::layout
       InlineLayoutUnit LogicalWidth {0.f};
       InlineLayoutUnit HangablePunctuationStartWidth {0.f};
     };
+
     HangingContent Hanging {};
 
     struct Directionality
@@ -91,6 +95,7 @@ namespace krys::boo::layout
       List<int32> VisualOrderList;
       TextDirection InlineBaseDirection {TextDirection::LTR};
     };
+
     Directionality BidiDirectionality {};
 
     struct IsFirstLast
@@ -98,6 +103,7 @@ namespace krys::boo::layout
       IsFirstFormattedLine FirstFormattedLine {IsFirstFormattedLine::Yes};
       bool IsLastLineWithInlineContent {true};
     };
+
     IsFirstLast FirstLast {};
 
     struct Ruby
@@ -105,6 +111,7 @@ namespace krys::boo::layout
       HashMap<const Box *, InlineLayoutUnit> BaseAlignmentOffsetList {};
       InlineLayoutUnit AnnotationAlignmentOffset {0.f};
     };
+
     Ruby RubyAlignment {};
 
     // Misc
@@ -112,16 +119,18 @@ namespace krys::boo::layout
     {
       Generic,
       Hyphen,
-      LineBreak
+      LineBreak,
     };
+
     // No value means line does not have any inline content (either float, out-of-flow or block inside inline)
     Maybe<InlineContentEnding> ContentEnding {};
 
     enum class InflowContentType : uint8
     {
       Inline,
-      Block
+      Block,
     };
+
     KRYS_NODISCARD Maybe<InflowContentType> GetInflowContentType() const noexcept
     {
       if (ContentEnding.has_value())
@@ -134,14 +143,17 @@ namespace krys::boo::layout
       }
       return {};
     }
+
     KRYS_NODISCARD bool HasContentfulInFlowContent() const noexcept
     {
       return GetInflowContentType().has_value();
     }
+
     KRYS_NODISCARD bool HasContentfulInlineContent() const noexcept
     {
       return HasContentfulInFlowContent() && *GetInflowContentType() == InflowContentType::Inline;
     }
+
     KRYS_NODISCARD bool IsBlockContent() const noexcept
     {
       return HasContentfulInFlowContent() && *GetInflowContentType() == InflowContentType::Block;
@@ -151,6 +163,7 @@ namespace krys::boo::layout
     {
       return ContentEnding && *ContentEnding == InlineContentEnding::Hyphen;
     }
+
     KRYS_NODISCARD bool EndsWithLineBreak() const noexcept
     {
       return ContentEnding && *ContentEnding == InlineContentEnding::LineBreak;

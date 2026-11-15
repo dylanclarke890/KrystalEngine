@@ -78,9 +78,9 @@
 
 namespace krys::boo::html
 {
-  static constexpr ImageSmoothingQuality DefaultSmoothingQuality = ImageSmoothingQuality::Low;
+  constexpr static ImageSmoothingQuality DefaultSmoothingQuality = ImageSmoothingQuality::Low;
 
-  static constexpr std::u8string_view DefaultFont = u8"10px sans-serif";
+  constexpr static std::u8string_view DefaultFont = u8"10px sans-serif";
 
   KRYS_NODISCARD static CanvasLineCap ToCanvasLineCap(LineCap lineCap) noexcept
   {
@@ -1864,7 +1864,7 @@ namespace krys::boo::html
   enum class ImageSizeType : uint8
   {
     AfterDevicePixelRatio,
-    BeforeDevicePixelRatio
+    BeforeDevicePixelRatio,
   };
 
   KRYS_NODISCARD static LayoutSize
@@ -2386,7 +2386,7 @@ namespace krys::boo::html
 
   // The area of image data a put of 60 by 60 pixels or less keeps, so that reading it back needn't read the
   // buffer.
-  static constexpr uint32 PutImageDataCacheAreaLimit = 60 * 60;
+  constexpr static uint32 PutImageDataCacheAreaLimit = 60 * 60;
 
   // https://html.spec.whatwg.org/#dom-context-2d-createimagedata-imagedata
   dom::ExceptionOr<Ref<ImageData>>

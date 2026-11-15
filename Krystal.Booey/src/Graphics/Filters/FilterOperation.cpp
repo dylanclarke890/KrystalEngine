@@ -331,5 +331,4 @@ namespace krys::boo
     krys_debug_assert_msg(false, "Unreachable");
     return nullptr;
   }
-
 }

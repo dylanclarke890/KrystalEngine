@@ -40,6 +40,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<ProgressBarPart> Create() noexcept;
+
     KRYS_NODISCARD static Ref<ProgressBarPart> Create(double position,
                                                       MonotonicTime::duration animationStartTime) noexcept;
 

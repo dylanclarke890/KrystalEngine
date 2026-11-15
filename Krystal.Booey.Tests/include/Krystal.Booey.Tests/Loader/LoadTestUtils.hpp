@@ -78,6 +78,7 @@ namespace krys::boo::tests
 
     /// @brief Each time the client is asked about icons, the icons, with their identifiers.
     List<List<Pair<LinkIcon, uint64>>> IconDecisions;
+
     void GetLoadDecisionForIcons(Span<const LinkIconLoadDecision> icons) noexcept override
     {
       auto &decisions = IconDecisions.emplace_back();

@@ -48,7 +48,7 @@ namespace krys::boo::html
   enum class DateTimePlaceholderIfNoValue : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief What a date or time field is part of: a date or time input's editable fields.
@@ -56,14 +56,23 @@ namespace krys::boo::html
   {
   public:
     virtual ~DateTimeFieldElementFieldOwner() noexcept = default;
+
     virtual void DidBlurFromField(dom::Event &event) noexcept = 0;
+
     virtual void FieldValueChanged() noexcept = 0;
+
     virtual bool FocusOnNextField(const DateTimeFieldElement &field) noexcept = 0;
+
     virtual bool FocusOnPreviousField(const DateTimeFieldElement &field) noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsFieldOwnerDisabled() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsFieldOwnerReadOnly() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsFieldOwnerHorizontal() const noexcept = 0;
+
     KRYS_NODISCARD virtual dom::DOMString LocaleIdentifier() const noexcept = 0;
+
     /// @brief The date fields show (greyed) until they have values: today.
     KRYS_NODISCARD virtual const DateComponents &PlaceholderDate() const noexcept = 0;
   };
@@ -78,7 +87,7 @@ namespace krys::boo::html
     enum class EventBehavior : bool
     {
       DispatchNoEvent,
-      DispatchInputAndChangeEvents
+      DispatchInputAndChangeEvents,
     };
 
   private:
@@ -96,16 +105,24 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD virtual bool HasValue() const noexcept = 0;
+
     virtual void PopulateDateTimeFieldsState(
       DateTimeFieldsState &state,
       DateTimePlaceholderIfNoValue placeholderIfNoValue = DateTimePlaceholderIfNoValue::No) noexcept = 0;
+
     virtual void SetEmptyValue(EventBehavior eventBehavior = EventBehavior::DispatchNoEvent) noexcept = 0;
+
     virtual void SetValueAsDate(const DateComponents &date) noexcept = 0;
+
     virtual void SetValueAsInteger(int value,
                                    EventBehavior eventBehavior = EventBehavior::DispatchNoEvent) noexcept = 0;
+
     virtual void StepDown() noexcept = 0;
+
     virtual void StepUp() noexcept = 0;
+
     KRYS_NODISCARD virtual dom::DOMString Value() const noexcept = 0;
+
     KRYS_NODISCARD virtual dom::DOMString PlaceholderValue() const noexcept = 0;
 
   protected:
@@ -117,14 +134,22 @@ namespace krys::boo::html
                            utf8_stringview label = {}) noexcept;
 
     KRYS_NODISCARD Locale &LocaleForOwner() const noexcept;
+
     KRYS_NODISCARD dom::DOMString LocaleIdentifier() const noexcept;
+
     void UpdateVisibleValue(EventBehavior eventBehavior) noexcept;
+
     /// @brief Sets `aria-valuenow` and `aria-valuetext` to the field's value, or removes them without one.
     void UpdateAriaValueAttributes() noexcept;
+
     virtual void AdjustMinInlineSize(RenderStyle &style) const noexcept = 0;
+
     KRYS_NODISCARD virtual int ValueAsInteger() const noexcept = 0;
+
     KRYS_NODISCARD virtual int PlaceholderValueAsInteger() const noexcept = 0;
+
     virtual void HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept = 0;
+
     virtual void HandleBlurEvent(dom::Event &event) noexcept;
 
     KRYS_NODISCARD DateTimeFieldElementFieldOwner *FieldOwner() const noexcept
@@ -138,8 +163,11 @@ namespace krys::boo::html
                          const RenderStyle *shadowHostStyle) noexcept final;
 
     void DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept;
+
     KRYS_NODISCARD bool IsFieldOwnerDisabled() const noexcept;
+
     KRYS_NODISCARD bool IsFieldOwnerReadOnly() const noexcept;
+
     KRYS_NODISCARD bool IsFieldOwnerHorizontal() const noexcept;
   };
 }

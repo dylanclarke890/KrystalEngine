@@ -60,6 +60,7 @@ namespace krys::boo
 
   public:
     constexpr LayoutUnit() noexcept = default;
+
     constexpr LayoutUnit(const LayoutUnit &) noexcept = default;
 
     constexpr LayoutUnit(int32 value) noexcept
@@ -108,6 +109,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD friend constexpr bool operator==(LayoutUnit, LayoutUnit) noexcept = default;
+
     KRYS_NODISCARD friend constexpr auto operator<=>(LayoutUnit, LayoutUnit) noexcept = default;
 
     KRYS_NODISCARD static LayoutUnit FromFloatCeil(float value) noexcept

@@ -910,8 +910,9 @@ namespace krys::boo
   enum class DidRepaintAndMarkContainingBlock : bool
   {
     No,
-    Yes
+    Yes,
   };
+
   static Maybe<DidRepaintAndMarkContainingBlock>
     RepaintAndMarkContainingBlockDirtyBeforeTearDown(const dom::Element &root,
                                                      auto composedTreeDescendants) noexcept

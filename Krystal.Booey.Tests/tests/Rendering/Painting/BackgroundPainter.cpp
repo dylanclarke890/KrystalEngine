@@ -289,7 +289,7 @@ namespace krys::boo::tests
             "[Rendering][BackgroundPainter][css-backgrounds:background-image]")
   {
     // 400x400 decodes to 640KB, over the 500KB that makes a still image large for decoding.
-    static constexpr uint8 LargePNG[] = {
+    constexpr static uint8 LargePNG[] = {
       137, 80,  78,  71,  13,  10,  26,  10,  0,   0,   0,   13,  73,  72,  68,  82,  0,   0,   1,   144, 0,
       0,   1,   144, 8,   6,   0,   0,   0,   128, 191, 54,  204, 0,   0,   4,   130, 73,  68,  65,  84,  120,
       218, 237, 213, 49,  1,   0,   0,   8,   195, 176, 73,  199, 249, 208, 192, 77,  142, 24,  232, 211, 116,

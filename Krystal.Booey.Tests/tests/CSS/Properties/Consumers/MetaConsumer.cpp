@@ -11,7 +11,6 @@
 
 namespace krys::boo::css::tests
 {
-
   TEST_CASE("MetaConsumer(Number token)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};

@@ -36,7 +36,7 @@ namespace krys::boo::detail
     {
       Pending,
       Fulfilled,
-      Rejected
+      Rejected,
     };
 
     Status _status {Status::Pending};
@@ -65,6 +65,7 @@ namespace krys::boo::detail
 
     /// @brief Fulfils the promise with its animation.
     void Resolve() noexcept;
+
     void Reject(dom::Exception exception) noexcept;
 
   private:

@@ -79,10 +79,12 @@ namespace krys::boo
                                   const StringAtom &emphasisMark, float emphasisMarkOffset,
                                   const FloatPoint &textOrigin, uint32 startOffset,
                                   uint32 endOffset) noexcept;
+
     void PaintTextWithShadows(const style::TextShadows *shadows, const FontCascade &font,
                               const TextRun &textRun, const FloatRect &boxRect, const FloatPoint &textOrigin,
                               uint32 startOffset, uint32 endOffset, const StringAtom &emphasisMark,
                               float emphasisMarkOffset, bool stroked) noexcept;
+
     void PaintTextAndEmphasisMarksIfNeeded(const TextRun &textRun, const FloatRect &boxRect,
                                            const FloatPoint &textOrigin, uint32 startOffset, uint32 endOffset,
                                            const TextPaintStyle &paintStyle,
@@ -110,6 +112,7 @@ namespace krys::boo
                   const FloatRect &textRect, bool isLastShadowIteration,
                   bool lastShadowIterationShouldDrawText = true, bool opaque = false,
                   bool ignoreWritingMode = false) noexcept;
+
     ~ShadowApplier() noexcept;
 
     /// @brief How far the text is moved to draw only its shadow.
@@ -117,10 +120,12 @@ namespace krys::boo
     {
       return _extraOffset;
     }
+
     KRYS_NODISCARD bool NothingToDraw() const noexcept
     {
       return _nothingToDraw;
     }
+
     KRYS_NODISCARD bool DidSaveContext() const noexcept
     {
       return _didSaveContext;

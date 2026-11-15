@@ -348,5 +348,4 @@ namespace krys::boo
   {
     _computedStyle.SetHasAutoCaretColor();
   }
-
 }

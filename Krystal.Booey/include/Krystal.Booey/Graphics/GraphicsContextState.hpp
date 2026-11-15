@@ -84,20 +84,21 @@ namespace krys::boo
 
       uint32 Value;
     };
+
     KRYS_NODISCARD static constexpr ChangeIndex ToIndex(Change change) noexcept
     {
       return {static_cast<uint32>(change)};
     }
 
-    static constexpr ChangeFlags BasicChangeFlags {Change::StrokeThickness, Change::StrokeBrush,
+    constexpr static ChangeFlags BasicChangeFlags {Change::StrokeThickness, Change::StrokeBrush,
                                                    Change::FillBrush};
-    static constexpr ChangeFlags StrokeChangeFlags {Change::StrokeThickness, Change::StrokeBrush};
+    constexpr static ChangeFlags StrokeChangeFlags {Change::StrokeThickness, Change::StrokeBrush};
 
     enum class Purpose : uint8
     {
       Initial,
       SaveRestore,
-      TransparencyLayer
+      TransparencyLayer,
     };
 
   private:
@@ -129,12 +130,14 @@ namespace krys::boo
                          InterpolationQuality = InterpolationQuality::Default) noexcept;
 
     void Repurpose(Purpose) noexcept;
+
     KRYS_NODISCARD GraphicsContextState Clone(Purpose) const noexcept;
 
     KRYS_NODISCARD ChangeFlags Changes() const noexcept
     {
       return _changeFlags;
     }
+
     void DidApplyChanges() noexcept
     {
       _changeFlags = {};
@@ -144,23 +147,28 @@ namespace krys::boo
     {
       return _fillBrush;
     }
+
     KRYS_NODISCARD const SourceBrush &FillBrush() const noexcept
     {
       return _fillBrush;
     }
+
     void SetFillBrush(const SourceBrush &brush) noexcept
     {
       SetProperty(Change::FillBrush, &GraphicsContextState::_fillBrush, brush);
     }
+
     void SetFillColor(const boo::Color &color) noexcept
     {
       SetProperty(Change::FillBrush, &GraphicsContextState::_fillBrush, SourceBrush {color});
     }
+
     void SetFillGradient(Ref<Gradient> &&gradient, const AffineTransform &spaceTransform) noexcept
     {
       _fillBrush.SetGradient(krys::move(gradient), spaceTransform);
       _changeFlags.Add(Change::FillBrush);
     }
+
     void SetFillPattern(Ref<Pattern> &&pattern) noexcept
     {
       _fillBrush.SetPattern(krys::move(pattern));
@@ -171,6 +179,7 @@ namespace krys::boo
     {
       return _fillRule;
     }
+
     void SetFillRule(WindRule fillRule) noexcept
     {
       SetProperty(Change::FillRule, &GraphicsContextState::_fillRule, fillRule);
@@ -180,23 +189,28 @@ namespace krys::boo
     {
       return _strokeBrush;
     }
+
     KRYS_NODISCARD const SourceBrush &StrokeBrush() const noexcept
     {
       return _strokeBrush;
     }
+
     void SetStrokeBrush(const SourceBrush &brush) noexcept
     {
       SetProperty(Change::StrokeBrush, &GraphicsContextState::_strokeBrush, brush);
     }
+
     void SetStrokeColor(const boo::Color &color) noexcept
     {
       SetProperty(Change::StrokeBrush, &GraphicsContextState::_strokeBrush, SourceBrush {color});
     }
+
     void SetStrokeGradient(Ref<Gradient> &&gradient, const AffineTransform &spaceTransform) noexcept
     {
       _strokeBrush.SetGradient(krys::move(gradient), spaceTransform);
       _changeFlags.Add(Change::StrokeBrush);
     }
+
     void SetStrokePattern(Ref<Pattern> &&pattern) noexcept
     {
       _strokeBrush.SetPattern(krys::move(pattern));
@@ -207,6 +221,7 @@ namespace krys::boo
     {
       return _strokeThickness;
     }
+
     void SetStrokeThickness(float strokeThickness) noexcept
     {
       SetProperty(Change::StrokeThickness, &GraphicsContextState::_strokeThickness, strokeThickness);
@@ -216,6 +231,7 @@ namespace krys::boo
     {
       return _strokeStyle;
     }
+
     void SetStrokeStyle(boo::StrokeStyle strokeStyle) noexcept
     {
       SetProperty(Change::StrokeStyle, &GraphicsContextState::_strokeStyle, strokeStyle);
@@ -225,6 +241,7 @@ namespace krys::boo
     {
       return _compositeMode;
     }
+
     void SetCompositeMode(boo::CompositeMode compositeMode) noexcept
     {
       SetProperty(Change::CompositeMode, &GraphicsContextState::_compositeMode, compositeMode);
@@ -234,6 +251,7 @@ namespace krys::boo
     {
       return _dropShadow;
     }
+
     void SetDropShadow(const Maybe<GraphicsDropShadow> &dropShadow) noexcept
     {
       SetProperty(Change::DropShadow, &GraphicsContextState::_dropShadow, dropShadow);
@@ -243,6 +261,7 @@ namespace krys::boo
     {
       return _style;
     }
+
     void SetStyle(const Maybe<GraphicsStyle> &style) noexcept
     {
       SetProperty(Change::Style, &GraphicsContextState::_style, style);
@@ -252,6 +271,7 @@ namespace krys::boo
     {
       return _alpha;
     }
+
     void SetAlpha(float alpha) noexcept
     {
       SetProperty(Change::Alpha, &GraphicsContextState::_alpha, alpha);
@@ -261,6 +281,7 @@ namespace krys::boo
     {
       return _imageInterpolationQuality;
     }
+
     void SetImageInterpolationQuality(InterpolationQuality imageInterpolationQuality) noexcept
     {
       SetProperty(Change::ImageInterpolationQuality, &GraphicsContextState::_imageInterpolationQuality,
@@ -271,6 +292,7 @@ namespace krys::boo
     {
       return _textDrawingMode;
     }
+
     void SetTextDrawingMode(TextDrawingModeFlags textDrawingMode) noexcept
     {
       SetProperty(Change::TextDrawingMode, &GraphicsContextState::_textDrawingMode, textDrawingMode);
@@ -280,6 +302,7 @@ namespace krys::boo
     {
       return _shouldAntialias;
     }
+
     void SetShouldAntialias(bool shouldAntialias) noexcept
     {
       SetProperty(Change::ShouldAntialias, &GraphicsContextState::_shouldAntialias, shouldAntialias);
@@ -289,6 +312,7 @@ namespace krys::boo
     {
       return _shouldSmoothFonts;
     }
+
     void SetShouldSmoothFonts(bool shouldSmoothFonts) noexcept
     {
       SetProperty(Change::ShouldSmoothFonts, &GraphicsContextState::_shouldSmoothFonts, shouldSmoothFonts);
@@ -298,6 +322,7 @@ namespace krys::boo
     {
       return _shouldSubpixelQuantizeFonts;
     }
+
     void SetShouldSubpixelQuantizeFonts(bool shouldSubpixelQuantizeFonts) noexcept
     {
       SetProperty(Change::ShouldSubpixelQuantizeFonts, &GraphicsContextState::_shouldSubpixelQuantizeFonts,
@@ -308,6 +333,7 @@ namespace krys::boo
     {
       return _shadowsIgnoreTransforms;
     }
+
     void SetShadowsIgnoreTransforms(bool shadowsIgnoreTransforms) noexcept
     {
       SetProperty(Change::ShadowsIgnoreTransforms, &GraphicsContextState::_shadowsIgnoreTransforms,
@@ -318,6 +344,7 @@ namespace krys::boo
     {
       return _drawLuminanceMask;
     }
+
     void SetDrawLuminanceMask(bool drawLuminanceMask) noexcept
     {
       SetProperty(Change::DrawLuminanceMask, &GraphicsContextState::_drawLuminanceMask, drawLuminanceMask);
@@ -325,8 +352,10 @@ namespace krys::boo
 
     void MergeLastChanges(const GraphicsContextState &,
                           const Maybe<GraphicsContextState> &lastDrawingState = std::nullopt) noexcept;
+
     void MergeSingleChange(const GraphicsContextState &, ChangeIndex,
                            const Maybe<GraphicsContextState> &lastDrawingState = std::nullopt) noexcept;
+
     void MergeAllChanges(const GraphicsContextState &) noexcept;
 
     KRYS_NODISCARD Purpose GetPurpose() const noexcept
@@ -350,5 +379,6 @@ namespace krys::boo
   };
 
   TextStream &operator<<(TextStream &ts, GraphicsContextState::Change change) noexcept;
+
   TextStream &operator<<(TextStream &ts, const GraphicsContextState &state) noexcept;
 }

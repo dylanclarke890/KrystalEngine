@@ -268,10 +268,12 @@ namespace krys::boo::layout
     {
       return _displayBoxNodes.front();
     }
+
     KRYS_NODISCARD Node &At(size_t index) noexcept
     {
       return _displayBoxNodes[index];
     }
+
     KRYS_NODISCARD const Node &At(size_t index) const noexcept
     {
       return _displayBoxNodes[index];
@@ -323,6 +325,7 @@ namespace krys::boo::layout
     Maybe<size_t> First {};
     Maybe<size_t> Last {};
   };
+
   using IsFirstLastIndexesMap = HashMap<const Box *, IsFirstLastIndex>;
 
   namespace

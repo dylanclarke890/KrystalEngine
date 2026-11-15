@@ -67,7 +67,7 @@ namespace krys::boo::html
     InFrameset,
     AfterFrameset,
     AfterAfterBody,
-    AfterAfterFrameset
+    AfterAfterFrameset,
   };
 
   /// @see https://html.spec.whatwg.org/multipage/parsing.html#parser-scripting-mode
@@ -76,7 +76,7 @@ namespace krys::boo::html
     Normal,
     Disabled,
     Inert,
-    Fragment
+    Fragment,
   };
 }
 

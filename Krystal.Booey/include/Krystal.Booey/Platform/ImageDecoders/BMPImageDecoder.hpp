@@ -59,8 +59,11 @@ namespace krys::boo
     {
       return u8"bmp";
     }
+
     void SetData(const SharedBuffer &data, bool allDataReceived) noexcept final;
+
     ScalableImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept final;
+
     // CAUTION: setFailed() deletes |m_reader|. Be careful to avoid
     // accessing deleted memory, especially when calling this from inside
     // BMPImageReader!
@@ -68,6 +71,7 @@ namespace krys::boo
 
   private:
     BMPImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
+
     void TryDecodeSize(bool allDataReceived) noexcept final
     {
       Decode(true, allDataReceived);

@@ -126,7 +126,7 @@ namespace krys::boo::style
   constexpr int32 fontSizeTableMin = 9;
 
   // WinIE/Nav4 table for font sizes. Designed to match the legacy font mapping system of HTML.
-  static constexpr std::array quirksFontSizeTable {
+  constexpr static std::array quirksFontSizeTable {
     std::array {9, 9, 9, 9, 11, 14, 18, 28},   std::array {9, 9, 9, 10, 12, 15, 20, 31},
     std::array {9, 9, 9, 11, 13, 17, 22, 34},  std::array {9, 9, 10, 12, 14, 18, 24, 37},
     std::array {9, 9, 10, 13, 16, 20, 26, 40}, // fixed font default (13)
@@ -139,7 +139,7 @@ namespace krys::boo::style
   //                      user pref
 
   // Strict mode table matches MacIE and Mozilla's settings exactly.
-  static constexpr std::array strictFontSizeTable {
+  constexpr static std::array strictFontSizeTable {
     std::array {9, 9, 9, 9, 11, 14, 18, 27},    std::array {9, 9, 9, 10, 12, 15, 20, 30},
     std::array {9, 9, 10, 11, 13, 17, 22, 33},  std::array {9, 9, 10, 12, 14, 18, 24, 36},
     std::array {9, 10, 12, 13, 16, 20, 26, 39}, // fixed font default (13)
@@ -153,7 +153,7 @@ namespace krys::boo::style
 
   // For values outside the range of the table, we use Todd Fahrner's suggested scale
   // factors for each keyword value.
-  static constexpr std::array fontSizeFactors {0.60f, 0.75f, 0.89f, 1.0f, 1.2f, 1.5f, 2.0f, 3.0f};
+  constexpr static std::array fontSizeFactors {0.60f, 0.75f, 0.89f, 1.0f, 1.2f, 1.5f, 2.0f, 3.0f};
 
   float FontSizeForKeyword(uint32 keywordID, bool shouldUseFixedDefaultSize, const SettingsValues &settings,
                            bool inQuirksMode) noexcept

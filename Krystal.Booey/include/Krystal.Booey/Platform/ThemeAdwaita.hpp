@@ -44,6 +44,7 @@ namespace krys::boo
     }
 
     void SetAccentColor(const Color &) noexcept;
+
     KRYS_NODISCARD Color AccentColor() const noexcept;
   };
 }

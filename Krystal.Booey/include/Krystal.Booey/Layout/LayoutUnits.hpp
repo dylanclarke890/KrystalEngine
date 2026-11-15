@@ -68,9 +68,11 @@ namespace krys::boo::layout
     LayoutUnit Y; // top
 
     constexpr Point() noexcept = default;
+
     constexpr Point(LayoutUnit x, LayoutUnit y) noexcept : X(x), Y(y)
     {
     }
+
     constexpr Point(LayoutPoint point) noexcept : X(point.X()), Y(point.Y())
     {
     }

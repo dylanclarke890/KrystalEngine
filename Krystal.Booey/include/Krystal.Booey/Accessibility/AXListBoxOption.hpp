@@ -45,27 +45,36 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<AXListBoxOption> Create(AXId id, html::HTMLElement &element,
                                                       AXObjectCache &cache) noexcept;
+
     ~AXListBoxOption() noexcept override;
 
     KRYS_NODISCARD bool IsListBoxOption() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override;
+
     void AddChildren() noexcept override
     {
       _childrenInitialized = true;
     }
+
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
       return false;
     }
 
     KRYS_NODISCARD bool IsEnabled() const noexcept override;
+
     KRYS_NODISCARD bool IsSelected() const noexcept override;
+
     KRYS_NODISCARD bool CanSetSelectedAttribute() const noexcept override;
+
     void SetSelected(bool selected) noexcept override;
+
     KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
+
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
   private:
@@ -75,9 +84,11 @@ namespace krys::boo
     {
       return AXRole::ListBoxOption;
     }
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override;
 
     KRYS_NODISCARD html::HTMLSelectElement *ListBoxOptionParentNode() const noexcept;
+
     KRYS_NODISCARD int32 ListBoxOptionIndex() const noexcept;
   };
 }

@@ -35,6 +35,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD Inset operator()(const css::Xywh &, const BuilderState &) noexcept;
   };
+
   template <>
   struct ToStyle<css::XywhFunction>
   {

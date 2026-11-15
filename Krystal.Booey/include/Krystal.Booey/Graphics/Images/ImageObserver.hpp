@@ -45,19 +45,24 @@ namespace krys::boo
     virtual ~ImageObserver() noexcept = default;
 
     KRYS_NODISCARD virtual url::URL SourceUrl() const noexcept = 0;
+
     KRYS_NODISCARD virtual utf8_string MimeType() const noexcept = 0;
+
     KRYS_NODISCARD virtual uint32 NumberOfClients() const noexcept
     {
       return 0;
     }
+
     KRYS_NODISCARD virtual int64 ExpectedContentLength() const noexcept = 0;
 
     virtual void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept
     {
     }
+
     virtual void DecodedSizeChanged(const Image &, int64 delta) noexcept = 0;
 
     virtual void DidDraw(const Image &) noexcept = 0;
+
     KRYS_NODISCARD virtual bool CanDestroyDecodedData(const Image &) const noexcept
     {
       return true;
@@ -65,8 +70,11 @@ namespace krys::boo
 
     virtual void ImageFrameAvailable(const Image &, ImageAnimatingState, const IntRect *changeRect = nullptr,
                                      DecodingStatus = DecodingStatus::Invalid) noexcept = 0;
+
     virtual void ChangedInRect(const Image &, const IntRect *changeRect = nullptr) noexcept = 0;
+
     virtual void ImageContentChanged(const Image &) noexcept = 0;
+
     virtual void ScheduleRenderingUpdate(const Image &) noexcept = 0;
 
     KRYS_NODISCARD virtual bool AllowsAnimation(const Image &) const noexcept

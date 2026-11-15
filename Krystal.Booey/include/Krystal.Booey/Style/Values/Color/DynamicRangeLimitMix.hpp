@@ -98,6 +98,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD DynamicRangeLimitMixFunction operator()(const css::DynamicRangeLimitMixFunction &mix,
                                                            const BuilderState &state) noexcept;
+
     KRYS_NODISCARD DynamicRangeLimitMixFunction
       operator()(const css::DynamicRangeLimitMixFunction &mix,
                  const css::ToLengthConversionData &conversionData) noexcept;

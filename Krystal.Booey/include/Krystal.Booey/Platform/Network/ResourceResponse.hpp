@@ -52,6 +52,7 @@ namespace krys::boo
 
   public:
     ResourceResponse() noexcept = default;
+
     ResourceResponse(url::URL url, utf8_string mimeType, int64 expectedContentLength,
                      utf8_string textEncodingName = {}) noexcept
         : _url(krys::move(url)), _mimeType(krys::move(mimeType)),
@@ -68,6 +69,7 @@ namespace krys::boo
     {
       return _url;
     }
+
     void SetURL(url::URL url) noexcept
     {
       _url = krys::move(url);
@@ -77,10 +79,12 @@ namespace krys::boo
     {
       return _mimeType;
     }
+
     KRYS_NODISCARD int64 ExpectedContentLength() const noexcept
     {
       return _expectedContentLength;
     }
+
     KRYS_NODISCARD const utf8_string &TextEncodingName() const noexcept
     {
       return _textEncodingName;
@@ -91,18 +95,22 @@ namespace krys::boo
     {
       return _httpStatusCode;
     }
+
     void SetHTTPStatusCode(uint16 statusCode) noexcept
     {
       _httpStatusCode = statusCode;
     }
+
     KRYS_NODISCARD const utf8_string &HTTPStatusText() const noexcept
     {
       return _httpStatusText;
     }
+
     void SetHTTPStatusText(utf8_string statusText) noexcept
     {
       _httpStatusText = krys::move(statusText);
     }
+
     /// @brief Whether the status is a success, 200 to 299.
     /// @see https://fetch.spec.whatwg.org/#ok-status
     KRYS_NODISCARD bool IsSuccessful() const noexcept
@@ -114,15 +122,18 @@ namespace krys::boo
     {
       return _httpHeaderFields;
     }
+
     /// @brief The value of the header @p name; empty without one.
     KRYS_NODISCARD utf8_stringview HTTPHeaderField(utf8_stringview name) const noexcept
     {
       return _httpHeaderFields.Get(name).value_or(utf8_stringview());
     }
+
     void SetHTTPHeaderField(utf8_stringview name, utf8_stringview value) noexcept
     {
       _httpHeaderFields.Set(name, value);
     }
+
     void AddHTTPHeaderField(utf8_stringview name, utf8_stringview value) noexcept
     {
       _httpHeaderFields.Add(name, value);

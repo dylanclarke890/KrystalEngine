@@ -16,6 +16,7 @@ namespace krys::boo::ax::tests
   {
   public:
     List<Pair<Ref<AXObject>, AXNotification>> Notifications;
+
     struct TextChange
     {
       Ref<AXObject> Object;
@@ -23,6 +24,7 @@ namespace krys::boo::ax::tests
       uint64 Offset;
       utf8_string Text;
     };
+
     List<TextChange> TextChanges;
     List<AXId> DetachedObjects;
 

@@ -57,11 +57,13 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     void Reattach(Rule &rule) noexcept final;
 
     KRYS_NODISCARD Ref<css::PositionTryRule> ProtectedPositionTryRule() const noexcept;
 
     KRYS_NODISCARD CSSOMStringAtom Name() const noexcept;
+
     KRYS_NODISCARD CSSPositionTryDescriptors &Style() noexcept;
   };
 }

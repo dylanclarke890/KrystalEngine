@@ -43,6 +43,7 @@ namespace krys::boo
     class BuilderState;
 
     KRYS_NODISCARD css::Blur ToCSSBlur(const BlurFilterOperation &, const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::Blur &,
                                                               const BuilderState &) noexcept;
   }

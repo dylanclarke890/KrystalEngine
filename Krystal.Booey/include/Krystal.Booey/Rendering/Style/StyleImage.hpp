@@ -37,9 +37,9 @@ namespace krys::boo
   class CachedImage;
   class CachedResourceLoader;
   class GraphicsContext;
-  struct ResourceLoaderOptions;
   class RenderElement;
   class RenderStyle;
+  struct ResourceLoaderOptions;
 
   /// @brief An opaque pointer identifying the image data behind a style image.
   using WrappedImagePtr = const void *;
@@ -83,19 +83,24 @@ namespace krys::boo
 
     // Loading.
     KRYS_NODISCARD virtual bool IsPending() const noexcept = 0;
+
     virtual void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept = 0;
+
     KRYS_NODISCARD virtual bool ErrorOccurred() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool UsesDataProtocol() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool HasImage() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual style::URL Url() const noexcept
     {
       return {};
@@ -103,29 +108,38 @@ namespace krys::boo
 
     // Clients.
     virtual void AddClient(RenderElement &) noexcept = 0;
+
     virtual void RemoveClient(RenderElement &) noexcept = 0;
+
     KRYS_NODISCARD virtual bool HasClient(RenderElement &) const noexcept = 0;
 
     // Size / scale.
     KRYS_NODISCARD virtual bool UsesImageContainerSize() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool ImageHasRelativeWidth() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool ImageHasRelativeHeight() const noexcept = 0;
+
     KRYS_NODISCARD virtual float ImageScaleFactor() const noexcept
     {
       return 1;
     }
+
     KRYS_NODISCARD virtual bool ImageHasNaturalDimensions() const noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD virtual bool IsLoaded(const RenderElement *) const noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD virtual FloatSize ImageSize(const RenderElement *, float /* multiplier */) const noexcept
     {
       return {};
     }
+
     virtual void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth,
                                             float &intrinsicHeight, FloatSize &intrinsicRatio) noexcept
     {
@@ -141,14 +155,17 @@ namespace krys::boo
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual StyleImage *SelectedImage() noexcept
     {
       return this;
     }
+
     KRYS_NODISCARD virtual const StyleImage *SelectedImage() const noexcept
     {
       return this;
     }
+
     KRYS_NODISCARD virtual CachedImage *GetCachedImage() const noexcept
     {
       return nullptr;
@@ -159,9 +176,11 @@ namespace krys::boo
     {
       return true;
     }
+
     virtual void SetContainerContextForRenderer(const RenderElement &, const FloatSize &, float) noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool KnownToBeOpaque(const RenderElement &) const noexcept
     {
       return false;
@@ -172,34 +191,42 @@ namespace krys::boo
     {
       return _type == Type::CachedImage;
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsCursorImage() const noexcept
     {
       return _type == Type::CursorImage;
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsImageSet() const noexcept
     {
       return _type == Type::ImageSet;
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsGeneratedImage() const noexcept
     {
       return IsFilterImage() || IsCrossfadeImage() || IsGradientImage() || IsPaintImage() || IsInvalidImage();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsFilterImage() const noexcept
     {
       return _type == Type::FilterImage;
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsCrossfadeImage() const noexcept
     {
       return _type == Type::CrossfadeImage;
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsGradientImage() const noexcept
     {
       return _type == Type::GradientImage;
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsPaintImage() const noexcept
     {
       return _type == Type::PaintImage;
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsInvalidImage() const noexcept
     {
       return _type == Type::InvalidImage;

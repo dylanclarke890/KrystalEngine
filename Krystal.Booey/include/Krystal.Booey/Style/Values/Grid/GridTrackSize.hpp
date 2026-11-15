@@ -46,6 +46,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const GridTrackMinMaxParameters &) const noexcept = default;
   };
+
   using GridTrackMinMax = css::FunctionNotation<css::ValueId::Minmax, GridTrackMinMaxParameters>;
 
   template <size_t I>
@@ -65,6 +66,7 @@ namespace krys::boo::style
   {
     using Base::Base;
   };
+
   using GridTrackFitContent = css::FunctionNotation<css::ValueId::FitContent, GridTrackFitContentLength>;
 
   // This class represents a <track-size> from the spec. Although there are 3 different types of
@@ -158,6 +160,7 @@ namespace krys::boo::style
     {
       return _minTrackBreadth;
     }
+
     KRYS_NODISCARD const GridTrackBreadth &MaxTrackBreadth() const noexcept
     {
       return _maxTrackBreadth;
@@ -167,10 +170,12 @@ namespace krys::boo::style
     {
       return _type == Type::Breadth;
     }
+
     KRYS_NODISCARD bool IsMinMax() const noexcept
     {
       return _type == Type::MinMax;
     }
+
     KRYS_NODISCARD bool IsFitContent() const noexcept
     {
       return _type == Type::FitContent;
@@ -216,54 +221,67 @@ namespace krys::boo::style
     {
       return _minTrackBreadthIsIntrinsic;
     }
+
     KRYS_NODISCARD bool HasIntrinsicMaxTrackBreadth() const noexcept
     {
       return _maxTrackBreadthIsIntrinsic;
     }
+
     KRYS_NODISCARD bool HasMinOrMaxContentMinTrackBreadth() const noexcept
     {
       return _minTrackBreadthIsMaxContent || _minTrackBreadthIsMinContent;
     }
+
     KRYS_NODISCARD bool HasAutoMinTrackBreadth() const noexcept
     {
       return _minTrackBreadthIsAuto;
     }
+
     KRYS_NODISCARD bool HasAutoMaxTrackBreadth() const noexcept
     {
       return _maxTrackBreadthIsAuto;
     }
+
     KRYS_NODISCARD bool HasMaxContentMaxTrackBreadth() const noexcept
     {
       return _maxTrackBreadthIsMaxContent;
     }
+
     KRYS_NODISCARD bool HasMaxContentOrAutoMaxTrackBreadth() const noexcept
     {
       return _maxTrackBreadthIsMaxContent || _maxTrackBreadthIsAuto;
     }
+
     KRYS_NODISCARD bool HasMinContentMaxTrackBreadth() const noexcept
     {
       return _maxTrackBreadthIsMinContent;
     }
+
     KRYS_NODISCARD bool HasMinOrMaxContentMaxTrackBreadth() const noexcept
     {
       return _maxTrackBreadthIsMaxContent || _maxTrackBreadthIsMinContent;
     }
+
     KRYS_NODISCARD bool HasMaxContentMinTrackBreadth() const noexcept
     {
       return _minTrackBreadthIsMaxContent;
     }
+
     KRYS_NODISCARD bool HasMinContentMinTrackBreadth() const noexcept
     {
       return _minTrackBreadthIsMinContent;
     }
+
     KRYS_NODISCARD bool HasMaxContentMinTrackBreadthAndMaxContentMaxTrackBreadth() const noexcept
     {
       return _minTrackBreadthIsMaxContent && _maxTrackBreadthIsMaxContent;
     }
+
     KRYS_NODISCARD bool HasAutoOrMinContentMinTrackBreadthAndIntrinsicMaxTrackBreadth() const noexcept
     {
       return (_minTrackBreadthIsMinContent || _minTrackBreadthIsAuto) && _maxTrackBreadthIsIntrinsic;
     }
+
     KRYS_NODISCARD bool HasFixedMaxTrackBreadth() const noexcept
     {
       return _maxTrackBreadthIsFixed;
@@ -276,8 +294,9 @@ namespace krys::boo::style
     {
       Breadth,
       MinMax,
-      FitContent
+      FitContent,
     };
+
     KRYS_NODISCARD Type GetType() const noexcept
     {
       return _type;

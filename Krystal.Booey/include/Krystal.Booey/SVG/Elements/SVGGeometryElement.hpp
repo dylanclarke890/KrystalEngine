@@ -41,11 +41,13 @@ namespace krys::boo::svg
   public:
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__getTotalLength
     KRYS_NODISCARD virtual float GetTotalLength() const noexcept;
+
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__getPointAtLength
     KRYS_NODISCARD virtual dom::ExceptionOr<Ref<SVGPoint>> GetPointAtLength(float distance) const noexcept;
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__isPointInFill
     KRYS_NODISCARD bool IsPointInFill(dom::DOMPointInit &&) noexcept;
+
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__isPointInStroke
     KRYS_NODISCARD bool IsPointInStroke(dom::DOMPointInit &&) noexcept;
 
@@ -55,6 +57,7 @@ namespace krys::boo::svg
     {
       return _pathLength->CurrentValue();
     }
+
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__pathLength
     KRYS_NODISCARD SVGAnimatedNumber &PathLengthAnimated() noexcept
     {
@@ -67,6 +70,7 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
   };
 }

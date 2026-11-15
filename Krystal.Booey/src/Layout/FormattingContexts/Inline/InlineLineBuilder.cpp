@@ -50,11 +50,13 @@ namespace krys::boo::layout
     Maybe<InlineLayoutUnit> OverflowLogicalWidth {};
     HashMap<const Box *, InlineLayoutUnit> RubyBaseAlignmentOffsetList {};
     InlineLayoutUnit RubyAnnotationOffset {0.f};
+
     enum class LineBreakReason : uint8
     {
       ForcedLineBreakByBlockContent,
-      Other
+      Other,
     };
+
     LineBreakReason BreakReason {LineBreakReason::Other};
   };
 
@@ -68,14 +70,17 @@ namespace krys::boo::layout
       {
         return _continuousContent;
       }
+
       KRYS_NODISCARD InlineContentBreaker::ContinuousContent &GetContinuousContent() noexcept
       {
         return _continuousContent;
       }
+
       KRYS_NODISCARD const InlineItem *TrailingLineBreak() const noexcept
       {
         return _trailingLineBreak;
       }
+
       KRYS_NODISCARD const InlineItem *TrailingWordBreakOpportunity() const noexcept
       {
         return _trailingWordBreakOpportunity;
@@ -84,7 +89,9 @@ namespace krys::boo::layout
       void AppendInlineItem(const InlineItem &inlineItem, const RenderStyle &style,
                             InlineLayoutUnit logicalWidth,
                             InlineLayoutUnit textSpacingAdjustment = 0) noexcept;
+
       void Reset() noexcept;
+
       KRYS_NODISCARD bool IsEmpty() const noexcept
       {
         return _continuousContent.Runs().empty() && !TrailingWordBreakOpportunity() && !TrailingLineBreak();
@@ -94,6 +101,7 @@ namespace krys::boo::layout
       {
         _hasTrailingSoftWrapOpportunity = hasTrailingSoftWrapOpportunity;
       }
+
       KRYS_NODISCARD bool HasTrailingSoftWrapOpportunity() const noexcept
       {
         return _hasTrailingSoftWrapOpportunity;
@@ -113,6 +121,7 @@ namespace krys::boo::layout
       {
         _hasTrailingClonedDecoration = hasClonedDecoration;
       }
+
       KRYS_NODISCARD bool HasTrailingClonedDecoration() const noexcept
       {
         return _hasTrailingClonedDecoration;
@@ -127,6 +136,7 @@ namespace krys::boo::layout
       {
         return _firstTextRunIndex;
       }
+
       KRYS_NODISCARD Maybe<size_t> LastTextRunIndex() const noexcept
       {
         return _lastTextRunIndex;
@@ -1074,13 +1084,15 @@ namespace krys::boo::layout
     {
       Content,
       Break,
-      Keep
+      Keep,
     };
+
     struct Content
     {
       ShapingType Type {ShapingType::Break};
       size_t Index {0};
     };
+
     List<Content> contentList;
     for (size_t index = 0; index < runs.size(); ++index)
     {

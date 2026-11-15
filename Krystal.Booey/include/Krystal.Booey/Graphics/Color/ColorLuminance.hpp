@@ -35,5 +35,6 @@ namespace krys::boo
   using krys::RelativeLuminance;
 
   KRYS_NODISCARD double RelativeLuminance(const Color &) noexcept;
+
   KRYS_NODISCARD double ContrastRatio(const Color &, const Color &) noexcept;
 }

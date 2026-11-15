@@ -48,7 +48,7 @@ namespace krys::boo
   enum class HitTestProgress
   {
     Stop,
-    Continue
+    Continue,
   };
 
   /// @brief What a hit test found: the innermost node under the point, the link element it's in, the point in
@@ -85,27 +85,35 @@ namespace krys::boo
     {
       return _scrollbar.get();
     }
+
     void SetScrollbar(RefPtr<Scrollbar> &&scrollbar) noexcept
     {
       _scrollbar = krys::move(scrollbar);
     }
 
     HitTestResult() noexcept;
+
     explicit HitTestResult(const LayoutPoint &point) noexcept;
+
     explicit HitTestResult(const LayoutRect &rect) noexcept;
+
     explicit HitTestResult(const HitTestLocation &location) noexcept;
+
     HitTestResult(const HitTestResult &other) noexcept;
+
     ~HitTestResult() noexcept;
 
     HitTestResult &operator=(const HitTestResult &other) noexcept;
 
     void SetInnerNode(dom::Node *node) noexcept;
+
     KRYS_NODISCARD dom::Node *InnerNode() const noexcept
     {
       return _innerNode.get();
     }
 
     void SetInnerNonSharedNode(dom::Node *node) noexcept;
+
     KRYS_NODISCARD dom::Node *InnerNonSharedNode() const noexcept
     {
       return _innerNonSharedNode.get();
@@ -114,6 +122,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::Element *InnerNonSharedElement() const noexcept;
 
     void SetURLElement(dom::Element *element) noexcept;
+
     KRYS_NODISCARD dom::Element *URLElement() const noexcept
     {
       return _innerURLElement.get();
@@ -123,6 +132,7 @@ namespace krys::boo
     {
       return _isOverWidget;
     }
+
     void SetIsOverWidget(bool isOverWidget) noexcept
     {
       _isOverWidget = isOverWidget;
@@ -132,6 +142,7 @@ namespace krys::boo
     {
       return _pseudoElementIdentifier;
     }
+
     void SetPseudoElementIdentifier(Maybe<style::PseudoElementIdentifier> pseudoElementIdentifier) noexcept
     {
       _pseudoElementIdentifier = pseudoElementIdentifier;
@@ -148,6 +159,7 @@ namespace krys::boo
     {
       return _hitTestLocation.Point();
     }
+
     KRYS_NODISCARD IntPoint RoundedPointInMainFrame() const noexcept
     {
       return RoundedIntPoint(PointInMainFrame());
@@ -158,10 +170,12 @@ namespace krys::boo
     {
       return LayoutPoint(_doublePointInInnerNodeFrame);
     }
+
     KRYS_NODISCARD const DoublePoint &DoublePointInInnerNodeFrame() const noexcept
     {
       return _doublePointInInnerNodeFrame;
     }
+
     KRYS_NODISCARD LocalFrame *InnerNodeFrame() const noexcept;
 
     /// @brief The hit-tested point in the coordinates of the inner node's renderer.
@@ -169,6 +183,7 @@ namespace krys::boo
     {
       return _localPoint;
     }
+
     void SetLocalPoint(const LayoutPoint &point) noexcept;
 
     /// @brief Moves the inner nodes out of user agent shadow trees, to their hosts.
@@ -180,18 +195,25 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LocalFrame *Frame() const noexcept;
+
     KRYS_NODISCARD bool IsOverLink() const noexcept;
 
     /// @brief Whether the hit-tested point is in its frame's selection.
     KRYS_NODISCARD bool IsSelected() const noexcept;
+
     /// @brief The `alt` text of the image or image input hit.
     KRYS_NODISCARD utf8_string AltDisplayString() const noexcept;
+
     /// @brief The image hit, if it has loaded.
     KRYS_NODISCARD Image *GetImage() const noexcept;
+
     /// @brief The box of the image hit, in absolute coordinates.
     KRYS_NODISCARD IntRect ImageRect() const noexcept;
+
     KRYS_NODISCARD url::URL AbsoluteImageURL() const noexcept;
+
     KRYS_NODISCARD url::URL AbsoluteLinkURL() const noexcept;
+
     /// @brief The text of the link hit.
     KRYS_NODISCARD utf8_string TextContent() const noexcept;
 
@@ -201,9 +223,11 @@ namespace krys::boo
     HitTestProgress AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
                                                  const HitTestLocation &locationInContainer,
                                                  const LayoutRect &rect = LayoutRect()) noexcept;
+
     HitTestProgress AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
                                                  const HitTestLocation &locationInContainer,
                                                  const FloatRect &rect) noexcept;
+
     /// @brief Takes @p other's inner node if there's none yet, and adds its list of nodes.
     void Append(const HitTestResult &other, const HitTestRequest &request) noexcept;
 
@@ -213,6 +237,7 @@ namespace krys::boo
     {
       return InnerNode();
     }
+
     /// @brief The inner node, or the nearest element above it.
     KRYS_NODISCARD dom::Element *TargetElement() const noexcept;
 

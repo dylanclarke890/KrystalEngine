@@ -89,6 +89,7 @@ namespace krys::ui
   public:
     ImageBufferSnapshot(AcceleratedImageBuffers &host, gfx::Device &device,
                         gfx::TextureHandle texture) noexcept;
+
     ~ImageBufferSnapshot() noexcept override;
 
     KRYS_NODISCARD gfx::TextureHandle Handle() const noexcept override;
@@ -135,8 +136,10 @@ namespace krys::ui
 
       KRYS_NODISCARD RefPtr<boo::ImageBuffer>
         CreateImageBuffer(const boo::FloatSize &, float resolutionScale = 1) const noexcept override;
+
       void DrawImageBuffer(boo::ImageBuffer &, const boo::FloatRect &destRect, const boo::FloatRect &srcRect,
                            boo::ImagePaintingOptions) noexcept override;
+
       using RecorderImpl::DrawImageBuffer;
     };
 
@@ -173,23 +176,30 @@ namespace krys::ui
     gfx::TextureHandle _texture;
 
   public:
-    static constexpr boo::RenderingMode BackendRenderingMode = boo::RenderingMode::Accelerated;
+    constexpr static boo::RenderingMode BackendRenderingMode = boo::RenderingMode::Accelerated;
 
     KRYS_NODISCARD static UniquePtr<ImageBufferRender2DBackend>
       Create(const Parameters &parameters, AcceleratedImageBuffers &host) noexcept;
 
     ImageBufferRender2DBackend(const Parameters &parameters, AcceleratedImageBuffers &host) noexcept;
+
     ~ImageBufferRender2DBackend() noexcept override;
 
     KRYS_NODISCARD boo::GraphicsContext &Context() noexcept override;
+
     void FlushContext() noexcept override;
+
     void PrepareForDisplay() noexcept override;
+
     KRYS_NODISCARD RefPtr<boo::GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() const noexcept override;
 
     KRYS_NODISCARD RefPtr<boo::NativeImage> CopyNativeImage() noexcept override;
+
     KRYS_NODISCARD RefPtr<boo::NativeImage> CreateNativeImageReference() noexcept override;
+
     using ImageBufferBackend::GetPixelBuffer;
+
     void GetPixelBuffer(const boo::IntRect &srcRect, boo::PixelBuffer &destination) noexcept override;
 
     /// @brief Renders what's been flushed into the texture with @p renderer, recording into @p commands,
@@ -211,8 +221,10 @@ namespace krys::ui
   private:
     /// @brief Hands what's been recorded since the last flush to be rendered.
     void Flush() noexcept;
+
     /// @brief The items that bring a fresh context to the state the last flush ended with.
     KRYS_NODISCARD List<boo::display_list::Item> StatePrefix() const noexcept;
+
     /// @brief Follows @p items' changes to the state stack.
     void AdvanceState(Span<const boo::display_list::Item> items) noexcept;
   };
@@ -238,11 +250,13 @@ namespace krys::ui
 
   public:
     explicit AcceleratedImageBuffers(FontFaceCache &fonts) noexcept;
+
     ~AcceleratedImageBuffers() noexcept;
 
     /// @brief Gives the buffers the device their textures are made on, so that they can be read back and
     /// copied before the view first paints; the first device the view is given or painted with stays.
     void SetDevice(gfx::Device &device) noexcept;
+
     KRYS_NODISCARD gfx::Device *Device() const noexcept
     {
       return _device;
@@ -251,6 +265,7 @@ namespace krys::ui
     /// @brief Renders what @p backend has flushed into its texture now, and returns the texture; invalid if
     /// there's no device yet.
     KRYS_NODISCARD gfx::TextureHandle RenderNow(ImageBufferRender2DBackend &backend) noexcept;
+
     /// @brief A copy of @p backend's texture with everything flushed rendered into it; null if there's no
     /// device yet.
     KRYS_NODISCARD RefPtr<boo::NativeImage> Snapshot(ImageBufferRender2DBackend &backend) noexcept;
@@ -258,6 +273,7 @@ namespace krys::ui
     /// @brief Called by a snapshot as it goes: its texture is freed once the commands recorded so far have
     /// run.
     void Retire(gfx::TextureHandle texture) noexcept;
+
     /// @brief Frees the textures of the snapshots that are gone, once the commands that may draw them have
     /// run: as the view starts painting again, the host having submitted its last frame.
     void DestroyRetiredTextures() noexcept;

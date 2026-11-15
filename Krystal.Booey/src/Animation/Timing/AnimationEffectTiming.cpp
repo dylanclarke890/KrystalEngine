@@ -324,7 +324,7 @@ namespace krys::boo
     enum class ComputedDirection : uint8
     {
       Forwards,
-      Reverse
+      Reverse,
     };
   }
 

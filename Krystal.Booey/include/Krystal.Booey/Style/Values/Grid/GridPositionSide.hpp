@@ -33,6 +33,6 @@ namespace krys::boo::style
     ColumnStartSide,
     ColumnEndSide,
     RowStartSide,
-    RowEndSide
+    RowEndSide,
   };
 }

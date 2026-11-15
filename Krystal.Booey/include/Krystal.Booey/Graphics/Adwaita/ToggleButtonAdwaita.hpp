@@ -42,6 +42,7 @@ namespace krys::boo
   private:
     void DrawCheckbox(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
                       const ControlStyle &) noexcept;
+
     void DrawRadio(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
                    const ControlStyle &) noexcept;
   };

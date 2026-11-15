@@ -46,6 +46,6 @@ namespace krys::boo
   {
     LinkClicked,
     FormSubmitted,
-    Other
+    Other,
   };
 }

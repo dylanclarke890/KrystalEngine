@@ -191,19 +191,19 @@ namespace krys::ui::tests
     auto &client = fixture.Client;
 
     auto root = fixture.CreateLayer(u8"root", {}, {360, 240});
-    root->SetBackgroundColor(Rgb(0xffffff));
+    root->SetBackgroundColor(Rgb(0xFFFFFF));
     root->SetMasksToBounds(true);
 
     auto drawn = fixture.CreateLayer(u8"drawn", {16, 16}, {100, 80});
     drawn->SetDrawsContent(true);
-    client.ContentsByName[u8"drawn"] = {Rgb(0x118ab2), {10, 10, 40, 30}, Rgb(0xffd166)};
+    client.ContentsByName[u8"drawn"] = {Rgb(0x118AB2), {10, 10, 40, 30}, Rgb(0xFFD166)};
 
     auto group = fixture.CreateLayer(u8"group", {140, 20}, {80, 80});
     group->SetOpacity(0.5f);
     auto under = fixture.CreateLayer(u8"under", {0, 0}, {50, 50});
-    under->SetBackgroundColor(Rgb(0x073b4c));
+    under->SetBackgroundColor(Rgb(0x073B4C));
     auto over = fixture.CreateLayer(u8"over", {20, 20}, {60, 60});
-    over->SetBackgroundColor(Rgb(0xef476f));
+    over->SetBackgroundColor(Rgb(0xEF476F));
     group->AddChild(under);
     group->AddChild(over);
 
@@ -212,23 +212,23 @@ namespace krys::ui::tests
     boo::TransformationMatrix rotation;
     rotation.Rotate(15);
     turned->SetTransform(rotation);
-    client.ContentsByName[u8"turned"] = {Rgb(0x06d6a0), {10, 10, 20, 20}, Rgb(0x073b4c)};
+    client.ContentsByName[u8"turned"] = {Rgb(0x06D6A0), {10, 10, 20, 20}, Rgb(0x073B4C)};
 
     auto blurred = fixture.CreateLayer(u8"blurred", {30, 140}, {100, 70});
     blurred->SetDrawsContent(true);
     CHECK(blurred->SetFilters(boo::FilterOperations {{boo::BlurFilterOperation::Create(3)}}));
-    client.ContentsByName[u8"blurred"] = {Rgb(0xef476f), {30, 20, 40, 30}, Rgb(0xffd166)};
+    client.ContentsByName[u8"blurred"] = {Rgb(0xEF476F), {30, 20, 40, 30}, Rgb(0xFFD166)};
 
     auto clipping = fixture.CreateLayer(u8"clipping", {170, 140}, {80, 70});
     clipping->SetMasksToBounds(true);
-    clipping->SetBackgroundColor(Rgb(0xe9ecf2));
+    clipping->SetBackgroundColor(Rgb(0xE9ECF2));
     auto clipped = fixture.CreateLayer(u8"clipped", {40, 30}, {80, 60});
     clipped->SetDrawsContent(true);
-    client.ContentsByName[u8"clipped"] = {Rgb(0x118ab2), {}, {}};
+    client.ContentsByName[u8"clipped"] = {Rgb(0x118AB2), {}, {}};
     clipping->AddChild(clipped);
 
     auto solid = fixture.CreateLayer(u8"solid", {280, 150}, {60, 50});
-    solid->SetContentsToSolidColor(Rgb(0x8338ec));
+    solid->SetContentsToSolidColor(Rgb(0x8338EC));
     solid->SetContentsRect({0, 0, 60, 50});
     solid->SetContentsClippingRect(boo::FloatRoundedRect({0, 0, 60, 50}));
 
@@ -330,7 +330,7 @@ namespace krys::ui::tests
     auto root = fixture.CreateLayer(u8"root", {}, {200, 100});
     auto drawn = fixture.CreateLayer(u8"drawn", {0, 0}, {200, 100});
     drawn->SetDrawsContent(true);
-    client.ContentsByName[u8"drawn"] = {Rgb(0x118ab2), {}, {}};
+    client.ContentsByName[u8"drawn"] = {Rgb(0x118AB2), {}, {}};
     root->AddChild(drawn);
 
     auto image = fixture.Composite(*root);
@@ -343,7 +343,7 @@ namespace krys::ui::tests
     CHECK(client.PaintCount == paints);
 
     // The contents change everywhere, but only the right half is dirty: the left keeps what was painted.
-    client.ContentsByName[u8"drawn"] = {Rgb(0xef476f), {}, {}};
+    client.ContentsByName[u8"drawn"] = {Rgb(0xEF476F), {}, {}};
     drawn->SetNeedsDisplayInRect({100, 0, 100, 100});
     image = fixture.Composite(*root);
     CHECK(PixelAt(image, 50, 50) == Array<uint8, 4> {17, 138, 178, 255});
@@ -356,7 +356,7 @@ namespace krys::ui::tests
     auto root = fixture.CreateLayer(u8"root", {}, {200, 100});
     auto drawn = fixture.CreateLayer(u8"drawn", {0, 0}, {200, 100});
     drawn->SetDrawsContent(true);
-    fixture.Client.ContentsByName[u8"drawn"] = {Rgb(0x118ab2), {}, {}};
+    fixture.Client.ContentsByName[u8"drawn"] = {Rgb(0x118AB2), {}, {}};
     root->AddChild(drawn);
     constexpr Array<uint8, 4> Content {17, 138, 178, 255};
     constexpr Array<uint8, 4> White {255, 255, 255, 255};
@@ -385,7 +385,7 @@ namespace krys::ui::tests
   TEST_CASE("Compositing: filter and individual transform animations run on layers", "[UI][GPU][Compositing]")
   {
     CompositingFixture fixture(200u, 100u);
-    fixture.Client.ContentsByName[u8"box"] = {Rgb(0xef476f), {}, {}};
+    fixture.Client.ContentsByName[u8"box"] = {Rgb(0xEF476F), {}, {}};
 
     auto root = fixture.CreateLayer(u8"root", {}, {200, 100});
     auto box = fixture.CreateLayer(u8"box", {}, {100, 100});

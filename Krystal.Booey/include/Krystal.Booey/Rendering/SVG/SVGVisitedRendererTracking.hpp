@@ -48,6 +48,7 @@ namespace krys::boo
     {
       return _visitedRenderers.empty();
     }
+
     KRYS_NODISCARD bool IsVisiting(const RenderElement &renderer) const noexcept
     {
       return _visitedRenderers.contains(&renderer);

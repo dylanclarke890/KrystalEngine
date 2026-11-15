@@ -40,6 +40,7 @@ namespace krys::boo
   public:
     InsertParagraphSeparatorCommand(dom::Document &document, bool mustUseDefaultParagraphElement,
                                     EditAction editingAction) noexcept;
+
     ~InsertParagraphSeparatorCommand() noexcept override;
 
     KRYS_NODISCARD static Ref<InsertParagraphSeparatorCommand>
@@ -50,12 +51,17 @@ namespace krys::boo
     void DoApply() noexcept override;
 
     void CalculateStyleBeforeInsertion(const dom::Position &position) noexcept;
+
     void ApplyStyleAfterInsertion(dom::Node *originalEnclosingBlock) noexcept;
+
     void GetAncestorsInsideBlock(const dom::Node *insertionNode, dom::Element *outerBlock,
                                  List<RefPtr<dom::Element>> &ancestors) noexcept;
+
     Ref<dom::Element> CloneHierarchyUnderNewBlock(const List<RefPtr<dom::Element>> &ancestors,
                                                   Ref<dom::Element> &&blockToInsert) noexcept;
+
     KRYS_NODISCARD bool ShouldUseDefaultParagraphElement(dom::Node *enclosingBlock) const noexcept;
+
     KRYS_NODISCARD bool PreservesTypingStyle() const noexcept override;
   };
 }

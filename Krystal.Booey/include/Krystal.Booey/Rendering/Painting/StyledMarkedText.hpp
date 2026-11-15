@@ -32,9 +32,9 @@
 
 namespace krys::boo
 {
+  struct PaintInfo;
   class RenderStyle;
   class RenderText;
-  struct PaintInfo;
 
   /// @brief A marked text with how it's painted.
   struct StyledMarkedText final : MarkedText
@@ -64,12 +64,16 @@ namespace krys::boo
                                                                      const RenderText &renderer,
                                                                      bool isFirstLine,
                                                                      const PaintInfo &paintInfo);
+
     KRYS_NODISCARD static List<StyledMarkedText>
       CoalesceAdjacentWithEqualBackground(const List<StyledMarkedText> &markedTexts);
+
     KRYS_NODISCARD static List<StyledMarkedText>
       CoalesceAdjacentWithEqualForeground(const List<StyledMarkedText> &markedTexts);
+
     KRYS_NODISCARD static List<StyledMarkedText>
       CoalesceAdjacentWithEqualDecorations(const List<StyledMarkedText> &markedTexts);
+
     /// @brief How @p renderer's text is painted where it isn't marked.
     KRYS_NODISCARD static Style ComputeStyleForUnmarkedMarkedText(const RenderText &renderer,
                                                                   const RenderStyle &lineStyle,

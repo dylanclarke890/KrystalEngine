@@ -46,8 +46,10 @@ namespace krys::boo::svg
 
   private:
     KRYS_NODISCARD bool HasValidAttributeType() const noexcept final;
+
     void AttributeChanged(const dom::QualifiedName &, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     KRYS_NODISCARD dom::DOMString AnimateRangeString(dom::DOMStringView) const noexcept final;
   };
 }

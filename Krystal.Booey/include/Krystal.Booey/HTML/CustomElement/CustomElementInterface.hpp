@@ -84,6 +84,7 @@ namespace krys::boo::html
   public:
     CustomElementInterface(dom::DOMStringAtom localName, CustomElementFactory &&factory,
                            CustomElementOptions &&options) noexcept;
+
     ~CustomElementInterface() noexcept;
 
     KRYS_NODISCARD static Ref<CustomElementInterface> Create(dom::DOMStringAtom localName,
@@ -108,14 +109,21 @@ namespace krys::boo::html
     void UpgradeElement(dom::Element &element) noexcept;
 
     void InvokeConnectedCallback(dom::Element &element) noexcept;
+
     void InvokeDisconnectedCallback(dom::Element &element) noexcept;
+
     void InvokeConnectedMoveCallback(dom::Element &element) noexcept;
+
     void InvokeAdoptedCallback(dom::Element &element, dom::Document &oldDocument,
                                dom::Document &newDocument) noexcept;
+
     void InvokeAttributeChangedCallback(dom::Element &element, const dom::QualifiedName &attributeName,
                                         dom::DOMStringAtom oldValue, dom::DOMStringAtom newValue) noexcept;
+
     void InvokeFormAssociatedCallback(dom::Element &element, HTMLFormElement *form) noexcept;
+
     void InvokeFormResetCallback(dom::Element &element) noexcept;
+
     void InvokeFormDisabledCallback(dom::Element &element, bool isDisabled) noexcept;
 
     KRYS_NODISCARD bool ObservesAttribute(dom::DOMStringAtom name) const noexcept

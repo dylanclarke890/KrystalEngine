@@ -89,6 +89,7 @@ namespace krys::gfx
 
     /// @brief Use `Create`.
     FontFace2D(Ref<text::FreeTypeFace> &&face, const FontFace2DOptions &options, FT_Size size) noexcept;
+
     ~FontFace2D() noexcept;
 
     KRYS_NODISCARD const text::FreeTypeFace &Face() const noexcept
@@ -109,6 +110,7 @@ namespace krys::gfx
 
     /// @brief The glyph of `codePoint`, or 0 if the face has none.
     KRYS_NODISCARD uint32 GlyphIndex(char32 codePoint) const noexcept;
+
     /// @brief How far the pen moves after `glyph` at `size` pixels per em, unhinted, as text is laid out.
     KRYS_NODISCARD float Advance(uint32 glyph, float size) const noexcept;
 

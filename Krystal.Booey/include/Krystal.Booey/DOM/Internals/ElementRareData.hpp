@@ -40,8 +40,8 @@
 namespace krys::boo
 {
   class ElementAnimationRareData;
-  class RenderStyle;
   struct IntersectionObserverData;
+  class RenderStyle;
   struct ResizeObserverData;
 }
 
@@ -117,6 +117,7 @@ namespace krys::boo::dom
 
   public:
     ElementRareData() noexcept;
+
     ~ElementRareData() noexcept override;
 
     KRYS_NODISCARD html::CustomElementReactionQueue *CustomElementReactionQueue() const noexcept
@@ -171,12 +172,14 @@ namespace krys::boo::dom
     {
       return _intersectionObserverData.get();
     }
+
     void SetIntersectionObserverData(UniquePtr<IntersectionObserverData> &&data) noexcept;
 
     KRYS_NODISCARD ResizeObserverData *GetResizeObserverData() const noexcept
     {
       return _resizeObserverData.get();
     }
+
     void SetResizeObserverData(UniquePtr<ResizeObserverData> &&data) noexcept;
 
     /// @brief The element's `part` list, once it's been asked for.
@@ -184,6 +187,7 @@ namespace krys::boo::dom
     {
       return _partList.get();
     }
+
     void SetPartList(UniquePtr<DOMTokenList> &&partList) noexcept;
 
     /// @brief The element's `dataset`, once it's been asked for.
@@ -191,6 +195,7 @@ namespace krys::boo::dom
     {
       return _dataset.get();
     }
+
     void SetDataset(UniquePtr<DatasetDOMStringMap> &&dataset) noexcept;
 
     /// @brief The element's `attributeStyleMap`, once it's been asked for.
@@ -198,6 +203,7 @@ namespace krys::boo::dom
     {
       return _attributeStyleMap.get();
     }
+
     void SetAttributeStyleMap(Ref<css::StylePropertyMap> map) noexcept;
 
     /// @brief The element's `computedStyleMap()`, once it's been asked for.
@@ -205,28 +211,34 @@ namespace krys::boo::dom
     {
       return _computedStyleMap.get();
     }
+
     void SetComputedStyleMap(Ref<css::StylePropertyMapReadOnly> map) noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalWidth() const noexcept
     {
       return _lastRememberedLogicalWidth;
     }
+
     KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalHeight() const noexcept
     {
       return _lastRememberedLogicalHeight;
     }
+
     void SetLastRememberedLogicalWidth(LayoutUnit width) noexcept
     {
       _lastRememberedLogicalWidth = width;
     }
+
     void SetLastRememberedLogicalHeight(LayoutUnit height) noexcept
     {
       _lastRememberedLogicalHeight = height;
     }
+
     void ClearLastRememberedLogicalWidth() noexcept
     {
       _lastRememberedLogicalWidth = null;
     }
+
     void ClearLastRememberedLogicalHeight() noexcept
     {
       _lastRememberedLogicalHeight = null;
@@ -236,6 +248,7 @@ namespace krys::boo::dom
     {
       return _contentRelevancy;
     }
+
     void SetContentRelevancy(EnumSet<ContentRelevancy> contentRelevancy) noexcept
     {
       _contentRelevancy = contentRelevancy;
@@ -286,10 +299,12 @@ namespace krys::boo::dom
     {
       return _savedLayerScrollPosition;
     }
+
     void SetSavedLayerScrollPosition(IntPoint position) noexcept
     {
       _savedLayerScrollPosition = position;
     }
+
     void SetAfterPseudoElement(RefPtr<PseudoElement> &&pseudoElement) noexcept;
 
     /// @brief The `random()` base values of the element (or one of its pseudo-elements).
@@ -314,9 +329,11 @@ namespace krys::boo::dom
     {
       return !_animationRareData.empty();
     }
+
     /// @brief The animation state of the element (or one of its pseudo-elements), if it has any.
     KRYS_NODISCARD ElementAnimationRareData *
       AnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     KRYS_NODISCARD ElementAnimationRareData &
       EnsureAnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
   };

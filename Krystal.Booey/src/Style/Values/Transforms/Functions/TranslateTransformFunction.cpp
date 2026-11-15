@@ -123,5 +123,4 @@ namespace krys::boo::style
                                               style::Blend(fromY, Y(), context),
                                               style::Blend(fromZ, Z(), context), *outputType);
   }
-
 }

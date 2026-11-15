@@ -44,10 +44,12 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsTime() const noexcept
     {
       return IsValue();
     }
+
     KRYS_NODISCARD Maybe<Time> TryTime() const noexcept
     {
       return TryValue();

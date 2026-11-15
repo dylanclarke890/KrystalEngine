@@ -52,8 +52,9 @@ namespace krys::boo
       enum Kind
       {
         Begin,
-        End
+        End,
       };
+
       Kind OffsetKind;
       uint32 Value; // Copy of markedText.startOffset/endOffset to avoid the need to branch based on kind.
       const MarkedText *Text;

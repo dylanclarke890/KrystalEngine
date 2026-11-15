@@ -135,7 +135,7 @@ namespace krys::boo::css
     /// @brief `i`.
     Insensitive,
     /// @brief `s`.
-    Sensitive
+    Sensitive,
   };
 
   enum class IsCaseSensitive : bool
@@ -182,7 +182,7 @@ namespace krys::boo::css
   {
     ClassA = 0x10000,
     ClassB = 0x100,
-    ClassC = 1
+    ClassC = 1,
   };
 
   /// @brief Represents a simple CSS selector that is part of a SelectorList and may be part of a more
@@ -244,13 +244,13 @@ namespace krys::boo::css
     enum class VisitFunctionalPseudoClasses : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class VisitOnlySubject : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     using VisitFunc = Func<bool(const Selector &)>;
@@ -283,6 +283,7 @@ namespace krys::boo::css
     explicit Selector(const dom::QualifiedName &name, bool tagIsForNamespaceRule = false) noexcept;
 
     Selector &operator=(const Selector &) = delete;
+
     KRYS_NON_MOVABLE(Selector);
 
     ~Selector() noexcept;
@@ -292,6 +293,7 @@ namespace krys::boo::css
                                             CSSOMStringView rightSide = {}) const noexcept;
 
     KRYS_NODISCARD uint32 ComputeSpecificity() const noexcept;
+
     KRYS_NODISCARD Array<uint8, 3> ComputeSpecificityTuple() const noexcept;
 
     bool VisitSimpleSelectors(
@@ -300,22 +302,31 @@ namespace krys::boo::css
       VisitOnlySubject visitOnlySubject = VisitOnlySubject::No) const noexcept;
 
     KRYS_NODISCARD bool HasExplicitNestingParent() const noexcept;
+
     KRYS_NODISCARD bool HasExplicitPseudoClassScope() const noexcept;
+
     KRYS_NODISCARD bool HasScope() const noexcept;
 
     /// @brief Maps from the selector pseudo-element type to the style type. Only pseudo-elements that are not
     /// element-backed have a type in style.
     KRYS_NODISCARD static Maybe<PseudoElementType>
       StylePseudoElementTypeFor(SelectorPseudoElement pseudoElement) noexcept;
+
     KRYS_NODISCARD static inline bool IsPseudoClassEnabled(SelectorPseudoClass type,
                                                            const SelectorParserContext &context) noexcept;
+
     KRYS_NODISCARD static inline bool IsPseudoElementEnabled(SelectorPseudoElement type, CSSOMStringView name,
                                                              const SelectorParserContext &context) noexcept;
+
     KRYS_NODISCARD static Maybe<SelectorPseudoElement>
       ParsePseudoElementName(CSSOMStringView name, const SelectorParserContext &context) noexcept;
+
     KRYS_NODISCARD static inline bool PseudoClassRequiresArgument(SelectorPseudoClass type) noexcept;
+
     KRYS_NODISCARD static inline bool PseudoElementRequiresArgument(SelectorPseudoElement type) noexcept;
+
     KRYS_NODISCARD static inline bool PseudoClassMayHaveArgument(SelectorPseudoClass type) noexcept;
+
     KRYS_NODISCARD static inline bool PseudoElementMayHaveArgument(SelectorPseudoElement type) noexcept;
 
     KRYS_NODISCARD static inline CSSOMStringView
@@ -331,16 +342,21 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD const Selector *FirstInCompoundSelector() const noexcept;
+
     KRYS_NODISCARD const Selector *LastInCompoundSelector() const noexcept;
+
     KRYS_NODISCARD const Selector *PrecedingCompoundSelectorComponent() const noexcept;
 
 #pragma endregion
 
     KRYS_NODISCARD const dom::QualifiedName &TagQualifiedName() const noexcept;
+
     KRYS_NODISCARD const CSSOMStringAtom &TagLocalNameLower() const noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &Value() const noexcept;
+
     KRYS_NODISCARD const CSSOMStringAtom &SerialisingValue() const noexcept;
+
     KRYS_NODISCARD const dom::QualifiedName &Attribute() const noexcept;
 
     KRYS_NODISCARD CSSOMStringAtom Argument() const noexcept
@@ -386,7 +402,9 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD bool MatchNth(int32 count) const noexcept;
+
     KRYS_NODISCARD int32 NthA() const noexcept;
+
     KRYS_NODISCARD int32 NthB() const noexcept;
 
     KRYS_NODISCARD bool HasDescendantRelation() const noexcept
@@ -417,8 +435,11 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD bool IsSiblingSelector() const noexcept;
+
     KRYS_NODISCARD bool IsAttributeSelector() const noexcept;
+
     KRYS_NODISCARD bool IsHostPseudoClass() const noexcept;
+
     KRYS_NODISCARD bool IsScopePseudoClass() const noexcept;
 
     KRYS_NODISCARD SelectorRelation Relation() const noexcept
@@ -475,11 +496,17 @@ namespace krys::boo::css
     void SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase = MatchLowercase::No) noexcept;
 
     void SetAttribute(const dom::QualifiedName &name, AttributeCaseFlag caseFlag) noexcept;
+
     void SetNth(int32 a, int32 b) noexcept;
+
     void SetArgument(const CSSOMStringAtom &value) noexcept;
+
     void SetArgumentList(FixedVector<CSSOMStringAtom> argumentList) noexcept;
+
     void SetLangList(FixedVector<PossiblyQuotedIdentifier> langList) noexcept;
+
     void SetIntegerList(FixedVector<int32> integerList) noexcept;
+
     void SetSubSelectors(UniquePtr<SelectorList> subSelectors) noexcept;
 
     void SetPseudoClass(SelectorPseudoClass pseudoClass) noexcept
@@ -511,6 +538,7 @@ namespace krys::boo::css
   };
 
   KRYS_NODISCARD bool ComplexSelectorCanMatchPseudoElement(const Selector &complexSelector) noexcept;
+
   KRYS_NODISCARD bool
     ComplexSelectorMatchesElementBackedPseudoElement(const Selector &complexSelector) noexcept;
 
@@ -518,7 +546,7 @@ namespace krys::boo::css
   enum class ComplexSelectorsEqualMode : bool
   {
     Full,
-    IgnoreNonElementBackedPseudoElements
+    IgnoreNonElementBackedPseudoElements,
   };
 
   KRYS_NODISCARD bool

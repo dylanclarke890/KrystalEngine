@@ -36,7 +36,7 @@ namespace krys::boo
   enum class WhitespacePosition : bool
   {
     LeadingWhitespace,
-    TrailingWhitespace
+    TrailingWhitespace,
   };
 
   KRYS_NODISCARD inline const RenderStyle &LineStyle(const RenderObject &renderer,

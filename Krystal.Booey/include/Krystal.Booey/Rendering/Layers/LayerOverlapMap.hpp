@@ -64,28 +64,35 @@ namespace krys::boo
 
   public:
     explicit LayerOverlapMap(const RenderLayer &rootLayer) noexcept;
+
     ~LayerOverlapMap() noexcept;
 
     void Add(const RenderLayer &layer, const LayoutRect &bounds,
              const LayerAndBoundsVector &enclosingClippingLayers) noexcept;
+
     KRYS_NODISCARD bool OverlapsLayers(const RenderLayer &layer, const LayoutRect &bounds,
                                        const LayerAndBoundsVector &enclosingClippingLayers) const noexcept;
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _isEmpty;
     }
 
     void PushCompositingContainer(const RenderLayer &layer) noexcept;
+
     void PopCompositingContainer(const RenderLayer &layer) noexcept;
 
     void PushSpeculativeCompositingContainer(const RenderLayer &layer) noexcept;
+
     void ConfirmSpeculativeCompositingContainer() noexcept;
+
     bool MaybePopSpeculativeCompositingContainer() noexcept;
 
     KRYS_NODISCARD const RenderGeometryMap &GeometryMap() const noexcept
     {
       return _geometryMap;
     }
+
     KRYS_NODISCARD RenderGeometryMap &GeometryMap() noexcept
     {
       return _geometryMap;

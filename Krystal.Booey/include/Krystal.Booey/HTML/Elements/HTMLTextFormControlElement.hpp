@@ -45,28 +45,28 @@ namespace krys::boo::html
   enum class ForBindings : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class TextFieldSelectionDirection : uint8
   {
     SelectionHasNoDirection,
     SelectionHasForwardDirection,
-    SelectionHasBackwardDirection
+    SelectionHasBackwardDirection,
   };
 
   enum class TextFieldEventBehavior : uint8
   {
     DispatchNoEvent,
     DispatchChangeEvent,
-    DispatchInputAndChangeEvent
+    DispatchInputAndChangeEvent,
   };
 
   enum class TextControlSetValueSelection : uint8
   {
     SetSelectionToEnd,
     Clamp,
-    DoNotSet
+    DoNotSet,
   };
 
   /// @brief A form control whose value is text: an input or a textarea. Its text is in an inner text element
@@ -99,7 +99,7 @@ namespace krys::boo::html
     enum NeedsToCheckDirtyFlag
     {
       CheckDirtyFlag,
-      IgnoreDirtyFlag
+      IgnoreDirtyFlag,
     };
 
     ~HTMLTextFormControlElement() noexcept override;
@@ -138,6 +138,7 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD int32 IndexForVisiblePosition(const VisiblePosition &position) const noexcept;
+
     KRYS_NODISCARD VisiblePosition VisiblePositionForIndex(int32 index) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
@@ -151,7 +152,9 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMStringView SelectionDirection() const noexcept;
 
     void SetSelectionStart(uint32 start) noexcept;
+
     void SetSelectionEnd(uint32 end) noexcept;
+
     void SetSelectionDirection(dom::DOMStringView direction) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-select
@@ -184,9 +187,11 @@ namespace krys::boo::html
 
     /// @brief The cached selection as a range in the inner text, or nothing if there's none.
     KRYS_NODISCARD Maybe<dom::SimpleRange> Selection() const noexcept;
+
     KRYS_NODISCARD dom::DOMString SelectedText() const noexcept;
 
     void DispatchFormControlChangeEvent() noexcept final;
+
     void ScheduleSelectEvent() noexcept;
 
     KRYS_NODISCARD virtual dom::DOMString Value() const noexcept = 0;
@@ -194,12 +199,14 @@ namespace krys::boo::html
     /// @brief Whether the control's auto directionality comes from its value rather than its text.
     /// @see https://html.spec.whatwg.org/#auto-directionality-form-associated-elements
     KRYS_NODISCARD virtual bool DirAutoUsesValue() const noexcept = 0;
+
     virtual dom::ExceptionOr<void> SetValue(
       dom::DOMStringView value,
       TextFieldEventBehavior eventBehavior = TextFieldEventBehavior::DispatchNoEvent,
       TextControlSetValueSelection selection = TextControlSetValueSelection::SetSelectionToEnd) noexcept = 0;
 
     KRYS_NODISCARD virtual RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept = 0;
+
     virtual RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept = 0;
 
     /// @brief The style of the inner text element, from the control's.
@@ -211,6 +218,7 @@ namespace krys::boo::html
     bool SelectionChanged(bool shouldFireSelectEvent) noexcept;
 
     KRYS_NODISCARD bool LastChangeWasUserEdit() const noexcept;
+
     KRYS_NODISCARD bool WasEverChangedByUserEdit() const noexcept;
 
     /// @brief Replaces the inner text with @p value (with a `<br>` after a trailing line break).
@@ -249,9 +257,11 @@ namespace krys::boo::html
     HTMLTextFormControlElement(dom::Document &document, HTMLElementInterface interface) noexcept;
 
     KRYS_NODISCARD bool IsPlaceholderEmpty() const noexcept;
+
     virtual void UpdatePlaceholderText() noexcept = 0;
 
     void DisabledStateChanged() noexcept override;
+
     void ReadOnlyStateChanged() noexcept override;
 
     KRYS_NODISCARD bool ReadOnlyBarsFromConstraintValidation() const noexcept final
@@ -271,6 +281,7 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD uint32 ComputeSelectionStart() const noexcept;
+
     KRYS_NODISCARD uint32 ComputeSelectionEnd() const noexcept;
 
     virtual void SubtreeHasChanged() noexcept = 0;
@@ -286,15 +297,18 @@ namespace krys::boo::html
 
     void DispatchFocusEvent(dom::EventTarget *relatedTarget,
                             const dom::FocusOptions &options) noexcept override;
+
     void DispatchBlurEvent(dom::EventTarget *relatedTarget) noexcept override;
 
     // Returns true if user-editable value is empty. Used to check placeholder visibility.
     KRYS_NODISCARD virtual bool IsEmptyValue() const noexcept = 0;
+
     // Called in DispatchFocusEvent(), after placeholder process, before calling parent's
     // DispatchFocusEvent().
     virtual void HandleFocusEvent(dom::Node * /* oldFocusedNode */) noexcept
     {
     }
+
     // Called in DispatchBlurEvent(), after placeholder process, before calling parent's DispatchBlurEvent().
     virtual void HandleBlurEvent() noexcept
     {

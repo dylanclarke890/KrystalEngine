@@ -60,19 +60,24 @@ namespace krys::boo::layout
     {
       return _gridBox;
     }
+
     KRYS_NODISCARD const IntegrationUtils &GetIntegrationUtils() const noexcept
     {
       return _integrationUtils;
     }
+
     KRYS_NODISCARD const BoxGeometry &GeometryForGridItem(const ElementBox &layoutBox) const noexcept;
 
   private:
     KRYS_NODISCARD UnplacedGridItems ConstructUnplacedGridItems() const noexcept;
+
     KRYS_NODISCARD const LayoutState &GetLayoutState() const noexcept
     {
       return _globalLayoutState;
     }
+
     KRYS_NODISCARD BoxGeometry &GeometryForGridItem(const ElementBox &layoutBox) noexcept;
+
     void SetGridItemGeometries(const GridItemRects &gridItemRects) noexcept;
   };
 }

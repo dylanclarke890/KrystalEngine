@@ -72,6 +72,7 @@ namespace krys::boo::layout
     {
       return _inlineAxisSizes;
     }
+
     KRYS_NODISCARD const ComputedSizes &BlockAxisSizes() const noexcept
     {
       return _blockAxisSizes;
@@ -81,14 +82,17 @@ namespace krys::boo::layout
     {
       return _gridAreaLines.ColumnStartLine;
     }
+
     KRYS_NODISCARD size_t ColumnEndLine() const noexcept
     {
       return _gridAreaLines.ColumnEndLine;
     }
+
     KRYS_NODISCARD size_t RowStartLine() const noexcept
     {
       return _gridAreaLines.RowStartLine;
     }
+
     KRYS_NODISCARD size_t RowEndLine() const noexcept
     {
       return _gridAreaLines.RowEndLine;
@@ -103,6 +107,7 @@ namespace krys::boo::layout
     {
       return _inlineAxisAlignment;
     }
+
     KRYS_NODISCARD const StyleSelfAlignmentData &BlockAxisAlignment() const noexcept
     {
       return _blockAxisAlignment;
@@ -113,6 +118,7 @@ namespace krys::boo::layout
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsReplacedElement() const noexcept
     {
       return _layoutBox->IsReplacedBox();
@@ -122,6 +128,7 @@ namespace krys::boo::layout
     {
       return _gridAreaLines;
     }
+
     KRYS_NODISCARD const style::ZoomFactor &UsedZoom() const noexcept
     {
       return _usedZoom;

@@ -42,16 +42,20 @@ namespace krys::boo::css
     Maybe<CSSOMString> _mimeType;
 
     ImageSetOptionValue(Ref<Value> &&image, Ref<PrimitiveValue> &&resolution) noexcept;
+
     ImageSetOptionValue(Ref<Value> &&image, Ref<PrimitiveValue> &&resolution, CSSOMString &&type) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<ImageSetOptionValue> Create(Ref<Value> &&image) noexcept;
+
     KRYS_NODISCARD static Ref<ImageSetOptionValue> Create(Ref<Value> &&image,
                                                           Ref<PrimitiveValue> &&resolution) noexcept;
+
     KRYS_NODISCARD static Ref<ImageSetOptionValue>
       Create(Ref<Value> &&image, Ref<PrimitiveValue> &&resolution, CSSOMString type) noexcept;
 
     KRYS_NODISCARD bool Equals(const ImageSetOptionValue &other) const noexcept;
+
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD Value &Image() const noexcept

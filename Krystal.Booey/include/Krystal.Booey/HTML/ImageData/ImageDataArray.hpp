@@ -49,6 +49,7 @@ namespace krys::boo::html
         : _data(krys::move(data)), _pixelFormat(pixelFormat)
     {
     }
+
     ImageDataArray(ImageDataArray &&original, Maybe<ImageDataPixelFormat> overridingPixelFormat) noexcept
         : _data(krys::move(original._data)),
           _pixelFormat(overridingPixelFormat.value_or(original._pixelFormat))
@@ -63,14 +64,17 @@ namespace krys::boo::html
     {
       return _pixelFormat;
     }
+
     KRYS_NODISCARD size_t Length() const noexcept
     {
       return _data->Length();
     }
+
     KRYS_NODISCARD size_t ByteLength() const noexcept
     {
       return _data->ByteLength();
     }
+
     /// @brief Whether the pixels were given away; never, as there are no scripts to transfer them.
     KRYS_NODISCARD bool IsDetached() const noexcept
     {

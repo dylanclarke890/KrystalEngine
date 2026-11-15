@@ -67,7 +67,7 @@ namespace krys::boo::dom
       Invalid,
       ReadWrite,
       Readonly,
-      Protected
+      Protected,
     };
 
   private:
@@ -76,7 +76,7 @@ namespace krys::boo::dom
       CopyAndPaste,
       DragAndDropData,
       DragAndDropFiles,
-      InputEvent
+      InputEvent,
     };
 
     DOMString _originIdentifier;
@@ -103,22 +103,27 @@ namespace krys::boo::dom
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer
     KRYS_NODISCARD static Ref<DataTransfer> Create() noexcept;
+
     KRYS_NODISCARD static Ref<DataTransfer>
       CreateForCopyAndPaste(const Document &document, StoreMode storeMode,
                             UniquePtr<Pasteboard> &&pasteboard) noexcept;
+
     /// @brief The read-only data of an input event: @p plainText and @p htmlText.
     KRYS_NODISCARD static Ref<DataTransfer> CreateForInputEvent(DOMStringView plainText,
                                                                 DOMStringView htmlText) noexcept;
 
     /// @brief The data of a drag that starts in @p document, which its pasteboard carries to the drop.
     KRYS_NODISCARD static Ref<DataTransfer> CreateForDrag(const Document &document) noexcept;
+
     /// @brief What `dragstart`'s listeners may write, moved into the drag's data transfer after it.
     KRYS_NODISCARD static Ref<DataTransfer> CreateForDragStartEvent(const Document &document) noexcept;
+
     /// @brief The read-only data of `drop`.
     KRYS_NODISCARD static Ref<DataTransfer> CreateForDrop(const Document &document,
                                                           UniquePtr<Pasteboard> &&pasteboard,
                                                           EnumSet<DragOperation> sourceOperationMask,
                                                           bool draggingFiles) noexcept;
+
     /// @brief The protected data of `dragenter`, `dragover` and `dragleave`: its types, not its data.
     KRYS_NODISCARD static Ref<DataTransfer>
       CreateForUpdatingDropTarget(const Document &document, UniquePtr<Pasteboard> &&pasteboard,
@@ -131,9 +136,12 @@ namespace krys::boo::dom
 
     /// @brief The operations `effectAllowed` allows.
     KRYS_NODISCARD EnumSet<DragOperation> SourceOperationMask() const noexcept;
+
     /// @brief The operation `dropEffect` chose.
     KRYS_NODISCARD EnumSet<DragOperation> DestinationOperationMask() const noexcept;
+
     void SetSourceOperationMask(EnumSet<DragOperation> operationMask) noexcept;
+
     void SetDestinationOperationMask(EnumSet<DragOperation> operationMask) noexcept;
 
     /// @brief Sets the drag image to @p element (an image that isn't in a document, or a snapshot of the
@@ -145,36 +153,45 @@ namespace krys::boo::dom
     {
       _shouldUpdateDragImage = true;
     }
+
     /// @brief Makes the drag image the page set, with where the cursor is in it in @p dragLocation; null if
     /// it set none.
     KRYS_NODISCARD DragImageRef CreateDragImage(const Document *document,
                                                 IntPoint &dragLocation) const noexcept;
+
     /// @brief Gives the pasteboard the drag image the page set, once the drag has started.
     void UpdateDragImage(const Document *document) noexcept;
+
     /// @brief The element the page set as the drag image, if it isn't an image out of a document.
     KRYS_NODISCARD RefPtr<Element> DragImageElement() const noexcept;
 
     /// @brief Takes the data, effects, drag image and files @p other (`dragstart`'s data transfer) has.
     void MoveDragState(Ref<DataTransfer> &&other) noexcept;
+
     /// @brief Whether the page set a drag image.
     KRYS_NODISCARD bool HasDragImage() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-dropeffect
     KRYS_NODISCARD DOMString DropEffect() const noexcept;
+
     void SetDropEffect(DOMStringView effect) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-effectallowed
     KRYS_NODISCARD DOMString EffectAllowed() const noexcept;
+
     void SetEffectAllowed(DOMStringView effect) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-items
     KRYS_NODISCARD DataTransferItemList &Items(Document &document) noexcept;
+
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-types
     KRYS_NODISCARD List<DOMString> Types(Document &document) const noexcept;
+
     KRYS_NODISCARD List<DOMString> TypesForItemList(Document &document) const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-files
     KRYS_NODISCARD FileList &Files(Document *document) const noexcept;
+
     KRYS_NODISCARD FileList &Files(Document &document) const noexcept;
 
     /// @brief Clears the data of @p type, or all the data if none.
@@ -183,10 +200,12 @@ namespace krys::boo::dom
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-getdata
     KRYS_NODISCARD DOMString GetData(Document &document, DOMStringView type) const noexcept;
+
     KRYS_NODISCARD DOMString GetDataForItem(Document &document, DOMStringView type) const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-setdata
     void SetData(Document &document, DOMStringView type, DOMStringView data) noexcept;
+
     void SetDataFromItemList(Document &document, DOMStringView type, DOMStringView data) noexcept;
 
     void MakeInvalidForSecurity() noexcept
@@ -195,20 +214,25 @@ namespace krys::boo::dom
     }
 
     KRYS_NODISCARD bool CanReadTypes() const noexcept;
+
     KRYS_NODISCARD bool CanReadData() const noexcept;
+
     KRYS_NODISCARD bool CanWriteData() const noexcept;
 
     KRYS_NODISCARD bool HasFileOfType(DOMStringView type) noexcept;
+
     KRYS_NODISCARD bool HasStringOfType(Document &document, DOMStringView type) noexcept;
 
     KRYS_NODISCARD Pasteboard &GetPasteboard() noexcept
     {
       return *_pasteboard;
     }
+
     /// @brief Writes what the page put in this data transfer's static pasteboard to @p nativePasteboard.
     void CommitToPasteboard(Pasteboard &nativePasteboard) noexcept;
 
     void DidAddFileToItemList() noexcept;
+
     void UpdateFileList(Document *document) noexcept;
 
   private:
@@ -221,6 +245,7 @@ namespace krys::boo::dom
     {
       return _type == Type::DragAndDropData || _type == Type::DragAndDropFiles;
     }
+
     KRYS_NODISCARD bool ForFileDrag() const noexcept
     {
       return _type == Type::DragAndDropFiles;
@@ -228,14 +253,17 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD DOMString ReadStringFromPasteboard(Document &document, DOMStringView lowercaseType,
                                                       WebContentReadingPolicy policy) const noexcept;
+
     KRYS_NODISCARD bool ShouldSuppressGetAndSetDataToAvoidExposingFilePaths() const noexcept;
 
     enum class AddFilesType : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     KRYS_NODISCARD List<DOMString> Types(Document &document, AddFilesType addFilesType) const noexcept;
+
     KRYS_NODISCARD List<Ref<File>> FilesFromPasteboardAndItemList() const noexcept;
   };
 }

@@ -23,7 +23,7 @@ namespace krys::boo
       RGBA,
       BGRA,
       /// @brief Adobe's inverted CMYK, as JPEGs store it.
-      InvertedCMYK
+      InvertedCMYK,
     };
 
   private:
@@ -31,8 +31,11 @@ namespace krys::boo
 
   public:
     ICCProfileTransform() noexcept = default;
+
     ICCProfileTransform(ICCProfileTransform &&other) noexcept;
+
     ICCProfileTransform &operator=(ICCProfileTransform &&other) noexcept;
+
     ~ICCProfileTransform() noexcept;
 
     /// @brief The transform from the colour space @p profile describes, with pixels laid out as @p source, to

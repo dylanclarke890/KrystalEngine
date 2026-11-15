@@ -256,7 +256,7 @@ namespace krys::boo
     // https://www.w3.org/TR/css-text-3/#small-kana
     KRYS_NODISCARD utf8_string ConvertToFullSizeKana(utf8_stringview string) noexcept
     {
-      static constexpr auto kanasMap = std::to_array<std::pair<char32, char32>>({
+      constexpr static auto kanasMap = std::to_array<std::pair<char32, char32>>({
         {0x3041, 0x3042},  {0x3043, 0x3044},  {0x3045, 0x3046},  {0x3047, 0x3048},  {0x3049, 0x304A},
         {0x3063, 0x3064},  {0x3083, 0x3084},  {0x3085, 0x3086},  {0x3087, 0x3088},  {0x308E, 0x308F},
         {0x3095, 0x304B},  {0x3096, 0x3051},  {0x30A1, 0x30A2},  {0x30A3, 0x30A4},  {0x30A5, 0x30A6},
@@ -925,7 +925,7 @@ namespace krys::boo
     {
       AlwaysDownstream,
       AlwaysUpstream,
-      UpstreamIfPositionIsNotAtStart
+      UpstreamIfPositionIsNotAtStart,
     };
 
     KRYS_NODISCARD bool
@@ -1221,7 +1221,7 @@ namespace krys::boo
     enum class OffsetType : bool
     {
       Character,
-      Caret
+      Caret,
     };
 
     KRYS_NODISCARD bool ContainsOffset(const RenderText &text, uint32 offset, OffsetType type) noexcept

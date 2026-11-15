@@ -26,6 +26,7 @@ namespace krys
 
   public:
     TaskInbox() noexcept = default;
+
     /// @brief Destroys the tasks that haven't run, unrun.
     ~TaskInbox() noexcept;
 

@@ -41,7 +41,6 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
-
   class LocalFrame;
 
   KRYS_NODISCARD constexpr inline int64 MaxDistance() noexcept
@@ -101,7 +100,7 @@ namespace krys::boo
   {
     None = 0,
     Partial,
-    Full
+    Full,
   };
 
   /// @brief An element that directional focus navigation could move to, with its rect and how it lies from
@@ -121,6 +120,7 @@ namespace krys::boo
     bool IsOffscreenAfterScrolling {true};
 
     FocusCandidate() noexcept = default;
+
     FocusCandidate(dom::Element *element, dom::FocusDirection direction) noexcept;
 
     KRYS_NODISCARD bool IsNull() const noexcept
@@ -140,28 +140,41 @@ namespace krys::boo
   /// if there is one).
   KRYS_NODISCARD bool HasOffscreenRect(const dom::Node &node,
                                        dom::FocusDirection direction = dom::FocusDirection::None) noexcept;
+
   bool ScrollInDirection(LocalFrame *frame, dom::FocusDirection direction) noexcept;
+
   bool ScrollInDirection(const dom::ContainerNode &container, dom::FocusDirection direction) noexcept;
+
   KRYS_NODISCARD bool CanScrollInDirection(const dom::ContainerNode &container,
                                            dom::FocusDirection direction) noexcept;
+
   KRYS_NODISCARD bool CanScrollInDirection(const LocalFrame *frame, dom::FocusDirection direction) noexcept;
+
   KRYS_NODISCARD bool CanBeScrolledIntoView(dom::FocusDirection direction,
                                             const FocusCandidate &candidate) noexcept;
+
   KRYS_NODISCARD bool AreElementsOnSameLine(const FocusCandidate &firstCandidate,
                                             const FocusCandidate &secondCandidate) noexcept;
+
   KRYS_NODISCARD bool IsValidCandidate(dom::FocusDirection direction, const FocusCandidate &current,
                                        FocusCandidate &candidate) noexcept;
+
   void DistanceDataForNode(dom::FocusDirection direction, const FocusCandidate &current,
                            FocusCandidate &candidate) noexcept;
+
   KRYS_NODISCARD dom::ContainerNode *
     ScrollableEnclosingBoxOrParentFrameForNodeInDirection(dom::FocusDirection direction,
                                                           dom::ContainerNode &container) noexcept;
+
   KRYS_NODISCARD LayoutRect NodeRectInAbsoluteCoordinates(const dom::ContainerNode &containerNode,
                                                           bool ignoreBorder = false) noexcept;
+
   KRYS_NODISCARD LayoutRect FrameRectInAbsoluteCoordinates(LocalFrame *frame) noexcept;
+
   KRYS_NODISCARD LayoutRect VirtualRectForDirection(dom::FocusDirection direction,
                                                     const LayoutRect &startingRect,
                                                     LayoutUnit width = LayoutUnit()) noexcept;
+
   KRYS_NODISCARD LayoutRect VirtualRectForAreaElementAndDirection(html::HTMLAreaElement *area,
                                                                   dom::FocusDirection direction) noexcept;
 }

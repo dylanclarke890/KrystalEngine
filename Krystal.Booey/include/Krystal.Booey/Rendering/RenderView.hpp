@@ -81,6 +81,7 @@ namespace krys::boo
 
   public:
     RenderView(dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderView() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
@@ -94,6 +95,7 @@ namespace krys::boo
     KRYS_NODISCARD float ZoomFactor() const noexcept;
 
     void UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept override;
+
     /// @brief The root element.
     KRYS_NODISCARD dom::Node *NodeForHitTest() const noexcept override;
 
@@ -106,13 +108,16 @@ namespace krys::boo
     {
       return _selection;
     }
+
     KRYS_NODISCARD const RenderSelection &Selection() const noexcept
     {
       return _selection;
     }
 
     KRYS_NODISCARD RenderLayerCompositor &Compositor() noexcept;
+
     KRYS_NODISCARD bool RootBackgroundIsEntirelyFixed() const noexcept;
+
     KRYS_NODISCARD bool UsesCompositing() const noexcept;
 
     void SetIsInWindow(bool isInWindow) noexcept;
@@ -121,10 +126,12 @@ namespace krys::boo
     {
       return *_initialContainingBlock;
     }
+
     KRYS_NODISCARD const layout::InitialContainingBlock &GetInitialContainingBlock() const noexcept
     {
       return *_initialContainingBlock;
     }
+
     KRYS_NODISCARD layout::LayoutState &GetLayoutState() noexcept
     {
       return *_layoutState;
@@ -136,10 +143,12 @@ namespace krys::boo
     {
       return _rendererCount;
     }
+
     void DidCreateRenderer() noexcept
     {
       ++_rendererCount;
     }
+
     void WillDestroyRenderer() noexcept
     {
       --_rendererCount;
@@ -150,6 +159,7 @@ namespace krys::boo
 #pragma region Painting
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept override;
 
     /// @brief The renderer whose background paints the canvas: the root element's, or the body's when the
@@ -158,13 +168,17 @@ namespace krys::boo
 
     /// @brief The rect the root background is painted over.
     KRYS_NODISCARD LayoutRect BackgroundRect() const noexcept;
+
     KRYS_NODISCARD LayoutRect UnextendedBackgroundRect() const noexcept;
+
     KRYS_NODISCARD IntRect UnscaledDocumentRect() const noexcept;
+
     /// @brief The document's rect, transformed by the view's transform if it has one.
     KRYS_NODISCARD IntRect DocumentRect() const noexcept;
 
     /// @brief Whether the view fills with the base background colour first.
     KRYS_NODISCARD bool ShouldPaintBaseBackground() const noexcept;
+
     KRYS_NODISCARD bool RootElementShouldPaintBaseBackground() const noexcept;
 
 #pragma endregion
@@ -176,19 +190,25 @@ namespace krys::boo
 
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
+
     void UpdateLogicalWidth() noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       AvailableLogicalHeight(AvailableLogicalHeightType heightType) const noexcept override;
 
     // The same as the FrameView's layoutHeight/layoutWidth but with null check guards.
     KRYS_NODISCARD int32 ViewHeight() const noexcept;
+
     KRYS_NODISCARD int32 ViewWidth() const noexcept;
+
     KRYS_NODISCARD int32 ViewLogicalWidth() const noexcept;
+
     KRYS_NODISCARD int32 ViewLogicalHeight() const noexcept;
 
     KRYS_NODISCARD LayoutUnit PageOrViewLogicalHeight() const noexcept;
 
     KRYS_NODISCARD LayoutUnit ClientLogicalWidthForFixedPosition() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ClientLogicalHeightForFixedPosition() const noexcept;
 
     KRYS_NODISCARD bool ShouldUsePrintingLayout() const noexcept
@@ -200,27 +220,34 @@ namespace krys::boo
     {
       return _hasQuotesNeedingUpdate;
     }
+
     void SetHasQuotesNeedingUpdate(bool b) noexcept
     {
       _hasQuotesNeedingUpdate = b;
     }
 
     void AddCounterNeedingUpdate(RenderCounter &renderer) noexcept;
+
     KRYS_NODISCARD RenderCounterSet TakeCountersNeedingUpdate() noexcept;
 
     KRYS_NODISCARD FloatSize SizeForCSSSmallViewportUnits() const noexcept;
+
     KRYS_NODISCARD FloatSize SizeForCSSLargeViewportUnits() const noexcept;
+
     KRYS_NODISCARD FloatSize SizeForCSSDynamicViewportUnits() const noexcept;
+
     KRYS_NODISCARD FloatSize SizeForCSSDefaultViewportUnits() const noexcept;
 
     void RegisterBoxWithScrollSnapPositions(const RenderBox &box) noexcept
     {
       _boxesWithScrollSnapPositions.insert(&box);
     }
+
     void UnregisterBoxWithScrollSnapPositions(const RenderBox &box) noexcept
     {
       _boxesWithScrollSnapPositions.erase(&box);
     }
+
     KRYS_NODISCARD const HashSet<const RenderBox *> &BoxesWithScrollSnapPositions() const noexcept
     {
       return _boxesWithScrollSnapPositions;
@@ -230,10 +257,12 @@ namespace krys::boo
     {
       _containerQueryBoxes.insert(&box);
     }
+
     void UnregisterContainerQueryBox(const RenderBox &box) noexcept
     {
       _containerQueryBoxes.erase(&box);
     }
+
     /// @brief The boxes of the query containers.
     KRYS_NODISCARD const HashSet<const RenderBox *> &ContainerQueryBoxes() const noexcept
     {
@@ -244,10 +273,12 @@ namespace krys::boo
     {
       _anchors.insert(&renderer);
     }
+
     void UnregisterAnchor(const RenderBoxModelObject &renderer) noexcept
     {
       _anchors.erase(&renderer);
     }
+
     /// @brief The renderers that are anchors: they have an anchor name or are an implicit anchor.
     KRYS_NODISCARD const HashSet<const RenderBoxModelObject *> &Anchors() const noexcept
     {
@@ -258,7 +289,9 @@ namespace krys::boo
     {
       _positionTryBoxes.insert(&box);
     }
+
     void UnregisterPositionTryBox(const RenderBox &box) noexcept;
+
     /// @brief The out-of-flow boxes with position-try fallbacks.
     KRYS_NODISCARD const HashSet<const RenderBox *> &PositionTryBoxes() const noexcept
     {
@@ -267,11 +300,15 @@ namespace krys::boo
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &transformState,
                              EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept override;
+
     void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
                                  TransformState &transformState) const noexcept override;
+
     const RenderElement *PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
                                                 RenderGeometryMap &geometryMap) const noexcept override;
+
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
 
 #pragma region Repaint
@@ -279,11 +316,15 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<RepaintRects>
       ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
                                      VisibleRectContext context) const noexcept override;
+
     /// @brief Repaints the whole of the view's contents (its layout overflow).
     void RepaintRootContents() noexcept;
+
     /// @brief Repaints @p repaintRect, in the view's (the contents') coordinates.
     void RepaintViewRectangle(const LayoutRect &repaintRect) noexcept;
+
     void RepaintViewAndCompositedLayers() noexcept;
+
     /// @brief The part of the contents the view shows.
     KRYS_NODISCARD LayoutRect ViewRect() const noexcept;
 
@@ -299,13 +340,16 @@ namespace krys::boo
 
     public:
       explicit RepaintRegionAccumulator(RenderView *view) noexcept;
+
       ~RepaintRegionAccumulator() noexcept;
     };
 
   private:
     KRYS_NODISCARD bool ShouldRepaint(const LayoutRect &rect) const noexcept;
+
     /// @return Whether the whole view is now dirty.
     bool AccumulateRepaintRect(IntRect rect, IntRect viewRect) noexcept;
+
     void FlushAccumulatedRepaintRegion() const noexcept;
 
   public:
@@ -313,8 +357,11 @@ namespace krys::boo
 
     /// @brief Resumes the paused image animations of the renderers now visible in @p visibleRect.
     void ResumePausedImageAnimationsIfNeeded(const IntRect &visibleRect) noexcept;
+
     void AddRendererWithPausedImageAnimations(RenderElement &renderer, CachedImage &image) noexcept;
+
     void RemoveRendererWithPausedImageAnimations(RenderElement &renderer) noexcept;
+
     void RemoveRendererWithPausedImageAnimations(RenderElement &renderer, CachedImage &image) noexcept;
 
   private:

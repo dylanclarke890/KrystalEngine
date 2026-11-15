@@ -11,10 +11,10 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
-  class Element;
-  class Text;
   class ContainerNode;
+  class Element;
   class Node;
+  class Text;
 
   class SlotAlgorithms
   {

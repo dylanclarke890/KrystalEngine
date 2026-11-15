@@ -46,12 +46,13 @@ namespace krys::boo
 
   /// @brief The `inputType` of the input events for an edit of @p action; empty for actions that have none.
   KRYS_NODISCARD utf8_stringview InputTypeNameForEditingAction(EditAction action) noexcept;
+
   KRYS_NODISCARD bool IsInputMethodComposingForEditingAction(EditAction action) noexcept;
 
   enum class AllowPasswordEcho : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief An edit: a change to the document that's applied once, then undone and redone through the
@@ -78,6 +79,7 @@ namespace krys::boo
     {
       return _startingSelection;
     }
+
     KRYS_NODISCARD const VisibleSelection &EndingSelection() const noexcept
     {
       return _endingSelection;
@@ -87,14 +89,17 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsSimpleEditCommand() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsCompositeEditCommand() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsTopLevelCommand() const noexcept
     {
       return !_parent;
@@ -105,6 +110,7 @@ namespace krys::boo
   protected:
     explicit EditCommand(dom::Document &document,
                          EditAction editingAction = EditAction::Unspecified) noexcept;
+
     EditCommand(dom::Document &document, const VisibleSelection &startingSelection,
                 const VisibleSelection &endingSelection) noexcept;
 
@@ -116,13 +122,17 @@ namespace krys::boo
     /// @brief Tells accessibility @p text was inserted or deleted at @p position (the selection's start if
     /// it isn't given).
     void PostTextStateChangeNotification(AXTextChange change, utf8_stringview text) noexcept;
+
     void PostTextStateChangeNotification(AXTextChange change, utf8_stringview text,
                                          const VisiblePosition &position) noexcept;
+
     KRYS_NODISCARD CompositeEditCommand *Parent() const noexcept
     {
       return _parent.get();
     }
+
     void SetStartingSelection(const VisibleSelection &selection) noexcept;
+
     void SetEndingSelection(const VisibleSelection &selection) noexcept;
 
     KRYS_NODISCARD bool IsEditingTextAreaOrTextInput() const noexcept;
@@ -139,6 +149,7 @@ namespace krys::boo
   {
   public:
     virtual void DoUnapply() noexcept = 0;
+
     virtual void DoReapply() noexcept; // calls DoApply()
 
   protected:

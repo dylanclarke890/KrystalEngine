@@ -63,7 +63,7 @@ namespace krys::boo::css
     {
       None,
       Valid,
-      Invalid
+      Invalid,
     };
 
     const Ref<VariableData> _data;
@@ -87,9 +87,11 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Ref<VariableReferenceValue> Create(const css::TokenRange &range,
                                                              const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static Ref<VariableReferenceValue> Create(Ref<VariableData> &&data) noexcept;
 
     KRYS_NODISCARD bool Equals(const VariableReferenceValue &other) const noexcept;
+
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD RefPtr<VariableData> ResolveVariableReferences(style::Builder &builder) const noexcept;
@@ -112,13 +114,16 @@ namespace krys::boo::css
   private:
     KRYS_NODISCARD Maybe<List<Token>> ResolveTokenRange(css::TokenRange range,
                                                         style::Builder &builder) const noexcept;
+
     KRYS_NODISCARD bool ResolveVariableReference(css::TokenRange range, css::ValueId functionId,
                                                  List<Token> &tokens, style::Builder &builder) const noexcept;
+
     KRYS_NODISCARD Pair<FallbackResult, List<Token>>
       ResolveVariableFallback(const CSSOMStringAtom &variableName, css::TokenRange range,
                               css::ValueId functionId, style::Builder &builder) const noexcept;
 
     void CacheSimpleReference() noexcept;
+
     KRYS_NODISCARD RefPtr<VariableData> TryResolveSimpleReference(style::Builder &builder) const noexcept;
   };
 

@@ -1236,7 +1236,9 @@ namespace krys::boo::dom
   }
 
   template Node *CommonInclusiveAncestor<TreeType::Tree>(const Node &, const Node &) noexcept;
+
   template Node *CommonInclusiveAncestor<TreeType::ShadowIncludingTree>(const Node &, const Node &) noexcept;
+
   template Node *CommonInclusiveAncestor<TreeType::ComposedTree>(const Node &, const Node &) noexcept;
 
   template <TreeType treeType>
@@ -1280,7 +1282,9 @@ namespace krys::boo::dom
   }
 
   template std::partial_ordering TreeOrder<TreeType::Tree>(const Node &, const Node &) noexcept;
+
   template std::partial_ordering TreeOrder<TreeType::ShadowIncludingTree>(const Node &,
                                                                           const Node &) noexcept;
+
   template std::partial_ordering TreeOrder<TreeType::ComposedTree>(const Node &, const Node &) noexcept;
 }

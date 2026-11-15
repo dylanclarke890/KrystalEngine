@@ -22,7 +22,7 @@ namespace krys::ui
   {
   public:
     /// @brief The palette's colours per row.
-    static constexpr int32 Columns = 8;
+    constexpr static int32 Columns = 8;
 
   private:
     View *_owner {nullptr};
@@ -43,12 +43,15 @@ namespace krys::ui
     /// @brief Makes the picker, and shows it with @p initialColor chosen.
     ColorChooserOverlay(View &owner, boo::ColorChooserClient &client,
                         const boo::Color &initialColor) noexcept;
+
     ~ColorChooserOverlay() noexcept override;
 
 #pragma region ColorChooser
 
     void ReattachColorChooser(const boo::Color &color) noexcept override;
+
     void SetSelectedColor(const boo::Color &color) noexcept override;
+
     void EndChooser() noexcept override;
 
 #pragma endregion
@@ -81,11 +84,15 @@ namespace krys::ui
     }
 
     void Hide() noexcept final;
+
     /// @brief Highlights the colour under @p point.
     void MouseMoved(const boo::IntPoint &point) noexcept final;
+
     /// @brief Chooses the colour under @p point.
     void MouseReleased(const boo::IntPoint &point) noexcept final;
+
     bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept final;
+
     /// @brief The arrow keys move the highlight; Enter and Space choose; Escape and Tab hide the picker.
     bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers) noexcept final;
 
@@ -109,9 +116,12 @@ namespace krys::ui
 
   private:
     void Show() noexcept;
+
     /// @brief Fills the picker's page with the palette, and places it.
     void Build() noexcept;
+
     void Highlight(int32 index) noexcept;
+
     void Choose(int32 index) noexcept;
   };
 }

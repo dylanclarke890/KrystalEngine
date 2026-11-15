@@ -68,23 +68,31 @@ namespace krys::boo::style
              dom::Element *element) noexcept;
 
     static void AdjustFromBuilder(RenderStyle &style) noexcept;
+
     void Adjust(RenderStyle &style) const noexcept;
+
     void AdjustAnimatedStyle(RenderStyle &style, EnumSet<AnimationImpact> impact) const noexcept;
 
     static void AdjustFirstLetterStyle(RenderStyle &style) noexcept;
+
     static void AdjustFirstLineStyle(RenderStyle &style) noexcept;
+
     static void AdjustSVGElementStyle(RenderStyle &style, const svg::SVGElement &svgElement) noexcept;
+
     static bool AdjustEventListenerRegionTypesForRootStyle(RenderStyle &rootStyle,
                                                            const dom::Document &document) noexcept;
+
     /// @brief Propagates the writing mode and direction of the document element (or `<body>`) to the initial
     /// containing block and the document element's used style.
     static void PropagateToDocumentElementAndInitialContainingBlock(Update &update,
                                                                     const dom::Document &document) noexcept;
+
     KRYS_NODISCARD static UniquePtr<RenderStyle>
       RestoreUsedDocumentElementStyleToComputed(const RenderStyle &style) noexcept;
 
   private:
     void AdjustInternal(RenderStyle &style) const noexcept;
+
     void AdjustDisplayContentsStyle(RenderStyle &style) const noexcept;
 
     void AdjustThemeStyle(RenderStyle &style, const RenderStyle &parentStyle) const noexcept;

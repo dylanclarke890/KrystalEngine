@@ -27,8 +27,8 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
   struct CSSPropertiesBitSet;
+  class RenderStyle;
 }
 
 namespace krys::boo::style

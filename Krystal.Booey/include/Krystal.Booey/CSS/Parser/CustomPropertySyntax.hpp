@@ -55,14 +55,14 @@ namespace krys::boo::css
       String,
       TransformFunction,
       TransformList,
-      Unknown
+      Unknown,
     };
 
     enum class Multiplier : uint8
     {
       Single,
       SpaceList,
-      CommaList
+      CommaList,
     };
 
     struct Component
@@ -82,6 +82,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static Maybe<CustomPropertySyntax> Parse(CSSOMStringView syntax) noexcept;
+
     KRYS_NODISCARD static Maybe<CustomPropertySyntax> ConsumeType(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD static CustomPropertySyntax Universal() noexcept
@@ -103,6 +104,7 @@ namespace krys::boo::css
 
   private:
     KRYS_NODISCARD static Maybe<Component> ParseComponent(CSSOMStringView component) noexcept;
+
     KRYS_NODISCARD static Type TypeForTypeName(CSSOMStringView dataTypeName) noexcept;
   };
 }

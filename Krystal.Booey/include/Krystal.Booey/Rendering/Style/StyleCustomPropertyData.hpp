@@ -56,6 +56,7 @@ namespace krys::boo::style
     {
       return AdoptRef(*new CustomPropertyData);
     }
+
     KRYS_NODISCARD Ref<CustomPropertyData> Copy() const noexcept
     {
       return AdoptRef(*new CustomPropertyData(*this));
@@ -64,22 +65,26 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const CustomPropertyData &) const noexcept;
 
     KRYS_NODISCARD const CustomProperty *Get(const css::CSSOMStringAtom &) const noexcept;
+
     void Set(const css::CSSOMStringAtom &, Ref<const CustomProperty> &&) noexcept;
 
     KRYS_NODISCARD uint32 Size() const noexcept
     {
       return _size;
     }
+
     KRYS_NODISCARD bool MayHaveAnimatableProperties() const noexcept
     {
       return _mayHaveAnimatableProperties;
     }
 
     void ForEach(const Func<IterationStatus(const Entry &)> &) const noexcept;
+
     KRYS_NODISCARD css::CSSOMStringAtom FindKeyAtIndex(uint32) const noexcept;
 
   private:
     CustomPropertyData() noexcept = default;
+
     CustomPropertyData(const CustomPropertyData &) noexcept;
 
     template <typename TCallback>

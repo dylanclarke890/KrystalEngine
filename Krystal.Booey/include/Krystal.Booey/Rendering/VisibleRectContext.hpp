@@ -39,7 +39,7 @@ namespace krys::boo
     ApplyCompositedClips,
     ApplyCompositedContainerScrolls,
     ApplyContainerClip,
-    CalculateAccurateRepaintRect
+    CalculateAccurateRepaintRect,
   };
 }
 

@@ -39,10 +39,12 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsLength() const noexcept
     {
       return IsValue();
     }
+
     KRYS_NODISCARD Maybe<Length> TryLength() const noexcept
     {
       return TryValue();
@@ -55,6 +57,7 @@ namespace krys::boo::style
   struct Blending<ColumnWidth>
   {
     KRYS_NODISCARD bool CanBlend(const ColumnWidth &, const ColumnWidth &) noexcept;
+
     KRYS_NODISCARD ColumnWidth Blend(const ColumnWidth &, const ColumnWidth &,
                                      const BlendingContext &) noexcept;
   };

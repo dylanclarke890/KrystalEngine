@@ -52,6 +52,7 @@ namespace krys::boo
     // MARK: - Deprecated Conversions
 
     KRYS_NODISCARD Ref<TimingFunction> CreateTimingFunctionDeprecated(const css::EasingFunction &) noexcept;
+
     KRYS_NODISCARD RefPtr<TimingFunction> CreateTimingFunctionDeprecated(const css::Value &) noexcept;
 
     // MARK: - Conversion
@@ -61,6 +62,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD EasingFunction operator()(BuilderState &, const css::Value &) noexcept;
     };
+
     template <>
     struct CSSValueCreation<EasingFunction>
     {

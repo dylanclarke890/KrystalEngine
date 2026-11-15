@@ -35,6 +35,6 @@ namespace krys::boo::style
   {
     UserAgent,
     User,
-    Author
+    Author,
   };
 }

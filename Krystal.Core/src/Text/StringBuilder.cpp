@@ -60,7 +60,9 @@ namespace krys
       std::string_view significand {digits.data(), digitCount};
 
       auto append = [&](std::string_view s)
-      { buffer.append(reinterpret_cast<const char8 *>(s.data()), s.length()); };
+      {
+        buffer.append(reinterpret_cast<const char8 *>(s.data()), s.length());
+      };
 
       if (negative)
       {
@@ -104,8 +106,9 @@ namespace krys
       buffer.push_back(u8'e');
       buffer.push_back(exponent < 0 ? u8'-' : u8'+');
       Array<char, 8> exponentDigits {};
-      auto exponentResult = std::to_chars(exponentDigits.data(), exponentDigits.data() + exponentDigits.size(),
-                                          exponent < 0 ? -exponent : exponent);
+      auto exponentResult =
+        std::to_chars(exponentDigits.data(), exponentDigits.data() + exponentDigits.size(),
+                      exponent < 0 ? -exponent : exponent);
       append(std::string_view {exponentDigits.data(), exponentResult.ptr});
     }
 
@@ -114,7 +117,8 @@ namespace krys
     {
       Array<char, 24> digits {};
       auto result = std::to_chars(digits.data(), digits.data() + digits.size(), number);
-      buffer.append(reinterpret_cast<const char8 *>(digits.data()), static_cast<size_t>(result.ptr - digits.data()));
+      buffer.append(reinterpret_cast<const char8 *>(digits.data()),
+                    static_cast<size_t>(result.ptr - digits.data()));
     }
   }
 

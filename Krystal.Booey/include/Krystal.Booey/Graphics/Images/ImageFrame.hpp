@@ -47,7 +47,7 @@ namespace krys::boo
     enum class Caching : uint8
     {
       Metadata,
-      MetadataAndImage
+      MetadataAndImage,
     };
 
   private:
@@ -92,28 +92,36 @@ namespace krys::boo
 
   public:
     ImageFrame() noexcept = default;
+
     explicit ImageFrame(Ref<NativeImage> &&nativeImage) noexcept;
+
     ImageFrame(const ImageFrame &other) noexcept = default;
+
     ImageFrame &operator=(const ImageFrame &other) noexcept = default;
+
     ~ImageFrame() noexcept;
 
     KRYS_NODISCARD static const ImageFrame &DefaultFrame() noexcept;
 
     /// @return The bytes freed.
     uint32 ClearImage() noexcept;
+
     uint32 Clear() noexcept;
 
     void SetDecodingStatus(DecodingStatus decodingStatus) noexcept;
+
     KRYS_NODISCARD DecodingStatus GetDecodingStatus() const noexcept;
 
     KRYS_NODISCARD bool IsInvalid() const noexcept
     {
       return _decodingStatus == DecodingStatus::Invalid;
     }
+
     KRYS_NODISCARD bool IsPartial() const noexcept
     {
       return _decodingStatus == DecodingStatus::Partial;
     }
+
     KRYS_NODISCARD bool IsComplete() const noexcept
     {
       return _decodingStatus == DecodingStatus::Complete;
@@ -123,10 +131,12 @@ namespace krys::boo
     {
       _size = size;
     }
+
     KRYS_NODISCARD IntSize Size() const noexcept
     {
       return _size;
     }
+
     KRYS_NODISCARD uint32 SizeInBytes() const noexcept
     {
       return static_cast<uint32>(Size().UnclampedArea()) * sizeof(uint32);
@@ -136,10 +146,12 @@ namespace krys::boo
     {
       _densityCorrectedSize = size;
     }
+
     KRYS_NODISCARD Maybe<IntSize> DensityCorrectedSize() const noexcept
     {
       return _densityCorrectedSize;
     }
+
     KRYS_NODISCARD SubsamplingLevel GetSubsamplingLevel() const noexcept
     {
       return _subsamplingLevel;
@@ -149,6 +161,7 @@ namespace krys::boo
     {
       return _source.Image;
     }
+
     KRYS_NODISCARD DecodingOptions GetDecodingOptions() const noexcept
     {
       return _source.Options;
@@ -158,6 +171,7 @@ namespace krys::boo
     {
       _orientation = orientation;
     }
+
     KRYS_NODISCARD ImageOrientation Orientation() const noexcept
     {
       return _orientation;
@@ -167,6 +181,7 @@ namespace krys::boo
     {
       _duration = duration;
     }
+
     KRYS_NODISCARD seconds Duration() const noexcept
     {
       return _duration;
@@ -176,6 +191,7 @@ namespace krys::boo
     {
       _hasAlpha = hasAlpha;
     }
+
     KRYS_NODISCARD bool HasAlpha() const noexcept
     {
       return !HasMetadata() || _hasAlpha;
@@ -185,11 +201,15 @@ namespace krys::boo
     {
       return _source.HasNativeImage();
     }
+
     KRYS_NODISCARD bool HasNativeImage(SubsamplingLevel subsamplingLevel) const noexcept;
+
     KRYS_NODISCARD bool HasFullSizeNativeImage(SubsamplingLevel subsamplingLevel) const noexcept;
+
     KRYS_NODISCARD bool
       HasDecodedNativeImageCompatibleWithOptions(const DecodingOptions &options,
                                                  SubsamplingLevel subsamplingLevel) const noexcept;
+
     KRYS_NODISCARD bool HasMetadata() const noexcept
     {
       return !Size().IsEmpty();

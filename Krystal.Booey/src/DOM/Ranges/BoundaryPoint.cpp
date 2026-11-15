@@ -163,8 +163,10 @@ namespace krys::boo::dom
 
   template std::partial_ordering TreeOrder<TreeType::Tree>(const BoundaryPoint &,
                                                            const BoundaryPoint &) noexcept;
+
   template std::partial_ordering TreeOrder<TreeType::ShadowIncludingTree>(const BoundaryPoint &,
                                                                           const BoundaryPoint &) noexcept;
+
   template std::partial_ordering TreeOrder<TreeType::ComposedTree>(const BoundaryPoint &,
                                                                    const BoundaryPoint &) noexcept;
 }

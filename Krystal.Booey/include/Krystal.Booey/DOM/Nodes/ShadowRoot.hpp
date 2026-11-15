@@ -59,14 +59,14 @@ namespace krys::boo::dom
     Closed,
     /// @brief A shadow root the user agent attaches for an element's insides (a form control's), which
     /// pages can't see.
-    UserAgent
+    UserAgent,
   };
 
   /// @see https://dom.spec.whatwg.org/#enumdef-slotassignmentmode
   enum class SlotAssignmentMode : uint8
   {
     Manual,
-    Named
+    Named,
   };
 }
 
@@ -151,6 +151,7 @@ namespace krys::boo::dom
   public:
     ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry = nullptr,
                NodeFlags flags = NodeFlags::None) noexcept;
+
     ~ShadowRoot() noexcept override;
 
 #pragma region ShadowRoot - https://dom.spec.whatwg.org/#shadowroot
@@ -208,8 +209,10 @@ namespace krys::boo::dom
     {
       return _referenceTarget;
     }
+
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-referencetarget
     void SetReferenceTarget(Maybe<DOMString> referenceTarget) noexcept;
+
     /// @brief Tells the observers of the host's ID (form controls whose `form` names it) that what a
     /// reference to the host resolves to may have changed.
     void NotifyHostIdTargetObservers() noexcept;
@@ -265,6 +268,7 @@ namespace krys::boo::dom
     /// as well-formed XML.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-innerhtml
     KRYS_NODISCARD ExceptionOr<DOMString> InnerHTML() const noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-innerhtml
     ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
 
@@ -300,6 +304,7 @@ namespace krys::boo::dom
     /// @brief The part names the host's `exportparts` attribute exports from the shadow tree.
     /// @see https://drafts.csswg.org/css-shadow-parts/#exportparts-attr
     KRYS_NODISCARD const PartMappings &GetPartMappings() const noexcept;
+
     /// @brief Forgets the part mappings, after the host's `exportparts` changes.
     void InvalidatePartMappings() noexcept
     {
@@ -318,7 +323,9 @@ namespace krys::boo::dom
 #pragma region Extension Hooks
 
     void OnInsert() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
+
     void OnAdopt(Document &oldDocument) noexcept override;
 
 #pragma endregion

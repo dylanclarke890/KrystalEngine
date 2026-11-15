@@ -48,6 +48,6 @@ namespace krys::boo::svg
     CurveToCubicSmoothAbs = 16,
     CurveToCubicSmoothRel = 17,
     CurveToQuadraticSmoothAbs = 18,
-    CurveToQuadraticSmoothRel = 19
+    CurveToQuadraticSmoothRel = 19,
   };
 }

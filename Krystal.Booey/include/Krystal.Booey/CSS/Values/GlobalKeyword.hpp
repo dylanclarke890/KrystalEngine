@@ -39,7 +39,7 @@ namespace krys::boo::css
     Inherit,
     Unset,
     Revert,
-    RevertLayer
+    RevertLayer,
   };
 
   KRYS_NODISCARD constexpr bool IsGlobalKeyword(ValueId valueId) noexcept

@@ -47,7 +47,9 @@ namespace krys::boo::mathml
     }
 
     KRYS_NODISCARD const Length &Width() noexcept;
+
     KRYS_NODISCARD const Length &Height() noexcept;
+
     KRYS_NODISCARD const Length &Depth() noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;

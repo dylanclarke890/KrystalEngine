@@ -41,17 +41,19 @@ namespace krys::boo
   {
     FloatPoint Point;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathMoveTo &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -64,17 +66,19 @@ namespace krys::boo
   {
     FloatPoint Point;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathLineTo &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -88,17 +92,19 @@ namespace krys::boo
     FloatPoint ControlPoint;
     FloatPoint EndPoint;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathQuadCurveTo &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -113,17 +119,19 @@ namespace krys::boo
     FloatPoint ControlPoint2;
     FloatPoint EndPoint;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathBezierCurveTo &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -138,17 +146,19 @@ namespace krys::boo
     FloatPoint ControlPoint2;
     float Radius;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathArcTo &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -166,17 +176,19 @@ namespace krys::boo
     float EndAngle;
     RotationDirection Direction;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathArc &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -190,17 +202,19 @@ namespace krys::boo
   {
     PathArc Arc;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathClosedArc &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -220,17 +234,19 @@ namespace krys::boo
     float EndAngle;
     RotationDirection Direction;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathEllipse &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -244,17 +260,19 @@ namespace krys::boo
   {
     FloatRect Rect;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathEllipseInRect &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
   };
@@ -263,17 +281,19 @@ namespace krys::boo
   {
     FloatRect Rect;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathRect &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
   };
@@ -283,23 +303,25 @@ namespace krys::boo
     enum class Strategy : uint8
     {
       PreferNative,
-      PreferBezier
+      PreferBezier,
     };
 
     FloatRoundedRect RoundedRect;
     Strategy RoundingStrategy;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathRoundedRect &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
   };
@@ -310,17 +332,19 @@ namespace krys::boo
     float CornerWidth;
     float CornerHeight;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathContinuousRoundedRect &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
   };
@@ -331,6 +355,7 @@ namespace krys::boo
         : _values {{start.X(), start.Y(), end.X(), end.Y()}}
     {
     }
+
     PathDataLine(std::span<const float, 4> values) noexcept
         : _values {values[0], values[1], values[2], values[3]}
     {
@@ -340,35 +365,42 @@ namespace krys::boo
     {
       return {_values[0], _values[1]};
     }
+
     void SetStart(FloatPoint p) noexcept
     {
       _values[0] = p.X();
       _values[1] = p.Y();
     }
+
     KRYS_NODISCARD FloatPoint End() const noexcept
     {
       return {_values[2], _values[3]};
     }
+
     void SetEnd(FloatPoint p) noexcept
     {
       _values[2] = p.X();
       _values[3] = p.Y();
     }
+
     std::span<const float, 4> span() const KRYS_LIFETIME_BOUND
     {
       return _values;
     }
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathDataLine &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -386,17 +418,19 @@ namespace krys::boo
     FloatPoint ControlPoint;
     FloatPoint EndPoint;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathDataQuadCurve &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -412,17 +446,19 @@ namespace krys::boo
     FloatPoint ControlPoint2;
     FloatPoint EndPoint;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathDataBezierCurve &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -438,17 +474,19 @@ namespace krys::boo
     FloatPoint ControlPoint2;
     float Radius;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathDataArc &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -460,17 +498,19 @@ namespace krys::boo
 
   struct PathCloseSubpath
   {
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathCloseSubpath &) const noexcept = default;
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -483,20 +523,36 @@ namespace krys::boo
 namespace krys::boo
 {
   TextStream &operator<<(TextStream &ts, const PathMoveTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathLineTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathQuadCurveTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathBezierCurveTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathArcTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathArc &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathClosedArc &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathEllipse &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathEllipseInRect &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathRect &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathRoundedRect &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathContinuousRoundedRect &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathDataLine &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathDataQuadCurve &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathDataBezierCurve &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathDataArc &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathCloseSubpath &data) noexcept;
 }

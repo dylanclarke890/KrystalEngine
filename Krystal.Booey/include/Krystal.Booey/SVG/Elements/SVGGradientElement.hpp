@@ -35,7 +35,7 @@ namespace krys::boo::svg
     SVGSpreadMethodUnknown = 0,
     SVGSpreadMethodPad,
     SVGSpreadMethodReflect,
-    SVGSpreadMethodRepeat
+    SVGSpreadMethodRepeat,
   };
 
   template <>
@@ -107,7 +107,7 @@ namespace krys::boo::svg
       SVG_SPREADMETHOD_UNKNOWN = SVGSpreadMethodUnknown,
       SVG_SPREADMETHOD_PAD = SVGSpreadMethodPad,
       SVG_SPREADMETHOD_REFLECT = SVGSpreadMethodReflect,
-      SVG_SPREADMETHOD_REPEAT = SVGSpreadMethodRepeat
+      SVG_SPREADMETHOD_REPEAT = SVGSpreadMethodRepeat,
     };
 
     KRYS_NODISCARD GradientColorStops BuildStops() noexcept;
@@ -118,10 +118,12 @@ namespace krys::boo::svg
     {
       return _spreadMethod->CurrentValue<SVGSpreadMethodType>();
     }
+
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType GradientUnits() const noexcept
     {
       return _gradientUnits->CurrentValue<SVGUnitTypes::SVGUnitType>();
     }
+
     KRYS_NODISCARD const SVGTransformList &GradientTransform() const noexcept
     {
       return _gradientTransform->CurrentValue();
@@ -131,10 +133,12 @@ namespace krys::boo::svg
     {
       return *_spreadMethod;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &GradientUnitsAnimated() noexcept
     {
       return *_gradientUnits;
     }
+
     KRYS_NODISCARD SVGAnimatedTransformList &GradientTransformAnimated() noexcept
     {
       return *_gradientTransform;
@@ -145,6 +149,7 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
 
     void InvalidateGradientResource() noexcept;
@@ -154,6 +159,7 @@ namespace krys::boo::svg
     {
       return false;
     }
+
     void OnChildrenChanged() noexcept override;
   };
 }

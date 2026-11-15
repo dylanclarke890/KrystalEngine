@@ -37,6 +37,6 @@ namespace krys::boo::html
     Middle,
     Alphabetic,
     Ideographic,
-    Bottom
+    Bottom,
   };
 }

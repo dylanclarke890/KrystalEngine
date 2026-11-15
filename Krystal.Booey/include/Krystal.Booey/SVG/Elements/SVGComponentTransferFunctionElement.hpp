@@ -95,32 +95,39 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD virtual ComponentTransferChannel Channel() const noexcept = 0;
+
     KRYS_NODISCARD ComponentTransferFunction TransferFunction() const noexcept;
 
     KRYS_NODISCARD ComponentTransferType GetType() const noexcept
     {
       return _type->CurrentValue<ComponentTransferType>();
     }
+
     KRYS_NODISCARD const SVGNumberList &TableValues() const noexcept
     {
       return _tableValues->CurrentValue();
     }
+
     KRYS_NODISCARD float Slope() const noexcept
     {
       return _slope->CurrentValue();
     }
+
     KRYS_NODISCARD float Intercept() const noexcept
     {
       return _intercept->CurrentValue();
     }
+
     KRYS_NODISCARD float Amplitude() const noexcept
     {
       return _amplitude->CurrentValue();
     }
+
     KRYS_NODISCARD float Exponent() const noexcept
     {
       return _exponent->CurrentValue();
     }
+
     KRYS_NODISCARD float Offset() const noexcept
     {
       return _offset->CurrentValue();
@@ -130,26 +137,32 @@ namespace krys::boo::svg
     {
       return *_type;
     }
+
     KRYS_NODISCARD SVGAnimatedNumberList &TableValuesAnimated() noexcept
     {
       return *_tableValues;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &SlopeAnimated() noexcept
     {
       return *_slope;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &InterceptAnimated() noexcept
     {
       return *_intercept;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &AmplitudeAnimated() noexcept
     {
       return *_amplitude;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &ExponentAnimated() noexcept
     {
       return *_exponent;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &OffsetAnimated() noexcept
     {
       return *_offset;
@@ -162,6 +175,7 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override

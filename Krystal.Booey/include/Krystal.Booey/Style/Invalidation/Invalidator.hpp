@@ -52,8 +52,8 @@ namespace krys::boo::dom
 
 namespace krys::boo::style
 {
-  class Scope;
   struct InvalidationRuleSet;
+  class Scope;
   struct SelectorMatchingState;
 
   /// @brief Invalidates the style of the elements that a set of rules may match, after a change to the rules
@@ -80,7 +80,7 @@ namespace krys::boo::style
     enum class CheckDescendants : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     RefPtr<RuleSet> _ownedRuleSet;
@@ -93,6 +93,7 @@ namespace krys::boo::style
   public:
     Invalidator(const List<Ref<css::StyleSheetContents>> &sheets,
                 const css::mq::MediaQueryEvaluator &mediaQueryEvaluator) noexcept;
+
     explicit Invalidator(const InvalidationRuleSetVector &ruleSets) noexcept;
 
     ~Invalidator() noexcept;
@@ -103,32 +104,45 @@ namespace krys::boo::style
     }
 
     void InvalidateStyle(dom::Document &document) noexcept;
+
     void InvalidateStyle(Scope &scope) noexcept;
+
     void InvalidateStyle(dom::ShadowRoot &shadowRoot) noexcept;
+
     void InvalidateStyle(dom::Element &element) noexcept;
 
     static void InvalidateShadowParts(dom::ShadowRoot &shadowRoot) noexcept;
 
     static void AddToMatchElementRuleSets(MatchElementRuleSets &matchElementRuleSets,
                                           const InvalidationRuleSet &invalidationRuleSet) noexcept;
+
     static void
       AddToMatchElementRuleSetsRespectingNegation(MatchElementRuleSets &matchElementRuleSets,
                                                   const InvalidationRuleSet &invalidationRuleSet) noexcept;
+
     static void InvalidateWithMatchElementRuleSets(dom::Element &element,
                                                    const MatchElementRuleSets &matchElementRuleSets) noexcept;
+
     static void InvalidateAllStyle(Scope &scope) noexcept;
+
     static void InvalidateHostAndSlottedStyleIfNeeded(dom::ShadowRoot &shadowRoot) noexcept;
+
     static void InvalidateWithScopeBreakingHasPseudoClassRuleSet(dom::Element &element,
                                                                  const RuleSet *ruleSet) noexcept;
 
   private:
     CheckDescendants InvalidateIfNeeded(dom::Element &element,
                                         SelectorMatchingState *selectorMatchingState) noexcept;
+
     void InvalidateStyleForTree(dom::Element &root, SelectorMatchingState *selectorMatchingState) noexcept;
+
     void InvalidateStyleForDescendants(dom::Element &root,
                                        SelectorMatchingState *selectorMatchingState) noexcept;
+
     void InvalidateInShadowTreeIfNeeded(dom::Element &element) noexcept;
+
     void InvalidateUserAgentParts(dom::ShadowRoot &shadowRoot) noexcept;
+
     void InvalidateStyleWithMatchElement(dom::Element &element, MatchElement matchElement) noexcept;
 
     KRYS_NODISCARD RuleInformation CollectRuleInformation() const noexcept;

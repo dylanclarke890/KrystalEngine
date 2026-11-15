@@ -45,18 +45,22 @@ namespace krys::boo
     ~LegacyRenderSVGContainer() noexcept override;
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void SetNeedsBoundariesUpdate() noexcept final
     {
       _needsBoundariesUpdate = true;
     }
+
     KRYS_NODISCARD virtual bool DidTransformToRootUpdate() noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsObjectBoundingBoxValid() const noexcept
     {
       return static_cast<bool>(_objectBoundingBox);
     }
+
     KRYS_NODISCARD bool IsRepaintSuspendedForChildren() const noexcept
     {
       return _repaintIsSuspendedForChildrenDuringLayout;
@@ -87,8 +91,10 @@ namespace krys::boo
                            const RenderLayerModelObject *paintContainer = nullptr) const noexcept final;
 
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
+
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
+
     KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
 
     bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
@@ -105,9 +111,11 @@ namespace krys::boo
     virtual void CalcViewport() noexcept
     {
     }
+
     virtual void ApplyViewportClip(PaintInfo &) noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool PointIsInsideViewportClip(const FloatPoint & /*pointInParent*/) noexcept
     {
       return true;
@@ -118,6 +126,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool SelfWillPaint() noexcept;
+
     void UpdateCachedBoundaries() noexcept;
   };
 }

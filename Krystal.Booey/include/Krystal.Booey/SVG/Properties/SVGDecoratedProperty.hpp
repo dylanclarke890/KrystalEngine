@@ -39,9 +39,11 @@ namespace krys::boo::svg
   {
   public:
     SVGDecoratedProperty() noexcept = default;
+
     virtual ~SVGDecoratedProperty() noexcept = default;
 
     virtual void SetValueInternal(const TDecoration &) noexcept = 0;
+
     virtual bool SetValue(const TDecoration &value) noexcept
     {
       SetValueInternal(value);
@@ -58,6 +60,7 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD virtual dom::DOMString ValueAsString() const noexcept = 0;
+
     KRYS_NODISCARD virtual Ref<SVGDecoratedProperty<TDecoration>> Clone() noexcept = 0;
   };
 }

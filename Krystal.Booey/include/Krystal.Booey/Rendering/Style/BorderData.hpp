@@ -84,14 +84,17 @@ namespace krys::boo
     {
       return BorderEdgeWidth<BoxSide::Left>();
     }
+
     KRYS_NODISCARD style::LineWidth BorderRightWidth() const noexcept
     {
       return BorderEdgeWidth<BoxSide::Right>();
     }
+
     KRYS_NODISCARD style::LineWidth BorderTopWidth() const noexcept
     {
       return BorderEdgeWidth<BoxSide::Top>();
     }
+
     KRYS_NODISCARD style::LineWidth BorderBottomWidth() const noexcept
     {
       return BorderEdgeWidth<BoxSide::Bottom>();
@@ -118,14 +121,17 @@ namespace krys::boo
       {
         return Accessor<BoxSide::Top>::Get(Data);
       }
+
       KRYS_NODISCARD GetterType Right() const noexcept
       {
         return Accessor<BoxSide::Right>::Get(Data);
       }
+
       KRYS_NODISCARD GetterType Bottom() const noexcept
       {
         return Accessor<BoxSide::Bottom>::Get(Data);
       }
+
       KRYS_NODISCARD GetterType Left() const noexcept
       {
         return Accessor<BoxSide::Left>::Get(Data);
@@ -136,16 +142,19 @@ namespace krys::boo
       {
         Accessor<BoxSide::Top>::Set(Data, std::forward<SetterType>(value));
       }
+
       void SetRight(SetterType value) noexcept
       requires(!isConst)
       {
         Accessor<BoxSide::Right>::Set(Data, std::forward<SetterType>(value));
       }
+
       void SetBottom(SetterType value) noexcept
       requires(!isConst)
       {
         Accessor<BoxSide::Bottom>::Set(Data, std::forward<SetterType>(value));
       }
+
       void SetLeft(SetterType value) noexcept
       requires(!isConst)
       {
@@ -162,17 +171,21 @@ namespace krys::boo
       {
         return data.Edges[side].Color;
       }
+
       static void Set(BorderData &data, style::Color &&color) noexcept
       {
         data.Edges[side].Color = krys::move(color);
       }
     };
+
     using BorderColorsView = BorderEdgesView<false, ColorAccessor, const style::Color &, style::Color &&>;
     using BorderColorsConstView = BorderEdgesView<true, ColorAccessor, const style::Color &, style::Color &&>;
+
     KRYS_NODISCARD BorderColorsView Colors() noexcept
     {
       return {.Data = *this};
     }
+
     KRYS_NODISCARD BorderColorsConstView Colors() const noexcept
     {
       return {.Data = *this};
@@ -185,17 +198,21 @@ namespace krys::boo
       {
         return data.Edges[side].Style;
       }
+
       static void Set(BorderData &data, uint8 style) noexcept
       {
         data.Edges[side].Style = style;
       }
     };
+
     using BorderStylesView = BorderEdgesView<false, StyleAccessor, uint8>;
     using BorderStylesConstView = BorderEdgesView<true, StyleAccessor, uint8>;
+
     KRYS_NODISCARD BorderStylesView Styles() noexcept
     {
       return {.Data = *this};
     }
+
     KRYS_NODISCARD BorderStylesConstView Styles() const noexcept
     {
       return {.Data = *this};
@@ -205,14 +222,17 @@ namespace krys::boo
     {
       return Edges.Left();
     }
+
     KRYS_NODISCARD BorderValue &Right() noexcept
     {
       return Edges.Right();
     }
+
     KRYS_NODISCARD BorderValue &Top() noexcept
     {
       return Edges.Top();
     }
+
     KRYS_NODISCARD BorderValue &Bottom() noexcept
     {
       return Edges.Bottom();
@@ -222,14 +242,17 @@ namespace krys::boo
     {
       return Edges.Left();
     }
+
     KRYS_NODISCARD const BorderValue &Right() const noexcept
     {
       return Edges.Right();
     }
+
     KRYS_NODISCARD const BorderValue &Top() const noexcept
     {
       return Edges.Top();
     }
+
     KRYS_NODISCARD const BorderValue &Bottom() const noexcept
     {
       return Edges.Bottom();
@@ -239,14 +262,17 @@ namespace krys::boo
     {
       return Radii.TopLeft();
     }
+
     KRYS_NODISCARD style::BorderRadiusValue &TopRightRadius() noexcept
     {
       return Radii.TopRight();
     }
+
     KRYS_NODISCARD style::BorderRadiusValue &BottomLeftRadius() noexcept
     {
       return Radii.BottomLeft();
     }
+
     KRYS_NODISCARD style::BorderRadiusValue &BottomRightRadius() noexcept
     {
       return Radii.BottomRight();
@@ -256,14 +282,17 @@ namespace krys::boo
     {
       return Radii.TopLeft();
     }
+
     KRYS_NODISCARD const style::BorderRadiusValue &TopRightRadius() const noexcept
     {
       return Radii.TopRight();
     }
+
     KRYS_NODISCARD const style::BorderRadiusValue &BottomLeftRadius() const noexcept
     {
       return Radii.BottomLeft();
     }
+
     KRYS_NODISCARD const style::BorderRadiusValue &BottomRightRadius() const noexcept
     {
       return Radii.BottomRight();
@@ -273,14 +302,17 @@ namespace krys::boo
     {
       return CornerShapes.TopLeft();
     }
+
     KRYS_NODISCARD const style::CornerShapeValue &TopRightCornerShape() const noexcept
     {
       return CornerShapes.TopRight();
     }
+
     KRYS_NODISCARD const style::CornerShapeValue &BottomLeftCornerShape() const noexcept
     {
       return CornerShapes.BottomLeft();
     }
+
     KRYS_NODISCARD const style::CornerShapeValue &BottomRightCornerShape() const noexcept
     {
       return CornerShapes.BottomRight();

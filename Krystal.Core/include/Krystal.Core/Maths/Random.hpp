@@ -86,10 +86,10 @@ namespace krys
     }
 
   private:
-    inline static std::mt19937 _randomEngine;
-    inline static std::uniform_int_distribution<std::mt19937::result_type> _distribution;
+    static inline std::mt19937 _randomEngine;
+    static inline std::uniform_int_distribution<std::mt19937::result_type> _distribution;
 
-    inline static uint32 Rand()
+    static inline uint32 Rand()
     {
       return _distribution(_randomEngine);
     }

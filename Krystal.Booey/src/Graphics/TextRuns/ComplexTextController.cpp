@@ -74,7 +74,6 @@ namespace krys::boo
     {
       return text::DecodeUTF8(Span<const char8> {text}.subspan(offset));
     }
-
   }
 
   void ComplexTextController::ComputeExpansionOpportunity() noexcept

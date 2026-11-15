@@ -74,24 +74,29 @@ namespace krys::boo::inline_iterator
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.IsText(); });
     }
+
     KRYS_NODISCARD bool IsInlineBox() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.IsInlineBox(); });
     }
+
     KRYS_NODISCARD bool IsRootInlineBox() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.IsRootInlineBox(); });
     }
+
     KRYS_NODISCARD bool IsLineBreak() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.IsLineBreak(); });
     }
+
     KRYS_NODISCARD bool IsBlockLevelBox() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.IsBlockLevelBox(); });
     }
+
     KRYS_NODISCARD bool IsAtomicInlineBox() const noexcept
     {
       return SwitchOn(_pathVariant,
@@ -99,6 +104,7 @@ namespace krys::boo::inline_iterator
     }
 
     KRYS_NODISCARD FloatRect VisualRect() const noexcept;
+
     KRYS_NODISCARD FloatRect VisualRectIgnoringBlockDirection() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto)
@@ -111,26 +117,32 @@ namespace krys::boo::inline_iterator
       auto rect = VisualRectIgnoringBlockDirection();
       return IsHorizontal() ? rect : rect.TransposedRect();
     }
+
     KRYS_NODISCARD float LogicalTop() const noexcept
     {
       return LogicalRectIgnoringInlineDirection().Y();
     }
+
     KRYS_NODISCARD float LogicalBottom() const noexcept
     {
       return LogicalRectIgnoringInlineDirection().MaxY();
     }
+
     KRYS_NODISCARD float LogicalHeight() const noexcept
     {
       return LogicalRectIgnoringInlineDirection().Height();
     }
+
     KRYS_NODISCARD float LogicalWidth() const noexcept
     {
       return LogicalRectIgnoringInlineDirection().Width();
     }
+
     KRYS_NODISCARD float LogicalLeft() const noexcept
     {
       return IsHorizontal() ? VisualRect().X() : VisualRect().Y();
     }
+
     KRYS_NODISCARD float LogicalRight() const noexcept
     {
       return LogicalLeft() + LogicalWidth();
@@ -142,6 +154,7 @@ namespace krys::boo::inline_iterator
     {
       return LogicalRectIgnoringInlineDirection().X();
     }
+
     KRYS_NODISCARD float LogicalRightIgnoringInlineDirection() const noexcept
     {
       return LogicalRectIgnoringInlineDirection().MaxX();
@@ -157,15 +170,18 @@ namespace krys::boo::inline_iterator
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.MinimumCaretOffset(); });
     }
+
     KRYS_NODISCARD uint32 MaximumCaretOffset() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.MaximumCaretOffset(); });
     }
+
     KRYS_NODISCARD uint32 LeftmostCaretOffset() const noexcept
     {
       return IsLeftToRightDirection() ? MinimumCaretOffset() : MaximumCaretOffset();
     }
+
     KRYS_NODISCARD uint32 RightmostCaretOffset() const noexcept
     {
       return IsLeftToRightDirection() ? MaximumCaretOffset() : MinimumCaretOffset();
@@ -176,14 +192,17 @@ namespace krys::boo::inline_iterator
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.BidiLevel(); });
     }
+
     KRYS_NODISCARD TextDirection Direction() const noexcept
     {
       return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
     }
+
     KRYS_NODISCARD bool IsLeftToRightDirection() const noexcept
     {
       return Direction() == TextDirection::LTR;
     }
+
     KRYS_NODISCARD bool IsInlineFlipped() const noexcept
     {
       return !(IsLeftToRightDirection() == GetWritingMode().IsLogicalLeftLineLeft());
@@ -193,15 +212,18 @@ namespace krys::boo::inline_iterator
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.Renderer(); });
     }
+
     KRYS_NODISCARD const RenderBlockFlow &FormattingContextRoot() const noexcept
     {
       return SwitchOn(_pathVariant,
                       [&](const auto &path) -> decltype(auto) { return path.FormattingContextRoot(); });
     }
+
     KRYS_NODISCARD const RenderStyle &Style() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.Style(); });
     }
+
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
 
     // FIXME: Remove. For intermediate porting steps only.
@@ -213,6 +235,7 @@ namespace krys::boo::inline_iterator
       }
       return std::get<BoxLegacyPath>(_pathVariant).GetLegacyInlineBox();
     }
+
     KRYS_NODISCARD const inline_display::Box *GetInlineBox() const noexcept
     {
       if (!std::holds_alternative<BoxModernPath>(_pathVariant))
@@ -224,18 +247,26 @@ namespace krys::boo::inline_iterator
 
     // Text-relative left/right
     KRYS_NODISCARD LeafBoxIterator NextLineRightwardOnLine() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLineLeftwardOnLine() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLineRightwardOnLineIgnoringLineBreak() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLineLeftwardOnLineIgnoringLineBreak() const noexcept;
 
     // Coordinate-relative left/right
     KRYS_NODISCARD LeafBoxIterator NextLogicalRightwardOnLine() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLogicalLeftwardOnLine() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLogicalRightwardOnLineIgnoringLineBreak() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLogicalLeftwardOnLineIgnoringLineBreak() const noexcept;
 
     KRYS_NODISCARD InlineBoxIterator ParentInlineBox() const noexcept;
+
     KRYS_NODISCARD LineBoxIterator GetLineBox() const noexcept;
+
     KRYS_NODISCARD size_t LineIndex() const noexcept
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.LineIndex(); });
@@ -245,6 +276,7 @@ namespace krys::boo::inline_iterator
     {
       return std::get<BoxModernPath>(_pathVariant);
     }
+
     KRYS_NODISCARD const BoxLegacyPath &LegacyPath() const noexcept
     {
       return std::get<BoxLegacyPath>(_pathVariant);
@@ -272,9 +304,11 @@ namespace krys::boo::inline_iterator
     BoxIterator() noexcept : _box(BoxLegacyPath {nullptr})
     {
     }
+
     explicit BoxIterator(Box::PathVariant &&path) noexcept : _box(krys::move(path))
     {
     }
+
     explicit BoxIterator(const Box &box) noexcept : _box(box)
     {
     }
@@ -285,6 +319,7 @@ namespace krys::boo::inline_iterator
     }
 
     KRYS_NODISCARD bool operator==(const BoxIterator &other) const noexcept;
+
     KRYS_NODISCARD bool operator==(EndIterator) const noexcept
     {
       return AtEnd();
@@ -294,12 +329,14 @@ namespace krys::boo::inline_iterator
     {
       return _box;
     }
+
     KRYS_NODISCARD const Box *operator->() const noexcept
     {
       return &_box;
     }
 
     BoxIterator &TraverseLineRightwardOnLine() noexcept;
+
     BoxIterator &TraverseLineRightwardOnLineSkippingChildren() noexcept;
 
     BoxIterator &operator++() noexcept
@@ -318,23 +355,31 @@ namespace krys::boo::inline_iterator
   {
   public:
     LeafBoxIterator() noexcept = default;
+
     explicit LeafBoxIterator(Box::PathVariant &&path) noexcept : BoxIterator(krys::move(path))
     {
     }
+
     explicit LeafBoxIterator(const Box &box) noexcept : BoxIterator(box)
     {
     }
 
     // Text-relative left/right
     LeafBoxIterator &TraverseLineRightwardOnLine() noexcept;
+
     LeafBoxIterator &TraverseLineLeftwardOnLine() noexcept;
+
     LeafBoxIterator &TraverseLineRightwardOnLineIgnoringLineBreak() noexcept;
+
     LeafBoxIterator &TraverseLineLeftwardOnLineIgnoringLineBreak() noexcept;
 
     // Coordinate-relative left/right
     LeafBoxIterator &TraverseLogicalRightwardOnLine() noexcept;
+
     LeafBoxIterator &TraverseLogicalLeftwardOnLine() noexcept;
+
     LeafBoxIterator &TraverseLogicalRightwardOnLineIgnoringLineBreak() noexcept;
+
     LeafBoxIterator &TraverseLogicalLeftwardOnLineIgnoringLineBreak() noexcept;
 
     LeafBoxIterator &operator++() noexcept
@@ -359,6 +404,7 @@ namespace krys::boo::inline_iterator
     {
       return _begin;
     }
+
     KRYS_NODISCARD EndIterator end() const noexcept
     {
       return {};
@@ -366,7 +412,9 @@ namespace krys::boo::inline_iterator
   };
 
   KRYS_NODISCARD LeafBoxIterator BoxFor(const RenderLineBreak &renderer) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator BoxFor(const RenderBox &renderer) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator BoxFor(const layout_integration::InlineContent &content,
                                         size_t boxIndex) noexcept;
 }

@@ -65,6 +65,7 @@ namespace krys::boo::layout_integration
     ComputeAdjustmentsForPagination(const InlineContent &inlineContent,
                                     const layout::PlacedFloats &placedFloats, bool allowLayoutRestart,
                                     RenderBlockFlow &flow) noexcept;
+
   /// @brief Moves the lines and boxes of @p inlineContent by @p adjustments.
   void AdjustLinePositionsForPagination(InlineContent &inlineContent,
                                         const List<LineAdjustment> &adjustments) noexcept;

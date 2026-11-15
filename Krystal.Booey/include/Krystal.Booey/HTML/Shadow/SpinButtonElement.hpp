@@ -43,9 +43,13 @@ namespace krys::boo::html
   {
   public:
     virtual ~SpinButtonOwner() noexcept = default;
+
     virtual void FocusAndSelectSpinButtonOwner() noexcept = 0;
+
     KRYS_NODISCARD virtual bool ShouldSpinButtonRespondToMouseEvents() const noexcept = 0;
+
     virtual void SpinButtonStepDown() noexcept = 0;
+
     virtual void SpinButtonStepUp() noexcept = 0;
   };
 
@@ -75,6 +79,7 @@ namespace krys::boo::html
 
   public:
     SpinButtonElement(dom::Document &, SpinButtonOwner &) noexcept;
+
     ~SpinButtonElement() noexcept override;
 
     // The owner of SpinButtonElement must call removeSpinButtonOwner
@@ -88,6 +93,7 @@ namespace krys::boo::html
     }
 
     void ReleaseCapture() noexcept;
+
     void RemoveSpinButtonOwner() noexcept
     {
       _spinButtonOwner = nullptr;
@@ -101,7 +107,9 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept override;
+
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept override;
+
     void DefaultEventHandler(dom::Event &) noexcept override;
 
     void SetHovered(bool, style::InvalidationScope = style::InvalidationScope::All,
@@ -112,11 +120,15 @@ namespace krys::boo::html
 
     // PopupOpeningObserver.
     void WillOpenPopup() noexcept final;
+
     void StopObservingPopups() noexcept;
 
     void DoStepAction(int32) noexcept;
+
     void StartRepeatingTimer() noexcept;
+
     void StopRepeatingTimer() noexcept;
+
     void RepeatingTimerFired() noexcept;
 
     KRYS_NODISCARD bool ShouldRespondToMouseEvents() const noexcept;

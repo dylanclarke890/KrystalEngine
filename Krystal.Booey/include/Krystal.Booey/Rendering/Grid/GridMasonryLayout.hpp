@@ -51,7 +51,7 @@ namespace krys::boo
     {
       LayoutPhase,
       MinContentPhase,
-      MaxContentPhase
+      MaxContentPhase,
     };
 
   private:
@@ -76,14 +76,18 @@ namespace krys::boo
 
     void InitializeMasonry(uint32 gridAxisTracks,
                            style::GridTrackSizingDirection masonryAxisDirection) noexcept;
+
     void PerformMasonryPlacement(const GridTrackSizingAlgorithm &algorithm, uint32 gridAxisTracks,
                                  style::GridTrackSizingDirection masonryAxisDirection,
                                  MasonryLayoutPhase layoutPhase) noexcept;
+
     KRYS_NODISCARD LayoutUnit OffsetForGridItem(const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD LayoutUnit GridContentSize() const noexcept
     {
       return _gridContentSize;
     }
+
     KRYS_NODISCARD LayoutUnit GridGap() const noexcept
     {
       return _masonryAxisGridGap;
@@ -91,28 +95,39 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD GridArea GridAreaForIndefiniteGridAxisItem(const RenderBox &item) noexcept;
+
     KRYS_NODISCARD GridArea GridAreaForDefiniteGridAxisItem(const RenderBox &gridItem) const noexcept;
 
     void PlaceMasonryItems(const GridTrackSizingAlgorithm &algorithm,
                            MasonryLayoutPhase layoutPhase) noexcept;
+
     void SetItemGridAxisContainingBlockToGridArea(const GridTrackSizingAlgorithm &algorithm,
                                                   RenderBox &gridItem) noexcept;
+
     void InsertIntoGridAndLayoutItem(const GridTrackSizingAlgorithm &algorithm, RenderBox &gridItem,
                                      const GridArea &area, MasonryLayoutPhase layoutPhase) noexcept;
+
     KRYS_NODISCARD LayoutUnit CalculateMasonryIntrinsicLogicalWidth(RenderBox &gridItem,
                                                                     MasonryLayoutPhase layoutPhase) noexcept;
 
     void ResizeAndResetRunningPositions() noexcept;
+
     KRYS_NODISCARD LayoutUnit MasonryAxisMarginBoxForItem(const RenderBox &gridItem) noexcept;
+
     void UpdateRunningPositions(const RenderBox &gridItem, const GridArea &area) noexcept;
+
     void UpdateItemOffset(const RenderBox &gridItem, LayoutUnit offset) noexcept;
+
     KRYS_NODISCARD LayoutUnit MaxRunningPositionForSpan(uint32 startLine, uint32 spanLength) const noexcept;
+
     KRYS_NODISCARD style::GridTrackSizingDirection GridAxisDirection() const noexcept;
 
     KRYS_NODISCARD bool
       HasDefiniteGridAxisPosition(const RenderBox &gridItem,
                                   style::GridTrackSizingDirection gridAxisDirection) const noexcept;
+
     KRYS_NODISCARD GridArea MasonryGridAreaFromGridAxisSpan(const GridSpan &gridAxisSpan) const noexcept;
+
     KRYS_NODISCARD GridSpan GridAxisSpanFromArea(const GridArea &gridArea) const noexcept;
   };
 }

@@ -44,6 +44,7 @@ namespace krys::boo::style
     constexpr ScrollSnapType(css::keywords::None) noexcept
     {
     }
+
     constexpr ScrollSnapType(ScrollSnapAxis axis,
                              ScrollSnapStrictness strictness = ScrollSnapStrictness::Proximity) noexcept
         : _value {ScrollSnapContainer {axis, strictness}}
@@ -54,10 +55,12 @@ namespace krys::boo::style
     {
       return !_value;
     }
+
     KRYS_NODISCARD constexpr bool IsContainer() const noexcept
     {
       return !!_value;
     }
+
     KRYS_NODISCARD constexpr Maybe<ScrollSnapContainer> TryContainer() const noexcept
     {
       return _value;

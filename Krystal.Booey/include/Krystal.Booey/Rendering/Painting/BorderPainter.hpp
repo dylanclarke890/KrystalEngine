@@ -32,8 +32,8 @@
 namespace krys::boo
 {
   class BorderShape;
-  class Path;
   struct PaintInfo;
+  class Path;
 
   namespace style
   {
@@ -70,6 +70,7 @@ namespace krys::boo
 
     bool PaintNinePieceImage(const LayoutRect &, const RenderStyle &, const style::BorderImage &,
                              CompositeOperator = CompositeOperator::SourceOver) const noexcept;
+
     bool PaintNinePieceImage(const LayoutRect &, const RenderStyle &, const style::MaskBorder &,
                              CompositeOperator = CompositeOperator::SourceOver) const noexcept;
 
@@ -82,6 +83,7 @@ namespace krys::boo
                                                         RectEdges<bool> closedEdges = {true}) noexcept;
 
     KRYS_NODISCARD static bool ShouldAntialiasLines(GraphicsContext &) noexcept;
+
     KRYS_NODISCARD static bool DecorationHasAllSolidEdges(const RectEdges<BorderEdge> &) noexcept;
 
   private:
@@ -93,6 +95,7 @@ namespace krys::boo
 
     void PaintTranslucentBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgesToDraw,
                                      bool antialias) const noexcept;
+
     void PaintBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgesToDraw, bool antialias,
                           const Color *overrideColor = nullptr) const noexcept;
 
@@ -103,6 +106,7 @@ namespace krys::boo
     void DrawBoxSideFromPath(const BorderShape &, const Path &borderPath, const BorderEdges &,
                              float thickness, float drawThickness, BoxSide, Color, BorderStyle,
                              BleedAvoidance) const noexcept;
+
     void ClipBorderSidePolygon(const BorderShape &, BoxSide, bool firstEdgeMatches,
                                bool secondEdgeMatches) const noexcept;
 

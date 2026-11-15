@@ -47,6 +47,7 @@ namespace krys::boo::style
   struct Blending<ColumnCount>
   {
     KRYS_NODISCARD bool CanBlend(const ColumnCount &, const ColumnCount &) noexcept;
+
     KRYS_NODISCARD ColumnCount Blend(const ColumnCount &, const ColumnCount &,
                                      const BlendingContext &) noexcept;
   };

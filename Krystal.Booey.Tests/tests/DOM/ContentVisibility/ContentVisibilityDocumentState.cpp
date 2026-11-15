@@ -24,7 +24,7 @@ namespace krys::boo::tests
     /// `content-visibility: auto`.
     struct ContentVisibilityFixture : css::tests::ValueFixture
     {
-      static constexpr IntSize ViewSize {200, 100};
+      constexpr static IntSize ViewSize {200, 100};
       Ref<Page> TestPage;
       Ref<dom::HTMLDocument> Document;
 

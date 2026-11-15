@@ -52,10 +52,14 @@ namespace krys::pal
     _mouse._released = MouseButton::None;
 
     for (const auto &key : _keyboard._pressed)
+    {
       _keyboard._held.emplace(key);
+    }
 
     for (const auto &key : _keyboard._released)
+    {
       _keyboard._held.erase(key);
+    }
 
     _keyboard._pressed.clear();
     _keyboard._released.clear();

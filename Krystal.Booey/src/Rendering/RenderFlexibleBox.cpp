@@ -126,7 +126,7 @@ namespace krys::boo
       {
         Inline,
         Block,
-        Both
+        Both,
       };
 
     private:
@@ -146,6 +146,7 @@ namespace krys::boo
           box.ClearOverridingBorderBoxLogicalWidth();
         }
       }
+
       static void SetOrClearHeight(RenderBox &box, Maybe<LayoutUnit> size) noexcept
       {
         if (size)
@@ -174,6 +175,7 @@ namespace krys::boo
           SetOrClearHeight(_box, size);
         }
       }
+
       ~OverridingSizesScope() noexcept
       {
         if (_axis == Axis::Inline || _axis == Axis::Both)
@@ -3847,6 +3849,7 @@ namespace krys::boo
     // Logically first (but visually last) item on logically last (but visually first) line.
     return FirstBaselineCandidateOnLine(_orderIterator, _numberOfFlexItemsOnFirstLine);
   }
+
   void RenderFlexibleBox::PaintChildren(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
                                         PaintInfo &paintInfoForFlexItem) noexcept
   {

@@ -49,10 +49,12 @@ namespace krys::boo::style
   public:
     IdChangeInvalidation(dom::Element &element, const dom::DOMStringAtom &oldId,
                          const dom::DOMStringAtom &newId) noexcept;
+
     ~IdChangeInvalidation() noexcept;
 
   private:
     void InvalidateStyle(const dom::DOMStringAtom &changedId) noexcept;
+
     void InvalidateStyleWithRuleSets() noexcept;
   };
 

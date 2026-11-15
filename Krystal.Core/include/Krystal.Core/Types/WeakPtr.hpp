@@ -255,6 +255,7 @@ namespace krys::detail
   {
     return lhs.get() == rhs.get();
   }
+
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   constexpr bool operator!=(const IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
                             std::nullptr_t) noexcept

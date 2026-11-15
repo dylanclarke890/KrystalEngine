@@ -48,9 +48,11 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<IconLoader> Create(DocumentLoader &documentLoader, url::URL url) noexcept;
+
     ~IconLoader() noexcept override;
 
     void StartLoading() noexcept;
+
     void StopLoading() noexcept;
 
   private:

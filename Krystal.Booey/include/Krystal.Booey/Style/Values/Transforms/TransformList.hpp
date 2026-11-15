@@ -47,6 +47,7 @@ namespace krys::boo
       using value_type = typename Container::value_type;
 
       TransformList() noexcept = default;
+
       TransformList(Container &&value) noexcept : _value {krys::move(value)}
       {
       }
@@ -59,14 +60,17 @@ namespace krys::boo
       {
         return _value.begin();
       }
+
       const_iterator end() const KRYS_LIFETIME_BOUND
       {
         return _value.end();
       }
+
       const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
       {
         return _value.rbegin();
       }
+
       const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
       {
         return _value.rend();
@@ -76,10 +80,12 @@ namespace krys::boo
       {
         return _value.isEmpty();
       }
+
       KRYS_NODISCARD size_t size() const noexcept
       {
         return _value.size();
       }
+
       const TransformFunction &operator[](size_t i) const KRYS_LIFETIME_BOUND
       {
         return _value[i];
@@ -95,8 +101,11 @@ namespace krys::boo
       // Return true if any of the operation types are 3D operation types (even if the
       // values describe affine transforms)
       KRYS_NODISCARD bool Has3DOperation() const noexcept;
+
       KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept;
+
       KRYS_NODISCARD bool AffectedByTransformOrigin() const noexcept;
+
       KRYS_NODISCARD bool ContainsNonInvertibleMatrix(const LayoutSize &) const noexcept;
 
       KRYS_NODISCARD TransformFunctionSizeDependencies ComputeSizeDependencies() const noexcept;
@@ -120,8 +129,10 @@ namespace krys::boo
     struct Blending<TransformList>
     {
       KRYS_NODISCARD bool CanBlend(const TransformList &, const TransformList &, CompositeOperation) noexcept;
+
       KRYS_NODISCARD TransformList Blend(const TransformList &, const TransformList &,
                                          const BlendingContext &) noexcept;
+
       /// @brief Blends against the border box of the animated renderer, and uses the animation's shared
       /// prefix of `transform` functions.
       KRYS_NODISCARD TransformList Blend(const TransformList &, const TransformList &,
@@ -132,7 +143,6 @@ namespace krys::boo
                                                               const BlendingContext &, LayoutSize boxSize,
                                                               Maybe<uint32> prefixLengthFromContext) noexcept;
     };
-
   }
 }
 

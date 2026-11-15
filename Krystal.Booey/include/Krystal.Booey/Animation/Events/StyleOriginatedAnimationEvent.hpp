@@ -43,6 +43,7 @@ namespace krys::boo
     StyleOriginatedAnimationEvent(
       dom::DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime, double elapsedTime,
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
     StyleOriginatedAnimationEvent(dom::DOMStringAtom type, const dom::EventInit &eventInitDict,
                                   double elapsedTime, const css::CSSOMString &pseudoElement) noexcept;
 

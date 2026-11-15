@@ -44,7 +44,7 @@ namespace krys::boo
     IsModal,
     IsSource,
     HasAttachedSheet,
-    IsCopyKeyDown
+    IsCopyKeyDown,
   };
 }
 
@@ -63,14 +63,14 @@ namespace krys::boo
     enum FilenameConversionPolicy : bool
     {
       DoNotConvertFilenames,
-      ConvertFilenames
+      ConvertFilenames,
     };
 
     enum class DraggingPurpose : uint8
     {
       ForEditing,
       ForFileUpload,
-      ForColorControl
+      ForColorControl,
     };
 
   private:
@@ -96,26 +96,32 @@ namespace krys::boo
     {
       return _clientPosition;
     }
+
     KRYS_NODISCARD const IntPoint &GlobalPosition() const noexcept
     {
       return _globalPosition;
     }
+
     void SetClientPosition(const IntPoint &clientPosition) noexcept
     {
       _clientPosition = clientPosition;
     }
+
     KRYS_NODISCARD EnumSet<DragApplicationFlags> Flags() const noexcept
     {
       return _applicationFlags;
     }
+
     KRYS_NODISCARD EnumSet<PlatformEventModifier> Modifiers() const noexcept
     {
       return _modifiers;
     }
+
     KRYS_NODISCARD const SelectionData *PlatformData() const noexcept
     {
       return _platformDragData;
     }
+
     KRYS_NODISCARD EnumSet<DragOperation> DraggingSourceOperationMask() const noexcept
     {
       return _draggingSourceOperationMask;
@@ -123,16 +129,25 @@ namespace krys::boo
 
     KRYS_NODISCARD bool
       ContainsURL(FilenameConversionPolicy filenamePolicy = ConvertFilenames) const noexcept;
+
     KRYS_NODISCARD bool ContainsPlainText() const noexcept;
+
     KRYS_NODISCARD bool
       ContainsCompatibleContent(DraggingPurpose purpose = DraggingPurpose::ForEditing) const noexcept;
+
     KRYS_NODISCARD utf8_string AsURL(FilenameConversionPolicy filenamePolicy = ConvertFilenames,
                                      utf8_string *title = nullptr) const noexcept;
+
     KRYS_NODISCARD utf8_string AsPlainText() const noexcept;
+
     KRYS_NODISCARD List<utf8_string> AsFilenames() const noexcept;
+
     KRYS_NODISCARD bool CanSmartReplace() const noexcept;
+
     KRYS_NODISCARD bool ContainsColor() const noexcept;
+
     KRYS_NODISCARD bool ContainsFiles() const noexcept;
+
     KRYS_NODISCARD uint32 NumberOfFiles() const noexcept;
 
     KRYS_NODISCARD EnumSet<DragDestinationAction> DragDestinationActionMask() const noexcept
@@ -144,6 +159,7 @@ namespace krys::boo
     {
       _fileNames = krys::move(fileNames);
     }
+
     KRYS_NODISCARD const List<utf8_string> &FileNames() const noexcept
     {
       return _fileNames;

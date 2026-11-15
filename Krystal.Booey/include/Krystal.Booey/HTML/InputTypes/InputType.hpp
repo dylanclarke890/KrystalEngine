@@ -65,13 +65,13 @@ namespace krys::boo::html
   class DOMFormData;
   class HTMLElement;
   class HTMLInputElement;
-  class TextControlInnerTextElement;
   struct InputElementClickState;
+  class TextControlInnerTextElement;
 
   enum class WasSetByJavaScript : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class InputTypeKind : uint8
@@ -117,7 +117,7 @@ namespace krys::boo::html
     enum class ShouldCallBaseEventHandler : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -242,10 +242,15 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool IsTextButton() const noexcept;
+
     KRYS_NODISCARD bool IsTextField() const noexcept;
+
     KRYS_NODISCARD bool IsTextType() const noexcept;
+
     KRYS_NODISCARD bool IsCheckable() const noexcept;
+
     KRYS_NODISCARD bool IsSteppable() const noexcept;
+
     KRYS_NODISCARD bool SupportsValidation() const noexcept;
 
     KRYS_NODISCARD Type GetType() const noexcept
@@ -263,7 +268,9 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool IsInteractiveContent() const noexcept;
+
     KRYS_NODISCARD bool IsLabelable() const noexcept;
+
     KRYS_NODISCARD bool IsEnumeratable() const noexcept;
 
     /// @brief Whether the input has activation behavior of its own (a click checks it, submits its form,
@@ -272,25 +279,33 @@ namespace krys::boo::html
 
     // Form value functions.
     KRYS_NODISCARD virtual bool IsFormDataAppendable() const noexcept;
+
     virtual bool AppendFormData(DOMFormData &formData) const noexcept;
 
     /// @brief Takes the files of @p dragData dropped on the input.
     /// @return Whether it took any.
     virtual bool ReceiveDroppedFiles(const DragData &dragData) noexcept;
+
     /// @brief A file input's text for its files, given with them by the host's chooser.
     KRYS_NODISCARD virtual dom::DOMString DisplayString() const noexcept;
 
     // DOM property functions.
     /// @brief Checked last, if both the dirty value and the value attribute are missing.
     KRYS_NODISCARD virtual Maybe<dom::DOMString> FallbackValue() const noexcept;
+
     /// @brief Checked after even FallbackValue, only by HTMLInputElement::ValueWithDefault.
     KRYS_NODISCARD virtual Maybe<dom::DOMString> DefaultValue() const noexcept;
+
     /// @brief Milliseconds since the epoch, or NaN.
     KRYS_NODISCARD virtual double ValueAsDate() const noexcept;
+
     virtual dom::ExceptionOr<void> SetValueAsDate(double value) const noexcept;
+
     KRYS_NODISCARD virtual double ValueAsDouble() const noexcept;
+
     virtual dom::ExceptionOr<void> SetValueAsDouble(double value,
                                                     TextFieldEventBehavior eventBehavior) const noexcept;
+
     virtual dom::ExceptionOr<void> SetValueAsDecimal(const Decimal &value,
                                                      TextFieldEventBehavior eventBehavior) const noexcept;
 
@@ -320,24 +335,41 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool RangeUnderflow(dom::DOMStringView value) const noexcept;
+
     KRYS_NODISCARD bool RangeOverflow(dom::DOMStringView value) const noexcept;
+
     KRYS_NODISCARD bool IsInRange(dom::DOMStringView value) const noexcept;
+
     KRYS_NODISCARD bool IsOutOfRange(dom::DOMStringView value) const noexcept;
+
     KRYS_NODISCARD virtual Decimal DefaultValueForStepUp() const noexcept;
+
     KRYS_NODISCARD double Minimum() const noexcept;
+
     KRYS_NODISCARD double Maximum() const noexcept;
+
     KRYS_NODISCARD bool StepMismatch(dom::DOMStringView value) const noexcept;
+
     KRYS_NODISCARD virtual bool GetAllowedValueStep(Decimal *step) const noexcept;
+
     KRYS_NODISCARD virtual StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept;
+
     virtual dom::ExceptionOr<void> StepUp(int n) noexcept;
+
     /// @brief Steps the value @p n times as the user does (the arrow keys, the spin button): an empty or
     /// invalid value starts from the default, and a value off the step snaps to it first.
     virtual void StepUpFromRenderer(int n) noexcept;
+
     KRYS_NODISCARD virtual dom::DOMString BadInputText() const noexcept;
+
     KRYS_NODISCARD virtual dom::DOMString TypeMismatchText() const noexcept;
+
     KRYS_NODISCARD virtual dom::DOMString ValueMissingText() const noexcept;
+
     KRYS_NODISCARD virtual bool CanSetStringValue() const noexcept;
+
     KRYS_NODISCARD virtual dom::DOMString VisibleValue() const noexcept;
+
     /// @brief @p proposedValue as the user sees it, in the element's locale.
     KRYS_NODISCARD virtual dom::DOMString LocalizeValue(dom::DOMStringView proposedValue) const noexcept;
 
@@ -356,6 +388,7 @@ namespace krys::boo::html
     virtual void HandleMouseDownEvent(dom::MouseEvent &) noexcept
     {
     }
+
     virtual void HandleClickEvent(dom::MouseEvent &) noexcept
     {
     }
@@ -375,11 +408,15 @@ namespace krys::boo::html
     }
 
     virtual ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept;
+
     virtual void HandleKeypressEvent(dom::KeyboardEvent &event) noexcept;
+
     virtual void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept;
+
     virtual void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &) noexcept
     {
     }
+
     virtual void ForwardEvent(dom::Event &) noexcept
     {
     }
@@ -387,10 +424,13 @@ namespace krys::boo::html
     virtual void HandleFocusEvent(dom::Node * /* oldFocusedNode */) noexcept
     {
     }
+
     virtual void HandleBlurEvent() noexcept
     {
     }
+
     virtual void SubtreeHasChanged() noexcept;
+
     virtual void ElementDidBlur() noexcept
     {
     }
@@ -424,48 +464,60 @@ namespace krys::boo::html
     // Shadow tree handling.
 
     void CreateShadowSubtreeIfNeeded() noexcept;
+
     virtual void CreateShadowSubtree() noexcept
     {
     }
+
     virtual void RemoveShadowSubtree() noexcept;
 
     KRYS_NODISCARD virtual HTMLElement *ContainerElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *InnerBlockElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept;
+
     KRYS_NODISCARD virtual HTMLElement *InnerSpinButtonElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *DataListButtonElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *SliderThumbElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *SliderTrackElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *ResultsButtonElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *CancelButtonElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *PlaceholderElement() const noexcept
     {
       return nullptr;
     }
+
     RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept;
 
     KRYS_NODISCARD virtual RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept;
@@ -473,6 +525,7 @@ namespace krys::boo::html
     virtual void UpdateInnerTextValue() noexcept
     {
     }
+
     virtual void UpdatePlaceholderText() noexcept
     {
     }
@@ -481,23 +534,33 @@ namespace krys::boo::html
     /// @return Whether the size includes the field's decorations.
     KRYS_NODISCARD virtual bool SizeShouldIncludeDecoration(int32 defaultSize,
                                                             int32 &preferredSize) const noexcept;
+
     KRYS_NODISCARD virtual float DecorationWidth(float inputWidth) const noexcept;
 
     // Helpers for event handlers.
     KRYS_NODISCARD virtual bool ShouldSubmitImplicitly(dom::Event &event) noexcept;
+
     KRYS_NODISCARD virtual bool CanBeSuccessfulSubmitButton() noexcept;
 
     // Miscellaneous functions.
     KRYS_NODISCARD virtual bool RendererIsNeeded() noexcept;
+
     KRYS_NODISCARD virtual bool ShouldSendChangeEventAfterCheckedChanged() noexcept;
+
     KRYS_NODISCARD virtual bool StoresValueSeparateFromAttribute() noexcept;
+
     virtual void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged,
                           TextFieldEventBehavior eventBehavior,
                           TextControlSetValueSelection selection) noexcept;
+
     KRYS_NODISCARD virtual bool ShouldRespectHeightAndWidthAttributes() noexcept;
+
     KRYS_NODISCARD virtual bool SupportsPlaceholder() const noexcept;
+
     KRYS_NODISCARD virtual bool IsEmptyValue() const noexcept;
+
     KRYS_NODISCARD virtual bool SupportsReadOnly() const noexcept;
+
     KRYS_NODISCARD virtual bool ShouldUseInputMethod() const noexcept;
 
     virtual void AttributeChanged(dom::DOMStringAtom) noexcept
@@ -536,7 +599,9 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD virtual bool MatchesIndeterminatePseudoClass() const noexcept;
+
     KRYS_NODISCARD virtual bool SupportsSelectionAPI() const noexcept;
+
     KRYS_NODISCARD virtual bool DirAutoUsesValue() const noexcept;
 
     virtual void WillUpdateCheckedness(bool /* nowChecked */, WasSetByJavaScript) noexcept
@@ -554,12 +619,15 @@ namespace krys::boo::html
 
     /// @brief The width and height of an image button; zero for other types.
     KRYS_NODISCARD virtual uint32 Height() const noexcept;
+
     KRYS_NODISCARD virtual uint32 Width() const noexcept;
 
     KRYS_NODISCARD bool IsInvalid(dom::DOMStringView value) const noexcept;
+
     void DispatchSimulatedClickIfActive(dom::KeyboardEvent &event) const noexcept;
 
     KRYS_NODISCARD virtual DateComponentsType DateType() const noexcept;
+
     KRYS_NODISCARD virtual Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept;
 
   protected:

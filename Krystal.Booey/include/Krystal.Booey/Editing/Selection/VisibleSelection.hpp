@@ -43,7 +43,7 @@ namespace krys::boo
   enum class Directionality : uint8
   {
     None,
-    Strong
+    Strong,
   };
 
   /// @brief Which way a selection is modified.
@@ -52,7 +52,7 @@ namespace krys::boo
     Forward,
     Backward,
     Right,
-    Left
+    Left,
   };
 
   /// @brief A selection: an anchor and a focus, canonicalised to candidate positions and expanded to a
@@ -65,7 +65,7 @@ namespace krys::boo
     {
       None,
       Caret,
-      Range
+      Range,
     };
 
     // We store only Positions because VisibleSelection is used to store values in
@@ -90,40 +90,50 @@ namespace krys::boo
     boo::Directionality _directionality {boo::Directionality::None};
 
   public:
-    static constexpr auto DefaultAffinity = VisiblePosition::DefaultAffinity;
+    constexpr static auto DefaultAffinity = VisiblePosition::DefaultAffinity;
 
     VisibleSelection() noexcept = default;
+
     VisibleSelection(const dom::Position &anchor, const dom::Position &focus,
                      Affinity affinity = DefaultAffinity,
                      boo::Directionality directionality = boo::Directionality::None) noexcept;
+
     // FIXME: A caret selection never has direction so we should remove the Directionality argument from this
     // function.
     VisibleSelection(const dom::Position &position, Affinity affinity,
                      boo::Directionality directionality = boo::Directionality::None) noexcept;
+
     explicit VisibleSelection(const dom::SimpleRange &range, Affinity affinity = DefaultAffinity,
                               boo::Directionality directionality = boo::Directionality::None) noexcept;
+
     // FIXME: A caret selection never has direction so we should remove the Directionality argument from this
     // function.
     explicit VisibleSelection(const VisiblePosition &position,
                               boo::Directionality directionality = boo::Directionality::None) noexcept;
+
     VisibleSelection(const VisiblePosition &anchor, const VisiblePosition &focus,
                      boo::Directionality directionality = boo::Directionality::None) noexcept;
 
     KRYS_NODISCARD static const VisibleSelection &EmptySelection() noexcept;
+
     KRYS_NODISCARD static VisibleSelection SelectionFromContentsOfNode(dom::Node *node) noexcept;
 
     void SetAffinity(Affinity affinity) noexcept
     {
       _affinity = affinity;
     }
+
     KRYS_NODISCARD Affinity GetAffinity() const noexcept
     {
       return _affinity;
     }
 
     void SetAnchor(const dom::Position &position) noexcept;
+
     void SetAnchor(const VisiblePosition &visiblePosition) noexcept;
+
     void SetFocus(const dom::Position &position) noexcept;
+
     void SetFocus(const VisiblePosition &visiblePosition) noexcept;
 
     // These functions return the values that were passed in, without the canonicalization done by
@@ -132,29 +142,36 @@ namespace krys::boo
     // canonical.
     // FIXME: Replace start/range/base/end/firstRange with these, renaming these to the shorter names.
     KRYS_NODISCARD const dom::Position &UncanonicalizedStart() const noexcept;
+
     KRYS_NODISCARD const dom::Position &UncanonicalizedEnd() const noexcept;
+
     KRYS_NODISCARD const dom::Position &Anchor() const noexcept
     {
       return _anchor;
     }
+
     KRYS_NODISCARD const dom::Position &Focus() const noexcept
     {
       return _focus;
     }
+
     KRYS_NODISCARD Maybe<dom::SimpleRange> Range() const noexcept;
 
     KRYS_NODISCARD const dom::Position &CanonicalAnchor() const noexcept
     {
       return _canonicalAnchor;
     }
+
     KRYS_NODISCARD const dom::Position &CanonicalFocus() const noexcept
     {
       return _canonicalFocus;
     }
+
     KRYS_NODISCARD const dom::Position &Start() const noexcept
     {
       return _start;
     }
+
     KRYS_NODISCARD const dom::Position &End() const noexcept
     {
       return _end;
@@ -164,16 +181,19 @@ namespace krys::boo
     {
       return VisiblePosition(_start, IsRange() ? Affinity::Downstream : _affinity);
     }
+
     KRYS_NODISCARD VisiblePosition VisibleEnd() const noexcept
     {
       return VisiblePosition(_end, IsRange() ? Affinity::Upstream : _affinity);
     }
+
     KRYS_NODISCARD VisiblePosition VisibleBase() const noexcept
     {
       return VisiblePosition(_canonicalAnchor, IsRange()
                                                  ? (IsBaseFirst() ? Affinity::Upstream : Affinity::Downstream)
                                                  : _affinity);
     }
+
     KRYS_NODISCARD VisiblePosition VisibleExtent() const noexcept
     {
       return VisiblePosition(
@@ -189,27 +209,34 @@ namespace krys::boo
     {
       return _type == Type::None;
     }
+
     KRYS_NODISCARD bool IsCaret() const noexcept
     {
       return _type == Type::Caret;
     }
+
     KRYS_NODISCARD bool IsRange() const noexcept
     {
       return _type == Type::Range;
     }
+
     KRYS_NODISCARD bool IsCaretOrRange() const noexcept
     {
       return !IsNone();
     }
+
     KRYS_NODISCARD bool IsNonOrphanedRange() const noexcept
     {
       return IsRange() && !_start.IsOrphan() && !_end.IsOrphan();
     }
+
     KRYS_NODISCARD bool IsNoneOrOrphaned() const noexcept
     {
       return IsNone() || _start.IsOrphan() || _end.IsOrphan();
     }
+
     KRYS_NODISCARD bool IsOrphan() const noexcept;
+
     KRYS_NODISCARD RefPtr<dom::Document> GetDocument() const noexcept;
 
     KRYS_NODISCARD bool IsBaseFirst() const noexcept
@@ -221,6 +248,7 @@ namespace krys::boo
     {
       return _directionality;
     }
+
     void SetDirectionality(boo::Directionality directionality) noexcept
     {
       _directionality = directionality;
@@ -250,8 +278,11 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsContentEditable() const noexcept;
+
     KRYS_NODISCARD bool HasEditableStyle() const noexcept;
+
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
 
     // Returns a child of the ShadowRoot node for shadow trees, or null for non-shadow trees.
@@ -259,6 +290,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static dom::Position AdjustPositionForEnd(const dom::Position &currentPosition,
                                                              dom::Node *startContainerNode) noexcept;
+
     KRYS_NODISCARD static dom::Position AdjustPositionForStart(const dom::Position &currentPosition,
                                                                dom::Node *endContainerNode) noexcept;
 
@@ -275,9 +307,13 @@ namespace krys::boo
 
     // Support methods for Validate()
     void SetCanonicalAnchorAndFocusToDeepEquivalents() noexcept;
+
     void AdjustSelectionRespectingGranularity(TextGranularity granularity) noexcept;
+
     void AdjustSelectionToAvoidCrossingShadowBoundaries() noexcept;
+
     void AdjustSelectionToAvoidCrossingEditingBoundaries() noexcept;
+
     void UpdateSelectionType() noexcept;
   };
 }

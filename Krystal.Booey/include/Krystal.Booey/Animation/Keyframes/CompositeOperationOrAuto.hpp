@@ -38,7 +38,7 @@ namespace krys::boo
     Replace,
     Add,
     Accumulate,
-    Auto
+    Auto,
   };
 
   KRYS_NODISCARD constexpr CompositeOperationOrAuto

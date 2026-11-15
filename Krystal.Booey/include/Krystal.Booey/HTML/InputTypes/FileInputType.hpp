@@ -61,8 +61,11 @@ namespace krys::boo::html
     }
 
     bool AppendFormData(DOMFormData &formData) const noexcept final;
+
     KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+
     KRYS_NODISCARD dom::DOMString ValueMissingText() const noexcept final;
+
     KRYS_NODISCARD bool CanSetStringValue() const noexcept final;
 
     /// @brief The value: C:\\fakepath\\ and the first file's name, or empty without files.
@@ -72,6 +75,7 @@ namespace krys::boo::html
     {
       return *_fileList;
     }
+
     /// @brief Replaces the files with @p files (if not null); unless set by script, fires `input` and
     /// `change` if their paths changed, or else `cancel`.
     void SetFiles(RefPtr<FileList> &&files, WasSetByJavaScript wasSetByJavaScript) noexcept;
@@ -85,6 +89,7 @@ namespace krys::boo::html
     void ShowPicker() noexcept final;
 
     bool ReceiveDroppedFiles(const DragData &dragData) noexcept final;
+
     KRYS_NODISCARD dom::DOMString DisplayString() const noexcept final;
 
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
@@ -94,13 +99,18 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept final;
+
     /// @brief The shadow tree: the button that opens the chooser (`::file-selector-button`).
     void CreateShadowSubtree() noexcept final;
+
     void DisabledStateChanged() noexcept final;
+
     void AttributeChanged(dom::DOMStringAtom name) noexcept final;
+
     void HandleActivationBehavior(dom::Event &event) noexcept final;
 
     void FileChoosingCancelled() noexcept final;
+
     /// @brief The chooser's settings, from the input's attributes and files.
     KRYS_NODISCARD FileChooserSettings ChooserSettings() const noexcept;
   };

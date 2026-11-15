@@ -43,6 +43,6 @@ namespace krys::boo
     SentenceBoundary,
     LineBoundary,
     ParagraphBoundary,
-    DocumentBoundary
+    DocumentBoundary,
   };
 }

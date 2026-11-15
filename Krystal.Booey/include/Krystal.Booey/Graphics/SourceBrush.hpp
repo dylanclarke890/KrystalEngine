@@ -49,6 +49,7 @@ namespace krys::boo
 
   public:
     SourceBrush() noexcept = default;
+
     SourceBrush(const boo::Color &color) noexcept : _color(color)
     {
     }
@@ -60,6 +61,7 @@ namespace krys::boo
     {
       return _color;
     }
+
     void SetColor(const boo::Color color) noexcept
     {
       _color = color;
@@ -69,16 +71,20 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<PackedColour::RGBA> PackedColor() const noexcept;
 
     KRYS_NODISCARD boo::Gradient *GetGradient() const noexcept;
+
     KRYS_NODISCARD boo::Pattern *GetPattern() const noexcept;
+
     KRYS_NODISCARD const AffineTransform &GradientSpaceTransform() const noexcept;
 
     void SetGradient(Ref<boo::Gradient> &&, const AffineTransform &spaceTransform = {}) noexcept;
+
     void SetPattern(Ref<boo::Pattern> &&) noexcept;
 
     KRYS_NODISCARD bool IsVisible() const noexcept
     {
       return HasPatternOrGradient() || _color.IsVisible();
     }
+
     KRYS_NODISCARD bool HasPatternOrGradient() const noexcept
     {
       return !std::holds_alternative<std::monostate>(_patternGradient);

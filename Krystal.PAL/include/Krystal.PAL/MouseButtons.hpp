@@ -10,7 +10,7 @@ namespace krys::pal
   {
     Pressed,
     Held,
-    Released
+    Released,
   };
 
   /// @brief Supported mouse buttons.
@@ -22,7 +22,7 @@ namespace krys::pal
     Middle = 1 << 2,
     Thumb1 = 1 << 3,
     Thumb2 = 1 << 4,
-    UNKNOWN = 1 << 5
+    UNKNOWN = 1 << 5,
   };
 }
 

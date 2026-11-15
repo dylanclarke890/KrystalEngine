@@ -61,13 +61,16 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD ControlFactory &GetControlFactory() const noexcept;
+
     void SetOverrideControlFactory(RefPtr<ControlFactory> &&controlFactory) noexcept
     {
       _overrideControlFactory = krys::move(controlFactory);
     }
 
     KRYS_NODISCARD FloatSize SizeForBounds(const FloatRect &bounds, const ControlStyle &) noexcept;
+
     KRYS_NODISCARD FloatRect RectForBounds(const FloatRect &bounds, const ControlStyle &) noexcept;
+
     void Draw(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
               const ControlStyle &) const noexcept;
 
@@ -75,6 +78,7 @@ namespace krys::boo
     explicit ControlPart(StyleAppearance) noexcept;
 
     KRYS_NODISCARD PlatformControl *GetPlatformControl() const noexcept;
+
     KRYS_NODISCARD virtual UniquePtr<PlatformControl> CreatePlatformControl() noexcept = 0;
   };
 }

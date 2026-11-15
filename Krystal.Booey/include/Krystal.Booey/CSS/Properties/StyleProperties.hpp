@@ -42,8 +42,8 @@ namespace krys::boo::css
 
   struct SerialisationContext;
 
-  enum class ValueId : uint16;
   enum class ParserMode : uint8;
+  enum class ValueId : uint16;
 
   /// @brief A declaration block: an ordered list of longhand and custom property declarations, either mutable
   /// or immutable (a compact copy shared between rules).
@@ -55,6 +55,7 @@ namespace krys::boo::css
     uint32 _arraySize : 28 {0u};
 
     inline explicit StyleProperties(css::ParserMode mode) noexcept;
+
     inline StyleProperties(css::ParserMode mode, uint32 immutableArraySize) noexcept;
 
   public:

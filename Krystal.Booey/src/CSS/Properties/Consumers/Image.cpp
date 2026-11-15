@@ -66,7 +66,7 @@ namespace krys::boo::css
     enum class ShapeKeyword : bool
     {
       Circle,
-      Ellipse
+      Ellipse,
     };
 
     // MARK: Keyword mappings
@@ -161,7 +161,7 @@ namespace krys::boo::css
     enum class SupportsColorHints : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     KRYS_NODISCARD static Maybe<Color> ConsumeStopColor(TokenRange &tokens,
@@ -899,6 +899,7 @@ namespace krys::boo::css
 
       KRYS_NODISCARD bool operator==(const ImageSetTypeFunctionRaw &) const noexcept = default;
     };
+
     using ImageSetTypeFunction = ImageSetTypeFunctionRaw;
 
     struct ImageSetTypeFunctionRawKnownTokenTypeFunctionConsumer

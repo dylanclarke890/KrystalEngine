@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::Opacity ToCSSOpacity(const BasicComponentTransferFilterOperation &,
                                              const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::Opacity &,
                                                               const BuilderState &) noexcept;
   }

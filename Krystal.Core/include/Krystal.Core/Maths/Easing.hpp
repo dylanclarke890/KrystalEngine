@@ -33,9 +33,13 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
+    {
       return T(2) * value * value;
+    }
     else
+    {
       return (-T(2) * value * value) + (4 * value) - One<T>();
+    }
   }
 
   template <FloatingPoint T>
@@ -59,7 +63,9 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
+    {
       return T(4) * value * value * value;
+    }
     else
     {
       const T f = ((T(2) * value) - T(2));
@@ -88,7 +94,9 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
+    {
       return T(8) * value * value * value * value;
+    }
     else
     {
       const T f = (value - One<T>());
@@ -117,7 +125,9 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
+    {
       return T(16) * value * value * value * value * value;
+    }
     else
     {
       const T f = ((T(2) * value) - T(2));
@@ -166,9 +176,13 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
+    {
       return T(0.5) * (One<T>() - Sqrt(One<T>() - T(4) * (value * value)));
+    }
     else
+    {
       return T(0.5) * (Sqrt(-((T(2) * value) - T(3)) * ((T(2) * value) - One<T>())) + One<T>());
+    }
   }
 
   template <FloatingPoint T>
@@ -177,7 +191,9 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value <= Zero<T>())
+    {
       return value;
+    }
     else
     {
       const T complementary = value - One<T>();
@@ -192,9 +208,13 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value >= One<T>())
+    {
       return value;
+    }
     else
+    {
       return One<T>() - Pow(T(2), -T(10) * value);
+    }
   }
 
   template <FloatingPoint T>
@@ -203,9 +223,13 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
+    {
       return T(0.5) * Pow(T(2), (T(20) * value) - T(10));
+    }
     else
+    {
       return -T(0.5) * Pow(T(2), (-T(20) * value) + T(10)) + One<T>();
+    }
   }
 
   template <FloatingPoint T>
@@ -228,13 +252,17 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
+    {
       return T(0.5) * Sin(T(13) * HalfPi<T>() * (T(2) * value))
              * Pow(T(2), T(10) * ((T(2) * value) - One<T>()));
+    }
     else
+    {
       return T(0.5)
              * (Sin(-T(13) * HalfPi<T>() * ((T(2) * value - One<T>()) + One<T>()))
                   * Pow(T(2), -T(10) * (T(2) * value - One<T>()))
                 + T(2));
+    }
   }
 
   template <FloatingPoint T>
@@ -303,13 +331,21 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(4.0 / 11.0))
+    {
       return (T(121) * value * value) / T(16);
+    }
     else if (value < T(8.0 / 11.0))
+    {
       return (T(363.0 / 40.0) * value * value) - (T(99.0 / 10.0) * value) + T(17.0 / 5.0);
+    }
     else if (value < T(9.0 / 10.0))
+    {
       return (T(4356.0 / 361.0) * value * value) - (T(35442.0 / 1805.0) * value) + T(16061.0 / 1805.0);
+    }
     else
+    {
       return (T(54.0 / 5.0) * value * value) - (T(513.0 / 25.0) * value) + T(268.0 / 25.0);
+    }
   }
 
   template <FloatingPoint T>
@@ -325,8 +361,12 @@ namespace krys
     krys_debug_assert_msg(value >= Zero<T>() && value <= One<T>(), "Value out of bounds [0,1]");
 
     if (value < T(0.5))
+    {
       return T(0.5) * (One<T>() - BounceEaseOut(One<T>() - value * T(2)));
+    }
     else
+    {
       return T(0.5) * BounceEaseOut(value * T(2) - One<T>()) + T(0.5);
+    }
   }
 }

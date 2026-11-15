@@ -4,7 +4,6 @@
 
 namespace krys::boo::tests
 {
-
   TEST_CASE("EllipsisBoxPainter: paints the ellipsis where the line is truncated",
             "[Rendering][EllipsisBoxPainter]")
   {

@@ -40,12 +40,15 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<ByteArrayPixelBuffer> Create(const PixelBufferFormat &, const IntSize &,
                                                            dom::Uint8ClampedArray &) noexcept;
+
     /// @brief A buffer holding a copy of @p data; empty if it's not as long as @p size's pixels.
     KRYS_NODISCARD static Maybe<Ref<ByteArrayPixelBuffer>> Create(const PixelBufferFormat &, const IntSize &,
                                                                   Span<const uint8> data) noexcept;
+
     /// @brief A buffer of @p size, all zero; null if it's too big.
     KRYS_NODISCARD static RefPtr<ByteArrayPixelBuffer> TryCreate(const PixelBufferFormat &,
                                                                  const IntSize &size) noexcept;
+
     /// @brief A buffer whose bytes are @p data; null if it's not as long as @p size's pixels.
     KRYS_NODISCARD static RefPtr<ByteArrayPixelBuffer>
       TryCreate(const PixelBufferFormat &, const IntSize &size, Ref<dom::Uint8ClampedArray> &&data) noexcept;
@@ -54,10 +57,12 @@ namespace krys::boo
     {
       return const_cast<dom::Uint8ClampedArray &>(*_data);
     }
+
     KRYS_NODISCARD Ref<dom::Uint8ClampedArray> ProtectedData() const noexcept
     {
       return _data;
     }
+
     /// @brief The bytes, shared: what's written to them after shows in the buffer too.
     KRYS_NODISCARD Ref<dom::Uint8ClampedArray> TakeData() noexcept
     {
@@ -68,6 +73,7 @@ namespace krys::boo
     {
       return Type::ByteArray;
     }
+
     KRYS_NODISCARD RefPtr<PixelBuffer> CreateScratchPixelBuffer(const IntSize &) const noexcept override;
 
   private:

@@ -52,54 +52,79 @@ namespace krys::boo
   {
   public:
     Path() noexcept = default;
+
     Path(PathSegment &&) noexcept;
+
     Path(List<PathSegment> &&) noexcept;
+
     explicit Path(const List<FloatPoint> &points) noexcept;
+
     Path(Ref<PathImpl> &&) noexcept;
 
     Path(const Path &) noexcept = default;
+
     Path(Path &&) noexcept = default;
+
     Path &operator=(const Path &) = default;
+
     Path &operator=(Path &&) = default;
 
     KRYS_NODISCARD bool DefinitelyEqual(const Path &) const noexcept;
 
     void MoveTo(const FloatPoint &) noexcept;
+
     void AddLineTo(const FloatPoint &) noexcept;
+
     void AddQuadCurveTo(const FloatPoint &controlPoint, const FloatPoint &endPoint) noexcept;
+
     void AddBezierCurveTo(const FloatPoint &controlPoint1, const FloatPoint &controlPoint2,
                           const FloatPoint &endPoint) noexcept;
+
     void AddArcTo(const FloatPoint &point1, const FloatPoint &point2, float radius) noexcept;
+
     void AddArc(const FloatPoint &, float radius, float startAngle, float endAngle,
                 RotationDirection) noexcept;
+
     void AddEllipse(const FloatPoint &, float radiusX, float radiusY, float rotation, float startAngle,
                     float endAngle, RotationDirection) noexcept;
+
     void AddEllipseInRect(const FloatRect &) noexcept;
+
     void AddRect(const FloatRect &) noexcept;
+
     void AddRoundedRect(const FloatRoundedRect &,
                         PathRoundedRect::Strategy = PathRoundedRect::Strategy::PreferNative) noexcept;
+
     void AddRoundedRect(const FloatRect &, const FloatSize &roundingRadii,
                         PathRoundedRect::Strategy = PathRoundedRect::Strategy::PreferNative) noexcept;
+
     void AddContinuousRoundedRect(const FloatRect &, float cornerRadius) noexcept;
+
     void AddContinuousRoundedRect(const FloatRect &, float cornerWidth, float cornerHeight) noexcept;
+
     void AddRoundedRect(const LayoutRoundedRect &) noexcept;
+
     void CloseSubpath() noexcept;
 
     void AddPath(const Path &, const AffineTransform &) noexcept;
 
     void ApplySegments(const PathSegmentApplier &) const noexcept;
+
     void ApplyElements(const PathElementApplier &) const noexcept;
 
     /// @brief Whether @p point is inside the path, filled with @p rule; curves are flattened into lines.
     KRYS_NODISCARD bool Contains(const FloatPoint &point, WindRule rule = WindRule::NonZero) const noexcept;
+
     /// @brief Whether @p point is inside the path stroked as @p strokeStyleApplier sets up a graphics
     /// context, as the host's @ref PathStrokeStrategy strokes it.
     KRYS_NODISCARD bool
       StrokeContains(const FloatPoint &point,
                      const Func<void(GraphicsContext &)> &strokeStyleApplier) const noexcept;
+
     void Clear() noexcept;
 
     void Translate(const FloatSize &delta) noexcept;
+
     void Transform(const AffineTransform &) noexcept;
 
     KRYS_NODISCARD constexpr static float CircleControlPoint() noexcept
@@ -108,27 +133,38 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Maybe<PathSegment> SingleSegment() const noexcept;
+
     KRYS_NODISCARD Maybe<PathDataLine> SingleDataLine() const noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept;
+
     KRYS_NODISCARD bool DefinitelySingleLine() const noexcept;
 
     KRYS_NODISCARD const PathSegment *SingleSegmentIfExists() const noexcept
     {
       return AsSingle();
     }
+
     KRYS_NODISCARD const List<PathSegment> *SegmentsIfExists() const noexcept;
+
     KRYS_NODISCARD List<PathSegment> Segments() const noexcept;
 
     KRYS_NODISCARD float Length() const noexcept;
+
     KRYS_NODISCARD bool IsClosed() const noexcept;
+
     KRYS_NODISCARD bool HasSubpaths() const noexcept;
+
     KRYS_NODISCARD FloatPoint CurrentPoint() const noexcept;
+
     KRYS_NODISCARD PathTraversalState TraversalStateAtLength(float length) const noexcept;
+
     KRYS_NODISCARD FloatPoint PointAtLength(float length) const noexcept;
 
     KRYS_NODISCARD FloatRect FastBoundingRect() const noexcept;
+
     KRYS_NODISCARD FloatRect BoundingRect() const noexcept;
+
     /// @brief The bounds of the path stroked as @p strokeStyleApplier sets up a graphics context (a solid
     /// stroke 1 wide without one), as the host's @ref PathStrokeStrategy strokes it.
     KRYS_NODISCARD FloatRect
@@ -136,18 +172,21 @@ namespace krys::boo
 
   private:
     PathImpl &SetImpl(Ref<PathImpl> &&) noexcept;
+
     PathImpl &EnsureImpl() noexcept;
 
     KRYS_NODISCARD PathSegment *AsSingle() noexcept
     {
       return std::get_if<PathSegment>(&_data);
     }
+
     KRYS_NODISCARD const PathSegment *AsSingle() const noexcept
     {
       return std::get_if<PathSegment>(&_data);
     }
 
     KRYS_NODISCARD PathImpl *AsImpl() noexcept;
+
     KRYS_NODISCARD const PathImpl *AsImpl() const noexcept;
 
     KRYS_NODISCARD Maybe<FloatPoint> InitialMoveToPoint() const noexcept;

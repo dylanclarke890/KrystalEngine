@@ -88,7 +88,9 @@ namespace krys::gfx::opengl
     {
       log::ILogger *logger = log::GetGlobalLogger();
       if (!logger)
+      {
         return;
+      }
 
       logger->Info("=== Shader Reflection Info ===");
       logger->Info("Uniforms ({}):", info.Uniforms.size());
@@ -211,7 +213,9 @@ namespace krys::gfx::opengl
 
         // skip block members (already handled above)
         if (values[4] != -1)
+        {
           continue;
+        }
 
         List<char> nameData(values[0]);
         glGetProgramResourceName(programId, GL_UNIFORM, i, (GLsizei)nameData.size(), nullptr,

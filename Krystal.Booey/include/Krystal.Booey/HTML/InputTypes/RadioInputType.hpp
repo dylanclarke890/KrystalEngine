@@ -56,14 +56,23 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
+
     KRYS_NODISCARD dom::DOMString ValueMissingText() const noexcept final;
+
     void HandleClickEvent(dom::MouseEvent &event) noexcept final;
+
     ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept final;
+
     void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept final;
+
     KRYS_NODISCARD bool ShouldSendChangeEventAfterCheckedChanged() noexcept final;
+
     void WillDispatchClick(InputElementClickState &state) noexcept final;
+
     void DidDispatchClick(dom::Event &event, const InputElementClickState &state) noexcept final;
+
     KRYS_NODISCARD bool MatchesIndeterminatePseudoClass() const noexcept final;
+
     void WillUpdateCheckedness(bool nowChecked, WasSetByJavaScript wasCheckedByJavaScript) noexcept final;
   };
 }

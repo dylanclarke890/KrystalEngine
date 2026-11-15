@@ -157,62 +157,95 @@ namespace krys::gfx::opengl
 
   public:
     explicit GLDevice(const DeviceDesc &desc) noexcept;
+
     ~GLDevice() noexcept override;
 
     /// @brief Creates the context and the device's own resources.
     KRYS_NODISCARD Expected<void> Initialise() noexcept;
 
     KRYS_NODISCARD Expected<BufferHandle> CreateBuffer(const BufferDesc &desc) noexcept override;
+
     KRYS_NODISCARD Expected<TextureHandle> CreateTexture(const TextureDesc &desc) noexcept override;
+
     KRYS_NODISCARD Expected<SamplerHandle> CreateSampler(const SamplerDesc &desc) noexcept override;
+
     KRYS_NODISCARD Expected<ShaderHandle> CreateShader(const ShaderDesc &desc) noexcept override;
+
     KRYS_NODISCARD Expected<PipelineHandle> CreatePipeline(const PipelineDesc &desc) noexcept override;
+
     KRYS_NODISCARD Expected<SwapchainHandle> CreateSwapchain(const SwapchainDesc &desc) noexcept override;
 
     void Destroy(BufferHandle buffer) noexcept override;
+
     void Destroy(TextureHandle texture) noexcept override;
+
     void Destroy(SamplerHandle sampler) noexcept override;
+
     void Destroy(ShaderHandle shader) noexcept override;
+
     void Destroy(PipelineHandle pipeline) noexcept override;
+
     void Destroy(SwapchainHandle swapchain) noexcept override;
 
     void ResizeSwapchain(SwapchainHandle swapchain, uint32 width, uint32 height) noexcept override;
+
     void SetVSync(SwapchainHandle swapchain, bool enabled) noexcept override;
 
     void WriteBuffer(BufferHandle buffer, uint64 offset, Span<const byte> data) noexcept override;
+
     void WriteTexture(TextureHandle texture, const TextureRegion &region,
                       Span<const byte> data) noexcept override;
+
     void ReadTexture(TextureHandle texture, const TextureRegion &region, Span<byte> out) noexcept override;
+
     void GenerateMipmaps(TextureHandle texture) noexcept override;
 
     KRYS_NODISCARD TransientAllocation AllocateTransient(uint64 size,
                                                          uint32 alignment = 256u) noexcept override;
 
     void BeginFrame() noexcept override;
+
     KRYS_NODISCARD CommandBuffer &GetCommandBuffer() noexcept override;
+
     void Submit(CommandBuffer &commands) noexcept override;
+
     void Present(SwapchainHandle swapchain) noexcept override;
+
     void EndFrame() noexcept override;
+
     void WaitIdle() noexcept override;
 
     KRYS_NODISCARD uint64 FrameNumber() const noexcept override;
+
     KRYS_NODISCARD const DeviceLimits &Limits() const noexcept override;
+
     KRYS_NODISCARD Maybe<TextureDesc> GetTextureDesc(TextureHandle texture) const noexcept override;
 
   private:
     void QueryLimits() noexcept;
+
     KRYS_NODISCARD Expected<void> CreateTransientRing() noexcept;
+
     void ReportLeaks() noexcept;
+
     void DestroyAll() noexcept;
+
     void ForgetFramebuffersUsing(GLuint texture) noexcept;
+
     KRYS_NODISCARD GLuint GetFramebuffer(const FramebufferKey &key) noexcept;
 
     void ExecuteBeginRenderPass(ReplayState &replay, const commands::BeginRenderPass &command) noexcept;
+
     void ExecuteEndRenderPass(ReplayState &replay) noexcept;
+
     void ExecuteBindPipeline(ReplayState &replay, PipelineHandle handle) noexcept;
+
     void ApplyPipelineState(const GLPipeline &pipeline, bool flipFrontFace) noexcept;
+
     void PrepareDraw(ReplayState &replay) noexcept;
+
     void ExecuteCopyBufferToTexture(const commands::CopyBufferToTexture &command) noexcept;
+
     void ExecuteBlitTexture(const commands::BlitTexture &command) noexcept;
   };
 }

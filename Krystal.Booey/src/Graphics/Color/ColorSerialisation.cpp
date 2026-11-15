@@ -61,7 +61,7 @@ namespace krys::boo
     enum class HexCase : uint8
     {
       Uppercase,
-      Lowercase
+      Lowercase,
     };
 
     void AppendHexByte(StringBuilder &builder, uint8 value, HexCase hexCase = HexCase::Uppercase) noexcept

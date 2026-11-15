@@ -40,7 +40,7 @@ namespace krys::boo
   {
     KRYS_NODISCARD hb_position_t FloatToHarfBuzzPosition(float value) noexcept
     {
-      static constexpr float HbPosition = 1 << 16;
+      constexpr static float HbPosition = 1 << 16;
       return static_cast<hb_position_t>(std::clamp<double>(std::round(value * HbPosition),
                                                            std::numeric_limits<hb_position_t>::min(),
                                                            std::numeric_limits<hb_position_t>::max()));

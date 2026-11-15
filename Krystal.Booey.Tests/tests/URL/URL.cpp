@@ -55,6 +55,7 @@ namespace krys::boo::url::tests
       utf8_stringview Input;
       const char *Expected;
     };
+
     TestCase cases[] {
       {u8"http://username:password@www.example.com:8080/index.html?var=val#fragment",
        "http://www.example.com:8080"},
@@ -174,6 +175,7 @@ namespace krys::boo::url::tests
       utf8_stringview Url2;
       bool Expected;
     };
+
     TestCase cases[] {
       {u8"http://example.com/", u8"http://example.com/", true},
       {u8"http://example.com/#hash", u8"http://example.com/", true},

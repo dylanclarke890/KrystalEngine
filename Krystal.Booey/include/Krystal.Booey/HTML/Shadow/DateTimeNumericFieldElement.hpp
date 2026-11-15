@@ -41,6 +41,7 @@ namespace krys::boo::html
       int Maximum;
 
       KRYS_NODISCARD int ClampValue(int value) const noexcept;
+
       KRYS_NODISCARD bool IsInRange(int value) const noexcept;
     };
 
@@ -61,10 +62,14 @@ namespace krys::boo::html
 
     // DateTimeFieldElement functions:
     KRYS_NODISCARD bool HasValue() const noexcept final;
+
     void SetEmptyValue(EventBehavior eventBehavior = EventBehavior::DispatchNoEvent) noexcept final;
+
     void SetValueAsInteger(int value,
                            EventBehavior eventBehavior = EventBehavior::DispatchNoEvent) noexcept final;
+
     void StepDown() noexcept override;
+
     void StepUp() noexcept override;
 
     KRYS_NODISCARD int ValueAsInteger() const noexcept final
@@ -80,12 +85,17 @@ namespace krys::boo::html
   private:
     // DateTimeFieldElement functions:
     void AdjustMinInlineSize(RenderStyle &style) const noexcept final;
+
     KRYS_NODISCARD dom::DOMString Value() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString PlaceholderValue() const noexcept final;
+
     void HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final;
+
     void HandleBlurEvent(dom::Event &event) noexcept final;
 
     KRYS_NODISCARD dom::DOMString FormatValue(int value) const noexcept;
+
     void SetValueAsIntegerByStepping(int value) noexcept;
   };
 }

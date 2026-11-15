@@ -57,6 +57,7 @@ namespace krys::boo::html
 
   public:
     ImageDocument() noexcept;
+
     ~ImageDocument() noexcept override;
 
     /// @brief The document's `img`, once the first data has made it.
@@ -64,24 +65,33 @@ namespace krys::boo::html
 
     /// @brief Gives the image the bytes loaded so far, making the document's elements on the first call.
     void UpdateDuringParsing(const SharedBuffer &data) noexcept;
+
     /// @brief Gives the image all its bytes, titles the document after the image and its size, and
     /// finishes parsing.
     void FinishLoading(const SharedBuffer *data) noexcept;
 
     /// @brief Shrinks the image to the view's new size, or restores it once it fits.
     void DidChangeViewSize() noexcept;
+
     /// @brief Toggles between the shrunk image and its natural size, scrolling to the point clicked (@p x
     /// and @p y in the shrunk image) when it grows.
     void ImageClicked(int32 x, int32 y) noexcept;
 
   private:
     void CreateDocumentStructure() noexcept;
+
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
+
     KRYS_NODISCARD LayoutSize ImageSize() noexcept;
+
     void ImageUpdated() noexcept;
+
     KRYS_NODISCARD float Scale() noexcept;
+
     void ResizeImageToFit() noexcept;
+
     void RestoreImageSize() noexcept;
+
     KRYS_NODISCARD bool ImageFitsInWindow() noexcept;
   };
 }

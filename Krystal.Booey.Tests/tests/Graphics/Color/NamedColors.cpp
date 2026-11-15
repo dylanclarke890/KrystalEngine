@@ -10,13 +10,13 @@ namespace krys::boo::tests
       const auto *aliceBlue = FindColor(u8"aliceblue");
       REQUIRE(aliceBlue);
       CHECK(aliceBlue->Name == u8"aliceblue");
-      CHECK(aliceBlue->ARGBValue == 0xff'f0'f8'ffu);
+      CHECK(aliceBlue->ARGBValue == 0xFF'F0'F8'FFu);
 
       REQUIRE(FindColor(u8"yellowgreen"));
-      CHECK(FindColor(u8"yellowgreen")->ARGBValue == 0xff'9a'cd'32u);
+      CHECK(FindColor(u8"yellowgreen")->ARGBValue == 0xFF'9A'CD'32u);
 
       REQUIRE(FindColor(u8"red"));
-      CHECK(FindColor(u8"red")->ARGBValue == 0xff'ff'00'00u);
+      CHECK(FindColor(u8"red")->ARGBValue == 0xFF'FF'00'00u);
 
       // Both spellings of grey.
       REQUIRE(FindColor(u8"gray"));

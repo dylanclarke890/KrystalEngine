@@ -13,7 +13,7 @@ namespace krys::boo::tests
   KRYS_NODISCARD inline utf8_string ToUTF8(const string &s) noexcept
   {
     return utf8_string(s.begin(), s.end());
-  };
+  }
 
   template <Number T>
   KRYS_NODISCARD utf8_string ToUTF8(T number) noexcept

@@ -56,15 +56,20 @@ namespace krys::boo::layout
 
   public:
     InlineItemsBuilder(InlineContentCache &inlineContentCache, const ElementBox &root) noexcept;
+
     void Build(InlineItemPosition startPosition) noexcept;
 
     static void PopulateBreakingPositionCache(const InlineItemList &inlineItemList) noexcept;
 
   private:
     void CollectInlineItems(InlineItemList &inlineItemList, InlineItemPosition startPosition) noexcept;
+
     KRYS_NODISCARD LayoutQueue InitializeLayoutQueue(InlineItemPosition startPosition) noexcept;
+
     KRYS_NODISCARD LayoutQueue TraverseUntilDamaged(const Box &firstDamagedLayoutBox) noexcept;
+
     void BreakAndComputeBidiLevels(InlineItemList &inlineItemList) noexcept;
+
     KRYS_NODISCARD InlineContentCache::InlineItems::ContentAttributes
       ComputeContentAttributesAndInlineTextItemWidths(InlineItemList &inlineItemList,
                                                       InlineItemPosition damagePosition,
@@ -72,11 +77,15 @@ namespace krys::boo::layout
 
     void HandleTextContent(const InlineTextBox &inlineTextBox, InlineItemList &inlineItemList,
                            Maybe<size_t> partialContentOffset) noexcept;
+
     KRYS_NODISCARD bool
       BuildInlineItemListForTextFromBreakingPositionsCache(const InlineTextBox &inlineTextBox,
                                                            InlineItemList &inlineItemList) noexcept;
+
     void HandleInlineBoxStart(const Box &inlineBox, InlineItemList &inlineItemList) noexcept;
+
     void HandleInlineBoxEnd(const Box &inlineBox, InlineItemList &inlineItemList) noexcept;
+
     void HandleInlineLevelBox(const Box &layoutBox, InlineItemList &inlineItemList) noexcept;
 
     KRYS_NODISCARD bool ContentRequiresVisualReordering() const noexcept
@@ -90,6 +99,7 @@ namespace krys::boo::layout
     {
       return _root;
     }
+
     KRYS_NODISCARD InlineContentCache &GetInlineContentCache() noexcept
     {
       return _inlineContentCache;

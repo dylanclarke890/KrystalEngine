@@ -107,7 +107,7 @@ namespace krys::boo
     {
       OnlyInheritableEditingProperties,
       AllEditingProperties,
-      PostLayoutProperties
+      PostLayoutProperties,
     };
 
     template <typename TStyleDeclaration>
@@ -207,13 +207,15 @@ namespace krys::boo
     enum class LegacyFontSizeMode : bool
     {
       AlwaysUseLegacyFontSize,
-      UseLegacyFontSizeOnlyIfPixelValuesMatch
+      UseLegacyFontSizeOnlyIfPixelValuesMatch,
     };
 
     KRYS_NODISCARD int32 LegacyFontSizeFromCSSValue(dom::Document &document, css::PrimitiveValue *value,
                                                     bool shouldUseFixedFontDefaultSize,
                                                     LegacyFontSizeMode mode) noexcept;
+
     KRYS_NODISCARD bool HasTransparentBackgroundColor(css::StyleProperties *style) noexcept;
+
     KRYS_NODISCARD RefPtr<css::Value> BackgroundColorInEffect(dom::Node *node) noexcept;
 
     KRYS_NODISCARD bool IsValueID(const css::Value &value, ValueId valueID) noexcept
@@ -270,26 +272,31 @@ namespace krys::boo
     {
       krys_debug_assert(primitiveValue != ValueId::Invalid);
     }
+
     virtual ~HTMLElementEquivalent() noexcept = default;
 
     KRYS_NODISCARD virtual bool Matches(const dom::Element &element) const noexcept
     {
       return !_tagName || IsHTMLElementOfType(&element, *_tagName);
     }
+
     KRYS_NODISCARD virtual bool HasAttribute() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool PropertyExistsInStyle(const EditingStyle &style) const noexcept
     {
       return style._mutableStyle && style._mutableStyle->GetPropertyCSSValue(_propertyID);
     }
+
     KRYS_NODISCARD virtual bool ValueIsPresentInStyle(dom::Element &element,
                                                       const EditingStyle &style) const noexcept
     {
       return Matches(element)
              && style._mutableStyle->PropertyAsValueId(_propertyID) == _primitiveValue->ValueId();
     }
+
     virtual void AddToStyle(dom::Element *, EditingStyle *style) const noexcept
     {
       style->SetProperty(_propertyID, _primitiveValue->CssText(css::DefaultSerialisationContext()));
@@ -299,6 +306,7 @@ namespace krys::boo
     explicit HTMLElementEquivalent(PropertyId id) noexcept : _propertyID(id)
     {
     }
+
     HTMLElementEquivalent(PropertyId id, html::TagName tagName) noexcept : _propertyID(id), _tagName(tagName)
     {
     }
@@ -429,6 +437,7 @@ namespace krys::boo
         : HTMLElementEquivalent(id, tagName), _attrName(attrName)
     {
     }
+
     HTMLAttributeEquivalent(PropertyId id, dom::DOMStringAtom attrName) noexcept
         : HTMLElementEquivalent(id), _attrName(attrName)
     {
@@ -438,10 +447,12 @@ namespace krys::boo
     {
       return HTMLElementEquivalent::Matches(element) && element.HasAttribute(_attrName);
     }
+
     KRYS_NODISCARD bool HasAttribute() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD bool ValueIsPresentInStyle(dom::Element &element,
                                               const EditingStyle &style) const noexcept override
     {
@@ -450,6 +461,7 @@ namespace krys::boo
 
       return CompareCSSValuePtr(value, styleValue);
     }
+
     void AddToStyle(dom::Element *element, EditingStyle *style) const noexcept override
     {
       if (RefPtr<css::Value> value = AttributeValueAsCSSValue(element))
@@ -457,6 +469,7 @@ namespace krys::boo
         style->SetProperty(_propertyID, value->CssText(css::DefaultSerialisationContext()));
       }
     }
+
     KRYS_NODISCARD virtual RefPtr<css::Value> AttributeValueAsCSSValue(dom::Element *element) const noexcept
     {
       krys_debug_assert(element);
@@ -470,6 +483,7 @@ namespace krys::boo
       (void)dummyStyle->SetProperty(_propertyID, *value);
       return dummyStyle->GetPropertyCSSValue(_propertyID);
     }
+
     KRYS_NODISCARD dom::DOMStringAtom AttributeName() const noexcept
     {
       return _attrName;
@@ -1853,7 +1867,6 @@ namespace krys::boo
       }
       (void)styleToRemovePropertiesFrom.RemoveProperties(Span<const PropertyId>(properties));
     }
-
   }
 
   Ref<css::MutableStyleProperties>

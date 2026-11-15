@@ -37,57 +37,77 @@ namespace krys::boo::style
   struct AlignContent
   {
     constexpr AlignContent(css::keywords::Normal) noexcept;
+
     constexpr AlignContent(css::keywords::Baseline, Maybe<BaselineAlignmentPreference> = null) noexcept;
+
     constexpr AlignContent(css::keywords::SpaceBetween) noexcept;
+
     constexpr AlignContent(css::keywords::SpaceAround) noexcept;
+
     constexpr AlignContent(css::keywords::SpaceEvenly) noexcept;
+
     constexpr AlignContent(css::keywords::Stretch) noexcept;
+
     constexpr AlignContent(css::keywords::Center, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr AlignContent(css::keywords::Start, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr AlignContent(css::keywords::End, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr AlignContent(css::keywords::FlexStart, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr AlignContent(css::keywords::FlexEnd, Maybe<OverflowPosition> = null) noexcept;
 
     KRYS_NODISCARD constexpr bool IsNormal() const noexcept
     {
       return Primary() == PrimaryKind::Normal;
     }
+
     KRYS_NODISCARD constexpr bool IsBaseline() const noexcept
     {
       return Primary() == PrimaryKind::Baseline;
     }
+
     KRYS_NODISCARD constexpr bool IsSpaceBetween() const noexcept
     {
       return Primary() == PrimaryKind::SpaceBetween;
     }
+
     KRYS_NODISCARD constexpr bool IsSpaceAround() const noexcept
     {
       return Primary() == PrimaryKind::SpaceAround;
     }
+
     KRYS_NODISCARD constexpr bool IsSpaceEvenly() const noexcept
     {
       return Primary() == PrimaryKind::SpaceEvenly;
     }
+
     KRYS_NODISCARD constexpr bool IsStretch() const noexcept
     {
       return Primary() == PrimaryKind::Stretch;
     }
+
     KRYS_NODISCARD constexpr bool IsCenter() const noexcept
     {
       return Primary() == PrimaryKind::Center;
     }
+
     KRYS_NODISCARD constexpr bool IsStart() const noexcept
     {
       return Primary() == PrimaryKind::Start;
     }
+
     KRYS_NODISCARD constexpr bool IsEnd() const noexcept
     {
       return Primary() == PrimaryKind::End;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexStart() const noexcept
     {
       return Primary() == PrimaryKind::FlexStart;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexEnd() const noexcept
     {
       return Primary() == PrimaryKind::FlexEnd;
@@ -98,6 +118,7 @@ namespace krys::boo::style
       return Primary() == PrimaryKind::Baseline
              && GetBaselineAlignmentPreference() == BaselineAlignmentPreferenceKind::First;
     }
+
     KRYS_NODISCARD constexpr bool IsLastBaseline() const noexcept
     {
       return Primary() == PrimaryKind::Baseline
@@ -128,20 +149,26 @@ namespace krys::boo::style
     };
 
     KRYS_NODISCARD constexpr static bool CanHaveBaselinePosition(PrimaryKind) noexcept;
+
     KRYS_NODISCARD constexpr static bool IsContentPosition(PrimaryKind) noexcept;
 
     constexpr AlignContent(PrimaryKind) noexcept;
+
     constexpr AlignContent(PrimaryKind, Maybe<BaselineAlignmentPreference>) noexcept;
+
     constexpr AlignContent(PrimaryKind, Maybe<OverflowPosition>) noexcept;
 
     KRYS_NODISCARD constexpr PrimaryKind Primary() const noexcept;
+
     KRYS_NODISCARD constexpr BaselineAlignmentPreferenceKind GetBaselineAlignmentPreference() const noexcept;
+
     KRYS_NODISCARD constexpr OverflowPositionKind GetOverflowPosition() const noexcept;
 
     uint8 _primary : 4 {static_cast<uint8>(PrimaryKind::Normal)};
     uint8 _secondary : 2 {
       0}; // unused, BaselineAlignmentPreferenceKind or OverflowPositionKind, depending on value of _primary
   };
+
   static_assert(sizeof(AlignContent) == 1);
 
   constexpr AlignContent::AlignContent(css::keywords::Normal) noexcept : AlignContent {PrimaryKind::Normal}
@@ -163,6 +190,7 @@ namespace krys::boo::style
       : AlignContent {PrimaryKind::SpaceAround}
   {
   }
+
   constexpr AlignContent::AlignContent(css::keywords::SpaceEvenly) noexcept
       : AlignContent {PrimaryKind::SpaceEvenly}
   {

@@ -50,20 +50,24 @@ namespace krys::boo
     virtual ~VertexPair() noexcept = default;
 
     KRYS_NODISCARD virtual const FloatPoint &Vertex1() const noexcept = 0;
+
     KRYS_NODISCARD virtual const FloatPoint &Vertex2() const noexcept = 0;
 
     KRYS_NODISCARD float MinX() const noexcept
     {
       return std::min(Vertex1().X(), Vertex2().X());
     }
+
     KRYS_NODISCARD float MinY() const noexcept
     {
       return std::min(Vertex1().Y(), Vertex2().Y());
     }
+
     KRYS_NODISCARD float MaxX() const noexcept
     {
       return std::max(Vertex1().X(), Vertex2().X());
     }
+
     KRYS_NODISCARD float MaxY() const noexcept
     {
       return std::max(Vertex1().Y(), Vertex2().Y());
@@ -95,6 +99,7 @@ namespace krys::boo
     {
       return _vertices[index];
     }
+
     KRYS_NODISCARD uint32 NumberOfVertices() const noexcept
     {
       return static_cast<uint32>(_vertices.size());
@@ -104,6 +109,7 @@ namespace krys::boo
     {
       return _edges[index];
     }
+
     KRYS_NODISCARD uint32 NumberOfEdges() const noexcept
     {
       return static_cast<uint32>(_edges.size());
@@ -113,9 +119,11 @@ namespace krys::boo
     {
       return _boundingBox;
     }
+
     /// @brief The edges whose vertical range overlaps `[minY, maxY]`.
     KRYS_NODISCARD List<std::reference_wrapper<const FloatPolygonEdge>>
       OverlappingEdges(float minY, float maxY) const noexcept;
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _empty;
@@ -164,14 +172,17 @@ namespace krys::boo
     {
       return _polygon;
     }
+
     KRYS_NODISCARD uint32 VertexIndex1() const noexcept
     {
       return _vertexIndex1;
     }
+
     KRYS_NODISCARD uint32 VertexIndex2() const noexcept
     {
       return _vertexIndex2;
     }
+
     KRYS_NODISCARD uint32 EdgeIndex() const noexcept
     {
       return _edgeIndex;

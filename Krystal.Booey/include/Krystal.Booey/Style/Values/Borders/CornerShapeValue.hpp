@@ -45,22 +45,28 @@ namespace krys::boo
       constexpr CornerShapeValue(css::keywords::Round) noexcept : Superellipse {2.0}
       {
       }
+
       constexpr CornerShapeValue(css::keywords::Scoop) noexcept : Superellipse {0.5}
       {
       }
+
       constexpr CornerShapeValue(css::keywords::Bevel) noexcept : Superellipse {1.0}
       {
       }
+
       constexpr CornerShapeValue(css::keywords::Notch) noexcept : Superellipse {0.0}
       {
       }
+
       constexpr CornerShapeValue(css::keywords::Straight) noexcept
           : Superellipse {std::numeric_limits<double>::infinity()}
       {
       }
+
       constexpr CornerShapeValue(css::keywords::Squircle) noexcept : Superellipse {4.0}
       {
       }
+
       constexpr CornerShapeValue(SuperellipseFunction value) noexcept : Superellipse {value}
       {
       }
@@ -117,7 +123,6 @@ namespace krys::boo
       KRYS_NODISCARD CornerShapeValue Blend(const CornerShapeValue &, const CornerShapeValue &,
                                             const BlendingContext &) noexcept;
     };
-
   }
 }
 

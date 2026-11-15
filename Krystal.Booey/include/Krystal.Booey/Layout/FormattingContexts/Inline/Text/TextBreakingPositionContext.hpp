@@ -42,7 +42,7 @@ namespace krys::boo::layout
   {
     CollapseAll,
     CollapseWhitespaceSequence,
-    Preserve
+    Preserve,
   };
 
   KRYS_NODISCARD constexpr WhiteSpaceCollapseBehavior
@@ -73,6 +73,7 @@ namespace krys::boo::layout
     StringAtom Locale {null};
 
     explicit TextBreakingPositionContext(const RenderStyle &style) noexcept;
+
     TextBreakingPositionContext() noexcept = default;
 
     KRYS_NODISCARD friend bool operator==(const TextBreakingPositionContext &,

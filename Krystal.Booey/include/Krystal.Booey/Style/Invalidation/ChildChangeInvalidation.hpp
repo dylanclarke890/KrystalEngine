@@ -48,7 +48,7 @@ namespace krys::boo::style
     enum class ChangedElementRelation : uint8
     {
       SelfOrDescendant,
-      Sibling
+      Sibling,
     };
 
   private:
@@ -62,23 +62,31 @@ namespace krys::boo::style
   public:
     ChildChangeInvalidation(dom::ContainerNode &container,
                             const dom::ContainerNode::ChildChange &childChange) noexcept;
+
     ~ChildChangeInvalidation() noexcept;
 
     static void InvalidateAfterFinishedParsingChildren(dom::Element &parent) noexcept;
 
   private:
     void InvalidateForHasBeforeMutation() noexcept;
+
     void InvalidateForHasAfterMutation() noexcept;
+
     void InvalidateAfterChange() noexcept;
+
     void CheckForSiblingStyleChanges() noexcept;
+
     void InvalidateForChangedElement(dom::Element &changedElement, MatchingHasSelectors &matchingHasSelectors,
                                      ChangedElementRelation changedElementRelation) noexcept;
+
     void InvalidateForChangeOutsideHasScope() noexcept;
 
     template <typename TFunction>
     void TraverseRemovedElements(TFunction &&function) noexcept;
+
     template <typename TFunction>
     void TraverseAddedElements(TFunction &&function) noexcept;
+
     template <typename TFunction>
     void TraverseRemainingExistingSiblings(TFunction &&function) noexcept;
 

@@ -65,10 +65,12 @@ namespace krys::boo::style
     {
       return _isAuto;
     }
+
     KRYS_NODISCARD constexpr bool IsValue() const noexcept
     {
       return !_isAuto;
     }
+
     KRYS_NODISCARD constexpr Maybe<Value> TryValue() const noexcept
     {
       return IsValue() ? Maybe<Value> {_value} : null;
@@ -122,6 +124,7 @@ namespace krys::boo::style
   struct Blending<ZIndex>
   {
     KRYS_NODISCARD bool CanBlend(const ZIndex &, const ZIndex &) noexcept;
+
     KRYS_NODISCARD ZIndex Blend(const ZIndex &, const ZIndex &, const BlendingContext &) noexcept;
   };
 }

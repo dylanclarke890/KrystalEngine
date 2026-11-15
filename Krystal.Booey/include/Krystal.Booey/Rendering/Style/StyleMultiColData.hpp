@@ -42,6 +42,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleMultiColData);
     }
+
     KRYS_NODISCARD Ref<StyleMultiColData> Copy() const noexcept;
 
     bool operator==(const StyleMultiColData &) const noexcept;
@@ -57,6 +58,7 @@ namespace krys::boo
 
   private:
     StyleMultiColData() noexcept;
+
     StyleMultiColData(const StyleMultiColData &) noexcept;
   };
 }

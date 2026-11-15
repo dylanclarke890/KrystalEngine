@@ -45,6 +45,7 @@ namespace krys::boo::css
       double Offset;
 
       void WriteToString(StringBuilder &builder) const noexcept;
+
       KRYS_NODISCARD bool operator==(const Key &) const noexcept = default;
     };
 
@@ -53,12 +54,14 @@ namespace krys::boo::css
     List<Key> _keys;
 
     explicit KeyframeRule(Ref<StyleProperties> &&properties) noexcept;
+
     KeyframeRule(List<Key> &&keys, Ref<StyleProperties> &&properties) noexcept;
 
   public:
     ~KeyframeRule() noexcept;
 
     KRYS_NODISCARD static Ref<KeyframeRule> Create(Ref<StyleProperties> &&properties) noexcept;
+
     KRYS_NODISCARD static Ref<KeyframeRule> Create(Span<const Pair<ValueId, double>> keys,
                                                    Ref<StyleProperties> &&properties) noexcept;
 

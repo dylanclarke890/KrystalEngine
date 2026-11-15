@@ -44,6 +44,7 @@ namespace krys::boo::style
     {
       return *Value;
     }
+
     KRYS_NODISCARD const Function *operator->() const noexcept
     {
       return Value.get();

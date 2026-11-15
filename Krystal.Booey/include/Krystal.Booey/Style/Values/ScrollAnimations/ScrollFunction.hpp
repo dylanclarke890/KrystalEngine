@@ -47,6 +47,7 @@ namespace krys::boo
 
       KRYS_NODISCARD bool operator==(const ScrollFunctionParameters &) const noexcept = default;
     };
+
     using ScrollFunction = css::FunctionNotation<css::ValueId::Scroll, ScrollFunctionParameters>;
 
     // MARK: - Conversion
@@ -55,6 +56,7 @@ namespace krys::boo
     struct CSSValueConversion<ScrollFunction>
     {
       KRYS_NODISCARD ScrollFunction operator()(BuilderState &, const css::Value &) noexcept;
+
       KRYS_NODISCARD ScrollFunction operator()(BuilderState &, const css::ScrollValue &) noexcept;
     };
 
@@ -73,6 +75,5 @@ namespace krys::boo
       void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                       const ScrollFunctionParameters &) noexcept;
     };
-
   }
 }

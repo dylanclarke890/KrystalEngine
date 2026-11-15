@@ -40,12 +40,15 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleInheritedData);
     }
+
     KRYS_NODISCARD Ref<StyleInheritedData> Copy() const noexcept;
 
     bool operator==(const StyleInheritedData &) const noexcept;
 
     KRYS_NODISCARD bool FastPathInheritedEqual(const StyleInheritedData &) const noexcept;
+
     KRYS_NODISCARD bool NonFastPathInheritedEqual(const StyleInheritedData &) const noexcept;
+
     void FastPathInheritFrom(const StyleInheritedData &) noexcept;
 
     style::BorderSpacing BorderSpacing;
@@ -57,7 +60,9 @@ namespace krys::boo
 
   private:
     StyleInheritedData() noexcept;
+
     StyleInheritedData(const StyleInheritedData &) noexcept;
+
     void operator=(const StyleInheritedData &) noexcept = delete;
   };
 }

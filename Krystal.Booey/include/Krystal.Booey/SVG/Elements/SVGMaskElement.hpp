@@ -48,22 +48,27 @@ namespace krys::boo::svg
     {
       return _x->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Y() const noexcept
     {
       return _y->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Width() const noexcept
     {
       return _width->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Height() const noexcept
     {
       return _height->CurrentValue();
     }
+
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType MaskUnits() const noexcept
     {
       return _maskUnits->CurrentValue<SVGUnitTypes::SVGUnitType>();
     }
+
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType MaskContentUnits() const noexcept
     {
       return _maskContentUnits->CurrentValue<SVGUnitTypes::SVGUnitType>();
@@ -73,22 +78,27 @@ namespace krys::boo::svg
     {
       return *_x;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &YAnimated() noexcept
     {
       return *_y;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &WidthAnimated() noexcept
     {
       return *_width;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &HeightAnimated() noexcept
     {
       return *_height;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &MaskUnitsAnimated() noexcept
     {
       return *_maskUnits;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &MaskContentUnitsAnimated() noexcept
     {
       return *_maskContentUnits;
@@ -99,7 +109,9 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+
     void OnChildrenChanged() noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
@@ -108,10 +120,12 @@ namespace krys::boo::svg
     {
       return SVGTests::IsValid();
     }
+
     KRYS_NODISCARD bool NeedsPendingResourceHandling() const noexcept final
     {
       return false;
     }
+
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept final
     {
       return true;

@@ -54,6 +54,7 @@ namespace krys::boo
 
   public:
     RenderMathMLMenclose(mathml::MathMLMencloseElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLMenclose() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
@@ -63,10 +64,13 @@ namespace krys::boo
 
   private:
     void ComputePreferredLogicalWidths() noexcept final;
+
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
+
     void Paint(PaintInfo &info, const LayoutPoint &paintOffset) noexcept final;
 
     KRYS_NODISCARD LayoutUnit RuleThickness() const noexcept;
+
     KRYS_NODISCARD bool
       HasNotation(mathml::MathMLMencloseElement::MencloseNotationFlag notationFlag) const noexcept
     {

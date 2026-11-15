@@ -68,10 +68,12 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsScrollTimeline() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsViewTimeline() const noexcept
     {
       return false;
@@ -82,6 +84,7 @@ namespace krys::boo
     {
       return !_duration;
     }
+
     KRYS_NODISCARD bool IsProgressBased() const noexcept
     {
       return !IsMonotonic();
@@ -93,6 +96,7 @@ namespace krys::boo
     }
 
     virtual void AnimationTimingDidChange(WebAnimation &animation) noexcept;
+
     virtual void RemoveAnimation(WebAnimation &animation) noexcept;
 
     KRYS_NODISCARD virtual Maybe<WebAnimationTime>
@@ -100,6 +104,7 @@ namespace krys::boo
     {
       return _currentTime;
     }
+
     KRYS_NODISCARD virtual Maybe<WebAnimationTime> Duration() const noexcept
     {
       return _duration;
@@ -110,8 +115,9 @@ namespace krys::boo
     enum class ShouldUpdateAnimationsAndSendEvents : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     KRYS_NODISCARD virtual ShouldUpdateAnimationsAndSendEvents
       DocumentWillUpdateAnimationsAndSendEvents() noexcept
     {
@@ -119,7 +125,9 @@ namespace krys::boo
     }
 
     virtual void SuspendAnimations() noexcept;
+
     virtual void ResumeAnimations() noexcept;
+
     KRYS_NODISCARD bool AnimationsAreSuspended() const noexcept;
 
     KRYS_NODISCARD virtual AnimationTimelinesController *Controller() const noexcept

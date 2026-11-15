@@ -29,8 +29,8 @@
 
 namespace krys::boo
 {
-  class RenderMenuList;
   class AXMenuListPopup;
+  class RenderMenuList;
 
   /// @brief A drop-down `select`: a pop-up button whose one child is its pop-up, whose children are the
   /// options.
@@ -44,34 +44,43 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<AXMenuList> Create(AXId id, RenderMenuList &renderer,
                                                  AXObjectCache &cache) noexcept;
+
     ~AXMenuList() noexcept override;
 
     KRYS_NODISCARD bool IsMenuList() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD AXMenuListPopup &Popup() const noexcept;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
       return true;
     }
+
     void AddChildren() noexcept override
     {
     }
+
     void UpdateChildrenIfNecessary() noexcept override;
+
     // The pop-up is the only child, for the menu list's life: changes are the pop-up's.
     void ClearChildren() noexcept override
     {
     }
+
     void SetNeedsToUpdateChildren() noexcept override
     {
     }
 
     KRYS_NODISCARD bool IsCollapsed() const noexcept override;
+
     /// @brief The select's active option changed to the one at @p optionIndex.
     void DidUpdateActiveOption(int32 optionIndex) noexcept;
+
     KRYS_NODISCARD bool CanSetFocusAttribute() const noexcept override;
+
     /// @brief Opens the pop-up, or closes it if it's open.
     bool Press() noexcept override;
 
@@ -82,6 +91,7 @@ namespace krys::boo
     {
       return AXRole::PopUpButton;
     }
+
     void DetachRemoteParts(AXDetachmentType detachmentType) noexcept override;
   };
 }

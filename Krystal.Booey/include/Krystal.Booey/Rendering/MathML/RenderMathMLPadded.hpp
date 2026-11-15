@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     RenderMathMLPadded(mathml::MathMLPaddedElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLPadded() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
@@ -54,14 +55,21 @@ namespace krys::boo
 
   private:
     void ComputePreferredLogicalWidths() noexcept final;
+
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
+
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;
 
     KRYS_NODISCARD mathml::MathMLPaddedElement &GetElement() const noexcept;
+
     KRYS_NODISCARD LayoutUnit Voffset() const noexcept;
+
     KRYS_NODISCARD LayoutUnit Lspace() const noexcept;
+
     KRYS_NODISCARD LayoutUnit MpaddedWidth(LayoutUnit contentWidth) const noexcept;
+
     KRYS_NODISCARD LayoutUnit MpaddedHeight(LayoutUnit contentHeight) const noexcept;
+
     KRYS_NODISCARD LayoutUnit MpaddedDepth(LayoutUnit contentDepth) const noexcept;
   };
 }

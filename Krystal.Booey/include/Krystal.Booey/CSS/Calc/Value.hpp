@@ -80,6 +80,7 @@ namespace krys::boo::css::calc
                                               AllowedSymbols, PropertyParserOptions) noexcept;
 
     KRYS_NODISCARD static Ref<Value> Create(const style::calc::Value &, const RenderStyle &) noexcept;
+
     KRYS_NODISCARD static Ref<Value> Create(css::Category, css::Range, calc::Tree &&) noexcept;
 
     ~Value() noexcept;
@@ -87,9 +88,12 @@ namespace krys::boo::css::calc
     // Creates a copy of the calc::Tree with non-canonical dimensions and any symbols present in the provided
     // symbol table resolved.
     KRYS_NODISCARD Ref<Value> CopySimplified(const ToLengthConversionData &) const noexcept;
+
     KRYS_NODISCARD Ref<Value> CopySimplified(const ToLengthConversionData &,
                                              const SymbolTable &) const noexcept;
+
     KRYS_NODISCARD Ref<Value> CopySimplified(NoConversionDataRequiredTag) const noexcept;
+
     KRYS_NODISCARD Ref<Value> CopySimplified(NoConversionDataRequiredTag, const SymbolTable &) const noexcept;
 
     KRYS_NODISCARD css::Category GetCategory() const noexcept
@@ -111,25 +115,34 @@ namespace krys::boo::css::calc
     }
 
     KRYS_NODISCARD double DoubleValue(const ToLengthConversionData &) const noexcept;
+
     KRYS_NODISCARD double DoubleValue(const ToLengthConversionData &, const SymbolTable &) const noexcept;
+
     KRYS_NODISCARD double DoubleValue(NoConversionDataRequiredTag) const noexcept;
+
     KRYS_NODISCARD double DoubleValue(NoConversionDataRequiredTag, const SymbolTable &) const noexcept;
+
     KRYS_NODISCARD double DoubleValueDeprecated() const noexcept;
 
     KRYS_NODISCARD double ComputeLengthPx(const ToLengthConversionData &) const noexcept;
+
     KRYS_NODISCARD double ComputeLengthPx(const ToLengthConversionData &, const SymbolTable &) const noexcept;
 
     KRYS_NODISCARD Ref<style::calc::Value> CreateCalculationValue(NoConversionDataRequiredTag) const noexcept;
+
     KRYS_NODISCARD Ref<style::calc::Value> CreateCalculationValue(NoConversionDataRequiredTag,
                                                                   const SymbolTable &) const noexcept;
+
     KRYS_NODISCARD Ref<style::calc::Value>
       CreateCalculationValue(const ToLengthConversionData &) const noexcept;
+
     KRYS_NODISCARD Ref<style::calc::Value> CreateCalculationValue(const ToLengthConversionData &,
                                                                   const SymbolTable &) const noexcept;
 
     void CollectComputedStyleDependencies(ComputedStyleDependencies &) const noexcept;
 
     KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &) const noexcept;
+
     KRYS_NODISCARD bool Equals(const Value &) const noexcept;
 
     KRYS_NODISCARD const calc::Tree &GetTree() const noexcept

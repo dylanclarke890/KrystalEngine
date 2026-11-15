@@ -49,10 +49,14 @@ namespace krys::boo::css::calc
 {
   static auto CopyAndSimplify(const Random::SharingType &, const SimplificationOptions &) noexcept
     -> Random::SharingType;
+
   static auto CopyAndSimplify(const keywords::None &, const SimplificationOptions &) noexcept
     -> keywords::None;
+
   static auto CopyAndSimplify(const Children &, const SimplificationOptions &) noexcept -> Children;
+
   static auto CopyAndSimplify(const ChildOrNone &, const SimplificationOptions &) noexcept -> ChildOrNone;
+
   template <typename T>
   static auto CopyAndSimplify(const Maybe<T> &, const SimplificationOptions &) noexcept -> Maybe<T>;
 
@@ -695,6 +699,7 @@ namespace krys::boo::css::calc
       uint32 Merges = 0;
       bool CanRemove = false;
     };
+
     std::array<FirstInstance, NumberOfNumericIdentityTypes> firstInstances {};
 
     for (size_t i = 0; i < root.Children.size(); ++i)
@@ -953,6 +958,7 @@ namespace krys::boo::css::calc
       double Value;
       calc::Type Type;
     };
+
     auto productResult = ProductResult {.Value = 1, .Type = calc::Type {}};
 
     bool success = false;
@@ -1380,16 +1386,20 @@ namespace krys::boo::css::calc
     struct NumberTag
     {
     };
+
     struct PercentageTag
     {
     };
+
     struct DimensionTag
     {
       calc::Dimension Dimension;
     };
+
     struct FailureTag
     {
     };
+
     Variant<std::monostate, NumberTag, PercentageTag, DimensionTag, FailureTag> result;
 
     double value = ExecuteMathOperation<Hypot>(

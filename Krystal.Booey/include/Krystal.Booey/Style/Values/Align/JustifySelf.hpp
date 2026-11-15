@@ -39,72 +39,98 @@ namespace krys::boo::style
   struct JustifySelf
   {
     constexpr JustifySelf(css::keywords::Auto) noexcept;
+
     constexpr JustifySelf(css::keywords::Normal) noexcept;
+
     constexpr JustifySelf(css::keywords::Stretch) noexcept;
+
     constexpr JustifySelf(css::keywords::Baseline, Maybe<BaselineAlignmentPreference> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::Center, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::Start, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::End, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::SelfStart, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::SelfEnd, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::FlexStart, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::FlexEnd, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::Left, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::Right, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifySelf(css::keywords::AnchorCenter, Maybe<OverflowPosition> = null) noexcept;
 
     KRYS_NODISCARD constexpr bool IsAuto() const noexcept
     {
       return Primary() == PrimaryKind::Auto;
     }
+
     KRYS_NODISCARD constexpr bool IsNormal() const noexcept
     {
       return Primary() == PrimaryKind::Normal;
     }
+
     KRYS_NODISCARD constexpr bool IsStretch() const noexcept
     {
       return Primary() == PrimaryKind::Stretch;
     }
+
     KRYS_NODISCARD constexpr bool IsBaseline() const noexcept
     {
       return Primary() == PrimaryKind::Baseline;
     }
+
     KRYS_NODISCARD constexpr bool IsCenter() const noexcept
     {
       return Primary() == PrimaryKind::Center;
     }
+
     KRYS_NODISCARD constexpr bool IsStart() const noexcept
     {
       return Primary() == PrimaryKind::Start;
     }
+
     KRYS_NODISCARD constexpr bool IsEnd() const noexcept
     {
       return Primary() == PrimaryKind::End;
     }
+
     KRYS_NODISCARD constexpr bool IsSelfStart() const noexcept
     {
       return Primary() == PrimaryKind::SelfStart;
     }
+
     KRYS_NODISCARD constexpr bool IsSelfEnd() const noexcept
     {
       return Primary() == PrimaryKind::SelfEnd;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexStart() const noexcept
     {
       return Primary() == PrimaryKind::FlexStart;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexEnd() const noexcept
     {
       return Primary() == PrimaryKind::FlexEnd;
     }
+
     KRYS_NODISCARD constexpr bool IsLeft() const noexcept
     {
       return Primary() == PrimaryKind::Left;
     }
+
     KRYS_NODISCARD constexpr bool IsRight() const noexcept
     {
       return Primary() == PrimaryKind::Right;
     }
+
     KRYS_NODISCARD constexpr bool IsAnchorCenter() const noexcept
     {
       return Primary() == PrimaryKind::AnchorCenter;
@@ -115,6 +141,7 @@ namespace krys::boo::style
       return Primary() == PrimaryKind::Baseline
              && GetBaselineAlignmentPreference() == BaselineAlignmentPreferenceKind::First;
     }
+
     KRYS_NODISCARD constexpr bool IsLastBaseline() const noexcept
     {
       return Primary() == PrimaryKind::Baseline
@@ -148,20 +175,26 @@ namespace krys::boo::style
     };
 
     KRYS_NODISCARD constexpr static bool CanHaveBaselinePosition(PrimaryKind) noexcept;
+
     KRYS_NODISCARD constexpr static bool CanHaveOverflowPosition(PrimaryKind) noexcept;
 
     constexpr JustifySelf(PrimaryKind) noexcept;
+
     constexpr JustifySelf(PrimaryKind, Maybe<BaselineAlignmentPreference>) noexcept;
+
     constexpr JustifySelf(PrimaryKind, Maybe<OverflowPosition>) noexcept;
 
     KRYS_NODISCARD constexpr PrimaryKind Primary() const noexcept;
+
     KRYS_NODISCARD constexpr BaselineAlignmentPreferenceKind GetBaselineAlignmentPreference() const noexcept;
+
     KRYS_NODISCARD constexpr OverflowPositionKind GetOverflowPosition() const noexcept;
 
     uint8 _primary : 4 {static_cast<uint8>(PrimaryKind::Normal)};
     uint8 _secondary : 2 {
       0}; // unused, BaselineAlignmentPreferenceKind or OverflowPositionKind, depending on value of _primary
   };
+
   static_assert(sizeof(JustifySelf) == 1);
 
   constexpr JustifySelf::JustifySelf(css::keywords::Auto) noexcept : JustifySelf {PrimaryKind::Auto}

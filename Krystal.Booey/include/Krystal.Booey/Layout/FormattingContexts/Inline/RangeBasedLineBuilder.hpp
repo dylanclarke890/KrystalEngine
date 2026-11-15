@@ -46,6 +46,7 @@ namespace krys::boo::layout
     RangeBasedLineBuilder(InlineFormattingContext &inlineFormattingContext,
                           HorizontalConstraints rootHorizontalConstraints,
                           const InlineContentCache::InlineItems &inlineItems) noexcept;
+
     KRYS_NODISCARD LineLayoutResult LayoutInlineContent(const LineInput &lineInput,
                                                         const Maybe<PreviousLine> &previousLine,
                                                         bool isFirstFormattedLineCandidate) noexcept final;

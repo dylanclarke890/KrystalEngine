@@ -60,19 +60,24 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     void Reattach(Rule &rule) noexcept final;
 
     KRYS_NODISCARD const CSSOMStringAtom &Name() const noexcept;
+
     void SetName(const CSSOMStringAtom &name) noexcept;
 
     KRYS_NODISCARD CSSRuleList &CssRules() noexcept;
 
     void AppendRule(const CSSOMString &rule) noexcept;
+
     void DeleteRule(const CSSOMString &key) noexcept;
+
     KRYS_NODISCARD CSSKeyframeRule *FindRule(const CSSOMString &key) noexcept;
 
     // For IndexedGetter and CSSRuleList.
     KRYS_NODISCARD uint32 Length() const noexcept;
+
     KRYS_NODISCARD CSSKeyframeRule *Item(uint32 index) const noexcept;
 
     KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept

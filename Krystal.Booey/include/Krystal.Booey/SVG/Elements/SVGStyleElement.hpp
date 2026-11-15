@@ -42,6 +42,7 @@ namespace krys::boo::svg
 
   public:
     explicit SVGStyleElement(dom::Document &document) noexcept;
+
     ~SVGStyleElement() noexcept override;
 
     /// @brief The associated CSS style sheet, if any.
@@ -53,18 +54,22 @@ namespace krys::boo::svg
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
+
     void Disabled(bool value) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
+
     void Type(dom::DOMString value) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__media
     KRYS_NODISCARD dom::DOMString Media() const noexcept;
+
     void Media(dom::DOMString value) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__title
     KRYS_NODISCARD dom::DOMString Title() const noexcept;
+
     void Title(dom::DOMString value) noexcept;
 
     bool SheetLoaded() noexcept final
@@ -80,8 +85,11 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void OnInsert() noexcept final;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+
     void OnChildrenChanged() noexcept final;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
@@ -90,6 +98,7 @@ namespace krys::boo::svg
     }
 
     void FinishParsingChildren() noexcept final;
+
     void NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept final;
 
     KRYS_NODISCARD bool IsLoading() const noexcept

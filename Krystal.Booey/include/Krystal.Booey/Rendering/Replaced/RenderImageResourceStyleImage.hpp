@@ -42,9 +42,11 @@ namespace krys::boo
 
   private:
     void Initialize(RenderElement &renderer) noexcept override;
+
     void Shutdown() noexcept override;
 
     KRYS_NODISCARD RefPtr<Image> GetImage(const IntSize &size = {}) const noexcept override;
+
     KRYS_NODISCARD bool ErrorOccurred() const noexcept override
     {
       return _styleImage->ErrorOccurred();
@@ -56,6 +58,7 @@ namespace krys::boo
     {
       return _styleImage->ImageHasRelativeWidth();
     }
+
     KRYS_NODISCARD bool ImageHasRelativeHeight() const noexcept override
     {
       return _styleImage->ImageHasRelativeHeight();
@@ -65,6 +68,7 @@ namespace krys::boo
     {
       return _styleImage->Data();
     }
+
     KRYS_NODISCARD LayoutSize ImageSize(float multiplier, CachedImage::SizeType) const noexcept override
     {
       return LayoutSize(_styleImage->ImageSize(Renderer(), multiplier));

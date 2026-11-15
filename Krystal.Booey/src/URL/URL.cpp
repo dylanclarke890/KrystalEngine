@@ -442,7 +442,7 @@ namespace krys::boo::url
   uint32 URL::PathStart() const noexcept
   {
     uint32 start = _hostEnd + _portLength;
-    if (start == _schemeEnd + 1U && start + 1 < _string.size() && _string[start] == '/'
+    if (start == _schemeEnd + 1u && start + 1 < _string.size() && _string[start] == '/'
         && _string[start + 1] == '.')
     {
       start += 2;
@@ -696,7 +696,7 @@ namespace krys::boo::url
       return false;
     }
 
-    bool slashSlashNeeded = _userStart == _schemeEnd + 1U;
+    bool slashSlashNeeded = _userStart == _schemeEnd + 1u;
     Parse(MakeString({utf8_stringview {_string}.substr(0, HostStart()), slashSlashNeeded ? u8"//" : u8"",
                       HasSpecialScheme() ? utf8_stringview {encodedHostName} : newHost,
                       utf8_stringview {_string}.substr(_hostEnd)}));
@@ -781,7 +781,7 @@ namespace krys::boo::url
       return;
     }
 
-    bool slashSlashNeeded = _userStart == _schemeEnd + 1U;
+    bool slashSlashNeeded = _userStart == _schemeEnd + 1u;
     Parse(MakeString({utf8_stringview {_string}.substr(0, HostStart()), slashSlashNeeded ? u8"//" : u8"",
                       HasSpecialScheme() ? utf8_stringview {encodedHostName} : hostName,
                       portString.empty() ? u8"" : u8":", portString,
@@ -830,7 +830,7 @@ namespace krys::boo::url
     uint32 end = _userEnd;
     if (!newUser.empty())
     {
-      bool slashSlashNeeded = _userStart == _schemeEnd + 1U;
+      bool slashSlashNeeded = _userStart == _schemeEnd + 1u;
       bool needSeparator = end == _hostEnd || (end == _passwordEnd && _string[end] != '@');
       Parse(MakeString({utf8_stringview {_string}.substr(0, _userStart), slashSlashNeeded ? u8"//" : u8"",
                         PercentEncodeCharacters(newUser, URLParser::IsInUserInfoEncodeSet),
@@ -856,7 +856,7 @@ namespace krys::boo::url
 
     if (!newPassword.empty())
     {
-      bool needLeadingSlashes = _userEnd == _schemeEnd + 1U;
+      bool needLeadingSlashes = _userEnd == _schemeEnd + 1u;
       Parse(MakeString({utf8_stringview {_string}.substr(0, _userEnd), needLeadingSlashes ? u8"//:" : u8":",
                         PercentEncodeCharacters(newPassword, URLParser::IsInUserInfoEncodeSet), u8"@",
                         utf8_stringview {_string}.substr(CredentialsEnd())}));
@@ -933,7 +933,7 @@ namespace krys::boo::url
 
     bool noSlashNeeded = path.starts_with(u8'/')
                          || (path.starts_with(u8'\\') && (HasSpecialScheme() || ProtocolIsFile()))
-                         || (!HasSpecialScheme() && path.empty() && _schemeEnd + 1U < PathStart());
+                         || (!HasSpecialScheme() && path.empty() && _schemeEnd + 1u < PathStart());
     bool dotSlashNeeded =
       !HasSpecialScheme() && Host().empty() && path.starts_with(u8"//") && path.size() > 2;
     ParseAllowingC0AtEnd(
@@ -1362,8 +1362,9 @@ namespace krys::boo::url
       WillSkip,
       Skipping,
       Skipped,
-      Final
+      Final,
     };
+
     auto skipState = None;
     auto count = 0;
 

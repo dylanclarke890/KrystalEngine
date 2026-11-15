@@ -73,21 +73,26 @@ namespace krys::boo::css
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorpercent
     KRYS_NODISCARD static dom::ExceptionOr<RectifiedCSSColorComponent>
       RectifyCSSColorPercent(CSSColorPercent percent) noexcept;
+
     /// @return A `SyntaxError` if @p angle is neither an angle nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolorangle
     KRYS_NODISCARD static dom::ExceptionOr<RectifiedCSSColorComponent>
       RectifyCSSColorAngle(CSSColorAngle angle) noexcept;
+
     /// @return A `SyntaxError` if @p number is neither a number nor `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-csscolornumber
     KRYS_NODISCARD static dom::ExceptionOr<RectifiedCSSColorComponent>
       RectifyCSSColorNumber(CSSColorNumber number) noexcept;
+
     /// @brief @p component as the variant the component's getters return.
     KRYS_NODISCARD static CSSColorPercent
       ToCSSColorComponent(const RectifiedCSSColorComponent &component) noexcept;
+
     /// @brief @p numberish as a percentage component, a number being a fraction.
     KRYS_NODISCARD static CSSColorPercent ToCSSColorPercent(const CSSNumberish &numberish) noexcept;
 
     KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
+
     void Serialise(StringBuilder &builder,
                    EnumSet<SerialisationArguments> arguments = {}) const noexcept final;
 

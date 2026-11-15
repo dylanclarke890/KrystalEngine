@@ -41,15 +41,18 @@ namespace krys::boo::css
     /// @return A `TypeError` if @p property isn't a property, or @p values aren't a valid value of it.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-set
     dom::ExceptionOr<void> Set(CSSOMStringView property, List<CSSStyleValueOrString> values) noexcept;
+
     /// @brief Appends @p values to the list-valued @p property.
     /// @return A `TypeError` if @p property isn't a list-valued property, or @p values aren't valid items of
     /// it.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-append
     dom::ExceptionOr<void> Append(CSSOMStringView property, List<CSSStyleValueOrString> values) noexcept;
+
     /// @brief Removes @p property.
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-delete
     dom::ExceptionOr<void> Delete(CSSOMStringView property) noexcept;
+
     /// @brief Removes every property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymap-clear
     virtual void Clear() noexcept = 0;
@@ -61,11 +64,15 @@ namespace krys::boo::css
 
   protected:
     virtual void RemoveProperty(PropertyId property) noexcept = 0;
+
     virtual void RemoveCustomProperty(const CSSOMStringAtom &property) noexcept = 0;
+
     /// @return False if @p value doesn't parse as @p property's value.
     virtual bool SetShorthandProperty(PropertyId property, const CSSOMString &value) noexcept = 0;
+
     /// @return False if @p value isn't a valid value of @p property.
     virtual bool SetProperty(PropertyId property, Ref<Value> value) noexcept = 0;
+
     virtual bool SetCustomProperty(const CSSOMStringAtom &property,
                                    Ref<VariableReferenceValue> value) noexcept = 0;
   };

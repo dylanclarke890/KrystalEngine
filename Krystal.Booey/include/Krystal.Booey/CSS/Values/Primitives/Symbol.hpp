@@ -79,6 +79,7 @@ namespace krys::boo::css
     {
     }
   };
+
   template <>
   struct ComputedStyleDependenciesCollector<Symbol>
   {

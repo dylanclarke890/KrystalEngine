@@ -627,7 +627,7 @@ namespace krys::boo
 
           switch (currentComponent.front())
           {
-            case 0xf9:
+            case 0xF9:
               es = GIFControlExtension;
               // The GIF spec mandates that the GIFControlExtension header block length is 4 bytes,
               // and the parser for this block reads 4 bytes, so we must enforce that the buffer
@@ -646,9 +646,9 @@ namespace krys::boo
               // ignoring plain text extension
               break;
 
-            case 0xff: es = GIFApplicationExtension; break;
+            case 0xFF: es = GIFApplicationExtension; break;
 
-            case 0xfe: es = GIFConsumeComment; break;
+            case 0xFE: es = GIFConsumeComment; break;
 
             default:   break;
           }

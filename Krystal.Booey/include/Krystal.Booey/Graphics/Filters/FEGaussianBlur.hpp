@@ -49,23 +49,28 @@ namespace krys::boo
     {
       return _stdX;
     }
+
     bool SetStdDeviationX(float stdX) noexcept;
 
     KRYS_NODISCARD float StdDeviationY() const noexcept
     {
       return _stdY;
     }
+
     bool SetStdDeviationY(float stdY) noexcept;
 
     KRYS_NODISCARD EdgeModeType EdgeMode() const noexcept
     {
       return _edgeMode;
     }
+
     bool SetEdgeMode(EdgeModeType edgeMode) noexcept;
 
     KRYS_NODISCARD static IntSize CalculateKernelSize(const Filter &filter, FloatSize stdDeviation) noexcept;
+
     /// @brief The size of the box blur kernels that approximate a Gaussian blur of `stdDeviation`.
     KRYS_NODISCARD static IntSize CalculateUnscaledKernelSize(FloatSize stdDeviation) noexcept;
+
     /// @brief How far a blur of `stdDeviation` spreads past each edge.
     KRYS_NODISCARD static IntSize CalculateOutsetSize(FloatSize stdDeviation) noexcept;
 

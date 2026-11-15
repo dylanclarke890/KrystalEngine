@@ -47,21 +47,28 @@ namespace krys::gfx
 
   public:
     void MoveTo(Vec2f point) noexcept;
+
     void LineTo(Vec2f point) noexcept;
+
     void QuadTo(Vec2f control, Vec2f end) noexcept;
+
     void CubicTo(Vec2f control1, Vec2f control2, Vec2f end) noexcept;
+
     /// @brief Closes the current contour; the current point moves back to its start.
     void Close() noexcept;
 
     /// @brief Adds a closed contour around a rect, clockwise on screen.
     void AddRect(const Rect2D &rect) noexcept;
+
     /// @brief Adds a closed contour around a rect with elliptical corners, clockwise on screen.
     /// @param radii The x and y radius of the top-left, top-right, bottom-right and bottom-left corners.
     /// Negative radii are treated as zero, and radii that don't fit are scaled down together until they do,
     /// as CSS does for `border-radius`.
     void AddRoundedRect(const Rect2D &rect, const Array<Vec2f, 4> &radii) noexcept;
+
     /// @brief Adds a closed contour around an ellipse, clockwise on screen.
     void AddEllipse(Vec2f centre, Vec2f radii) noexcept;
+
     /// @brief Adds an elliptical arc from `startAngle` to `endAngle` (radians, from the x axis, increasing
     /// clockwise on screen), as cubics. A line joins the current point to the arc's start, if there is one.
     /// A sweep of a full turn or more draws the whole ellipse.

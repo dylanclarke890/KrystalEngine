@@ -40,7 +40,7 @@ namespace krys::boo::html
     {
       Optimum,
       Suboptimal,
-      EvenLessGood
+      EvenLessGood,
     };
 
   private:
@@ -53,6 +53,7 @@ namespace krys::boo::html
     }
 
     explicit HTMLMeterElement(dom::Document &document) noexcept;
+
     ~HTMLMeterElement() noexcept override;
 
     KRYS_NODISCARD static Ref<HTMLMeterElement> Create(dom::Document &document) noexcept;
@@ -100,6 +101,7 @@ namespace krys::boo::html
 #pragma endregion
 
     KRYS_NODISCARD double ValueRatio() const noexcept;
+
     KRYS_NODISCARD GaugeRegion GetGaugeRegion() const noexcept;
 
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
@@ -111,9 +113,11 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+
     void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
 
     void DidElementStateChange() noexcept;
+
     KRYS_NODISCARD RenderMeter *GetRenderMeter() const noexcept;
   };
 }

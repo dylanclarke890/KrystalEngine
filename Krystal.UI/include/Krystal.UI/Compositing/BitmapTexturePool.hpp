@@ -18,7 +18,7 @@ namespace krys::ui
     };
 
     /// @brief How many frames a texture stays unused before it's released.
-    static constexpr uint64 ReleaseUnusedFrames = 180;
+    constexpr static uint64 ReleaseUnusedFrames = 180;
 
     gfx::Device &_device;
     List<Entry> _textures;

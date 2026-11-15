@@ -60,14 +60,19 @@ namespace krys::boo
 
     public:
       GlyphPageCacheEntry() noexcept;
+
       explicit GlyphPageCacheEntry(RefPtr<GlyphPage> &&singleFont) noexcept;
+
       GlyphPageCacheEntry(GlyphPageCacheEntry &&) noexcept;
+
       GlyphPageCacheEntry &operator=(GlyphPageCacheEntry &&) noexcept;
+
       ~GlyphPageCacheEntry() noexcept;
 
       KRYS_NODISCARD GlyphData GlyphDataForCharacter(char32 character) const noexcept;
 
       void SetSingleFontPage(RefPtr<GlyphPage> &&page) noexcept;
+
       void SetGlyphDataForCharacter(char32 character, GlyphData glyphData) noexcept;
 
       KRYS_NODISCARD bool IsNull() const noexcept
@@ -81,7 +86,7 @@ namespace krys::boo
       }
     };
 
-    static constexpr size_t ResolvedEmojiPolicyCount = 3;
+    constexpr static size_t ResolvedEmojiPolicyCount = 3;
 
     SmallList<FontRanges, 1> _realizedFallbackRanges;
     uint32 _lastRealizedFallbackIndex {0};
@@ -100,6 +105,7 @@ namespace krys::boo
     Maybe<bool> _canTakeFixedPitchFastContentMeasuring;
 
     FontCascadeFonts() noexcept;
+
     explicit FontCascadeFonts(const FontPlatformData &platformData) noexcept;
 
   public:
@@ -128,6 +134,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsFixedPitch(const FontCascadeDescription &description,
                                      FontSelector *fontSelector) noexcept;
+
     KRYS_NODISCARD bool CanTakeFixedPitchFastContentMeasuring(const FontCascadeDescription &description,
                                                               FontSelector *fontSelector) noexcept;
 
@@ -137,6 +144,7 @@ namespace krys::boo
     {
       return _widthCache;
     }
+
     KRYS_NODISCARD const WidthCache &GetWidthCache() const noexcept
     {
       return _widthCache;
@@ -150,6 +158,7 @@ namespace krys::boo
 
     KRYS_NODISCARD const Font &PrimaryFont(const FontCascadeDescription &description,
                                            FontSelector *fontSelector) noexcept;
+
     KRYS_NODISCARD const FontRanges &RealizeFallbackRangesAt(const FontCascadeDescription &description,
                                                              FontSelector *fontSelector,
                                                              uint32 fallbackIndex) noexcept;
@@ -162,12 +171,14 @@ namespace krys::boo
                                                         FontSelector *fontSelector, FontVariant variant,
                                                         ResolvedEmojiPolicy resolvedEmojiPolicy,
                                                         bool systemFallbackShouldBeInvisible) noexcept;
+
     KRYS_NODISCARD GlyphData GlyphDataForVariant(char32 character, const FontCascadeDescription &description,
                                                  FontSelector *fontSelector, FontVariant variant,
                                                  ResolvedEmojiPolicy resolvedEmojiPolicy,
                                                  uint32 fallbackIndex = 0) noexcept;
 
     void DeterminePitch(const FontCascadeDescription &description, FontSelector *fontSelector) noexcept;
+
     void DetermineCanTakeFixedPitchFastContentMeasuring(const FontCascadeDescription &description,
                                                         FontSelector *fontSelector) noexcept;
   };

@@ -15,7 +15,7 @@ namespace krys
     Shorter,
     Longer,
     Increasing,
-    Decreasing
+    Decreasing,
   };
 
   enum class ColourInterpolationColourSpace : uint8
@@ -34,7 +34,7 @@ namespace krys
     ProPhotoRGB,
     Rec2020,
     XYZD50,
-    XYZD65
+    XYZD65,
   };
 
   template <typename T, typename = void>

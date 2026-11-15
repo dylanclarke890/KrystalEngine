@@ -44,11 +44,15 @@ namespace krys::boo
     {
       return _position;
     }
+
     bool SetX(float) noexcept override;
+
     bool SetY(float) noexcept override;
+
     bool SetZ(float) noexcept override;
 
     void InitPaintingData(const Filter &, const FilterImage &result, PaintingData &) const noexcept override;
+
     KRYS_NODISCARD ComputedLightingData ComputePixelLightingData(const PaintingData &, int32 x, int32 y,
                                                                  float z) const noexcept final;
 

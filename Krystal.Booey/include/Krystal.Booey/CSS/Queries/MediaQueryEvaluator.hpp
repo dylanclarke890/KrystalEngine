@@ -57,12 +57,14 @@ namespace krys::boo::css::mq
                                  EvaluationResult mediaConditionResult = EvaluationResult::False) noexcept;
 
     KRYS_NODISCARD bool Evaluate(const MediaQueryList &list) const noexcept;
+
     KRYS_NODISCARD bool Evaluate(const MediaQuery &query) const noexcept;
 
     KRYS_NODISCARD bool EvaluateMediaType(const MediaQuery &query) const noexcept;
 
     KRYS_NODISCARD MediaQueryDynamicDependency
       CollectDynamicDependencies(const MediaQueryList &queries) const noexcept;
+
     KRYS_NODISCARD MediaQueryDynamicDependency
       CollectDynamicDependencies(const MediaQuery &query) const noexcept;
 

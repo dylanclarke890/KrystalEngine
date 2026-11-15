@@ -40,8 +40,8 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
-  struct ResolutionContext;
   enum class IsInDisplayNoneTree : bool;
+  struct ResolutionContext;
 
   using WeakStyleOriginatedAnimations = List<WeakPtr<StyleOriginatedAnimation>>;
 
@@ -61,6 +61,7 @@ namespace krys::boo::style
     {
       return Styleable(element, null);
     }
+
     /// @brief The element, or pseudo-element of an element, @p renderer renders.
     KRYS_NODISCARD static Maybe<Styleable> FromRenderer(const RenderElement &renderer) noexcept;
 
@@ -85,16 +86,22 @@ namespace krys::boo::style
     {
       return Element.GetKeyframeEffectStack(PseudoElementIdentifier);
     }
+
     KRYS_NODISCARD boo::KeyframeEffectStack &EnsureKeyframeEffectStack() const noexcept
     {
       return Element.EnsureKeyframeEffectStack(PseudoElementIdentifier);
     }
+
     KRYS_NODISCARD bool IsRunningAcceleratedAnimationOfProperty(css::PropertyId property) const noexcept;
+
     KRYS_NODISCARD bool IsRunningAcceleratedTransformRelatedAnimation() const noexcept;
+
     KRYS_NODISCARD bool HasRunningAcceleratedAnimations() const noexcept;
+
     /// @brief Grows @p bounds to cover where the transform animations move them.
     /// @return False if the extent can't be computed.
     KRYS_NODISCARD bool ComputeAnimationExtent(LayoutRect &bounds) const noexcept;
+
     KRYS_NODISCARD bool MayHaveNonZeroOpacity() const noexcept;
 
     KRYS_NODISCARD bool HasKeyframeEffects() const noexcept
@@ -111,27 +118,33 @@ namespace krys::boo::style
     {
       return Element.Animations(PseudoElementIdentifier);
     }
+
     KRYS_NODISCARD bool
       HasCompletedTransitionForProperty(const AnimatableCSSProperty &property) const noexcept
     {
       return Element.HasCompletedTransitionForProperty(PseudoElementIdentifier, property);
     }
+
     KRYS_NODISCARD bool HasRunningTransitionForProperty(const AnimatableCSSProperty &property) const noexcept
     {
       return Element.HasRunningTransitionForProperty(PseudoElementIdentifier, property);
     }
+
     KRYS_NODISCARD bool HasRunningTransitions() const noexcept
     {
       return Element.HasRunningTransitions(PseudoElementIdentifier);
     }
+
     KRYS_NODISCARD AnimationCollection &EnsureAnimations() const noexcept
     {
       return Element.EnsureAnimations(PseudoElementIdentifier);
     }
+
     KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &EnsureCompletedTransitionsByProperty() const noexcept
     {
       return Element.EnsureCompletedTransitionsByProperty(PseudoElementIdentifier);
     }
+
     KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &EnsureRunningTransitionsByProperty() const noexcept
     {
       return Element.EnsureRunningTransitionsByProperty(PseudoElementIdentifier);
@@ -141,6 +154,7 @@ namespace krys::boo::style
     {
       return Element.LastStyleChangeEventStyle(PseudoElementIdentifier);
     }
+
     void SetLastStyleChangeEventStyle(UniquePtr<const RenderStyle> &&style) const noexcept
     {
       Element.SetLastStyleChangeEventStyle(PseudoElementIdentifier, krys::move(style));
@@ -150,6 +164,7 @@ namespace krys::boo::style
     {
       return Element.HasPropertiesOverridenAfterAnimation(PseudoElementIdentifier);
     }
+
     void SetHasPropertiesOverridenAfterAnimation(bool value) const noexcept
     {
       Element.SetHasPropertiesOverridenAfterAnimation(PseudoElementIdentifier, value);
@@ -159,10 +174,12 @@ namespace krys::boo::style
     {
       return Element.AnimationsCreatedByMarkup(PseudoElementIdentifier);
     }
+
     void SetAnimationsCreatedByMarkup(CSSAnimationCollection &&collection) const noexcept
     {
       Element.SetAnimationsCreatedByMarkup(PseudoElementIdentifier, krys::move(collection));
     }
+
     void KeyframesRuleDidChange() const noexcept
     {
       Element.KeyframesRuleDidChange(PseudoElementIdentifier);
@@ -170,21 +187,26 @@ namespace krys::boo::style
 
     /// @brief Recomputes the keyframes that use container units, since the element's query container changed.
     void QueryContainerDidChange() const noexcept;
+
     /// @brief Whether @p animations names an `@keyframes` rule that didn't exist when the CSS animations were
     /// last updated.
     KRYS_NODISCARD bool
       AnimationListContainsNewlyValidAnimation(const style::Animations &animations) const noexcept;
 
     void ElementWasRemoved() const noexcept;
+
     void WillChangeRenderer() const noexcept;
 
     void CancelStyleOriginatedAnimations() const noexcept;
+
     /// @brief Cancels the style-originated animations, silently for those in @p animationsToCancelSilently.
     void CancelStyleOriginatedAnimations(
       const WeakStyleOriginatedAnimations &animationsToCancelSilently) const noexcept;
 
     void AnimationWasAdded(WebAnimation &animation) const noexcept;
+
     void AnimationWasRemoved(WebAnimation &animation) const noexcept;
+
     void RemoveStyleOriginatedAnimationFromListsForOwningElement(WebAnimation &animation) const noexcept;
 
     /// @brief Creates, updates and cancels the CSS animations of a style change event.
@@ -193,13 +215,16 @@ namespace krys::boo::style
                              const ResolutionContext &resolutionContext,
                              WeakStyleOriginatedAnimations &newStyleOriginatedAnimations,
                              IsInDisplayNoneTree isInDisplayNoneTree) const noexcept;
+
     /// @brief Starts, reverses and cancels the CSS transitions of a style change event.
     /// @see https://drafts.csswg.org/css-transitions-1/#starting
     void UpdateCSSTransitions(const RenderStyle &currentStyle, const RenderStyle &newStyle,
                               WeakStyleOriginatedAnimations &newStyleOriginatedAnimations) const noexcept;
+
     /// @brief Gives the element's anonymous scroll timelines their source, and registers its named ones.
     void UpdateCSSScrollTimelines(const RenderStyle *currentStyle,
                                   const RenderStyle &afterChangeStyle) const noexcept;
+
     /// @brief Gives the element's anonymous view timelines their subject, and registers its named ones.
     void UpdateCSSViewTimelines(const RenderStyle *currentStyle,
                                 const RenderStyle &afterChangeStyle) const noexcept;

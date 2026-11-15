@@ -62,13 +62,17 @@ namespace krys::boo
     ~FontLoadRequest() noexcept override = default;
 
     KRYS_NODISCARD virtual const url::URL &URL() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsPending() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsLoading() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool ErrorOccurred() const noexcept = 0;
 
     /// @brief Makes the font from the loaded file, if it hasn't been made yet.
     /// @return Whether there's a font.
     virtual bool EnsureCustomFontData() noexcept = 0;
+
     KRYS_NODISCARD virtual RefPtr<Font> CreateFont(const FontDescription &, bool syntheticBold,
                                                    bool syntheticItalic,
                                                    const FontCreationContext &) noexcept = 0;

@@ -36,6 +36,7 @@ namespace krys::boo
     List<Ref<File>> Files;
 
     void ReadFilename(utf8_stringview filename) noexcept final;
+
     void ReadBuffer(utf8_stringview filename, utf8_stringview type,
                     Ref<SharedBuffer> &&buffer) noexcept final;
   };

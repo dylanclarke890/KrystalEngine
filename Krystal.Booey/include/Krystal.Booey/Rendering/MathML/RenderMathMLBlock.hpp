@@ -52,7 +52,9 @@ namespace krys::boo
 
   public:
     RenderMathMLBlock(Type type, mathml::MathMLPresentationElement &container, RenderStyle &&style) noexcept;
+
     RenderMathMLBlock(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderMathMLBlock() noexcept override;
 
     KRYS_NODISCARD bool IsChildAllowed(const RenderObject &child,
@@ -81,22 +83,30 @@ namespace krys::boo
     /// @brief The default rule thickness, for fonts without a MATH table.
     /// @see https://w3c.github.io/mathml-core/#dfn-default-rule-thickness
     KRYS_NODISCARD LayoutUnit RuleThicknessFallback() const noexcept;
+
     KRYS_NODISCARD LayoutUnit MathAxisHeight() const noexcept;
+
     KRYS_NODISCARD LayoutUnit MirrorIfNeeded(LayoutUnit horizontalOffset,
                                              LayoutUnit boxWidth = 0_lu) const noexcept;
+
     KRYS_NODISCARD LayoutUnit MirrorIfNeeded(LayoutUnit horizontalOffset,
                                              const RenderBox &child) const noexcept;
+
     KRYS_NODISCARD static LayoutUnit AscentForChild(const RenderBox &child) noexcept;
 
     void LayoutBlock(RelayoutChildren relayoutChildren,
                      LayoutUnit pageLogicalHeight = 0_lu) noexcept override;
 
     void ComputeAndSetBlockDirectionMarginsOfChildren() noexcept;
+
     void InsertPositionedChildrenIntoContainingBlock() noexcept;
+
     void LayoutFloatingChildren() noexcept;
+
     void ShiftInFlowChildren(LayoutUnit left, LayoutUnit top) noexcept;
 
     void AdjustPreferredLogicalWidthsForBorderAndPadding() noexcept;
+
     void AdjustLayoutForBorderAndPadding() noexcept;
 
     enum class LayoutPhase : uint8
@@ -143,6 +153,7 @@ namespace krys::boo
 
   public:
     RenderMathMLTable(mathml::MathMLElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLTable() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final

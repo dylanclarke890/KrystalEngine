@@ -10,6 +10,6 @@ namespace krys::boo
     Before,
     Active,
     After,
-    Idle
+    Idle,
   };
 }

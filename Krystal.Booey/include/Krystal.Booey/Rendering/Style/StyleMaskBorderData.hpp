@@ -38,6 +38,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleMaskBorderData);
     }
+
     KRYS_NODISCARD Ref<StyleMaskBorderData> Copy() const noexcept;
 
     bool operator==(const StyleMaskBorderData &) const noexcept;
@@ -46,6 +47,7 @@ namespace krys::boo
 
   private:
     StyleMaskBorderData() noexcept;
+
     StyleMaskBorderData(const StyleMaskBorderData &) noexcept;
   };
 }

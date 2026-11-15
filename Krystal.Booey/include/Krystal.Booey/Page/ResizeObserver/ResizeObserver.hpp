@@ -76,16 +76,19 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserver-resizeobserver
     KRYS_NODISCARD static Ref<ResizeObserver> Create(dom::Document &document,
                                                      ResizeObserverCallback &&callback) noexcept;
+
     /// @brief An observer for the user agent's own use, gathered and delivered by the document rather than
     /// with the document's other observers.
     KRYS_NODISCARD static Ref<ResizeObserver>
       CreateNativeObserver(dom::Document &document, ResizeObserverCallback &&callback) noexcept;
+
     ~ResizeObserver() noexcept;
 
     KRYS_NODISCARD bool HasObservations() const noexcept
     {
       return !_observations.empty();
     }
+
     KRYS_NODISCARD bool HasActiveObservations() const noexcept
     {
       return !_activeObservations.empty();
@@ -93,8 +96,10 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserver-observe
     void Observe(dom::Element &target, const ResizeObserverOptions &options = {}) noexcept;
+
     /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserver-unobserve
     void Unobserve(dom::Element &target) noexcept;
+
     /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserver-disconnect
     void Disconnect() noexcept;
 
@@ -111,6 +116,7 @@ namespace krys::boo
     /// @return The depth of the shallowest active observation, or `MaxElementDepth()` if there's none.
     /// @see https://drafts.csswg.org/resize-observer/#gather-active-observations-h
     KRYS_NODISCARD size_t GatherObservations(size_t deeperThan) noexcept;
+
     /// @brief Calls the callback with the active observations' entries.
     /// @see https://drafts.csswg.org/resize-observer/#broadcast-active-resize-observations
     void DeliverObservations() noexcept;
@@ -119,6 +125,7 @@ namespace krys::boo
     {
       return _hasSkippedObservations;
     }
+
     void SetHasSkippedObservations(bool skipped) noexcept
     {
       _hasSkippedObservations = skipped;
@@ -129,8 +136,11 @@ namespace krys::boo
 
   private:
     bool RemoveTarget(dom::Element &target) noexcept;
+
     void RemoveAllTargets() noexcept;
+
     bool RemoveObservation(const dom::Element &target) noexcept;
+
     void ObserveInternal(dom::Element &target, ResizeObserverBoxOptions boxOptions) noexcept;
   };
 }

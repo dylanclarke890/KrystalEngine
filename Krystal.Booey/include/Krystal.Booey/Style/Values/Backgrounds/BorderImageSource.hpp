@@ -45,6 +45,7 @@ namespace krys::boo::style
     {
       return !_image;
     }
+
     KRYS_NODISCARD bool IsImage() const noexcept
     {
       return !!_image;
@@ -54,6 +55,7 @@ namespace krys::boo::style
     {
       return _image ? Maybe<ImageWrapper> {ImageWrapper {ShareRef(*_image)}} : std::nullopt;
     }
+
     KRYS_NODISCARD RefPtr<StyleImage> TryStyleImage() const noexcept
     {
       return _image;
@@ -94,6 +96,7 @@ namespace krys::boo::style
   struct Blending<BorderImageSource>
   {
     KRYS_NODISCARD bool CanBlend(const BorderImageSource &, const BorderImageSource &) noexcept;
+
     KRYS_NODISCARD BorderImageSource Blend(const BorderImageSource &, const BorderImageSource &,
                                            const BlendingContext &) noexcept;
   };

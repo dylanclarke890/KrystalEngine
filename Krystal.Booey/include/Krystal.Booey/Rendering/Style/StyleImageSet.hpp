@@ -43,9 +43,11 @@ namespace krys::boo
     /// @param sortedIndices The indices of `images` from the lowest resolution to the highest.
     KRYS_NODISCARD static Ref<StyleImageSet> Create(List<ImageWithScale> &&images,
                                                     List<size_t> &&sortedIndices) noexcept;
+
     ~StyleImageSet() noexcept override;
 
     KRYS_NODISCARD bool Equals(const StyleImage &other) const noexcept final;
+
     KRYS_NODISCARD bool Equals(const StyleImageSet &) const noexcept;
 
     KRYS_NODISCARD ImageWithScale SelectBestFitImage(const dom::Document &) noexcept final;
@@ -56,6 +58,7 @@ namespace krys::boo
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
 
     KRYS_NODISCARD ImageWithScale BestImageForScaleFactor() noexcept;
+
     void UpdateDeviceScaleFactor(const dom::Document &) noexcept;
   };
 }

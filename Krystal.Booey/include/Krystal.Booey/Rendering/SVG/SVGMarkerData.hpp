@@ -32,7 +32,7 @@ namespace krys::boo
   {
     StartMarker,
     MidMarker,
-    EndMarker
+    EndMarker,
   };
 
   /// @brief Where a marker is drawn on a path, and at what angle.

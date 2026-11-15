@@ -45,12 +45,14 @@ namespace krys::boo::style
     KRYS_NODISCARD static Ref<const ScaleTransformFunction> Create(NumberOrPercentageResolvedToNumber<>,
                                                                    NumberOrPercentageResolvedToNumber<>,
                                                                    TransformFunctionBase::Type) noexcept;
+
     KRYS_NODISCARD static Ref<const ScaleTransformFunction> Create(NumberOrPercentageResolvedToNumber<>,
                                                                    NumberOrPercentageResolvedToNumber<>,
                                                                    NumberOrPercentageResolvedToNumber<>,
                                                                    TransformFunctionBase::Type) noexcept;
 
     KRYS_NODISCARD Ref<const TransformFunctionBase> Clone() const noexcept override;
+
     KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const FloatSize &) const noexcept override;
 
     KRYS_NODISCARD TransformFunctionBase::Type PrimitiveType() const noexcept override
@@ -62,10 +64,12 @@ namespace krys::boo::style
     {
       return _x;
     }
+
     KRYS_NODISCARD NumberOrPercentageResolvedToNumber<> Y() const noexcept
     {
       return _y;
     }
+
     KRYS_NODISCARD NumberOrPercentageResolvedToNumber<> Z() const noexcept
     {
       return _z;
@@ -75,10 +79,12 @@ namespace krys::boo::style
     {
       return _x == 1 && _y == 1 && _z == 1;
     }
+
     KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept override
     {
       return _z == 1;
     }
+
     KRYS_NODISCARD bool IsAffectedByTransformOrigin() const noexcept override
     {
       return !IsIdentity();

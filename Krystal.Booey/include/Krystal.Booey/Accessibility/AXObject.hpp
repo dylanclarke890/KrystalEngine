@@ -202,10 +202,12 @@ namespace krys::boo
     {
       return _id;
     }
+
     KRYS_NODISCARD AXRole Role() const noexcept
     {
       return _role;
     }
+
     /// @brief The cache holding the object; null once it's detached.
     KRYS_NODISCARD AXObjectCache *AxObjectCache() const noexcept
     {
@@ -215,51 +217,62 @@ namespace krys::boo
     /// @brief Removes the object from the tree: clears its children, lets go of its node and renderer and
     /// tells the platform its wrapper is gone.
     void Detach(AXDetachmentType detachmentType) noexcept;
+
     KRYS_NODISCARD virtual bool IsDetached() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsAccessibilityNodeObject() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsAccessibilityRenderObject() const noexcept
     {
       return false;
     }
+
     /// @brief Whether the object stands for no node or renderer of its own (a slider's thumb, a menu list's
     /// pop-up), its parent being set by whoever made it.
     KRYS_NODISCARD virtual bool IsMockObject() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMenuList() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMenuListPopup() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMenuListOption() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsListBoxOption() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsScrollView() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsAccessibilitySVGObject() const noexcept
     {
       return false;
     }
+
     /// @brief Whether this is an `svg` root's object.
     KRYS_NODISCARD virtual bool IsAccessibilitySVGRoot() const noexcept
     {
       return false;
     }
+
     /// @brief Whether this is a MathML element's object.
     KRYS_NODISCARD virtual bool IsMathElement() const noexcept
     {
@@ -275,32 +288,43 @@ namespace krys::boo
     {
       return nullptr;
     }
+
     KRYS_NODISCARD dom::Element *GetElement() const noexcept;
+
     KRYS_NODISCARD virtual RenderObject *Renderer() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual dom::Document *GetDocument() const noexcept;
+
     KRYS_NODISCARD Page *GetPage() const noexcept;
+
     KRYS_NODISCARD LocalFrameView *DocumentFrameView() const noexcept;
+
     /// @brief The style of the object's renderer, or else its element's computed style.
     KRYS_NODISCARD const RenderStyle *Style() const noexcept;
 
     // The tree.
 
     KRYS_NODISCARD virtual AXObject *ParentObject() const noexcept = 0;
+
     /// @brief The nearest ancestor that isn't ignored: the object's parent in the tree.
     KRYS_NODISCARD AXObject *ParentObjectUnignored() const noexcept;
+
     /// @brief The object's children, added first if they're out of date and @p updateChildrenIfNeeded.
     KRYS_NODISCARD const AXChildrenVector &Children(bool updateChildrenIfNeeded = true) noexcept;
+
     KRYS_NODISCARD bool ChildrenInitialized() const noexcept
     {
       return _childrenInitialized;
     }
+
     KRYS_NODISCARD uint32 IndexInParent() const noexcept
     {
       return _indexInParent;
     }
+
     KRYS_NODISCARD bool HasDirtySubtree() const noexcept
     {
       return _subtreeDirty;
@@ -309,24 +333,31 @@ namespace krys::boo
     virtual void AddChildren() noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool CanHaveChildren() const noexcept
     {
       return true;
     }
+
     virtual void UpdateChildrenIfNecessary() noexcept;
+
     /// @brief Marks the children out of date, so the next `Children()` adds them again.
     virtual void SetNeedsToUpdateChildren() noexcept
     {
     }
+
     /// @brief Marks the children and their subtrees out of date.
     virtual void SetNeedsToUpdateSubtree() noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool NeedsToUpdateChildren() const noexcept
     {
       return false;
     }
+
     virtual void ClearChildren() noexcept;
+
     /// @brief Forgets the parent a mock object was given (its parent is clearing its children).
     virtual void DetachFromParent() noexcept
     {
@@ -335,6 +366,7 @@ namespace krys::boo
     /// @brief Inserts @p child at @p index; an ignored child's children instead if @p descendIfIgnored.
     void InsertChild(AXObject &child, uint32 index,
                      DescendIfIgnored descendIfIgnored = DescendIfIgnored::Yes) noexcept;
+
     void AddChild(AXObject *child, DescendIfIgnored descendIfIgnored = DescendIfIgnored::Yes) noexcept
     {
       if (child)
@@ -344,28 +376,36 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsDescendantOfObject(const AXObject &ancestor) const noexcept;
+
     KRYS_NODISCARD bool IsAncestorOfObject(const AXObject &descendant) const noexcept;
+
     KRYS_NODISCARD bool IsDescendantOfRole(AXRole role) const noexcept;
 
     // Whether the object is in the tree.
 
     /// @brief Whether the object is left out of the tree (its children take its place).
     KRYS_NODISCARD bool IsIgnored() const noexcept;
+
     /// @brief Works out `IsIgnored()` again, telling the parent its children changed if it did.
     void RecomputeIsIgnored() noexcept
     {
       (void)IsIgnored();
     }
+
     void RecomputeIsIgnoredForDescendants(bool includeSelf = false) noexcept;
+
     /// @brief The common reasons to include or ignore an object (inertness, hiddenness, a presentational
     /// ancestor), before the rules for its kind.
     KRYS_NODISCARD AXObjectInclusion DefaultObjectInclusion() const noexcept;
+
     KRYS_NODISCARD bool IsIgnoredByDefault() const noexcept
     {
       return DefaultObjectInclusion() == AXObjectInclusion::IgnoreObject;
     }
+
     /// @brief Whether `aria-hidden="true"` applies to the object itself.
     KRYS_NODISCARD bool IsARIAHidden() const noexcept;
+
     /// @brief Whether `aria-hidden="true"` applies to the object or an ancestor.
     KRYS_NODISCARD bool IsAXHidden() const noexcept;
 
@@ -375,20 +415,27 @@ namespace krys::boo
     {
       return AXRole::Unknown;
     }
+
     KRYS_NODISCARD bool HasExplicitGenericRole() const noexcept
     {
       return AriaRoleAttribute() == AXRole::Generic;
     }
+
     /// @brief Works out the role again, telling the cache if it changed.
     void UpdateRole() noexcept;
+
     /// @brief The first role in @p value (a space-separated list of ARIA roles) that isn't skipped.
     KRYS_NODISCARD static AXRole AriaRoleToRole(dom::DOMStringView value) noexcept;
+
     KRYS_NODISCARD static AXRole AriaRoleToRole(dom::DOMStringView value,
                                                 const Func<bool(AXRole)> &skipRole) noexcept;
+
     /// @brief The ARIA role the object maps to (`computedrole` in WebDriver), empty for none.
     KRYS_NODISCARD utf8_stringview ComputedRoleString() const noexcept;
+
     /// @brief Whether the role makes its descendants presentational (ARIA "children presentational").
     KRYS_NODISCARD bool AriaRoleHasPresentationalChildren() const noexcept;
+
     /// @brief Whether the role is one of those ARIA defines as a widget an author may make (button,
     /// checkbox and so on).
     KRYS_NODISCARD static bool IsARIAControl(AXRole role) noexcept;
@@ -397,212 +444,274 @@ namespace krys::boo
     {
       return _role == AXRole::Heading;
     }
+
     KRYS_NODISCARD bool IsLink() const noexcept
     {
       return _role == AXRole::Link;
     }
+
     KRYS_NODISCARD bool IsImage() const noexcept
     {
       return _role == AXRole::Image;
     }
+
     KRYS_NODISCARD bool IsWebArea() const noexcept
     {
       return _role == AXRole::WebArea;
     }
+
     KRYS_NODISCARD bool IsCheckbox() const noexcept
     {
       return _role == AXRole::Checkbox;
     }
+
     KRYS_NODISCARD bool IsRadioButton() const noexcept
     {
       return _role == AXRole::RadioButton;
     }
+
     KRYS_NODISCARD bool IsCheckboxOrRadio() const noexcept
     {
       return IsCheckbox() || IsRadioButton();
     }
+
     KRYS_NODISCARD bool IsSwitch() const noexcept
     {
       return _role == AXRole::Switch;
     }
+
     KRYS_NODISCARD bool IsToggleButton() const noexcept
     {
       return _role == AXRole::ToggleButton;
     }
+
     KRYS_NODISCARD bool IsListBox() const noexcept
     {
       return _role == AXRole::ListBox;
     }
+
     KRYS_NODISCARD bool IsListItem() const noexcept
     {
       return _role == AXRole::ListItem;
     }
+
     KRYS_NODISCARD bool IsMenu() const noexcept
     {
       return _role == AXRole::Menu;
     }
+
     KRYS_NODISCARD bool IsMenuBar() const noexcept
     {
       return _role == AXRole::MenuBar;
     }
+
     KRYS_NODISCARD bool IsComboBox() const noexcept
     {
       return _role == AXRole::ComboBox;
     }
+
     KRYS_NODISCARD bool IsTree() const noexcept
     {
       return _role == AXRole::Tree;
     }
+
     KRYS_NODISCARD bool IsStaticText() const noexcept
     {
       return _role == AXRole::StaticText;
     }
+
     KRYS_NODISCARD bool IsSummary() const noexcept
     {
       return _role == AXRole::Summary;
     }
+
     KRYS_NODISCARD bool IsProgressIndicator() const noexcept
     {
       return _role == AXRole::ProgressIndicator || _role == AXRole::Meter;
     }
+
     KRYS_NODISCARD bool IsSlider() const noexcept
     {
       return _role == AXRole::Slider;
     }
+
     KRYS_NODISCARD bool IsSpinButton() const noexcept
     {
       return _role == AXRole::SpinButton;
     }
+
     KRYS_NODISCARD bool IsList() const noexcept
     {
       return _role == AXRole::List || _role == AXRole::DescriptionList;
     }
+
     KRYS_NODISCARD bool IsMenuItem() const noexcept;
+
     KRYS_NODISCARD bool IsMenuRelated() const noexcept;
+
     KRYS_NODISCARD bool IsButton() const noexcept;
+
     KRYS_NODISCARD bool IsControl() const noexcept;
+
     KRYS_NODISCARD bool IsTextControl() const noexcept;
+
     /// @brief Whether the object edits text without being an `input` or `textarea` (`contenteditable`, or a
     /// text box role).
     KRYS_NODISCARD virtual bool IsNonNativeTextControl() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsGroup() const noexcept;
+
     KRYS_NODISCARD bool IsTreeItem() const noexcept
     {
       return _role == AXRole::TreeItem;
     }
+
     KRYS_NODISCARD bool IsTabList() const noexcept
     {
       return _role == AXRole::TabList;
     }
+
     KRYS_NODISCARD bool IsTabItem() const noexcept
     {
       return _role == AXRole::Tab;
     }
+
     KRYS_NODISCARD bool IsRadioGroup() const noexcept
     {
       return _role == AXRole::RadioGroup;
     }
+
     KRYS_NODISCARD bool IsLandmark() const noexcept;
+
     KRYS_NODISCARD bool IsRangeControl() const noexcept;
+
     /// @brief Whether the object is an image map's `area`.
     KRYS_NODISCARD bool IsImageMapLink() const noexcept;
+
     KRYS_NODISCARD bool IsRootWebArea() const noexcept;
     // Relations.
 
     /// @brief The objects this one is related to by @p relation.
     KRYS_NODISCARD AXChildrenVector RelatedObjects(AXRelation relation) const noexcept;
+
     /// @brief The object `aria-activedescendant` makes the active one, if any.
     KRYS_NODISCARD AXObject *ActiveDescendant() const noexcept;
+
     KRYS_NODISCARD AXChildrenVector ActiveDescendantOfObjects() const noexcept
     {
       return RelatedObjects(AXRelation::ActiveDescendantOf);
     }
+
     KRYS_NODISCARD AXChildrenVector ControlledObjects() const noexcept
     {
       return RelatedObjects(AXRelation::ControllerFor);
     }
+
     KRYS_NODISCARD AXChildrenVector Controllers() const noexcept
     {
       return RelatedObjects(AXRelation::ControlledBy);
     }
+
     KRYS_NODISCARD AXChildrenVector DescribedByObjects() const noexcept
     {
       return RelatedObjects(AXRelation::DescribedBy);
     }
+
     KRYS_NODISCARD AXChildrenVector DescriptionForObjects() const noexcept
     {
       return RelatedObjects(AXRelation::DescriptionFor);
     }
+
     KRYS_NODISCARD AXChildrenVector DetailedByObjects() const noexcept
     {
       return RelatedObjects(AXRelation::Details);
     }
+
     KRYS_NODISCARD AXChildrenVector DetailsForObjects() const noexcept
     {
       return RelatedObjects(AXRelation::DetailsFor);
     }
+
     KRYS_NODISCARD AXChildrenVector ErrorMessageObjects() const noexcept
     {
       return RelatedObjects(AXRelation::ErrorMessage);
     }
+
     KRYS_NODISCARD AXChildrenVector ErrorMessageForObjects() const noexcept
     {
       return RelatedObjects(AXRelation::ErrorMessageFor);
     }
+
     KRYS_NODISCARD AXChildrenVector FlowToObjects() const noexcept
     {
       return RelatedObjects(AXRelation::FlowsTo);
     }
+
     KRYS_NODISCARD AXChildrenVector FlowFromObjects() const noexcept
     {
       return RelatedObjects(AXRelation::FlowsFrom);
     }
+
     KRYS_NODISCARD AXChildrenVector LabeledByObjects() const noexcept
     {
       return RelatedObjects(AXRelation::LabeledBy);
     }
+
     KRYS_NODISCARD AXChildrenVector LabelForObjects() const noexcept
     {
       return RelatedObjects(AXRelation::LabelFor);
     }
+
     KRYS_NODISCARD AXChildrenVector OwnedObjects() const noexcept
     {
       return RelatedObjects(AXRelation::OwnerFor);
     }
+
     KRYS_NODISCARD AXChildrenVector Owners() const noexcept
     {
       return RelatedObjects(AXRelation::OwnedBy);
     }
+
     /// @brief Whether the focus is on the active descendant when the object is focused (by its ARIA role).
     KRYS_NODISCARD bool ShouldFocusActiveDescendant() const noexcept;
+
     /// @brief Whether the role is one that can have an active descendant.
     KRYS_NODISCARD bool SupportsActiveDescendant() const noexcept;
 
     /// @brief Whether the role is one whose children can be selected (with `aria-selected`, or as the focused
     /// or active descendant).
     KRYS_NODISCARD bool CanHaveSelectedChildren() const noexcept;
+
     /// @brief A container's selected items: a list box's selected options, a grid's or tree's selected rows,
     /// a tab list's selected tab, a list's selected items, a menu list pop-up's selected options, and the
     /// active (or focused) item of a menu or combo box. Empty for objects that can't have any.
     KRYS_NODISCARD AXChildrenVector SelectedChildren() noexcept;
+
     /// @brief A radio group's checked radio button.
     KRYS_NODISCARD AXObject *SelectedRadioButton() noexcept;
+
     /// @brief A tab list's selected tab.
     KRYS_NODISCARD AXObject *SelectedTabItem() noexcept;
+
     /// @brief The tree items below the object in tree order: those in its children (and their groups),
     /// then those `aria-owns` adds.
     KRYS_NODISCARD AXChildrenVector AriaTreeRows() noexcept;
+
     /// @brief A tree item's content: its children other than tree items and the groups that hold them.
     KRYS_NODISCARD AXChildrenVector AriaTreeItemContent() noexcept;
+
     /// @brief Whether the object is the active descendant of a focused container.
     KRYS_NODISCARD bool IsActiveDescendantOfFocusedContainer() const noexcept;
+
     /// @brief Whether a tab is selected because the focus is inside a tab panel it controls.
     KRYS_NODISCARD bool IsTabItemSelected() const noexcept;
+
     /// @brief Whether the role is one whose row count can change (by expanding or collapsing rows).
     KRYS_NODISCARD bool SupportsRowCountChange() const noexcept;
+
     /// @brief Whether the object's name comes from the text under it, so it changes with that text.
     KRYS_NODISCARD bool DependsOnTextUnderElement() const noexcept;
 
@@ -612,15 +721,20 @@ namespace krys::boo
     /// neither is set.
     KRYS_NODISCARD static dom::DOMString AttributeWithDefaultARIA(const dom::Element &element,
                                                                   dom::DOMStringView name) noexcept;
+
     /// @brief Whether the element has @p name, or (for ARIA attributes) its custom element has a default.
     KRYS_NODISCARD bool HasAttribute(dom::DOMStringView name) const noexcept;
+
     /// @brief The element's @p name attribute, or (for ARIA attributes) its custom element's default;
     /// empty if neither is set.
     KRYS_NODISCARD dom::DOMString GetAttribute(dom::DOMStringView name) const noexcept;
+
     /// @brief `GetAttribute` with leading and trailing ASCII whitespace stripped.
     KRYS_NODISCARD dom::DOMString GetAttributeTrimmed(dom::DOMStringView name) const noexcept;
+
     /// @brief `GetAttribute` as an integer, 0 if it isn't one.
     KRYS_NODISCARD int32 IntegralAttribute(dom::DOMStringView name) const noexcept;
+
     /// @brief Whether the element has any global ARIA state or property.
     KRYS_NODISCARD bool SupportsARIAAttributes() const noexcept;
 
@@ -632,67 +746,83 @@ namespace krys::boo
     {
       return {};
     }
+
     /// @brief The positions at the start and end of the object's content.
     KRYS_NODISCARD virtual VisiblePositionRange GetVisiblePositionRange() const noexcept
     {
       return {};
     }
+
     /// @brief The document's selection.
     KRYS_NODISCARD virtual VisiblePositionRange SelectedVisiblePositionRange() const noexcept
     {
       return {};
     }
+
     /// @brief Selects @p range as the user would (in a text control, the part of its value it covers).
     virtual void SetSelectedVisiblePositionRange(const VisiblePositionRange &range) const noexcept
     {
       (void)range;
     }
+
     KRYS_NODISCARD virtual int32 IndexForVisiblePosition(const VisiblePosition &position) const noexcept
     {
       (void)position;
       return 0;
     }
+
     KRYS_NODISCARD virtual VisiblePosition VisiblePositionForIndex(int32 index) const noexcept
     {
       (void)index;
       return {};
     }
+
     /// @brief The selected part of a text control's text.
     KRYS_NODISCARD virtual CharacterRange SelectedTextRange() const noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD virtual dom::DOMString SelectedText() const noexcept
     {
       return {};
     }
+
     /// @brief The object that tells the platform about changes in this one: the text control, list box or
     /// editable region it's in, or the exposed table a row is in.
     KRYS_NODISCARD virtual AXObject *ObservableObject() const noexcept
     {
       return nullptr;
     }
+
     /// @brief The text from @p range's start to its end.
     KRYS_NODISCARD static dom::DOMString
       StringForVisiblePositionRange(const VisiblePositionRange &range) noexcept;
+
     /// @brief A text control's index of @p position; -1 if the position isn't in it or this isn't a text
     /// control.
     KRYS_NODISCARD int32 Index(const VisiblePosition &position) const noexcept;
+
     /// @brief The length of the object's text.
     KRYS_NODISCARD uint64 TextLength() const noexcept
     {
       return Text().size();
     }
+
     /// @brief The part of a text control's text @p range covers.
     KRYS_NODISCARD dom::DOMString DoAXStringForRange(const CharacterRange &range) const noexcept;
+
     /// @brief The range of a text control's line @p lineNumber (from 0), with its line break if it has one.
     KRYS_NODISCARD CharacterRange DoAXRangeForLine(uint32 lineNumber) const noexcept;
+
     /// @brief The line @p position is on, from the top of its editable region (from 0); -1 if it's outside
     /// the object.
     KRYS_NODISCARD int32 LineForPosition(const VisiblePosition &position) const noexcept;
+
     /// @brief @p range as indexes in a text control's text; empty if it isn't all in it.
     KRYS_NODISCARD CharacterRange
       PlainTextRangeForVisiblePositionRange(const VisiblePositionRange &range) const noexcept;
+
     /// @brief The positions @p range covers in the object's text; null if it goes past the end.
     KRYS_NODISCARD VisiblePositionRange
       VisiblePositionRangeForRange(const CharacterRange &range) const noexcept;
@@ -702,21 +832,28 @@ namespace krys::boo
     /// @brief The live region status @p role has when `aria-live` isn't set: "assertive" for alerts, "polite"
     /// for logs and statuses, "off" for timers and marquees, and empty for the others.
     KRYS_NODISCARD static dom::DOMStringView DefaultLiveRegionStatusForRole(AXRole role) noexcept;
+
     /// @brief Whether @p status makes a region announce its changes ("polite" or "assertive").
     KRYS_NODISCARD static bool LiveRegionStatusIsEnabled(dom::DOMStringView status) noexcept;
+
     /// @brief `aria-live`, or the role's default.
     KRYS_NODISCARD dom::DOMString LiveRegionStatus() const noexcept;
+
     /// @brief `aria-relevant`, or its default ("additions text").
     KRYS_NODISCARD dom::DOMString LiveRegionRelevant() const noexcept;
+
     /// @brief Whether the region is announced as a whole when part of it changes: `aria-atomic`, true by
     /// default for alerts and statuses.
     KRYS_NODISCARD bool LiveRegionAtomic() const noexcept;
+
     /// @brief Whether `aria-busy` says the object is being updated (so its changes shouldn't be announced
     /// yet).
     KRYS_NODISCARD bool IsBusy() const noexcept;
+
     /// @brief Whether the object is a live region: one that announces its changes or, unless
     /// @p excludeIfOff, one whose status is "off".
     KRYS_NODISCARD bool SupportsLiveRegion(bool excludeIfOff = true) const noexcept;
+
     /// @brief The nearest live region at or above the object.
     KRYS_NODISCARD AXObject *LiveRegionAncestor(bool excludeIfOff = true) const noexcept;
 
@@ -726,68 +863,85 @@ namespace krys::boo
     {
       return false;
     }
+
     /// @brief Whether the element has a `click`, `mousedown` or `mouseup` listener.
     KRYS_NODISCARD virtual bool HasClickHandler() const noexcept
     {
       return false;
     }
+
     /// @brief The nearest object at or above this one with a click handler, stopping at the body unless
     /// @p includeBody; null if there's none or it's presentational.
     KRYS_NODISCARD AXObject *ClickableSelfOrAncestor(bool includeBody = false) const noexcept;
+
     KRYS_NODISCARD virtual bool IsEnabled() const noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD virtual bool IsChecked() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsIndeterminate() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsPressed() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsSelected() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsRequired() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMultiSelectable() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsVisited() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool SupportsExpanded() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsExpanded() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool CanSetFocusAttribute() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool CanSetSelectedAttribute() const noexcept
     {
       return false;
     }
+
     /// @brief Whether a collapsible object (a menu list's pop-up) is collapsed.
     KRYS_NODISCARD virtual bool IsCollapsed() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual AXButtonState CheckboxOrRadioValue() const noexcept;
+
     /// @brief The heading level, 1 to 6 for HTML headings or `aria-level` for ARIA ones; 0 if not a heading.
     KRYS_NODISCARD virtual uint32 HeadingLevel() const noexcept
     {
@@ -801,11 +955,13 @@ namespace krys::boo
     {
       return {};
     }
+
     /// @brief The accessible description, as accname computes it.
     KRYS_NODISCARD virtual dom::DOMString AccessibleDescription() const noexcept
     {
       return {};
     }
+
     /// @brief The object's value as text (a text control's value, a static text's text and so on).
     KRYS_NODISCARD virtual dom::DOMString StringValue() const noexcept
     {
@@ -818,24 +974,29 @@ namespace krys::boo
     {
       return 0;
     }
+
     KRYS_NODISCARD virtual float MaxValueForRange() const noexcept
     {
       return 0;
     }
+
     KRYS_NODISCARD virtual float MinValueForRange() const noexcept
     {
       return 0;
     }
+
     /// @brief The value as text (`aria-valuetext`), if the author gave one.
     KRYS_NODISCARD virtual dom::DOMString ValueDescription() const noexcept
     {
       return {};
     }
+
     /// @brief The orientation the author or the control gives, if any.
     KRYS_NODISCARD virtual Maybe<AXOrientation> ExplicitOrientation() const noexcept
     {
       return null;
     }
+
     /// @brief The explicit orientation, or else the role's default.
     KRYS_NODISCARD AXOrientation Orientation() const noexcept;
 
@@ -847,65 +1008,80 @@ namespace krys::boo
     {
       return false;
     }
+
     /// @brief Whether the object is a table that's exposed as one: an ARIA table, or a data table rather
     /// than one for layout.
     KRYS_NODISCARD virtual bool IsExposableTable() const noexcept
     {
       return false;
     }
+
     /// @brief Whether the object has the `grid`, `table` or `treegrid` role.
     KRYS_NODISCARD virtual bool IsAriaTable() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsTableRow() const noexcept
     {
       return false;
     }
+
     /// @brief Whether the object is a row of an exposed table.
     KRYS_NODISCARD virtual bool IsExposedTableRow() const noexcept
     {
       return false;
     }
+
     /// @brief Whether the object has the `row` role.
     KRYS_NODISCARD virtual bool IsARIAGridRow() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsTableCell() const noexcept
     {
       return false;
     }
+
     /// @brief Whether the object is a cell of an exposed table.
     KRYS_NODISCARD virtual bool IsExposedTableCell() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsColumnHeader() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsRowHeader() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsTableColumn() const noexcept
     {
       return _role == AXRole::Column;
     }
+
     KRYS_NODISCARD bool IsTreeGrid() const noexcept
     {
       return _role == AXRole::TreeGrid;
     }
+
     KRYS_NODISCARD bool HasGridRole() const noexcept
     {
       return _role == AXRole::Grid || _role == AXRole::TreeGrid;
     }
+
     KRYS_NODISCARD bool HasCellRole() const noexcept;
+
     KRYS_NODISCARD bool HasCellOrRowRole() const noexcept
     {
       return HasCellRole() || _role == AXRole::Row;
     }
+
     /// @brief Whether the object is a `thead`, `tbody` or `tfoot`.
     KRYS_NODISCARD bool HasRowGroupTag() const noexcept;
 
@@ -914,31 +1090,38 @@ namespace krys::boo
     {
       return nullptr;
     }
+
     /// @brief The nearest exposed table above the object (or the object itself, if @p includeSelf).
     KRYS_NODISCARD AXObject *ExposedTableAncestor(bool includeSelf = false) const noexcept;
+
     /// @brief A table's rows.
     KRYS_NODISCARD virtual AXChildrenVector Rows() noexcept
     {
       return {};
     }
+
     /// @brief A table's columns (which aren't in the tree).
     KRYS_NODISCARD virtual AXChildrenVector Columns() noexcept
     {
       return {};
     }
+
     /// @brief A table's cells, row by row.
     KRYS_NODISCARD virtual AXChildrenVector Cells() noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD virtual uint32 RowCount() noexcept
     {
       return 0;
     }
+
     KRYS_NODISCARD virtual uint32 ColumnCount() noexcept
     {
       return 0;
     }
+
     /// @brief The table's cell covering the slot at @p column and @p row, if any.
     KRYS_NODISCARD virtual AXObject *CellForColumnAndRow(uint32 column, uint32 row) noexcept
     {
@@ -946,74 +1129,92 @@ namespace krys::boo
       (void)row;
       return nullptr;
     }
+
     /// @brief A table's column headers, together in an object that isn't in the tree.
     KRYS_NODISCARD virtual AXObject *TableHeaderContainer() noexcept
     {
       return nullptr;
     }
+
     /// @brief A cell's column headers (the headers above it in its column), or a table's (each column's).
     KRYS_NODISCARD AXChildrenVector ColumnHeaders() noexcept;
+
     /// @brief A cell's row headers (the headers before it in its row), or a table's or row's (each row's).
     KRYS_NODISCARD virtual AXChildrenVector RowHeaders() noexcept
     {
       return {};
     }
+
     /// @brief A column's header cell.
     KRYS_NODISCARD AXObject *ColumnHeader() noexcept;
+
     /// @brief A row's header cell: its first cell, if that's a `th` and the rest aren't; for a grid row, its
     /// first row header.
     KRYS_NODISCARD AXObject *RowHeader() noexcept;
+
     /// @brief A table's `aria-rowcount`, if valid (-1 for an unknown count); 0 otherwise.
     KRYS_NODISCARD virtual int32 AxRowCount() const noexcept
     {
       return 0;
     }
+
     /// @brief A table's `aria-colcount`, if valid (-1 for an unknown count); 0 otherwise.
     KRYS_NODISCARD virtual int32 AxColumnCount() const noexcept
     {
       return 0;
     }
+
     /// @brief A row's or cell's `aria-rowindex` (a cell's falling back to its row's).
     KRYS_NODISCARD virtual Maybe<uint32> AxRowIndex() const noexcept
     {
       return null;
     }
+
     /// @brief A row's or cell's `aria-colindex` (a cell's falling back to the one its row gives it).
     KRYS_NODISCARD virtual Maybe<uint32> AxColumnIndex() const noexcept
     {
       return null;
     }
+
     KRYS_NODISCARD virtual dom::DOMString AxRowIndexText() const noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD virtual dom::DOMString AxColumnIndexText() const noexcept
     {
       return {};
     }
+
     /// @brief A column's index in its table.
     KRYS_NODISCARD virtual uint32 ColumnIndex() const noexcept
     {
       return 0;
     }
+
     /// @brief A cell's first row and the number of rows it spans.
     KRYS_NODISCARD virtual Pair<uint32, uint32> RowIndexRange() const noexcept
     {
       return {0, 1};
     }
+
     /// @brief A cell's first column and the number of columns it spans.
     KRYS_NODISCARD virtual Pair<uint32, uint32> ColumnIndexRange() const noexcept
     {
       return {0, 1};
     }
+
     /// @brief A cell's `scope`.
     KRYS_NODISCARD dom::DOMString CellScope() const noexcept
     {
       return GetAttribute(u8"scope");
     }
+
     /// @brief The ID of a cell's nearest `thead`, `tbody` or `tfoot`.
     KRYS_NODISCARD Maybe<AXId> RowGroupAncestorID() const noexcept;
+
     KRYS_NODISCARD bool IsTableCellInSameRowGroup(const AXObject &otherTableCell) const noexcept;
+
     /// @brief Brings a table's cell slots, and so its cells' indexes, up to date.
     void EnsureCellIndexesUpToDate() noexcept
     {
@@ -1028,117 +1229,145 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathFraction() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathSubscriptSuperscript() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathRow() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathUnderOver() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathRoot() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathSquareRoot() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathToken() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathOperator() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathFenceOperator() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathSeparatorOperator() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathText() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathNumber() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathIdentifier() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathMultiscript() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathTable() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathTableRow() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsMathTableCell() const noexcept
     {
       return false;
     }
+
     /// @brief A root's radicand: a square root's children, or a root's first child.
     KRYS_NODISCARD virtual Maybe<AXChildrenVector> MathRadicand() noexcept
     {
       return null;
     }
+
     /// @brief A root's index.
     KRYS_NODISCARD virtual AXObject *MathRootIndexObject() noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual AXObject *MathNumeratorObject() noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual AXObject *MathDenominatorObject() noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual AXObject *MathUnderObject() noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual AXObject *MathOverObject() noexcept
     {
       return nullptr;
     }
+
     /// @brief A script's or under-over's base.
     KRYS_NODISCARD virtual AXObject *MathBaseObject() noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual AXObject *MathSubscriptObject() noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual AXObject *MathSuperscriptObject() noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual AXMathMultiscriptPairs MathPrescripts() noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD virtual AXMathMultiscriptPairs MathPostscripts() noexcept
     {
       return {};
@@ -1151,16 +1380,20 @@ namespace krys::boo
     {
       return {};
     }
+
     /// @brief Where a press lands: the middle of the object (of its one child, for a heading, which is
     /// usually much wider than its text).
     KRYS_NODISCARD IntPoint ClickPoint() noexcept;
+
     /// @brief Whether none of the object is in the view's visible content.
     KRYS_NODISCARD virtual bool IsOffScreen() const noexcept
     {
       return false;
     }
+
     /// @brief The unignored object at @p point (in the root view's coordinates) in this one's subtree.
     KRYS_NODISCARD virtual AXObject *AccessibilityHitTest(const IntPoint &point) const noexcept;
+
     /// @brief The object at @p point among this one and the children it makes itself (a slider's thumb).
     KRYS_NODISCARD virtual AXObject *ElementAccessibilityHitTest(const IntPoint &point) const noexcept;
 
@@ -1172,42 +1405,52 @@ namespace krys::boo
     {
       return nullptr;
     }
+
     /// @brief Presses the object as a click would (on the element under its click point, if that's in it);
     /// whether anything was pressed.
     virtual bool Press() noexcept;
+
     /// @brief Focuses (or unfocuses) the object's element, first focusing the page.
     virtual void SetFocused(bool focused) noexcept;
+
     /// @brief Whether the object's value can be set (an editable text control, a range control).
     KRYS_NODISCARD virtual bool CanSetValueAttribute() const noexcept
     {
       return false;
     }
+
     /// @brief Sets a text control's value as typing would, or a slider's value; whether it was set.
     virtual bool SetValue(dom::DOMStringView value) noexcept
     {
       (void)value;
       return false;
     }
+
     /// @brief Sets a range control's value; whether it was set.
     virtual bool SetValue(float value) noexcept;
+
     /// @brief Steps a slider or spin button up.
     virtual void Increment() noexcept
     {
     }
+
     /// @brief Steps a slider or spin button down.
     virtual void Decrement() noexcept
     {
     }
+
     /// @brief Selects (or deselects) an option.
     virtual void SetSelected(bool selected) noexcept
     {
       (void)selected;
     }
+
     /// @brief Opens (or closes) a disclosure (`details`).
     virtual void SetIsExpanded(bool expanded) noexcept
     {
       (void)expanded;
     }
+
     /// @brief Scrolls the object into view.
     void ScrollToMakeVisible() const noexcept;
 
@@ -1215,22 +1458,28 @@ namespace krys::boo
     AXObject(AXId id, AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD virtual AXRole DetermineAccessibilityRole() noexcept = 0;
+
     virtual void RecomputeAriaRole() noexcept
     {
     }
+
     /// @brief Whether the rules for the object's kind leave it out of the tree.
     KRYS_NODISCARD virtual bool ComputeIsIgnored() const noexcept
     {
       return true;
     }
+
     /// @brief Lets go of the node and renderer, and of the children.
     virtual void DetachRemoteParts(AXDetachmentType detachmentType) noexcept;
 
     /// @brief The role a `button` (or a button-like input) takes: toggle button if `aria-pressed` is set,
     /// pop-up button if it or a link around it has a pop-up.
     KRYS_NODISCARD AXRole ButtonRoleType() const noexcept;
+
     KRYS_NODISCARD bool HasPopup() const noexcept;
+
     void ResetChildrenIndexInParent() noexcept;
+
     /// @brief Whether the object's children are its own: a column's and a table header container's cells
     /// are their rows', which set their index.
     KRYS_NODISCARD bool ShouldSetChildIndexInParent() const noexcept
@@ -1240,11 +1489,14 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD bool IsIgnoredWithoutCache() const noexcept;
+
     /// @brief Whether the object is ignored for being outside the modal dialog that's open: unless it
     /// controls or is the active descendant of something in it, or is stacked above it.
     KRYS_NODISCARD bool IgnoredFromModalPresence() const noexcept;
+
     /// @brief Whether the object is in @p modalNode (in the composed tree).
     KRYS_NODISCARD bool IsModalDescendant(const dom::Node &modalNode) const noexcept;
+
     void PostMenuClosedNotificationIfNecessary() const noexcept;
   };
 }

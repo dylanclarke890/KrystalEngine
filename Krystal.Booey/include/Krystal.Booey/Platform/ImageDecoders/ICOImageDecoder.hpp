@@ -93,20 +93,29 @@ namespace krys::boo
     {
       return u8"ico";
     }
+
     void SetData(const SharedBuffer &data, bool allDataReceived) noexcept final;
+
     KRYS_NODISCARD IntSize Size() const noexcept final;
+
     KRYS_NODISCARD IntSize FrameSizeAtIndex(size_t index, SubsamplingLevel) const noexcept final;
+
     bool SetSize(const IntSize &size) noexcept final;
+
     KRYS_NODISCARD size_t FrameCount() const noexcept final;
+
     ScalableImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept final;
+
     // CAUTION: setFailed() deletes all readers and decoders. Be careful to
     // avoid accessing deleted memory, especially when calling this from
     // inside BMPImageReader!
     bool SetFailed() noexcept final;
+
     KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept final;
 
   private:
     ICOImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
+
     void TryDecodeSize(bool allDataReceived) noexcept final
     {
       Decode(0, true, allDataReceived);

@@ -1084,7 +1084,7 @@ namespace krys::boo
     {
       NoScrollbar,
       Enabled,
-      Disabled
+      Disabled,
     };
 
     auto scrollbarForAxis = [&](ScrollbarOrientation orientation) -> RefPtr<Scrollbar> &

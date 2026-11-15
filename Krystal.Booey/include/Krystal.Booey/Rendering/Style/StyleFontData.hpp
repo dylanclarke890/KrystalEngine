@@ -39,6 +39,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleFontData);
     }
+
     KRYS_NODISCARD Ref<StyleFontData> Copy() const noexcept;
 
     bool operator==(const StyleFontData &) const noexcept;
@@ -49,7 +50,9 @@ namespace krys::boo
 
   private:
     StyleFontData() noexcept;
+
     StyleFontData(const StyleFontData &) noexcept;
+
     void operator=(const StyleFontData &) noexcept = delete;
   };
 }

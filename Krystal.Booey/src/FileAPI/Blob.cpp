@@ -289,7 +289,7 @@ namespace krys::boo
     // FIXME: Do we really want to treat the empty string and null string as valid content types?
     for (auto character : contentType)
     {
-      if (character < 0x20 || character > 0x7e)
+      if (character < 0x20 || character > 0x7E)
       {
         return false;
       }

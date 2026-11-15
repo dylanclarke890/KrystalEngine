@@ -37,6 +37,7 @@ namespace krys::boo
 
   public:
     RenderMeter(html::HTMLElement &, RenderStyle &&) noexcept;
+
     ~RenderMeter() noexcept override;
 
     KRYS_NODISCARD html::HTMLMeterElement *MeterElement() const noexcept;
@@ -45,6 +46,7 @@ namespace krys::boo
 
   private:
     void UpdateLogicalWidth() noexcept override;
+
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
 

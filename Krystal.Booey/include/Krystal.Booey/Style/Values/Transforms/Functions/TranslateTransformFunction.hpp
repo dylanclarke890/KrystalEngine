@@ -55,12 +55,14 @@ namespace krys::boo::style
 
     KRYS_NODISCARD static Ref<const TranslateTransformFunction>
       Create(const LengthPercentage &, const LengthPercentage &, TransformFunctionBase::Type) noexcept;
+
     KRYS_NODISCARD static Ref<const TranslateTransformFunction> Create(const LengthPercentage &,
                                                                        const LengthPercentage &,
                                                                        const Length &,
                                                                        TransformFunctionBase::Type) noexcept;
 
     KRYS_NODISCARD Ref<const TransformFunctionBase> Clone() const noexcept override;
+
     KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const FloatSize &) const noexcept override;
 
     KRYS_NODISCARD TransformFunctionBase::Type PrimitiveType() const noexcept override
@@ -72,10 +74,12 @@ namespace krys::boo::style
     {
       return _x;
     }
+
     const LengthPercentage &Y() const
     {
       return _y;
     }
+
     KRYS_NODISCARD Length Z() const noexcept
     {
       return _z;
@@ -85,6 +89,7 @@ namespace krys::boo::style
     {
       return _x.IsKnownZero() && _y.IsKnownZero() && _z.IsZero();
     }
+
     KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept override
     {
       return _z.IsZero();

@@ -48,11 +48,13 @@ namespace krys::boo::html
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
+
 namespace krys::boo::html::detail
 {
   /// @brief A new HTML element named @p localName in @p document, for the table members that create rows,

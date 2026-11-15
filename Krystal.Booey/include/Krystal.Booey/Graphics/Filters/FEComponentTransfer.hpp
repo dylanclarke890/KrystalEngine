@@ -37,7 +37,7 @@ namespace krys::boo
     FECOMPONENTTRANSFER_TYPE_TABLE = 2,
     FECOMPONENTTRANSFER_TYPE_DISCRETE = 3,
     FECOMPONENTTRANSFER_TYPE_LINEAR = 4,
-    FECOMPONENTTRANSFER_TYPE_GAMMA = 5
+    FECOMPONENTTRANSFER_TYPE_GAMMA = 5,
   };
 
   /// @brief How one channel is transferred.
@@ -64,7 +64,7 @@ namespace krys::boo
     Red,
     Green,
     Blue,
-    Alpha
+    Alpha,
   };
 
   /// @brief The functions of the red, green, blue and alpha channels.
@@ -84,6 +84,7 @@ namespace krys::boo
       Create(const ComponentTransferFunction &redFunction, const ComponentTransferFunction &greenFunction,
              const ComponentTransferFunction &blueFunction, const ComponentTransferFunction &alphaFunction,
              const DestinationColorSpace &colorSpace = DestinationColorSpace::SRGB()) noexcept;
+
     KRYS_NODISCARD static Ref<FEComponentTransfer> Create(ComponentTransferFunctions &&functions) noexcept;
 
     KRYS_NODISCARD static LookupTable ComputeLookupTable(const ComponentTransferFunction &function) noexcept;
@@ -94,25 +95,34 @@ namespace krys::boo
     {
       return FunctionOf(ComponentTransferChannel::Red);
     }
+
     KRYS_NODISCARD ComponentTransferFunction GreenFunction() const noexcept
     {
       return FunctionOf(ComponentTransferChannel::Green);
     }
+
     KRYS_NODISCARD ComponentTransferFunction BlueFunction() const noexcept
     {
       return FunctionOf(ComponentTransferChannel::Blue);
     }
+
     KRYS_NODISCARD ComponentTransferFunction AlphaFunction() const noexcept
     {
       return FunctionOf(ComponentTransferChannel::Alpha);
     }
 
     bool SetType(ComponentTransferChannel channel, ComponentTransferType type) noexcept;
+
     bool SetSlope(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetIntercept(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetAmplitude(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetExponent(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetOffset(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetTableValues(ComponentTransferChannel channel, List<float> &&values) noexcept;
 
   private:
@@ -121,6 +131,7 @@ namespace krys::boo
                         const ComponentTransferFunction &blueFunction,
                         const ComponentTransferFunction &alphaFunction,
                         const DestinationColorSpace &colorSpace) noexcept;
+
     explicit FEComponentTransfer(ComponentTransferFunctions &&functions) noexcept;
 
     KRYS_NODISCARD const ComponentTransferFunction &
@@ -128,6 +139,7 @@ namespace krys::boo
     {
       return _functions[static_cast<size_t>(channel)];
     }
+
     KRYS_NODISCARD ComponentTransferFunction &FunctionOf(ComponentTransferChannel channel) noexcept
     {
       return _functions[static_cast<size_t>(channel)];

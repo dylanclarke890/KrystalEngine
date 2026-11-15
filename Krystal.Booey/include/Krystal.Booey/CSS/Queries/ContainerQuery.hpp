@@ -37,7 +37,7 @@ namespace krys::boo::css::cq
   enum class ContainsUnknownFeature : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief The prelude of an `@container` rule: an optional container name and a condition.
@@ -54,5 +54,6 @@ namespace krys::boo::css::cq
   using ContainerQueryList = List<ContainerQuery>;
 
   void Serialise(StringBuilder &builder, const ContainerQuery &query) noexcept;
+
   void Serialise(StringBuilder &builder, const ContainerQueryList &queries) noexcept;
 }

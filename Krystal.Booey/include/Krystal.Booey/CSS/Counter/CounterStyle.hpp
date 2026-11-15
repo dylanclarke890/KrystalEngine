@@ -209,16 +209,23 @@ namespace krys::boo::css
     void ExtendAndResolve(const CounterStyle &extendedCounterStyle) noexcept;
 
     KRYS_NODISCARD static CSSOMString CounterForSystemSimplifiedChineseInformal(int32 value) noexcept;
+
     KRYS_NODISCARD static CSSOMString CounterForSystemSimplifiedChineseFormal(int32 value) noexcept;
+
     KRYS_NODISCARD static CSSOMString CounterForSystemTraditionalChineseInformal(int32 value) noexcept;
+
     KRYS_NODISCARD static CSSOMString CounterForSystemTraditionalChineseFormal(int32 value) noexcept;
+
     KRYS_NODISCARD static CSSOMString CounterForSystemEthiopicNumeric(uint32 value) noexcept;
+
     KRYS_NODISCARD static CSSOMString CounterForSystemDisclosureClosed(WritingMode writingMode) noexcept;
+
     KRYS_NODISCARD static CSSOMString CounterForSystemDisclosureOpen(WritingMode writingMode) noexcept;
 
   private:
     // https://www.w3.org/TR/css-counter-styles-3/#counter-style-range
     KRYS_NODISCARD bool IsInRange(int32 value) const noexcept;
+
     // https://www.w3.org/TR/css-counter-styles-3/#counter-style-negative
     KRYS_NODISCARD bool ShouldApplyNegativeSymbols(int32 value) const noexcept;
 
@@ -231,6 +238,7 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString FallbackText(int32 value, WritingMode writingMode) noexcept;
 
     void ApplyPadSymbols(CSSOMString &text, int32 value) const noexcept;
+
     void ApplyNegativeSymbols(CSSOMString &text) const noexcept;
 
     // Initial text representation for the counter, before applying pad and/or negative symbols. Suffix and
@@ -239,11 +247,17 @@ namespace krys::boo::css
     // the value.
     KRYS_NODISCARD Maybe<CSSOMString> InitialRepresentation(int32 value,
                                                             WritingMode writingMode) const noexcept;
+
     KRYS_NODISCARD CSSOMString CounterForSystemCyclic(int32 value) const noexcept;
+
     KRYS_NODISCARD Maybe<CSSOMString> CounterForSystemFixed(int32 value) const noexcept;
+
     KRYS_NODISCARD Maybe<CSSOMString> CounterForSystemSymbolic(uint32 value) const noexcept;
+
     KRYS_NODISCARD Maybe<CSSOMString> CounterForSystemAlphabetic(uint32 value) const noexcept;
+
     KRYS_NODISCARD CSSOMString CounterForSystemNumeric(uint32 value) const noexcept;
+
     KRYS_NODISCARD Maybe<CSSOMString> CounterForSystemAdditive(uint32 value) const noexcept;
 
     KRYS_NODISCARD bool IsPredefinedCounterStyle() const noexcept

@@ -27,6 +27,7 @@ namespace krys::boo::html
     explicit HTMLFormControlsCollection(HTMLFormElement &ownerNode) noexcept;
 
     using LiveHTMLCollection::NamedItem;
+
     KRYS_NODISCARD RefPtr<dom::Element> NamedItem(dom::DOMStringView name) noexcept override;
 
     void InvalidateCache() noexcept override;
@@ -46,6 +47,7 @@ namespace krys::boo::html
 
   protected:
     KRYS_NODISCARD dom::Element *CollectionBegin() const noexcept override;
+
     KRYS_NODISCARD dom::Element *CollectionNext(dom::Element &element) const noexcept override;
 
   private:

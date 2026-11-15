@@ -43,9 +43,11 @@ namespace krys::ui::input
   KRYS_NODISCARD KeyDescription Describe(pal::Key key) noexcept;
 
   KRYS_NODISCARD boo::MouseButton ToBooey(pal::MouseButton button) noexcept;
+
   KRYS_NODISCARD EnumSet<boo::PlatformEvent::Modifier> ToBooey(pal::KeyModifiers modifiers) noexcept;
 
   KRYS_NODISCARD EnumSet<boo::DragOperation> ToBooey(pal::DropOperations operations) noexcept;
+
   /// @brief The drop operation for a drag operation: none for those other than copying, moving and linking.
   KRYS_NODISCARD Maybe<pal::DropOperation> ToDropOperation(boo::DragOperation operation) noexcept;
 

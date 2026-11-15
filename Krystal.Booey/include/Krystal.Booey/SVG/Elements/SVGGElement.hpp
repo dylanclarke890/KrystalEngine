@@ -17,10 +17,12 @@ namespace krys::boo::svg
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
+
     KRYS_NODISCARD bool IsValid() const noexcept final
     {
       return SVGTests::IsValid();
     }
+
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final;
   };
 }

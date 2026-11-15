@@ -36,6 +36,6 @@ namespace krys::boo::html
     End,
     Left,
     Right,
-    Center
+    Center,
   };
 }

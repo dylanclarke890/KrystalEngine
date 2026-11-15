@@ -92,11 +92,13 @@ namespace krys::gfx::tests
   TEST_CASE("Gradient2D: flattens other interpolations within the tolerance", "[Gfx][Render2D]")
   {
     using Method = ColourInterpolationMethod;
+
     struct Case
     {
       const char *Name;
       Method Interpolation;
     };
+
     const Case cases[] {
       {"srgb, straight alpha",
        {.ColourSpace = Method::SRGB {}, .AlphaPremultiplication = AlphaPremultiplication::Unpremultiplied}},

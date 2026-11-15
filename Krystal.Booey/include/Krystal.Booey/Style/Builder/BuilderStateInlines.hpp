@@ -52,6 +52,7 @@ namespace krys::boo::style
   {
     _fontDirty |= _style.SetTextOrientation(orientation);
   }
+
   inline void BuilderState::SetWritingMode(StyleWritingMode mode) noexcept
   {
     _fontDirty |= _style.SetWritingMode(mode);
@@ -61,6 +62,7 @@ namespace krys::boo::style
   {
     _fontDirty |= _style.SetZoom(zoom);
   }
+
   inline void BuilderState::SetUsedZoom(float zoom) noexcept
   {
     _fontDirty |= _style.SetUsedZoom(zoom);
@@ -70,10 +72,12 @@ namespace krys::boo::style
   {
     return ParentStyle().GetFontDescription();
   }
+
   inline const FontCascadeDescription &BuilderState::GetFontDescription() const noexcept
   {
     return _style.GetFontDescription();
   }
+
   inline void BuilderState::SetFontDescription(FontCascadeDescription &&description) noexcept
   {
     _fontDirty |= _style.SetFontDescriptionWithoutUpdate(krys::move(description));

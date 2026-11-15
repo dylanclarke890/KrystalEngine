@@ -252,7 +252,7 @@ namespace krys::boo
     // FIXME: this value was chosen to be appropriate for Apple ports since the image
     // subsampling is only enabled by default on Apple ports. Choose a different value
     // if image subsampling is enabled on other platform.
-    static constexpr int64 maximumImageAreaBeforeSubsampling = 5 * 1'024 * 1'024;
+    constexpr static int64 maximumImageAreaBeforeSubsampling = 5 * 1'024 * 1'024;
     auto level = SubsamplingLevel::First;
 
     for (; level < SubsamplingLevel::Last;

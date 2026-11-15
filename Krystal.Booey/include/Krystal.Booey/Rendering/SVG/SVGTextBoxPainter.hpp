@@ -36,11 +36,11 @@
 namespace krys::boo
 {
   class GraphicsContext;
+  struct PaintInfo;
   class Path;
   class RenderBoxModelObject;
-  class RenderSVGInlineText;
   class RenderStyle;
-  struct PaintInfo;
+  class RenderSVGInlineText;
   struct SVGTextFragment;
 
   /// @brief Paints an SVG text box's text fragments: decorations, fill and stroke (with the SVG paint
@@ -61,9 +61,11 @@ namespace krys::boo
 
   public:
     SVGTextBoxPainter(TTextBoxPath &&, PaintInfo &, const LayoutPoint &paintOffset) noexcept;
+
     ~SVGTextBoxPainter() noexcept = default;
 
     void Paint() noexcept;
+
     void PaintSelectionBackground() noexcept;
 
   private:
@@ -73,22 +75,28 @@ namespace krys::boo
     {
       return _renderer;
     }
+
     KRYS_NODISCARD const RenderBoxModelObject &ParentRenderer() const noexcept;
+
     KRYS_NODISCARD EnumSet<RenderSVGResourceMode> PaintingResourceMode() const noexcept
     {
       return _paintingResourceMode;
     }
 
     void PaintDecoration(style::TextDecorationLine, const SVGTextFragment &) noexcept;
+
     void PaintDecorationWithStyle(style::TextDecorationLine, const SVGTextFragment &,
                                   const RenderBoxModelObject &) noexcept;
+
     void PaintTextWithShadows(const RenderStyle &, TextRun &, const SVGTextFragment &, uint32 startPosition,
                               uint32 endPosition) noexcept;
+
     void PaintText(const RenderStyle &, const RenderStyle &selectionStyle, const SVGTextFragment &,
                    bool hasSelection, bool paintSelectedTextOnly) noexcept;
 
     bool AcquireLegacyPaintingResource(GraphicsContext *&, float scalingFactor, RenderBoxModelObject &,
                                        const RenderStyle &) noexcept;
+
     void ReleaseLegacyPaintingResource(GraphicsContext *&, const Path *) noexcept;
 
     KRYS_NODISCARD std::pair<uint32, uint32> SelectionStartEnd() const noexcept;
@@ -113,9 +121,11 @@ namespace krys::boo
   };
 
   KRYS_NODISCARD TextRun ConstructTextRun(utf8_stringview, TextDirection, const SVGTextFragment &) noexcept;
+
   KRYS_NODISCARD FloatRect SelectionRectForTextFragment(const RenderSVGInlineText &, TextDirection,
                                                         const SVGTextFragment &, uint32 startPosition,
                                                         uint32 endPosition) noexcept;
+
   bool MapStartEndPositionsIntoFragmentCoordinates(uint32 textBoxStart, const SVGTextFragment &,
                                                    uint32 &startPosition, uint32 &endPosition) noexcept;
 }

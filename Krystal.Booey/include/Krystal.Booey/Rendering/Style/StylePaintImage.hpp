@@ -45,24 +45,29 @@ namespace krys::boo
     const Ref<css::VariableData> _arguments;
 
   public:
-    static constexpr bool IsFixedSize = false;
+    constexpr static bool IsFixedSize = false;
 
     KRYS_NODISCARD static Ref<StylePaintImage> Create(css::CSSOMString name,
                                                       Ref<css::VariableData> arguments) noexcept
     {
       return AdoptRef(*new StylePaintImage(krys::move(name), krys::move(arguments)));
     }
+
     ~StylePaintImage() noexcept override;
 
   private:
     StylePaintImage(css::CSSOMString &&, Ref<css::VariableData> &&) noexcept;
 
     KRYS_NODISCARD bool Equals(const StyleImage &) const noexcept final;
+
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
+
     KRYS_NODISCARD bool IsPending() const noexcept final;
+
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final
     {
     }
+
     KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final
     {
       return {};

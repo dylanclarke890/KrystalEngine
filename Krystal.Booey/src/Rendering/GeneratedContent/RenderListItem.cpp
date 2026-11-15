@@ -412,6 +412,7 @@ namespace krys::boo
     auto *list = AsOrderedList(EnclosingList(*this));
     return list && list->IsReversed();
   }
+
   void RenderListItem::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
     if (!LogicalHeight() && HasNonVisibleOverflow())

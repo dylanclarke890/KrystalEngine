@@ -41,7 +41,7 @@ namespace krys::boo
   enum class PrintColorAdjust : bool
   {
     Economy,
-    Exact
+    Exact,
   };
 
   /// @brief The pseudo-elements that have their own style (those not backed by an element).
@@ -61,7 +61,7 @@ namespace krys::boo
     Checkmark,
     PickerIcon,
 
-    HighestEnumValue = PickerIcon
+    HighestEnumValue = PickerIcon,
   };
 }
 
@@ -92,19 +92,19 @@ namespace krys::boo
   enum class ColumnFill : bool
   {
     Balance,
-    Auto
+    Auto,
   };
 
   enum class ColumnSpan : bool
   {
     None,
-    All
+    All,
   };
 
   enum class BorderCollapse : bool
   {
     Separate,
-    Collapse
+    Collapse,
   };
 
   // These have been defined in the order of their precedence for border-collapsing. Do
@@ -120,7 +120,7 @@ namespace krys::boo
     Dotted,
     Dashed,
     Solid,
-    Double
+    Double,
   };
 
   enum class BorderPrecedence : uint8
@@ -131,7 +131,7 @@ namespace krys::boo
     Column,
     RowGroup,
     Row,
-    Cell
+    Cell,
   };
 
   enum class OutlineStyle : uint8
@@ -145,7 +145,7 @@ namespace krys::boo
     Dotted,
     Dashed,
     Solid,
-    Double
+    Double,
   };
 
   enum class PositionType : uint8
@@ -155,7 +155,7 @@ namespace krys::boo
     Absolute = 2,
     Sticky = 3,
     // This value is required to pack our bits efficiently in RenderObject.
-    Fixed = 6
+    Fixed = 6,
   };
 
   enum class Float : uint8
@@ -171,21 +171,21 @@ namespace krys::boo
   {
     None = 1 << 0,
     Left = 1 << 1,
-    Right = 1 << 2
+    Right = 1 << 2,
   };
 
   // Box decoration attributes. Not inherited.
   enum class BoxDecorationBreak : bool
   {
     Slice,
-    Clone
+    Clone,
   };
 
   // Box attributes. Not inherited.
   enum class BoxSizing : bool
   {
     ContentBox,
-    BorderBox
+    BorderBox,
   };
 
   // Random visual rendering model attributes. Not inherited.
@@ -205,7 +205,7 @@ namespace krys::boo
     Right,
     InlineStart,
     InlineEnd,
-    Both
+    Both,
   };
 
   enum class UsedClear : uint8
@@ -213,26 +213,26 @@ namespace krys::boo
     None,
     Left,
     Right,
-    Both
+    Both,
   };
 
   enum class TableLayoutType : bool
   {
     Auto,
-    Fixed
+    Fixed,
   };
 
   enum class TextCombine : bool
   {
     None,
-    All
+    All,
   };
 
   enum class FillAttachment : uint8
   {
     ScrollBackground,
     LocalBackground,
-    FixedBackground
+    FixedBackground,
   };
 
   enum class FillBox : uint8
@@ -242,7 +242,7 @@ namespace krys::boo
     ContentBox,
     BorderArea,
     Text,
-    NoClip
+    NoClip,
   };
 
   constexpr uint32 FillBoxBitWidth = 3;
@@ -269,7 +269,7 @@ namespace krys::boo
     Repeat,
     NoRepeat,
     Round,
-    Space
+    Space,
   };
 
   // CSS3 Background Values
@@ -278,7 +278,7 @@ namespace krys::boo
     Contain,
     Cover,
     Size,
-    None
+    None,
   };
 
   // CSS3 <position>
@@ -287,7 +287,7 @@ namespace krys::boo
     Top,
     Right,
     Bottom,
-    Left
+    Left,
   };
 
   // CSS3 Flexbox Properties
@@ -296,14 +296,14 @@ namespace krys::boo
     Row,
     RowReverse,
     Column,
-    ColumnReverse
+    ColumnReverse,
   };
 
   enum class FlexWrap : uint8
   {
     NoWrap,
     Wrap,
-    Reverse
+    Reverse,
   };
 
   enum class ItemPosition : uint8
@@ -330,13 +330,13 @@ namespace krys::boo
   {
     Default,
     Unsafe,
-    Safe
+    Safe,
   };
 
   enum class ItemPositionType : bool
   {
     NonLegacy,
-    Legacy
+    Legacy,
   };
 
   enum class ContentPosition : uint8
@@ -350,7 +350,7 @@ namespace krys::boo
     FlexStart,
     FlexEnd,
     Left,
-    Right
+    Right,
   };
 
   enum class ContentDistribution : uint8
@@ -359,19 +359,19 @@ namespace krys::boo
     SpaceBetween,
     SpaceAround,
     SpaceEvenly,
-    Stretch
+    Stretch,
   };
 
   enum class TextSecurity : bool
   {
     None,
-    Disc
+    Disc,
   };
 
   enum class InputSecurity : bool
   {
     Auto,
-    None
+    None,
   };
 
   // CSS3 User Modify Properties
@@ -379,7 +379,7 @@ namespace krys::boo
   {
     ReadOnly,
     ReadWrite,
-    ReadWritePlaintextOnly
+    ReadWritePlaintextOnly,
   };
 
   // CSS3 User Drag Values
@@ -387,7 +387,7 @@ namespace krys::boo
   {
     Auto,
     None,
-    Element
+    Element,
   };
 
   // CSS3 User Select Values
@@ -395,7 +395,7 @@ namespace krys::boo
   {
     None,
     Text,
-    All
+    All,
   };
 
   // CSS3 Image Values
@@ -405,7 +405,7 @@ namespace krys::boo
     Contain,
     Cover,
     None,
-    ScaleDown
+    ScaleDown,
   };
 
   enum class AspectRatioType : uint8
@@ -413,7 +413,7 @@ namespace krys::boo
     Auto,
     Ratio,
     AutoAndRatio,
-    AutoZero
+    AutoZero,
   };
 
   enum class WordBreak : uint8
@@ -422,14 +422,14 @@ namespace krys::boo
     BreakAll,
     KeepAll,
     BreakWord,
-    AutoPhrase
+    AutoPhrase,
   };
 
   enum class OverflowWrap : uint8
   {
     Normal,
     BreakWord,
-    Anywhere
+    Anywhere,
   };
 
   enum class LineBreak : uint8
@@ -439,7 +439,7 @@ namespace krys::boo
     Normal,
     Strict,
     AfterWhiteSpace,
-    Anywhere
+    Anywhere,
   };
 
   enum class QuoteType : uint8
@@ -447,7 +447,7 @@ namespace krys::boo
     OpenQuote,
     CloseQuote,
     NoOpenQuote,
-    NoCloseQuote
+    NoCloseQuote,
   };
 
   enum class AnimationFillMode : uint8
@@ -455,13 +455,13 @@ namespace krys::boo
     None,
     Forwards,
     Backwards,
-    Both
+    Both,
   };
 
   enum class AnimationPlayState : bool
   {
     Running,
-    Paused
+    Paused,
   };
 
   enum class WhiteSpace : uint8
@@ -471,7 +471,7 @@ namespace krys::boo
     PreWrap,
     PreLine,
     NoWrap,
-    BreakSpaces
+    BreakSpaces,
   };
 
   enum class WhiteSpaceCollapse : uint8
@@ -479,7 +479,7 @@ namespace krys::boo
     Collapse,
     Preserve,
     PreserveBreaks,
-    BreakSpaces
+    BreakSpaces,
   };
 
   enum class TextDecorationStyle : uint8
@@ -488,7 +488,7 @@ namespace krys::boo
     Double,
     Dotted,
     Dashed,
-    Wavy
+    Wavy,
   };
 
   enum class TextJustify : uint8
@@ -496,14 +496,14 @@ namespace krys::boo
     Auto,
     None,
     InterWord,
-    InterCharacter
+    InterCharacter,
   };
 
   enum class TextDecorationSkipInk : uint8
   {
     None,
     Auto,
-    All
+    All,
   };
 
   enum class TextGroupAlign : uint8
@@ -513,7 +513,7 @@ namespace krys::boo
     End,
     Left,
     Right,
-    Center
+    Center,
   };
 
   enum class TextBoxTrim : uint8
@@ -521,7 +521,7 @@ namespace krys::boo
     None,
     TrimStart,
     TrimEnd,
-    TrimBoth
+    TrimBoth,
   };
 
   enum class TextEdgeOver : uint8
@@ -530,7 +530,7 @@ namespace krys::boo
     Ideographic,
     IdeographicInk,
     Cap,
-    Ex
+    Ex,
   };
 
   enum class TextEdgeUnder : uint8
@@ -552,7 +552,7 @@ namespace krys::boo
     LeftPage,
     RightPage,
     RectoPage,
-    VersoPage
+    VersoPage,
   };
 
   KRYS_NODISCARD bool AlwaysPageBreak(BreakBetween) noexcept;
@@ -562,32 +562,32 @@ namespace krys::boo
     Auto,
     Avoid,
     AvoidColumn,
-    AvoidPage
+    AvoidPage,
   };
 
   enum class EmptyCell : bool
   {
     Show,
-    Hide
+    Hide,
   };
 
   enum class CaptionSide : uint8
   {
     Top,
-    Bottom
+    Bottom,
   };
 
   enum class ListStylePosition : bool
   {
     Outside,
-    Inside
+    Inside,
   };
 
   enum class Visibility : uint8
   {
     Visible,
     Hidden,
-    Collapse
+    Collapse,
   };
 
   enum class CursorType : uint8
@@ -631,7 +631,7 @@ namespace krys::boo
     ZoomOut,
     // The following are handled as exceptions so don't need to match.
     Copy,
-    None
+    None,
   };
 
   enum class DisplayType : uint8
@@ -662,7 +662,7 @@ namespace krys::boo
     RubyBlock,
     RubyBase,
     RubyAnnotation,
-    None
+    None,
   };
 
   enum class PointerEvents : uint8
@@ -677,7 +677,7 @@ namespace krys::boo
     VisibleFill,
     VisiblePainted,
     BoundingBox,
-    All
+    All,
   };
 
   enum class TransformStyle3D : uint8
@@ -689,7 +689,7 @@ namespace krys::boo
   enum class BackfaceVisibility : uint8
   {
     Visible,
-    Hidden
+    Hidden,
   };
 
   enum class TransformBox : uint8
@@ -698,26 +698,26 @@ namespace krys::boo
     ContentBox,
     BorderBox,
     FillBox,
-    ViewBox
+    ViewBox,
   };
 
   enum class OverflowContinue : bool
   {
     Auto,
-    Discard
+    Discard,
   };
 
   enum class Hyphens : uint8
   {
     None,
     Manual,
-    Auto
+    Auto,
   };
 
   enum class TextEmphasisFill : bool
   {
     Filled,
-    Open
+    Open,
   };
 
   enum class TextEmphasisMark : uint8
@@ -726,19 +726,19 @@ namespace krys::boo
     Circle,
     DoubleCircle,
     Triangle,
-    Sesame
+    Sesame,
   };
 
   enum class TextOverflow : bool
   {
     Clip,
-    Ellipsis
+    Ellipsis,
   };
 
   enum class TextWrapMode : bool
   {
     Wrap,
-    NoWrap
+    NoWrap,
   };
 
   enum class TextWrapStyle : uint8
@@ -746,7 +746,7 @@ namespace krys::boo
     Auto,
     Balance,
     Pretty,
-    Stable
+    Stable,
   };
 
   enum class ImageRendering : uint8
@@ -755,7 +755,7 @@ namespace krys::boo
     OptimizeSpeed,
     OptimizeQuality,
     CrispEdges,
-    Pixelated
+    Pixelated,
   };
 
   TextStream &operator<<(TextStream &ts, ImageRendering imageRendering) noexcept;
@@ -764,7 +764,7 @@ namespace krys::boo
   {
     Over,
     Under,
-    InterCharacter
+    InterCharacter,
   };
 
   enum class RubyAlign : uint8
@@ -772,19 +772,19 @@ namespace krys::boo
     Start,
     Center,
     SpaceBetween,
-    SpaceAround
+    SpaceAround,
   };
 
   enum class RubyOverhang : bool
   {
     Auto,
-    None
+    None,
   };
 
   enum class ColorScheme : uint8
   {
     Light,
-    Dark
+    Dark,
   };
 
   constexpr size_t ColorSchemeBits = 2;
@@ -793,7 +793,7 @@ namespace krys::boo
   {
     None,
     Fill,
-    Fit
+    Fit,
   };
 
   // Reasonable maximum to prevent insane font sizes from causing crashes on some platforms (such as Windows).
@@ -802,14 +802,14 @@ namespace krys::boo
   enum class Isolation : bool
   {
     Auto,
-    Isolate
+    Isolate,
   };
 
   /// @see https://drafts.csswg.org/css-position-4/#overlay
   enum class Overlay : bool
   {
     None,
-    Auto
+    Auto,
   };
 
   // Fill, Stroke, ViewBox are just used for SVG.
@@ -822,13 +822,13 @@ namespace krys::boo
     ContentBox,
     FillBox,
     StrokeBox,
-    ViewBox
+    ViewBox,
   };
 
   enum class ScrollSnapStrictness : bool
   {
     Proximity,
-    Mandatory
+    Mandatory,
   };
 
   enum class ScrollSnapAxis : uint8
@@ -837,7 +837,7 @@ namespace krys::boo
     YAxis,
     Block,
     Inline,
-    Both
+    Both,
   };
 
   enum class ScrollSnapAxisAlignType : uint8
@@ -845,7 +845,7 @@ namespace krys::boo
     None,
     Start,
     Center,
-    End
+    End,
   };
 
   enum class ScrollSnapStop : bool
@@ -860,7 +860,7 @@ namespace krys::boo
     Block,
     Swap,
     Fallback,
-    Optional
+    Optional,
   };
 
   enum class EventListenerRegionType : uint64
@@ -944,27 +944,27 @@ namespace krys::boo
     Auto,
     Center,
     Start,
-    End
+    End,
   };
 
   enum class BlockStepInsert : uint8
   {
     MarginBox,
     PaddingBox,
-    ContentBox
+    ContentBox,
   };
 
   enum class BlockStepRound : uint8
   {
     Up,
     Down,
-    Nearest
+    Nearest,
   };
 
   enum class FieldSizing : bool
   {
     Fixed,
-    Content
+    Content,
   };
 
   enum class NinePieceImageRule : uint8
@@ -980,7 +980,7 @@ namespace krys::boo
     Normal,
     Alternate,
     Reverse,
-    AlternateReverse
+    AlternateReverse,
   };
 
   enum class TransitionBehavior : bool
@@ -993,21 +993,21 @@ namespace krys::boo
   {
     Nearest,
     Root,
-    Self
+    Self,
   };
 
   enum class TextAnchor : uint8
   {
     Start,
     Middle,
-    End
+    End,
   };
 
   enum class ColorInterpolation : uint8
   {
     Auto,
     SRGB,
-    LinearRGB
+    LinearRGB,
   };
 
   enum class ShapeRendering : uint8
@@ -1015,7 +1015,7 @@ namespace krys::boo
     Auto,
     OptimizeSpeed,
     CrispEdges,
-    GeometricPrecision
+    GeometricPrecision,
   };
 
   enum class GlyphOrientation : uint8
@@ -1024,7 +1024,7 @@ namespace krys::boo
     Degrees90,
     Degrees180,
     Degrees270,
-    Auto
+    Auto,
   };
 
   enum class AlignmentBaseline : uint8
@@ -1039,7 +1039,7 @@ namespace krys::boo
     Ideographic,
     Alphabetic,
     Hanging,
-    Mathematical
+    Mathematical,
   };
 
   enum class DominantBaseline : uint8
@@ -1055,19 +1055,19 @@ namespace krys::boo
     Central,
     Middle,
     TextAfterEdge,
-    TextBeforeEdge
+    TextBeforeEdge,
   };
 
   enum class VectorEffect : uint8
   {
     None,
-    NonScalingStroke
+    NonScalingStroke,
   };
 
   enum class MaskType : uint8
   {
     Luminance,
-    Alpha
+    Alpha,
   };
 
   KRYS_NODISCARD CSSBoxType TransformBoxToCSSBoxType(TransformBox) noexcept;
@@ -1077,6 +1077,6 @@ namespace krys::boo
   enum class UsesSVGZoomRulesForLength : bool
   {
     No,
-    Yes
+    Yes,
   };
 }

@@ -40,9 +40,9 @@ namespace krys::boo::css
 {
   class Value;
 
+  struct ParserContext;
   struct PropertyParserState;
   struct Range;
-  struct ParserContext;
 
   class ParserFastPaths
   {

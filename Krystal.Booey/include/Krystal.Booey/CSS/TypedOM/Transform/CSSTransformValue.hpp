@@ -52,6 +52,7 @@ namespace krys::boo::css
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-transform-list
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTransformValue>> Create(const TransformListValue &list,
                                                                           dom::Document &document) noexcept;
+
     /// @return A `TypeError` if @p transforms is empty.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-csstransformvalue
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSTransformValue>>
@@ -64,16 +65,20 @@ namespace krys::boo::css
     {
       return _components.size();
     }
+
     KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept
     {
       return index < _components.size();
     }
+
     /// @return Null if @p index is out of range.
     KRYS_NODISCARD RefPtr<CSSTransformComponent> Item(size_t index) const noexcept;
+
     /// @brief Replaces the component at @p index, or appends one at the end.
     /// @return A `RangeError` if @p index is past the end.
     dom::ExceptionOr<Ref<CSSTransformComponent>> SetItem(size_t index,
                                                          Ref<CSSTransformComponent> component) noexcept;
+
     KRYS_NODISCARD const List<Ref<CSSTransformComponent>> &Components() const noexcept
     {
       return _components;
@@ -91,6 +96,7 @@ namespace krys::boo::css
     {
       return CSSStyleValueType::CSSTransformValue;
     }
+
     KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
 
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept final;

@@ -50,6 +50,7 @@ namespace krys::boo
   KRYS_NODISCARD utf8_string DispatchBeforeTextInsertedEvent(utf8_stringview text,
                                                              const VisibleSelection &selectionForInsertion,
                                                              bool insertionIsForUpdatingComposition) noexcept;
+
   KRYS_NODISCARD bool CanAppendNewLineFeedToSelection(const VisibleSelection &selection) noexcept;
 
   // LineOperation should define member function "opeartor (size_t lineOffset, size_t lineLength, bool

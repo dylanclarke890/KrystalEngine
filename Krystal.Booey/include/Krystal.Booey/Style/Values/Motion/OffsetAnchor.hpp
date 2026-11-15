@@ -36,9 +36,11 @@ namespace krys::boo::style
     OffsetAnchor(css::keywords::Auto keyword) noexcept : _value {keyword}
     {
     }
+
     OffsetAnchor(Position &&position) noexcept : _value {krys::move(position)}
     {
     }
+
     OffsetAnchor(const Position &position) noexcept : _value {position}
     {
     }
@@ -47,10 +49,12 @@ namespace krys::boo::style
     {
       return HoldsAlternative<css::keywords::Auto>();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsPosition() const noexcept
     {
       return HoldsAlternative<Position>();
     }
+
     KRYS_NODISCARD Maybe<Position> TryPosition() const noexcept
     {
       return IsPosition() ? Maybe(std::get<Position>(_value)) : std::nullopt;
@@ -58,6 +62,7 @@ namespace krys::boo::style
 
     template <typename>
     KRYS_NODISCARD bool HoldsAlternative() const noexcept;
+
     template <typename... F>
     KRYS_NODISCARD decltype(auto) SwitchOn(F &&...) const noexcept;
 
@@ -93,8 +98,10 @@ namespace krys::boo::style
   struct Blending<OffsetAnchor>
   {
     KRYS_NODISCARD bool CanBlend(const OffsetAnchor &, const OffsetAnchor &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const OffsetAnchor &,
                                                                       const OffsetAnchor &) noexcept;
+
     KRYS_NODISCARD OffsetAnchor Blend(const OffsetAnchor &, const OffsetAnchor &,
                                       const BlendingContext &) noexcept;
   };

@@ -83,22 +83,26 @@ namespace krys::pal
   {
     Text,
     HTML,
-    Files
+    Files,
   };
 
   /// @brief Whether the system clipboard holds @p format.
   KRYS_NODISCARD bool IsClipboardFormatAvailable(ClipboardFormat format) noexcept;
+
   /// @brief Whether the system clipboard holds bytes in the application's format named @p formatName.
   KRYS_NODISCARD bool IsClipboardDataAvailable(utf8_stringview formatName) noexcept;
 
   /// @brief Gets the system clipboard's HTML fragment, as UTF-8 markup.
   /// @return The markup, or none if the clipboard holds no HTML or can't be opened.
   KRYS_NODISCARD Maybe<utf8_string> GetClipboardHTML() noexcept;
+
   /// @brief Gets the paths of the files on the system clipboard (copied in a file manager, say).
   KRYS_NODISCARD List<utf8_string> GetClipboardFiles() noexcept;
+
   /// @brief Gets the system clipboard's bytes in the application's format named @p formatName.
   /// @return The bytes, or none if the clipboard doesn't hold that format or can't be opened.
   KRYS_NODISCARD Maybe<List<uint8>> GetClipboardData(utf8_stringview formatName) noexcept;
+
   /// @brief A count that changes whenever the system clipboard's contents do.
   KRYS_NODISCARD uint32 GetClipboardChangeCount() noexcept;
 }

@@ -6,22 +6,22 @@
 
 namespace krys::boo::dom
 {
-  class TraversalBase;
   class Node;
   class NodeIterator;
-  class TreeWalker;
   struct NodePointer;
+  class TraversalBase;
+  class TreeWalker;
 
   enum class TraversalNextOrPrev
   {
     Next,
-    Previous
+    Previous,
   };
 
   enum class TraverseFirstOrLast
   {
     First,
-    Last
+    Last,
   };
 
   class IteratorAlgorithms

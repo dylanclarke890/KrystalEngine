@@ -48,6 +48,7 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+
     KRYS_NODISCARD Maybe<style::UnadjustedStyle>
       ResolveCustomStyle(const style::ResolutionContext &resolutionContext,
                          const RenderStyle *shadowHostStyle) noexcept override;
@@ -99,6 +100,7 @@ namespace krys::boo::html
     void UpdateInnerTextElementEditabilityImpl(bool isEditable) noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+
     KRYS_NODISCARD Maybe<style::UnadjustedStyle>
       ResolveCustomStyle(const style::ResolutionContext &resolutionContext,
                          const RenderStyle *shadowHostStyle) noexcept override;

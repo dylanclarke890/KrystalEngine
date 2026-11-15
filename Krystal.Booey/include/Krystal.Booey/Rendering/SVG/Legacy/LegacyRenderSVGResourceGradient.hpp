@@ -64,10 +64,12 @@ namespace krys::boo
   {
   public:
     GradientApplier() noexcept = default;
+
     virtual ~GradientApplier() noexcept = default;
 
     virtual bool ApplyResource(RenderElement &, const RenderStyle &, GraphicsContext *&, const GradientData &,
                                EnumSet<RenderSVGResourceMode>) noexcept = 0;
+
     virtual void PostApplyResource(RenderElement &, GraphicsContext *&, const GradientData &,
                                    svg::SVGUnitTypes::SVGUnitType gradientUnits,
                                    const AffineTransform &gradientTransform, EnumSet<RenderSVGResourceMode>,
@@ -94,14 +96,18 @@ namespace krys::boo
     }
 
     void RemoveAllClientsFromCache() noexcept final;
+
     void RemoveAllClientsFromCacheAndMarkForInvalidationIfNeeded(
       bool markForInvalidation, VisitedRenderers *visitedRenderers) noexcept override;
+
     void RemoveClientFromCache(RenderElement &) noexcept final;
 
     EnumSet<ApplyResult> ApplyResource(RenderElement &, const RenderStyle &, GraphicsContext *&,
                                        EnumSet<RenderSVGResourceMode>) noexcept final;
+
     void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>, const Path *,
                            const RenderElement *) noexcept final;
+
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &, RepaintRectCalculation) noexcept final
     {
       return FloatRect();
@@ -118,12 +124,16 @@ namespace krys::boo
 
     KRYS_NODISCARD GradientData::Inputs ComputeInputs(RenderElement &,
                                                       EnumSet<RenderSVGResourceMode>) noexcept;
+
     KRYS_NODISCARD GradientData *GradientDataForRenderer(RenderElement &,
                                                          EnumSet<RenderSVGResourceMode>) noexcept;
 
     KRYS_NODISCARD virtual svg::SVGUnitTypes::SVGUnitType GradientUnits() const noexcept = 0;
+
     KRYS_NODISCARD virtual AffineTransform GradientTransform() const noexcept = 0;
+
     virtual bool CollectGradientAttributes() noexcept = 0;
+
     KRYS_NODISCARD virtual Ref<Gradient> BuildGradient() const noexcept = 0;
   };
 }

@@ -36,7 +36,7 @@ namespace krys::boo::style
   enum class PathConversion : bool
   {
     None,
-    ForceAbsolute
+    ForceAbsolute,
   };
 
   struct Path
@@ -55,6 +55,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const Path &) const noexcept = default;
   };
+
   using PathFunction = css::FunctionNotation<css::ValueId::Path, Path>;
 
   template <size_t I>
@@ -85,6 +86,7 @@ namespace krys::boo::style
     KRYS_NODISCARD css::Path operator()(const Path &, const RenderStyle &,
                                         PathConversion = PathConversion::None) noexcept;
   };
+
   template <>
   struct ToStyle<css::Path>
   {
@@ -98,6 +100,7 @@ namespace krys::boo::style
     KRYS_NODISCARD css::Path::PathData operator()(const Path::PathData &, const RenderStyle &,
                                                   PathConversion = PathConversion::None) noexcept;
   };
+
   template <>
   struct ToStyle<css::Path::PathData>
   {
@@ -142,6 +145,7 @@ namespace krys::boo::style
   struct Blending<Path>
   {
     KRYS_NODISCARD bool CanBlend(const Path &, const Path &) noexcept;
+
     KRYS_NODISCARD Path Blend(const Path &, const Path &, const BlendingContext &) noexcept;
   };
 }

@@ -45,7 +45,7 @@ namespace krys::boo::svg
   {
     SVGLengthAdjustUnknown,
     SVGLengthAdjustSpacing,
-    SVGLengthAdjustSpacingAndGlyphs
+    SVGLengthAdjustSpacingAndGlyphs,
   };
 
   template <>
@@ -110,25 +110,33 @@ namespace krys::boo::svg
     {
       LENGTHADJUST_UNKNOWN = SVGLengthAdjustUnknown,
       LENGTHADJUST_SPACING = SVGLengthAdjustSpacing,
-      LENGTHADJUST_SPACINGANDGLYPHS = SVGLengthAdjustSpacingAndGlyphs
+      LENGTHADJUST_SPACINGANDGLYPHS = SVGLengthAdjustSpacingAndGlyphs,
     };
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getNumberOfChars
     KRYS_NODISCARD uint32 GetNumberOfChars() noexcept;
+
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getComputedTextLength
     KRYS_NODISCARD float GetComputedTextLength() noexcept;
+
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getSubStringLength
     KRYS_NODISCARD dom::ExceptionOr<float> GetSubStringLength(uint32 charnum, uint32 nchars) noexcept;
+
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getStartPositionOfChar
     KRYS_NODISCARD dom::ExceptionOr<Ref<SVGPoint>> GetStartPositionOfChar(uint32 charnum) noexcept;
+
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getEndPositionOfChar
     KRYS_NODISCARD dom::ExceptionOr<Ref<SVGPoint>> GetEndPositionOfChar(uint32 charnum) noexcept;
+
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getExtentOfChar
     KRYS_NODISCARD dom::ExceptionOr<Ref<SVGRect>> GetExtentOfChar(uint32 charnum) noexcept;
+
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getRotationOfChar
     KRYS_NODISCARD dom::ExceptionOr<float> GetRotationOfChar(uint32 charnum) noexcept;
+
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getCharNumAtPosition
     KRYS_NODISCARD int32 GetCharNumAtPosition(dom::DOMPointInit &&) noexcept;
+
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__selectSubString
     dom::ExceptionOr<void> SelectSubString(uint32 charnum, uint32 nchars) noexcept;
 
@@ -140,16 +148,19 @@ namespace krys::boo::svg
     {
       return _specifiedTextLength;
     }
+
     KRYS_NODISCARD const SVGLengthValue &TextLength() const noexcept
     {
       return _textLength->CurrentValue();
     }
+
     KRYS_NODISCARD SVGLengthAdjustType LengthAdjust() const noexcept
     {
       return _lengthAdjust->CurrentValue<SVGLengthAdjustType>();
     }
 
     KRYS_NODISCARD SVGAnimatedLength &TextLengthAnimated() noexcept;
+
     KRYS_NODISCARD SVGAnimatedEnumeration &LengthAdjustAnimated() noexcept
     {
       return *_lengthAdjust;
@@ -166,12 +177,15 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept override;

@@ -56,6 +56,7 @@ namespace krys::boo
 
   public:
     constexpr FloatPoint() noexcept = default;
+
     constexpr FloatPoint(float x, float y) noexcept : _x(x), _y(y)
     {
     }
@@ -209,6 +210,7 @@ namespace krys::boo
     KRYS_NODISCARD FloatPoint ConstrainedWithin(const FloatRect &rect) const noexcept;
 
     KRYS_NODISCARD FloatPoint MatrixTransform(const TransformationMatrix &transform) const noexcept;
+
     KRYS_NODISCARD FloatPoint MatrixTransform(const AffineTransform &transform) const noexcept;
 
     KRYS_NODISCARD constexpr FloatPoint ShrunkTo(const FloatPoint &other) const noexcept

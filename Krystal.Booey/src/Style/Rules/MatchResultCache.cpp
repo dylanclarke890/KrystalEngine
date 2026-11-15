@@ -85,6 +85,7 @@ namespace krys::boo::style
   };
 
   MatchResultCache::MatchResultCache() noexcept = default;
+
   MatchResultCache::~MatchResultCache() noexcept = default;
 
   bool

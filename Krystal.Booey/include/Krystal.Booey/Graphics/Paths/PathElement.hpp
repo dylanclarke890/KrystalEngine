@@ -38,8 +38,9 @@ namespace krys::boo
       AddLineToPoint,
       AddQuadCurveToPoint,
       AddCurveToPoint,
-      CloseSubpath
+      CloseSubpath,
     };
+
     Type ElementType;
     std::array<FloatPoint, 3> Points;
   };

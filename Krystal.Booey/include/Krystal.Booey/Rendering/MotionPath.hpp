@@ -32,8 +32,8 @@ namespace krys::boo
 {
   class BoxPathOperation;
   class Path;
-  class RenderElement;
   class RayPathOperation;
+  class RenderElement;
   class ShapePathOperation;
   class TransformationMatrix;
   struct TransformOperationData;
@@ -69,8 +69,10 @@ namespace krys::boo
 
     KRYS_NODISCARD static Maybe<Path> ComputePathForBox(const BoxPathOperation &,
                                                         const TransformOperationData &) noexcept;
+
     KRYS_NODISCARD static Maybe<Path> ComputePathForShape(const ShapePathOperation &,
                                                           const TransformOperationData &) noexcept;
+
     KRYS_NODISCARD static Maybe<Path> ComputePathForRay(const RayPathOperation &,
                                                         const TransformOperationData &) noexcept;
   };

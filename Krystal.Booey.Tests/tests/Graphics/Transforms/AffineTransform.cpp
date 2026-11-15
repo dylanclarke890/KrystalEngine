@@ -926,9 +926,9 @@ namespace krys::boo::tests
 
   TEST_CASE("AffineTransform: Constexpr", "[Graphics][AffineTransform]")
   {
-    static constexpr AffineTransform transform;
+    constexpr static AffineTransform transform;
     STATIC_CHECK(transform == transform);
-    static constexpr AffineTransform transform2(1, 2, 3, 4, 5, 6);
+    constexpr static AffineTransform transform2(1, 2, 3, 4, 5, 6);
     STATIC_CHECK(transform2 == transform2);
   }
 }

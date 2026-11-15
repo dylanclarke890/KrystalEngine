@@ -46,7 +46,7 @@ namespace krys::boo::dom
     enum class Simulated : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -69,8 +69,10 @@ namespace krys::boo::dom
 
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-screenx
     KRYS_NODISCARD virtual double ScreenX() const noexcept;
+
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-screeny
     KRYS_NODISCARD virtual double ScreenY() const noexcept;
+
     KRYS_NODISCARD const DoublePoint &ScreenLocation() const noexcept
     {
       return _screenLocation;
@@ -78,8 +80,10 @@ namespace krys::boo::dom
 
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-clientx
     KRYS_NODISCARD virtual double ClientX() const noexcept;
+
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-clienty
     KRYS_NODISCARD virtual double ClientY() const noexcept;
+
     KRYS_NODISCARD const DoublePoint &ClientLocation() const noexcept
     {
       return _clientLocation;
@@ -90,6 +94,7 @@ namespace krys::boo::dom
     {
       return _movementX;
     }
+
     /// @see https://w3c.github.io/pointerlock/#dom-mouseevent-movementy
     KRYS_NODISCARD double MovementY() const noexcept
     {
@@ -103,11 +108,13 @@ namespace krys::boo::dom
 
     /// @note Non-standard.
     KRYS_NODISCARD int32 LayerX() const noexcept;
+
     /// @note Non-standard.
     KRYS_NODISCARD int32 LayerY() const noexcept;
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-mouseevent-offsetx
     KRYS_NODISCARD virtual double OffsetX() const noexcept;
+
     /// @see https://drafts.csswg.org/cssom-view/#dom-mouseevent-offsety
     KRYS_NODISCARD virtual double OffsetY() const noexcept;
 
@@ -118,6 +125,7 @@ namespace krys::boo::dom
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-mouseevent-pagex
     KRYS_NODISCARD virtual double PageX() const noexcept;
+
     /// @see https://drafts.csswg.org/cssom-view/#dom-mouseevent-pagey
     KRYS_NODISCARD virtual double PageY() const noexcept;
 
@@ -126,6 +134,7 @@ namespace krys::boo::dom
     {
       return ClientX();
     }
+
     /// @see https://drafts.csswg.org/cssom-view/#dom-mouseevent-y
     KRYS_NODISCARD double Y() const noexcept
     {
@@ -148,6 +157,7 @@ namespace krys::boo::dom
     MouseRelatedEvent(DOMStringAtom type, const MouseEventInit &initializer) noexcept;
 
     void InitCoordinates(const DoublePoint &clientLocation) noexcept;
+
     /// @brief Makes the frame view the one of the event's view, after that changed.
     void UpdateFrameView() noexcept;
 
@@ -172,12 +182,16 @@ namespace krys::boo::dom
     }
 
     void ComputeRelativePosition() const noexcept;
+
     KRYS_NODISCARD bool HasCachedRelativePosition() const noexcept;
 
   private:
     void Init(bool isSimulated, const DoublePoint &windowLocation) noexcept;
+
     void InitCoordinates() noexcept;
+
     void ComputePageLocation() noexcept;
+
     KRYS_NODISCARD float DocumentToAbsoluteScaleFactor() const noexcept;
   };
 }

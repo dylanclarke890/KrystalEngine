@@ -44,6 +44,7 @@ namespace krys::boo
       Normal,
       Break,
     };
+
     enum class WordBreakBehavior : uint8
     {
       Normal,
@@ -51,6 +52,7 @@ namespace krys::boo
       KeepAll,
       AutoPhrase,
     };
+
     enum class LineBreakRules : uint8
     {
       Normal,  // Fast path available when using default line-breaking rules within ASCII.
@@ -91,6 +93,7 @@ namespace krys::boo
 
     // Helper functions.
     enum BreakClass : uint16;
+
     template <LineBreakRules TRules, NoBreakSpaceBehavior TSpaces>
     KRYS_NODISCARD static inline BreakClass Classify(char32 character) noexcept;
 
@@ -152,10 +155,10 @@ namespace krys::boo
     class LineBreakTable
     {
     public:
-      static constexpr char32 FirstCharacter = '!';
-      static constexpr char32 LastCharacter = 0xFF;
-      static constexpr uint32 RowCount = LastCharacter - FirstCharacter + 1;
-      static constexpr uint32 ColumnCount = (LastCharacter - FirstCharacter) / 8 + 1;
+      constexpr static char32 FirstCharacter = '!';
+      constexpr static char32 LastCharacter = 0xFF;
+      constexpr static uint32 RowCount = LastCharacter - FirstCharacter + 1;
+      constexpr static uint32 ColumnCount = (LastCharacter - FirstCharacter) / 8 + 1;
 
       // Must range check before calling.
       KRYS_NODISCARD static inline bool UnsafeLookup(char32 before, char32 after) noexcept
@@ -477,11 +480,11 @@ namespace krys::boo
     // This function is optimized for letters and NBSP.
     // See LineBreak.txt for classification.
 
-    static constexpr char32 blockLast3 = ~char32 {0x07};
-    static constexpr char32 blockLast4 = ~char32 {0x0F};
-    static constexpr char32 blockLast6 = ~char32 {0x3F};
-    static constexpr char32 blockLast7 = ~char32 {0x7F};
-    static constexpr char32 blockLast8 = ~char32 {0xFF};
+    constexpr static char32 blockLast3 = ~char32 {0x07};
+    constexpr static char32 blockLast4 = ~char32 {0x0F};
+    constexpr static char32 blockLast6 = ~char32 {0x3F};
+    constexpr static char32 blockLast7 = ~char32 {0x7F};
+    constexpr static char32 blockLast8 = ~char32 {0xFF};
 
     switch ((character & blockLast7) / 0x80)
     {
@@ -719,7 +722,7 @@ namespace krys::boo
       return ID; // WARNING: These are actually H2 or H3.
     }
     // More CJK
-    if (0xF900 <= character && character <= 0XFAFF)
+    if (0xF900 <= character && character <= 0xFAFF)
     {
       return ID;
     }

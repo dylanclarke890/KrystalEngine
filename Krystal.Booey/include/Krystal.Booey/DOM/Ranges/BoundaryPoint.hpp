@@ -69,6 +69,7 @@ namespace krys::boo::dom
 
   /// @brief The boundary point before @p node in its parent, or null if it has no parent.
   KRYS_NODISCARD Maybe<BoundaryPoint> MakeBoundaryPointBeforeNode(Node &node) noexcept;
+
   /// @brief The boundary point after @p node in its parent, or null if it has no parent.
   KRYS_NODISCARD Maybe<BoundaryPoint> MakeBoundaryPointAfterNode(Node &node) noexcept;
 

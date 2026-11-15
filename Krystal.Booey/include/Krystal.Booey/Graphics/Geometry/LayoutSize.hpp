@@ -46,7 +46,7 @@ namespace krys::boo
   enum class AspectRatioFit
   {
     Shrink,
-    Grow
+    Grow,
   };
 
   /// @brief A width and height in layout units.

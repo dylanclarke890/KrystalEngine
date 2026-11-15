@@ -88,6 +88,7 @@ namespace krys::boo
     {
       return _subresourceCachePolicy;
     }
+
     void SetSubresourceCachePolicy(CachePolicy policy) noexcept
     {
       _subresourceCachePolicy = policy;
@@ -138,6 +139,7 @@ namespace krys::boo
 
     /// @brief The caret position nearest @p framePoint (in the frame's contents).
     KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const IntPoint &framePoint) const noexcept;
+
     /// @brief The document under @p point (in the window).
     KRYS_NODISCARD dom::Document *DocumentAtPoint(const IntPoint &point) noexcept;
 
@@ -154,11 +156,14 @@ namespace krys::boo
     }
 
     void SetPageZoomFactor(float factor) noexcept;
+
     void SetTextZoomFactor(float factor) noexcept;
+
     void SetPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor) noexcept;
 
     /// @brief How much the frame's content is scaled: the page's scale.
     KRYS_NODISCARD float FrameScaleFactor() const noexcept;
+
     /// @brief Tells the frame's compositor the device or page scale changed.
     void DeviceOrPageScaleFactorChanged() noexcept;
   };

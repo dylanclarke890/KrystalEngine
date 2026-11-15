@@ -64,7 +64,7 @@ namespace krys::boo::style
     enum class Type : uint8
     {
       InvalidateStyle,
-      ResetStyle
+      ResetStyle,
     };
 
     Type ChangeType;
@@ -84,7 +84,7 @@ namespace krys::boo::style
           InvalidationRuleSets.push_back(krys::move(ruleSet));
         }
       }
-    };
+    }
   };
 
   /// @brief The style rules of a set of style sheets, bucketed by the rightmost compound selector of each
@@ -98,9 +98,9 @@ namespace krys::boo::style
     using RuleDataVector = SmallList<RuleData, 1>;
     using AtomRuleMap = HashMap<css::CSSOMStringAtom, UniquePtr<RuleDataVector>>;
 
-    static constexpr auto CascadeLayerPriorityForPresentationalHints =
+    constexpr static auto CascadeLayerPriorityForPresentationalHints =
       std::numeric_limits<CascadeLayerPriority>::min();
-    static constexpr auto CascadeLayerPriorityForUnlayered = std::numeric_limits<CascadeLayerPriority>::max();
+    constexpr static auto CascadeLayerPriorityForUnlayered = std::numeric_limits<CascadeLayerPriority>::max();
 
   private:
     using CascadeLayerIdentifier = uint32;
@@ -219,6 +219,7 @@ namespace krys::boo::style
     void AddRule(const css::StyleRule &rule, uint32 selectorIndex, uint32 selectorListIndex) noexcept;
 
     void AddToRuleSet(const css::CSSOMStringAtom &key, AtomRuleMap &map, const RuleData &ruleData) noexcept;
+
     void ShrinkToFit() noexcept;
 
     KRYS_NODISCARD bool HasViewportDependentMediaQueries() const noexcept
@@ -246,6 +247,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD const RuleDataVector *AttributeRules(const css::CSSOMStringAtom &key,
                                                         bool isHTMLName) const noexcept;
+
     KRYS_NODISCARD const RuleDataVector *TagRules(const css::CSSOMStringAtom &key,
                                                   bool isHTMLName) const noexcept;
 
@@ -335,6 +337,7 @@ namespace krys::boo::style
     /// true query for the rule to apply.
     KRYS_NODISCARD List<const css::cq::ContainerQueryList *>
       ContainerQueriesFor(const RuleData &ruleData) const noexcept;
+
     KRYS_NODISCARD List<Ref<const css::ContainerRule>> ContainerQueryRules() const noexcept;
 
     KRYS_NODISCARD bool HasScopeRules() const noexcept
@@ -357,6 +360,7 @@ namespace krys::boo::style
 
     template <typename TFunction>
     void TraverseRuleDatas(TFunction &&function) noexcept;
+
     template <typename TFunction>
     void TraverseRuleDatas(TFunction &&function) const noexcept;
 

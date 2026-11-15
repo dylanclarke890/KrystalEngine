@@ -162,7 +162,9 @@ namespace krys::boo::dom
     }
 
     void SetFlags(Element &element, EnumSet<Flag> flags) noexcept;
+
     void ClearFlags(Element &element, EnumSet<Flag> flags) noexcept;
+
     KRYS_NODISCARD bool HasFlag(const Element &element, Flag flag) const noexcept;
   };
 }

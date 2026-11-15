@@ -28,7 +28,7 @@ namespace krys::Serialisation
         StartObject,
         InObject,
         StartArray,
-        InArray
+        InArray,
       } NodeType {Type::StartObject};
 
       uint32 NameCounter {0u};
@@ -207,7 +207,7 @@ namespace krys::Serialisation
       }
 
       /// @brief Get the value of the current node
-      GenericValue const &Value()
+      const GenericValue &Value()
       {
         if (_index >= _size)
         {
@@ -258,11 +258,12 @@ namespace krys::Serialisation
       MemberIterator _memberIteratorBegin {}, _memberIteratorEnd {}; /// @brief The member iterator (object)
       ValueIterator _valueIteratorBegin {};                          /// @brief The value iterator (array)
       size_t _index {0u}, _size {0u}; /// @brief The current index of this iterator
+
       enum class Type
       {
         Value,
         Member,
-        null
+        null,
       } _type {Type::null}; /// @brief Whether this holds values (array) or members (objects) or nothing
     };
 

@@ -47,12 +47,14 @@ namespace krys::boo
     {
       return _floodColor;
     }
+
     bool SetFloodColor(const Color &color) noexcept;
 
     KRYS_NODISCARD float FloodOpacity() const noexcept
     {
       return _floodOpacity;
     }
+
     bool SetFloodOpacity(float floodOpacity) noexcept;
 
     // feFlood does not perform color interpolation of any kind, so the result is always in the current

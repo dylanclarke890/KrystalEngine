@@ -44,7 +44,9 @@ namespace krys::boo::dom
     List<Ref<DOMRect>> _items;
 
     DOMRectList() noexcept = default;
+
     explicit DOMRectList(const List<FloatQuad> &quads) noexcept;
+
     explicit DOMRectList(const List<FloatRect> &rects) noexcept;
 
   public:
@@ -55,10 +57,12 @@ namespace krys::boo::dom
     {
       return AdoptRef(*new DOMRectList(quads));
     }
+
     KRYS_NODISCARD static Ref<DOMRectList> Create(const List<FloatRect> &rects) noexcept
     {
       return AdoptRef(*new DOMRectList(rects));
     }
+
     KRYS_NODISCARD static Ref<DOMRectList> Create() noexcept
     {
       return AdoptRef(*new DOMRectList());

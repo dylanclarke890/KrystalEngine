@@ -157,7 +157,7 @@ namespace krys::boo
     enum class MSOListMode : bool
     {
       Preserve,
-      DoNotPreserve
+      DoNotPreserve,
     };
 
     /// @brief Serializes a range with the styles that give it its appearance inlined.
@@ -167,7 +167,7 @@ namespace krys::boo
       enum RangeFullySelectsNode : bool
       {
         DoesFullySelectNode,
-        DoesNotFullySelectNode
+        DoesNotFullySelectNode,
       };
 
     private:
@@ -180,7 +180,7 @@ namespace krys::boo
       enum class NodeTraversalMode : bool
       {
         EmitString,
-        DoNotEmitString
+        DoNotEmitString,
       };
 
       dom::Position _start;
@@ -223,15 +223,19 @@ namespace krys::boo
       }
 
       RefPtr<dom::Node> SerializeNodes(const dom::Position &start, const dom::Position &end) noexcept;
+
       void WrapWithNode(dom::Node &node, bool convertBlocksToInlines = false,
                         RangeFullySelectsNode rangeFullySelectsNode = DoesFullySelectNode) noexcept;
+
       void WrapWithStyleNode(css::StyleProperties *style, bool isBlock = false) noexcept;
+
       KRYS_NODISCARD utf8_string TakeResults() noexcept;
 
       KRYS_NODISCARD bool NeedRelativeStyleWrapper() const noexcept
       {
         return _needRelativeStyleWrapper;
       }
+
       KRYS_NODISCARD bool NeedClearingDiv() const noexcept
       {
         return _needClearingDiv;
@@ -306,14 +310,17 @@ namespace krys::boo
 
     private:
       KRYS_NODISCARD bool ContainsOnlyASCII() const noexcept;
+
       void AppendStyleNodeOpenTag(utf8_string &out, css::StyleProperties *style, bool isBlock = false,
                                   Maybe<TextDirection> directionToAppend = null) noexcept;
+
       KRYS_NODISCARD static utf8_stringview StyleNodeCloseTag(bool isBlock = false) noexcept
       {
         return isBlock ? u8"</div>" : u8"</span>";
       }
 
       KRYS_NODISCARD utf8_string RenderedTextRespectingRange(const dom::Text &text) noexcept;
+
       KRYS_NODISCARD utf8_string TextContentRespectingRange(const dom::Text &text) noexcept;
 
       KRYS_NODISCARD bool ShouldPreserveMSOListStyleForElement(const dom::Element &element) noexcept;
@@ -322,11 +329,14 @@ namespace krys::boo
 
       void AppendStartTag(utf8_string &out, const dom::Element &element, bool addDisplayInline,
                           RangeFullySelectsNode rangeFullySelectsNode) noexcept;
+
       void AppendEndTag(utf8_string &out, const dom::Element &element) noexcept override;
+
       void AppendCustomAttributes(utf8_string &out, const dom::Element &element,
                                   Namespaces *namespaces) noexcept override;
 
       void AppendText(utf8_string &out, const dom::Text &text) noexcept override;
+
       void AppendStartTag(utf8_string &out, const dom::Element &element, Namespaces *) noexcept override
       {
         AppendStartTag(out, element, false, DoesFullySelectNode);
@@ -1543,7 +1553,7 @@ namespace krys::boo
     auto &frame = page->MainFrame();
     frame.CreateView(IntSize {800, 600});
 
-    static constexpr utf8_stringview markup = u8"<!DOCTYPE html><html><head><meta name='color-scheme' "
+    constexpr static utf8_stringview markup = u8"<!DOCTYPE html><html><head><meta name='color-scheme' "
                                               u8"content='light dark'/></head><body></body></html>";
     DocumentWriter writer;
     writer.SetFrame(frame);

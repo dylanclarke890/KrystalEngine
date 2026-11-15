@@ -37,6 +37,7 @@ namespace krys::boo::css
     Ref<StyleProperties> _properties;
 
     PositionTryRule(CSSOMStringAtom &&name, Ref<StyleProperties> &&properties) noexcept;
+
     PositionTryRule(const PositionTryRule &other) noexcept;
 
   public:

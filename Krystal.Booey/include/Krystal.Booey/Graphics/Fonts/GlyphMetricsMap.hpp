@@ -49,7 +49,7 @@ namespace krys::boo
     class GlyphMetricsPage
     {
     public:
-      static constexpr size_t Size = 16;
+      constexpr static size_t Size = 16;
 
     private:
       Array<T, Size> _metrics;

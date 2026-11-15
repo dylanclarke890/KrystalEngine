@@ -104,7 +104,9 @@ namespace krys
 
   public:
     constexpr Quaternion(const Quaternion<T> &other) noexcept = default;
+
     constexpr Quaternion<T> &operator=(const Quaternion<T> &other) noexcept = default;
+
     constexpr ~Quaternion() noexcept = default;
 
     constexpr auto operator<=>(const Quaternion<T> &other) const noexcept = default;
@@ -113,6 +115,7 @@ namespace krys
         : w(other.w), x(other.x), y(other.y), z(other.z)
     {
     }
+
     constexpr Quaternion<T> &operator=(const Quaternion<T> &&other) noexcept
     {
       w = other.w;
@@ -241,7 +244,9 @@ namespace krys
       const auto halfAngle = std::acos(w);
       const auto sinHalfAngle = std::sin(halfAngle);
       if (sinHalfAngle < std::numeric_limits<T>::epsilon())
+      {
         return {Vector3<T>(1.0f, 0.0f, 0.0f), 0.0f};
+      }
 
       const auto angle = 2.0f * halfAngle;
       return {Vector3<T>(x / sinHalfAngle, y / sinHalfAngle, z / sinHalfAngle), angle};
@@ -264,8 +269,10 @@ namespace krys
 
       // Handle the case where the quaternion represents no rotation
       if (sinHalfAngle < std::numeric_limits<T>::epsilon())
+      {
         // No meaningful axis; return a default axis
         return Vector3<T>(1.0f, 0.0f, 0.0f);
+      }
 
       // Normalize the vector part to get the rotation axis
       return Vector3<T>(x / sinHalfAngle, y / sinHalfAngle, z / sinHalfAngle);
@@ -307,10 +314,14 @@ namespace krys
       // Normalize the axis
       const T length = Length(axis);
       if (length < std::numeric_limits<T>::epsilon())
+      {
         // If the axis length is near zero, return a default axis
         return Vector3<T>(1.0f, 0.0f, 0.0f);
+      }
       else
+      {
         return axis / length; // Return the normalized axis
+      }
     }
 
 #pragma endregion AxisAngle

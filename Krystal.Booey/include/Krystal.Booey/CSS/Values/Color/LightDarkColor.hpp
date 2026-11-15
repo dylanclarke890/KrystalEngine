@@ -35,7 +35,7 @@ namespace krys::boo::css
   enum class LightDarkColorAppearance : bool
   {
     Light,
-    Dark
+    Dark,
   };
 
   struct LightDarkColor
@@ -48,6 +48,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD boo::Color CreateColor(const LightDarkColor &unresolved,
                                         PlatformColorResolutionState &state) noexcept;
+
   KRYS_NODISCARD bool ContainsCurrentColor(const LightDarkColor &unresolved) noexcept;
 
   KRYS_NODISCARD constexpr bool ContainsColorSchemeDependentColor(const LightDarkColor &) noexcept

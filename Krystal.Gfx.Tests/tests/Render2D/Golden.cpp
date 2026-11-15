@@ -74,23 +74,23 @@ namespace krys::gfx::tests
     /// @brief `golden/scenes/shadows.html`: outer shadows soft, sharp and wide, and an inset shadow.
     void ShadowsScene(Renderer2D &renderer)
     {
-      renderer.FillRect({0.f, 0.f, 320.f, 240.f}, Rgb(0xe9ecf2));
+      renderer.FillRect({0.f, 0.f, 320.f, 240.f}, Rgb(0xE9ECF2));
 
       const auto soft = Box(24.f, 24.f, 112.f, 72.f, 12.f);
       BoxShadow(renderer, soft, {0.f, 4.f}, 12.f, Rgb(0x000000, 89));
-      renderer.FillRoundedRect(soft, Rgb(0xffffff));
+      renderer.FillRoundedRect(soft, Rgb(0xFFFFFF));
 
       const auto sharp = Box(184.f, 24.f, 112.f, 72.f, 0.f);
-      BoxShadow(renderer, sharp, {6.f, 6.f}, 0.f, Rgb(0x2846aa));
-      renderer.FillRoundedRect(sharp, Rgb(0xffffff));
+      BoxShadow(renderer, sharp, {6.f, 6.f}, 0.f, Rgb(0x2846AA));
+      renderer.FillRoundedRect(sharp, Rgb(0xFFFFFF));
 
       const auto inset = Box(24.f, 136.f, 112.f, 72.f, 16.f);
-      renderer.FillRoundedRect(inset, Rgb(0xfafafa));
+      renderer.FillRoundedRect(inset, Rgb(0xFAFAFA));
       InsetShadow(renderer, inset, {0.f, 4.f}, 10.f, Rgb(0x000000, 128));
 
       const auto wide = Box(184.f, 136.f, 112.f, 72.f, 36.f);
-      BoxShadow(renderer, wide, {0.f, 0.f}, 30.f, Rgb(0xdc3c3c, 217));
-      renderer.FillRoundedRect(wide, Rgb(0xffffff));
+      BoxShadow(renderer, wide, {0.f, 0.f}, 30.f, Rgb(0xDC3C3C, 217));
+      renderer.FillRoundedRect(wide, Rgb(0xFFFFFF));
     }
 
     /// @brief The colour matrices of CSS's filter functions (Filter Effects 1, section 13), as SVG's
@@ -152,12 +152,12 @@ namespace krys::gfx::tests
     void FiltersScene(Renderer2D &renderer)
     {
       using namespace filter_matrices;
-      renderer.FillRect({0.f, 0.f, 320.f, 240.f}, Rgb(0xe9ecf2));
+      renderer.FillRect({0.f, 0.f, 320.f, 240.f}, Rgb(0xE9ECF2));
 
       auto content = [&](float x, float y)
       {
-        renderer.FillRect({x + 14.f, y + 14.f, 36.f, 36.f}, Rgb(0xe04848));
-        renderer.FillRoundedRect(Box(x + 30.f, y + 30.f, 36.f, 36.f, 18.f), Rgb(0x3c64dc));
+        renderer.FillRect({x + 14.f, y + 14.f, 36.f, 36.f}, Rgb(0xE04848));
+        renderer.FillRoundedRect(Box(x + 30.f, y + 30.f, 36.f, 36.f, 18.f), Rgb(0x3C64DC));
       };
       auto tile = [&](uint32 index, const LayerFilter2D &filter)
       {
@@ -195,27 +195,27 @@ namespace krys::gfx::tests
     /// rotation and a stroked path.
     void UiScene(Renderer2D &renderer)
     {
-      renderer.FillRect({0.f, 0.f, 360.f, 260.f}, Rgb(0xffffff));
+      renderer.FillRect({0.f, 0.f, 360.f, 260.f}, Rgb(0xFFFFFF));
 
       // A header: linear-gradient(to right, ...).
       const Gradient2D header {
         .Shape = LinearGradient2D {{0.f, 20.f}, {360.f, 20.f}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0x4f6df5)}, {.Offset = 1.f, .Colour = Hex(0xb04ff5)}}};
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0x4F6DF5)}, {.Offset = 1.f, .Colour = Hex(0xB04FF5)}}};
       renderer.FillRect({0.f, 0.f, 360.f, 40.f}, header);
 
       // A card with a radial-gradient background (positioned in its padding box) and a 3px border.
       const auto card = Box(16.f, 56.f, 140.f, 100.f, 10.f);
       const Gradient2D glow {
         .Shape = RadialGradient2D {{59.f, 99.f}, {59.f, 99.f}, 0.f, 50.f},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0xffffff)}, {.Offset = 1.f, .Colour = Hex(0x99cccc)}}};
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0xFFFFFF)}, {.Offset = 1.f, .Colour = Hex(0x99CCCC)}}};
       renderer.Save();
       renderer.ClipRoundedRect(card);
       renderer.FillRect(card.Rect, glow);
-      renderer.FillRectWithRoundedHole(card.Rect, Box(19.f, 59.f, 134.f, 94.f, 7.f), Rgb(0x33aa77));
+      renderer.FillRectWithRoundedHole(card.Rect, Box(19.f, 59.f, 134.f, 94.f, 7.f), Rgb(0x33AA77));
       renderer.Restore();
 
       // conic-gradient(from 45deg, red, yellow, lime, aqua, blue, magenta, red) in a circle.
-      const uint32 hues[] {0xff0000, 0xffff00, 0x00ff00, 0x00ffff, 0x0000ff, 0xff00ff, 0xff0000};
+      const uint32 hues[] {0xFF0000, 0xFFFF00, 0x00FF00, 0x00FFFF, 0x0000FF, 0xFF00FF, 0xFF0000};
       Gradient2D wheel {.Shape = ConicGradient2D {{226.f, 106.f}, std::numbers::pi_v<float> / 4.f}};
       for (uint32 i = 0u; i < 7u; ++i)
       {
@@ -227,7 +227,7 @@ namespace krys::gfx::tests
       renderer.Save();
       renderer.Translate(316.f, 106.f);
       renderer.Rotate(20.f * std::numbers::pi_v<float> / 180.f);
-      renderer.FillRect({-20.f, -20.f, 40.f, 40.f}, Rgb(0xee0044));
+      renderer.FillRect({-20.f, -20.f, 40.f, 40.f}, Rgb(0xEE0044));
       renderer.Restore();
 
       // overflow: hidden with rounded corners, its child overflowing.
@@ -235,20 +235,20 @@ namespace krys::gfx::tests
       renderer.Save();
       renderer.ClipRoundedRect(clip);
       renderer.FillRect(clip.Rect, Rgb(0x222233));
-      renderer.FillRect({76.f, 200.f, 120.f, 60.f}, Rgb(0xf5a623));
+      renderer.FillRect({76.f, 200.f, 120.f, 60.f}, Rgb(0xF5A623));
       renderer.Restore();
 
       // opacity: 0.5 on a group of two circles.
       renderer.BeginLayer(0.5f);
-      renderer.FillRoundedRect(Box(176.f, 166.f, 40.f, 40.f, 20.f), Rgb(0xff0000));
-      renderer.FillRoundedRect(Box(196.f, 176.f, 40.f, 40.f, 20.f), Rgb(0x0000ff));
+      renderer.FillRoundedRect(Box(176.f, 166.f, 40.f, 40.f, 20.f), Rgb(0xFF0000));
+      renderer.FillRoundedRect(Box(196.f, 176.f, 40.f, 40.f, 20.f), Rgb(0x0000FF));
       renderer.EndLayer();
 
       // mix-blend-mode: multiply over a rect.
-      renderer.FillRect({250.f, 176.f, 90.f, 40.f}, Rgb(0x3366ff));
+      renderer.FillRect({250.f, 176.f, 90.f, 40.f}, Rgb(0x3366FF));
       renderer.Save();
       renderer.SetBlendMode(BlendMode::Multiply);
-      renderer.FillRoundedRect(Box(270.f, 166.f, 50.f, 50.f, 25.f), Rgb(0x33cc66));
+      renderer.FillRoundedRect(Box(270.f, 166.f, 50.f, 50.f, 25.f), Rgb(0x33CC66));
       renderer.Restore();
 
       // An SVG polyline, 3px with round joins.
@@ -265,12 +265,12 @@ namespace krys::gfx::tests
     /// rays.
     void ConicScene(Renderer2D &renderer)
     {
-      renderer.FillRect({0.f, 0.f, 200.f, 200.f}, Rgb(0xffffff));
+      renderer.FillRect({0.f, 0.f, 200.f, 200.f}, Rgb(0xFFFFFF));
       const Gradient2D wheel {.Shape = ConicGradient2D {{100.f, 100.f}, 0.f},
-                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xef476f)},
-                                        {.Offset = 0.33f, .Colour = Hex(0xffd166)},
-                                        {.Offset = 0.66f, .Colour = Hex(0x06d6a0)},
-                                        {.Offset = 1.f, .Colour = Hex(0xef476f)}}};
+                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xEF476F)},
+                                        {.Offset = 0.33f, .Colour = Hex(0xFFD166)},
+                                        {.Offset = 0.66f, .Colour = Hex(0x06D6A0)},
+                                        {.Offset = 1.f, .Colour = Hex(0xEF476F)}}};
       renderer.FillRoundedRect(Box(10.f, 10.f, 180.f, 180.f, 90.f), wheel);
     }
 
@@ -314,13 +314,13 @@ namespace krys::gfx::tests
     /// @brief `golden/scenes/text.html`: Liberation Sans at several sizes, dark on light and light on dark.
     void TextScene(Renderer2D &renderer)
     {
-      renderer.FillRect({0.f, 0.f, 360.f, 200.f}, Rgb(0xffffff));
+      renderer.FillRect({0.f, 0.f, 360.f, 200.f}, Rgb(0xFFFFFF));
       DrawText(renderer, U"The quick brown fox jumps over the lazy dog", {10.f, 20.f}, 12.f, Rgb(0x222222));
       DrawText(renderer, U"The quick brown fox jumps over the lazy", {10.f, 44.f}, 16.f, Rgb(0x222222));
       DrawText(renderer, U"Krystal Engine 0123456789", {10.f, 78.f}, 24.f, Rgb(0x222222));
-      DrawText(renderer, U"Hamburgefonstiv", {10.f, 140.f}, 48.f, Rgb(0x4f6df5));
-      renderer.FillRect({0.f, 160.f, 360.f, 40.f}, Rgb(0x23283a));
-      DrawText(renderer, U"Light on dark, at 14 pixels", {10.f, 185.f}, 14.f, Rgb(0xffffff));
+      DrawText(renderer, U"Hamburgefonstiv", {10.f, 140.f}, 48.f, Rgb(0x4F6DF5));
+      renderer.FillRect({0.f, 160.f, 360.f, 40.f}, Rgb(0x23283A));
+      DrawText(renderer, U"Light on dark, at 14 pixels", {10.f, 185.f}, 14.f, Rgb(0xFFFFFF));
     }
 
     struct Scene

@@ -143,6 +143,7 @@ namespace krys::boo::svg
   using InvokeResult = typename std::invoke_result_t<Function, SVGPathSource, FloatPoint>::value_type;
   template <typename Function>
   using ResultPair = std::pair<InvokeResult<Function>, InvokeResult<Function>>;
+
   template <typename Function>
   KRYS_NODISCARD static Maybe<ResultPair<Function>>
     PullFromSources(SVGPathSource &fromSource, SVGPathSource &toSource, Function &&function,

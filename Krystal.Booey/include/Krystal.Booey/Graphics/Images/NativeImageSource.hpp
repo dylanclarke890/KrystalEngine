@@ -46,6 +46,7 @@ namespace krys::boo
     {
       return _frame.Size();
     }
+
     KRYS_NODISCARD Maybe<Color> SinglePixelSolidColor() const noexcept final
     {
       return _frame.GetNativeImage()->SinglePixelSolidColor();
@@ -55,6 +56,7 @@ namespace krys::boo
     {
       return _frame;
     }
+
     KRYS_NODISCARD RefPtr<NativeImage> PrimaryNativeImage() noexcept final
     {
       return _frame.GetNativeImage();

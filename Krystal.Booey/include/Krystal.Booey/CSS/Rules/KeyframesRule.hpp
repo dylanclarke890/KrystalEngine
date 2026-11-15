@@ -38,6 +38,7 @@ namespace krys::boo::css
     CSSOMStringAtom _name;
 
     explicit KeyframesRule(const CSSOMStringAtom &name) noexcept;
+
     KeyframesRule(const KeyframesRule &other) noexcept;
 
   public:
@@ -53,7 +54,9 @@ namespace krys::boo::css
     }
 
     void ParserAppendKeyframe(RefPtr<KeyframeRule> &&keyframe) noexcept;
+
     void WrapperAppendKeyframe(Ref<KeyframeRule> &&keyframe) noexcept;
+
     void WrapperRemoveKeyframe(uint32 index) noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &Name() const noexcept

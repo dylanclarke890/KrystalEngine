@@ -48,12 +48,14 @@ namespace krys::boo
     {
       return _dx;
     }
+
     bool SetDx(float dx) noexcept;
 
     KRYS_NODISCARD float Dy() const noexcept
     {
       return _dy;
     }
+
     bool SetDy(float dy) noexcept;
 
     KRYS_NODISCARD static IntOutsets CalculateOutsets(const FloatSize &offset) noexcept;

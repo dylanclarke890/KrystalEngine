@@ -40,7 +40,7 @@ namespace krys::boo::dom
   enum class IsInputMethodComposing : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @see https://w3c.github.io/uievents/#dictdef-inputeventinit
@@ -69,6 +69,7 @@ namespace krys::boo::dom
 
     /// @see https://w3c.github.io/uievents/#dom-inputevent-inputevent
     InputEvent(DOMStringAtom type, const InputEventInit &eventInitDict = {}) noexcept;
+
     ~InputEvent() noexcept;
 
     /// @brief A trusted input event, which bubbles and crosses shadow boundaries.

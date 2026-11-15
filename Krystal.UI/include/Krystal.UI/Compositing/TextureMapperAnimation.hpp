@@ -23,7 +23,7 @@ namespace krys::ui
     {
       Playing,
       Paused,
-      Stopped
+      Stopped,
     };
 
     /// @brief The values a layer's animations produce at a time.
@@ -38,7 +38,7 @@ namespace krys::ui
     enum class KeepInternalState : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -59,14 +59,19 @@ namespace krys::ui
 
   public:
     TextureMapperAnimation() noexcept = default;
+
     TextureMapperAnimation(utf8_stringview name, const boo::GraphicsLayerKeyframeValueList &keyframes,
                            const boo::GraphicsLayerAnimation &animation, MonotonicTime::duration startTime,
                            boo::Seconds pauseTime, State state) noexcept;
+
     ~TextureMapperAnimation() noexcept = default;
 
     TextureMapperAnimation(const TextureMapperAnimation &other) noexcept;
+
     TextureMapperAnimation &operator=(const TextureMapperAnimation &other) noexcept;
+
     TextureMapperAnimation(TextureMapperAnimation &&) noexcept = default;
+
     TextureMapperAnimation &operator=(TextureMapperAnimation &&) noexcept = default;
 
     /// @brief Adds the animation's value at @p time to @p applicationResults.
@@ -75,8 +80,10 @@ namespace krys::ui
 
     /// @brief Holds it at @p offset into the animation.
     void Pause(boo::Seconds offset) noexcept;
+
     /// @brief Holds it, if it's playing, where it is at @p time, until it's resumed.
     void Suspend(MonotonicTime::duration time) noexcept;
+
     /// @brief Plays it on from where a suspension held it, from @p now. Paused animations stay paused.
     void Resume(MonotonicTime::duration now) noexcept;
 
@@ -84,14 +91,17 @@ namespace krys::ui
     {
       return _name;
     }
+
     KRYS_NODISCARD const boo::GraphicsLayerKeyframeValueList &Keyframes() const noexcept
     {
       return _keyframes;
     }
+
     KRYS_NODISCARD State GetState() const noexcept
     {
       return _state;
     }
+
     KRYS_NODISCARD boo::TimingFunction *GetTimingFunction() const noexcept
     {
       return _timingFunction.get();
@@ -100,6 +110,7 @@ namespace krys::ui
   private:
     void ApplyInternal(ApplicationResult &applicationResults, const boo::GraphicsLayerAnimationValue &from,
                        const boo::GraphicsLayerAnimationValue &to, float progress) noexcept;
+
     KRYS_NODISCARD boo::Seconds ComputeTotalRunningTime(MonotonicTime::duration time) noexcept;
   };
 
@@ -119,24 +130,32 @@ namespace krys::ui
     {
       _translate = transform;
     }
+
     void SetRotate(const boo::TransformationMatrix &transform) noexcept
     {
       _rotate = transform;
     }
+
     void SetScale(const boo::TransformationMatrix &transform) noexcept
     {
       _scale = transform;
     }
+
     void SetTransform(const boo::TransformationMatrix &transform) noexcept
     {
       _transform = transform;
     }
 
     void Add(const TextureMapperAnimation &animation) noexcept;
+
     void Remove(utf8_stringview name) noexcept;
+
     void Remove(utf8_stringview name, boo::AnimatedProperty property) noexcept;
+
     void Pause(utf8_stringview name, boo::Seconds offset) noexcept;
+
     void Suspend(MonotonicTime::duration time) noexcept;
+
     void Resume(MonotonicTime::duration now) noexcept;
 
     void Apply(TextureMapperAnimation::ApplicationResult &applicationResults, MonotonicTime::duration time,
@@ -147,14 +166,17 @@ namespace krys::ui
     {
       return _animations.empty();
     }
+
     KRYS_NODISCARD size_t Size() const noexcept
     {
       return _animations.size();
     }
+
     KRYS_NODISCARD const List<TextureMapperAnimation> &Animations() const noexcept
     {
       return _animations;
     }
+
     KRYS_NODISCARD List<TextureMapperAnimation> &Animations() noexcept
     {
       return _animations;
@@ -163,6 +185,7 @@ namespace krys::ui
     KRYS_NODISCARD bool HasActiveAnimationsOfType(boo::AnimatedProperty type) const noexcept;
 
     KRYS_NODISCARD bool HasRunningAnimations() const noexcept;
+
     KRYS_NODISCARD bool HasRunningTransformAnimations() const noexcept;
   };
 }

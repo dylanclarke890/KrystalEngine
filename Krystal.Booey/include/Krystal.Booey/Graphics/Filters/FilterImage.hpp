@@ -63,6 +63,7 @@ namespace krys::boo
                                                   const IntRect &absoluteImageRect, bool isAlphaImage,
                                                   bool isValidPremultiplied,
                                                   const DestinationColorSpace &colorSpace) noexcept;
+
     KRYS_NODISCARD static Ref<FilterImage> Create(const FloatRect &primitiveSubregion,
                                                   const FloatRect &imageRect,
                                                   const IntRect &absoluteImageRect,
@@ -73,7 +74,9 @@ namespace krys::boo
     {
       return _primitiveSubregion;
     }
+
     KRYS_NODISCARD FloatRect MaxEffectRect(const Filter &filter) const noexcept;
+
     KRYS_NODISCARD FloatRect ImageRect() const noexcept
     {
       return _imageRect;
@@ -84,17 +87,21 @@ namespace krys::boo
     {
       return _absoluteImageRect;
     }
+
     KRYS_NODISCARD IntRect AbsoluteImageRectRelativeTo(const FilterImage &origin) const noexcept;
+
     KRYS_NODISCARD FloatPoint MappedAbsolutePoint(const FloatPoint &point) const noexcept;
 
     KRYS_NODISCARD bool IsAlphaImage() const noexcept
     {
       return _isAlphaImage;
     }
+
     KRYS_NODISCARD bool IsValidPremultiplied() const noexcept
     {
       return _isValidPremultiplied;
     }
+
     KRYS_NODISCARD const DestinationColorSpace &ColorSpace() const noexcept
     {
       return _colorSpace;
@@ -114,6 +121,7 @@ namespace krys::boo
     {
       return _acceleratedImage;
     }
+
     void SetAcceleratedImage(uint32 image) noexcept
     {
       _acceleratedImage = image;
@@ -129,6 +137,7 @@ namespace krys::boo
     FilterImage(const FloatRect &primitiveSubregion, const FloatRect &imageRect,
                 const IntRect &absoluteImageRect, bool isAlphaImage, bool isValidPremultiplied,
                 const DestinationColorSpace &colorSpace) noexcept;
+
     FilterImage(const FloatRect &primitiveSubregion, const FloatRect &imageRect,
                 const IntRect &absoluteImageRect, Ref<ImageBuffer> &&imageBuffer) noexcept;
   };

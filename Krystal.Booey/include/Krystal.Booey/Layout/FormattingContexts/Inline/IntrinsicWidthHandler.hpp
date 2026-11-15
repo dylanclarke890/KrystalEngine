@@ -43,7 +43,7 @@ namespace krys::boo::layout
     enum class MayCacheLayoutResult : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -60,6 +60,7 @@ namespace krys::boo::layout
                           const InlineContentCache::InlineItems &inlineItems) noexcept;
 
     KRYS_NODISCARD InlineLayoutUnit MinimumContentSize() noexcept;
+
     KRYS_NODISCARD InlineLayoutUnit MaximumContentSize() noexcept;
 
     KRYS_NODISCARD Maybe<LineLayoutResult> &MaximumIntrinsicWidthLineContent() noexcept
@@ -71,7 +72,9 @@ namespace krys::boo::layout
     KRYS_NODISCARD InlineLayoutUnit ComputedIntrinsicWidthForConstraint(
       IntrinsicWidthMode intrinsicWidthMode, AbstractLineBuilder &lineBuilder,
       MayCacheLayoutResult mayCacheLayoutResult = MayCacheLayoutResult::No) noexcept;
+
     KRYS_NODISCARD InlineLayoutUnit SimplifiedMinimumWidth(const ElementBox &root) const noexcept;
+
     KRYS_NODISCARD InlineLayoutUnit
       SimplifiedMaximumWidth(MayCacheLayoutResult mayCacheLayoutResult = MayCacheLayoutResult::No) noexcept;
 
@@ -79,12 +82,16 @@ namespace krys::boo::layout
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const InlineFormattingContext &GetFormattingContext() const noexcept
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const ElementBox &FormattingContextRoot() const noexcept;
+
     KRYS_NODISCARD const ElementBox &LineBuilerRoot() const noexcept;
+
     KRYS_NODISCARD const InlineItemList &GetInlineItemList() const noexcept
     {
       return _inlineItems.Content();

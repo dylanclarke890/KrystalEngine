@@ -53,26 +53,26 @@ namespace krys::boo::svg
     Points,
     Picas,
     Lh,
-    Ch
+    Ch,
   };
 
   enum class SVGLengthMode : uint8
   {
     Width,
     Height,
-    Other
+    Other,
   };
 
   enum class SVGLengthNegativeValuesMode : uint8
   {
     Allow,
-    Forbid
+    Forbid,
   };
 
   enum class ShouldConvertNumberToPxLength : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   class SVGLengthValue
@@ -84,7 +84,9 @@ namespace krys::boo::svg
   public:
     explicit SVGLengthValue(SVGLengthMode = SVGLengthMode::Other,
                             dom::DOMStringView valueAsString = {}) noexcept;
+
     SVGLengthValue(float valueInSpecifiedUnits, SVGLengthType, SVGLengthMode = SVGLengthMode::Other) noexcept;
+
     SVGLengthValue(const SVGLengthContext &, float, SVGLengthType = SVGLengthType::Number,
                    SVGLengthMode = SVGLengthMode::Other) noexcept;
 
@@ -94,27 +96,36 @@ namespace krys::boo::svg
                 Maybe<dom::DOMStringView> fallbackValue = {}) noexcept;
 
     KRYS_NODISCARD SVGLengthType LengthType() const noexcept;
+
     KRYS_NODISCARD SVGLengthMode LengthMode() const noexcept
     {
       return _lengthMode;
     }
 
     KRYS_NODISCARD bool IsZero() const noexcept;
+
     KRYS_NODISCARD bool IsRelative() const noexcept;
 
     KRYS_NODISCARD float Value(const SVGLengthContext &) const noexcept;
+
     KRYS_NODISCARD float ValueAsPercentage() const noexcept;
+
     KRYS_NODISCARD float ValueInSpecifiedUnits() const noexcept;
 
     KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept;
+
     KRYS_NODISCARD dom::DOMStringAtom ValueAsAtomString() const noexcept;
+
     KRYS_NODISCARD dom::ExceptionOr<float> ValueForBindings(const SVGLengthContext &) const noexcept;
 
     void SetValueInSpecifiedUnits(float) noexcept;
+
     dom::ExceptionOr<void> SetValue(const SVGLengthContext &, float) noexcept;
+
     dom::ExceptionOr<void> SetValue(const SVGLengthContext &, float, SVGLengthType, SVGLengthMode) noexcept;
 
     dom::ExceptionOr<void> SetValueAsString(dom::DOMStringView) noexcept;
+
     dom::ExceptionOr<void> SetValueAsString(dom::DOMStringView, SVGLengthMode) noexcept;
 
     dom::ExceptionOr<void> ConvertToSpecifiedUnits(const SVGLengthContext &, SVGLengthType) noexcept;

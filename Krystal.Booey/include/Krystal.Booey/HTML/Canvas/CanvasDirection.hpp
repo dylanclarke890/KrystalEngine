@@ -9,6 +9,6 @@ namespace krys::boo::html
   {
     Ltr,
     Rtl,
-    Inherit
+    Inherit,
   };
 }

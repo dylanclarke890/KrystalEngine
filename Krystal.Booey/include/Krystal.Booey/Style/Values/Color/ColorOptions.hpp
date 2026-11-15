@@ -35,7 +35,7 @@ namespace krys::boo::style
     None = 0,
     UseSystemAppearance = 1 << 0,
     UseDarkAppearance = 1 << 1,
-    UseElevatedUserInterfaceLevel = 1 << 2
+    UseElevatedUserInterfaceLevel = 1 << 2,
   };
 }
 

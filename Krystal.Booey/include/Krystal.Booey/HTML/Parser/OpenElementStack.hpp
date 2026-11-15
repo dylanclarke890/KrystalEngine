@@ -107,6 +107,7 @@ namespace krys::boo::html
 #pragma endregion
 
 #pragma region InScope
+
   private:
     KRYS_NODISCARD bool IsScopeMarker(const StackItem &item) const noexcept;
 

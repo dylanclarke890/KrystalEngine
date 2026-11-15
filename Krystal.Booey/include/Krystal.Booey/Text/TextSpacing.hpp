@@ -47,7 +47,7 @@ namespace krys::boo
       FullWidthClosingPunctuation = 1 << 4,
       FullWidthMiddleDotPunctuation = 1 << 5,
       FullWidthColonPunctuation = 1 << 6,
-      FullWidthDotPunctuation = 1 << 7
+      FullWidthDotPunctuation = 1 << 7,
     };
 
     struct CharactersData
@@ -87,7 +87,7 @@ namespace krys::boo
     {
       SpaceAll = 0, // equivalent to None in text-spacing shorthand
       TrimAll,
-      Auto
+      Auto,
     };
 
   private:
@@ -125,7 +125,7 @@ namespace krys::boo
     Auto,
     IdeographAlpha,
     IdeographNumeric,
-    Normal
+    Normal,
   };
 }
 
@@ -183,7 +183,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldApplySpacing(text_spacing::CharacterClass firstCharacterClass,
                                            text_spacing::CharacterClass secondCharacterClass) const noexcept;
+
     KRYS_NODISCARD bool ShouldApplySpacing(char32_t firstCharacter, char32_t secondCharacter) const noexcept;
+
     /// @brief The space added between ideographs and non-ideographs: 1/8 of @p font's CJK advance.
     KRYS_NODISCARD static float TextAutospaceSize(const Font &font) noexcept;
   };

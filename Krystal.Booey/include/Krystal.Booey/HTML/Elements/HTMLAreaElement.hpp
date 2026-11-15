@@ -50,7 +50,7 @@ namespace krys::boo::html
       Default,
       Poly,
       Rect,
-      Circle
+      Circle,
     };
 
   private:
@@ -79,6 +79,7 @@ namespace krys::boo::html
 
     /// @brief The area's shape in absolute coordinates, over its image's @p renderer.
     KRYS_NODISCARD Path ComputePath(const RenderElement &renderer) const noexcept;
+
     /// @brief The bounds of the area's shape in absolute coordinates, over its image's @p renderer.
     KRYS_NODISCARD LayoutRect ComputeRect(const RenderObject *renderer) const noexcept;
 
@@ -185,9 +186,11 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD url::URL FullURL() const noexcept final;
+
     void SetFullURL(const url::URL &url) noexcept final;
 
     KRYS_NODISCARD Path GetRegion(const LayoutSize &size) const noexcept;
+
     void InvalidateCachedRegion() noexcept;
   };
 }

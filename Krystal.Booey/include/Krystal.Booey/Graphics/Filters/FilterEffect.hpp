@@ -48,6 +48,7 @@ namespace krys::boo
     {
       return _operatingColorSpace;
     }
+
     virtual void SetOperatingColorSpace(const DestinationColorSpace &colorSpace) noexcept
     {
       _operatingColorSpace = colorSpace;
@@ -105,15 +106,18 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool ResultIsValidPremultiplied() const noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD virtual const DestinationColorSpace &
       ResultColorSpace(Span<const Ref<FilterImage>>) const noexcept
     {
       return _operatingColorSpace;
     }
+
     virtual void TransformInputsColorSpace(Span<const Ref<FilterImage>> inputs) const noexcept;
 
     /// @brief The applier for the filter's rendering mode: the accelerated backend's, from @p results.
@@ -128,6 +132,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RefPtr<FilterImage> Apply(const Filter &filter, FilterImage &input,
                                              FilterResults &results) noexcept override;
+
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context, const Filter &filter,
                                                         const FilterStyle &input) const noexcept override;
   };

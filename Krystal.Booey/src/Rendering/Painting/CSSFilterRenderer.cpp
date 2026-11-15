@@ -52,6 +52,7 @@ namespace krys::boo
     {
       return value.Get();
     }
+
     KRYS_NODISCARD const FilterOperation &OperationOf(const Ref<FilterOperation> &operation) noexcept
     {
       return *operation;
@@ -63,6 +64,7 @@ namespace krys::boo
       const auto &data = matrix.data();
       return List<float>(data.begin(), data.end());
     }
+
     template <size_t ColumnCount, size_t RowCount>
     KRYS_NODISCARD List<float> ValuesOf(const ColourMatrix<ColumnCount, RowCount> &matrix) noexcept
     {

@@ -737,6 +737,7 @@ namespace krys::boo::html
     auto &shadowRoot = *element->UserAgentShadowRoot();
 
     auto &document = element->NodeDocument();
+
     // FIXME: <https://webkit.org/b/245977> Suppress selectionchange events during subtree modification.
     struct SelectionState
     {
@@ -744,6 +745,7 @@ namespace krys::boo::html
       uint32 End;
       TextFieldSelectionDirection Direction;
     };
+
     Maybe<SelectionState> selectionState;
     if (preserveSelection == PreserveSelectionRange::Yes
         && EnclosingTextFormControl(document.Selection().Selection().Start()) == element.get())

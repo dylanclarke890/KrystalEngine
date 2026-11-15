@@ -76,14 +76,17 @@ namespace krys::boo
     /// @brief Scrolls to @p destinationOffset, from where a running animation has got to.
     /// @return Whether it's animating: false if it's already there.
     bool ScrollToOffsetWithAnimation(const FloatPoint &destinationOffset, ScrollType scrollType) noexcept;
+
     void StopAnimation() noexcept
     {
       _isAnimating = false;
     }
+
     KRYS_NODISCARD bool IsAnimating() const noexcept
     {
       return _isAnimating;
     }
+
     KRYS_NODISCARD const FloatPoint &DestinationOffset() const noexcept
     {
       return _destinationOffset;
@@ -97,19 +100,23 @@ namespace krys::boo
     {
       return _snapOffsetsInfo.has_value();
     }
+
     KRYS_NODISCARD const ScrollSnapOffsetsInfo *SnapOffsetsInfo() const noexcept
     {
       return _snapOffsetsInfo ? &*_snapOffsetsInfo : nullptr;
     }
+
     void SetSnapOffsetsInfo(ScrollSnapOffsetsInfo info) noexcept
     {
       _snapOffsetsInfo = krys::move(info);
     }
+
     void ClearSnapOffsetsInfo() noexcept;
 
     /// @brief @p offset, moved to where a scroll to it snaps.
     KRYS_NODISCARD FloatPoint ScrollOffsetAdjustedForSnapping(
       const FloatPoint &offset, ScrollSnapPointSelectionMethod method) const noexcept;
+
     /// @brief The offset on @p axis of the snap position for a scroll to @p destination.
     /// @param velocity The scroll's direction on @p axis: 0 for the closest position.
     /// @param originalOffset Where a directional scroll started on @p axis.
@@ -119,6 +126,7 @@ namespace krys::boo
 
     /// @brief Notes what the area's scroll position is now snapped to.
     void UpdateSnapTargets() noexcept;
+
     /// @brief Moves the area to where what it was snapped to has gone, or the closest snap position.
     /// @see https://drafts.csswg.org/css-scroll-snap-1/#re-snap
     void ResnapAfterLayout() noexcept;

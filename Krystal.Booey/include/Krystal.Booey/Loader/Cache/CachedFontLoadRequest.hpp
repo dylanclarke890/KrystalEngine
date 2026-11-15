@@ -63,10 +63,12 @@ namespace krys::boo
     {
       RefCounted::AddRef();
     }
+
     void SubRef() const noexcept final
     {
       RefCounted::SubRef();
     }
+
     KRYS_NODISCARD uint32 GetRefCount() const noexcept final
     {
       return RefCounted::GetRefCount();
@@ -86,14 +88,17 @@ namespace krys::boo
     {
       return _font->URL();
     }
+
     KRYS_NODISCARD bool IsPending() const noexcept final
     {
       return _font->GetStatus() == CachedResource::Status::Pending;
     }
+
     KRYS_NODISCARD bool IsLoading() const noexcept final
     {
       return _font->IsLoading();
     }
+
     KRYS_NODISCARD bool ErrorOccurred() const noexcept final
     {
       return _font->ErrorOccurred();

@@ -33,9 +33,9 @@
 
 namespace krys::boo::css
 {
+  struct CounterStyleDescriptors;
   class CounterStyleRule;
   class Value;
-  struct CounterStyleDescriptors;
 
   /// @brief An `@counter-style` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-counter-styles/#the-csscounterstylerule-interface
@@ -53,6 +53,7 @@ namespace krys::boo::css
                                                           CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     void Reattach(Rule &rule) noexcept final;
 
     KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
@@ -61,27 +62,47 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString Name() const noexcept;
+
     KRYS_NODISCARD CSSOMString System() const noexcept;
+
     KRYS_NODISCARD CSSOMString Negative() const noexcept;
+
     KRYS_NODISCARD CSSOMString Prefix() const noexcept;
+
     KRYS_NODISCARD CSSOMString Suffix() const noexcept;
+
     KRYS_NODISCARD CSSOMString Range() const noexcept;
+
     KRYS_NODISCARD CSSOMString Pad() const noexcept;
+
     KRYS_NODISCARD CSSOMString Fallback() const noexcept;
+
     KRYS_NODISCARD CSSOMString Symbols() const noexcept;
+
     KRYS_NODISCARD CSSOMString AdditiveSymbols() const noexcept;
+
     KRYS_NODISCARD CSSOMString SpeakAs() const noexcept;
 
     void SetName(const CSSOMString &text) noexcept;
+
     void SetSystem(const CSSOMString &text) noexcept;
+
     void SetNegative(const CSSOMString &text) noexcept;
+
     void SetPrefix(const CSSOMString &text) noexcept;
+
     void SetSuffix(const CSSOMString &text) noexcept;
+
     void SetRange(const CSSOMString &text) noexcept;
+
     void SetPad(const CSSOMString &text) noexcept;
+
     void SetFallback(const CSSOMString &text) noexcept;
+
     void SetSymbols(const CSSOMString &text) noexcept;
+
     void SetAdditiveSymbols(const CSSOMString &text) noexcept;
+
     void SetSpeakAs(const CSSOMString &text) noexcept;
 
   private:
@@ -89,6 +110,7 @@ namespace krys::boo::css
                                                   const CSSOMString &text) const noexcept;
 
     KRYS_NODISCARD const CounterStyleDescriptors &Descriptors() const noexcept;
+
     KRYS_NODISCARD CounterStyleDescriptors &MutableDescriptors() noexcept;
   };
 }

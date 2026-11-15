@@ -46,20 +46,24 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGTransformableContainer(svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGTransformableContainer() noexcept override;
 
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override
     {
       return _localTransform;
     }
+
     void SetNeedsTransformUpdate() noexcept override
     {
       _needsTransformUpdate = true;
     }
+
     KRYS_NODISCARD bool DidTransformToRootUpdate() noexcept override
     {
       return _didTransformToRootUpdate;
     }
+
     KRYS_NODISCARD const FloatSize &AdditionalTranslation() const noexcept
     {
       return _additionalTranslation;
@@ -67,9 +71,11 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD svg::SVGGraphicsElement &GraphicsElement() noexcept;
+
     void GetElement() const = delete;
 
     bool CalculateLocalTransform() noexcept override;
+
     KRYS_NODISCARD AffineTransform LocalTransform() const noexcept override
     {
       return _localTransform;

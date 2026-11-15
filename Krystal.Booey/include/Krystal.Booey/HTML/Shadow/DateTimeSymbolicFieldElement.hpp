@@ -37,7 +37,7 @@ namespace krys::boo::html
   class DateTimeSymbolicFieldElement : public DateTimeFieldElement, public TypeAheadDataSource
   {
   private:
-    static constexpr int InvalidIndex = -1;
+    constexpr static int InvalidIndex = -1;
 
     const List<utf8_string> _symbols;
     int _selectedIndex {InvalidIndex};
@@ -55,7 +55,9 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool HasValue() const noexcept final;
+
     void SetEmptyValue(EventBehavior eventBehavior = EventBehavior::DispatchNoEvent) noexcept override;
+
     void SetValueAsInteger(int newSelectedIndex,
                            EventBehavior eventBehavior = EventBehavior::DispatchNoEvent) noexcept override;
 
@@ -72,15 +74,22 @@ namespace krys::boo::html
   private:
     // DateTimeFieldElement functions:
     void AdjustMinInlineSize(RenderStyle &style) const noexcept final;
+
     void StepDown() noexcept final;
+
     void StepUp() noexcept final;
+
     KRYS_NODISCARD dom::DOMString Value() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString PlaceholderValue() const noexcept final;
+
     void HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final;
 
     // TypeAheadDataSource functions:
     KRYS_NODISCARD int32 IndexOfSelectedOption() const noexcept final;
+
     KRYS_NODISCARD int32 OptionCount() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString OptionAtIndex(int32 index) const noexcept final;
   };
 }

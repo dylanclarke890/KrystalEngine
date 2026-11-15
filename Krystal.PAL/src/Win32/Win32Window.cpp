@@ -81,12 +81,12 @@ namespace
       case 0x47:          return Key::G;
       case 0x48:          return Key::H;
       case 0x49:          return Key::I;
-      case 0x4a:          return Key::J;
-      case 0x4b:          return Key::K;
-      case 0x4c:          return Key::L;
-      case 0x4d:          return Key::M;
-      case 0x4e:          return Key::N;
-      case 0x4f:          return Key::O;
+      case 0x4A:          return Key::J;
+      case 0x4B:          return Key::K;
+      case 0x4C:          return Key::L;
+      case 0x4D:          return Key::M;
+      case 0x4E:          return Key::N;
+      case 0x4F:          return Key::O;
       case 0x50:          return Key::P;
       case 0x51:          return Key::Q;
       case 0x52:          return Key::R;
@@ -97,7 +97,7 @@ namespace
       case 0x57:          return Key::W;
       case 0x58:          return Key::X;
       case 0x59:          return Key::Y;
-      case 0x5a:          return Key::Z;
+      case 0x5A:          return Key::Z;
       case VK_OEM_PLUS:   return Key::Equal;
       case VK_OEM_MINUS:  return Key::Minus;
       case VK_OEM_6:      return Key::RightBracket;
@@ -117,7 +117,7 @@ namespace
       case VK_CAPITAL:    return Key::CapsLock;
       case VK_SHIFT:
         // The right Shift has its own scan code rather than the extended bit.
-        return ::MapVirtualKeyW((lParam >> 16) & 0xff, MAPVK_VSC_TO_VK_EX) == VK_RSHIFT ? Key::RightShift
+        return ::MapVirtualKeyW((lParam >> 16) & 0xFF, MAPVK_VSC_TO_VK_EX) == VK_RSHIFT ? Key::RightShift
                                                                                         : Key::Shift;
       case VK_LSHIFT:      return Key::Shift;
       case VK_RSHIFT:      return Key::RightShift;
@@ -228,7 +228,7 @@ namespace
   /// @brief Whether @p character is text: not a control character, except the carriage return.
   static bool IsTypedCharacter(const wchar_t character) noexcept
   {
-    return (character >= 0x20 && character != 0x7f) || character == L'\r';
+    return (character >= 0x20 && character != 0x7F) || character == L'\r';
   }
 
   /// @brief @p text in UTF-8 (a lone surrogate as the replacement character).
@@ -279,10 +279,10 @@ namespace
     {
       return keyCode;
     }
-    UINT scanCode = (lParam >> 16) & 0xff;
+    UINT scanCode = (lParam >> 16) & 0xFF;
     if ((HIWORD(lParam) & KF_EXTENDED) != 0)
     {
-      scanCode |= 0xe000;
+      scanCode |= 0xE000;
     }
     const UINT mapped = ::MapVirtualKeyW(scanCode, MAPVK_VSC_TO_VK);
     return mapped != 0 ? mapped : keyCode;
@@ -351,7 +351,7 @@ namespace
     constexpr UINT DontChangeKeyboardState = 1u << 2;
     wchar_t buffer[8] {};
     const int count =
-      ::ToUnicodeEx(static_cast<UINT>(keyCode), (lParam >> 16) & 0xff, state, buffer,
+      ::ToUnicodeEx(static_cast<UINT>(keyCode), (lParam >> 16) & 0xFF, state, buffer,
                     static_cast<int>(std::size(buffer)), DontChangeKeyboardState, ::GetKeyboardLayout(0));
     if (count <= 0)
     {
@@ -547,13 +547,19 @@ namespace krys::pal
 
       int styles = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
       if (_settings.Visible)
+      {
         styles |= WS_VISIBLE;
+      }
       if (_settings.SizeBounds.Resizable)
+      {
         styles |= WS_SIZEBOX | WS_MAXIMIZEBOX;
+      }
 
       auto result = ::AdjustWindowRect(&dimensions, styles, 0);
       if (!result)
+      {
         throw std::runtime_error("Failed to adjust window rect: " + win32::GetLastErrorAsString());
+      }
 
       int width = dimensions.right - dimensions.left;
       int height = dimensions.bottom - dimensions.top;
@@ -561,7 +567,9 @@ namespace krys::pal
       _handle = ::CreateWindowExW(0, _class.lpszClassName, ToWideString(_settings.Title).c_str(), styles,
                                   CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, instance, this);
       if (!_handle)
+      {
         throw std::runtime_error("Failed to create window: " + win32::GetLastErrorAsString());
+      }
 
       // The size is at 96 DPI; the window's monitor, known once it's made, may have another.
       UINT dpi = ::GetDpiForWindow(_handle);
@@ -589,7 +597,9 @@ namespace krys::pal
 
       auto result = ::RegisterRawInputDevices(&rid, 1, sizeof(rid));
       if (!result)
+      {
         throw std::runtime_error("Failed to register raw input device: " + win32::GetLastErrorAsString());
+      }
     }
 
     bool Win32Window::HandlePointerMessage(HWND window, UINT message, WPARAM wParam) const noexcept
@@ -792,6 +802,7 @@ namespace krys::pal
           break;
         }
 #pragma region Input Messages
+
         // Pens and touches; the mouse's come as the mouse messages.
         case WM_POINTERENTER:
         case WM_POINTERDOWN:
@@ -909,7 +920,7 @@ namespace krys::pal
         // eats the next key. Mnemonics (lParam is the character) still go on, for Alt+Space.
         case WM_SYSCOMMAND:
         {
-          if ((wParam & 0xfff0) == SC_KEYMENU && lParam == 0)
+          if ((wParam & 0xFFF0) == SC_KEYMENU && lParam == 0)
           {
             return 0;
           }
@@ -1082,7 +1093,9 @@ namespace krys::pal
           if (raw.header.dwType == RIM_TYPEMOUSE)
           {
             if (!_callbacks.OnMouseMove)
+            {
               return 0; // no mouse move callback registered, ignore
+            }
             // get mouse delta from raw input data
             float x = static_cast<float>(raw.data.mouse.lLastX);
             float y = static_cast<float>(raw.data.mouse.lLastY);
@@ -1103,6 +1116,7 @@ namespace krys::pal
           }
           break;
         }
+
 #pragma endregion
         case WM_DISPLAYCHANGE:
         {

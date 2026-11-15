@@ -36,7 +36,7 @@ namespace krys::boo
   {
     Auto,
     Synchronous,
-    Asynchronous
+    Asynchronous,
   };
 
   /// @brief How an image frame is to be decoded: when, and at what size.
@@ -61,14 +61,17 @@ namespace krys::boo
     {
       return _decodingMode;
     }
+
     KRYS_NODISCARD constexpr bool IsAuto() const noexcept
     {
       return _decodingMode == DecodingMode::Auto;
     }
+
     KRYS_NODISCARD constexpr bool IsSynchronous() const noexcept
     {
       return _decodingMode == DecodingMode::Synchronous;
     }
+
     KRYS_NODISCARD constexpr bool IsAsynchronous() const noexcept
     {
       return _decodingMode == DecodingMode::Asynchronous;
@@ -78,10 +81,12 @@ namespace krys::boo
     {
       return _sizeForDrawing;
     }
+
     KRYS_NODISCARD constexpr bool HasFullSize() const noexcept
     {
       return !_sizeForDrawing;
     }
+
     KRYS_NODISCARD constexpr bool HasSizeForDrawing() const noexcept
     {
       return _sizeForDrawing.has_value();

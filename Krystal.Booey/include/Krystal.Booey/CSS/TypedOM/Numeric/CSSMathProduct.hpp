@@ -39,8 +39,10 @@ namespace krys::boo::css
     /// @return A `SyntaxError` if there are no values, or a `TypeError` if their types can't be combined.
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathProduct>>
       Create(List<CSSNumberish> &&numberishes) noexcept;
+
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathProduct>>
       Create(List<Ref<CSSNumericValue>> &&values) noexcept;
+
     KRYS_NODISCARD const CSSNumericArray &Values() const noexcept
     {
       return *_values;
@@ -53,12 +55,16 @@ namespace krys::boo::css
     {
       return CSSMathOperator::Product;
     }
+
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {
       return CSSStyleValueType::CSSMathProduct;
     }
+
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept final;
+
     KRYS_NODISCARD Maybe<SumValue> ToSumValue() const noexcept final;
+
     KRYS_NODISCARD bool Equals(const CSSNumericValue &other) const noexcept final
     {
       return EqualsImpl<CSSMathProduct>(other);

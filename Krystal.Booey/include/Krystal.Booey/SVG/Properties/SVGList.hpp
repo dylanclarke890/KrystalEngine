@@ -253,10 +253,15 @@ namespace krys::boo::svg
     virtual void DetachItems() noexcept
     {
     }
+
     KRYS_NODISCARD virtual TItem At(uint32 index) const noexcept = 0;
+
     virtual TItem InsertAt(uint32 index, TItem &&) noexcept = 0;
+
     virtual TItem ReplaceAt(uint32 index, TItem &&) noexcept = 0;
+
     virtual TItem RemoveAt(uint32 index) noexcept = 0;
+
     virtual TItem Append(TItem &&) noexcept = 0;
   };
 }

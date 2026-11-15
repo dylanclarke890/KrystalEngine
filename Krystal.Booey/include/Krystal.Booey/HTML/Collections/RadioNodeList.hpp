@@ -42,7 +42,7 @@ namespace krys::boo::html
   enum class RadioNodeListCandidates : uint8
   {
     ListedElements,
-    Images
+    Images,
   };
 
   /// @brief The listed elements of a form with an ID or name, as its named getter returns them when there are
@@ -58,6 +58,7 @@ namespace krys::boo::html
   public:
     RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name,
                   RadioNodeListCandidates candidates = RadioNodeListCandidates::ListedElements) noexcept;
+
     ~RadioNodeList() noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-radionodelist-value

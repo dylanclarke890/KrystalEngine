@@ -2,6 +2,8 @@ Language: Cpp
 Standard: Latest
 BasedOnStyle: LLVM
 ColumnLimit: 110
+LineEnding: LF
+InsertNewlineAtEOF: true
 
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
@@ -15,15 +17,14 @@ AlignConsecutiveShortCaseStatements:
   AcrossEmptyLines: true
   AcrossComments: true
   AlignCaseColons: false
-# ArrayInitializerAlignmentStyle: Right
-# EscapedNewlineAlignmentStyle: LeftWithLastLine
+AlignArrayOfStructures: None
+AlignEscapedNewlines: Right
 BinPackArguments: true
 
 TabWidth: 2
 UseTab: Never
 IndentWidth: 2
 IndentCaseLabels: true
-# IndentCaseContents: true
 IndentCaseBlocks: false
 IndentRequiresClause: false
 IndentWrappedFunctionNames: true
@@ -32,22 +33,37 @@ NamespaceIndentation: All
 FixNamespaceComments: false
 ReflowComments: true
 CompactNamespaces: false
+WrapNamespaceBodyWithEmptyLines: Never
 IndentExternBlock: AfterExternBlock
 IndentPPDirectives: BeforeHash
 AccessModifierOffset: -2
 Cpp11BracedListStyle: true
 
 SortIncludes: CaseInsensitive
-# SortUsingDeclarationsOptions: Lexicographic
+IncludeBlocks: Preserve
+SortUsingDeclarations: LexicographicNumeric
 
-# BreakBeforeConceptDeclarationsStyle: Always
+BreakBeforeConceptDeclarations: Always
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeTernaryOperators: true
-AlwaysBreakTemplateDeclarations: true
+BreakTemplateDeclarations: Yes
 BreakConstructorInitializers: BeforeColon
 BreakFunctionDefinitionParameters: false
 BreakBeforeBraces: Allman
 BreakAfterAttributes: Never
+
+InsertBraces: true
+SeparateDefinitionBlocks: Always
+MaxEmptyLinesToKeep: 1
+EmptyLineBeforeAccessModifier: Always
+RemoveEmptyLinesInUnwrappedLines: true
+RemoveSemicolon: true
+RemoveParentheses: Leave
+EnumTrailingComma: Insert
+NumericLiteralCase: { Prefix: Lower, HexDigit: Upper, Suffix: Lower, ExponentLetter: Lower }
+
+QualifierAlignment: Custom
+QualifierOrder: [friend, constexpr, static, inline, const, type]
 
 IntegerLiteralSeparator:
   Binary: 3
@@ -83,4 +99,7 @@ SpacesInLineCommentPrefix:
 SpacesInParens: Never
 MacroBlockBegin: "^BEGIN_STATE|^KRYS_SPECIALIZE_.*_BEGIN$"
 MacroBlockEnd: "^END_STATE|^KRYS_SPECIALIZE_.*_END$"
-AttributeMacros: [KRYS_NODISCARD, KRYS_NORETURN, KRYS_FALLTHROUGH, KRYS_LIKELY, KRYS_UNLIKELY, KRYS_MAYBE_UNUSED, KRYS_DEPRECATED, KRYS_NO_UNIQUE_ADDRESS]
+AttributeMacros:
+  [KRYS_ALWAYS_INLINE, KRYS_DEPRECATED, KRYS_EMPTY_BASE_CLASS, KRYS_FALLTHROUGH, KRYS_LIFETIME_BOUND, KRYS_LIKELY,
+   KRYS_MAYBE_UNUSED, KRYS_NEVER_INLINE, KRYS_NODISCARD, KRYS_NOESCAPE, KRYS_NORETURN, KRYS_NO_UNIQUE_ADDRESS,
+   KRYS_RETURNS_NONNULL, KRYS_TRIVIAL_ABI, KRYS_UNLIKELY, KRYS_UNUSED_TYPE_ALIAS]

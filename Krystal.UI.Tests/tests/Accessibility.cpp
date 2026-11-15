@@ -41,80 +41,102 @@ namespace krys::ui::tests
       {
         return {};
       }
+
       void ProcessMessages() noexcept override
       {
       }
+
       void SetTitle(const string &title) noexcept override
       {
         _title = title;
       }
+
       KRYS_NODISCARD const string &GetTitle() const noexcept override
       {
         return _title;
       }
+
       KRYS_NODISCARD pal::WindowSize GetSize() const noexcept override
       {
         return {};
       }
+
       KRYS_NODISCARD pal::WindowPosition ClientOriginOnScreen() const noexcept override
       {
         return {};
       }
+
       KRYS_NODISCARD Maybe<uint32> DisplayRefreshRate() const noexcept override
       {
         return null;
       }
+
       KRYS_NODISCARD pal::DisplayColour GetDisplayColour() const noexcept override
       {
         return {};
       }
+
       void Show() noexcept override
       {
       }
+
       void Hide() noexcept override
       {
       }
+
       void SetCallbacks(pal::WindowCallbacks &&) noexcept override
       {
       }
+
       void SetCursor(pal::CursorShape) noexcept override
       {
       }
+
       void SetCursorImage(Ref<pal::CursorImage>) noexcept override
       {
       }
+
       KRYS_NODISCARD pal::CursorShape GetCursor() const noexcept override
       {
         return pal::CursorShape::Arrow;
       }
+
       KRYS_NODISCARD pal::CursorImage *GetCursorImage() const noexcept override
       {
         return nullptr;
       }
+
       bool SetPointerLocked(bool) noexcept override
       {
         return false;
       }
+
       KRYS_NODISCARD bool IsPointerLocked() const noexcept override
       {
         return false;
       }
+
       void SetTextInputEnabled(bool) noexcept override
       {
       }
+
       KRYS_NODISCARD bool IsTextInputEnabled() const noexcept override
       {
         return false;
       }
+
       void SetTextInputRect(const pal::TextInputRect &) noexcept override
       {
       }
+
       void CompleteComposition() noexcept override
       {
       }
+
       void CancelComposition() noexcept override
       {
       }
+
       void SetDropOperation(Maybe<pal::DropOperation>) noexcept override
       {
       }
@@ -123,21 +145,25 @@ namespace krys::ui::tests
       {
         Tree = tree;
       }
+
       KRYS_NODISCARD bool IsAccessibilityActive() const noexcept override
       {
         return Active;
       }
+
       void RaiseAccessibilityEvent(pal::AccessibilityNodeID node,
                                    pal::AccessibilityEvent event) noexcept override
       {
         Events.push_back({node, event});
       }
+
       void RaiseAccessibilityTextChange(pal::AccessibilityNodeID, pal::AccessibilityTextChange change, uint64,
                                         utf8_stringview text) noexcept override
       {
         TextChanges.push_back(utf8_string(change == pal::AccessibilityTextChange::Inserted ? u8"+" : u8"-")
                               + utf8_string(text));
       }
+
       void AccessibilityNodeRemoved(pal::AccessibilityNodeID node) noexcept override
       {
         Removed.push_back(node);
@@ -539,8 +565,11 @@ namespace krys::ui::tests
       T *Pointer {nullptr};
 
       ComRef() noexcept = default;
+
       ComRef(const ComRef &) = delete;
+
       ComRef &operator=(const ComRef &) = delete;
+
       ~ComRef() noexcept
       {
         if (Pointer)
@@ -553,10 +582,12 @@ namespace krys::ui::tests
       {
         return Pointer;
       }
+
       T **operator&() noexcept
       {
         return &Pointer;
       }
+
       explicit operator bool() const noexcept
       {
         return Pointer != nullptr;
@@ -596,17 +627,21 @@ namespace krys::ui::tests
     WaitForLoad(view);
     view.UpdateRendering();
     int32 clicks = 0;
+
     struct ClickCounter final : boo::dom::EventListenerCallback
     {
       int32 &Clicks;
+
       explicit ClickCounter(int32 &clicks) noexcept : Clicks(clicks)
       {
       }
+
       void HandleEvent(boo::dom::Event &) noexcept override
       {
         ++Clicks;
       }
     };
+
     view.Document()
       .GetElementById(u8"button")
       ->AddEventListener(u8"click", Ref<boo::dom::EventListenerCallback>(CreateRef<ClickCounter>(clicks)),

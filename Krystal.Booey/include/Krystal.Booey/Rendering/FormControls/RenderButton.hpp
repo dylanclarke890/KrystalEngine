@@ -46,6 +46,7 @@ namespace krys::boo
 
   public:
     RenderButton(html::HTMLFormControlElement &, RenderStyle &&) noexcept;
+
     ~RenderButton() noexcept override;
 
     KRYS_NODISCARD html::HTMLFormControlElement &FormControlElement() const noexcept;
@@ -60,12 +61,15 @@ namespace krys::boo
     void UpdateFromElement() noexcept override;
 
     KRYS_NODISCARD bool CanHaveGeneratedChildren() const noexcept override;
+
     KRYS_NODISCARD bool HasControlClip() const noexcept override;
+
     KRYS_NODISCARD LayoutRect ControlClipRect(const LayoutPoint &) const noexcept override;
 
     void UpdateAnonymousChildStyle(RenderStyle &) const noexcept override;
 
     void SetText(const utf8_string &) noexcept;
+
     KRYS_NODISCARD utf8_string Text() const noexcept;
 
     KRYS_NODISCARD RenderTextFragment *TextRenderer() const noexcept

@@ -41,14 +41,17 @@ namespace krys::boo::style
     constexpr StrokeMiterlimit(Number number) noexcept : Value {number}
     {
     }
+
     constexpr StrokeMiterlimit(Number::ResolvedValueType literal) noexcept : Value {literal}
     {
     }
+
     constexpr StrokeMiterlimit(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept : Value {literal}
     {
     }
 
     KRYS_NODISCARD constexpr bool operator==(const StrokeMiterlimit &) const noexcept = default;
+
     KRYS_NODISCARD constexpr auto operator<=>(const StrokeMiterlimit &) const noexcept = default;
   };
   DEFINE_TYPE_WRAPPER_GET(StrokeMiterlimit, Value)

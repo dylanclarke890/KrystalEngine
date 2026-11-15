@@ -43,7 +43,7 @@ namespace krys::boo
   enum class AnnotateForInterchange : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief @p in, from @p node, with runs of collapsible spaces kept as spans of no-break spaces, so they

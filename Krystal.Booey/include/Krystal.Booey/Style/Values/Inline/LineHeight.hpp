@@ -57,6 +57,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD LineHeight operator()(BuilderState &, const css::Value &,
                                          float multiplier = 1.0f) noexcept;
+
     KRYS_NODISCARD LineHeight operator()(BuilderState &, const css::PrimitiveValue &,
                                          float multiplier = 1.0f) noexcept;
   };
@@ -67,8 +68,10 @@ namespace krys::boo::style
   struct Blending<LineHeight>
   {
     KRYS_NODISCARD bool CanBlend(const LineHeight &, const LineHeight &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const LineHeight &,
                                                                       const LineHeight &) noexcept;
+
     KRYS_NODISCARD LineHeight Blend(const LineHeight &, const LineHeight &, const BlendingContext &) noexcept;
   };
 }

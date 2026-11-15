@@ -13,7 +13,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-
     template <typename... Ts>
     std::string ConsumeAndResolve(utf8_stringview css)
     {

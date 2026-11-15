@@ -39,11 +39,13 @@ namespace krys::boo::svg
     {
       return _points->CurrentValue();
     }
+
     /// @see https://svgwg.org/svg2-draft/shapes.html#__svg__SVGAnimatedPoints__points
     KRYS_NODISCARD SVGPointList &Points() noexcept
     {
       return *_points->BaseVal();
     }
+
     /// @see https://svgwg.org/svg2-draft/shapes.html#__svg__SVGAnimatedPoints__animatedPoints
     KRYS_NODISCARD SVGPointList &AnimatedPoints() noexcept
     {
@@ -58,12 +60,14 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool IsValid() const noexcept override
     {
       return SVGTests::IsValid();
     }
+
     KRYS_NODISCARD bool SupportsMarkers() const noexcept override
     {
       return true;

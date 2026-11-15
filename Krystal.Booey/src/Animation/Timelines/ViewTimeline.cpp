@@ -495,7 +495,7 @@ namespace krys::boo
       enum class PaddingEdge : bool
       {
         Start,
-        End
+        End,
       };
       auto scrollPadding = [&](PaddingEdge edge) -> const style::ScrollPaddingEdge &
       {

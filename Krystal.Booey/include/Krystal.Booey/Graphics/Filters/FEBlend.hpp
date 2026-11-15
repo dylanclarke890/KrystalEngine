@@ -47,6 +47,7 @@ namespace krys::boo
     {
       return _mode;
     }
+
     bool SetBlendMode(BlendMode mode) noexcept;
 
   private:

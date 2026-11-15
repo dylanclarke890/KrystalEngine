@@ -48,6 +48,7 @@ namespace krys::boo
 
   public:
     RenderMathMLUnderOver(mathml::MathMLUnderOverElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLUnderOver() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
@@ -72,23 +73,34 @@ namespace krys::boo
     {
       return !ShouldMoveLimits();
     }
+
     KRYS_NODISCARD mathml::MathMLUnderOverElement &GetElement() const noexcept;
 
     void ComputePreferredLogicalWidths() noexcept final;
+
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
 
     void StretchHorizontalOperatorsAndLayoutChildren() noexcept;
+
     KRYS_NODISCARD bool IsValid() const noexcept;
+
     KRYS_NODISCARD bool ShouldMoveLimits() const noexcept;
+
     KRYS_NODISCARD RenderBox &Base() const noexcept;
+
     KRYS_NODISCARD RenderBox &Under() const noexcept;
+
     KRYS_NODISCARD RenderBox &Over() const noexcept;
+
     KRYS_NODISCARD LayoutUnit HorizontalOffset(const RenderBox &child) const noexcept;
+
     KRYS_NODISCARD bool HasAccent(bool accentUnder = false) const noexcept;
+
     KRYS_NODISCARD bool HasAccentUnder() const noexcept
     {
       return HasAccent(true);
     }
+
     KRYS_NODISCARD VerticalParameters GetVerticalParameters() const noexcept;
   };
 }

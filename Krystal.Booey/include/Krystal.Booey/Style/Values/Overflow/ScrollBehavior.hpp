@@ -32,6 +32,6 @@ namespace krys::boo::style
   enum class ScrollBehavior : bool
   {
     Auto,
-    Smooth
+    Smooth,
   };
 }

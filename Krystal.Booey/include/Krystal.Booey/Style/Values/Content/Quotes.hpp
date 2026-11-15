@@ -48,16 +48,19 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<css::keywords::Auto>(_value);
     }
+
     KRYS_NODISCARD bool IsNone() const noexcept
     {
       return krys::HoldsAlternative<css::keywords::None>(_value);
     }
+
     KRYS_NODISCARD bool IsQuotes() const noexcept
     {
       return krys::HoldsAlternative<Data>(_value);
     }
 
     KRYS_NODISCARD const css::CSSOMString &OpenQuote(unsigned index) const noexcept;
+
     KRYS_NODISCARD const css::CSSOMString &CloseQuote(unsigned index) const noexcept;
 
     template <typename... F>

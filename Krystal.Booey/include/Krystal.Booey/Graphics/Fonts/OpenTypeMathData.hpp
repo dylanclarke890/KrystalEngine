@@ -132,8 +132,10 @@ namespace krys::boo
 
     /// @brief The constant @p constant at @p font's size; the percentages are fractions.
     KRYS_NODISCARD float GetMathConstant(const Font &font, MathConstant constant) const noexcept;
+
     /// @brief The italic correction of @p glyph at @p font's size.
     KRYS_NODISCARD float GetItalicCorrection(const Font &font, Glyph glyph) const noexcept;
+
     /// @brief The larger versions of @p glyph in the direction it stretches, and the parts to build it from
     /// when they aren't large enough.
     void GetMathVariants(Glyph glyph, bool isVertical, List<Glyph> &sizeVariants,

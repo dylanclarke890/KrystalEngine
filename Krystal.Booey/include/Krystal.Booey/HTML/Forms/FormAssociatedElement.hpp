@@ -49,6 +49,7 @@ namespace krys::boo::html
     virtual ~FormAssociatedElement() noexcept;
 
     KRYS_NODISCARD virtual HTMLElement &AsHTMLElement() noexcept = 0;
+
     KRYS_NODISCARD virtual const HTMLElement &AsHTMLElement() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsFormListedElement() const noexcept = 0;
@@ -72,6 +73,7 @@ namespace krys::boo::html
     void SetFormSetByParser(HTMLFormElement *form) noexcept;
 
     virtual void ElementInsertedIntoAncestor(dom::Element &element, bool connectedToDocument) noexcept;
+
     virtual void ElementRemovedFromAncestor(dom::Element &element, bool disconnectedFromDocument) noexcept;
 
     KRYS_NODISCARD virtual FormAssociatedElement *AsFormAssociatedElement() noexcept = 0;

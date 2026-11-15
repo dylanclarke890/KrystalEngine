@@ -82,25 +82,35 @@ namespace krys::boo::layout
     ElementBox(ElementAttributes &&attributes, RenderStyle &&style,
                UniquePtr<RenderStyle> &&firstLineStyle = nullptr,
                EnumSet<BaseTypeFlag> baseTypeFlags = {ElementBoxFlag}) noexcept;
+
     ElementBox(ElementAttributes &&attributes, EnumSet<ListMarkerAttribute> listMarkerAttributes,
                RenderStyle &&style, UniquePtr<RenderStyle> &&firstLineStyle = nullptr) noexcept;
+
     ElementBox(ElementAttributes &&attributes, ReplacedAttributes &&replacedAttributes, RenderStyle &&style,
                UniquePtr<RenderStyle> &&firstLineStyle = nullptr) noexcept;
+
     ~ElementBox() noexcept override;
 
     KRYS_NODISCARD const Box *FirstChild() const noexcept
     {
       return _firstChild.get();
     }
+
     KRYS_NODISCARD const Box *FirstInFlowChild() const noexcept;
+
     KRYS_NODISCARD const Box *FirstInFlowOrFloatingChild() const noexcept;
+
     KRYS_NODISCARD const Box *FirstOutOfFlowChild() const noexcept;
+
     KRYS_NODISCARD const Box *LastChild() const noexcept
     {
       return _lastChild.get();
     }
+
     KRYS_NODISCARD const Box *LastInFlowChild() const noexcept;
+
     KRYS_NODISCARD const Box *LastInFlowOrFloatingChild() const noexcept;
+
     KRYS_NODISCARD const Box *LastOutOfFlowChild() const noexcept;
 
     // FIXME: This is currently needed for style updates.
@@ -113,45 +123,59 @@ namespace krys::boo::layout
     {
       return FirstChild() != nullptr;
     }
+
     KRYS_NODISCARD bool HasInFlowChild() const noexcept
     {
       return FirstInFlowChild() != nullptr;
     }
+
     KRYS_NODISCARD bool HasInFlowOrFloatingChild() const noexcept
     {
       return FirstInFlowOrFloatingChild() != nullptr;
     }
+
     KRYS_NODISCARD bool HasOutOfFlowChild() const noexcept;
 
     void AppendChild(UniquePtr<Box> childRef) noexcept;
+
     void InsertChild(UniquePtr<Box> childRef, Box *beforeChild = nullptr) noexcept;
+
     void DestroyChildren() noexcept;
 
     void SetBaselineForIntegration(LayoutUnit baseline) noexcept
     {
       _baselineForIntegration = baseline;
     }
+
     KRYS_NODISCARD Maybe<LayoutUnit> BaselineForIntegration() const noexcept
     {
       return _baselineForIntegration;
     }
 
     KRYS_NODISCARD bool HasIntrinsicWidth() const noexcept;
+
     KRYS_NODISCARD bool HasIntrinsicHeight() const noexcept;
+
     KRYS_NODISCARD bool HasIntrinsicRatio() const noexcept;
+
     KRYS_NODISCARD LayoutUnit IntrinsicWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit IntrinsicHeight() const noexcept;
+
     KRYS_NODISCARD LayoutUnit IntrinsicRatio() const noexcept;
+
     KRYS_NODISCARD bool HasAspectRatio() const noexcept;
 
     void SetListMarkerAttributes(EnumSet<ListMarkerAttribute> listMarkerAttributes) noexcept
     {
       _replacedData->ListMarkerAttributes = listMarkerAttributes;
     }
+
     KRYS_NODISCARD bool IsListMarkerImage() const noexcept
     {
       return _replacedData && _replacedData->ListMarkerAttributes.Contains(ListMarkerAttribute::Image);
     }
+
     KRYS_NODISCARD bool IsListMarkerOutside() const noexcept
     {
       return _replacedData && _replacedData->ListMarkerAttributes.Contains(ListMarkerAttribute::Outside);
@@ -162,6 +186,7 @@ namespace krys::boo::layout
     {
       _replacedData->LayoutBounds = layoutBounds;
     }
+
     KRYS_NODISCARD Pair<int32, int32> LayoutBoundsForListMarker() const noexcept
     {
       return _replacedData ? _replacedData->LayoutBounds : Pair<int32, int32> {};

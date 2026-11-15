@@ -78,6 +78,7 @@ namespace krys::boo::style::interpolation
                    const RenderStyle &to, double progress, CompositeOperation compositeOperation,
                    IterationCompositeOperation iterationCompositeOperation, double currentIteration,
                    const Client &client) noexcept;
+
   void Interpolate(const AnimatableCSSProperty &property, RenderStyle &destination, const RenderStyle &from,
                    const RenderStyle &to, double progress, CompositeOperation compositeOperation,
                    const Client &client) noexcept;

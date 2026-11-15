@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::FilterReference ToCSSFilterReference(const ReferenceFilterOperation &,
                                                              const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::FilterReference &,
                                                               const BuilderState &) noexcept;
   }

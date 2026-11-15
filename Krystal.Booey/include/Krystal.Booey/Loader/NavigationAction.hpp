@@ -78,13 +78,19 @@ namespace krys::boo
 
   public:
     NavigationAction() noexcept;
+
     NavigationAction(const ResourceRequest &originalRequest, bool isFormSubmission,
                      dom::Event *event = nullptr, dom::DOMStringAtom downloadAttribute = null,
                      dom::Element *sourceElement = nullptr) noexcept;
+
     ~NavigationAction() noexcept;
+
     NavigationAction(const NavigationAction &) noexcept;
+
     NavigationAction &operator=(const NavigationAction &) noexcept;
+
     NavigationAction(NavigationAction &&) noexcept;
+
     NavigationAction &operator=(NavigationAction &&) noexcept;
 
     /// @brief The modifier keys of the first event with them in the chain of events that started the

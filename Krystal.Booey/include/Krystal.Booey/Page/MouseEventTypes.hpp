@@ -30,8 +30,8 @@
 
 namespace krys::boo
 {
-  static constexpr double ForceAtClick = 1;
-  static constexpr double ForceAtForceClick = 2;
+  constexpr static double ForceAtClick = 1;
+  constexpr static double ForceAtForceClick = 2;
 
   /// @brief Whether a mouse event stands in for a tap, and with how many fingers.
   /// @brief How a pen is held: its tilt along each axis and its twist about its own axis, in degrees.
@@ -47,7 +47,7 @@ namespace krys::boo
   {
     NoTap,
     OneFingerTap,
-    TwoFingerTap
+    TwoFingerTap,
   };
 
   // These button numbers match the ones used in the DOM API, 0 through 2, except for None and Other which
@@ -64,7 +64,7 @@ namespace krys::boo
     Right,
     Back,
     Forward,
-    Other
+    Other,
   };
 
   /// @brief The button a DOM `button` value names, or `Other` if it names none.

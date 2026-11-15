@@ -502,6 +502,7 @@ namespace krys::boo::style
       style::CascadeLayerPriority LayerPriority;
       style::FromStyleAttribute FromStyleAttribute;
     };
+
     List<ImportantMatch> importantMatches;
     bool hasMatchesFromOtherScopesOrLayers = false;
 

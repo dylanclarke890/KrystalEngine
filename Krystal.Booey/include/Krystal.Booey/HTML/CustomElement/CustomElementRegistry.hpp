@@ -66,8 +66,10 @@ namespace krys::boo::html
   public:
     /// @brief A document's global registry.
     explicit CustomElementRegistry(dom::Document &document) noexcept;
+
     /// @brief A scoped registry.
     CustomElementRegistry() noexcept;
+
     ~CustomElementRegistry() noexcept;
 
     KRYS_NODISCARD static Ref<CustomElementRegistry> Create(dom::Document &document) noexcept
@@ -121,6 +123,7 @@ namespace krys::boo::html
     void AppendToScopedDocumentSet(dom::Document &document) noexcept;
 
     KRYS_NODISCARD CustomElementInterface *FindInterface(dom::DOMStringAtom name) const noexcept;
+
     KRYS_NODISCARD CustomElementInterface *FindInterface(const dom::QualifiedName &name) const noexcept;
 
   private:

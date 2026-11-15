@@ -9,7 +9,7 @@ namespace krys::boo
   class BrokenImageIcon final : public Image
   {
   public:
-    static constexpr float IconSize = 16.f;
+    constexpr static float IconSize = 16.f;
 
     /// @brief The one icon, shared by every broken image.
     KRYS_NODISCARD static BrokenImageIcon &Singleton() noexcept;
@@ -30,6 +30,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool CurrentFrameIsComplete() const noexcept override
     {
       return true;

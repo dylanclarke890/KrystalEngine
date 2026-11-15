@@ -15,6 +15,7 @@ namespace krys::io
 
   public:
     IStreamReader() = default;
+
     virtual ~IStreamReader() = default;
 
     /// @brief Checks if the stream is open.
@@ -56,6 +57,7 @@ namespace krys::io
 
   public:
     IStreamWriter() = default;
+
     virtual ~IStreamWriter() = default;
 
     /// @brief Checks if the stream is open.

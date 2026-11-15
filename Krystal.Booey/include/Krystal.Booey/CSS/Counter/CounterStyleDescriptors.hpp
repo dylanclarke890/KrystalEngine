@@ -48,6 +48,7 @@ namespace krys::boo::css
     CSSOMString Text;
 
     KRYS_NODISCARD bool operator==(const CounterStyleSymbol &) const noexcept = default;
+
     KRYS_NODISCARD CSSOMString CssText() const noexcept;
   };
 
@@ -70,7 +71,7 @@ namespace krys::boo::css
     TraditionalChineseInformal,
     TraditionalChineseFormal,
     EthiopicNumeric,
-    Extends
+    Extends,
   };
 
   enum class CounterStyleSpeakAs : uint8
@@ -89,6 +90,7 @@ namespace krys::boo::css
     CounterStyleSymbol PadSymbol;
 
     KRYS_NODISCARD bool operator==(const CounterStylePad &) const noexcept = default;
+
     KRYS_NODISCARD CSSOMString CssText() const noexcept;
   };
 
@@ -115,7 +117,7 @@ namespace krys::boo::css
     Fallback = 1 << 6,
     Symbols = 1 << 7,
     AdditiveSymbols = 1 << 8,
-    SpeakAs = 1 << 9
+    SpeakAs = 1 << 9,
   };
 }
 
@@ -160,31 +162,51 @@ namespace krys::boo::css
     }
 
     void SetExplicitlySetDescriptors(const StyleProperties &properties) noexcept;
+
     KRYS_NODISCARD bool IsValid() const noexcept;
+
     KRYS_NODISCARD static bool
       AreSymbolsValidForSystem(CounterStyleSystem system, const List<CounterStyleSymbol> &symbols,
                                const CounterStyleAdditiveSymbols &additiveSymbols) noexcept;
 
     void SetName(CounterStyleName name) noexcept;
+
     void SetSystemData(CounterStyleSystemData systemData) noexcept;
+
     void SetNegative(CounterStyleNegativeSymbols negative) noexcept;
+
     void SetPrefix(CounterStyleSymbol prefix) noexcept;
+
     void SetSuffix(CounterStyleSymbol suffix) noexcept;
+
     void SetRanges(CounterStyleRanges ranges) noexcept;
+
     void SetPad(CounterStylePad pad) noexcept;
+
     void SetFallbackName(CounterStyleName name) noexcept;
+
     void SetSymbols(List<CounterStyleSymbol> symbols) noexcept;
+
     void SetAdditiveSymbols(CounterStyleAdditiveSymbols additiveSymbols) noexcept;
 
     KRYS_NODISCARD CSSOMString NameCSSText() const noexcept;
+
     KRYS_NODISCARD CSSOMString SystemCSSText() const noexcept;
+
     KRYS_NODISCARD CSSOMString NegativeCSSText() const noexcept;
+
     KRYS_NODISCARD CSSOMString PrefixCSSText() const noexcept;
+
     KRYS_NODISCARD CSSOMString SuffixCSSText() const noexcept;
+
     KRYS_NODISCARD CSSOMString RangesCSSText() const noexcept;
+
     KRYS_NODISCARD CSSOMString PadCSSText() const noexcept;
+
     KRYS_NODISCARD CSSOMString FallbackCSSText() const noexcept;
+
     KRYS_NODISCARD CSSOMString SymbolsCSSText() const noexcept;
+
     KRYS_NODISCARD CSSOMString AdditiveSymbolsCSSText() const noexcept;
   };
 
@@ -192,12 +214,19 @@ namespace krys::boo::css
   KRYS_NODISCARD CounterStyleSystem ToCounterStyleSystemEnum(const Value *system) noexcept;
 
   KRYS_NODISCARD CounterStyleRanges RangeFromValue(Ref<Value> value) noexcept;
+
   KRYS_NODISCARD CounterStyleAdditiveSymbols AdditiveSymbolsFromValue(Ref<Value> value) noexcept;
+
   KRYS_NODISCARD CounterStylePad PadFromValue(Ref<Value> value) noexcept;
+
   KRYS_NODISCARD CounterStyleNegativeSymbols NegativeSymbolsFromValue(Ref<Value> value) noexcept;
+
   KRYS_NODISCARD CounterStyleSymbol SymbolFromValue(RefPtr<Value> value) noexcept;
+
   KRYS_NODISCARD List<CounterStyleSymbol> SymbolsFromValue(Ref<Value> value) noexcept;
+
   KRYS_NODISCARD CounterStyleName FallbackNameFromValue(Ref<Value> value) noexcept;
+
   KRYS_NODISCARD CounterStyleSystemData ExtractSystemDataFromValue(RefPtr<Value> systemValue,
                                                                    CounterStyleSystem system) noexcept;
 }

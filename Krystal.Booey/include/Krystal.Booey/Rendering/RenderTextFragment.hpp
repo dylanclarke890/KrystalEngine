@@ -52,9 +52,12 @@ namespace krys::boo
 
   public:
     RenderTextFragment(dom::Text &textNode, utf8_stringview text, size_t startOffset, size_t length) noexcept;
+
     RenderTextFragment(dom::Document &document, utf8_stringview text, size_t startOffset,
                        size_t length) noexcept;
+
     RenderTextFragment(dom::Document &document, utf8_string text) noexcept;
+
     ~RenderTextFragment() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
@@ -67,6 +70,7 @@ namespace krys::boo
     {
       return _start;
     }
+
     /// @brief The length of the fragment, in bytes.
     KRYS_NODISCARD size_t End() const noexcept
     {
@@ -74,11 +78,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderBoxModelObject *FirstLetter() const noexcept;
+
     void SetFirstLetter(RenderBoxModelObject &firstLetter) noexcept;
 
     KRYS_NODISCARD RenderBlock *BlockForAccompanyingFirstLetter() noexcept;
 
     void SetContentString(utf8_string text) noexcept;
+
     KRYS_NODISCARD const utf8_string &ContentString() const noexcept
     {
       return _contentString;
@@ -89,6 +95,7 @@ namespace krys::boo
     {
       return _altText;
     }
+
     void SetAltText(Maybe<utf8_string> altText) noexcept
     {
       _altText = krys::move(altText);

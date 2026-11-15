@@ -10,8 +10,8 @@
 
 namespace krys::log
 {
-  struct LoggerSettings;
   class ILogger;
+  struct LoggerSettings;
 
   KRYS_NODISCARD Expected<UniquePtr<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept;
 
@@ -27,7 +27,7 @@ namespace krys::log
     Warn,
     Error,
     Critical,
-    Off
+    Off,
   };
 
   struct LoggerSettings
@@ -46,8 +46,11 @@ namespace krys::log
     virtual ~ILogger() noexcept = default;
 
     ILogger(ILogger &) = default;
+
     ILogger &operator=(ILogger &) = default;
+
     ILogger(ILogger &&) = default;
+
     ILogger &operator=(ILogger &&) = default;
 
     template <typename... Args>
@@ -84,7 +87,6 @@ namespace krys::log
 
     virtual void LogImpl(Level level, const string &message) noexcept = 0;
   };
-
 }
 
 #ifdef KRYS_LOGGING_DISABLED

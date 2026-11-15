@@ -48,24 +48,26 @@ namespace krys::boo::style
   // <to-position> = to <position>
   struct ToPosition
   {
-    static constexpr CommandAffinity Affinity = css::keywords::To {};
+    constexpr static CommandAffinity Affinity = css::keywords::To {};
 
     style::Position Offset;
 
     KRYS_NODISCARD bool operator==(const ToPosition &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(ToPosition, Offset);
   DEFINE_TYPE_MAPPING(css::ToPosition, ToPosition)
 
   // <by-coordinate-pair> = by <coordinate-pair>
   struct ByCoordinatePair
   {
-    static constexpr CommandAffinity Affinity = css::keywords::By {};
+    constexpr static CommandAffinity Affinity = css::keywords::By {};
 
     CoordinatePair Offset;
 
     KRYS_NODISCARD bool operator==(const ByCoordinatePair &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(ByCoordinatePair, Offset);
   DEFINE_TYPE_MAPPING(css::ByCoordinatePair, ByCoordinatePair)
 
@@ -74,13 +76,14 @@ namespace krys::boo::style
   struct RelativeControlPoint
   {
     using AnchorType = ControlPointAnchor;
-    static constexpr auto DefaultAnchor = AnchorType {css::keywords::Start {}};
+    constexpr static auto DefaultAnchor = AnchorType {css::keywords::Start {}};
 
     CoordinatePair Offset;
     Maybe<AnchorType> Anchor;
 
     KRYS_NODISCARD bool operator==(const RelativeControlPoint &) const noexcept = default;
   };
+
   template <size_t I>
   const auto &get(const RelativeControlPoint &value)
   {
@@ -99,6 +102,7 @@ namespace krys::boo::style
   struct Blending<RelativeControlPoint>
   {
     KRYS_NODISCARD bool CanBlend(const RelativeControlPoint &, const RelativeControlPoint &) noexcept;
+
     KRYS_NODISCARD RelativeControlPoint Blend(const RelativeControlPoint &, const RelativeControlPoint &,
                                               const BlendingContext &) noexcept;
   };
@@ -108,13 +112,14 @@ namespace krys::boo::style
   struct AbsoluteControlPoint
   {
     using AnchorType = ControlPointAnchor;
-    static constexpr auto DefaultAnchor = AnchorType {css::keywords::Origin {}};
+    constexpr static auto DefaultAnchor = AnchorType {css::keywords::Origin {}};
 
     style::Position Offset;
     Maybe<AnchorType> Anchor;
 
     KRYS_NODISCARD bool operator==(const AbsoluteControlPoint &) const noexcept = default;
   };
+
   template <size_t I>
   const auto &get(const AbsoluteControlPoint &value)
   {
@@ -133,6 +138,7 @@ namespace krys::boo::style
   struct Blending<AbsoluteControlPoint>
   {
     KRYS_NODISCARD bool CanBlend(const AbsoluteControlPoint &, const AbsoluteControlPoint &) noexcept;
+
     KRYS_NODISCARD AbsoluteControlPoint Blend(const AbsoluteControlPoint &, const AbsoluteControlPoint &,
                                               const BlendingContext &) noexcept;
   };
@@ -144,13 +150,14 @@ namespace krys::boo::style
   // Modified by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
   struct MoveCommand
   {
-    static constexpr auto Name = css::ValueId::Move;
+    constexpr static auto Name = css::ValueId::Move;
     using To = ToPosition;
     using By = ByCoordinatePair;
     Variant<To, By> ToBy;
 
     KRYS_NODISCARD bool operator==(const MoveCommand &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(MoveCommand, ToBy);
   DEFINE_TYPE_MAPPING(css::MoveCommand, MoveCommand)
 
@@ -161,13 +168,14 @@ namespace krys::boo::style
   // Modified by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
   struct LineCommand
   {
-    static constexpr auto Name = css::ValueId::Line;
+    constexpr static auto Name = css::ValueId::Line;
     using To = ToPosition;
     using By = ByCoordinatePair;
     Variant<To, By> ToBy;
 
     KRYS_NODISCARD bool operator==(const LineCommand &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(LineCommand, ToBy);
   DEFINE_TYPE_MAPPING(css::LineCommand, LineCommand)
 
@@ -178,27 +186,31 @@ namespace krys::boo::style
   // by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2426552611
   struct HLineCommand
   {
-    static constexpr auto Name = css::ValueId::Hline;
+    constexpr static auto Name = css::ValueId::Hline;
+
     struct To
     {
-      static constexpr CommandAffinity Affinity = css::keywords::To {};
+      constexpr static CommandAffinity Affinity = css::keywords::To {};
 
       TwoComponentPositionHorizontal Offset;
 
       KRYS_NODISCARD bool operator==(const To &) const noexcept = default;
     };
+
     struct By
     {
-      static constexpr CommandAffinity Affinity = css::keywords::By {};
+      constexpr static CommandAffinity Affinity = css::keywords::By {};
 
       LengthPercentage<> Offset;
 
       KRYS_NODISCARD bool operator==(const By &) const noexcept = default;
     };
+
     Variant<To, By> ToBy;
 
     KRYS_NODISCARD bool operator==(const HLineCommand &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(HLineCommand::By, Offset);
   DEFINE_TYPE_WRAPPER_GET(HLineCommand::To, Offset);
   DEFINE_TYPE_WRAPPER_GET(HLineCommand, ToBy);
@@ -213,27 +225,31 @@ namespace krys::boo::style
   // https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2426552611
   struct VLineCommand
   {
-    static constexpr auto Name = css::ValueId::Vline;
+    constexpr static auto Name = css::ValueId::Vline;
+
     struct To
     {
-      static constexpr CommandAffinity Affinity = css::keywords::To {};
+      constexpr static CommandAffinity Affinity = css::keywords::To {};
 
       TwoComponentPositionVertical Offset;
 
       KRYS_NODISCARD bool operator==(const To &) const noexcept = default;
     };
+
     struct By
     {
-      static constexpr CommandAffinity Affinity = css::keywords::By {};
+      constexpr static CommandAffinity Affinity = css::keywords::By {};
 
       LengthPercentage<> Offset;
 
       KRYS_NODISCARD bool operator==(const By &) const noexcept = default;
     };
+
     Variant<To, By> ToBy;
 
     KRYS_NODISCARD bool operator==(const VLineCommand &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(VLineCommand::By, Offset);
   DEFINE_TYPE_WRAPPER_GET(VLineCommand::To, Offset);
   DEFINE_TYPE_WRAPPER_GET(VLineCommand, ToBy);
@@ -250,10 +266,11 @@ namespace krys::boo::style
   // Modified by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
   struct CurveCommand
   {
-    static constexpr auto Name = css::ValueId::Curve;
+    constexpr static auto Name = css::ValueId::Curve;
+
     struct To
     {
-      static constexpr CommandAffinity Affinity = css::keywords::To {};
+      constexpr static CommandAffinity Affinity = css::keywords::To {};
 
       style::Position Offset;
       AbsoluteControlPoint ControlPoint1;
@@ -261,9 +278,10 @@ namespace krys::boo::style
 
       KRYS_NODISCARD bool operator==(const To &) const noexcept = default;
     };
+
     struct By
     {
-      static constexpr CommandAffinity Affinity = css::keywords::By {};
+      constexpr static CommandAffinity Affinity = css::keywords::By {};
 
       CoordinatePair Offset;
       RelativeControlPoint ControlPoint1;
@@ -271,10 +289,12 @@ namespace krys::boo::style
 
       KRYS_NODISCARD bool operator==(const By &) const noexcept = default;
     };
+
     Variant<To, By> ToBy;
 
     KRYS_NODISCARD bool operator==(const CurveCommand &) const noexcept = default;
   };
+
   template <size_t I>
   const auto &get(const CurveCommand::To &value)
   {
@@ -291,6 +311,7 @@ namespace krys::boo::style
       return value.ControlPoint2;
     }
   }
+
   template <size_t I>
   const auto &get(const CurveCommand::By &value)
   {
@@ -307,6 +328,7 @@ namespace krys::boo::style
       return value.ControlPoint2;
     }
   }
+
   DEFINE_TYPE_WRAPPER_GET(CurveCommand, ToBy);
 
   DEFINE_TYPE_MAPPING(css::CurveCommand, CurveCommand)
@@ -321,29 +343,33 @@ namespace krys::boo::style
   // Modified by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
   struct SmoothCommand
   {
-    static constexpr auto Name = css::ValueId::Smooth;
+    constexpr static auto Name = css::ValueId::Smooth;
+
     struct To
     {
-      static constexpr CommandAffinity Affinity = css::keywords::To {};
+      constexpr static CommandAffinity Affinity = css::keywords::To {};
 
       style::Position Offset;
       Maybe<AbsoluteControlPoint> ControlPoint;
 
       KRYS_NODISCARD bool operator==(const To &) const noexcept = default;
     };
+
     struct By
     {
-      static constexpr CommandAffinity Affinity = css::keywords::By {};
+      constexpr static CommandAffinity Affinity = css::keywords::By {};
 
       CoordinatePair Offset;
       Maybe<RelativeControlPoint> ControlPoint;
 
       KRYS_NODISCARD bool operator==(const By &) const noexcept = default;
     };
+
     Variant<To, By> ToBy;
 
     KRYS_NODISCARD bool operator==(const SmoothCommand &) const noexcept = default;
   };
+
   template <size_t I>
   const auto &get(const SmoothCommand::To &value)
   {
@@ -356,6 +382,7 @@ namespace krys::boo::style
       return value.ControlPoint;
     }
   }
+
   template <size_t I>
   const auto &get(const SmoothCommand::By &value)
   {
@@ -368,6 +395,7 @@ namespace krys::boo::style
       return value.ControlPoint;
     }
   }
+
   DEFINE_TYPE_WRAPPER_GET(SmoothCommand, ToBy);
 
   DEFINE_TYPE_MAPPING(css::SmoothCommand, SmoothCommand)
@@ -381,7 +409,7 @@ namespace krys::boo::style
   // Modified by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
   struct ArcCommand
   {
-    static constexpr auto Name = css::ValueId::Arc;
+    constexpr static auto Name = css::ValueId::Arc;
     using To = ToPosition;
     using By = ByCoordinatePair;
     Variant<To, By> ToBy;
@@ -395,6 +423,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const ArcCommand &) const noexcept = default;
   };
+
   template <size_t I>
   const auto &get(const ArcCommand &value)
   {
@@ -426,6 +455,7 @@ namespace krys::boo::style
   struct Blending<ArcCommand>
   {
     KRYS_NODISCARD bool CanBlend(const ArcCommand &, const ArcCommand &) noexcept;
+
     KRYS_NODISCARD ArcCommand Blend(const ArcCommand &, const ArcCommand &, const BlendingContext &) noexcept;
   };
 
@@ -458,6 +488,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const Shape &) const noexcept = default;
   };
+
   using ShapeFunction = css::FunctionNotation<css::ValueId::Shape, Shape>;
 
   template <size_t I>
@@ -484,6 +515,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD boo::Path operator()(const Shape &, const FloatRect &) noexcept;
   };
+
   template <>
   struct WindRuleComputation<Shape>
   {
@@ -494,6 +526,7 @@ namespace krys::boo::style
   struct Blending<Shape>
   {
     KRYS_NODISCARD bool CanBlend(const Shape &, const Shape &) noexcept;
+
     KRYS_NODISCARD Shape Blend(const Shape &, const Shape &, const BlendingContext &) noexcept;
   };
 

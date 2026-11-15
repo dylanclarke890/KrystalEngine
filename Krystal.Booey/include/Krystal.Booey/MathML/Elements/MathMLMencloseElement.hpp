@@ -51,7 +51,7 @@ namespace krys::boo::mathml
       VerticalStrike = 1 << 10,
       HorizontalStrike = 1 << 11,
       UpDiagonalArrow = 1 << 12, // FIXME: updiagonalarrow is not implemented. See http://wkb.ug/127466
-      PhasorAngle = 1 << 13      // FIXME: phasorangle is not implemented. See http://wkb.ug/127466
+      PhasorAngle = 1 << 13,     // FIXME: phasorangle is not implemented. See http://wkb.ug/127466
       // We do not implement the Radical notation. Authors should instead use the <msqrt> element.
     };
 

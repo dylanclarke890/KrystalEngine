@@ -172,6 +172,7 @@ namespace krys::boo::html
     HTMLElement(dom::Document &document, HTMLElementInterface interface,
                 HTMLElementFlags flags = HTMLElementFlags::None,
                 dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+
     /// @brief Constructs an element with its tag name, for elements made outside the element factory (the
     /// elements of user agent shadow trees), which otherwise gives elements their names.
     HTMLElement(dom::Document &document, HTMLElementInterface interface, dom::DOMStringAtom localName,
@@ -426,24 +427,29 @@ namespace krys::boo::html
     enum class AllowZeroValue : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
     /// @param value The `border` attribute's value, or null if there isn't one.
     KRYS_NODISCARD uint32 ParseBorderWidthAttribute(Maybe<dom::DOMStringView> value) const noexcept;
+
     void ApplyBorderAttributeToStyle(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
+
     void ApplyAlignmentAttributeToStyle(dom::DOMStringView alignment,
                                         css::MutableStyleProperties &style) noexcept;
+
     void ApplyAspectRatioFromWidthAndHeightAttributesToStyle(dom::DOMStringView widthAttribute,
                                                              dom::DOMStringView heightAttribute,
                                                              css::MutableStyleProperties &style) noexcept;
+
     void ApplyAspectRatioWithoutDimensionalRulesFromWidthAndHeightAttributesToStyle(
       dom::DOMStringView widthAttribute, dom::DOMStringView heightAttribute,
       css::MutableStyleProperties &style) noexcept;
@@ -452,13 +458,16 @@ namespace krys::boo::html
     void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               dom::DOMStringView value,
                               AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
+
     // https://www.w3.org/TR/html4/sgml/dtd.html#MultiLength, including pixel, percentage, and relative
     // values.
     void AddHTMLMultiLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                    dom::DOMStringView value) noexcept;
+
     // https://www.w3.org/TR/html4/sgml/dtd.html#Pixels, including pixel value.
     void AddHTMLPixelsToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               dom::DOMStringView value) noexcept;
+
     void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                              dom::DOMStringView attributeValue) noexcept;
 
@@ -504,6 +513,7 @@ namespace krys::boo::html
 
     /// @brief The popover commands, for a popover.
     KRYS_NODISCARD bool IsValidCommandType(dom::CommandType command) const noexcept override;
+
     /// @brief Shows or hides the element, if it's a popover, for the popover commands.
     bool HandleCommandInternal(HTMLButtonElement &invoker, dom::CommandType command) noexcept override;
 
@@ -1049,31 +1059,34 @@ namespace krys::boo::html
     }
 
 #pragma endregion
+
   private:
     enum class AllowPercentage : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class UseCSSPXAsUnitType : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class IsMultiLength : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               dom::DOMStringView value, AllowPercentage allowPercentage,
                               UseCSSPXAsUnitType useCSSPX, IsMultiLength isMultiLength,
                               AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
+
     void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
                                                   css::MutableStyleProperties &style) noexcept;
+
     void MapLanguageAttributeToLocale(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
 
     /// @brief Whether the popover can be shown (@p expectedToBeShowing false) or hidden: false if it already
@@ -1081,16 +1094,21 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#check-popover-validity
     KRYS_NODISCARD dom::ExceptionOr<bool>
       CheckPopoverValidity(bool expectedToBeShowing, dom::Document *expectedDocument) const noexcept;
+
     /// @see https://html.spec.whatwg.org/#popover-focusing-steps
     void RunPopoverFocusingSteps() noexcept;
+
     /// @see https://html.spec.whatwg.org/#queue-a-popover-toggle-event-task
     void QueuePopoverToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
                                      HTMLElement *source) noexcept;
+
     /// @return Whether the event wasn't canceled.
     bool FirePopoverBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState, bool cancelable,
                                       HTMLElement *source) noexcept;
+
     /// @brief Sets the popover's trigger, which becomes its invoked popover's invoker.
     void SetInvoker(HTMLElement *invoker) noexcept;
+
     void PopoverAttributeChanged(Maybe<dom::DOMStringView> value) noexcept;
   };
 }

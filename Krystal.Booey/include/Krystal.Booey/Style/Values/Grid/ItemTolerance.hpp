@@ -42,6 +42,7 @@ namespace krys::boo::style
     {
       return HoldsAlternative<css::keywords::Normal>();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsInfinite() const noexcept
     {
       return HoldsAlternative<css::keywords::Infinite>();
@@ -62,6 +63,7 @@ namespace krys::boo::style
   struct Blending<ItemTolerance>
   {
     KRYS_NODISCARD bool CanBlend(const ItemTolerance &, const ItemTolerance &) noexcept;
+
     KRYS_NODISCARD ItemTolerance Blend(const ItemTolerance &, const ItemTolerance &,
                                        const BlendingContext &) noexcept;
   };

@@ -85,9 +85,12 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-scrolltimeline-scrolltimeline
     KRYS_NODISCARD static Ref<ScrollTimeline> Create(dom::Document &document,
                                                      ScrollTimelineOptions &&options = {}) noexcept;
+
     KRYS_NODISCARD static Ref<ScrollTimeline> Create(const css::CSSOMStringAtom &name,
                                                      ScrollAxis axis) noexcept;
+
     KRYS_NODISCARD static Ref<ScrollTimeline> Create(Scroller scroller, ScrollAxis axis) noexcept;
+
     KRYS_NODISCARD static Ref<ScrollTimeline>
       CreateInactiveStyleOriginatedTimeline(const css::CSSOMStringAtom &name) noexcept;
 
@@ -95,16 +98,21 @@ namespace krys::boo
     {
       return _source;
     }
+
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-scrolltimeline-source
     KRYS_NODISCARD virtual RefPtr<dom::Element> BindingsSource() const noexcept;
+
     KRYS_NODISCARD virtual RefPtr<dom::Element> Source() const noexcept;
+
     void SetSource(dom::Element *source) noexcept;
+
     void SetSource(const style::Styleable &styleable) noexcept;
 
     KRYS_NODISCARD ScrollAxis Axis() const noexcept
     {
       return _axis;
     }
+
     void SetAxis(ScrollAxis axis) noexcept
     {
       _axis = axis;
@@ -114,6 +122,7 @@ namespace krys::boo
     {
       return _name;
     }
+
     void SetName(const css::CSSOMStringAtom &name) noexcept
     {
       _name = name;
@@ -126,18 +135,23 @@ namespace krys::boo
 
     KRYS_NODISCARD ShouldUpdateAnimationsAndSendEvents
       DocumentWillUpdateAnimationsAndSendEvents() noexcept override;
+
     void UpdateCurrentTimeIfStale() noexcept;
 
     KRYS_NODISCARD AnimationTimelinesController *Controller() const noexcept override;
 
     KRYS_NODISCARD Maybe<WebAnimationTime>
       CurrentTime(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) noexcept override;
+
     KRYS_NODISCARD style::SingleAnimationRange DefaultRange() const noexcept override;
+
     KRYS_NODISCARD const WeakPtr<dom::Element> &TimelineScopeDeclaredElement() const noexcept
     {
       return _timelineScopeElement;
     }
+
     void SetTimelineScopeElement(const dom::Element &element) noexcept;
+
     void ClearTimelineScopeDeclaredElement() noexcept
     {
       _timelineScopeElement = nullptr;
@@ -157,11 +171,14 @@ namespace krys::boo
 
     KRYS_NODISCARD static ScrollableArea *ScrollableAreaForSourceRenderer(const RenderElement *renderer,
                                                                           dom::Document &document) noexcept;
+
     KRYS_NODISCARD ResolvedScrollDirection GetResolvedScrollDirection() const noexcept;
+
     void SourceMetricsDidChange() noexcept;
 
   private:
     ScrollTimeline() noexcept;
+
     ScrollTimeline(Scroller scroller, ScrollAxis axis) noexcept;
 
     KRYS_NODISCARD bool IsScrollTimeline() const noexcept final
@@ -172,6 +189,7 @@ namespace krys::boo
     void AnimationTimingDidChange(WebAnimation &animation) noexcept override;
 
     KRYS_NODISCARD CurrentTimeData ComputeCurrentTimeData() const noexcept;
+
     void CacheCurrentTime() noexcept;
   };
 }

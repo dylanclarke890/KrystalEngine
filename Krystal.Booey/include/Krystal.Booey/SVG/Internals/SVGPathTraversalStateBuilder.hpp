@@ -47,21 +47,27 @@ namespace krys::boo::svg
     {
       return _segmentIndex;
     }
+
     KRYS_NODISCARD float TotalLength() const noexcept;
+
     KRYS_NODISCARD FloatPoint CurrentPoint() const noexcept;
 
     void IncrementPathSegmentCount() noexcept final
     {
       ++_segmentIndex;
     }
+
     KRYS_NODISCARD bool ContinueConsuming() noexcept final;
 
   private:
     // Used in UnalteredParsing/NormalizedParsing modes.
     void MoveTo(const FloatPoint &, bool closed, PathCoordinateMode) noexcept final;
+
     void LineTo(const FloatPoint &, PathCoordinateMode) noexcept final;
+
     void CurveToCubic(const FloatPoint &, const FloatPoint &, const FloatPoint &,
                       PathCoordinateMode) noexcept final;
+
     void ClosePath() noexcept final;
 
     // Not used for PathTraversalState.
@@ -69,22 +75,27 @@ namespace krys::boo::svg
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void LineToVertical(float, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void CurveToCubicSmooth(const FloatPoint &, const FloatPoint &, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void CurveToQuadratic(const FloatPoint &, const FloatPoint &, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void CurveToQuadraticSmooth(const FloatPoint &, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void ArcTo(float, float, float, bool, bool, const FloatPoint &, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");

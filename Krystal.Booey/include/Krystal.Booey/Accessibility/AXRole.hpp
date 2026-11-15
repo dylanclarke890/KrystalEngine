@@ -171,9 +171,11 @@ namespace krys::boo
   /// @brief An accessibility object's role: what kind of thing it is to assistive technology.
   enum class AXRole : uint8
   {
+  // clang-format off: the expansion already ends with a comma.
 #define KRYS_AX_DEFINE_ROLE(name) name,
     KRYS_AX_ROLES(KRYS_AX_DEFINE_ROLE)
 #undef KRYS_AX_DEFINE_ROLE
+    // clang-format on
   };
 
   /// @brief @p role's enumerator name, as accessibility tree dumps show it.

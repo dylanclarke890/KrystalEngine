@@ -57,6 +57,7 @@ namespace krys::boo::style
 
   private:
     KRYS_NODISCARD bool Equals(const FilterOperation &) const noexcept override;
+
     KRYS_NODISCARD bool RequiresRepaintForCurrentColorChange() const noexcept override
     {
       return _styleColor.ContainsCurrentColor();

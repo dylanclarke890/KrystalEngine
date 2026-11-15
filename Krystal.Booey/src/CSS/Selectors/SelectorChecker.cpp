@@ -1963,5 +1963,4 @@ namespace krys::boo::css
 
     return result;
   }
-
 }

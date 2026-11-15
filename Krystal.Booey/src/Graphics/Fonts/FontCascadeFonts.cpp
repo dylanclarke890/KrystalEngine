@@ -85,8 +85,10 @@ namespace krys::boo
   }
 
   FontCascadeFonts::GlyphPageCacheEntry::GlyphPageCacheEntry(GlyphPageCacheEntry &&) noexcept = default;
+
   auto FontCascadeFonts::GlyphPageCacheEntry::operator=(GlyphPageCacheEntry &&) noexcept
     -> GlyphPageCacheEntry & = default;
+
   FontCascadeFonts::GlyphPageCacheEntry::~GlyphPageCacheEntry() noexcept = default;
 
   GlyphData FontCascadeFonts::GlyphPageCacheEntry::GlyphDataForCharacter(char32 character) const noexcept
@@ -578,7 +580,7 @@ namespace krys::boo
   {
     Immaterial,
     Visible,
-    Invisible
+    Invisible,
   };
 
   static void OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,

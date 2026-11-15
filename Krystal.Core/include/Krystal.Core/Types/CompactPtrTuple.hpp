@@ -38,6 +38,7 @@ namespace krys
 
   public:
     KRYS_ALWAYS_INLINE constexpr CompactPtr() noexcept = default;
+
     KRYS_ALWAYS_INLINE constexpr ~CompactPtr() noexcept = default;
 
     KRYS_ALWAYS_INLINE constexpr CompactPtr(std::nullptr_t) noexcept
@@ -272,11 +273,12 @@ namespace krys
     friend bool operator==(const CompactPtrTuple &, const CompactPtrTuple &) = default;
 
 #if KRYS_ADDRESS_SPACE(64)
+
   public:
     constexpr static uint8 MaxPtrBits = 48;
     static_assert(KRYS_EFFECTIVE_ADDRESS_WIDTH <= MaxPtrBits);
 
-    constexpr static uint64_t PtrMask = (1ULL << MaxPtrBits) - 1;
+    constexpr static uint64_t PtrMask = (1ull << MaxPtrBits) - 1;
 
     CompactPtrTuple(TPtr ptr, TData data) noexcept : _data(Encode(ptr, data))
     {
@@ -338,6 +340,7 @@ namespace krys
       return std::bit_cast<uint64>(pointer) | EncodeData(data);
     }
 #else
+
   public:
     constexpr CompactPtrTuple(TPtr ptr, TData TData) noexcept : _ptr(ptr), _data(TData)
     {

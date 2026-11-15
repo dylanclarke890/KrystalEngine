@@ -41,7 +41,7 @@ namespace krys::boo::css
     enum class ListOptimization : bool
     {
       None,
-      SingleValue
+      SingleValue,
     };
 
     struct ListBounds

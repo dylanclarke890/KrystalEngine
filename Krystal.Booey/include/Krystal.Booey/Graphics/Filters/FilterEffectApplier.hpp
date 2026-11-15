@@ -38,6 +38,7 @@ namespace krys::boo
   {
   public:
     FilterEffectApplier() noexcept = default;
+
     virtual ~FilterEffectApplier() noexcept = default;
 
     /// @return Whether the effect was applied.

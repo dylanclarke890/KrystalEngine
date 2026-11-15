@@ -31,6 +31,7 @@ namespace krys::boo
     /// @brief Whether @p point is inside @p path stroked with @p style.
     KRYS_NODISCARD virtual bool StrokeContains(const Path &path, const FloatPoint &point,
                                                const PathStrokeStyle &style) noexcept = 0;
+
     /// @brief The bounds of @p path stroked with @p style.
     KRYS_NODISCARD virtual FloatRect StrokeBoundingRect(const Path &path,
                                                         const PathStrokeStyle &style) noexcept = 0;

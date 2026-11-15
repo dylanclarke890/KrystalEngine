@@ -177,6 +177,7 @@ namespace krys::boo::css
 
     Kind Value;
   };
+
   DEFINE_TYPE_WRAPPER_GET(PositionY, Value)
 
   /// @brief Whether `position` is `center center` (or `50% 50%`) in its two-component form.

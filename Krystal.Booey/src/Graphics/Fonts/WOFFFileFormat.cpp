@@ -34,8 +34,8 @@ namespace krys::boo
 {
   namespace
   {
-    constexpr uint32 Woff2Signature = 0x77'4f'46'32; // "wOF2"
-    constexpr uint32 WoffSignature = 0x77'4f'46'46;  // "wOFF"
+    constexpr uint32 Woff2Signature = 0x77'4F'46'32; // "wOF2"
+    constexpr uint32 WoffSignature = 0x77'4F'46'46;  // "wOFF"
 
     KRYS_NODISCARD bool ReadUInt32(const SharedBuffer &buffer, size_t &offset, uint32 &value) noexcept
     {
@@ -177,7 +177,7 @@ namespace krys::boo
         return false;
       }
 
-      if (!numTables || numTables > 0x0fff)
+      if (!numTables || numTables > 0x0FFF)
       {
         return false;
       }

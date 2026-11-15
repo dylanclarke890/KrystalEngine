@@ -49,7 +49,7 @@ namespace krys::boo
   private:
     enum class RawTag
     {
-      RawTag
+      RawTag,
     };
 
     constexpr static int FractionalEntropy = 4;
@@ -130,6 +130,7 @@ namespace krys::boo
 
     KRYS_NODISCARD friend constexpr auto operator<=>(FontSelectionValue,
                                                      FontSelectionValue) noexcept = default;
+
     KRYS_NODISCARD friend constexpr bool operator==(FontSelectionValue,
                                                     FontSelectionValue) noexcept = default;
 
@@ -388,17 +389,21 @@ namespace krys::boo
 
   public:
     FontSelectionAlgorithm() = delete;
+
     FontSelectionAlgorithm(FontSelectionRequest, const List<Capabilities> &,
                            Maybe<Capabilities> capabilitiesBounds = std::nullopt) noexcept;
 
     KRYS_NODISCARD DistanceResult WidthDistance(Capabilities) const noexcept;
+
     KRYS_NODISCARD DistanceResult StyleDistance(Capabilities) const noexcept;
+
     KRYS_NODISCARD DistanceResult WeightDistance(Capabilities) const noexcept;
 
     KRYS_NODISCARD size_t IndexOfBestCapabilities() noexcept;
 
   private:
     KRYS_NODISCARD FontSelectionValue BestValue(Span<const bool> eliminated, DistanceFunction) const noexcept;
+
     void FilterCapability(Span<bool> eliminated, DistanceFunction, CapabilitiesRange) noexcept;
   };
 }

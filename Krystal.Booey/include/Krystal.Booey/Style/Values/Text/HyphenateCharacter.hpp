@@ -39,6 +39,7 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsString() const noexcept
     {
       return IsValue();

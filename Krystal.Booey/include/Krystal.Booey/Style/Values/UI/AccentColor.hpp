@@ -40,10 +40,12 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsColor() const noexcept
     {
       return IsValue();
     }
+
     KRYS_NODISCARD Maybe<Color> TryColor() const noexcept
     {
       return TryValue();
@@ -60,12 +62,15 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool Equals(const AccentColor &, const AccentColor &, const RenderStyle &,
                                const RenderStyle &) noexcept;
+
     KRYS_NODISCARD bool CanBlend(const AccentColor &, const AccentColor &) noexcept;
+
     KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const AccentColor &,
                                                                                 const AccentColor &) noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD AccentColor Blend(const AccentColor &, const AccentColor &, const RenderStyle &,
                                      const RenderStyle &, const BlendingContext &) noexcept;
   };

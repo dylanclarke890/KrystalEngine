@@ -51,6 +51,7 @@ namespace krys::boo::css
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-as-a-cssstylevalue
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleValue>>
       ReifyValue(dom::Document &document, const Value &value, Maybe<PropertyId> property) noexcept;
+
     /// @brief Parses @p cssText as a value of @p property, then reifies its first iteration, or each of them
     /// if
     /// @p parseMultiple.
@@ -59,11 +60,13 @@ namespace krys::boo::css
     KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSStyleValue>>>
       ParseStyleValue(dom::Document &document, CSSOMStringView property, CSSOMStringView cssText,
                       bool parseMultiple) noexcept;
+
     /// @brief A shorthand's value, from its serialisation: an unparsed value if it references variables,
     /// otherwise a generic style value. Null if @p serialisation is.
     KRYS_NODISCARD static RefPtr<CSSStyleValue>
       ConstructStyleValueForShorthandSerialisation(dom::Document &document,
                                                    const CSSOMString &serialisation) noexcept;
+
     /// @brief @p values as style values for @p property, the strings among them parsed as each of their
     /// iterations.
     KRYS_NODISCARD static dom::ExceptionOr<List<Ref<CSSStyleValue>>>

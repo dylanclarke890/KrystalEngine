@@ -50,20 +50,27 @@ namespace krys::boo
     SourceImage(ImageVariant &&) noexcept;
 
     SourceImage(const SourceImage &) noexcept;
+
     SourceImage(SourceImage &&) noexcept;
+
     SourceImage &operator=(const SourceImage &) noexcept;
+
     SourceImage &operator=(SourceImage &&) noexcept;
+
     ~SourceImage() noexcept;
 
     KRYS_NODISCARD bool operator==(const SourceImage &) const noexcept;
 
     KRYS_NODISCARD NativeImage *NativeImageIfExists() const noexcept;
+
     KRYS_NODISCARD NativeImage *GetNativeImage() const noexcept;
 
     KRYS_NODISCARD ImageBuffer *ImageBufferIfExists() const noexcept;
+
     KRYS_NODISCARD ImageBuffer *GetImageBuffer() const noexcept;
 
     KRYS_NODISCARD RenderingResourceIdentifier ImageIdentifier() const noexcept;
+
     KRYS_NODISCARD IntSize Size() const noexcept;
   };
 }

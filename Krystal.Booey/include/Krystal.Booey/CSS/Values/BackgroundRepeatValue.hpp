@@ -46,6 +46,7 @@ namespace krys::boo::css
                                                             css::ValueId repeatYValue) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const BackgroundRepeatValue &other) const noexcept;
 
     KRYS_NODISCARD css::ValueId XValue() const noexcept

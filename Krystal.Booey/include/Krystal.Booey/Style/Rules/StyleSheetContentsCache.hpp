@@ -58,12 +58,15 @@ namespace krys::boo::style
 
   public:
     StyleSheetContentsCache() noexcept;
+
     ~StyleSheetContentsCache() noexcept;
 
     KRYS_NODISCARD static StyleSheetContentsCache &Singleton() noexcept;
 
     KRYS_NODISCARD RefPtr<css::StyleSheetContents> Get(const Key &key) const noexcept;
+
     void Add(Key &&key, Ref<css::StyleSheetContents> contents) noexcept;
+
     void Clear() noexcept;
   };
 }

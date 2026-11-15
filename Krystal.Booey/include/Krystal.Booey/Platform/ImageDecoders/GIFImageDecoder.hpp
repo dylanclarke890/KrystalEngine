@@ -40,7 +40,7 @@ namespace krys::boo
     {
       GIFFullQuery,
       GIFSizeQuery,
-      GIFFrameCountQuery
+      GIFFrameCountQuery,
     };
 
   private:
@@ -62,30 +62,41 @@ namespace krys::boo
     {
       return u8"gif";
     }
+
     void SetData(const SharedBuffer &data, bool allDataReceived) noexcept final;
+
     bool SetSize(const IntSize &size) noexcept final;
+
     KRYS_NODISCARD size_t FrameCount() const noexcept final;
+
     KRYS_NODISCARD RepetitionCount GetRepetitionCount() const noexcept final;
+
     ScalableImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept final;
+
     // CAUTION: setFailed() deletes |m_reader|. Be careful to avoid
     // accessing deleted memory, especially when calling this from inside
     // GIFImageReader!
     bool SetFailed() noexcept final;
+
     void ClearFrameBufferCache(size_t clearBeforeFrame) noexcept final;
 
     // Callbacks from the GIF reader.
     bool HaveDecodedRow(unsigned frameIndex, const List<unsigned char> &rowBuffer, size_t width,
                         size_t rowNumber, unsigned repeatCount, bool writeTransparentPixels) noexcept;
+
     bool FrameComplete(unsigned frameIndex, unsigned frameDuration,
                        ScalableImageDecoderFrame::DisposalMethod disposalMethod) noexcept;
+
     void GifComplete() noexcept;
 
   private:
     GIFImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
+
     void TryDecodeSize(bool allDataReceived) noexcept final
     {
       Decode(0, GIFSizeQuery, allDataReceived);
     }
+
     KRYS_NODISCARD size_t FindFirstRequiredFrameToDecode(size_t frameIndex) noexcept;
 
     // If the query is GIFFullQuery, decodes the image up to (but not

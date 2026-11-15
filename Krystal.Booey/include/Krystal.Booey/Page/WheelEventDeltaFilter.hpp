@@ -61,6 +61,7 @@ namespace krys::boo
 
   private:
     void Reset() noexcept;
+
     void UpdateWithDelta(FloatSize delta) noexcept;
   };
 }

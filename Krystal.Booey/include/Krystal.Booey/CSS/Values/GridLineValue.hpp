@@ -49,6 +49,7 @@ namespace krys::boo::css
                                                     RefPtr<PrimitiveValue> gridLineName) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const GridLineValue &other) const noexcept;
 
     KRYS_NODISCARD PrimitiveValue *SpanValue() const noexcept

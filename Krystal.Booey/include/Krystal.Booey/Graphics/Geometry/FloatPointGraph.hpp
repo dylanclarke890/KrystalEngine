@@ -74,6 +74,7 @@ namespace krys::boo
       {
         return _visited;
       }
+
       void Visit() noexcept
       {
         _visited = true;
@@ -94,7 +95,9 @@ namespace krys::boo
 
   public:
     FloatPointGraph() noexcept = default;
+
     FloatPointGraph(FloatPointGraph &&) noexcept = default;
+
     FloatPointGraph &operator=(FloatPointGraph &&) noexcept = default;
 
     /// @brief The polygons outlining the union of @p rects, or none when it has holes; the graph owns their
@@ -104,6 +107,7 @@ namespace krys::boo
 
     /// @brief The node at @p point (within a small tolerance), made if there isn't one.
     KRYS_NODISCARD Node *FindOrCreateNode(FloatPoint point);
+
     void Reset() noexcept;
   };
 }

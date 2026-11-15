@@ -32,11 +32,11 @@
 
 namespace krys::boo::css
 {
-  class TokenRange;
-  class Value;
-  struct PropertyParserState;
   struct BorderImageComponents;
   struct BorderRadius;
+  struct PropertyParserState;
+  class TokenRange;
+  class Value;
 
   namespace PropertyParserHelpers
   {
@@ -44,7 +44,7 @@ namespace krys::boo::css
     enum class BorderImageSliceFillDefault : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     // Legacy behavior needed by -webkit-border-image that makes fixed border slices also set the border
@@ -52,7 +52,7 @@ namespace krys::boo::css
     enum class BorderImageWidthOverridesWidthForLength : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     // MARK: - Border Radius

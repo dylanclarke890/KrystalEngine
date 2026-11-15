@@ -42,6 +42,7 @@ namespace krys::boo::svg
     {
       return _clipPathUnits->CurrentValue<SVGUnitTypes::SVGUnitType>();
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &ClipPathUnitsAnimated() noexcept
     {
       return *_clipPathUnits;
@@ -52,13 +53,16 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
+
     void OnChildrenChanged() noexcept final;
 
     KRYS_NODISCARD bool IsValid() const noexcept final
     {
       return SVGTests::IsValid();
     }
+
     KRYS_NODISCARD bool NeedsPendingResourceHandling() const noexcept final
     {
       return false;
