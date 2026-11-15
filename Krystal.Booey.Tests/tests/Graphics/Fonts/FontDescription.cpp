@@ -74,11 +74,11 @@ namespace krys::boo::tests
   TEST_CASE("FontPalette", "[Graphics][FontDescription]")
   {
     FontPalette normal;
-    FontPalette dark {FontPalette::Type::Dark, StringAtom {u8"ignored"}};
-    CHECK(normal == FontPalette {FontPalette::Type::Normal, StringAtom {u8"other"}});
+    FontPalette dark {FontPalette::Type::Dark, u8"ignored"};
+    CHECK(normal == FontPalette {FontPalette::Type::Normal, u8"other"});
     CHECK(dark == FontPalette {FontPalette::Type::Dark, null});
-    CHECK(FontPalette {FontPalette::Type::Custom, StringAtom {u8"--a"}}
-          != FontPalette {FontPalette::Type::Custom, StringAtom {u8"--b"}});
+    CHECK(FontPalette {FontPalette::Type::Custom, u8"--a"}
+          != FontPalette {FontPalette::Type::Custom, u8"--b"});
     CHECK(DefaultHash<FontPalette>::Hash(dark)
           == DefaultHash<FontPalette>::Hash({FontPalette::Type::Dark, null}));
   }
@@ -156,28 +156,28 @@ namespace krys::boo::tests
 
     SECTION("locale")
     {
-      description.SetSpecifiedLocale(StringAtom {u8"ja-JP"});
+      description.SetSpecifiedLocale(u8"ja-JP");
       CHECK(description.Script() == USCRIPT_KATAKANA_OR_HIRAGANA);
-      CHECK(description.ComputedLocale() == StringAtom {u8"ja-JP"});
-      CHECK(description.SpecifiedLocale() == StringAtom {u8"ja-JP"});
+      CHECK(description.ComputedLocale() == u8"ja-JP");
+      CHECK(description.SpecifiedLocale() == u8"ja-JP");
 
       // Han locales compute to a specialised Chinese locale.
-      description.SetSpecifiedLocale(StringAtom {u8"zh"});
+      description.SetSpecifiedLocale(u8"zh");
       CHECK(description.Script() == USCRIPT_HAN);
-      CHECK(description.ComputedLocale() == StringAtom {u8"zh-hans"});
-      CHECK(description.SpecifiedLocale() == StringAtom {u8"zh"});
+      CHECK(description.ComputedLocale() == u8"zh-hans");
+      CHECK(description.SpecifiedLocale() == u8"zh");
 
-      description.SetSpecifiedLocale(StringAtom {u8"zh-TW"});
+      description.SetSpecifiedLocale(u8"zh-TW");
       CHECK(description.Script() == USCRIPT_TRADITIONAL_HAN);
-      CHECK(description.ComputedLocale() == StringAtom {u8"zh-TW"});
+      CHECK(description.ComputedLocale() == u8"zh-TW");
 
       // The specialised locale is the first Chinese language the user prefers.
       OverrideUserPreferredLanguages({u8"en-GB", u8"zh-Hant-HK"});
-      description.SetSpecifiedLocale(StringAtom {u8"zh"});
-      CHECK(description.ComputedLocale() == StringAtom {u8"zh-Hant-HK"});
+      description.SetSpecifiedLocale(u8"zh");
+      CHECK(description.ComputedLocale() == u8"zh-Hant-HK");
       OverrideUserPreferredLanguages({});
-      description.SetSpecifiedLocale(StringAtom {u8"zh"});
-      CHECK(description.ComputedLocale() == StringAtom {u8"zh-hans"});
+      description.SetSpecifiedLocale(u8"zh");
+      CHECK(description.ComputedLocale() == u8"zh-hans");
     }
 
     SECTION("equality")
@@ -189,7 +189,7 @@ namespace krys::boo::tests
       CHECK(other.GetTextRenderingMode() == TextRenderingMode::OptimizeLegibility);
     }
 
-    CHECK(FontDescription::PlatformResolveGenericFamily(USCRIPT_LATIN, null, StringAtom {u8"serif"}) == null);
+    CHECK(FontDescription::PlatformResolveGenericFamily(USCRIPT_LATIN, null, u8"serif") == null);
   }
 
   TEST_CASE("FontCascadeDescription", "[Graphics][FontDescription]")
@@ -237,11 +237,10 @@ namespace krys::boo::tests
       CHECK(description.EffectiveFamilyCount() == 2);
       CHECK(description.EffectiveFamilyAt(1) == css::GenericFontFamilyNames::SerifFamily());
 
-      CHECK(FontCascadeDescription::FamilyNamesAreEqual(StringAtom {u8"Arial"}, StringAtom {u8"aRIAL"}));
-      CHECK_FALSE(
-        FontCascadeDescription::FamilyNamesAreEqual(StringAtom {u8"Arial"}, StringAtom {u8"Arial2"}));
-      CHECK(FontCascadeDescription::FamilyNameHash(StringAtom {u8"Arial"})
-            == FontCascadeDescription::FamilyNameHash(StringAtom {u8"ARIAL"}));
+      CHECK(FontCascadeDescription::FamilyNamesAreEqual(u8"Arial", u8"aRIAL"));
+      CHECK_FALSE(FontCascadeDescription::FamilyNamesAreEqual(u8"Arial", u8"Arial2"));
+      CHECK(FontCascadeDescription::FamilyNameHash(u8"Arial")
+            == FontCascadeDescription::FamilyNameHash(u8"ARIAL"));
       CHECK(FontCascadeDescription::FoldedFamilyName(u8"Times New Roman") == u8"times new roman");
     }
 

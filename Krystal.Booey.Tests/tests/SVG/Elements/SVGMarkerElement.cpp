@@ -58,7 +58,7 @@ namespace krys::boo::svg::tests
     auto &k = ElementById<SVGMarkerElement>(*fixture.Document, u8"k");
     CHECK(k.Orient().View().empty());
 
-    k.SetOrient(dom::DOMStringAtom(u8"auto"));
+    k.SetOrient(u8"auto");
     CHECK(k.Orient().View() == u8"auto");
     CHECK(k.OrientType() == SVGMarkerOrientAuto);
 

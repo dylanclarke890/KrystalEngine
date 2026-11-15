@@ -361,7 +361,7 @@ namespace krys::boo::html
                          [&](const auto &pair) { return pair[0] == token.Name().View(); });
           if (adjustedNameIt != svgTagNameAdjustments.end())
           {
-            token._name = (*adjustedNameIt)[1];
+            token._name = dom::DOMStringAtom((*adjustedNameIt)[1]);
           }
 
           AdjustSVGAttributes(token);
@@ -4310,9 +4310,9 @@ namespace krys::boo::html
 
       // If element does not have an attribute whose name is attribute's name, then add attribute's name and
       // its corresponding value to element.
-      if (!element.HasAttribute(attr.NameView()))
+      if (dom::DOMStringAtom name {attr.NameView()}; !element.HasAttribute(name))
       {
-        element.SetAttribute(attr.NameView(), dom::DOMString(attr.ValueView()));
+        element.SetAttribute(name, dom::DOMString(attr.ValueView()));
       }
     }
   }
@@ -4542,7 +4542,7 @@ namespace krys::boo::html
         }
 
         // 17b. Append attribute to element.
-        dom::ElementAlgorithms::SetAttributeValue(*element, attr.NameView(),
+        dom::ElementAlgorithms::SetAttributeValue(*element, dom::DOMStringAtom(attr.NameView()),
                                                   dom::DOMString(attr.ValueView()));
       }
       else
@@ -4584,8 +4584,8 @@ namespace krys::boo::html
         {
           continue;
         }
-        dom::ElementAlgorithms::SetAttributeValue(*element, localName, dom::DOMString(attr.ValueView()),
-                                                  prefix, namespaceUri);
+        dom::ElementAlgorithms::SetAttributeValue(*element, dom::DOMStringAtom(localName),
+                                                  dom::DOMString(attr.ValueView()), prefix, namespaceUri);
       }
     }
 

@@ -37,7 +37,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
       return ConsumeCounterStyleNameInPrelude(range);
     };
 
-    CHECK(prelude(u8"my-style") == CSSOMStringAtom(u8"my-style"));
+    CHECK(prelude(u8"my-style") == u8"my-style");
     CHECK(prelude(u8"none") == null);
     CHECK(prelude(u8"my-style extra") == null);
 
@@ -46,7 +46,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(prelude(u8"disc") == null);
 
     // Other predefined styles can be, and their names are lowercased.
-    CHECK(prelude(u8"Upper-Roman") == CSSOMStringAtom(u8"upper-roman"));
+    CHECK(prelude(u8"Upper-Roman") == u8"upper-roman");
   }
 
   TEST_CASE("PropertyParserHelpers(ConsumeCounterStyleSystem)", "[CSS][Properties][Consumers]")

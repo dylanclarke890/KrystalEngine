@@ -78,7 +78,7 @@ namespace krys::boo::ax::tests
 
     SECTION("Removing aria-owns gives the item back")
     {
-      page.ById(u8"owner").RemoveAttribute(dom::DOMStringAtom(u8"aria-owns"));
+      page.ById(u8"owner").RemoveAttribute(u8"aria-owns");
       (void)page.TakeNotifications();
       CHECK(item.ParentObject() == &other);
       CHECK(Contains(other.Children(), item));

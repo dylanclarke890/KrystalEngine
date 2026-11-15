@@ -265,7 +265,7 @@ namespace krys::ui::tests
       view.SetScreenOrigin({100, 200});
       double screenX = 0;
       double screenY = 0;
-      auto handle = view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"mousedown"),
+      auto handle = view.Document().AddEventListener(u8"mousedown",
                                                      Func<void(boo::dom::Event &)>(
                                                        [&](boo::dom::Event &event)
                                                        {
@@ -890,7 +890,7 @@ namespace krys::ui::tests
     // A press on `a` asks to lock the pointer to it (a press is a user gesture).
     boo::dom::PointerLockOptions options;
     handles.push_back(a.AddEventListener(
-      boo::dom::DOMStringAtom(u8"mousedown"),
+      u8"mousedown",
       Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { a.RequestPointerLock(options); })));
     auto click = [&]
     {
@@ -1047,7 +1047,7 @@ namespace krys::ui::tests
     {
       RefPtr<boo::dom::PointerEvent> down;
       handles.push_back(view.Document().AddEventListener(
-        boo::dom::DOMStringAtom(u8"pointerdown"),
+        u8"pointerdown",
         Func<void(boo::dom::Event &)>([&](boo::dom::Event &event)
                                       { down = ShareRefPtr(&Downcast<boo::dom::PointerEvent>(event)); })));
 
@@ -1430,9 +1430,8 @@ namespace krys::ui::tests
     auto rect = input.GetBoundingClientRect();
     auto y = rect->Y() + rect->Height() / 2;
     uint32 changes = 0;
-    auto handle =
-      input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
-                             Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
+    auto handle = input.AddEventListener(
+      u8"change", Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
 
     auto touch = [&](pal::PointerAction action, boo::DoublePoint point)
     {
@@ -1478,9 +1477,8 @@ namespace krys::ui::tests
     view.UpdateRendering();
     auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"f"));
     uint32 changes = 0;
-    auto handle =
-      input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
-                             Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
+    auto handle = input.AddEventListener(
+      u8"change", Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
     auto click = [&]
     {
       view.MousePressed({5, 5}, pal::MouseButton::Left);
@@ -1758,7 +1756,7 @@ namespace krys::ui::tests
         event.PreventDefault();
       }
     };
-    view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"keydown"), CreateRef<Canceller>(), false);
+    view.Document().AddEventListener(u8"keydown", CreateRef<Canceller>(), false);
     CHECK(view.KeyPressed(pal::Key::B, {}, {u8"b", u8"b"}));
     CHECK(records == List<std::string> {"keydown:b/KeyB/66/0/0"});
   }
@@ -1848,7 +1846,7 @@ namespace krys::ui::tests
       }
     };
     Ref<ScrollCounter> counter = CreateRef<ScrollCounter>();
-    view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"scroll"), counter, false);
+    view.Document().AddEventListener(u8"scroll", counter, false);
 
     CHECK(view.ScrollPosition() == boo::IntPoint());
     view.ScrollTo({0, 150});
@@ -1965,9 +1963,8 @@ namespace krys::ui::tests
       }
     };
     int32 ran = 0;
-    view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"mousedown"),
-                                     Ref<boo::dom::EventListenerCallback> {CreateRef<MicrotaskQueuer>(ran)},
-                                     false);
+    view.Document().AddEventListener(
+      u8"mousedown", Ref<boo::dom::EventListenerCallback> {CreateRef<MicrotaskQueuer>(ran)}, false);
     view.MousePressed({5, 5}, pal::MouseButton::Left);
     CHECK(ran == 1);
     view.MouseReleased({5, 5}, pal::MouseButton::Left);
@@ -2185,7 +2182,7 @@ namespace krys::ui::tests
         ++Count;
       }
     };
-    select.AddEventListener(boo::dom::DOMStringAtom(u8"change"), CreateRef<Counter>(changes), false);
+    select.AddEventListener(u8"change", CreateRef<Counter>(changes), false);
 
     // Pressing the drop-down opens its popup below it, with the selected item highlighted; its release goes
     // to the page and leaves the popup open.
@@ -2338,7 +2335,7 @@ namespace krys::ui::tests
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
-    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"), changes, false);
+    input.AddEventListener(u8"change", changes, false);
     auto open = [&]
     {
       view.MousePressed(inside, pal::MouseButton::Left);
@@ -2463,7 +2460,7 @@ namespace krys::ui::tests
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
-    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"), changes, false);
+    input.AddEventListener(u8"change", changes, false);
     auto open = [&]
     {
       view.MousePressed(inside, pal::MouseButton::Left);
@@ -2584,7 +2581,7 @@ namespace krys::ui::tests
     auto box = input.GetBoundingClientRect();
     boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
     auto changes = CreateRef<EventCounter>();
-    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"), changes, false);
+    input.AddEventListener(u8"change", changes, false);
     auto click = [&](boo::IntPoint point)
     {
       view.MousePressed(point, pal::MouseButton::Left);

@@ -129,11 +129,11 @@ namespace krys::boo::html
 
     if (value)
     {
-      (void)element->SetAttribute(dom::DOMStringAtom(u8"value"), krys::move(*value));
+      (void)element->SetAttribute(u8"value", krys::move(*value));
     }
     if (defaultSelected)
     {
-      (void)element->SetAttribute(dom::DOMStringAtom(u8"selected"), dom::DOMString());
+      (void)element->SetAttribute(u8"selected", dom::DOMString());
     }
 
     // 6. If selected is true, then set option's selectedness to true; otherwise set its selectedness to false

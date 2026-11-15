@@ -1194,7 +1194,7 @@ namespace krys::boo
         return;
       }
 
-      (void)element->SetAttribute(dom::DOMStringAtom(u8"dir"), directionValue);
+      (void)element->SetAttribute(u8"dir", directionValue);
       DispatchInputEvent(*element, writingDirectionInputTypeName, dom::IsInputMethodComposing::No,
                          dom::DOMString(directionValue));
       (void)_document.UpdateStyleIfNeeded();

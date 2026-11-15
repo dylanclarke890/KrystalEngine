@@ -121,8 +121,7 @@ namespace krys::boo::css::tests
       auto a = CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"1px"));
       CHECK(*a == *CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"1px")));
       CHECK_FALSE(*a == *CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"2px")));
-      CHECK_FALSE(*a
-                  == *CustomPropertyValue::CreateSyntaxAll(CSSOMStringAtom {u8"--other"}, MakeData(u8"1px")));
+      CHECK_FALSE(*a == *CustomPropertyValue::CreateSyntaxAll(u8"--other", MakeData(u8"1px")));
       CHECK(*CustomPropertyValue::CreateEmpty(Name()) == *CustomPropertyValue::CreateEmpty(Name()));
     }
 

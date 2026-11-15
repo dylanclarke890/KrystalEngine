@@ -5,7 +5,7 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    constexpr DOMStringView XHTML_NS = u8"http://www.w3.org/1999/xhtml";
+    constexpr const char8 *XHTML_NS = u8"http://www.w3.org/1999/xhtml";
   }
 
   TEST_CASE("Valid namespace prefix: non-empty, without ASCII whitespace, NULL, '/' or '>'",

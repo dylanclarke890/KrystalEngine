@@ -54,7 +54,7 @@ namespace krys::boo::tests
     auto *transition = fixture.RunningTransition(u8"box", css::PropertyId::Opacity);
     REQUIRE(transition);
     CHECK(transition->Property() == AnimatableCSSProperty {css::PropertyId::Opacity});
-    CHECK(transition->TransitionProperty() == css::CSSOMStringAtom {u8"opacity"});
+    CHECK(transition->TransitionProperty() == u8"opacity");
     CHECK(transition->OwningElement() == style::Styleable::FromElement(fixture.ById(u8"box")));
     CHECK(transition->Timeline() == &fixture.Document->Timeline());
     REQUIRE(transition->GetKeyframeEffect());

@@ -111,7 +111,7 @@ namespace krys::boo::css::tests
     {
       auto settings = Settings::Create();
       auto &menu = settings->Values.SystemFonts[SystemFontKeyword::Menu];
-      menu.Family = StringAtom {u8"Ahem"};
+      menu.Family = u8"Ahem";
       menu.Size = 20;
       menu.Weight = BoldWeightValue();
       document.SetSettings(Ref<Settings>(settings));
@@ -145,11 +145,11 @@ namespace krys::boo::css::tests
     {
       FontDescription description;
       description.SetComputedSize(16);
-      auto ranges = selector.FontRangesForFamily(description, StringAtom {u8"Ahem"});
+      auto ranges = selector.FontRangesForFamily(description, u8"Ahem");
       REQUIRE_FALSE(ranges.IsNull());
       CHECK_FALSE(ranges.IsGenericFontFamily());
       CHECK(ranges.FontForFirstRange().PlatformData().FamilyName() == u8"Ahem");
-      CHECK(selector.FontRangesForFamily(description, StringAtom {u8"No Such Family"}).IsNull());
+      CHECK(selector.FontRangesForFamily(description, u8"No Such Family").IsNull());
     }
 
     SECTION("Invalidating the font cache restyles the document")

@@ -254,8 +254,8 @@ namespace krys::boo::css::tests
 
     SECTION("LayerRule")
     {
-      auto statement = LayerRule::CreateStatement(
-        {{CSSOMStringAtom(u8"a")}, {CSSOMStringAtom(u8"b"), CSSOMStringAtom(u8"c")}});
+      auto statement =
+        LayerRule::CreateStatement({{CSSOMStringAtom(u8"a")}, {CSSOMStringAtom(u8"b"), u8"c"}});
       CHECK(statement->Type() == RuleType::LayerStatement);
       CHECK(statement->IsLayerRule());
       CHECK(statement->IsStatement());
@@ -263,7 +263,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(statement->IsGroupRule());
       REQUIRE(statement->NameList().size() == 2);
       CHECK(statement->NameList()[1].size() == 2);
-      CHECK(statement->NameList()[1][1] == CSSOMStringAtom(u8"c"));
+      CHECK(statement->NameList()[1][1] == u8"c");
       CHECK(statement->ChildRules().empty());
 
       auto block =
@@ -281,8 +281,8 @@ namespace krys::boo::css::tests
       CHECK(rule->Type() == RuleType::Container);
       CHECK(rule->IsContainerRule());
       CHECK(rule->IsGroupRule());
-      CHECK(rule->ContainerQueries().front().Name == CSSOMStringAtom(u8"card"));
-      CHECK(rule->Copy()->ContainerQueries().front().Name == CSSOMStringAtom(u8"card"));
+      CHECK(rule->ContainerQueries().front().Name == u8"card");
+      CHECK(rule->Copy()->ContainerQueries().front().Name == u8"card");
     }
 
     SECTION("ScopeRule")
@@ -350,11 +350,10 @@ namespace krys::boo::css::tests
 
     SECTION("PropertyRule")
     {
-      auto rule =
-        PropertyRule::Create({.Name = CSSOMStringAtom(u8"--x"), .Syntax = u8"<length>", .Inherits = false});
+      auto rule = PropertyRule::Create({.Name = u8"--x", .Syntax = u8"<length>", .Inherits = false});
       CHECK(rule->Type() == RuleType::Property);
       CHECK(rule->IsPropertyRule());
-      CHECK(rule->GetDescriptor().Name == CSSOMStringAtom(u8"--x"));
+      CHECK(rule->GetDescriptor().Name == u8"--x");
       CHECK(rule->GetDescriptor().Syntax == u8"<length>");
       CHECK(rule->GetDescriptor().Inherits == false);
       CHECK_FALSE(rule->GetDescriptor().InitialValue);
@@ -366,11 +365,11 @@ namespace krys::boo::css::tests
       List<FontPaletteValues::OverriddenColor> colors;
       colors.push_back({1u, boo::Color::black});
       auto rule =
-        FontPaletteValuesRule::Create(CSSOMStringAtom(u8"--p"), {CSSOMStringAtom(u8"Bixa")},
+        FontPaletteValuesRule::Create(u8"--p", {CSSOMStringAtom(u8"Bixa")},
                                       FontPaletteIndex(FontPaletteIndex::Type::Dark), krys::move(colors));
       CHECK(rule->Type() == RuleType::FontPaletteValues);
       CHECK(rule->IsFontPaletteValuesRule());
-      CHECK(rule->Name() == CSSOMStringAtom(u8"--p"));
+      CHECK(rule->Name() == u8"--p");
       CHECK(rule->FontFamilies().size() == 1);
       CHECK(rule->BasePalette() == FontPaletteIndex(FontPaletteIndex::Type::Dark));
       REQUIRE(rule->OverrideColors().size() == 1);
@@ -405,12 +404,11 @@ namespace krys::boo::css::tests
       CHECK(charset->IsCharsetRule());
       CHECK(charset->Copy()->IsCharsetRule());
 
-      auto rule =
-        NamespaceRule::Create(CSSOMStringAtom(u8"svg"), CSSOMStringAtom(u8"http://www.w3.org/2000/svg"));
+      auto rule = NamespaceRule::Create(u8"svg", u8"http://www.w3.org/2000/svg");
       CHECK(rule->Type() == RuleType::Namespace);
       CHECK(rule->IsNamespaceRule());
-      CHECK(rule->Prefix() == CSSOMStringAtom(u8"svg"));
-      CHECK(rule->Copy()->Uri() == CSSOMStringAtom(u8"http://www.w3.org/2000/svg"));
+      CHECK(rule->Prefix() == u8"svg");
+      CHECK(rule->Copy()->Uri() == u8"http://www.w3.org/2000/svg");
     }
   }
 }

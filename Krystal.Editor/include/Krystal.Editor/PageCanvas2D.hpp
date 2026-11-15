@@ -361,7 +361,7 @@ namespace krys::editor
       if (auto clear = ById(u8"pad-clear"))
       {
         _listeners.push_back(
-          clear->AddEventListener(boo::dom::DOMStringAtom(u8"click"),
+          clear->AddEventListener(u8"click",
                                   [this](boo::dom::Event &)
                                   {
                                     if (_pad && _document)
@@ -422,7 +422,7 @@ namespace krys::editor
       _colour = Text(colour);
       if (auto swatch = ById(u8"pad-colour"))
       {
-        (void)swatch->SetAttribute(boo::dom::DOMStringAtom(u8"style"), Text("background: " + colour));
+        (void)swatch->SetAttribute(u8"style", Text("background: " + colour));
       }
     }
 

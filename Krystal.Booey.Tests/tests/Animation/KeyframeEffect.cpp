@@ -109,7 +109,7 @@ namespace krys::boo::tests
       CHECK(Narrow(keyframes[0].StyleStrings.at(css::PropertyId::BackgroundColor)) == "red");
       CHECK(Narrow(keyframes[0].StyleStrings.at(css::PropertyId::Float)) == "left");
       CHECK(keyframes[0].StyleStrings.size() == 2);
-      CHECK(Narrow(keyframes[0].CustomStyleStrings.at(css::CSSOMStringAtom(u8"--size"))) == "4px");
+      CHECK(Narrow(keyframes[0].CustomStyleStrings.at(u8"--size")) == "4px");
       CHECK(Narrow(KeyframeEffect::PropertyIdToIDLAttributeName(css::PropertyId::BackgroundColor))
             == "backgroundColor");
       CHECK(Narrow(KeyframeEffect::PropertyIdToIDLAttributeName(css::PropertyId::Float)) == "cssFloat");
@@ -281,7 +281,7 @@ namespace krys::boo::tests
     auto syntax = css::CustomPropertySyntax::Parse(u8"<length>");
     REQUIRE(syntax);
     auto &registry = fixture.Document->StyleScope().GetCustomPropertyRegistry();
-    REQUIRE(registry.RegisterFromAPI({.Name = css::CSSOMStringAtom(u8"--x"), .Syntax = *syntax}));
+    REQUIRE(registry.RegisterFromAPI({.Name = u8"--x", .Syntax = *syntax}));
     CHECK(custom->GetBlendingKeyframes().Size() == 0);
     CHECK(other->GetBlendingKeyframes().Size() == 2);
 

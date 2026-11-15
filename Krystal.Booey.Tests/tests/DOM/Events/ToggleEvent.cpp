@@ -36,14 +36,14 @@ namespace krys::boo::dom::tests
       init.OldState = u8"closed";
       init.NewState = u8"open";
       init.Source = ShareRefPtr(&button);
-      auto event = CreateRef<ToggleEvent>(DOMStringAtom(u8"toggle"), init);
+      auto event = CreateRef<ToggleEvent>(u8"toggle", init);
       CHECK_FALSE(event->IsTrusted());
       CHECK(Narrow(event->OldState()) == "closed");
       CHECK(Narrow(event->NewState()) == "open");
       CHECK(event->Source() == &button);
       CHECK(Is<ToggleEvent>(*event));
 
-      auto trusted = ToggleEvent::Create(DOMStringAtom(u8"beforetoggle"), init, true);
+      auto trusted = ToggleEvent::Create(u8"beforetoggle", init, true);
       CHECK(trusted->IsTrusted());
       CHECK(trusted->Cancelable());
       CHECK_FALSE(trusted->Bubbles());
@@ -58,7 +58,7 @@ namespace krys::boo::dom::tests
       CommandEventInit init;
       init.Source = inner;
       init.Command = u8"--refresh";
-      auto event = CommandEvent::Create(DOMStringAtom(u8"command"), init, true);
+      auto event = CommandEvent::Create(u8"command", init, true);
       CHECK(event->IsTrusted());
       CHECK(Narrow(event->Command()) == "--refresh");
       CHECK(Is<CommandEvent>(*event));

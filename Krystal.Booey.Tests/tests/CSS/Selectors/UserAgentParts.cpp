@@ -16,6 +16,6 @@ namespace krys::boo::css::tests
   TEST_CASE("UserAgentParts(atoms)", "[CSS][Selectors][UserAgentParts]")
   {
     CHECK(&UserAgentParts::Placeholder() == &UserAgentParts::Placeholder());
-    CHECK(UserAgentParts::Placeholder() == CSSOMStringAtom(u8"placeholder"));
+    CHECK(UserAgentParts::Placeholder() == u8"placeholder");
   }
 }

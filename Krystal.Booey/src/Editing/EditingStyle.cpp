@@ -480,7 +480,7 @@ namespace krys::boo
   {
   public:
     HTMLFontSizeEquivalent() noexcept
-        : HTMLAttributeEquivalent(PropertyId::FontSize, html::TagName::font, dom::DOMStringAtom(u8"size"))
+        : HTMLAttributeEquivalent(PropertyId::FontSize, html::TagName::font, u8"size")
     {
     }
 
@@ -1274,13 +1274,12 @@ namespace krys::boo
         // ElementIsStyledSpanOrHTMLEquivalent depends on the fact each HTMLAttributeEquivalent matches
         // exactly
         // one attribute of exactly one element except dir.
-        new HTMLAttributeEquivalent(PropertyId::Color, html::TagName::font, dom::DOMStringAtom(u8"color")),
-        new HTMLAttributeEquivalent(PropertyId::FontFamily, html::TagName::font,
-                                    dom::DOMStringAtom(u8"face")),
+        new HTMLAttributeEquivalent(PropertyId::Color, html::TagName::font, u8"color"),
+        new HTMLAttributeEquivalent(PropertyId::FontFamily, html::TagName::font, u8"face"),
         new HTMLFontSizeEquivalent,
 
-        new HTMLAttributeEquivalent(PropertyId::Direction, dom::DOMStringAtom(u8"dir")),
-        new HTMLAttributeEquivalent(PropertyId::UnicodeBidi, dom::DOMStringAtom(u8"dir")),
+        new HTMLAttributeEquivalent(PropertyId::Direction, u8"dir"),
+        new HTMLAttributeEquivalent(PropertyId::UnicodeBidi, u8"dir"),
       };
       return equivalents;
     }
@@ -1440,7 +1439,7 @@ namespace krys::boo
       return false; // element is not a span, a html element equivalent, or font element.
     }
 
-    if (element.HasAttribute(dom::DOMStringAtom(u8"style")))
+    if (element.HasAttribute(u8"style"))
     {
       if (auto *styledElement = DynamicDowncast<dom::StyledElement>(element))
       {

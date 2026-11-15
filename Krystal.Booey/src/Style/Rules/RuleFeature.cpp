@@ -738,7 +738,7 @@ namespace krys::boo::style
 
   void RuleFeatureSet::RegisterContentAttribute(const css::CSSOMStringAtom &attributeName) noexcept
   {
-    ContentAttributeNamesInRules.insert(css::CSSOMStringAtom(text::ToASCIILower(attributeName.View())));
+    ContentAttributeNamesInRules.insert(attributeName.ToASCIILower());
     AttributeLowercaseLocalNamesInRules.insert(attributeName);
     AttributeLocalNamesInRules.insert(attributeName);
   }

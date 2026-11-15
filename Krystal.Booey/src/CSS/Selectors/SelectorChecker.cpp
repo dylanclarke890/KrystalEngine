@@ -1509,7 +1509,7 @@ namespace krys::boo::css
         {
           if (Is<html::HTMLDetailsElement>(element) || Is<html::HTMLDialogElement>(element))
           {
-            return element.HasAttribute(dom::DOMStringAtom(u8"open"));
+            return element.HasAttribute(u8"open");
           }
           if (auto *select = DynamicDowncast<html::HTMLSelectElement>(element))
           {

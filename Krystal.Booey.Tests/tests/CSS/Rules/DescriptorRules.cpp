@@ -10,10 +10,10 @@ namespace krys::boo::css::tests
 {
   TEST_CASE_METHOD(ValueFixture, "PositionTryRule", "[CSS][Rules][PositionTryRule]")
   {
-    auto rule = PositionTryRule::Create(CSSOMStringAtom(u8"--flip"), ImmutableDeclarations(u8"top: 1px"));
+    auto rule = PositionTryRule::Create(u8"--flip", ImmutableDeclarations(u8"top: 1px"));
     CHECK(rule->Type() == RuleType::PositionTry);
     CHECK(rule->IsPositionTryRule());
-    CHECK(rule->Name() == CSSOMStringAtom(u8"--flip"));
+    CHECK(rule->Name() == u8"--flip");
     CHECK(AsText(rule->Properties()) == "top: 1px;");
     CHECK(rule->ProtectedProperties().get() == &rule->Properties());
     CHECK_FALSE(rule->Properties().IsMutable());
@@ -37,14 +37,14 @@ namespace krys::boo::css::tests
 
     List<FunctionRule::Parameter> parameters;
     parameters.push_back({CSSOMStringAtom(u8"--a"), CustomPropertySyntax::Universal(), nullptr});
-    auto rule = FunctionRule::Create(CSSOMStringAtom(u8"--f"), krys::move(parameters),
-                                     CustomPropertySyntax::Universal(), {body});
+    auto rule =
+      FunctionRule::Create(u8"--f", krys::move(parameters), CustomPropertySyntax::Universal(), {body});
     CHECK(rule->Type() == RuleType::Function);
     CHECK(rule->IsGroupRule());
     CHECK(Is<FunctionRule>(static_cast<Rule &>(*rule)));
-    CHECK(rule->Name() == CSSOMStringAtom(u8"--f"));
+    CHECK(rule->Name() == u8"--f");
     REQUIRE(rule->Parameters().size() == 1);
-    CHECK(rule->Parameters()[0].Name == CSSOMStringAtom(u8"--a"));
+    CHECK(rule->Parameters()[0].Name == u8"--a");
     CHECK(rule->ReturnType().IsUniversal());
 
     auto copy = rule->Copy();

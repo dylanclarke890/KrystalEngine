@@ -71,8 +71,7 @@ namespace krys::boo::tests
     auto circle = document.GetElementById(u8"c");
     REQUIRE(circle);
     CHECK(IsSVG<svg::SVGCircleElement>(*circle));
-    CHECK(circle->GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), dom::DOMStringAtom(u8"title"))
-          == u8"dot");
+    CHECK(circle->GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"title") == u8"dot");
 
     auto *desc = circle->NextSibling();
     REQUIRE(desc);

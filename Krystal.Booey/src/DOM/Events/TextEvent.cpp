@@ -43,7 +43,7 @@ namespace krys::boo::dom
     }
   }
 
-  TextEvent::TextEvent() noexcept : UIEvent(DOMStringAtom(u8""))
+  TextEvent::TextEvent() noexcept : UIEvent(u8"")
   {
   }
 

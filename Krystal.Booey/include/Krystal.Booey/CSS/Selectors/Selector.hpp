@@ -589,8 +589,7 @@ namespace krys::boo::css
   inline void Selector::SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase) noexcept
   {
     krys_debug_assert(Match() != SelectorMatch::Type);
-    auto matchingValue =
-      matchLowercase == MatchLowercase::Yes ? CSSOMStringAtom(text::ToASCIILower(value.View())) : value;
+    auto matchingValue = matchLowercase == MatchLowercase::Yes ? value.ToASCIILower() : value;
     if (!HasRareData() && matchingValue != value)
     {
       CreateRareData();

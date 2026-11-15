@@ -109,8 +109,8 @@ namespace krys::boo::style::tests
     {
       REQUIRE(UserAgentStyle::DefaultStyle->RuleCount() > 100u);
       REQUIRE(UserAgentStyle::DefaultQuirksStyle->RuleCount() > 0u);
-      REQUIRE(UserAgentStyle::DefaultStyle->TagRules(css::CSSOMStringAtom(u8"div"), true));
-      REQUIRE(UserAgentStyle::DefaultQuirksStyle->TagRules(css::CSSOMStringAtom(u8"table"), true));
+      REQUIRE(UserAgentStyle::DefaultStyle->TagRules(u8"div", true));
+      REQUIRE(UserAgentStyle::DefaultQuirksStyle->TagRules(u8"table", true));
       // The user agent sheets don't use IDs.
       REQUIRE(UserAgentStyle::DefaultStyle->Features().IdsInRules.empty());
     }
@@ -188,11 +188,9 @@ namespace krys::boo::style::tests
     // Only in HTML documents: an XML document's tables can hold forms.
     auto document = CreateRef<dom::XMLDocument>();
     auto table =
-      document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom(u8"table"))
-        .ReleaseValue();
+      document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), u8"table").ReleaseValue();
     auto form =
-      document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom(u8"form"))
-        .ReleaseValue();
+      document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), u8"form").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*table).HasException());
     REQUIRE_FALSE(table->AppendChild(*form).HasException());
     auto &resolver = document->StyleScope().GetResolver();

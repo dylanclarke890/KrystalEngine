@@ -45,17 +45,17 @@ namespace krys::boo::tests
       CHECK_FALSE(font->PlatformData().SyntheticBold());
       CHECK_FALSE(font->PlatformData().SyntheticOblique());
       // Families match case-insensitively, and the same font is returned for the same description.
-      CHECK(cache.FontForFamily(description, StringAtom {u8"ahem"}) == font);
+      CHECK(cache.FontForFamily(description, u8"ahem") == font);
       CHECK(cache.FontForPlatformData(font->PlatformData()).get() == font.get());
     }
 
     SECTION("An unknown family")
     {
-      CHECK_FALSE(cache.FontForFamily(description, StringAtom {u8"No Such Family"}));
+      CHECK_FALSE(cache.FontForFamily(description, u8"No Such Family"));
       // Aliases only find what's registered.
-      CHECK_FALSE(cache.FontForFamily(description, StringAtom {u8"Arial"}));
+      CHECK_FALSE(cache.FontForFamily(description, u8"Arial"));
       // Generic families aren't families: the font selector resolves them.
-      CHECK_FALSE(cache.FontForFamily(description, StringAtom {u8"sans-serif"}));
+      CHECK_FALSE(cache.FontForFamily(description, u8"sans-serif"));
     }
 
     SECTION("Synthesis")
@@ -118,7 +118,7 @@ namespace krys::boo::tests
     {
       auto families = cache.SystemFontFamilies();
       CHECK(std::ranges::find(families, u8"Ahem") != families.end());
-      CHECK(cache.UseBackslashAsYenSignForFamily(StringAtom {u8"MS Gothic"}));
+      CHECK(cache.UseBackslashAsYenSignForFamily(u8"MS Gothic"));
       CHECK_FALSE(cache.UseBackslashAsYenSignForFamily(Ahem));
     }
   }

@@ -181,7 +181,7 @@ namespace krys::boo::svg
         && GetAttributeNS(XLinkNames::ShowAttr().NamespaceURI(), XLinkNames::ShowAttr().LocalName())
              == u8"new")
     {
-      target = dom::DOMStringAtom(u8"_blank");
+      target = u8"_blank";
     }
     event.SetDefaultHandled();
 

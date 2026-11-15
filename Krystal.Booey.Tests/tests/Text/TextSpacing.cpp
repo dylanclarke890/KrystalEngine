@@ -83,7 +83,7 @@ namespace krys::boo::tests
 
   TEST_CASE("Hyphenation", "[Core][Hyphenation]")
   {
-    CHECK_FALSE(CanHyphenate(StringAtom {u8"en"}));
+    CHECK_FALSE(CanHyphenate(u8"en"));
     CHECK(EnoughWidthForHyphenation(21, 16));
     CHECK_FALSE(EnoughWidthForHyphenation(20, 16));
   }

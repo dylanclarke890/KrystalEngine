@@ -373,8 +373,8 @@ namespace krys::boo::tests
 
       CHECK_FALSE(animation.Effect());
       CHECK_FALSE(noTimeline->Effect());
-      (void)animation.DispatchEvent(*dom::Event::Create(dom::DOMStringAtom(u8"custom"), false, false));
-      (void)noTimeline->DispatchEvent(*dom::Event::Create(dom::DOMStringAtom(u8"custom"), false, false));
+      (void)animation.DispatchEvent(*dom::Event::Create(u8"custom", false, false));
+      (void)noTimeline->DispatchEvent(*dom::Event::Create(u8"custom", false, false));
       CHECK(fired == 0);
     }
   }

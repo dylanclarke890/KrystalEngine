@@ -25,17 +25,13 @@ namespace krys::boo::svg::tests
                    "[SVG][PresentationalHints]")
   {
     using css::PropertyId;
-    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom(u8"fill"), null)
-          == PropertyId::Fill);
-    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom(u8"font-stretch"), null)
-          == PropertyId::FontWidth);
-    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom(u8"transform-origin"), null)
+    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"fill", null) == PropertyId::Fill);
+    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"font-stretch", null) == PropertyId::FontWidth);
+    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"transform-origin", null)
           == PropertyId::TransformOrigin);
-    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom(u8"d"), null) == PropertyId::D);
-    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom(u8"href"), null)
-          == PropertyId::Invalid);
-    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom(u8"fill"),
-                                                       dom::DOMStringAtom(infra::Namespaces::XLink))
+    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"d", null) == PropertyId::D);
+    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"href", null) == PropertyId::Invalid);
+    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"fill", dom::DOMStringAtom(infra::Namespaces::XLink))
           == PropertyId::Invalid);
 
     auto document =

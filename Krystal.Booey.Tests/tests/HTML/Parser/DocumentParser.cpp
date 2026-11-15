@@ -272,14 +272,15 @@ namespace krys::boo::html::tests
           auto space = context.find(u8' ');
           auto namespaceURI =
             context.starts_with(u8"svg ") ? infra::Namespaces::SVG : infra::Namespaces::MathML;
-          element =
-            document->CreateElementNS(namespaceURI, dom::DOMString(context.substr(space + 1))).ReleaseValue();
+          element = document->CreateElementNS(namespaceURI, dom::DOMStringAtom(context.substr(space + 1)))
+                      .ReleaseValue();
         }
         else
         {
           TagName fragmentTagName = ParseTagName(*test.FragmentContext);
-          dom::QualifiedName qName = dom::QualifiedName {
-            infra::Namespaces::HTML, null, test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
+          dom::QualifiedName qName = dom::QualifiedName {infra::Namespaces::HTML, null,
+                                                         dom::DOMStringAtom(test.FragmentContext.value()),
+                                                         fragmentTagName, Namespace::HTML};
           element = dom::ElementFactory::Create(*document, qName, null);
         }
         auto result = DocumentParser::ParseFragment(*element, test.Input, false,
@@ -345,14 +346,14 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    Ref<dom::Element> CreateElement(dom::Document &document, const dom::DOMString &tagName)
+    Ref<dom::Element> CreateElement(dom::Document &document, dom::DOMStringAtom tagName)
     {
       auto element = document.CreateElement(tagName);
       REQUIRE(element.HasValue());
       return *element;
     }
 
-    Ref<svg::SVGElement> CreateSVGElement(dom::Document &document, const dom::DOMString &tagName) noexcept
+    Ref<svg::SVGElement> CreateSVGElement(dom::Document &document, dom::DOMStringAtom tagName) noexcept
     {
       auto element = document.CreateElementNS(infra::Namespaces::SVG, tagName);
       REQUIRE(element.HasValue());

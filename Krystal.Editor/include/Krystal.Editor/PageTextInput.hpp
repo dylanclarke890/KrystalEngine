@@ -47,7 +47,7 @@ namespace krys::editor
       }
       if (RefPtr<boo::dom::EventTarget> clear = document.GetElementById(u8"ime-clear"))
       {
-        _listeners.push_back(clear->AddEventListener(boo::dom::DOMStringAtom(u8"click"),
+        _listeners.push_back(clear->AddEventListener(u8"click",
                                                      [this](boo::dom::Event &)
                                                      {
                                                        _lines.clear();

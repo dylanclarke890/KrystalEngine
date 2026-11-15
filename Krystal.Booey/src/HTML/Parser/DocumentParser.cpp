@@ -181,7 +181,7 @@ namespace krys::boo::html
       ParsedAttribute attribute {};
       attribute.Name.assign(attrName.begin(), attrName.end());
 
-      auto attrValue = context.GetAttribute(attrName);
+      auto attrValue = context.GetAttribute(dom::DOMStringAtom(attrName));
       if (attrValue.has_value())
       {
         attribute.Value.assign(attrValue->begin(), attrValue->end());

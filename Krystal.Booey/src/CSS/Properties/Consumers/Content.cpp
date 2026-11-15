@@ -126,7 +126,7 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       return nullptr;
     }
-    CSSOMStringAtom separator = args.Consume().IdentCodePoints();
+    CSSOMStringAtom separator {args.Consume().IdentCodePoints()};
     args.DiscardWhitespace();
 
     RefPtr<Value> counterStyle;

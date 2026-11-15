@@ -34,7 +34,7 @@ namespace krys::boo::ax::tests
 
       SECTION("Removing aria-modal ends it")
       {
-        page.ById(u8"dialog").RemoveAttribute(dom::DOMStringAtom(u8"aria-modal"));
+        page.ById(u8"dialog").RemoveAttribute(u8"aria-modal");
         (void)page.TakeNotifications();
         CHECK(page.Cache().ModalNode() == nullptr);
         CHECK_FALSE(outside.IsIgnored());

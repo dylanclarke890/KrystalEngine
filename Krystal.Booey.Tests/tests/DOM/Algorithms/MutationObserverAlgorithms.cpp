@@ -44,7 +44,7 @@ namespace krys::boo::dom::tests
       }
     };
 
-    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringView name) noexcept
+    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringAtom name) noexcept
     {
       return document.CreateElement(DOMStringAtom(name)).ReleaseValue();
     }
@@ -140,7 +140,7 @@ namespace krys::boo::dom::tests
       }
     };
     auto counter = CreateRef<Counter>();
-    slot->AddEventListener(DOMStringAtom(u8"slotchange"), counter, false);
+    slot->AddEventListener(u8"slotchange", counter, false);
 
     // A slottable joining the slot signals a slot change, which fires at the next notification.
     REQUIRE_FALSE(host->AppendChild(*NewElement(*document, u8"span")).HasException());

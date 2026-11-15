@@ -22,7 +22,7 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringView localName)
+    KRYS_NODISCARD Ref<Element> NewElement(Document &document, dom::DOMStringAtom localName)
     {
       auto element = document.CreateElement(localName);
       REQUIRE_FALSE(element.HasException());
@@ -390,10 +390,10 @@ namespace krys::boo::dom::tests
     {
       EventTarget *relatedTarget = nullptr;
       auto listener = fixture.Child->AddEventListener<FocusEvent>(
-        DOMStringAtom(u8"focus"), [&](FocusEvent &e) { relatedTarget = e.RelatedTarget().get(); });
+        u8"focus", [&](FocusEvent &e) { relatedTarget = e.RelatedTarget().get(); });
       FocusEventInit attributes;
       attributes.RelatedTarget = fixture.Parent;
-      REQUIRE(EventDispatcher::FireEvent<FocusEvent>(DOMStringAtom(u8"focus"), *fixture.Child, attributes));
+      REQUIRE(EventDispatcher::FireEvent<FocusEvent>(u8"focus", *fixture.Child, attributes));
       REQUIRE(relatedTarget == fixture.Parent.get());
     }
 

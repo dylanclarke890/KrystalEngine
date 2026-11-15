@@ -492,7 +492,7 @@ namespace krys::boo::html::tests
       CHECK(events->Joined() == "click change");
 
       events->PreventDefault = true;
-      b.AddEventListener(dom::DOMStringAtom(u8"click"), events, false);
+      b.AddEventListener(u8"click", events, false);
       b.Click();
       CHECK(a.Checked());
       CHECK_FALSE(b.Checked());

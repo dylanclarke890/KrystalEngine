@@ -157,7 +157,7 @@ namespace krys::boo::dom::tests
                                                        { mouse += event.Button() + 1; });
     (void)Target->DispatchEvent(*Event::Create(u8"click", false, false));
     CHECK(mouse == 0);
-    (void)Target->DispatchEvent(*CreateRef<MouseEvent>(DOMStringAtom(u8"click")));
+    (void)Target->DispatchEvent(*CreateRef<MouseEvent>(u8"click"));
     CHECK(mouse == 1);
   }
 }

@@ -89,9 +89,9 @@ namespace krys::boo::dom
       ClearNodeFlag(NodeFlags::StyleAttributeIsDirty);
       auto newValue = inlineStyle->AsText(css::DefaultSerialisationContext());
       auto oldValue = GetAttribute(u8"style");
-      style::AttributeChangeInvalidation styleInvalidation(
-        *this, QualifiedName {null, null, DOMStringAtom(u8"style")},
-        oldValue ? Maybe<DOMStringView>(*oldValue) : null, newValue);
+      style::AttributeChangeInvalidation styleInvalidation(*this, QualifiedName {null, null, u8"style"},
+                                                           oldValue ? Maybe<DOMStringView>(*oldValue) : null,
+                                                           newValue);
       SetSynchronizedLazyAttribute(u8"style", krys::move(newValue));
     }
   }

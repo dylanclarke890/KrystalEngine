@@ -276,7 +276,7 @@ namespace krys::boo::html::tests
       listener->Target = &element;
       listener->Calls = &Calls;
       element.AddEventListener(u8"custom", listener, false);
-      auto event = CreateRef<dom::Event>(dom::DOMStringAtom(u8"custom"));
+      auto event = CreateRef<dom::Event>(u8"custom");
       (void)element.DispatchEvent(*event);
       CHECK(TakeCalls() == Log {u8"attribute value null from-listener", u8"returned"});
     }

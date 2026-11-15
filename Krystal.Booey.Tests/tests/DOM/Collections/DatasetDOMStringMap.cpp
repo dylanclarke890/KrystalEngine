@@ -29,7 +29,7 @@ namespace krys::boo::dom::tests
                                    "[html:concept-domstringmap-pairs]")
   {
     auto document = CreateRef<HTMLDocument>();
-    auto element = document->CreateElement(DOMStringAtom(u8"div")).ReleaseValue();
+    auto element = document->CreateElement(u8"div").ReleaseValue();
     auto &dataset = element->Dataset();
 
     SECTION("is the same object each time")
@@ -40,27 +40,27 @@ namespace krys::boo::dom::tests
 
     SECTION("names the data attributes as properties, in attribute order")
     {
-      (void)element->SetAttribute(DOMStringAtom(u8"data-foo-bar"), u8"1");
-      (void)element->SetAttribute(DOMStringAtom(u8"title"), u8"2");
-      (void)element->SetAttribute(DOMStringAtom(u8"data-x"), u8"3");
-      (void)element->SetAttribute(DOMStringAtom(u8"data-"), u8"4");
-      (void)element->SetAttribute(DOMStringAtom(u8"data--a"), u8"5");
-      (void)element->SetAttribute(DOMStringAtom(u8"data-a-1"), u8"6");
-      (void)element->SetAttribute(DOMStringAtom(u8"datax"), u8"7");
+      (void)element->SetAttribute(u8"data-foo-bar", u8"1");
+      (void)element->SetAttribute(u8"title", u8"2");
+      (void)element->SetAttribute(u8"data-x", u8"3");
+      (void)element->SetAttribute(u8"data-", u8"4");
+      (void)element->SetAttribute(u8"data--a", u8"5");
+      (void)element->SetAttribute(u8"data-a-1", u8"6");
+      (void)element->SetAttribute(u8"datax", u8"7");
       CHECK(DatasetNames(dataset) == List<std::string> {"fooBar", "x", "", "A", "a-1"});
     }
 
     SECTION("skips data attributes with uppercase letters")
     {
       // Only an attribute set with a namespace keeps its case in an HTML document.
-      (void)element->SetAttributeNS(null, DOMStringAtom(u8"data-Upper"), u8"1");
+      (void)element->SetAttributeNS(null, u8"data-Upper", u8"1");
       CHECK(DatasetNames(dataset).empty());
       CHECK_FALSE(dataset.IsSupportedPropertyName(u8"Upper"));
     }
 
     SECTION("gets a data attribute's value by its property name")
     {
-      (void)element->SetAttribute(DOMStringAtom(u8"data-foo-bar"), u8"value");
+      (void)element->SetAttribute(u8"data-foo-bar", u8"value");
       CHECK(dataset.IsSupportedPropertyName(u8"fooBar"));
       REQUIRE(dataset.NamedItem(u8"fooBar"));
       CHECK(DatasetText(*dataset.NamedItem(u8"fooBar")) == "value");
@@ -73,7 +73,7 @@ namespace krys::boo::dom::tests
 
     SECTION("only data attributes have property names")
     {
-      (void)element->SetAttribute(DOMStringAtom(u8"abcdefoo"), u8"1");
+      (void)element->SetAttribute(u8"abcdefoo", u8"1");
       CHECK_FALSE(dataset.IsSupportedPropertyName(u8"foo"));
       CHECK_FALSE(dataset.NamedItem(u8"foo"));
       CHECK_FALSE(dataset.NamedItem(u8""));
@@ -105,8 +105,8 @@ namespace krys::boo::dom::tests
 
     SECTION("deletes the data attribute for a property name")
     {
-      (void)element->SetAttribute(DOMStringAtom(u8"data-foo-bar"), u8"1");
-      (void)element->SetAttribute(DOMStringAtom(u8"data-other"), u8"2");
+      (void)element->SetAttribute(u8"data-foo-bar", u8"1");
+      (void)element->SetAttribute(u8"data-other", u8"2");
       dataset.DeleteNamedProperty(u8"fooBar");
       CHECK_FALSE(element->HasAttribute(u8"data-foo-bar"));
       CHECK(element->HasAttribute(u8"data-other"));
@@ -116,8 +116,7 @@ namespace krys::boo::dom::tests
 
     SECTION("works on SVG elements")
     {
-      auto svg = document->CreateElementNS(DOMStringAtom(infra::Namespaces::SVG), DOMStringAtom(u8"svg"))
-                   .ReleaseValue();
+      auto svg = document->CreateElementNS(DOMStringAtom(infra::Namespaces::SVG), u8"svg").ReleaseValue();
       REQUIRE_FALSE(svg->Dataset().SetNamedItem(u8"shape", u8"round").HasException());
       CHECK(svg->GetAttribute(u8"data-shape") == u8"round");
     }

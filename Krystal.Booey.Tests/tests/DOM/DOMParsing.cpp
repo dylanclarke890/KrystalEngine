@@ -35,11 +35,11 @@ namespace krys::boo::dom::tests
 
       MarkupDocument() noexcept
       {
-        auto html = Document->CreateElement(DOMStringAtom(u8"html")).ReleaseValue();
+        auto html = Document->CreateElement(u8"html").ReleaseValue();
         (void)Document->AppendChild(*html);
-        Body = Document->CreateElement(DOMStringAtom(u8"body")).ReleaseValue();
+        Body = Document->CreateElement(u8"body").ReleaseValue();
         (void)html->AppendChild(*Body);
-        Div = Document->CreateElement(DOMStringAtom(u8"div")).ReleaseValue();
+        Div = Document->CreateElement(u8"div").ReleaseValue();
         (void)Body->AppendChild(*Div);
       }
     };
@@ -54,8 +54,8 @@ namespace krys::boo::dom::tests
     SECTION("serialises the children, escaping text and attribute values")
     {
       REQUIRE_FALSE(div.AppendChild(*data.Document->CreateTextNode(u8"a < b & c")).HasException());
-      auto span = data.Document->CreateElement(DOMStringAtom(u8"span")).ReleaseValue();
-      (void)span->SetAttribute(DOMStringAtom(u8"title"), u8"\"q\" & more");
+      auto span = data.Document->CreateElement(u8"span").ReleaseValue();
+      (void)span->SetAttribute(u8"title", u8"\"q\" & more");
       REQUIRE_FALSE(div.AppendChild(*span).HasException());
       CHECK(MarkupText(div.InnerHTML().ReleaseValue())
             == "a &lt; b &amp; c<span title=\"&quot;q&quot; &amp; more\"></span>");
@@ -79,11 +79,11 @@ namespace krys::boo::dom::tests
 
     SECTION("parses in the element's context")
     {
-      auto table = data.Document->CreateElement(DOMStringAtom(u8"table")).ReleaseValue();
+      auto table = data.Document->CreateElement(u8"table").ReleaseValue();
       REQUIRE_FALSE(table->InnerHTML(u8"<tr><td>1</td></tr>").HasException());
       CHECK(MarkupText(table->InnerHTML().ReleaseValue()) == "<tbody><tr><td>1</td></tr></tbody>");
 
-      auto textarea = data.Document->CreateElement(DOMStringAtom(u8"textarea")).ReleaseValue();
+      auto textarea = data.Document->CreateElement(u8"textarea").ReleaseValue();
       REQUIRE_FALSE(textarea->InnerHTML(u8"<b>not bold</b>").HasException());
       REQUIRE(textarea->FirstChild());
       CHECK(Is<Text>(*textarea->FirstChild()));
@@ -104,7 +104,7 @@ namespace krys::boo::dom::tests
 
     SECTION("goes into a template's content")
     {
-      auto templateElement = data.Document->CreateElement(DOMStringAtom(u8"template")).ReleaseValue();
+      auto templateElement = data.Document->CreateElement(u8"template").ReleaseValue();
       REQUIRE_FALSE(templateElement->InnerHTML(u8"<span>in</span>").HasException());
       CHECK_FALSE(templateElement->HasChildNodes());
       auto content = Downcast<html::HTMLTemplateElement>(*templateElement).Content();
@@ -140,8 +140,7 @@ namespace krys::boo::dom::tests
             "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
   {
     auto document = CreateRef<XMLDocument>();
-    auto root = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"div"))
-                  .ReleaseValue();
+    auto root = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"div").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*root).HasException());
 
     CHECK_FALSE(root->InnerHTML(u8"<p>well formed</p>").HasException());
@@ -160,14 +159,11 @@ namespace krys::boo::dom::tests
             "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
   {
     auto document = CreateRef<XMLDocument>();
-    auto root =
-      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
+    auto root = document->CreateElementNS(u8"urn:root", u8"root").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*root).HasException());
-    REQUIRE_FALSE(
-      root->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns:p"), u8"urn:outer")
-        .HasException());
-    auto context =
-      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"context")).ReleaseValue();
+    REQUIRE_FALSE(root->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), u8"xmlns:p", u8"urn:outer")
+                    .HasException());
+    auto context = document->CreateElementNS(u8"urn:root", u8"context").ReleaseValue();
     REQUIRE_FALSE(root->AppendChild(*context).HasException());
 
     SECTION("the default namespace and an ancestor's prefix")
@@ -184,8 +180,7 @@ namespace krys::boo::dom::tests
     SECTION("a prefix declared nearer the context wins")
     {
       REQUIRE_FALSE(
-        context
-          ->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns:p"), u8"urn:inner")
+        context->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), u8"xmlns:p", u8"urn:inner")
           .HasException());
       REQUIRE_FALSE(context->InnerHTML(u8"<p:b/>").HasException());
       auto b = context->FirstElementChild();
@@ -199,13 +194,12 @@ namespace krys::boo::dom::tests
     "[DOM][Element][DOMParsing][html:xml-fragment-serialisation-algorithm][html:relevant-child-nodes]")
   {
     auto document = CreateRef<XMLDocument>();
-    auto root =
-      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
+    auto root = document->CreateElementNS(u8"urn:root", u8"root").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*root).HasException());
 
     SECTION("declares the empty default namespace for elements in no namespace")
     {
-      auto child = document->CreateElementNS(null, DOMStringAtom(u8"c")).ReleaseValue();
+      auto child = document->CreateElementNS(null, u8"c").ReleaseValue();
       REQUIRE_FALSE(root->AppendChild(*child).HasException());
       CHECK(MarkupText(root->InnerHTML().ReleaseValue()) == "<c xmlns=\"\"/>");
     }
@@ -213,8 +207,7 @@ namespace krys::boo::dom::tests
     SECTION("serialises a template's contents")
     {
       auto templateElement =
-        document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"template"))
-          .ReleaseValue();
+        document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"template").ReleaseValue();
       REQUIRE_FALSE(root->AppendChild(*templateElement).HasException());
       REQUIRE_FALSE(templateElement->InnerHTML(u8"<b/>").HasException());
       CHECK(templateElement->FirstChild() == nullptr);
@@ -228,8 +221,7 @@ namespace krys::boo::dom::tests
             "algorithm-steps][html:dom-element-innerhtml][html:dom-element-outerhtml]")
   {
     auto document = CreateRef<XMLDocument>();
-    auto root =
-      document->CreateElementNS(DOMStringAtom(u8"urn:root"), DOMStringAtom(u8"root")).ReleaseValue();
+    auto root = document->CreateElementNS(u8"urn:root", u8"root").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*root).HasException());
 
     auto throwsInvalidState = [&]
@@ -286,23 +278,23 @@ namespace krys::boo::dom::tests
       append(*document->CreateTextNode(u8"\uFFFF"));
       CHECK(throwsInvalidState());
       REQUIRE_FALSE(root->RemoveChild(*root->FirstChild()).HasException());
-      auto child = document->CreateElement(DOMStringAtom(u8"c")).ReleaseValue();
+      auto child = document->CreateElement(u8"c").ReleaseValue();
       append(*child);
-      REQUIRE_FALSE(child->SetAttribute(DOMStringAtom(u8"a"), u8"\u001F").HasException());
+      REQUIRE_FALSE(child->SetAttribute(u8"a", u8"\u001F").HasException());
       CHECK(throwsInvalidState());
     }
 
     SECTION("an element whose local name has a colon")
     {
-      append(*document->CreateElement(DOMStringAtom(u8"a:b")).ReleaseValue());
+      append(*document->CreateElement(u8"a:b").ReleaseValue());
       CHECK(throwsInvalidState());
     }
 
     SECTION("an attribute in no namespace named xmlns")
     {
-      auto child = document->CreateElement(DOMStringAtom(u8"c")).ReleaseValue();
+      auto child = document->CreateElement(u8"c").ReleaseValue();
       append(*child);
-      REQUIRE_FALSE(child->SetAttribute(DOMStringAtom(u8"xmlns"), u8"urn:other").HasException());
+      REQUIRE_FALSE(child->SetAttribute(u8"xmlns", u8"urn:other").HasException());
       CHECK(throwsInvalidState());
     }
 
@@ -318,8 +310,7 @@ namespace krys::boo::dom::tests
             "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
   {
     auto document = CreateRef<XMLDocument>();
-    auto root = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"div"))
-                  .ReleaseValue();
+    auto root = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"div").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*root).HasException());
 
     for (auto name : {u8"script", u8"style"})
@@ -387,7 +378,7 @@ namespace krys::boo::dom::tests
     SECTION("escapes text and attribute values")
     {
       auto span = make(u8"span");
-      REQUIRE_FALSE(span->SetAttribute(DOMStringAtom(u8"title"), u8"&\u00A0\"<>").HasException());
+      REQUIRE_FALSE(span->SetAttribute(u8"title", u8"&\u00A0\"<>").HasException());
       REQUIRE_FALSE(span->AppendChild(*document.CreateTextNode(u8"&\u00A0\"<>")).HasException());
       REQUIRE_FALSE(div.AppendChild(*span).HasException());
       CHECK(MarkupText(div.InnerHTML().ReleaseValue())
@@ -412,19 +403,14 @@ namespace krys::boo::dom::tests
     {
       auto span = make(u8"span");
       REQUIRE_FALSE(
-        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XML), DOMStringAtom(u8"a:lang"), u8"1")
-          .HasException());
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XML), u8"a:lang", u8"1").HasException());
       REQUIRE_FALSE(
-        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XLink), DOMStringAtom(u8"b:href"), u8"2")
-          .HasException());
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XLink), u8"b:href", u8"2").HasException());
       REQUIRE_FALSE(
-        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns"), u8"3")
-          .HasException());
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), u8"xmlns", u8"3").HasException());
       REQUIRE_FALSE(
-        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), DOMStringAtom(u8"xmlns:c"), u8"4")
-          .HasException());
-      REQUIRE_FALSE(
-        span->SetAttributeNS(DOMStringAtom(u8"urn:x"), DOMStringAtom(u8"d:e"), u8"5").HasException());
+        span->SetAttributeNS(DOMStringAtom(infra::Namespaces::XMLNS), u8"xmlns:c", u8"4").HasException());
+      REQUIRE_FALSE(span->SetAttributeNS(u8"urn:x", u8"d:e", u8"5").HasException());
       CHECK(MarkupText(span->OuterHTML().ReleaseValue())
             == "<span xml:lang=\"1\" xlink:href=\"2\" xmlns=\"3\" xmlns:c=\"4\" d:e=\"5\"></span>");
     }
@@ -442,12 +428,10 @@ namespace krys::boo::dom::tests
 
     SECTION("adds an is value that isn't in the attributes")
     {
-      auto withIs =
-        document.CreateElement(DOMStringAtom(u8"p"), ElementCreationOptions {.Is = DOMStringAtom(u8"x-a")})
-          .ReleaseValue();
+      auto withIs = document.CreateElement(u8"p", ElementCreationOptions {.Is = u8"x-a"}).ReleaseValue();
       CHECK(MarkupText(withIs->OuterHTML().ReleaseValue()) == "<p is=\"x-a\"></p>");
 
-      REQUIRE_FALSE(withIs->SetAttribute(DOMStringAtom(u8"is"), u8"x-b").HasException());
+      REQUIRE_FALSE(withIs->SetAttribute(u8"is", u8"x-b").HasException());
       CHECK(MarkupText(withIs->OuterHTML().ReleaseValue()) == "<p is=\"x-b\"></p>");
     }
 
@@ -487,7 +471,7 @@ namespace krys::boo::dom::tests
 
     SECTION("serialises the element")
     {
-      (void)div.SetAttribute(DOMStringAtom(u8"id"), u8"d");
+      (void)div.SetAttribute(u8"id", u8"d");
       REQUIRE_FALSE(div.InnerHTML(u8"<br>").HasException());
       CHECK(MarkupText(div.OuterHTML().ReleaseValue()) == "<div id=\"d\"><br></div>");
     }
@@ -511,7 +495,7 @@ namespace krys::boo::dom::tests
 
     SECTION("does nothing without a parent, and throws when the parent is the document")
     {
-      auto orphan = data.Document->CreateElement(DOMStringAtom(u8"span")).ReleaseValue();
+      auto orphan = data.Document->CreateElement(u8"span").ReleaseValue();
       CHECK_FALSE(orphan->OuterHTML(u8"<b></b>").HasException());
 
       auto result = data.Document->DocumentElement()->OuterHTML(u8"<html></html>");
@@ -522,7 +506,7 @@ namespace krys::boo::dom::tests
     SECTION("throws when the parent is a document fragment")
     {
       auto fragment = data.Document->CreateDocumentFragment();
-      auto span = data.Document->CreateElement(DOMStringAtom(u8"span")).ReleaseValue();
+      auto span = data.Document->CreateElement(u8"span").ReleaseValue();
       REQUIRE_FALSE(fragment->AppendChild(*span).HasException());
       auto result = span->OuterHTML(u8"<i></i>");
       REQUIRE(result.HasException());
@@ -551,7 +535,7 @@ namespace krys::boo::dom::tests
 
     SECTION("parses in the parent's context before and after the element")
     {
-      auto table = data.Document->CreateElement(DOMStringAtom(u8"table")).ReleaseValue();
+      auto table = data.Document->CreateElement(u8"table").ReleaseValue();
       REQUIRE_FALSE(div.AppendChild(*table).HasException());
       REQUIRE_FALSE(
         table->InsertAdjacentHTML(InsertAdjacentWhere::AfterBegin, u8"<td>1</td>").HasException());
@@ -580,7 +564,7 @@ namespace krys::boo::dom::tests
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::NoModificationAllowedError);
 
-      auto orphan = data.Document->CreateElement(DOMStringAtom(u8"span")).ReleaseValue();
+      auto orphan = data.Document->CreateElement(u8"span").ReleaseValue();
       result = orphan->InsertAdjacentHTML(InsertAdjacentWhere::BeforeBegin, u8"<p></p>");
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::NoModificationAllowedError);
@@ -590,8 +574,8 @@ namespace krys::boo::dom::tests
 
     SECTION("insertAdjacentElement returns null when there's nowhere to insert")
     {
-      auto orphan = data.Document->CreateElement(DOMStringAtom(u8"span")).ReleaseValue();
-      auto other = data.Document->CreateElement(DOMStringAtom(u8"b")).ReleaseValue();
+      auto orphan = data.Document->CreateElement(u8"span").ReleaseValue();
+      auto other = data.Document->CreateElement(u8"b").ReleaseValue();
       auto result = orphan->InsertAdjacentElement(InsertAdjacentWhere::AfterEnd, *other);
       REQUIRE_FALSE(result.HasException());
       CHECK(result.Value() == nullptr);

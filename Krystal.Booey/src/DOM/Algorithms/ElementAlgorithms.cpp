@@ -274,7 +274,7 @@ namespace krys::boo::dom
     //    qualifiedName to qualifiedName in ASCII lowercase.
     if (element.NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(element.NodeDocument()))
     {
-      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
+      qualifiedName = qualifiedName.ToASCIILower();
     }
 
     // 2. Return the first attribute in element's attribute list whose qualified name is qualifiedName;

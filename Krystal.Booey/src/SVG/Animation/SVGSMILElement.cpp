@@ -87,8 +87,7 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD const dom::QualifiedName &AnyQName() noexcept
     {
-      static const NeverDestroyed<dom::QualifiedName> anyName {
-        dom::DOMStringAtom(u8"*"), dom::DOMStringAtom(u8"*"), dom::DOMStringAtom(u8"*")};
+      static const NeverDestroyed<dom::QualifiedName> anyName {dom::DOMStringAtom(u8"*"), u8"*", u8"*"};
       return anyName;
     }
   }
@@ -513,7 +512,7 @@ namespace krys::boo::svg
       }
       // FIXME: By assigning an unsigned to a signed, this can turn large integers into negative numbers.
       repeats = static_cast<int32>(*parsedRepeat);
-      nameString = dom::DOMStringAtom(u8"repeat");
+      nameString = u8"repeat";
       type = Condition::EventBase;
     }
     else if (nameView == u8"begin" || nameView == u8"end")

@@ -41,7 +41,7 @@ namespace krys::boo::html::tests
       init.Bubbles = true;
       init.Cancelable = true;
       init.ShiftKey = shiftKey;
-      (void)target.DispatchEvent(*CreateRef<dom::MouseEvent>(dom::DOMStringAtom(u8"mousedown"), init));
+      (void)target.DispatchEvent(*CreateRef<dom::MouseEvent>(u8"mousedown", init));
     }
   }
 
@@ -103,7 +103,7 @@ namespace krys::boo::html::tests
       Click(fixture.ById(u8"dl"));
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK_FALSE(fixture.Navigations()[0].IsNewWindow);
-      CHECK(fixture.Navigations()[0].Action.DownloadAttribute() == dom::DOMStringAtom(u8"saved.zip"));
+      CHECK(fixture.Navigations()[0].Action.DownloadAttribute() == u8"saved.zip");
     }
 
     SECTION("the document's base target applies to links without one")
@@ -183,7 +183,7 @@ namespace krys::boo::html::tests
     init.Cancelable = true;
     init.KeyIdentifier = u8"Enter";
     init.ShiftKey = true;
-    (void)a.DispatchEvent(*CreateRef<dom::KeyboardEvent>(dom::DOMStringAtom(u8"keydown"), init));
+    (void)a.DispatchEvent(*CreateRef<dom::KeyboardEvent>(u8"keydown", init));
 
     REQUIRE(fixture.Navigations().size() == 1);
     auto &navigation = fixture.Navigations()[0];

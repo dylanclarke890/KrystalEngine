@@ -748,7 +748,7 @@ namespace krys::boo::dom
     // the element gets them when the window gets system focus (FocusAlgorithms::SystemFocusChanged).
     if (NodeDocument().IsFocusedAndActive())
     {
-      html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"focus"), *this, relatedTarget);
+      html::FocusAlgorithms::FireFocusEvent(u8"focus", *this, relatedTarget);
     }
   }
 
@@ -757,7 +757,7 @@ namespace krys::boo::dom
     // (See DispatchFocusEvent: the element had its blur when the window lost system focus.)
     if (NodeDocument().IsFocusedAndActive())
     {
-      html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"blur"), *this, relatedTarget);
+      html::FocusAlgorithms::FireFocusEvent(u8"blur", *this, relatedTarget);
     }
   }
 
@@ -2145,7 +2145,7 @@ namespace krys::boo::dom
     //    to qualifiedName in ASCII lowercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
+      qualifiedName = qualifiedName.ToASCIILower();
     }
 
     // 3. (Skipped: Trusted Types aren't supported, so value is used as it is.)
@@ -2223,7 +2223,7 @@ namespace krys::boo::dom
     //    to qualifiedName in ASCII lowercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
+      qualifiedName = qualifiedName.ToASCIILower();
     }
 
     // 3. Let attribute be the first attribute in this's attribute list whose qualified name is qualifiedName,
@@ -2267,7 +2267,7 @@ namespace krys::boo::dom
     //    to qualifiedName in ASCII lowercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
+      qualifiedName = qualifiedName.ToASCIILower();
     }
 
     // 2. Return true if this has an attribute whose qualified name is qualifiedName; otherwise false.

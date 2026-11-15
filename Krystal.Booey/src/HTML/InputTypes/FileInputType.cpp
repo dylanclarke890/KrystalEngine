@@ -191,7 +191,7 @@ namespace krys::boo::html
     Ref<HTMLInputElement> element = ShareRef(*Element());
     auto button =
       dom::ElementFactory::CreateHTMLElement<HTMLInputElement>(element->NodeDocument(), u8"input");
-    (void)button->SetAttribute(dom::DOMStringAtom(u8"type"), dom::DOMString(InputTypeNames::Button));
+    (void)button->SetAttribute(u8"type", dom::DOMString(InputTypeNames::Button));
     button->SetUserAgentPart(css::UserAgentParts::FileSelectorButton());
     (void)button->SetValue(element->Multiple() ? FileButtonChooseMultipleFilesLabel()
                                                : FileButtonChooseFileLabel());
@@ -214,7 +214,7 @@ namespace krys::boo::html
 
     if (auto button = FileSelectorButton(*Element()))
     {
-      (void)button->ToggleAttribute(dom::DOMStringAtom(u8"disabled"), Element()->IsDisabledFormControl());
+      (void)button->ToggleAttribute(u8"disabled", Element()->IsDisabledFormControl());
     }
   }
 

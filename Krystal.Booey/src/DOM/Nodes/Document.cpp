@@ -498,7 +498,7 @@ namespace krys::boo::dom
     // 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
     if (Is<HTMLDocument>(*this))
     {
-      localName = ::krys::text::ToASCIILower(localName.View());
+      localName = localName.ToASCIILower();
     }
 
     // 3. Let registry and is be the result of flattening element creation options given options and this.
@@ -659,7 +659,7 @@ namespace krys::boo::dom
     // 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
     if (Is<HTMLDocument>(*this))
     {
-      localName = krys::text::ToASCIILower(localName.View());
+      localName = localName.ToASCIILower();
     }
 
     // 3. Return the result of creating an attribute given this and localName.
@@ -758,7 +758,7 @@ namespace krys::boo::dom
     }
 
     // 6. Initialize event's type attribute to the empty string.
-    event->_type = DOMStringAtom(u8"");
+    event->_type = u8"";
     event->_bubbles = false;
     event->_cancellable = false;
     event->_composed = false;

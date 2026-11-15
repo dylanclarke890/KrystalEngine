@@ -1568,8 +1568,7 @@ namespace krys::boo::html
     if (IsPopoverShowing())
     {
       (void)HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, nullptr);
-      newPopoverState = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(
-        GetAttribute(dom::DOMStringAtom(u8"popover")));
+      newPopoverState = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(GetAttribute(u8"popover"));
     }
 
     if (newPopoverState == dom::PopoverState::None)

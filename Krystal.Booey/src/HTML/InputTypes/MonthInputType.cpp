@@ -46,7 +46,7 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto &element = *Element();
-    auto attribute = [&](dom::DOMStringView name)
+    auto attribute = [&](dom::DOMStringAtom name)
     {
       return element.GetAttribute(name).value_or(dom::DOMString());
     };

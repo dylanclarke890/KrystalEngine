@@ -251,11 +251,11 @@ namespace krys::boo::tests
       CHECK_FALSE(FontCascade::CanReceiveTextEmphasis(text::EthiopicWordspace));
 
       auto cascade = Ahem();
-      CHECK(cascade.EmphasisMarkHeight(StringAtom {u8""}) == 0);
+      CHECK(cascade.EmphasisMarkHeight(u8"") == 0);
       // Emphasis marks use a half size font.
-      CHECK(cascade.FloatEmphasisMarkHeight(StringAtom {u8"x"}) == Catch::Approx(8.f));
-      CHECK(cascade.EmphasisMarkAscent(StringAtom {u8"x"}) + cascade.EmphasisMarkDescent(StringAtom {u8"x"})
-            == cascade.EmphasisMarkHeight(StringAtom {u8"x"}));
+      CHECK(cascade.FloatEmphasisMarkHeight(u8"x") == Catch::Approx(8.f));
+      CHECK(cascade.EmphasisMarkAscent(u8"x") + cascade.EmphasisMarkDescent(u8"x")
+            == cascade.EmphasisMarkHeight(u8"x"));
     }
 
     SECTION("Simplified text measuring")

@@ -89,7 +89,7 @@ namespace krys::boo::html::tests
       input.Elements = List<SanitizerElementNamespaceWithAttributes> {
         u8"div", SanitizerElementNamespaceWithAttributes {u8"circle", SVG}};
       input.Elements->back().Attributes =
-        List<SanitizerAttributeNamespace> {u8"cx", {u8"href", XLink}, {u8"title", dom::DOMStringAtom(u8"")}};
+        List<SanitizerAttributeNamespace> {u8"cx", {u8"href", XLink}, {u8"title", u8""}};
       auto config = Make(input)->Get();
       REQUIRE(config.Elements->size() == 2);
       auto &circle = (*config.Elements)[1];

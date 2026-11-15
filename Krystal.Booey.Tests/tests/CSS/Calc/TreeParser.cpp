@@ -431,7 +431,7 @@ namespace krys::boo::css::calc::tests
       value->GetTree().Root, [](const IndirectNode<Anchor> &node) -> const Anchor * { return &*node; },
       [](const auto &) -> const Anchor * { return nullptr; });
     REQUIRE(anchor);
-    CHECK(anchor->ElementName == CSSOMStringAtom(u8"--a"));
+    CHECK(anchor->ElementName == u8"--a");
     CHECK(anchor->Side == AnchorSide {ValueId::Top});
     CHECK_FALSE(anchor->Fallback);
 
@@ -471,7 +471,7 @@ namespace krys::boo::css::calc::tests
       value->GetTree().Root, [](const IndirectNode<AnchorSize> &node) -> const AnchorSize *
       { return &*node; }, [](const auto &) -> const AnchorSize * { return nullptr; });
     REQUIRE(anchorSize);
-    CHECK(anchorSize->ElementName == CSSOMStringAtom(u8"--a"));
+    CHECK(anchorSize->ElementName == u8"--a");
     CHECK(anchorSize->Dimension == style::AnchorSizeDimension::Height);
     CHECK(anchorSize->Fallback);
 

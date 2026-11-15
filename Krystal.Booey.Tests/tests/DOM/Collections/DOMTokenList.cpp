@@ -408,7 +408,7 @@ namespace krys::boo::dom::tests
     }
     SECTION("SVG a's relList")
     {
-      auto element = document->CreateElementNS(DOMStringAtom(infra::Namespaces::SVG), DOMStringAtom(u8"a"));
+      auto element = document->CreateElementNS(DOMStringAtom(infra::Namespaces::SVG), u8"a");
       REQUIRE_FALSE(element.HasException());
       auto &anchor = Downcast<svg::SVGAElement>(Downcast<svg::SVGElement>(*element.Value()));
       CheckFollowsAttribute(anchor, anchor.RelList(), u8"rel");
@@ -442,7 +442,7 @@ namespace krys::boo::dom::tests
     {
       auto &list = element.ClassList();
       REQUIRE_FALSE(element.SetAttribute(u8"class", u8"a").HasException());
-      REQUIRE_FALSE(element.SetAttributeNS(DOMStringAtom(u8"urn:x"), u8"x:class", u8"b").HasException());
+      REQUIRE_FALSE(element.SetAttributeNS(u8"urn:x", u8"x:class", u8"b").HasException());
       CHECK(Joined(list) == u8"a");
     }
   }

@@ -120,15 +120,15 @@ layer at (0,0) size 800x38
 
     SECTION("The button follows the input's multiple and disabled")
     {
-      (void)one.SetAttribute(dom::DOMStringAtom(u8"multiple"), u8"");
+      (void)one.SetAttribute(u8"multiple", u8"");
       CHECK(button.Value() == u8"Choose Files");
-      (void)one.ToggleAttribute(dom::DOMStringAtom(u8"multiple"), false);
+      (void)one.ToggleAttribute(u8"multiple", false);
       CHECK(button.Value() == u8"Choose File");
 
       CHECK_FALSE(button.IsDisabledFormControl());
-      (void)one.SetAttribute(dom::DOMStringAtom(u8"disabled"), u8"");
+      (void)one.SetAttribute(u8"disabled", u8"");
       CHECK(button.IsDisabledFormControl());
-      (void)one.ToggleAttribute(dom::DOMStringAtom(u8"disabled"), false);
+      (void)one.ToggleAttribute(u8"disabled", false);
       CHECK_FALSE(button.IsDisabledFormControl());
     }
 

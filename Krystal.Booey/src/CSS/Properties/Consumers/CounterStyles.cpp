@@ -94,7 +94,8 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     auto name = nameToken.IdentCodePoints();
-    return IsPredefinedCounterStyle(nameToken.ValueId()) ? krys::text::ToASCIILower(name) : name;
+    return IsPredefinedCounterStyle(nameToken.ValueId()) ? CSSOMStringAtom(krys::text::ToASCIILower(name))
+                                                         : CSSOMStringAtom(name);
   }
 
   RefPtr<Value> ConsumeCounterStyleName(TokenRange &tokens, PropertyParserState &) noexcept

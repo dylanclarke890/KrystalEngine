@@ -10,7 +10,7 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    constexpr DOMStringView TestNamespace = u8"http://example.com/ns";
+    constexpr const char8 *TestNamespace = u8"http://example.com/ns";
 
     struct CommonTestData
     {

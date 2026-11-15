@@ -112,11 +112,10 @@ namespace krys::boo::tests
 
     // Once an element takes the id, the text path finds it.
     auto *svg = fixture.Document->QuerySelector(u8"svg").ReleaseValue().get();
-    auto path = fixture.Document
-                  ->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::SVG), dom::DOMStringAtom(u8"path"))
-                  .ReleaseValue();
-    REQUIRE(!path->SetAttribute(dom::DOMStringAtom(u8"id"), u8"later").HasException());
-    REQUIRE(!path->SetAttribute(dom::DOMStringAtom(u8"d"), u8"M 0 50 L 200 50").HasException());
+    auto path =
+      fixture.Document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::SVG), u8"path").ReleaseValue();
+    REQUIRE(!path->SetAttribute(u8"id", u8"later").HasException());
+    REQUIRE(!path->SetAttribute(u8"d", u8"M 0 50 L 200 50").HasException());
     REQUIRE(!svg->AppendChild(*path).HasException());
     CHECK(SVGDump(fixture) == u8R"(      RenderSVGRoot {svg} at (0,35) size 26x19
         RenderSVGText {text} at (0,35) size 26x19 contains 1 chunk(s)

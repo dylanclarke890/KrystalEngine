@@ -434,7 +434,7 @@ namespace krys::boo
     // of MS Shell Dlg, the default font for textareas in Firefox, Safari Win and
     // IE for some encodings (in IE, the default font is encoding specific).
     // 901 is the avgCharWidth value in the OS/2 table for MS Shell Dlg.
-    if (Style().GetFontCascade().FirstFamily() == StringAtom(u8"Lucida Grande"))
+    if (Style().GetFontCascade().FirstFamily() == u8"Lucida Grande")
     {
       return ScaleEmToUnits(901);
     }
@@ -460,7 +460,7 @@ namespace krys::boo
     // of MS Shell Dlg, the default font for textareas in Firefox, Safari Win and
     // IE for some encodings (in IE, the default font is encoding specific).
     // 4027 is the (xMax - xMin) value in the "head" font table for MS Shell Dlg.
-    if (family == StringAtom(u8"Lucida Grande"))
+    if (family == u8"Lucida Grande")
     {
       maxCharWidth = ScaleEmToUnits(4'027);
     }

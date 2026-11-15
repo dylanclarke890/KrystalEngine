@@ -234,10 +234,10 @@ namespace krys::boo::style::tests
     CHECK(cascade.CustomProperties().size() == 3);
     CHECK(CustomWinner(cascade, u8"--a") == "2");
     CHECK(CustomWinner(cascade, u8"--b") == "ua");
-    CHECK(cascade.GetCustomProperty(css::CSSOMStringAtom(u8"--b")).Origin == Origin::UserAgent);
+    CHECK(cascade.GetCustomProperty(u8"--b").Origin == Origin::UserAgent);
     CHECK(CustomWinner(cascade, u8"--c") == "var(--a)");
-    CHECK(cascade.GetCustomProperty(css::CSSOMStringAtom(u8"--c")).Id == PropertyId::Custom);
-    CHECK_FALSE(cascade.HasCustomProperty(css::CSSOMStringAtom(u8"--d")));
+    CHECK(cascade.GetCustomProperty(u8"--c").Id == PropertyId::Custom);
+    CHECK_FALSE(cascade.HasCustomProperty(u8"--d"));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "PropertyCascade: included properties",
@@ -260,7 +260,7 @@ namespace krys::boo::style::tests
       CHECK_FALSE(Has(nonInherited, PropertyId::Color));
       CHECK(Winner(nonInherited, PropertyId::Width) == "1px");
       CHECK(Winner(nonInherited, PropertyId::Height) == "inherit");
-      CHECK_FALSE(nonInherited.HasCustomProperty(css::CSSOMStringAtom(u8"--a")));
+      CHECK_FALSE(nonInherited.HasCustomProperty(u8"--a"));
 
       PropertyCascade explicitlyInherited(*result, {{PropertyType::ExplicitlyInherited}});
       CHECK_FALSE(Has(explicitlyInherited, PropertyId::Color));
@@ -431,8 +431,7 @@ namespace krys::boo::style::tests
     {
       result->AuthorDeclarations.push_back(Block(u8"opacity: 0.5 !important; --a: 1 !important; width: 1px"));
       result->AuthorDeclarations.push_back(Block(u8"height: 2em; margin-top: 1px; --b: 2"));
-      HashSet<AnimatableCSSProperty> animated {PropertyId::Opacity, PropertyId::Width,
-                                               css::CSSOMStringAtom(u8"--a")};
+      HashSet<AnimatableCSSProperty> animated {PropertyId::Opacity, PropertyId::Width, u8"--a"};
 
       PropertyCascade afterAnimation(*result, {{PropertyType::AfterAnimation}}, &animated);
       CHECK(Winner(afterAnimation, PropertyId::Opacity) == "0.5");
@@ -440,7 +439,7 @@ namespace krys::boo::style::tests
       CHECK_FALSE(Has(afterAnimation, PropertyId::Width));
       CHECK_FALSE(Has(afterAnimation, PropertyId::Height));
       CHECK_FALSE(Has(afterAnimation, PropertyId::MarginTop));
-      CHECK_FALSE(afterAnimation.HasCustomProperty(css::CSSOMStringAtom(u8"--b")));
+      CHECK_FALSE(afterAnimation.HasCustomProperty(u8"--b"));
       // Custom properties are recorded as PropertyId::Custom.
       auto overridden = afterAnimation.OverriddenAnimatedProperties();
       CHECK(overridden.size() == 2);
@@ -451,14 +450,14 @@ namespace krys::boo::style::tests
       PropertyCascade afterTransition(*result, {{PropertyType::AfterAnimation}}, &animated, nullptr,
                                       &animated);
       CHECK_FALSE(Has(afterTransition, PropertyId::Opacity));
-      CHECK_FALSE(afterTransition.HasCustomProperty(css::CSSOMStringAtom(u8"--a")));
+      CHECK_FALSE(afterTransition.HasCustomProperty(u8"--a"));
       CHECK(afterTransition.OverriddenAnimatedProperties().empty());
 
       // That's decided property by property.
       HashSet<AnimatableCSSProperty> transitioning {css::CSSOMStringAtom(u8"--a")};
       PropertyCascade mixed(*result, {{PropertyType::AfterAnimation}}, &animated, nullptr, &transitioning);
       CHECK(Winner(mixed, PropertyId::Opacity) == "0.5");
-      CHECK_FALSE(mixed.HasCustomProperty(css::CSSOMStringAtom(u8"--a")));
+      CHECK_FALSE(mixed.HasCustomProperty(u8"--a"));
     }
 
     SECTION("Declarations that depend on an animated font size or line height")
@@ -490,7 +489,7 @@ namespace krys::boo::style::tests
       PropertyCascade cascade(*result, {{PropertyType::AfterAnimation}}, &animated);
       CHECK(Winner(cascade, PropertyId::PaddingTop) == "var(--b)");
       CHECK(CustomWinner(cascade, u8"--c") == "var(--d)");
-      CHECK_FALSE(cascade.HasCustomProperty(css::CSSOMStringAtom(u8"--e")));
+      CHECK_FALSE(cascade.HasCustomProperty(u8"--e"));
       CHECK_FALSE(Has(cascade, PropertyId::ZIndex));
     }
 
@@ -523,8 +522,7 @@ namespace krys::boo::style::tests
     CHECK(Winner(cascade, PropertyId::Color) == "red");
     CHECK(Winner(cascade, PropertyId::Display) == "inline");
     CHECK(CustomWinner(cascade, u8"--a") == "1");
-    CHECK(cascade.GetCustomProperty(css::CSSOMStringAtom(u8"--a")).FromStyleAttribute
-          == FromStyleAttribute::Yes);
+    CHECK(cascade.GetCustomProperty(u8"--a").FromStyleAttribute == FromStyleAttribute::Yes);
     // The user agent sheet's margins, then the author's.
     auto *margin = cascade.LastPropertyResolvingLogicalPropertyPair(PropertyId::MarginLeft, WritingMode());
     REQUIRE(margin);

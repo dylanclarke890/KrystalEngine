@@ -62,8 +62,8 @@ namespace krys::boo::html
   {
     if (!HasValue())
     {
-      RemoveAttribute(dom::DOMStringAtom(u8"aria-valuenow"));
-      RemoveAttribute(dom::DOMStringAtom(u8"aria-valuetext"));
+      RemoveAttribute(u8"aria-valuenow");
+      RemoveAttribute(u8"aria-valuetext");
       return;
     }
     (void)SetAttribute(u8"aria-valuenow", detail::IntegerToString(ValueAsInteger()));

@@ -13,7 +13,7 @@ namespace krys::boo::dom
 
   inline const StringAtom &StarAtom() noexcept
   {
-    static StringAtom starAtom = StringAtom(u8"*");
+    static StringAtom starAtom = u8"*";
     return starAtom;
   }
 }

@@ -51,8 +51,8 @@ namespace krys::boo::tests
     CHECK(document.IsSuspended());
     CHECK(document.ScheduledTasksAreSuspended());
     CHECK(document.ReasonForSuspendingActiveDOMObjects() == Reason);
-    document.QueueTaskToDispatchEventOnWindow(
-      html::TaskSource::DOMManipulation, dom::Event::Create(dom::DOMStringAtom(u8"custom"), false, false));
+    document.QueueTaskToDispatchEventOnWindow(html::TaskSource::DOMManipulation,
+                                              dom::Event::Create(u8"custom", false, false));
     eventLoop.RunUntilIdle();
     CHECK(fired == 0);
     CHECK_FALSE(eventLoop.HasPendingTasks());

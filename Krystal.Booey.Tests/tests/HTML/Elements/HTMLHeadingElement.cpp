@@ -8,7 +8,7 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::Element> CreateWith(dom::Document &document, utf8_stringview localName,
+    KRYS_NODISCARD Ref<dom::Element> CreateWith(dom::Document &document, dom::DOMStringAtom localName,
                                                 utf8_stringview attribute = {},
                                                 utf8_stringview value = {}) noexcept
     {

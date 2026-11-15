@@ -47,7 +47,7 @@ namespace krys::boo::tests
       auto keyframes = Keyframes(fixture, u8"fade", &found);
       REQUIRE(found);
       REQUIRE(keyframes.Size() == 3);
-      CHECK(keyframes.KeyframesName() == StringAtom {u8"fade"});
+      CHECK(keyframes.KeyframesName() == u8"fade");
       CHECK(keyframes[0].Offset() == 0);
       CHECK(keyframes[1].Offset() == 0.5);
       CHECK(keyframes[2].Offset() == 1);

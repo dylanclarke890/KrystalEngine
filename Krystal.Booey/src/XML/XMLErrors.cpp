@@ -49,8 +49,7 @@ namespace krys::boo::xml
                                                                  null, dom::DOMStringAtom(localName)));
       if (!style.empty())
       {
-        dom::ElementAlgorithms::SetAttributeValue(*element, dom::DOMStringAtom(u8"style"),
-                                                  dom::DOMString(style));
+        dom::ElementAlgorithms::SetAttributeValue(*element, u8"style", dom::DOMString(style));
       }
       return element;
     }

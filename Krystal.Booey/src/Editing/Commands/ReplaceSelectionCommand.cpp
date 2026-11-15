@@ -67,7 +67,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasClass(const dom::Node &node, utf8_stringview className) noexcept
     {
       auto *element = DynamicDowncast<dom::Element>(node);
-      return element && element->GetAttribute(dom::DOMStringAtom(u8"class")) == dom::DOMString(className);
+      return element && element->GetAttribute(u8"class") == dom::DOMString(className);
     }
 
     KRYS_NODISCARD bool IsInterchangeNewlineNode(const dom::Node &node) noexcept
@@ -255,7 +255,7 @@ namespace krys::boo
 
       // We can skip over elements whose class attribute is
       // one of our internal classes.
-      auto classAttribute = element->GetAttribute(dom::DOMStringAtom(u8"class")).value_or(dom::DOMString());
+      auto classAttribute = element->GetAttribute(u8"class").value_or(dom::DOMString());
       utf8_stringview classAttributeValue = classAttribute;
       if (classAttributeValue == AppleTabSpanClass || classAttributeValue == AppleConvertedSpace)
       {
@@ -857,13 +857,13 @@ namespace krys::boo
           RemoveNodePreservingChildren(*element);
           continue;
         }
-        RemoveNodeAttribute(*element, dom::DOMStringAtom(u8"style"));
+        RemoveNodeAttribute(*element, u8"style");
       }
       // FIXME: It seems wrong to rely only on the difference of properties set, and not on which properties
       // are set.
       else if (newInlineStyle->Style()->PropertyCount() != inlineStyle->PropertyCount())
       {
-        SetNodeAttribute(*element, dom::DOMStringAtom(u8"style"),
+        SetNodeAttribute(*element, u8"style",
                          newInlineStyle->Style()->AsText(css::DefaultSerialisationContext()));
       }
 
@@ -882,7 +882,7 @@ namespace krys::boo
 
       if (element->ParentNode() && element->ParentNode()->HasRichlyEditableStyle())
       {
-        RemoveNodeAttribute(*element, dom::DOMStringAtom(u8"contenteditable"));
+        RemoveNodeAttribute(*element, u8"contenteditable");
       }
     }
   }

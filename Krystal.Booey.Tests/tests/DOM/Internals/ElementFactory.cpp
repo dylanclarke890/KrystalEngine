@@ -36,8 +36,7 @@ namespace krys::boo::dom::tests
 
     SECTION("An uppercase name in the HTML namespace is unknown")
     {
-      auto element =
-        document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"DIV"));
+      auto element = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"DIV");
       REQUIRE_FALSE(element.HasException());
       auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element.Value());
       REQUIRE(htmlElement != nullptr);
@@ -46,8 +45,7 @@ namespace krys::boo::dom::tests
 
     SECTION("A lowercase name in the HTML namespace is its element")
     {
-      auto element =
-        document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), DOMStringAtom(u8"div"));
+      auto element = document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"div");
       REQUIRE_FALSE(element.HasException());
       auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element.Value());
       REQUIRE(htmlElement != nullptr);
@@ -56,7 +54,7 @@ namespace krys::boo::dom::tests
 
     SECTION("createElement lowercases the name in an HTML document")
     {
-      auto element = document->CreateElement(DOMStringAtom(u8"DIV"));
+      auto element = document->CreateElement(u8"DIV");
       REQUIRE_FALSE(element.HasException());
       auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element.Value());
       REQUIRE(htmlElement != nullptr);
@@ -129,7 +127,7 @@ namespace krys::boo::dom::tests
             "[DOM][ElementFactory][html:referenced]")
   {
     auto document = CreateRef<HTMLDocument>();
-    auto create = [&](utf8_stringview localName)
+    auto create = [&](dom::DOMStringAtom localName)
     {
       return ElementFactory::Create(*document,
                                     QualifiedName {infra::Namespaces::HTML, null, DOMStringAtom(localName)});
@@ -162,13 +160,13 @@ namespace krys::boo::dom::tests
             "[DOM][ElementFactory][html:other-elements,-attributes-and-apis]")
   {
     auto document = CreateRef<HTMLDocument>();
-    auto dir = document->CreateElement(DOMStringAtom(u8"dir")).ReleaseValue();
+    auto dir = document->CreateElement(u8"dir").ReleaseValue();
     auto &directory = Downcast<html::HTMLDirectoryElement>(Downcast<html::HTMLElement>(*dir));
     CHECK_FALSE(directory.Compact());
     directory.Compact(true);
     CHECK(directory.HasAttribute(u8"compact"));
 
-    auto element = document->CreateElement(DOMStringAtom(u8"param")).ReleaseValue();
+    auto element = document->CreateElement(u8"param").ReleaseValue();
     auto &param = Downcast<html::HTMLParamElement>(Downcast<html::HTMLElement>(*element));
     param.Name(u8"n");
     param.Value(u8"v");

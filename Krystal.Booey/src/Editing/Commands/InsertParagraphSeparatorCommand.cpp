@@ -264,7 +264,7 @@ namespace krys::boo
     {
       auto child = CloneElementWithoutChildren(*ancestors[i - 1]);
       // It should always be okay to remove id from the cloned elements, since the originals are not deleted.
-      child->RemoveAttribute(dom::DOMStringAtom(u8"id"));
+      child->RemoveAttribute(u8"id");
       AppendNode(*child, *parent);
       parent = krys::move(child);
     }

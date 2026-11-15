@@ -5,6 +5,7 @@
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Null.hpp"
@@ -155,6 +156,29 @@ namespace krys
       Ref(_impl);
     }
 
+    template <typename TNeedsConverting, typename TConvert>
+    KRYS_NODISCARD StringAtom ConvertASCIICase(TNeedsConverting needsConverting,
+                                               TConvert convert) const noexcept
+    {
+      auto view = View();
+      auto first = view.begin();
+      while (first != view.end() && !needsConverting(*first))
+      {
+        ++first;
+      }
+      if (first == view.end())
+      {
+        return *this;
+      }
+
+      utf8_string converted(view);
+      for (auto it = converted.begin() + (first - view.begin()); it != converted.end(); ++it)
+      {
+        *it = convert(*it);
+      }
+      return StringAtom(krys::move(converted));
+    }
+
     static void Ref(const StringAtomImpl *impl) noexcept
     {
       if (impl)
@@ -199,21 +223,25 @@ namespace krys
       return emptyAtom;
     }
 
+    /// @brief The atom for a string literal (implicit, as literals are names the code already knows).
     StringAtom(const char8 *str) noexcept
         : StringAtom(StringAtomPool::Current().GetOrAdd(utf8_stringview {str}))
     {
     }
 
-    StringAtom(utf8_stringview str) noexcept : StringAtom(StringAtomPool::Current().GetOrAdd(str))
+    /// @brief The atom for @p str. Explicit, as interning a string that came from elsewhere costs a lookup
+    /// and maybe an allocation, which call sites should show.
+    explicit StringAtom(utf8_stringview str) noexcept : StringAtom(StringAtomPool::Current().GetOrAdd(str))
     {
     }
 
-    StringAtom(const utf8_string &str) noexcept
+    explicit StringAtom(const utf8_string &str) noexcept
         : StringAtom(StringAtomPool::Current().GetOrAdd(utf8_stringview {str}))
     {
     }
 
-    StringAtom(utf8_string &&str) noexcept : StringAtom(StringAtomPool::Current().GetOrAdd(krys::move(str)))
+    explicit StringAtom(utf8_string &&str) noexcept
+        : StringAtom(StringAtomPool::Current().GetOrAdd(krys::move(str)))
     {
     }
 
@@ -299,6 +327,21 @@ namespace krys
     KRYS_NODISCARD utf8_stringview View() const noexcept
     {
       return _impl ? _impl->View() : utf8_stringview {};
+    }
+
+    /// @brief The atom with ASCII upper-case letters lowered: this atom itself, without interning anything,
+    /// if it has none (most names don't).
+    KRYS_NODISCARD StringAtom ToASCIILower() const noexcept
+    {
+      return ConvertASCIICase([](char8 c) { return text::IsASCIIUpper(c); },
+                              [](char8 c) { return text::ToASCIILower(c); });
+    }
+
+    /// @brief The atom with ASCII lower-case letters raised: this atom itself if it has none.
+    KRYS_NODISCARD StringAtom ToASCIIUpper() const noexcept
+    {
+      return ConvertASCIICase([](char8 c) { return text::IsASCIILower(c); },
+                              [](char8 c) { return text::ToASCIIUpper(c); });
     }
 
     /// @brief A copy of the interned string; empty for the null atom.

@@ -385,10 +385,8 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(mid->SetAttribute(u8"exportparts", u8" a , b:c, b : d, bad:, :bad, e f,").HasException());
       const auto &mappings = midShadow->GetPartMappings();
       REQUIRE(mappings.size() == 2uz);
-      CHECK(mappings.at(dom::DOMStringAtom(u8"a"))
-            == SmallList<dom::DOMStringAtom, 1> {dom::DOMStringAtom(u8"a")});
-      CHECK(mappings.at(dom::DOMStringAtom(u8"b"))
-            == SmallList<dom::DOMStringAtom, 1> {dom::DOMStringAtom(u8"c"), dom::DOMStringAtom(u8"d")});
+      CHECK(mappings.at(u8"a") == SmallList<dom::DOMStringAtom, 1> {dom::DOMStringAtom(u8"a")});
+      CHECK(mappings.at(u8"b") == SmallList<dom::DOMStringAtom, 1> {dom::DOMStringAtom(u8"c"), u8"d"});
     }
   }
 
@@ -476,8 +474,7 @@ namespace krys::boo::style::tests
       REQUIRE(Names(marker->AuthorDeclarations) == Strings {"marker"});
       REQUIRE(Find(marker->AuthorDeclarations, u8"marker")->AllowlistType == PropertyAllowlist::Marker);
 
-      auto two =
-        MatchAll(p, PseudoElementRequest(PseudoElementType::Highlight, css::CSSOMStringAtom(u8"two")));
+      auto two = MatchAll(p, PseudoElementRequest(PseudoElementType::Highlight, u8"two"));
       REQUIRE(Names(two->AuthorDeclarations) == Strings {"two"});
     }
 

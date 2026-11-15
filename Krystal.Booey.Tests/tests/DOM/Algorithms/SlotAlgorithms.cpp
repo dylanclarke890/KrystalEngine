@@ -213,7 +213,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
 
     int changes = 0;
-    auto listener = slot->AddEventListener(DOMStringAtom(u8"slotchange"), [&](Event &) { ++changes; });
+    auto listener = slot->AddEventListener(u8"slotchange", [&](Event &) { ++changes; });
 
     auto span = document->CreateElement(u8"span").ReleaseValue();
     REQUIRE_FALSE(host->AppendChild(*span).HasException());
@@ -303,9 +303,9 @@ namespace krys::boo::dom::tests
 
     List<html::HTMLSlotElement *> fired;
     auto firstListener =
-      first->AddEventListener(DOMStringAtom(u8"slotchange"), [&](Event &) { fired.push_back(first.get()); });
-    auto secondListener = second->AddEventListener(DOMStringAtom(u8"slotchange"),
-                                                   [&](Event &) { fired.push_back(second.get()); });
+      first->AddEventListener(u8"slotchange", [&](Event &) { fired.push_back(first.get()); });
+    auto secondListener =
+      second->AddEventListener(u8"slotchange", [&](Event &) { fired.push_back(second.get()); });
 
     SlotAlgorithms::SignalSlotChange(*second);
     SlotAlgorithms::SignalSlotChange(*first);

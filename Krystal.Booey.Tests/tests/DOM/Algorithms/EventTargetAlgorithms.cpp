@@ -144,8 +144,7 @@ namespace krys::boo::dom::tests
       REQUIRE(
         EventTargetAlgorithms::AddEventListener(*target, *Listener(click, callback, WithCapture(true))));
       REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *Listener(click, Callback())));
-      REQUIRE(
-        EventTargetAlgorithms::AddEventListener(*target, *Listener(DOMStringAtom(u8"other"), callback)));
+      REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *Listener(u8"other", callback)));
       REQUIRE(target->EventListeners().size() == 4);
     }
 
@@ -188,7 +187,7 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<Document>();
     auto target = document->CreateElement(u8"div").ReleaseValue();
     auto first = Listener(DOMStringAtom(EventNames::Click), Callback());
-    auto second = Listener(DOMStringAtom(u8"other"), Callback());
+    auto second = Listener(u8"other", Callback());
     REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *first));
     REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *second));
 

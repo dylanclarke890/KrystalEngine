@@ -108,8 +108,7 @@ namespace krys::ui::tests
     REQUIRE(p3);
     int32 changes = 0;
     auto onChange =
-      p3->AddEventListener(boo::dom::DOMStringAtom(u8"change"),
-                           Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
+      p3->AddEventListener(u8"change", Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { ++changes; }));
     CHECK_FALSE(p3->Matches());
     CHECK(window.MatchMedia(u8"(color: 8)")->Matches());
     CheckPixel(frame(), 20, 10, {255, 0, 0, 255});

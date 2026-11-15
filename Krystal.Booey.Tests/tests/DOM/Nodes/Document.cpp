@@ -300,7 +300,7 @@ namespace krys::boo::dom::tests
     REQUIRE(dispatched.HasException());
     CHECK(dispatched.GetException().Code() == ExceptionCode::InvalidStateError);
 
-    event->InitEvent(DOMStringAtom(u8"custom"), true, true);
+    event->InitEvent(u8"custom", true, true);
     CHECK_FALSE(element->DispatchEvent(*event).HasException());
   }
 
@@ -315,7 +315,7 @@ namespace krys::boo::dom::tests
     {
       auto event = document->CreateEvent(u8"customevent").ReleaseValue();
       auto &custom = static_cast<CreatedCustomEvent &>(*event);
-      custom.InitCustomEvent(DOMStringAtom(u8"custom"), true, false, EmptyTag {});
+      custom.InitCustomEvent(u8"custom", true, false, EmptyTag {});
       CHECK(custom.Type() == u8"custom");
       CHECK(custom.Bubbles());
       CHECK(custom.Detail());
@@ -325,11 +325,11 @@ namespace krys::boo::dom::tests
     {
       auto event = document->CreateEvent(u8"customevent").ReleaseValue();
       auto &custom = static_cast<CreatedCustomEvent &>(*event);
-      custom.InitCustomEvent(DOMStringAtom(u8"custom"));
+      custom.InitCustomEvent(u8"custom");
       auto element = document->CreateElement(u8"div").ReleaseValue();
       auto handle = element->AddEventListener(
-        DOMStringAtom(u8"custom"), [](Event &dispatched)
-        { static_cast<CreatedCustomEvent &>(dispatched).InitCustomEvent(DOMStringAtom(u8"other")); });
+        u8"custom",
+        [](Event &dispatched) { static_cast<CreatedCustomEvent &>(dispatched).InitCustomEvent(u8"other"); });
       CHECK_FALSE(element->DispatchEvent(custom).HasException());
       CHECK(custom.Type() == u8"custom");
     }

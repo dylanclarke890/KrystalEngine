@@ -42,7 +42,7 @@ namespace krys::boo::html
       if ((view.find(u8'\n') != view.npos || view.find(u8'\r') != view.npos || view.find(u8'\t') != view.npos)
           && view.find(u8'<') != view.npos)
       {
-        return dom::DOMStringAtom(u8"_blank");
+        return u8"_blank";
       }
       return target;
     }

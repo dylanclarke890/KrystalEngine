@@ -50,7 +50,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(*a == *ImageValue::Create(ImageURL(u8"b.png")));
 
     // The initiator type isn't compared.
-    CHECK(*a == *ImageValue::Create(ImageURL(u8"a.png"), CSSOMStringAtom {u8"css"}));
+    CHECK(*a == *ImageValue::Create(ImageURL(u8"a.png"), u8"css"));
 
     size_t seed = 0uz;
     CHECK_FALSE(a->AddHash(seed));

@@ -31,9 +31,9 @@ namespace krys::boo::html::tests
 
     TableDocument() noexcept
     {
-      auto html = Document->CreateElement(dom::DOMStringAtom(u8"html")).ReleaseValue();
+      auto html = Document->CreateElement(u8"html").ReleaseValue();
       (void)Document->AppendChild(*html);
-      Body = Document->CreateElement(dom::DOMStringAtom(u8"body")).ReleaseValue();
+      Body = Document->CreateElement(u8"body").ReleaseValue();
       (void)html->AppendChild(*Body);
     }
 

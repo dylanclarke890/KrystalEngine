@@ -202,10 +202,9 @@ namespace krys::boo::css::tests
   TEST_CASE("SelectorParser(namespaces)", "[CSS][Selectors][SelectorParser]")
   {
     auto sheet = StyleSheetContents::Create();
-    sheet->ParserAddNamespace(CSSOMStringAtom(u8"svg"), CSSOMStringAtom(u8"http://www.w3.org/2000/svg"));
-    CHECK(sheet->NamespaceURIFromPrefix(CSSOMStringAtom(u8"svg"))
-          == CSSOMStringAtom(u8"http://www.w3.org/2000/svg"));
-    CHECK(sheet->NamespaceURIFromPrefix(CSSOMStringAtom(u8"foo")) == null);
+    sheet->ParserAddNamespace(u8"svg", u8"http://www.w3.org/2000/svg");
+    CHECK(sheet->NamespaceURIFromPrefix(u8"svg") == u8"http://www.w3.org/2000/svg");
+    CHECK(sheet->NamespaceURIFromPrefix(u8"foo") == null);
     CHECK(sheet->DefaultNamespace() == dom::StarAtom());
 
     CHECK(Parse(u8"svg|rect", {}, sheet.get()) == u8"svg|rect");
@@ -222,12 +221,11 @@ namespace krys::boo::css::tests
     CHECK(Parse(u8"[foo|href]", {}, sheet.get()) == u8"<invalid>");
 
     auto rect = ParseValid(u8"svg|rect", {}, sheet.get());
-    CHECK(rect.FirstSelectorComponent()->TagQualifiedName().NamespaceURI()
-          == CSSOMStringAtom(u8"http://www.w3.org/2000/svg"));
+    CHECK(rect.FirstSelectorComponent()->TagQualifiedName().NamespaceURI() == u8"http://www.w3.org/2000/svg");
 
     // A default namespace adds an implicit, unserialised universal selector.
-    sheet->ParserAddNamespace(null, CSSOMStringAtom(u8"http://www.w3.org/1999/xhtml"));
-    CHECK(sheet->DefaultNamespace() == CSSOMStringAtom(u8"http://www.w3.org/1999/xhtml"));
+    sheet->ParserAddNamespace(null, u8"http://www.w3.org/1999/xhtml");
+    CHECK(sheet->DefaultNamespace() == u8"http://www.w3.org/1999/xhtml");
     auto withDefault = ParseValid(u8".a", {}, sheet.get());
     CHECK(withDefault.ComponentCount() == 2);
     CHECK(withDefault.SelectorsText() == u8".a");
@@ -330,8 +328,7 @@ namespace krys::boo::css::tests
     CHECK(SelectorParser::ParsePseudoElement(u8"::details-content", context)
           == Pair<bool, Maybe<Identifier>> {true, {}});
     CHECK(SelectorParser::ParsePseudoElement(u8"::highlight(x)", context)
-          == Pair<bool, Maybe<Identifier>> {
-            true, Identifier {PseudoElementType::Highlight, CSSOMStringAtom(u8"x")}});
+          == Pair<bool, Maybe<Identifier>> {true, Identifier {PseudoElementType::Highlight, u8"x"}});
     CHECK(!SelectorParser::ParsePseudoElement(u8"::highlight", context).first);
     CHECK(!SelectorParser::ParsePseudoElement(u8"::highlight(x y)", context).first);
     CHECK(!SelectorParser::ParsePseudoElement(u8":hover", context).first);
@@ -383,10 +380,10 @@ namespace krys::boo::css::tests
     SelectorParserContext quirks;
     quirks.Mode = ParserMode::HTMLQuirks;
     auto list = ParseValid(u8".FooBar#Baz", quirks);
-    CHECK(list.FirstSelectorComponent()->Value() == CSSOMStringAtom(u8"foobar"));
-    CHECK(list.SelectorComponentAt(1)->Value() == CSSOMStringAtom(u8"baz"));
+    CHECK(list.FirstSelectorComponent()->Value() == u8"foobar");
+    CHECK(list.SelectorComponentAt(1)->Value() == u8"baz");
     CHECK(list.SelectorsText() == u8".FooBar#Baz");
-    CHECK(ParseValid(u8".FooBar").FirstSelectorComponent()->Value() == CSSOMStringAtom(u8"FooBar"));
+    CHECK(ParseValid(u8".FooBar").FirstSelectorComponent()->Value() == u8"FooBar");
   }
 
   TEST_CASE("SelectorParser(functional pseudo-classes)", "[CSS][Selectors][SelectorParser]")

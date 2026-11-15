@@ -97,7 +97,7 @@ namespace krys::boo::css::tests
                                                                   .Inherits = true,
                                                                   .InitialValue = CSSOMString(u8"10px")})
                       .HasException());
-      const auto *registered = registry.Get(CSSOMStringAtom(u8"--size"));
+      const auto *registered = registry.Get(u8"--size");
       REQUIRE(registered);
       CHECK(registered->Inherits);
       REQUIRE(registered->InitialValue);
@@ -108,13 +108,13 @@ namespace krys::boo::css::tests
       // The first registration wins.
       CHECK(exceptionCode({.Name = u8"--size", .Syntax = u8"<color>", .InitialValue = CSSOMString(u8"red")})
             == dom::ExceptionCode::InvalidModificationError);
-      CHECK(registry.Get(CSSOMStringAtom(u8"--size"))->Inherits);
+      CHECK(registry.Get(u8"--size")->Inherits);
     }
 
     SECTION("the universal syntax needs no initial value")
     {
       REQUIRE_FALSE(DOMCSSNamespace::RegisterProperty(*document, {.Name = u8"--any"}).HasException());
-      const auto *registered = registry.Get(CSSOMStringAtom(u8"--any"));
+      const auto *registered = registry.Get(u8"--any");
       REQUIRE(registered);
       CHECK_FALSE(registered->Inherits);
     }
@@ -131,7 +131,7 @@ namespace krys::boo::css::tests
       // The initial value must be computationally independent.
       CHECK(exceptionCode({.Name = u8"--x", .Syntax = u8"<length>", .InitialValue = CSSOMString(u8"2em")})
             == syntaxError);
-      CHECK_FALSE(registry.Get(CSSOMStringAtom(u8"--x")));
+      CHECK_FALSE(registry.Get(u8"--x"));
     }
   }
 }

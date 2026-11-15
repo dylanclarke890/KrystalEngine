@@ -235,9 +235,9 @@ namespace krys::boo::tests
     Ref<dom::EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
     // Enter and leave don't bubble: inner's own listeners see only its events, and outer's capturing one sees
     // those of the elements inside it too. Nothing listens on the others, so nothing is sent to them.
-    fixture.ById(u8"inner").AddEventListener(dom::DOMStringAtom(u8"mouseenter"), Ref {recorder}, false);
-    fixture.ById(u8"inner").AddEventListener(dom::DOMStringAtom(u8"pointerenter"), Ref {recorder}, false);
-    fixture.ById(u8"outer").AddEventListener(dom::DOMStringAtom(u8"mouseleave"), Ref {recorder}, true);
+    fixture.ById(u8"inner").AddEventListener(u8"mouseenter", Ref {recorder}, false);
+    fixture.ById(u8"inner").AddEventListener(u8"pointerenter", Ref {recorder}, false);
+    fixture.ById(u8"outer").AddEventListener(u8"mouseleave", Ref {recorder}, true);
 
     fixture.Move(15, 15);
     CHECK(fixture.Take() == Strings {"pointerenter:inner/0", "mouseenter:inner"});
@@ -674,8 +674,7 @@ namespace krys::boo::tests
     SECTION("an update chooses again for a still mouse")
     {
       (void)fixture.Move(100, 10);
-      (void)fixture.ById(u8"box").SetAttribute(dom::DOMStringAtom(u8"style"),
-                                               dom::DOMString(u8"cursor:wait"));
+      (void)fixture.ById(u8"box").SetAttribute(u8"style", dom::DOMString(u8"cursor:wait"));
       (void)fixture.Document->UpdateLayout();
       CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Pointer);
       fixture.Handler().UpdateCursor();

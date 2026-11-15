@@ -24,7 +24,7 @@ namespace krys::boo::css::tests
     REQUIRE(before);
     CHECK(before->Match() == SelectorMatch::PseudoElement);
     CHECK(before->PseudoElement() == SelectorPseudoElement::Before);
-    CHECK(before->Value() == CSSOMStringAtom(u8"before"));
+    CHECK(before->Value() == u8"before");
     CHECK(B::List(krys::move(before)).SelectorsText() == u8"::before");
 
     CHECK(!MutableSelector::ParsePseudoClassSelector(u8"nope", context));
@@ -39,7 +39,7 @@ namespace krys::boo::css::tests
     REQUIRE(marker);
     CHECK(marker->Match() == SelectorMatch::PseudoElement);
     CHECK(marker->PseudoElement() == SelectorPseudoElement::Marker);
-    CHECK(marker->Value() == CSSOMStringAtom(u8"marker"));
+    CHECK(marker->Value() == u8"marker");
 
     auto part = MutableSelector::ParsePseudoElementSelector(u8"Details-Content", context);
     REQUIRE(part);
@@ -62,12 +62,12 @@ namespace krys::boo::css::tests
     selector->LeftmostSimpleSelector()->SetRelation(SelectorRelation::Child);
     CHECK(selector->StartsWithExplicitCombinator());
     selector->PrependComplexSelectorComponentAsRelative(B::Class(u8"c"));
-    CHECK(selector->LeftmostSimpleSelector()->Value() == CSSOMStringAtom(u8"c"));
+    CHECK(selector->LeftmostSimpleSelector()->Value() == u8"c");
     CHECK(B::List(krys::move(selector)).SelectorsText() == u8".c > .b .a");
 
     // A tag is put at the start of the compound.
     auto compound = B::Compound(B::Class(u8"x"), B::Id(u8"y"));
-    compound->AppendTagInComplexSelector(dom::QualifiedName(dom::StarAtom(), null, CSSOMStringAtom(u8"div")));
+    compound->AppendTagInComplexSelector(dom::QualifiedName(dom::StarAtom(), null, u8"div"));
     CHECK(compound->Match() == SelectorMatch::Type);
     CHECK(B::List(krys::move(compound)).SelectorsText() == u8"div.x#y");
 

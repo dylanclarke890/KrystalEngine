@@ -58,19 +58,19 @@ namespace krys::boo::style::tests
 
     SECTION("Content attributes are registered for ::before and ::after")
     {
-      State->RegisterContentAttribute(css::CSSOMStringAtom {u8"title"});
+      State->RegisterContentAttribute(u8"title");
       CHECK(State->RegisteredContentAttributes().empty());
 
       Style.SetPseudoElementIdentifier(PseudoElementIdentifier {PseudoElementType::Before});
-      State->RegisterContentAttribute(css::CSSOMStringAtom {u8"title"});
+      State->RegisterContentAttribute(u8"title");
       Style.SetPseudoElementIdentifier(PseudoElementIdentifier {PseudoElementType::Marker});
-      State->RegisterContentAttribute(css::CSSOMStringAtom {u8"alt"});
+      State->RegisterContentAttribute(u8"alt");
       Style.SetPseudoElementIdentifier(PseudoElementIdentifier {PseudoElementType::After});
-      State->RegisterContentAttribute(css::CSSOMStringAtom {u8"lang"});
+      State->RegisterContentAttribute(u8"lang");
 
       REQUIRE(State->RegisteredContentAttributes().size() == 2);
-      CHECK(State->RegisteredContentAttributes()[0] == css::CSSOMStringAtom {u8"title"});
-      CHECK(State->RegisteredContentAttributes()[1] == css::CSSOMStringAtom {u8"lang"});
+      CHECK(State->RegisteredContentAttributes()[0] == u8"title");
+      CHECK(State->RegisteredContentAttributes()[1] == u8"lang");
     }
 
     SECTION("Unit usage")

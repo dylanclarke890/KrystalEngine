@@ -6,7 +6,7 @@ namespace krys::boo::dom::tests
 {
   TEST_CASE("WheelEvent: from a dictionary", "[DOM][WheelEvent]")
   {
-    Ref<WheelEvent> defaults = CreateRef<WheelEvent>(DOMStringAtom(u8"wheel"));
+    Ref<WheelEvent> defaults = CreateRef<WheelEvent>(u8"wheel");
     CHECK(defaults->DeltaX() == 0);
     CHECK(defaults->DeltaY() == 0);
     CHECK(defaults->DeltaZ() == 0);
@@ -22,7 +22,7 @@ namespace krys::boo::dom::tests
     init.DeltaZ = 3;
     init.DeltaMode = WheelEvent::DOM_DELTA_LINE;
     init.ClientX = 10;
-    Ref<WheelEvent> event = CreateRef<WheelEvent>(DOMStringAtom(u8"wheel"), init);
+    Ref<WheelEvent> event = CreateRef<WheelEvent>(u8"wheel", init);
     CHECK(event->DeltaX() == 1.5);
     CHECK(event->DeltaY() == -2);
     CHECK(event->DeltaZ() == 3);

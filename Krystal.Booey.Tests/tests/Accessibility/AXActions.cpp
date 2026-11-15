@@ -26,7 +26,8 @@ namespace krys::boo::ax::tests
       }
     };
 
-    void ListenWith(dom::Element &element, utf8_stringview type, Func<void(dom::Event &)> &&function) noexcept
+    void ListenWith(dom::Element &element, dom::DOMStringAtom type,
+                    Func<void(dom::Event &)> &&function) noexcept
     {
       element.AddEventListener(
         dom::DOMStringAtom(type),
@@ -110,7 +111,7 @@ namespace krys::boo::ax::tests
 
     auto &details = page.Object(u8"details");
     details.SetIsExpanded(true);
-    CHECK(page.ById(u8"details").HasAttribute(dom::DOMStringAtom(u8"open")));
+    CHECK(page.ById(u8"details").HasAttribute(u8"open"));
   }
 
   TEST_CASE("AXActions: hit testing", "[Accessibility][AXActions]")

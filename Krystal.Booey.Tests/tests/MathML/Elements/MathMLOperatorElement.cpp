@@ -176,16 +176,14 @@ namespace krys::boo::mathml::tests
       REQUIRE(minus.Form() == Form::Prefix);
       REQUIRE(minus.DefaultLeadingSpace().Value == 0);
       auto &row = *minus.ParentNode();
-      auto before =
-        document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::MathML), dom::DOMStringAtom(u8"mi"));
+      auto before = document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::MathML), u8"mi");
       REQUIRE_FALSE(row.InsertBefore(*before.ReleaseValue(), &minus).HasException());
       CHECK(minus.Form() == Form::Infix);
       CHECK(minus.DefaultLeadingSpace().Value == 4);
 
       // A ")" between two siblings has no infix entry, so it keeps its postfix one.
       auto &close = mo(u8"close");
-      auto after =
-        document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::MathML), dom::DOMStringAtom(u8"mi"));
+      auto after = document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::MathML), u8"mi");
       REQUIRE_FALSE(close.ParentNode()->AppendChild(*after.ReleaseValue()).HasException());
       CHECK(close.Form() == Form::Postfix);
 

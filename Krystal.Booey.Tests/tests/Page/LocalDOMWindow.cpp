@@ -604,12 +604,12 @@ namespace krys::boo::tests
       button.SetOnTouchEnd(count);
       button.SetOnTouchMove(count);
       button.SetOnTouchStart(count);
-      for (auto type :
+      for (dom::DOMStringAtom type :
            {EventNames::GotPointerCapture, EventNames::LostPointerCapture, EventNames::PointerCancel,
             EventNames::PointerDown, EventNames::PointerEnter, EventNames::PointerLeave,
-            EventNames::PointerMove, EventNames::PointerOut, EventNames::PointerOver,
-            utf8_stringview(u8"pointerrawupdate"), EventNames::PointerUp, EventNames::TouchCancel,
-            EventNames::TouchEnd, EventNames::TouchMove, EventNames::TouchStart})
+            EventNames::PointerMove, EventNames::PointerOut, EventNames::PointerOver, u8"pointerrawupdate",
+            EventNames::PointerUp, EventNames::TouchCancel, EventNames::TouchEnd, EventNames::TouchMove,
+            EventNames::TouchStart})
       {
         dom::EventDispatcher::FireEvent(type, button);
       }

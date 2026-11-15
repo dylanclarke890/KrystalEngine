@@ -80,7 +80,7 @@ namespace krys::boo
     {
       return false;
     }
-    auto hasValue = [](const dom::Element &element, dom::DOMStringView name)
+    auto hasValue = [](const dom::Element &element, dom::DOMStringAtom name)
     {
       auto value = element.GetAttribute(name);
       return value && !value->empty();

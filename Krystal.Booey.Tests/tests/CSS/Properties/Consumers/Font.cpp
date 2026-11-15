@@ -299,8 +299,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
             "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumePreludeNames(u8"Foo, \"Bar Baz\", Qux  Quux")
-          == List<CSSOMStringAtom> {CSSOMStringAtom {u8"Foo"}, CSSOMStringAtom {u8"Bar Baz"},
-                                    CSSOMStringAtom {u8"Qux Quux"}});
+          == List<CSSOMStringAtom> {CSSOMStringAtom {u8"Foo"}, u8"Bar Baz", u8"Qux Quux"});
 
     CHECK(ConsumePreludeNames(u8"serif").empty());
     CHECK(ConsumePreludeNames(u8"Foo, serif").empty());

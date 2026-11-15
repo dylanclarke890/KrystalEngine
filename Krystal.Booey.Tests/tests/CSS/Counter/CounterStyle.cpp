@@ -78,7 +78,7 @@ namespace krys::boo::css::tests
     SECTION("Unknown names resolve to decimal")
     {
       REQUIRE(Text(u8"nonsense", 3) == "3");
-      REQUIRE(Registry.ResolvedCounterStyle(CSSOMStringAtom(u8"nonsense")).get()
+      REQUIRE(Registry.ResolvedCounterStyle(u8"nonsense").get()
               == CounterStyleRegistry::DecimalCounter().get());
     }
   }
@@ -131,7 +131,7 @@ namespace krys::boo::css::tests
       REQUIRE(Text(u8"chain", 7) == "007");
 
       // The prefix isn't part of the representation, but is inherited from the descriptors.
-      auto parens = Registry.ResolvedCounterStyle(CSSOMStringAtom(u8"parens"));
+      auto parens = Registry.ResolvedCounterStyle(u8"parens");
       REQUIRE(ToNarrow(parens->Text(2, {})) == "b");
       REQUIRE(ToNarrow(parens->Prefix().Text) == "(");
       REQUIRE(parens->System() == CounterStyleSystem::Alphabetic);

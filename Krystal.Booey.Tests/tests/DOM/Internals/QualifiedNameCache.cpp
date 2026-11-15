@@ -8,10 +8,8 @@ namespace krys::boo::dom::tests
   TEST_CASE("QualifiedNameCache: Same namespace, prefix, and localName should share storage",
             "[HTML][QualifiedNameCache]")
   {
-    auto qn1 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"div"));
-    auto qn2 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"div"));
+    auto qn1 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
+    auto qn2 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
 
     REQUIRE(qn1 == qn2);
   }
@@ -19,10 +17,8 @@ namespace krys::boo::dom::tests
   TEST_CASE("QualifiedNameCache: Different localNames should have different storage",
             "[HTML][QualifiedNameCache]")
   {
-    auto qn1 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"div"));
-    auto qn2 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"span"));
+    auto qn1 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
+    auto qn2 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"span");
 
     REQUIRE(qn1 != qn2);
   }
@@ -30,10 +26,8 @@ namespace krys::boo::dom::tests
   TEST_CASE("QualifiedNameCache: Different namespaces should have different storage",
             "[HTML][QualifiedNameCache]")
   {
-    auto qn1 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"div"));
-    auto qn2 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/2000/svg"), null, dom::DOMStringAtom(u8"div"));
+    auto qn1 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
+    auto qn2 = QualifiedName(u8"http://www.w3.org/2000/svg", null, u8"div");
 
     REQUIRE(qn1 != qn2);
   }
@@ -41,10 +35,8 @@ namespace krys::boo::dom::tests
   TEST_CASE("QualifiedNameCache: Different prefixes should have different storage",
             "[HTML][QualifiedNameCache]")
   {
-    auto qn1 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"div"));
-    auto qn2 = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"),
-                             dom::DOMStringAtom(u8"xhtml"), dom::DOMStringAtom(u8"div"));
+    auto qn1 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
+    auto qn2 = QualifiedName(u8"http://www.w3.org/1999/xhtml", u8"xhtml", u8"div");
 
     REQUIRE(qn1 != qn2);
   }
@@ -52,12 +44,9 @@ namespace krys::boo::dom::tests
   TEST_CASE("QualifiedNameCache: Multiple creations with same parameters should be equal",
             "[HTML][QualifiedNameCache]")
   {
-    auto qn1 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"div"));
-    auto qn2 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"div"));
-    auto qn3 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"div"));
+    auto qn1 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
+    auto qn2 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
+    auto qn3 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
 
     REQUIRE(qn1 == qn2);
     REQUIRE(qn2 == qn3);
@@ -66,10 +55,10 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("QualifiedNameCache: QualifiedName with TagName and Namespace", "[HTML][QualifiedNameCache]")
   {
-    auto qn1 = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null,
-                             dom::DOMStringAtom(u8"div"), html::TagName::div, html::Namespace::HTML);
-    auto qn2 = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null,
-                             dom::DOMStringAtom(u8"div"), html::TagName::div, html::Namespace::HTML);
+    auto qn1 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div", html::TagName::div,
+                             html::Namespace::HTML);
+    auto qn2 = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div", html::TagName::div,
+                             html::Namespace::HTML);
 
     REQUIRE(qn1 == qn2);
     REQUIRE(qn1.TagName() == html::TagName::div);
@@ -87,29 +76,27 @@ namespace krys::boo::dom::tests
     REQUIRE(qn.NamespaceURI() == namespaceURI);
     REQUIRE(qn.NamespacePrefix() == prefix);
     REQUIRE(qn.LocalName() == localName);
-    REQUIRE(qn.LocalNameLower() == dom::DOMStringAtom(u8"div"));
+    REQUIRE(qn.LocalNameLower() == u8"div");
   }
 
   TEST_CASE("QualifiedNameCache: LocalNameLower is correctly computed", "[HTML][QualifiedNameCache]")
   {
-    auto qn =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"DIV"));
+    auto qn = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"DIV");
 
-    REQUIRE(qn.LocalNameLower() == dom::DOMStringAtom(u8"div"));
+    REQUIRE(qn.LocalNameLower() == u8"div");
   }
 
   TEST_CASE("QualifiedNameCache: LocalNameUpper is correctly computed", "[HTML][QualifiedNameCache]")
   {
-    auto qn =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null, dom::DOMStringAtom(u8"div"));
+    auto qn = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
 
-    REQUIRE(qn.LocalNameUpper() == dom::DOMStringAtom(u8"DIV"));
+    REQUIRE(qn.LocalNameUpper() == u8"DIV");
   }
 
   TEST_CASE("QualifiedNameCache: null namespace and prefix", "[HTML][QualifiedNameCache]")
   {
-    auto qn1 = QualifiedName(null, null, dom::DOMStringAtom(u8"localName"));
-    auto qn2 = QualifiedName(null, null, dom::DOMStringAtom(u8"localName"));
+    auto qn1 = QualifiedName(null, null, u8"localName");
+    auto qn2 = QualifiedName(null, null, u8"localName");
 
     REQUIRE(qn1 == qn2);
     REQUIRE(qn1.NamespaceURI() == null);
@@ -120,16 +107,12 @@ namespace krys::boo::dom::tests
             "[HTML][QualifiedNameCache]")
   {
     // Create first QualifiedName
-    auto qn1 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/2000/svg"), null, dom::DOMStringAtom(u8"circle"));
+    auto qn1 = QualifiedName(u8"http://www.w3.org/2000/svg", null, u8"circle");
 
     // Create same QualifiedName multiple times
-    auto qn2 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/2000/svg"), null, dom::DOMStringAtom(u8"circle"));
-    auto qn3 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/2000/svg"), null, dom::DOMStringAtom(u8"circle"));
-    auto qn4 =
-      QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/2000/svg"), null, dom::DOMStringAtom(u8"circle"));
+    auto qn2 = QualifiedName(u8"http://www.w3.org/2000/svg", null, u8"circle");
+    auto qn3 = QualifiedName(u8"http://www.w3.org/2000/svg", null, u8"circle");
+    auto qn4 = QualifiedName(u8"http://www.w3.org/2000/svg", null, u8"circle");
 
     // All should point to the same storage
     REQUIRE(qn1 == qn2);
@@ -140,16 +123,14 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("QualifiedNameCache: Name property with prefix", "[HTML][QualifiedNameCache]")
   {
-    auto qn = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"),
-                            dom::DOMStringAtom(u8"custom"), dom::DOMStringAtom(u8"element"));
+    auto qn = QualifiedName(u8"http://www.w3.org/1999/xhtml", u8"custom", u8"element");
 
     REQUIRE(qn.Name() == u8"custom:element");
   }
 
   TEST_CASE("QualifiedNameCache: Name property without prefix", "[HTML][QualifiedNameCache]")
   {
-    auto qn = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), null,
-                            dom::DOMStringAtom(u8"element"));
+    auto qn = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"element");
 
     REQUIRE(qn.Name() == u8"element");
   }

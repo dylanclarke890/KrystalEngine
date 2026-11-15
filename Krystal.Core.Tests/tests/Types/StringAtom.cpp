@@ -38,7 +38,7 @@ namespace krys::tests
   TEST_CASE("StringAtom - View returns correct string", "[StringAtom]")
   {
     utf8_stringview text = u8"example";
-    StringAtom atomStr = text;
+    StringAtom atomStr {text};
     REQUIRE(atomStr.View() == text);
   }
 
@@ -54,8 +54,8 @@ namespace krys::tests
     utf8_string original = u8"incremental";
     utf8_string temp = original.substr(0, 5); // "incre"
     temp += original.substr(5);               // "mental"
-    StringAtom atomStr1 = original;
-    StringAtom atomStr2 = std::move(temp);
+    StringAtom atomStr1 {original};
+    StringAtom atomStr2 {krys::move(temp)};
     REQUIRE(atomStr1 == atomStr2);
   }
 
@@ -146,5 +146,26 @@ namespace krys::tests
 
     CHECK(StringAtom() != u8"");
     CHECK(StringAtom::Empty() == u8"");
+  }
+
+  TEST_CASE("StringAtom - ToASCIILower and ToASCIIUpper convert ASCII letters", "[StringAtom]")
+  {
+    StringAtom mixed = u8"MiXeD-É";
+    CHECK(mixed.ToASCIILower() == u8"mixed-É");
+    CHECK(mixed.ToASCIIUpper() == u8"MIXED-É");
+    CHECK(StringAtom().ToASCIILower() == null);
+  }
+
+  TEST_CASE("StringAtom - converting the case of an atom that has none to convert gives the same atom",
+            "[StringAtom]")
+  {
+    auto &pool = StringAtomPool::Current();
+    StringAtom lower = u8"already-lower";
+    StringAtom upper = u8"ALREADY-UPPER";
+    auto before = pool.Size();
+
+    CHECK(lower.ToASCIILower().Storage() == lower.Storage());
+    CHECK(upper.ToASCIIUpper().Storage() == upper.Storage());
+    CHECK(pool.Size() == before);
   }
 }

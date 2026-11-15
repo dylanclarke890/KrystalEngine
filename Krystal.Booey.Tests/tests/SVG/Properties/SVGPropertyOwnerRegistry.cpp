@@ -28,8 +28,7 @@ namespace krys::boo::svg::tests
     CHECK(SVGURIReference::PropertyRegistry::IsKnownAttribute(SVGNames::HrefAttr()));
 
     // Attributes are matched by their namespace and local name, whatever their prefix.
-    dom::QualifiedName unprefixedXLinkHref {dom::DOMStringAtom(infra::Namespaces::XLink), null,
-                                            dom::DOMStringAtom(u8"href")};
+    dom::QualifiedName unprefixedXLinkHref {dom::DOMStringAtom(infra::Namespaces::XLink), null, u8"href"};
     CHECK(SVGURIReference::PropertyRegistry::IsKnownAttribute(unprefixedXLinkHref));
     CHECK_FALSE(SVGURIReference::PropertyRegistry::IsKnownAttribute(TestAttributeName(u8"xlink:href")));
 

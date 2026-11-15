@@ -429,13 +429,11 @@ namespace krys::boo::style::tests
     {
       auto &anchor = ById(u8"anchor");
       auto anchorStyle = Resolve(anchor);
-      CHECK_FALSE(GetResolver().RuleSets().Features().ContentAttributeNamesInRules.contains(
-        css::CSSOMStringAtom(u8"data-x")));
+      CHECK_FALSE(GetResolver().RuleSets().Features().ContentAttributeNamesInRules.contains(u8"data-x"));
       auto before = GetResolver().StyleForPseudoElement(
         anchor, PseudoElementRequest {PseudoElementType::Before}, {.ParentStyle = anchorStyle.Style.get()});
       REQUIRE(before);
-      CHECK(GetResolver().RuleSets().Features().ContentAttributeNamesInRules.contains(
-        css::CSSOMStringAtom(u8"data-x")));
+      CHECK(GetResolver().RuleSets().Features().ContentAttributeNamesInRules.contains(u8"data-x"));
     }
   }
 

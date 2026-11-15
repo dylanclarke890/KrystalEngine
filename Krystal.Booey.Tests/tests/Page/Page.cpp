@@ -158,7 +158,7 @@ namespace krys::boo::tests
       Ref<dom::EventListenerCallback> recorder = CreateRef<Listener>(
         [&](dom::Event &event)
         { records.emplace_back(event.Type().View().begin(), event.Type().View().end()); });
-      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"scroll"), Ref {recorder}, false);
+      fixture.Document->AddEventListener(u8"scroll", Ref {recorder}, false);
 
       fixture.View().SetScrollPosition({0, 100});
       CHECK(page.IsRenderingUpdateScheduled());
@@ -179,7 +179,7 @@ namespace krys::boo::tests
             fixture.View().SetScrollPosition({0, 200});
           }
         });
-      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"scroll"), Ref {scroller}, false);
+      fixture.Document->AddEventListener(u8"scroll", Ref {scroller}, false);
 
       fixture.View().SetScrollPosition({0, 100});
       page.UpdateRendering();

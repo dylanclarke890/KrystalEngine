@@ -605,7 +605,7 @@ namespace krys::boo::dom
     //    - Whose namespace is not the HTML namespace and whose qualified name is qualifiedName.
     if (Is<HTMLDocument>(root.NodeDocument()))
     {
-      DOMStringAtom qualifiedNameLowercase = ::krys::text::ToASCIILower(qualifiedName.View());
+      DOMStringAtom qualifiedNameLowercase = qualifiedName.ToASCIILower();
       return CreateRef<LiveHTMLCollection>(root,
                                            [qualifiedName, qualifiedNameLowercase](const Element &element)
                                            {

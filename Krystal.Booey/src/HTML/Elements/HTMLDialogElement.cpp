@@ -119,7 +119,7 @@ namespace krys::boo::html
     QueueDialogToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, nullptr);
 
     // 6. Add an open attribute to this, whose value is the empty string.
-    (void)SetAttribute(dom::DOMStringAtom(u8"open"), dom::DOMString());
+    (void)SetAttribute(u8"open", dom::DOMString());
 
     // 7. Set this's previously focused element to the focused element.
     _previouslyFocusedElement = CreateWeakPtr(NodeDocument().FocusedElement());
@@ -230,7 +230,7 @@ namespace krys::boo::html
     QueueDialogToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, source);
 
     // 11. Add an open attribute to subject, whose value is the empty string.
-    (void)SetAttribute(dom::DOMStringAtom(u8"open"), dom::DOMString());
+    (void)SetAttribute(u8"open", dom::DOMString());
 
     // 12. Assert: subject's close watcher is not null.
     // (Null in a document without a window.)
@@ -285,7 +285,7 @@ namespace krys::boo::html
     QueueDialogToggleEventTask(dom::ToggleState::Open, dom::ToggleState::Closed, source);
 
     // 5. Remove subject's open attribute.
-    RemoveAttribute(dom::DOMStringAtom(u8"open"));
+    RemoveAttribute(u8"open");
 
     // 6. If is modal of subject is true, then request an element to be removed from the top layer given
     //    subject.

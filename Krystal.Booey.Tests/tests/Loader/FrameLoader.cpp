@@ -52,14 +52,14 @@ namespace krys::boo::tests
 
     SECTION("targets")
     {
-      Navigate(fixture, u8"#a", dom::DOMStringAtom(u8"_self"));
-      Navigate(fixture, u8"#b", dom::DOMStringAtom(u8"_TOP"));
-      Navigate(fixture, u8"#c", dom::DOMStringAtom(u8"_parent"));
+      Navigate(fixture, u8"#a", u8"_self");
+      Navigate(fixture, u8"#b", u8"_TOP");
+      Navigate(fixture, u8"#c", u8"_parent");
       CHECK(fixture.DocumentURL() == "https://example.com/dir/page.html#c");
       CHECK(fixture.Client->DidNavigateWithinPageCount == 3);
 
-      Navigate(fixture, u8"#d", dom::DOMStringAtom(u8"_blank"));
-      Navigate(fixture, u8"#e", dom::DOMStringAtom(u8"elsewhere"));
+      Navigate(fixture, u8"#d", u8"_blank");
+      Navigate(fixture, u8"#e", u8"elsewhere");
       REQUIRE(fixture.Navigations().size() == 2);
       CHECK(fixture.Navigations()[0].IsNewWindow);
       CHECK(fixture.Navigations()[1].NewWindowName == "elsewhere");

@@ -348,7 +348,7 @@ namespace krys::boo::tests
     auto &selection = fixture.Selection();
     auto &text = fixture.TextIn(u8"a");
     auto listener = CreateRef<ModifySelectStartListener>();
-    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"selectstart"), listener, true);
+    fixture.Document->AddEventListener(u8"selectstart", listener, true);
 
     SECTION("Extending a caret fires selectstart, which can cancel it")
     {

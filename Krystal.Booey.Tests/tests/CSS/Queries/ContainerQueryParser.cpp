@@ -333,7 +333,7 @@ namespace krys::boo::css::tests
     CHECK(range->Schema == &cq::Features::Style());
     CHECK(range->FunctionId == ValueId::Style);
     REQUIRE(range->Values.size() == 3uz);
-    CHECK(range->Values[1].CustomPropertyName == CSSOMStringAtom(u8"--foo"));
+    CHECK(range->Values[1].CustomPropertyName == u8"--foo");
     CHECK(range->Values[0].Value);
     CHECK(range->Operators
           == List {mq::ComparisonOperator::LessThan, mq::ComparisonOperator::LessThanOrEqual});
@@ -353,7 +353,7 @@ namespace krys::boo::css::tests
     queries = ParseContainerQueryList(u8"container, container2");
     REQUIRE(queries);
     REQUIRE(queries->size() == 2u);
-    CHECK(queries->at(1).Name == CSSOMStringAtom(u8"container2"));
+    CHECK(queries->at(1).Name == u8"container2");
 
     queries = ParseContainerQueryList(u8"a (width > 1px) , style(--x: 1)");
     REQUIRE(queries);

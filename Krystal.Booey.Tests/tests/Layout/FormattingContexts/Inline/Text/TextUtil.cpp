@@ -314,8 +314,8 @@ namespace krys::boo::tests
       CHECK(TextUtil::DirectionForTextContent(u8"123 \u05E9") == TextDirection::RTL);
       CHECK(TextUtil::DirectionForTextContent(u8"123") == TextDirection::LTR);
 
-      CHECK(TextUtil::EllipsisTextInInlineDirection() == StringAtom {u8"\u2026"});
-      CHECK(TextUtil::EllipsisTextInInlineDirection(false) == StringAtom {u8"\u22EE"});
+      CHECK(TextUtil::EllipsisTextInInlineDirection() == u8"\u2026");
+      CHECK(TextUtil::EllipsisTextInInlineDirection(false) == u8"\u22EE");
     }
   }
 

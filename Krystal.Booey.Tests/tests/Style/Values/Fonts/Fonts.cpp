@@ -46,9 +46,9 @@ namespace krys::boo::style::tests
     auto families = Convert<FontFamilies>(PropertyId::FontFamily, u8"\"Foo Bar\", serif, Arial");
     REQUIRE(families.size() == 3);
     CHECK(families.IsSpecifiedFont());
-    CHECK(families.First().Value == css::CSSOMStringAtom {u8"Foo Bar"});
+    CHECK(families.First().Value == u8"Foo Bar");
     CHECK(families.ToPlatform()[1] == css::GenericFontFamilyNames::SerifFamily());
-    CHECK(families.Last().Value == css::CSSOMStringAtom {u8"Arial"});
+    CHECK(families.Last().Value == u8"Arial");
     CHECK(Serialised(families) == "\"Foo Bar\", serif, Arial");
     CHECK(Created(families) == "\"Foo Bar\", serif, Arial");
 
@@ -110,7 +110,7 @@ namespace krys::boo::style::tests
 
     auto custom = Convert<FontPalette>(PropertyId::FontPalette, u8"--custom");
     CHECK(custom.Platform().PaletteType == boo::FontPalette::Type::Custom);
-    CHECK(custom.Platform().Identifier == css::CSSOMStringAtom {u8"--custom"});
+    CHECK(custom.Platform().Identifier == u8"--custom");
     CHECK(Serialised(custom) == "--custom");
     CHECK(Created(custom) == "--custom");
 

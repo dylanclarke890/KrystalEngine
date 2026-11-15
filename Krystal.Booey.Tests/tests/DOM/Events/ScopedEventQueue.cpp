@@ -11,14 +11,12 @@ namespace krys::boo::dom::tests
   {
     auto target = CreateRef<EventTarget>();
     List<std::string> dispatched;
-    auto first =
-      target->AddEventListener(DOMStringAtom(u8"first"), [&](Event &) { dispatched.push_back("first"); });
-    auto second =
-      target->AddEventListener(DOMStringAtom(u8"second"), [&](Event &) { dispatched.push_back("second"); });
+    auto first = target->AddEventListener(u8"first", [&](Event &) { dispatched.push_back("first"); });
+    auto second = target->AddEventListener(u8"second", [&](Event &) { dispatched.push_back("second"); });
 
     SECTION("Without a scope an event is dispatched straight away")
     {
-      ScopedEventQueue::DispatchOrQueue(Event::Create(DOMStringAtom(u8"first"), false, false), target);
+      ScopedEventQueue::DispatchOrQueue(Event::Create(u8"first", false, false), target);
       CHECK(dispatched == List<std::string> {"first"});
     }
 
@@ -26,10 +24,10 @@ namespace krys::boo::dom::tests
     {
       {
         EventQueueScope outer;
-        ScopedEventQueue::DispatchOrQueue(Event::Create(DOMStringAtom(u8"first"), false, false), target);
+        ScopedEventQueue::DispatchOrQueue(Event::Create(u8"first", false, false), target);
         {
           EventQueueScope inner;
-          ScopedEventQueue::DispatchOrQueue(Event::Create(DOMStringAtom(u8"second"), false, false), target);
+          ScopedEventQueue::DispatchOrQueue(Event::Create(u8"second", false, false), target);
         }
         CHECK(dispatched.empty());
       }

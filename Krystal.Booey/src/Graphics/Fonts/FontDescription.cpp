@@ -47,7 +47,7 @@ namespace krys::boo
           return StringAtom {language};
         }
       }
-      return StringAtom {u8"zh-hans"}; // We have no signal. Pick one option arbitrarily.
+      return u8"zh-hans"; // We have no signal. Pick one option arbitrarily.
     }
 
     // The first `zh-` language the user prefers, recomputed when the host sets the languages.

@@ -115,7 +115,7 @@ namespace krys::boo::svg::tests
     (void)fixture.Document->UpdateLayout();
     auto &a = AById(fixture, u8"a");
 
-    CHECK(a.Target() == dom::DOMStringAtom(u8"t"));
+    CHECK(a.Target() == u8"t");
     CHECK(css::IsLink(a));
     CHECK(a.RelList().Length() == 2);
     CHECK(a.RelList().Supports(u8"noopener").Value());

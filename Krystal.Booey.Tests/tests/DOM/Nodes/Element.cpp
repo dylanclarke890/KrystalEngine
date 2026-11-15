@@ -30,7 +30,7 @@ namespace krys::boo::dom::tests
       }
     };
 
-    constexpr DOMStringView TestNamespace = u8"http://example.com/ns";
+    constexpr const char8 *TestNamespace = u8"http://example.com/ns";
   }
 
   TEST_CASE("Node.nodeName: an Element's is its HTML-uppercased qualified name",

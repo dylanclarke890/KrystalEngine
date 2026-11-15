@@ -178,10 +178,10 @@ namespace krys::boo::css::PropertyParserHelpers
       auto valueId = ValueIdFromName(token.IdentCodePoints());
       if (IsValidCustomIdentifier(valueId) && valueId != ValueId::None)
       {
-        return PrimitiveValue::CreateCustomIdent(token.IdentCodePoints());
+        return PrimitiveValue::CreateCustomIdent(CSSOMStringAtom(token.IdentCodePoints()));
       }
 
-      return PrimitiveValue::Create(token.IdentCodePoints());
+      return PrimitiveValue::Create(CSSOMStringAtom(token.IdentCodePoints()));
     }
 
     return ConsumeCustomIdent(tokens);

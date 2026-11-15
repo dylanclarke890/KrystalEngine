@@ -225,9 +225,8 @@ namespace krys::boo::tests
 
     SECTION("A cancelled typing step doesn't keep the view from following its contents")
     {
-      auto cancel =
-        root.AddEventListener(dom::DOMStringAtom(u8"beforeinput"),
-                              Func<void(dom::Event &)>([](dom::Event &event) { event.PreventDefault(); }));
+      auto cancel = root.AddEventListener(
+        u8"beforeinput", Func<void(dom::Event &)>([](dom::Event &event) { event.PreventDefault(); }));
       (void)fixture.Run(u8"InsertParagraph");
       CHECK(Narrow(fixture.InnerHTML(root)) == "<div id=\"a\">abc</div>");
 

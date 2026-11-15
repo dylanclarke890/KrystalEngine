@@ -793,7 +793,7 @@ namespace krys::boo
           childNodes.push_back(ShareRef(child));
         }
         {
-          for (auto &ownedElement : element.ResolvedElementsForAttribute(dom::DOMStringAtom(u8"aria-owns")))
+          for (auto &ownedElement : element.ResolvedElementsForAttribute(u8"aria-owns"))
           {
             // (A child it also owns isn't counted twice.)
             if (std::ranges::none_of(childNodes,
@@ -2348,10 +2348,8 @@ namespace krys::boo
       init.Composed = true;
 
       Ref protectedNode = ShareRef(*node);
-      bool handled =
-        !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(dom::DOMStringAtom(u8"keydown"), *node, init);
-      handled |=
-        !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(dom::DOMStringAtom(u8"keyup"), *node, init);
+      bool handled = !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(u8"keydown", *node, init);
+      handled |= !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(u8"keyup", *node, init);
       return handled;
     }
 
@@ -2419,7 +2417,7 @@ namespace krys::boo
   void AXNodeObject::SetIsExpanded(bool expanded) noexcept
   {
     if (auto *details = DynamicDowncast<html::HTMLDetailsElement>(GetNode());
-        details && expanded != details->HasAttribute(dom::DOMStringAtom(u8"open")))
+        details && expanded != details->HasAttribute(u8"open"))
     {
       details->ToggleOpen();
     }

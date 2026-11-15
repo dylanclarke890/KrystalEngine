@@ -193,8 +193,7 @@ namespace krys::boo::html::tests
   {
     MapFixture fixture;
     List<dom::Element *> clicked;
-    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"click"), CreateRef<ClickRecorder>(clicked),
-                                       true);
+    fixture.Document->AddEventListener(u8"click", CreateRef<ClickRecorder>(clicked), true);
 
     fixture.Click(10, 10);
     fixture.Click(30, 80);

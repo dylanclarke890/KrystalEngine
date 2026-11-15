@@ -32,7 +32,7 @@ namespace krys::boo::dom
 
     if (_localName != null)
     {
-      _localNameLower = DOMStringAtom(krys::text::ToASCIILower(_localName.View()));
+      _localNameLower = _localName.ToASCIILower();
     }
   }
 
@@ -58,7 +58,7 @@ namespace krys::boo::dom
   {
     if (_storage->_localNameUpper == null)
     {
-      _storage->_localNameUpper = DOMStringAtom(krys::text::ToASCIIUpper(_storage->_localName.View()));
+      _storage->_localNameUpper = _storage->_localName.ToASCIIUpper();
     }
 
     return _storage->_localNameUpper;
