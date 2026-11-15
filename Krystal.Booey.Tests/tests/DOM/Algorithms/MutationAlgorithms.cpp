@@ -423,7 +423,7 @@ namespace krys::boo::dom::tests
 
       auto second = CreateRef<TestElement>(*document);
       REQUIRE_FALSE(
-        MutationAlgorithms::Insert(*second, *parent, first.get(), SuppressObservers(true)).HasException());
+        MutationAlgorithms::Insert(*second, *parent, first.get(), SuppressObservers::Yes).HasException());
       CHECK(observer->TakeRecords().empty());
       CHECK(parent->FirstChild() == second.get());
     }
@@ -996,7 +996,7 @@ namespace krys::boo::dom::tests
       CHECK(records[0]->RemovedNodes()->Item(0).get() == second.get());
       CHECK(records[0]->PreviousSibling().get() == first.get());
 
-      REQUIRE_FALSE(MutationAlgorithms::Remove(*first, SuppressObservers(true)).HasException());
+      REQUIRE_FALSE(MutationAlgorithms::Remove(*first, SuppressObservers::Yes).HasException());
       CHECK(observer->TakeRecords().empty());
     }
 

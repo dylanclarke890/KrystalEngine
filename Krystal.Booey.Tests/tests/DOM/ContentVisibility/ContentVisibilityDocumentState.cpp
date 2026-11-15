@@ -36,7 +36,7 @@ namespace krys::boo::tests
         frame.CreateView(ViewSize);
         frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
-        parser->InputStream().Append(u8"<!DOCTYPE html>" + krys::move(markup), IsEOF(true));
+        parser->InputStream().Append(u8"<!DOCTYPE html>" + krys::move(markup), IsEOF::Yes);
         (void)parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();
       }

@@ -125,7 +125,7 @@ namespace krys::boo::html::tests
       auto &host = fixture.ById(u8"host");
       REQUIRE_FALSE(host.SetAttribute(u8"tabindex", u8"0").HasException());
       CHECK(focusable(u8"host"));
-      REQUIRE_FALSE(host.AttachShadow({.DelegatesFocus = dom::DelegatesFocus(true)}).HasException());
+      REQUIRE_FALSE(host.AttachShadow({.DelegatesFocus = dom::DelegatesFocus::Yes}).HasException());
       document.UpdateStyleIfNeeded();
       CHECK_FALSE(focusable(u8"host"));
     }
@@ -312,7 +312,7 @@ namespace krys::boo::html::tests
       u8R"(<!DOCTYPE html><style>:focus { color: rgb(0, 0, 255) }</style><body><div id=host></div></body>)"};
     auto &document = *fixture.Document;
     auto &host = HTML(fixture.ById(u8"host"));
-    auto shadow = host.AttachShadow({.DelegatesFocus = dom::DelegatesFocus(true)}).ReleaseValue();
+    auto shadow = host.AttachShadow({.DelegatesFocus = dom::DelegatesFocus::Yes}).ReleaseValue();
     auto first = document.CreateElement(u8"button").ReleaseValue();
     auto second = document.CreateElement(u8"button").ReleaseValue();
     REQUIRE_FALSE(shadow->AppendChild(*first).HasException());

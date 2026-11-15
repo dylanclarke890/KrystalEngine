@@ -21,7 +21,7 @@ namespace krys::boo::html
     SourceLocation _currentLocation;
 
   public:
-    void Append(utf8_string chunk, IsEOF isEOF = IsEOF(false)) noexcept
+    void Append(utf8_string chunk, IsEOF isEOF = IsEOF::No) noexcept
     {
       krys_debug_assert(_data.empty() || _data.back() != EOFMarker);
 
@@ -32,7 +32,7 @@ namespace krys::boo::html
         _data.append(decodeResult.Output);
       }
 
-      if (isEOF)
+      if (isEOF == IsEOF::Yes)
       {
         _data.append(1uz, EOFMarker);
       }

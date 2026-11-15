@@ -57,8 +57,8 @@ namespace krys
   };
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using InlineWeakRef = IntrusivePtr<T, PtrTraits, InlineWeakRefPolicy<T>, IsNullable(false)>;
+  using InlineWeakRef = IntrusivePtr<T, PtrTraits, InlineWeakRefPolicy<T>, IsNullable::No>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using InlineWeakPtr = IntrusivePtr<T, PtrTraits, InlineWeakRefPolicy<T>, IsNullable(true)>;
+  using InlineWeakPtr = IntrusivePtr<T, PtrTraits, InlineWeakRefPolicy<T>, IsNullable::Yes>;
 }

@@ -44,8 +44,8 @@ namespace krys::boo::css::tests
     auto value = TrimWhitespace(declaration.substr(colon + 1));
 
     constexpr utf8_stringview importantSuffix = u8"!important";
-    IsImportant important(value.ends_with(importantSuffix));
-    if (important)
+    auto important = value.ends_with(importantSuffix) ? IsImportant::Yes : IsImportant::No;
+    if (important == IsImportant::Yes)
     {
       value = TrimWhitespace(value.substr(0, value.size() - importantSuffix.size()));
     }

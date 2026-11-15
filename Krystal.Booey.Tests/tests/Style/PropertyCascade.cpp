@@ -87,7 +87,7 @@ namespace krys::boo::style::tests
     {
       auto document = CreateRef<dom::HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF(true));
+      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       (void)parser->PumpTokenizer();
       document->StyleScope().FlushPendingUpdate();
       return document;

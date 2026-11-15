@@ -43,14 +43,15 @@ namespace krys::boo::css::tests
 
     KRYS_NODISCARD static UniquePtr<MutableSelector>
       Attribute(SelectorMatch match, CSSOMStringView name, CSSOMStringView value = {},
-                IsCaseSensitive caseSensitive = IsCaseSensitive(true),
+                IsCaseSensitive caseSensitive = IsCaseSensitive::Yes,
                 CSSOMStringAtom prefix = CSSOMStringAtom::Null()) noexcept
     {
       auto selector = CreateUnique<MutableSelector>();
       selector->SetMatch(match);
       selector->SetValue(CSSOMStringAtom(value));
       selector->SetAttribute(dom::QualifiedName(dom::StarAtom(), prefix, CSSOMStringAtom(name)),
-                             caseSensitive ? AttributeCaseFlag::None : AttributeCaseFlag::Insensitive);
+                             caseSensitive == IsCaseSensitive::Yes ? AttributeCaseFlag::None
+                                                                   : AttributeCaseFlag::Insensitive);
       return selector;
     }
 

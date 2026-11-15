@@ -611,8 +611,8 @@ namespace krys::boo::css::tests
     SECTION("SetProperty")
     {
       bool failed = true;
-      CHECK(properties->SetProperty(PropertyId::Color, CSSOMString(u8"red"), context, IsImportant(false),
-                                    &failed));
+      CHECK(
+        properties->SetProperty(PropertyId::Color, CSSOMString(u8"red"), context, IsImportant::No, &failed));
       CHECK_FALSE(failed);
       CHECK(AsText(*properties) == "color: red;");
 
@@ -622,15 +622,15 @@ namespace krys::boo::css::tests
       CHECK(properties->SetProperty(PropertyId::Margin, CSSOMString(u8"1px 2px"), context));
       CHECK(AsText(*properties) == "color: red; margin: 1px 2px;");
 
-      CHECK_FALSE(properties->SetProperty(PropertyId::Color, CSSOMString(u8"nope"), context,
-                                          IsImportant(false), &failed));
+      CHECK_FALSE(
+        properties->SetProperty(PropertyId::Color, CSSOMString(u8"nope"), context, IsImportant::No, &failed));
       CHECK(failed);
 
       // An empty value removes the property.
       CHECK(properties->SetProperty(PropertyId::Color, CSSOMString(), context));
       CHECK(AsText(*properties) == "margin: 1px 2px;");
 
-      CHECK(properties->SetProperty(PropertyId::Color, CSSOMString(u8"blue"), IsImportant(true)));
+      CHECK(properties->SetProperty(PropertyId::Color, CSSOMString(u8"blue"), IsImportant::Yes));
       CHECK(AsText(*properties) == "margin: 1px 2px; color: blue !important;");
     }
 

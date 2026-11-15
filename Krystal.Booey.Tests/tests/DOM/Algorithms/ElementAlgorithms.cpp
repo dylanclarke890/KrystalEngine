@@ -341,8 +341,8 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<HTMLDocument>();
     auto attach = [](Element &element)
     {
-      return ElementAlgorithms::AttachShadowRoot(element, ShadowRootMode::Open, Clonable(false),
-                                                 Serialisable(false), DelegatesFocus(false),
+      return ElementAlgorithms::AttachShadowRoot(element, ShadowRootMode::Open, Clonable::No,
+                                                 Serialisable::No, DelegatesFocus::No,
                                                  SlotAssignmentMode::Named, null, nullptr);
     };
     auto requireNotSupported = [](const ExceptionOr<void> &result)
@@ -373,7 +373,7 @@ namespace krys::boo::dom::tests
     auto registry = html::CustomElementRegistry::CreateScoped();
 
     REQUIRE_FALSE(ElementAlgorithms::AttachShadowRoot(
-                    *host, ShadowRootMode::Open, Clonable(true), Serialisable(true), DelegatesFocus(true),
+                    *host, ShadowRootMode::Open, Clonable::Yes, Serialisable::Yes, DelegatesFocus::Yes,
                     SlotAssignmentMode::Manual, DOMString(u8"inner"), registry.get())
                     .HasException());
 
@@ -392,8 +392,8 @@ namespace krys::boo::dom::tests
     CHECK_FALSE(shadow->HasChildNodes());
 
     // A second attach throws, as the shadow root isn't declarative.
-    auto again = ElementAlgorithms::AttachShadowRoot(*host, ShadowRootMode::Open, Clonable(true),
-                                                     Serialisable(true), DelegatesFocus(true),
+    auto again = ElementAlgorithms::AttachShadowRoot(*host, ShadowRootMode::Open, Clonable::Yes,
+                                                     Serialisable::Yes, DelegatesFocus::Yes,
                                                      SlotAssignmentMode::Manual, null, registry.get());
     REQUIRE(again.HasException());
     CHECK(again.GetException().Code() == ExceptionCode::NotSupportedError);

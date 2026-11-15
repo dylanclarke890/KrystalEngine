@@ -71,18 +71,18 @@ namespace krys::text
 
         if (state == Accept)
         {
-          return DecodeOneSuccess<UTF8>(static_cast<char32>(codePoint), CodeUnitsConsumed(consumed));
+          return DecodeOneSuccess<UTF8>(static_cast<char32>(codePoint), static_cast<uint8>(consumed));
         }
         else if (state == Reject)
         {
-          return DecodeOneInvalidSequenceError<UTF8>(CodeUnitsConsumed(consumed));
+          return DecodeOneInvalidSequenceError<UTF8>(static_cast<uint8>(consumed));
         }
 
         // state is positive (e.g., 24, 36) -> we need more input, so loop continues
       }
 
       // If we exit the loop, we ran out of input before the DFA reached Accept
-      return DecodeOneIncompleteSequenceError<UTF8>(CodeUnitsConsumed(consumed));
+      return DecodeOneIncompleteSequenceError<UTF8>(static_cast<uint8>(consumed));
     }
 
     KRYS_NODISCARD constexpr static EncodeOneResult<UTF8> EncodeOne(char32 codePoint) noexcept
@@ -147,27 +147,26 @@ namespace krys::text
       auto leadCodeUnit = Endian::ToSystemEndian<Endian::Little>(static_cast<char16>(*current));
       if (!IsSingleOrLeadUTF16(leadCodeUnit))
       {
-        return DecodeOneInvalidSequenceError<UTF16LE>(CodeUnitsConsumed(1u));
+        return DecodeOneInvalidSequenceError<UTF16LE>(1u);
       }
 
       if (IsSingleUTF16(leadCodeUnit))
       {
-        return DecodeOneSuccess<UTF16LE>(leadCodeUnit, CodeUnitsConsumed(1u));
+        return DecodeOneSuccess<UTF16LE>(leadCodeUnit, 1u);
       }
 
       if (++current == end)
       {
-        return DecodeOneIncompleteSequenceError<UTF16LE>(CodeUnitsConsumed(1u));
+        return DecodeOneIncompleteSequenceError<UTF16LE>(1u);
       }
 
       auto trailCodeUnit = Endian::ToSystemEndian<Endian::Little>(static_cast<char16>(*current));
       if (!IsTrailSurrogate(trailCodeUnit))
       {
-        return DecodeOneInvalidSequenceError<UTF16LE>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<UTF16LE>(2u);
       }
 
-      return DecodeOneSuccess<UTF16LE>(UTF16CombineSurrogates(leadCodeUnit, trailCodeUnit),
-                                       CodeUnitsConsumed(2u));
+      return DecodeOneSuccess<UTF16LE>(UTF16CombineSurrogates(leadCodeUnit, trailCodeUnit), 2u);
     }
 
     KRYS_NODISCARD constexpr static EncodeOneResult<UTF16LE> EncodeOne(char32 codePoint) noexcept
@@ -212,27 +211,26 @@ namespace krys::text
       auto leadCodeUnit = Endian::ToSystemEndian<Endian::Big>(static_cast<char16>(*current));
       if (!IsSingleOrLeadUTF16(leadCodeUnit))
       {
-        return DecodeOneInvalidSequenceError<UTF16BE>(CodeUnitsConsumed(1u));
+        return DecodeOneInvalidSequenceError<UTF16BE>(1u);
       }
 
       if (IsSingleUTF16(leadCodeUnit))
       {
-        return DecodeOneSuccess<UTF16BE>(leadCodeUnit, CodeUnitsConsumed(1u));
+        return DecodeOneSuccess<UTF16BE>(leadCodeUnit, 1u);
       }
 
       if (++current == end)
       {
-        return DecodeOneIncompleteSequenceError<UTF16BE>(CodeUnitsConsumed(1u));
+        return DecodeOneIncompleteSequenceError<UTF16BE>(1u);
       }
 
       auto trailCodeUnit = Endian::ToSystemEndian<Endian::Big>(static_cast<char16>(*current));
       if (!IsTrailSurrogate(trailCodeUnit))
       {
-        return DecodeOneInvalidSequenceError<UTF16BE>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<UTF16BE>(2u);
       }
 
-      return DecodeOneSuccess<UTF16BE>(UTF16CombineSurrogates(leadCodeUnit, trailCodeUnit),
-                                       CodeUnitsConsumed(2u));
+      return DecodeOneSuccess<UTF16BE>(UTF16CombineSurrogates(leadCodeUnit, trailCodeUnit), 2u);
     }
 
     KRYS_NODISCARD constexpr static EncodeOneResult<UTF16BE> EncodeOne(char32 codePoint) noexcept

@@ -3,7 +3,6 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 
 namespace krys::boo::dom
 {
@@ -12,9 +11,10 @@ namespace krys::boo::dom
 
   /// @see https://dom.spec.whatwg.org/#insert-suppressobservers
   /// @see https://dom.spec.whatwg.org/#remove-suppressobservers
-  struct SuppressObservers : public StronglyTypedBool<SuppressObservers>
+  enum class SuppressObservers : bool
   {
-    using Base::Base;
+    No,
+    Yes,
   };
 
   /// @see https://dom.spec.whatwg.org/#mutation-algorithms
@@ -33,7 +33,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-node-insert
     KRYS_NODISCARD static ExceptionOr<void>
       Insert(Node &node, ContainerNode &parent, Node *refChild,
-             SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
+             SuppressObservers suppressObservers = SuppressObservers::No) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-append
     KRYS_NODISCARD static ExceptionOr<Node &> Append(Node &node, ContainerNode &parent) noexcept;
@@ -54,6 +54,6 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#concept-node-remove
     KRYS_NODISCARD static ExceptionOr<void>
-      Remove(Node &node, SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
+      Remove(Node &node, SuppressObservers suppressObservers = SuppressObservers::No) noexcept;
   };
 }

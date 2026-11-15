@@ -14,7 +14,6 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/NTTPMaybe.hpp"
 #include "Krystal.Core/Types/NTTPString.hpp"
-#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include <charconv>
 #include <limits>
 
@@ -60,12 +59,18 @@ namespace krys::boo::html
     int32 ClampedMax {0};
   };
 
+  /// @brief The value a reflected numeric attribute takes when it's missing or invalid: IDL's
+  /// `[ReflectDefault]`.
+  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
   template <Number T>
   struct ReflectDefault
-      : public StronglyTypedNumber<ReflectDefault<T>, conditional_t<SameType<T, double>, double, uint32>>
   {
-    using StronglyTypedNumber<ReflectDefault<T>,
-                              conditional_t<SameType<T, double>, double, uint32>>::StronglyTypedNumber;
+    T Value {};
+
+    constexpr ReflectDefault() noexcept = default;
+    explicit constexpr ReflectDefault(T value) noexcept : Value(value)
+    {
+    }
   };
 
   namespace detail
@@ -82,24 +87,28 @@ namespace krys::boo::html
     template <typename T>
     constexpr inline MaybeReflectRange<T> NoRange = {};
 
-    struct OnlyNonNegativeNumbers : public StronglyTypedBool<OnlyNonNegativeNumbers>
+    enum class OnlyNonNegativeNumbers : bool
     {
-      using Base::Base;
+      No,
+      Yes,
     };
 
-    struct OnlyPositiveNumbers : public StronglyTypedBool<OnlyPositiveNumbers>
+    enum class OnlyPositiveNumbers : bool
     {
-      using Base::Base;
+      No,
+      Yes,
     };
 
-    struct OnlyPositiveNumbersWithFallback : public StronglyTypedBool<OnlyPositiveNumbersWithFallback>
+    enum class OnlyPositiveNumbersWithFallback : bool
     {
-      using Base::Base;
+      No,
+      Yes,
     };
 
-    struct TreatedAsURL : public StronglyTypedBool<TreatedAsURL>
+    enum class TreatedAsURL : bool
     {
-      using Base::Base;
+      No,
+      Yes,
     };
 
     template <typename T>
@@ -107,7 +116,8 @@ namespace krys::boo::html
 
     template <typename T, OnlyNonNegativeNumbers OnlyNonNegative, OnlyPositiveNumbers OnlyPositive>
     using reflect_set_return_t =
-      conditional_t<(SameType<T, int32> && OnlyNonNegative) || (SameType<T, uint32> && OnlyPositive),
+      conditional_t<(SameType<T, int32> && OnlyNonNegative == OnlyNonNegativeNumbers::Yes)
+                      || (SameType<T, uint32> && OnlyPositive == OnlyPositiveNumbers::Yes),
                     dom::ExceptionOr<void>, void>;
 
     /// @brief @p value as the shortest valid integer.
@@ -252,7 +262,7 @@ namespace krys::boo::html
       {
         return {};
       }
-      if constexpr (AsUrl)
+      if constexpr (AsUrl == TreatedAsURL::Yes)
       {
         // 3b. Let urlString be the result of encoding-parsing-and-serializing a URL given
         //     contentAttributeValue, relative to element's node document.
@@ -329,7 +339,7 @@ namespace krys::boo::html
         //     integer parsing contentAttributeValue.
         auto parsedValue = [&]() -> MicroParserResult<int64>
         {
-          if constexpr (OnlyNonNegative)
+          if constexpr (OnlyNonNegative == OnlyNonNegativeNumbers::Yes)
           {
             auto nonNegative = Numbers::ParseNonNegativeInteger(*contentAttributeValue);
             return {.Value = static_cast<int64>(nonNegative.Value), .Error = nonNegative.Error};
@@ -351,10 +361,10 @@ namespace krys::boo::html
       // 3. If the reflected IDL attribute has a default value, then return defaultValue.
       if constexpr (DefaultValue)
       {
-        return *DefaultValue;
+        return (*DefaultValue).Value;
       }
       // 4. If the reflected IDL attribute is limited to only non-negative numbers, then return −1.
-      else if constexpr (OnlyNonNegative)
+      else if constexpr (OnlyNonNegative == OnlyNonNegativeNumbers::Yes)
       {
         return -1;
       }
@@ -365,12 +375,12 @@ namespace krys::boo::html
 
     /// @brief Helper for setting reflected content attributes with 'long' type.
     template <OnlyNonNegativeNumbers OnlyNonNegative, ReflectTarget Target>
-    KRYS_NODISCARD reflect_set_return_t<int32, OnlyNonNegative, OnlyPositiveNumbers(false)>
+    KRYS_NODISCARD reflect_set_return_t<int32, OnlyNonNegative, OnlyPositiveNumbers::No>
       ReflectLong(Target &target, dom::DOMStringAtom name, int32 value) noexcept
     {
       // 1. If the reflected IDL attribute is limited to only non-negative numbers and the given value is
       //    negative, then throw an "IndexSizeError" DOMException.
-      if constexpr (OnlyNonNegative)
+      if constexpr (OnlyNonNegative == OnlyNonNegativeNumbers::Yes)
       {
         if (value < 0)
         {
@@ -383,7 +393,7 @@ namespace krys::boo::html
       //    representing the number as a valid integer.
       SetContentAttribute(target, name, IntegerToString(value));
 
-      if constexpr (OnlyNonNegative)
+      if constexpr (OnlyNonNegative == OnlyNonNegativeNumbers::Yes)
       {
         return {};
       }
@@ -401,7 +411,8 @@ namespace krys::boo::html
               MaybeReflectDefault<uint32> DefaultValue, MaybeReflectRange<uint32> Range, ReflectTarget Target>
     KRYS_NODISCARD uint32 ReflectUnsignedLong(const Target &target, dom::DOMStringAtom name) noexcept
     {
-      static_assert(!(OnlyPositive && OnlyPositiveWithFallback),
+      static_assert(!(OnlyPositive == OnlyPositiveNumbers::Yes
+                      && OnlyPositiveWithFallback == OnlyPositiveNumbersWithFallback::Yes),
                     "Cannot be both 'OnlyPositive' and 'OnlyPositiveWithFallback'.");
 
       // 1. Let contentAttributeValue be the result of running this's get the content attribute.
@@ -412,7 +423,8 @@ namespace krys::boo::html
 
       // 3. If the reflected IDL attribute is limited to only positive numbers or limited to only positive
       //    numbers with fallback, then set minimum to 1.
-      if constexpr (OnlyPositive || OnlyPositiveWithFallback)
+      if constexpr (OnlyPositive == OnlyPositiveNumbers::Yes
+                    || OnlyPositiveWithFallback == OnlyPositiveNumbersWithFallback::Yes)
       {
         minimum = 1u;
       }
@@ -460,7 +472,7 @@ namespace krys::boo::html
       // 7. If the reflected IDL attribute has a default value, then return defaultValue.
       if constexpr (DefaultValue)
       {
-        return *DefaultValue;
+        return (*DefaultValue).Value;
       }
       // 8. Return minimum.
       else
@@ -472,15 +484,16 @@ namespace krys::boo::html
     /// @brief Helper for setting reflected content attributes with 'unsigned long' type.
     template <OnlyPositiveNumbers OnlyPositive, OnlyPositiveNumbersWithFallback OnlyPositiveWithFallback,
               MaybeReflectDefault<uint32> DefaultValue, ReflectTarget Target>
-    KRYS_NODISCARD conditional_t<OnlyPositive, dom::ExceptionOr<void>, void>
+    KRYS_NODISCARD conditional_t<OnlyPositive == OnlyPositiveNumbers::Yes, dom::ExceptionOr<void>, void>
       ReflectUnsignedLong(Target &target, dom::DOMStringAtom name, uint32 value) noexcept
     {
-      static_assert(!(OnlyPositive && OnlyPositiveWithFallback),
+      static_assert(!(OnlyPositive == OnlyPositiveNumbers::Yes
+                      && OnlyPositiveWithFallback == OnlyPositiveNumbersWithFallback::Yes),
                     "Cannot be both 'OnlyPositive' and 'OnlyPositiveWithFallback'.");
 
       // 1. If the reflected IDL attribute is limited to only positive numbers and the given value is 0, then
       //    throw an "IndexSizeError" DOMException.
-      if constexpr (OnlyPositive)
+      if constexpr (OnlyPositive == OnlyPositiveNumbers::Yes)
       {
         if (value == 0)
         {
@@ -493,7 +506,8 @@ namespace krys::boo::html
 
       // 3. If the reflected IDL attribute is limited to only positive numbers or limited to only positive
       //    numbers with fallback, then set minimum to 1.
-      if constexpr (OnlyPositive || OnlyPositiveWithFallback)
+      if constexpr (OnlyPositive == OnlyPositiveNumbers::Yes
+                    || OnlyPositiveWithFallback == OnlyPositiveNumbersWithFallback::Yes)
       {
         minimum = 1u;
       }
@@ -504,7 +518,7 @@ namespace krys::boo::html
       // 5. If the reflected IDL attribute has a default value, then set newValue to defaultValue.
       if constexpr (DefaultValue)
       {
-        newValue = *DefaultValue;
+        newValue = (*DefaultValue).Value;
       }
 
       // 6. If the given value is in the range minimum to 2147483647, inclusive, then set newValue to it.
@@ -517,7 +531,7 @@ namespace krys::boo::html
       //    representing the number as a valid non-negative integer.
       SetContentAttribute(target, name, IntegerToString(newValue));
 
-      if constexpr (OnlyPositive)
+      if constexpr (OnlyPositive == OnlyPositiveNumbers::Yes)
       {
         return {};
       }
@@ -547,7 +561,7 @@ namespace krys::boo::html
           // 2c. If parsedValue is not an error and the reflected IDL attribute is not limited to only
           // positive
           //     numbers, then return parsedValue.
-          if (!OnlyPositive || parsedValue > 0)
+          if (OnlyPositive == OnlyPositiveNumbers::No || parsedValue > 0)
           {
             return parsedValue.Value;
           }
@@ -557,7 +571,7 @@ namespace krys::boo::html
       // 3. If the reflected IDL attribute has a default value, then return defaultValue.
       if constexpr (DefaultValue)
       {
-        return *DefaultValue;
+        return (*DefaultValue).Value;
       }
 
       // 4. Return 0.
@@ -570,7 +584,7 @@ namespace krys::boo::html
     {
       // 1. If the reflected IDL attribute is limited to only positive numbers and the given value is not
       //    greater than 0, then return.
-      if constexpr (OnlyPositive)
+      if constexpr (OnlyPositive == OnlyPositiveNumbers::Yes)
       {
         if (!(value > 0))
         {
@@ -606,7 +620,7 @@ namespace krys::boo::html
     }
     else if constexpr (SameType<TValue, dom::USVString>)
     {
-      return detail::ReflectUSVString<detail::TreatedAsURL(false)>(target, name);
+      return detail::ReflectUSVString<detail::TreatedAsURL::No>(target, name);
     }
     else if constexpr (SameType<TValue, bool>)
     {
@@ -614,20 +628,20 @@ namespace krys::boo::html
     }
     else if constexpr (SameType<TValue, int32>)
     {
-      return detail::ReflectLong<detail::OnlyNonNegativeNumbers(false), detail::NoDefaultValue<int32>>(target,
-                                                                                                       name);
+      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::No, detail::NoDefaultValue<int32>>(target,
+                                                                                                    name);
     }
     else if constexpr (SameType<TValue, uint32>)
     {
-      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers(false),
-                                         detail::OnlyPositiveNumbersWithFallback(false),
+      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
+                                         detail::OnlyPositiveNumbersWithFallback::No,
                                          detail::NoDefaultValue<uint32>, detail::NoRange<uint32>>(target,
                                                                                                   name);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers(false), detail::NoDefaultValue<double>>(target,
-                                                                                                       name);
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::No, detail::NoDefaultValue<double>>(target,
+                                                                                                    name);
     }
     else
     {
@@ -638,8 +652,8 @@ namespace krys::boo::html
   /// @brief Represents the `[Reflect]` IDL attribute (setter).
   /// @see https://html.spec.whatwg.org/#xattr-reflect
   template <ReflectType TValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers(false),
-                                              detail::OnlyPositiveNumbers(false)>
+  KRYS_NODISCARD
+  detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
     Reflect(Target &target, dom::DOMStringAtom name, TValue &&value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [Reflect] setter");
@@ -650,7 +664,7 @@ namespace krys::boo::html
     }
     else if constexpr (SameType<TValue, dom::USVString>)
     {
-      return detail::ReflectUSVString<detail::TreatedAsURL(false)>(target, name, krys::move(value));
+      return detail::ReflectUSVString<detail::TreatedAsURL::No>(target, name, krys::move(value));
     }
     else if constexpr (SameType<TValue, bool>)
     {
@@ -658,17 +672,17 @@ namespace krys::boo::html
     }
     else if constexpr (SameType<TValue, int32>)
     {
-      detail::ReflectLong<detail::OnlyNonNegativeNumbers(false)>(target, name, value);
+      detail::ReflectLong<detail::OnlyNonNegativeNumbers::No>(target, name, value);
     }
     else if constexpr (SameType<TValue, uint32>)
     {
-      detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers(false),
-                                  detail::OnlyPositiveNumbersWithFallback(false),
+      detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
+                                  detail::OnlyPositiveNumbersWithFallback::No,
                                   detail::NoDefaultValue<uint32>>(target, name, value);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      detail::ReflectDouble<detail::OnlyPositiveNumbers(false)>(target, name, value);
+      detail::ReflectDouble<detail::OnlyPositiveNumbers::No>(target, name, value);
     }
     else
     {
@@ -685,18 +699,18 @@ namespace krys::boo::html
   {
     if constexpr (SameType<TValue, int32>)
     {
-      return detail::ReflectLong<detail::OnlyNonNegativeNumbers(false),
+      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::No,
                                  detail::MaybeReflectDefault<int32>(DefaultValue)>(target, name);
     }
     else if constexpr (SameType<TValue, uint32>)
     {
       return detail::ReflectUnsignedLong<
-        detail::OnlyPositiveNumbers(false), detail::OnlyPositiveNumbersWithFallback(false),
+        detail::OnlyPositiveNumbers::No, detail::OnlyPositiveNumbersWithFallback::No,
         detail::MaybeReflectDefault<uint32>(DefaultValue), detail::NoRange<uint32>>(target, name);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers(false),
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::No,
                                    detail::MaybeReflectDefault<double>(DefaultValue)>(target, name);
     }
     else
@@ -709,16 +723,16 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflect
   /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
   template <ReflectDefaultSetterType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers(false),
-                                              detail::OnlyPositiveNumbers(false)>
+  KRYS_NODISCARD
+  detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
     Reflect(Target &target, dom::DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [Reflect][ReflectDefault] setter");
 
     if constexpr (SameType<TValue, uint32>)
     {
-      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers(false),
-                                         detail::OnlyPositiveNumbersWithFallback(false),
+      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
+                                         detail::OnlyPositiveNumbersWithFallback::No,
                                          detail::MaybeReflectDefault<uint32>(DefaultValue)>(target, name,
                                                                                             value);
     }
@@ -738,7 +752,7 @@ namespace krys::boo::html
     if constexpr (SameType<TValue, uint32>)
     {
       return detail::ReflectUnsignedLong<
-        detail::OnlyPositiveNumbers(false), detail::OnlyPositiveNumbersWithFallback(false),
+        detail::OnlyPositiveNumbers::No, detail::OnlyPositiveNumbersWithFallback::No,
         detail::NoDefaultValue<uint32>, detail::MaybeReflectRange<uint32>(Range)>(target, name);
     }
     else
@@ -760,7 +774,7 @@ namespace krys::boo::html
     if constexpr (SameType<TValue, uint32>)
     {
       return detail::ReflectUnsignedLong<
-        detail::OnlyPositiveNumbers(false), detail::OnlyPositiveNumbersWithFallback(false),
+        detail::OnlyPositiveNumbers::No, detail::OnlyPositiveNumbersWithFallback::No,
         detail::MaybeReflectDefault<uint32>(DefaultValue), detail::MaybeReflectRange<uint32>(Range)>(target,
                                                                                                      name);
     }
@@ -817,8 +831,8 @@ namespace krys::boo::html
   /// @brief Represents the `[ReflectSetter]` IDL attribute (setter).
   /// @see https://html.spec.whatwg.org/#xattr-reflectsetter
   template <ReflectType TValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers(false),
-                                              detail::OnlyPositiveNumbers(false)>
+  KRYS_NODISCARD
+  detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
     ReflectSetter(Target &target, dom::DOMStringAtom name, TValue &&value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectSetter] setter");
@@ -836,19 +850,19 @@ namespace krys::boo::html
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectURL(const Target &target,
                                                                  dom::DOMStringAtom name) noexcept
   {
-    return detail::ReflectUSVString<detail::TreatedAsURL(true)>(target, name);
+    return detail::ReflectUSVString<detail::TreatedAsURL::Yes>(target, name);
   }
 
   /// @brief Represents the `[ReflectURL]` IDL attribute (setter).
   /// @see https://html.spec.whatwg.org/#xattr-reflecturl
   template <ReflectURLType TValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers(false),
-                                              detail::OnlyPositiveNumbers(false)>
+  KRYS_NODISCARD
+  detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
     ReflectURL(Target &target, dom::DOMStringAtom name, TValue &&value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectURL] setter");
 
-    return detail::ReflectUSVString<detail::TreatedAsURL(true)>(target, name, krys::move(value));
+    return detail::ReflectUSVString<detail::TreatedAsURL::Yes>(target, name, krys::move(value));
   }
 
 #pragma endregion
@@ -863,8 +877,8 @@ namespace krys::boo::html
   {
     if constexpr (SameType<TValue, int32>)
     {
-      return detail::ReflectLong<detail::OnlyNonNegativeNumbers(true), detail::NoDefaultValue<int32>>(target,
-                                                                                                      name);
+      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::Yes, detail::NoDefaultValue<int32>>(target,
+                                                                                                     name);
     }
     else
     {
@@ -875,15 +889,15 @@ namespace krys::boo::html
   /// @brief Represents the `[ReflectNonNegative]` IDL attribute (setter).
   /// @see https://html.spec.whatwg.org/#xattr-reflectnonnegative
   template <ReflectNonNegativeType TValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers(true),
-                                              detail::OnlyPositiveNumbers(false)>
+  KRYS_NODISCARD
+  detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::Yes, detail::OnlyPositiveNumbers::No>
     ReflectNonNegative(Target &target, dom::DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectNonNegative] setter");
 
     if constexpr (SameType<TValue, int32>)
     {
-      return detail::ReflectLong<detail::OnlyNonNegativeNumbers(true)>(target, name, value);
+      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::Yes>(target, name, value);
     }
     else
     {
@@ -900,7 +914,7 @@ namespace krys::boo::html
   {
     if constexpr (SameType<TValue, int32>)
     {
-      return detail::ReflectLong<detail::OnlyNonNegativeNumbers(true),
+      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::Yes,
                                  detail::MaybeReflectDefault<int32>(DefaultValue)>(target, name);
     }
     else
@@ -921,15 +935,15 @@ namespace krys::boo::html
   {
     if constexpr (SameType<TValue, uint32>)
     {
-      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers(true),
-                                         detail::OnlyPositiveNumbersWithFallback(false),
+      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::Yes,
+                                         detail::OnlyPositiveNumbersWithFallback::No,
                                          detail::NoDefaultValue<uint32>, detail::NoRange<uint32>>(target,
                                                                                                   name);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers(true), detail::NoDefaultValue<double>>(target,
-                                                                                                      name);
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes, detail::NoDefaultValue<double>>(target,
+                                                                                                     name);
     }
     else
     {
@@ -940,21 +954,21 @@ namespace krys::boo::html
   /// @brief Represents the `[ReflectPositive]` IDL attribute (setter).
   /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
   template <ReflectPositiveType TValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers(false),
-                                              detail::OnlyPositiveNumbers(true)>
+  KRYS_NODISCARD
+  detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::Yes>
     ReflectPositive(Target &target, dom::DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectPositive] setter");
 
     if constexpr (SameType<TValue, uint32>)
     {
-      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers(true),
-                                         detail::OnlyPositiveNumbersWithFallback(false),
+      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::Yes,
+                                         detail::OnlyPositiveNumbersWithFallback::No,
                                          detail::NoDefaultValue<uint32>>(target, name, value);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers(true)>(target, name, value);
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes>(target, name, value);
     }
     else
     {
@@ -973,12 +987,12 @@ namespace krys::boo::html
     if constexpr (SameType<TValue, uint32>)
     {
       return detail::ReflectUnsignedLong<
-        detail::OnlyPositiveNumbers(true), detail::OnlyPositiveNumbersWithFallback(false),
+        detail::OnlyPositiveNumbers::Yes, detail::OnlyPositiveNumbersWithFallback::No,
         detail::MaybeReflectDefault<uint32>(DefaultValue), detail::NoRange<uint32>>(target, name);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers(true),
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes,
                                    detail::MaybeReflectDefault<double>(DefaultValue)>(target, name);
     }
     else
@@ -992,16 +1006,16 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
   /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
   template <ReflectPositiveType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers(false),
-                                              detail::OnlyPositiveNumbers(true)>
+  KRYS_NODISCARD
+  detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::Yes>
     ReflectPositive(Target &target, dom::DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectPositive][ReflectDefault] setter");
 
     if constexpr (SameType<TValue, uint32>)
     {
-      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers(true),
-                                         detail::OnlyPositiveNumbersWithFallback(false),
+      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::Yes,
+                                         detail::OnlyPositiveNumbersWithFallback::No,
                                          detail::MaybeReflectDefault<uint32>(DefaultValue)>(target, name,
                                                                                             value);
     }
@@ -1023,15 +1037,15 @@ namespace krys::boo::html
   {
     if constexpr (SameType<TValue, uint32>)
     {
-      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers(false),
-                                         detail::OnlyPositiveNumbersWithFallback(true),
+      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
+                                         detail::OnlyPositiveNumbersWithFallback::Yes,
                                          detail::NoDefaultValue<uint32>, detail::NoRange<uint32>>(target,
                                                                                                   name);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers(true), detail::NoDefaultValue<double>>(target,
-                                                                                                      name);
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes, detail::NoDefaultValue<double>>(target,
+                                                                                                     name);
     }
     else
     {
@@ -1042,21 +1056,21 @@ namespace krys::boo::html
   /// @brief Represents the `[ReflectPositiveWithFallback]` IDL attribute (setter).
   /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
   template <ReflectPositiveWithFallbackType TValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers(false),
-                                              detail::OnlyPositiveNumbers(false)>
+  KRYS_NODISCARD
+  detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
     ReflectPositiveWithFallback(Target &target, dom::DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectPositiveWithFallback] setter");
 
     if constexpr (SameType<TValue, uint32>)
     {
-      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers(false),
-                                         detail::OnlyPositiveNumbersWithFallback(true),
+      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
+                                         detail::OnlyPositiveNumbersWithFallback::Yes,
                                          detail::NoDefaultValue<uint32>>(target, name, value);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers(true)>(target, name, value);
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes>(target, name, value);
     }
     else
     {
@@ -1075,12 +1089,12 @@ namespace krys::boo::html
     if constexpr (SameType<TValue, uint32>)
     {
       return detail::ReflectUnsignedLong<
-        detail::OnlyPositiveNumbers(false), detail::OnlyPositiveNumbersWithFallback(true),
+        detail::OnlyPositiveNumbers::No, detail::OnlyPositiveNumbersWithFallback::Yes,
         detail::MaybeReflectDefault<uint32>(DefaultValue), detail::NoRange<uint32>>(target, name);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers(true),
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes,
                                    detail::MaybeReflectDefault<double>(DefaultValue)>(target, name);
     }
     else
@@ -1095,7 +1109,7 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
   /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
   template <ReflectPositiveWithFallbackType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers(false),
+  KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No,
                                               detail::OnlyPositiveNumbers(SameType<TValue, double>)>
     ReflectPositiveWithFallback(Target &target, dom::DOMStringAtom name, TValue value) noexcept
   {
@@ -1104,8 +1118,8 @@ namespace krys::boo::html
 
     if constexpr (SameType<TValue, uint32>)
     {
-      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers(false),
-                                         detail::OnlyPositiveNumbersWithFallback(true),
+      return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
+                                         detail::OnlyPositiveNumbersWithFallback::Yes,
                                          detail::MaybeReflectDefault<uint32>(DefaultValue)>(target, name,
                                                                                             value);
     }
@@ -1115,7 +1129,7 @@ namespace krys::boo::html
       // for 'OnlyPositiveWithFallback' for 'double' reflected attributes. Here we assume it has the same
       // behavior as 'OnlyPositive' for 'double'.
 
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers(true),
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes,
                                    detail::MaybeReflectDefault<double>(DefaultValue)>(target, name, value);
     }
     else

@@ -6,7 +6,7 @@ namespace krys::boo::html::tests
   TEST_CASE("InputStream: basic iteration", "[HTML][InputStream]")
   {
     InputStream stream;
-    stream.Append(u8"abc", IsEOF(true));
+    stream.Append(u8"abc", IsEOF::Yes);
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'a');
@@ -27,7 +27,7 @@ namespace krys::boo::html::tests
   TEST_CASE("InputStream: CR normalizes to LF", "[HTML][InputStream][html:preprocessing-the-input-stream]")
   {
     InputStream stream;
-    stream.Append(u8"a\rb", IsEOF(true));
+    stream.Append(u8"a\rb", IsEOF::Yes);
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'a');
@@ -45,7 +45,7 @@ namespace krys::boo::html::tests
             "[HTML][InputStream][html:preprocessing-the-input-stream]")
   {
     InputStream stream;
-    stream.Append(u8"a\r\nb", IsEOF(true));
+    stream.Append(u8"a\r\nb", IsEOF::Yes);
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'a');
@@ -62,7 +62,7 @@ namespace krys::boo::html::tests
   TEST_CASE("InputStream: LF preserved", "[HTML][InputStream][html:preprocessing-the-input-stream]")
   {
     InputStream stream;
-    stream.Append(u8"a\nb", IsEOF(true));
+    stream.Append(u8"a\nb", IsEOF::Yes);
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'a');
@@ -91,7 +91,7 @@ namespace krys::boo::html::tests
 
     REQUIRE_FALSE(stream.Peek());
 
-    stream.Append(u8"cd", IsEOF(true));
+    stream.Append(u8"cd", IsEOF::Yes);
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'c');
@@ -104,7 +104,7 @@ namespace krys::boo::html::tests
   TEST_CASE("InputStream: Peek does not consume", "[HTML][InputStream]")
   {
     InputStream stream;
-    stream.Append(u8"x", IsEOF(true));
+    stream.Append(u8"x", IsEOF::Yes);
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'x');
@@ -120,7 +120,7 @@ namespace krys::boo::html::tests
   TEST_CASE("InputStream: Advance past advances the correct amount of characters", "[HTML][InputStream]")
   {
     InputStream stream;
-    stream.Append(u8"aBcDeF", IsEOF(true));
+    stream.Append(u8"aBcDeF", IsEOF::Yes);
 
     auto result = stream.AdvancePast<false>("aBc");
     REQUIRE(result == InputStream::MatchResult::Matched);
@@ -143,7 +143,7 @@ namespace krys::boo::html::tests
   {
     InputStream stream;
 
-    stream.Append(u8"a\nb\rc\r\ndtext", IsEOF(true));
+    stream.Append(u8"a\nb\rc\r\ndtext", IsEOF::Yes);
     {
       const auto &loc = stream.GetCurrentLocation();
       REQUIRE(loc.Line == 1uz);

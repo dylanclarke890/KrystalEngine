@@ -34,7 +34,7 @@ namespace krys::boo::dom::tests
   {
     auto document = CreateRef<HTMLDocument>();
     auto parser = CreateRef<html::DocumentParser>(*document);
-    parser->InputStream().Append(u8"<!DOCTYPE html><table id=t></table><p id=p>text</p>", IsEOF(true));
+    parser->InputStream().Append(u8"<!DOCTYPE html><table id=t></table><p id=p>text</p>", IsEOF::Yes);
     parser->PumpTokenizer();
     auto range = document->CreateRange();
 

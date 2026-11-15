@@ -507,7 +507,7 @@ namespace krys::boo::dom::tests
     auto deep = element->CloneNode(true).ReleaseValue();
     CHECK(deep->IsEqualNode(element.get()));
 
-    auto shadow = element->AttachShadow({.Clonable = Clonable(true)}).ReleaseValue();
+    auto shadow = element->AttachShadow({.Clonable = Clonable::Yes}).ReleaseValue();
     auto result = shadow->CloneNode(true);
     REQUIRE(result.HasException());
     CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);

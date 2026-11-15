@@ -4,7 +4,6 @@
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include "Krystal.Core/Types/WeakPtrImpl.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 
@@ -23,7 +22,7 @@ namespace krys::detail
     using type = T;
     using weak_pointer_impl = Impl;
     using pointer_traits = PtrTraits;
-    constexpr static bool nullable = Nullable.Value;
+    constexpr static bool nullable = Nullable == IsNullable::Yes;
 
   private:
     RefPtr<weak_pointer_impl, pointer_traits> _impl;
@@ -304,10 +303,10 @@ namespace krys
     ::krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, Nullable>::nullable;
 
   template <typename T, typename Impl = WeakPtrImpl, typename PtrTraits = RawPtrTraits<WeakPtrImpl>>
-  using WeakPtr = ::krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, IsNullable(true)>;
+  using WeakPtr = ::krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, IsNullable::Yes>;
 
   template <typename T, typename Impl = WeakPtrImpl, typename PtrTraits = RawPtrTraits<WeakPtrImpl>>
-  using WeakRef = ::krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, IsNullable(false)>;
+  using WeakRef = ::krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, IsNullable::No>;
 
   template <typename T, typename Impl = WeakPtrImpl, typename PtrTraits = RawPtrTraits<WeakPtrImpl>>
   requires(!IsPointer<T>)

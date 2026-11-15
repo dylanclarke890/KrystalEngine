@@ -272,7 +272,8 @@ namespace krys::boo::style
       {
         hasImportantProperties = true;
       }
-      if ((!important && current.IsImportant()) || (important && !current.IsImportant()))
+      if ((important == css::IsImportant::No && current.IsImportant())
+          || (important == css::IsImportant::Yes && !current.IsImportant()))
       {
         continue;
       }
@@ -449,7 +450,7 @@ namespace krys::boo::style
       return;
     }
 
-    AddMatch(*_positionTryFallbackProperties, Origin::PositionFallback, css::IsImportant(false));
+    AddMatch(*_positionTryFallbackProperties, Origin::PositionFallback, css::IsImportant::No);
   }
 
   namespace
@@ -486,7 +487,7 @@ namespace krys::boo::style
     bool hasImportant = false;
     for (auto &matchedDeclarations : DeclarationsForOrigin(_matchResult, origin))
     {
-      hasImportant |= AddMatch(matchedDeclarations, origin, css::IsImportant(false));
+      hasImportant |= AddMatch(matchedDeclarations, origin, css::IsImportant::No);
     }
 
     return hasImportant;
@@ -553,7 +554,7 @@ namespace krys::boo::style
 
     for (auto &match : importantMatches)
     {
-      AddMatch(matchedDeclarations[match.Index], origin, css::IsImportant(true));
+      AddMatch(matchedDeclarations[match.Index], origin, css::IsImportant::Yes);
     }
   }
 

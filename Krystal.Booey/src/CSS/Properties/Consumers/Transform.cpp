@@ -88,7 +88,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
 
       auto angle = PrimitiveValueResolver<Angle<>>::ConsumeAndResolve(
-        args, state, {.UnitlessZeroAngle = AllowUnitlessZero(true)});
+        args, state, {.UnitlessZeroAngle = AllowUnitlessZero::Yes});
       if (!angle)
       {
         return {};

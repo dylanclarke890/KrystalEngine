@@ -111,15 +111,15 @@ namespace krys::boo::css
     tokens.DiscardWhitespace();
     auto consume = [&]
     {
-      if (nestedContext && !isForgiving)
+      if (nestedContext && isForgiving == IsForgivingSelectorList::No)
       {
         return parser.ConsumeNestedSelectorList(tokens);
       }
-      if (nestedContext && isForgiving)
+      if (nestedContext && isForgiving == IsForgivingSelectorList::Yes)
       {
         return parser.ConsumeNestedComplexForgivingSelectorList(tokens);
       }
-      if (isForgiving)
+      if (isForgiving == IsForgivingSelectorList::Yes)
       {
         return parser.ConsumeComplexForgivingSelectorList(tokens);
       }
@@ -147,7 +147,7 @@ namespace krys::boo::css
                                         StyleSheetContents *styleSheet, NestedContext nestedContext) noexcept
   {
     auto result = ParseMutableSelectorList(tokens, context, styleSheet, nestedContext,
-                                           IsForgivingSelectorList(false), DisallowPseudoElements(false));
+                                           IsForgivingSelectorList::No, DisallowPseudoElements::No);
 
     if (result.empty() || !tokens.IsAtEnd())
     {
@@ -161,7 +161,7 @@ namespace krys::boo::css
                                  NestedContext nestedContext,
                                  DisallowPseudoElements disallowPseudoElements) noexcept
       : _context(context), _styleSheet(ShareRefPtr(styleSheet)), _nestedContext(nestedContext),
-        _disallowPseudoElements(disallowPseudoElements)
+        _disallowPseudoElements(disallowPseudoElements == DisallowPseudoElements::Yes)
   {
   }
 

@@ -32,7 +32,7 @@ namespace krys::boo::dom::tests
     {
       auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF(true));
+      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       (void)parser->PumpTokenizer();
       return document;
     }
@@ -334,12 +334,12 @@ namespace krys::boo::dom::tests
     REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Display, css::ValueId::None));
     REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Width, 10.0, css::UnitType::px));
     REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Color, css::CSSOMString(u8"red")));
-    REQUIRE(element->SetInlineStyleCustomProperty(u8"--x", u8"1", css::IsImportant(true)));
+    REQUIRE(element->SetInlineStyleCustomProperty(u8"--x", u8"1", css::IsImportant::Yes));
     REQUIRE(StyleAttribute(*element) == "display: none; width: 10px; color: red; --x: 1 !important;");
 
     bool didFailParsing = false;
     REQUIRE_FALSE(element->SetInlineStyleProperty(css::PropertyId::Color, css::CSSOMString(u8"nonsense"),
-                                                  css::IsImportant(false), &didFailParsing));
+                                                  css::IsImportant::No, &didFailParsing));
     REQUIRE(didFailParsing);
 
     REQUIRE(element->RemoveInlineStyleProperty(css::PropertyId::Width));

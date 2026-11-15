@@ -115,7 +115,7 @@ namespace krys::boo::css
     }
     StyleAttributeMutationScope mutationScope(_element.get());
     bool didFailParsing = false;
-    std::ignore = _element->SetInlineStyleProperty(property, value, IsImportant(false), &didFailParsing);
+    std::ignore = _element->SetInlineStyleProperty(property, value, IsImportant::No, &didFailParsing);
     if (!didFailParsing)
     {
       mutationScope.EnqueueMutationRecord();
@@ -133,7 +133,7 @@ namespace krys::boo::css
     bool didFailParsing = false;
     // FIXME: Validating the value without serialising it and parsing the text.
     std::ignore = _element->SetInlineStyleProperty(property, value->CssText(DefaultSerialisationContext()),
-                                                   IsImportant(false), &didFailParsing);
+                                                   IsImportant::No, &didFailParsing);
     if (!didFailParsing)
     {
       std::ignore = _element->SetInlineStyleProperty(property, krys::move(value));

@@ -58,7 +58,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSFunctionDescriptors::SetResult(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Result, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Result, value, IsImportant::No);
   }
 
 #pragma endregion

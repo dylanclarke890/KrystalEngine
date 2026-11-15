@@ -351,7 +351,7 @@ namespace krys::boo::css
     if (property.Id() == PropertyId::Custom)
     {
       if (!CustomPropertyIsImportant(Downcast<CustomPropertyValue>(property.Value()).Name().View())
-          || property.Important())
+          || property.Important() == IsImportant::Yes)
       {
         return SetProperty(property);
       }

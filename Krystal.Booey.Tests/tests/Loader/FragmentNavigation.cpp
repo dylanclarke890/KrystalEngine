@@ -172,7 +172,7 @@ namespace krys::boo::tests
     frame.SetDocument(ShareRefPtr<dom::Document>(document.get()));
 
     auto parser = CreateRef<html::DocumentParser>(*document);
-    parser->InputStream().Append(u8"<!DOCTYPE html>" + utf8_string(Page), IsEOF(true));
+    parser->InputStream().Append(u8"<!DOCTYPE html>" + utf8_string(Page), IsEOF::Yes);
     (void)parser->PumpTokenizer();
     html::EventLoop::Current().RunUntilIdle();
 

@@ -4211,10 +4211,13 @@ namespace krys::boo::html
     // 13a.ii. Let mode be template's shadowrootmode attribute's value.
     // 13a.iii. Let delegatesFocus be true if template has a shadowrootdelegatesfocus attribute; otherwise
     // false.
-    dom::DelegatesFocus delegatesFocus(templateElement.HasAttribute(u8"shadowrootdelegatesfocus"));
+    auto delegatesFocus = templateElement.HasAttribute(u8"shadowrootdelegatesfocus")
+                            ? dom::DelegatesFocus::Yes
+                            : dom::DelegatesFocus::No;
 
     // 13a.iv. Let serializable be true if template has a shadowrootserializable attribute; otherwise false.
-    dom::Serialisable serializable(templateElement.HasAttribute(u8"shadowrootserializable"));
+    auto serializable = templateElement.HasAttribute(u8"shadowrootserializable") ? dom::Serialisable::Yes
+                                                                                 : dom::Serialisable::No;
 
     // 13a.v. Let slotAssignment be "named".
     // 13a.vi. If template's shadowrootslotassignment attribute is in the Manual state, then set
@@ -4228,7 +4231,8 @@ namespace krys::boo::html
     }
 
     // 13a.vii. Let clonable be true if template has a shadowrootclonable attribute; otherwise false.
-    dom::Clonable clonable(templateElement.HasAttribute(u8"shadowrootclonable"));
+    auto clonable =
+      templateElement.HasAttribute(u8"shadowrootclonable") ? dom::Clonable::Yes : dom::Clonable::No;
 
     // 13a.viii. Let referenceTarget be the value of template's shadowrootreferencetarget attribute if it has
     //           one; otherwise null.

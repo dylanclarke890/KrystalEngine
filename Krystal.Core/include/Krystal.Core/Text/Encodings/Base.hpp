@@ -3,7 +3,6 @@
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Text/Encodings/EncodingId.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include <ranges>
 
 namespace krys::text
@@ -121,31 +120,22 @@ namespace krys::text
   template <IsChar TChar, size_t Size>
   using char_or_char_array_t = conditional_t<Size == 1uz, TChar, Array<TChar, Size>>;
 
-  struct CodeUnitsConsumed : public StronglyTypedNumber<CodeUnitsConsumed, uint8>
+  enum class MightBeInvalidEntry : bool
   {
-    using Base = StronglyTypedNumber<CodeUnitsConsumed, uint8>;
-    using Base::Base;
+    No,
+    Yes,
   };
 
-  struct CodeUnitsProduced : public StronglyTypedNumber<CodeUnitsProduced, uint8>
+  enum class CheckForBOM : bool
   {
-    using Base = StronglyTypedNumber<CodeUnitsProduced, uint8>;
-    using Base::Base;
+    No,
+    Yes,
   };
 
-  struct MightBeInvalidEntry : public StronglyTypedBool<MightBeInvalidEntry>
+  enum class AppendBOM : bool
   {
-    using Base::Base;
-  };
-
-  struct CheckForBOM : public StronglyTypedBool<CheckForBOM>
-  {
-    using Base::Base;
-  };
-
-  struct AppendBOM : public StronglyTypedBool<AppendBOM>
-  {
-    using Base::Base;
+    No,
+    Yes,
   };
 
   /// @brief A lookup entry for a multi-byte encoding's sparse table, mapping an index to a Unicode code
@@ -221,7 +211,7 @@ namespace krys::text
 
   template <typename TEncoding>
   KRYS_NODISCARD constexpr DecodeOneResult<TEncoding>
-    DecodeOneInvalidSequenceError(CodeUnitsConsumed codeUnitsConsumed = CodeUnitsConsumed(1u)) noexcept
+    DecodeOneInvalidSequenceError(uint8 codeUnitsConsumed = 1u) noexcept
   {
     if constexpr (TEncoding::MaxDecodeCodePoints == 1uz)
     {
@@ -241,7 +231,7 @@ namespace krys::text
 
   template <typename TEncoding>
   KRYS_NODISCARD constexpr DecodeOneResult<TEncoding>
-    DecodeOneIncompleteSequenceError(CodeUnitsConsumed codeUnitsConsumed = CodeUnitsConsumed(1u)) noexcept
+    DecodeOneIncompleteSequenceError(uint8 codeUnitsConsumed = 1u) noexcept
   {
     if constexpr (TEncoding::MaxDecodeCodePoints == 1uz)
     {
@@ -260,8 +250,8 @@ namespace krys::text
   }
 
   template <typename TEncoding>
-  KRYS_NODISCARD constexpr DecodeOneResult<TEncoding>
-    DecodeOneSuccess(char32 codePoint, CodeUnitsConsumed codeUnitsConsumed = CodeUnitsConsumed(1u)) noexcept
+  KRYS_NODISCARD constexpr DecodeOneResult<TEncoding> DecodeOneSuccess(char32 codePoint,
+                                                                       uint8 codeUnitsConsumed = 1u) noexcept
   {
     if constexpr (TEncoding::MaxDecodeCodePoints == 1uz)
     {
@@ -280,9 +270,8 @@ namespace krys::text
   }
 
   template <typename TEncoding>
-  KRYS_NODISCARD constexpr DecodeOneResult<TEncoding>
-    DecodeOneSuccess(char32 first, char32 second,
-                     CodeUnitsConsumed codeUnitsConsumed = CodeUnitsConsumed(1u)) noexcept
+  KRYS_NODISCARD constexpr DecodeOneResult<TEncoding> DecodeOneSuccess(char32 first, char32 second,
+                                                                       uint8 codeUnitsConsumed = 1u) noexcept
   {
     return {.Output = {{first, second}},
             .CodeUnitsConsumed = codeUnitsConsumed,
@@ -303,7 +292,7 @@ namespace krys::text
     return DecodeOneSuccess<TEncoding>(codePoint);
   }
 
-  template <Encoding TEncoding, MightBeInvalidEntry MightBeInvalid = MightBeInvalidEntry(false)>
+  template <Encoding TEncoding, MightBeInvalidEntry MightBeInvalid = MightBeInvalidEntry::No>
   KRYS_NODISCARD constexpr DecodeOneResult<TEncoding>
     DecodeOneWithExtendedASCIILookupMap(char32 codeUnit) noexcept
   {
@@ -319,7 +308,7 @@ namespace krys::text
     }
 
     auto codePoint = TEncoding::LookupMap[index];
-    if constexpr (MightBeInvalid)
+    if constexpr (MightBeInvalid == MightBeInvalidEntry::Yes)
     {
       if (codePoint == UnmappedByte)
       {

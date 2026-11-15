@@ -209,7 +209,7 @@ namespace krys
 
   using ThreadSafeWeakPtrControlBlockPtr =
     IntrusivePtr<ThreadSafeWeakPtrControlBlock, RawPtrTraits<ThreadSafeWeakPtrControlBlock>,
-                 WeakPtrThreadSafeControlBlockPolicy, IsNullable(true)>;
+                 WeakPtrThreadSafeControlBlockPolicy, IsNullable::Yes>;
 
   template <typename T>
   class RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe

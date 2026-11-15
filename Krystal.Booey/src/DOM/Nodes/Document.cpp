@@ -836,7 +836,7 @@ namespace krys::boo::dom
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->SanitizerConfiguration(krys::move(configuration));
       // 3. Place html into the input stream for parser.
-      parser->InputStream().Append(DOMString(html), IsEOF(true));
+      parser->InputStream().Append(DOMString(html), IsEOF::Yes);
       // 4. Start parser and let it run until it has consumed all the characters just inserted into the input
       //    stream.
       parser->PumpTokenizer();

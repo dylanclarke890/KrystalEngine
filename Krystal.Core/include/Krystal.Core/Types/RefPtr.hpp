@@ -57,10 +57,10 @@ namespace krys
   };
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using Ref = IntrusivePtr<T, PtrTraits, StrongRefPolicy, IsNullable(false)>;
+  using Ref = IntrusivePtr<T, PtrTraits, StrongRefPolicy, IsNullable::No>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using RefPtr = IntrusivePtr<T, PtrTraits, StrongRefPolicy, IsNullable(true)>;
+  using RefPtr = IntrusivePtr<T, PtrTraits, StrongRefPolicy, IsNullable::Yes>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
   requires(Constructible<T, Args...>)

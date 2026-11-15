@@ -479,7 +479,7 @@ namespace krys::boo::dom
     // 7. Set shadow's mode to mode.
     shadow->_mode = mode;
     // 8. Set shadow's delegates focus to delegatesFocus.
-    shadow->_delegatesFocus = delegatesFocus;
+    shadow->_delegatesFocus = delegatesFocus == DelegatesFocus::Yes;
 
     // 9. If element's custom element state is "precustomized" or "custom", then set shadow's available to
     //    element internals to true.
@@ -492,11 +492,11 @@ namespace krys::boo::dom
     // 10. Set shadow's declarative to false.
     shadow->_declarative = false;
     // 11. Set shadow's serializable to serializable.
-    shadow->_serializable = serializable;
+    shadow->_serializable = serializable == Serialisable::Yes;
     // 12. Set shadow's slot assignment to slotAssignment.
     shadow->_slotAssignment = slotAssignment;
     // 13. Set shadow's clonable to clonable.
-    shadow->_clonable = clonable;
+    shadow->_clonable = clonable == Clonable::Yes;
     // 14. Set shadow's reference target to referenceTarget.
     shadow->_referenceTarget = krys::move(referenceTarget);
 

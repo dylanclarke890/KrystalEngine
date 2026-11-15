@@ -260,7 +260,7 @@ namespace krys::boo
     void RemoveDisplayPropertyFromSpanStyleIfRedundant(
       dom::StyledElement &element, css::MutableStyleProperties &styleFromMatchedRules) noexcept;
     void SetProperty(css::PropertyId propertyID, const dom::DOMString &value,
-                     css::IsImportant important = css::IsImportant(false)) noexcept;
+                     css::IsImportant important = css::IsImportant::No) noexcept;
     template <typename T>
     KRYS_NODISCARD TriState TriStateOfStyle(
       T &styleToCompare, ShouldIgnoreTextOnlyProperties shouldIgnoreTextOnlyProperties) const noexcept;

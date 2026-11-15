@@ -38,12 +38,12 @@ namespace krys::boo::css
                                          IsImportant important, IsImplicit implicit) noexcept
   {
     uint8 shorthandIndex = 0u;
-    IsSetFromShorthand setFromShorthand = IsSetFromShorthand(false);
+    IsSetFromShorthand setFromShorthand = IsSetFromShorthand::No;
 
     if (currentShorthand != PropertyId::Invalid)
     {
       auto shorthands = MatchingShorthandsForLonghand(property);
-      setFromShorthand = IsSetFromShorthand(true);
+      setFromShorthand = IsSetFromShorthand::Yes;
       if (shorthands.size() > 1uz)
       {
         shorthandIndex = static_cast<uint8>(IndexOfShorthandForLonghand(currentShorthand, shorthands));
@@ -53,8 +53,8 @@ namespace krys::boo::css
     // Allow anything to be set from a shorthand (e.g. the CSS all property always sets everything,
     // regardless of whether the longhands are enabled), and allow internal properties as we use
     // them to handle certain DOM-exposed values.
-    krys_debug_assert(IsExposed(property, state.Context.PropertySettings) || setFromShorthand
-                      || IsInternal(property));
+    krys_debug_assert(IsExposed(property, state.Context.PropertySettings)
+                      || setFromShorthand == IsSetFromShorthand::Yes || IsInternal(property));
 
     if (value && !value->IsImplicitInitialValue())
     {
@@ -63,9 +63,9 @@ namespace krys::boo::css
     }
     else
     {
-      krys_debug_assert(setFromShorthand);
+      krys_debug_assert(setFromShorthand == IsSetFromShorthand::Yes);
       AddProperty(Property(property, ShareRef(PrimitiveValue::ImplicitInitialValue()), important,
-                           IsImplicit(true), setFromShorthand, shorthandIndex));
+                           IsImplicit::Yes, setFromShorthand, shorthandIndex));
     }
   }
 

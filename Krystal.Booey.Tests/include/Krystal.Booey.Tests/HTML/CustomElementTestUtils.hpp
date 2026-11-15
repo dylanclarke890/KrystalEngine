@@ -102,7 +102,7 @@ namespace krys::boo::html::tests
     void Parse(utf8_string &&markup) noexcept
     {
       auto parser = CreateRef<DocumentParser>(*Document);
-      parser->InputStream().Append(u8"<!DOCTYPE html><body>" + krys::move(markup), IsEOF(true));
+      parser->InputStream().Append(u8"<!DOCTYPE html><body>" + krys::move(markup), IsEOF::Yes);
       (void)parser->PumpTokenizer();
     }
 

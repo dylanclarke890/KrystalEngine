@@ -207,7 +207,7 @@ namespace krys::boo::html
 
     // 20. Place the input into the input stream for the HTML parser just created. The encoding confidence is
     //     irrelevant.
-    parser->InputStream().Append(krys::move(input), IsEOF(true));
+    parser->InputStream().Append(krys::move(input), IsEOF::Yes);
 
     // 21. Start the HTML parser and let it run until it has consumed all the characters just inserted into
     //     the input stream.

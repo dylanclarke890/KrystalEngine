@@ -60,7 +60,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMargin(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Margin, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Margin, value, IsImportant::No);
   }
 
   // @position-try 'margin-top'
@@ -71,7 +71,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginTop(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginTop, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginTop, value, IsImportant::No);
   }
 
   // @position-try 'margin-right'
@@ -82,7 +82,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginRight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginRight, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginRight, value, IsImportant::No);
   }
 
   // @position-try 'margin-bottom'
@@ -93,7 +93,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBottom(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginBottom, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginBottom, value, IsImportant::No);
   }
 
   // @position-try 'margin-left'
@@ -104,7 +104,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginLeft(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginLeft, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginLeft, value, IsImportant::No);
   }
 
   // @position-try 'margin-block'
@@ -115,7 +115,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlock(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginBlock, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginBlock, value, IsImportant::No);
   }
 
   // @position-try 'margin-block-start'
@@ -126,7 +126,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlockStart(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginBlockStart, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginBlockStart, value, IsImportant::No);
   }
 
   // @position-try 'margin-block-end'
@@ -137,7 +137,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginBlockEnd(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginBlockEnd, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginBlockEnd, value, IsImportant::No);
   }
 
   // @position-try 'margin-inline'
@@ -148,7 +148,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInline(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginInline, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginInline, value, IsImportant::No);
   }
 
   // @position-try 'margin-inline-start'
@@ -159,7 +159,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInlineStart(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginInlineStart, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginInlineStart, value, IsImportant::No);
   }
 
   // @position-try 'margin-inline-end'
@@ -170,7 +170,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMarginInlineEnd(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MarginInlineEnd, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MarginInlineEnd, value, IsImportant::No);
   }
 
   // @position-try 'inset'
@@ -181,7 +181,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInset(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Inset, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Inset, value, IsImportant::No);
   }
 
   // @position-try 'inset-block'
@@ -192,7 +192,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlock(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetBlock, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::InsetBlock, value, IsImportant::No);
   }
 
   // @position-try 'inset-block-start'
@@ -203,7 +203,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlockStart(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetBlockStart, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::InsetBlockStart, value, IsImportant::No);
   }
 
   // @position-try 'inset-block-end'
@@ -214,7 +214,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetBlockEnd(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetBlockEnd, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::InsetBlockEnd, value, IsImportant::No);
   }
 
   // @position-try 'inset-inline'
@@ -225,7 +225,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInline(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetInline, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::InsetInline, value, IsImportant::No);
   }
 
   // @position-try 'inset-inline-start'
@@ -236,7 +236,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInlineStart(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetInlineStart, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::InsetInlineStart, value, IsImportant::No);
   }
 
   // @position-try 'inset-inline-end'
@@ -247,7 +247,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInsetInlineEnd(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InsetInlineEnd, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::InsetInlineEnd, value, IsImportant::No);
   }
 
   // @position-try 'top'
@@ -258,7 +258,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetTop(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Top, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Top, value, IsImportant::No);
   }
 
   // @position-try 'left'
@@ -269,7 +269,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetLeft(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Left, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Left, value, IsImportant::No);
   }
 
   // @position-try 'right'
@@ -280,7 +280,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetRight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Right, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Right, value, IsImportant::No);
   }
 
   // @position-try 'bottom'
@@ -291,7 +291,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetBottom(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Bottom, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Bottom, value, IsImportant::No);
   }
 
   // @position-try 'width'
@@ -302,7 +302,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetWidth(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Width, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Width, value, IsImportant::No);
   }
 
   // @position-try 'min-width'
@@ -313,7 +313,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinWidth(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MinWidth, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MinWidth, value, IsImportant::No);
   }
 
   // @position-try 'max-width'
@@ -324,7 +324,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxWidth(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MaxWidth, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MaxWidth, value, IsImportant::No);
   }
 
   // @position-try 'height'
@@ -335,7 +335,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetHeight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Height, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Height, value, IsImportant::No);
   }
 
   // @position-try 'min-height'
@@ -346,7 +346,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinHeight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MinHeight, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MinHeight, value, IsImportant::No);
   }
 
   // @position-try 'max-height'
@@ -357,7 +357,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxHeight(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MaxHeight, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MaxHeight, value, IsImportant::No);
   }
 
   // @position-try 'block-size'
@@ -368,7 +368,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetBlockSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::BlockSize, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::BlockSize, value, IsImportant::No);
   }
 
   // @position-try 'min-block-size'
@@ -379,7 +379,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinBlockSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MinBlockSize, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MinBlockSize, value, IsImportant::No);
   }
 
   // @position-try 'max-block-size'
@@ -390,7 +390,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxBlockSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MaxBlockSize, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MaxBlockSize, value, IsImportant::No);
   }
 
   // @position-try 'inline-size'
@@ -401,7 +401,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetInlineSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::InlineSize, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::InlineSize, value, IsImportant::No);
   }
 
   // @position-try 'min-inline-size'
@@ -412,7 +412,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMinInlineSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MinInlineSize, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MinInlineSize, value, IsImportant::No);
   }
 
   // @position-try 'max-inline-size'
@@ -423,7 +423,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetMaxInlineSize(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::MaxInlineSize, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::MaxInlineSize, value, IsImportant::No);
   }
 
   // @position-try 'place-self'
@@ -434,7 +434,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPlaceSelf(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::PlaceSelf, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::PlaceSelf, value, IsImportant::No);
   }
 
   // @position-try 'align-self'
@@ -445,7 +445,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetAlignSelf(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::AlignSelf, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::AlignSelf, value, IsImportant::No);
   }
 
   // @position-try 'justify-self'
@@ -456,7 +456,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetJustifySelf(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::JustifySelf, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::JustifySelf, value, IsImportant::No);
   }
 
   // @position-try 'position-anchor'
@@ -467,7 +467,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPositionAnchor(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::PositionAnchor, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::PositionAnchor, value, IsImportant::No);
   }
 
   // @position-try 'position-area'
@@ -478,7 +478,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSPositionTryDescriptors::SetPositionArea(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::PositionArea, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::PositionArea, value, IsImportant::No);
   }
 
 #pragma endregion

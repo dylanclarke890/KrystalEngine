@@ -12,9 +12,9 @@ namespace krys::boo::css::tests
     {
       Property property(PropertyId::Color, PrimitiveValue::Create(ValueId::Red));
       CHECK(property.Id() == PropertyId::Color);
-      CHECK_FALSE(property.Important());
-      CHECK_FALSE(property.Implicit());
-      CHECK_FALSE(property.SetFromShorthand());
+      CHECK(property.Important() == IsImportant::No);
+      CHECK(property.Implicit() == IsImplicit::No);
+      CHECK(property.SetFromShorthand() == IsSetFromShorthand::No);
       CHECK(property.ShorthandIndex() == 0u);
       CHECK(property.ShorthandId() == PropertyId::Invalid);
       CHECK(CssText(property.Value()) == "red");
@@ -22,31 +22,31 @@ namespace krys::boo::css::tests
 
     SECTION("Flags")
     {
-      Property property(PropertyId::Color, PrimitiveValue::Create(ValueId::Red), IsImportant(true),
-                        IsImplicit(true));
-      CHECK(property.Important());
-      CHECK(property.Implicit());
-      CHECK_FALSE(property.SetFromShorthand());
+      Property property(PropertyId::Color, PrimitiveValue::Create(ValueId::Red), IsImportant::Yes,
+                        IsImplicit::Yes);
+      CHECK(property.Important() == IsImportant::Yes);
+      CHECK(property.Implicit() == IsImplicit::Yes);
+      CHECK(property.SetFromShorthand() == IsSetFromShorthand::No);
     }
 
     SECTION("ShorthandId")
     {
       // margin-top's shorthands are `all` and `margin`.
-      Property fromMargin(PropertyId::MarginTop, PrimitiveValue::Create(0.0), IsImportant(false),
-                          IsImplicit(false), IsSetFromShorthand(true), 1u);
-      CHECK(fromMargin.SetFromShorthand());
+      Property fromMargin(PropertyId::MarginTop, PrimitiveValue::Create(0.0), IsImportant::No, IsImplicit::No,
+                          IsSetFromShorthand::Yes, 1u);
+      CHECK(fromMargin.SetFromShorthand() == IsSetFromShorthand::Yes);
       CHECK(fromMargin.ShorthandIndex() == 1u);
       CHECK(fromMargin.ShorthandId() == PropertyId::Margin);
 
-      Property fromAll(PropertyId::MarginTop, PrimitiveValue::Create(0.0), IsImportant(false),
-                       IsImplicit(false), IsSetFromShorthand(true), 0u);
+      Property fromAll(PropertyId::MarginTop, PrimitiveValue::Create(0.0), IsImportant::No, IsImplicit::No,
+                       IsSetFromShorthand::Yes, 0u);
       CHECK(fromAll.ShorthandId() == PropertyId::All);
     }
 
     SECTION("Metadata constructor")
     {
-      Property original(PropertyId::MarginTop, PrimitiveValue::Create(0.0), IsImportant(true),
-                        IsImplicit(false), IsSetFromShorthand(true), 1u);
+      Property original(PropertyId::MarginTop, PrimitiveValue::Create(0.0), IsImportant::Yes, IsImplicit::No,
+                        IsSetFromShorthand::Yes, 1u);
       Property copy(original.Metadata(), PrimitiveValue::Create(0.0));
       CHECK(copy.Metadata() == original.Metadata());
       CHECK(copy == original);
@@ -58,10 +58,10 @@ namespace krys::boo::css::tests
       CHECK(a == Property(PropertyId::Color, PrimitiveValue::Create(ValueId::Red)));
       CHECK_FALSE(a == Property(PropertyId::Color, PrimitiveValue::Create(ValueId::Blue)));
       CHECK_FALSE(a == Property(PropertyId::BackgroundColor, PrimitiveValue::Create(ValueId::Red)));
-      CHECK_FALSE(a == Property(PropertyId::Color, PrimitiveValue::Create(ValueId::Red), IsImportant(true)));
+      CHECK_FALSE(a == Property(PropertyId::Color, PrimitiveValue::Create(ValueId::Red), IsImportant::Yes));
       CHECK_FALSE(a
-                  == Property(PropertyId::Color, PrimitiveValue::Create(ValueId::Red), IsImportant(false),
-                              IsImplicit(true)));
+                  == Property(PropertyId::Color, PrimitiveValue::Create(ValueId::Red), IsImportant::No,
+                              IsImplicit::Yes));
     }
 
     SECTION("ParsedPropertyList")

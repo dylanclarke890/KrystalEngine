@@ -232,7 +232,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     auto parsedValue =
-      MetaConsumer<Angle<>>::Consume(args, state, {.UnitlessZeroAngle = AllowUnitlessZero(true)});
+      MetaConsumer<Angle<>>::Consume(args, state, {.UnitlessZeroAngle = AllowUnitlessZero::Yes});
     if (!parsedValue || !args.IsAtEnd())
     {
       return {};

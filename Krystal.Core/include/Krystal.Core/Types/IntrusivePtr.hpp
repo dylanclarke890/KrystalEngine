@@ -4,7 +4,6 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 #include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
@@ -12,6 +11,13 @@
 
 namespace krys
 {
+  /// @brief Whether a smart pointer can be null (pointer-like) or not (reference-like).
+  enum class IsNullable : bool
+  {
+    No,
+    Yes,
+  };
+
   /// @brief A wrapper around a pointer to an object that manages reference counting intrusively.
   /// @typeparam T The type of the object being pointed to. Must not be a pointer type.
   /// @typeparam PtrTraits The pointer traits to use for this intrusive pointer. This defines how the pointer
@@ -32,7 +38,7 @@ namespace krys
     using element_type = T;
     using pointer_traits = PtrTraits;
     using ref_policy = RefPolicy;
-    constexpr static bool nullable = Nullable.Value;
+    constexpr static bool nullable = Nullable == IsNullable::Yes;
     using pointer = typename pointer_traits::storage_type;
 
   private:
@@ -408,13 +414,13 @@ namespace krys
 
   /// @brief @p source as its derived type @p Target if it is one, and null otherwise (so always nullable).
   template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable(true)>
+  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable::Yes>
     DynamicDowncast(const IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &source) noexcept
   {
     static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
     static_assert(CanDowncast<Source, Target>, "Invalid downcast");
 
-    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable(true)>;
+    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable::Yes>;
     if (!Is<Target>(source))
     {
       return Result(nullptr);
@@ -424,13 +430,13 @@ namespace krys
 
   /// @brief @p source as its derived type @p Target if it is one, and null otherwise (so always nullable).
   template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable(true)>
+  KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable::Yes>
     DynamicDowncast(IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &&source) noexcept
   {
     static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
     static_assert(CanDowncast<Source, Target>, "Invalid downcast");
 
-    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable(true)>;
+    using Result = detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable::Yes>;
     if (!Is<Target>(source))
     {
       return Result(nullptr);

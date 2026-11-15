@@ -195,8 +195,8 @@ namespace krys::boo::css
       HashSet<CSSOMStringAtom> seenCustomProperties;
 
       // Filled back to front, as upstream fills a list of the same size from its end.
-      FilterProperties(IsImportant(true), properties, results, seenProperties, seenCustomProperties);
-      FilterProperties(IsImportant(false), properties, results, seenProperties, seenCustomProperties);
+      FilterProperties(IsImportant::Yes, properties, results, seenProperties, seenCustomProperties);
+      FilterProperties(IsImportant::No, properties, results, seenProperties, seenCustomProperties);
       std::reverse(results.begin(), results.end());
 
       return results;
@@ -1295,7 +1295,7 @@ namespace krys::boo::css
           // Parse the selector list range
           auto mutableSelectorList = ParseMutableSelectorList(
             selectorListRange, SelectorParserContext(_context), _styleSheet.get(), ancestorRuleType,
-            IsForgivingSelectorList(false), DisallowPseudoElements(true));
+            IsForgivingSelectorList::No, DisallowPseudoElements::Yes);
           if (mutableSelectorList.empty())
           {
             return false;
@@ -1546,7 +1546,7 @@ namespace krys::boo::css
   {
     auto mutableSelectorList = ParseMutableSelectorList(
       prelude, SelectorParserContext(_context), _styleSheet.get(), LastAncestorRuleType(),
-      IsForgivingSelectorList(false), DisallowPseudoElements(false));
+      IsForgivingSelectorList::No, DisallowPseudoElements::No);
 
     if (mutableSelectorList.empty())
     {
@@ -1790,26 +1790,26 @@ namespace krys::boo::css
     tokens.DiscardTrailingWhitespace();
     if (tokens.Size() < 2)
     {
-      return IsImportant(false);
+      return IsImportant::No;
     }
 
     auto removeImportantRange = tokens;
     if (auto &last = removeImportantRange.ConsumeLast();
         last.Type() != TokenType::Ident || !text::IsASCIICaselessEqual(last.IdentCodePoints(), u8"important"))
     {
-      return IsImportant(false);
+      return IsImportant::No;
     }
 
     removeImportantRange.DiscardTrailingWhitespace();
     if (auto &last = removeImportantRange.ConsumeLast();
         last.Type() != TokenType::Delim || last.Delimiter() != U'!')
     {
-      return IsImportant(false);
+      return IsImportant::No;
     }
 
     removeImportantRange.DiscardTrailingWhitespace();
     tokens = removeImportantRange;
-    return IsImportant(true);
+    return IsImportant::Yes;
   }
 
   namespace
@@ -1837,7 +1837,7 @@ namespace krys::boo::css
     tokens.DiscardWhitespace();
 
     auto important = ConsumeTrailingImportantAndWhitespace(tokens);
-    if (important && RuleDoesNotAllowImportant(ruleType))
+    if (important == IsImportant::Yes && RuleDoesNotAllowImportant(ruleType))
     {
       return false;
     }

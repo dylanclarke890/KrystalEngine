@@ -76,26 +76,25 @@ namespace krys::boo::css
       krys_debug_assert_msg(!IsShorthand(_metadata.Id), "unexpected shorthand property");
     }
 
-    Property(PropertyId id, Ref<css::Value> &&value, IsImportant important = IsImportant(false),
-             IsImplicit implicit = IsImplicit(false),
-             IsSetFromShorthand setFromShorthand = IsSetFromShorthand(false),
-             uint8 shorthandIndex = 0u) noexcept
+    Property(PropertyId id, Ref<css::Value> &&value, IsImportant important = IsImportant::No,
+             IsImplicit implicit = IsImplicit::No,
+             IsSetFromShorthand setFromShorthand = IsSetFromShorthand::No, uint8 shorthandIndex = 0u) noexcept
         : _metadata({.Id = id, .ShorthandIndex = shorthandIndex}), _value(krys::move(value))
     {
       krys_debug_assert(id != PropertyId::Invalid);
       krys_debug_assert_msg(!IsShorthand(id), "unexpected shorthand property");
 
-      if (important)
+      if (important == IsImportant::Yes)
       {
         _metadata.Flags = _metadata.Flags | PropertyFlag::Important;
       }
 
-      if (implicit)
+      if (implicit == IsImplicit::Yes)
       {
         _metadata.Flags = _metadata.Flags | PropertyFlag::Implicit;
       }
 
-      if (setFromShorthand)
+      if (setFromShorthand == IsSetFromShorthand::Yes)
       {
         _metadata.Flags = _metadata.Flags | PropertyFlag::SetFromShorthand;
       }

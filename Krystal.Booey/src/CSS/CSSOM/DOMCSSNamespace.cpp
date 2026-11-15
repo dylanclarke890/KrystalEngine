@@ -93,8 +93,8 @@ namespace krys::boo::css
     if (propertyId == PropertyId::Invalid && IsCustomPropertyName(property))
     {
       auto declaration = MutableStyleProperties::Create();
-      return Parser::ParseCustomPropertyValue(*declaration, CSSOMStringAtom(property), value,
-                                              IsImportant(false), context)
+      return Parser::ParseCustomPropertyValue(*declaration, CSSOMStringAtom(property), value, IsImportant::No,
+                                              context)
              != Parser::ParseResult::Error;
     }
 
@@ -105,7 +105,7 @@ namespace krys::boo::css
     }
 
     auto declaration = MutableStyleProperties::Create();
-    return Parser::ParseValue(*declaration, propertyId, value, IsImportant(false), context)
+    return Parser::ParseValue(*declaration, propertyId, value, IsImportant::No, context)
            != Parser::ParseResult::Error;
   }
 

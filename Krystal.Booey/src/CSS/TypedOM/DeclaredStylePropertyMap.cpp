@@ -112,7 +112,7 @@ namespace krys::boo::css
     auto *styleRule = GetStyleRule();
     bool didFailParsing = false;
     std::ignore =
-      styleRule->MutableProperties().SetProperty(property, value, IsImportant(false), &didFailParsing);
+      styleRule->MutableProperties().SetProperty(property, value, IsImportant::No, &didFailParsing);
     return !didFailParsing;
   }
 
@@ -127,7 +127,7 @@ namespace krys::boo::css
     auto *styleRule = GetStyleRule();
     bool didFailParsing = false;
     std::ignore = styleRule->MutableProperties().SetProperty(
-      property, value->CssText(DefaultSerialisationContext()), IsImportant(false), &didFailParsing);
+      property, value->CssText(DefaultSerialisationContext()), IsImportant::No, &didFailParsing);
     return !didFailParsing;
   }
 

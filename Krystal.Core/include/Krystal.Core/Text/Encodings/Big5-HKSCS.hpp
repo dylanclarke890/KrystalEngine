@@ -3746,23 +3746,23 @@ namespace krys::text
       char32 first = CodeUnitValue(*current);
       if (first <= MaxASCIIChar)
       {
-        return DecodeOneSuccess<Big5_HKSCS_2001>(first, CodeUnitsConsumed(1uz));
+        return DecodeOneSuccess<Big5_HKSCS_2001>(first, 1u);
       }
 
       if (++current == end)
       {
-        return DecodeOneIncompleteSequenceError<Big5_HKSCS_2001>(current, CodeUnitsConsumed(1uz));
+        return DecodeOneIncompleteSequenceError<Big5_HKSCS_2001>(current, 1u);
       }
 
       char32 second = CodeUnitValue(*current);
       if (first < 0x81 || first > 0xFE)
       {
-        return DecodeOneInvalidSequenceError<Big5_HKSCS_2001>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<Big5_HKSCS_2001>(2u);
       }
 
       if (!(second >= 0x40 && second <= 0x7E) || (second >= 0xA1 && second <= 0xFE))
       {
-        return DecodeOneInvalidSequenceError<Big5_HKSCS_2001>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<Big5_HKSCS_2001>(2u);
       }
 
       auto SerialiseDoubleBytes = [](size_t index)

@@ -107,16 +107,15 @@ namespace krys::boo::css::tests
     CHECK(Text(B::Attribute(SelectorMatch::AttributePrefix, u8"a", u8"b")) == u8"[a^=\"b\"]");
     CHECK(Text(B::Attribute(SelectorMatch::AttributeSuffix, u8"a", u8"b")) == u8"[a$=\"b\"]");
     CHECK(Text(B::Attribute(SelectorMatch::AttributeSubstring, u8"a", u8"b")) == u8"[a*=\"b\"]");
-    CHECK(Text(B::Attribute(SelectorMatch::AttributeEquals, u8"a", u8"B", IsCaseSensitive(false)))
+    CHECK(Text(B::Attribute(SelectorMatch::AttributeEquals, u8"a", u8"B", IsCaseSensitive::No))
           == u8"[a=\"B\" i]");
-    CHECK(Text(B::Attribute(SelectorMatch::AttributeEquals, u8"href", u8"x", IsCaseSensitive(true),
+    CHECK(Text(B::Attribute(SelectorMatch::AttributeEquals, u8"href", u8"x", IsCaseSensitive::Yes,
                             CSSOMStringAtom(u8"xlink")))
           == u8"[xlink|href=\"x\"]");
-    CHECK(
-      Text(B::Attribute(SelectorMatch::AttributeExists, u8"a", {}, IsCaseSensitive(true), dom::StarAtom()))
-      == u8"[*|a]");
+    CHECK(Text(B::Attribute(SelectorMatch::AttributeExists, u8"a", {}, IsCaseSensitive::Yes, dom::StarAtom()))
+          == u8"[*|a]");
     // An empty prefix (`[|a]`, no namespace) serialises without it.
-    CHECK(Text(B::Attribute(SelectorMatch::AttributeExists, u8"a", {}, IsCaseSensitive(true),
+    CHECK(Text(B::Attribute(SelectorMatch::AttributeExists, u8"a", {}, IsCaseSensitive::Yes,
                             CSSOMStringAtom::Empty()))
           == u8"[a]");
     CHECK(Text(B::Attribute(SelectorMatch::AttributeEquals, u8"a", u8"q\"t")) == u8"[a=\"q\\\"t\"]");
@@ -201,7 +200,7 @@ namespace krys::boo::css::tests
   {
     auto quirky = CreateUnique<MutableSelector>();
     quirky->SetMatch(SelectorMatch::Class);
-    quirky->SetValue(CSSOMStringAtom(u8"FooBar"), MatchLowercase(true));
+    quirky->SetValue(CSSOMStringAtom(u8"FooBar"), MatchLowercase::Yes);
     auto list = B::List(krys::move(quirky));
     const auto &selector = *list.FirstSelectorComponent();
     CHECK(selector.Value() == CSSOMStringAtom(u8"foobar"));
@@ -211,7 +210,7 @@ namespace krys::boo::css::tests
     // Already lowercase: no rare data needed, both values are the same atom.
     auto lower = CreateUnique<MutableSelector>();
     lower->SetMatch(SelectorMatch::Id);
-    lower->SetValue(CSSOMStringAtom(u8"foo"), MatchLowercase(true));
+    lower->SetValue(CSSOMStringAtom(u8"foo"), MatchLowercase::Yes);
     CHECK(lower->GetSelector()->Value() == lower->GetSelector()->SerialisingValue());
     CHECK(lower->GetSelector()->Argument() == CSSOMStringAtom::Null());
     CHECK(!lower->GetSelector()->ArgumentList());
@@ -355,7 +354,7 @@ namespace krys::boo::css::tests
     CHECK(!IsLogicalCombinationPseudoClass(SelectorPseudoClass::Host));
 
     auto attribute =
-      B::List(B::Attribute(SelectorMatch::AttributeDash, u8"lang", u8"en", IsCaseSensitive(false)));
+      B::List(B::Attribute(SelectorMatch::AttributeDash, u8"lang", u8"en", IsCaseSensitive::No));
     CHECK(attribute.FirstSelectorComponent()->IsAttributeSelector());
     CHECK(attribute.FirstSelectorComponent()->IsAttributeValueMatchingCaseInsensitive());
     CHECK(attribute.FirstSelectorComponent()->Attribute().LocalName() == CSSOMStringAtom(u8"lang"));

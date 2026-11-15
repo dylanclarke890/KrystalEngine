@@ -4864,22 +4864,22 @@ namespace krys::text
       char32 first = CodeUnitValue(*current);
       if (first <= MaxASCIIChar)
       {
-        return DecodeOneSuccess<GB18030>(first, CodeUnitsConsumed(1u));
+        return DecodeOneSuccess<GB18030>(first, 1u);
       }
 
       if (first == 0x80)
       {
-        return DecodeOneSuccess<GB18030>(static_cast<char32>(0x20AC), CodeUnitsConsumed(1u));
+        return DecodeOneSuccess<GB18030>(static_cast<char32>(0x20AC), 1u);
       }
 
       if (!(first >= 0x81 && first <= 0xFE))
       {
-        return DecodeOneInvalidSequenceError<GB18030>(CodeUnitsConsumed(1u));
+        return DecodeOneInvalidSequenceError<GB18030>(1u);
       }
 
       if (++current == end)
       {
-        return DecodeOneIncompleteSequenceError<GB18030>(CodeUnitsConsumed(1u));
+        return DecodeOneIncompleteSequenceError<GB18030>(1u);
       }
 
       char32 second = CodeUnitValue(*current);
@@ -4893,37 +4893,37 @@ namespace krys::text
                                    { return entry.Index < index; });
         if (it != CodePointLookupMap.end() && it->Index == lookupIndex)
         {
-          return DecodeOneSuccess<GB18030>(it->CodePoint, CodeUnitsConsumed(2u));
+          return DecodeOneSuccess<GB18030>(it->CodePoint, 2u);
         }
 
-        return DecodeOneInvalidSequenceError<GB18030>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<GB18030>(2u);
       }
 
       if (!(second >= 0x30 && second <= 0x39))
       {
-        return DecodeOneInvalidSequenceError<GB18030>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<GB18030>(2u);
       }
 
       if (++current == end)
       {
-        return DecodeOneIncompleteSequenceError<GB18030>(CodeUnitsConsumed(2u));
+        return DecodeOneIncompleteSequenceError<GB18030>(2u);
       }
 
       char32 third = CodeUnitValue(*current);
       if (!(third >= 0x81 && third <= 0xFE))
       {
-        return DecodeOneInvalidSequenceError<GB18030>(CodeUnitsConsumed(3u));
+        return DecodeOneInvalidSequenceError<GB18030>(3u);
       }
 
       if (++current == end)
       {
-        return DecodeOneIncompleteSequenceError<GB18030>(CodeUnitsConsumed(3u));
+        return DecodeOneIncompleteSequenceError<GB18030>(3u);
       }
 
       char32 fourth = CodeUnitValue(*current);
       if (!(fourth >= 0x30 && fourth <= 0x39))
       {
-        return DecodeOneInvalidSequenceError<GB18030>(CodeUnitsConsumed(4u));
+        return DecodeOneInvalidSequenceError<GB18030>(4u);
       }
 
       const size_t lookupIndex = ((first - 0x81uz) * (10uz * 126uz * 10uz))
@@ -4932,12 +4932,12 @@ namespace krys::text
 
       if ((lookupIndex > 39'419uz && lookupIndex < 189'000uz) || lookupIndex > 1'237'575uz)
       {
-        return DecodeOneInvalidSequenceError<GB18030>(CodeUnitsConsumed(4u));
+        return DecodeOneInvalidSequenceError<GB18030>(4u);
       }
 
       if (lookupIndex == 7'457uz)
       {
-        return DecodeOneSuccess<GB18030>(static_cast<char32>(0xE7C7), CodeUnitsConsumed(4u));
+        return DecodeOneSuccess<GB18030>(static_cast<char32>(0xE7C7), 4u);
       }
 
       auto it =
@@ -4945,7 +4945,7 @@ namespace krys::text
                          [](const EncodingLookupEntry &entry, size_t index) { return entry.Index < index; });
       if (it == IndexRangeLookupMap.end())
       {
-        return DecodeOneInvalidSequenceError<GB18030>(CodeUnitsConsumed(4u));
+        return DecodeOneInvalidSequenceError<GB18030>(4u);
       }
 
       --it;
@@ -4953,8 +4953,7 @@ namespace krys::text
       const auto offset = entry.Index;
       const auto codePointOffset = entry.CodePoint;
 
-      return DecodeOneSuccess<GB18030>(static_cast<char32>((codePointOffset + lookupIndex) - offset),
-                                       CodeUnitsConsumed(4u));
+      return DecodeOneSuccess<GB18030>(static_cast<char32>((codePointOffset + lookupIndex) - offset), 4u);
     }
 
     KRYS_NODISCARD constexpr static EncodeOneResult<GB18030> EncodeOne(char32 codePoint) noexcept
@@ -5044,28 +5043,28 @@ namespace krys::text
       char32 first = CodeUnitValue(*current);
       if (first <= MaxASCIIChar)
       {
-        return DecodeOneSuccess<GBK>(first, CodeUnitsConsumed(1u));
+        return DecodeOneSuccess<GBK>(first, 1u);
       }
 
       if (first == 0x80)
       {
-        return DecodeOneSuccess<GBK>(static_cast<char32>(0x20AC), CodeUnitsConsumed(1u));
+        return DecodeOneSuccess<GBK>(static_cast<char32>(0x20AC), 1u);
       }
 
       if (!(first >= 0x81 && first <= 0xFE))
       {
-        return DecodeOneInvalidSequenceError<GBK>(CodeUnitsConsumed(1u));
+        return DecodeOneInvalidSequenceError<GBK>(1u);
       }
 
       if (++current == end)
       {
-        return DecodeOneIncompleteSequenceError<GBK>(CodeUnitsConsumed(1u));
+        return DecodeOneIncompleteSequenceError<GBK>(1u);
       }
 
       char32 second = CodeUnitValue(*current);
       if (!((second >= 0x40 && second <= 0x7E) || (second >= 0x80 && second <= 0xFE)))
       {
-        return DecodeOneInvalidSequenceError<GBK>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<GBK>(2u);
       }
 
       const uint32 secondOffset = second < 0x7F ? 0x40 : 0x41;
@@ -5076,10 +5075,10 @@ namespace krys::text
                          [](const EncodingLookupEntry &entry, size_t index) { return entry.Index < index; });
       if (it == CodePointLookupMap.end() || it->Index != lookupIndex)
       {
-        return DecodeOneInvalidSequenceError<GBK>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<GBK>(2u);
       }
 
-      return DecodeOneSuccess<GBK>(it->CodePoint, CodeUnitsConsumed(2u));
+      return DecodeOneSuccess<GBK>(it->CodePoint, 2u);
     }
 
     KRYS_NODISCARD constexpr static EncodeOneResult<GBK> EncodeOne(char32 codePoint) noexcept

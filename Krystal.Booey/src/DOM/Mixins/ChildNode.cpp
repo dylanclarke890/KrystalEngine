@@ -159,6 +159,6 @@ namespace krys::boo::dom::mixins
     }
 
     // 2. Remove this.
-    return MutationAlgorithms::Remove(node, SuppressObservers(false));
+    return MutationAlgorithms::Remove(node, SuppressObservers::No);
   }
 }

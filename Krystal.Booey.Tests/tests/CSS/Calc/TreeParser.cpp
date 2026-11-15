@@ -421,7 +421,7 @@ namespace krys::boo::css::calc::tests
     auto options = WithCategory(css::Category::LengthPercentage);
     CHECK_FALSE(ParseValue(u8"anchor(--a top)", options));
 
-    options.PropertyOptions.AnchorPolicy = AllowAnchor {true};
+    options.PropertyOptions.AnchorPolicy = AllowAnchor::Yes;
 
     auto value = ParseValue(u8"anchor(--a top)", options);
     REQUIRE(value);
@@ -462,7 +462,7 @@ namespace krys::boo::css::calc::tests
     auto options = WithCategory(css::Category::LengthPercentage);
     CHECK_FALSE(ParseValue(u8"anchor-size(width)", options));
 
-    options.PropertyOptions.AnchorSizePolicy = AllowAnchorSize {true};
+    options.PropertyOptions.AnchorSizePolicy = AllowAnchorSize::Yes;
     auto value = ParseValue(u8"anchor-size(--a height, 10px)", options);
     REQUIRE(value);
     CHECK(value->RequiresConversionData());

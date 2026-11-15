@@ -39,7 +39,7 @@ namespace krys::boo::css
           [this](const auto &data)
           {
             ParsedPropertyList parsedProperties;
-            if (!PropertyParser::ParseValue(_shorthandPropertyId, IsImportant(false), data->TokenRange(),
+            if (!PropertyParser::ParseValue(_shorthandPropertyId, IsImportant::No, data->TokenRange(),
                                             data->Context(), parsedProperties, RuleType::Style))
             {
               _cachedPropertyValues = {};

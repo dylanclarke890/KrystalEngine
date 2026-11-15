@@ -41,7 +41,7 @@ namespace krys::boo::css
 
     RuleType CurrentRule {RuleType::Style};
     PropertyId CurrentProperty {PropertyId::Invalid};
-    IsImportant Important {false};
+    IsImportant Important {IsImportant::No};
 
     /// @brief Count of CSS random() functions seen so far for the current property.
     uint32 CSSRandomFunctionCount {0};
