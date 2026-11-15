@@ -44,6 +44,7 @@ namespace krys::boo::tests
       List<LayerAnimation> Animations;
       RefPtr<GraphicsLayerContentsDisplayDelegate> Delegate;
       ContentsLayerPurpose Purpose {ContentsLayerPurpose::None};
+      uint32 ScaleChanges {0};
 
       CompositingTestLayer(Type type, GraphicsLayerClient &client) noexcept : GraphicsLayer(type, client)
       {
@@ -62,6 +63,11 @@ namespace krys::boo::tests
       void SetNeedsDisplayInRect(const FloatRect &rect, ShouldClipToLayer) noexcept final
       {
         NeedsDisplayRects.push_back(rect);
+      }
+
+      void DeviceOrPageScaleFactorChanged() noexcept final
+      {
+        ++ScaleChanges;
       }
 
       void SetContentsNeedsDisplay() noexcept final
@@ -434,6 +440,20 @@ namespace krys::boo::tests
     fixture.TestPage->UpdateRendering();
     CHECK(fixture.LayerOf(u8"scroller").IsComposited());
     CHECK(fixture.LayerOf(u8"scroller").UsesCompositedScrolling());
+  }
+
+  TEST_CASE("RenderLayerCompositor: layers draw at the page's device scale factor",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(u8"<div id=box style='width:50px;height:50px;will-change:transform'></div>");
+    auto &layer = fixture.GraphicsLayerOf(u8"box");
+    CHECK(layer.DeviceScaleFactor() == 1);
+
+    fixture.TestPage->SetDeviceScaleFactor(2);
+    CHECK(fixture.Compositor().DeviceScaleFactor() == 2);
+    CHECK(layer.DeviceScaleFactor() == 2);
+    // The layers are told, to draw their contents again at the new scale.
+    CHECK(layer.ScaleChanges == 1);
   }
 
   TEST_CASE("RenderLayerCompositor: fixed elements composite for their position",
