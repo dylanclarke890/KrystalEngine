@@ -530,13 +530,13 @@ namespace krys::boo::layout
         return TextUtil::EllipsisTextInInlineDirection(displayLine.IsHorizontal());
       }
       return displayBoxes[0].LayoutBox().Style().GetBlockEllipsis().SwitchOn(
-        [&](const css::keywords::None &) -> StringAtom { return StringAtom::Null(); },
+        [&](const css::keywords::None &) -> StringAtom { return null; },
         [&](const css::keywords::Auto &) -> StringAtom
         { return TextUtil::EllipsisTextInInlineDirection(displayLine.IsHorizontal()); },
         [&](const StringAtom &string) -> StringAtom { return string; });
     }();
 
-    if (ellipsisText == StringAtom::Null())
+    if (ellipsisText == null)
     {
       return;
     }

@@ -77,8 +77,7 @@ namespace krys::boo::style
 
       css::CSSOMStringAtom attributeLocalName {attrValue.AttributeName()};
       const auto *element = state.GetElement();
-      auto attributeValue =
-        element ? element->GetAttributeNS(dom::DOMStringAtom::Null(), attributeLocalName) : std::nullopt;
+      auto attributeValue = element ? element->GetAttributeNS(null, attributeLocalName) : std::nullopt;
 
       // Register the fact that the attribute value affects the style.
       state.RegisterContentAttribute(attributeLocalName);

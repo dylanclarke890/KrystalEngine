@@ -300,7 +300,7 @@ namespace krys::boo::dom::tests
     REQUIRE(dispatched.HasException());
     CHECK(dispatched.GetException().Code() == ExceptionCode::InvalidStateError);
 
-    event->InitEvent(DOMStringAtom(u8"custom"), true, true);
+    event->InitEvent(u8"custom", true, true);
     CHECK_FALSE(element->DispatchEvent(*event).HasException());
   }
 
@@ -315,7 +315,7 @@ namespace krys::boo::dom::tests
     {
       auto event = document->CreateEvent(u8"customevent").ReleaseValue();
       auto &custom = static_cast<CreatedCustomEvent &>(*event);
-      custom.InitCustomEvent(DOMStringAtom(u8"custom"), true, false, EmptyTag {});
+      custom.InitCustomEvent(u8"custom", true, false, EmptyTag {});
       CHECK(custom.Type() == u8"custom");
       CHECK(custom.Bubbles());
       CHECK(custom.Detail());
@@ -325,11 +325,11 @@ namespace krys::boo::dom::tests
     {
       auto event = document->CreateEvent(u8"customevent").ReleaseValue();
       auto &custom = static_cast<CreatedCustomEvent &>(*event);
-      custom.InitCustomEvent(DOMStringAtom(u8"custom"));
+      custom.InitCustomEvent(u8"custom");
       auto element = document->CreateElement(u8"div").ReleaseValue();
       auto handle = element->AddEventListener(
-        DOMStringAtom(u8"custom"), [](Event &dispatched)
-        { static_cast<CreatedCustomEvent &>(dispatched).InitCustomEvent(DOMStringAtom(u8"other")); });
+        u8"custom",
+        [](Event &dispatched) { static_cast<CreatedCustomEvent &>(dispatched).InitCustomEvent(u8"other"); });
       CHECK_FALSE(element->DispatchEvent(custom).HasException());
       CHECK(custom.Type() == u8"custom");
     }
@@ -483,7 +483,7 @@ namespace krys::boo::dom::tests
       auto element = document->CreateElement(u8"DIV").ReleaseValue();
       CHECK(element->LocalName() == u8"div");
       CHECK(element->NamespaceURI() == infra::Namespaces::HTML);
-      CHECK(element->Prefix() == DOMStringAtom::Null());
+      CHECK(element->Prefix() == null);
       CHECK(Is<html::HTMLElement>(*element));
     }
 
@@ -492,7 +492,7 @@ namespace krys::boo::dom::tests
       auto document = CreateRef<XMLDocument>();
       auto element = document->CreateElement(u8"DIV").ReleaseValue();
       CHECK(element->LocalName() == u8"DIV");
-      CHECK(element->NamespaceURI() == DOMStringAtom::Null());
+      CHECK(element->NamespaceURI() == null);
     }
 
     SECTION("4. an XHTML document's are HTML elements, as given")
@@ -691,8 +691,8 @@ namespace krys::boo::dom::tests
     auto html = CreateRef<HTMLDocument>();
     auto attribute = html->CreateAttribute(u8"ID").ReleaseValue();
     CHECK(attribute->LocalName() == u8"id");
-    CHECK(attribute->NamespaceURI() == DOMStringAtom::Null());
-    CHECK(attribute->Prefix() == DOMStringAtom::Null());
+    CHECK(attribute->NamespaceURI() == null);
+    CHECK(attribute->Prefix() == null);
     CHECK(attribute->Value() == u8"");
     CHECK(attribute->OwnerElement() == nullptr);
     CHECK(&attribute->NodeDocument() == html.get());
@@ -718,8 +718,7 @@ namespace krys::boo::dom::tests
 
     CHECK(document->CreateAttributeNS(u8"urn:x", u8"a b").GetException().Code()
           == ExceptionCode::InvalidCharacterError);
-    CHECK(document->CreateAttributeNS(DOMStringAtom::Null(), u8"p:a").GetException().Code()
-          == ExceptionCode::NamespaceError);
+    CHECK(document->CreateAttributeNS(null, u8"p:a").GetException().Code() == ExceptionCode::NamespaceError);
     CHECK(document->CreateAttributeNS(u8"urn:x", u8"xmlns").GetException().Code()
           == ExceptionCode::NamespaceError);
   }

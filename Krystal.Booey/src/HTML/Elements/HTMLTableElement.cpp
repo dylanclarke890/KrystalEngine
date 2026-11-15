@@ -654,7 +654,7 @@ namespace krys::boo::html
   bool HTMLTableElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                             dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null()
+    if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"bgcolor"
             || localName == u8"background" || localName == u8"valign" || localName == u8"vspace"
             || localName == u8"hspace" || localName == u8"cellspacing" || localName == u8"border"
@@ -671,7 +671,7 @@ namespace krys::boo::html
                                                                 css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;
@@ -784,7 +784,7 @@ namespace krys::boo::html
   {
     using namespace presentational_hints;
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }

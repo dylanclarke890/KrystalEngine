@@ -156,7 +156,7 @@ namespace krys::boo::style
   void RuleSet::AddToRuleSet(const css::CSSOMStringAtom &key, AtomRuleMap &map,
                              const RuleData &ruleData) noexcept
   {
-    if (key == css::CSSOMStringAtom::Null())
+    if (key == null)
     {
       return;
     }

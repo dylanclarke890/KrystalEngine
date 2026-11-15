@@ -748,7 +748,7 @@ namespace krys::boo::dom
     // the element gets them when the window gets system focus (FocusAlgorithms::SystemFocusChanged).
     if (NodeDocument().IsFocusedAndActive())
     {
-      html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"focus"), *this, relatedTarget);
+      html::FocusAlgorithms::FireFocusEvent(u8"focus", *this, relatedTarget);
     }
   }
 
@@ -757,7 +757,7 @@ namespace krys::boo::dom
     // (See DispatchFocusEvent: the element had its blur when the window lost system focus.)
     if (NodeDocument().IsFocusedAndActive())
     {
-      html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"blur"), *this, relatedTarget);
+      html::FocusAlgorithms::FireFocusEvent(u8"blur", *this, relatedTarget);
     }
   }
 
@@ -833,7 +833,7 @@ namespace krys::boo::dom
       linkAttribute = GetAttribute(u8"href");
       if (!linkAttribute)
       {
-        linkAttribute = GetAttributeNS(DOMStringAtom(infra::Namespaces::XLink), u8"href");
+        linkAttribute = GetAttributeNS(infra::Namespaces::XLink, u8"href");
       }
     }
     else
@@ -1203,12 +1203,12 @@ namespace krys::boo::dom
       // Special case: If it's a double click event, we also send the dblclick event. This is not part
       // of the DOM specs, but is used for compatibility with the ondblclick="" attribute. This is treated
       // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
-      Ref<MouseEvent> doubleClickEvent = MouseEvent::Create(
-        DOMStringAtom(EventNames::DblClick), mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
-        html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
-        mouseEvent->ScreenX(), mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(),
-        mouseEvent->ModifierKeys(), mouseEvent->ButtonType(), mouseEvent->Buttons(),
-        mouseEvent->GetSyntheticClickType(), relatedTarget);
+      Ref<MouseEvent> doubleClickEvent =
+        MouseEvent::Create(EventNames::DblClick, mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
+                           html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
+                           mouseEvent->ScreenX(), mouseEvent->ScreenY(), mouseEvent->ClientX(),
+                           mouseEvent->ClientY(), mouseEvent->ModifierKeys(), mouseEvent->ButtonType(),
+                           mouseEvent->Buttons(), mouseEvent->GetSyntheticClickType(), relatedTarget);
 
       if (mouseEvent->DefaultHandled())
       {
@@ -2145,7 +2145,7 @@ namespace krys::boo::dom
     //    to qualifiedName in ASCII lowercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
+      qualifiedName = qualifiedName.ToASCIILower();
     }
 
     // 3. (Skipped: Trusted Types aren't supported, so value is used as it is.)
@@ -2166,8 +2166,7 @@ namespace krys::boo::dom
       //    null, null, and verifiedValue.
       // 7. Append attribute to this.
       auto attr = AdoptRef<Attr>(
-        *new Attr(NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), qualifiedName},
-                  krys::move(value)));
+        *new Attr(NodeDocument(), QualifiedName {null, null, qualifiedName}, krys::move(value)));
       ElementAlgorithms::AppendAttribute(*attr, *this);
     }
 
@@ -2224,7 +2223,7 @@ namespace krys::boo::dom
     //    to qualifiedName in ASCII lowercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
+      qualifiedName = qualifiedName.ToASCIILower();
     }
 
     // 3. Let attribute be the first attribute in this's attribute list whose qualified name is qualifiedName,
@@ -2240,8 +2239,8 @@ namespace krys::boo::dom
       //     node document and qualifiedName to this, and then return true.
       if (!force.has_value() || force.value())
       {
-        auto attr = AdoptRef<Attr>(*new Attr(
-          NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), qualifiedName}, u8""));
+        auto attr =
+          AdoptRef<Attr>(*new Attr(NodeDocument(), QualifiedName {null, null, qualifiedName}, u8""));
         ElementAlgorithms::AppendAttribute(*attr, *this);
         return true;
       }
@@ -2268,7 +2267,7 @@ namespace krys::boo::dom
     //    to qualifiedName in ASCII lowercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
+      qualifiedName = qualifiedName.ToASCIILower();
     }
 
     // 2. Return true if this has an attribute whose qualified name is qualifiedName; otherwise false.
@@ -2281,7 +2280,7 @@ namespace krys::boo::dom
     // 1. If namespace is the empty string, then set it to null.
     if (namespaceURI == DOMStringAtom::Empty())
     {
-      namespaceURI = DOMStringAtom::Null();
+      namespaceURI = null;
     }
 
     // 2. Return true if this has an attribute whose namespace is namespace and local name is localName;
@@ -2401,14 +2400,14 @@ namespace krys::boo::dom
   {
     krys_debug_assert(IsInUserAgentShadowTree());
     auto part = GetAttribute(u8"useragentpart");
-    return part ? DOMStringAtom(*part) : DOMStringAtom::Null();
+    return part ? DOMStringAtom(*part) : null;
   }
 
   void Element::SetUserAgentPart(DOMStringAtom part) noexcept
   {
     // We may set the useragentpart attribute on elements before appending them to the shadow tree.
     krys_debug_assert(!IsConnected() || IsInUserAgentShadowTree());
-    (void)SetAttribute(u8"useragentpart", DOMString(part.View()));
+    (void)SetAttribute(u8"useragentpart", part.ToString());
   }
 
   ExceptionOr<RefPtr<Element>> Element::Closest(DOMStringView selectors) noexcept
@@ -2972,18 +2971,17 @@ namespace krys::boo::dom
 
   void Element::SetSynchronizedLazyAttribute(DOMStringAtom localName, DOMString value) noexcept
   {
-    auto it = std::ranges::find_if(
-      _attributes, [&](const Ref<Attr> &attr)
-      { return attr->LocalName() == localName && attr->NamespaceURI() == DOMStringAtom::Null(); });
+    auto it =
+      std::ranges::find_if(_attributes, [&](const Ref<Attr> &attr)
+                           { return attr->LocalName() == localName && attr->NamespaceURI() == null; });
     if (it != _attributes.end())
     {
       (*it)->_value = krys::move(value);
       return;
     }
 
-    auto attr = AdoptRef<Attr>(
-      *new Attr(NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), localName},
-                krys::move(value)));
+    auto attr =
+      AdoptRef<Attr>(*new Attr(NodeDocument(), QualifiedName {null, null, localName}, krys::move(value)));
     attr->_ownerElement = CreateWeakPtr(this);
     _attributes.push_back(krys::move(attr));
   }
@@ -3023,7 +3021,7 @@ namespace krys::boo::dom
   void Element::OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
                                    Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept
   {
-    if (namespaceURI != DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }

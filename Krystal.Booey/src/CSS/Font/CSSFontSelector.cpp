@@ -231,7 +231,7 @@ namespace krys::boo::css
   void CSSFontSelector::AddFontPaletteValuesRule(const FontPaletteValuesRule &fontPaletteValuesRule) noexcept
   {
     const auto &name = fontPaletteValuesRule.Name();
-    krys_debug_assert(name != StringAtom::Null());
+    krys_debug_assert(name != null);
 
     const auto &fontFamilies = fontPaletteValuesRule.FontFamilies();
     if (fontFamilies.empty())

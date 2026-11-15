@@ -89,9 +89,7 @@ namespace krys::boo::html
   HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface,
                            dom::DOMStringAtom localName, HTMLElementFlags flags,
                            dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document,
-                      dom::QualifiedName(dom::DOMStringAtom(infra::Namespaces::HTML),
-                                         dom::DOMStringAtom::Null(), localName),
+      : StyledElement(document, dom::QualifiedName(infra::Namespaces::HTML, null, localName),
                       nodeFlags | dom::NodeFlags::IsHTMLElement),
         _flags(flags), _interface(interface)
   {
@@ -796,7 +794,7 @@ namespace krys::boo::html
   dom::ExceptionOr<Ref<ElementInternals>> HTMLElement::AttachInternals() noexcept
   {
     // 1. If this's is value is not null, then throw a "NotSupportedError" DOMException.
-    if (IsValue() != dom::DOMStringAtom::Null())
+    if (IsValue() != null)
     {
       return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
@@ -1527,7 +1525,7 @@ namespace krys::boo::html
     // source.
     init.Composed = true;
     init.Source = ShareRefPtr<dom::Element>(source);
-    auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(EventNames::BeforeToggle), init, cancelable);
+    auto event = dom::ToggleEvent::Create(EventNames::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }
@@ -1569,8 +1567,7 @@ namespace krys::boo::html
     if (IsPopoverShowing())
     {
       (void)HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, nullptr);
-      newPopoverState = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(
-        GetAttribute(dom::DOMStringAtom(u8"popover")));
+      newPopoverState = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(GetAttribute(u8"popover"));
     }
 
     if (newPopoverState == dom::PopoverState::None)
@@ -1596,14 +1593,14 @@ namespace krys::boo::html
   {
     StyledElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
-    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"popover")
+    if (namespaceURI == null && localName == u8"popover")
     {
       PopoverAttributeChanged(value);
     }
 
     // The computed heading levels below, which `:heading()` matches, follow these.
-    if (namespaceURI == dom::DOMStringAtom::Null()
-        && (localName == u8"headingoffset" || localName == u8"headingreset") && oldValue != value)
+    if (namespaceURI == null && (localName == u8"headingoffset" || localName == u8"headingreset")
+        && oldValue != value)
     {
       InvalidateStyleForSubtree();
     }
@@ -1738,7 +1735,7 @@ namespace krys::boo::html
   bool HTMLElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                        dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null())
+    if (namespaceURI == null)
     {
       if (localName == u8"align" || localName == u8"contenteditable" || localName == u8"hidden"
           || localName == u8"lang" || localName == u8"draggable" || localName == u8"dir")
@@ -1763,7 +1760,7 @@ namespace krys::boo::html
       MapLanguageAttributeToLocale(value, style);
       return;
     }
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       StyledElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;
@@ -1867,7 +1864,7 @@ namespace krys::boo::html
     else if (localName == u8"lang")
     {
       // xml:lang has a higher priority than lang.
-      if (!HasAttributeNS(dom::DOMStringAtom(infra::Namespaces::XML), u8"lang"))
+      if (!HasAttributeNS(infra::Namespaces::XML, u8"lang"))
       {
         MapLanguageAttributeToLocale(value, style);
       }

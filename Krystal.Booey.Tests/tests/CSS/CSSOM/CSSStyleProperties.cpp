@@ -187,6 +187,6 @@ namespace krys::boo::css::tests
     CHECK(id(u8"") == Invalid);
     CHECK(id(u8"nonsense") == Invalid);
     CHECK(id(u8"epubWritingMode") == Invalid);
-    CHECK(CSSStyleProperties::GetPropertyIdFromJavaScriptPropertyName(CSSOMStringAtom::Null()) == Invalid);
+    CHECK(CSSStyleProperties::GetPropertyIdFromJavaScriptPropertyName(null) == Invalid);
   }
 }

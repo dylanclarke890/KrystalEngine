@@ -45,6 +45,6 @@ namespace krys::boo::style
   void Serialiser<FontFamilyName>::operator()(StringBuilder &builder, const css::SerialisationContext &,
                                               const RenderStyle &, const FontFamilyName &value) noexcept
   {
-    builder.Append(css::SerialiseFontFamily(css::CSSOMString {value.Value.View()}));
+    builder.Append(css::SerialiseFontFamily(value.Value.ToString()));
   }
 }

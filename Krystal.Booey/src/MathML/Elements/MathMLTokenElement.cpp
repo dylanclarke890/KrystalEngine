@@ -68,7 +68,7 @@ namespace krys::boo::mathml
   bool MathMLTokenElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                               dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null() && localName == MathMLNames::MathvariantAttr().LocalName()
+    if (namespaceURI == null && localName == MathMLNames::MathvariantAttr().LocalName()
         && HasTagName(html::TagName::mi))
     {
       return true;
@@ -82,7 +82,7 @@ namespace krys::boo::mathml
                                                                   css::MutableStyleProperties &style) noexcept
   {
     // https://w3c.github.io/mathml-core/#the-mathvariant-attribute
-    if (namespaceURI == dom::DOMStringAtom::Null() && localName == MathMLNames::MathvariantAttr().LocalName()
+    if (namespaceURI == null && localName == MathMLNames::MathvariantAttr().LocalName()
         && HasTagName(html::TagName::mi))
     {
       if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"normal"))

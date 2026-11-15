@@ -63,7 +63,7 @@ namespace krys::boo::html
   bool HTMLBRElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                                          dom::DOMStringAtom namespaceURI) const noexcept
   {
-    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"clear"))
+    if (namespaceURI == null && (localName == u8"clear"))
     {
       return true;
     }
@@ -76,7 +76,7 @@ namespace krys::boo::html
                                                              css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
       return;

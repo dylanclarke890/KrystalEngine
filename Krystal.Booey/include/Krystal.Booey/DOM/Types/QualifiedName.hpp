@@ -32,11 +32,11 @@ namespace krys::boo::dom
   {
     html::TagName _tagName {html::TagName::Unknown};
     html::Namespace _namespace {html::Namespace::Unknown};
-    DOMStringAtom _namespaceURI {DOMStringAtom::Null()};
-    DOMStringAtom _namespacePrefix {DOMStringAtom::Null()};
-    DOMStringAtom _localName {DOMStringAtom::Null()};
-    DOMStringAtom _localNameLower {DOMStringAtom::Null()};
-    mutable DOMStringAtom _localNameUpper {DOMStringAtom::Null()};
+    DOMStringAtom _namespaceURI {null};
+    DOMStringAtom _namespacePrefix {null};
+    DOMStringAtom _localName {null};
+    DOMStringAtom _localNameLower {null};
+    mutable DOMStringAtom _localNameUpper {null};
 
   public:
     QualifiedNameStorage(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName,
@@ -107,13 +107,13 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name
     KRYS_NODISCARD DOMString Name() const noexcept
     {
-      if (NamespacePrefix() == DOMStringAtom::Null())
+      if (NamespacePrefix() == null)
       {
-        return DOMString(LocalName().View());
+        return LocalName().ToString();
       }
       else
       {
-        return DOMString {NamespacePrefix().View()} + u8":" + DOMString {LocalName().View()};
+        return NamespacePrefix().ToString() + u8":" + LocalName().ToString();
       }
     }
 
@@ -142,13 +142,11 @@ namespace krys::boo::dom
 
   KRYS_NODISCARD inline QualifiedName NullQualifiedName() noexcept
   {
-    return QualifiedName(DOMStringAtom::Null(), DOMStringAtom::Null(), DOMStringAtom::Null(),
-                         html::TagName::Unknown, html::Namespace::None);
+    return QualifiedName(null, null, null, html::TagName::Unknown, html::Namespace::None);
   }
 
   KRYS_NODISCARD inline QualifiedName AnyQualifiedName() noexcept
   {
-    return QualifiedName(StarAtom(), DOMStringAtom::Null(), StarAtom(), html::TagName::Unknown,
-                         html::Namespace::Unknown);
+    return QualifiedName(StarAtom(), null, StarAtom(), html::TagName::Unknown, html::Namespace::Unknown);
   }
 }

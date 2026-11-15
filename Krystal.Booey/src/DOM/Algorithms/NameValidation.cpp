@@ -140,11 +140,11 @@ namespace krys::boo::dom
     // 1. If namespace is the empty string, then set it to null.
     if (namespaceURI == DOMStringAtom::Empty())
     {
-      namespaceURI = DOMStringAtom::Null();
+      namespaceURI = null;
     }
 
     // 2. Let prefix be null.
-    DOMStringAtom prefix = DOMStringAtom::Null();
+    DOMStringAtom prefix = null;
 
     // 3. Let localName be qualifiedName.
     DOMStringAtom localName = qualifiedName;
@@ -166,7 +166,7 @@ namespace krys::boo::dom
     }
 
     // 5. Assert: prefix is either null or a valid namespace prefix.
-    krys_debug_assert(prefix == DOMStringAtom::Null() || IsValidNamespacePrefix(prefix.View()));
+    krys_debug_assert(prefix == null || IsValidNamespacePrefix(prefix.View()));
 
     // 6. If context is "attribute" and localName is not a valid attribute local name, then throw an
     // "InvalidCharacterError" DOMException.
@@ -183,7 +183,7 @@ namespace krys::boo::dom
     }
 
     // 8. If prefix is non-null and namespace is null, then throw a "NamespaceError" DOMException.
-    if (prefix != DOMStringAtom::Null() && namespaceURI == DOMStringAtom::Null())
+    if (prefix != null && namespaceURI == null)
     {
       return ExceptionCode::NamespaceError;
     }

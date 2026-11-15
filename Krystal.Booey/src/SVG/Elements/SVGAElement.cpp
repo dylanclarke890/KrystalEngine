@@ -181,7 +181,7 @@ namespace krys::boo::svg
         && GetAttributeNS(XLinkNames::ShowAttr().NamespaceURI(), XLinkNames::ShowAttr().LocalName())
              == u8"new")
     {
-      target = dom::DOMStringAtom(u8"_blank");
+      target = u8"_blank";
     }
     event.SetDefaultHandled();
 
@@ -190,8 +190,7 @@ namespace krys::boo::svg
 
     if (RefPtr<LocalFrame> frame = ShareRefPtr(document->Frame()))
     {
-      frame->Loader().ChangeLocation(completedURL, target, &event, referrerPolicy, dom::DOMStringAtom::Null(),
-                                     this);
+      frame->Loader().ChangeLocation(completedURL, target, &event, referrerPolicy, null, this);
     }
   }
 

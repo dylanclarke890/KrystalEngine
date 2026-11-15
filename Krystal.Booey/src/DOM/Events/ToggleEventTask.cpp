@@ -73,7 +73,7 @@ namespace krys::boo::dom
         init.Composed = true;
         init.Source = krys::move(data.Source);
         RefPtr<Element> source = init.Source;
-        auto event = ToggleEvent::Create(DOMStringAtom(EventNames::Toggle), init, false);
+        auto event = ToggleEvent::Create(EventNames::Toggle, init, false);
         (void)EventDispatcher::DispatchFromSource(*event, *element, source.get());
       });
   }

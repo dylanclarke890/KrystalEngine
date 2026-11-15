@@ -581,7 +581,7 @@ namespace krys::boo
         {
           return nullptr;
         }
-        auto href = element.GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"href");
+        auto href = element.GetAttributeNS(infra::Namespaces::XLink, u8"href");
         if (!href || href->empty())
         {
           href = element.GetAttribute(u8"href");
@@ -605,7 +605,7 @@ namespace krys::boo
         }
         if (element.LocalName() == u8"a")
         {
-          if (auto title = element.GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"title");
+          if (auto title = element.GetAttributeNS(infra::Namespaces::XLink, u8"title");
               title && !title->empty())
           {
             return *title;
@@ -793,7 +793,7 @@ namespace krys::boo
           childNodes.push_back(ShareRef(child));
         }
         {
-          for (auto &ownedElement : element.ResolvedElementsForAttribute(dom::DOMStringAtom(u8"aria-owns")))
+          for (auto &ownedElement : element.ResolvedElementsForAttribute(u8"aria-owns"))
           {
             // (A child it also owns isn't counted twice.)
             if (std::ranges::none_of(childNodes,
@@ -2284,9 +2284,9 @@ namespace krys::boo
   {
     auto *element = GetElement();
     return element
-           && (element->HasEventListener(dom::DOMStringAtom(EventNames::Click))
-               || element->HasEventListener(dom::DOMStringAtom(EventNames::MouseDown))
-               || element->HasEventListener(dom::DOMStringAtom(EventNames::MouseUp)));
+           && (element->HasEventListener(EventNames::Click)
+               || element->HasEventListener(EventNames::MouseDown)
+               || element->HasEventListener(EventNames::MouseUp));
   }
 
   void AXNodeObject::SetFocused(bool focused) noexcept
@@ -2348,10 +2348,8 @@ namespace krys::boo
       init.Composed = true;
 
       Ref protectedNode = ShareRef(*node);
-      bool handled =
-        !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(dom::DOMStringAtom(u8"keydown"), *node, init);
-      handled |=
-        !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(dom::DOMStringAtom(u8"keyup"), *node, init);
+      bool handled = !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(u8"keydown", *node, init);
+      handled |= !dom::EventDispatcher::FireEvent<dom::KeyboardEvent>(u8"keyup", *node, init);
       return handled;
     }
 
@@ -2419,7 +2417,7 @@ namespace krys::boo
   void AXNodeObject::SetIsExpanded(bool expanded) noexcept
   {
     if (auto *details = DynamicDowncast<html::HTMLDetailsElement>(GetNode());
-        details && expanded != details->HasAttribute(dom::DOMStringAtom(u8"open")))
+        details && expanded != details->HasAttribute(u8"open"))
     {
       details->ToggleOpen();
     }

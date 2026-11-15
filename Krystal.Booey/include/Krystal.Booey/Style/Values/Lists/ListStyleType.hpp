@@ -46,7 +46,7 @@ namespace krys::boo::style
     Type _type {Type::None};
     // The identifier is the string when the type is String and is the @counter-style name when the type is
     // CounterStyle.
-    css::CSSOMStringAtom _identifier {css::CSSOMStringAtom::Null()};
+    css::CSSOMStringAtom _identifier {null};
 
   public:
     ListStyleType(css::keywords::None) noexcept : _type {Type::None}

@@ -86,7 +86,7 @@ namespace krys::boo::css
         {
           builder.Append(separator);
         }
-        builder.Append(SerialiseFontFamily(CSSOMString(element.View())));
+        builder.Append(SerialiseFontFamily(element.ToString()));
         first = false;
       }
     };

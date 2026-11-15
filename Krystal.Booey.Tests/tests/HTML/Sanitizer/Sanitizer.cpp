@@ -39,11 +39,10 @@ namespace krys::boo::html::tests
       return names;
     }
 
-    KRYS_NODISCARD bool
-      Allows(const SanitizerConfig &config, dom::DOMStringView attribute, dom::DOMStringView value = u8"",
-             dom::DOMStringView element = u8"div",
-             dom::DOMStringAtom elementNamespace = dom::DOMStringAtom(infra::Namespaces::HTML),
-             dom::DOMStringAtom attributeNamespace = dom::DOMStringAtom::Null()) noexcept
+    KRYS_NODISCARD bool Allows(const SanitizerConfig &config, dom::DOMStringView attribute,
+                               dom::DOMStringView value = u8"", dom::DOMStringView element = u8"div",
+                               dom::DOMStringAtom elementNamespace = infra::Namespaces::HTML,
+                               dom::DOMStringAtom attributeNamespace = null) noexcept
     {
       return SanitizerAlgorithms::AllowsAttribute(attribute, attributeNamespace, value, element,
                                                   elementNamespace, config);
@@ -89,11 +88,11 @@ namespace krys::boo::html::tests
       input.Elements = List<SanitizerElementNamespaceWithAttributes> {
         u8"div", SanitizerElementNamespaceWithAttributes {u8"circle", SVG}};
       input.Elements->back().Attributes =
-        List<SanitizerAttributeNamespace> {u8"cx", {u8"href", XLink}, {u8"title", dom::DOMStringAtom(u8"")}};
+        List<SanitizerAttributeNamespace> {u8"cx", {u8"href", XLink}, {u8"title", u8""}};
       auto config = Make(input)->Get();
       REQUIRE(config.Elements->size() == 2);
       auto &circle = (*config.Elements)[1];
-      CHECK((*config.Elements)[0].Namespace == dom::DOMStringAtom(infra::Namespaces::HTML));
+      CHECK((*config.Elements)[0].Namespace == infra::Namespaces::HTML);
       REQUIRE((*config.Elements)[0].RemoveAttributes);
       CHECK((*config.Elements)[0].RemoveAttributes->empty());
       CHECK(circle.Namespace == SVG);
@@ -106,7 +105,7 @@ namespace krys::boo::html::tests
         }
         else
         {
-          CHECK(attribute.Namespace == dom::DOMStringAtom::Null());
+          CHECK(attribute.Namespace == null);
         }
       }
     }
@@ -165,12 +164,12 @@ namespace krys::boo::html::tests
     {
       return SanitizerAlgorithms::ActionForElementName(name, namespaceURI, config) == SanitizerAction::Keep;
     };
-    CHECK(has(u8"p", dom::DOMStringAtom(infra::Namespaces::HTML)));
-    CHECK(has(u8"h6", dom::DOMStringAtom(infra::Namespaces::HTML)));
+    CHECK(has(u8"p", infra::Namespaces::HTML));
+    CHECK(has(u8"h6", infra::Namespaces::HTML));
     CHECK(has(u8"mfrac", MathML));
     CHECK(has(u8"foreignObject", SVG));
-    CHECK_FALSE(has(u8"script", dom::DOMStringAtom(infra::Namespaces::HTML)));
-    CHECK_FALSE(has(u8"img", dom::DOMStringAtom(infra::Namespaces::HTML)));
+    CHECK_FALSE(has(u8"script", infra::Namespaces::HTML));
+    CHECK_FALSE(has(u8"img", infra::Namespaces::HTML));
     CHECK_FALSE(has(u8"use", SVG));
     CHECK(config.Comments == false);
     CHECK(config.DataAttributes == false);
@@ -213,9 +212,9 @@ namespace krys::boo::html::tests
       CHECK(sanitizer->RemoveElement(u8"b"));
       CHECK_FALSE(sanitizer->RemoveElement(u8"b"));
       CHECK(sanitizer->ReplaceElementWithChildren(u8"p"));
-      CHECK(SanitizerAlgorithms::ActionForElementName(u8"p", dom::DOMStringAtom(infra::Namespaces::HTML),
-                                                      sanitizer->Configuration())
-            == SanitizerAction::ReplaceWithChildren);
+      CHECK(
+        SanitizerAlgorithms::ActionForElementName(u8"p", infra::Namespaces::HTML, sanitizer->Configuration())
+        == SanitizerAction::ReplaceWithChildren);
       CHECK_FALSE(sanitizer->ReplaceElementWithChildren(u8"html"));
       CHECK(sanitizer->AllowAttribute(u8"class"));
       CHECK_FALSE(sanitizer->AllowAttribute(u8"class"));

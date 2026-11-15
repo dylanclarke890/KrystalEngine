@@ -2669,12 +2669,12 @@ namespace krys
   {
     static bool IsEmptyValue(const boo::css::CustomIdentifier &identifier)
     {
-      return identifier.Value == boo::css::CSSOMStringAtom::Null();
+      return identifier.Value == null;
     }
 
     static boo::css::CustomIdentifier EmptyValue()
     {
-      return {boo::css::CSSOMStringAtom::Null()};
+      return {null};
     }
   };
 }

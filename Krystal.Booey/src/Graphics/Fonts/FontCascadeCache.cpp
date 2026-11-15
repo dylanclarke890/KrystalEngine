@@ -44,7 +44,7 @@ namespace krys::boo
                          static_cast<uint8>(description.VariantCaps()));
   }
 
-  FontFamilyName::FontFamilyName() noexcept : _name(StringAtom::Null())
+  FontFamilyName::FontFamilyName() noexcept : _name(null)
   {
   }
 
@@ -54,7 +54,7 @@ namespace krys::boo
 
   bool FontFamilyName::operator==(const FontFamilyName &other) const noexcept
   {
-    return (_name == StringAtom::Null() || other._name == StringAtom::Null())
+    return (_name == null || other._name == null)
              ? _name == other._name
              : FontCascadeDescription::FamilyNamesAreEqual(_name, other._name);
   }
@@ -62,7 +62,7 @@ namespace krys::boo
   size_t FontFamilyName::Hash() const noexcept
   {
     // FIXME: Would be better to hash the characters in the name instead of hashing a hash.
-    if (_name == StringAtom::Null())
+    if (_name == null)
     {
       return 0;
     }

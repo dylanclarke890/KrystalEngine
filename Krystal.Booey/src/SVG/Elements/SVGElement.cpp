@@ -460,7 +460,7 @@ namespace krys::boo::svg
       return;
     }
 
-    auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Load), false, false);
+    auto event = dom::Event::Create(EventNames::Load, false, false);
     (void)DispatchEvent(*event);
   }
 
@@ -482,8 +482,7 @@ namespace krys::boo::svg
                                       Maybe<dom::DOMStringView> value,
                                       dom::DOMStringAtom namespaceURI) noexcept
   {
-    AttributeChanged(dom::QualifiedName {namespaceURI, dom::DOMStringAtom::Null(), localName}, oldValue,
-                     value);
+    AttributeChanged(dom::QualifiedName {namespaceURI, null, localName}, oldValue, value);
   }
 
   void SVGElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
@@ -1167,7 +1166,7 @@ namespace krys::boo::svg
   css::PropertyId SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom localName,
                                                                dom::DOMStringAtom namespaceURI) noexcept
   {
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return css::PropertyId::Invalid;
     }

@@ -82,9 +82,9 @@ namespace krys::boo::css
     for (const auto &query : GetContainerRule().ContainerQueries())
     {
       StringBuilder name;
-      if (query.Name != CSSOMStringAtom::Null() && !query.Name.View().empty())
+      if (query.Name != null && !query.Name.View().empty())
       {
-        SerialiseIdentifier(CSSOMString(query.Name.View()), name);
+        SerialiseIdentifier(query.Name.ToString(), name);
       }
       StringBuilder condition;
       mq::Serialise(condition, query.Condition);

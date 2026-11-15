@@ -45,7 +45,7 @@ namespace krys::boo::dom::tests
       auto result = DocumentAlgorithms::FlattenElementCreationOptions(u8"x-a", *document);
       REQUIRE_FALSE(result.HasException());
       CHECK(result.Value().CustomElementRegistry.get() == global.get());
-      CHECK(result.Value().Is == DOMStringAtom::Null());
+      CHECK(result.Value().Is == null);
     }
 
     SECTION("3a. the is value")
@@ -99,7 +99,7 @@ namespace krys::boo::dom::tests
     CHECK(Is<html::HTMLElement>(*html));
 
     CHECK(Throws(document->CreateElementNS(u8"urn:x", u8"1a"), ExceptionCode::InvalidCharacterError));
-    CHECK(Throws(document->CreateElementNS(DOMStringAtom::Null(), u8"p:a"), ExceptionCode::NamespaceError));
+    CHECK(Throws(document->CreateElementNS(null, u8"p:a"), ExceptionCode::NamespaceError));
     CHECK(Throws(document->CreateElementNS(u8"urn:x", u8"xml:a"), ExceptionCode::NamespaceError));
     CHECK(Throws(document->CreateElementNS(
                    u8"urn:x", u8"a",

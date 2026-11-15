@@ -77,12 +77,12 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "KeyframesRule", "[CSS][Rules][KeyframesRule]")
   {
-    auto rule = KeyframesRule::Create(CSSOMStringAtom(u8"spin"));
+    auto rule = KeyframesRule::Create(u8"spin");
     CHECK(rule->Type() == RuleType::Keyframes);
     CHECK(rule->IsKeyframesRule());
-    CHECK(rule->Name() == CSSOMStringAtom(u8"spin"));
-    rule->SetName(CSSOMStringAtom(u8"turn"));
-    CHECK(rule->Name() == CSSOMStringAtom(u8"turn"));
+    CHECK(rule->Name() == u8"spin");
+    rule->SetName(u8"turn");
+    CHECK(rule->Name() == u8"turn");
 
     rule->ParserAppendKeyframe(CreateKeyframe(u8"from", u8"color: red"));
     rule->ParserAppendKeyframe(nullptr);
@@ -115,7 +115,7 @@ namespace krys::boo::css::tests
       auto &keyframes = Downcast<KeyframesRule>(*copy);
       REQUIRE(keyframes.Keyframes().size() == 3);
       CHECK(keyframes.Keyframes()[0].get() == rule->Keyframes()[0].get());
-      CHECK(keyframes.Name() == CSSOMStringAtom(u8"turn"));
+      CHECK(keyframes.Name() == u8"turn");
     }
   }
 }

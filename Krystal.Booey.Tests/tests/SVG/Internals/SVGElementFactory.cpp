@@ -79,10 +79,9 @@ namespace krys::boo::svg::tests
   namespace
   {
     template <typename T>
-    KRYS_NODISCARD bool IsCreated(dom::Document &document, dom::DOMStringView localName) noexcept
+    KRYS_NODISCARD bool IsCreated(dom::Document &document, dom::DOMStringAtom localName) noexcept
     {
-      auto element =
-        document.CreateElementNS(dom::DOMStringAtom(infra::Namespaces::SVG), dom::DOMStringAtom(localName));
+      auto element = document.CreateElementNS(infra::Namespaces::SVG, localName);
       krys_assert(!element.HasException());
       auto *svgElement = DynamicDowncast<SVGElement>(*element.Value());
       return svgElement && Is<T>(*svgElement) && element.Value()->LocalName() == localName;

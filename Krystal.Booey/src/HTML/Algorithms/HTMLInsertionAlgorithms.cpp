@@ -191,8 +191,8 @@ namespace krys::boo::html
       // 1c. If all of the following are true: context's local name is "script"; and context's namespace is
       //     the HTML namespace or the SVG namespace, then return null.
       if (context->LocalName() == u8"script"
-          && (context->NamespaceURI() == dom::DOMStringAtom(infra::Namespaces::HTML)
-              || context->NamespaceURI() == dom::DOMStringAtom(infra::Namespaces::SVG)))
+          && (context->NamespaceURI() == infra::Namespaces::HTML
+              || context->NamespaceURI() == infra::Namespaces::SVG))
       {
         return RefPtr<dom::DocumentFragment> {};
       }

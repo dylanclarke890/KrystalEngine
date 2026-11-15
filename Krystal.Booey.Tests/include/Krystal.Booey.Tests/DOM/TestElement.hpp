@@ -12,8 +12,7 @@ namespace krys::boo::dom::tests
 
   public:
     TestElement(dom::Document &document) noexcept
-        : Element(document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"test-element"},
-                  dom::NodeFlags::None)
+        : Element(document, {infra::Namespaces::HTML, null, u8"test-element"}, dom::NodeFlags::None)
     {
     }
   };

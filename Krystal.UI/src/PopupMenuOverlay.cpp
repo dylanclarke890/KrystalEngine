@@ -379,7 +379,7 @@ namespace krys::ui
       {
         classes.resize(classes.size() - suffix.size());
       }
-      (void)element.SetAttribute(boo::dom::DOMStringAtom(u8"class"), krys::move(classes));
+      (void)element.SetAttribute(u8"class", krys::move(classes));
     };
 
     setHighlighted(_highlightedIndex, false);

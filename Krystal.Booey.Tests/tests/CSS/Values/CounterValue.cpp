@@ -9,12 +9,12 @@ namespace krys::boo::css::tests
   {
     KRYS_NODISCARD Ref<CounterValue> Counter(Ref<Value> style) noexcept
     {
-      return CounterValue::Create(CSSOMStringAtom {u8"item"}, CSSOMStringAtom {u8""}, krys::move(style));
+      return CounterValue::Create(u8"item", u8"", krys::move(style));
     }
 
     KRYS_NODISCARD Ref<CounterValue> Counters(CSSOMStringView separator, Ref<Value> style) noexcept
     {
-      return CounterValue::Create(CSSOMStringAtom {u8"item"}, CSSOMStringAtom {separator}, krys::move(style));
+      return CounterValue::Create(u8"item", CSSOMStringAtom {separator}, krys::move(style));
     }
   }
 
@@ -23,8 +23,8 @@ namespace krys::boo::css::tests
     auto style = PrimitiveValue::Create(ValueId::UpperRoman);
     auto counter = Counters(u8".", style);
     CHECK(counter->IsCounterValue());
-    CHECK(counter->Identifier() == CSSOMStringAtom {u8"item"});
-    CHECK(counter->Separator() == CSSOMStringAtom {u8"."});
+    CHECK(counter->Identifier() == u8"item");
+    CHECK(counter->Separator() == u8".");
     CHECK(counter->CounterStyle().get() == style.get());
     CHECK(ToNarrow(counter->CounterStyleCSSText()) == "upper-roman");
     CHECK(
@@ -61,8 +61,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CounterValue serialisation with a null separator",
                    "[CSS][Values][CounterValue]")
   {
-    auto counter = CounterValue::Create(CSSOMStringAtom {u8"item"}, CSSOMStringAtom::Null(),
-                                        PrimitiveValue::Create(ValueId::Decimal));
+    auto counter = CounterValue::Create(u8"item", null, PrimitiveValue::Create(ValueId::Decimal));
     CHECK(CssText(*counter) == "counter(item)");
   }
 
@@ -73,9 +72,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(*a == *Counters(u8"-", PrimitiveValue::Create(ValueId::UpperRoman)));
     CHECK_FALSE(*a == *Counters(u8".", PrimitiveValue::Create(ValueId::Decimal)));
     CHECK_FALSE(*a == *Counter(PrimitiveValue::Create(ValueId::UpperRoman)));
-    CHECK_FALSE(*a
-                == *CounterValue::Create(CSSOMStringAtom {u8"other"}, CSSOMStringAtom {u8"."},
-                                         PrimitiveValue::Create(ValueId::UpperRoman)));
+    CHECK_FALSE(*a == *CounterValue::Create(u8"other", u8".", PrimitiveValue::Create(ValueId::UpperRoman)));
   }
 
   TEST_CASE_METHOD(ValueFixture, "CounterValue visits its counter style", "[CSS][Values][CounterValue]")

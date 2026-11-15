@@ -115,8 +115,7 @@ namespace krys::boo::html::tests
 
     SECTION("an element with an is value has none")
     {
-      auto element = Document->CreateElement(
-        u8"x-plain", dom::ElementCreationOptions {.Is = dom::DOMStringAtom(u8"x-other")});
+      auto element = Document->CreateElement(u8"x-plain", dom::ElementCreationOptions {.Is = u8"x-other"});
       REQUIRE_FALSE(element.HasException());
       REQUIRE(element.Value()->IsDefinedCustomElement());
       auto internals = Downcast<HTMLElement>(*element.Value()).AttachInternals();
@@ -350,11 +349,11 @@ namespace krys::boo::html::tests
       internals.Role(dom::DOMString(u8"checkbox"));
       internals.AriaChecked(dom::DOMString(u8"false"));
       CHECK(internals.Role() == u8"checkbox");
-      CHECK(internals.InternalContentAttribute(dom::DOMStringAtom(u8"aria-checked")) == u8"false");
+      CHECK(internals.InternalContentAttribute(u8"aria-checked") == u8"false");
       CHECK_FALSE(element.HasAttribute(u8"role"));
       CHECK_FALSE(element.Role());
       internals.AriaChecked(null);
-      CHECK_FALSE(internals.InternalContentAttribute(dom::DOMStringAtom(u8"aria-checked")));
+      CHECK_FALSE(internals.InternalContentAttribute(u8"aria-checked"));
     }
 
     SECTION("element references resolve in the element's tree")

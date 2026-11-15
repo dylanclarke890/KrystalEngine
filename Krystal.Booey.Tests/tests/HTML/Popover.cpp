@@ -133,7 +133,7 @@ namespace krys::boo::html::tests
     {
       CHECK(ShowError(plain) == dom::ExceptionCode::NotSupportedError);
       auto detached = document.CreateElement(u8"div").ReleaseValue();
-      (void)detached->SetAttribute(dom::DOMStringAtom(u8"popover"), dom::DOMString());
+      (void)detached->SetAttribute(u8"popover", dom::DOMString());
       CHECK(ShowError(Downcast<HTMLElement>(*detached)) == dom::ExceptionCode::InvalidStateError);
       CHECK(log.Take().empty());
     }
@@ -348,7 +348,7 @@ namespace krys::boo::html::tests
     SECTION("A modal dialog can't be a popover")
     {
       auto dialog = document.CreateElement(u8"dialog").ReleaseValue();
-      (void)dialog->SetAttribute(dom::DOMStringAtom(u8"popover"), dom::DOMString());
+      (void)dialog->SetAttribute(u8"popover", dom::DOMString());
       REQUIRE_FALSE(document.Body()->AppendChild(*dialog).HasException());
       auto &modal = Downcast<HTMLDialogElement>(*dialog);
       REQUIRE_FALSE(modal.ShowModal().HasException());
@@ -431,7 +431,7 @@ namespace krys::boo::html::tests
       after.PopoverTargetElementForBindings(&popover);
       CHECK(NarrowOrNull(after.GetAttribute(u8"popovertarget")) == "");
       CHECK(after.PopoverTargetElement().get() == &popover);
-      (void)after.SetAttribute(dom::DOMStringAtom(u8"popovertarget"), u8"nope");
+      (void)after.SetAttribute(u8"popovertarget", u8"nope");
       CHECK_FALSE(after.PopoverTargetElement());
       after.PopoverTargetElementForBindings(nullptr);
       CHECK_FALSE(after.HasAttribute(u8"popovertarget"));

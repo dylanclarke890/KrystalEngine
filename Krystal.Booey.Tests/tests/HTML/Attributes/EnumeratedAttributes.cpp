@@ -70,8 +70,8 @@ namespace krys::boo::html::tests
   namespace
   {
     template <typename TElement>
-    KRYS_NODISCARD Ref<TElement> Create(dom::Document &document, dom::DOMStringView name,
-                                        dom::DOMStringView attribute = {}, Maybe<dom::DOMString> value = null)
+    KRYS_NODISCARD Ref<TElement> Create(dom::Document &document, dom::DOMStringAtom name,
+                                        dom::DOMStringAtom attribute = {}, Maybe<dom::DOMString> value = null)
     {
       auto element = document.CreateElement(name).ReleaseValue();
       if (value)
@@ -82,9 +82,9 @@ namespace krys::boo::html::tests
     }
 
     template <typename TElement>
-    void CheckCrossOriginAndFetchPriority(dom::Document &document, dom::DOMStringView name)
+    void CheckCrossOriginAndFetchPriority(dom::Document &document, dom::DOMStringAtom name)
     {
-      INFO(reinterpret_cast<const char *>(name.data()));
+      INFO(reinterpret_cast<const char *>(name.View().data()));
       CHECK(Create<TElement>(document, name)->CrossOrigin() == null);
       CHECK(Create<TElement>(document, name, u8"crossorigin", dom::DOMString())->CrossOrigin()
             == u8"anonymous");
@@ -104,9 +104,9 @@ namespace krys::boo::html::tests
     }
 
     template <typename TElement>
-    void CheckReferrerPolicy(dom::Document &document, dom::DOMStringView name)
+    void CheckReferrerPolicy(dom::Document &document, dom::DOMStringAtom name)
     {
-      INFO(reinterpret_cast<const char *>(name.data()));
+      INFO(reinterpret_cast<const char *>(name.View().data()));
       CHECK(Create<TElement>(document, name)->ReferrerPolicy() == u8"");
       CHECK(Create<TElement>(document, name, u8"referrerpolicy", u8"No-Referrer")->ReferrerPolicy()
             == u8"no-referrer");

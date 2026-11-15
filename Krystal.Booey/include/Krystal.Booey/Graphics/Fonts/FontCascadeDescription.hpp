@@ -46,7 +46,7 @@ namespace krys::boo
   class FontCascadeDescription : public FontDescription
   {
   private:
-    List<StringAtom> _families {StringAtom::Null()};
+    List<StringAtom> _families {null};
 
     // Specified CSS value. Independent of rendering issues such as integer rounding, minimum font sizes, and
     // zooming.

@@ -43,7 +43,7 @@ namespace krys::boo::html::tests
 
           krys::boo::tests::Indent(output, depth);
 
-          auto localName = dom::DOMString(element.LocalName().View());
+          auto localName = element.LocalName().ToString();
           auto namespaceName = [&] -> dom::DOMString
           {
             if (element.NamespaceURI() == infra::Namespaces::HTML)
@@ -70,7 +70,7 @@ namespace krys::boo::html::tests
           for (size_t i = 0; i < element.Attributes().Length(); ++i)
           {
             auto attr = element.Attributes().Item(i);
-            auto attrLocalName = dom::DOMString(attr->LocalName().View());
+            auto attrLocalName = attr->LocalName().ToString();
             auto attrNamespaceName = [&] -> dom::DOMString
             {
               if (attr->NamespaceURI() == infra::Namespaces::HTML)
@@ -272,16 +272,16 @@ namespace krys::boo::html::tests
           auto space = context.find(u8' ');
           auto namespaceURI =
             context.starts_with(u8"svg ") ? infra::Namespaces::SVG : infra::Namespaces::MathML;
-          element =
-            document->CreateElementNS(namespaceURI, dom::DOMString(context.substr(space + 1))).ReleaseValue();
+          element = document->CreateElementNS(namespaceURI, dom::DOMStringAtom(context.substr(space + 1)))
+                      .ReleaseValue();
         }
         else
         {
           TagName fragmentTagName = ParseTagName(*test.FragmentContext);
-          dom::QualifiedName qName =
-            dom::QualifiedName {infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
-          element = dom::ElementFactory::Create(*document, qName, dom::DOMStringAtom::Null());
+          dom::QualifiedName qName = dom::QualifiedName {infra::Namespaces::HTML, null,
+                                                         dom::DOMStringAtom(test.FragmentContext.value()),
+                                                         fragmentTagName, Namespace::HTML};
+          element = dom::ElementFactory::Create(*document, qName, null);
         }
         auto result = DocumentParser::ParseFragment(*element, test.Input, false,
                                                     test.ScriptingMode.value_or(ParserScriptingMode::Inert));
@@ -346,14 +346,14 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    Ref<dom::Element> CreateElement(dom::Document &document, const dom::DOMString &tagName)
+    Ref<dom::Element> CreateElement(dom::Document &document, dom::DOMStringAtom tagName)
     {
       auto element = document.CreateElement(tagName);
       REQUIRE(element.HasValue());
       return *element;
     }
 
-    Ref<svg::SVGElement> CreateSVGElement(dom::Document &document, const dom::DOMString &tagName) noexcept
+    Ref<svg::SVGElement> CreateSVGElement(dom::Document &document, dom::DOMStringAtom tagName) noexcept
     {
       auto element = document.CreateElementNS(infra::Namespaces::SVG, tagName);
       REQUIRE(element.HasValue());
@@ -728,7 +728,7 @@ namespace krys::boo::html::tests
     // xmlns has no prefix.
     auto xmlns = svg->GetAttributeNodeNS(infra::Namespaces::XMLNS, u8"xmlns");
     REQUIRE(xmlns);
-    CHECK(xmlns->Prefix() == dom::DOMStringAtom::Null());
+    CHECK(xmlns->Prefix() == null);
     CHECK(svg->GetAttribute(u8"xmlns") == dom::DOMString(u8"http://www.w3.org/2000/svg"));
 
     // xmlns:xlink and xlink:href keep their prefixes.

@@ -17,11 +17,10 @@ namespace krys::boo::style::tests
 
   TEST_CASE("ScopedName", "[Style][ScopedName]")
   {
-    auto name = ScopedName {.Name = css::CSSOMStringAtom {u8"--a"}};
+    auto name = ScopedName {.Name = u8"--a"};
     CHECK(name.ScopeOrdinal == ScopeOrdinal::Element);
     CHECK(name.IsIdentifier);
-    CHECK(name == ScopedName {.Name = css::CSSOMStringAtom {u8"--a"}});
-    CHECK_FALSE(name
-                == ScopedName {.Name = css::CSSOMStringAtom {u8"--a"}, .ScopeOrdinal = ScopeOrdinal::Shadow});
+    CHECK(name == ScopedName {.Name = u8"--a"});
+    CHECK_FALSE(name == ScopedName {.Name = u8"--a", .ScopeOrdinal = ScopeOrdinal::Shadow});
   }
 }

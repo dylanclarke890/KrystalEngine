@@ -30,7 +30,7 @@ namespace krys::boo::dom::tests
       }
     };
 
-    constexpr DOMStringView TestNamespace = u8"http://example.com/ns";
+    constexpr const char8 *TestNamespace = u8"http://example.com/ns";
   }
 
   TEST_CASE("Node.nodeName: an Element's is its HTML-uppercased qualified name",
@@ -62,7 +62,7 @@ namespace krys::boo::dom::tests
 
     auto div = document->CreateElement(u8"div").ReleaseValue();
     CHECK(div->NamespaceURI() == infra::Namespaces::HTML);
-    CHECK(div->Prefix() == DOMStringAtom::Null());
+    CHECK(div->Prefix() == null);
     CHECK(div->LocalName() == u8"div");
   }
 
@@ -74,21 +74,16 @@ namespace krys::boo::dom::tests
     SECTION("Uppercased for an HTML element in an HTML document")
     {
       CHECK(document->CreateElement(u8"div").ReleaseValue()->TagName() == u8"DIV");
-      CHECK(document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"h:sPan")
-              .ReleaseValue()
-              ->TagName()
+      CHECK(document->CreateElementNS(infra::Namespaces::HTML, u8"h:sPan").ReleaseValue()->TagName()
             == u8"H:SPAN");
     }
 
     SECTION("Otherwise its qualified name as it is")
     {
-      CHECK(document->CreateElementNS(DOMStringAtom(infra::Namespaces::SVG), u8"s:foreignObject")
-              .ReleaseValue()
-              ->TagName()
+      CHECK(document->CreateElementNS(infra::Namespaces::SVG, u8"s:foreignObject").ReleaseValue()->TagName()
             == u8"s:foreignObject");
       auto xml = CreateRef<XMLDocument>();
-      CHECK(xml->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"div").ReleaseValue()->TagName()
-            == u8"div");
+      CHECK(xml->CreateElementNS(infra::Namespaces::HTML, u8"div").ReleaseValue()->TagName() == u8"div");
     }
   }
 
@@ -224,8 +219,8 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(data.Node->SetAttribute(u8"x:a", u8"1").HasException());
       auto *attr = data.Node->GetAttributeNode(u8"x:a");
       REQUIRE(attr != nullptr);
-      CHECK(attr->NamespaceURI() == DOMStringAtom::Null());
-      CHECK(attr->Prefix() == DOMStringAtom::Null());
+      CHECK(attr->NamespaceURI() == null);
+      CHECK(attr->Prefix() == null);
       CHECK(attr->LocalName() == u8"x:a");
       CHECK(attr->Value() == u8"1");
     }
@@ -247,7 +242,7 @@ namespace krys::boo::dom::tests
       CHECK(data.Node->GetAttributeNames() == List<DOMString> {u8"mixed"});
 
       auto xml = CreateRef<XMLDocument>();
-      auto element = xml->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"div").ReleaseValue();
+      auto element = xml->CreateElementNS(infra::Namespaces::HTML, u8"div").ReleaseValue();
       REQUIRE_FALSE(element->SetAttribute(u8"Mixed", u8"1").HasException());
       CHECK(element->GetAttributeNames() == List<DOMString> {u8"Mixed"});
     }
@@ -287,7 +282,7 @@ namespace krys::boo::dom::tests
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
 
-      result = data.Node->SetAttributeNS(DOMStringAtom::Null(), u8"x:a", u8"value");
+      result = data.Node->SetAttributeNS(null, u8"x:a", u8"value");
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::NamespaceError);
     }
@@ -583,7 +578,7 @@ namespace krys::boo::dom::tests
     CHECK(tagNames->Item(0)->Id() == u8"inner");
     CHECK(root->GetElementsByTagName(u8"p")->Length() == 0u);
 
-    auto tagNamesNS = root->GetElementsByTagNameNS(DOMStringAtom(infra::Namespaces::HTML), u8"*");
+    auto tagNamesNS = root->GetElementsByTagNameNS(infra::Namespaces::HTML, u8"*");
     REQUIRE(tagNamesNS->Length() == 1u);
     CHECK(tagNamesNS->Item(0)->Id() == u8"inner");
 

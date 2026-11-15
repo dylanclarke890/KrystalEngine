@@ -28,7 +28,7 @@ namespace krys::boo::tests
       void Navigate(utf8_stringview url) noexcept
       {
         Frame->Loader().ChangeLocation(url::URL(Document->GetURL(), url), dom::DOMStringAtom::Empty(),
-                                       nullptr, ReferrerPolicy::EmptyString, dom::DOMStringAtom::Null());
+                                       nullptr, ReferrerPolicy::EmptyString, null);
         html::EventLoop::Current().RunUntilIdle();
       }
 

@@ -15,11 +15,11 @@ namespace krys::boo::html
   struct SanitizerElementNamespace
   {
     dom::DOMString Name;
-    /// @brief The namespace; null (`DOMStringAtom::Null()`) for no namespace.
+    /// @brief The namespace; null (`null`) for no namespace.
     dom::DOMStringAtom Namespace;
 
-    SanitizerElementNamespace(dom::DOMString name, dom::DOMStringAtom namespaceURI =
-                                                     dom::DOMStringAtom(infra::Namespaces::HTML)) noexcept
+    SanitizerElementNamespace(dom::DOMString name,
+                              dom::DOMStringAtom namespaceURI = infra::Namespaces::HTML) noexcept
         : Name(krys::move(name)), Namespace(namespaceURI)
     {
     }
@@ -40,11 +40,10 @@ namespace krys::boo::html
   struct SanitizerAttributeNamespace
   {
     dom::DOMString Name;
-    /// @brief The namespace; null (`DOMStringAtom::Null()`) for no namespace.
+    /// @brief The namespace; null (`null`) for no namespace.
     dom::DOMStringAtom Namespace;
 
-    SanitizerAttributeNamespace(dom::DOMString name,
-                                dom::DOMStringAtom namespaceURI = dom::DOMStringAtom::Null()) noexcept
+    SanitizerAttributeNamespace(dom::DOMString name, dom::DOMStringAtom namespaceURI = null) noexcept
         : Name(krys::move(name)), Namespace(namespaceURI)
     {
     }

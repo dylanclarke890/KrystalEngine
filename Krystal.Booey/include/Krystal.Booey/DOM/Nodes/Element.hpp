@@ -219,7 +219,7 @@ namespace krys::boo::dom
     List<Ref<Attr>> _attributes;
     /// @brief Kept as given, but ignored: customized built-in elements aren't supported.
     /// @see https://dom.spec.whatwg.org/#concept-element-is-value
-    DOMStringAtom _is {DOMStringAtom::Null()};
+    DOMStringAtom _is {null};
     /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
     CustomElementState _customElementState {CustomElementState::Uncustomized};
 

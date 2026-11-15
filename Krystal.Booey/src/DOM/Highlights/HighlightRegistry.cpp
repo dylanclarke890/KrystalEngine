@@ -32,7 +32,7 @@ namespace krys::boo::dom
   {
     KRYS_NODISCARD DOMStringAtom AnnotationHighlightKey() noexcept
     {
-      return DOMStringAtom(u8"annotationHighlightKey");
+      return u8"annotationHighlightKey";
     }
   }
 

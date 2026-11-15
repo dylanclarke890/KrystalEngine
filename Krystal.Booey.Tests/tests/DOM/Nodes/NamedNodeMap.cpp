@@ -10,7 +10,7 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    constexpr DOMStringView TestNamespace = u8"http://example.com/ns";
+    constexpr const char8 *TestNamespace = u8"http://example.com/ns";
 
     struct CommonTestData
     {
@@ -86,7 +86,7 @@ namespace krys::boo::dom::tests
       CommonTestData data;
       REQUIRE_FALSE(data.Node->SetAttribute(u8"b", u8"").HasException());
       REQUIRE_FALSE(data.Node->SetAttributeNS(u8"urn:a", u8"x:y", u8"").HasException());
-      REQUIRE_FALSE(data.Node->SetAttributeNS(DOMStringAtom::Null(), u8"Upper", u8"").HasException());
+      REQUIRE_FALSE(data.Node->SetAttributeNS(null, u8"Upper", u8"").HasException());
       REQUIRE_FALSE(data.Node->SetAttributeNS(u8"urn:b", u8"x:y", u8"").HasException());
 
       CHECK(data.Attributes().SupportedPropertyNames() == List<DOMString> {u8"b", u8"x:y"});
@@ -99,8 +99,7 @@ namespace krys::boo::dom::tests
     SECTION("Otherwise they're all kept")
     {
       auto document = CreateRef<XMLDocument>();
-      auto element =
-        document->CreateElementNS(DOMStringAtom(infra::Namespaces::HTML), u8"div").ReleaseValue();
+      auto element = document->CreateElementNS(infra::Namespaces::HTML, u8"div").ReleaseValue();
       REQUIRE_FALSE(element->SetAttribute(u8"Upper", u8"").HasException());
       REQUIRE_FALSE(element->SetAttribute(u8"lower", u8"").HasException());
       CHECK(element->Attributes().SupportedPropertyNames() == List<DOMString> {u8"Upper", u8"lower"});

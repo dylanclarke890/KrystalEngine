@@ -98,14 +98,14 @@ namespace krys::boo::style::tests
       auto filled = Convert<TextEmphasisStyle>(PropertyId::TextEmphasisStyle, u8"filled");
       // `filled` alone is a circle in horizontal writing.
       CHECK(Serialised(filled) == "circle");
-      CHECK(filled.MarkString() == css::CSSOMStringAtom {u8"●"});
+      CHECK(filled.MarkString() == u8"●");
 
       auto open = Convert<TextEmphasisStyle>(PropertyId::TextEmphasisStyle, u8"open triangle");
       CHECK(Serialised(open) == "open triangle");
-      CHECK(open.MarkString() == css::CSSOMStringAtom {u8"△"});
+      CHECK(open.MarkString() == u8"△");
 
       auto custom = Convert<TextEmphasisStyle>(PropertyId::TextEmphasisStyle, u8"\"x\"");
-      CHECK(custom.MarkString() == css::CSSOMStringAtom {u8"x"});
+      CHECK(custom.MarkString() == u8"x");
       CHECK(Convert<TextEmphasisStyle>(PropertyId::TextEmphasisStyle, u8"none").IsNone());
 
       CHECK(Serialised(Convert<TextEmphasisPosition>(PropertyId::TextEmphasisPosition, u8"under left"))
@@ -131,7 +131,7 @@ namespace krys::boo::style::tests
     CHECK(Convert<WebkitLocale>(PropertyId::InternalLocale, u8"auto").IsAuto());
     auto locale = Convert<WebkitLocale>(PropertyId::InternalLocale, u8"\"en-GB\"");
     CHECK_FALSE(locale.IsAuto());
-    CHECK(ConvertToPlatform(locale) == css::CSSOMStringAtom {u8"en-GB"});
+    CHECK(ConvertToPlatform(locale) == u8"en-GB");
     // Serialised as a custom ident, although it parses as a string.
     CHECK(Serialised(locale) == "en-GB");
 

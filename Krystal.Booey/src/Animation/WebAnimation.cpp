@@ -2129,7 +2129,7 @@ namespace krys::boo
         return existingInlineStyle->MutableCopy();
       }
       auto styleDeclaration = css::MutableStyleProperties::Create();
-      if (auto styleAttribute = styledElement->GetAttribute(dom::DOMStringAtom(u8"style")))
+      if (auto styleAttribute = styledElement->GetAttribute(u8"style"))
       {
         (void)styleDeclaration->ParseDeclaration(*styleAttribute, parserContext);
       }
@@ -2221,8 +2221,7 @@ namespace krys::boo
             *animatedStyle, customProperty, css::DefaultSerialisationContext());
           if (!string.empty())
           {
-            return inlineStyle->SetCustomProperty(css::CSSOMString(customProperty.View()), string,
-                                                  parserContext);
+            return inlineStyle->SetCustomProperty(customProperty.ToString(), string, parserContext);
           }
           return false;
         });
@@ -2252,8 +2251,7 @@ namespace krys::boo
     if (didMutate)
     {
       (void)styledElement->SetAttribute(
-        dom::DOMStringAtom(u8"style"),
-        dom::DOMString(inlineStyle->AsTextAtom(css::DefaultSerialisationContext()).View()));
+        u8"style", inlineStyle->AsTextAtom(css::DefaultSerialisationContext()).ToString());
     }
 
     return {};

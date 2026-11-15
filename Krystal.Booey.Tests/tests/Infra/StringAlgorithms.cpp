@@ -256,11 +256,11 @@ namespace krys::boo::infra::tests
             "[Infra][Namespaces][infra:namespaces][infra:html-namespace][infra:mathml-namespace]"
             "[infra:svg-namespace][infra:xlink-namespace][infra:xml-namespace][infra:xmlns-namespace]")
   {
-    STATIC_CHECK(Namespaces::HTML == u8"http://www.w3.org/1999/xhtml");
-    STATIC_CHECK(Namespaces::MathML == u8"http://www.w3.org/1998/Math/MathML");
-    STATIC_CHECK(Namespaces::SVG == u8"http://www.w3.org/2000/svg");
-    STATIC_CHECK(Namespaces::XLink == u8"http://www.w3.org/1999/xlink");
-    STATIC_CHECK(Namespaces::XML == u8"http://www.w3.org/XML/1998/namespace");
-    STATIC_CHECK(Namespaces::XMLNS == u8"http://www.w3.org/2000/xmlns/");
+    STATIC_CHECK(utf8_stringview {Namespaces::HTML} == u8"http://www.w3.org/1999/xhtml");
+    STATIC_CHECK(utf8_stringview {Namespaces::MathML} == u8"http://www.w3.org/1998/Math/MathML");
+    STATIC_CHECK(utf8_stringview {Namespaces::SVG} == u8"http://www.w3.org/2000/svg");
+    STATIC_CHECK(utf8_stringview {Namespaces::XLink} == u8"http://www.w3.org/1999/xlink");
+    STATIC_CHECK(utf8_stringview {Namespaces::XML} == u8"http://www.w3.org/XML/1998/namespace");
+    STATIC_CHECK(utf8_stringview {Namespaces::XMLNS} == u8"http://www.w3.org/2000/xmlns/");
   }
 }

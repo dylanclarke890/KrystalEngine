@@ -259,7 +259,7 @@ namespace krys::boo::style
     else
     {
       _nonInheritedFlags.PseudoElementType = 0;
-      SET_NESTED(_nonInheritedData, RareData, PseudoElementNameArgument, css::CSSOMStringAtom::Null());
+      SET_NESTED(_nonInheritedData, RareData, PseudoElementNameArgument, null);
     }
   }
 

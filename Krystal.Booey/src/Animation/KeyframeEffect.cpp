@@ -496,8 +496,8 @@ namespace krys::boo
         }
         else
         {
-          propertiesAndValues.push_back(KeyframeEffect::PropertyAndValues {
-            cssPropertyId, css::CSSOMStringAtom::Null(), animationProperty->second});
+          propertiesAndValues.push_back(
+            KeyframeEffect::PropertyAndValues {cssPropertyId, null, animationProperty->second});
         }
       }
 
@@ -511,8 +511,7 @@ namespace krys::boo
     {
       if (property.Property == css::PropertyId::Custom)
       {
-        if (keyframe.Style->SetCustomProperty(css::CSSOMString(property.CustomProperty.View()), value,
-                                              parserContext))
+        if (keyframe.Style->SetCustomProperty(property.CustomProperty.ToString(), value, parserContext))
         {
           keyframe.CustomStyleStrings.insert_or_assign(property.CustomProperty, value);
         }

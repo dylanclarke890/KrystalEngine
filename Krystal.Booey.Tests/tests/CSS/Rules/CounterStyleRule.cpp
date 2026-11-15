@@ -8,8 +8,7 @@ namespace krys::boo::css::tests
   {
     KRYS_NODISCARD CounterStyleDescriptors Descriptors(utf8_stringview css)
     {
-      return CounterStyleDescriptors::Create(CSSOMStringAtom(u8"foo"),
-                                             *ParseDescriptors(css, RuleType::CounterStyle));
+      return CounterStyleDescriptors::Create(u8"foo", *ParseDescriptors(css, RuleType::CounterStyle));
     }
   }
 
@@ -18,15 +17,15 @@ namespace krys::boo::css::tests
     SECTION("Defaults")
     {
       auto descriptors = Descriptors(u8"");
-      CHECK(descriptors.Name == CSSOMStringAtom(u8"foo"));
+      CHECK(descriptors.Name == u8"foo");
       CHECK(descriptors.System == CounterStyleSystem::Symbolic);
       CHECK(descriptors.NegativeSymbols == CounterStyleNegativeSymbols {});
       CHECK(descriptors.NegativeSymbols.Prefix.Text == u8"-");
       CHECK(descriptors.Prefix == CounterStyleSymbol {});
       CHECK(descriptors.Suffix == CounterStyleSymbol {false, u8". "});
       CHECK(descriptors.Ranges.empty());
-      CHECK(descriptors.FallbackName == CSSOMStringAtom(u8"decimal"));
-      CHECK(descriptors.ExtendsName == CSSOMStringAtom(u8"decimal"));
+      CHECK(descriptors.FallbackName == u8"decimal");
+      CHECK(descriptors.ExtendsName == u8"decimal");
       CHECK(descriptors.FixedSystemFirstSymbolValue == 1);
       CHECK(descriptors.SpeakAs == CounterStyleSpeakAs::Auto);
       CHECK(descriptors.ExplicitlySetDescriptors == CounterStyleDescriptor::None);
@@ -75,7 +74,7 @@ namespace krys::boo::css::tests
 
       auto extends = Descriptors(u8"system: extends lower-alpha");
       CHECK(extends.System == CounterStyleSystem::Extends);
-      CHECK(extends.ExtendsName == CSSOMStringAtom(u8"lower-alpha"));
+      CHECK(extends.ExtendsName == u8"lower-alpha");
       CHECK(ToNarrow(extends.SystemCSSText()) == "extends lower-alpha");
       CHECK(extends.IsValid());
     }
@@ -114,7 +113,7 @@ namespace krys::boo::css::tests
       descriptors.SetPad({2u, {true, u8"z"}});
       CHECK(ToNarrow(descriptors.PadCSSText()) == "2 z");
 
-      descriptors.SetFallbackName(CSSOMStringAtom(u8"disc"));
+      descriptors.SetFallbackName(u8"disc");
       CHECK(ToNarrow(descriptors.FallbackCSSText()) == "disc");
 
       descriptors.SetNegative({{false, u8"-"}, {false, u8"!"}, true});
@@ -133,16 +132,16 @@ namespace krys::boo::css::tests
 
     SECTION("SetName ignores null names")
     {
-      descriptors.SetName(CSSOMStringAtom::Null());
-      CHECK(descriptors.Name == CSSOMStringAtom(u8"foo"));
-      descriptors.SetName(CSSOMStringAtom(u8"bar"));
-      CHECK(descriptors.Name == CSSOMStringAtom(u8"bar"));
+      descriptors.SetName(null);
+      CHECK(descriptors.Name == u8"foo");
+      descriptors.SetName(u8"bar");
+      CHECK(descriptors.Name == u8"bar");
     }
 
     SECTION("SetSystemData")
     {
       descriptors.SetSystemData({CSSOMStringAtom(u8"upper-alpha"), 4});
-      CHECK(descriptors.ExtendsName == CSSOMStringAtom(u8"upper-alpha"));
+      CHECK(descriptors.ExtendsName == u8"upper-alpha");
       CHECK(descriptors.FixedSystemFirstSymbolValue == 4);
     }
 
@@ -160,11 +159,10 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CounterStyleRule", "[CSS][Rules][CounterStyleRule]")
   {
     auto rule = CounterStyleRule::Create(
-      CSSOMStringAtom(u8"foo"),
-      Descriptors(u8"system: cyclic; symbols: \"*\"; suffix: \" \"; speak-as: bullets"));
+      u8"foo", Descriptors(u8"system: cyclic; symbols: \"*\"; suffix: \" \"; speak-as: bullets"));
     CHECK(rule->Type() == RuleType::CounterStyle);
     CHECK(rule->IsCounterStyleRule());
-    CHECK(rule->Name() == CSSOMStringAtom(u8"foo"));
+    CHECK(rule->Name() == u8"foo");
     CHECK(ToNarrow(rule->System()) == "cyclic");
     CHECK(ToNarrow(rule->Symbols()) == "\"*\"");
     CHECK(ToNarrow(rule->Suffix()) == "\" \"");
@@ -174,13 +172,13 @@ namespace krys::boo::css::tests
     CHECK(rule->SpeakAs().empty());
     CHECK(HasFlag(rule->Descriptors().ExplicitlySetDescriptors, CounterStyleDescriptor::SpeakAs));
 
-    rule->SetName(CSSOMStringAtom(u8"bar"));
+    rule->SetName(u8"bar");
     rule->MutableDescriptors().SetPrefix({false, u8"#"});
 
     Ref<Rule> base = rule;
     auto copied = base->Copy();
     auto &copy = Downcast<CounterStyleRule>(*copied);
-    CHECK(copy.Name() == CSSOMStringAtom(u8"bar"));
+    CHECK(copy.Name() == u8"bar");
     CHECK(copy.Descriptors() == rule->Descriptors());
   }
 }

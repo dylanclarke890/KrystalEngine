@@ -33,7 +33,7 @@ namespace krys::boo::style
   // https://www.w3.org/TR/css-animations-1/#propdef-animation-name
   struct SingleAnimationName
   {
-    SingleAnimationName(css::keywords::None) noexcept : _value {ScopedName {css::CSSOMStringAtom::Null()}}
+    SingleAnimationName(css::keywords::None) noexcept : _value {ScopedName {null}}
     {
     }
 
@@ -43,11 +43,11 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool IsNone() const noexcept
     {
-      return _value.Name == css::CSSOMStringAtom::Null();
+      return _value.Name == null;
     }
     KRYS_NODISCARD bool IsKeyframesName() const noexcept
     {
-      return _value.Name != css::CSSOMStringAtom::Null();
+      return _value.Name != null;
     }
     KRYS_NODISCARD Maybe<ScopedName> TryKeyframesName() const noexcept
     {

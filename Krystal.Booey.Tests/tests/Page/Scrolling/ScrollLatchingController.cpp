@@ -106,7 +106,7 @@ namespace krys::boo::tests
     SECTION("its wheel events go to the element it started over")
     {
       auto counter = CreateRef<WheelCounter>();
-      fixture.ById(u8"other").AddEventListener(dom::DOMStringAtom(u8"wheel"), counter, false);
+      fixture.ById(u8"other").AddEventListener(u8"wheel", counter, false);
       (void)Pan(fixture, Phase::Began, 0);
       (void)Pan(fixture, Phase::Changed, -50, {10, 150});
       CHECK(counter->Count == 0);
@@ -152,10 +152,10 @@ namespace krys::boo::tests
     {
       auto scroller = CreateRef<ScriptScroller>();
       scroller->Box = &box;
-      box.AddEventListener(dom::DOMStringAtom(u8"wheel"), scroller, false);
+      box.AddEventListener(u8"wheel", scroller, false);
       CHECK(Pan(fixture, Phase::Changed, -50));
       CHECK(box.ScrollTop() == 60);
-      box.RemoveEventListener(dom::DOMStringAtom(u8"wheel"), scroller, false);
+      box.RemoveEventListener(u8"wheel", scroller, false);
 
       CHECK(Pan(fixture, Phase::Changed, -50, {150, 50}));
       CHECK(ViewY(fixture) == 50);

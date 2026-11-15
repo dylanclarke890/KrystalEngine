@@ -49,14 +49,14 @@ namespace krys::boo::style
     using PositionType = Integer<>;
 
     PositionType Position {1};
-    css::CustomIdentifier Name {css::CSSOMStringAtom::Null()};
+    css::CustomIdentifier Name {null};
 
     template <typename... F>
     KRYS_NODISCARD decltype(auto) SwitchOn(F &&...f) const noexcept
     {
       auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
 
-      if (Name.Value == css::CSSOMStringAtom::Null())
+      if (Name.Value == null)
       {
         return visitor(Position);
       }
@@ -73,14 +73,14 @@ namespace krys::boo::style
     using PositionType = Integer<css::Range {1, css::Range::Inf}>;
 
     PositionType Position {1};
-    css::CustomIdentifier Name {css::CSSOMStringAtom::Null()};
+    css::CustomIdentifier Name {null};
 
     template <typename... F>
     KRYS_NODISCARD decltype(auto) SwitchOn(F &&...f) const noexcept
     {
       auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
 
-      if (Name.Value == css::CSSOMStringAtom::Null())
+      if (Name.Value == null)
       {
         return visitor(css::SpaceSeparatedTuple {css::keywords::Span {}, Position});
       }
@@ -115,7 +115,7 @@ namespace krys::boo::style
 
     GridPositionType _type {GridPositionType::Auto};
     int _integerPosition {1};
-    css::CustomIdentifier _namedGridLine {css::CSSOMStringAtom::Null()};
+    css::CustomIdentifier _namedGridLine {null};
 
   public:
     GridPosition(css::keywords::Auto) noexcept

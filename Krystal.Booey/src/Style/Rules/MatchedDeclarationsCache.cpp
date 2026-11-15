@@ -61,7 +61,7 @@ namespace krys::boo::style
     // FIXME: Without the following early return we hit the final assert in
     // Element::resolvePseudoElementStyle(). Making matchedPseudoElements
     // PseudoElementIdentifier-aware might be a possible solution.
-    if (style.PseudoElementNameArgument() != css::CSSOMStringAtom::Null())
+    if (style.PseudoElementNameArgument() != null)
     {
       return false;
     }

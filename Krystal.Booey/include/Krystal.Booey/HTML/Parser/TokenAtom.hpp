@@ -43,7 +43,7 @@ namespace krys::boo::html
     bool _isSelfClosing : 1 {false};
     bool _selfClosingTagAcknowledged : 1 {false};
     bool _dataReleased : 1 {false};
-    dom::DOMStringAtom _name {dom::DOMStringAtom::Null()};
+    dom::DOMStringAtom _name {null};
     UniquePtr<DoctypeData> _doctypeData;
     dom::DOMString _data;
     ParsedAttributeList _attributes;
@@ -66,7 +66,7 @@ namespace krys::boo::html
         }
         case TokenType::DOCTYPE:
         {
-          _name = dom::DOMString {data.begin(), data.end()};
+          _name = dom::DOMStringAtom(dom::DOMStringView {data.begin(), data.end()});
           _doctypeData = token.ReleaseDOCTYPEData();
 
           break;
@@ -80,7 +80,7 @@ namespace krys::boo::html
         }
         case TokenType::ProcessingInstruction:
         {
-          _name = dom::DOMString {data.begin(), data.end()};
+          _name = dom::DOMStringAtom(dom::DOMStringView {data.begin(), data.end()});
           const auto &piData = token.ProcessingInstructionData();
           _data = dom::DOMString {piData.begin(), piData.end()};
 
@@ -89,7 +89,7 @@ namespace krys::boo::html
         case TokenType::StartTag:
         case TokenType::EndTag:
         {
-          _name = dom::DOMString {data.begin(), data.end()};
+          _name = dom::DOMStringAtom(dom::DOMStringView {data.begin(), data.end()});
           _attributes = krys::move(token.Attributes());
 
           if (_type == TokenType::StartTag)

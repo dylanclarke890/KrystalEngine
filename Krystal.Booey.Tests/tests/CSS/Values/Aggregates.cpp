@@ -186,8 +186,8 @@ namespace krys::boo::css::tests
   {
     CustomIdentifier a {CSSOMStringAtom(u8"foo")};
     CHECK(a == CustomIdentifier {CSSOMStringAtom(u8"foo")});
-    CHECK(a == CSSOMStringAtom(u8"foo"));
-    CHECK_FALSE(a == CSSOMStringAtom(u8"bar"));
+    CHECK(a == u8"foo");
+    CHECK_FALSE(a == u8"bar");
 
     CHECK(PropertyIdentifier {PropertyId::Color} == PropertyIdentifier {PropertyId::Color});
     CHECK_FALSE(PropertyIdentifier {PropertyId::Color} == PropertyIdentifier {PropertyId::MarginTop});

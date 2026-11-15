@@ -87,7 +87,7 @@ namespace krys::boo::dom
     // 1. If get an attribute by namespace and local name given null, set’s attribute name, and set’s element
     // returns
     //    null and set’s token set is empty, then return.
-    auto attr = ElementAlgorithms::GetAttributeByNamespace(DOMStringAtom::Null(), _attributeName, *_element);
+    auto attr = ElementAlgorithms::GetAttributeByNamespace(null, _attributeName, *_element);
     if (attr == nullptr && _tokens.empty())
     {
       return;

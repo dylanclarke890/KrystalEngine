@@ -537,7 +537,7 @@ namespace krys::boo::css
         {
           if (RefPtr value = PropertyParserHelpers::ConsumeCustomIdent(range))
           {
-            if (component.Ident == CSSOMStringAtom::Null() || value->StringValue() == component.Ident.View())
+            if (component.Ident == null || value->StringValue() == component.Ident.View())
             {
               return value;
             }

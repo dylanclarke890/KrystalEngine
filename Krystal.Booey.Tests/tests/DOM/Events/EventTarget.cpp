@@ -76,7 +76,7 @@ namespace krys::boo::dom::tests
     {
       target->AddEventListener(EventNames::Click, Ref<EventListenerCallback>(callback), true);
       target->RemoveEventListener(EventNames::Click, Ref<EventListenerCallback>(callback), false);
-      target->RemoveEventListener(DOMStringAtom(u8"other"), Ref<EventListenerCallback>(callback), true);
+      target->RemoveEventListener(u8"other", Ref<EventListenerCallback>(callback), true);
       target->RemoveEventListener(EventNames::Click, CreateRef<FunctionEventListenerCallback>([](Event &) {}),
                                   true);
       REQUIRE(target->EventListeners().size() == 1);

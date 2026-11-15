@@ -82,16 +82,16 @@ namespace krys::boo::dom::tests
       REQUIRE(window);
 
       CHECK(EventTargetAlgorithms::DefaultPassiveValue(wheel, *window));
-      CHECK(EventTargetAlgorithms::DefaultPassiveValue(DOMStringAtom(EventNames::TouchStart), *window));
-      CHECK(EventTargetAlgorithms::DefaultPassiveValue(DOMStringAtom(EventNames::TouchMove), *window));
-      CHECK(EventTargetAlgorithms::DefaultPassiveValue(DOMStringAtom(EventNames::MouseWheel), *window));
+      CHECK(EventTargetAlgorithms::DefaultPassiveValue(EventNames::TouchStart, *window));
+      CHECK(EventTargetAlgorithms::DefaultPassiveValue(EventNames::TouchMove, *window));
+      CHECK(EventTargetAlgorithms::DefaultPassiveValue(EventNames::MouseWheel, *window));
       CHECK(EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document));
       CHECK(EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->DocumentElement()));
       CHECK(EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->Body()));
       CHECK_FALSE(
         EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->GetElementById(u8"box")));
-      CHECK_FALSE(EventTargetAlgorithms::DefaultPassiveValue(DOMStringAtom(EventNames::Click), *window));
-      CHECK_FALSE(EventTargetAlgorithms::DefaultPassiveValue(DOMStringAtom(EventNames::TouchEnd), *window));
+      CHECK_FALSE(EventTargetAlgorithms::DefaultPassiveValue(EventNames::Click, *window));
+      CHECK_FALSE(EventTargetAlgorithms::DefaultPassiveValue(EventNames::TouchEnd, *window));
     }
 
     SECTION("A frameset is the body element")
@@ -144,8 +144,7 @@ namespace krys::boo::dom::tests
       REQUIRE(
         EventTargetAlgorithms::AddEventListener(*target, *Listener(click, callback, WithCapture(true))));
       REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *Listener(click, Callback())));
-      REQUIRE(
-        EventTargetAlgorithms::AddEventListener(*target, *Listener(DOMStringAtom(u8"other"), callback)));
+      REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *Listener(u8"other", callback)));
       REQUIRE(target->EventListeners().size() == 4);
     }
 
@@ -187,8 +186,8 @@ namespace krys::boo::dom::tests
   {
     auto document = CreateRef<Document>();
     auto target = document->CreateElement(u8"div").ReleaseValue();
-    auto first = Listener(DOMStringAtom(EventNames::Click), Callback());
-    auto second = Listener(DOMStringAtom(u8"other"), Callback());
+    auto first = Listener(EventNames::Click, Callback());
+    auto second = Listener(u8"other", Callback());
     REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *first));
     REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *second));
 

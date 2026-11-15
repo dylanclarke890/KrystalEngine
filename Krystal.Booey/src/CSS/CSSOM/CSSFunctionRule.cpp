@@ -43,7 +43,7 @@ namespace krys::boo::css
 
   CSSOMString CSSFunctionRule::Name() const noexcept
   {
-    return CSSOMString(GetFunctionRule().Name().View());
+    return GetFunctionRule().Name().ToString();
   }
 
   List<CSSFunctionRule::FunctionParameter> CSSFunctionRule::GetParameters() const noexcept
@@ -54,7 +54,7 @@ namespace krys::boo::css
     {
       const auto &defaultValue = parameter.DefaultValue;
       result.push_back({
-        .Name = CSSOMString(parameter.Name.View()),
+        .Name = parameter.Name.ToString(),
         .Type = parameter.Type.SyntaxString(),
         .DefaultValue = defaultValue ? Maybe<CSSOMString>(defaultValue->Serialise()) : null,
       });
@@ -79,7 +79,7 @@ namespace krys::boo::css
     for (const auto &parameter : GetFunctionRule().Parameters())
     {
       builder.Append(separator);
-      SerialiseIdentifier(CSSOMString(parameter.Name.View()), builder);
+      SerialiseIdentifier(parameter.Name.ToString(), builder);
       if (!parameter.Type.IsUniversal())
       {
         builder.Append(u8' ', parameter.Type.CSSTypeString());

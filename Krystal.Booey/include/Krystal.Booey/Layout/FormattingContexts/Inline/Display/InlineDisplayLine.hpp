@@ -55,7 +55,7 @@ namespace krys::boo::inline_display
       Type EllipsisType {Type::Inline};
       // This is visual rect ignoring block direction.
       FloatRect VisualRect;
-      StringAtom Text {StringAtom::Null()};
+      StringAtom Text {null};
     };
 
   private:

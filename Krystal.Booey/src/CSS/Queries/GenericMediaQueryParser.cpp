@@ -46,7 +46,7 @@ namespace krys::boo::css::mq
   {
     if (tokens.Peek().Type() != TokenType::Ident)
     {
-      return CSSOMStringAtom::Null();
+      return null;
     }
     auto name = tokens.ConsumeIncludingWhitespace().IdentCodePoints();
     if (IsCustomPropertyName(name))
@@ -94,7 +94,7 @@ namespace krys::boo::css::mq
       auto name = ConsumeFeatureName(tokens);
       if (name.View().empty())
       {
-        return {CSSOMStringAtom::Null(), ComparisonOperator::Equal};
+        return {null, ComparisonOperator::Equal};
       }
       if (IsCustomPropertyName(name.View()))
       {

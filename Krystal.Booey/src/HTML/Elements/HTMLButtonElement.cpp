@@ -92,7 +92,7 @@ namespace krys::boo::html
                                              dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }
@@ -317,7 +317,7 @@ namespace krys::boo::html
 
   RefPtr<dom::Element> HTMLButtonElement::CommandForElement() const noexcept
   {
-    return ResolvedElementForAttribute(dom::DOMStringAtom(u8"commandfor"));
+    return ResolvedElementForAttribute(u8"commandfor");
   }
 
   // https://html.spec.whatwg.org/#attr-button-command
@@ -393,7 +393,7 @@ namespace krys::boo::html
     init.Source = ShareRefPtr<dom::Element>(this);
     init.Command = commandRaw.value_or(dom::DOMString());
 
-    auto event = dom::CommandEvent::Create(dom::DOMStringAtom(EventNames::Command), init, true);
+    auto event = dom::CommandEvent::Create(EventNames::Command, init, true);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *invokee, this);
 
     // 5e. If continue is false, then return.
@@ -449,13 +449,13 @@ namespace krys::boo::html
   {
     // The getter steps are to return the result of running this's get the unresolved commandfor target
     // element (a host, not what its reference target names).
-    return ElementForAttributeInternal(dom::DOMStringAtom(u8"commandfor"));
+    return ElementForAttributeInternal(u8"commandfor");
   }
 
   void HTMLButtonElement::CommandForElementForBindings(dom::Element *element) noexcept
   {
     CEReactionsScope ceReactions;
-    SetElementAttribute(dom::DOMStringAtom(u8"commandfor"), element);
+    SetElementAttribute(u8"commandfor", element);
   }
 
   bool HTMLButtonElement::Disabled() const noexcept

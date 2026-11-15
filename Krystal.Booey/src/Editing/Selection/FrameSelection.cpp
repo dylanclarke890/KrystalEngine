@@ -497,7 +497,7 @@ namespace krys::boo
           if (RefPtr<dom::Document> document = ShareRefPtr(weakDocument.get()))
           {
             document->Selection()._hasScheduledSelectionChangeEventOnDocument = false;
-            (void)dom::EventDispatcher::FireEvent(dom::DOMStringAtom(EventNames::SelectionChange), *document);
+            (void)dom::EventDispatcher::FireEvent(EventNames::SelectionChange, *document);
           }
         });
     }

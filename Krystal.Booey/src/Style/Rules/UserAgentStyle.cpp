@@ -68,15 +68,13 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD const css::mq::MediaQueryEvaluator &ScreenEval() noexcept
     {
-      static NeverDestroyed<const css::mq::MediaQueryEvaluator> staticScreenEval(
-        css::CSSOMStringAtom(u8"screen"));
+      static NeverDestroyed<const css::mq::MediaQueryEvaluator> staticScreenEval(u8"screen");
       return staticScreenEval;
     }
 
     KRYS_NODISCARD const css::mq::MediaQueryEvaluator &PrintEval() noexcept
     {
-      static NeverDestroyed<const css::mq::MediaQueryEvaluator> staticPrintEval(
-        css::CSSOMStringAtom(u8"print"));
+      static NeverDestroyed<const css::mq::MediaQueryEvaluator> staticPrintEval(u8"print");
       return staticPrintEval;
     }
 
@@ -213,7 +211,7 @@ namespace krys::boo::style
       // FIXME: The switch control style sheet, for checkboxes with the switch attribute, once there are
       // settings (SwitchControlEnabled is off by default).
 
-      if (!PopoverStyleSheet && element.HasAttribute(dom::DOMStringAtom(u8"popover")))
+      if (!PopoverStyleSheet && element.HasAttribute(u8"popover"))
       {
         PopoverStyleSheet = ParseUASheet(css::PopoverUserAgentStyleSheet);
         AddToDefaultStyle(*PopoverStyleSheet);

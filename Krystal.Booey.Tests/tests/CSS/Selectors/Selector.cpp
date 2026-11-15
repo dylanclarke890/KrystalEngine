@@ -23,7 +23,7 @@ namespace krys::boo::css::tests
     {
       auto selector = B::PseudoClass(pseudoClass);
       selector->SetNth(a, b);
-      selector->SetArgument(CSSOMStringAtom(u8"an+b"));
+      selector->SetArgument(u8"an+b");
       return selector;
     }
 
@@ -48,7 +48,7 @@ namespace krys::boo::css::tests
   {
     CHECK(Text(B::Type(u8"div")) == u8"div");
     CHECK(Text(B::Type(u8"*")) == u8"*");
-    CHECK(Text(B::Type(u8"rect", CSSOMStringAtom(u8"svg"))) == u8"svg|rect");
+    CHECK(Text(B::Type(u8"rect", u8"svg")) == u8"svg|rect");
     CHECK(Text(B::Type(u8"*", dom::StarAtom())) == u8"*|*");
     CHECK(Text(B::Type(u8"p", CSSOMStringAtom::Empty())) == u8"|p");
     CHECK(Text(B::Compound(B::Type(u8"div"), B::Id(u8"a"), B::Class(u8"b"))) == u8"div#a.b");
@@ -109,8 +109,7 @@ namespace krys::boo::css::tests
     CHECK(Text(B::Attribute(SelectorMatch::AttributeSubstring, u8"a", u8"b")) == u8"[a*=\"b\"]");
     CHECK(Text(B::Attribute(SelectorMatch::AttributeEquals, u8"a", u8"B", IsCaseSensitive::No))
           == u8"[a=\"B\" i]");
-    CHECK(Text(B::Attribute(SelectorMatch::AttributeEquals, u8"href", u8"x", IsCaseSensitive::Yes,
-                            CSSOMStringAtom(u8"xlink")))
+    CHECK(Text(B::Attribute(SelectorMatch::AttributeEquals, u8"href", u8"x", IsCaseSensitive::Yes, u8"xlink"))
           == u8"[xlink|href=\"x\"]");
     CHECK(Text(B::Attribute(SelectorMatch::AttributeExists, u8"a", {}, IsCaseSensitive::Yes, dom::StarAtom()))
           == u8"[*|a]");
@@ -136,11 +135,11 @@ namespace krys::boo::css::tests
     CHECK(Text(B::PseudoClass(SelectorPseudoClass::Where, B::MutableList(B::Id(u8"x")))) == u8":where(#x)");
 
     auto dir = B::PseudoClass(SelectorPseudoClass::Dir);
-    dir->SetArgument(CSSOMStringAtom(u8"ltr"));
+    dir->SetArgument(u8"ltr");
     CHECK(Text(krys::move(dir)) == u8":dir(ltr)");
 
     auto state = B::PseudoClass(SelectorPseudoClass::State);
-    state->SetArgument(CSSOMStringAtom(u8"my state"));
+    state->SetArgument(u8"my state");
     CHECK(Text(krys::move(state)) == u8":state(my\\ state)");
 
     auto lang = B::PseudoClass(SelectorPseudoClass::Lang);
@@ -167,7 +166,7 @@ namespace krys::boo::css::tests
     // :nth-of-type keeps its argument as written.
     auto ofType = B::PseudoClass(SelectorPseudoClass::NthOfType);
     ofType->SetNth(2, 1);
-    ofType->SetArgument(CSSOMStringAtom(u8"odd"));
+    ofType->SetArgument(u8"odd");
     CHECK(Text(krys::move(ofType)) == u8":nth-of-type(odd)");
   }
 
@@ -180,7 +179,7 @@ namespace krys::boo::css::tests
     CHECK(Text(B::PseudoElement(SelectorPseudoElement::UserAgentPart, u8"details-content"))
           == u8"::details-content");
     CHECK(Text(WithArguments(B::PseudoElement(SelectorPseudoElement::Part, u8"part"),
-                             {CSSOMStringAtom(u8"a"), CSSOMStringAtom(u8"b")}))
+                             {CSSOMStringAtom(u8"a"), u8"b"}))
           == u8"::part(a b)");
     CHECK(Text(WithArguments(B::PseudoElement(SelectorPseudoElement::Highlight, u8"highlight"),
                              {CSSOMStringAtom(u8"x")}))
@@ -200,19 +199,19 @@ namespace krys::boo::css::tests
   {
     auto quirky = CreateUnique<MutableSelector>();
     quirky->SetMatch(SelectorMatch::Class);
-    quirky->SetValue(CSSOMStringAtom(u8"FooBar"), MatchLowercase::Yes);
+    quirky->SetValue(u8"FooBar", MatchLowercase::Yes);
     auto list = B::List(krys::move(quirky));
     const auto &selector = *list.FirstSelectorComponent();
-    CHECK(selector.Value() == CSSOMStringAtom(u8"foobar"));
-    CHECK(selector.SerialisingValue() == CSSOMStringAtom(u8"FooBar"));
+    CHECK(selector.Value() == u8"foobar");
+    CHECK(selector.SerialisingValue() == u8"FooBar");
     CHECK(list.SelectorsText() == u8".FooBar");
 
     // Already lowercase: no rare data needed, both values are the same atom.
     auto lower = CreateUnique<MutableSelector>();
     lower->SetMatch(SelectorMatch::Id);
-    lower->SetValue(CSSOMStringAtom(u8"foo"), MatchLowercase::Yes);
+    lower->SetValue(u8"foo", MatchLowercase::Yes);
     CHECK(lower->GetSelector()->Value() == lower->GetSelector()->SerialisingValue());
-    CHECK(lower->GetSelector()->Argument() == CSSOMStringAtom::Null());
+    CHECK(lower->GetSelector()->Argument() == null);
     CHECK(!lower->GetSelector()->ArgumentList());
   }
 
@@ -336,9 +335,9 @@ namespace krys::boo::css::tests
     CHECK(b->Relation() == SelectorRelation::Child);
     CHECK(b->HasDescendantOrChildRelation());
     CHECK(!b->HasDescendantRelation());
-    CHECK(p->TagQualifiedName().LocalName() == CSSOMStringAtom(u8"p"));
-    CHECK(p->TagLocalNameLower() == CSSOMStringAtom(u8"p"));
-    CHECK(a->Value() == CSSOMStringAtom(u8"a"));
+    CHECK(p->TagQualifiedName().LocalName() == u8"p");
+    CHECK(p->TagLocalNameLower() == u8"p");
+    CHECK(a->Value() == u8"a");
   }
 
   TEST_CASE("Selector(queries)", "[CSS][Selectors][Selector]")
@@ -357,7 +356,7 @@ namespace krys::boo::css::tests
       B::List(B::Attribute(SelectorMatch::AttributeDash, u8"lang", u8"en", IsCaseSensitive::No));
     CHECK(attribute.FirstSelectorComponent()->IsAttributeSelector());
     CHECK(attribute.FirstSelectorComponent()->IsAttributeValueMatchingCaseInsensitive());
-    CHECK(attribute.FirstSelectorComponent()->Attribute().LocalName() == CSSOMStringAtom(u8"lang"));
+    CHECK(attribute.FirstSelectorComponent()->Attribute().LocalName() == u8"lang");
     CHECK(!B::List(B::Class(u8"x")).FirstSelectorComponent()->IsAttributeSelector());
 
     auto host = B::List(B::PseudoClass(SelectorPseudoClass::Host));
@@ -388,7 +387,7 @@ namespace krys::boo::css::tests
     complex.FirstSelectorComponent()->VisitSimpleSelectors(
       [&](const Selector &selector)
       {
-        visited.push_back(CSSOMString(selector.Value().View()));
+        visited.push_back(selector.Value().ToString());
         return false;
       },
       Selector::VisitFunctionalPseudoClasses::No, Selector::VisitOnlySubject::Yes);

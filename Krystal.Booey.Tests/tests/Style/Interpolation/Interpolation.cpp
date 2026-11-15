@@ -170,7 +170,7 @@ namespace krys::boo::style::tests
     CHECK(interpolation::CanInterpolate(css::PropertyId::Margin));
     CHECK_FALSE(interpolation::CanInterpolate(css::PropertyId::Direction));
     CHECK_FALSE(interpolation::CanInterpolate(css::PropertyId::AnimationName));
-    CHECK(interpolation::CanInterpolate(css::CSSOMStringAtom(u8"--anything")));
+    CHECK(interpolation::CanInterpolate(u8"--anything"));
 
     CHECK(interpolation::IsAdditiveOrCumulative(css::PropertyId::Opacity));
     CHECK_FALSE(interpolation::IsAdditiveOrCumulative(css::PropertyId::StrokeDasharray));

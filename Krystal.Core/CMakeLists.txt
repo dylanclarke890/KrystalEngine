@@ -256,6 +256,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/Markable.hpp
       include/Krystal.Core/Types/Maybe.hpp
       include/Krystal.Core/Types/NTTPMaybe.hpp
+      include/Krystal.Core/Types/Null.hpp
       include/Krystal.Core/Types/NTTPString.hpp
       include/Krystal.Core/Types/Packed.hpp
       include/Krystal.Core/Types/Pair.hpp

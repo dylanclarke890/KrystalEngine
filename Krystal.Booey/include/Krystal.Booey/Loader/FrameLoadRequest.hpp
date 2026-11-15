@@ -44,7 +44,7 @@ namespace krys::boo
   class FrameLoadRequestBase
   {
   private:
-    dom::DOMStringAtom _downloadAttribute {dom::DOMStringAtom::Null()};
+    dom::DOMStringAtom _downloadAttribute {null};
     RefPtr<dom::Element> _sourceElement;
 
   public:
@@ -91,8 +91,7 @@ namespace krys::boo
     /// @param frameName The browsing context to load into (`_self`, `_blank` and the others, or a name).
     /// @param downloadAttribute The `download` attribute of the link followed; null if it has none.
     FrameLoadRequest(Ref<dom::Document> &&requester, ResourceRequest &&resourceRequest,
-                     dom::DOMStringAtom frameName,
-                     dom::DOMStringAtom downloadAttribute = dom::DOMStringAtom::Null()) noexcept;
+                     dom::DOMStringAtom frameName, dom::DOMStringAtom downloadAttribute = null) noexcept;
     ~FrameLoadRequest() noexcept;
     FrameLoadRequest(const FrameLoadRequest &) noexcept;
     FrameLoadRequest &operator=(const FrameLoadRequest &) noexcept;

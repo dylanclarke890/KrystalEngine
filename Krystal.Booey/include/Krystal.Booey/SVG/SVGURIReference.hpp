@@ -74,7 +74,7 @@ namespace krys::boo::svg
     struct TargetElementResult
     {
       RefPtr<dom::Element> Element;
-      dom::DOMStringAtom Identifier {dom::DOMStringAtom::Null()};
+      dom::DOMStringAtom Identifier {null};
     };
 
     KRYS_NODISCARD static TargetElementResult

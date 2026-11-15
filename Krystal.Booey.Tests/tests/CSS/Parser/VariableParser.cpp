@@ -37,8 +37,7 @@ namespace krys::boo::css::tests
     RefPtr<CustomPropertyValue> ParseDeclarationValue(utf8_stringview css)
     {
       TokenSource tokens(css);
-      return VariableParser::ParseDeclarationValue(CSSOMStringAtom(u8"--x"), tokens.Range(),
-                                                   StrictParserContext());
+      return VariableParser::ParseDeclarationValue(u8"--x", tokens.Range(), StrictParserContext());
     }
   }
 
@@ -135,7 +134,7 @@ namespace krys::boo::css::tests
     {
       auto value = ParseDeclarationValue(u8" inherit ");
       REQUIRE(value);
-      CHECK(value->Name() == CSSOMStringAtom(u8"--x"));
+      CHECK(value->Name() == u8"--x");
       CHECK(value->TryGlobalKeyword() == GlobalKeyword::Inherit);
     }
 

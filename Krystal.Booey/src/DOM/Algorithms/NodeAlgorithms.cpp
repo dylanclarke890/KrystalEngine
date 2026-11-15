@@ -454,7 +454,7 @@ namespace krys::boo::dom
   {
     // 1. If element's namespace is namespace and its namespace prefix is non-null, then return its namespace
     //    prefix.
-    if (element.NamespaceURI() == namespaceURI && element.Prefix() != DOMStringAtom::Null())
+    if (element.NamespaceURI() == namespaceURI && element.Prefix() != null)
     {
       return element.Prefix();
     }
@@ -479,7 +479,7 @@ namespace krys::boo::dom
     }
 
     // 4. Return null.
-    return DOMStringAtom::Null();
+    return null;
   }
 
   DOMStringAtom NodeAlgorithms::LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept
@@ -503,7 +503,7 @@ namespace krys::boo::dom
 
         // 3. If its namespace is non-null and its namespace prefix is prefix, then return namespace.
         auto &element = Downcast<Element>(node);
-        if (element.NamespaceURI() != DOMStringAtom::Null() && element.Prefix() == prefix)
+        if (element.NamespaceURI() != null && element.Prefix() == prefix)
         {
           return element.NamespaceURI();
         }
@@ -521,10 +521,10 @@ namespace krys::boo::dom
           }
 
           if ((attribute->Prefix() == infra::NamespacePrefixes::XMLNS && attribute->LocalName() == prefix)
-              || (prefix == DOMStringAtom::Null() && attribute->Prefix() == DOMStringAtom::Null()
+              || (prefix == null && attribute->Prefix() == null
                   && attribute->LocalName() == infra::NamespacePrefixes::XMLNS))
           {
-            return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
+            return attribute->Value().empty() ? null : DOMStringAtom(attribute->Value());
           }
         }
 
@@ -532,7 +532,7 @@ namespace krys::boo::dom
         const Element *parentElement = element.ParentElement();
         if (parentElement == nullptr)
         {
-          return DOMStringAtom::Null();
+          return null;
         }
 
         // 6. Return the result of running locate a namespace on its parent element using prefix.
@@ -545,7 +545,7 @@ namespace krys::boo::dom
         RefPtr<const Element> documentElement = Downcast<Document>(node).DocumentElement();
         if (documentElement == nullptr)
         {
-          return DOMStringAtom::Null();
+          return null;
         }
 
         // 2. Return the result of running locate a namespace on its document element using prefix.
@@ -555,7 +555,7 @@ namespace krys::boo::dom
       case NodeType::DOCUMENT_TYPE_NODE:
       case NodeType::DOCUMENT_FRAGMENT_NODE:
       {
-        return DOMStringAtom::Null();
+        return null;
       }
       // Attr:
       case NodeType::ATTRIBUTE_NODE:
@@ -564,7 +564,7 @@ namespace krys::boo::dom
         const Element *ownerElement = Downcast<Attr>(node).OwnerElement();
         if (ownerElement == nullptr)
         {
-          return DOMStringAtom::Null();
+          return null;
         }
 
         // 2. Return the result of running locate a namespace on its element using prefix.
@@ -577,7 +577,7 @@ namespace krys::boo::dom
         const Element *parentElement = node.ParentElement();
         if (parentElement == nullptr)
         {
-          return DOMStringAtom::Null();
+          return null;
         }
 
         // 2. Return the result of running locate a namespace on its parent element using prefix.
@@ -605,7 +605,7 @@ namespace krys::boo::dom
     //    - Whose namespace is not the HTML namespace and whose qualified name is qualifiedName.
     if (Is<HTMLDocument>(root.NodeDocument()))
     {
-      DOMStringAtom qualifiedNameLowercase = ::krys::text::ToASCIILower(qualifiedName.View());
+      DOMStringAtom qualifiedNameLowercase = qualifiedName.ToASCIILower();
       return CreateRef<LiveHTMLCollection>(root,
                                            [qualifiedName, qualifiedNameLowercase](const Element &element)
                                            {
@@ -632,7 +632,7 @@ namespace krys::boo::dom
     // 1. If namespace is the empty string, then set it to null.
     if (namespaceUri == DOMStringAtom::Empty())
     {
-      namespaceUri = DOMStringAtom::Null();
+      namespaceUri = null;
     }
 
     // 2. If both namespace and localName are U+002A (*), then return an HTMLCollection rooted at root, whose

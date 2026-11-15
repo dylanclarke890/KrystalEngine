@@ -45,7 +45,7 @@ namespace krys::boo::style::tests
             == u8"abc");
       CHECK(ConvertCSSValueToStyle<css::CSSOMStringAtom>(
               *State, *css::PrimitiveValue::Create(css::CSSOMString {u8"abc"}))
-            == css::CSSOMStringAtom {u8"abc"});
+            == u8"abc");
       CHECK_FALSE(IsInvalid());
     }
 
@@ -68,7 +68,7 @@ namespace krys::boo::style::tests
       CHECK(ConvertCSSValueToStyle<css::CustomIdentifier>(
               *State, *css::PrimitiveValue::CreateCustomIdent(css::CSSOMString {u8"foo"}))
               .Value
-            == css::CSSOMStringAtom {u8"foo"});
+            == u8"foo");
       CHECK_FALSE(IsInvalid());
 
       CHECK(ConvertCSSValueToStyle<css::CustomIdentifier>(*State, *css::PrimitiveValue::Create(ValueId::Auto))

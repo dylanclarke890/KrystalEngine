@@ -53,7 +53,7 @@ namespace krys::boo::html::tests
       REQUIRE(definition);
       CHECK(Registry().GetName(*definition) == u8"x-a");
       auto other = CustomElementRegistry::CreateScoped();
-      CHECK(other->GetName(*definition) == dom::DOMStringAtom::Null());
+      CHECK(other->GetName(*definition) == null);
     }
 
     SECTION("whenDefined calls back in a microtask once the name is defined")
@@ -276,7 +276,7 @@ namespace krys::boo::html::tests
       listener->Target = &element;
       listener->Calls = &Calls;
       element.AddEventListener(u8"custom", listener, false);
-      auto event = CreateRef<dom::Event>(dom::DOMStringAtom(u8"custom"));
+      auto event = CreateRef<dom::Event>(u8"custom");
       (void)element.DispatchEvent(*event);
       CHECK(TakeCalls() == Log {u8"attribute value null from-listener", u8"returned"});
     }

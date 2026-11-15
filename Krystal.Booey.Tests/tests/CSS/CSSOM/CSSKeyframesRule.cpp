@@ -13,7 +13,7 @@ namespace krys::boo::css::tests
     auto &rule = RuleAt<CSSKeyframesRule>(*sheet, 0);
 
     CHECK(rule.StyleRuleType() == RuleType::Keyframes);
-    CHECK(ToNarrow(CSSOMString(rule.Name().View())) == "spin");
+    CHECK(ToNarrow(rule.Name().ToString()) == "spin");
     CHECK(rule.Length() == 3);
     CHECK(rule.IsSupportedPropertyIndex(2));
     CHECK_FALSE(rule.IsSupportedPropertyIndex(3));

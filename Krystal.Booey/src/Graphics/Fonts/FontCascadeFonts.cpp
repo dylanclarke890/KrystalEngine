@@ -230,7 +230,7 @@ namespace krys::boo
     while (index < description.EffectiveFamilyCount())
     {
       const auto &family = description.EffectiveFamilyAt(index++);
-      if (family == StringAtom::Null())
+      if (family == null)
       {
         continue;
       }

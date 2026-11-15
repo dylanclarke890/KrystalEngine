@@ -242,6 +242,6 @@ namespace krys::boo::html
 
   dom::DOMString FormAssociatedCustomElement::FormControlType() const noexcept
   {
-    return dom::DOMString(_element.LocalName().View());
+    return _element.LocalName().ToString();
   }
 }

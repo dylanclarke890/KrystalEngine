@@ -221,7 +221,7 @@ namespace krys::boo::html
     //    that item's name.
     // 2. Return null.
     auto *found = FindInterface(elementInterface.Name().LocalName());
-    return found == &elementInterface ? elementInterface.Name().LocalName() : dom::DOMStringAtom::Null();
+    return found == &elementInterface ? elementInterface.Name().LocalName() : null;
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-whendefined

@@ -63,20 +63,20 @@ namespace krys::boo::dom::tests
     CHECK_FALSE(document->HasHighlight());
 
     auto text = document->CreateTextNode(u8"Text");
-    registry.Set(DOMStringAtom(u8"b"), Highlight::Create({MakeStaticRange(*text, 0, *text, 1)}));
-    registry.Set(DOMStringAtom(u8"a"), Highlight::Create());
+    registry.Set(u8"b", Highlight::Create({MakeStaticRange(*text, 0, *text, 1)}));
+    registry.Set(u8"a", Highlight::Create());
     CHECK(document->HasHighlight());
     REQUIRE(registry.HighlightNames().size() == 2);
-    CHECK(registry.HighlightNames()[0] == DOMStringAtom(u8"b"));
+    CHECK(registry.HighlightNames()[0] == u8"b");
 
     // Setting a name again keeps its place.
     auto replacement = Highlight::Create();
-    registry.Set(DOMStringAtom(u8"b"), Ref<Highlight>(replacement));
-    CHECK(registry.HighlightNames()[0] == DOMStringAtom(u8"b"));
-    CHECK(registry.Get(DOMStringAtom(u8"b")) == replacement.get());
+    registry.Set(u8"b", Ref<Highlight>(replacement));
+    CHECK(registry.HighlightNames()[0] == u8"b");
+    CHECK(registry.Get(u8"b") == replacement.get());
 
-    CHECK(registry.Delete(DOMStringAtom(u8"b")));
-    CHECK_FALSE(registry.Has(DOMStringAtom(u8"b")));
+    CHECK(registry.Delete(u8"b"));
+    CHECK_FALSE(registry.Has(u8"b"));
     CHECK(registry.Size() == 1);
     registry.Clear();
     CHECK(registry.IsEmpty());
@@ -93,7 +93,7 @@ namespace krys::boo::dom::tests
     auto unhighlighted = fixture.Painted();
     CHECK_FALSE(Has(unhighlighted, u8"#FFD166"));
 
-    fixture.Document->GetHighlightRegistry().Set(DOMStringAtom(u8"mark"),
+    fixture.Document->GetHighlightRegistry().Set(u8"mark",
                                                  Highlight::Create({MakeStaticRange(text, 6, text, 17)}));
     fixture.Document->UpdateHighlightPositions();
     auto painted = fixture.Painted();
@@ -102,7 +102,7 @@ namespace krys::boo::dom::tests
 
     // A highlight without a ::highlight() style isn't painted.
     fixture.Document->GetHighlightRegistry().Clear();
-    fixture.Document->GetHighlightRegistry().Set(DOMStringAtom(u8"other"),
+    fixture.Document->GetHighlightRegistry().Set(u8"other",
                                                  Highlight::Create({MakeStaticRange(text, 0, text, 5)}));
     fixture.Document->UpdateHighlightPositions();
     CHECK(fixture.Painted() == unhighlighted);
@@ -115,7 +115,7 @@ namespace krys::boo::dom::tests
       u8"::highlight(live) { background-color: #ef476f }</style><p id=p>Live</p>");
     auto &text = *fixture.ById(u8"p").FirstChild();
     auto range = CreateRef<Range>(BoundaryPoint {ShareRef(text), 0}, BoundaryPoint {ShareRef(text), 0});
-    fixture.Document->GetHighlightRegistry().Set(DOMStringAtom(u8"live"), Highlight::Create({range}));
+    fixture.Document->GetHighlightRegistry().Set(u8"live", Highlight::Create({range}));
     fixture.Document->UpdateHighlightPositions();
     // A collapsed range highlights nothing.
     CHECK_FALSE(Has(fixture.Painted(), u8"#EF476F"));

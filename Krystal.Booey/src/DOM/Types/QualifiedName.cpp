@@ -28,11 +28,11 @@ namespace krys::boo::dom
       : _namespaceURI(namespaceURI), _namespacePrefix(prefix), _localName(localName), _tagName(tagName),
         _namespace(tagNamespace)
   {
-    krys_debug_assert(_localName != DOMStringAtom::Null() || _namespacePrefix != DOMStringAtom::Empty());
+    krys_debug_assert(_localName != null || _namespacePrefix != DOMStringAtom::Empty());
 
-    if (_localName != DOMStringAtom::Null())
+    if (_localName != null)
     {
-      _localNameLower = DOMStringAtom(krys::text::ToASCIILower(_localName.View()));
+      _localNameLower = _localName.ToASCIILower();
     }
   }
 
@@ -56,9 +56,9 @@ namespace krys::boo::dom
 
   KRYS_NODISCARD const DOMStringAtom &QualifiedName::LocalNameUpper() const noexcept
   {
-    if (_storage->_localNameUpper == DOMStringAtom::Null())
+    if (_storage->_localNameUpper == null)
     {
-      _storage->_localNameUpper = DOMStringAtom(krys::text::ToASCIIUpper(_storage->_localName.View()));
+      _storage->_localNameUpper = _storage->_localName.ToASCIIUpper();
     }
 
     return _storage->_localNameUpper;

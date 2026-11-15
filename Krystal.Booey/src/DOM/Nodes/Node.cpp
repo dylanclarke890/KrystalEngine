@@ -536,9 +536,9 @@ namespace krys::boo::dom
   DOMStringAtom Node::LookupPrefix(DOMStringAtom namespaceURI) const noexcept
   {
     // 1. If namespace is null or the empty string, then return null.
-    if (namespaceURI == DOMStringAtom::Null() || namespaceURI == DOMStringAtom::Empty())
+    if (namespaceURI == null || namespaceURI == DOMStringAtom::Empty())
     {
-      return DOMStringAtom::Null();
+      return null;
     }
 
     // 2. Switch on the interface this implements:
@@ -556,7 +556,7 @@ namespace krys::boo::dom
         auto *documentElement = TreeQueries::DocumentElement(Downcast<Document>(*this));
         if (documentElement == nullptr)
         {
-          return DOMStringAtom::Null();
+          return null;
         }
 
         // 2b. Return the result of locating a namespace prefix for this's document element using namespace.
@@ -566,7 +566,7 @@ namespace krys::boo::dom
       case NodeType::DOCUMENT_TYPE_NODE:
       case NodeType::DOCUMENT_FRAGMENT_NODE:
       {
-        return DOMStringAtom::Null();
+        return null;
       }
       // Attr:
       case NodeType::ATTRIBUTE_NODE:
@@ -575,7 +575,7 @@ namespace krys::boo::dom
         const Element *ownerElement = Downcast<Attr>(*this).OwnerElement();
         if (ownerElement == nullptr)
         {
-          return DOMStringAtom::Null();
+          return null;
         }
 
         // 2b. Return the result of locating a namespace prefix for this's element using namespace.
@@ -588,7 +588,7 @@ namespace krys::boo::dom
         const Element *parentElement = ParentElement();
         if (parentElement == nullptr)
         {
-          return DOMStringAtom::Null();
+          return null;
         }
 
         // 2b. Return the result of locating a namespace prefix for this's parent element using namespace.
@@ -602,7 +602,7 @@ namespace krys::boo::dom
     // 1. If prefix is the empty string, then set it to null.
     if (prefix == DOMStringAtom::Empty())
     {
-      prefix = DOMStringAtom::Null();
+      prefix = null;
     }
 
     // 2. Return the result of running locate a namespace for this using prefix.
@@ -614,11 +614,11 @@ namespace krys::boo::dom
     // 1. If namespace is the empty string, then set it to null.
     if (namespaceURI == DOMStringAtom::Empty())
     {
-      namespaceURI = DOMStringAtom::Null();
+      namespaceURI = null;
     }
 
     // 2. Let defaultNamespace be the result of running locate a namespace for this using null.
-    auto defaultNamespace = NodeAlgorithms::LocateNamespace(*this, DOMStringAtom::Null());
+    auto defaultNamespace = NodeAlgorithms::LocateNamespace(*this, null);
 
     // 3. Return true if defaultNamespace is the same as namespace; otherwise false.
     return namespaceURI == defaultNamespace;

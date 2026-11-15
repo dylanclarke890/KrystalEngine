@@ -42,7 +42,7 @@ namespace krys::boo::html
       if ((view.find(u8'\n') != view.npos || view.find(u8'\r') != view.npos || view.find(u8'\t') != view.npos)
           && view.find(u8'<') != view.npos)
       {
-        return dom::DOMStringAtom(u8"_blank");
+        return u8"_blank";
       }
       return target;
     }
@@ -220,7 +220,7 @@ namespace krys::boo::html
     //     subject's hyperlink referrer policy, userInvolvement set to userInvolvement, and sourceElement set
     //     to subject.
     auto downloadAttribute = subject.GetAttribute(u8"download");
-    auto download = downloadAttribute ? dom::DOMStringAtom(*downloadAttribute) : dom::DOMStringAtom::Null();
+    auto download = downloadAttribute ? dom::DOMStringAtom(*downloadAttribute) : null;
     frame->Loader().ChangeLocation(urlRecord, targetAttributeValue, &event, HyperlinkReferrerPolicy(subject),
                                    download, &subject);
   }

@@ -498,7 +498,7 @@ namespace krys::boo::dom
     // 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
     if (Is<HTMLDocument>(*this))
     {
-      localName = ::krys::text::ToASCIILower(localName.View());
+      localName = localName.ToASCIILower();
     }
 
     // 3. Let registry and is be the result of flattening element creation options given options and this.
@@ -510,7 +510,7 @@ namespace krys::boo::dom
 
     // 4. Let namespace be the HTML namespace, if this is an HTML document or this's content type is
     //    "application/xhtml+xml"; otherwise null.
-    DOMStringAtom namespaceURI = DOMStringAtom::Null();
+    DOMStringAtom namespaceURI = null;
     if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
     {
       namespaceURI = infra::Namespaces::HTML;
@@ -518,8 +518,7 @@ namespace krys::boo::dom
 
     // 5. Return the result of creating an element given this, localName, namespace, null, is, true, and
     // registry.
-    return ElementFactory::Create(*this, {namespaceURI, DOMStringAtom::Null(), localName},
-                                  creationOptions.Value().Is, true,
+    return ElementFactory::Create(*this, {namespaceURI, null, localName}, creationOptions.Value().Is, true,
                                   creationOptions.Value().CustomElementRegistry);
   }
 
@@ -660,11 +659,11 @@ namespace krys::boo::dom
     // 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
     if (Is<HTMLDocument>(*this))
     {
-      localName = krys::text::ToASCIILower(localName.View());
+      localName = localName.ToASCIILower();
     }
 
     // 3. Return the result of creating an attribute given this and localName.
-    QualifiedName qualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), localName};
+    QualifiedName qualifiedName {null, null, localName};
     return AdoptRef<Attr>(*new Attr(*this, qualifiedName));
   }
 
@@ -759,7 +758,7 @@ namespace krys::boo::dom
     }
 
     // 6. Initialize event's type attribute to the empty string.
-    event->_type = DOMStringAtom(u8"");
+    event->_type = u8"";
     event->_bubbles = false;
     event->_cancellable = false;
     event->_composed = false;
@@ -962,7 +961,7 @@ namespace krys::boo::dom
       {
         // Let element be the result of creating an element given the document element's node document,
         // "title", and the SVG namespace. Insert element as the first child of the document element.
-        title = ElementFactory::Create(*this, {infra::Namespaces::SVG, DOMStringAtom::Null(), u8"title"});
+        title = ElementFactory::Create(*this, {infra::Namespaces::SVG, null, u8"title"});
 
         if (auto insert =
               MutationAlgorithms::PreInsert(*title, *documentElement, documentElement->FirstChild());
@@ -996,7 +995,7 @@ namespace krys::boo::dom
       {
         // 3a. Let element be the result of creating an element given the document element's node document,
         //     "title", and the HTML namespace.
-        element = ElementFactory::Create(*this, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
+        element = ElementFactory::Create(*this, {infra::Namespaces::HTML, null, u8"title"});
 
         // 3b. Append element to the head element.
         if (auto append = MutationAlgorithms::Append(*element, *head); append.HasException())
@@ -2102,8 +2101,7 @@ namespace krys::boo::dom
     }
 
     // 7. Fire an event named visibilitychange at document, with its bubbles attribute initialized to true.
-    (void)EventDispatcher::DispatchToTarget(
-      *Event::Create(DOMStringAtom(EventNames::VisibilityChange), true, false), this);
+    (void)EventDispatcher::DispatchToTarget(*Event::Create(EventNames::VisibilityChange, true, false), this);
   }
 
   void Document::VisibilityStateChanged() noexcept
@@ -2120,8 +2118,8 @@ namespace krys::boo::dom
       html::TaskSource::UserInteraction, *this,
       [protectedThis = ShareRef(*this)]
       {
-        (void)EventDispatcher::DispatchToTarget(
-          *Event::Create(DOMStringAtom(EventNames::VisibilityChange), true, false), protectedThis.get());
+        (void)EventDispatcher::DispatchToTarget(*Event::Create(EventNames::VisibilityChange, true, false),
+                                                protectedThis.get());
 
         bool pageIsVisible = protectedThis->GetPage() && protectedThis->GetPage()->IsVisible();
         if (!pageIsVisible)
@@ -2596,7 +2594,7 @@ namespace krys::boo::dom
       _needsVisualViewportScrollEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(DOMStringAtom(EventNames::Scroll), window->GetVisualViewport());
+        (void)EventDispatcher::FireEvent(EventNames::Scroll, window->GetVisualViewport());
       }
     }
   }
@@ -2636,7 +2634,7 @@ namespace krys::boo::dom
       _needsDOMWindowResizeEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(DOMStringAtom(EventNames::Resize), *window);
+        (void)EventDispatcher::FireEvent(EventNames::Resize, *window);
       }
     }
     if (_needsVisualViewportResizeEvent)
@@ -2644,7 +2642,7 @@ namespace krys::boo::dom
       _needsVisualViewportResizeEvent = false;
       if (RefPtr<LocalDOMWindow> window = _domWindow)
       {
-        (void)EventDispatcher::FireEvent(DOMStringAtom(EventNames::Resize), window->GetVisualViewport());
+        (void)EventDispatcher::FireEvent(EventNames::Resize, window->GetVisualViewport());
       }
     }
   }
@@ -3670,7 +3668,7 @@ namespace krys::boo::dom
       if (!_loadTiming.DOMContentLoadedEventStartTime)
       {
         _loadTiming.DOMContentLoadedEventStartTime = _domWindow ? _domWindow->NowTimestamp() : 0;
-        auto event = Event::Create(DOMStringAtom(EventNames::DOMContentLoaded), true, false);
+        auto event = Event::Create(EventNames::DOMContentLoaded, true, false);
         (void)EventDispatcher::DispatchToTarget(*event, this);
         _loadTiming.DOMContentLoadedEventEndTime = _domWindow ? _domWindow->NowTimestamp() : 0;
       }
@@ -3779,7 +3777,7 @@ namespace krys::boo::dom
     {
       _loadTiming.LoadEventStartTime = window->NowTimestamp();
     }
-    (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(EventNames::Load), *window, {}, true);
+    (void)EventDispatcher::FireEvent<Event>(EventNames::Load, *window, {}, true);
     if (!_loadTiming.LoadEventEndTime)
     {
       _loadTiming.LoadEventEndTime = window->NowTimestamp();
@@ -3868,7 +3866,7 @@ namespace krys::boo::dom
     _pageShowing = false;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(DOMStringAtom(EventNames::PageHide), persisted);
+      auto event = html::PageTransitionEvent::Create(EventNames::PageHide, persisted);
       (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }
@@ -3884,7 +3882,7 @@ namespace krys::boo::dom
     _pageShowing = true;
     if (RefPtr<LocalDOMWindow> window = _domWindow)
     {
-      auto event = html::PageTransitionEvent::Create(DOMStringAtom(EventNames::PageShow), persisted);
+      auto event = html::PageTransitionEvent::Create(EventNames::PageShow, persisted);
       (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }

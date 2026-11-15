@@ -8,11 +8,11 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<dom::Element> CreateWith(dom::Document &document, utf8_stringview localName,
+    KRYS_NODISCARD Ref<dom::Element> CreateWith(dom::Document &document, dom::DOMStringAtom localName,
                                                 utf8_stringview attribute = {},
                                                 utf8_stringview value = {}) noexcept
     {
-      auto element = document.CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
+      auto element = document.CreateElement(localName).ReleaseValue();
       if (!attribute.empty())
       {
         REQUIRE_FALSE(

@@ -304,7 +304,7 @@ namespace krys::boo::css::tests
       // Printing uses 300dpi; other media types have no resolution.
       fixture.ViewMediaType = Print();
       CHECK(fixture.Matches(u8"(resolution: 300dpi)", Print()));
-      fixture.ViewMediaType = CSSOMStringAtom {u8"tv"};
+      fixture.ViewMediaType = u8"tv";
       CHECK_FALSE(fixture.Matches(u8"(resolution)"));
     }
 

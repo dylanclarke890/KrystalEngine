@@ -22,10 +22,10 @@ namespace krys::boo::html::tests
       return document;
     }
 
-    KRYS_NODISCARD Ref<HTMLElement> CreateWithTarget(dom::Document &document, utf8_stringview localName,
+    KRYS_NODISCARD Ref<HTMLElement> CreateWithTarget(dom::Document &document, dom::DOMStringAtom localName,
                                                      Maybe<utf8_stringview> target) noexcept
     {
-      auto element = document.CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
+      auto element = document.CreateElement(localName).ReleaseValue();
       if (target)
       {
         REQUIRE_FALSE(element->SetAttribute(u8"target", dom::DOMString(*target)).HasException());

@@ -45,12 +45,10 @@ namespace krys::boo::xml
                                                        utf8_stringview style = {}) noexcept
     {
       auto element = dom::ElementFactory::Create(
-        document, dom::QualifiedName(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom::Null(),
-                                     dom::DOMStringAtom(localName)));
+        document, dom::QualifiedName(infra::Namespaces::HTML, null, dom::DOMStringAtom(localName)));
       if (!style.empty())
       {
-        dom::ElementAlgorithms::SetAttributeValue(*element, dom::DOMStringAtom(u8"style"),
-                                                  dom::DOMString(style));
+        dom::ElementAlgorithms::SetAttributeValue(*element, u8"style", dom::DOMString(style));
       }
       return element;
     }

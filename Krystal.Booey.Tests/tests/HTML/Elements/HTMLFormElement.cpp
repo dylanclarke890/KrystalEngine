@@ -235,7 +235,7 @@ namespace krys::boo::html::tests
     auto enter = [&](utf8_stringview id)
     {
       (void)fixture.Get<HTMLInputElement>(id).DispatchEvent(
-        *CreateRef<dom::KeyboardEvent>(dom::DOMStringAtom(u8"keypress"), init));
+        *CreateRef<dom::KeyboardEvent>(u8"keypress", init));
     };
     enter(u8"t1");
     CHECK(fixture.Submissions().empty());
@@ -257,8 +257,8 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       value=Go><button id=other name=other value=o></button></form>)");
     auto &form = fixture.Get<HTMLFormElement>(u8"f");
     auto events = CreateRef<SubmissionEvents>();
-    form.AddEventListener(dom::DOMStringAtom(u8"submit"), events, false);
-    form.AddEventListener(dom::DOMStringAtom(u8"formdata"), events, false);
+    form.AddEventListener(u8"submit", events, false);
+    form.AddEventListener(u8"formdata", events, false);
 
     SECTION("submit() skips the submit event and validation")
     {
@@ -388,7 +388,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
     init.Bubbles = true;
     init.Cancelable = true;
     init.CharCode = '\r';
-    auto enter = CreateRef<dom::KeyboardEvent>(dom::DOMStringAtom(u8"keypress"), init);
+    auto enter = CreateRef<dom::KeyboardEvent>(u8"keypress", init);
     (void)t.DispatchEvent(*enter);
     REQUIRE(fixture.Submissions().size() == 1);
     // The default button submits, as if it were clicked.

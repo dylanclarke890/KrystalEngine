@@ -75,8 +75,7 @@ namespace krys::boo::svg
       }
     }
     else if (name.Matches(XLinkNames::HrefAttr())
-             && !ContextElement().HasAttributeNS(dom::DOMStringAtom::Null(),
-                                                 SVGNames::HrefAttr().LocalName()))
+             && !ContextElement().HasAttributeNS(null, SVGNames::HrefAttr().LocalName()))
     {
       _href->SetBaseValInternal(dom::DOMString {value.value_or(dom::DOMStringView {})});
     }

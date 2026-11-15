@@ -91,7 +91,7 @@ namespace krys::boo
   }
 
   ViewTimeline::ViewTimeline(ScrollAxis axis) noexcept
-      : ScrollTimeline(css::CSSOMStringAtom::Null(), axis), _insets(css::keywords::Auto {})
+      : ScrollTimeline(null, axis), _insets(css::keywords::Auto {})
   {
   }
 

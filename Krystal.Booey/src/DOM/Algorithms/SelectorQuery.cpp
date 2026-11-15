@@ -84,7 +84,7 @@ namespace krys::boo::dom
       return selector.Match() == css::SelectorMatch::Id
              || (selector.Match() == css::SelectorMatch::AttributeEquals
                  && selector.Attribute().LocalName().View() == u8"id"
-                 && selector.Attribute().NamespaceURI() == DOMStringAtom::Null()
+                 && selector.Attribute().NamespaceURI() == null
                  && !selector.IsAttributeValueMatchingCaseInsensitive() && !selector.Value().View().empty());
     }
 
@@ -123,8 +123,7 @@ namespace krys::boo::dom
 
       // Bailout if we need to synchronize attributes.
       static const DOMStringAtom styleAttr(u8"style");
-      static NeverDestroyed<const QualifiedName> styleName(DOMStringAtom::Null(), DOMStringAtom::Null(),
-                                                           styleAttr);
+      static NeverDestroyed<const QualifiedName> styleName(null, null, styleAttr);
       if (NameMatchesFilter(styleName.get(), attribute.NamespacePrefix(), attribute.LocalNameLower(),
                             attribute.NamespaceURI()))
       {

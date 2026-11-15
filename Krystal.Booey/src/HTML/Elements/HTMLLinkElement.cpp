@@ -249,7 +249,7 @@ namespace krys::boo::html
                                            dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }
@@ -688,7 +688,7 @@ namespace krys::boo::html
   {
     krys_debug_assert(eventSender == &LinkLoadEventSenderSingleton());
     (void)eventSender;
-    (void)dom::EventDispatcher::FireEvent(dom::DOMStringAtom(eventType), *this);
+    (void)dom::EventDispatcher::FireEvent(eventType, *this);
   }
 
   void HTMLLinkElement::NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept

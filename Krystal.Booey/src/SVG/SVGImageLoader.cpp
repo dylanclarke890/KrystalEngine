@@ -36,7 +36,7 @@ namespace krys::boo::svg
   {
     if (Image()->ErrorOccurred())
     {
-      (void)dom::EventDispatcher::FireEvent(dom::DOMStringAtom(EventNames::Error), GetElement());
+      (void)dom::EventDispatcher::FireEvent(EventNames::Error, GetElement());
     }
     else
     {

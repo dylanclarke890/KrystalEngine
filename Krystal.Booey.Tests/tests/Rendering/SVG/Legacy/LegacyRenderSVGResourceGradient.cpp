@@ -139,8 +139,7 @@ layer at (0,0) size 800x104
     CHECK(Contains(text, u8"RenderSVGGradientStop {stop} [offset=0.00] [color=#0000FF]"));
 
     // The stroke waits for its gradient, and takes it once there's one with the id.
-    auto gradient = fixture.Document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::SVG),
-                                                      dom::DOMStringAtom(u8"radialGradient"));
+    auto gradient = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"radialGradient");
     REQUIRE_FALSE(gradient.HasException());
     (void)gradient.Value()->SetAttribute(u8"id", u8"later");
     (void)ElementById(*fixture.Document, u8"g").ParentNode()->AppendChild(*gradient.Value());
@@ -155,7 +154,7 @@ layer at (0,0) size 800x104
     resources = ResourcesById(*fixture.Document, u8"r");
     CHECK((!resources || !resources->Fill()));
     CHECK_FALSE(Contains(ExternalRepresentation(fixture.Frame.get()), u8"LINEAR-GRADIENT"));
-    CHECK(fixture.Document->IsIdOfPendingSVGResource(dom::DOMStringAtom(u8"g")));
+    CHECK(fixture.Document->IsIdOfPendingSVGResource(u8"g"));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGResourceGradient: cycles",

@@ -44,9 +44,9 @@ namespace krys::boo::dom::tests
       }
     };
 
-    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringView name) noexcept
+    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringAtom name) noexcept
     {
-      return document.CreateElement(DOMStringAtom(name)).ReleaseValue();
+      return document.CreateElement(name).ReleaseValue();
     }
   }
 
@@ -140,7 +140,7 @@ namespace krys::boo::dom::tests
       }
     };
     auto counter = CreateRef<Counter>();
-    slot->AddEventListener(DOMStringAtom(u8"slotchange"), counter, false);
+    slot->AddEventListener(u8"slotchange", counter, false);
 
     // A slottable joining the slot signals a slot change, which fires at the next notification.
     REQUIRE_FALSE(host->AppendChild(*NewElement(*document, u8"span")).HasException());
@@ -263,7 +263,7 @@ namespace krys::boo::dom::tests
       CHECK(parentOnly->TakeRecords().empty());
       auto filteredRecords = filtered->TakeRecords();
       REQUIRE(filteredRecords.size() == 1);
-      CHECK(filteredRecords[0]->OldValue() == DOMStringAtom::Null());
+      CHECK(filteredRecords[0]->OldValue() == null);
     }
 
     SECTION("an attribute in a namespace isn't in any attribute filter")
@@ -339,8 +339,8 @@ namespace krys::boo::dom::tests
     CHECK(record.RemovedNodes()->Length() == 0u);
     CHECK(record.PreviousSibling().get() == first.get());
     CHECK(record.NextSibling().get() == last.get());
-    CHECK(record.AttributeName() == DOMStringAtom::Null());
-    CHECK(record.AttributeNamespace() == DOMStringAtom::Null());
-    CHECK(record.OldValue() == DOMStringAtom::Null());
+    CHECK(record.AttributeName() == null);
+    CHECK(record.AttributeNamespace() == null);
+    CHECK(record.OldValue() == null);
   }
 }

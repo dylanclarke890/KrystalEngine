@@ -120,7 +120,7 @@ namespace krys::boo::css::calc::tests
   TEST_CASE("TreeSerialisation(random and anchors)", "[CSS][Calc][TreeSerialisation]")
   {
     CHECK(SerialiseTree(
-            Node(Random {.Sharing = Random::SharingOptions {.Identifier = CSSOMStringAtom {u8"--a"},
+            Node(Random {.Sharing = Random::SharingOptions {.Identifier = u8"--a",
                                                             .ElementShared = keywords::ElementShared {}},
                          .Min = Num(1.0, UnitType::px),
                          .Max = Num(5.0, UnitType::px),
@@ -137,24 +137,21 @@ namespace krys::boo::css::calc::tests
                          .Max = Num(5.0, UnitType::px)}))
           == u8"random(fixed 0.5, 1px, 5px)");
 
-    CHECK(SerialiseTree(Node(Anchor {.ElementName = CSSOMStringAtom {u8"--a"},
-                                     .Side = AnchorSide {ValueId::Top},
-                                     .Fallback = Num(4.0, UnitType::px)}))
+    CHECK(SerialiseTree(Node(Anchor {
+            .ElementName = u8"--a", .Side = AnchorSide {ValueId::Top}, .Fallback = Num(4.0, UnitType::px)}))
           == u8"anchor(--a top, 4px)");
-    CHECK(SerialiseTree(Node(Anchor {.ElementName = CSSOMStringAtom::Null(),
-                                     .Side = AnchorSide {Num(50.0, UnitType::Percentage)}}))
-          == u8"anchor(50%)");
-    CHECK(SerialiseTree(Node(AnchorSize {.ElementName = CSSOMStringAtom {u8"--a"},
-                                         .Dimension = style::AnchorSizeDimension::SelfInline}))
-          == u8"anchor-size(--a self-inline)");
+    CHECK(
+      SerialiseTree(Node(Anchor {.ElementName = null, .Side = AnchorSide {Num(50.0, UnitType::Percentage)}}))
+      == u8"anchor(50%)");
     CHECK(SerialiseTree(
-            Node(AnchorSize {.ElementName = CSSOMStringAtom::Null(), .Fallback = Num(1.0, UnitType::px)}))
+            Node(AnchorSize {.ElementName = u8"--a", .Dimension = style::AnchorSizeDimension::SelfInline}))
+          == u8"anchor-size(--a self-inline)");
+    CHECK(SerialiseTree(Node(AnchorSize {.ElementName = null, .Fallback = Num(1.0, UnitType::px)}))
           == u8"anchor-size(1px)");
 
     // Fallbacks that aren't leaves keep their math function.
-    CHECK(
-      SerialiseTree(Node(AnchorSize {.ElementName = CSSOMStringAtom::Null(),
-                                     .Fallback = Node(Add(Num(1.0, UnitType::px), Num(1.0, UnitType::em)))}))
-      == u8"anchor-size(calc(1em + 1px))");
+    CHECK(SerialiseTree(Node(AnchorSize {
+            .ElementName = null, .Fallback = Node(Add(Num(1.0, UnitType::px), Num(1.0, UnitType::em)))}))
+          == u8"anchor-size(calc(1em + 1px))");
   }
 }

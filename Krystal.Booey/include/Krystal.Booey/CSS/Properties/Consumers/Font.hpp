@@ -128,7 +128,7 @@ namespace krys::boo::css
 
     // Sub-production of 'font-family': <generic-family>
     // https://drafts.csswg.org/css-fonts-4/#generic-family-name-syntax
-    KRYS_NODISCARD const CSSOMStringAtom &GenericFontFamily(ValueId ident) noexcept;
+    KRYS_NODISCARD CSSOMStringAtom GenericFontFamily(ValueId ident) noexcept;
 
     KRYS_NODISCARD GenericFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept;
 

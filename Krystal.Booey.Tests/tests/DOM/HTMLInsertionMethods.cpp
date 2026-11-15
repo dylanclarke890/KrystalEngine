@@ -28,11 +28,11 @@ namespace krys::boo::dom::tests
 
       InsertionDocument() noexcept
       {
-        auto html = Document->CreateElement(DOMStringAtom(u8"html")).ReleaseValue();
+        auto html = Document->CreateElement(u8"html").ReleaseValue();
         (void)Document->AppendChild(*html);
-        Body = Document->CreateElement(DOMStringAtom(u8"body")).ReleaseValue();
+        Body = Document->CreateElement(u8"body").ReleaseValue();
         (void)html->AppendChild(*Body);
-        Div = Document->CreateElement(DOMStringAtom(u8"div")).ReleaseValue();
+        Div = Document->CreateElement(u8"div").ReleaseValue();
         (void)Body->AppendChild(*Div);
       }
 
@@ -97,7 +97,7 @@ namespace krys::boo::dom::tests
 
     SECTION("does nothing on a script element")
     {
-      auto script = data.Document->CreateElement(DOMStringAtom(u8"script")).ReleaseValue();
+      auto script = data.Document->CreateElement(u8"script").ReleaseValue();
       REQUIRE_FALSE(script->AppendChild(*data.Document->CreateTextNode(u8"keep")).HasException());
       REQUIRE_FALSE(script->SetHTML(u8"<b>x</b>").HasException());
       CHECK(InsertedMarkup(script->InnerHTML().ReleaseValue()) == "keep");
@@ -105,7 +105,7 @@ namespace krys::boo::dom::tests
 
     SECTION("goes into a template's contents")
     {
-      auto templateElement = data.Document->CreateElement(DOMStringAtom(u8"template")).ReleaseValue();
+      auto templateElement = data.Document->CreateElement(u8"template").ReleaseValue();
       REQUIRE_FALSE(templateElement->SetHTML(u8"<b>x</b><script></script>").HasException());
       CHECK_FALSE(templateElement->HasChildNodes());
       CHECK(InsertedMarkup(templateElement->InnerHTML().ReleaseValue()) == "<b>x</b>");
@@ -295,7 +295,7 @@ namespace krys::boo::dom::tests
 
     SECTION("a node without a parent does nothing")
     {
-      auto lone = data.Document->CreateElement(DOMStringAtom(u8"span")).ReleaseValue();
+      auto lone = data.Document->CreateElement(u8"span").ReleaseValue();
       CHECK_FALSE(lone->BeforeHTML(u8"<b></b>").HasException());
       CHECK_FALSE(lone->ParentNode());
     }
@@ -317,20 +317,20 @@ namespace krys::boo::dom::tests
 
       // A fragment without a host.
       auto fragment = data.Document->CreateDocumentFragment();
-      auto child = data.Document->CreateElement(DOMStringAtom(u8"span")).ReleaseValue();
+      auto child = data.Document->CreateElement(u8"span").ReleaseValue();
       REQUIRE_FALSE(fragment->AppendChild(*child).HasException());
       CHECK(isHierarchyError(child->ReplaceWithHTML(u8"<b></b>")));
 
       // A template element (rather than its contents).
-      auto templateElement = data.Document->CreateElement(DOMStringAtom(u8"template")).ReleaseValue();
-      auto inTemplate = data.Document->CreateElement(DOMStringAtom(u8"span")).ReleaseValue();
+      auto templateElement = data.Document->CreateElement(u8"template").ReleaseValue();
+      auto inTemplate = data.Document->CreateElement(u8"span").ReleaseValue();
       REQUIRE_FALSE(templateElement->AppendChild(*inTemplate).HasException());
       CHECK(isHierarchyError(inTemplate->AfterHTML(u8"<b></b>")));
     }
 
     SECTION("a child of a template's contents takes the template as its context")
     {
-      auto templateElement = data.Document->CreateElement(DOMStringAtom(u8"template")).ReleaseValue();
+      auto templateElement = data.Document->CreateElement(u8"template").ReleaseValue();
       REQUIRE_FALSE(templateElement->SetHTMLUnsafe(u8"<span>a</span>").HasException());
       auto &contents = Downcast<html::HTMLTemplateElement>(*templateElement).TemplateContents();
       REQUIRE(contents.Host() == templateElement.get());

@@ -32,7 +32,7 @@ namespace krys::boo::css
   void SerialiseCustomIdentifier(StringBuilder &builder, const SerialisationContext &,
                                  const CustomIdentifier &value) noexcept
   {
-    SerialiseIdentifier(CSSOMString {value.Value.View()}, builder);
+    SerialiseIdentifier(value.Value.ToString(), builder);
   }
 
   void SerialisePropertyIdentifier(StringBuilder &builder, const SerialisationContext &,
@@ -44,7 +44,7 @@ namespace krys::boo::css
   void SerialiseString(StringBuilder &builder, const SerialisationContext &,
                        const CSSOMStringAtom &value) noexcept
   {
-    css::SerialiseString(CSSOMString {value.View()}, builder);
+    css::SerialiseString(value.ToString(), builder);
   }
 
   void SerialiseString(StringBuilder &builder, const SerialisationContext &,

@@ -142,7 +142,7 @@ namespace krys::boo::css
   Ref<CounterStyle> CounterStyleRegistry::DecimalCounter() noexcept
   {
     auto &userAgentCounters = UserAgentCounterStyles();
-    auto iterator = userAgentCounters.find(CSSOMStringAtom(u8"decimal"));
+    auto iterator = userAgentCounters.find(u8"decimal");
     // user agent counter style should always be populated with a counter named decimal if
     // counter-style-at-rule is enabled
     krys_assert(iterator != userAgentCounters.end());

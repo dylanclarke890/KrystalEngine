@@ -82,7 +82,7 @@ namespace krys::boo::css::tests
         REQUIRE(component);
         CHECK(component->Type == expected);
         CHECK(component->Multiplier == Multiplier::Single);
-        CHECK(component->Ident == CSSOMStringAtom::Null());
+        CHECK(component->Ident == null);
       }
     }
 
@@ -110,11 +110,11 @@ namespace krys::boo::css::tests
       auto component = Single(u8"foo");
       REQUIRE(component);
       CHECK(component->Type == Type::CustomIdent);
-      CHECK(component->Ident == CSSOMStringAtom(u8"foo"));
+      CHECK(component->Ident == u8"foo");
 
       auto list = Single(u8"foo#");
       REQUIRE(list);
-      CHECK(list->Ident == CSSOMStringAtom(u8"foo"));
+      CHECK(list->Ident == u8"foo");
       CHECK(list->Multiplier == Multiplier::CommaList);
 
       // Not valid custom identifiers.
@@ -132,7 +132,7 @@ namespace krys::boo::css::tests
       REQUIRE(parsed->Definition.size() == 3uz);
       CHECK(parsed->Definition[0].Type == Type::Length);
       CHECK(parsed->Definition[1].Type == Type::CustomIdent);
-      CHECK(parsed->Definition[1].Ident == CSSOMStringAtom(u8"auto"));
+      CHECK(parsed->Definition[1].Ident == u8"auto");
       CHECK(parsed->Definition[2].Type == Type::Color);
       CHECK(parsed->Definition[2].Multiplier == Multiplier::CommaList);
       CHECK_FALSE(parsed->IsUniversal());
@@ -179,7 +179,7 @@ namespace krys::boo::css::tests
 
       auto [spaceType, spaceRest] = ConsumeType(u8"foo bar");
       REQUIRE(spaceType);
-      CHECK(spaceType->Definition[0].Ident == CSSOMStringAtom(u8"foo"));
+      CHECK(spaceType->Definition[0].Ident == u8"foo");
       CHECK(spaceRest == u8"bar");
     }
 

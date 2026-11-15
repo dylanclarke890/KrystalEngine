@@ -470,7 +470,7 @@ namespace krys::boo::style
   {
     auto compute = [&]
     {
-      auto *ruleSets = AttributeInvalidationRuleSets(css::CSSOMStringAtom(u8"style"));
+      auto *ruleSets = AttributeInvalidationRuleSets(u8"style");
       if (!ruleSets)
       {
         return SelectorsForStyleAttribute::None;

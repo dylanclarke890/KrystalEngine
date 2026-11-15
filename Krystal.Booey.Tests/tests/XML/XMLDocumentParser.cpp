@@ -71,8 +71,7 @@ namespace krys::boo::tests
     auto circle = document.GetElementById(u8"c");
     REQUIRE(circle);
     CHECK(IsSVG<svg::SVGCircleElement>(*circle));
-    CHECK(circle->GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), dom::DOMStringAtom(u8"title"))
-          == u8"dot");
+    CHECK(circle->GetAttributeNS(infra::Namespaces::XLink, u8"title") == u8"dot");
 
     auto *desc = circle->NextSibling();
     REQUIRE(desc);
@@ -107,7 +106,7 @@ namespace krys::boo::tests
 
     auto root = document.DocumentElement();
     REQUIRE(root);
-    CHECK(root->NamespaceURI() == dom::DOMStringAtom::Null());
+    CHECK(root->NamespaceURI() == null);
     CHECK(root->LocalName() == u8"note");
     REQUIRE(Is<dom::ProcessingInstruction>(root->FirstChild()));
     CHECK(Downcast<dom::ProcessingInstruction>(*root->FirstChild()).Target() == u8"app");
@@ -233,7 +232,7 @@ namespace krys::boo::tests
       CHECK(item.NamespaceURI() == u8"urn:a");
       CHECK(item.LocalName() == u8"item");
       REQUIRE(Is<dom::Element>(fragment->LastChild()));
-      CHECK(Downcast<dom::Element>(*fragment->LastChild()).NamespaceURI() == dom::DOMStringAtom::Null());
+      CHECK(Downcast<dom::Element>(*fragment->LastChild()).NamespaceURI() == null);
     }
 
     SECTION("malformed")

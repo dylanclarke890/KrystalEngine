@@ -605,7 +605,7 @@ namespace krys::boo
       }
       if (_shouldPreserveMSOList)
       {
-        auto style = element.GetAttribute(dom::DOMStringAtom(u8"style")).value_or(dom::DOMString());
+        auto style = element.GetAttribute(u8"style").value_or(dom::DOMString());
         utf8_stringview view(style);
         return view.starts_with(u8"mso-list:") || view.find(u8";mso-list:") != utf8_stringview::npos
                || view.find(u8"\nmso-list:") != utf8_stringview::npos;
@@ -649,8 +649,8 @@ namespace krys::boo
       for (const auto &attribute : element.AttributeList())
       {
         // We'll handle the style attribute separately, below.
-        if (attribute->NamespaceURI().View().empty()
-            && attribute->LocalName() == dom::DOMStringAtom(u8"style") && shouldOverrideStyleAttr)
+        if (attribute->NamespaceURI().View().empty() && attribute->LocalName() == u8"style"
+            && shouldOverrideStyleAttr)
         {
           continue;
         }
@@ -1721,7 +1721,7 @@ namespace krys::boo
     auto createHTMLBRElement = [&document]()
     {
       auto element = CreateHTMLElement(document, u8"br");
-      (void)element->SetAttribute(dom::DOMStringAtom(u8"class"), dom::DOMString(AppleInterchangeNewline));
+      (void)element->SetAttribute(u8"class", dom::DOMString(AppleInterchangeNewline));
       return element;
     };
 

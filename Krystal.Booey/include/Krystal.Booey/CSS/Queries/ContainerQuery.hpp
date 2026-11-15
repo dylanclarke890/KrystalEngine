@@ -43,7 +43,7 @@ namespace krys::boo::css::cq
   /// @brief The prelude of an `@container` rule: an optional container name and a condition.
   struct ContainerQuery
   {
-    CSSOMStringAtom Name {CSSOMStringAtom::Null()};
+    CSSOMStringAtom Name {null};
     mq::Condition Condition;
     Axis RequiredAxes {Axis::None};
     cq::ContainsUnknownFeature ContainsUnknownFeature {cq::ContainsUnknownFeature::No};

@@ -361,7 +361,7 @@ namespace krys::boo::html::tests
     // The host's shadow tree: a button, a slot for the host's button and a button with a positive tabindex,
     // which comes first in the host's scope.
     auto shadow = HTML(fixture.ById(u8"host")).AttachShadow({}).ReleaseValue();
-    auto append = [&](dom::ContainerNode &parent, dom::DOMStringView tagName, dom::DOMStringView id,
+    auto append = [&](dom::ContainerNode &parent, dom::DOMStringAtom tagName, dom::DOMStringView id,
                       dom::DOMStringView tabIndex = {})
     {
       auto element = document.CreateElement(tagName).ReleaseValue();

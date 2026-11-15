@@ -288,7 +288,7 @@ namespace krys::boo
 
           uint32 stringLength = complexTextRun.StringLength();
           CachedTextBreakIterator cursorPositionIterator(characters, {}, TextBreakIterator::CaretMode {},
-                                                         StringAtom::Null());
+                                                         null);
           uint32 clusterStart;
           if (cursorPositionIterator.IsBoundary(hitIndex))
           {

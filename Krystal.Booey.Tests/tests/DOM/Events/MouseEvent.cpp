@@ -34,7 +34,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("MouseEvent: from a dictionary", "[DOM][MouseEvent]")
   {
-    Ref<MouseEvent> defaults = CreateRef<MouseEvent>(DOMStringAtom(u8"click"));
+    Ref<MouseEvent> defaults = CreateRef<MouseEvent>(u8"click");
     CHECK(defaults->Button() == 0);
     CHECK(defaults->Buttons() == 0);
     CHECK(defaults->ButtonDown());
@@ -59,7 +59,7 @@ namespace krys::boo::dom::tests
     init.ModifierCapsLock = true;
     init.RelatedTarget = related;
     init.Detail = 2;
-    Ref<MouseEvent> event = CreateRef<MouseEvent>(DOMStringAtom(u8"mousedown"), init);
+    Ref<MouseEvent> event = CreateRef<MouseEvent>(u8"mousedown", init);
     CHECK(event->Bubbles());
     CHECK(event->Detail() == 2);
     CHECK(event->ScreenX() == 30);
@@ -84,12 +84,12 @@ namespace krys::boo::dom::tests
     // Movement is only kept for moves.
     MouseEventInit moved;
     moved.MovementX = 4;
-    CHECK(CreateRef<MouseEvent>(DOMStringAtom(u8"mousemove"), moved)->MovementX() == 4);
+    CHECK(CreateRef<MouseEvent>(u8"mousemove", moved)->MovementX() == 4);
 
     SECTION("initMouseEvent")
     {
-      event->InitMouseEvent(DOMStringAtom(u8"mouseup"), false, true, nullptr, 1, 1, 2, 3, 4, false, true,
-                            true, false, 1, nullptr);
+      event->InitMouseEvent(u8"mouseup", false, true, nullptr, 1, 1, 2, 3, 4, false, true, true, false, 1,
+                            nullptr);
       CHECK(event->Type() == u8"mouseup");
       CHECK_FALSE(event->Bubbles());
       CHECK(event->Cancelable());
@@ -109,9 +109,8 @@ namespace krys::boo::dom::tests
       CHECK_FALSE(MouseEvent::CanTriggerActivationBehavior(*event));
       MouseEventInit right;
       right.Button = 2;
-      CHECK_FALSE(
-        MouseEvent::CanTriggerActivationBehavior(*CreateRef<MouseEvent>(DOMStringAtom(u8"click"), right)));
-      CHECK(IsAnyClick(DOMStringAtom(u8"auxclick")));
+      CHECK_FALSE(MouseEvent::CanTriggerActivationBehavior(*CreateRef<MouseEvent>(u8"click", right)));
+      CHECK(IsAnyClick(u8"auxclick"));
     }
   }
 
@@ -130,13 +129,11 @@ namespace krys::boo::dom::tests
 
     SECTION("enter and leave don't bubble")
     {
-      auto enter = MouseEvent::Create(DOMStringAtom(u8"mouseenter"), fixture.Frame->View(), platform, {}, {},
-                                      0, nullptr);
+      auto enter = MouseEvent::Create(u8"mouseenter", fixture.Frame->View(), platform, {}, {}, 0, nullptr);
       CHECK_FALSE(enter->Bubbles());
       CHECK_FALSE(enter->Cancelable());
       CHECK_FALSE(enter->Composed());
-      auto down =
-        MouseEvent::Create(DOMStringAtom(u8"mousedown"), fixture.Frame->View(), platform, {}, {}, 1, nullptr);
+      auto down = MouseEvent::Create(u8"mousedown", fixture.Frame->View(), platform, {}, {}, 1, nullptr);
       CHECK(down->Bubbles());
       CHECK(down->Cancelable());
       CHECK(down->Composed());
@@ -149,16 +146,15 @@ namespace krys::boo::dom::tests
       // Movement is only kept for moves.
       CHECK(down->MovementX() == 0);
       CHECK(
-        MouseEvent::Create(DOMStringAtom(u8"mousemove"), fixture.Frame->View(), platform, {}, {}, 0, nullptr)
-          ->MovementY()
+        MouseEvent::Create(u8"mousemove", fixture.Frame->View(), platform, {}, {}, 0, nullptr)->MovementY()
         == 4);
     }
 
     SECTION("offsets are relative to the target's border box, layer positions to its layer")
     {
       Ref<OffsetRecorder> recorder = CreateRef<OffsetRecorder>();
-      box.AddEventListener(DOMStringAtom(u8"mousedown"), recorder, false);
-      (void)box.DispatchMouseEvent(platform, DOMStringAtom(u8"mousedown"), 1);
+      box.AddEventListener(u8"mousedown", recorder, false);
+      (void)box.DispatchMouseEvent(platform, u8"mousedown", 1);
       CHECK(recorder->OffsetX == 13);
       CHECK(recorder->OffsetY == 17);
       CHECK(recorder->LayerX == 12);
@@ -171,8 +167,7 @@ namespace krys::boo::dom::tests
     {
       fixture.Frame->SetPageZoomFactor(2);
       (void)fixture.Document->UpdateLayout();
-      auto down =
-        MouseEvent::Create(DOMStringAtom(u8"mousedown"), fixture.Frame->View(), platform, {}, {}, 1, nullptr);
+      auto down = MouseEvent::Create(u8"mousedown", fixture.Frame->View(), platform, {}, {}, 1, nullptr);
       CHECK(down->PageX() == 16);
       CHECK(down->ClientX() == 16);
     }

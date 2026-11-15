@@ -265,9 +265,9 @@ namespace krys::boo::style
     KRYS_NODISCARD PseudoClassInvalidationKey MakePseudoClassInvalidationKey(
       css::SelectorPseudoClass pseudoClass, const css::Selector &selector) noexcept
     {
-      auto attributeName = css::CSSOMStringAtom::Null();
-      auto className = css::CSSOMStringAtom::Null();
-      auto tagName = css::CSSOMStringAtom::Null();
+      css::CSSOMStringAtom attributeName = null;
+      css::CSSOMStringAtom className = null;
+      css::CSSOMStringAtom tagName = null;
       for (auto *simpleSelector = selector.LastInCompoundSelector(); simpleSelector;
            simpleSelector = simpleSelector->PrecedingComplexSelectorComponent())
       {
@@ -277,7 +277,7 @@ namespace krys::boo::style
                                                        simpleSelector->Value());
         }
 
-        if (simpleSelector->Match() == css::SelectorMatch::Class && className == css::CSSOMStringAtom::Null())
+        if (simpleSelector->Match() == css::SelectorMatch::Class && className == null)
         {
           className = simpleSelector->Value();
         }
@@ -738,7 +738,7 @@ namespace krys::boo::style
 
   void RuleFeatureSet::RegisterContentAttribute(const css::CSSOMStringAtom &attributeName) noexcept
   {
-    ContentAttributeNamesInRules.insert(css::CSSOMStringAtom(text::ToASCIILower(attributeName.View())));
+    ContentAttributeNamesInRules.insert(attributeName.ToASCIILower());
     AttributeLowercaseLocalNamesInRules.insert(attributeName);
     AttributeLocalNamesInRules.insert(attributeName);
   }

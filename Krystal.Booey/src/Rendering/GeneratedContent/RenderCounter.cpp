@@ -651,7 +651,7 @@ namespace krys::boo
       return GetCounterStyle()->Text(value, Style().GetWritingMode());
     };
     auto text = counterText(value);
-    if (_counter.Separator != css::CSSOMStringAtom::Null())
+    if (_counter.Separator != null)
     {
       if (!child->ActsAsReset())
       {

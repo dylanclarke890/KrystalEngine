@@ -111,8 +111,7 @@ namespace krys::boo::css
       return _defaultNamespace;
     }
 
-    KRYS_NODISCARD const CSSOMStringAtom &
-      NamespaceURIFromPrefix(const CSSOMStringAtom &prefix) const noexcept;
+    KRYS_NODISCARD CSSOMStringAtom NamespaceURIFromPrefix(const CSSOMStringAtom &prefix) const noexcept;
 
     /// @brief Parses @p sheetText into this sheet.
     bool ParseString(const CSSOMString &sheetText) noexcept;

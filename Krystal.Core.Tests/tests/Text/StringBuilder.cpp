@@ -37,7 +37,7 @@ namespace krys::tests
     CHECK(builder.IsEmpty());
     builder.Append(u8"abc", utf8_string {u8"def"}, utf8_stringview {u8"g"});
     builder.Append("hi", u8'j', 'k');
-    builder.Append(StringAtom {u8"lm"});
+    builder.Append(u8"lm");
     CHECK(builder.ToString() == u8"abcdefghijklm");
     CHECK(builder.Length() == 13);
     CHECK(builder[1] == u8'b');
@@ -79,7 +79,7 @@ namespace krys::tests
       builder.Swap(other);
       CHECK(builder.ToString() == u8"xy");
       CHECK(other.ToString() == u8"<xy>");
-      CHECK(other.ToAtomString() == StringAtom {u8"<xy>"});
+      CHECK(other.ToAtomString() == u8"<xy>");
     }
 
     SECTION("Moving the string out")

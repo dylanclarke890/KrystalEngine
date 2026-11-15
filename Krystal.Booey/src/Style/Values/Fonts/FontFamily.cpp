@@ -49,8 +49,7 @@ namespace krys::boo::style
       }
 
       auto valueID = primitiveValue->ValueId();
-      if (auto family = css::PropertyParserHelpers::GenericFontFamily(valueID);
-          family != css::CSSOMStringAtom::Null())
+      if (auto family = css::PropertyParserHelpers::GenericFontFamily(valueID); family != null)
       {
         return {family, FontFamilyKind::Generic};
       }
@@ -61,21 +60,21 @@ namespace krys::boo::style
         const auto &font = state.GetDocument()
                              .GetSettings()
                              .Values.SystemFonts[css::PropertyParserHelpers::LowerFontShorthand(valueID)];
-        if (font.Family == StringAtom::Null() || font.Family.View().empty())
+        if (font.Family == null || font.Family.View().empty())
         {
           return {css::GenericFontFamilyNames::StandardFamily(), FontFamilyKind::Generic};
         }
-        return {css::CSSOMStringAtom {font.Family}, FontFamilyKind::Specified};
+        return {font.Family, FontFamilyKind::Specified};
       }
 
       state.SetCurrentPropertyInvalidAtComputedValueTime();
-      return {css::CSSOMStringAtom::Null(), FontFamilyKind::Generic};
+      return {null, FontFamilyKind::Generic};
     }
 
     auto valueList = RequiredListDowncast<css::ValueList, css::PrimitiveValue>(state, value);
     if (!valueList)
     {
-      return {css::CSSOMStringAtom::Null(), FontFamilyKind::Generic};
+      return {null, FontFamilyKind::Generic};
     }
 
     Maybe<FontFamilyKind> firstFontKind;
@@ -93,7 +92,7 @@ namespace krys::boo::style
         return {css::PropertyParserHelpers::GenericFontFamily(valueID), FontFamilyKind::Generic};
       }();
 
-      if (family == css::CSSOMStringAtom::Null())
+      if (family == null)
       {
         continue;
       }
@@ -109,7 +108,7 @@ namespace krys::boo::style
     if (families.empty())
     {
       state.SetCurrentPropertyInvalidAtComputedValueTime();
-      return {css::CSSOMStringAtom::Null(), FontFamilyKind::Generic};
+      return {null, FontFamilyKind::Generic};
     }
 
     return {krys::move(families), *firstFontKind};

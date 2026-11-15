@@ -61,19 +61,19 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributename
     KRYS_NODISCARD virtual DOMStringAtom AttributeName() const noexcept
     {
-      return DOMStringAtom::Null();
+      return null;
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributenamespace
     KRYS_NODISCARD virtual DOMStringAtom AttributeNamespace() const noexcept
     {
-      return DOMStringAtom::Null();
+      return null;
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-oldvalue
     KRYS_NODISCARD virtual DOMStringAtom OldValue() const noexcept
     {
-      return DOMStringAtom::Null();
+      return null;
     }
 
 #pragma endregion

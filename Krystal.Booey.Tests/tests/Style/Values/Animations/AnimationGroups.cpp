@@ -78,7 +78,7 @@ namespace krys::boo::style::tests
 
     auto name = animationName(u8"slide");
     REQUIRE(name.TryKeyframesName());
-    CHECK(name.TryKeyframesName()->Name == css::CSSOMStringAtom {u8"slide"});
+    CHECK(name.TryKeyframesName()->Name == u8"slide");
     CHECK(name.TryKeyframesName()->IsIdentifier);
     CHECK(Serialised(name) == "slide");
     CHECK(animationName(u8"none").IsNone());
@@ -103,7 +103,7 @@ namespace krys::boo::style::tests
       CHECK(Convert<SingleAnimationTimeline>(PropertyId::AnimationTimeline, u8"auto").IsAuto());
       CHECK(Convert<SingleAnimationTimeline>(PropertyId::AnimationTimeline, u8"none").IsNone());
       auto named = Convert<SingleAnimationTimeline>(PropertyId::AnimationTimeline, u8"--scroller");
-      CHECK(named.TryCustomIdentifier()->Value == css::CSSOMStringAtom {u8"--scroller"});
+      CHECK(named.TryCustomIdentifier()->Value == u8"--scroller");
 
       auto scroll = Convert<SingleAnimationTimeline>(PropertyId::AnimationTimeline, u8"scroll(root inline)");
       REQUIRE(scroll.TryScrollFunction());
@@ -236,7 +236,7 @@ namespace krys::boo::style::tests
   TEST_CASE_METHOD(BuilderFixture, "Style scroll timelines", "[Style][Values][ScrollAnimations]")
   {
     auto name = Convert<ProgressTimelineName>(PropertyId::ScrollTimelineName, u8"--a");
-    CHECK(name.Value.Value == css::CSSOMStringAtom {u8"--a"});
+    CHECK(name.Value.Value == u8"--a");
     CHECK(Serialised(name) == "--a");
 
     auto single = Convert<ViewTimelineInsets>(PropertyId::ViewTimelineInset, u8"10px 20%");

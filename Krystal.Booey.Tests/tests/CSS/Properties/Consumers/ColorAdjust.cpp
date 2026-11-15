@@ -38,8 +38,8 @@ namespace krys::boo::css::tests
     auto schemes = ParseUnresolvedColorScheme(u8"  light dark  ", ParserContext {ParserMode::HTMLStandard});
     REQUIRE(schemes);
     REQUIRE(schemes->Schemes.size() == 2);
-    CHECK(schemes->Schemes.Value[0] == CSSOMStringAtom(u8"light"));
-    CHECK(schemes->Schemes.Value[1] == CSSOMStringAtom(u8"dark"));
+    CHECK(schemes->Schemes.Value[0] == u8"light");
+    CHECK(schemes->Schemes.Value[1] == u8"dark");
     CHECK_FALSE(schemes->Only);
 
     CHECK(Serialised(u8"normal") == "normal");

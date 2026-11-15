@@ -158,7 +158,7 @@ namespace krys::boo::tests
       Ref<dom::EventListenerCallback> recorder = CreateRef<Listener>(
         [&](dom::Event &event)
         { records.emplace_back(event.Type().View().begin(), event.Type().View().end()); });
-      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"scroll"), Ref {recorder}, false);
+      fixture.Document->AddEventListener(u8"scroll", Ref {recorder}, false);
 
       fixture.View().SetScrollPosition({0, 100});
       CHECK(page.IsRenderingUpdateScheduled());
@@ -179,7 +179,7 @@ namespace krys::boo::tests
             fixture.View().SetScrollPosition({0, 200});
           }
         });
-      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"scroll"), Ref {scroller}, false);
+      fixture.Document->AddEventListener(u8"scroll", Ref {scroller}, false);
 
       fixture.View().SetScrollPosition({0, 100});
       page.UpdateRendering();
@@ -594,7 +594,7 @@ namespace krys::boo::tests
     CHECK_FALSE(document.Hidden());
 
     List<bool> events;
-    auto handle = document.AddEventListener(dom::DOMStringAtom(EventNames::VisibilityChange),
+    auto handle = document.AddEventListener(EventNames::VisibilityChange,
                                             [&](dom::Event &event) { events.push_back(event.Bubbles()); });
 
     SECTION("Hiding and showing the page fire visibilitychange in a task")

@@ -411,7 +411,7 @@ namespace krys::boo::tests
     {
       fixture.Frame().Loader().ChangeLocation(url::URL(u8"https://example.com/elsewhere.html"),
                                               dom::DOMStringAtom::Empty(), nullptr,
-                                              ReferrerPolicy::EmptyString, dom::DOMStringAtom::Null());
+                                              ReferrerPolicy::EmptyString, null);
     };
     auto pageHide = window->AddEventListener<html::PageTransitionEvent>(u8"pagehide",
                                                                         [&](html::PageTransitionEvent &event)
@@ -453,10 +453,10 @@ namespace krys::boo::tests
     CHECK(fixture.Document().VisibilityState() == html::DocumentVisibilityState::Visible);
 
     // The unloaded document drops its listeners, and its window's and nodes'.
-    CHECK_FALSE(window->HasEventListener(dom::DOMStringAtom(u8"pagehide")));
-    CHECK_FALSE(window->HasEventListener(dom::DOMStringAtom(u8"unload")));
-    CHECK_FALSE(first->HasEventListener(dom::DOMStringAtom(u8"click")));
-    CHECK_FALSE(paragraph->HasEventListener(dom::DOMStringAtom(u8"click")));
+    CHECK_FALSE(window->HasEventListener(u8"pagehide"));
+    CHECK_FALSE(window->HasEventListener(u8"unload"));
+    CHECK_FALSE(first->HasEventListener(u8"click"));
+    CHECK_FALSE(paragraph->HasEventListener(u8"click"));
     CHECK_FALSE(first->PageShowing());
     CHECK(std::ranges::find(fixture.Events, "navigation to https://example.com/elsewhere.html")
           == fixture.Events.end());

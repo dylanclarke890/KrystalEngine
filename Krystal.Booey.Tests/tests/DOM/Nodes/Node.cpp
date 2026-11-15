@@ -680,8 +680,8 @@ namespace krys::boo::dom::tests
     SECTION("a null or empty namespace has no prefix")
     {
       auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
-      CHECK(element->LookupPrefix(DOMStringAtom::Null()) == DOMStringAtom::Null());
-      CHECK(element->LookupPrefix(DOMStringAtom::Empty()) == DOMStringAtom::Null());
+      CHECK(element->LookupPrefix(null) == null);
+      CHECK(element->LookupPrefix(DOMStringAtom::Empty()) == null);
     }
 
     SECTION("node is an Element")
@@ -694,14 +694,14 @@ namespace krys::boo::dom::tests
 
       SECTION("returns null if it doesn't have a namespace prefix")
       {
-        auto element = CreateRef<NamespaceTestElement>(*data.Document, dom::DOMStringAtom::Null());
-        REQUIRE(element->LookupPrefix(u8"http://a") == dom::DOMStringAtom::Null());
+        auto element = CreateRef<NamespaceTestElement>(*data.Document, null);
+        REQUIRE(element->LookupPrefix(u8"http://a") == null);
       }
 
       SECTION("returns null if its namespace doesn't match")
       {
         auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
-        REQUIRE(element->LookupPrefix(u8"http://b") == dom::DOMStringAtom::Null());
+        REQUIRE(element->LookupPrefix(u8"http://b") == null);
       }
     }
 
@@ -709,7 +709,7 @@ namespace krys::boo::dom::tests
     {
       SECTION("returns null if its documentElement is null")
       {
-        REQUIRE(data.Document->LookupPrefix(u8"foo") == dom::DOMStringAtom::Null());
+        REQUIRE(data.Document->LookupPrefix(u8"foo") == null);
       }
 
       SECTION("returns its documentElement's namespace prefix if its documentElement is not null")
@@ -724,13 +724,13 @@ namespace krys::boo::dom::tests
     SECTION("returns null if Node is a DocumentFragment")
     {
       auto fragment = CreateRef<DocumentFragment>(*data.Document);
-      REQUIRE(fragment->LookupPrefix(u8"foo") == dom::DOMStringAtom::Null());
+      REQUIRE(fragment->LookupPrefix(u8"foo") == null);
     }
 
     SECTION("returns null if Node is a DocumentType")
     {
       auto doctype = data.Document->Implementation().CreateDocumentType(u8"test", u8"", u8"");
-      REQUIRE(doctype->LookupPrefix(u8"foo") == dom::DOMStringAtom::Null());
+      REQUIRE(doctype->LookupPrefix(u8"foo") == null);
     }
 
     SECTION("Node is an Attr")
@@ -739,7 +739,7 @@ namespace krys::boo::dom::tests
       {
         auto attr = data.Document->CreateAttribute(u8"test");
         REQUIRE_FALSE(attr.HasException());
-        REQUIRE(attr->LookupPrefix(u8"foo") == dom::DOMStringAtom::Null());
+        REQUIRE(attr->LookupPrefix(u8"foo") == null);
       }
 
       SECTION("returns its element owner's namespace prefix if it has an element owner")
@@ -758,7 +758,7 @@ namespace krys::boo::dom::tests
 
       SECTION("returns null if parent element is null")
       {
-        REQUIRE(textNode->LookupPrefix(u8"foo") == dom::DOMStringAtom::Null());
+        REQUIRE(textNode->LookupPrefix(u8"foo") == null);
       }
 
       SECTION("returns parent element's namespace prefix if parent element is not null")
@@ -775,10 +775,10 @@ namespace krys::boo::dom::tests
             "[DOM][Node][dom:dom-node-lookupnamespaceuri]")
   {
     CommonTestData data {};
-    auto element = CreateRef<NamespaceTestElement>(*data.Document, DOMStringAtom::Null());
+    auto element = CreateRef<NamespaceTestElement>(*data.Document, null);
     CHECK(element->LookupNamespaceURI(DOMStringAtom::Empty()) == u8"http://a");
-    CHECK(element->LookupNamespaceURI(DOMStringAtom::Null()) == u8"http://a");
-    CHECK(element->LookupNamespaceURI(u8"other") == DOMStringAtom::Null());
+    CHECK(element->LookupNamespaceURI(null) == u8"http://a");
+    CHECK(element->LookupNamespaceURI(u8"other") == null);
   }
 
   TEST_CASE(
@@ -789,10 +789,10 @@ namespace krys::boo::dom::tests
     auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
     REQUIRE_FALSE(element->IsDefaultNamespace(u8"foo"));
     REQUIRE_FALSE(element->IsDefaultNamespace(u8"http://a"));
-    REQUIRE(element->IsDefaultNamespace(dom::DOMStringAtom::Null()));
+    REQUIRE(element->IsDefaultNamespace(null));
     REQUIRE(element->IsDefaultNamespace(dom::DOMStringAtom::Empty()));
 
-    auto unprefixed = CreateRef<NamespaceTestElement>(*data.Document, DOMStringAtom::Null());
+    auto unprefixed = CreateRef<NamespaceTestElement>(*data.Document, null);
     REQUIRE(unprefixed->IsDefaultNamespace(u8"http://a"));
     REQUIRE_FALSE(unprefixed->IsDefaultNamespace(DOMStringAtom::Empty()));
   }

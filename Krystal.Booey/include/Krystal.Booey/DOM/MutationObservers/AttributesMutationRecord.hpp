@@ -16,7 +16,8 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD DOMStringAtom Type() const noexcept override
     {
-      return u8"attributes";
+      static const DOMStringAtom type {u8"attributes"};
+      return type;
     }
 
     KRYS_NODISCARD DOMStringAtom AttributeName() const noexcept final

@@ -90,9 +90,8 @@ namespace krys::boo::style
       return null;
     }
 
-    auto container =
-      SelectContainer(containerQuery.RequiredAxes, css::CSSOMString(containerQuery.Name.View()), *_element,
-                      _selectionMode, _scopeOrdinal, _evaluationState);
+    auto container = SelectContainer(containerQuery.RequiredAxes, containerQuery.Name.ToString(), *_element,
+                                     _selectionMode, _scopeOrdinal, _evaluationState);
     if (!container)
     {
       return null;

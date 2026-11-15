@@ -94,7 +94,7 @@ namespace krys::boo::tests
     auto &view = *frame->View();
     CHECK(&view.Frame() == frame.get());
     CHECK(view.Size() == IntSize {800, 600});
-    CHECK(view.MediaType() == css::CSSOMStringAtom {u8"screen"});
+    CHECK(view.MediaType() == u8"screen");
 
     frame->SetDocument(ShareRefPtr<dom::Document>(document.get()));
     CHECK(frame->Document() == document.get());
@@ -355,15 +355,15 @@ namespace krys::boo::tests
     auto paged = document.Window()->MatchMedia(u8"(overflow-block: paged)");
     CHECK_FALSE(paged->Matches());
 
-    fixture.View().SetMediaType(css::CSSOMStringAtom {u8"print"});
+    fixture.View().SetMediaType(u8"print");
     document.UpdateStyleIfNeeded();
     CHECK(fixture.Rendered(u8"p").GetColor() == Blue);
-    CHECK(document.GetMediaQueryMatcher().MediaType() == css::CSSOMStringAtom {u8"print"});
+    CHECK(document.GetMediaQueryMatcher().MediaType() == u8"print");
 
     document.EvaluateMediaQueriesAndReportChanges();
     CHECK(paged->Matches());
 
-    fixture.View().SetMediaType(css::CSSOMStringAtom {u8"screen"});
+    fixture.View().SetMediaType(u8"screen");
     document.UpdateStyleIfNeeded();
     CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
   }

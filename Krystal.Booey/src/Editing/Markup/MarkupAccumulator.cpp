@@ -144,7 +144,7 @@ namespace krys::boo
           && (namespaceURI == infra::Namespaces::HTML || namespaceURI == infra::Namespaces::MathML
               || namespaceURI == infra::Namespaces::SVG))
       {
-        return utf8_string(element.LocalName().View());
+        return element.LocalName().ToString();
       }
       return element.TagQualifiedName().Name();
     }
@@ -155,7 +155,7 @@ namespace krys::boo
       auto namespaceURI = attribute.NamespaceURI().View();
       if (namespaceURI.empty())
       {
-        return utf8_string(attribute.LocalName().View());
+        return attribute.LocalName().ToString();
       }
 
       utf8_stringview prefix;
@@ -434,15 +434,15 @@ namespace krys::boo
       // Make sure xml prefix and namespace are always known to uphold the constraints listed at
       // http://www.w3.org/TR/xml-names11/#xmlReserved.
       Namespaces namespaceHash;
-      namespaceHash.insert_or_assign(XMLAtom(), dom::DOMStringAtom(infra::Namespaces::XML));
-      namespaceHash.insert_or_assign(dom::DOMStringAtom(infra::Namespaces::XML), XMLAtom());
+      namespaceHash.insert_or_assign(XMLAtom(), infra::Namespaces::XML);
+      namespaceHash.insert_or_assign(infra::Namespaces::XML, XMLAtom());
 
       // An element's children are serialized in the default namespace in scope on it, so that children in no
       // namespace declare the empty default namespace.
       if (auto *element = DynamicDowncast<dom::Element>(targetNode);
           element && root != SerializedNodes::SubtreeIncludingNode)
       {
-        auto defaultNamespace = element->LookupNamespaceURI(dom::DOMStringAtom::Null());
+        auto defaultNamespace = element->LookupNamespaceURI(null);
         if (!defaultNamespace.View().empty())
         {
           namespaceHash.insert_or_assign(EmptyAtom(), defaultNamespace);
@@ -811,8 +811,7 @@ namespace krys::boo
     // If current node's is value is not null, and the element does not have an is content attribute in its
     // attribute list, then append the string " is="", followed by current node's is value escaped as
     // described below in attribute mode, followed by a U+0022 QUOTATION MARK character (").
-    if (!InXMLFragmentSerialization() && element.IsValue() != dom::DOMStringAtom::Null()
-        && !element.HasAttribute(IsAtom()))
+    if (!InXMLFragmentSerialization() && element.IsValue() != null && !element.HasAttribute(IsAtom()))
     {
       result.append(u8" is=\"");
       AppendAttributeValue(result, element.IsValue().View());
@@ -927,7 +926,7 @@ namespace krys::boo
 
     if (prefix.View().empty())
     {
-      return utf8_string(attribute.LocalName().View());
+      return attribute.LocalName().ToString();
     }
     utf8_string name(prefix.View());
     name.push_back(u8':');

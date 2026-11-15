@@ -15,7 +15,7 @@ namespace krys::boo::css::tests
 
     CHECK(TypeOf(rule) == RuleType::FontFeatureValues);
     REQUIRE(rule.FontFamilies().size() == 2);
-    CHECK(ToNarrow(CSSOMString(rule.FontFamily().View())) == "Font One, Font Two");
+    CHECK(ToNarrow(rule.FontFamily().ToString()) == "Font One, Font Two");
     // Each block is written once, in Servo's order.
     CHECK(
       RuleText(rule)

@@ -67,7 +67,7 @@ namespace krys::boo
       }
 
       uint32 matchedAttributes = 0;
-      if (element.HasAttribute(dom::DOMStringAtom(u8"style"))
+      if (element.HasAttribute(u8"style")
           && (shouldStyleAttributeBeEmpty == AllowNonEmptyStyleAttribute || !element.InlineStyle()
               || element.InlineStyle()->empty()))
       {
@@ -560,19 +560,18 @@ namespace krys::boo
       // and all matching style rules in order to determine how to best set the unicode-bidi property to
       // 'normal'. For now, it assumes that if the 'dir' attribute is present, then removing it will suffice,
       // and otherwise it sets the property in the inline style declaration.
-      if (element->HasAttribute(dom::DOMStringAtom(u8"dir")))
+      if (element->HasAttribute(u8"dir"))
       {
         // FIXME: If this is a BDO element, we should probably just remove it if it has no
         // other attributes, like we (should) do with B and I elements.
-        RemoveNodeAttribute(*element, dom::DOMStringAtom(u8"dir"));
+        RemoveNodeAttribute(*element, u8"dir");
       }
       else
       {
         auto inlineStyle = CopyStyleOrCreateEmpty(element->InlineStyle());
         (void)inlineStyle->SetProperty(PropertyId::UnicodeBidi, ValueId::Normal);
         (void)inlineStyle->RemoveProperty(PropertyId::Direction);
-        SetNodeAttribute(*element, dom::DOMStringAtom(u8"style"),
-                         inlineStyle->AsText(css::DefaultSerialisationContext()));
+        SetNodeAttribute(*element, u8"style", inlineStyle->AsText(css::DefaultSerialisationContext()));
         if (IsSpanWithoutAttributesOrUnstyledStyleSpan(*element))
         {
           RemoveNodePreservingChildren(*element);
@@ -847,8 +846,7 @@ namespace krys::boo
           {
             (void)inlineStyle->MergeAndOverrideOnConflict(*otherStyle);
           }
-          SetNodeAttribute(*element, dom::DOMStringAtom(u8"style"),
-                           inlineStyle->AsText(css::DefaultSerialisationContext()));
+          SetNodeAttribute(*element, u8"style", inlineStyle->AsText(css::DefaultSerialisationContext()));
           next = ShareRefPtr(TreeQueries::NextSkippingChildren(*element));
           continue;
         }
@@ -1123,12 +1121,11 @@ namespace krys::boo
 
     if (newInlineStyle->empty())
     {
-      RemoveNodeAttribute(element, dom::DOMStringAtom(u8"style"));
+      RemoveNodeAttribute(element, u8"style");
     }
     else
     {
-      SetNodeAttribute(element, dom::DOMStringAtom(u8"style"),
-                       newInlineStyle->AsText(css::DefaultSerialisationContext()));
+      SetNodeAttribute(element, u8"style", newInlineStyle->AsText(css::DefaultSerialisationContext()));
     }
 
     if (IsSpanWithoutAttributesOrUnstyledStyleSpan(element))
@@ -1196,7 +1193,7 @@ namespace krys::boo
     {
       if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(node))
       {
-        SetNodeAttribute(*htmlElement, dom::DOMStringAtom(u8"style"),
+        SetNodeAttribute(*htmlElement, u8"style",
                          newInlineStyle->Style()->AsText(css::DefaultSerialisationContext()));
         return;
       }
@@ -1270,7 +1267,7 @@ namespace krys::boo
           for (auto &element : elementsToPushDown)
           {
             auto wrapper = CloneElementWithoutChildren(*element);
-            wrapper->RemoveAttribute(dom::DOMStringAtom(u8"style"));
+            wrapper->RemoveAttribute(u8"style");
             SurroundNodeRangeWithElement(*child, *child, krys::move(wrapper));
           }
         }
@@ -1692,10 +1689,9 @@ namespace krys::boo
   {
     // Do not check for legacy styles here. Those styles, like <B> and <I>, only apply for inline content.
     krys_debug_assert(styleChange.CssStyle());
-    SetNodeAttribute(
-      block, dom::DOMStringAtom(u8"style"),
-      JoinWithSpace(styleChange.CssStyle()->AsText(css::DefaultSerialisationContext()),
-                    block.GetAttribute(dom::DOMStringAtom(u8"style")).value_or(dom::DOMString())));
+    SetNodeAttribute(block, u8"style",
+                     JoinWithSpace(styleChange.CssStyle()->AsText(css::DefaultSerialisationContext()),
+                                   block.GetAttribute(u8"style").value_or(dom::DOMString())));
   }
 
   void ApplyStyleCommand::AddInlineStyleIfNeeded(EditingStyle *style, dom::Node &start, dom::Node &end,
@@ -1822,20 +1818,19 @@ namespace krys::boo
         {
           auto inlineStyle = EditingStyle::Create(existingStyle);
           inlineStyle->OverrideWithStyle(*styleToMerge);
-          SetNodeAttribute(*styleContainer, dom::DOMStringAtom(u8"style"),
+          SetNodeAttribute(*styleContainer, u8"style",
                            inlineStyle->Style()->AsText(css::DefaultSerialisationContext()));
         }
         else
         {
-          SetNodeAttribute(*styleContainer, dom::DOMStringAtom(u8"style"),
+          SetNodeAttribute(*styleContainer, u8"style",
                            styleToMerge->AsText(css::DefaultSerialisationContext()));
         }
       }
       else
       {
         auto styleElement = CreateStyleSpanElement(GetDocument());
-        (void)styleElement->SetAttribute(dom::DOMStringAtom(u8"style"),
-                                         styleToMerge->AsText(css::DefaultSerialisationContext()));
+        (void)styleElement->SetAttribute(u8"style", styleToMerge->AsText(css::DefaultSerialisationContext()));
         SurroundNodeRangeWithElement(*startNode, *endNode, krys::move(styleElement));
       }
     }

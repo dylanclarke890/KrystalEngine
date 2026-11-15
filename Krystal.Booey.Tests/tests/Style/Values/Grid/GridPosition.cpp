@@ -12,7 +12,7 @@ namespace krys::boo::style::tests
 
     css::CustomIdentifier NoName()
     {
-      return css::CustomIdentifier {css::CSSOMStringAtom::Null()};
+      return css::CustomIdentifier {null};
     }
   }
 

@@ -140,7 +140,7 @@ namespace krys::boo::css
       buffer.remove_prefix(1uz);
     }
 
-    auto ident = [&]
+    auto ident = [&]() -> CSSOMStringAtom
     {
       InputStream input {CSSOMString(ConsumedSince(begin, buffer))};
       Tokenizer tokenizer {input};
@@ -150,14 +150,14 @@ namespace krys::boo::css
       range.DiscardWhitespace();
       if (range.Peek().Type() != TokenType::Ident || !IsValidCustomIdentifier(range.Peek().ValueId()))
       {
-        return CSSOMStringAtom::Null();
+        return null;
       }
 
       auto value = range.ConsumeIncludingWhitespace().IdentCodePoints();
-      return range.IsAtEnd() ? CSSOMStringAtom {value} : CSSOMStringAtom::Null();
+      return range.IsAtEnd() ? CSSOMStringAtom {value} : null;
     }();
 
-    if (ident == CSSOMStringAtom::Null())
+    if (ident == null)
     {
       return {};
     }
@@ -294,9 +294,9 @@ namespace krys::boo::css
       builder.Append(separator);
       separator = u8" | ";
 
-      if (component.Ident != CSSOMStringAtom::Null())
+      if (component.Ident != null)
       {
-        SerialiseIdentifier(CSSOMString(component.Ident.View()), builder);
+        SerialiseIdentifier(component.Ident.ToString(), builder);
       }
       else
       {

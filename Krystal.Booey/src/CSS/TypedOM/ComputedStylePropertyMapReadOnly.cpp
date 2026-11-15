@@ -132,7 +132,7 @@ namespace krys::boo::css
         [&](const auto &entry)
         {
           entries.push_back(
-            Entry {CSSOMString(entry.first.View()),
+            Entry {entry.first.ToString(),
                    ReifyValueToList(document, extractor.CustomPropertyValue(entry.first), {})});
           return IterationStatus::Continue;
         });

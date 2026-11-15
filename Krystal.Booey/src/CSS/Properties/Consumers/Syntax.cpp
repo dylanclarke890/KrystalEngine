@@ -34,6 +34,6 @@ namespace krys::boo::css::PropertyParserHelpers
   RefPtr<Value> ConsumeDeclarationValue(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-syntax-3/#typedef-declaration-value
-    return VariableParser::ParseDeclarationValue(CSSOMStringAtom::Null(), tokens.ConsumeAll(), state.Context);
+    return VariableParser::ParseDeclarationValue(null, tokens.ConsumeAll(), state.Context);
   }
 }

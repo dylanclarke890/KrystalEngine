@@ -363,8 +363,8 @@ namespace krys::boo
     // the captured element).
     if (element)
     {
-      UpdateMouseEventTargetNode(dom::DOMStringAtom(EventNames::GotPointerCapture), element,
-                                 _lastPlatformMouseEvent, FireMouseOverOut::Yes);
+      UpdateMouseEventTargetNode(EventNames::GotPointerCapture, element, _lastPlatformMouseEvent,
+                                 FireMouseOverOut::Yes);
     }
   }
 
@@ -493,8 +493,7 @@ namespace krys::boo
     {
       if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
       {
-        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent,
-                                                       dom::DOMStringAtom(EventNames::MouseDown));
+        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, EventNames::MouseDown);
         return true;
       }
     }
@@ -566,16 +565,16 @@ namespace krys::boo
       _resizeLayer = CreateWeakPtr(layer);
       _offsetFromResizeCorner = LayoutSize(layer->OffsetFromResizeCorner(localPoint));
       RefPtr<dom::Node> resizedNode = ShareRefPtr(mouseEvent.TargetNode());
-      (void)DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseDown), resizedNode.get(), _clickCount,
-                               platformMouseEvent, FireMouseOverOut::Yes);
+      (void)DispatchMouseEvent(EventNames::MouseDown, resizedNode.get(), _clickCount, platformMouseEvent,
+                               FireMouseOverOut::Yes);
       return true;
     }
 
     _frame.Document()->Selection().SetCaretBlinkingSuspended(true);
 
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
-    bool swallowEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseDown), targetNode.get(),
-                                            _clickCount, platformMouseEvent, FireMouseOverOut::Yes);
+    bool swallowEvent = !DispatchMouseEvent(EventNames::MouseDown, targetNode.get(), _clickCount,
+                                            platformMouseEvent, FireMouseOverOut::Yes);
     if (!swallowEvent || mouseEvent.GetScrollbar())
     {
       _capturesDragging = true;
@@ -648,8 +647,7 @@ namespace krys::boo
     {
       if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
       {
-        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent,
-                                                       dom::DOMStringAtom(EventNames::MouseMove));
+        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, EventNames::MouseMove);
         return true;
       }
     }
@@ -714,8 +712,8 @@ namespace krys::boo
     }
 
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
-    bool swallowEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseMove), targetNode.get(), 0,
-                                            platformMouseEvent, FireMouseOverOut::Yes);
+    bool swallowEvent = !DispatchMouseEvent(EventNames::MouseMove, targetNode.get(), 0, platformMouseEvent,
+                                            FireMouseOverOut::Yes);
 
     if (!swallowEvent
         || (!_capturesDragging
@@ -840,8 +838,7 @@ namespace krys::boo
     {
       if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
       {
-        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent,
-                                                       dom::DOMStringAtom(EventNames::MouseUp));
+        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, EventNames::MouseUp);
         return true;
       }
     }
@@ -860,8 +857,8 @@ namespace krys::boo
       InvalidateClick();
       (void)lastScrollbarUnderMouse->MouseUp(platformMouseEvent);
       RefPtr<dom::Element> lastElementUnderMouse = _lastElementUnderMouse;
-      return !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseUp), lastElementUnderMouse.get(),
-                                 _clickCount, platformMouseEvent, FireMouseOverOut::No);
+      return !DispatchMouseEvent(EventNames::MouseUp, lastElementUnderMouse.get(), _clickCount,
+                                 platformMouseEvent, FireMouseOverOut::No);
     }
 
     MouseEventWithHitTestResults mouseEvent = PrepareMouseEvent(
@@ -872,8 +869,8 @@ namespace krys::boo
     // FIXME: Mouse capture.
 
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
-    bool swallowMouseUpEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseUp), targetNode.get(),
-                                                   _clickCount, platformMouseEvent, FireMouseOverOut::Yes);
+    bool swallowMouseUpEvent = !DispatchMouseEvent(EventNames::MouseUp, targetNode.get(), _clickCount,
+                                                   platformMouseEvent, FireMouseOverOut::Yes);
 
     bool swallowClickEvent =
       SwallowAnyClickEvent(platformMouseEvent, mouseEvent, IgnoreAncestorNodesForClickEvent::No);
@@ -1076,29 +1073,27 @@ namespace krys::boo
 
         // Enter and leave events (and the pointer events dispatched with them) go only to the elements a
         // listener would see them on, as they don't bubble.
-        const std::array leaveTypes {dom::DOMStringAtom(EventNames::MouseLeave),
-                                     dom::DOMStringAtom(EventNames::PointerLeave)};
-        const std::array enterTypes {dom::DOMStringAtom(EventNames::MouseEnter),
-                                     dom::DOMStringAtom(EventNames::PointerEnter)};
+        const std::array<dom::DOMStringAtom, 2> leaveTypes {EventNames::MouseLeave, EventNames::PointerLeave};
+        const std::array<dom::DOMStringAtom, 2> enterTypes {EventNames::MouseEnter, EventNames::PointerEnter};
         RemoveBoundaryTargetsWithoutListeners(leftElementsChain, leaveTypes);
         RemoveBoundaryTargetsWithoutListeners(enteredElementsChain, enterTypes);
 
         if (RefPtr<dom::Element> lastElementUnderMouse = _lastElementUnderMouse)
         {
-          (void)lastElementUnderMouse->DispatchMouseEvent(
-            platformMouseEvent, dom::DOMStringAtom(EventNames::MouseOut), 0, _elementUnderMouse.get());
+          (void)lastElementUnderMouse->DispatchMouseEvent(platformMouseEvent, EventNames::MouseOut, 0,
+                                                          _elementUnderMouse.get());
         }
 
         for (auto &chain : leftElementsChain)
         {
-          (void)chain->DispatchMouseEvent(platformMouseEvent, dom::DOMStringAtom(EventNames::MouseLeave), 0,
+          (void)chain->DispatchMouseEvent(platformMouseEvent, EventNames::MouseLeave, 0,
                                           _elementUnderMouse.get());
         }
 
         if (RefPtr<dom::Element> elementUnderMouse = _elementUnderMouse)
         {
-          (void)elementUnderMouse->DispatchMouseEvent(
-            platformMouseEvent, dom::DOMStringAtom(EventNames::MouseOver), 0, _lastElementUnderMouse.get());
+          (void)elementUnderMouse->DispatchMouseEvent(platformMouseEvent, EventNames::MouseOver, 0,
+                                                      _lastElementUnderMouse.get());
         }
 
         for (auto it = enteredElementsChain.rbegin(); it != enteredElementsChain.rend(); ++it)
@@ -1111,7 +1106,7 @@ namespace krys::boo
 
           if (!IsElementAnAncestorOfLastElementUnderMouse(chain.get()))
           {
-            (void)chain->DispatchMouseEvent(platformMouseEvent, dom::DOMStringAtom(EventNames::MouseEnter), 0,
+            (void)chain->DispatchMouseEvent(platformMouseEvent, EventNames::MouseEnter, 0,
                                             _lastElementUnderMouse.get());
           }
         }
@@ -2848,7 +2843,7 @@ namespace krys::boo
         mouseEvent.GetHitTestResult(), AppendTrailingWhitespaceForEvent(_frame, mouseEvent));
     }
 
-    return !DispatchMouseEvent(dom::DOMStringAtom(EventNames::ContextMenu), mouseEvent.TargetNode(), 0, event,
+    return !DispatchMouseEvent(EventNames::ContextMenu, mouseEvent.TargetNode(), 0, event,
                                FireMouseOverOut::No);
   }
 
@@ -2858,12 +2853,12 @@ namespace krys::boo
     {
       switch (state)
       {
-        case PlatformTouchPoint::TouchReleased:  return dom::DOMStringAtom(EventNames::TouchEnd);
-        case PlatformTouchPoint::TouchCancelled: return dom::DOMStringAtom(EventNames::TouchCancel);
-        case PlatformTouchPoint::TouchPressed:   return dom::DOMStringAtom(EventNames::TouchStart);
-        case PlatformTouchPoint::TouchMoved:     return dom::DOMStringAtom(EventNames::TouchMove);
+        case PlatformTouchPoint::TouchReleased:  return EventNames::TouchEnd;
+        case PlatformTouchPoint::TouchCancelled: return EventNames::TouchCancel;
+        case PlatformTouchPoint::TouchPressed:   return EventNames::TouchStart;
+        case PlatformTouchPoint::TouchMoved:     return EventNames::TouchMove;
         // TouchStationary state is not converted to touch events, so fall through to assert.
-        default:                                 krys_debug_assert_msg(false, "Not reached."); return dom::DOMStringAtom::Null();
+        default:                                 krys_debug_assert_msg(false, "Not reached."); return null;
       }
     }
 
@@ -4010,17 +4005,16 @@ namespace krys::boo
       {
         // As per the HTML spec, we must always fire a drag event before firing a dragenter, dragleave, or
         // dragover event.
-        DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::Drag), event);
-        response =
-          DispatchDragEnterOrDragOverEvent(dom::DOMStringAtom(EventNames::DragEnter), *newTarget, event,
-                                           makePasteboard(), sourceOperationMask, draggingFiles);
+        DispatchEventToDragSourceElement(EventNames::Drag, event);
+        response = DispatchDragEnterOrDragOverEvent(EventNames::DragEnter, *newTarget, event,
+                                                    makePasteboard(), sourceOperationMask, draggingFiles);
       }
 
       if (RefPtr<dom::Element> dragTarget = _dragTarget)
       {
         auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
           dragTarget->NodeDocument(), makePasteboard(), sourceOperationMask, draggingFiles);
-        (void)DispatchDragEvent(dom::DOMStringAtom(EventNames::DragLeave), *dragTarget, event, *dataTransfer);
+        (void)DispatchDragEvent(EventNames::DragLeave, *dragTarget, event, *dataTransfer);
         dataTransfer->MakeInvalidForSecurity();
       }
 
@@ -4038,10 +4032,10 @@ namespace krys::boo
       // have been fired earlier.
       if (!_shouldOnlyFireDragOverEvent)
       {
-        DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::Drag), event);
+        DispatchEventToDragSourceElement(EventNames::Drag, event);
       }
-      response = DispatchDragEnterOrDragOverEvent(dom::DOMStringAtom(EventNames::DragOver), *newTarget, event,
-                                                  makePasteboard(), sourceOperationMask, draggingFiles);
+      response = DispatchDragEnterOrDragOverEvent(EventNames::DragOver, *newTarget, event, makePasteboard(),
+                                                  sourceOperationMask, draggingFiles);
       _shouldOnlyFireDragOverEvent = false;
     }
     _dragTarget = krys::move(newTarget);
@@ -4056,11 +4050,11 @@ namespace krys::boo
 
     if (RefPtr<dom::Element> dragTarget = _dragTarget)
     {
-      DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::Drag), event);
+      DispatchEventToDragSourceElement(EventNames::Drag, event);
 
       auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
         dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
-      (void)DispatchDragEvent(dom::DOMStringAtom(EventNames::DragLeave), *dragTarget, event, *dataTransfer);
+      (void)DispatchDragEvent(EventNames::DragLeave, *dragTarget, event, *dataTransfer);
       dataTransfer->MakeInvalidForSecurity();
     }
     ClearDragState();
@@ -4077,8 +4071,7 @@ namespace krys::boo
     {
       Ref<dom::DataTransfer> dataTransfer = dom::DataTransfer::CreateForDrop(
         dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
-      preventedDefault =
-        DispatchDragEvent(dom::DOMStringAtom(EventNames::Drop), *dragTarget, event, *dataTransfer);
+      preventedDefault = DispatchDragEvent(EventNames::Drop, *dragTarget, event, *dataTransfer);
       dataTransfer->MakeInvalidForSecurity();
     }
     ClearDragState();
@@ -4162,7 +4155,7 @@ namespace krys::boo
     if (ShouldDispatchEventsToDragSourceElement())
     {
       GetDragState().DataTransfer->SetDestinationOperationMask(dragOperationMask);
-      DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::DragEnd), event);
+      DispatchEventToDragSourceElement(EventNames::DragEnd, event);
     }
     InvalidateDataTransfer();
 
@@ -4206,8 +4199,7 @@ namespace krys::boo
                                                     dataTransfer,
                                                     RoundedIntPoint(_mouseDownContentsPosition));
     }
-    return !DispatchDragEvent(dom::DOMStringAtom(EventNames::DragStart), *draggedElement, _mouseDownEvent,
-                              dataTransfer)
+    return !DispatchDragEvent(EventNames::DragStart, *draggedElement, _mouseDownEvent, dataTransfer)
            && !_frame.Document()->Selection().Selection().IsInPasswordField();
   }
 
@@ -4356,7 +4348,7 @@ namespace krys::boo
         }
         else
         {
-          DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::DragEnd), event.Event());
+          DispatchEventToDragSourceElement(EventNames::DragEnd, event.Event());
           _mouseDownMayStartDrag = false;
           InvalidateDataTransfer();
           SetDragStateSource(nullptr);
@@ -4394,7 +4386,7 @@ namespace krys::boo
       if (ShouldDispatchEventsToDragSourceElement())
       {
         // Drag was canned at the last minute. We owe dragSource a dragend event.
-        DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::DragEnd), event.Event());
+        DispatchEventToDragSourceElement(EventNames::DragEnd, event.Event());
         _mouseDownMayStartDrag = false;
       }
     }

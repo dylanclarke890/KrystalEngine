@@ -356,13 +356,9 @@ namespace krys::boo::css::tests
   {
     auto list = Parse(u8"screen and ((width > 1px) or (asdf)), (hover)");
     List<std::string> names;
-    mq::TraverseFeatures(list,
-                         [&](const mq::Feature &feature)
-                         {
-                           names.push_back(feature.Name == CSSOMStringAtom::Null()
-                                             ? "<general-enclosed>"
-                                             : ToNarrow(feature.Name.View()));
-                         });
+    mq::TraverseFeatures(
+      list, [&](const mq::Feature &feature)
+      { names.push_back(feature.Name == null ? "<general-enclosed>" : ToNarrow(feature.Name.View())); });
     CHECK(names == List<std::string> {"width", "<general-enclosed>", "hover"});
   }
 }

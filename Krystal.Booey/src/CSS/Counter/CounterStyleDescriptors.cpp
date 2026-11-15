@@ -42,7 +42,7 @@ namespace krys::boo::css
   {
     KRYS_NODISCARD CSSOMString NameText(const CounterStyleName &name) noexcept
     {
-      return name == CounterStyleName::Null() ? CSSOMString() : CSSOMString(name.View());
+      return name == null ? CSSOMString() : name.ToString();
     }
 
     KRYS_NODISCARD CounterStyleRanges RangeFromStyleProperties(const StyleProperties &properties) noexcept
@@ -71,7 +71,7 @@ namespace krys::boo::css
       auto *primitiveValue = DynamicDowncast<PrimitiveValue>(*value);
       if (!primitiveValue)
       {
-        return CounterStyleName::Null();
+        return null;
       }
 
       return CounterStyleName(primitiveValue->StringValue());
@@ -468,7 +468,7 @@ namespace krys::boo::css
 
   void CounterStyleDescriptors::SetName(CounterStyleName name) noexcept
   {
-    if (name == CounterStyleName::Null() || Name == name)
+    if (name == null || Name == name)
     {
       return;
     }

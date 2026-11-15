@@ -61,7 +61,7 @@ namespace krys::boo::dom::tests
 
     SECTION("3. no document element for the empty or null qualified name")
     {
-      for (auto name : {DOMStringAtom::Empty(), DOMStringAtom::Null()})
+      for (auto name : {DOMStringAtom::Empty(), DOMStringAtom()})
       {
         auto document = implementation.CreateDocument(u8"urn:x", name).ReleaseValue();
         CHECK_FALSE(document->HasChildNodes());
@@ -73,7 +73,7 @@ namespace krys::boo::dom::tests
     {
       CHECK(implementation.CreateDocument(u8"urn:x", u8"1a").GetException().Code()
             == ExceptionCode::InvalidCharacterError);
-      CHECK(implementation.CreateDocument(DOMStringAtom::Null(), u8"p:a").GetException().Code()
+      CHECK(implementation.CreateDocument(null, u8"p:a").GetException().Code()
             == ExceptionCode::NamespaceError);
     }
 

@@ -27,7 +27,7 @@ namespace krys::boo::dom
       // 3. Let event be the result of running the inner event creation steps with eventInterface, realm, the
       // time of the occurrence that the event is signaling, and dictionary.
       // The constructor runs the inner event creation steps, with the time now.
-      Ref<TEvent> event = CreateRef<TEvent>(DOMStringAtom::Null(), dictionary);
+      Ref<TEvent> event = CreateRef<TEvent>(null, dictionary);
 
       // 4. Initialize event's isTrusted attribute to true.
       static_cast<Event &>(*event)._isTrusted = true;

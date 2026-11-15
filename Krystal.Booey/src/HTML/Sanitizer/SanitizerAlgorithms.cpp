@@ -104,9 +104,9 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMStringAtom CanonicalSanitizerNamespace(dom::DOMStringAtom namespaceURI) noexcept
     {
       // 3. If name["namespace"] is the empty string, then set it to null.
-      if (namespaceURI != dom::DOMStringAtom::Null() && namespaceURI.View().empty())
+      if (namespaceURI != null && namespaceURI.View().empty())
       {
-        return dom::DOMStringAtom::Null();
+        return null;
       }
       return namespaceURI;
     }
@@ -798,7 +798,7 @@ namespace krys::boo::html
       //     configuration["dataAttributes"] is not true, then return false.
       if (!SanitizerListContains(*configuration.Attributes, attrName)
           && !(localAttributes() && SanitizerListContains(*localAttributes(), attrName))
-          && (!localName.starts_with(u8"data-") || namespaceURI != dom::DOMStringAtom::Null()
+          && (!localName.starts_with(u8"data-") || namespaceURI != null
               || !configuration.DataAttributes.value_or(false)))
       {
         return false;
@@ -837,10 +837,8 @@ namespace krys::boo::html
 
     // 10. If elementNamespace is the MathML namespace, localName is "href", namespace is null or the XLink
     //     namespace, and value contains a javascript: URL, then return false.
-    if (elementNamespace == dom::DOMStringAtom(infra::Namespaces::MathML) && localName == u8"href"
-        && (namespaceURI == dom::DOMStringAtom::Null()
-            || namespaceURI == dom::DOMStringAtom(infra::Namespaces::XLink))
-        && ContainsJavaScriptURL(value))
+    if (elementNamespace == infra::Namespaces::MathML && localName == u8"href"
+        && (namespaceURI == null || namespaceURI == infra::Namespaces::XLink) && ContainsJavaScriptURL(value))
     {
       return false;
     }
@@ -862,7 +860,7 @@ namespace krys::boo::html
     // A custom data attribute is an attribute in no namespace whose name starts with the string "data-", has
     // at least one character after the hyphen, is XML-compatible, and contains no ASCII upper alphas.
     const auto &name = attribute.Name;
-    return attribute.Namespace == dom::DOMStringAtom::Null() && name.starts_with(u8"data-") && name.size() > 5
+    return attribute.Namespace == null && name.starts_with(u8"data-") && name.size() > 5
            && dom::NameValidation::IsValidXMLName(name) && name.find(u8':') == dom::DOMString::npos
            && std::ranges::none_of(name, [](char8_t c) { return c >= u8'A' && c <= u8'Z'; });
   }
@@ -872,9 +870,9 @@ namespace krys::boo::html
   {
     // 1.-2. Let namespaceA be itemA["namespace"]. Let namespaceB be itemB["namespace"].
     // 3.-3a. If namespaceA is null: if namespaceB is not null, then return true.
-    if (namespaceA == dom::DOMStringAtom::Null())
+    if (namespaceA == null)
     {
-      if (namespaceB != dom::DOMStringAtom::Null())
+      if (namespaceB != null)
       {
         return true;
       }
@@ -883,7 +881,7 @@ namespace krys::boo::html
     //        namespaceB, then return true. If namespaceA is not namespaceB, then return false.
     else
     {
-      if (namespaceB == dom::DOMStringAtom::Null())
+      if (namespaceB == null)
       {
         return false;
       }

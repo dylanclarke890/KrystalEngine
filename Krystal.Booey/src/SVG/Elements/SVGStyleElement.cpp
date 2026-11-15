@@ -92,12 +92,12 @@ namespace krys::boo::svg
   void SVGStyleElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                                          Maybe<dom::DOMStringView> value) noexcept
   {
-    auto newValue = value ? dom::DOMStringAtom(*value) : dom::DOMStringAtom::Null();
+    auto newValue = value ? dom::DOMStringAtom(*value) : null;
     if (name == SVGNames::TitleAttr())
     {
       if (auto *sheet = Sheet(); sheet && !dom::TreeQueries::IsInShadowTree(*this))
       {
-        sheet->SetTitle(css::CSSOMString(newValue.View()));
+        sheet->SetTitle(newValue.ToString());
       }
     }
     else if (name == SVGNames::TypeAttr())

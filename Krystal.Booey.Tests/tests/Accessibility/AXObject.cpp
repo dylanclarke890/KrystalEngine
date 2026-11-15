@@ -76,7 +76,7 @@ namespace krys::boo::ax::tests
     CHECK(Ids(menu.SelectedChildren()) == "m2");
 
     // Without an active descendant, the focused item is the selected one.
-    page.ById(u8"menu").RemoveAttribute(dom::DOMStringAtom(u8"aria-activedescendant"));
+    page.ById(u8"menu").RemoveAttribute(u8"aria-activedescendant");
     Downcast<html::HTMLElement>(page.ById(u8"m1")).Focus();
     (void)page.TakeNotifications();
     CHECK(page.Object(u8"m1").IsSelected());
@@ -105,7 +105,7 @@ namespace krys::boo::ax::tests
     // Tree items in groups count, and those aria-owns lists come after the rest (aria-owns makes i1 the
     // tree's last child; its group is visited on the way, as on WebKit).
     CHECK(Ids(tree.AriaTreeRows()) == "i3,i2,i1");
-    page.ById(u8"tree").RemoveAttribute(dom::DOMStringAtom(u8"aria-owns"));
+    page.ById(u8"tree").RemoveAttribute(u8"aria-owns");
     (void)page.TakeNotifications();
     // A tree is multi-selectable only when aria-multiselectable says so.
     CHECK(Ids(tree.SelectedChildren()) == "i1");

@@ -1070,7 +1070,7 @@ namespace krys::boo::dom::tests
     SECTION("Moving into an empty slot signals a slot change")
     {
       int changes = 0;
-      auto listener = slot->AddEventListener(DOMStringAtom(u8"slotchange"), [&](Event &) { ++changes; });
+      auto listener = slot->AddEventListener(u8"slotchange", [&](Event &) { ++changes; });
       auto fallback = document->CreateElement(u8"b").ReleaseValue();
       REQUIRE_FALSE(shadow->AppendChild(*fallback).HasException());
       loop.PerformMicrotaskCheckpoint();

@@ -12,7 +12,7 @@ namespace krys::boo::html::presentational_hints
   KRYS_NODISCARD inline bool IsAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                          dom::DOMStringView expected) noexcept
   {
-    return namespaceURI == dom::DOMStringAtom::Null() && localName == expected;
+    return namespaceURI == null && localName == expected;
   }
 
   KRYS_NODISCARD inline css::CSSOMString ToCSSOMString(dom::DOMStringView value) noexcept

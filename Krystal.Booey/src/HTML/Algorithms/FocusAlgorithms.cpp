@@ -1515,7 +1515,7 @@ namespace krys::boo::html
     if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
         !focused && focusedElement)
     {
-      FireFocusEvent(dom::DOMStringAtom(u8"blur"), *focusedElement, nullptr);
+      FireFocusEvent(u8"blur", *focusedElement, nullptr);
     }
     if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document.Window()))
     {
@@ -1529,7 +1529,7 @@ namespace krys::boo::html
     if (RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
         focused && focusedElement)
     {
-      FireFocusEvent(dom::DOMStringAtom(u8"focus"), *focusedElement, nullptr);
+      FireFocusEvent(u8"focus", *focusedElement, nullptr);
     }
   }
 

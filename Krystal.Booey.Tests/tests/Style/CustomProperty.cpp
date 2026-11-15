@@ -76,16 +76,14 @@ namespace krys::boo::style::tests
           == "1px, 2px");
 
     CHECK_FALSE(*length == *list);
-    CHECK_FALSE(
-      *length
-      == *CustomProperty::CreateForValue(CSSOMStringAtom {u8"--y"}, CustomProperty::Value {Length<> {10}}));
+    CHECK_FALSE(*length == *CustomProperty::CreateForValue(u8"--y", CustomProperty::Value {Length<> {10}}));
   }
 
   TEST_CASE("Custom property data", "[Style][CustomProperty]")
   {
     auto value = [](float px)
     {
-      return CustomProperty::CreateForValue(CSSOMStringAtom {u8"--a"}, CustomProperty::Value {Length<> {px}});
+      return CustomProperty::CreateForValue(u8"--a", CustomProperty::Value {Length<> {px}});
     };
     auto named = [](const char8_t *name, float px)
     {
@@ -94,24 +92,24 @@ namespace krys::boo::style::tests
 
     auto root = CustomPropertyData::Create();
     CHECK(root->Size() == 0);
-    root->Set(CSSOMStringAtom {u8"--a"}, value(1));
-    root->Set(CSSOMStringAtom {u8"--b"}, named(u8"--b", 2));
+    root->Set(u8"--a", value(1));
+    root->Set(u8"--b", named(u8"--b", 2));
     CHECK(root->Size() == 2);
     CHECK(root->MayHaveAnimatableProperties());
-    REQUIRE(root->Get(CSSOMStringAtom {u8"--a"}));
-    CHECK(*root->Get(CSSOMStringAtom {u8"--a"}) == *value(1));
-    CHECK_FALSE(root->Get(CSSOMStringAtom {u8"--missing"}));
+    REQUIRE(root->Get(u8"--a"));
+    CHECK(*root->Get(u8"--a") == *value(1));
+    CHECK_FALSE(root->Get(u8"--missing"));
 
     // A copy of the root references it as its parent; overriding a value doesn't change the size.
     auto child = root->Copy();
     CHECK(*child == *root);
-    child->Set(CSSOMStringAtom {u8"--a"}, value(5));
+    child->Set(u8"--a", value(5));
     CHECK(child->Size() == 2);
-    CHECK(*child->Get(CSSOMStringAtom {u8"--a"}) == *value(5));
-    CHECK(*root->Get(CSSOMStringAtom {u8"--a"}) == *value(1));
+    CHECK(*child->Get(u8"--a") == *value(5));
+    CHECK(*root->Get(u8"--a") == *value(1));
     CHECK_FALSE(*child == *root);
 
-    child->Set(CSSOMStringAtom {u8"--c"}, named(u8"--c", 3));
+    child->Set(u8"--c", named(u8"--c", 3));
     CHECK(child->Size() == 3);
 
     // Iteration visits each property once, preferring the overriding value.
@@ -120,21 +118,21 @@ namespace krys::boo::style::tests
       [&](const CustomPropertyData::Entry &entry)
       {
         ++count;
-        if (entry.first == CSSOMStringAtom {u8"--a"})
+        if (entry.first == u8"--a")
         {
           CHECK(*entry.second == *value(5));
         }
         return IterationStatus::Continue;
       });
     CHECK(count == 3);
-    CHECK(child->FindKeyAtIndex(3) == CSSOMStringAtom::Null());
-    CHECK_FALSE(child->FindKeyAtIndex(0) == CSSOMStringAtom::Null());
+    CHECK(child->FindKeyAtIndex(3) == null);
+    CHECK_FALSE(child->FindKeyAtIndex(0) == null);
 
     // Data with equal values under different parents compares equal.
     auto other = CustomPropertyData::Create();
-    other->Set(CSSOMStringAtom {u8"--a"}, value(5));
-    other->Set(CSSOMStringAtom {u8"--b"}, named(u8"--b", 2));
-    other->Set(CSSOMStringAtom {u8"--c"}, named(u8"--c", 3));
+    other->Set(u8"--a", value(5));
+    other->Set(u8"--b", named(u8"--b", 2));
+    other->Set(u8"--c", named(u8"--c", 3));
     CHECK(*other == *child);
   }
 }

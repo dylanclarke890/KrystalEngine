@@ -85,7 +85,7 @@ namespace krys::boo::style
   {
     krys_debug_assert(_type == GridPositionType::Explicit || _type == GridPositionType::Span
                       || _type == GridPositionType::NamedGridArea);
-    return css::CSSOMString {_namedGridLine.Value.View()};
+    return _namedGridLine.Value.ToString();
   }
 
   int GridPosition::Max() noexcept
@@ -139,7 +139,7 @@ namespace krys::boo::style
                             : 0;
     auto gridLineName = uncheckedGridLineName && uncheckedGridLineName->IsCustomIdent()
                           ? css::CSSOMStringAtom {uncheckedGridLineName->StringValue()}
-                          : css::CSSOMStringAtom::Null();
+                          : null;
 
     if (uncheckedSpanValue && uncheckedSpanValue->ValueId() == css::ValueId::Span)
     {

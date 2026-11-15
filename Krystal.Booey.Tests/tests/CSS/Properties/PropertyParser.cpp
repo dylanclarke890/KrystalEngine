@@ -245,14 +245,14 @@ namespace krys::boo::css::tests
   {
     auto &pool = ValuePool::MainThreadPool();
 
-    auto value = pool.CreateFontFaceValue(CSSOMStringAtom(u8"Arial, serif"));
+    auto value = pool.CreateFontFaceValue(u8"Arial, serif");
     REQUIRE(value);
     CHECK(CssText(*value) == "Arial, serif");
 
     // Cached.
-    CHECK(pool.CreateFontFaceValue(CSSOMStringAtom(u8"Arial, serif")) == value);
+    CHECK(pool.CreateFontFaceValue(u8"Arial, serif") == value);
 
-    CHECK_FALSE(pool.CreateFontFaceValue(CSSOMStringAtom(u8"10px")));
+    CHECK_FALSE(pool.CreateFontFaceValue(u8"10px"));
   }
 
   TEST_CASE_METHOD(style::tests::BuilderFixture, "PropertyParser: typed custom properties",

@@ -150,7 +150,7 @@ namespace krys::boo::html
                                                   dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI != dom::DOMStringAtom::Null())
+    if (namespaceURI != null)
     {
       return;
     }
@@ -205,13 +205,13 @@ namespace krys::boo::html
 
   void HTMLFormControlElement::DispatchChangeEvent() noexcept
   {
-    dom::ScopedEventQueue::DispatchOrQueue(
-      dom::Event::Create(dom::DOMStringAtom(EventNames::Change), true, false), ShareRef(*this));
+    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(EventNames::Change, true, false),
+                                           ShareRef(*this));
   }
 
   void HTMLFormControlElement::DispatchCancelEvent() noexcept
   {
-    auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Cancel), true, false);
+    auto event = dom::Event::Create(EventNames::Cancel, true, false);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
   }
 
@@ -225,8 +225,8 @@ namespace krys::boo::html
   void HTMLFormControlElement::DispatchFormControlInputEvent() noexcept
   {
     SetChangedSinceLastFormControlChangeEvent(true);
-    dom::ScopedEventQueue::DispatchOrQueue(
-      dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true), ShareRef(*this));
+    dom::ScopedEventQueue::DispatchOrQueue(dom::Event::Create(EventNames::Input, true, false, true),
+                                           ShareRef(*this));
   }
 
   Maybe<dom::DOMString> HTMLFormControlElement::ResultForDialogSubmit() const noexcept
@@ -266,7 +266,7 @@ namespace krys::boo::html
     // 5. If popoverElement is null, then return null.
     // 6. If popoverElement's popover attribute is in the No Popover state, then return null.
     // 7. Return popoverElement.
-    RefPtr<dom::Element> element = ResolvedElementForAttribute(dom::DOMStringAtom(u8"popovertarget"));
+    RefPtr<dom::Element> element = ResolvedElementForAttribute(u8"popovertarget");
     auto *popover = element ? DynamicDowncast<HTMLElement>(*element) : nullptr;
     if (popover && popover->GetPopoverState() != dom::PopoverState::None)
     {
@@ -279,13 +279,13 @@ namespace krys::boo::html
   {
     // The getter steps are to return the result of running this's get the unresolved popovertarget target
     // element (a host, not what its reference target names).
-    return ElementForAttributeInternal(dom::DOMStringAtom(u8"popovertarget"));
+    return ElementForAttributeInternal(u8"popovertarget");
   }
 
   void HTMLFormControlElement::PopoverTargetElementForBindings(dom::Element *element) noexcept
   {
     CEReactionsScope ceReactions;
-    SetElementAttribute(dom::DOMStringAtom(u8"popovertarget"), element);
+    SetElementAttribute(u8"popovertarget", element);
   }
 
   // https://html.spec.whatwg.org/#dom-popovertargetaction
@@ -324,7 +324,7 @@ namespace krys::boo::html
     }
 
     auto action = EnumeratedAttribute<"popovertargetaction", HTMLFormControlElement>::ResolveState(
-      GetAttribute(dom::DOMStringAtom(u8"popovertargetaction")));
+      GetAttribute(u8"popovertargetaction"));
     // 4. If node's popovertargetaction attribute is in the show state and popover's popover visibility state
     //    is showing, then return.
     if (action == PopoverTargetActionAttributeState::Show && popover->IsPopoverShowing())

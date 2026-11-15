@@ -52,10 +52,10 @@ namespace krys::boo
     FontFeatureSettings _featureSettings;
     FontVariationSettings _variationSettings;
     FontVariantAlternates _variantAlternates {FontVariantAlternates::Normal()};
-    boo::FontPalette _fontPalette {boo::FontPalette::Type::Normal, StringAtom::Null()};
+    boo::FontPalette _fontPalette {boo::FontPalette::Type::Normal, null};
     boo::FontSizeAdjust _sizeAdjust;
-    StringAtom _locale {StringAtom::Null()};
-    StringAtom _specifiedLocale {StringAtom::Null()};
+    StringAtom _locale {null};
+    StringAtom _specifiedLocale {null};
 
     boo::FontSelectionRequest _fontSelectionRequest {NormalWeightValue(), NormalWidthValue(), std::nullopt};
     boo::TextSpacingTrim _textSpacingTrim;

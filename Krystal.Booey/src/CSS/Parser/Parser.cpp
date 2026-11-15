@@ -743,7 +743,7 @@ namespace krys::boo::css
 
   RefPtr<NamespaceRule> Parser::ConsumeNamespaceRule(TokenRange prelude) noexcept
   {
-    auto namespacePrefix = CSSOMStringAtom::Null();
+    CSSOMStringAtom namespacePrefix = null;
     if (prelude.Peek().Type() == TokenType::Ident)
     {
       namespacePrefix = CSSOMStringAtom(prelude.ConsumeIncludingWhitespace().IdentCodePoints());
@@ -1103,7 +1103,7 @@ namespace krys::boo::css
   {
     auto rangeCopy = prelude;
     auto name = PropertyParserHelpers::ConsumeCounterStyleNameInPrelude(rangeCopy, _context.Mode);
-    if (name == CSSOMStringAtom::Null())
+    if (name == null)
     {
       return nullptr;
     }

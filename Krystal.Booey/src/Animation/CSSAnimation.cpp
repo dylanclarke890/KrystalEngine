@@ -229,8 +229,7 @@ namespace krys::boo
       },
       [&](const style::ViewFunction &viewFunction)
       {
-        auto viewTimeline =
-          ViewTimeline::Create(css::CSSOMStringAtom::Null(), viewFunction->Axis, viewFunction->Insets);
+        auto viewTimeline = ViewTimeline::Create(null, viewFunction->Axis, viewFunction->Insets);
         viewTimeline->SetSubject(*OwningElement());
         SetTimeline(krys::move(viewTimeline));
       });
@@ -471,6 +470,6 @@ namespace krys::boo
                               const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
   {
     return CreateRef<CSSAnimationEvent>(eventType, this, scheduledTime, elapsedTime, pseudoElementIdentifier,
-                                        css::CSSOMString {_animationName.Name.View()});
+                                        _animationName.Name.ToString());
   }
 }

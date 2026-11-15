@@ -106,7 +106,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CounterValue::Create(krys::move(identifier), CSSOMStringAtom::Null(), krys::move(counterStyle));
+    return CounterValue::Create(krys::move(identifier), null, krys::move(counterStyle));
   }
 
   KRYS_NODISCARD static RefPtr<Value> ConsumeCountersContent(TokenRange args,
@@ -126,7 +126,7 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       return nullptr;
     }
-    CSSOMStringAtom separator = args.Consume().IdentCodePoints();
+    CSSOMStringAtom separator {args.Consume().IdentCodePoints()};
     args.DiscardWhitespace();
 
     RefPtr<Value> counterStyle;

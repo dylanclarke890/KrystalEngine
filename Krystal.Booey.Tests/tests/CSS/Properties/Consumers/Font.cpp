@@ -81,7 +81,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(GenericFontFamily(ValueId::Serif) == GenericFontFamilyNames::SerifFamily());
     CHECK(GenericFontFamily(ValueId::SansSerif).View() == u8"-internal-sans-serif");
     CHECK(GenericFontFamily(ValueId::Math).View() == u8"-internal-math");
-    CHECK(GenericFontFamily(ValueId::Bold) == CSSOMStringAtom::Null());
+    CHECK(GenericFontFamily(ValueId::Bold) == null);
 
     CHECK(GenericFontFamilyIndex(ValueId::Monospace)
           == GenericFontFamilyNames::FamilyNamesIndex::MonospaceFamily);
@@ -299,8 +299,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
             "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumePreludeNames(u8"Foo, \"Bar Baz\", Qux  Quux")
-          == List<CSSOMStringAtom> {CSSOMStringAtom {u8"Foo"}, CSSOMStringAtom {u8"Bar Baz"},
-                                    CSSOMStringAtom {u8"Qux Quux"}});
+          == List<CSSOMStringAtom> {CSSOMStringAtom {u8"Foo"}, u8"Bar Baz", u8"Qux Quux"});
 
     CHECK(ConsumePreludeNames(u8"serif").empty());
     CHECK(ConsumePreludeNames(u8"Foo, serif").empty());

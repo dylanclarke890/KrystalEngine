@@ -33,8 +33,7 @@ namespace krys::boo::dom
   {
     // 1. Let registry be the result of looking up a custom element registry given document.
     // 2. Let is be null.
-    ElementCreationOptions result {.CustomElementRegistry = document.CustomElementRegistry(),
-                                   .Is = DOMStringAtom::Null()};
+    ElementCreationOptions result {.CustomElementRegistry = document.CustomElementRegistry(), .Is = null};
 
     // 3. If options is a dictionary:
     if (std::holds_alternative<ElementCreationOptions>(options))
@@ -49,7 +48,7 @@ namespace krys::boo::dom
       if (dict.CustomElementRegistry != nullptr)
       {
         // 3b.i. If is is non-null, then throw a "NotSupportedError" DOMException.
-        if (result.Is != DOMStringAtom::Null())
+        if (result.Is != null)
         {
           return Exception {ExceptionCode::NotSupportedError};
         }

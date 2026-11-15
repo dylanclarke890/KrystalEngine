@@ -34,7 +34,7 @@ namespace krys::boo::style
   // NOTE: There is no standard associated with this property.
   struct WebkitLocale
   {
-    WebkitLocale(css::keywords::Auto) noexcept : _platform {css::CSSOMStringAtom::Null()}
+    WebkitLocale(css::keywords::Auto) noexcept : _platform {null}
     {
     }
     WebkitLocale(const css::CSSOMStringAtom &value) noexcept : _platform {value}
@@ -55,7 +55,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool IsAuto() const noexcept
     {
-      return _platform == css::CSSOMStringAtom::Null();
+      return _platform == null;
     }
 
     template <typename... F>

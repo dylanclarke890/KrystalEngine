@@ -53,7 +53,7 @@ namespace krys::boo::css
 
   CSSOMString CSSFontPaletteValuesRule::Name() const noexcept
   {
-    return CSSOMString(_fontPaletteValuesRule->Name().View());
+    return _fontPaletteValuesRule->Name().ToString();
   }
 
   CSSOMString CSSFontPaletteValuesRule::FontFamily() const noexcept
@@ -65,7 +65,7 @@ namespace krys::boo::css
       {
         result.Append(u8", ");
       }
-      result.Append(SerialiseFontFamily(CSSOMString(family.View())));
+      result.Append(SerialiseFontFamily(family.ToString()));
     }
     return krys::move(result).ToString();
   }

@@ -5,7 +5,7 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    constexpr DOMStringView XHTML_NS = u8"http://www.w3.org/1999/xhtml";
+    constexpr const char8 *XHTML_NS = u8"http://www.w3.org/1999/xhtml";
   }
 
   TEST_CASE("Valid namespace prefix: non-empty, without ASCII whitespace, NULL, '/' or '>'",
@@ -342,8 +342,8 @@ namespace krys::boo::dom::tests
     {
       auto result = NameValidation::ValidateAndExtract(u8"", u8"foo", ValidateAndExtractContext::Element);
       REQUIRE_FALSE(result.HasException());
-      REQUIRE(result.Value().NamespaceURI() == DOMStringAtom::Null());
-      REQUIRE(result.Value().NamespacePrefix() == DOMStringAtom::Null());
+      REQUIRE(result.Value().NamespaceURI() == null);
+      REQUIRE(result.Value().NamespacePrefix() == null);
       REQUIRE(result.Value().LocalName().View() == u8"foo");
     }
 
@@ -371,7 +371,7 @@ namespace krys::boo::dom::tests
       result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/2000/xmlns/", u8"xmlns",
                                                   ValidateAndExtractContext::Attribute);
       REQUIRE_FALSE(result.HasException());
-      REQUIRE(result.Value().NamespacePrefix() == DOMStringAtom::Null());
+      REQUIRE(result.Value().NamespacePrefix() == null);
       REQUIRE(result.Value().LocalName().View() == u8"xmlns");
     }
 

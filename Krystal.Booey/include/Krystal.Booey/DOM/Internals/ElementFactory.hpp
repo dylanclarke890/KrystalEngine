@@ -30,7 +30,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#create-an-element-internal
     /// @see https://dom.spec.whatwg.org/#concept-element-interface
     KRYS_NODISCARD static Ref<Element>
-      Create(Document &document, const QualifiedName &name, DOMStringAtom is = DOMStringAtom::Null(),
+      Create(Document &document, const QualifiedName &name, DOMStringAtom is = null,
              bool synchronousCustomElements = false,
              CustomElementRegistryOrDefault registry = DefaultCustomElementRegistry) noexcept;
 
@@ -40,8 +40,7 @@ namespace krys::boo::dom
     template <typename T>
     KRYS_NODISCARD static Ref<T> CreateHTMLElement(Document &document, DOMStringAtom localName) noexcept
     {
-      auto element =
-        Create(document, QualifiedName {infra::Namespaces::HTML, DOMStringAtom::Null(), localName});
+      auto element = Create(document, QualifiedName {infra::Namespaces::HTML, null, localName});
       return ShareRef(Downcast<T>(Downcast<html::HTMLElement>(*element)));
     }
   };

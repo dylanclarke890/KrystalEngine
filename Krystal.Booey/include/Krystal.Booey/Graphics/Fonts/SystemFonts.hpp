@@ -49,7 +49,7 @@ namespace krys::boo
   struct SystemFont
   {
     /// @brief The family, or null for the standard family.
-    StringAtom Family {StringAtom::Null()};
+    StringAtom Family {null};
     float Size {16};
     FontSelectionValue Weight {NormalWeightValue()};
   };
@@ -63,10 +63,10 @@ namespace krys::boo
     Array<SystemFont, static_cast<size_t>(SystemFontKeyword::StatusBar) + 1> Fonts {{
       {},
       {},
-      {StringAtom::Null(), 12},
+      {null, 12},
       {},
-      {StringAtom::Null(), 12},
-      {StringAtom::Null(), 12},
+      {null, 12},
+      {null, 12},
     }};
 
     KRYS_NODISCARD const SystemFont &operator[](SystemFontKeyword keyword) const noexcept

@@ -154,7 +154,7 @@ namespace krys::boo::css
       case ValueId::Monospace: return MonospaceFamily();
       case ValueId::SystemUi:  return SystemUiFamily();
       case ValueId::Math:      return MathFamily();
-      default:                 return StringAtom::Null();
+      default:                 return null;
     }
   }
 
@@ -169,7 +169,7 @@ namespace krys::boo::css
     }
 
     auto familyName = FamilyNameFromPrimitive(Downcast<PrimitiveValue>(*family));
-    if (familyName == StringAtom::Null())
+    if (familyName == null)
     {
       return;
     }
@@ -224,7 +224,7 @@ namespace krys::boo::css
                                                   const Value &familyToSearchFor) noexcept
   {
     auto familyName = FamilyNameFromPrimitive(Downcast<PrimitiveValue>(familyToSearchFor));
-    if (familyName == StringAtom::Null())
+    if (familyName == null)
     {
       return;
     }

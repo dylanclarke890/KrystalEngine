@@ -559,7 +559,7 @@ namespace krys::boo::html
     auto &element = *Element();
 
     RangeLimitations rangeLimitations = RangeLimitations::Invalid;
-    auto extractBound = [&](dom::DOMStringView attributeName, const Decimal &defaultValue) -> Decimal
+    auto extractBound = [&](dom::DOMStringAtom attributeName, const Decimal &defaultValue) -> Decimal
     {
       Decimal valueFromAttribute =
         ParseToNumberOrNaN(element.GetAttribute(attributeName).value_or(dom::DOMString()));

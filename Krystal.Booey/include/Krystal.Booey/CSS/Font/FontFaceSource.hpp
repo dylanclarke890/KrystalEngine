@@ -71,7 +71,7 @@ namespace krys::boo::css
     };
 
   private:
-    StringAtom _fontFaceName {StringAtom::Null()}; // Font name for local fonts
+    StringAtom _fontFaceName {null}; // Font name for local fonts
     CSSFontFace &_owningCSSFontFace;
     WeakPtr<CSSFontSelector> _fontSelector;     // For remote fonts, to orchestrate loading.
     const RefPtr<FontLoadRequest> _fontRequest; // Also for remote fonts, a pointer to the resource request.

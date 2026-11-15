@@ -225,8 +225,7 @@ namespace krys::boo::style::tests
 
     SECTION("Inherited custom properties")
     {
-      ParentStyle.SetCustomPropertyValue(
-        CustomProperty::CreateForGuaranteedInvalid(css::CSSOMStringAtom {u8"--p"}), true);
+      ParentStyle.SetCustomPropertyValue(CustomProperty::CreateForGuaranteedInvalid(u8"--p"), true);
       Matched->AuthorDeclarations.push_back(Block(u8"--q: inherit"));
       Build();
       CHECK(Custom(u8"--q") == "<invalid>");
@@ -253,8 +252,7 @@ namespace krys::boo::style::tests
     {
       ParentStyle.SetCustomPropertyValue(
         CustomProperty::CreateForVariableData(
-          css::CSSOMStringAtom {u8"--k"},
-          css::VariableData::Create(css::tests::Tokens {u8"parent"}.Tokenizer.Tokens())),
+          u8"--k", css::VariableData::Create(css::tests::Tokens {u8"parent"}.Tokenizer.Tokens())),
         true);
       BuildAuthor(u8"--k: var(--missing, inherit)");
       CHECK(Custom(u8"--k") == "parent");
@@ -280,11 +278,10 @@ namespace krys::boo::style::tests
     SECTION("Values that don't match are unset")
     {
       Register(u8"--len", u8"<length>", true, u8"7px");
-      ParentStyle.SetCustomPropertyValue(Ref<const CustomProperty> {Document->StyleScope()
-                                                                      .GetCustomPropertyRegistry()
-                                                                      .Get(css::CSSOMStringAtom {u8"--len"})
-                                                                      ->InitialValue},
-                                         true);
+      ParentStyle.SetCustomPropertyValue(
+        Ref<const CustomProperty> {
+          Document->StyleScope().GetCustomPropertyRegistry().Get(u8"--len")->InitialValue},
+        true);
       BuildAuthor(u8"--other: red; --len: var(--other)");
       // Inherited, so unset is the parent's value.
       CHECK(Custom(u8"--len") == "7px");

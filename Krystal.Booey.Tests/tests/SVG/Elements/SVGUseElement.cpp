@@ -105,14 +105,14 @@ layer at (0,0) size 800x104
     // A use whose target doesn't exist yet waits for an element to take its id.
     CHECK_FALSE(TargetClone(fixture, use));
     CHECK(use.HasPendingResources());
-    CHECK(fixture.Document->IsIdOfPendingSVGResource(dom::DOMStringAtom(u8"later")));
+    CHECK(fixture.Document->IsIdOfPendingSVGResource(u8"later"));
 
     (void)ById<SVGGElement>(*fixture.Document, u8"g").SetAttribute(u8"id", u8"later");
     auto *clone = TargetClone(fixture, use);
     REQUIRE(clone);
     CHECK(Is<SVGGElement>(*clone));
     CHECK_FALSE(use.HasPendingResources());
-    CHECK_FALSE(fixture.Document->IsIdOfPendingSVGResource(dom::DOMStringAtom(u8"later")));
+    CHECK_FALSE(fixture.Document->IsIdOfPendingSVGResource(u8"later"));
 
     // Removing the target empties the use, which waits for the id again.
     auto &target = *clone->CorrespondingElement();
@@ -122,10 +122,10 @@ layer at (0,0) size 800x104
 
     // A removed use stops waiting.
     Ref<SVGUseElement> protectedUse = ShareRef(use);
-    CHECK(fixture.Document->IsPendingSVGResource(use, dom::DOMStringAtom(u8"later")));
+    CHECK(fixture.Document->IsPendingSVGResource(use, u8"later"));
     (void)use.Remove();
     CHECK_FALSE(use.HasPendingResources());
-    CHECK_FALSE(fixture.Document->IsIdOfPendingSVGResource(dom::DOMStringAtom(u8"later")));
+    CHECK_FALSE(fixture.Document->IsIdOfPendingSVGResource(u8"later"));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGUseElement: symbols and nested uses", "[SVG][SVGUseElement]")
@@ -210,13 +210,13 @@ layer at (0,0) size 800x104
     clone = TargetClone(fixture, use);
     REQUIRE(clone);
     auto afterHandle = rect.AddEventListener(u8"ping", [&](dom::Event &) { ++after; });
-    (void)clone->DispatchEvent(*CreateRef<dom::Event>(dom::DOMStringAtom(u8"ping")));
+    (void)clone->DispatchEvent(*CreateRef<dom::Event>(u8"ping"));
     CHECK(before == 1);
     CHECK(after == 1);
 
     // Removing a listener removes it from the instances.
     afterHandle = {};
-    (void)clone->DispatchEvent(*CreateRef<dom::Event>(dom::DOMStringAtom(u8"ping")));
+    (void)clone->DispatchEvent(*CreateRef<dom::Event>(u8"ping"));
     CHECK(before == 2);
     CHECK(after == 1);
   }

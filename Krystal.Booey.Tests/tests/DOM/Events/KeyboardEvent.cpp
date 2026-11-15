@@ -17,7 +17,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("KeyboardEvent: from a dictionary", "[DOM][KeyboardEvent]")
   {
-    Ref<KeyboardEvent> defaults = CreateRef<KeyboardEvent>(DOMStringAtom(u8"keydown"));
+    Ref<KeyboardEvent> defaults = CreateRef<KeyboardEvent>(u8"keydown");
     CHECK(defaults->IsKeyboardEvent());
     CHECK_FALSE(defaults->IsMouseEvent());
     CHECK(defaults->Key().empty());
@@ -41,7 +41,7 @@ namespace krys::boo::dom::tests
     init.CharCode = 65;
     init.KeyCode = 66;
     init.Which = 67;
-    Ref<KeyboardEvent> event = CreateRef<KeyboardEvent>(DOMStringAtom(u8"keypress"), init);
+    Ref<KeyboardEvent> event = CreateRef<KeyboardEvent>(u8"keypress", init);
     CHECK(event->Bubbles());
     CHECK(event->Key() == u8"A");
     CHECK(event->Code() == u8"KeyA");
@@ -56,7 +56,7 @@ namespace krys::boo::dom::tests
 
     SECTION("initKeyboardEvent")
     {
-      event->InitKeyboardEvent(DOMStringAtom(u8"keyup"), false, true, nullptr, u8"U+0041",
+      event->InitKeyboardEvent(u8"keyup", false, true, nullptr, u8"U+0041",
                                KeyboardEvent::DOM_KEY_LOCATION_LEFT, true, false, false, true);
       CHECK(event->Type() == u8"keyup");
       CHECK_FALSE(event->Bubbles());

@@ -208,9 +208,8 @@ namespace krys::boo::tests
       REQUIRE(client->Chooser);
 
       List<dom::DOMString> swatchAtInput;
-      auto handle =
-        input.AddEventListener(dom::DOMStringAtom(u8"input"), [&](dom::Event &)
-                               { swatchAtInput.push_back(*Swatch(input).GetAttribute(u8"style")); });
+      auto handle = input.AddEventListener(
+        u8"input", [&](dom::Event &) { swatchAtInput.push_back(*Swatch(input).GetAttribute(u8"style")); });
       client->Chooser->Client->DidChooseColor(SRGBA<uint8> {255, 0, 0});
       REQUIRE(swatchAtInput.size() == 1);
       CHECK(swatchAtInput[0] == u8"background-color: rgb(255, 0, 0);");

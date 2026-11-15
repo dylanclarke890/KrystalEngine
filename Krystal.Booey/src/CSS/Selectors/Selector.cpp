@@ -66,7 +66,7 @@ namespace krys::boo::css
     }
 
     // Move the value to the rare data stucture.
-    _data.Rare = CreateRef<RareData>(CSSOMStringAtom(_data.Value)).release();
+    _data.Rare = CreateRef<RareData>(CSSOMStringAtom::AdoptStorage(_data.Value)).release();
     SetFlag(SelectorFlag::HasRareData, true);
   }
 
@@ -411,7 +411,7 @@ namespace krys::boo::css
   {
     void AppendIdentifier(const CSSOMStringAtom &identifier, StringBuilder &builder) noexcept
     {
-      SerialiseIdentifier(CSSOMString(identifier.View()), builder);
+      SerialiseIdentifier(identifier.ToString(), builder);
     }
 
     void AppendIdentifierOrStar(const CSSOMStringAtom &identifier, StringBuilder &builder) noexcept
@@ -455,7 +455,7 @@ namespace krys::boo::css
       }
       else
       {
-        SerialiseString(CSSOMString(identifier.Identifier.View()), builder);
+        SerialiseString(identifier.Identifier.ToString(), builder);
       }
     }
 
@@ -514,7 +514,7 @@ namespace krys::boo::css
         }
       };
 
-      if (selector.Argument() == CSSOMStringAtom::Null())
+      if (selector.Argument() == null)
       {
         return;
       }
@@ -555,7 +555,7 @@ namespace krys::boo::css
 
     if (Match() == SelectorMatch::Type && !HasFlag(_flags, SelectorFlag::TagIsForNamespaceRule))
     {
-      if (const auto &prefix = TagQualifiedName().NamespacePrefix(); prefix != CSSOMStringAtom::Null())
+      if (const auto &prefix = TagQualifiedName().NamespacePrefix(); prefix != null)
       {
         AppendIdentifierOrStar(prefix, builder);
         builder.Append(u8'|');
@@ -747,7 +747,7 @@ namespace krys::boo::css
       {
         builder.Append(u8'[');
         if (const auto &prefix = selector->Attribute().NamespacePrefix();
-            prefix != CSSOMStringAtom::Null() && prefix != CSSOMStringAtom::Empty())
+            prefix != null && prefix != CSSOMStringAtom::Empty())
         {
           AppendIdentifierOrStar(prefix, builder);
           builder.Append(u8'|');
@@ -798,7 +798,7 @@ namespace krys::boo::css
         }
         if (selector->Match() != SelectorMatch::AttributeExists)
         {
-          SerialiseString(CSSOMString(selector->SerialisingValue().View()), builder);
+          SerialiseString(selector->SerialisingValue().ToString(), builder);
           if (selector->IsAttributeValueMatchingCaseInsensitive())
           {
             builder.Append(u8" i]");
@@ -1032,6 +1032,7 @@ namespace krys::boo::css
     else
     {
       _data.Value = other._data.Value;
+      CSSOMStringAtom::RefStorage(_data.Value);
     }
   }
 
@@ -1277,12 +1278,12 @@ namespace krys::boo::css
         case SelectorMatch::AttributeSuffix:
         case SelectorMatch::AttributeSubstring:
         {
-          seed = Hash::Combine(seed, simpleSelector.Attribute().get(), simpleSelector.Value().Storage());
+          seed = Hash::Combine(seed, simpleSelector.Attribute().get(), simpleSelector.Value().ExistingHash());
           break;
         }
         default:
         {
-          seed = Hash::Combine(seed, simpleSelector.Value().Storage());
+          seed = Hash::Combine(seed, simpleSelector.Value().ExistingHash());
           break;
         }
       }

@@ -61,9 +61,9 @@ namespace krys::boo::html::tests
   {
     auto document = CreateRef<dom::HTMLDocument>();
     auto isInteractive =
-      [&](utf8_stringview localName, utf8_stringview attribute = {}, utf8_stringview value = {})
+      [&](dom::DOMStringAtom localName, utf8_stringview attribute = {}, utf8_stringview value = {})
     {
-      auto element = document->CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
+      auto element = document->CreateElement(localName).ReleaseValue();
       if (!attribute.empty())
       {
         REQUIRE_FALSE(

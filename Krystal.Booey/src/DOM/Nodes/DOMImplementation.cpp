@@ -76,7 +76,7 @@ namespace krys::boo::dom
 
     // 3. If qualifiedName is not the empty string, then set element to the result of running the internal
     //    createElementNS steps, given document, namespace, qualifiedName, and an empty dictionary.
-    if (qualifiedName != DOMStringAtom::Empty() && qualifiedName != DOMStringAtom::Null())
+    if (qualifiedName != DOMStringAtom::Empty() && qualifiedName != null)
     {
       auto elementCreateResult =
         DocumentAlgorithms::InternalCreateElementNS(*document, namespaceUri, qualifiedName, {});
@@ -130,8 +130,7 @@ namespace krys::boo::dom
     }
 
     // 5. Append the result of creating an element given doc, "html", and the HTML namespace, to doc.
-    auto htmlElement =
-      ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"html"});
+    auto htmlElement = ElementFactory::Create(*document, {infra::Namespaces::HTML, null, u8"html"});
     if (auto appendResult = document->AppendChild(*htmlElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
@@ -140,8 +139,7 @@ namespace krys::boo::dom
     // 6. Append the result of creating an element given doc, "head", and the HTML namespace, to the html
     // element
     //    created earlier.
-    auto headElement =
-      ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"head"});
+    auto headElement = ElementFactory::Create(*document, {infra::Namespaces::HTML, null, u8"head"});
     if (auto appendResult = htmlElement->AppendChild(*headElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
@@ -152,8 +150,7 @@ namespace krys::boo::dom
     {
       // 7a. Append the result of creating an element given doc, "title", and the HTML namespace, to the head
       //     element created earlier.
-      auto titleElement =
-        ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
+      auto titleElement = ElementFactory::Create(*document, {infra::Namespaces::HTML, null, u8"title"});
       if (auto appendResult = headElement->AppendChild(*titleElement); appendResult.HasException())
       {
         return appendResult.ReleaseException();
@@ -174,8 +171,7 @@ namespace krys::boo::dom
     // 8. Append the result of creating an element given doc, "body", and the HTML namespace, to the html
     // element
     //    created earlier.
-    auto bodyElement =
-      ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"body"});
+    auto bodyElement = ElementFactory::Create(*document, {infra::Namespaces::HTML, null, u8"body"});
     if (auto appendResult = htmlElement->AppendChild(*bodyElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();

@@ -46,21 +46,21 @@ namespace krys::editor
         return;
       }
 
-      _listeners.push_back(sample->AddEventListener(
-        boo::dom::DOMStringAtom(u8"dragstart"), [this](boo::dom::Event &event) { StartCardDrag(event); }));
+      _listeners.push_back(
+        sample->AddEventListener(u8"dragstart", [this](boo::dom::Event &event) { StartCardDrag(event); }));
       for (auto type : {u8"dragenter", u8"dragover"})
       {
         _listeners.push_back(sample->AddEventListener(boo::dom::DOMStringAtom(type),
                                                       [this](boo::dom::Event &event) { DragOver(event); }));
       }
-      _listeners.push_back(sample->AddEventListener(boo::dom::DOMStringAtom(u8"dragleave"),
-                                                    [this](boo::dom::Event &event) { DragLeave(event); }));
-      _listeners.push_back(sample->AddEventListener(boo::dom::DOMStringAtom(u8"drop"),
-                                                    [this](boo::dom::Event &event) { Drop(event); }));
-      _listeners.push_back(sample->AddEventListener(boo::dom::DOMStringAtom(u8"dragend"),
-                                                    [this](boo::dom::Event &) { EndCardDrag(); }));
-      _listeners.push_back(sample->AddEventListener(boo::dom::DOMStringAtom(u8"change"),
-                                                    [this](boo::dom::Event &event) { FilesChosen(event); }));
+      _listeners.push_back(
+        sample->AddEventListener(u8"dragleave", [this](boo::dom::Event &event) { DragLeave(event); }));
+      _listeners.push_back(
+        sample->AddEventListener(u8"drop", [this](boo::dom::Event &event) { Drop(event); }));
+      _listeners.push_back(
+        sample->AddEventListener(u8"dragend", [this](boo::dom::Event &) { EndCardDrag(); }));
+      _listeners.push_back(
+        sample->AddEventListener(u8"change", [this](boo::dom::Event &event) { FilesChosen(event); }));
       // Every drag event but those of each move (`drag` and `dragover`) goes in the log, as the handlers
       // above left it.
       for (auto type : {u8"dragstart", u8"dragenter", u8"dragleave", u8"drop", u8"dragend"})
@@ -70,7 +70,7 @@ namespace krys::editor
       }
       if (RefPtr<boo::dom::EventTarget> clear = document.GetElementById(u8"drag-clear"))
       {
-        _listeners.push_back(clear->AddEventListener(boo::dom::DOMStringAtom(u8"click"),
+        _listeners.push_back(clear->AddEventListener(u8"click",
                                                      [this](boo::dom::Event &)
                                                      {
                                                        _lines.clear();

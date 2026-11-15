@@ -20,8 +20,7 @@ namespace krys::boo::css::tests
 
     KRYS_NODISCARD Ref<NamespaceRule> Namespace(utf8_stringview prefix, utf8_stringview uri)
     {
-      return NamespaceRule::Create(prefix.empty() ? CSSOMStringAtom::Null() : CSSOMStringAtom(prefix),
-                                   CSSOMStringAtom(uri));
+      return NamespaceRule::Create(prefix.empty() ? null : CSSOMStringAtom(prefix), CSSOMStringAtom(uri));
     }
 
     /// @brief The rule types of `sheet`, in `RuleAt` order.
@@ -102,9 +101,8 @@ namespace krys::boo::css::tests
                                RuleType::Namespace, RuleType::Style, RuleType::LayerStatement});
 
       CHECK(sheet->ImportRules()[0]->ParentStyleSheet() == sheet.get());
-      CHECK(sheet->NamespaceURIFromPrefix(CSSOMStringAtom(u8"svg"))
-            == CSSOMStringAtom(u8"http://www.w3.org/2000/svg"));
-      CHECK(sheet->DefaultNamespace() == CSSOMStringAtom(u8"http://www.w3.org/1999/xhtml"));
+      CHECK(sheet->NamespaceURIFromPrefix(u8"svg") == u8"http://www.w3.org/2000/svg");
+      CHECK(sheet->DefaultNamespace() == u8"http://www.w3.org/1999/xhtml");
       CHECK_FALSE(sheet->IsLoading());
     }
 
@@ -175,10 +173,10 @@ namespace krys::boo::css::tests
     SECTION("Namespace rules")
     {
       CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:a"), 0));
-      CHECK(sheet->NamespaceURIFromPrefix(CSSOMStringAtom(u8"a")) == CSSOMStringAtom(u8"urn:a"));
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:a");
       // A later namespace rule with the same prefix replaces the URI.
       CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:b"), 0));
-      CHECK(sheet->NamespaceURIFromPrefix(CSSOMStringAtom(u8"a")) == CSSOMStringAtom(u8"urn:b"));
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:b");
       CHECK(sheet->WrapperInsertRule(CreateStyleRule(u8".a", u8"color: red"), 2));
       // Not once there are other rules.
       CHECK_FALSE(sheet->WrapperInsertRule(Namespace(u8"c", u8"urn:c"), 2));
@@ -193,9 +191,9 @@ namespace krys::boo::css::tests
       CHECK(sheet->WrapperInsertRule(Namespace(u8"b", u8"urn:b"), 2));
       CHECK(sheet->WrapperInsertRule(Namespace(u8"c", u8"urn:c"), 1));
       REQUIRE(sheet->NamespaceRules().size() == 3);
-      CHECK(sheet->NamespaceRules()[0]->Prefix() == CSSOMStringAtom(u8"c"));
-      CHECK(sheet->NamespaceRules()[1]->Prefix() == CSSOMStringAtom(u8"a"));
-      CHECK(sheet->NamespaceRules()[2]->Prefix() == CSSOMStringAtom(u8"b"));
+      CHECK(sheet->NamespaceRules()[0]->Prefix() == u8"c");
+      CHECK(sheet->NamespaceRules()[1]->Prefix() == u8"a");
+      CHECK(sheet->NamespaceRules()[2]->Prefix() == u8"b");
       CHECK_FALSE(sheet->WrapperInsertRule(Namespace(u8"d", u8"urn:d"), 0));
     }
 
@@ -340,7 +338,7 @@ namespace krys::boo::css::tests
       auto copy = namespaced->Copy();
       CHECK(copy->RuleCount() == 2);
       CHECK(copy->RuleAt(0) == namespaced->RuleAt(0));
-      CHECK(copy->NamespaceURIFromPrefix(CSSOMStringAtom(u8"a")) == CSSOMStringAtom(u8"urn:a"));
+      CHECK(copy->NamespaceURIFromPrefix(u8"a") == u8"urn:a");
 
       auto failed = StyleSheetContents::Create();
       failed->CheckLoaded();

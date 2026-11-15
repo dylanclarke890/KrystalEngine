@@ -131,11 +131,10 @@ namespace krys::boo::css::calc::tests
     CHECK(std::get<IndirectNode<Sum>>(copy.Root.Value).Op.get()
           != std::get<IndirectNode<Sum>>(a.Root.Value).Op.get());
 
-    auto anchor = CreateTree(CreateChild(Anchor {.ElementName = CSSOMStringAtom {u8"--a"},
-                                                 .Side = AnchorSide {ValueId::Top},
-                                                 .Fallback = Px(4.0)},
-                                         Type::CreateLength()),
-                             Type::CreateLength());
+    auto anchor = CreateTree(
+      CreateChild(Anchor {.ElementName = u8"--a", .Side = AnchorSide {ValueId::Top}, .Fallback = Px(4.0)},
+                  Type::CreateLength()),
+      Type::CreateLength());
     CHECK(Copy(anchor) == anchor);
 
     auto side = Copy(AnchorSide {Percent(10.0)});
@@ -211,11 +210,11 @@ namespace krys::boo::css::calc::tests
     CHECK(symbolDependencies.ViewportDimensions);
 
     ComputedStyleDependencies anchorDependencies;
-    auto anchor = CreateTree(CreateChild(AnchorSize {.ElementName = CSSOMStringAtom::Null(),
-                                                     .Dimension = style::AnchorSizeDimension::Width,
-                                                     .Fallback = Em(1.0)},
-                                         Type::CreateLength()),
-                             Type::CreateLength());
+    auto anchor = CreateTree(
+      CreateChild(
+        AnchorSize {.ElementName = null, .Dimension = style::AnchorSizeDimension::Width, .Fallback = Em(1.0)},
+        Type::CreateLength()),
+      Type::CreateLength());
     CollectComputedStyleDependencies(anchor, anchorDependencies);
     CHECK(anchorDependencies.Anchors);
     CHECK(anchorDependencies.Properties == List<PropertyId> {PropertyId::FontSize});

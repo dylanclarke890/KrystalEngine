@@ -767,7 +767,7 @@ namespace krys::boo::css
           [rule]
           {
             auto *cssKeyframeRule = DynamicDowncast<CSSKeyframesRule>(rule);
-            return cssKeyframeRule ? CSSOMString(cssKeyframeRule->Name().View()) : CSSOMString();
+            return cssKeyframeRule ? cssKeyframeRule->Name().ToString() : CSSOMString();
           }())
   {
     if (_styleSheet)

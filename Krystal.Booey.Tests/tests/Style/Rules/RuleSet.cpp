@@ -269,7 +269,7 @@ namespace krys::boo::style::tests
       auto queries = ruleSet->ContainerQueriesFor(ruleSet->ClassRules(Atom(u8"a"))->front());
       REQUIRE(queries.size() == 2uz);
       // Innermost first.
-      REQUIRE(queries[0]->front().Name == css::CSSOMStringAtom::Null());
+      REQUIRE(queries[0]->front().Name == null);
       REQUIRE(queries[1]->front().Name == Atom(u8"card"));
       REQUIRE(ruleSet->ContainerQueriesFor(ruleSet->ClassRules(Atom(u8"b"))->front()).empty());
     }

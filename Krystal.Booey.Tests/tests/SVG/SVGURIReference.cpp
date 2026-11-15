@@ -39,6 +39,6 @@ namespace krys::boo::svg::tests
 
     result = SVGURIReference::TargetElementFromIRIString(u8"target", scope);
     CHECK(result.Element == nullptr);
-    CHECK(result.Identifier == dom::DOMStringAtom::Null());
+    CHECK(result.Identifier == null);
   }
 }

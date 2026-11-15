@@ -28,7 +28,7 @@ namespace krys::boo::dom::mixins::tests
         REQUIRE_FALSE(body->AppendChild(*B).HasException());
       }
 
-      KRYS_NODISCARD Ref<dom::Element> Create(dom::DOMStringView localName, dom::DOMStringView id) noexcept
+      KRYS_NODISCARD Ref<dom::Element> Create(dom::DOMStringAtom localName, dom::DOMStringView id) noexcept
       {
         auto element = Document->CreateElement(localName).ReleaseValue();
         REQUIRE_FALSE(element->SetAttribute(u8"id", dom::DOMString(id)).HasException());

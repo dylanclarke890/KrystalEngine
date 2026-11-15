@@ -35,31 +35,30 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "FontFaceSrcLocalValue::Create", "[CSS][Values][FontFaceSrcLocalValue]")
   {
-    auto value = FontFaceSrcLocalValue::Create(CSSOMStringAtom {u8"Helvetica Neue"});
+    auto value = FontFaceSrcLocalValue::Create(u8"Helvetica Neue");
     CHECK(value->IsFontFaceSrcLocalValue());
     CHECK_FALSE(value->IsFontFaceSrcResourceValue());
     CHECK_FALSE(value->IsImage());
     CHECK_FALSE(value->IsEmpty());
-    CHECK(value->FontFaceName() == CSSOMStringAtom {u8"Helvetica Neue"});
+    CHECK(value->FontFaceName() == u8"Helvetica Neue");
 
-    CHECK(FontFaceSrcLocalValue::Create(CSSOMStringAtom {u8""})->IsEmpty());
+    CHECK(FontFaceSrcLocalValue::Create(u8"")->IsEmpty());
   }
 
   TEST_CASE_METHOD(ValueFixture, "FontFaceSrcLocalValue serialisation",
                    "[CSS][Values][FontFaceSrcLocalValue]")
   {
     // The name is serialised as a string.
-    CHECK(CssText(*FontFaceSrcLocalValue::Create(CSSOMStringAtom {u8"Helvetica Neue"}))
-          == "local(\"Helvetica Neue\")");
-    CHECK(CssText(*FontFaceSrcLocalValue::Create(CSSOMStringAtom {u8"a\"b"})) == "local(\"a\\\"b\")");
+    CHECK(CssText(*FontFaceSrcLocalValue::Create(u8"Helvetica Neue")) == "local(\"Helvetica Neue\")");
+    CHECK(CssText(*FontFaceSrcLocalValue::Create(u8"a\"b")) == "local(\"a\\\"b\")");
   }
 
   TEST_CASE_METHOD(ValueFixture, "FontFaceSrcLocalValue equality and children",
                    "[CSS][Values][FontFaceSrcLocalValue]")
   {
-    auto a = FontFaceSrcLocalValue::Create(CSSOMStringAtom {u8"Arial"});
-    auto b = FontFaceSrcLocalValue::Create(CSSOMStringAtom {u8"Arial"});
-    auto c = FontFaceSrcLocalValue::Create(CSSOMStringAtom {u8"Times"});
+    auto a = FontFaceSrcLocalValue::Create(u8"Arial");
+    auto b = FontFaceSrcLocalValue::Create(u8"Arial");
+    auto c = FontFaceSrcLocalValue::Create(u8"Times");
     CHECK(*a == *b);
     CHECK_FALSE(*a == *c);
     CHECK_FALSE(*a == *FontFaceSrcResourceValue::Create(FontURL(u8"Arial"), {}, {}));

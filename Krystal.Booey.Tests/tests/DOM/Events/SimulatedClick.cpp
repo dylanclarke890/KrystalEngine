@@ -56,7 +56,7 @@ namespace krys::boo::tests
                                       u8"width:40px;height:10px'></button>");
     auto &button = fixture.ById(u8"button");
     auto recorder = CreateRef<CoordinateRecorder>();
-    button.AddEventListener(dom::DOMStringAtom(EventNames::Click), recorder, false);
+    button.AddEventListener(EventNames::Click, recorder, false);
 
     (void)fixture.Document->UpdateLayout();
     CHECK(button.ScreenRect() == IntRect(110, 220, 40, 10));
@@ -69,8 +69,7 @@ namespace krys::boo::tests
     CHECK(recorder->ScreenY == 225);
 
     // The user agent's mouse events made without an underlying event are too.
-    auto event =
-      dom::MouseEvent::CreateSimulated(dom::DOMStringAtom(EventNames::Click), nullptr, button, true);
+    auto event = dom::MouseEvent::CreateSimulated(EventNames::Click, nullptr, button, true);
     CHECK(event->ScreenX() == 130);
     CHECK(event->ClientX() == 30);
   }

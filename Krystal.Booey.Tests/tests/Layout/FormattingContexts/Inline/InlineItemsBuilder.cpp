@@ -459,7 +459,7 @@ world foo</div>
     otherContext.Context.WordBreak = WordBreak::BreakAll;
     CHECK_FALSE(cache.Get(otherContext));
     auto otherLocale = key;
-    otherLocale.Context.Locale = StringAtom {u8"ja"};
+    otherLocale.Context.Locale = u8"ja";
     CHECK_FALSE(cache.Get(otherLocale));
 
     cache.Clear();

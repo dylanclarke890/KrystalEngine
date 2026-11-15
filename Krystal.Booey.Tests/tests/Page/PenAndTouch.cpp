@@ -180,14 +180,14 @@ namespace krys::boo::tests
     dom::TouchEventInit init;
     init.ChangedTouches.push_back(touch);
     init.CtrlKey = true;
-    auto event = CreateRef<dom::TouchEvent>(dom::DOMStringAtom(u8"touchstart"), init);
+    auto event = CreateRef<dom::TouchEvent>(u8"touchstart", init);
     CHECK_FALSE(event->IsTrusted());
     CHECK(event->Touches()->Length() == 0);
     CHECK(event->ChangedTouches()->Length() == 1);
     CHECK(event->CtrlKey());
 
-    auto cancel = dom::TouchEvent::Create(list.get(), list.get(), list.get(),
-                                          dom::DOMStringAtom(u8"touchcancel"), nullptr, {}, {});
+    auto cancel =
+      dom::TouchEvent::Create(list.get(), list.get(), list.get(), u8"touchcancel", nullptr, {}, {});
     CHECK(cancel->IsTrusted());
     CHECK(cancel->Bubbles());
     CHECK_FALSE(cancel->Cancelable());

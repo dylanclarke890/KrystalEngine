@@ -75,13 +75,13 @@ namespace krys::boo::css::PropertyParserHelpers
     auto &nameToken = prelude.ConsumeIncludingWhitespace();
     if (!prelude.IsAtEnd())
     {
-      return CSSOMStringAtom::Null();
+      return null;
     }
 
     // Ensure this token is a valid <custom-ident>.
     if (nameToken.Type() != TokenType::Ident || !IsValidCustomIdentifier(nameToken.ValueId()))
     {
-      return CSSOMStringAtom::Null();
+      return null;
     }
 
     auto id = nameToken.ValueId();
@@ -90,11 +90,12 @@ namespace krys::boo::css::PropertyParserHelpers
             && IdentMatches<ValueId::Decimal, ValueId::Disc, ValueId::Circle, ValueId::Square,
                             ValueId::DisclosureOpen, ValueId::DisclosureClosed>(id)))
     {
-      return CSSOMStringAtom::Null();
+      return null;
     }
 
     auto name = nameToken.IdentCodePoints();
-    return IsPredefinedCounterStyle(nameToken.ValueId()) ? krys::text::ToASCIILower(name) : name;
+    return IsPredefinedCounterStyle(nameToken.ValueId()) ? CSSOMStringAtom(krys::text::ToASCIILower(name))
+                                                         : CSSOMStringAtom(name);
   }
 
   RefPtr<Value> ConsumeCounterStyleName(TokenRange &tokens, PropertyParserState &) noexcept

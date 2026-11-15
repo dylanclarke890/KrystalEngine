@@ -56,17 +56,15 @@ namespace krys::boo::dom
                                                         const Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-get-value
-    KRYS_NODISCARD static DOMString
-      GetAttributeValue(const Element &element, DOMStringAtom localName,
-                        DOMStringAtom namespaceURI = DOMStringAtom::Null()) noexcept;
+    KRYS_NODISCARD static DOMString GetAttributeValue(const Element &element, DOMStringAtom localName,
+                                                      DOMStringAtom namespaceURI = null) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-set
     static ExceptionOr<RefPtr<Attr>> SetAttribute(Attr &attr, Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-set-value
     static void SetAttributeValue(Element &element, DOMStringAtom localName, DOMString value,
-                                  DOMStringAtom prefix = DOMStringAtom::Null(),
-                                  DOMStringAtom namespaceURI = DOMStringAtom::Null()) noexcept;
+                                  DOMStringAtom prefix = null, DOMStringAtom namespaceURI = null) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-remove-by-name
     static RefPtr<Attr> RemoveAttributeByName(DOMStringAtom qualifiedName, Element &element) noexcept;

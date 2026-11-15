@@ -29,8 +29,7 @@ namespace krys::boo::svg::tests
 
     CHECK(SVGPropertyTraits<float>::FromString(element, u8"1.5") == 1.5f);
     CHECK(SVGPropertyTraits<float>::FromString(element, u8"abc") == 0);
-    dom::QualifiedName name(dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(),
-                            dom::DOMStringAtom(u8"x"));
+    dom::QualifiedName name(null, null, u8"x");
     CHECK_FALSE(SVGPropertyTraits<float>::Parse(name, u8"abc"));
     CHECK(SVGPropertyTraits<float>::Parse(name, u8"2") == 2.f);
     CHECK(SVGPropertyTraits<float>::ToString(0.25f) == u8"0.25");

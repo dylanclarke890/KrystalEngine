@@ -665,8 +665,8 @@ namespace krys::boo::css
 
     UniquePtr<MutableSelector> compoundSelector;
 
-    CSSOMStringAtom namespacePrefix = CSSOMStringAtom::Null();
-    CSSOMStringAtom elementName = CSSOMStringAtom::Null();
+    CSSOMStringAtom namespacePrefix = null;
+    CSSOMStringAtom elementName = null;
     const bool hasName = ConsumeName(tokens, elementName, namespacePrefix);
     if (!hasName)
     {
@@ -715,14 +715,14 @@ namespace krys::boo::css
     if (!compoundSelector)
     {
       CSSOMStringAtom namespaceURI = DetermineNamespace(namespacePrefix);
-      if (namespaceURI == CSSOMStringAtom::Null())
+      if (namespaceURI == null)
       {
         _failedParsing = true;
         return nullptr;
       }
       if (namespaceURI == DefaultNamespace())
       {
-        namespacePrefix = CSSOMStringAtom::Null();
+        namespacePrefix = null;
       }
 
       return CreateUnique<MutableSelector>(dom::QualifiedName(namespaceURI, namespacePrefix, elementName));
@@ -784,8 +784,8 @@ namespace krys::boo::css
   bool SelectorParser::ConsumeName(TokenRange &tokens, CSSOMStringAtom &name,
                                    CSSOMStringAtom &namespacePrefix) noexcept
   {
-    name = CSSOMStringAtom::Null();
-    namespacePrefix = CSSOMStringAtom::Null();
+    name = null;
+    namespacePrefix = null;
 
     const auto &firstToken = tokens.Peek();
     if (firstToken.Type() == TokenType::Ident)
@@ -813,7 +813,7 @@ namespace krys::boo::css
     {
       if (name == CSSOMStringAtom::Empty())
       {
-        name = CSSOMStringAtom::Null();
+        name = null;
         return false;
       }
       return true;
@@ -833,8 +833,8 @@ namespace krys::boo::css
     }
     else
     {
-      name = CSSOMStringAtom::Null();
-      namespacePrefix = CSSOMStringAtom::Null();
+      name = null;
+      namespacePrefix = null;
       return false;
     }
 
@@ -894,8 +894,8 @@ namespace krys::boo::css
     TokenRange block = tokens.ConsumeBlock();
     block.DiscardWhitespace();
 
-    CSSOMStringAtom namespacePrefix = CSSOMStringAtom::Null();
-    CSSOMStringAtom attributeName = CSSOMStringAtom::Null();
+    CSSOMStringAtom namespacePrefix = null;
+    CSSOMStringAtom attributeName = null;
     if (!ConsumeName(block, attributeName, namespacePrefix))
     {
       return nullptr;
@@ -903,15 +903,14 @@ namespace krys::boo::css
     block.DiscardWhitespace();
 
     CSSOMStringAtom namespaceURI = DetermineNamespace(namespacePrefix);
-    if (namespaceURI == CSSOMStringAtom::Null())
+    if (namespaceURI == null)
     {
       return nullptr;
     }
 
-    dom::QualifiedName qualifiedName =
-      namespacePrefix == CSSOMStringAtom::Null()
-        ? dom::QualifiedName(CSSOMStringAtom::Null(), CSSOMStringAtom::Null(), attributeName)
-        : dom::QualifiedName(namespaceURI, namespacePrefix, attributeName);
+    dom::QualifiedName qualifiedName = namespacePrefix == null
+                                         ? dom::QualifiedName(null, null, attributeName)
+                                         : dom::QualifiedName(namespaceURI, namespacePrefix, attributeName);
 
     auto selector = CreateUnique<MutableSelector>();
 
@@ -1514,9 +1513,9 @@ namespace krys::boo::css
     return _styleSheet->DefaultNamespace();
   }
 
-  const CSSOMStringAtom &SelectorParser::DetermineNamespace(const CSSOMStringAtom &prefix) const noexcept
+  CSSOMStringAtom SelectorParser::DetermineNamespace(const CSSOMStringAtom &prefix) const noexcept
   {
-    if (prefix == CSSOMStringAtom::Null())
+    if (prefix == null)
     {
       return DefaultNamespace();
     }
@@ -1531,8 +1530,8 @@ namespace krys::boo::css
     }
     if (!_styleSheet)
     {
-      return CSSOMStringAtom::Null(); // Cannot resolve prefix to namespace without a stylesheet, syntax
-                                      // error.
+      return null; // Cannot resolve prefix to namespace without a stylesheet, syntax
+                   // error.
     }
     return _styleSheet->NamespaceURIFromPrefix(prefix);
   }
@@ -1543,15 +1542,14 @@ namespace krys::boo::css
   {
     bool isShadowDOM = compoundSelector.NeedsImplicitShadowCombinatorForMatching();
 
-    if (elementName == CSSOMStringAtom::Null() && DefaultNamespace() == dom::StarAtom() && !isShadowDOM)
+    if (elementName == null && DefaultNamespace() == dom::StarAtom() && !isShadowDOM)
     {
       return;
     }
 
-    CSSOMStringAtom determinedElementName =
-      elementName == CSSOMStringAtom::Null() ? dom::StarAtom() : elementName;
+    CSSOMStringAtom determinedElementName = elementName == null ? dom::StarAtom() : elementName;
     CSSOMStringAtom namespaceURI = DetermineNamespace(namespacePrefix);
-    if (namespaceURI == CSSOMStringAtom::Null())
+    if (namespaceURI == null)
     {
       _failedParsing = true;
       return;
@@ -1559,7 +1557,7 @@ namespace krys::boo::css
     CSSOMStringAtom determinedPrefix = namespacePrefix;
     if (namespaceURI == DefaultNamespace())
     {
-      determinedPrefix = CSSOMStringAtom::Null();
+      determinedPrefix = null;
     }
     dom::QualifiedName tag(namespaceURI, determinedPrefix, determinedElementName);
 
@@ -1570,15 +1568,14 @@ namespace krys::boo::css
     // matching (custom pseudo elements, ::cue), we need a universal selector to set the combinator (relation)
     // on in the cases where there are no simple selectors preceding the pseudo element.
     bool isHostPseudo = compoundSelector.IsHostPseudoClass();
-    if (isHostPseudo && elementName == CSSOMStringAtom::Null() && namespacePrefix == CSSOMStringAtom::Null())
+    if (isHostPseudo && elementName == null && namespacePrefix == null)
     {
       return;
     }
     if (tag != dom::AnyQualifiedName() || isHostPseudo || isShadowDOM)
     {
-      compoundSelector.AppendTagInComplexSelector(tag, determinedPrefix == CSSOMStringAtom::Null()
-                                                         && determinedElementName == dom::StarAtom()
-                                                         && !isHostPseudo);
+      compoundSelector.AppendTagInComplexSelector(
+        tag, determinedPrefix == null && determinedElementName == dom::StarAtom() && !isHostPseudo);
     }
   }
 

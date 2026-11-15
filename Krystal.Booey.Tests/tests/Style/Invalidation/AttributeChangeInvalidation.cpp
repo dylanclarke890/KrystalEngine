@@ -106,7 +106,7 @@ namespace krys::boo::style::tests
     CHECK(p.StyleValidity() == Validity::Valid);
 
     {
-      IdChangeInvalidation invalidation(d, dom::DOMStringAtom(u8"b"), dom::DOMStringAtom(u8"b"));
+      IdChangeInvalidation invalidation(d, u8"b", u8"b");
     }
     CHECK(d.StyleValidity() == Validity::Valid);
   }

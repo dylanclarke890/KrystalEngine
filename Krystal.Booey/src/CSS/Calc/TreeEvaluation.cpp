@@ -315,7 +315,7 @@ namespace krys::boo::css::calc
     auto builderState = options.ConversionData->ProtectedStyleBuilderState();
 
     Maybe<style::ScopedName> anchorSizeScopedName;
-    if (anchorSize->ElementName != CSSOMStringAtom::Null())
+    if (anchorSize->ElementName != null)
     {
       anchorSizeScopedName = style::ScopedName {.Name = anchorSize->ElementName,
                                                 .ScopeOrdinal = builderState->StyleScopeOrdinal()};
@@ -391,7 +391,7 @@ namespace krys::boo::css::calc
       [&](ValueId sideId) -> style::AnchorPositionEvaluator::Side { return sideId; });
 
     Maybe<style::ScopedName> anchorScopedName;
-    if (anchor.ElementName != CSSOMStringAtom::Null())
+    if (anchor.ElementName != null)
     {
       anchorScopedName =
         style::ScopedName {.Name = anchor.ElementName, .ScopeOrdinal = builderState->StyleScopeOrdinal()};

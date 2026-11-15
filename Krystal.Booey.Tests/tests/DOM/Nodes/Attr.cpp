@@ -58,15 +58,15 @@ namespace krys::boo::dom::tests
     SECTION("Without one, the name is the local name")
     {
       auto attr = data.Document->CreateAttributeNS(u8"http://example.com/ns", u8"test-attr").ReleaseValue();
-      CHECK(attr->Prefix() == DOMStringAtom::Null());
+      CHECK(attr->Prefix() == null);
       CHECK(attr->Name() == u8"test-attr");
     }
 
     SECTION("A named attribute has no namespace or prefix")
     {
       auto attr = data.Document->CreateAttribute(u8"test-attr").ReleaseValue();
-      CHECK(attr->NamespaceURI() == DOMStringAtom::Null());
-      CHECK(attr->Prefix() == DOMStringAtom::Null());
+      CHECK(attr->NamespaceURI() == null);
+      CHECK(attr->Prefix() == null);
       CHECK(attr->LocalName() == u8"test-attr");
     }
   }

@@ -132,7 +132,7 @@ namespace krys::boo::dom
           // 4.2.2. Fire an event named beforematch at ancestorToReveal with the bubbles attribute initialized
           //        to true.
           {
-            auto event = Event::Create(DOMStringAtom(EventNames::BeforeMatch), true, false);
+            auto event = Event::Create(EventNames::BeforeMatch, true, false);
             (void)element->DispatchEvent(*event);
           }
           // 4.2.3. If ancestorToReveal is not connected, then return.

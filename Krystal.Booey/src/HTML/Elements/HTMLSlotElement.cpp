@@ -118,7 +118,7 @@ namespace krys::boo::html
 
     // https://dom.spec.whatwg.org/#slot-name
     // 1. If element is a slot, localName is name, and namespace is null:
-    if (localName != u8"name" || namespaceURI != dom::DOMStringAtom::Null())
+    if (localName != u8"name" || namespaceURI != null)
     {
       return;
     }

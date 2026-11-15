@@ -148,8 +148,7 @@ namespace krys::boo
     /// @brief Whether @p element is named by ARIA (which takes precedence over a label element).
     KRYS_NODISCARD bool HasAnyARIALabelling(const dom::Element &element) noexcept
     {
-      return element.HasAttribute(dom::DOMStringAtom(u8"aria-label"))
-             || element.HasAttribute(dom::DOMStringAtom(u8"aria-labelledby"));
+      return element.HasAttribute(u8"aria-label") || element.HasAttribute(u8"aria-labelledby");
     }
 
     /// @brief A label's control, unless it's a descendant of the label that's being torn down.

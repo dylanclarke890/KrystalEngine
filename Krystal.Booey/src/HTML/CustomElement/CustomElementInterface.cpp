@@ -37,9 +37,9 @@ namespace krys::boo::html
 {
   CustomElementInterface::CustomElementInterface(dom::DOMStringAtom localName, CustomElementFactory &&factory,
                                                  CustomElementOptions &&options) noexcept
-      : _name(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom::Null(), localName),
-        _factory(krys::move(factory)), _isElementInternalsDisabled(options.DisableInternals),
-        _isShadowDisabled(options.DisableShadow), _isFormAssociated(options.FormAssociated)
+      : _name(infra::Namespaces::HTML, null, localName), _factory(krys::move(factory)),
+        _isElementInternalsDisabled(options.DisableInternals), _isShadowDisabled(options.DisableShadow),
+        _isFormAssociated(options.FormAssociated)
   {
     for (auto &name : options.ObservedAttributes)
     {

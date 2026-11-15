@@ -55,16 +55,16 @@ namespace krys::boo::css
   CSSOMString CSSNamespaceRule::CssText() const noexcept
   {
     auto prefix = Prefix();
-    auto prefixIsEmpty = prefix == CSSOMStringAtom::Null() || prefix.View().empty();
+    auto prefixIsEmpty = prefix == null || prefix.View().empty();
 
     StringBuilder result;
     result.Append(u8"@namespace ");
     if (!prefixIsEmpty)
     {
-      SerialiseIdentifier(CSSOMString(prefix.View()), result);
+      SerialiseIdentifier(prefix.ToString(), result);
     }
     result.Append(prefixIsEmpty ? u8"" : u8" ", u8"url(");
-    result.Append(SerialiseString(CSSOMString(NamespaceURI().View())), u8");");
+    result.Append(SerialiseString(NamespaceURI().ToString()), u8");");
     return krys::move(result).ToString();
   }
 

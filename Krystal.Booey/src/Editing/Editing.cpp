@@ -1231,8 +1231,7 @@ namespace krys::boo
 
   Ref<dom::Element> CreateHTMLElement(dom::Document &document, dom::DOMStringView localName) noexcept
   {
-    auto element =
-      document.CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom(localName));
+    auto element = document.CreateElementNS(infra::Namespaces::HTML, dom::DOMStringAtom(localName));
     krys_debug_assert(!element.HasException());
     return element.ReleaseValue();
   }
@@ -1254,8 +1253,8 @@ namespace krys::boo
     {
       auto spanElement = CreateHTMLElement(document, u8"span");
 
-      (void)spanElement->SetAttribute(dom::DOMStringAtom(u8"class"), dom::DOMString(AppleTabSpanClass));
-      (void)spanElement->SetAttribute(dom::DOMStringAtom(u8"style"), u8"white-space:pre");
+      (void)spanElement->SetAttribute(u8"class", dom::DOMString(AppleTabSpanClass));
+      (void)spanElement->SetAttribute(u8"style", u8"white-space:pre");
 
       (void)spanElement->AppendChild(tabTextNode);
 
@@ -1338,7 +1337,7 @@ namespace krys::boo
     if (IsHTMLElementOfType(node, html::TagName::span))
     {
       auto &span = Downcast<dom::Element>(*node);
-      if (span.GetAttribute(dom::DOMStringAtom(u8"class")) == dom::DOMString(AppleTabSpanClass))
+      if (span.GetAttribute(u8"class") == dom::DOMString(AppleTabSpanClass))
       {
         return &span;
       }

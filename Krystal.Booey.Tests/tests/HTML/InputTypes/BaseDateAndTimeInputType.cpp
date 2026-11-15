@@ -104,7 +104,7 @@ namespace krys::boo::tests
         Input(utf8_stringview type, utf8_stringview lang = u8"en-US",
               std::initializer_list<Pair<utf8_stringview, utf8_stringview>> attributes = {}) noexcept
       {
-        auto element = Document->CreateElement(dom::DOMStringAtom(u8"input")).Value();
+        auto element = Document->CreateElement(u8"input").Value();
         auto &input = Downcast<HTMLInputElement>(*element);
         (void)input.SetAttribute(u8"lang", dom::DOMString(lang));
         for (auto &[name, value] : attributes)

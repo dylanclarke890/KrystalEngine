@@ -141,7 +141,7 @@ namespace krys::boo::css
     KRYS_NODISCARD AttributeCaseFlag ConsumeAttributeFlags(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &DefaultNamespace() const noexcept;
-    KRYS_NODISCARD const CSSOMStringAtom &DetermineNamespace(const CSSOMStringAtom &prefix) const noexcept;
+    KRYS_NODISCARD CSSOMStringAtom DetermineNamespace(const CSSOMStringAtom &prefix) const noexcept;
     void PrependTypeSelectorIfNeeded(const CSSOMStringAtom &namespacePrefix,
                                      const CSSOMStringAtom &elementName,
                                      MutableSelector &compoundSelector) noexcept;

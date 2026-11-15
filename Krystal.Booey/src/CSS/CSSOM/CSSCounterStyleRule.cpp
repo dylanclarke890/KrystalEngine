@@ -59,7 +59,7 @@ namespace krys::boo::css
 
   CSSOMString CSSCounterStyleRule::Name() const noexcept
   {
-    return CSSOMString(_counterStyleRule->Name().View());
+    return _counterStyleRule->Name().ToString();
   }
 
   CSSOMString CSSCounterStyleRule::System() const noexcept
@@ -159,7 +159,7 @@ namespace krys::boo::css
     std::ignore = tokenizer.PumpTokenizer();
     auto tokenRange = tokenizer.Tokens();
     auto name = PropertyParserHelpers::ConsumeCounterStyleNameInPrelude(tokenRange);
-    if (name == CSSOMStringAtom::Null())
+    if (name == null)
     {
       return;
     }

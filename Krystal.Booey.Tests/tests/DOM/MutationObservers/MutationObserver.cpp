@@ -121,7 +121,7 @@ namespace krys::boo::dom::tests
       auto records = observer->TakeRecords();
       REQUIRE(records.size() == 1);
       CHECK(records[0]->Type() == u8"characterData");
-      CHECK(records[0]->OldValue() == (option ? DOMStringAtom(u8"a") : DOMStringAtom::Null()));
+      CHECK(records[0]->OldValue() == (option ? DOMStringAtom(u8"a") : null));
     }
   }
 

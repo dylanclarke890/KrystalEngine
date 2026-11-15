@@ -59,7 +59,7 @@ namespace krys::boo::css::mq
   struct MediaQuery
   {
     Maybe<mq::Prefix> Prefix;
-    CSSOMStringAtom MediaType {CSSOMStringAtom::Null()};
+    CSSOMStringAtom MediaType {null};
     Maybe<mq::Condition> Condition {};
   };
 

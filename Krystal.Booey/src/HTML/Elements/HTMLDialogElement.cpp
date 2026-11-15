@@ -119,7 +119,7 @@ namespace krys::boo::html
     QueueDialogToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, nullptr);
 
     // 6. Add an open attribute to this, whose value is the empty string.
-    (void)SetAttribute(dom::DOMStringAtom(u8"open"), dom::DOMString());
+    (void)SetAttribute(u8"open", dom::DOMString());
 
     // 7. Set this's previously focused element to the focused element.
     _previouslyFocusedElement = CreateWeakPtr(NodeDocument().FocusedElement());
@@ -230,7 +230,7 @@ namespace krys::boo::html
     QueueDialogToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, source);
 
     // 11. Add an open attribute to subject, whose value is the empty string.
-    (void)SetAttribute(dom::DOMStringAtom(u8"open"), dom::DOMString());
+    (void)SetAttribute(u8"open", dom::DOMString());
 
     // 12. Assert: subject's close watcher is not null.
     // (Null in a document without a window.)
@@ -285,7 +285,7 @@ namespace krys::boo::html
     QueueDialogToggleEventTask(dom::ToggleState::Open, dom::ToggleState::Closed, source);
 
     // 5. Remove subject's open attribute.
-    RemoveAttribute(dom::DOMStringAtom(u8"open"));
+    RemoveAttribute(u8"open");
 
     // 6. If is modal of subject is true, then request an element to be removed from the top layer given
     //    subject.
@@ -331,13 +331,13 @@ namespace krys::boo::html
     // 13. Queue an element task on the user interaction task source given the subject element to fire an
     // event
     //     named close at subject.
-    EventLoop::Current().QueueTask(
-      TaskSource::UserInteraction, NodeDocument(),
-      [protectedThis]
-      {
-        auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Close), false, false);
-        (void)dom::EventDispatcher::DispatchToTarget(*event, protectedThis.get());
-      });
+    EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
+                                   [protectedThis]
+                                   {
+                                     auto event = dom::Event::Create(EventNames::Close, false, false);
+                                     (void)dom::EventDispatcher::DispatchToTarget(*event,
+                                                                                  protectedThis.get());
+                                   });
   }
 
   // https://html.spec.whatwg.org/#dialog-request-close
@@ -526,7 +526,7 @@ namespace krys::boo::html
     // https://html.spec.whatwg.org/#the-dialog-element:concept-element-attributes-change-ext
     // 1. If namespace is not null, then return.
     // 2. If localName is not open, then return.
-    if (namespaceURI != dom::DOMStringAtom::Null() || localName != u8"open")
+    if (namespaceURI != null || localName != u8"open")
     {
       return;
     }
@@ -595,7 +595,7 @@ namespace krys::boo::html
     // source.
     init.Composed = true;
     init.Source = ShareRefPtr(source);
-    auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(EventNames::BeforeToggle), init, cancelable);
+    auto event = dom::ToggleEvent::Create(EventNames::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();
   }
@@ -663,7 +663,7 @@ namespace krys::boo::html
         {
           return true;
         }
-        auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Cancel), false, canPreventClose);
+        auto event = dom::Event::Create(EventNames::Cancel, false, canPreventClose);
         (void)dom::EventDispatcher::DispatchToTarget(*event, dialog.get());
         return !event->DefaultPrevented();
       },

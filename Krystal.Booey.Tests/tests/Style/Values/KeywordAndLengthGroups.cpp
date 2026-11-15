@@ -174,10 +174,10 @@ namespace krys::boo::style::tests
 
       auto custom = Convert<ListStyleType>(PropertyId::ListStyleType, u8"my-style");
       REQUIRE(custom.TryCounterStyle());
-      CHECK(*custom.TryCounterStyle() == css::CSSOMStringAtom {u8"my-style"});
+      CHECK(*custom.TryCounterStyle() == u8"my-style");
 
       auto string = Convert<ListStyleType>(PropertyId::ListStyleType, u8"\"-\"");
-      CHECK(string.TryString() == css::CSSOMStringAtom {u8"-"});
+      CHECK(string.TryString() == u8"-");
       CHECK(Created(string) == "\"-\"");
       CHECK(Created(disc) == "disc");
       CHECK(Created(ListStyleType {css::keywords::None {}}) == "none");

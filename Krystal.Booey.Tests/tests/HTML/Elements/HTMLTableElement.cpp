@@ -31,7 +31,7 @@ namespace krys::boo::html::tests
     {
       auto &table = data.Table(u8"<caption id=a></caption><caption id=b></caption>");
       auto caption = CreateTableElement<HTMLTableCaptionElement>(*data.Document, u8"caption");
-      (void)caption->SetAttribute(dom::DOMStringAtom(u8"id"), u8"c");
+      (void)caption->SetAttribute(u8"id", u8"c");
       REQUIRE_FALSE(table.Caption(RefPtr<HTMLTableCaptionElement>(caption)).HasException());
       CHECK(data.Markup() == "<caption id=\"c\"></caption><caption id=\"b\"></caption>");
       REQUIRE_FALSE(table.Caption(nullptr).HasException());
@@ -95,7 +95,7 @@ namespace krys::boo::html::tests
     CHECK(table.TBodies().get() == tBodies.get());
 
     auto body = table.CreateTBody();
-    (void)body->SetAttribute(dom::DOMStringAtom(u8"id"), u8"c");
+    (void)body->SetAttribute(u8"id", u8"c");
     CHECK(TableIds(*tBodies) == List<std::string> {"a", "b", "c"});
     CHECK(table.LastElementChild() == body.get());
   }
@@ -111,7 +111,7 @@ namespace krys::boo::html::tests
         u8"<thead><tr id=h1></tr></thead><tbody><tr id=b3></tr></tbody><thead><tr id=h2></tr></thead>");
       // A row directly in the table, which the parser never makes.
       auto row = CreateTableElement<HTMLTableRowElement>(*data.Document, u8"tr");
-      (void)row->SetAttribute(dom::DOMStringAtom(u8"id"), u8"t1");
+      (void)row->SetAttribute(u8"id", u8"t1");
       (void)table.InsertBefore(*row, table.LastChild());
 
       auto rows = table.Rows();

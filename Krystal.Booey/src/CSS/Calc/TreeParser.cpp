@@ -982,7 +982,7 @@ namespace krys::boo::css::calc
   {
     if (!string)
     {
-      return CSSOMStringAtom::Null();
+      return null;
     }
 
     return CSSOMStringAtom {krys::move(*string)};

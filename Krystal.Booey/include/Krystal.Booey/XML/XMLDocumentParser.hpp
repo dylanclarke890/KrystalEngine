@@ -92,7 +92,7 @@ namespace krys::boo::xml
     bool _parsingFragment {false};
 
     HashMap<dom::DOMStringAtom, dom::DOMStringAtom> _prefixToNamespaceMap;
-    dom::DOMStringAtom _defaultNamespaceURI {dom::DOMStringAtom::Null()};
+    dom::DOMStringAtom _defaultNamespaceURI {null};
 
   public:
     KRYS_NODISCARD static Ref<XMLDocumentParser> Create(dom::Document &document) noexcept

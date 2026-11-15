@@ -85,7 +85,7 @@ namespace krys::boo::style
     };
 
     Type _type {Type::None};
-    css::CSSOMStringAtom _string {css::CSSOMStringAtom::Null()};
+    css::CSSOMStringAtom _string {null};
   };
 
   // MARK: - Conversion

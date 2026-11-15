@@ -75,7 +75,7 @@ namespace krys::boo
   }
 
   ReferencePathOperation::ReferencePathOperation(Maybe<Path> &&path) noexcept
-      : PathOperation(Type::Reference), _fragment(StringAtom::Null()), _path(krys::move(path))
+      : PathOperation(Type::Reference), _fragment(null), _path(krys::move(path))
   {
   }
 

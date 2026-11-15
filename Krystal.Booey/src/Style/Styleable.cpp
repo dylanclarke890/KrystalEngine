@@ -406,7 +406,7 @@ namespace krys::boo::style
         {
           if (auto *resolver = scope.ResolverIfExists())
           {
-            return resolver->IsAnimationNameValid(css::CSSOMString {name.View()});
+            return resolver->IsAnimationNameValid(name.ToString());
           }
           return false;
         });
@@ -425,8 +425,7 @@ namespace krys::boo::style
     {
       if (auto keyframesName = currentAnimation.GetName().TryKeyframesName();
           keyframesName && !keyframesName->Name.View().empty()
-          && keyframeEffectStack.ContainsInvalidCSSAnimationName(
-            css::CSSOMString {keyframesName->Name.View()})
+          && keyframeEffectStack.ContainsInvalidCSSAnimationName(keyframesName->Name.ToString())
           && KeyframesRuleExistsForAnimation(Element, *keyframesName))
       {
         return true;
@@ -498,7 +497,7 @@ namespace krys::boo::style
 
         if (!KeyframesRuleExistsForAnimation(Element, *keyframesName))
         {
-          keyframeEffectStack.AddInvalidCSSAnimationName(css::CSSOMString {keyframesName->Name.View()});
+          keyframeEffectStack.AddInvalidCSSAnimationName(keyframesName->Name.ToString());
           continue;
         }
 

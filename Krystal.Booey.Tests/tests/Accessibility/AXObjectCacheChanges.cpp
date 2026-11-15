@@ -133,7 +133,7 @@ namespace krys::boo::ax::tests
     (void)page.TakeNotifications();
     CHECK(inner.IsIgnored());
 
-    page.ById(u8"outer").RemoveAttribute(dom::DOMStringAtom(u8"aria-hidden"));
+    page.ById(u8"outer").RemoveAttribute(u8"aria-hidden");
     (void)page.TakeNotifications();
     CHECK_FALSE(inner.IsIgnored());
   }

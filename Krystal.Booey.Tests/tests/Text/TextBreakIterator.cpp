@@ -6,7 +6,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    const StringAtom NoLocale = StringAtom::Null();
+    const StringAtom NoLocale = null;
 
     KRYS_NODISCARD CachedTextBreakIterator LineBreaks(
       utf8_stringview text, utf8_stringview priorContext = {},
@@ -177,7 +177,7 @@ namespace krys::boo::tests
       CHECK(factory.Get().IsBoundary(0));
       CHECK(factory.Get().Following(0) == 4u);
 
-      factory.ResetStringAndReleaseIterator(u8"gh ij", StringAtom::Null(), TextBreakLineBehavior::Strict);
+      factory.ResetStringAndReleaseIterator(u8"gh ij", null, TextBreakLineBehavior::Strict);
       CHECK(factory.Mode() == TextBreakLineBehavior::Strict);
       CHECK(factory.Get().Following(0) == 3u);
     }

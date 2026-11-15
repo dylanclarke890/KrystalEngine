@@ -56,7 +56,7 @@ namespace krys::boo::tests
   {
     CSSAnimationFixture fixture {FadingBox(u8"fade 1s linear")};
     auto &animation = fixture.OnlyAnimation(u8"box");
-    CHECK(animation.AnimationName() == css::CSSOMStringAtom {u8"fade"});
+    CHECK(animation.AnimationName() == u8"fade");
     CHECK(animation.OwningElement() == style::Styleable::FromElement(fixture.ById(u8"box")));
     REQUIRE(animation.GetKeyframeEffect());
     CHECK(animation.GetKeyframeEffect()->AnimationType() == WebAnimationType::CSSAnimation);
@@ -157,7 +157,7 @@ namespace krys::boo::tests
     }
     SECTION("On the window")
     {
-      fixture.Document->Window()->AddEventListener(dom::DOMStringAtom(u8"animationiteration"),
+      fixture.Document->Window()->AddEventListener(u8"animationiteration",
                                                    ShareRef<dom::EventListenerCallback>(*recorder), false);
     }
     CHECK(fixture.Document->HasAnimationIterationListener());
@@ -268,7 +268,7 @@ namespace krys::boo::tests
       fixture.SetStyle(u8"box", u8"animation-name:dim");
       fixture.Frame();
       auto &dim = fixture.OnlyAnimation(u8"box");
-      CHECK(dim.AnimationName() == css::CSSOMStringAtom {u8"dim"});
+      CHECK(dim.AnimationName() == u8"dim");
       CHECK(fade->GetPlayState() == WebAnimation::PlayState::Idle);
       CHECK_FALSE(fade->OwningElement());
       fixture.StartAnimations();
@@ -285,7 +285,7 @@ namespace krys::boo::tests
       auto animations = fixture.Animations(u8"box");
       REQUIRE(animations.size() == 2);
       CHECK(animations[0].get() == fade.get());
-      CHECK(animations[1]->AnimationName() == css::CSSOMStringAtom {u8"dim"});
+      CHECK(animations[1]->AnimationName() == u8"dim");
 
       // The animation later in animation-name is applied last: it wins.
       fixture.StartAnimations();

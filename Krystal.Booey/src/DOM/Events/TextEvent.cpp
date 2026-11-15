@@ -43,18 +43,18 @@ namespace krys::boo::dom
     }
   }
 
-  TextEvent::TextEvent() noexcept : UIEvent(DOMStringAtom(u8""))
+  TextEvent::TextEvent() noexcept : UIEvent(u8"")
   {
   }
 
   TextEvent::TextEvent(DOMStringView data, TextEventInputType inputType) noexcept
-      : UIEvent(DOMStringAtom(EventNames::TextInput), TextInputInit()), _inputType(inputType), _data(data)
+      : UIEvent(EventNames::TextInput, TextInputInit()), _inputType(inputType), _data(data)
   {
   }
 
   TextEvent::TextEvent(DOMStringView data, RefPtr<DocumentFragment> &&pastingFragment,
                        TextEventInputType inputType, bool shouldSmartReplace, bool shouldMatchStyle) noexcept
-      : UIEvent(DOMStringAtom(EventNames::TextInput), TextInputInit()), _inputType(inputType), _data(data),
+      : UIEvent(EventNames::TextInput, TextInputInit()), _inputType(inputType), _data(data),
         _pastingFragment(krys::move(pastingFragment)), _shouldSmartReplace(shouldSmartReplace),
         _shouldMatchStyle(shouldMatchStyle)
   {

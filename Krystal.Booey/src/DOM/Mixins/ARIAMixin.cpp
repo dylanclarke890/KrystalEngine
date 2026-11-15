@@ -10,14 +10,14 @@ namespace krys::boo::dom::mixins
   RefPtr<dom::Element> ARIAMixin<TTarget>::AriaActiveDescendantElement() const noexcept
   {
     // The getter steps are to return the result of running this's get the attr-associated element.
-    return ReflectedTarget().ElementForAttributeInternal(dom::DOMStringAtom(u8"aria-activedescendant"));
+    return ReflectedTarget().ElementForAttributeInternal(u8"aria-activedescendant");
   }
 
   template <typename TTarget>
   void ARIAMixin<TTarget>::AriaActiveDescendantElement(dom::Element *element) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ReflectedTarget().SetElementAttribute(dom::DOMStringAtom(u8"aria-activedescendant"), element);
+    ReflectedTarget().SetElementAttribute(u8"aria-activedescendant", element);
   }
 
   template <typename TTarget>

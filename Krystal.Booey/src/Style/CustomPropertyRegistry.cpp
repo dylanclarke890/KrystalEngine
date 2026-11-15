@@ -158,7 +158,7 @@ namespace krys::boo::style
     }
 
     _propertiesFromStylesheet.clear();
-    Invalidate(css::CSSOMStringAtom::Null());
+    Invalidate(null);
   }
 
   const RenderStyle &CustomPropertyRegistry::InitialValuePrototypeStyle() const noexcept
@@ -197,7 +197,7 @@ namespace krys::boo::style
     _scope.InvalidateMatchedDeclarationsCache();
 
     // FIXME: Invalidate all?
-    if (customProperty != css::CSSOMStringAtom::Null())
+    if (customProperty != null)
     {
       NotifyAnimationsOfCustomPropertyRegistration(customProperty);
     }

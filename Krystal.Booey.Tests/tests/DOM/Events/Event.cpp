@@ -21,7 +21,7 @@ namespace krys::boo::dom::tests
       return CreateRef<Event>(EventNames::Click, EventInit {.Cancelable = true});
     }
 
-    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringView localName)
+    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringAtom localName)
     {
       auto element = document.CreateElement(localName);
       REQUIRE_FALSE(element.HasException());

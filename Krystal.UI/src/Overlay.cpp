@@ -100,7 +100,7 @@ namespace krys::ui
       auto last = padded.find_last_not_of(u8' ');
       classes = first == utf8_string::npos ? utf8_string() : padded.substr(first, last - first + 1);
     }
-    (void)element.SetAttribute(boo::dom::DOMStringAtom(u8"class"), krys::move(classes));
+    (void)element.SetAttribute(u8"class", krys::move(classes));
   }
 
   void Overlay::AppendEscaped(utf8_string &html, utf8_stringview text) noexcept

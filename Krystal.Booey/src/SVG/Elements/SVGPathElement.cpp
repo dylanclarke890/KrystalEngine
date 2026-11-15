@@ -174,7 +174,7 @@ namespace krys::boo::svg
                                                               dom::DOMStringView value,
                                                               css::MutableStyleProperties &style) noexcept
   {
-    if (localName == SVGNames::DAttr().LocalName() && namespaceURI == dom::DOMStringAtom::Null())
+    if (localName == SVGNames::DAttr().LocalName() && namespaceURI == null)
     {
       CollectDPresentationalHint(style);
     }
@@ -196,8 +196,7 @@ namespace krys::boo::svg
   {
     // In the case of the `d` property, we want to avoid providing a string value since it will require
     // the path data to be parsed again and path data can be unwieldy.
-    auto property =
-      CssPropertyIdForSVGAttributeName(SVGNames::DAttr().LocalName(), dom::DOMStringAtom::Null());
+    auto property = CssPropertyIdForSVGAttributeName(SVGNames::DAttr().LocalName(), null);
     // The fill rule value passed here is not relevant for the `d` property.
     auto cssPathValue = css::PathValue::Create(css::PathFunction {
       .Parameters =

@@ -71,7 +71,7 @@ namespace krys::boo
 
     // Delete id attribute from the second element because the same id cannot be used for more than one
     // element
-    _element2->RemoveAttribute(dom::DOMStringAtom(u8"id"));
+    _element2->RemoveAttribute(u8"id");
 
     for (auto &child : children)
     {
@@ -108,9 +108,9 @@ namespace krys::boo
     }
 
     // Recover the id attribute of the original element.
-    if (auto id = element1->GetAttribute(dom::DOMStringAtom(u8"id")))
+    if (auto id = element1->GetAttribute(u8"id"))
     {
-      (void)_element2->SetAttribute(dom::DOMStringAtom(u8"id"), krys::move(*id));
+      (void)_element2->SetAttribute(u8"id", krys::move(*id));
     }
 
     (void)dom::mixins::ChildNode::Remove(*element1);

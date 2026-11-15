@@ -85,12 +85,12 @@ namespace krys::boo::css::calc
 
     KRYS_NODISCARD bool IsNull(const CSSOMStringAtom &atom) noexcept
     {
-      return atom == CSSOMStringAtom::Null();
+      return atom == null;
     }
 
     void AppendIdentifier(StringBuilder &builder, const CSSOMStringAtom &atom) noexcept
     {
-      SerialiseIdentifier(CSSOMString {atom.View()}, builder);
+      SerialiseIdentifier(atom.ToString(), builder);
     }
   }
 

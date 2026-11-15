@@ -60,13 +60,13 @@ namespace krys::boo::css
     CSSOMString styleLiteral = isDecimal ? CSSOMString() : CounterStyleCSSText();
 
     StringBuilder result;
-    if (_separator == CSSOMStringAtom::Null() || _separator.View().empty())
+    if (_separator == null || _separator.View().empty())
     {
       result.Append(u8"counter(", _identifier, styleSeparator, styleLiteral, u8')');
       return krys::move(result).ToString();
     }
     result.Append(u8"counters(", _identifier, u8", ");
-    SerialiseString(CSSOMString(_separator.View()), result);
+    SerialiseString(_separator.ToString(), result);
     result.Append(styleSeparator, styleLiteral, u8')');
     return krys::move(result).ToString();
   }

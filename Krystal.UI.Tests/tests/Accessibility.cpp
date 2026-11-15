@@ -609,8 +609,8 @@ namespace krys::ui::tests
     };
     view.Document()
       .GetElementById(u8"button")
-      ->AddEventListener(boo::dom::DOMStringAtom(u8"click"),
-                         Ref<boo::dom::EventListenerCallback>(CreateRef<ClickCounter>(clicks)), false);
+      ->AddEventListener(u8"click", Ref<boo::dom::EventListenerCallback>(CreateRef<ClickCounter>(clicks)),
+                         false);
     view.AttachAccessibility(**window);
 
     auto handle = (*window)->GetWindowHandle().As<HWND>();
