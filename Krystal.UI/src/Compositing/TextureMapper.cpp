@@ -35,9 +35,11 @@ namespace krys::ui
       return rows;
     }
 
-    /// @brief The layer filter `operation` is, if Render2D can apply it.
+    /// @brief The layer filter `operation` is, if Render2D can apply it, at @p scale target pixels a layer
+    /// pixel (its blurs and offsets are in target pixels).
     KRYS_NODISCARD Maybe<gfx::LayerFilter2D> LayerFilterFor(const boo::FilterOperation &operation,
-                                                            gfx::EdgeMode2D blurEdgeMode) noexcept
+                                                            gfx::EdgeMode2D blurEdgeMode,
+                                                            float scale) noexcept
     {
       using Type = boo::FilterOperation::Type;
       switch (operation.GetType())
@@ -78,15 +80,15 @@ namespace krys::ui
         case Type::Blur:
         {
           // A layer filter's blur radius is twice the standard deviation.
-          return gfx::LayerFilter2D::Blur(Downcast<boo::BlurFilterOperation>(operation).StdDeviation() * 2.f,
-                                          blurEdgeMode);
+          return gfx::LayerFilter2D::Blur(
+            Downcast<boo::BlurFilterOperation>(operation).StdDeviation() * 2.f * scale, blurEdgeMode);
         }
         case Type::DropShadow:
         {
           const auto &shadow = Downcast<boo::DropShadowFilterOperation>(operation);
           return gfx::LayerFilter2D::DropShadow(
-            {.Offset = {static_cast<float>(shadow.X()), static_cast<float>(shadow.Y())},
-             .BlurRadius = static_cast<float>(shadow.StdDeviation()) * 2.f,
+            {.Offset = {static_cast<float>(shadow.X()) * scale, static_cast<float>(shadow.Y()) * scale},
+             .BlurRadius = static_cast<float>(shadow.StdDeviation()) * 2.f * scale,
              .Colour = ToColour(shadow.GetColor())});
         }
         default:
@@ -366,9 +368,11 @@ namespace krys::ui
     // filter, the last outermost.
     _renderer->BeginLayer(opacity, blendMode);
     uint32 layers = 1u;
+    // The filters' lengths are the layer's, which the transform scales (by the device and page scales).
+    float scale = std::sqrt(std::abs(_renderer->GetTransform().Determinant()));
     for (auto it = filters.rbegin(); it != filters.rend(); ++it)
     {
-      if (auto filter = LayerFilterFor(**it, blurEdgeMode))
+      if (auto filter = LayerFilterFor(**it, blurEdgeMode, scale))
       {
         _renderer->BeginLayer(1.f, BlendMode::Normal, *filter);
         ++layers;

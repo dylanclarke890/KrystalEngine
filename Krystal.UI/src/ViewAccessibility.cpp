@@ -341,8 +341,12 @@ namespace krys::ui
     {
       if (ancestor->AxObjectCache() == overlayCache)
       {
+        // The overlay is placed in the view's CSS pixels.
         auto location = _view.ShownOverlay()->Rect().Location();
-        return {OverlayView(), boo::IntPoint(_origin.X() + location.X(), _origin.Y() + location.Y())};
+        auto scale = _view.DeviceScaleFactor();
+        return {OverlayView(),
+                boo::IntPoint(_origin.X() + static_cast<int32>(std::lround(location.X() * scale)),
+                              _origin.Y() + static_cast<int32>(std::lround(location.Y() * scale)))};
       }
       if (ancestor->AxObjectCache() == cache)
       {
@@ -454,7 +458,10 @@ namespace krys::ui
       x -= static_cast<float>(scroll.X());
       y -= static_cast<float>(scroll.Y());
     }
-    return {x + static_cast<float>(origin.X()), y + static_cast<float>(origin.Y()), width, height};
+    // The page is in CSS pixels; the window, in the view's.
+    auto scale = view->DeviceScaleFactor();
+    return {x * scale + static_cast<float>(origin.X()), y * scale + static_cast<float>(origin.Y()),
+            width * scale, height * scale};
   }
 
   void ViewAccessibility::NotificationPosted(AccessibilityObject &object,
@@ -695,8 +702,10 @@ namespace krys::ui
     {
       return 0;
     }
-    boo::IntPoint viewPoint(static_cast<int32>(std::floor(x)) - _origin.X(),
-                            static_cast<int32>(std::floor(y)) - _origin.Y());
+    // The window is in the view's pixels; the page, in CSS pixels.
+    auto scale = _view.DeviceScaleFactor();
+    boo::IntPoint viewPoint(static_cast<int32>(std::floor((x - static_cast<float>(_origin.X())) / scale)),
+                            static_cast<int32>(std::floor((y - static_cast<float>(_origin.Y())) / scale)));
     // The overlay is over the page.
     if (auto *overlay = _view.ShownOverlay(); overlay && overlay->Rect().Contains(viewPoint))
     {
@@ -879,12 +888,14 @@ namespace krys::ui
     {
       return bounds;
     }
-    // The rects are in the viewport's coordinates, so only the view's origin moves them.
-    auto origin = ViewAndOrigin(*object).second;
+    // The rects are in the viewport's CSS pixels, so only the view's scale and origin move them.
+    auto [view, origin] = ViewAndOrigin(*object);
+    auto scale = view->DeviceScaleFactor();
     for (const auto &rect : boo::RenderObject::ClientBorderAndTextRects(*simpleRange))
     {
-      bounds.push_back({rect.X() + static_cast<float>(origin.X()), rect.Y() + static_cast<float>(origin.Y()),
-                        rect.Width(), rect.Height()});
+      bounds.push_back({rect.X() * scale + static_cast<float>(origin.X()),
+                        rect.Y() * scale + static_cast<float>(origin.Y()), rect.Width() * scale,
+                        rect.Height() * scale});
     }
     return bounds;
   }

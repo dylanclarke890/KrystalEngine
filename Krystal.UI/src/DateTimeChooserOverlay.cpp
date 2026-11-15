@@ -462,10 +462,7 @@ namespace krys::ui
     {
       _view = CreateUnique<View>(viewport);
     }
-    else
-    {
-      _view->Resize(viewport);
-    }
+    SizeContentView(*_view, *_owner, viewport);
     ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
@@ -494,7 +491,7 @@ namespace krys::ui
       }
     }
     _rect = Place(_parameters.AnchorRectInRootView, contentSize, viewport, rightToLeft);
-    _view->Resize(_rect.Size());
+    SizeContentView(*_view, *_owner, _rect.Size());
 
     SetHighlightedClass(_highlighted, true);
   }

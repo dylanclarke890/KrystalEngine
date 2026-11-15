@@ -48,11 +48,27 @@ namespace krys::ui
     return boo::IntRect(x, y, std::max(width, 1), std::max(height, 1));
   }
 
+  void Overlay::SizeContentView(View &view, const View &owner, const boo::IntSize &size) noexcept
+  {
+    view.SetDeviceScaleFactor(owner.DeviceScaleFactor());
+    view.ResizeToLayoutSize(size);
+  }
+
+  boo::dom::Element *Overlay::HitTest(View &view, const boo::IntPoint &point) noexcept
+  {
+    return view.HitTestInPage(point);
+  }
+
+  bool Overlay::WheelView(View &view, const boo::IntPoint &point, float notchesX, float notchesY) noexcept
+  {
+    return view.MouseWheelInPage(point, notchesX, notchesY, {}, pal::GetWheelScrollSettings());
+  }
+
   boo::dom::Element *Overlay::ElementWithAttributeAt(View &view, const boo::IntPoint &point,
                                                      utf8_stringview name) noexcept
   {
     auto attribute = boo::dom::DOMStringAtom(name);
-    for (auto *element = view.HitTest(point); element; element = element->ParentElement())
+    for (auto *element = view.HitTestInPage(point); element; element = element->ParentElement())
     {
       if (element->HasAttribute(attribute))
       {

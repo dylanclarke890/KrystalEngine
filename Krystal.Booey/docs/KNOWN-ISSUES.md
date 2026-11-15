@@ -68,6 +68,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 ### Bugs
 
 - A dashed rounded border with different widths on each side has its dashes drift from Chrome's along the sides, by a few pixels (FIXME in `BorderPainter::DrawBoxSideFromPath`).
+- A diagonal `linear-gradient`'s hard stops fall a device pixel before Chrome's (the `device-scale-images` golden's tiled gradient, and the same at a scale of 1).
 - Dashed collapsed table borders share out the junctions between cells slightly differently from Chrome: an edge after a junction starts a few pixels off, so its gaps differ a little (the `tables` and `dashed-borders` goldens).
 - A mask's `color-interpolation: linearRGB` is drawn in sRGB (`LegacyRenderSVGResourceMasker`, FIXME), because image buffers have no colour space conversion.
 - A composited mask's or clip path's edge pixels (and those of a turned masked layer) can differ slightly from the whole-page repaint.

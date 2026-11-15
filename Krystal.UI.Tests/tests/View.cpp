@@ -220,6 +220,168 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: lays out the viewport's pixels at its device scale factor", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style>"
+                  u8"<div id=a style='width: 50%'></div><div id=b></div><input id=field>");
+    WaitForLoad(view);
+    CHECK(view.DeviceScaleFactor() == 1);
+    view.SetDeviceScaleFactor(2);
+    view.UpdateRendering();
+    CHECK(view.DeviceScaleFactor() == 2);
+    CHECK(view.ViewportSize() == boo::IntSize(200, 150));
+    CHECK(WidthOf(view, u8"a") == 100);
+    CHECK(view.Document().Window()->DevicePixelRatio() == 2);
+
+    SECTION("A resize is in its pixels")
+    {
+      view.Resize({600, 300});
+      view.UpdateRendering();
+      CHECK(view.ViewportSize() == boo::IntSize(300, 150));
+      CHECK(WidthOf(view, u8"a") == 150);
+    }
+
+    SECTION("A fraction lays out as many CSS pixels as fit, to the nearest")
+    {
+      view.SetDeviceScaleFactor(1.5f);
+      CHECK(view.ViewportSize() == boo::IntSize(267, 200));
+      // Scales that aren't positive and finite are ignored.
+      view.SetDeviceScaleFactor(0);
+      view.SetDeviceScaleFactor(std::numeric_limits<float>::infinity());
+      CHECK(view.DeviceScaleFactor() == 1.5f);
+    }
+
+    SECTION("Points are in its pixels")
+    {
+      auto a = view.Document().GetElementById(u8"a");
+      auto b = view.Document().GetElementById(u8"b");
+      CHECK(view.HitTest({20, 90}) == a.get());
+      CHECK(view.HitTest({20, 110}) == b.get());
+      view.MouseMoved({20, 110});
+      CHECK(b->Hovered());
+
+      // The screen is in CSS pixels too.
+      view.SetScreenOrigin({100, 200});
+      double screenX = 0;
+      double screenY = 0;
+      auto handle = view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"mousedown"),
+                                                     Func<void(boo::dom::Event &)>(
+                                                       [&](boo::dom::Event &event)
+                                                       {
+                                                         auto &mouse = Downcast<boo::dom::MouseEvent>(event);
+                                                         screenX = mouse.ScreenX();
+                                                         screenY = mouse.ScreenY();
+                                                       }));
+      view.MousePressed({20, 40}, pal::MouseButton::Left);
+      view.MouseReleased({20, 40}, pal::MouseButton::Left);
+      CHECK(screenX == 60);
+      CHECK(screenY == 120);
+    }
+
+    SECTION("The input method's rect is in its pixels")
+    {
+      auto &field = Downcast<boo::html::HTMLElement>(*view.Document().GetElementById(u8"field"));
+      field.Focus();
+      view.UpdateRendering();
+      auto rect = view.TextInputRect();
+      REQUIRE(rect);
+      auto box = field.GetBoundingClientRect();
+      CHECK(rect->Y() >= static_cast<int32>(box->Y()) * 2);
+      CHECK(rect->MaxY() <= static_cast<int32>(box->Bottom()) * 2);
+    }
+  }
+
+  TEST_CASE("View: every input's points are in its pixels at a device scale factor", "[UI]")
+  {
+    View view({400, 300});
+    view.SetDeviceScaleFactor(2);
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } #a { height: 1000px; touch-action: none }"
+                  u8"</style><div id=a contenteditable></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    // Each event as `type:clientX,clientY`, a pointer event's with its type and width.
+    List<std::string> records;
+    auto record = [&](boo::dom::Event &event)
+    {
+      auto type = event.Type().View();
+      auto &mouse = Downcast<boo::dom::MouseEvent>(event);
+      std::string text = std::string(type.begin(), type.end()) + ":"
+                         + std::to_string(static_cast<int>(mouse.ClientX())) + ","
+                         + std::to_string(static_cast<int>(mouse.ClientY()));
+      if (auto *pointer = DynamicDowncast<boo::dom::PointerEvent>(event))
+      {
+        auto pointerType = utf8_stringview(pointer->PointerType());
+        text += "/" + std::string(pointerType.begin(), pointerType.end()) + "/"
+                + std::to_string(static_cast<int>(pointer->Width()));
+      }
+      records.push_back(text);
+    };
+    List<boo::dom::EventListenerHandle> handles;
+    for (auto type : {u8"wheel", u8"pointerdown", u8"dragenter"})
+    {
+      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
+                                                         Func<void(boo::dom::Event &)>(record)));
+    }
+
+    SECTION("The wheel and a touchpad's pan, whose pixels are the view's")
+    {
+      (void)view.MouseWheel({40, 60}, 0, 0.03f);
+      CHECK(records == List<std::string> {"wheel:20,30"});
+      records.clear();
+      CHECK(view.TouchpadPan({40, 60}, {.Phase = pal::TouchpadPanPhase::Began}) == false);
+      auto scrolled = view.ScrollPosition().Y();
+      CHECK(
+        view.TouchpadPan({40, 60}, {.Phase = pal::TouchpadPanPhase::Changed, .DeltaX = 0, .DeltaY = -14}));
+      CHECK(view.ScrollPosition().Y() == scrolled + 7);
+      CHECK(records == List<std::string> {"wheel:20,30"});
+    }
+
+    SECTION("A pen and a touch, whose contact is in the view's pixels")
+    {
+      pal::PointerInput pen;
+      pen.Id = 1;
+      pen.Type = pal::PointerType::Pen;
+      pen.Action = pal::PointerAction::Pressed;
+      pen.InContact = true;
+      view.PenInput({40, 60}, pen);
+      pen.Action = pal::PointerAction::Released;
+      pen.InContact = false;
+      view.PenInput({40, 60}, pen);
+
+      pal::PointerInput touch;
+      touch.Id = 2;
+      touch.Type = pal::PointerType::Touch;
+      touch.Action = pal::PointerAction::Pressed;
+      touch.InContact = true;
+      touch.Width = 20;
+      touch.Height = 20;
+      (void)view.TouchInput({40, 60}, touch);
+      touch.Action = pal::PointerAction::Released;
+      touch.InContact = false;
+      (void)view.TouchInput({40, 60}, touch);
+      CHECK(records.size() >= 2);
+      CHECK(records[0] == "pointerdown:20,30/pen/1");
+      CHECK(records[1] == "pointerdown:20,30/touch/10");
+    }
+
+    SECTION("A drag from another application")
+    {
+      pal::DragInput input;
+      input.Action = pal::DragAction::Entered;
+      input.ClientX = 40;
+      input.ClientY = 60;
+      input.AllowedOperations = {pal::DropOperation::Copy};
+      input.Content.Text = u8"dropped";
+      (void)view.SystemDragInput({40, 60}, input);
+      input.Action = pal::DragAction::Left;
+      input.Content = {};
+      (void)view.SystemDragInput({40, 60}, input);
+      CHECK(records == List<std::string> {"dragenter:20,30"});
+    }
+  }
+
   TEST_CASE("View: frees a page's document when it loads another, or goes", "[UI]")
   {
     // A page with style, layout, composited layers, a running animation, a transition and a hovered element:
@@ -784,6 +946,21 @@ namespace krys::ui::tests
       view.LockedMouseMoved({4, -2}, {2, -1});
       view.MouseMoved({15, 12});
       CHECK(records == List<std::string> {"mousemove:a/5,2"});
+    }
+
+    SECTION("at a device scale factor, the movement is in CSS pixels, but the device's is its own")
+    {
+      view.SetDeviceScaleFactor(2);
+      view.UpdateRendering();
+      click();
+      REQUIRE(view.PointerLocked());
+      records.clear();
+      view.LockedMouseMoved({4, -2}, {2, -1});
+      options.UnadjustedMovement = true;
+      click();
+      view.LockedMouseMoved({4, -2}, {2, -1});
+      CHECK(records
+            == List<std::string> {"mousemove:a/2,-1", "pointerlockchange:document", "mousemove:a/2,-1"});
     }
 
     SECTION("the window losing focus unlocks it, and a window without focus can't lock it")
@@ -2109,6 +2286,44 @@ namespace krys::ui::tests
         ++Count;
       }
     };
+  }
+
+  TEST_CASE("View: a drop-down's popup at a device scale factor", "[UI]")
+  {
+    View view({400, 300});
+    view.SetDeviceScaleFactor(2);
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } select { margin: 10px }"
+      u8"</style><select id=s><option>Apple</option><option>Banana</option><option>Cherry</option>"
+      u8"</select>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    auto &select = Downcast<boo::html::HTMLSelectElement>(*view.Document().GetElementById(u8"s"));
+    auto box = select.GetBoundingClientRect();
+    boo::IntPoint inside((static_cast<int32>(box->X()) + 5) * 2, (static_cast<int32>(box->Y()) + 5) * 2);
+    view.MousePressed(inside, pal::MouseButton::Left);
+    view.MouseReleased(inside, pal::MouseButton::Left);
+    auto *popup = static_cast<PopupMenuOverlay *>(view.ShownOverlay());
+    REQUIRE(popup);
+
+    // The popup is placed in CSS pixels, and lays out at the view's scale.
+    CHECK(popup->Rect().Y() == static_cast<int32>(box->Bottom()));
+    CHECK(popup->ContentView().DeviceScaleFactor() == 2);
+    CHECK(popup->ContentView().ViewportSize() == popup->Rect().Size());
+
+    // A release over an item, in the view's pixels, chooses it.
+    auto item = popup->ContentView().Document().QuerySelector(u8"[data-index='2']");
+    REQUIRE_FALSE(item.HasException());
+    REQUIRE(item.Value());
+    auto itemBox = item.Value()->GetBoundingClientRect();
+    boo::IntPoint onItem((popup->Rect().X() + static_cast<int32>(itemBox->X()) + 5) * 2,
+                         (popup->Rect().Y() + static_cast<int32>(itemBox->Y()) + 5) * 2);
+    view.MouseMoved(onItem);
+    view.MousePressed(onItem, pal::MouseButton::Left);
+    view.MouseReleased(onItem, pal::MouseButton::Left);
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(select.SelectedIndex() == 2);
   }
 
   TEST_CASE("View: a date input's picker", "[UI]")

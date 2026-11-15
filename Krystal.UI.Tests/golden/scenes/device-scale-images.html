@@ -1,0 +1,24 @@
+﻿<!doctype html>
+<!-- The "device-scale-images" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through a View at a device
+     scale factor of 2. -->
+<html data-width="180" data-height="120" data-device-scale="2">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  div, img { position: absolute; box-sizing: border-box; }
+</style>
+</head>
+<body>
+  <!-- Tiled gradients and bitmaps, which draw a tile into a buffer and repeat it. -->
+  <div style="left: 8px; top: 8px; width: 48px; height: 48px; background: linear-gradient(45deg, #ef476f 25%, #ffd166 25% 50%, #118ab2 50% 75%, #06d6a0 75%) 0 0 / 16px 16px"></div>
+  <div style="left: 64px; top: 8px; width: 48px; height: 48px; background: url(images/checker.png) 0 0 / 12px 12px space"></div>
+  <!-- SVG images, drawn at the view's pixels. -->
+  <img src="images/badge.svg" style="left: 120px; top: 8px; width: 48px; height: 48px">
+  <div style="left: 8px; top: 64px; width: 48px; height: 48px; background: url(images/tile.svg) 0 0 / 16px 16px"></div>
+  <!-- A filter painted on the page, and a mask and a clip. -->
+  <div style="left: 64px; top: 64px; width: 48px; height: 48px; background: #4f6df5; filter: blur(2px)"></div>
+  <div style="left: 120px; top: 64px; width: 48px; height: 48px; background: #ef476f; clip-path: circle(20px); mask-image: linear-gradient(transparent, #000)"></div>
+</body>
+</html>

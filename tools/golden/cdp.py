@@ -108,9 +108,10 @@ VIRTUAL_TIME_BUDGET_MS = 5000
 
 
 class Chrome:
-    """A headless Chrome showing one page, at a viewport of width by height."""
+    """A headless Chrome showing one page, at a viewport of width by height CSS pixels, at a device pixel ratio of
+    scale."""
 
-    def __init__(self, chrome, width, height):
+    def __init__(self, chrome, width, height, scale=1):
         self.profile = tempfile.TemporaryDirectory()
         self.process = subprocess.Popen(
             [
@@ -119,7 +120,7 @@ class Chrome:
                 "--disable-gpu",
                 "--no-first-run",
                 "--hide-scrollbars",
-                "--force-device-scale-factor=1",
+                f"--force-device-scale-factor={scale:g}",
                 "--force-color-profile=srgb",
                 "--allow-file-access-from-files",
                 "--remote-debugging-port=0",
@@ -143,7 +144,9 @@ class Chrome:
         self.socket = WebSocket(page["webSocketDebuggerUrl"])
         self.next_id = 0
         # The window includes room the viewport does not get, so the viewport is set as the scene asks.
-        self.call("Emulation.setDeviceMetricsOverride", width=width, height=height, deviceScaleFactor=1, mobile=False)
+        self.call(
+            "Emulation.setDeviceMetricsOverride", width=width, height=height, deviceScaleFactor=scale, mobile=False
+        )
 
     def call(self, method, **params):
         self.next_id += 1

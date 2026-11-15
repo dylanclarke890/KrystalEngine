@@ -150,10 +150,7 @@ namespace krys::ui
     {
       _view = CreateUnique<View>(boo::IntSize(width, viewport.Height()));
     }
-    else
-    {
-      _view->Resize(boo::IntSize(width, viewport.Height()));
-    }
+    SizeContentView(*_view, *_owner, boo::IntSize(width, viewport.Height()));
     ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
@@ -196,7 +193,7 @@ namespace krys::ui
     }
     contentSize.SetWidth(std::max(contentSize.Width(), width));
     _rect = Place(fieldRect, contentSize, viewport, rightToLeft);
-    _view->Resize(_rect.Size());
+    SizeContentView(*_view, *_owner, _rect.Size());
 
     auto highlighted = std::exchange(_highlightedIndex, -1);
     Highlight(highlighted);

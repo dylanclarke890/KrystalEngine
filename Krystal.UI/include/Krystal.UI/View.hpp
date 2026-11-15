@@ -128,6 +128,9 @@ namespace krys::ui
   /// pages load `file:` images.
   /// @note A menu list's popup and the date and colour pickers show as overlays above the page: while one is
   /// open, it takes the keys and the mouse, and a press outside it closes it.
+  /// @note What the host passes in and gets back (the viewport's size, the input's points and the rects it's
+  /// told) is in the view's pixels, which are the display's. The page lays out in CSS pixels, each the
+  /// device scale factor's view pixels (`SetDeviceScaleFactor`), and is painted at that scale.
   class EditorClient;
 
   class View
@@ -162,6 +165,8 @@ namespace krys::ui
     UniquePtr<TextureMapper> _textureMapper;
     /// @brief Whether the page may look different since it was last painted.
     bool _needsPaint {true};
+    /// @brief The viewport's size in view pixels, which the page lays out over the device scale factor.
+    boo::IntSize _viewportPixels;
     /// @brief The buttons held, as the DOM's `buttons` bit set.
     uint16 _buttons {0};
     /// @brief Where the last mouse event was, so moves that don't move can be dropped.
@@ -366,7 +371,8 @@ namespace krys::ui
     static constexpr std::chrono::milliseconds GamepadMaximumScrollStep {100};
 
   public:
-    /// @brief A view of an empty document, with a viewport of @p viewportSize.
+    /// @brief A view of an empty document, with a viewport of @p viewportSize (at a device scale factor of
+    /// 1).
     explicit View(const boo::IntSize &viewportSize) noexcept;
     ~View() noexcept;
 
@@ -412,9 +418,17 @@ namespace krys::ui
     /// @return How many faces were registered.
     static uint32 AddFontDirectory(const std::filesystem::path &directory);
 
-    /// @brief Resizes the viewport; the document is laid out again at its next update.
+    /// @brief Resizes the viewport to @p viewportSize view pixels; the document is laid out again at its
+    /// next update.
     void Resize(const boo::IntSize &viewportSize) noexcept;
+    /// @brief The viewport's size, in CSS pixels.
     KRYS_NODISCARD boo::IntSize ViewportSize() const noexcept;
+
+    /// @brief Sets how many view pixels make a CSS pixel (@p scale, positive and finite; the display's DPI
+    /// over 96 on Windows): the page lays out the viewport's view pixels over it, and paints at it.
+    /// `devicePixelRatio` and the `resolution` media feature follow it. It starts at 1.
+    void SetDeviceScaleFactor(float scale) noexcept;
+    KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
 
     /// @brief Runs a frame of the page at the host's time @p now: Booey's event loop (the timers that are
     /// due, such as style and layout, then the queued tasks, each followed by a microtask checkpoint), then
@@ -428,13 +442,14 @@ namespace krys::ui
     /// @brief Runs the page's rendering update now, whether or not one was scheduled.
     void UpdateRendering() noexcept;
 
-    /// @brief How far the viewport is scrolled into the document, in pixels.
+    /// @brief How far the viewport is scrolled into the document, in CSS pixels.
     KRYS_NODISCARD boo::IntPoint ScrollPosition() const noexcept;
-    /// @brief Scrolls the viewport to @p position (in pixels), within the document; `scroll` fires at the
+    /// @brief Scrolls the viewport to @p position (in CSS pixels), within the document; `scroll` fires at the
     /// next rendering update.
     void ScrollTo(const boo::IntPoint &position) noexcept;
 
-    /// @brief Paints the page, up to date, into a display list, its composited layers flattened into it.
+    /// @brief Paints the page, up to date, into a display list, its composited layers flattened into it; the
+    /// list is in CSS pixels.
     KRYS_NODISCARD Ref<const boo::display_list::DisplayList> Record() noexcept;
 
     /// @brief Paints the page into @p renderer, between its `Begin` and `End`: the page's layer tree is
@@ -447,7 +462,8 @@ namespace krys::ui
     /// @brief Whether the page has changed since it was last painted (or never was).
     KRYS_NODISCARD bool NeedsPaint() const noexcept;
 
-    /// @brief Replays @p displayList into @p renderer, with this page's fonts, between its `Begin` and `End`.
+    /// @brief Replays @p displayList into @p renderer, with this page's fonts, between its `Begin` and `End`,
+    /// in the renderer's units (not scaled by the device scale factor).
     void Replay(const boo::display_list::DisplayList &displayList, gfx::Renderer2D &renderer) noexcept;
 
     /// @brief The topmost element at @p point (in viewport coordinates), or null if there's none.
@@ -569,9 +585,9 @@ namespace krys::ui
     {
       return _pointerLocked;
     }
-    /// @brief The mouse moved by @p movement (with the system's acceleration; @p unadjustedMovement without
-    /// it) while the pointer is locked: `mousemove` fires at the locked element with the movement, where the
-    /// mouse was when it was locked.
+    /// @brief The mouse moved by @p movement view pixels (with the system's acceleration; @p
+    /// unadjustedMovement, in the device's counts, without it) while the pointer is locked: `mousemove` fires
+    /// at the locked element with the movement, in CSS pixels, where the mouse was when it was locked.
     void LockedMouseMoved(const boo::DoublePoint &movement, const boo::DoublePoint &unadjustedMovement,
                           pal::KeyModifiers modifiers = {}) noexcept;
 
@@ -748,15 +764,32 @@ namespace krys::ui
     static void PerformMicrotaskCheckpoint() noexcept;
     /// @brief @p button's bit in the DOM's `buttons` bit set.
     KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;
-    /// @brief Where @p point, in the view's coordinates, is on the screen.
+    /// @brief Where @p point, in the viewport's CSS pixels, is on the screen, in CSS pixels.
     KRYS_NODISCARD boo::IntPoint ToScreen(const boo::IntPoint &point) const noexcept
     {
-      return point + boo::IntSize(_screenOrigin.X(), _screenOrigin.Y());
+      return point + boo::ToIntSize(ToPage(_screenOrigin));
     }
     KRYS_NODISCARD boo::DoublePoint ToScreen(const boo::DoublePoint &point) const noexcept
     {
-      return boo::DoublePoint(point.X() + _screenOrigin.X(), point.Y() + _screenOrigin.Y());
+      auto origin = ToPage(boo::DoublePoint(_screenOrigin));
+      return boo::DoublePoint(point.X() + origin.X(), point.Y() + origin.Y());
     }
+    /// @brief The topmost element at @p point, in the viewport's CSS pixels.
+    KRYS_NODISCARD boo::dom::Element *HitTestInPage(const boo::IntPoint &point) noexcept;
+    /// @brief `MouseWheel` at @p point, in the viewport's CSS pixels.
+    bool MouseWheelInPage(const boo::IntPoint &point, float notchesX, float notchesY,
+                          pal::KeyModifiers modifiers, const pal::WheelScrollSettings &settings) noexcept;
+    /// @brief @p point, in view pixels, in CSS pixels.
+    KRYS_NODISCARD boo::IntPoint ToPage(const boo::IntPoint &point) const noexcept;
+    KRYS_NODISCARD boo::DoublePoint ToPage(const boo::DoublePoint &point) const noexcept;
+    /// @brief @p input, its sizes in CSS pixels.
+    KRYS_NODISCARD pal::PointerInput ToPage(const pal::PointerInput &input) const noexcept;
+    KRYS_NODISCARD pal::TouchpadPanInput ToPage(const pal::TouchpadPanInput &input) const noexcept;
+    /// @brief @p rect, in CSS pixels, in view pixels (the smallest rect of whole view pixels holding it).
+    KRYS_NODISCARD boo::IntRect ToViewPixels(const boo::IntRect &rect) const noexcept;
+    /// @brief Resizes the viewport to @p size CSS pixels: an overlay's, which lays out at its owner's
+    /// scale.
+    void ResizeToLayoutSize(const boo::IntSize &size) noexcept;
 
     KRYS_NODISCARD boo::PlatformMouseEvent PenEvent(boo::PlatformEvent::Type type,
                                                     const boo::DoublePoint &point, boo::MouseButton button,

@@ -436,6 +436,53 @@ namespace krys::ui::tests
     CHECK(tree.TextRunAt(paragraph, text.size())->Style.BackgroundColor == 0xFF'00'00'FFu);
   }
 
+  TEST_CASE("View: accessibility at a device scale factor", "[UI][Accessibility]")
+  {
+    View view({400, 300});
+    view.SetDeviceScaleFactor(2);
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
+                  u8"<button id=button style='width: 100px; height: 40px'>Go</button>"
+                  u8"<input id=field aria-label=Name value=Hello style='display: block'>"
+                  u8"<select id=menu aria-label=Fruit><option>Apple</option><option>Plum</option></select>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    AccessibilityWindow window;
+    view.AttachAccessibility(window, {0, 50});
+    auto &tree = *window.Tree;
+    auto root = tree.Root();
+    auto button = FindByName(tree, root, u8"Go");
+    auto field = FindByName(tree, root, u8"Name");
+    auto menu = FindByName(tree, root, u8"Fruit");
+    REQUIRE((button && field && menu));
+
+    // The window is in the view's pixels, the origin among them.
+    auto bounds = tree.Node(button)->Bounds;
+    CHECK(bounds.X == 0);
+    CHECK(bounds.Y == 50);
+    CHECK(bounds.Width == 200);
+    CHECK(bounds.Height == 80);
+    CHECK(tree.HitTest(10, 120) == button);
+    CHECK(tree.HitTest(10, 140) != button);
+    auto fieldBox = view.Document().GetElementById(u8"field")->GetBoundingClientRect();
+    auto text = tree.TextBounds(field, {0, 5});
+    REQUIRE_FALSE(text.empty());
+    CHECK(text.front().Y >= 50 + static_cast<float>(fieldBox->Y()) * 2);
+
+    // An overlay's nodes are where it is, in the view's pixels.
+    REQUIRE(tree.PerformAction(menu, pal::AccessibilityAction::Press));
+    auto *overlay = view.ShownOverlay();
+    REQUIRE(overlay);
+    view.UpdateRendering();
+    auto plum = FindByName(tree, tree.Children(root).back(), u8"Plum");
+    REQUIRE(plum != 0);
+    auto plumBounds = tree.Node(plum)->Bounds;
+    CHECK(plumBounds.Y >= static_cast<float>(overlay->Rect().Y() * 2 + 50));
+    auto hit = tree.HitTest(plumBounds.X + plumBounds.Width / 2, plumBounds.Y + plumBounds.Height / 2);
+    CHECK((hit == plum || tree.Parent(hit) == plum));
+    overlay->Hide();
+  }
+
   TEST_CASE("View: accessibility of overlays", "[UI][Accessibility]")
   {
     View view({400, 300});

@@ -56,15 +56,16 @@ namespace krys::ui::tests
     /// to the list are destroyed once the page is painted.
     using PageSetup = Func<void(View &, gfx::Device &, List<gfx::TextureHandle> &)>;
 
-    /// @brief Paints the page golden `golden/scenes/<name>.html` through a `View` of its size, after @p setup
-    /// (input, say) if given.
+    /// @brief Paints the page golden `golden/scenes/<name>.html` through a `View` of its size (in pixels), at
+    /// @p deviceScale, after @p setup (input, say) if given.
     KRYS_NODISCARD GoldenImage Render(gfx::Device &device, gfx::Renderer2D &renderer, const std::string &name,
-                                      uint32 width, uint32 height, const PageSetup &setup)
+                                      uint32 width, uint32 height, const PageSetup &setup, float deviceScale)
     {
       // Liberation Sans, as the scenes name it.
       static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
       (void)fonts;
       View view({static_cast<int32>(width), static_cast<int32>(height)});
+      view.SetDeviceScaleFactor(deviceScale);
       REQUIRE(view.LoadFile(GoldenDirectory() / "scenes" / (name + ".html")).has_value());
       WaitForLoad(view);
       // Let the page's resources load, as Chrome's capture does: its images and style sheets load as
@@ -118,15 +119,16 @@ namespace krys::ui::tests
     /// @param chromeReportOnly Whether Chrome's golden is only reported, not checked: where Chrome's
     /// rendering follows its own algorithm rather than the one ported (border image tiling).
     /// @param setup Run on the view before it's painted, if given.
+    /// @param deviceScale The view's device scale factor; @p width and @p height are in its pixels.
     void CheckPageOnDevice(const std::string &name, uint32 width, uint32 height, bool chromeReportOnly,
-                           const PageSetup &setup)
+                           const PageSetup &setup, float deviceScale = 1)
     {
       // Pages draw in many small batches (a tile, a clip, a gradient each), so they get a full frame's
       // memory.
       auto device = CreateTestDevice(gfx::DeviceDesc {}.TransientMemoryPerFrame);
       auto renderer = gfx::Renderer2D::Create(*device);
       REQUIRE(renderer.has_value());
-      const auto actual = Render(*device, **renderer, name, width, height, setup);
+      const auto actual = Render(*device, **renderer, name, width, height, setup, deviceScale);
       const auto output = GoldenOutputDirectory();
       CHECK(SavePng(output / (name + ".actual.png"), actual));
 
@@ -815,6 +817,54 @@ namespace krys::ui::tests
                 boo::html::EventLoop::Current().RunUntilIdle();
                 view.UpdateRendering();
               });
+  }
+
+  TEST_CASE("Golden: device scale", "[UI][GPU][Golden]")
+  {
+    // At a scale of 2, the page lays out at half the view's pixels and paints at twice the detail: its
+    // borders, images and composited layers (their filters too) are drawn at the view's pixels, as Chrome
+    // draws them at a device pixel ratio of 2.
+    CheckPageOnDevice("device-scale", 360u, 240u, false, {}, 2);
+  }
+
+  TEST_CASE("Golden: device scale images", "[UI][GPU][Golden]")
+  {
+    // Tiled gradients and bitmaps, SVG images, and filters, masks and clips painted on the page draw into
+    // buffers at the view's pixels. Chrome's golden is only reported: the tiled gradient's hard stops fall a
+    // pixel from Chrome's, at any scale (see KNOWN-ISSUES.md).
+    CheckPageOnDevice(
+      "device-scale-images", 360u, 240u, true,
+      [](View &view, gfx::Device &, List<gfx::TextureHandle> &)
+      {
+        boo::html::EventLoop::Current().RunUntilIdle();
+        view.UpdateRendering();
+      },
+      2);
+  }
+
+  TEST_CASE("Golden: device scale popup", "[UI][GPU][Golden]")
+  {
+    // An overlay is placed in CSS pixels, and painted at the view's scale.
+    CheckPageOnDevice(
+      "device-scale-popup", 480u, 400u, true,
+      [](View &view, gfx::Device &, List<gfx::TextureHandle> &)
+      {
+        auto select = view.Document().GetElementById(u8"fruit");
+        REQUIRE(select);
+        auto box = select->GetBoundingClientRect();
+        boo::IntPoint inside((static_cast<int32>(box->X()) + 5) * 2, (static_cast<int32>(box->Y()) + 5) * 2);
+        view.MousePressed(inside, pal::MouseButton::Left);
+        view.MouseReleased(inside, pal::MouseButton::Left);
+        REQUIRE(view.ShownOverlay());
+        view.UpdateRendering();
+      },
+      2);
+  }
+
+  TEST_CASE("Golden: device scale text", "[UI][GPU][Golden]")
+  {
+    // Text's glyphs are rasterised at the view's pixels, on the page and on composited layers.
+    CheckPageOnDevice("device-scale-text", 360u, 200u, true, {}, 2);
   }
 
   TEST_CASE("Golden: engine textures", "[UI][GPU][Golden]")
