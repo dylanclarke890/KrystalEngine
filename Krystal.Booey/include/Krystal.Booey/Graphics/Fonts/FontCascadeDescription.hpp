@@ -71,14 +71,17 @@ namespace krys::boo
     {
       return static_cast<uint32>(_families.size());
     }
+
     KRYS_NODISCARD const StringAtom &FirstFamily() const noexcept
     {
       return FamilyAt(0);
     }
+
     KRYS_NODISCARD const StringAtom &FamilyAt(uint32 i) const noexcept
     {
       return _families[i];
     }
+
     KRYS_NODISCARD const List<StringAtom> &Families() const noexcept
     {
       return _families;
@@ -95,18 +98,22 @@ namespace krys::boo
     {
       return _specifiedSize;
     }
+
     KRYS_NODISCARD bool IsAbsoluteSize() const noexcept
     {
       return _isAbsoluteSize;
     }
+
     KRYS_NODISCARD FontSelectionValue LighterWeight() const noexcept
     {
       return LighterWeight(Weight());
     }
+
     KRYS_NODISCARD FontSelectionValue BolderWeight() const noexcept
     {
       return BolderWeight(Weight());
     }
+
     KRYS_NODISCARD static FontSelectionValue LighterWeight(FontSelectionValue) noexcept;
     KRYS_NODISCARD static FontSelectionValue BolderWeight(FontSelectionValue) noexcept;
 
@@ -120,10 +127,12 @@ namespace krys::boo
     {
       return static_cast<boo::Kerning>(_kerning);
     }
+
     KRYS_NODISCARD uint32 KeywordSize() const noexcept
     {
       return _keywordSize;
     }
+
     KRYS_NODISCARD css::ValueId KeywordSizeAsIdentifier() const noexcept
     {
       auto identifier = _keywordSize
@@ -133,11 +142,14 @@ namespace krys::boo
                         || (identifier >= css::ValueId::XxSmall && identifier <= css::ValueId::XxxLarge));
       return identifier;
     }
+
     KRYS_NODISCARD FontSmoothingMode FontSmoothing() const noexcept
     {
       return static_cast<FontSmoothingMode>(_fontSmoothing);
     }
+
     KRYS_NODISCARD FontSmoothingMode UsedFontSmoothing() const noexcept;
+
     KRYS_NODISCARD bool IsSpecifiedFont() const noexcept
     {
       return _isSpecifiedFont;
@@ -148,32 +160,39 @@ namespace krys::boo
       krys_debug_assert(_families.size() == 1);
       _families[0] = family;
     }
+
     void SetFamilies(const List<StringAtom> &families)
     {
       _families = families;
     }
+
     void SetFamilies(List<StringAtom> &&families) noexcept
     {
       _families = krys::move(families);
     }
+
     void SetSpecifiedSize(float s) noexcept
     {
       _specifiedSize = ClampTo<float>(s);
     }
+
     void SetIsAbsoluteSize(bool s) noexcept
     {
       _isAbsoluteSize = s;
     }
+
     void SetKerning(boo::Kerning kerning) noexcept
     {
       _kerning = ToUnderlying(kerning);
     }
+
     void SetKeywordSize(uint32 size) noexcept
     {
       krys_debug_assert(size <= 8);
       _keywordSize = size;
       krys_debug_assert(_keywordSize == size); // Make sure it fits in the bitfield.
     }
+
     void SetKeywordSizeFromIdentifier(css::ValueId identifier) noexcept
     {
       krys_debug_assert(identifier == css::ValueId::Invalid
@@ -184,10 +203,12 @@ namespace krys::boo
                        ? ToUnderlying(identifier) - ToUnderlying(css::ValueId::XxSmall) + 1u
                        : 0u);
     }
+
     void SetFontSmoothing(FontSmoothingMode smoothing) noexcept
     {
       _fontSmoothing = ToUnderlying(smoothing);
     }
+
     void SetIsSpecifiedFont(bool isSpecifiedFont) noexcept
     {
       _isSpecifiedFont = isSpecifiedFont;

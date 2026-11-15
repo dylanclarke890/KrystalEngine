@@ -54,10 +54,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutRect ShapeMarginLogicalBoundingBox() const noexcept override;
+
     KRYS_NODISCARD bool IsEmpty() const noexcept override
     {
       return _bounds.IsEmpty();
     }
+
     KRYS_NODISCARD LineSegment GetExcludedInterval(LayoutUnit logicalTop,
                                                    LayoutUnit logicalHeight) const noexcept override;
 

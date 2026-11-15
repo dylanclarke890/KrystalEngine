@@ -48,7 +48,7 @@ namespace krys::boo
     {
       Unknown,
       Time,
-      Percentage
+      Percentage,
     };
 
     Type _type {Type::Unknown};
@@ -61,6 +61,7 @@ namespace krys::boo
   public:
     constexpr WebAnimationTime() noexcept = default;
     WebAnimationTime(Maybe<Seconds> time, Maybe<double> percentage) noexcept;
+
     constexpr WebAnimationTime(const Seconds &value) noexcept : _type(Type::Time), _value(value.count())
     {
     }

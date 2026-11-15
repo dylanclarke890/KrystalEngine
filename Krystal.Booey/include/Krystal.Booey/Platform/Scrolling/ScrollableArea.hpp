@@ -45,6 +45,7 @@ namespace krys::boo
   class ScrollAnchoringController;
   class ScrollAnimator;
   class ScrollbarsController;
+
   /// @brief Something that scrolls: a scroll position within its contents, its scroll origin, and its
   /// scrollbars, whose overlay scrollbars its scrollbars controller shows and hides.
   // FIXME: Compositing layers.
@@ -57,13 +58,13 @@ namespace krys::boo
     enum class VisibleContentRectIncludesScrollbars : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class AvailableSizeChangeReason : bool
     {
       ScrollbarsChanged,
-      AreaSizeChanged
+      AreaSizeChanged,
     };
 
   private:
@@ -96,6 +97,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsRenderLayer() const noexcept
     {
       return false;
@@ -117,6 +119,7 @@ namespace krys::boo
     void DidStopAnimatedScroll() noexcept;
 
     KRYS_NODISCARD ScrollAnimator &GetScrollAnimator() noexcept;
+
     KRYS_NODISCARD ScrollAnimator *ExistingScrollAnimator() const noexcept
     {
       return _scrollAnimator.get();
@@ -137,10 +140,12 @@ namespace krys::boo
     /// @brief A scroll that didn't snap as it went (an autoscroll, a pan) has ended: snaps to the closest
     /// position, smoothly.
     void SnapAfterScrollEnds() noexcept;
+
     KRYS_NODISCARD bool IsGestureScrollInProgress() const noexcept
     {
       return _isGestureScrollInProgress;
     }
+
     /// @brief Scrolls by @p stepCount steps of @p granularity (a line, a page, the document or a pixel of the
     /// scrollbar in @p direction).
     /// @return Whether it scrolled: false without a scrollbar in that direction, or at its end.
@@ -157,6 +162,7 @@ namespace krys::boo
     /// @return Whether it scrolled: false if it can't scroll, or is at its end in the event's direction.
     virtual bool HandleWheelEventForScrolling(const PlatformWheelEvent &wheelEvent) noexcept;
     KRYS_NODISCARD virtual bool IsScrollableOrRubberbandable() const noexcept = 0;
+
     /// @brief Whether a wheel's notches scroll smoothly (`Settings::ScrollAnimatorEnabled`).
     KRYS_NODISCARD virtual bool ScrollAnimatorEnabled() const noexcept
     {
@@ -174,6 +180,7 @@ namespace krys::boo
     {
       return false;
     }
+
     virtual void StopAsyncAnimatedScroll() noexcept
     {
     }
@@ -182,6 +189,7 @@ namespace krys::boo
     {
       return _scrollClamping;
     }
+
     void SetScrollClamping(ScrollClamping clamping) noexcept
     {
       _scrollClamping = clamping;
@@ -191,6 +199,7 @@ namespace krys::boo
     {
       _verticalScrollElasticity = scrollElasticity;
     }
+
     KRYS_NODISCARD ScrollElasticity VerticalScrollElasticity() const noexcept
     {
       return _verticalScrollElasticity;
@@ -200,6 +209,7 @@ namespace krys::boo
     {
       _horizontalScrollElasticity = scrollElasticity;
     }
+
     KRYS_NODISCARD ScrollElasticity HorizontalScrollElasticity() const noexcept
     {
       return _horizontalScrollElasticity;
@@ -209,10 +219,12 @@ namespace krys::boo
     {
       return ScrollbarMode::Auto;
     }
+
     KRYS_NODISCARD virtual ScrollbarMode VerticalScrollbarMode() const noexcept
     {
       return ScrollbarMode::Auto;
     }
+
     KRYS_NODISCARD bool CanHaveScrollbars() const noexcept
     {
       return HorizontalScrollbarMode() != ScrollbarMode::AlwaysOff
@@ -283,6 +295,7 @@ namespace krys::boo
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual Scrollbar *VerticalScrollbar() const noexcept
     {
       return nullptr;
@@ -308,6 +321,7 @@ namespace krys::boo
     {
       return _scrollOrigin;
     }
+
     KRYS_NODISCARD bool ScrollOriginChanged() const noexcept
     {
       return _scrollOriginChanged;
@@ -318,6 +332,7 @@ namespace krys::boo
     {
       return _scrollShouldClearLatchedState;
     }
+
     void SetScrollShouldClearLatchedState(bool shouldClear) noexcept
     {
       _scrollShouldClearLatchedState = shouldClear;
@@ -326,16 +341,19 @@ namespace krys::boo
     KRYS_NODISCARD virtual ScrollPosition GetScrollPosition() const noexcept = 0;
     KRYS_NODISCARD virtual ScrollPosition MinimumScrollPosition() const noexcept;
     KRYS_NODISCARD virtual ScrollPosition MaximumScrollPosition() const noexcept;
+
     KRYS_NODISCARD ScrollPosition ConstrainedScrollPosition(const ScrollPosition &position) const noexcept
     {
       return position.ConstrainedBetween(MinimumScrollPosition(), MaximumScrollPosition());
     }
 
     KRYS_NODISCARD ScrollOffset GetScrollOffset() const noexcept;
+
     KRYS_NODISCARD ScrollOffset MinimumScrollOffset() const noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD ScrollOffset MaximumScrollOffset() const noexcept;
 
     KRYS_NODISCARD ScrollPosition ScrollPositionFromOffset(ScrollOffset offset) const noexcept;
@@ -362,6 +380,7 @@ namespace krys::boo
     {
       return _currentScrollType;
     }
+
     void SetCurrentScrollType(ScrollType scrollType) noexcept
     {
       _currentScrollType = scrollType;
@@ -372,6 +391,7 @@ namespace krys::boo
     {
       return _scrollAnimationStatus;
     }
+
     void SetScrollAnimationStatus(ScrollAnimationStatus status) noexcept
     {
       _scrollAnimationStatus = status;
@@ -379,21 +399,26 @@ namespace krys::boo
 
     KRYS_NODISCARD IntRect VisibleContentRect() const noexcept;
     KRYS_NODISCARD IntRect VisibleContentRectIncludingScrollbars() const noexcept;
+
     KRYS_NODISCARD int32 VisibleWidth() const noexcept
     {
       return VisibleSize().Width();
     }
+
     KRYS_NODISCARD int32 VisibleHeight() const noexcept
     {
       return VisibleSize().Height();
     }
+
     KRYS_NODISCARD virtual IntSize VisibleSize() const noexcept = 0;
 
     KRYS_NODISCARD virtual IntSize ContentsSize() const noexcept = 0;
+
     KRYS_NODISCARD virtual int32 HeaderHeight() const noexcept
     {
       return 0;
     }
+
     KRYS_NODISCARD virtual int32 FooterHeight() const noexcept
     {
       return 0;
@@ -418,6 +443,7 @@ namespace krys::boo
     {
       return _scrollbarOverlayStyle;
     }
+
     /// @brief Sets the overlay scrollbars' style, repainting them.
     void SetScrollbarOverlayStyle(ScrollbarOverlayStyle style) noexcept;
 
@@ -427,9 +453,11 @@ namespace krys::boo
     virtual void MouseEnteredScrollbar(Scrollbar *) const noexcept
     {
     }
+
     virtual void MouseExitedScrollbar(Scrollbar *) const noexcept
     {
     }
+
     virtual void MouseIsDownInScrollbar(Scrollbar *, bool) const noexcept
     {
     }
@@ -460,18 +488,22 @@ namespace krys::boo
     {
       return OverscrollBehavior::Auto;
     }
+
     KRYS_NODISCARD virtual OverscrollBehavior VerticalOverscrollBehavior() const noexcept
     {
       return OverscrollBehavior::Auto;
     }
+
     KRYS_NODISCARD bool HorizontalOverscrollBehaviorPreventsPropagation() const noexcept
     {
       return HorizontalOverscrollBehavior() != OverscrollBehavior::Auto;
     }
+
     KRYS_NODISCARD bool VerticalOverscrollBehaviorPreventsPropagation() const noexcept
     {
       return VerticalOverscrollBehavior() != OverscrollBehavior::Auto;
     }
+
     /// @brief @p biasedDelta, less the axes `overscroll-behavior` stops from scrolling past the area.
     KRYS_NODISCARD FloatSize DeltaForPropagation(const FloatSize &biasedDelta) const noexcept;
     KRYS_NODISCARD bool ShouldBlockScrollPropagation(const FloatSize &biasedDelta) const noexcept;
@@ -503,6 +535,7 @@ namespace krys::boo
     {
       return nullptr;
     }
+
     /// @brief Chooses the scroll anchor if there's none, and queues the area's adjustment after layout.
     void UpdateScrollAnchoringElement() noexcept;
     /// @brief Scrolls by as far as the scroll anchor moved, if the area is queued for that.
@@ -515,6 +548,7 @@ namespace krys::boo
     virtual ~ScrollableArea() noexcept;
 
     void SetScrollOrigin(const IntPoint &origin) noexcept;
+
     void ResetScrollOriginChanged() noexcept
     {
       _scrollOriginChanged = false;
@@ -524,6 +558,7 @@ namespace krys::boo
     {
       return _isAwaitingScrollend;
     }
+
     void SetIsAwaitingScrollend(bool isAwaitingScrollend) noexcept
     {
       _isAwaitingScrollend = isAwaitingScrollend;

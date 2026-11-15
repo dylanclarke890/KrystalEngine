@@ -70,7 +70,7 @@ namespace krys::boo
   enum class IgnoreCollapsedRanges : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   KRYS_NODISCARD bool
@@ -192,6 +192,7 @@ namespace krys::boo
     {
       return !_positionNode;
     }
+
     void Advance() noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
@@ -199,6 +200,7 @@ namespace krys::boo
       krys_debug_assert(!AtEnd());
       return _text;
     }
+
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
     KRYS_NODISCARD dom::Node *GetNode() const noexcept;
 
@@ -207,6 +209,7 @@ namespace krys::boo
       krys_debug_assert(!AtEnd());
       return _copyableText;
     }
+
     void AppendTextToString(utf8_string &builder) const noexcept
     {
       CopyableText().AppendToString(builder);
@@ -279,6 +282,7 @@ namespace krys::boo
     {
       return !_positionNode;
     }
+
     void Advance() noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
@@ -286,7 +290,9 @@ namespace krys::boo
       krys_debug_assert(!AtEnd());
       return _text;
     }
+
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
+
     KRYS_NODISCARD dom::Node *GetNode() const noexcept
     {
       krys_debug_assert(!AtEnd());
@@ -321,18 +327,21 @@ namespace krys::boo
     {
       return _underlyingIterator.AtEnd();
     }
+
     void Advance(int32 numCharacters) noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
     {
       return _underlyingIterator.Text().substr(_runOffset);
     }
+
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
 
     KRYS_NODISCARD bool AtBreak() const noexcept
     {
       return _atBreak;
     }
+
     KRYS_NODISCARD uint32 CharacterOffset() const noexcept
     {
       return _offset;
@@ -354,12 +363,14 @@ namespace krys::boo
     {
       return _underlyingIterator.AtEnd();
     }
+
     void Advance(int32 numCharacters) noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
     {
       return _underlyingIterator.Text().substr(0, _underlyingIterator.Text().size() - _runOffset);
     }
+
     KRYS_NODISCARD dom::SimpleRange Range() const noexcept;
   };
 
@@ -383,6 +394,7 @@ namespace krys::boo
     {
       return !_didLookAhead && _underlyingIterator.AtEnd();
     }
+
     void Advance() noexcept;
     KRYS_NODISCARD utf8_stringview Text() const noexcept;
   };

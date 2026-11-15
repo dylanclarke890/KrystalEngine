@@ -44,10 +44,12 @@ namespace krys::boo::style
     FontSizeAdjust(css::keywords::None) noexcept : _platform {Metric::ExHeight}
     {
     }
+
     FontSizeAdjust(Metric metric, css::keywords::FromFont) noexcept
         : _platform {metric, ValueType::FromFont, std::nullopt}
     {
     }
+
     FontSizeAdjust(Metric metric, Number metricValue) noexcept
         : _platform {metric, ValueType::Number, static_cast<float>(metricValue.Value)}
     {
@@ -61,6 +63,7 @@ namespace krys::boo::style
     {
       return _platform.IsNone();
     }
+
     KRYS_NODISCARD bool IsFromFont() const noexcept
     {
       return _platform.IsFromFont();
@@ -70,10 +73,12 @@ namespace krys::boo::style
     {
       return _platform.MetricType;
     }
+
     KRYS_NODISCARD Maybe<float> MetricValue() const noexcept
     {
       return _platform.Value ? Maybe<float> {*_platform.Value} : std::nullopt;
     }
+
     KRYS_NODISCARD Maybe<float> ResolvedMetricValue(const RenderStyle &) const noexcept;
 
     KRYS_NODISCARD boo::FontSizeAdjust Platform() const noexcept
@@ -94,6 +99,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD FontSizeAdjust operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   // NOTE: `FontSizeAdjust` is special-cased to allow resolution of `from-font`.
   template <>
   struct CSSValueCreation<FontSizeAdjust>

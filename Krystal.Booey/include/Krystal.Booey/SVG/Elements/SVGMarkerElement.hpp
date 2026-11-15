@@ -51,7 +51,7 @@ namespace krys::boo::svg
     {
       SVG_MARKERUNITS_UNKNOWN = krys::ToUnderlying(SVGMarkerUnitsType::Unknown),
       SVG_MARKERUNITS_USERSPACEONUSE = krys::ToUnderlying(SVGMarkerUnitsType::UserSpaceOnUse),
-      SVG_MARKERUNITS_STROKEWIDTH = krys::ToUnderlying(SVGMarkerUnitsType::StrokeWidth)
+      SVG_MARKERUNITS_STROKEWIDTH = krys::ToUnderlying(SVGMarkerUnitsType::StrokeWidth),
     };
 
     enum : uint16
@@ -59,7 +59,7 @@ namespace krys::boo::svg
       SVG_MARKER_ORIENT_UNKNOWN = SVGMarkerOrientUnknown,
       SVG_MARKER_ORIENT_AUTO = SVGMarkerOrientAuto,
       SVG_MARKER_ORIENT_ANGLE = SVGMarkerOrientAngle,
-      SVG_MARKER_ORIENT_AUTO_START_REVERSE = SVGMarkerOrientAutoStartReverse
+      SVG_MARKER_ORIENT_AUTO_START_REVERSE = SVGMarkerOrientAutoStartReverse,
     };
 
     explicit SVGMarkerElement(dom::Document &document) noexcept;
@@ -70,26 +70,32 @@ namespace krys::boo::svg
     {
       return _refX->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &RefY() const noexcept
     {
       return _refY->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &MarkerWidth() const noexcept
     {
       return _markerWidth->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &MarkerHeight() const noexcept
     {
       return _markerHeight->CurrentValue();
     }
+
     KRYS_NODISCARD SVGMarkerUnitsType MarkerUnits() const noexcept
     {
       return _markerUnits->CurrentValue<SVGMarkerUnitsType>();
     }
+
     KRYS_NODISCARD const SVGAngleValue &OrientAngle() const noexcept
     {
       return _orientAngle->CurrentValue();
     }
+
     KRYS_NODISCARD SVGMarkerOrientType OrientType() const noexcept
     {
       return _orientType->CurrentValue<SVGMarkerOrientType>();
@@ -99,26 +105,32 @@ namespace krys::boo::svg
     {
       return *_refX;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &RefYAnimated() noexcept
     {
       return *_refY;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &MarkerWidthAnimated() noexcept
     {
       return *_markerWidth;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &MarkerHeightAnimated() noexcept
     {
       return *_markerHeight;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &MarkerUnitsAnimated() noexcept
     {
       return *_markerUnits;
     }
+
     KRYS_NODISCARD SVGAnimatedAngle &OrientAngleAnimated() noexcept
     {
       return *_orientAngle;
     }
+
     KRYS_NODISCARD Ref<SVGAnimatedEnumeration> OrientTypeAnimated() noexcept
     {
       return _orientType;
@@ -139,14 +151,17 @@ namespace krys::boo::svg
     void OnChildrenChanged() noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
+
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
     {
       return true;
     }
+
     KRYS_NODISCARD bool NeedsPendingResourceHandling() const noexcept final
     {
       return false;
     }
+
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept final;
 
     void InvalidateMarkerResource() noexcept;

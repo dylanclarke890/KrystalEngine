@@ -77,26 +77,32 @@ namespace krys::boo
     {
       return _transitions;
     }
+
     KRYS_NODISCARD size_t NumTransitions() const noexcept
     {
       return _transitions.size();
     }
+
     KRYS_NODISCARD size_t CurrentTransition() const noexcept
     {
       return _currentTransition;
     }
+
     void SetCurrentTransition(size_t currentTransition) noexcept
     {
       _currentTransition = currentTransition;
     }
+
     void IncrementCurrentTransition() noexcept
     {
       ++_currentTransition;
     }
+
     void DecrementNumTransitions() noexcept
     {
       _transitions.pop_back();
     }
+
     KRYS_NODISCARD bool BetweenTransitions() const noexcept
     {
       return _currentTransition % 2;
@@ -200,18 +206,22 @@ namespace krys::boo
     {
       return _start;
     }
+
     KRYS_NODISCARD uint32 Stop() const noexcept
     {
       return _stop;
     }
+
     KRYS_NODISCARD uint8 Level() const noexcept
     {
       return _level;
     }
+
     KRYS_NODISCARD bool Reversed(bool visuallyOrdered) const noexcept
     {
       return _level % 2 && !visuallyOrdered;
     }
+
     KRYS_NODISCARD bool DirOverride(bool visuallyOrdered) const noexcept
     {
       return _override || visuallyOrdered;
@@ -221,10 +231,12 @@ namespace krys::boo
     {
       return _next.get();
     }
+
     KRYS_NODISCARD UniquePtr<BidiCharacterRun> TakeNext() noexcept
     {
       return krys::move(_next);
     }
+
     void SetNext(UniquePtr<BidiCharacterRun> &&next) noexcept
     {
       _next = krys::move(next);
@@ -270,10 +282,12 @@ namespace krys::boo
     {
       return _current;
     }
+
     void SetPositionIgnoringNestedIsolates(const Iterator &position) noexcept
     {
       _current = position;
     }
+
     void SetPosition(const Iterator &position, uint32 nestedIsolatedCount) noexcept
     {
       _current = position;
@@ -289,6 +303,7 @@ namespace krys::boo
     {
       return _status.Context.get();
     }
+
     void SetContext(RefPtr<BidiContext> &&context) noexcept
     {
       _status.Context = krys::move(context);
@@ -298,10 +313,12 @@ namespace krys::boo
     {
       _status.Last = lastDir;
     }
+
     void SetLastStrongDir(UCharDirection lastStrongDir) noexcept
     {
       _status.LastStrong = lastStrongDir;
     }
+
     void SetEorDir(UCharDirection eorDir) noexcept
     {
       _status.Eor = eorDir;
@@ -311,6 +328,7 @@ namespace krys::boo
     {
       return _direction;
     }
+
     void SetDir(UCharDirection direction) noexcept
     {
       _direction = direction;
@@ -320,6 +338,7 @@ namespace krys::boo
     {
       return _status;
     }
+
     void SetStatus(BidiStatus status) noexcept
     {
       _status = krys::move(status);
@@ -337,11 +356,13 @@ namespace krys::boo
     {
       _nestedIsolateCount++;
     }
+
     void ExitIsolate() noexcept
     {
       krys_debug_assert(_nestedIsolateCount >= 1);
       _nestedIsolateCount--;
     }
+
     KRYS_NODISCARD bool InIsolate() const noexcept
     {
       return _nestedIsolateCount;
@@ -402,6 +423,7 @@ namespace krys::boo
     {
       static_cast<DerivedClass &>(*this).AppendRunInternal();
     }
+
     KRYS_NODISCARD bool NeedsContinuePastEnd() const noexcept
     {
       return static_cast<const DerivedClass &>(*this).NeedsContinuePastEndInternal();
@@ -411,7 +433,9 @@ namespace krys::boo
     {
       _current.Increment();
     }
+
     void AppendRunInternal() noexcept;
+
     KRYS_NODISCARD bool NeedsContinuePastEndInternal() const noexcept
     {
       return true;
@@ -442,6 +466,7 @@ namespace krys::boo
 
   public:
     BidiResolverWithIsolate() noexcept = default;
+
     ~BidiResolverWithIsolate() noexcept
     {
       // The owner of this resolver should have handled the isolated runs.

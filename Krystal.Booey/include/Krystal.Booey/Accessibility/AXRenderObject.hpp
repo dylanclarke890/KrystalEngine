@@ -56,14 +56,17 @@ namespace krys::boo
     {
       return !_renderer && AXNodeObject::IsDetached();
     }
+
     KRYS_NODISCARD bool IsAccessibilityRenderObject() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD RenderObject *Renderer() const noexcept override
     {
       return _renderer.get();
     }
+
     /// @brief Sets the renderer, for a node whose renderer was created or destroyed; whether it changed.
     bool SetRendererIfNeeded(RenderObject *renderer) noexcept;
     KRYS_NODISCARD dom::Document *GetDocument() const noexcept override;

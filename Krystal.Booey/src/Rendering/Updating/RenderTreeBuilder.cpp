@@ -76,8 +76,9 @@ namespace krys::boo
     enum class IsRemoval : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     void InvalidateLineLayout(RenderObject &renderer, IsRemoval isRemoval) noexcept
     {
       auto *container = layout_integration::LineLayout::BlockContainer(renderer);

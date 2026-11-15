@@ -37,7 +37,7 @@ namespace krys::boo
     {
       Optimum,
       Suboptimal,
-      EvenLessGood
+      EvenLessGood,
     };
 
   private:

@@ -75,7 +75,7 @@ namespace krys::boo::style
     enum class CustomPropertyCycleTracking : bool
     {
       Enabled,
-      Disabled
+      Disabled,
     };
 
   private:
@@ -102,6 +102,7 @@ namespace krys::boo::style
     {
       ApplyProperties(id, id);
     }
+
     void ApplyCustomProperty(const css::CSSOMStringAtom &name) noexcept;
 
     KRYS_NODISCARD RefPtr<const CustomProperty>

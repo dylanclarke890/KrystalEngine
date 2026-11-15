@@ -52,10 +52,12 @@ namespace krys::boo
     {
       return _x;
     }
+
     KRYS_NODISCARD float Y() const noexcept
     {
       return _y;
     }
+
     KRYS_NODISCARD float Z() const noexcept
     {
       return _z;

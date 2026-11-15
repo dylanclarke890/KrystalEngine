@@ -55,7 +55,7 @@ namespace krys::boo::style
     {
       No,
       Yes,
-      ParentDocument
+      ParentDocument,
     };
 
     using PhysicalDirection = BoxSide;

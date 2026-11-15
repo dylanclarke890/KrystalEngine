@@ -33,50 +33,62 @@ namespace krys::boo::css::tests
     {
       return Primary;
     }
+
     KRYS_NODISCARD bool HoverSupportedByPrimaryPointingDevice() const noexcept override
     {
       return PrimaryHovers;
     }
+
     KRYS_NODISCARD PointerCharacteristics AllAvailablePointingDevices() const noexcept override
     {
       return AllAvailable;
     }
+
     KRYS_NODISCARD bool HoverSupportedByAnyAvailablePointingDevice() const noexcept override
     {
       return AnyHovers;
     }
+
     KRYS_NODISCARD FloatSize ScreenSize() const noexcept override
     {
       return Screen;
     }
+
     KRYS_NODISCARD int32 ScreenDepthPerComponent() const noexcept override
     {
       return DepthPerComponent;
     }
+
     KRYS_NODISCARD bool ScreenIsMonochrome() const noexcept override
     {
       return Monochrome;
     }
+
     KRYS_NODISCARD bool ScreenSupportsExtendedColor() const noexcept override
     {
       return ExtendedColor;
     }
+
     KRYS_NODISCARD bool ScreenSupportsRec2020Color() const noexcept override
     {
       return Rec2020Color;
     }
+
     KRYS_NODISCARD bool ScreenSupportsHighDynamicRange() const noexcept override
     {
       return HighDynamicRange;
     }
+
     KRYS_NODISCARD bool ColorsAreInverted() const noexcept override
     {
       return Inverted;
     }
+
     KRYS_NODISCARD bool UserPrefersContrast() const noexcept override
     {
       return PrefersContrast;
     }
+
     KRYS_NODISCARD bool UserPrefersReducedMotion() const noexcept override
     {
       return PrefersReducedMotion;

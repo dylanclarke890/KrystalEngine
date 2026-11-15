@@ -67,13 +67,13 @@ namespace krys::boo::css
       SelectorMatches,
       SelectorFailsLocally,
       SelectorFailsAllSiblings,
-      SelectorFailsCompletely
+      SelectorFailsCompletely,
     };
 
     enum class MatchType
     {
       VirtualPseudoElementOnly,
-      Element
+      Element,
     };
 
     struct MatchResult
@@ -108,7 +108,7 @@ namespace krys::boo::css
       CollectingRules,
       StyleInvalidation,
       // This is used for querySelector() API
-      QueryingRules
+      QueryingRules,
     };
 
     struct CheckingContext

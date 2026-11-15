@@ -47,10 +47,12 @@ namespace krys::boo::layout
 
   public:
     AvailableLineWidthOverride() noexcept = default;
+
     AvailableLineWidthOverride(LayoutUnit globalLineWidthOverride) noexcept
         : _globalLineWidthOverride(globalLineWidthOverride)
     {
     }
+
     AvailableLineWidthOverride(List<LayoutUnit> individualLineWidthOverrides) noexcept
         : _individualLineWidthOverrides(krys::move(individualLineWidthOverrides))
     {

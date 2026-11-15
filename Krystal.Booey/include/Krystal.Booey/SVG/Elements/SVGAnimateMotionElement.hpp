@@ -41,7 +41,7 @@ namespace krys::boo::svg
     {
       RotateAngle,
       RotateAuto,
-      RotateAutoReverse
+      RotateAutoReverse,
     };
 
   private:

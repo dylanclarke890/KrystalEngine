@@ -57,7 +57,7 @@ namespace krys::boo::layout
       FullFromDamage,
       // Display content represents part of the inline content starting from damaged line until damage stops
       // -result of partial layout with damage that does not cover the entire inline content
-      PartialFromDamage
+      PartialFromDamage,
     };
     Range ContentRange {Range::Full};
     bool DidDiscardContent {false};
@@ -72,7 +72,7 @@ namespace krys::boo::layout
   public:
     enum class EscapeReason : uint8
     {
-      InkOverflowNeedsInitialContiningBlockForStrokeWidth
+      InkOverflowNeedsInitialContiningBlockForStrokeWidth,
     };
 
   private:
@@ -101,14 +101,17 @@ namespace krys::boo::layout
     {
       return _rootBlockContainer;
     }
+
     KRYS_NODISCARD const InlineFormattingUtils &FormattingUtils() const noexcept
     {
       return _inlineFormattingUtils;
     }
+
     KRYS_NODISCARD const InlineQuirks &Quirks() const noexcept
     {
       return _inlineQuirks;
     }
+
     KRYS_NODISCARD const FloatingContext &GetFloatingContext() const noexcept
     {
       return _floatingContext;
@@ -118,6 +121,7 @@ namespace krys::boo::layout
     {
       return _inlineLayoutState;
     }
+
     KRYS_NODISCARD const InlineLayoutState &GetLayoutState() const noexcept
     {
       return _inlineLayoutState;

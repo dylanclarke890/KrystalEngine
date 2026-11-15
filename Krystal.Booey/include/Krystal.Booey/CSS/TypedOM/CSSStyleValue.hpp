@@ -69,7 +69,7 @@ namespace krys::boo::css
     CSSRGB,
     CSSUnitValue,
     CSSUnparsedValue,
-    CSSKeywordValue
+    CSSKeywordValue,
   };
 
   KRYS_NODISCARD constexpr bool IsCSSNumericValue(CSSStyleValueType type) noexcept
@@ -227,6 +227,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD virtual RefPtr<Value> ToCSSValue() const noexcept;
+
     KRYS_NODISCARD virtual RefPtr<Value> ToCSSValueWithProperty(PropertyId) const noexcept
     {
       return ToCSSValue();

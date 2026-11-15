@@ -338,37 +338,37 @@ namespace krys::ui
     boo::DoubleSize _gamepadScrollRemainder;
 
     // FIXME: The system's double click time and distance, once the host reports them.
-    static constexpr std::chrono::milliseconds DoubleClickTime {500};
-    static constexpr int32 DoubleClickDistance {2};
+    constexpr static std::chrono::milliseconds DoubleClickTime {500};
+    constexpr static int32 DoubleClickDistance {2};
 
     // FIXME: The system's touch thresholds, once the host reports them.
     /// @brief How near a tap is to the last for the two to be a double tap.
-    static constexpr int32 DoubleTapDistance {20};
+    constexpr static int32 DoubleTapDistance {20};
     /// @brief How far a touch moves before it's a pan, not a tap.
-    static constexpr double PanThreshold {10};
+    constexpr static double PanThreshold {10};
     /// @brief How long a still touch is held before it's a long press.
-    static constexpr std::chrono::milliseconds LongPressDuration {500};
+    constexpr static std::chrono::milliseconds LongPressDuration {500};
     /// @brief How far back the pan's positions give the fling its velocity.
-    static constexpr std::chrono::milliseconds FlingSampleWindow {100};
+    constexpr static std::chrono::milliseconds FlingSampleWindow {100};
     /// @brief The slowest pan (in pixels a second) that flings, and the speed a fling stops at.
-    static constexpr double MinimumFlingVelocity {100};
-    static constexpr double StopFlingVelocity {20};
+    constexpr static double MinimumFlingVelocity {100};
+    constexpr static double StopFlingVelocity {20};
     /// @brief How quickly a fling slows: its velocity falls by a factor of e in this many seconds.
-    static constexpr double FlingTimeConstant {0.325};
+    constexpr static double FlingTimeConstant {0.325};
     /// @brief How far a pinch scales the page.
-    static constexpr float MinimumPageScale {1};
-    static constexpr float MaximumPageScale {5};
+    constexpr static float MinimumPageScale {1};
+    constexpr static float MaximumPageScale {5};
 
     /// @brief How long a direction is held on the pad before the focus moves again, and how often it moves
     /// after that.
-    static constexpr std::chrono::milliseconds GamepadRepeatDelay {500};
-    static constexpr std::chrono::milliseconds GamepadRepeatInterval {100};
+    constexpr static std::chrono::milliseconds GamepadRepeatDelay {500};
+    constexpr static std::chrono::milliseconds GamepadRepeatInterval {100};
     /// @brief How far the left stick is pushed before it moves the focus.
-    static constexpr float GamepadStickThreshold {0.5f};
+    constexpr static float GamepadStickThreshold {0.5f};
     /// @brief How fast the right stick scrolls when pushed all the way, in pixels a second.
-    static constexpr double GamepadScrollSpeed {1'500};
+    constexpr static double GamepadScrollSpeed {1'500};
     /// @brief The longest time a frame of the right stick scrolls for, so a long frame doesn't jump.
-    static constexpr std::chrono::milliseconds GamepadMaximumScrollStep {100};
+    constexpr static std::chrono::milliseconds GamepadMaximumScrollStep {100};
 
   public:
     /// @brief A view of an empty document, with a viewport of @p viewportSize (at a device scale factor of
@@ -513,6 +513,7 @@ namespace krys::ui
     /// (`contextmenu` as it lifts); two pinch, scaling the page about the point between them.
     /// @return Whether the page cancelled or handled the touch event.
     bool TouchInput(const boo::DoublePoint &point, const pal::PointerInput &input) noexcept;
+
     /// @brief The touches on the screen.
     KRYS_NODISCARD uint32 TouchCount() const noexcept
     {
@@ -531,6 +532,7 @@ namespace krys::ui
     {
       _screenOrigin = origin;
     }
+
     /// @brief Where the view's top-left corner is on the screen, as the host last said.
     KRYS_NODISCARD const boo::IntPoint &ScreenOrigin() const noexcept
     {
@@ -541,6 +543,7 @@ namespace krys::ui
     /// for its media features (`color-gamut`, `dynamic-range` and `color`). Until the host does, it's sRGB at
     /// 8 bits a component.
     void SetDisplayColour(const pal::DisplayColour &colour) noexcept;
+
     /// @brief What colours the display shows, as the host last said.
     KRYS_NODISCARD const pal::DisplayColour &GetDisplayColour() const noexcept
     {
@@ -580,11 +583,13 @@ namespace krys::ui
     /// Without one, pages can't lock the pointer; a page can't lock it while the window doesn't have focus,
     /// and loses it when the window does.
     void SetPointerLockHandler(Func<bool(bool)> &&handler) noexcept;
+
     /// @brief Whether the pointer is locked for the page.
     KRYS_NODISCARD bool PointerLocked() const noexcept
     {
       return _pointerLocked;
     }
+
     /// @brief The mouse moved by @p movement view pixels (with the system's acceleration; @p
     /// unadjustedMovement, in the device's counts, without it) while the pointer is locked: `mousemove` fires
     /// at the locked element with the movement, in CSS pixels, where the mouse was when it was locked.
@@ -637,6 +642,7 @@ namespace krys::ui
     /// @brief Turns the pads' mapping onto the page on or off (for pages that read the pads themselves); it
     /// starts on.
     void SetGamepadNavigationEnabled(bool enabled) noexcept;
+
     KRYS_NODISCARD bool GamepadNavigationEnabled() const noexcept
     {
       return _gamepadNavigationEnabled;
@@ -683,6 +689,7 @@ namespace krys::ui
     void AttachAccessibility(pal::IWindow &window, const boo::IntPoint &origin = {}) noexcept;
     /// @brief Stops exposing the page to assistive technology.
     void DetachAccessibility() noexcept;
+
     /// @brief What exposes the page to assistive technology; null if it isn't attached.
     KRYS_NODISCARD ViewAccessibility *Accessibility() const noexcept
     {
@@ -764,16 +771,19 @@ namespace krys::ui
     static void PerformMicrotaskCheckpoint() noexcept;
     /// @brief @p button's bit in the DOM's `buttons` bit set.
     KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;
+
     /// @brief Where @p point, in the viewport's CSS pixels, is on the screen, in CSS pixels.
     KRYS_NODISCARD boo::IntPoint ToScreen(const boo::IntPoint &point) const noexcept
     {
       return point + boo::ToIntSize(ToPage(_screenOrigin));
     }
+
     KRYS_NODISCARD boo::DoublePoint ToScreen(const boo::DoublePoint &point) const noexcept
     {
       auto origin = ToPage(boo::DoublePoint(_screenOrigin));
       return boo::DoublePoint(point.X() + origin.X(), point.Y() + origin.Y());
     }
+
     /// @brief The topmost element at @p point, in the viewport's CSS pixels.
     KRYS_NODISCARD boo::dom::Element *HitTestInPage(const boo::IntPoint &point) noexcept;
     /// @brief `MouseWheel` at @p point, in the viewport's CSS pixels.

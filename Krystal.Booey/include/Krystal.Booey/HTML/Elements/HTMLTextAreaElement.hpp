@@ -38,14 +38,14 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTextAreaElement);
 
   private:
-    static constexpr uint32 DefaultRows = 2;
-    static constexpr uint32 DefaultCols = 20;
+    constexpr static uint32 DefaultRows = 2;
+    constexpr static uint32 DefaultCols = 20;
 
     enum WrapMethod : uint8
     {
       NoWrap,
       SoftWrap,
-      HardWrap
+      HardWrap,
     };
 
     mutable dom::DOMString _value;

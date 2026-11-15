@@ -46,7 +46,7 @@ namespace krys::boo::css::calc
       enum class GroupingParenthesis
       {
         Omit,
-        Include
+        Include,
       };
 
       KRYS_NODISCARD CSSOMStringView OpenGroup() const noexcept

@@ -46,7 +46,7 @@ namespace krys::boo::css::calc
     Frequency,
     Resolution,
     Flex,
-    Percent
+    Percent,
   };
 
   /// @see https://drafts.css-houdini.org/css-typed-om-1/#cssnumericvalue-percent-hint
@@ -57,7 +57,7 @@ namespace krys::boo::css::calc
     Time,
     Frequency,
     Resolution,
-    Flex
+    Flex,
   };
 
   /// @see https://drafts.css-houdini.org/css-typed-om-1/#cssnumericvalue-type
@@ -76,7 +76,7 @@ namespace krys::boo::css::calc
         Time = static_cast<uint8>(calc::PercentHint::Time),
         Frequency = static_cast<uint8>(calc::PercentHint::Frequency),
         Resolution = static_cast<uint8>(calc::PercentHint::Resolution),
-        Flex = static_cast<uint8>(calc::PercentHint::Flex)
+        Flex = static_cast<uint8>(calc::PercentHint::Flex),
       };
 
       InternalValue _value;
@@ -318,7 +318,7 @@ namespace krys::boo::css::calc
       Time,
       Frequency,
       Resolution,
-      Flex
+      Flex,
     };
 
     template <Match... M>
@@ -340,17 +340,17 @@ namespace krys::boo::css::calc
     {
       MustBeZero,
       MustBeOneOrZero,
-      MustBeOne
+      MustBeOne,
     };
 
     template <Type::Match match>
-    static constexpr bool ContainsMatch() noexcept
+    constexpr static bool ContainsMatch() noexcept
     {
       return ((M == match) || ...);
     }
 
     template <Type::Match match>
-    static constexpr Check ComputeCheck() noexcept
+    constexpr static Check ComputeCheck() noexcept
     {
       if constexpr (ContainsMatch<match>())
       {
@@ -369,7 +369,7 @@ namespace krys::boo::css::calc
       }
     }
 
-    static constexpr Check ComputeCheck(BaseType baseType) noexcept
+    constexpr static Check ComputeCheck(BaseType baseType) noexcept
     {
       switch (baseType)
       {
@@ -460,7 +460,7 @@ namespace krys::boo::css::calc
   {
     Any,
     Number,
-    NumberOrAngle
+    NumberOrAngle,
   };
 
   template <AllowedTypes allowed>
@@ -484,7 +484,7 @@ namespace krys::boo::css::calc
   enum class MergePolicy
   {
     Same,
-    Consistent
+    Consistent,
   };
 
   template <MergePolicy Policy>

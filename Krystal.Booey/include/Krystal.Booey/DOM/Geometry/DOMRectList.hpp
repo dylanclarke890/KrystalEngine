@@ -55,10 +55,12 @@ namespace krys::boo::dom
     {
       return AdoptRef(*new DOMRectList(quads));
     }
+
     KRYS_NODISCARD static Ref<DOMRectList> Create(const List<FloatRect> &rects) noexcept
     {
       return AdoptRef(*new DOMRectList(rects));
     }
+
     KRYS_NODISCARD static Ref<DOMRectList> Create() noexcept
     {
       return AdoptRef(*new DOMRectList());

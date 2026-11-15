@@ -75,10 +75,12 @@ namespace krys::boo::css
     {
       RefCounted::AddRef();
     }
+
     void SubRef() const noexcept final
     {
       RefCounted::SubRef();
     }
+
     KRYS_NODISCARD uint32 GetRefCount() const noexcept final
     {
       return RefCounted::GetRefCount();

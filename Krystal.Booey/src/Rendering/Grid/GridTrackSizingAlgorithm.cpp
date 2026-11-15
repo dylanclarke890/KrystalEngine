@@ -438,6 +438,7 @@ namespace krys::boo
     {
       return *_gridItem;
     }
+
     KRYS_NODISCARD GridSpan Span() const noexcept
     {
       return _span;
@@ -1896,18 +1897,22 @@ namespace krys::boo
     bool RecomputeUsedFlexFractionIfNeeded(double &flexFraction,
                                            LayoutUnit &totalGrowth) const noexcept override;
     KRYS_NODISCARD LayoutUnit FreeSpaceForStretchAutoTracksStep() const noexcept override;
+
     KRYS_NODISCARD bool IsComputingSizeContainment() const noexcept override
     {
       return GetRenderGrid()->ShouldApplySizeContainment();
     }
+
     KRYS_NODISCARD bool IsComputingInlineSizeContainment() const noexcept override
     {
       return GetRenderGrid()->ShouldApplyInlineSizeContainment();
     }
+
     KRYS_NODISCARD bool IsComputingSizeOrInlineSizeContainment() const noexcept override
     {
       return GetRenderGrid()->ShouldApplySizeOrInlineSizeContainment();
     }
+
     void AccumulateFlexFraction(double &flexFraction, GridIterator &iterator,
                                 GridTrackSizingDirection outermostDirection,
                                 HashSet<const RenderBox *> &itemsSet,
@@ -2177,14 +2182,17 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit
       MinLogicalSizeForGridItem(RenderBox &gridItem, const style::MinimumSize &gridItemMinSize,
                                 Maybe<LayoutUnit> availableSize) const noexcept override;
+
     KRYS_NODISCARD bool IsComputingSizeContainment() const noexcept override
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsComputingInlineSizeContainment() const noexcept override
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsComputingSizeOrInlineSizeContainment() const noexcept override
     {
       return false;

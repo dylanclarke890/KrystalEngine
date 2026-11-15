@@ -52,42 +52,52 @@ namespace krys::boo::style
     {
       return Primary() == PrimaryKind::Normal;
     }
+
     KRYS_NODISCARD constexpr bool IsBaseline() const noexcept
     {
       return Primary() == PrimaryKind::Baseline;
     }
+
     KRYS_NODISCARD constexpr bool IsSpaceBetween() const noexcept
     {
       return Primary() == PrimaryKind::SpaceBetween;
     }
+
     KRYS_NODISCARD constexpr bool IsSpaceAround() const noexcept
     {
       return Primary() == PrimaryKind::SpaceAround;
     }
+
     KRYS_NODISCARD constexpr bool IsSpaceEvenly() const noexcept
     {
       return Primary() == PrimaryKind::SpaceEvenly;
     }
+
     KRYS_NODISCARD constexpr bool IsStretch() const noexcept
     {
       return Primary() == PrimaryKind::Stretch;
     }
+
     KRYS_NODISCARD constexpr bool IsCenter() const noexcept
     {
       return Primary() == PrimaryKind::Center;
     }
+
     KRYS_NODISCARD constexpr bool IsStart() const noexcept
     {
       return Primary() == PrimaryKind::Start;
     }
+
     KRYS_NODISCARD constexpr bool IsEnd() const noexcept
     {
       return Primary() == PrimaryKind::End;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexStart() const noexcept
     {
       return Primary() == PrimaryKind::FlexStart;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexEnd() const noexcept
     {
       return Primary() == PrimaryKind::FlexEnd;
@@ -98,6 +108,7 @@ namespace krys::boo::style
       return Primary() == PrimaryKind::Baseline
              && GetBaselineAlignmentPreference() == BaselineAlignmentPreferenceKind::First;
     }
+
     KRYS_NODISCARD constexpr bool IsLastBaseline() const noexcept
     {
       return Primary() == PrimaryKind::Baseline
@@ -142,6 +153,7 @@ namespace krys::boo::style
     uint8 _secondary : 2 {
       0}; // unused, BaselineAlignmentPreferenceKind or OverflowPositionKind, depending on value of _primary
   };
+
   static_assert(sizeof(AlignContent) == 1);
 
   constexpr AlignContent::AlignContent(css::keywords::Normal) noexcept : AlignContent {PrimaryKind::Normal}
@@ -163,6 +175,7 @@ namespace krys::boo::style
       : AlignContent {PrimaryKind::SpaceAround}
   {
   }
+
   constexpr AlignContent::AlignContent(css::keywords::SpaceEvenly) noexcept
       : AlignContent {PrimaryKind::SpaceEvenly}
   {

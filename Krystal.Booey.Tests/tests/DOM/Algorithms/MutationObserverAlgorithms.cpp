@@ -139,6 +139,7 @@ namespace krys::boo::dom::tests
         Bubbles = event.Bubbles();
       }
     };
+
     auto counter = CreateRef<Counter>();
     slot->AddEventListener(u8"slotchange", counter, false);
 

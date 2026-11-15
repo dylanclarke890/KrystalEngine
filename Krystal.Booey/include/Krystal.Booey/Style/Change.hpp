@@ -43,7 +43,7 @@ namespace krys::boo::style
     Inherited,
     FastPathInherited,
     Container,
-    Renderer
+    Renderer,
   };
 
   KRYS_NODISCARD constexpr EnumSet<Change> InheritedChanges() noexcept

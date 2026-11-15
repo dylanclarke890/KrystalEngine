@@ -61,6 +61,7 @@ namespace krys::boo
 
   public:
     RenderRange() noexcept = default;
+
     RenderRange(RenderObject *start, RenderObject *end, uint32 startOffset, uint32 endOffset) noexcept
         : _start(CreateWeakPtr(start)), _end(CreateWeakPtr(end)), _startOffset(startOffset),
           _endOffset(endOffset)
@@ -71,14 +72,17 @@ namespace krys::boo
     {
       return _start.get();
     }
+
     KRYS_NODISCARD RenderObject *End() const noexcept
     {
       return _end.get();
     }
+
     KRYS_NODISCARD uint32 StartOffset() const noexcept
     {
       return _startOffset;
     }
+
     KRYS_NODISCARD uint32 EndOffset() const noexcept
     {
       return _endOffset;
@@ -110,6 +114,7 @@ namespace krys::boo
     {
       return _current;
     }
+
     RenderObject *Next() noexcept;
 
   private:
@@ -126,10 +131,11 @@ namespace krys::boo
   public:
     enum IsSelectionTag
     {
-      IsSelection
+      IsSelection,
     };
 
     RenderHighlight() noexcept = default;
+
     explicit RenderHighlight(IsSelectionTag) noexcept : _isSelection(true)
     {
     }
@@ -138,6 +144,7 @@ namespace krys::boo
     /// @brief The render range a highlight range's positions cover.
     /// @return Whether it has one: both positions are set and their containers have renderers.
     bool SetRenderRange(const dom::HighlightRange &highlightRange) noexcept;
+
     KRYS_NODISCARD const RenderRange &Get() const noexcept
     {
       return _renderRange;
@@ -147,6 +154,7 @@ namespace krys::boo
     {
       return _renderRange.Start();
     }
+
     KRYS_NODISCARD RenderObject *End() const noexcept
     {
       return _renderRange.End();
@@ -156,6 +164,7 @@ namespace krys::boo
     {
       return _renderRange.StartOffset();
     }
+
     KRYS_NODISCARD uint32 EndOffset() const noexcept
     {
       return _renderRange.EndOffset();

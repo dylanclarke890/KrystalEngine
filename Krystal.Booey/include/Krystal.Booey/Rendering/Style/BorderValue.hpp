@@ -46,6 +46,7 @@ namespace krys::boo
     {
       return static_cast<BorderStyle>(Style) == BorderStyle::Hidden;
     }
+
     KRYS_NODISCARD bool HasVisibleStyle() const noexcept
     {
       return static_cast<BorderStyle>(Style) > BorderStyle::Hidden;

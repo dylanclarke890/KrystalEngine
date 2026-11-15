@@ -67,7 +67,7 @@ namespace krys::boo::css::calc
     enum class ParseStatus
     {
       Ok,
-      TooDeep
+      TooDeep,
     };
 
     struct ParserState

@@ -61,571 +61,683 @@ namespace krys::boo::style
   {
     return std::forward<T>(value);
   }
+
   template <auto R, typename V>
   KRYS_NODISCARD inline Length<R, V> ForwardInheritedValue(const Length<R, V> &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline AccentColor ForwardInheritedValue(const AccentColor &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline AnchorNames ForwardInheritedValue(const AnchorNames &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline AspectRatio ForwardInheritedValue(const AspectRatio &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BackgroundSize ForwardInheritedValue(const BackgroundSize &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BlockEllipsis ForwardInheritedValue(const BlockEllipsis &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BlockStepSize ForwardInheritedValue(const BlockStepSize &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BorderImageSource ForwardInheritedValue(const BorderImageSource &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BorderImageSlice ForwardInheritedValue(const BorderImageSlice &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BorderImageWidth ForwardInheritedValue(const BorderImageWidth &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BorderImageOutset ForwardInheritedValue(const BorderImageOutset &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BorderImageRepeat ForwardInheritedValue(const BorderImageRepeat &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BorderRadiusValue ForwardInheritedValue(const BorderRadiusValue &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BorderSpacing ForwardInheritedValue(const BorderSpacing &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline BoxShadows ForwardInheritedValue(const BoxShadows &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ContainIntrinsicSize ForwardInheritedValue(const ContainIntrinsicSize &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ContainerNames ForwardInheritedValue(const ContainerNames &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Content ForwardInheritedValue(const Content &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline boo::Color ForwardInheritedValue(const boo::Color &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Color ForwardInheritedValue(const Color &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline EasingFunction ForwardInheritedValue(const EasingFunction &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline GapGutter ForwardInheritedValue(const GapGutter &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline FontFamilies ForwardInheritedValue(const FontFamilies &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline FilterOperations ForwardInheritedValue(const FilterOperations &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ScrollMarginEdge ForwardInheritedValue(const ScrollMarginEdge &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ScrollPaddingEdge ForwardInheritedValue(const ScrollPaddingEdge &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline MaskBorderSource ForwardInheritedValue(const MaskBorderSource &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline MaskBorderSlice ForwardInheritedValue(const MaskBorderSlice &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline MaskBorderWidth ForwardInheritedValue(const MaskBorderWidth &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline MaskBorderOutset ForwardInheritedValue(const MaskBorderOutset &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline MaskBorderRepeat ForwardInheritedValue(const MaskBorderRepeat &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline MarginEdge ForwardInheritedValue(const MarginEdge &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline PaddingEdge ForwardInheritedValue(const PaddingEdge &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ImageOrNone ForwardInheritedValue(const ImageOrNone &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline InsetEdge ForwardInheritedValue(const InsetEdge &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Perspective ForwardInheritedValue(const Perspective &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Quotes ForwardInheritedValue(const Quotes &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Rotate ForwardInheritedValue(const Rotate &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Scale ForwardInheritedValue(const Scale &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Translate ForwardInheritedValue(const Translate &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline PreferredSize ForwardInheritedValue(const PreferredSize &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline MinimumSize ForwardInheritedValue(const MinimumSize &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline MaximumSize ForwardInheritedValue(const MaximumSize &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Filter ForwardInheritedValue(const Filter &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline FlexBasis ForwardInheritedValue(const FlexBasis &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline DynamicRangeLimit ForwardInheritedValue(const DynamicRangeLimit &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Clip ForwardInheritedValue(const Clip &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ClipPath ForwardInheritedValue(const ClipPath &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline CornerShapeValue ForwardInheritedValue(const CornerShapeValue &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline GridPosition ForwardInheritedValue(const GridPosition &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline GridTemplateAreas ForwardInheritedValue(const GridTemplateAreas &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline GridTemplateList ForwardInheritedValue(const GridTemplateList &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline GridTrackSizes ForwardInheritedValue(const GridTrackSizes &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline HyphenateCharacter ForwardInheritedValue(const HyphenateCharacter &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ItemTolerance ForwardInheritedValue(const ItemTolerance &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline LetterSpacing ForwardInheritedValue(const LetterSpacing &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline LineHeight ForwardInheritedValue(const LineHeight &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ListStyleType ForwardInheritedValue(const ListStyleType &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline NameScope ForwardInheritedValue(const NameScope &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline OffsetAnchor ForwardInheritedValue(const OffsetAnchor &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline OffsetDistance ForwardInheritedValue(const OffsetDistance &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline OffsetPath ForwardInheritedValue(const OffsetPath &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline OffsetPosition ForwardInheritedValue(const OffsetPosition &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline OffsetRotate ForwardInheritedValue(const OffsetRotate &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Position ForwardInheritedValue(const Position &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline PositionAnchor ForwardInheritedValue(const PositionAnchor &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline PositionTryFallbacks ForwardInheritedValue(const PositionTryFallbacks &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline PositionX ForwardInheritedValue(const PositionX &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline PositionY ForwardInheritedValue(const PositionY &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline RepeatStyle ForwardInheritedValue(const RepeatStyle &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGBaselineShift ForwardInheritedValue(const SVGBaselineShift &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGCenterCoordinateComponent
     ForwardInheritedValue(const SVGCenterCoordinateComponent &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGCoordinateComponent
     ForwardInheritedValue(const SVGCoordinateComponent &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGMarkerResource ForwardInheritedValue(const SVGMarkerResource &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGPathData ForwardInheritedValue(const SVGPathData &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGPaint ForwardInheritedValue(const SVGPaint &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGRadius ForwardInheritedValue(const SVGRadius &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGRadiusComponent ForwardInheritedValue(const SVGRadiusComponent &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGStrokeDasharray ForwardInheritedValue(const SVGStrokeDasharray &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SVGStrokeDashoffset ForwardInheritedValue(const SVGStrokeDashoffset &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ScrollSnapAlign ForwardInheritedValue(const ScrollSnapAlign &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ScrollSnapType ForwardInheritedValue(const ScrollSnapType &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ScrollbarColor ForwardInheritedValue(const ScrollbarColor &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ScrollbarGutter ForwardInheritedValue(const ScrollbarGutter &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ShapeMargin ForwardInheritedValue(const ShapeMargin &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ShapeOutside ForwardInheritedValue(const ShapeOutside &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SingleAnimationName ForwardInheritedValue(const SingleAnimationName &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SingleAnimationRangeStart
     ForwardInheritedValue(const SingleAnimationRangeStart &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SingleAnimationRangeEnd
     ForwardInheritedValue(const SingleAnimationRangeEnd &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SingleAnimationRange ForwardInheritedValue(const SingleAnimationRange &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SingleAnimationTimeline
     ForwardInheritedValue(const SingleAnimationTimeline &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline SingleTransitionProperty
     ForwardInheritedValue(const SingleTransitionProperty &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline StrokeWidth ForwardInheritedValue(const StrokeWidth &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline TabSize ForwardInheritedValue(const TabSize &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline TextDecorationLine ForwardInheritedValue(const TextDecorationLine &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline TextDecorationThickness
     ForwardInheritedValue(const TextDecorationThickness &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline TextEmphasisStyle ForwardInheritedValue(const TextEmphasisStyle &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline TextIndent ForwardInheritedValue(const TextIndent &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline TextShadows ForwardInheritedValue(const TextShadows &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline TextUnderlineOffset ForwardInheritedValue(const TextUnderlineOffset &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline URL ForwardInheritedValue(const URL &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline FixedVector<PositionTryFallback>
     ForwardInheritedValue(const FixedVector<PositionTryFallback> &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ProgressTimelineAxes ForwardInheritedValue(const ProgressTimelineAxes &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ProgressTimelineNames
     ForwardInheritedValue(const ProgressTimelineNames &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ScrollTimelines ForwardInheritedValue(const ScrollTimelines &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline Transform ForwardInheritedValue(const Transform &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline VerticalAlign ForwardInheritedValue(const VerticalAlign &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ViewTimelineInsets ForwardInheritedValue(const ViewTimelineInsets &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline ViewTimelines ForwardInheritedValue(const ViewTimelines &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline WebkitInitialLetter ForwardInheritedValue(const WebkitInitialLetter &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline WillChange ForwardInheritedValue(const WillChange &value) noexcept
   {
     auto copy = value;
     return copy;
   }
+
   KRYS_NODISCARD inline WordSpacing ForwardInheritedValue(const WordSpacing &value) noexcept
   {
     auto copy = value;
@@ -684,8 +796,9 @@ namespace krys::boo::style
     {
       Increment,
       Reset,
-      Set
+      Set,
     };
+
     template <CounterBehavior>
     static void ApplyInheritCounter(BuilderState &) noexcept;
     template <CounterBehavior>

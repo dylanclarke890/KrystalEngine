@@ -52,15 +52,15 @@ namespace krys::boo::dom
     enum class IsCancelable : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     /// @see https://w3c.github.io/uievents/#dom-wheelevent-dom_delta_pixel
-    static constexpr uint32 DOM_DELTA_PIXEL = 0x00;
+    constexpr static uint32 DOM_DELTA_PIXEL = 0x00;
     /// @see https://w3c.github.io/uievents/#dom-wheelevent-dom_delta_line
-    static constexpr uint32 DOM_DELTA_LINE = 0x01;
+    constexpr static uint32 DOM_DELTA_LINE = 0x01;
     /// @see https://w3c.github.io/uievents/#dom-wheelevent-dom_delta_page
-    static constexpr uint32 DOM_DELTA_PAGE = 0x02;
+    constexpr static uint32 DOM_DELTA_PAGE = 0x02;
 
   private:
     double _deltaX {0};
@@ -88,17 +88,20 @@ namespace krys::boo::dom
     {
       return _deltaX;
     }
+
     /// @brief Positive when scrolling down.
     /// @see https://w3c.github.io/uievents/#dom-wheelevent-deltay
     KRYS_NODISCARD double DeltaY() const noexcept
     {
       return _deltaY;
     }
+
     /// @see https://w3c.github.io/uievents/#dom-wheelevent-deltaz
     KRYS_NODISCARD double DeltaZ() const noexcept
     {
       return _deltaZ;
     }
+
     /// @see https://w3c.github.io/uievents/#dom-wheelevent-deltamode
     KRYS_NODISCARD uint32 DeltaMode() const noexcept
     {

@@ -35,7 +35,7 @@ namespace krys::boo::css
   enum class LightDarkColorAppearance : bool
   {
     Light,
-    Dark
+    Dark,
   };
 
   struct LightDarkColor

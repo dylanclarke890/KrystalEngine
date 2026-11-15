@@ -736,11 +736,13 @@ namespace krys::boo::tests
         void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
         {
         }
+
         KRYS_NODISCARD Maybe<ScrollbarOverlayStyle> PreferredScrollbarOverlayStyle() const noexcept override
         {
           return ScrollbarOverlayStyle::Light;
         }
       };
+
       auto chrome = CreateUnique<LightScrollbarsChromeClient>();
       auto testPage = Page::Create(krys::move(chrome));
       PageInFrameFixture fixture(*testPage, page(u8"white"));

@@ -42,7 +42,7 @@ namespace krys::boo::html
   enum class RadioNodeListCandidates : uint8
   {
     ListedElements,
-    Images
+    Images,
   };
 
   /// @brief The listed elements of a form with an ID or name, as its named getter returns them when there are

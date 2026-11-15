@@ -92,6 +92,7 @@ namespace krys::boo
     {
       return _animationName.Name;
     }
+
     KRYS_NODISCARD const style::ScopedName &ScopedAnimationName() const noexcept
     {
       return _animationName;
@@ -110,6 +111,7 @@ namespace krys::boo
     {
       return _backingStyleAnimation;
     }
+
     void SetBackingStyleAnimation(const style::Animation &backingStyleAnimation) noexcept;
 
   private:

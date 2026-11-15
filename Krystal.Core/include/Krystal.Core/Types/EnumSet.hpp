@@ -177,7 +177,7 @@ namespace krys
 
     friend constexpr bool operator==(const EnumSet &, const EnumSet &) noexcept = default;
 
-    constexpr friend EnumSet operator|(EnumSet lhs, EnumSet rhs) noexcept
+    friend constexpr EnumSet operator|(EnumSet lhs, EnumSet rhs) noexcept
     {
       return FromRaw(lhs._storage | rhs._storage);
     }
@@ -188,17 +188,17 @@ namespace krys
       return *this;
     }
 
-    constexpr friend EnumSet operator&(EnumSet lhs, EnumSet rhs) noexcept
+    friend constexpr EnumSet operator&(EnumSet lhs, EnumSet rhs) noexcept
     {
       return FromRaw(lhs._storage & rhs._storage);
     }
 
-    constexpr friend EnumSet operator-(EnumSet lhs, EnumSet rhs) noexcept
+    friend constexpr EnumSet operator-(EnumSet lhs, EnumSet rhs) noexcept
     {
       return FromRaw(lhs._storage & ~rhs._storage);
     }
 
-    constexpr friend EnumSet operator^(EnumSet lhs, EnumSet rhs) noexcept
+    friend constexpr EnumSet operator^(EnumSet lhs, EnumSet rhs) noexcept
     {
       return FromRaw(lhs._storage ^ rhs._storage);
     }
@@ -216,7 +216,7 @@ namespace krys
 
     enum InitializationTag
     {
-      FromRawValue
+      FromRawValue,
     };
 
     constexpr EnumSet(StorageType rawValue, InitializationTag) noexcept : _storage(rawValue)

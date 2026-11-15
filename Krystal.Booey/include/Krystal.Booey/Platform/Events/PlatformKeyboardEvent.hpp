@@ -170,14 +170,17 @@ namespace krys::boo
     {
       return _handledByInputMethod;
     }
+
     KRYS_NODISCARD const Maybe<List<CompositionUnderline>> &PreeditUnderlines() const noexcept
     {
       return _preeditUnderlines;
     }
+
     KRYS_NODISCARD const Maybe<uint64> &PreeditSelectionRangeStart() const noexcept
     {
       return _preeditSelectionRangeStart;
     }
+
     KRYS_NODISCARD const Maybe<uint64> &PreeditSelectionRangeLength() const noexcept
     {
       return _preeditSelectionRangeLength;

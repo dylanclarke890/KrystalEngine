@@ -66,7 +66,7 @@ namespace krys::text
         current++;
 
         uint32 type = LookupTable[byte];
-        codePoint = (state != Accept) ? (byte & 0x3FU) | (codePoint << 6) : (0xFF >> type) & (byte);
+        codePoint = (state != Accept) ? (byte & 0x3Fu) | (codePoint << 6) : (0xFF >> type) & (byte);
         state = LookupTable[256uz + state + type];
 
         if (state == Accept)

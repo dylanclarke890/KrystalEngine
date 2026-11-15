@@ -54,7 +54,7 @@ namespace krys::boo::css
     enum class Formality : bool
     {
       Informal,
-      Formal
+      Formal,
     };
 
     // This table format was derived from an old draft of the CSS specification: 3 group markers, 3 digit
@@ -81,7 +81,7 @@ namespace krys::boo::css
         Digit7,
         Digit8,
         Digit9,
-        NegativeSign
+        NegativeSign,
       };
 
       if (!number)
@@ -367,7 +367,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyle::CounterForSystemSimplifiedChineseInformal(int32 value) noexcept
   {
-    static constexpr Array<char32, 17> simplifiedChineseInformalTable {
+    constexpr static Array<char32, 17> simplifiedChineseInformalTable {
       0x842C, 0x5104, 0x5146, // These three group markers are probably wrong; OK because we don't use this on
                               // big enough numbers.
       0x5341, 0x767E, 0x5343, 0x96F6, 0x4E00, 0x4E8C, 0x4E09, 0x56DB, 0x4E94, 0x516D, 0x4E03, 0x516B, 0x4E5D,
@@ -377,7 +377,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyle::CounterForSystemSimplifiedChineseFormal(int32 value) noexcept
   {
-    static constexpr Array<char32, 17> simplifiedChineseFormalTable {
+    constexpr static Array<char32, 17> simplifiedChineseFormalTable {
       0x842C, 0x5104, 0x5146, // These three group markers are probably wrong; OK because we don't use this on
                               // big enough numbers.
       0x62FE, 0x4F70, 0x4EDF, 0x96F6, 0x58F9, 0x8D30, 0x53C1, 0x8086, 0x4F0D, 0x9646, 0x67D2, 0x634C, 0x7396,
@@ -387,7 +387,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyle::CounterForSystemTraditionalChineseInformal(int32 value) noexcept
   {
-    static constexpr Array<char32, 17> traditionalChineseInformalTable {
+    constexpr static Array<char32, 17> traditionalChineseInformalTable {
       0x842C, 0x5104, 0x5146, 0x5341, 0x767E, 0x5343, 0x96F6, 0x4E00, 0x4E8C,
       0x4E09, 0x56DB, 0x4E94, 0x516D, 0x4E03, 0x516B, 0x4E5D, 0x8CA0};
     return CounterForSystemCJK(value, traditionalChineseInformalTable, Formality::Informal);
@@ -395,7 +395,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyle::CounterForSystemTraditionalChineseFormal(int32 value) noexcept
   {
-    static constexpr Array<char32, 17> traditionalChineseFormalTable {
+    constexpr static Array<char32, 17> traditionalChineseFormalTable {
       0x842C, 0x5104, 0x5146, // These three group markers are probably wrong; OK because we don't use this on
                               // big enough numbers.
       0x62FE, 0x4F70, 0x4EDF, 0x96F6, 0x58F9, 0x8CB3, 0x53C3, 0x8086, 0x4F0D, 0x9678, 0x67D2, 0x634C, 0x7396,

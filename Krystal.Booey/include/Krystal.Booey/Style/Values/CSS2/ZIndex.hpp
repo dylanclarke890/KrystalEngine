@@ -65,10 +65,12 @@ namespace krys::boo::style
     {
       return _isAuto;
     }
+
     KRYS_NODISCARD constexpr bool IsValue() const noexcept
     {
       return !_isAuto;
     }
+
     KRYS_NODISCARD constexpr Maybe<Value> TryValue() const noexcept
     {
       return IsValue() ? Maybe<Value> {_value} : null;

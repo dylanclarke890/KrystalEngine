@@ -51,6 +51,7 @@ namespace krys::ui
       WeakPtr<boo::NativeImage> Image;
       gfx::TextureHandle Texture {};
     };
+
     /// @brief The native images uploaded, by rendering resource identifier.
     HashMap<uint64, UploadedImage> _uploaded;
     /// @brief Evaluates filter graphs, made on first use.

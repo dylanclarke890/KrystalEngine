@@ -1239,5 +1239,4 @@ namespace krys::boo::tests
       CHECK(Count(fixture.Drawn(), "draw-focus-ring-path") == 1u);
     }
   }
-
 }

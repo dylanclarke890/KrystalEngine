@@ -147,8 +147,8 @@ namespace krys::boo::html
 
       // 3c. If x is negative, set x to 0.
       // 3d. If y is negative, set y to 0.
-      x = std::max(x, 0L);
-      y = std::max(y, 0L);
+      x = std::max(x, 0l);
+      y = std::max(y, 0l);
 
       // 3e. Set hyperlinkSuffix to the concatenation of U+003F (?), the value of x expressed as a base-ten
       //     integer using ASCII digits, U+002C (,), and the value of y expressed as a base-ten integer using

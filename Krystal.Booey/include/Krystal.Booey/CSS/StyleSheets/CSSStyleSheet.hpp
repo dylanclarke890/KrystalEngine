@@ -82,13 +82,13 @@ namespace krys::boo::css
       OtherMutation,
       RuleInsertion,
       KeyframesRuleMutation,
-      RuleReplace
+      RuleReplace,
     };
 
     enum class ContentsClonedForMutation : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     /// @brief Notifies the style sheet before and after its rules change.

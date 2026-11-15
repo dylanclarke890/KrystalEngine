@@ -58,38 +58,47 @@ namespace krys::boo::svg
     {
       return _azimuth->CurrentValue();
     }
+
     KRYS_NODISCARD float Elevation() const noexcept
     {
       return _elevation->CurrentValue();
     }
+
     KRYS_NODISCARD float X() const noexcept
     {
       return _x->CurrentValue();
     }
+
     KRYS_NODISCARD float Y() const noexcept
     {
       return _y->CurrentValue();
     }
+
     KRYS_NODISCARD float Z() const noexcept
     {
       return _z->CurrentValue();
     }
+
     KRYS_NODISCARD float PointsAtX() const noexcept
     {
       return _pointsAtX->CurrentValue();
     }
+
     KRYS_NODISCARD float PointsAtY() const noexcept
     {
       return _pointsAtY->CurrentValue();
     }
+
     KRYS_NODISCARD float PointsAtZ() const noexcept
     {
       return _pointsAtZ->CurrentValue();
     }
+
     KRYS_NODISCARD float SpecularExponent() const noexcept
     {
       return _specularExponent->CurrentValue();
     }
+
     KRYS_NODISCARD float LimitingConeAngle() const noexcept
     {
       return _limitingConeAngle->CurrentValue();
@@ -99,38 +108,47 @@ namespace krys::boo::svg
     {
       return *_azimuth;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &ElevationAnimated() noexcept
     {
       return *_elevation;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &XAnimated() noexcept
     {
       return *_x;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &YAnimated() noexcept
     {
       return *_y;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &ZAnimated() noexcept
     {
       return *_z;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &PointsAtXAnimated() noexcept
     {
       return *_pointsAtX;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &PointsAtYAnimated() noexcept
     {
       return *_pointsAtY;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &PointsAtZAnimated() noexcept
     {
       return *_pointsAtZ;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &SpecularExponentAnimated() noexcept
     {
       return *_specularExponent;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &LimitingConeAngleAnimated() noexcept
     {
       return *_limitingConeAngle;

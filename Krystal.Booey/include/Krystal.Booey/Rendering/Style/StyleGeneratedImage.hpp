@@ -62,14 +62,17 @@ namespace krys::boo
     {
       return !_fixedSize;
     }
+
     KRYS_NODISCARD bool ImageHasRelativeHeight() const noexcept final
     {
       return !_fixedSize;
     }
+
     KRYS_NODISCARD bool UsesImageContainerSize() const noexcept final
     {
       return !_fixedSize;
     }
+
     KRYS_NODISCARD bool ImageHasNaturalDimensions() const noexcept final
     {
       return !UsesImageContainerSize();
@@ -80,18 +83,23 @@ namespace krys::boo
     void AddClient(RenderElement &) noexcept final;
     void RemoveClient(RenderElement &) noexcept final;
     KRYS_NODISCARD bool HasClient(RenderElement &) const noexcept final;
+
     KRYS_NODISCARD const HashMap<RenderElement *, uint32> &Clients() const noexcept
     {
       return _clients;
     }
+
     virtual void DidAddClient(RenderElement &) noexcept
     {
     }
+
     virtual void DidRemoveClient(RenderElement &) noexcept
     {
     }
+
     void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth, float &intrinsicHeight,
                                     FloatSize &intrinsicRatio) noexcept final;
+
     void SetContainerContextForRenderer(const RenderElement &, const FloatSize &containerSize,
                                         float) noexcept final
     {

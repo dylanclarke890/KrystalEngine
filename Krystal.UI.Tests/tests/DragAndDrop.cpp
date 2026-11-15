@@ -398,5 +398,4 @@ namespace krys::ui::tests
 
     view.MouseReleased({200, 150}, pal::MouseButton::Left);
   }
-
 }

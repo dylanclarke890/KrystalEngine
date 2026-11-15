@@ -52,6 +52,7 @@ namespace krys::boo::dom
     {
       return _anchorNode.get();
     }
+
     KRYS_NODISCARD int32 OffsetInLeafNode() const noexcept
     {
       return _offsetInAnchor;

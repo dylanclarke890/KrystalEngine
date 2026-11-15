@@ -39,13 +39,13 @@ namespace krys::boo::dom
   /// trees replace their hosts' children, and slots their fallback content with their assigned nodes.
   class ComposedTreeIterator
   {
-    static constexpr size_t NotFound = std::numeric_limits<size_t>::max();
+    constexpr static size_t NotFound = std::numeric_limits<size_t>::max();
 
     struct Context
     {
       enum SlottedTag
       {
-        Slotted
+        Slotted,
       };
 
       ElementAndTextDescendantIterator Iterator;
@@ -76,7 +76,7 @@ namespace krys::boo::dom
   public:
     enum FirstChildTag
     {
-      FirstChild
+      FirstChild,
     };
 
     ComposedTreeIterator() noexcept : _contextStack({Context {}})
@@ -473,7 +473,7 @@ namespace krys::boo::dom
   enum class ComposedTreeAsTextMode : uint8
   {
     Normal,
-    WithPointers
+    WithPointers,
   };
 
   /// @brief A description of the composed tree under @p root, one node per line, indented by depth.

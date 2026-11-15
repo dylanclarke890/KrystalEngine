@@ -57,50 +57,62 @@ namespace krys::boo
     {
       return _tableRows;
     }
+
     KRYS_NODISCARD const AXObject::AXChildrenVector &TableColumns() const noexcept
     {
       return _tableColumns;
     }
+
     KRYS_NODISCARD uint32 RowCount() const noexcept
     {
       return static_cast<uint32>(_tableRows.size());
     }
+
     KRYS_NODISCARD uint32 ColumnCount() const noexcept
     {
       return static_cast<uint32>(_tableColumns.size());
     }
+
     void AppendColumn(AXObject &column) noexcept
     {
       _tableColumns.emplace_back(ShareRef(column));
     }
+
     void AppendRow(AXObject &row) noexcept
     {
       _tableRows.emplace_back(ShareRef(row));
     }
+
     KRYS_NODISCARD bool IsExposableTable() const noexcept
     {
       return _isExposableTable;
     }
+
     void SetIsExposableTable(bool value) noexcept
     {
       _isExposableTable = value;
     }
+
     KRYS_NODISCARD AXObject *TableHeaderContainer() const noexcept
     {
       return _tableHeaderContainer.get();
     }
+
     void SetTableHeaderContainer(AXObject &object) noexcept
     {
       _tableHeaderContainer = ShareRefPtr(&object);
     }
+
     KRYS_NODISCARD const List<List<Maybe<AXId>>> &CellSlots() const noexcept
     {
       return _cellSlots;
     }
+
     KRYS_NODISCARD List<List<Maybe<AXId>>> &MutableCellSlots() noexcept
     {
       return _cellSlots;
     }
+
     /// @brief Forgets what the table's children determine (rows, columns, cell slots and the header
     /// container), for when they're cleared.
     void ResetChildrenDependentTableFields() noexcept
@@ -118,34 +130,42 @@ namespace krys::boo
     {
       return _rowIndex;
     }
+
     void SetRowIndex(uint32 rowIndex) noexcept
     {
       _rowIndex = rowIndex;
     }
+
     KRYS_NODISCARD uint32 ColumnIndex() const noexcept
     {
       return _columnIndex;
     }
+
     void SetColumnIndex(uint32 columnIndex) noexcept
     {
       _columnIndex = columnIndex;
     }
+
     KRYS_NODISCARD int32 AxColIndexFromRow() const noexcept
     {
       return _axColIndexFromRow;
     }
+
     void SetAXColIndexFromRow(int32 index) noexcept
     {
       _axColIndexFromRow = index;
     }
+
     KRYS_NODISCARD uint32 EffectiveRowSpan() const noexcept
     {
       return _effectiveRowSpan;
     }
+
     void IncrementEffectiveRowSpan() noexcept
     {
       ++_effectiveRowSpan;
     }
+
     void ResetEffectiveRowSpan() noexcept
     {
       _effectiveRowSpan = 1;

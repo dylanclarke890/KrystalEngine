@@ -4,7 +4,6 @@
 
 namespace krys::boo::tests
 {
-
   TEST_CASE("InlineBoxPainter: paints an inline box's background and border around its text",
             "[Rendering][InlineBoxPainter]")
   {

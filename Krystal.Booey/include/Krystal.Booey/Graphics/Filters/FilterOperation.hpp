@@ -57,7 +57,7 @@ namespace krys::boo
       DropShadowWithStyleColor,
       Passthrough,
       Default,
-      None
+      None,
     };
 
     virtual ~FilterOperation() noexcept = default;
@@ -68,6 +68,7 @@ namespace krys::boo
     {
       return Equals(other);
     }
+
     KRYS_NODISCARD virtual bool Equals(const FilterOperation &) const noexcept = 0;
 
     KRYS_NODISCARD virtual RefPtr<FilterOperation> Blend(const FilterOperation * /*from*/,
@@ -129,12 +130,14 @@ namespace krys::boo
     {
       return false;
     }
+
     // True if the value of one pixel can affect the value of another pixel under this operation, such as
     // blur.
     KRYS_NODISCARD virtual bool MovesPixels() const noexcept
     {
       return false;
     }
+
     // True if the filter should not be allowed to work on content that is not available from this security
     // origin.
     KRYS_NODISCARD virtual bool ShouldBeRestrictedBySecurityOrigin() const noexcept
@@ -314,6 +317,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD bool MovesPixels() const noexcept override
     {
       return true;
@@ -343,14 +347,17 @@ namespace krys::boo
     {
       return _location.X();
     }
+
     KRYS_NODISCARD int Y() const noexcept
     {
       return _location.Y();
     }
+
     KRYS_NODISCARD IntPoint Location() const noexcept
     {
       return _location;
     }
+
     KRYS_NODISCARD int StdDeviation() const noexcept
     {
       return _stdDeviation;
@@ -360,6 +367,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD bool MovesPixels() const noexcept override
     {
       return true;

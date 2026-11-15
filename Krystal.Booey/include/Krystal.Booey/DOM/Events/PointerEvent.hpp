@@ -78,7 +78,7 @@ namespace krys::boo::dom
     enum class IsPrimary : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -259,22 +259,27 @@ namespace krys::boo::dom
     {
       return AdjustedCoordinateForType(ScreenLocation().X());
     }
+
     KRYS_NODISCARD double ScreenY() const noexcept override
     {
       return AdjustedCoordinateForType(ScreenLocation().Y());
     }
+
     KRYS_NODISCARD double ClientX() const noexcept override
     {
       return AdjustedCoordinateForType(ClientLocation().X());
     }
+
     KRYS_NODISCARD double ClientY() const noexcept override
     {
       return AdjustedCoordinateForType(ClientLocation().Y());
     }
+
     KRYS_NODISCARD double PageX() const noexcept override
     {
       return AdjustedCoordinateForType(PageLocation().X());
     }
+
     KRYS_NODISCARD double PageY() const noexcept override
     {
       return AdjustedCoordinateForType(PageLocation().Y());
@@ -300,6 +305,7 @@ namespace krys::boo::dom
     {
       return nullptr;
     }
+
     KRYS_NODISCARD RefPtr<Node> FromElement() const noexcept final
     {
       return nullptr;
@@ -308,6 +314,7 @@ namespace krys::boo::dom
     /// @brief Whether a pointer event of @p type always says which button changed: `pointerdown`,
     /// `pointerup`, `click`, `auxclick` and `contextmenu`.
     KRYS_NODISCARD static bool TypeRequiresResolvedButton(DOMStringAtom type) noexcept;
+
     KRYS_NODISCARD static MouseButton ButtonForType(DOMStringAtom type) noexcept
     {
       return !TypeRequiresResolvedButton(type) ? MouseButton::PointerHasNotChanged : MouseButton::Left;
@@ -318,10 +325,12 @@ namespace krys::boo::dom
     {
       return !TypeIsEnterOrLeave(type);
     }
+
     KRYS_NODISCARD static bool TypeIsCancelable(DOMStringAtom type) noexcept
     {
       return !TypeIsEnterOrLeave(type) && type != EventNames::PointerRawUpdate;
     }
+
     KRYS_NODISCARD static bool TypeIsComposed(DOMStringAtom type) noexcept
     {
       return !TypeIsEnterOrLeave(type);

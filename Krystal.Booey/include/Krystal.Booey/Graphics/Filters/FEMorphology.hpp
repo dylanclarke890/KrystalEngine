@@ -32,7 +32,7 @@ namespace krys::boo
   {
     Unknown,
     Erode,
-    Dilate
+    Dilate,
   };
 
   /// @brief The morphology filter effect: its input thinned (eroded) or fattened (dilated).
@@ -54,18 +54,21 @@ namespace krys::boo
     {
       return _type;
     }
+
     bool SetMorphologyOperator(MorphologyOperatorType type) noexcept;
 
     KRYS_NODISCARD float RadiusX() const noexcept
     {
       return _radiusX;
     }
+
     bool SetRadiusX(float radiusX) noexcept;
 
     KRYS_NODISCARD float RadiusY() const noexcept
     {
       return _radiusY;
     }
+
     bool SetRadiusY(float radiusY) noexcept;
 
   private:

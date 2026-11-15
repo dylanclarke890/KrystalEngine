@@ -540,7 +540,7 @@ namespace krys::boo
   {
     // willBeOverdrawn assumes that we draw in order: top, bottom, left, right.
     // This is different from BoxSide enum order.
-    static constexpr Array<BoxSide, 4> paintOrderSides = {BoxSide::Top, BoxSide::Bottom, BoxSide::Left,
+    constexpr static Array<BoxSide, 4> paintOrderSides = {BoxSide::Top, BoxSide::Bottom, BoxSide::Left,
                                                           BoxSide::Right};
 
     while (!edgesToDraw.IsEmpty())
@@ -1554,7 +1554,7 @@ namespace krys::boo
     enum Operation
     {
       Darken,
-      Lighten
+      Lighten,
     };
 
     Operation operation =

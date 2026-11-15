@@ -46,7 +46,7 @@ namespace krys::boo::svg
     To,
     By,
     Values,
-    Path
+    Path,
   };
 
   /// @see https://svgwg.org/specs/animations/#CalcModeAttribute
@@ -55,7 +55,7 @@ namespace krys::boo::svg
     Discrete,
     Linear,
     Paced,
-    Spline
+    Spline,
   };
 
   /// @brief Animates one attribute of a target element for an animation element: an animated property's

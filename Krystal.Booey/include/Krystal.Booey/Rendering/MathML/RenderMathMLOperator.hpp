@@ -62,15 +62,19 @@ namespace krys::boo
 
     void StretchTo(LayoutUnit heightAboveBaseline, LayoutUnit depthBelowBaseline) noexcept;
     void StretchTo(LayoutUnit width) noexcept;
+
     KRYS_NODISCARD LayoutUnit StretchSize() const noexcept
     {
       return IsVertical() ? _stretchHeightAboveBaseline + _stretchDepthBelowBaseline : _stretchWidth;
     }
+
     void ResetStretchSize() noexcept;
+
     void SetStretchWidthLocked(bool stretchWidthLocked) noexcept
     {
       _isStretchWidthLocked = stretchWidthLocked;
     }
+
     KRYS_NODISCARD bool IsStretchWidthLocked() const noexcept
     {
       return _isStretchWidthLocked;
@@ -78,11 +82,14 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasOperatorFlag(mathml::MathMLOperatorDictionary::Flag flag) const noexcept;
     KRYS_NODISCARD bool IsLargeOperatorInDisplayStyle() const noexcept;
+
     KRYS_NODISCARD bool ShouldMoveLimits() const noexcept
     {
       return HasOperatorFlag(mathml::MathMLOperatorDictionary::MovableLimits);
     }
+
     KRYS_NODISCARD bool IsVertical() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ItalicCorrection() const noexcept
     {
       return _mathOperator.ItalicCorrection();
@@ -91,6 +98,7 @@ namespace krys::boo
     void UpdateTokenContent() noexcept final;
     void UpdateFromElement() noexcept final;
     KRYS_NODISCARD char32 TextContent() const noexcept;
+
     KRYS_NODISCARD bool IsStretchy() const noexcept
     {
       return TextContent() && HasOperatorFlag(mathml::MathMLOperatorDictionary::Stretchy);
@@ -119,6 +127,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsInvisibleOperator() const noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;
+
     KRYS_NODISCARD RenderMathMLOperator *UnembellishedOperator() const noexcept final
     {
       return const_cast<RenderMathMLOperator *>(this);

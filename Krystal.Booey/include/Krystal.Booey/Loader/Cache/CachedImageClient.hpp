@@ -39,7 +39,7 @@ namespace krys::boo
   {
     Unknown,
     Yes,
-    No
+    No,
   };
 
   /// @brief Something told when a cached image's data or frames change.
@@ -52,6 +52,7 @@ namespace krys::boo
     {
       return ImageType;
     }
+
     KRYS_NODISCARD CachedResourceClientType ResourceClientType() const noexcept override
     {
       return ExpectedType();
@@ -72,6 +73,7 @@ namespace krys::boo
     // advance to the next frame.
     virtual VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                        const IntRect *) noexcept;
+
     KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const dom::Document &) const noexcept
     {
       return VisibleInViewportState::No;
@@ -84,6 +86,7 @@ namespace krys::boo
     virtual void ImageContentChanged(CachedImage &) noexcept
     {
     }
+
     virtual void ScheduleRenderingUpdateForImage(CachedImage &) noexcept
     {
     }

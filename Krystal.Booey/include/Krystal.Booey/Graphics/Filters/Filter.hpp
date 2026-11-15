@@ -56,6 +56,7 @@ namespace krys::boo
     {
       return _filterRenderingModes;
     }
+
     void SetFilterRenderingModes(EnumSet<FilterRenderingMode> preferredFilterRenderingModes) noexcept;
 
     KRYS_NODISCARD const FilterGeometry &Geometry() const noexcept
@@ -67,6 +68,7 @@ namespace krys::boo
     {
       return _geometry.Scale;
     }
+
     void SetFilterScale(const FloatSize &filterScale) noexcept
     {
       _geometry.Scale = filterScale;
@@ -76,6 +78,7 @@ namespace krys::boo
     {
       return _geometry.FilterRegion;
     }
+
     void SetFilterRegion(const FloatRect &filterRegion) noexcept
     {
       _geometry.FilterRegion = filterRegion;
@@ -90,6 +93,7 @@ namespace krys::boo
     {
       return size;
     }
+
     KRYS_NODISCARD virtual FloatPoint3D ResolvedPoint3D(const FloatPoint3D &point) const noexcept
     {
       return point;

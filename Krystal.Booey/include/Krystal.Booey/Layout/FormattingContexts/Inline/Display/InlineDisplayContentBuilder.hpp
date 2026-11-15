@@ -124,29 +124,36 @@ namespace krys::boo::layout
     {
       return _lineIsFullyTruncatedInBlockDirection;
     }
+
     KRYS_NODISCARD bool IsFirstFormattedLine() const noexcept
     {
       return GetLineBox().IsFirstFormattedLine();
     }
+
     KRYS_NODISCARD const LineBox &GetLineBox() const noexcept
     {
       return _lineBox;
     }
+
     KRYS_NODISCARD size_t LineIndex() const noexcept
     {
       return GetLineBox().LineIndex();
     }
+
     KRYS_NODISCARD const ConstraintsForInlineContent &GetConstraints() const noexcept
     {
       return _constraints;
     }
+
     KRYS_NODISCARD const ElementBox &Root() const noexcept;
     KRYS_NODISCARD InlineRect LogicalRectForInlineBoxOnBlockLine(
       const Box &inlineBox, const LineLayoutResult &lineLayoutResult) const noexcept;
+
     KRYS_NODISCARD InlineFormattingContext &GetFormattingContext() noexcept
     {
       return _formattingContext;
     }
+
     KRYS_NODISCARD const InlineFormattingContext &GetFormattingContext() const noexcept
     {
       return _formattingContext;

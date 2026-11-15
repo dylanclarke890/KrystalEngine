@@ -22,7 +22,7 @@ namespace krys::ui
   {
   public:
     /// @brief The palette's colours per row.
-    static constexpr int32 Columns = 8;
+    constexpr static int32 Columns = 8;
 
   private:
     View *_owner {nullptr};

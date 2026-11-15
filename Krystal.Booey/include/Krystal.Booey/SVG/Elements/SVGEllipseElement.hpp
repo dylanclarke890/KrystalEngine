@@ -44,14 +44,17 @@ namespace krys::boo::svg
     {
       return _cx->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Cy() const noexcept
     {
       return _cy->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Rx() const noexcept
     {
       return _rx->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Ry() const noexcept
     {
       return _ry->CurrentValue();
@@ -61,14 +64,17 @@ namespace krys::boo::svg
     {
       return *_cx;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &CyAnimated() noexcept
     {
       return *_cy;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &RxAnimated() noexcept
     {
       return *_rx;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &RyAnimated() noexcept
     {
       return *_ry;
@@ -85,6 +91,7 @@ namespace krys::boo::svg
     {
       return SVGTests::IsValid();
     }
+
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept final
     {
       return true;

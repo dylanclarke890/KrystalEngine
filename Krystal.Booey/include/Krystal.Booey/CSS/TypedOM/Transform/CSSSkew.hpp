@@ -50,10 +50,12 @@ namespace krys::boo::css
     {
       return *_ax;
     }
+
     KRYS_NODISCARD const CSSNumericValue &Ay() const noexcept
     {
       return *_ay;
     }
+
     /// @return A `TypeError` if @p ax isn't an angle.
     dom::ExceptionOr<void> SetAx(Ref<CSSNumericValue> ax) noexcept;
     /// @return A `TypeError` if @p ay isn't an angle.
@@ -71,6 +73,7 @@ namespace krys::boo::css
     {
       return CSSTransformType::Skew;
     }
+
     KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
 
   private:

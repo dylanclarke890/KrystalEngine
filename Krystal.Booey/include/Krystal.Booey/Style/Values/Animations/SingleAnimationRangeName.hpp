@@ -54,7 +54,7 @@ namespace krys::boo
       Entry,
       Exit,
       EntryCrossing,
-      ExitCrossing
+      ExitCrossing,
     };
 
     KRYS_NODISCARD css::ValueId ConvertSingleAnimationRangeNameToValueId(SingleAnimationRangeName) noexcept;

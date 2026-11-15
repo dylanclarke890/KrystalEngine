@@ -43,10 +43,12 @@ namespace krys::boo::dom
     {
       return AdoptRef(*new DOMPoint(x, y, z, w));
     }
+
     KRYS_NODISCARD static Ref<DOMPoint> Create(const DOMPointInit &init) noexcept
     {
       return Create(init.X, init.Y, init.Z, init.W);
     }
+
     KRYS_NODISCARD static Ref<DOMPoint> FromPoint(const DOMPointInit &init) noexcept
     {
       return Create(init.X, init.Y, init.Z, init.W);
@@ -56,14 +58,17 @@ namespace krys::boo::dom
     {
       _x = x;
     }
+
     void SetY(double y) noexcept
     {
       _y = y;
     }
+
     void SetZ(double z) noexcept
     {
       _z = z;
     }
+
     void SetW(double w) noexcept
     {
       _w = w;

@@ -25,7 +25,6 @@
 
 namespace krys::boo
 {
-
   StyleTransformData::StyleTransformData() noexcept
       : Transform(style::ComputedStyle::InitialTransform()),
         Origin({style::ComputedStyle::InitialTransformOriginX(),

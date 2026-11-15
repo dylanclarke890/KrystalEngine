@@ -40,7 +40,7 @@ namespace krys::boo::dom
   enum class IsInputMethodComposing : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @see https://w3c.github.io/uievents/#dictdef-inputeventinit

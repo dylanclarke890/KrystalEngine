@@ -44,7 +44,7 @@ namespace krys::boo
       Unspecified,
       DoNotDispose,
       RestoreToBackground,
-      RestoreToPrevious
+      RestoreToPrevious,
     };
 
   private:
@@ -59,6 +59,7 @@ namespace krys::boo
 
   public:
     ScalableImageDecoderFrame() noexcept;
+
     ScalableImageDecoderFrame(const ScalableImageDecoderFrame &other) noexcept
     {
       operator=(other);
@@ -80,10 +81,12 @@ namespace krys::boo
     {
       return _decodingStatus == DecodingStatus::Invalid;
     }
+
     KRYS_NODISCARD bool IsPartial() const noexcept
     {
       return _decodingStatus == DecodingStatus::Partial;
     }
+
     KRYS_NODISCARD bool IsComplete() const noexcept
     {
       return _decodingStatus == DecodingStatus::Complete;
@@ -95,6 +98,7 @@ namespace krys::boo
     {
       _disposalMethod = method;
     }
+
     KRYS_NODISCARD DisposalMethod GetDisposalMethod() const noexcept
     {
       return _disposalMethod;
@@ -104,6 +108,7 @@ namespace krys::boo
     {
       _orientation = orientation;
     }
+
     KRYS_NODISCARD ImageOrientation Orientation() const noexcept
     {
       return _orientation;
@@ -113,6 +118,7 @@ namespace krys::boo
     {
       _duration = duration;
     }
+
     KRYS_NODISCARD seconds Duration() const noexcept
     {
       return _duration;
@@ -122,10 +128,12 @@ namespace krys::boo
     {
       _hasAlpha = hasAlpha;
     }
+
     KRYS_NODISCARD bool HasAlpha() const noexcept
     {
       return !HasMetadata() || _hasAlpha;
     }
+
     KRYS_NODISCARD bool HasMetadata() const noexcept
     {
       return !Size().IsEmpty();
@@ -135,6 +143,7 @@ namespace krys::boo
     {
       return _backingStore.get();
     }
+
     KRYS_NODISCARD bool HasBackingStore() const noexcept
     {
       return BackingStore();

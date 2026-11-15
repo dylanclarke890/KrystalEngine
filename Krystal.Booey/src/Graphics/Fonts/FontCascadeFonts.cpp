@@ -578,7 +578,7 @@ namespace krys::boo
   {
     Immaterial,
     Visible,
-    Invisible
+    Invisible,
   };
 
   static void OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,

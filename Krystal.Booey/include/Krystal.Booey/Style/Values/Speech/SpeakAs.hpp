@@ -50,12 +50,15 @@ namespace krys::boo::style
     constexpr SpeakAs(css::keywords::Normal) noexcept : _value {}
     {
     }
+
     constexpr SpeakAs(EnumSet &&set) noexcept : _value {krys::move(set)}
     {
     }
+
     constexpr SpeakAs(value_type value) noexcept : SpeakAs {EnumSet {value}}
     {
     }
+
     constexpr SpeakAs(std::initializer_list<value_type> initializerList) noexcept
         : SpeakAs {EnumSet {initializerList}}
     {
@@ -65,6 +68,7 @@ namespace krys::boo::style
     {
       return EnumSet::FromRaw(rawValue);
     }
+
     KRYS_NODISCARD constexpr EnumSet::StorageType ToRaw() const noexcept
     {
       return _value.ToRaw();
@@ -74,14 +78,17 @@ namespace krys::boo::style
     {
       return _value.Contains(e);
     }
+
     KRYS_NODISCARD constexpr bool ContainsAny(EnumSet other) const noexcept
     {
       return _value.ContainsAny(other.Value);
     }
+
     KRYS_NODISCARD constexpr bool ContainsAll(EnumSet other) const noexcept
     {
       return _value.ContainsAll(other.Value);
     }
+
     KRYS_NODISCARD constexpr bool ContainsOnly(EnumSet other) const noexcept
     {
       return _value.ContainsOnly(other.Value);

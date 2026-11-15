@@ -438,6 +438,7 @@ namespace krys::boo::dom
     {
       return HasNodeFlag(NodeFlags::ContainsSelectionEndPoint);
     }
+
     void SetContainsSelectionEndPoint(bool value) noexcept
     {
       if (value)
@@ -455,6 +456,7 @@ namespace krys::boo::dom
     {
       return HasNodeFlag(NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
     }
+
     void SetSelfOrPrecedingNodesAffectDirAuto(bool flag) noexcept
     {
       if (flag)
@@ -477,6 +479,7 @@ namespace krys::boo::dom
     {
       return HasNodeFlag(NodeFlags::UsesEffectiveTextDirection);
     }
+
     void SetUsesEffectiveTextDirection(bool value) noexcept
     {
       if (value)
@@ -493,6 +496,7 @@ namespace krys::boo::dom
     {
       return HasNodeFlag(NodeFlags::NeedsSVGRendererUpdate);
     }
+
     void SetNeedsSVGRendererUpdate(bool flag) noexcept
     {
       if (flag)
@@ -587,14 +591,17 @@ namespace krys::boo::dom
     /// @brief The ancestor that's a child of a shadow root, or null outside shadow trees.
     KRYS_NODISCARD Node *NonBoundaryShadowTreeRootNode() noexcept;
     KRYS_NODISCARD bool IsDescendantOf(const Node *other) const noexcept;
+
     KRYS_NODISCARD bool IsDescendantOf(const Node &other) const noexcept
     {
       return IsDescendantOf(&other);
     }
+
     KRYS_NODISCARD bool IsInclusiveDescendantOf(const Node &other) const noexcept
     {
       return this == &other || IsDescendantOf(other);
     }
+
     KRYS_NODISCARD bool IsShadowIncludingDescendantOf(const Node *other) const noexcept;
     /// @brief The last node in the subtree, in tree order.
     KRYS_NODISCARD Node *LastDescendant() const noexcept;
@@ -606,20 +613,20 @@ namespace krys::boo::dom
     enum class UserSelectAllTreatment : bool
     {
       NotEditable,
-      Editable
+      Editable,
     };
 
     enum class Editability : uint8
     {
       ReadOnly,
       CanEditPlainText,
-      CanEditRichly
+      CanEditRichly,
     };
 
     enum class ShouldUpdateStyle : bool
     {
       Update,
-      DoNotUpdate
+      DoNotUpdate,
     };
 
     /// @brief Whether the node is editable, resolving style first if it's out of date.
@@ -661,6 +668,7 @@ namespace krys::boo::dom
     /// target, then for the nodes on its path until one handles it (`Event::SetDefaultHandled`), if it
     /// bubbles.
     virtual void DefaultEventHandler(Event &event) noexcept;
+
     /// @brief Whether a position can be inside the node; the content of nodes it can't be inside (images,
     /// `<br>`, form controls) is ignored by editing.
     KRYS_NODISCARD virtual bool CanContainRangeEndPoint() const noexcept
@@ -1002,7 +1010,7 @@ namespace krys::boo::dom
   {
     Tree,
     ShadowIncludingTree,
-    ComposedTree
+    ComposedTree,
   };
 
   template <TreeType = TreeType::Tree>

@@ -60,6 +60,7 @@ namespace krys::boo
     {
       return _span;
     }
+
     void SetSpan(uint32 span) noexcept
     {
       _span = span;
@@ -69,10 +70,12 @@ namespace krys::boo
     {
       return FirstChild();
     }
+
     KRYS_NODISCARD bool IsTableColumn() const noexcept;
     KRYS_NODISCARD bool IsTableColumnGroup() const noexcept;
 
     KRYS_NODISCARD RenderTableCol *EnclosingColumnGroup() const noexcept;
+
     KRYS_NODISCARD RenderTableCol *EnclosingColumnGroupIfAdjacentBefore() const noexcept
     {
       if (PreviousSibling())
@@ -81,6 +84,7 @@ namespace krys::boo
       }
       return EnclosingColumnGroup();
     }
+
     KRYS_NODISCARD RenderTableCol *EnclosingColumnGroupIfAdjacentAfter() const noexcept
     {
       if (NextSibling())
@@ -127,6 +131,7 @@ namespace krys::boo
     {
       krys_debug_assert(false);
     }
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
     {
       krys_debug_assert(false);

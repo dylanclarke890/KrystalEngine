@@ -186,6 +186,7 @@ namespace krys::boo
     {
       _ignoreGammaAndColorProfile = flag;
     }
+
     KRYS_NODISCARD bool IgnoresGammaAndColorProfile() const noexcept
     {
       return _ignoreGammaAndColorProfile;
@@ -195,10 +196,12 @@ namespace krys::boo
     {
       return _orientation;
     }
+
     KRYS_NODISCARD Maybe<IntSize> FrameDensityCorrectedSizeAtIndex(size_t) const noexcept final
     {
       return _densityCorrectedSize;
     }
+
     /// @brief Takes the image's orientation and density-corrected size from its EXIF metadata.
     void SetEXIFMetadata(const EXIFMetadata &metadata) noexcept
     {
@@ -206,7 +209,7 @@ namespace krys::boo
       _densityCorrectedSize = metadata.DensityCorrectedSize;
     }
 
-    static constexpr size_t ICCColorProfileHeaderLength = 128;
+    constexpr static size_t ICCColorProfileHeaderLength = 128;
 
     KRYS_NODISCARD size_t BytesDecodedToDetermineProperties() const noexcept final
     {

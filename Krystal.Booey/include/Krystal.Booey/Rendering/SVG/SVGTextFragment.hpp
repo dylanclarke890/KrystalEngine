@@ -31,7 +31,7 @@ namespace krys::boo
     enum class TransformType : bool
     {
       TransformRespectingTextLength,
-      TransformIgnoringTextLength
+      TransformIgnoringTextLength,
     };
 
     /// @brief The first rendered character starts at this byte offset of the RenderSVGInlineText's text.

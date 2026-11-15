@@ -52,10 +52,12 @@ namespace krys::boo::style
     {
       return !_path;
     }
+
     KRYS_NODISCARD bool IsPath() const noexcept
     {
       return !!_path;
     }
+
     KRYS_NODISCARD const Maybe<PathFunction> &TryPath() const noexcept KRYS_LIFETIME_BOUND
     {
       return _path;
@@ -86,6 +88,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD SVGPathData operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<SVGPathData>
   {

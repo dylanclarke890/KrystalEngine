@@ -69,12 +69,14 @@ namespace krys::boo
     {
       return _functions;
     }
+
     void SetFilterRegion(const FloatRect &filterRegion) noexcept;
 
     KRYS_NODISCARD bool HasFilterThatMovesPixels() const noexcept
     {
       return _hasFilterThatMovesPixels;
     }
+
     KRYS_NODISCARD bool HasFilterThatShouldBeRestrictedBySecurityOrigin() const noexcept
     {
       return _hasFilterThatShouldBeRestrictedBySecurityOrigin;

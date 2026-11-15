@@ -139,6 +139,7 @@ namespace krys::boo::css
     KRYS_NODISCARD IterationStatus VisitChildren(const Func<IterationStatus(Value &)> &) const noexcept;
 
     KRYS_NODISCARD bool Equals(const Value &other) const noexcept;
+
     KRYS_NODISCARD bool operator==(const Value &other) const noexcept
     {
       return Equals(other);

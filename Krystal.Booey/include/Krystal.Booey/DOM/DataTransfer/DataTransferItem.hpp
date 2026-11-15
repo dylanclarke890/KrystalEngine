@@ -57,7 +57,7 @@ namespace krys::boo::dom
     enum class Kind : uint8
     {
       String,
-      File
+      File,
     };
 
   private:
@@ -81,6 +81,7 @@ namespace krys::boo::dom
     {
       return _file;
     }
+
     /// @brief Detaches the item from its list, after which it has no type and gives no data.
     void ClearListAndPutIntoDisabledMode() noexcept;
 

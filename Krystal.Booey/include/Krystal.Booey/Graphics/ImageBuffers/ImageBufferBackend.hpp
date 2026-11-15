@@ -79,6 +79,7 @@ namespace krys::boo
     KRYS_NODISCARD static AffineTransform CalculateBaseTransform(const Parameters &) noexcept;
 
     KRYS_NODISCARD virtual GraphicsContext &Context() noexcept = 0;
+
     virtual void FlushContext() noexcept
     {
     }
@@ -87,6 +88,7 @@ namespace krys::boo
     virtual void PrepareForDisplay() noexcept
     {
     }
+
     /// @brief What shows the buffer as a layer's contents; null when it's painted instead.
     KRYS_NODISCARD virtual RefPtr<GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() const noexcept;
@@ -111,6 +113,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual uint32 BytesPerRow() const noexcept;
     KRYS_NODISCARD const DestinationColorSpace &ColorSpace() const noexcept;
+
     KRYS_NODISCARD PixelFormat GetPixelFormat() const noexcept
     {
       return PixelFormat::RGBA8;
@@ -120,10 +123,12 @@ namespace krys::boo
     {
       return _parameters.BackendSize;
     }
+
     KRYS_NODISCARD float ResolutionScale() const noexcept
     {
       return _parameters.ResolutionScale;
     }
+
     KRYS_NODISCARD const Parameters &GetParameters() const noexcept
     {
       return _parameters;
@@ -137,10 +142,12 @@ namespace krys::boo
       _isLuminanceMask = true;
       _luminanceMaskColorSpace = colorSpace;
     }
+
     KRYS_NODISCARD bool IsLuminanceMask() const noexcept
     {
       return _isLuminanceMask;
     }
+
     /// @brief The colour space a luminance mask's luminance is of.
     KRYS_NODISCARD const DestinationColorSpace &LuminanceMaskColorSpace() const noexcept
     {

@@ -67,14 +67,17 @@ namespace krys::boo
     {
       return !_renderer;
     }
+
     KRYS_NODISCARD inline_iterator::LineBoxIterator LineBox() const noexcept
     {
       return _box ? _box->GetLineBox() : inline_iterator::LineBoxIterator();
     }
+
     KRYS_NODISCARD inline_iterator::LeafBoxIterator Box() const noexcept
     {
       return _box;
     }
+
     KRYS_NODISCARD uint32 Offset() const noexcept
     {
       return _offset;
@@ -88,22 +91,26 @@ namespace krys::boo
     enum class ShouldMatchBidiLevel : bool
     {
       MatchBidiLevel,
-      IgnoreBidiLevel
+      IgnoreBidiLevel,
     };
+
     KRYS_NODISCARD bool AtLeftBoundaryOfBidiRun() const noexcept
     {
       return AtLeftBoundaryOfBidiRun(ShouldMatchBidiLevel::IgnoreBidiLevel, 0);
     }
+
     KRYS_NODISCARD bool AtRightBoundaryOfBidiRun() const noexcept
     {
       return AtRightBoundaryOfBidiRun(ShouldMatchBidiLevel::IgnoreBidiLevel, 0);
     }
+
     // The following two functions return true only if the current position is at the end of the bidi run
     // of the specified bidi embedding level.
     KRYS_NODISCARD bool AtLeftBoundaryOfBidiRun(uint8 bidiLevelOfRun) const noexcept
     {
       return AtLeftBoundaryOfBidiRun(ShouldMatchBidiLevel::MatchBidiLevel, bidiLevelOfRun);
     }
+
     KRYS_NODISCARD bool AtRightBoundaryOfBidiRun(uint8 bidiLevelOfRun) const noexcept
     {
       return AtRightBoundaryOfBidiRun(ShouldMatchBidiLevel::MatchBidiLevel, bidiLevelOfRun);
@@ -116,6 +123,7 @@ namespace krys::boo
     {
       return _box && _offset == _box->LeftmostCaretOffset();
     }
+
     KRYS_NODISCARD bool AtRightmostOffsetInBox() const noexcept
     {
       return _box && _offset == _box->RightmostCaretOffset();

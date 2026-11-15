@@ -45,7 +45,7 @@ namespace krys::boo::css
     FontFace,
     Page,
     PositionTry,
-    Function
+    Function,
   };
 
   /// @brief A declaration block exposed to scripts.

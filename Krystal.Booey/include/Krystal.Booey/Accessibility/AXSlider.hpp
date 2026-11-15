@@ -60,6 +60,7 @@ namespace krys::boo
     {
       return AXRole::Slider;
     }
+
     KRYS_NODISCARD html::HTMLInputElement *InputElement() const noexcept;
   };
 

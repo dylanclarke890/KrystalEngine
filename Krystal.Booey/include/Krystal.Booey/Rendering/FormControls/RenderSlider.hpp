@@ -35,7 +35,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderSlider);
 
   public:
-    static constexpr int32 DefaultTrackLength = 129;
+    constexpr static int32 DefaultTrackLength = 129;
 
     RenderSlider(html::HTMLInputElement &, RenderStyle &&) noexcept;
     ~RenderSlider() noexcept override;

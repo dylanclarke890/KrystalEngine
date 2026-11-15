@@ -39,7 +39,7 @@ namespace krys::boo::css
     enum class IdenticalValueSerialisation : bool
     {
       DoNotCoalesce,
-      Coalesce
+      Coalesce,
     };
 
   private:

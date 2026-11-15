@@ -70,6 +70,7 @@ namespace krys::boo
              const LayerAndBoundsVector &enclosingClippingLayers) noexcept;
     KRYS_NODISCARD bool OverlapsLayers(const RenderLayer &layer, const LayoutRect &bounds,
                                        const LayerAndBoundsVector &enclosingClippingLayers) const noexcept;
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _isEmpty;
@@ -86,6 +87,7 @@ namespace krys::boo
     {
       return _geometryMap;
     }
+
     KRYS_NODISCARD RenderGeometryMap &GeometryMap() noexcept
     {
       return _geometryMap;

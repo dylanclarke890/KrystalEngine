@@ -762,10 +762,16 @@ namespace krys
     // Result has P columns and R rows (R x P).
     Matrix<T, P, R> out {T(0)};
 
-    for (int col = 0; col < P; ++col)   // column of result / rhs
+    for (int col = 0; col < P; ++col) // column of result / rhs
+    {
       for (int row = 0; row < R; ++row) // row of result / lhs
-        for (int k = 0; k < C; ++k)     // inner dimension
+      {
+        for (int k = 0; k < C; ++k) // inner dimension
+        {
           out[col][row] += lhs[k][row] * rhs[col][k];
+        }
+      }
+    }
 
     return out;
   }
@@ -776,8 +782,12 @@ namespace krys
   {
     Vector<T, R> result {T(0)};
     for (int row = 0; row < R; ++row)
+    {
       for (int k = 0; k < C; ++k)
+      {
         result[row] += lhs[k][row] * rhs[k];
+      }
+    }
     return result;
   }
 
@@ -882,7 +892,9 @@ namespace krys
     {
       T determinant = Determinant(m);
       if (determinant == T(0))
+      {
         determinant = T(1);
+      }
 
       T oneOverDeterminant = T(1) / determinant;
       return Matrix<T, 2, 2>(+m[1].y * oneOverDeterminant, -m[0].y * oneOverDeterminant,
@@ -892,7 +904,9 @@ namespace krys
     {
       T determinant = Determinant(m);
       if (determinant == T(0))
+      {
         determinant = T(1);
+      }
       T oneOverDet = T(1) / determinant;
 
       return Matrix<T, 3, 3>(+((m[1].y * m[2].z - m[2].y * m[1].z) * oneOverDet),
@@ -934,7 +948,9 @@ namespace krys
               - m[0].w * (m[1].x * A1223 - m[1].y * A0223 + m[1].z * A0123);
 
       if (det == T(0))
+      {
         det = 1;
+      }
       det = T(1) / det;
 
       return Matrix<T, 4, 4>({det * (m[1].y * A2323 - m[1].z * A1323 + m[1].w * A1223),
@@ -962,8 +978,12 @@ namespace krys
   {
     Matrix<T, C, R> mat;
     for (int col = 0; col < C; ++col)
+    {
       for (int row = 0; row < R; ++row)
+      {
         mat[col][row] = a[row] * b[col];
+      }
+    }
     return mat;
   }
 

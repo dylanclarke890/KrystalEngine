@@ -62,7 +62,7 @@ namespace krys::boo::layout
     enum class MayBeAboveLastFloat : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:

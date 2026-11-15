@@ -49,7 +49,7 @@ namespace krys::boo
     IncludeRootLayers,
   };
 
-  static constexpr EnumSet<LayerTreeAsTextOptions> AllLayerTreeAsTextOptions = {
+  constexpr static EnumSet<LayerTreeAsTextOptions> AllLayerTreeAsTextOptions = {
     LayerTreeAsTextOptions::Debug,
     LayerTreeAsTextOptions::IncludeVisibleRects,
     LayerTreeAsTextOptions::IncludeTileCaches,

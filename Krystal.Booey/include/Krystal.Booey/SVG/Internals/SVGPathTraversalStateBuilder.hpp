@@ -47,6 +47,7 @@ namespace krys::boo::svg
     {
       return _segmentIndex;
     }
+
     KRYS_NODISCARD float TotalLength() const noexcept;
     KRYS_NODISCARD FloatPoint CurrentPoint() const noexcept;
 
@@ -54,6 +55,7 @@ namespace krys::boo::svg
     {
       ++_segmentIndex;
     }
+
     KRYS_NODISCARD bool ContinueConsuming() noexcept final;
 
   private:
@@ -69,22 +71,27 @@ namespace krys::boo::svg
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void LineToVertical(float, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void CurveToCubicSmooth(const FloatPoint &, const FloatPoint &, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void CurveToQuadratic(const FloatPoint &, const FloatPoint &, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void CurveToQuadraticSmooth(const FloatPoint &, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");
     }
+
     void ArcTo(float, float, float, bool, bool, const FloatPoint &, PathCoordinateMode) noexcept final
     {
       krys_debug_assert_msg(false, "Unreachable");

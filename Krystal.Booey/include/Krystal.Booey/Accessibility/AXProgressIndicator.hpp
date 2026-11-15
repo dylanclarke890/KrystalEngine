@@ -49,6 +49,7 @@ namespace krys::boo
     AXProgressIndicator(AXId id, RenderObject *renderer, dom::Node *node, AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override;
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override
     {
       return IsIgnoredByDefault();

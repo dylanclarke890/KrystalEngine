@@ -102,6 +102,7 @@ namespace krys::boo::layout
       {
         return _highestBlockAxisPosition;
       }
+
       KRYS_NODISCARD PositionInContextRoot LowestBlockAxisPosition() const noexcept;
 
       KRYS_NODISCARD InlineAxisConstraints GetInlineAxisConstraints() const noexcept;

@@ -46,6 +46,7 @@ namespace krys::boo
   public:
     /// @brief The value of the header @p name, or none.
     KRYS_NODISCARD Maybe<utf8_stringview> Get(utf8_stringview name) const noexcept;
+
     KRYS_NODISCARD bool Contains(utf8_stringview name) const noexcept
     {
       return Get(name).has_value();
@@ -61,14 +62,17 @@ namespace krys::boo
     {
       return _headers.empty();
     }
+
     KRYS_NODISCARD size_t Size() const noexcept
     {
       return _headers.size();
     }
+
     KRYS_NODISCARD auto begin() const noexcept
     {
       return _headers.begin();
     }
+
     KRYS_NODISCARD auto end() const noexcept
     {
       return _headers.end();

@@ -59,6 +59,7 @@ namespace krys::boo
     {
       return _sourceElement.get();
     }
+
     void SetSourceElement(dom::Element *sourceElement) noexcept;
 
   protected:
@@ -112,6 +113,7 @@ namespace krys::boo
     {
       return _resourceRequest;
     }
+
     KRYS_NODISCARD const ResourceRequest &GetResourceRequest() const noexcept
     {
       return _resourceRequest;
@@ -127,10 +129,12 @@ namespace krys::boo
     {
       return _substituteData;
     }
+
     void SetSubstituteData(SubstituteData &&substituteData) noexcept
     {
       _substituteData = krys::move(substituteData);
     }
+
     void SetFrameName(dom::DOMStringAtom frameName) noexcept
     {
       _frameName = frameName;
@@ -140,6 +144,7 @@ namespace krys::boo
     {
       return _referrerPolicy;
     }
+
     void SetReferrerPolicy(ReferrerPolicy referrerPolicy) noexcept
     {
       _referrerPolicy = referrerPolicy;

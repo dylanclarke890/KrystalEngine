@@ -80,6 +80,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual size_t BytesDecodedToDetermineProperties() const noexcept = 0;
 
     KRYS_NODISCARD virtual EncodedDataStatus GetEncodedDataStatus() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsSizeAvailable() const noexcept
     {
       return GetEncodedDataStatus() >= EncodedDataStatus::SizeAvailable;
@@ -87,25 +88,31 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual IntSize Size() const noexcept = 0;
     KRYS_NODISCARD virtual size_t FrameCount() const noexcept = 0;
+
     KRYS_NODISCARD virtual size_t PrimaryFrameIndex() const noexcept
     {
       return 0;
     }
+
     KRYS_NODISCARD virtual RepetitionCount GetRepetitionCount() const noexcept = 0;
     KRYS_NODISCARD virtual utf8_string FilenameExtension() const noexcept = 0;
+
     KRYS_NODISCARD virtual utf8_string AccessibilityDescription() const noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD virtual Maybe<IntPoint> HotSpot() const noexcept = 0;
 
     KRYS_NODISCARD virtual IntSize
       FrameSizeAtIndex(size_t index, SubsamplingLevel = SubsamplingLevel::Default) const noexcept = 0;
     KRYS_NODISCARD virtual bool FrameIsCompleteAtIndex(size_t index) const noexcept = 0;
+
     KRYS_NODISCARD virtual ImageOrientation FrameOrientationAtIndex(size_t) const noexcept
     {
       return ImageOrientation::Orientation::None;
     }
+
     KRYS_NODISCARD virtual Maybe<IntSize> FrameDensityCorrectedSizeAtIndex(size_t) const noexcept
     {
       return null;
@@ -124,6 +131,7 @@ namespace krys::boo
     virtual void SetExpectedContentSize(int64) noexcept
     {
     }
+
     virtual void SetData(const SharedBuffer &data, bool allDataReceived) noexcept = 0;
     KRYS_NODISCARD virtual bool IsAllDataReceived() const noexcept = 0;
     virtual void ClearFrameBufferCache(size_t index) noexcept = 0;

@@ -52,7 +52,7 @@ namespace krys::boo::css::cq
   enum class UsesSVGZoomRulesForLength : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   namespace
@@ -126,6 +126,7 @@ namespace krys::boo::css::cq
       // SizeFeatureSchema conformance
 
       using SizeFeatureSchema::Evaluate;
+
       KRYS_NODISCARD mq::EvaluationResult
         Evaluate(const mq::Feature &feature, const RenderBox &renderer,
                  const ToLengthConversionData &conversionData) const noexcept override
@@ -148,6 +149,7 @@ namespace krys::boo::css::cq
       // SizeFeatureSchema conformance
 
       using SizeFeatureSchema::Evaluate;
+
       KRYS_NODISCARD mq::EvaluationResult
         Evaluate(const mq::Feature &feature, const RenderBox &renderer,
                  const ToLengthConversionData &conversionData) const noexcept override
@@ -170,6 +172,7 @@ namespace krys::boo::css::cq
       // SizeFeatureSchema conformance
 
       using SizeFeatureSchema::Evaluate;
+
       KRYS_NODISCARD mq::EvaluationResult
         Evaluate(const mq::Feature &feature, const RenderBox &renderer,
                  const ToLengthConversionData &conversionData) const noexcept override
@@ -193,6 +196,7 @@ namespace krys::boo::css::cq
       // SizeFeatureSchema conformance
 
       using SizeFeatureSchema::Evaluate;
+
       KRYS_NODISCARD mq::EvaluationResult
         Evaluate(const mq::Feature &feature, const RenderBox &renderer,
                  const ToLengthConversionData &conversionData) const noexcept override
@@ -216,6 +220,7 @@ namespace krys::boo::css::cq
       // SizeFeatureSchema conformance
 
       using SizeFeatureSchema::Evaluate;
+
       KRYS_NODISCARD mq::EvaluationResult
         Evaluate(const mq::Feature &feature, const RenderBox &renderer,
                  const ToLengthConversionData &conversionData) const noexcept override
@@ -236,6 +241,7 @@ namespace krys::boo::css::cq
       // SizeFeatureSchema conformance
 
       using SizeFeatureSchema::Evaluate;
+
       KRYS_NODISCARD mq::EvaluationResult
         Evaluate(const mq::Feature &feature, const RenderBox &renderer,
                  const ToLengthConversionData &conversionData) const noexcept override

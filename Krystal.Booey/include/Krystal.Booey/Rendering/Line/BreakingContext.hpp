@@ -113,14 +113,17 @@ namespace krys::boo
     {
       return _current.Renderer();
     }
+
     KRYS_NODISCARD LegacyInlineIterator LineBreak() const noexcept
     {
       return _lineBreak;
     }
+
     KRYS_NODISCARD LineWidth &GetLineWidth() noexcept
     {
       return _width;
     }
+
     KRYS_NODISCARD bool AtEnd() const noexcept
     {
       return _atEnd;
@@ -139,10 +142,12 @@ namespace krys::boo
     bool HandleText() noexcept;
     void TrailingSpacesHang(LegacyInlineIterator &, RenderObject &, bool canBreakMidWord,
                             bool previousCharacterIsSpace) noexcept;
+
     KRYS_NODISCARD bool CanBreakAtThisPosition() const noexcept
     {
       return false;
     }
+
     void CommitAndUpdateLineBreakIfNeeded() noexcept;
     KRYS_NODISCARD LegacyInlineIterator HandleEndOfLine() noexcept;
 

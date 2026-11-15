@@ -92,18 +92,22 @@ namespace krys::boo
     {
       return _data;
     }
+
     KRYS_NODISCARD ColourInterpolationMethod GetColorInterpolationMethod() const noexcept
     {
       return _colorInterpolationMethod;
     }
+
     KRYS_NODISCARD GradientSpreadMethod SpreadMethod() const noexcept
     {
       return _spreadMethod;
     }
+
     KRYS_NODISCARD const GradientColorStops &Stops() const noexcept
     {
       return _stops;
     }
+
     KRYS_NODISCARD bool IsTransient() const noexcept
     {
       return _isTransient;

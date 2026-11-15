@@ -6,7 +6,8 @@
 
 namespace krys
 {
-  /// @brief A copy-on-write reference to shared data: copies share the data until one of them calls `Access()`.
+  /// @brief A copy-on-write reference to shared data: copies share the data until one of them calls
+  /// `Access()`.
   /// @note `T` must be ref-counted and have a `Copy()` returning a `Ref<T>`.
   template <typename T>
   class DataRef
@@ -36,18 +37,22 @@ namespace krys
     {
       return *_data;
     }
+
     KRYS_NODISCARD const T *Ptr() const noexcept KRYS_LIFETIME_BOUND
     {
       return _data.get();
     }
+
     KRYS_NODISCARD const T &Get() const noexcept KRYS_LIFETIME_BOUND
     {
       return *_data;
     }
+
     KRYS_NODISCARD const T &operator*() const noexcept KRYS_LIFETIME_BOUND
     {
       return *_data;
     }
+
     KRYS_NODISCARD const T *operator->() const noexcept KRYS_LIFETIME_BOUND
     {
       return _data.get();

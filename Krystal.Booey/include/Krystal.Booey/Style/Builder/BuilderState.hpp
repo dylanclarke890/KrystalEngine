@@ -74,7 +74,7 @@ namespace krys::boo::style
   {
     Value,
     Initial,
-    Inherit
+    Inherit,
   };
 
   struct BuilderPositionTryFallback
@@ -226,6 +226,7 @@ namespace krys::boo::style
     {
       return _context.TreeResolutionState ? &_context.TreeResolutionState->AnchorPositionedStates : nullptr;
     }
+
     KRYS_NODISCARD const Maybe<BuilderPositionTryFallback> &GetPositionTryFallback() const noexcept
     {
       return _context.PositionTryFallback;

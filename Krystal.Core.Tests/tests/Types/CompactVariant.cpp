@@ -164,7 +164,7 @@ namespace krys::tests
   TEST_CASE("CompactVariant: 64-bit pointers keep their top byte", "[CompactVariant]")
   {
     int testInt = 1;
-    void *testPtr = reinterpret_cast<void *>(0x26'00'12'34'56'78'9a'bcULL);
+    void *testPtr = reinterpret_cast<void *>(0x26'00'12'34'56'78'9A'BCull);
 
     CompactVariant<int *, void *> variant = &testInt;
     CHECK(HoldsAlternative<int *>(variant));
@@ -175,7 +175,7 @@ namespace krys::tests
     CHECK(HoldsAlternative<void *>(variant));
     SwitchOn(
       variant, [&](int *const &) { FAIL(); },
-      [&](void *const &value) { CHECK(reinterpret_cast<uintptr_t>(value) == 0x26'00'12'34'56'78'9a'bcULL); });
+      [&](void *const &value) { CHECK(reinterpret_cast<uintptr_t>(value) == 0x26'00'12'34'56'78'9A'BCull); });
   }
 
   TEST_CASE("CompactVariant: smart pointers", "[CompactVariant]")

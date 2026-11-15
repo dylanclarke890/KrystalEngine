@@ -1312,5 +1312,4 @@ namespace krys::ui::tests
     CHECK(changed.PixelsOver == 80u * 40u);
     CheckNoStalePixels(fixture, view, "2d-canvas-changed");
   }
-
 }

@@ -25,7 +25,7 @@ namespace krys
     enum class Color : bool
     {
       Red,
-      Black
+      Black,
     };
 
     class Node
@@ -48,6 +48,7 @@ namespace krys
       {
         return _color;
       }
+
       void SetColor(Color color) noexcept
       {
         _color = color;
@@ -57,6 +58,7 @@ namespace krys
       {
         return _data;
       }
+
       KRYS_NODISCARD const T &Data() const noexcept
       {
         return _data;
@@ -71,6 +73,7 @@ namespace krys
       {
         return _left;
       }
+
       void SetLeft(Node *node) noexcept
       {
         _left = node;
@@ -80,6 +83,7 @@ namespace krys
       {
         return _right;
       }
+
       void SetRight(Node *node) noexcept
       {
         _right = node;
@@ -89,6 +93,7 @@ namespace krys
       {
         return _parent;
       }
+
       void SetParent(Node *node) noexcept
       {
         _parent = node;

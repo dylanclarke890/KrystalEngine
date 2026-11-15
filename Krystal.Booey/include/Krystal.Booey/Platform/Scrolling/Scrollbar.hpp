@@ -90,12 +90,14 @@ namespace krys::boo
     {
       return _frameRect;
     }
+
     void SetFrameRect(const IntRect &rect) noexcept;
 
     KRYS_NODISCARD int32 Width() const noexcept
     {
       return _frameRect.Width();
     }
+
     KRYS_NODISCARD int32 Height() const noexcept
     {
       return _frameRect.Height();
@@ -120,12 +122,16 @@ namespace krys::boo
     {
       return 40;
     }
+
     KRYS_NODISCARD static int32 PixelsPerLineStep(int32 viewWidthOrHeight) noexcept;
+
     KRYS_NODISCARD static float MinFractionToStepWhenPaging() noexcept
     {
       return 0.8f;
     }
+
     KRYS_NODISCARD static int32 MaxOverlapBetweenPages() noexcept;
+
     KRYS_NODISCARD static int32 PageStep(int32 viewWidthOrHeight, int32 contentWidthOrHeight) noexcept
     {
       return std::max(
@@ -134,6 +140,7 @@ namespace krys::boo
           std::lround(static_cast<float>(contentWidthOrHeight - Scrollbar::MaxOverlapBetweenPages()))),
         1);
     }
+
     KRYS_NODISCARD static int32 PageStep(int32 viewWidthOrHeight) noexcept
     {
       return PageStep(viewWidthOrHeight, viewWidthOrHeight);
@@ -157,6 +164,7 @@ namespace krys::boo
     {
       return static_cast<int32>(std::lround(_currentPos));
     }
+
     KRYS_NODISCARD float CurrentPos() const noexcept
     {
       return _currentPos;
@@ -166,14 +174,17 @@ namespace krys::boo
     {
       return _visibleSize;
     }
+
     KRYS_NODISCARD int32 TotalSize() const noexcept
     {
       return _totalSize;
     }
+
     KRYS_NODISCARD int32 Maximum() const noexcept
     {
       return _totalSize - _visibleSize;
     }
+
     KRYS_NODISCARD ScrollbarWidth WidthStyle() const noexcept
     {
       return _widthStyle;
@@ -186,10 +197,12 @@ namespace krys::boo
     {
       return _lineStep;
     }
+
     KRYS_NODISCARD int32 PageStep() const noexcept
     {
       return _pageStep;
     }
+
     KRYS_NODISCARD float PixelStep() const noexcept
     {
       return _pixelStep;
@@ -203,6 +216,7 @@ namespace krys::boo
     {
       return _suppressInvalidation;
     }
+
     void SetSuppressInvalidation(bool suppress) noexcept
     {
       _suppressInvalidation = suppress;
@@ -212,6 +226,7 @@ namespace krys::boo
     {
       return _enabled;
     }
+
     void SetEnabled(bool enabled) noexcept;
 
     KRYS_NODISCARD bool IsOverlayScrollbar() const noexcept;
@@ -286,6 +301,7 @@ namespace krys::boo
 
     /// @brief Repaints the scrollbar's @p rect.
     void InvalidateRect(const IntRect &rect) noexcept;
+
     void Invalidate() noexcept
     {
       InvalidateRect(IntRect(IntPoint(), _frameRect.Size()));

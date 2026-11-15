@@ -105,6 +105,7 @@ namespace krys::boo::svg
     {
       return _page.get();
     }
+
     KRYS_NODISCARD RefPtr<SVGSvgElement> RootElement() const noexcept;
 
   private:
@@ -116,10 +117,12 @@ namespace krys::boo::svg
 
     void SetContainerSize(const FloatSize &) noexcept final;
     KRYS_NODISCARD IntSize ContainerSize() const noexcept;
+
     KRYS_NODISCARD bool UsesContainerSize() const noexcept final
     {
       return true;
     }
+
     void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
                                     FloatSize &intrinsicRatio) noexcept final;
 
@@ -130,6 +133,7 @@ namespace krys::boo::svg
     {
       return false;
     }
+
     KRYS_NODISCARD bool CurrentFrameIsComplete() const noexcept final
     {
       return static_cast<bool>(_page);

@@ -64,6 +64,7 @@ namespace krys::boo::layout
     {
       return _flexBox;
     }
+
     KRYS_NODISCARD const FlexFormattingUtils &FormattingUtils() const noexcept
     {
       return _flexFormattingUtils;

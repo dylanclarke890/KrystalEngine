@@ -126,7 +126,7 @@ namespace krys::boo::css
     enum class IgnorePseudoElement : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     KRYS_NODISCARD SelectorSpecificity

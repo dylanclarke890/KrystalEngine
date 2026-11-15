@@ -59,6 +59,7 @@ namespace krys::boo
     {
       return _affectedByRadius;
     }
+
     void SetAffectedByRadius(bool affectedByRadius) noexcept
     {
       _affectedByRadius = affectedByRadius;
@@ -95,10 +96,12 @@ namespace krys::boo
     {
       _rect.Move(x, y);
     }
+
     void Move(const LayoutSize &size) noexcept
     {
       _rect.Move(size);
     }
+
     void MoveBy(const LayoutPoint &point) noexcept
     {
       _rect.MoveBy(point);
@@ -112,6 +115,7 @@ namespace krys::boo
       }
       return _rect.Intersects(rect);
     }
+
     KRYS_NODISCARD bool Intersects(const HitTestLocation &hitTestLocation) const noexcept
     {
       if (IsInfinite())
@@ -125,6 +129,7 @@ namespace krys::boo
     {
       return _rect.IsEmpty();
     }
+
     KRYS_NODISCARD bool IsInfinite() const noexcept
     {
       return _rect.IsInfinite();
@@ -134,10 +139,12 @@ namespace krys::boo
     {
       _rect.InflateX(dx);
     }
+
     void InflateY(LayoutUnit dy) noexcept
     {
       _rect.InflateY(dy);
     }
+
     void Inflate(LayoutUnit d) noexcept
     {
       InflateX(d);

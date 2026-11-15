@@ -105,9 +105,11 @@ namespace krys::boo
 
   public:
     DragImage() noexcept = default;
+
     explicit DragImage(DragImageRef dragImageRef) noexcept : _dragImageRef(krys::move(dragImageRef))
     {
     }
+
     DragImage(DragImage &&) noexcept = default;
     DragImage &operator=(DragImage &&) noexcept = default;
 

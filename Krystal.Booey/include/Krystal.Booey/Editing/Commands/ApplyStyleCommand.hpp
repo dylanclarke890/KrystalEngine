@@ -39,7 +39,7 @@ namespace krys::boo
   enum ShouldIncludeTypingStyle : bool
   {
     IncludeTypingStyle,
-    IgnoreTypingStyle
+    IgnoreTypingStyle,
   };
 
   /// @brief Applies an editing style to the selection or a range: block properties to the paragraphs' blocks,
@@ -52,13 +52,13 @@ namespace krys::boo
     {
       IfNeeded,
       Always,
-      None
+      None,
     };
 
     enum class AddStyledElement : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     using IsInlineElementToRemoveFunction = bool (*)(const dom::Element *);
@@ -100,6 +100,7 @@ namespace krys::boo
 
   private:
     void DoApply() noexcept override;
+
     KRYS_NODISCARD bool ShouldDispatchInputEvents() const noexcept final
     {
       return false;
@@ -114,11 +115,13 @@ namespace krys::boo
     bool RemoveInlineStyleFromElement(EditingStyle &style, html::HTMLElement &element,
                                       InlineStyleRemovalMode mode = InlineStyleRemovalMode::IfNeeded,
                                       EditingStyle *extractedStyle = nullptr) noexcept;
+
     KRYS_NODISCARD bool ShouldRemoveInlineStyleFromElement(EditingStyle &style,
                                                            html::HTMLElement &element) noexcept
     {
       return RemoveInlineStyleFromElement(style, element, InlineStyleRemovalMode::None);
     }
+
     void ReplaceWithSpanOrRemoveIfWithoutAttributes(html::HTMLElement &element) noexcept;
     bool RemoveImplicitlyStyledElement(EditingStyle &style, html::HTMLElement &element,
                                        InlineStyleRemovalMode mode, EditingStyle *extractedStyle) noexcept;
@@ -171,7 +174,7 @@ namespace krys::boo
   enum ShouldStyleAttributeBeEmpty : bool
   {
     AllowNonEmptyStyleAttribute,
-    StyleAttributeShouldBeEmpty
+    StyleAttributeShouldBeEmpty,
   };
 
   KRYS_NODISCARD bool IsEmptyFontTag(

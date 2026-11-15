@@ -23,7 +23,7 @@ namespace krys::boo::dom
     Labels,
     /// @brief Reads a control's ID, name and whether it's listed and enumeratable.
     FormControls,
-    Count
+    Count,
   };
 
   /// @brief Which nodes a live collection looks at.
@@ -33,7 +33,7 @@ namespace krys::boo::dom
     Children,
     /// @brief The descendants of the root of the node's tree, which changes as the node moves. As a change
     /// anywhere in that tree matters, the document holds the collection as well as the node.
-    OwnerTree
+    OwnerTree,
   };
 
   /// @brief Whether a change to the attribute called @p localName can change the items of a collection with

@@ -108,6 +108,7 @@ namespace krys::boo
     {
       return _pageLogicalHeight;
     }
+
     KRYS_NODISCARD bool PageLogicalHeightChanged() const noexcept
     {
       return _pageLogicalHeightChanged;
@@ -117,6 +118,7 @@ namespace krys::boo
     {
       return _paintOffset;
     }
+
     KRYS_NODISCARD LayoutSize LayoutOffset() const noexcept
     {
       return _layoutOffset;
@@ -142,12 +144,14 @@ namespace krys::boo
     {
       return _clipRect;
     }
+
     KRYS_NODISCARD bool IsClipped() const noexcept
     {
       return _clipped;
     }
 
     void AddLayoutDelta(LayoutSize delta) noexcept;
+
     KRYS_NODISCARD LayoutSize LayoutDelta() const noexcept
     {
       return _layoutDelta;
@@ -160,6 +164,7 @@ namespace krys::boo
     {
       _lineClamp = lineClamp;
     }
+
     KRYS_NODISCARD Maybe<LineClamp> GetLineClamp() const noexcept
     {
       return _lineClamp;
@@ -169,6 +174,7 @@ namespace krys::boo
     {
       _marginTrimBlockStart = marginTrimBlockStart;
     }
+
     KRYS_NODISCARD bool MarginTrimBlockStart() const noexcept
     {
       return _marginTrimBlockStart;
@@ -253,7 +259,7 @@ namespace krys::boo
     {
       Hidden,
       Auto,
-      RevealedWhenFound
+      RevealedWhenFound,
     };
 
   private:

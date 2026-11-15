@@ -27,7 +27,7 @@ namespace krys::boo::svg
   enum class FloatBlendMode : bool
   {
     Horizontal,
-    Vertical
+    Vertical,
   };
 
   class SVGPathSource;

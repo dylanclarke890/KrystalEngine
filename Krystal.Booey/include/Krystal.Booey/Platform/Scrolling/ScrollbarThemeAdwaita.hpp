@@ -49,10 +49,12 @@ namespace krys::boo
 
   protected:
     KRYS_NODISCARD bool UsesOverlayScrollbars() const noexcept override;
+
     KRYS_NODISCARD bool InvalidateOnMouseEnterExit() const noexcept override
     {
       return UsesOverlayScrollbars();
     }
+
     bool Paint(Scrollbar &, GraphicsContext &, const IntRect &) noexcept override;
     void PaintScrollCorner(ScrollableArea &, GraphicsContext &, const IntRect &) noexcept override;
     KRYS_NODISCARD ScrollbarButtonPressAction HandleMousePressEvent(Scrollbar &, const PlatformMouseEvent &,

@@ -40,7 +40,7 @@ namespace krys::boo::html
     {
       Optimum,
       Suboptimal,
-      EvenLessGood
+      EvenLessGood,
     };
 
   private:

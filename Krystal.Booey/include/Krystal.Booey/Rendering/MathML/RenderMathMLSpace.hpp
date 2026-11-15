@@ -59,6 +59,7 @@ namespace krys::boo
     {
       return false;
     }
+
     void ComputePreferredLogicalWidths() noexcept final;
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;

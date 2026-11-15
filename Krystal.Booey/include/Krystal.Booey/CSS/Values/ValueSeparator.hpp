@@ -28,7 +28,7 @@ namespace krys::boo::css
   {
     SpaceSeparator,
     CommaSeparator,
-    SlashSeparator
+    SlashSeparator,
   };
 }
 

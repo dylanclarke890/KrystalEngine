@@ -96,6 +96,7 @@ namespace krys::boo
     {
       return std::chrono::milliseconds(250);
     }
+
     KRYS_NODISCARD virtual MonotonicTime::duration AutoscrollTimerDelay() const noexcept
     {
       return std::chrono::milliseconds(50);

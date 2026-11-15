@@ -49,7 +49,7 @@ namespace krys::boo
   {
     Increment,
     Reset,
-    Set
+    Set,
   };
 }
 
@@ -89,22 +89,27 @@ namespace krys::boo
     {
       return HasResetType() || !_parent;
     }
+
     KRYS_NODISCARD bool HasResetType() const noexcept
     {
       return _type.Contains(Type::Reset);
     }
+
     KRYS_NODISCARD bool HasSetType() const noexcept
     {
       return _type.Contains(Type::Set);
     }
+
     KRYS_NODISCARD int32 Value() const noexcept
     {
       return _value;
     }
+
     KRYS_NODISCARD int32 CountInParent() const noexcept
     {
       return _countInParent;
     }
+
     KRYS_NODISCARD RenderElement &Owner() const noexcept;
     void AddRenderer(RenderCounter &renderer) noexcept;
     void RemoveRenderer(RenderCounter &renderer) noexcept;
@@ -116,22 +121,27 @@ namespace krys::boo
     {
       return _parent.get();
     }
+
     KRYS_NODISCARD CounterNode *PreviousSibling() const noexcept
     {
       return _previousSibling.get();
     }
+
     KRYS_NODISCARD CounterNode *NextSibling() const noexcept
     {
       return _nextSibling.get();
     }
+
     KRYS_NODISCARD CounterNode *FirstChild() const noexcept
     {
       return _firstChild.get();
     }
+
     KRYS_NODISCARD CounterNode *LastChild() const noexcept
     {
       return _lastChild.get();
     }
+
     KRYS_NODISCARD CounterNode *LastDescendant() const noexcept;
     KRYS_NODISCARD CounterNode *PreviousInPreOrder() const noexcept;
     KRYS_NODISCARD CounterNode *NextInPreOrder(const CounterNode *stayWithin = nullptr) const noexcept;

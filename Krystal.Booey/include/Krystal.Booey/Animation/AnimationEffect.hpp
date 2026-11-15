@@ -96,22 +96,29 @@ namespace krys::boo
     virtual void AnimationDidTick() noexcept
     {
     }
+
     virtual void AnimationBecameReady() noexcept
     {
     }
+
     virtual void AnimationDidChangeTimingProperties() noexcept
     {
     }
+
     virtual void AnimationWasCanceled() noexcept
     {
     }
+
     virtual void AnimationSuspensionStateDidChange(bool) noexcept
     {
     }
+
     virtual void AnimationTimelineDidChange() noexcept;
+
     virtual void AnimationDidFinish() noexcept
     {
     }
+
     virtual void AnimationPlaybackRateDidChange() noexcept;
     virtual void AnimationProgressBasedTimelineSourceDidChangeMetrics(
       const style::SingleAnimationRange &animationAttachmentRange) noexcept;
@@ -126,32 +133,39 @@ namespace krys::boo
     {
       return _animation.get();
     }
+
     virtual void SetAnimation(WebAnimation *animation) noexcept;
 
     KRYS_NODISCARD WebAnimationTime Delay() noexcept;
+
     KRYS_NODISCARD Seconds SpecifiedDelay() const noexcept
     {
       return _timing.SpecifiedStartDelay;
     }
+
     void SetDelay(const Seconds &delay) noexcept;
 
     KRYS_NODISCARD WebAnimationTime EndDelay() noexcept;
+
     KRYS_NODISCARD Seconds SpecifiedEndDelay() const noexcept
     {
       return _timing.SpecifiedEndDelay;
     }
+
     void SetEndDelay(const Seconds &endDelay) noexcept;
 
     KRYS_NODISCARD FillMode Fill() const noexcept
     {
       return _timing.Fill;
     }
+
     void SetFill(FillMode fill) noexcept;
 
     KRYS_NODISCARD double IterationStart() const noexcept
     {
       return _timing.IterationStart;
     }
+
     /// @return A `TypeError`, leaving the iteration start unchanged, if it's negative.
     dom::ExceptionOr<void> SetIterationStart(double iterationStart) noexcept;
 
@@ -159,28 +173,33 @@ namespace krys::boo
     {
       return _timing.Iterations;
     }
+
     /// @return A `TypeError`, leaving the iteration count unchanged, if it's negative or NaN.
     dom::ExceptionOr<void> SetIterations(double iterations) noexcept;
 
     KRYS_NODISCARD WebAnimationTime IterationDuration() noexcept;
     /// @attention The computed timing properties must be up to date.
     KRYS_NODISCARD WebAnimationTime IterationDuration() const noexcept;
+
     KRYS_NODISCARD Maybe<Seconds> SpecifiedIterationDuration() const noexcept
     {
       return _timing.SpecifiedIterationDuration;
     }
+
     void SetIterationDuration(const Maybe<Seconds> &duration) noexcept;
 
     KRYS_NODISCARD PlaybackDirection Direction() const noexcept
     {
       return _timing.Direction;
     }
+
     void SetDirection(PlaybackDirection direction) noexcept;
 
     KRYS_NODISCARD boo::TimingFunction *TimingFunction() const noexcept
     {
       return _timing.TimingFunction.get();
     }
+
     void SetTimingFunction(const RefPtr<boo::TimingFunction> &timingFunction) noexcept;
 
     KRYS_NODISCARD WebAnimationTime ActiveDuration() noexcept;
@@ -199,6 +218,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual Maybe<double> ProgressUntilNextStep(double iterationProgress) const noexcept;
 
   private:

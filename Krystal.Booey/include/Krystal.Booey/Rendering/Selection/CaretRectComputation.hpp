@@ -36,7 +36,7 @@ namespace krys::boo
   enum class CaretRectMode : bool
   {
     Normal,
-    ExpandToEndOfLine
+    ExpandToEndOfLine,
   };
 
   KRYS_NODISCARD int32 CaretWidth() noexcept;

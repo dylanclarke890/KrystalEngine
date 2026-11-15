@@ -10,6 +10,7 @@ inline void *operator new(size_t, krys::NotNullTag, void *location)
 }
 
 #define KRYS_FORBID_HEAP_ALLOCATION                                                                          \
+                                                                                                             \
 private:                                                                                                     \
   void *operator new(size_t, void *) = delete;                                                               \
   void *operator new[](size_t, void *) = delete;                                                             \
@@ -19,6 +20,7 @@ private:                                                                        
   using _forceSemicolonForbidHeapAllocation = int
 
 #define KRYS_FORBID_HEAP_ALLOCATION_ALLOWING_PLACEMENT_NEW                                                   \
+                                                                                                             \
 public:                                                                                                      \
   void *operator new(size_t, krys::NotNullTag, void *location)                                               \
   {                                                                                                          \

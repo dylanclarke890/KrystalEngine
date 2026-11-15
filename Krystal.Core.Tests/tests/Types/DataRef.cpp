@@ -36,7 +36,7 @@ namespace krys::tests
     /// @brief Counts the values it creates, so tests can see when the cache misses.
     struct CountingPolicy : TinyLRUCachePolicy<int, int>
     {
-      inline static int Created = 0;
+      static inline int Created = 0;
 
       KRYS_NODISCARD static bool IsKeyNull(const int &key) noexcept
       {

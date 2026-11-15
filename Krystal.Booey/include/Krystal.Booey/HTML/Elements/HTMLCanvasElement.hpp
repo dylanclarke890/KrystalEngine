@@ -59,8 +59,8 @@ namespace krys::boo::html
 
   public:
     // These values come from the HTML standard.
-    static constexpr uint32 DefaultWidth = 300;
-    static constexpr uint32 DefaultHeight = 150;
+    constexpr static uint32 DefaultWidth = 300;
+    constexpr static uint32 DefaultHeight = 150;
 
     HTMLCanvasElement(dom::Document &document) noexcept;
     ~HTMLCanvasElement() noexcept override;
@@ -69,10 +69,12 @@ namespace krys::boo::html
     {
       HTMLElement::AddRef();
     }
+
     void SubRef() const noexcept final
     {
       HTMLElement::SubRef();
     }
+
     KRYS_NODISCARD uint32 GetRefCount() const noexcept final
     {
       return HTMLElement::GetRefCount();
@@ -82,6 +84,7 @@ namespace krys::boo::html
     {
       return false;
     }
+
     KRYS_NODISCARD bool CanStartSelection() const noexcept final
     {
       return false;
@@ -156,6 +159,7 @@ namespace krys::boo::html
     {
       _isSnapshotting = isSnapshotting;
     }
+
     KRYS_NODISCARD bool IsSnapshotting() const noexcept
     {
       return _isSnapshotting;

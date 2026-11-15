@@ -32,6 +32,6 @@ namespace krys::boo
   enum class RepaintRectCalculation : bool
   {
     Fast,
-    Accurate
+    Accurate,
   };
 }

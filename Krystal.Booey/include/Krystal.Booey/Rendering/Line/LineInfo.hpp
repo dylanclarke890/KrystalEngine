@@ -50,22 +50,27 @@ namespace krys::boo
     {
       return _isFirstLine;
     }
+
     KRYS_NODISCARD bool IsLastLine() const noexcept
     {
       return _isLastLine;
     }
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _isEmpty;
     }
+
     KRYS_NODISCARD uint32 RunsFromLeadingWhitespace() const noexcept
     {
       return _runsFromLeadingWhitespace;
     }
+
     void ResetRunsFromLeadingWhitespace() noexcept
     {
       _runsFromLeadingWhitespace = 0;
     }
+
     void IncrementRunsFromLeadingWhitespace() noexcept
     {
       _runsFromLeadingWhitespace++;
@@ -75,10 +80,12 @@ namespace krys::boo
     {
       _isFirstLine = firstLine;
     }
+
     void SetLastLine(bool lastLine) noexcept
     {
       _isLastLine = lastLine;
     }
+
     void SetEmpty(bool empty) noexcept
     {
       _isEmpty = empty;

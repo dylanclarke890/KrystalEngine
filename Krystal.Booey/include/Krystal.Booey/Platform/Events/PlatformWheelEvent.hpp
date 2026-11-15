@@ -128,6 +128,7 @@ namespace krys::boo
       copy._isTouchScroll = true;
       return copy;
     }
+
     KRYS_NODISCARD bool IsTouchScroll() const noexcept
     {
       return _isTouchScroll;
@@ -150,10 +151,12 @@ namespace krys::boo
     {
       return _phase;
     }
+
     KRYS_NODISCARD PlatformWheelEventPhase MomentumPhase() const noexcept
     {
       return _momentumPhase;
     }
+
     /// @brief Whether the deltas are the pixels the content follows (a touchpad's), rather than notches of a
     /// wheel made into pixels.
     KRYS_NODISCARD bool HasPreciseScrollingDeltas() const noexcept
@@ -169,22 +172,26 @@ namespace krys::boo
       return _isTouchScroll || _phase != PlatformWheelEventPhase::None
              || _momentumPhase != PlatformWheelEventPhase::None;
     }
+
     /// @brief Whether the event is part of a touchpad's gesture or its momentum, so goes to the element and
     /// scroller the gesture started over.
     KRYS_NODISCARD bool UseLatchedEventElement() const noexcept
     {
       return _phase != PlatformWheelEventPhase::None || _momentumPhase != PlatformWheelEventPhase::None;
     }
+
     /// @brief Whether the event starts a touchpad's gesture.
     KRYS_NODISCARD bool IsGestureStart() const noexcept
     {
       return _phase == PlatformWheelEventPhase::Began;
     }
+
     /// @brief Whether the event is a step of a touchpad's gesture with the fingers down (not its momentum).
     KRYS_NODISCARD bool IsGestureContinuation() const noexcept
     {
       return _phase == PlatformWheelEventPhase::Changed;
     }
+
     /// @brief Whether the event ends a touchpad's gesture, and the momentum after it.
     KRYS_NODISCARD bool EndsGesture() const noexcept
     {
@@ -208,6 +215,7 @@ namespace krys::boo
     {
       return _position;
     }
+
     // Screen coordinates.
     KRYS_NODISCARD const IntPoint &GlobalPosition() const noexcept
     {
@@ -218,10 +226,12 @@ namespace krys::boo
     {
       return _deltaX;
     }
+
     KRYS_NODISCARD float DeltaY() const noexcept
     {
       return _deltaY;
     }
+
     KRYS_NODISCARD FloatSize Delta() const noexcept
     {
       return {_deltaX, _deltaY};
@@ -231,6 +241,7 @@ namespace krys::boo
     {
       return _wheelTicksX;
     }
+
     KRYS_NODISCARD float WheelTicksY() const noexcept
     {
       return _wheelTicksY;

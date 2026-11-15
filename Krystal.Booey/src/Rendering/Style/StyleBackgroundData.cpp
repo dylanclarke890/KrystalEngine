@@ -26,7 +26,6 @@
 
 namespace krys::boo
 {
-
   StyleBackgroundData::StyleBackgroundData() noexcept
       : Background(css::keywords::None {}), BackgroundColor(style::ComputedStyle::InitialBackgroundColor())
   {

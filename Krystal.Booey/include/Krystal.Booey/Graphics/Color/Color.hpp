@@ -110,7 +110,7 @@ namespace krys::boo
 
   private:
     constexpr static uint64 maxNumberOfBitsInPointer = 48;
-    constexpr static uint64 colorValueMask = (1ULL << maxNumberOfBitsInPointer) - 1;
+    constexpr static uint64 colorValueMask = (1ull << maxNumberOfBitsInPointer) - 1;
     constexpr static uint64 flagsSize = sizeof(ColorFlagsIncludingPrivate) * 8;
     constexpr static uint64 flagsShift = maxNumberOfBitsInPointer;
     constexpr static uint64 colorSpaceSize = sizeof(ColourSpace) * 8;

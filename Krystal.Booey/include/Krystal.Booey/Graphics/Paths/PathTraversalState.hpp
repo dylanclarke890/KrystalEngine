@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD bool ProcessPathElement(PathElement::Type, std::span<const FloatPoint>) noexcept;
+
     KRYS_NODISCARD bool ProcessPathElement(const PathElement &element) noexcept
     {
       return ProcessPathElement(element.ElementType, element.Points);
@@ -54,14 +55,17 @@ namespace krys::boo
     {
       return _action;
     }
+
     void SetAction(Action action) noexcept
     {
       _action = action;
     }
+
     KRYS_NODISCARD float DesiredLength() const noexcept
     {
       return _desiredLength;
     }
+
     void SetDesiredLength(float desiredLength) noexcept
     {
       _desiredLength = desiredLength;
@@ -72,14 +76,17 @@ namespace krys::boo
     {
       return _success;
     }
+
     KRYS_NODISCARD float TotalLength() const noexcept
     {
       return _totalLength;
     }
+
     KRYS_NODISCARD FloatPoint Current() const noexcept
     {
       return _current;
     }
+
     KRYS_NODISCARD float NormalAngle() const noexcept
     {
       return _normalAngle;

@@ -72,6 +72,7 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;
     void Paint(PaintInfo &info, const LayoutPoint &paintOffset) noexcept final;
     KRYS_NODISCARD RenderMathMLOperator *UnembellishedOperator() const noexcept final;
+
     KRYS_NODISCARD bool IsMathContentCentered() const noexcept final
     {
       return true;

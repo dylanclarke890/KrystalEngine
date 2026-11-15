@@ -7,7 +7,7 @@ namespace krys::Serialisation
   /// @brief Saving for std-like pair associative containers.
   template <typename Archive, template <typename...> typename TMap, typename... Args,
             typename = typename TMap<Args...>::mapped_type>
-  void Save(Archive &archive, TMap<Args...> const &map) noexcept
+  void Save(Archive &archive, const TMap<Args...> &map) noexcept
   {
     archive(KRYS_CONTAINER_SIZE(map.size()));
 

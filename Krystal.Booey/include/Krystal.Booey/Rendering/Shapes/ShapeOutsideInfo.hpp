@@ -74,16 +74,19 @@ namespace krys::boo
     {
       return _isValid;
     }
+
     KRYS_NODISCARD LayoutUnit LeftMarginBoxDelta() const noexcept
     {
       krys_debug_assert(_isValid);
       return _leftMarginBoxDelta;
     }
+
     KRYS_NODISCARD LayoutUnit RightMarginBoxDelta() const noexcept
     {
       krys_debug_assert(_isValid);
       return _rightMarginBoxDelta;
     }
+
     KRYS_NODISCARD bool LineOverlapsShape() const noexcept
     {
       krys_debug_assert(_isValid);
@@ -124,6 +127,7 @@ namespace krys::boo
     {
       _shape = nullptr;
     }
+
     KRYS_NODISCARD bool IsShapeDirty() const noexcept
     {
       return !_shape;

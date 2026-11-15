@@ -101,7 +101,7 @@ namespace krys::boo
     enum class UserScrollType : uint8
     {
       Explicit,
-      Implicit
+      Implicit,
     };
 
     struct OverrideViewportSize
@@ -284,6 +284,7 @@ namespace krys::boo
     {
       return _hasFlippedBlockRenderers;
     }
+
     void SetHasFlippedBlockRenderers(bool b) noexcept
     {
       _hasFlippedBlockRenderers = b;
@@ -317,6 +318,7 @@ namespace krys::boo
     {
       return _extendedBackgroundRect.has_value();
     }
+
     KRYS_NODISCARD IntRect ExtendedBackgroundRectForPainting() const noexcept
     {
       return _extendedBackgroundRect.value_or(IntRect());
@@ -470,6 +472,7 @@ namespace krys::boo
     /// @brief The scroll position fixed-position boxes are placed relative to: the scroll position (there's
     /// no visual viewport, page scale, header or rubber-banding).
     KRYS_NODISCARD LayoutPoint ScrollPositionForFixedPosition() const noexcept;
+
     KRYS_NODISCARD LayoutPoint ScrollPositionRespectingCustomFixedPosition() const noexcept
     {
       return ScrollPositionForFixedPosition();
@@ -522,10 +525,12 @@ namespace krys::boo
     /// adds or removes the scrollbars to match.
     void SetScrollbarModes(ScrollbarMode horizontalMode, ScrollbarMode verticalMode,
                            bool horizontalLock = false, bool verticalLock = false) noexcept;
+
     void SetHorizontalScrollbarMode(ScrollbarMode mode, bool lock = false) noexcept
     {
       SetScrollbarModes(mode, VerticalScrollbarMode(), lock, _verticalScrollbarLock);
     }
+
     void SetVerticalScrollbarMode(ScrollbarMode mode, bool lock = false) noexcept
     {
       SetScrollbarModes(HorizontalScrollbarMode(), mode, _horizontalScrollbarLock, lock);
@@ -534,7 +539,7 @@ namespace krys::boo
     enum class ScrollbarModesCalculationStrategy : bool
     {
       RulesFromWebContentOnly,
-      AnyRule
+      AnyRule,
     };
 
     /// @brief The scrollbar modes the root's (or the body's) `overflow` asks for.
@@ -564,10 +569,12 @@ namespace krys::boo
     /// @brief Whether the root's writing mode is horizontal (its blocks stack vertically).
     KRYS_NODISCARD bool IsVerticalDocument() const noexcept;
     KRYS_NODISCARD bool IsFlippedDocument() const noexcept;
+
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override
     {
       return IsScrollable();
     }
+
     KRYS_NODISCARD bool ScrollAnimatorEnabled() const noexcept override;
 
     /// @brief The view's scrollbar at @p windowPoint, if any.
@@ -596,10 +603,12 @@ namespace krys::boo
     /// @return Whether it was there.
     bool RemoveScrollableArea(ScrollableArea &scrollableArea) noexcept;
     KRYS_NODISCARD bool ContainsScrollableArea(const ScrollableArea &scrollableArea) const noexcept;
+
     KRYS_NODISCARD const HashSet<ScrollableArea *> &ScrollableAreas() const noexcept
     {
       return _scrollableAreas;
     }
+
     void ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept;
     /// @brief Repaints the scrollbars of the view and of every scroller and list box in it, for a change in
     /// the page's dark appearance.
@@ -609,6 +618,7 @@ namespace krys::boo
     {
       return _scrollAnchoringController.get();
     }
+
     void QueueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept;
     void DequeueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept;
     /// @brief Chooses the scroll anchors of the view and its scrollers that have none.
@@ -656,7 +666,7 @@ namespace krys::boo
     void Paint(GraphicsContext &context, const IntRect &rect) noexcept;
 
     /// @brief How far (in pixels) the mouse can be from the start of pan scrolling without it scrolling.
-    static constexpr int32 NoPanScrollRadius = 15;
+    constexpr static int32 NoPanScrollRadius = 15;
 
     /// @brief Shows the icon marking the start of pan scrolling, centred on @p iconPosition (in the window).
     void AddPanScrollIcon(const IntPoint &iconPosition) noexcept;
@@ -670,11 +680,13 @@ namespace krys::boo
     void InvalidateRect(const IntRect &rect) noexcept;
     /// @brief Damages the whole view.
     void RepaintEntireView() noexcept;
+
     /// @brief Whether anything needs painting again.
     KRYS_NODISCARD bool HasDamage() const noexcept
     {
       return !_damage.IsEmpty();
     }
+
     /// @brief What needs painting again, in the view's coordinates; the view then has no damage.
     /// @note Take the scrolled contents first: the damage is where the contents are once they've moved.
     KRYS_NODISCARD Region TakeDamage() noexcept;
@@ -687,20 +699,25 @@ namespace krys::boo
     void AddSlowRepaintObject(const RenderElement &renderer) noexcept;
     void RemoveSlowRepaintObject(const RenderElement &renderer) noexcept;
     KRYS_NODISCARD bool HasSlowRepaintObject(const RenderElement &renderer) const noexcept;
+
     KRYS_NODISCARD bool HasSlowRepaintObjects() const noexcept
     {
       return !_slowRepaintObjects.empty();
     }
+
     KRYS_NODISCARD const HashSet<const RenderElement *> &SlowRepaintObjects() const noexcept
     {
       return _slowRepaintObjects;
     }
+
     void AddViewportConstrainedObject(const RenderLayerModelObject &object) noexcept;
     void RemoveViewportConstrainedObject(const RenderLayerModelObject &object) noexcept;
+
     KRYS_NODISCARD bool HasViewportConstrainedObjects() const noexcept
     {
       return !_viewportConstrainedObjects.empty();
     }
+
     /// @brief Whether scrolling repaints the whole view rather than moving the painted contents.
     KRYS_NODISCARD bool UseSlowRepaints() const noexcept;
 
@@ -715,13 +732,15 @@ namespace krys::boo
     enum SelectionInSnapshot
     {
       IncludeSelection,
-      ExcludeSelection
+      ExcludeSelection,
     };
+
     enum CoordinateSpaceForSnapshot
     {
       DocumentCoordinates,
-      ViewCoordinates
+      ViewCoordinates,
     };
+
     /// @brief Paints @p imageRect for a snapshot, with the composited layers flattened into it: of the
     /// contents (in their coordinates), or of the view as it's scrolled.
     void PaintContentsForSnapshot(GraphicsContext &context, const IntRect &imageRect,
@@ -732,10 +751,12 @@ namespace krys::boo
     {
       _paintBehavior = behavior;
     }
+
     KRYS_NODISCARD EnumSet<PaintBehavior> GetPaintBehavior() const noexcept
     {
       return _paintBehavior;
     }
+
     KRYS_NODISCARD bool IsPainting() const noexcept
     {
       return _isPainting;
@@ -745,6 +766,7 @@ namespace krys::boo
     {
       return _isTransparent;
     }
+
     void SetTransparent(bool isTransparent) noexcept;
 
     /// @brief The colour painted under the document where nothing else is (white by default).
@@ -752,7 +774,9 @@ namespace krys::boo
     {
       return _baseBackgroundColor;
     }
+
     void SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept;
+
     KRYS_NODISCARD bool HasOpaqueBackground() const noexcept
     {
       return !_isTransparent && _baseBackgroundColor.IsOpaque();
@@ -959,10 +983,12 @@ namespace krys::boo
     /// they don't come and go as its content arrives; or lets them change again, repainting them if
     /// @p repaintOnUnsuppress.
     void SetScrollbarsSuppressed(bool suppressed, bool repaintOnUnsuppress = false) noexcept;
+
     KRYS_NODISCARD bool ScrollbarsSuppressed() const noexcept
     {
       return _scrollbarsSuppressed;
     }
+
     /// @brief Lets the scrollbars change again, once the document has been parsed.
     void RestoreScrollbar() noexcept;
     /// @brief Readies the view for a new document: its next layout is a first layout, and its scrollbars
@@ -985,7 +1011,7 @@ namespace krys::boo
       CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept;
 
   private:
-    static constexpr int32 PanScrollIconSize = 16;
+    constexpr static int32 PanScrollIconSize = 16;
 
     void InvalidatePanScrollIcon(const IntPoint &iconPosition) noexcept;
 

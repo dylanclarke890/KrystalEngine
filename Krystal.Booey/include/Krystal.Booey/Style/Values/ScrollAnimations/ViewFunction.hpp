@@ -47,6 +47,7 @@ namespace krys::boo
 
       KRYS_NODISCARD bool operator==(const ViewFunctionParameters &) const noexcept = default;
     };
+
     using ViewFunction = css::FunctionNotation<css::ValueId::View, ViewFunctionParameters>;
 
     // MARK: - Conversion
@@ -73,6 +74,5 @@ namespace krys::boo
       void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                       const ViewFunctionParameters &) noexcept;
     };
-
   }
 }

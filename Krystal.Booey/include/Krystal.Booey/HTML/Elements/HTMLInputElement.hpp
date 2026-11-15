@@ -60,16 +60,16 @@ namespace krys::boo::html
 
   public:
     /// @brief The longest value a text field holds; longer values are truncated.
-    static constexpr uint32 MaxEffectiveLength = 524'288;
+    constexpr static uint32 MaxEffectiveLength = 524'288;
 
   private:
-    static constexpr int32 DefaultSize = 20;
+    constexpr static int32 DefaultSize = 20;
 
     enum AutoCompleteSetting : uint8
     {
       Uninitialized,
       On,
-      Off
+      Off,
     };
 
     dom::DOMString _name;
@@ -177,11 +177,13 @@ namespace krys::boo::html
     /// @brief Takes a file input's files from @p dragData, dropped on it.
     /// @return Whether it took any.
     bool ReceiveDroppedFiles(const DragData &dragData) noexcept;
+
     /// @brief Whether a drag over the input carries files it would take.
     KRYS_NODISCARD bool CanReceiveDroppedFiles() const noexcept
     {
       return _canReceiveDroppedFiles;
     }
+
     void SetCanReceiveDroppedFiles(bool canReceiveDroppedFiles) noexcept;
     /// @brief A file input's text for its files, given with them by the host's chooser.
     KRYS_NODISCARD dom::DOMString DisplayString() const noexcept;

@@ -47,14 +47,17 @@ namespace krys::boo::svg
     {
       return _in1->CurrentValue();
     }
+
     KRYS_NODISCARD float StdDeviationX() const noexcept
     {
       return _stdDeviationX->CurrentValue();
     }
+
     KRYS_NODISCARD float StdDeviationY() const noexcept
     {
       return _stdDeviationY->CurrentValue();
     }
+
     KRYS_NODISCARD EdgeModeType EdgeMode() const noexcept
     {
       return _edgeMode->CurrentValue<EdgeModeType>();
@@ -64,14 +67,17 @@ namespace krys::boo::svg
     {
       return *_in1;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &StdDeviationXAnimated() noexcept
     {
       return *_stdDeviationX;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &StdDeviationYAnimated() noexcept
     {
       return *_stdDeviationY;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &EdgeModeAnimated() noexcept
     {
       return *_edgeMode;
@@ -87,10 +93,12 @@ namespace krys::boo::svg
 
     bool SetFilterEffectAttribute(FilterEffect &effect,
                                   const dom::QualifiedName &attributeName) noexcept final;
+
     KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
       return {dom::DOMStringAtom(In1())};
     }
+
     KRYS_NODISCARD bool IsIdentity() const noexcept final;
     KRYS_NODISCARD IntOutsets Outsets(const FloatRect &targetBoundingBox,
                                       SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept final;

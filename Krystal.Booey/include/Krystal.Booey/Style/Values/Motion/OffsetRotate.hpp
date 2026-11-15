@@ -40,6 +40,7 @@ namespace krys::boo::style
     constexpr OffsetRotate(css::keywords::Auto keyword) noexcept : _angle {0}, _autoKeyword {keyword}
     {
     }
+
     constexpr OffsetRotate(Maybe<css::keywords::Auto> autoKeyword, Angle angle) noexcept
         : _angle(angle), _autoKeyword(autoKeyword)
     {
@@ -49,6 +50,7 @@ namespace krys::boo::style
     {
       return _autoKeyword.has_value();
     }
+
     KRYS_NODISCARD Maybe<css::keywords::Auto> AutoKeyword() const noexcept
     {
       return _autoKeyword;

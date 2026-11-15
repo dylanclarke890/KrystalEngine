@@ -84,7 +84,7 @@ namespace krys::boo
   enum AppendTrailingWhitespace : bool
   {
     ShouldAppendTrailingWhitespace,
-    DontAppendTrailingWhitespace
+    DontAppendTrailingWhitespace,
   };
   class ScrollableArea;
   class Scrollbar;
@@ -101,7 +101,7 @@ namespace krys::boo
   enum CheckDragHysteresis : bool
   {
     ShouldCheckDragHysteresis,
-    DontCheckDragHysteresis
+    DontCheckDragHysteresis,
   };
 
   /// @brief Turns the host's mouse and keyboard input into DOM events for a frame: `mousemove`, `mousedown`
@@ -127,26 +127,26 @@ namespace krys::boo
     enum class FireMouseOverOut : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class IgnoreAncestorNodesForClickEvent : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class SetOrClearLastScrollbar : bool
     {
       Clear,
-      Set
+      Set,
     };
 
     enum SelectionInitiationState : uint8
     {
       HaveNotStartedSelection,
       PlacedCaret,
-      ExtendedSelection
+      ExtendedSelection,
     };
 
     /// @brief Whether the press may go on to drag or select, or why it can't.
@@ -196,6 +196,7 @@ namespace krys::boo
       {
         return !_inabilityReason;
       }
+
       KRYS_NODISCARD InabilityReason GetInabilityReason() const noexcept
       {
         return *_inabilityReason;
@@ -351,7 +352,7 @@ namespace krys::boo
     };
 
     /// @brief How long a press on the selection must be held before moving drags it rather than selecting.
-    static constexpr MonotonicTime::duration TextDragDelay {};
+    constexpr static MonotonicTime::duration TextDragDelay {};
 
     /// @brief A drag moved over the frame: `dragenter` and `dragleave` as its target changes, else
     /// `dragover`, each after `drag` at the source.
@@ -395,6 +396,7 @@ namespace krys::boo
     {
       _mouseDownMayStartAutoscroll = true;
     }
+
     KRYS_NODISCARD bool AutoscrollInProgress() const noexcept;
     /// @brief Whether any autoscroll (a selection's, a drag's, or a pan) is scrolling something.
     KRYS_NODISCARD bool IsAutoscrolling() const noexcept;
@@ -500,6 +502,7 @@ namespace krys::boo
     /// it scrolled snaps.
     void DidEndGestureScroll() noexcept;
     KRYS_NODISCARD ScrollIsAnimated KeyboardScrollIsAnimated() const noexcept;
+
     KRYS_NODISCARD bool IsHandlingWheelEvent() const noexcept
     {
       return _isHandlingWheelEvent;

@@ -64,15 +64,18 @@ namespace krys::boo::css
     {
       return _segments.size();
     }
+
     KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept
     {
       return index < _segments.size();
     }
+
     /// @return Nothing if @p index is out of range.
     KRYS_NODISCARD Maybe<CSSUnparsedSegment> Item(size_t index) const noexcept;
     /// @brief Replaces the segment at @p index, or appends one at the end.
     /// @return A `RangeError` if @p index is past the end.
     dom::ExceptionOr<CSSUnparsedSegment> SetItem(size_t index, CSSUnparsedSegment segment) noexcept;
+
     KRYS_NODISCARD const List<CSSUnparsedSegment> &Segments() const noexcept
     {
       return _segments;

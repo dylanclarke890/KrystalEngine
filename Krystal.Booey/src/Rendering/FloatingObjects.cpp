@@ -187,10 +187,12 @@ namespace krys::boo
       {
         return _lineTop;
       }
+
       KRYS_NODISCARD LayoutUnit HighValue() const noexcept
       {
         return _lineBottom;
       }
+
       void CollectIfNeeded(const IntervalType &interval) noexcept
       {
         const auto &floatingObject = *interval.Data();
@@ -346,6 +348,7 @@ namespace krys::boo
       {
         return _belowLogicalHeight;
       }
+
       KRYS_NODISCARD LayoutUnit HighValue() const noexcept
       {
         return LayoutUnit::Max();
@@ -397,6 +400,7 @@ namespace krys::boo
       {
         return _nextLogicalBottom.value_or(0_lu);
       }
+
       KRYS_NODISCARD LayoutUnit NextShapeLogicalBottom() const noexcept
       {
         return _nextShapeLogicalBottom.value_or(NextLogicalBottom());

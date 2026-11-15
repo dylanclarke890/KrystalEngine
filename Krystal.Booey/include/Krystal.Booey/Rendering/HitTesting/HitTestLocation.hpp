@@ -57,6 +57,7 @@ namespace krys::boo
     {
       return _point;
     }
+
     KRYS_NODISCARD IntPoint RoundedPoint() const noexcept
     {
       return RoundedIntPoint(_point);
@@ -67,10 +68,12 @@ namespace krys::boo
     {
       return _isRectBased;
     }
+
     KRYS_NODISCARD bool IsRectilinear() const noexcept
     {
       return _isRectilinear;
     }
+
     KRYS_NODISCARD LayoutRect BoundingBox() const noexcept
     {
       return _boundingBox;
@@ -84,6 +87,7 @@ namespace krys::boo
     {
       return _transformedPoint;
     }
+
     KRYS_NODISCARD const FloatQuad &TransformedRect() const noexcept
     {
       return _transformedRect;

@@ -125,7 +125,7 @@ namespace krys::boo
     {
       Vertical,
       HorizontalUpLeft,
-      HorizontalUpRight
+      HorizontalUpRight,
     };
 
     /// @brief The platform's theme.
@@ -282,6 +282,7 @@ namespace krys::boo
                                                  DocumentMarkerLineStyleMode) const noexcept;
 
     KRYS_NODISCARD Color FocusRingColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color PlatformFocusRingColor(style::ColorOptions) const noexcept
     {
       return Color::black;
@@ -348,6 +349,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual FloatSize MeterSizeForBounds(const RenderMeter &,
                                                         const FloatRect &) const noexcept;
+
     KRYS_NODISCARD virtual bool SupportsMeter(StyleAppearance) const noexcept
     {
       return false;
@@ -373,6 +375,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual bool ShouldHaveSpinButton(const html::HTMLInputElement &) const noexcept;
+
     KRYS_NODISCARD virtual bool ShouldHaveCapsLockIndicator(const html::HTMLInputElement &) const noexcept
     {
       return false;
@@ -519,24 +522,28 @@ namespace krys::boo
 
     // Methods for each appearance value.
     virtual void AdjustCheckboxStyle(RenderStyle &, const dom::Element *) const noexcept;
+
     virtual bool PaintCheckbox(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
     }
 
     virtual void AdjustRadioStyle(RenderStyle &, const dom::Element *) const noexcept;
+
     virtual bool PaintRadio(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
     }
 
     virtual void AdjustButtonStyle(RenderStyle &, const dom::Element *) const noexcept;
+
     virtual bool PaintButton(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
     }
 
     virtual void AdjustColorWellStyle(RenderStyle &, const dom::Element *) const noexcept;
+
     virtual bool PaintColorWell(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
@@ -565,6 +572,7 @@ namespace krys::boo
     }
 
     virtual void AdjustInnerSpinButtonStyle(RenderStyle &, const dom::Element *) const noexcept;
+
     virtual bool PaintInnerSpinButton(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
@@ -597,6 +605,7 @@ namespace krys::boo
     }
 
     virtual void AdjustMenuListStyle(RenderStyle &, const dom::Element *) const noexcept;
+
     virtual bool PaintMenuList(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
@@ -622,6 +631,7 @@ namespace krys::boo
     }
 
     virtual void AdjustMeterStyle(RenderStyle &, const dom::Element *) const noexcept;
+
     virtual bool PaintMeter(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;
@@ -655,6 +665,7 @@ namespace krys::boo
     }
 
     virtual void AdjustSliderThumbStyle(RenderStyle &, const dom::Element *) const noexcept;
+
     virtual bool PaintSliderThumb(const RenderElement &, const PaintInfo &, const FloatRect &) noexcept
     {
       return true;

@@ -41,6 +41,7 @@ namespace krys::boo::style
 
       KRYS_NODISCARD bool operator==(const UnknownProperty &) const noexcept = default;
     };
+
     struct SingleProperty
     {
       AnimatableCSSProperty Value;
@@ -77,14 +78,17 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<css::keywords::All>(_value);
     }
+
     KRYS_NODISCARD bool IsNone() const noexcept
     {
       return krys::HoldsAlternative<css::keywords::None>(_value);
     }
+
     KRYS_NODISCARD bool IsUnknownProperty() const noexcept
     {
       return krys::HoldsAlternative<UnknownProperty>(_value);
     }
+
     KRYS_NODISCARD bool IsSingleProperty() const noexcept
     {
       return krys::HoldsAlternative<SingleProperty>(_value);

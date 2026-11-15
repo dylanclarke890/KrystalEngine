@@ -145,5 +145,4 @@ namespace krys::boo
     }
     return RotateTransformOperation::Create(x, y, z, angle, Type::Rotate3D);
   }
-
 }

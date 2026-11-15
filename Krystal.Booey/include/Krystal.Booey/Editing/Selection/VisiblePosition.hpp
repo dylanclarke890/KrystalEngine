@@ -53,7 +53,7 @@ namespace krys::boo
   public:
     // VisiblePosition default affinity is downstream for callers that do not really care because it is more
     // efficient than upstream.
-    static constexpr auto DefaultAffinity = Affinity::Downstream;
+    constexpr static auto DefaultAffinity = Affinity::Downstream;
 
     VisiblePosition() noexcept = default;
 
@@ -64,10 +64,12 @@ namespace krys::boo
     {
       return _deepPosition.IsNull();
     }
+
     KRYS_NODISCARD bool IsNotNull() const noexcept
     {
       return _deepPosition.IsNotNull();
     }
+
     KRYS_NODISCARD bool IsOrphan() const noexcept
     {
       return _deepPosition.IsOrphan();
@@ -77,10 +79,12 @@ namespace krys::boo
     {
       return _deepPosition;
     }
+
     KRYS_NODISCARD Affinity GetAffinity() const noexcept
     {
       return _affinity;
     }
+
     void SetAffinity(Affinity affinity) noexcept
     {
       _affinity = affinity;
@@ -106,6 +110,7 @@ namespace krys::boo
                                          bool *reachedBoundary = nullptr) const noexcept;
 
     KRYS_NODISCARD char32 CharacterAfter() const noexcept;
+
     KRYS_NODISCARD char32 CharacterBefore() const noexcept
     {
       return Previous().CharacterAfter();

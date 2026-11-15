@@ -29,14 +29,14 @@ namespace krys::boo::svg
   {
     SVGTextPathMethodUnknown = 0,
     SVGTextPathMethodAlign,
-    SVGTextPathMethodStretch
+    SVGTextPathMethodStretch,
   };
 
   enum SVGTextPathSpacingType : uint8
   {
     SVGTextPathSpacingUnknown = 0,
     SVGTextPathSpacingAuto,
-    SVGTextPathSpacingExact
+    SVGTextPathSpacingExact,
   };
 
   template <>
@@ -147,7 +147,7 @@ namespace krys::boo::svg
       TEXTPATH_METHODTYPE_STRETCH = SVGTextPathMethodStretch,
       TEXTPATH_SPACINGTYPE_UNKNOWN = SVGTextPathSpacingUnknown,
       TEXTPATH_SPACINGTYPE_AUTO = SVGTextPathSpacingAuto,
-      TEXTPATH_SPACINGTYPE_EXACT = SVGTextPathSpacingExact
+      TEXTPATH_SPACINGTYPE_EXACT = SVGTextPathSpacingExact,
     };
 
     explicit SVGTextPathElement(dom::Document &) noexcept;
@@ -157,10 +157,12 @@ namespace krys::boo::svg
     {
       return _startOffset->CurrentValue();
     }
+
     KRYS_NODISCARD SVGTextPathMethodType Method() const noexcept
     {
       return _method->CurrentValue<SVGTextPathMethodType>();
     }
+
     KRYS_NODISCARD SVGTextPathSpacingType Spacing() const noexcept
     {
       return _spacing->CurrentValue<SVGTextPathSpacingType>();
@@ -170,10 +172,12 @@ namespace krys::boo::svg
     {
       return *_startOffset;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &MethodAnimated() noexcept
     {
       return *_method;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &SpacingAnimated() noexcept
     {
       return *_spacing;

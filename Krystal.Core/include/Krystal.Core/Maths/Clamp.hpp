@@ -164,37 +164,59 @@ namespace krys
   KRYS_NODISCARD constexpr T FMin(T a, T b) noexcept
   {
     if (IsNaN(a))
+    {
       return b;
+    }
     else
+    {
       return Min(a, b);
+    }
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T FMin(T a, T b, T c) noexcept
   {
     if (IsNaN(a))
+    {
       return FMin(b, c);
+    }
     else if (IsNaN(b))
+    {
       return FMin(a, c);
+    }
     else if (IsNaN(c))
+    {
       return Min(a, b);
+    }
     else
+    {
       return Min(a, b, c);
+    }
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T FMin(T a, T b, T c, T d) noexcept
   {
     if (IsNaN(a))
+    {
       return FMin(b, c, d);
+    }
     else if (IsNaN(b))
+    {
       return Min(a, FMin(c, d));
+    }
     else if (IsNaN(c))
+    {
       return FMin(Min(a, b), d);
+    }
     else if (IsNaN(d))
+    {
       return Min(a, b, c);
+    }
     else
+    {
       return Min(a, b, c, d);
+    }
   }
 
   template <FloatingPoint T, int N>
@@ -259,37 +281,59 @@ namespace krys
   KRYS_NODISCARD constexpr T FMax(T a, T b) noexcept
   {
     if (IsNaN(a))
+    {
       return b;
+    }
     else
+    {
       return Max(a, b);
+    }
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T FMax(T a, T b, T c) noexcept
   {
     if (IsNaN(a))
+    {
       return FMax(b, c);
+    }
     else if (IsNaN(b))
+    {
       return FMax(a, c);
+    }
     else if (IsNaN(c))
+    {
       return Max(a, b);
+    }
     else
+    {
       return Max(a, b, c);
+    }
   }
 
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T FMax(T a, T b, T c, T d) noexcept
   {
     if (IsNaN(a))
+    {
       return FMax(b, c, d);
+    }
     else if (IsNaN(b))
+    {
       return Max(a, FMax(c, d));
+    }
     else if (IsNaN(c))
+    {
       return FMax(Max(a, b), d);
+    }
     else if (IsNaN(d))
+    {
       return Max(a, b, c);
+    }
     else
+    {
       return Max(a, b, c, d);
+    }
   }
 
   template <FloatingPoint T, int N>

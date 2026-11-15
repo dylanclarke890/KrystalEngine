@@ -48,13 +48,14 @@ namespace krys::boo
     bool _inputImagesAreReady {false};
 
   public:
-    static constexpr bool IsFixedSize = true;
+    constexpr static bool IsFixedSize = true;
 
     KRYS_NODISCARD static Ref<StyleCrossfadeImage> Create(RefPtr<StyleImage> from, RefPtr<StyleImage> to,
                                                           double percentage) noexcept
     {
       return AdoptRef(*new StyleCrossfadeImage(krys::move(from), krys::move(to), percentage));
     }
+
     ~StyleCrossfadeImage() noexcept override;
 
     KRYS_NODISCARD RefPtr<StyleCrossfadeImage> Blend(const StyleCrossfadeImage &,
@@ -68,10 +69,12 @@ namespace krys::boo
     {
       return _from;
     }
+
     KRYS_NODISCARD RefPtr<StyleImage> To() const noexcept
     {
       return _to;
     }
+
     KRYS_NODISCARD double Percentage() const noexcept
     {
       return _percentage;

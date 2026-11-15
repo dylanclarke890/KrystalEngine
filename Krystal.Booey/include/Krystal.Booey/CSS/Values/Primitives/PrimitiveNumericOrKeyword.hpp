@@ -169,7 +169,7 @@ namespace krys::boo::css
       return _data == other._data;
     }
 
-    KRYS_NODISCARD bool operator==(ValidKeywordForList<Keywords> auto const &other) const noexcept
+    KRYS_NODISCARD bool operator==(const ValidKeywordForList<Keywords> auto &other) const noexcept
     {
       return _data == other;
     }

@@ -27,7 +27,7 @@ namespace krys
     Color,
     Luminosity,
     PlusDarker,
-    PlusLighter
+    PlusLighter,
   };
 
   /// @brief The CSS name of @p blendMode, such as `color-dodge`.

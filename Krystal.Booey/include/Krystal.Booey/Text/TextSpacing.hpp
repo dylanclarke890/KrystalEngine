@@ -47,7 +47,7 @@ namespace krys::boo
       FullWidthClosingPunctuation = 1 << 4,
       FullWidthMiddleDotPunctuation = 1 << 5,
       FullWidthColonPunctuation = 1 << 6,
-      FullWidthDotPunctuation = 1 << 7
+      FullWidthDotPunctuation = 1 << 7,
     };
 
     struct CharactersData
@@ -87,7 +87,7 @@ namespace krys::boo
     {
       SpaceAll = 0, // equivalent to None in text-spacing shorthand
       TrimAll,
-      Auto
+      Auto,
     };
 
   private:
@@ -125,7 +125,7 @@ namespace krys::boo
     Auto,
     IdeographAlpha,
     IdeographNumeric,
-    Normal
+    Normal,
   };
 }
 

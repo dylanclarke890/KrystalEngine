@@ -40,7 +40,7 @@ namespace krys::boo::html
       Automatic,
       Normal,
       Contact,
-      Credential
+      Credential,
     };
 
     struct AutofillFieldCategory

@@ -65,10 +65,12 @@ namespace krys::boo::css
     KRYS_NODISCARD static Maybe<CSSNumericType> MultiplyTypes(const CSSNumericType &a,
                                                               const CSSNumericType &b) noexcept;
     KRYS_NODISCARD BaseTypeStorage &ValueForType(CSSNumericBaseType type) noexcept;
+
     KRYS_NODISCARD const BaseTypeStorage &ValueForType(CSSNumericBaseType type) const noexcept
     {
       return const_cast<CSSNumericType *>(this)->ValueForType(type);
     }
+
     /// @see https://drafts.css-houdini.org/css-typed-om/#apply-the-percent-hint
     void ApplyPercentHint(CSSNumericBaseType hint) noexcept;
     KRYS_NODISCARD size_t NonZeroEntryCount() const noexcept;

@@ -93,10 +93,12 @@ namespace krys::boo
     {
       return _margin;
     }
+
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept
     {
       return _writingMode;
     }
+
     KRYS_NODISCARD static bool ShouldFlipStartAndEndPoints(WritingMode writingMode) noexcept;
 
   private:

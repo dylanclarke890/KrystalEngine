@@ -53,22 +53,27 @@ namespace krys::boo::svg
     {
       return _in1->CurrentValue();
     }
+
     KRYS_NODISCARD float SpecularConstant() const noexcept
     {
       return _specularConstant->CurrentValue();
     }
+
     KRYS_NODISCARD float SpecularExponent() const noexcept
     {
       return _specularExponent->CurrentValue();
     }
+
     KRYS_NODISCARD float SurfaceScale() const noexcept
     {
       return _surfaceScale->CurrentValue();
     }
+
     KRYS_NODISCARD float KernelUnitLengthX() const noexcept
     {
       return _kernelUnitLengthX->CurrentValue();
     }
+
     KRYS_NODISCARD float KernelUnitLengthY() const noexcept
     {
       return _kernelUnitLengthY->CurrentValue();
@@ -78,22 +83,27 @@ namespace krys::boo::svg
     {
       return *_in1;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &SpecularConstantAnimated() noexcept
     {
       return *_specularConstant;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &SpecularExponentAnimated() noexcept
     {
       return *_specularExponent;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &SurfaceScaleAnimated() noexcept
     {
       return *_surfaceScale;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &KernelUnitLengthXAnimated() noexcept
     {
       return *_kernelUnitLengthX;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &KernelUnitLengthYAnimated() noexcept
     {
       return *_kernelUnitLengthY;
@@ -109,10 +119,12 @@ namespace krys::boo::svg
 
     bool SetFilterEffectAttribute(FilterEffect &effect,
                                   const dom::QualifiedName &attributeName) noexcept final;
+
     KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
       return {dom::DOMStringAtom(In1())};
     }
+
     KRYS_NODISCARD RefPtr<FilterEffect>
       CreateFilterEffect(const FilterEffectVector &inputs,
                          const GraphicsContext &destinationContext) const noexcept final;

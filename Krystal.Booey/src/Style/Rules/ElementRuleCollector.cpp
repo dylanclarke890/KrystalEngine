@@ -1040,7 +1040,7 @@ namespace krys::boo::style
         // Presentation attributes in SVG elements tend to be unique and not restyled often. Avoid bloating
         // the cache.
         // FIXME: Refcount is an imperfect proxy for sharing within a single document.
-        static constexpr auto matchedDeclarationsCacheSharingThreshold = 4;
+        constexpr static auto matchedDeclarationsCacheSharingThreshold = 4;
         bool allowFullCaching =
           !Is<svg::SVGElement>(*styledElement)
           || presentationalHintStyle->GetRefCount() > matchedDeclarationsCacheSharingThreshold;

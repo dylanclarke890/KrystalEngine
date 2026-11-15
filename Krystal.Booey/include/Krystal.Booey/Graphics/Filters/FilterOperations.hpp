@@ -59,14 +59,17 @@ namespace krys::boo
     {
       return _operations.begin();
     }
+
     KRYS_NODISCARD const_iterator end() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.end();
     }
+
     KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.rbegin();
     }
+
     KRYS_NODISCARD const_reverse_iterator rend() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.rend();
@@ -76,10 +79,12 @@ namespace krys::boo
     {
       return _operations.empty();
     }
+
     KRYS_NODISCARD size_t size() const noexcept
     {
       return _operations.size();
     }
+
     KRYS_NODISCARD const FilterOperation *At(size_t index) const noexcept KRYS_LIFETIME_BOUND
     {
       return index < _operations.size() ? _operations[index].get() : nullptr;
@@ -89,10 +94,12 @@ namespace krys::boo
     {
       return _operations[i];
     }
+
     KRYS_NODISCARD const Ref<FilterOperation> &First() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.front();
     }
+
     KRYS_NODISCARD const Ref<FilterOperation> &Last() const noexcept KRYS_LIFETIME_BOUND
     {
       return _operations.back();
@@ -104,6 +111,7 @@ namespace krys::boo
     {
       return !Outsets().IsZero();
     }
+
     KRYS_NODISCARD IntOutsets Outsets() const noexcept;
 
     KRYS_NODISCARD bool HasFilterThatAffectsOpacity() const noexcept;

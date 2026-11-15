@@ -36,6 +36,7 @@ namespace krys::boo
     {
       return SVGDocumentType;
     }
+
     KRYS_NODISCARD CachedResourceClientType ResourceClientType() const noexcept override
     {
       return ExpectedType();

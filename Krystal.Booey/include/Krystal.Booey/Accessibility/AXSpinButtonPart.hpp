@@ -43,10 +43,12 @@ namespace krys::boo
     {
       return _isIncrementor;
     }
+
     void SetIsIncrementor(bool value) noexcept
     {
       _isIncrementor = value;
     }
+
     /// @brief Steps the spin button's input up or down; false if the part has no spin button.
     bool Press() noexcept override;
 

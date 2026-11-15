@@ -42,6 +42,7 @@ namespace krys::boo::style
     {
       return HoldsAlternative<css::keywords::Normal>();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsInfinite() const noexcept
     {
       return HoldsAlternative<css::keywords::Infinite>();

@@ -51,13 +51,13 @@ namespace krys::boo::layout
   enum class PackingStrategy : bool
   {
     Sparse,
-    Dense
+    Dense,
   };
 
   enum class GridAutoFlowDirection : bool
   {
     Row,
-    Column
+    Column,
   };
 
   struct GridAutoFlowOptions
@@ -99,6 +99,7 @@ namespace krys::boo::layout
     {
       return _gridMatrix.size();
     }
+
     KRYS_NODISCARD size_t ColumnsCount() const noexcept
     {
       return RowsCount() ? _gridMatrix[0].size() : 0;
@@ -206,6 +207,7 @@ namespace krys::boo::layout
     {
       return _gridFormattingContext;
     }
+
     KRYS_NODISCARD const ElementBox &GridContainer() const noexcept;
     KRYS_NODISCARD const RenderStyle &GridContainerStyle() const noexcept;
   };

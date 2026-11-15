@@ -34,11 +34,14 @@ namespace krys::ui
     TextureMapperTile &operator=(TextureMapperTile &&) noexcept = default;
 
     KRYS_NODISCARD RefPtr<BitmapTexture> Texture() const noexcept;
+
     KRYS_NODISCARD boo::FloatRect Rect() const noexcept
     {
       return _rect;
     }
+
     void SetTexture(BitmapTexture *texture) noexcept;
+
     void SetRect(const boo::FloatRect &rect) noexcept
     {
       _rect = rect;
@@ -48,6 +51,7 @@ namespace krys::ui
     {
       return _dirtyRect;
     }
+
     void AddDirtyRect(const boo::IntRect &rect) noexcept
     {
       _dirtyRect.Unite(rect);

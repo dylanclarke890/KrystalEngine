@@ -71,7 +71,7 @@ namespace krys::boo
     {
       Get,
       Post,
-      Dialog
+      Dialog,
     };
 
     /// @brief The submission attributes of a form, which a submitter's own attributes override.

@@ -48,10 +48,12 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<css::keywords::Auto>(_value);
     }
+
     KRYS_NODISCARD bool IsNone() const noexcept
     {
       return krys::HoldsAlternative<css::keywords::None>(_value);
     }
+
     KRYS_NODISCARD bool IsQuotes() const noexcept
     {
       return krys::HoldsAlternative<Data>(_value);

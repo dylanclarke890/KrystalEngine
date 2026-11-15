@@ -51,6 +51,7 @@ namespace krys::boo
     {
       return u8"RenderSVGInline";
     }
+
     KRYS_NODISCARD bool RequiresLayer() const noexcept final
     {
       return false;

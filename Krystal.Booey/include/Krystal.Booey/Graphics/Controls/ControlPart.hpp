@@ -61,6 +61,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD ControlFactory &GetControlFactory() const noexcept;
+
     void SetOverrideControlFactory(RefPtr<ControlFactory> &&controlFactory) noexcept
     {
       _overrideControlFactory = krys::move(controlFactory);

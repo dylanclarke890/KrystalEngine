@@ -41,9 +41,11 @@ namespace krys::boo::style
     constexpr StrokeMiterlimit(Number number) noexcept : Value {number}
     {
     }
+
     constexpr StrokeMiterlimit(Number::ResolvedValueType literal) noexcept : Value {literal}
     {
     }
+
     constexpr StrokeMiterlimit(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept : Value {literal}
     {
     }

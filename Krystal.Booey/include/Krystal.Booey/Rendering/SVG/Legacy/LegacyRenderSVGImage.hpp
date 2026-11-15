@@ -57,10 +57,12 @@ namespace krys::boo
     KRYS_NODISCARD svg::SVGImageElement &ImageElement() const noexcept;
 
     bool UpdateImageViewport() noexcept;
+
     void SetNeedsBoundariesUpdate() noexcept override
     {
       _needsBoundariesUpdate = true;
     }
+
     void SetNeedsTransformUpdate() noexcept override
     {
       _needsTransformUpdate = true;
@@ -70,6 +72,7 @@ namespace krys::boo
     {
       return *_imageResource;
     }
+
     KRYS_NODISCARD const RenderImageResource &ImageResource() const noexcept
     {
       return *_imageResource;
@@ -92,6 +95,7 @@ namespace krys::boo
     {
       return u8"RenderSVGImage";
     }
+
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
       return false;
@@ -105,19 +109,23 @@ namespace krys::boo
     void NotifyFinished(CachedResource &newImage) noexcept override;
 
     KRYS_NODISCARD FloatRect CalculateObjectBoundingBox() const noexcept;
+
     KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
     {
       return _objectBoundingBox;
     }
+
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept override
     {
       return _objectBoundingBox;
     }
+
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept override
     {
       return _repaintBoundingBox;
     }
+
     KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept override
     {
       return _objectBoundingBox;

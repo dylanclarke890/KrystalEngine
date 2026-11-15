@@ -117,8 +117,7 @@ namespace krys::boo::html::tests
     "[HTML][Forms][html:barred-from-constraint-validation][html:concept-fe-disabled][html:concept-fe-mutable]"
     "[html:dom-cva-willvalidate]")
   {
-    FormFixture fixture(
-      u8R"(<form><input id=hidden type=hidden required><input id=disabled disabled required>
+    FormFixture fixture(u8R"(<form><input id=hidden type=hidden required><input id=disabled disabled required>
       <input id=readonly readonly required><button id=button type=button></button><button id=submit></button>
       <fieldset disabled><legend><input id=inlegend></legend><input id=infieldset></fieldset></form>)");
     CHECK_FALSE(fixture.Get<HTMLInputElement>(u8"hidden").WillValidate());

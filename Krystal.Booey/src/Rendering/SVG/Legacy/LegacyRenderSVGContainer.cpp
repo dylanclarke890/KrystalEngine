@@ -51,8 +51,8 @@ namespace krys::boo
       // Issuing repaint requires absolute rect which means ancestor tree walk.
       // In cases when a container has many direct children, the overhead of resolving each individual repaint
       // rects is so large that issuing repaint for the container itself ends up being cheaper.
-      static constexpr size_t maximumRequiredChildren = 200;
-      static constexpr size_t minimumRequiredChildren = 50;
+      constexpr static size_t maximumRequiredChildren = 200;
+      constexpr static size_t minimumRequiredChildren = 50;
 
       size_t numberOfChildren = 0;
       for (auto &child : ChildrenOfType<RenderElement>(container))

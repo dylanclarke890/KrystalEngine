@@ -40,7 +40,7 @@ namespace krys::boo::style
     {
       CounterStyle,
       String,
-      None
+      None,
     };
 
     Type _type {Type::None};

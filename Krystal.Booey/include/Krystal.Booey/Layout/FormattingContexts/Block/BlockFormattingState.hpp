@@ -62,6 +62,7 @@ namespace krys::boo::layout
     {
       return _placedFloats;
     }
+
     KRYS_NODISCARD PlacedFloats &GetPlacedFloats() noexcept
     {
       return _placedFloats;
@@ -71,10 +72,12 @@ namespace krys::boo::layout
     {
       _outOfFlowBoxes.push_back(ShareCheckedRef(outOfFlowBox));
     }
+
     void SetOutOfFlowBoxes(OutOfFlowBoxList &&outOfFlowBoxes) noexcept
     {
       _outOfFlowBoxes = krys::move(outOfFlowBoxes);
     }
+
     KRYS_NODISCARD const OutOfFlowBoxList &OutOfFlowBoxes() const noexcept
     {
       return _outOfFlowBoxes;
@@ -84,11 +87,13 @@ namespace krys::boo::layout
     {
       _usedVerticalMargins[&layoutBox] = usedVerticalMargin;
     }
+
     KRYS_NODISCARD UsedVerticalMargin GetUsedVerticalMargin(const Box &layoutBox) const noexcept
     {
       auto iterator = _usedVerticalMargins.find(&layoutBox);
       return iterator != _usedVerticalMargins.end() ? iterator->second : UsedVerticalMargin {};
     }
+
     KRYS_NODISCARD bool HasUsedVerticalMargin(const Box &layoutBox) const noexcept
     {
       return _usedVerticalMargins.contains(&layoutBox);
@@ -98,10 +103,12 @@ namespace krys::boo::layout
     {
       _clearanceSet.insert(&layoutBox);
     }
+
     void ClearHasClearance(const Box &layoutBox) noexcept
     {
       _clearanceSet.erase(&layoutBox);
     }
+
     KRYS_NODISCARD bool HasClearance(const Box &layoutBox) const noexcept
     {
       return _clearanceSet.contains(&layoutBox);

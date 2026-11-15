@@ -50,6 +50,7 @@ namespace krys::boo
     {
       return _sourceImage;
     }
+
     void SetImageSource(SourceImage &&sourceImage) noexcept
     {
       _sourceImage = krys::move(sourceImage);
@@ -59,6 +60,7 @@ namespace krys::boo
     {
       return _sourceImageRect;
     }
+
     KRYS_NODISCARD const svg::SVGPreserveAspectRatioValue &PreserveAspectRatio() const noexcept
     {
       return _preserveAspectRatio;

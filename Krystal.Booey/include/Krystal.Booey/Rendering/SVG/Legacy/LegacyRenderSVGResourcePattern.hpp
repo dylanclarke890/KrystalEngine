@@ -68,6 +68,7 @@ namespace krys::boo
                                        EnumSet<RenderSVGResourceMode>) noexcept override;
     void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>, const Path *,
                            const RenderElement *) noexcept override;
+
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
                                                  RepaintRectCalculation) noexcept override
     {
@@ -83,6 +84,7 @@ namespace krys::boo
 
   private:
     void GetElement() const = delete;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGResourcePattern";

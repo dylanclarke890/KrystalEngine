@@ -77,10 +77,12 @@ namespace krys::boo
     {
       return _parameters.PatternSpaceTransform;
     }
+
     KRYS_NODISCARD bool RepeatX() const noexcept
     {
       return _parameters.RepeatX;
     }
+
     KRYS_NODISCARD bool RepeatY() const noexcept
     {
       return _parameters.RepeatY;

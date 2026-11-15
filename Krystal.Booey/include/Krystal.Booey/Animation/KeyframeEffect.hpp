@@ -114,13 +114,13 @@ namespace krys::boo
     enum class RecomputationReason : uint8
     {
       LogicalPropertyChange,
-      Other
+      Other,
     };
 
     enum class Accelerated : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -130,20 +130,20 @@ namespace krys::boo
       Pause,
       UpdateProperties,
       TransformChange,
-      Stop
+      Stop,
     };
     enum class AcceleratedPropertiesState : uint8
     {
       None,
       Some,
-      All
+      All,
     };
     enum class RunningAccelerated : uint8
     {
       NotStarted,
       Yes,
       Prevented,
-      Failed
+      Failed,
     };
 
     /// @brief Tells the effect stack when the effect's ability to run accelerated changed in its scope.
@@ -220,6 +220,7 @@ namespace krys::boo
     {
       return _target.get();
     }
+
     void SetTarget(RefPtr<dom::Element> &&newTarget) noexcept;
     KRYS_NODISCARD bool TargetsPseudoElement() const noexcept;
     KRYS_NODISCARD css::CSSOMString PseudoElement() const noexcept;
@@ -241,11 +242,14 @@ namespace krys::boo
     {
       return _iterationCompositeOperation;
     }
+
     void SetIterationComposite(boo::IterationCompositeOperation iterationCompositeOperation) noexcept;
+
     KRYS_NODISCARD boo::CompositeOperation Composite() const noexcept
     {
       return _compositeOperation;
     }
+
     void SetComposite(boo::CompositeOperation compositeOperation) noexcept;
     /// @brief The composite operation, as `composite` gives it: the style of a style-originated animation is
     /// brought up to date first.
@@ -296,10 +300,12 @@ namespace krys::boo
     void ComputeStyleOriginatedAnimationBlendingKeyframes(
       const RenderStyle *oldStyle, const RenderStyle &newStyle,
       const style::ResolutionContext &resolutionContext) noexcept;
+
     KRYS_NODISCARD const BlendingKeyframes &GetBlendingKeyframes() const noexcept
     {
       return _blendingKeyframes;
     }
+
     KRYS_NODISCARD const AnimatableCSSPropertySet &AnimatedProperties() noexcept;
     KRYS_NODISCARD bool AnimatesProperty(const AnimatableCSSProperty &property) const noexcept;
 
@@ -313,6 +319,7 @@ namespace krys::boo
     void ApplyPendingAcceleratedActionsOrUpdateTimingProperties() noexcept;
 
     KRYS_NODISCARD bool IsRunningAccelerated() const noexcept;
+
     // FIXME: These ignore the fact that some timing functions can prevent acceleration.
     KRYS_NODISCARD bool IsAboutToRunAccelerated() const noexcept
     {
@@ -324,16 +331,19 @@ namespace krys::boo
     {
       return _acceleratedProperties;
     }
+
     KRYS_NODISCARD const AnimatableCSSPropertySet &AcceleratedPropertiesWithImplicitKeyframe() const noexcept
     {
       return _acceleratedPropertiesWithImplicitKeyframe;
     }
 
     KRYS_NODISCARD bool CanBeAccelerated() const noexcept;
+
     KRYS_NODISCARD bool AccelerationWasPrevented() const noexcept
     {
       return _runningAccelerated == RunningAccelerated::Prevented;
     }
+
     KRYS_NODISCARD bool PreventsAcceleration() const noexcept;
     void EffectStackNoLongerPreventsAcceleration() noexcept;
     void EffectStackNoLongerAllowsAcceleration() noexcept;
@@ -373,10 +383,12 @@ namespace krys::boo
                                  const style::ResolutionContext &resolutionContext) noexcept;
 
     void AddPendingAcceleratedAction(AcceleratedAction action) noexcept;
+
     KRYS_NODISCARD bool IsCompletelyAccelerated() const noexcept
     {
       return _acceleratedPropertiesState == AcceleratedPropertiesState::All;
     }
+
     void UpdateAcceleratedActions() noexcept;
     KRYS_NODISCARD Ref<const GraphicsLayerAnimation> BackingAnimationForCompositedRenderer() noexcept;
     void ComputeAcceleratedPropertiesState() noexcept;
@@ -414,6 +426,7 @@ namespace krys::boo
     {
       return true;
     }
+
     void AnimationDidTick() noexcept final;
     void AnimationDidChangeTimingProperties() noexcept final;
     void AnimationWasCanceled() noexcept final;
@@ -437,15 +450,19 @@ namespace krys::boo
     {
       return _compositeOperation;
     }
+
     KRYS_NODISCARD boo::IterationCompositeOperation IterationCompositeOperation() const noexcept final
     {
       return _iterationCompositeOperation;
     }
+
     KRYS_NODISCARD const KeyframeInterpolation::Keyframe &KeyframeAtIndex(size_t index) const noexcept final;
+
     KRYS_NODISCARD size_t NumberOfKeyframes() const noexcept final
     {
       return _blendingKeyframes.Size();
     }
+
     KRYS_NODISCARD const boo::TimingFunction *
       TimingFunctionForKeyframe(const KeyframeInterpolation::Keyframe &keyframe) const noexcept final;
     KRYS_NODISCARD bool

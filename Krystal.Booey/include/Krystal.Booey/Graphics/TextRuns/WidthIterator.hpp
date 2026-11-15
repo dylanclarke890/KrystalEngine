@@ -64,16 +64,19 @@ namespace krys::boo
       krys_debug_assert(_accountForGlyphBounds);
       return _maxGlyphBoundingBoxY;
     }
+
     KRYS_NODISCARD float MinGlyphBoundingBoxY() const noexcept
     {
       krys_debug_assert(_accountForGlyphBounds);
       return _minGlyphBoundingBoxY;
     }
+
     KRYS_NODISCARD float FirstGlyphOverflow() const noexcept
     {
       krys_debug_assert(_accountForGlyphBounds);
       return _firstGlyphOverflow;
     }
+
     KRYS_NODISCARD float LastGlyphOverflow() const noexcept
     {
       krys_debug_assert(_accountForGlyphBounds);
@@ -84,10 +87,12 @@ namespace krys::boo
     {
       return _run;
     }
+
     KRYS_NODISCARD float RunWidthSoFar() const noexcept
     {
       return _runWidthSoFar;
     }
+
     KRYS_NODISCARD uint32 CurrentCharacterIndex() const noexcept
     {
       return _currentCharacterIndex;
@@ -164,10 +169,12 @@ namespace krys::boo
     {
       return _direction;
     }
+
     KRYS_NODISCARD bool Rtl() const noexcept
     {
       return _direction == TextDirection::RTL;
     }
+
     KRYS_NODISCARD bool Ltr() const noexcept
     {
       return _direction == TextDirection::LTR;

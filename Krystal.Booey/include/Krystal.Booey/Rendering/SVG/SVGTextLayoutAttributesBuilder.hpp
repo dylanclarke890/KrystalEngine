@@ -80,6 +80,7 @@ namespace krys::boo
     {
       _textPositions.clear();
     }
+
     KRYS_NODISCARD uint32 NumberOfTextPositioningElements() const noexcept
     {
       return static_cast<uint32>(_textPositions.size());

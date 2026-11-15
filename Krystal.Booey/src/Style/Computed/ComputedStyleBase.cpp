@@ -395,5 +395,4 @@ namespace krys::boo::style
   {
     return _nonInheritedData.Access().RareData.Access().CounterDirectives;
   }
-
 }

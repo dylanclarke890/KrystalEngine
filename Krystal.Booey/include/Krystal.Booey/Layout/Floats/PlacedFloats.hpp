@@ -56,7 +56,7 @@ namespace krys::boo::layout
       enum class Position : bool
       {
         Start,
-        End
+        End,
       };
 
     private:
@@ -83,6 +83,7 @@ namespace krys::boo::layout
       {
         return _position == Position::Start;
       }
+
       KRYS_NODISCARD bool IsEndPositioned() const noexcept
       {
         return _position == Position::End;
@@ -96,14 +97,17 @@ namespace krys::boo::layout
       {
         return BoxGeometry::MarginBoxRect(_absoluteBoxGeometry);
       }
+
       KRYS_NODISCARD Rect AbsoluteBorderBoxRect() const noexcept
       {
         return BoxGeometry::BorderBoxRect(_absoluteBoxGeometry);
       }
+
       KRYS_NODISCARD BoxGeometry::HorizontalEdges InlineAxisMargin() const noexcept
       {
         return _absoluteBoxGeometry.HorizontalMargin();
       }
+
       KRYS_NODISCARD PositionInContextRoot AbsoluteBottom() const noexcept
       {
         return {AbsoluteRectWithMargin().Bottom()};
@@ -131,7 +135,7 @@ namespace krys::boo::layout
     enum class PositionType : bool
     {
       Start,
-      End
+      End,
     };
 
     CheckedRef<const ElementBox> _blockFormattingContextRoot;
@@ -151,6 +155,7 @@ namespace krys::boo::layout
     {
       return _list;
     }
+
     KRYS_NODISCARD const Item *Last() const noexcept
     {
       return GetList().empty() ? nullptr : &_list.back();
@@ -169,6 +174,7 @@ namespace krys::boo::layout
     {
       return _positionTypes.Contains(PositionType::Start);
     }
+
     KRYS_NODISCARD bool HasEndPositioned() const noexcept
     {
       return _positionTypes.Contains(PositionType::End);

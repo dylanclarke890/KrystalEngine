@@ -61,7 +61,9 @@ namespace krys
       int32_t numCores = 0;
       int result = sysctlbyname("hw.physicalcpu_max", &numCores, &valueSize, nullptr, 0);
       if (result < 0)
+      {
         return Default;
+      }
       return numCores;
     }();
 

@@ -43,7 +43,7 @@ namespace krys::boo
       ClipboardDataTypeURIList,
       ClipboardDataTypeURL,
       ClipboardDataTypeImage,
-      ClipboardDataTypeUnknown
+      ClipboardDataTypeUnknown,
     };
 
     KRYS_NODISCARD PasteboardStrategy *Strategy() noexcept

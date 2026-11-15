@@ -37,10 +37,12 @@ namespace krys::boo::css
 
   public:
     KRYS_NODISCARD static Ref<CSSMathNegate> Create(CSSNumberish &&numberish) noexcept;
+
     KRYS_NODISCARD CSSNumericValue &Value() noexcept
     {
       return *_value;
     }
+
     KRYS_NODISCARD const CSSNumericValue &Value() const noexcept
     {
       return *_value;
@@ -53,10 +55,12 @@ namespace krys::boo::css
     {
       return CSSMathOperator::Negate;
     }
+
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {
       return CSSStyleValueType::CSSMathNegate;
     }
+
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept final;
     KRYS_NODISCARD Maybe<SumValue> ToSumValue() const noexcept final;
     KRYS_NODISCARD bool Equals(const CSSNumericValue &other) const noexcept final;

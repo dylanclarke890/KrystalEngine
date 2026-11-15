@@ -1149,7 +1149,7 @@ namespace krys::boo::style
   {
     Same,
     Lower,
-    Higher
+    Higher,
   };
 
   static TopLayerStatus ComputeTopLayerStatus(const RenderBox &anchored,

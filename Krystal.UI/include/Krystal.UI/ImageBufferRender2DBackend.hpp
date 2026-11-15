@@ -173,7 +173,7 @@ namespace krys::ui
     gfx::TextureHandle _texture;
 
   public:
-    static constexpr boo::RenderingMode BackendRenderingMode = boo::RenderingMode::Accelerated;
+    constexpr static boo::RenderingMode BackendRenderingMode = boo::RenderingMode::Accelerated;
 
     KRYS_NODISCARD static UniquePtr<ImageBufferRender2DBackend>
       Create(const Parameters &parameters, AcceleratedImageBuffers &host) noexcept;
@@ -243,6 +243,7 @@ namespace krys::ui
     /// @brief Gives the buffers the device their textures are made on, so that they can be read back and
     /// copied before the view first paints; the first device the view is given or painted with stays.
     void SetDevice(gfx::Device &device) noexcept;
+
     KRYS_NODISCARD gfx::Device *Device() const noexcept
     {
       return _device;

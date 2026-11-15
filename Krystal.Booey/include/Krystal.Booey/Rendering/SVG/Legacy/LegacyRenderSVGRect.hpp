@@ -54,10 +54,12 @@ namespace krys::boo
     }
 
     void UpdateShapeFromElement() noexcept override;
+
     KRYS_NODISCARD bool IsEmpty() const noexcept override
     {
       return HasPath() ? LegacyRenderSVGShape::IsEmpty() : _fillBoundingBox.IsEmpty();
     }
+
     KRYS_NODISCARD bool IsRenderingDisabled() const noexcept override;
     void FillShape(GraphicsContext &) const noexcept override;
     void StrokeShape(GraphicsContext &) const noexcept override;

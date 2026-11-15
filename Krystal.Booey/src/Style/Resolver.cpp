@@ -893,5 +893,4 @@ namespace krys::boo::style
       Document().SetHasStyleWithViewportUnits();
     }
   }
-
 }

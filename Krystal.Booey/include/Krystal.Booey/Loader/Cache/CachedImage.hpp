@@ -68,6 +68,7 @@ namespace krys::boo
       {
         return _cachedImages;
       }
+
       KRYS_NODISCARD const HashSet<CachedImage *> &CachedImages() const noexcept
       {
         return _cachedImages;
@@ -125,10 +126,12 @@ namespace krys::boo
       GetImage() const noexcept; // Returns the nullImage() if the image is not available yet.
     KRYS_NODISCARD Image *ImageForRenderer(const RenderObject *) noexcept; // Returns the nullImage() if the
                                                                            // image is not available yet.
+
     KRYS_NODISCARD bool HasImage() const noexcept
     {
       return static_cast<bool>(_image);
     }
+
     KRYS_NODISCARD bool CurrentFrameKnownToBeOpaque(const RenderElement *) noexcept;
     KRYS_NODISCARD bool CurrentFrameIsComplete(const RenderElement *) noexcept;
 
@@ -145,6 +148,7 @@ namespace krys::boo
     {
       _allowsOrientationOverride = b;
     }
+
     KRYS_NODISCARD bool AllowsOrientationOverride() const noexcept
     {
       return _allowsOrientationOverride;
@@ -156,14 +160,17 @@ namespace krys::boo
     KRYS_NODISCARD bool IsClientWaitingForAsyncDecoding(const CachedImageClient &) const noexcept;
     /// @brief Remembers that @p client drew nothing while the frame decodes, so it's told when it's decoded.
     void AddClientWaitingForAsyncDecoding(CachedImageClient &) noexcept;
+
     KRYS_NODISCARD bool UsesImageContainerSize() const noexcept
     {
       return _image && _image->UsesContainerSize();
     }
+
     KRYS_NODISCARD bool ImageHasRelativeWidth() const noexcept
     {
       return _image && _image->HasRelativeWidth();
     }
+
     KRYS_NODISCARD bool ImageHasRelativeHeight() const noexcept
     {
       return _image && _image->HasRelativeHeight();
@@ -175,8 +182,9 @@ namespace krys::boo
     enum SizeType : uint8
     {
       UsedSize,
-      IntrinsicSize
+      IntrinsicSize,
     };
+
     KRYS_NODISCARD FloatSize ImageSizeForRenderer(const RenderElement *renderer,
                                                   SizeType = UsedSize) const noexcept;
     // This method takes a zoom multiplier that can be used to increase the natural size of the image by the

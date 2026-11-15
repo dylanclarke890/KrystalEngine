@@ -324,7 +324,9 @@ namespace krys
       // to strong only.
       uintptr_t bits = _bits.loadRelaxed();
       if (!IsStrongOnly(bits)) [[likely]]
+      {
         return *std::bit_cast<ThreadSafeWeakPtrControlBlock *>(bits);
+      }
 
       auto *controlBlock = new ThreadSafeWeakPtrControlBlock(this);
 
@@ -519,7 +521,7 @@ namespace krys
     enum class Status
     {
       Strong = 0,
-      Weak = 1
+      Weak = 1,
     };
 
   private:
@@ -698,9 +700,13 @@ namespace krys
     ~ThreadSafeWeakOrStrongPtr() noexcept
     {
       if (IsStrong())
+      {
         _strong.~RefPtr<T>();
+      }
       else
+      {
         _weak.~ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>>();
+      }
     }
 
     template <typename U>

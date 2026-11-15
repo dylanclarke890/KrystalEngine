@@ -31,12 +31,12 @@ namespace krys::boo::style
 {
   std::span<const PaintType, 3> SVGPaintOrder::PaintTypes() const noexcept
   {
-    static constexpr std::array fillStrokeMarkers {PaintType::Fill, PaintType::Stroke, PaintType::Markers};
-    static constexpr std::array fillMarkersStroke {PaintType::Fill, PaintType::Markers, PaintType::Stroke};
-    static constexpr std::array strokeFillMarkers {PaintType::Stroke, PaintType::Fill, PaintType::Markers};
-    static constexpr std::array strokeMarkersFill {PaintType::Stroke, PaintType::Markers, PaintType::Fill};
-    static constexpr std::array markersFillStroke {PaintType::Markers, PaintType::Fill, PaintType::Stroke};
-    static constexpr std::array markersStrokeFill {PaintType::Markers, PaintType::Stroke, PaintType::Fill};
+    constexpr static std::array fillStrokeMarkers {PaintType::Fill, PaintType::Stroke, PaintType::Markers};
+    constexpr static std::array fillMarkersStroke {PaintType::Fill, PaintType::Markers, PaintType::Stroke};
+    constexpr static std::array strokeFillMarkers {PaintType::Stroke, PaintType::Fill, PaintType::Markers};
+    constexpr static std::array strokeMarkersFill {PaintType::Stroke, PaintType::Markers, PaintType::Fill};
+    constexpr static std::array markersFillStroke {PaintType::Markers, PaintType::Fill, PaintType::Stroke};
+    constexpr static std::array markersStrokeFill {PaintType::Markers, PaintType::Stroke, PaintType::Fill};
 
     switch (_type)
     {

@@ -90,7 +90,7 @@ namespace krys::boo
     Fullscreen,
     Standalone,
     MinimalUI,
-    Browser
+    Browser,
   };
 }
 
@@ -247,6 +247,7 @@ namespace krys::boo
     {
       return *_scrollLatchingController;
     }
+
     /// @brief Keeps a touchpad's gesture to one axis.
     KRYS_NODISCARD WheelEventDeltaFilter &GetWheelEventDeltaFilter() const noexcept
     {
@@ -277,6 +278,7 @@ namespace krys::boo
     {
       return _pageScaleFactor;
     }
+
     /// @brief Scales the page by @p scale, and scrolls the main frame to @p origin (in the scaled content).
     // FIXME: Telling media elements in a stable state (inStableState, pageScaleFactorChanged), once there are
     // media elements.
@@ -317,26 +319,31 @@ namespace krys::boo
     {
       _prefersNonBlinkingCaret = prefers;
     }
+
     KRYS_NODISCARD bool PrefersNonBlinkingCaret() const noexcept
     {
       return _prefersNonBlinkingCaret;
     }
+
     KRYS_NODISCARD bool ImageAnimationEnabled() const noexcept
     {
       return _imageAnimationEnabled;
     }
 
     /// @brief The rate the page is shown at when nothing tells it otherwise.
-    static constexpr uint32 FullSpeedFramesPerSecond {60};
+    constexpr static uint32 FullSpeedFramesPerSecond {60};
     /// @brief Sets the rate the host runs the page's rendering updates at (its display's refresh rate, or the
     /// rate it caps its frames to), which animations align their updates to.
     void SetDisplayNominalFramesPerSecond(uint32 framesPerSecond) noexcept;
+
     KRYS_NODISCARD uint32 DisplayNominalFramesPerSecond() const noexcept
     {
       return _displayNominalFramesPerSecond;
     }
+
     /// @brief The time between the page's rendering updates, at the host's rate.
     KRYS_NODISCARD MonotonicTime::duration PreferredRenderingUpdateInterval() const noexcept;
+
     /// @brief The event loop's time at the start of the last rendering update.
     KRYS_NODISCARD MonotonicTime::duration LastRenderingUpdateTimestamp() const noexcept
     {

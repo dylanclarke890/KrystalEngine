@@ -71,7 +71,7 @@ namespace krys::boo::html
       {
         RelativePlus,
         RelativeMinus,
-        Absolute
+        Absolute,
       } mode;
 
       switch (input[position])
@@ -148,7 +148,6 @@ namespace krys::boo::html
 
       return value;
     }
-
   }
 
   Maybe<css::ValueId> HTMLFontElement::CSSValueFromFontSizeNumber(dom::DOMStringView string) noexcept

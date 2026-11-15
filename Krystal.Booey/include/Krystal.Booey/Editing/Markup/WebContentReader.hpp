@@ -78,6 +78,7 @@ namespace krys::boo
 
     void AddFragment(Ref<dom::DocumentFragment> &&fragment) noexcept;
     KRYS_NODISCARD RefPtr<dom::DocumentFragment> TakeFragment() noexcept;
+
     KRYS_NODISCARD dom::DocumentFragment *Fragment() const noexcept
     {
       return _fragment.get();
@@ -117,15 +118,19 @@ namespace krys::boo
     {
       return false;
     }
+
     bool ReadFilePaths(const List<utf8_string> &) noexcept override
     {
       return false;
     }
+
     bool ReadHTML(utf8_stringview markup) noexcept override;
+
     bool ReadURL(const url::URL &, utf8_stringview) noexcept override
     {
       return false;
     }
+
     bool ReadPlainText(utf8_stringview) noexcept override
     {
       return false;

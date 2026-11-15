@@ -51,6 +51,7 @@ namespace krys::boo::dom
     {
       return false;
     }
+
     KRYS_NODISCARD bool CanStartSelection() const noexcept override
     {
       return false;

@@ -72,6 +72,7 @@ namespace krys::boo
     {
       return !ShouldMoveLimits();
     }
+
     KRYS_NODISCARD mathml::MathMLUnderOverElement &GetElement() const noexcept;
 
     void ComputePreferredLogicalWidths() noexcept final;
@@ -85,10 +86,12 @@ namespace krys::boo
     KRYS_NODISCARD RenderBox &Over() const noexcept;
     KRYS_NODISCARD LayoutUnit HorizontalOffset(const RenderBox &child) const noexcept;
     KRYS_NODISCARD bool HasAccent(bool accentUnder = false) const noexcept;
+
     KRYS_NODISCARD bool HasAccentUnder() const noexcept
     {
       return HasAccent(true);
     }
+
     KRYS_NODISCARD VerticalParameters GetVerticalParameters() const noexcept;
   };
 }

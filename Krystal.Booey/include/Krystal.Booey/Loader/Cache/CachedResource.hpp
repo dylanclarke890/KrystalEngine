@@ -79,7 +79,7 @@ namespace krys::boo
       Pending, // only partially loaded
       Cached,  // regular case
       LoadError,
-      DecodeError
+      DecodeError,
     };
 
   protected:
@@ -119,6 +119,7 @@ namespace krys::boo
     {
       _error = error;
     }
+
     KRYS_NODISCARD const ResourceError &GetResourceError() const noexcept
     {
       return _error;
@@ -128,10 +129,12 @@ namespace krys::boo
     {
       return _resourceRequest;
     }
+
     KRYS_NODISCARD const url::URL &URL() const noexcept
     {
       return _resourceRequest.URL();
     }
+
     KRYS_NODISCARD Type GetType() const noexcept
     {
       return _type;
@@ -141,6 +144,7 @@ namespace krys::boo
     {
       return Response().MimeType();
     }
+
     KRYS_NODISCARD int64 ExpectedContentLength() const noexcept
     {
       return Response().ExpectedContentLength();
@@ -148,22 +152,27 @@ namespace krys::boo
 
     void AddClient(CachedResourceClient &) noexcept;
     void RemoveClient(CachedResourceClient &) noexcept;
+
     KRYS_NODISCARD bool HasClients() const noexcept
     {
       return !_clients.empty();
     }
+
     KRYS_NODISCARD bool HasClient(const CachedResourceClient &client) const noexcept
     {
       return _clients.contains(const_cast<CachedResourceClient *>(&client));
     }
 
     virtual void DidAddClient(CachedResourceClient &) noexcept;
+
     virtual void DidRemoveClient(CachedResourceClient &) noexcept
     {
     }
+
     virtual void AllClientsRemoved() noexcept
     {
     }
+
     void DestroyDecodedDataIfNeeded() noexcept;
 
     KRYS_NODISCARD uint32 NumberOfClients() const noexcept
@@ -175,6 +184,7 @@ namespace krys::boo
     {
       return _status;
     }
+
     void SetStatus(Status status) noexcept
     {
       _status = status;
@@ -184,14 +194,17 @@ namespace krys::boo
     {
       return EncodedSize() + DecodedSize() + OverheadSize();
     }
+
     KRYS_NODISCARD uint32 EncodedSize() const noexcept
     {
       return _encodedSize;
     }
+
     KRYS_NODISCARD uint32 DecodedSize() const noexcept
     {
       return _decodedSize;
     }
+
     KRYS_NODISCARD uint32 OverheadSize() const noexcept;
 
     // FIXME. Method name is inaccurate. Loading might not have started yet.
@@ -199,15 +212,19 @@ namespace krys::boo
     {
       return !_loading;
     }
+
     KRYS_NODISCARD bool IsLoading() const noexcept
     {
       return _loading;
     }
+
     void SetLoading(bool) noexcept;
+
     KRYS_NODISCARD virtual bool StillNeedsLoad() const noexcept
     {
       return false;
     }
+
     void WhenLoaded(Func<void()> &&) noexcept;
 
     KRYS_NODISCARD bool IsImage() const noexcept
@@ -219,6 +236,7 @@ namespace krys::boo
     {
       return _accessCount;
     }
+
     void IncreaseAccessCount() noexcept
     {
       _accessCount++;
@@ -234,6 +252,7 @@ namespace krys::boo
     {
       _inCache = inCache;
     }
+
     KRYS_NODISCARD bool InCache() const noexcept
     {
       return _inCache;
@@ -246,6 +265,7 @@ namespace krys::boo
 
     virtual void ResponseReceived(ResourceResponse &&) noexcept;
     void SetResponse(ResourceResponse &&) noexcept;
+
     KRYS_NODISCARD const ResourceResponse &Response() const noexcept
     {
       return _response;
@@ -260,6 +280,7 @@ namespace krys::boo
     {
       return _status == LoadError || _status == DecodeError;
     }
+
     KRYS_NODISCARD bool LoadFailedOrCanceled() const noexcept
     {
       return !_error.IsNull();
@@ -269,11 +290,13 @@ namespace krys::boo
     {
       return _options.DataBuffering;
     }
+
     KRYS_NODISCARD bool AllowsCaching() const noexcept
     {
       return _options.Caching == CachingPolicy::AllowCaching
              || _options.Caching == CachingPolicy::AllowCachingMainResourcePrefetch;
     }
+
     KRYS_NODISCARD const ResourceLoaderOptions &Options() const noexcept
     {
       return _options;

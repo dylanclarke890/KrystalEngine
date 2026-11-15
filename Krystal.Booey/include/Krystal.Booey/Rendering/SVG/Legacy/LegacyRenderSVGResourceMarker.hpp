@@ -48,6 +48,7 @@ namespace krys::boo
     void RemoveAllClientsFromCache() noexcept override
     {
     }
+
     void RemoveClientFromCache(RenderElement &) noexcept override
     {
     }
@@ -71,6 +72,7 @@ namespace krys::boo
     {
       return {};
     }
+
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
                                                  RepaintRectCalculation) noexcept override
     {
@@ -88,6 +90,7 @@ namespace krys::boo
 
   private:
     void GetElement() const = delete;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGResourceMarker";

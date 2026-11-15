@@ -50,7 +50,7 @@ namespace krys::boo::css
       TagNameSalt = 13,
       IdSalt = 17,
       ClassSalt = 19,
-      AttributeSalt = 23
+      AttributeSalt = 23,
     };
 
     /// @brief A non-zero hash of @p identifier (zero ends a `SelectorFilter::Hashes`).

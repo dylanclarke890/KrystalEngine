@@ -56,6 +56,7 @@ namespace krys::boo::style
     {
       return _value.first().Value;
     }
+
     KRYS_NODISCARD constexpr float Drop() const noexcept
     {
       return _value.second().Value;

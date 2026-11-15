@@ -55,10 +55,10 @@ namespace krys
 
     constexpr static Storage MovedFromDataValue = Limits<Storage>::max();
     constexpr static Storage IndexShift = 48;
-    constexpr static Storage IndexMask = 0xFFULL << IndexShift;
+    constexpr static Storage IndexMask = 0xFFull << IndexShift;
     constexpr static Storage PayloadMask = ~IndexMask;
     constexpr static Storage TopByteShift = 64 - 8;
-    constexpr static Storage TopByteMask = 0xFFULL << TopByteShift;
+    constexpr static Storage TopByteMask = 0xFFull << TopByteShift;
 
     KRYS_NODISCARD constexpr static Storage EncodedIndex(Index index) noexcept
     {

@@ -42,7 +42,7 @@ namespace krys::boo
     {
       Light,
       Dark,
-      Integer
+      Integer,
     };
 
     Type IndexType {Type::Integer};

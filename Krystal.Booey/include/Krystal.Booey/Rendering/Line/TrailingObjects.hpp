@@ -45,13 +45,14 @@ namespace krys::boo
     enum class CollapseFirstSpace : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     void SetTrailingWhitespace(RenderText &whitespace) noexcept
     {
       _whitespace = ShareCheckedPtr(&whitespace);
     }
+
     void Clear() noexcept
     {
       _whitespace = nullptr;

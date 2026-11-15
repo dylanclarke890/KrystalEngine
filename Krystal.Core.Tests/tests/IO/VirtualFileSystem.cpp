@@ -181,9 +181,13 @@ namespace krys::io::tests
       {
         const auto s = e.RelativePath.ToString();
         if (s.find("ui/theme.txt") != std::string::npos)
+        {
           has_theme = true;
+        }
         if (s.find("images/pic.png") != std::string::npos)
+        {
           has_pic = true;
+        }
       }
       REQUIRE(has_theme);
       REQUIRE(has_pic);
@@ -194,9 +198,13 @@ namespace krys::io::tests
       {
         const auto s = e.RelativePath.ToString();
         if (s.find("ui/theme.txt") != std::string::npos)
+        {
           flat_has_theme = true;
+        }
         if (s.find("images/pic.png") != std::string::npos)
+        {
           flat_has_pic = true;
+        }
       }
       REQUIRE_FALSE(flat_has_theme);
       REQUIRE_FALSE(flat_has_pic);

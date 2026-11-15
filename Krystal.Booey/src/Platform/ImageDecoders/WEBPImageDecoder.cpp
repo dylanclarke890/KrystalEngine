@@ -436,7 +436,7 @@ namespace krys::boo
       // the global animation (ANIM) properties have been read since
       // an ANIM chunk must precede the ANMF frame chunks.
       _repetitionCount = static_cast<int32>(WebPDemuxGetI(demuxer, WEBP_FF_LOOP_COUNT));
-      krys_debug_assert(_repetitionCount == (_repetitionCount & 0xffff)); // Loop count is always <= 16 bits.
+      krys_debug_assert(_repetitionCount == (_repetitionCount & 0xFFFF)); // Loop count is always <= 16 bits.
       if (!_repetitionCount)
       {
         _repetitionCount = RepetitionCountInfinite;

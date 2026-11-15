@@ -56,7 +56,7 @@ namespace krys::boo::css
     {
       Computed,
       Declared,
-      Inline
+      Inline,
     };
 
     virtual ~StylePropertyMapReadOnly() noexcept;

@@ -50,10 +50,12 @@ namespace krys::boo::css
     void SetColorSpace(CSSKeywordish colorSpace) noexcept;
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-channels
     KRYS_NODISCARD List<CSSColorPercent> Channels() const noexcept;
+
     KRYS_NODISCARD const CSSNumberish &Alpha() const noexcept
     {
       return _alpha;
     }
+
     void SetAlpha(CSSNumberish alpha) noexcept
     {
       _alpha = krys::move(alpha);

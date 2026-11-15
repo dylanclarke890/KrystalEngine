@@ -48,15 +48,19 @@ namespace krys::boo::style
     constexpr TouchAction(css::keywords::Auto keyword) noexcept : _value {keyword}
     {
     }
+
     constexpr TouchAction(css::keywords::None keyword) noexcept : _value {keyword}
     {
     }
+
     constexpr TouchAction(css::keywords::Manipulation keyword) noexcept : _value {keyword}
     {
     }
+
     constexpr TouchAction(TouchActionValueEnumSet &&set) noexcept : _value {krys::move(set)}
     {
     }
+
     constexpr TouchAction(TouchActionValue value) noexcept : _value {TouchActionValueEnumSet {value}}
     {
     }
@@ -65,18 +69,22 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<css::keywords::None>(_value);
     }
+
     KRYS_NODISCARD constexpr bool IsAuto() const noexcept
     {
       return krys::HoldsAlternative<css::keywords::Auto>(_value);
     }
+
     KRYS_NODISCARD constexpr bool IsManipulation() const noexcept
     {
       return krys::HoldsAlternative<css::keywords::Manipulation>(_value);
     }
+
     KRYS_NODISCARD constexpr bool IsEnumSet() const noexcept
     {
       return krys::HoldsAlternative<TouchActionValueEnumSet>(_value);
     }
+
     KRYS_NODISCARD constexpr Maybe<TouchActionValueEnumSet> TryEnumSet() const noexcept
     {
       return IsEnumSet() ? Maybe(std::get<TouchActionValueEnumSet>(_value)) : null;

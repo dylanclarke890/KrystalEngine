@@ -80,7 +80,7 @@ namespace krys::boo
       enum class BlinkState : bool
       {
         Off,
-        On
+        On,
       };
 
       BlinkState Blink {BlinkState::On};
@@ -114,6 +114,7 @@ namespace krys::boo
     {
       _isBlinkingSuspended = suspended;
     }
+
     KRYS_NODISCARD bool IsBlinkingSuspended() const noexcept;
 
     virtual void SetVisible(bool visible) noexcept = 0;

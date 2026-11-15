@@ -33,7 +33,7 @@ namespace krys::boo
   enum class SelectionPart : bool
   {
     Background,
-    Foreground
+    Foreground,
   };
 
   enum class ThemeFont : uint8
@@ -46,7 +46,7 @@ namespace krys::boo
     StatusBarFont,
     MiniControlFont,
     SmallControlFont,
-    ControlFont
+    ControlFont,
   };
 
   enum class ThemeColor : uint8
@@ -86,6 +86,6 @@ namespace krys::boo
     WindowColor,
     WindowFrameColor,
     WindowTextColor,
-    FocusRingColor
+    FocusRingColor,
   };
 }

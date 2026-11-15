@@ -295,6 +295,7 @@ namespace krys::boo::tests
     text.SetText(u8"a\u00A0b");
     CHECK(text.Text() == u8"a b");
   }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "DataTransfer: the drag image",
                    "[DOM][DataTransfer][html:dom-datatransfer-setdragimage]")
   {

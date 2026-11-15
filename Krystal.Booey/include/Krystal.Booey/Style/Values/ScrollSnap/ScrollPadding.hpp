@@ -52,6 +52,7 @@ namespace krys::boo
       KRYS_NODISCARD LayoutUnit operator()(const ScrollPaddingEdge &, LayoutUnit referenceLength,
                                            ZoomNeeded) noexcept;
     };
+
     template <>
     struct Evaluation<ScrollPaddingEdge, float>
     {
@@ -62,7 +63,6 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutBoxExtent ExtentForRect(const ScrollPaddingBox &, const LayoutRect &,
                                                  ZoomNeeded) noexcept;
-
   }
 }
 

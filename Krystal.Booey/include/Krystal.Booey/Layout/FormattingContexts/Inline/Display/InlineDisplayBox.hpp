@@ -52,7 +52,7 @@ namespace krys::boo::inline_display
         Start,
         Inside,
         End,
-        NotApplicable
+        NotApplicable,
       };
 
     private:
@@ -69,6 +69,7 @@ namespace krys::boo::inline_display
 
     public:
       Text() noexcept = default;
+
       /// @param originalContent The inline text box's content, which must outlive the box.
       Text(size_t start, size_t length, const utf8_string &originalContent,
            Maybe<utf8_string> adjustedContentToRender = null, bool hasHyphen = false,
@@ -83,10 +84,12 @@ namespace krys::boo::inline_display
       {
         return _start;
       }
+
       KRYS_NODISCARD size_t End() const noexcept
       {
         return Start() + Length();
       }
+
       KRYS_NODISCARD size_t Length() const noexcept
       {
         return _length;
@@ -101,6 +104,7 @@ namespace krys::boo::inline_display
         auto originalContent = utf8_stringview {*_originalContent};
         return originalContent.substr(std::min<size_t>(_start, originalContent.size()), _length);
       }
+
       KRYS_NODISCARD utf8_stringview RenderedContent() const noexcept
       {
         return _adjustedContentToRender ? utf8_stringview {*_adjustedContentToRender} : OriginalContent();
@@ -110,10 +114,12 @@ namespace krys::boo::inline_display
       {
         return _shapingBoundary == ShapingBoundary::Start;
       }
+
       KRYS_NODISCARD bool IsAtShapingBoundaryEnd() const noexcept
       {
         return _shapingBoundary == ShapingBoundary::End;
       }
+
       KRYS_NODISCARD bool IsInsideShapingBoundary() const noexcept
       {
         return _shapingBoundary == ShapingBoundary::Inside;
@@ -132,6 +138,7 @@ namespace krys::boo::inline_display
         }
         return _partiallyVisibleContentLength;
       }
+
       void SetPartiallyVisibleContentLength(size_t truncatedLength) noexcept
       {
         _partiallyVisibleContentLength = static_cast<uint32>(truncatedLength);
@@ -168,7 +175,7 @@ namespace krys::boo::inline_display
     enum class PositionWithinInlineLevelBox : bool
     {
       First,
-      Last
+      Last,
     };
 
   private:
@@ -207,58 +214,72 @@ namespace krys::boo::inline_display
     {
       return _type == Type::Text || IsWordSeparator();
     }
+
     KRYS_NODISCARD bool IsWordSeparator() const noexcept
     {
       return _type == Type::WordSeparator;
     }
+
     KRYS_NODISCARD bool IsEllipsis() const noexcept
     {
       return _type == Type::Ellipsis;
     }
+
     KRYS_NODISCARD bool IsSoftLineBreak() const noexcept
     {
       return _type == Type::SoftLineBreak;
     }
+
     KRYS_NODISCARD bool IsTextOrSoftLineBreak() const noexcept
     {
       return IsText() || IsSoftLineBreak();
     }
+
     KRYS_NODISCARD bool IsLineBreakBox() const noexcept
     {
       return _type == Type::LineBreakBox;
     }
+
     KRYS_NODISCARD bool IsLineBreak() const noexcept
     {
       return IsSoftLineBreak() || IsLineBreakBox();
     }
+
     KRYS_NODISCARD bool IsAtomicInlineBox() const noexcept
     {
       return _type == Type::AtomicInlineBox;
     }
+
     KRYS_NODISCARD bool IsInlineBox() const noexcept
     {
       return IsNonRootInlineBox() || IsRootInlineBox();
     }
+
     KRYS_NODISCARD bool IsNonRootInlineBox() const noexcept
     {
       return _type == Type::NonRootInlineBox;
     }
+
     KRYS_NODISCARD bool IsRootInlineBox() const noexcept
     {
       return _type == Type::RootInlineBox;
     }
+
     KRYS_NODISCARD bool IsGenericInlineLevelBox() const noexcept
     {
       return _type == Type::GenericInlineLevelBox;
     }
+
     KRYS_NODISCARD bool IsInlineLevelBox() const noexcept
     {
       return IsAtomicInlineBox() || IsLineBreakBox() || IsInlineBox() || IsGenericInlineLevelBox();
     }
+
     KRYS_NODISCARD bool IsBlockLevelBox() const noexcept
     {
       return _type == Type::BlockLevelBox;
     }
+
     KRYS_NODISCARD bool IsNonRootInlineLevelBox() const noexcept
     {
       return IsInlineLevelBox() && !IsRootInlineBox();
@@ -275,9 +296,11 @@ namespace krys::boo::inline_display
     {
       return _hasContent;
     }
+
     KRYS_NODISCARD bool IsVisible() const noexcept;
     // Inline boxes around blocks are visible to hit testing but don't paint.
     KRYS_NODISCARD bool IsVisibleIgnoringUsedVisibility() const noexcept;
+
     KRYS_NODISCARD bool IsFullyTruncated() const noexcept
     {
       return _isFullyTruncated;
@@ -287,6 +310,7 @@ namespace krys::boo::inline_display
     {
       return _unflippedVisualRect;
     }
+
     KRYS_NODISCARD static FloatRect
       VisibleRectIgnoringBlockDirection(const Box &box, const FloatRect &visibleLineRect) noexcept
     {
@@ -297,6 +321,7 @@ namespace krys::boo::inline_display
       visualRectIgnoringBlockDirection.ShiftMaxXEdgeTo(visibleBoxRight);
       return visualRectIgnoringBlockDirection;
     }
+
     KRYS_NODISCARD const FloatRect &InkOverflow() const noexcept
     {
       return _inkOverflow;
@@ -306,22 +331,27 @@ namespace krys::boo::inline_display
     {
       return VisualRectIgnoringBlockDirection().Y();
     }
+
     KRYS_NODISCARD float Bottom() const noexcept
     {
       return VisualRectIgnoringBlockDirection().MaxY();
     }
+
     KRYS_NODISCARD float Left() const noexcept
     {
       return VisualRectIgnoringBlockDirection().X();
     }
+
     KRYS_NODISCARD float Right() const noexcept
     {
       return VisualRectIgnoringBlockDirection().MaxX();
     }
+
     KRYS_NODISCARD float Width() const noexcept
     {
       return VisualRectIgnoringBlockDirection().Width();
     }
+
     KRYS_NODISCARD float Height() const noexcept
     {
       return VisualRectIgnoringBlockDirection().Height();
@@ -332,21 +362,25 @@ namespace krys::boo::inline_display
       _unflippedVisualRect.Move({{}, offset});
       _inkOverflow.Move({{}, offset});
     }
+
     void MoveHorizontally(float offset) noexcept
     {
       _unflippedVisualRect.Move({offset, {}});
       _inkOverflow.Move({offset, {}});
     }
+
     void ExpandVertically(float delta) noexcept
     {
       _unflippedVisualRect.Expand({{}, delta});
       _inkOverflow.Expand({{}, delta});
     }
+
     void ExpandHorizontally(float delta) noexcept
     {
       _unflippedVisualRect.Expand({delta, {}});
       _inkOverflow.Expand({delta, {}});
     }
+
     void AdjustInkOverflow(const FloatRect &childBorderBox) noexcept
     {
       _inkOverflow.UniteEvenIfEmpty(childBorderBox);
@@ -358,24 +392,28 @@ namespace krys::boo::inline_display
       _unflippedVisualRect.SetX(physicalLeft);
       _inkOverflow.SetX(_inkOverflow.X() + offset);
     }
+
     void SetRight(float physicalRight) noexcept
     {
       auto offset = physicalRight - Right();
       _unflippedVisualRect.ShiftMaxXEdgeTo(physicalRight);
       _inkOverflow.ShiftMaxXEdgeTo(_inkOverflow.MaxX() + offset);
     }
+
     void SetTop(float physicalTop) noexcept
     {
       auto offset = physicalTop - Top();
       _unflippedVisualRect.SetY(physicalTop);
       _inkOverflow.SetY(_inkOverflow.Y() + offset);
     }
+
     void SetBottom(float physicalBottom) noexcept
     {
       auto offset = physicalBottom - Bottom();
       _unflippedVisualRect.ShiftMaxYEdgeTo(physicalBottom);
       _inkOverflow.ShiftMaxYEdgeTo(_inkOverflow.MaxY() + offset);
     }
+
     void SetRect(const FloatRect &rect, const FloatRect &inkOverflow) noexcept
     {
       _unflippedVisualRect = rect;
@@ -386,6 +424,7 @@ namespace krys::boo::inline_display
     {
       _hasContent = true;
     }
+
     void SetIsFullyTruncated() noexcept
     {
       _isFullyTruncated = true;
@@ -396,6 +435,7 @@ namespace krys::boo::inline_display
       krys_debug_assert(IsTextOrSoftLineBreak());
       return _text;
     }
+
     KRYS_NODISCARD const Text &GetText() const noexcept
     {
       krys_debug_assert(IsTextOrSoftLineBreak());
@@ -407,6 +447,7 @@ namespace krys::boo::inline_display
       _horizontalExpansion = expansion.HorizontalExpansion;
       _expansionBehavior = expansion.Behavior;
     }
+
     KRYS_NODISCARD Expansion GetExpansion() const noexcept
     {
       return {_expansionBehavior, _horizontalExpansion};
@@ -416,20 +457,24 @@ namespace krys::boo::inline_display
     {
       return *_layoutBox;
     }
+
     KRYS_NODISCARD const RenderStyle &Style() const noexcept
     {
       return IsFirstFormattedLine() ? LayoutBox().FirstLineStyle() : LayoutBox().Style();
     }
+
     KRYS_NODISCARD boo::WritingMode GetWritingMode() const noexcept;
 
     void MoveToLine(uint32 lineIndex) noexcept
     {
       _lineIndex = lineIndex;
     }
+
     KRYS_NODISCARD size_t LineIndex() const noexcept
     {
       return _lineIndex;
     }
+
     KRYS_NODISCARD bool IsFirstFormattedLine() const noexcept
     {
       return _isFirstFormattedLine;
@@ -442,14 +487,17 @@ namespace krys::boo::inline_display
     {
       return _isFirstForLayoutBox;
     }
+
     KRYS_NODISCARD bool IsLastForLayoutBox() const noexcept
     {
       return _isLastForLayoutBox;
     }
+
     void SetIsFirstForLayoutBox() noexcept
     {
       _isFirstForLayoutBox = true;
     }
+
     void SetIsLastForLayoutBox() noexcept
     {
       _isLastForLayoutBox = true;

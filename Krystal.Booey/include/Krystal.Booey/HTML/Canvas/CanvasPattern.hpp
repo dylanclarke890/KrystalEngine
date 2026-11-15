@@ -62,6 +62,7 @@ namespace krys::boo::html
     {
       return *_pattern;
     }
+
     KRYS_NODISCARD const Pattern &GetPattern() const noexcept
     {
       return *_pattern;

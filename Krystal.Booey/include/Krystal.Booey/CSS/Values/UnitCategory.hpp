@@ -37,7 +37,7 @@ namespace krys::boo::css
     Frequency,
     Resolution,
     Flex,
-    Other
+    Other,
   };
 }
 

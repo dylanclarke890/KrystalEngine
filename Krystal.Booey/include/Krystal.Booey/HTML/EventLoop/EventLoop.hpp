@@ -30,7 +30,7 @@ namespace krys::boo::html
     /// @brief It's dropped, as its document is gone.
     Drop,
     /// @brief It runs, as it finishes work other documents may share (a load in the memory cache).
-    Run
+    Run,
   };
 
   /// @brief A minimal event loop: one queue of tasks and a microtask queue, with the timers, run by the host

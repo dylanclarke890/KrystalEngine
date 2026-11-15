@@ -53,10 +53,11 @@ namespace krys::boo
     enum class ContainsMode : uint8
     {
       InsideOrOnStroke,
-      InsideButNotOnStroke
+      InsideButNotOnStroke,
     };
 
     constexpr FloatRect() noexcept = default;
+
     constexpr FloatRect(const FloatPoint &location, const FloatSize &size) noexcept
         : _location(location), _size(size)
     {

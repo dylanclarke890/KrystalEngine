@@ -126,16 +126,19 @@ namespace krys::boo
     }
 
     void SetNeedsItemsPlacement(bool needsItemsPlacement) noexcept;
+
     KRYS_NODISCARD bool NeedsItemsPlacement() const noexcept
     {
       return _needsItemsPlacement;
     }
 
     void SetupGridForMasonryLayout() noexcept;
+
     KRYS_NODISCARD uint32 MaxRows() const noexcept
     {
       return _maxRows;
     }
+
     KRYS_NODISCARD uint32 MaxColumns() const noexcept
     {
       return _maxColumns;

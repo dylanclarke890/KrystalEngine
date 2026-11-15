@@ -58,7 +58,6 @@ namespace krys::boo::dom
 
 namespace krys::boo::style
 {
-
   // The following style color kinds are forward declared and stored in
   // UniquePtrs to avoid unnecessarily growing the size of Color for the
   // uncommon case of un-resolvability due to currentColor.

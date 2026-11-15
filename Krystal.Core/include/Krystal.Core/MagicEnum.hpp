@@ -139,7 +139,6 @@
 
 namespace magic_enum
 {
-
 // If need another optional type, define the macro MAGIC_ENUM_USING_ALIAS_OPTIONAL.
 #if defined(MAGIC_ENUM_USING_ALIAS_OPTIONAL)
   MAGIC_ENUM_USING_ALIAS_OPTIONAL
@@ -204,7 +203,6 @@ namespace magic_enum
 
   namespace customize
   {
-
     template <bool IsFlags = false, int Min = MAGIC_ENUM_RANGE_MIN, int Max = MAGIC_ENUM_RANGE_MAX,
               std::size_t PrefixLength = 0>
     struct adl_info_holder
@@ -258,14 +256,12 @@ namespace magic_enum
 
     namespace detail
     {
-
       enum class customize_tag
       {
         default_tag,
         invalid_tag,
-        custom_tag
+        custom_tag,
       };
-
     } // namespace magic_enum::customize::detail
 
     class customize_t : public std::pair<detail::customize_tag, string_view>
@@ -275,9 +271,11 @@ namespace magic_enum
           : std::pair<detail::customize_tag, string_view> {detail::customize_tag::custom_tag, srt}
       {
       }
+
       constexpr customize_t(const char_type *srt) : customize_t {string_view {srt}}
       {
       }
+
       constexpr customize_t(detail::customize_tag tag)
           : std::pair<detail::customize_tag, string_view> {tag, string_view {}}
       {
@@ -303,12 +301,10 @@ namespace magic_enum
     {
       return default_tag;
     }
-
   } // namespace magic_enum::customize
 
   namespace detail
   {
-
     template <typename T>
     struct supported
 #if defined(MAGIC_ENUM_SUPPORTED) || defined(MAGIC_ENUM_NO_CHECK_SUPPORT)
@@ -596,7 +592,7 @@ namespace magic_enum
       }
     }
 
-#if defined(__cpp_lib_array_constexpr) && __cpp_lib_array_constexpr >= 201'603L
+#if defined(__cpp_lib_array_constexpr) && __cpp_lib_array_constexpr >= 201'603l
   #define MAGIC_ENUM_ARRAY_CONSTEXPR 1
 #else
     template <typename T, std::size_t N, std::size_t... I>
@@ -924,7 +920,7 @@ namespace magic_enum
     enum class enum_subtype
     {
       common,
-      flags
+      flags,
     };
 
     template <typename E, int O, enum_subtype S, typename U = std::underlying_type_t<E>>
@@ -998,31 +994,25 @@ namespace magic_enum
       }
     }
 
-#define MAGIC_ENUM_FOR_EACH_256(T)                                                                           \
-  T(0)                                                                                                       \
-  T(1)                                                                                                       \
-  T(2)                                                                                                       \
-  T(3)                                                                                                       \
-  T(4) T(5) T(6) T(7) T(8) T(9) T(10) T(11) T(12) T(13) T(14) T(15) T(16) T(17) T(18) T(19) T(20) T(21)      \
-    T(22) T(23) T(24) T(25) T(26) T(27) T(28) T(29) T(30) T(31) T(32) T(33) T(34) T(35) T(36) T(37) T(38)    \
-      T(39) T(40) T(41) T(42) T(43) T(44) T(45) T(46) T(47) T(48) T(49) T(50) T(51) T(52) T(53) T(54) T(55)  \
-        T(56) T(57) T(58) T(59) T(60) T(61) T(62) T(63) T(64) T(65) T(66) T(67) T(68) T(69) T(70) T(71)      \
-          T(72) T(73) T(74) T(75) T(76) T(77) T(78) T(79) T(80) T(81) T(82) T(83) T(84) T(85) T(86) T(87)    \
-            T(88) T(89) T(90) T(91) T(92) T(93) T(94) T(95) T(96) T(97) T(98) T(99) T(100) T(101) T(102)     \
-              T(103) T(104) T(105) T(106) T(107) T(108) T(109) T(110) T(111) T(112) T(113) T(114) T(115)     \
-                T(116) T(117) T(118) T(119) T(120) T(121) T(122) T(123) T(124) T(125) T(126) T(127) T(128)   \
-                  T(129) T(130) T(131) T(132) T(133) T(134) T(135) T(136) T(137) T(138) T(139) T(140) T(141) \
-                    T(142) T(143) T(144) T(145) T(146) T(147) T(148) T(149) T(150) T(151) T(152) T(153)      \
-                      T(154) T(155) T(156) T(157) T(158) T(159) T(160) T(161) T(162) T(163) T(164) T(165)    \
-                        T(166) T(167) T(168) T(169) T(170) T(171) T(172) T(173) T(174) T(175) T(176) T(177)  \
-                          T(178) T(179) T(180) T(181) T(182) T(183) T(184) T(185) T(186) T(187) T(188)       \
-                            T(189) T(190) T(191) T(192) T(193) T(194) T(195) T(196) T(197) T(198) T(199)     \
-                              T(200) T(201) T(202) T(203) T(204) T(205) T(206) T(207) T(208) T(209) T(210)   \
-                                T(211) T(212) T(213) T(214) T(215) T(216) T(217) T(218) T(219) T(220) T(221) \
-                                  T(222) T(223) T(224) T(225) T(226) T(227) T(228) T(229) T(230) T(231)      \
-                                    T(232) T(233) T(234) T(235) T(236) T(237) T(238) T(239) T(240) T(241)    \
-                                      T(242) T(243) T(244) T(245) T(246) T(247) T(248) T(249) T(250) T(251)  \
-                                        T(252) T(253) T(254) T(255)
+    // clang-format off
+#define MAGIC_ENUM_FOR_EACH_256(T)                                                                                \
+  T(0) T(1) T(2) T(3) T(4) T(5) T(6) T(7) T(8) T(9) T(10) T(11) T(12) T(13) T(14) T(15)                           \
+  T(16) T(17) T(18) T(19) T(20) T(21) T(22) T(23) T(24) T(25) T(26) T(27) T(28) T(29) T(30) T(31)                 \
+  T(32) T(33) T(34) T(35) T(36) T(37) T(38) T(39) T(40) T(41) T(42) T(43) T(44) T(45) T(46) T(47)                 \
+  T(48) T(49) T(50) T(51) T(52) T(53) T(54) T(55) T(56) T(57) T(58) T(59) T(60) T(61) T(62) T(63)                 \
+  T(64) T(65) T(66) T(67) T(68) T(69) T(70) T(71) T(72) T(73) T(74) T(75) T(76) T(77) T(78) T(79)                 \
+  T(80) T(81) T(82) T(83) T(84) T(85) T(86) T(87) T(88) T(89) T(90) T(91) T(92) T(93) T(94) T(95)                 \
+  T(96) T(97) T(98) T(99) T(100) T(101) T(102) T(103) T(104) T(105) T(106) T(107) T(108) T(109) T(110) T(111)     \
+  T(112) T(113) T(114) T(115) T(116) T(117) T(118) T(119) T(120) T(121) T(122) T(123) T(124) T(125) T(126) T(127) \
+  T(128) T(129) T(130) T(131) T(132) T(133) T(134) T(135) T(136) T(137) T(138) T(139) T(140) T(141) T(142) T(143) \
+  T(144) T(145) T(146) T(147) T(148) T(149) T(150) T(151) T(152) T(153) T(154) T(155) T(156) T(157) T(158) T(159) \
+  T(160) T(161) T(162) T(163) T(164) T(165) T(166) T(167) T(168) T(169) T(170) T(171) T(172) T(173) T(174) T(175) \
+  T(176) T(177) T(178) T(179) T(180) T(181) T(182) T(183) T(184) T(185) T(186) T(187) T(188) T(189) T(190) T(191) \
+  T(192) T(193) T(194) T(195) T(196) T(197) T(198) T(199) T(200) T(201) T(202) T(203) T(204) T(205) T(206) T(207) \
+  T(208) T(209) T(210) T(211) T(212) T(213) T(214) T(215) T(216) T(217) T(218) T(219) T(220) T(221) T(222) T(223) \
+  T(224) T(225) T(226) T(227) T(228) T(229) T(230) T(231) T(232) T(233) T(234) T(235) T(236) T(237) T(238) T(239) \
+  T(240) T(241) T(242) T(243) T(244) T(245) T(246) T(247) T(248) T(249) T(250) T(251) T(252) T(253) T(254) T(255)
+    // clang-format on
 
     template <std::size_t N>
     struct valid_count_t
@@ -1307,6 +1297,7 @@ namespace magic_enum
           return static_cast<U>(value);
         }
       }
+
       using secondary_hash = constexpr_hash_t;
     };
 
@@ -1314,67 +1305,68 @@ namespace magic_enum
     struct constexpr_hash_t<Value, std::enable_if_t<std::is_same_v<Value, string_view>>>
     {
       constexpr static std::uint32_t crc_table[256] {
-        0x00'00'00'00L, 0x77'07'30'96L, 0xee'0e'61'2cL, 0x99'09'51'baL, 0x07'6d'c4'19L, 0x70'6a'f4'8fL,
-        0xe9'63'a5'35L, 0x9e'64'95'a3L, 0x0e'db'88'32L, 0x79'dc'b8'a4L, 0xe0'd5'e9'1eL, 0x97'd2'd9'88L,
-        0x09'b6'4c'2bL, 0x7e'b1'7c'bdL, 0xe7'b8'2d'07L, 0x90'bf'1d'91L, 0x1d'b7'10'64L, 0x6a'b0'20'f2L,
-        0xf3'b9'71'48L, 0x84'be'41'deL, 0x1a'da'd4'7dL, 0x6d'dd'e4'ebL, 0xf4'd4'b5'51L, 0x83'd3'85'c7L,
-        0x13'6c'98'56L, 0x64'6b'a8'c0L, 0xfd'62'f9'7aL, 0x8a'65'c9'ecL, 0x14'01'5c'4fL, 0x63'06'6c'd9L,
-        0xfa'0f'3d'63L, 0x8d'08'0d'f5L, 0x3b'6e'20'c8L, 0x4c'69'10'5eL, 0xd5'60'41'e4L, 0xa2'67'71'72L,
-        0x3c'03'e4'd1L, 0x4b'04'd4'47L, 0xd2'0d'85'fdL, 0xa5'0a'b5'6bL, 0x35'b5'a8'faL, 0x42'b2'98'6cL,
-        0xdb'bb'c9'd6L, 0xac'bc'f9'40L, 0x32'd8'6c'e3L, 0x45'df'5c'75L, 0xdc'd6'0d'cfL, 0xab'd1'3d'59L,
-        0x26'd9'30'acL, 0x51'de'00'3aL, 0xc8'd7'51'80L, 0xbf'd0'61'16L, 0x21'b4'f4'b5L, 0x56'b3'c4'23L,
-        0xcf'ba'95'99L, 0xb8'bd'a5'0fL, 0x28'02'b8'9eL, 0x5f'05'88'08L, 0xc6'0c'd9'b2L, 0xb1'0b'e9'24L,
-        0x2f'6f'7c'87L, 0x58'68'4c'11L, 0xc1'61'1d'abL, 0xb6'66'2d'3dL, 0x76'dc'41'90L, 0x01'db'71'06L,
-        0x98'd2'20'bcL, 0xef'd5'10'2aL, 0x71'b1'85'89L, 0x06'b6'b5'1fL, 0x9f'bf'e4'a5L, 0xe8'b8'd4'33L,
-        0x78'07'c9'a2L, 0x0f'00'f9'34L, 0x96'09'a8'8eL, 0xe1'0e'98'18L, 0x7f'6a'0d'bbL, 0x08'6d'3d'2dL,
-        0x91'64'6c'97L, 0xe6'63'5c'01L, 0x6b'6b'51'f4L, 0x1c'6c'61'62L, 0x85'65'30'd8L, 0xf2'62'00'4eL,
-        0x6c'06'95'edL, 0x1b'01'a5'7bL, 0x82'08'f4'c1L, 0xf5'0f'c4'57L, 0x65'b0'd9'c6L, 0x12'b7'e9'50L,
-        0x8b'be'b8'eaL, 0xfc'b9'88'7cL, 0x62'dd'1d'dfL, 0x15'da'2d'49L, 0x8c'd3'7c'f3L, 0xfb'd4'4c'65L,
-        0x4d'b2'61'58L, 0x3a'b5'51'ceL, 0xa3'bc'00'74L, 0xd4'bb'30'e2L, 0x4a'df'a5'41L, 0x3d'd8'95'd7L,
-        0xa4'd1'c4'6dL, 0xd3'd6'f4'fbL, 0x43'69'e9'6aL, 0x34'6e'd9'fcL, 0xad'67'88'46L, 0xda'60'b8'd0L,
-        0x44'04'2d'73L, 0x33'03'1d'e5L, 0xaa'0a'4c'5fL, 0xdd'0d'7c'c9L, 0x50'05'71'3cL, 0x27'02'41'aaL,
-        0xbe'0b'10'10L, 0xc9'0c'20'86L, 0x57'68'b5'25L, 0x20'6f'85'b3L, 0xb9'66'd4'09L, 0xce'61'e4'9fL,
-        0x5e'de'f9'0eL, 0x29'd9'c9'98L, 0xb0'd0'98'22L, 0xc7'd7'a8'b4L, 0x59'b3'3d'17L, 0x2e'b4'0d'81L,
-        0xb7'bd'5c'3bL, 0xc0'ba'6c'adL, 0xed'b8'83'20L, 0x9a'bf'b3'b6L, 0x03'b6'e2'0cL, 0x74'b1'd2'9aL,
-        0xea'd5'47'39L, 0x9d'd2'77'afL, 0x04'db'26'15L, 0x73'dc'16'83L, 0xe3'63'0b'12L, 0x94'64'3b'84L,
-        0x0d'6d'6a'3eL, 0x7a'6a'5a'a8L, 0xe4'0e'cf'0bL, 0x93'09'ff'9dL, 0x0a'00'ae'27L, 0x7d'07'9e'b1L,
-        0xf0'0f'93'44L, 0x87'08'a3'd2L, 0x1e'01'f2'68L, 0x69'06'c2'feL, 0xf7'62'57'5dL, 0x80'65'67'cbL,
-        0x19'6c'36'71L, 0x6e'6b'06'e7L, 0xfe'd4'1b'76L, 0x89'd3'2b'e0L, 0x10'da'7a'5aL, 0x67'dd'4a'ccL,
-        0xf9'b9'df'6fL, 0x8e'be'ef'f9L, 0x17'b7'be'43L, 0x60'b0'8e'd5L, 0xd6'd6'a3'e8L, 0xa1'd1'93'7eL,
-        0x38'd8'c2'c4L, 0x4f'df'f2'52L, 0xd1'bb'67'f1L, 0xa6'bc'57'67L, 0x3f'b5'06'ddL, 0x48'b2'36'4bL,
-        0xd8'0d'2b'daL, 0xaf'0a'1b'4cL, 0x36'03'4a'f6L, 0x41'04'7a'60L, 0xdf'60'ef'c3L, 0xa8'67'df'55L,
-        0x31'6e'8e'efL, 0x46'69'be'79L, 0xcb'61'b3'8cL, 0xbc'66'83'1aL, 0x25'6f'd2'a0L, 0x52'68'e2'36L,
-        0xcc'0c'77'95L, 0xbb'0b'47'03L, 0x22'02'16'b9L, 0x55'05'26'2fL, 0xc5'ba'3b'beL, 0xb2'bd'0b'28L,
-        0x2b'b4'5a'92L, 0x5c'b3'6a'04L, 0xc2'd7'ff'a7L, 0xb5'd0'cf'31L, 0x2c'd9'9e'8bL, 0x5b'de'ae'1dL,
-        0x9b'64'c2'b0L, 0xec'63'f2'26L, 0x75'6a'a3'9cL, 0x02'6d'93'0aL, 0x9c'09'06'a9L, 0xeb'0e'36'3fL,
-        0x72'07'67'85L, 0x05'00'57'13L, 0x95'bf'4a'82L, 0xe2'b8'7a'14L, 0x7b'b1'2b'aeL, 0x0c'b6'1b'38L,
-        0x92'd2'8e'9bL, 0xe5'd5'be'0dL, 0x7c'dc'ef'b7L, 0x0b'db'df'21L, 0x86'd3'd2'd4L, 0xf1'd4'e2'42L,
-        0x68'dd'b3'f8L, 0x1f'da'83'6eL, 0x81'be'16'cdL, 0xf6'b9'26'5bL, 0x6f'b0'77'e1L, 0x18'b7'47'77L,
-        0x88'08'5a'e6L, 0xff'0f'6a'70L, 0x66'06'3b'caL, 0x11'01'0b'5cL, 0x8f'65'9e'ffL, 0xf8'62'ae'69L,
-        0x61'6b'ff'd3L, 0x16'6c'cf'45L, 0xa0'0a'e2'78L, 0xd7'0d'd2'eeL, 0x4e'04'83'54L, 0x39'03'b3'c2L,
-        0xa7'67'26'61L, 0xd0'60'16'f7L, 0x49'69'47'4dL, 0x3e'6e'77'dbL, 0xae'd1'6a'4aL, 0xd9'd6'5a'dcL,
-        0x40'df'0b'66L, 0x37'd8'3b'f0L, 0xa9'bc'ae'53L, 0xde'bb'9e'c5L, 0x47'b2'cf'7fL, 0x30'b5'ff'e9L,
-        0xbd'bd'f2'1cL, 0xca'ba'c2'8aL, 0x53'b3'93'30L, 0x24'b4'a3'a6L, 0xba'd0'36'05L, 0xcd'd7'06'93L,
-        0x54'de'57'29L, 0x23'd9'67'bfL, 0xb3'66'7a'2eL, 0xc4'61'4a'b8L, 0x5d'68'1b'02L, 0x2a'6f'2b'94L,
-        0xb4'0b'be'37L, 0xc3'0c'8e'a1L, 0x5a'05'df'1bL, 0x2d'02'ef'8dL};
+        0x00'00'00'00l, 0x77'07'30'96l, 0xEE'0E'61'2Cl, 0x99'09'51'BAl, 0x07'6D'C4'19l, 0x70'6A'F4'8Fl,
+        0xE9'63'A5'35l, 0x9E'64'95'A3l, 0x0E'DB'88'32l, 0x79'DC'B8'A4l, 0xE0'D5'E9'1El, 0x97'D2'D9'88l,
+        0x09'B6'4C'2Bl, 0x7E'B1'7C'BDl, 0xE7'B8'2D'07l, 0x90'BF'1D'91l, 0x1D'B7'10'64l, 0x6A'B0'20'F2l,
+        0xF3'B9'71'48l, 0x84'BE'41'DEl, 0x1A'DA'D4'7Dl, 0x6D'DD'E4'EBl, 0xF4'D4'B5'51l, 0x83'D3'85'C7l,
+        0x13'6C'98'56l, 0x64'6B'A8'C0l, 0xFD'62'F9'7Al, 0x8A'65'C9'ECl, 0x14'01'5C'4Fl, 0x63'06'6C'D9l,
+        0xFA'0F'3D'63l, 0x8D'08'0D'F5l, 0x3B'6E'20'C8l, 0x4C'69'10'5El, 0xD5'60'41'E4l, 0xA2'67'71'72l,
+        0x3C'03'E4'D1l, 0x4B'04'D4'47l, 0xD2'0D'85'FDl, 0xA5'0A'B5'6Bl, 0x35'B5'A8'FAl, 0x42'B2'98'6Cl,
+        0xDB'BB'C9'D6l, 0xAC'BC'F9'40l, 0x32'D8'6C'E3l, 0x45'DF'5C'75l, 0xDC'D6'0D'CFl, 0xAB'D1'3D'59l,
+        0x26'D9'30'ACl, 0x51'DE'00'3Al, 0xC8'D7'51'80l, 0xBF'D0'61'16l, 0x21'B4'F4'B5l, 0x56'B3'C4'23l,
+        0xCF'BA'95'99l, 0xB8'BD'A5'0Fl, 0x28'02'B8'9El, 0x5F'05'88'08l, 0xC6'0C'D9'B2l, 0xB1'0B'E9'24l,
+        0x2F'6F'7C'87l, 0x58'68'4C'11l, 0xC1'61'1D'ABl, 0xB6'66'2D'3Dl, 0x76'DC'41'90l, 0x01'DB'71'06l,
+        0x98'D2'20'BCl, 0xEF'D5'10'2Al, 0x71'B1'85'89l, 0x06'B6'B5'1Fl, 0x9F'BF'E4'A5l, 0xE8'B8'D4'33l,
+        0x78'07'C9'A2l, 0x0F'00'F9'34l, 0x96'09'A8'8El, 0xE1'0E'98'18l, 0x7F'6A'0D'BBl, 0x08'6D'3D'2Dl,
+        0x91'64'6C'97l, 0xE6'63'5C'01l, 0x6B'6B'51'F4l, 0x1C'6C'61'62l, 0x85'65'30'D8l, 0xF2'62'00'4El,
+        0x6C'06'95'EDl, 0x1B'01'A5'7Bl, 0x82'08'F4'C1l, 0xF5'0F'C4'57l, 0x65'B0'D9'C6l, 0x12'B7'E9'50l,
+        0x8B'BE'B8'EAl, 0xFC'B9'88'7Cl, 0x62'DD'1D'DFl, 0x15'DA'2D'49l, 0x8C'D3'7C'F3l, 0xFB'D4'4C'65l,
+        0x4D'B2'61'58l, 0x3A'B5'51'CEl, 0xA3'BC'00'74l, 0xD4'BB'30'E2l, 0x4A'DF'A5'41l, 0x3D'D8'95'D7l,
+        0xA4'D1'C4'6Dl, 0xD3'D6'F4'FBl, 0x43'69'E9'6Al, 0x34'6E'D9'FCl, 0xAD'67'88'46l, 0xDA'60'B8'D0l,
+        0x44'04'2D'73l, 0x33'03'1D'E5l, 0xAA'0A'4C'5Fl, 0xDD'0D'7C'C9l, 0x50'05'71'3Cl, 0x27'02'41'AAl,
+        0xBE'0B'10'10l, 0xC9'0C'20'86l, 0x57'68'B5'25l, 0x20'6F'85'B3l, 0xB9'66'D4'09l, 0xCE'61'E4'9Fl,
+        0x5E'DE'F9'0El, 0x29'D9'C9'98l, 0xB0'D0'98'22l, 0xC7'D7'A8'B4l, 0x59'B3'3D'17l, 0x2E'B4'0D'81l,
+        0xB7'BD'5C'3Bl, 0xC0'BA'6C'ADl, 0xED'B8'83'20l, 0x9A'BF'B3'B6l, 0x03'B6'E2'0Cl, 0x74'B1'D2'9Al,
+        0xEA'D5'47'39l, 0x9D'D2'77'AFl, 0x04'DB'26'15l, 0x73'DC'16'83l, 0xE3'63'0B'12l, 0x94'64'3B'84l,
+        0x0D'6D'6A'3El, 0x7A'6A'5A'A8l, 0xE4'0E'CF'0Bl, 0x93'09'FF'9Dl, 0x0A'00'AE'27l, 0x7D'07'9E'B1l,
+        0xF0'0F'93'44l, 0x87'08'A3'D2l, 0x1E'01'F2'68l, 0x69'06'C2'FEl, 0xF7'62'57'5Dl, 0x80'65'67'CBl,
+        0x19'6C'36'71l, 0x6E'6B'06'E7l, 0xFE'D4'1B'76l, 0x89'D3'2B'E0l, 0x10'DA'7A'5Al, 0x67'DD'4A'CCl,
+        0xF9'B9'DF'6Fl, 0x8E'BE'EF'F9l, 0x17'B7'BE'43l, 0x60'B0'8E'D5l, 0xD6'D6'A3'E8l, 0xA1'D1'93'7El,
+        0x38'D8'C2'C4l, 0x4F'DF'F2'52l, 0xD1'BB'67'F1l, 0xA6'BC'57'67l, 0x3F'B5'06'DDl, 0x48'B2'36'4Bl,
+        0xD8'0D'2B'DAl, 0xAF'0A'1B'4Cl, 0x36'03'4A'F6l, 0x41'04'7A'60l, 0xDF'60'EF'C3l, 0xA8'67'DF'55l,
+        0x31'6E'8E'EFl, 0x46'69'BE'79l, 0xCB'61'B3'8Cl, 0xBC'66'83'1Al, 0x25'6F'D2'A0l, 0x52'68'E2'36l,
+        0xCC'0C'77'95l, 0xBB'0B'47'03l, 0x22'02'16'B9l, 0x55'05'26'2Fl, 0xC5'BA'3B'BEl, 0xB2'BD'0B'28l,
+        0x2B'B4'5A'92l, 0x5C'B3'6A'04l, 0xC2'D7'FF'A7l, 0xB5'D0'CF'31l, 0x2C'D9'9E'8Bl, 0x5B'DE'AE'1Dl,
+        0x9B'64'C2'B0l, 0xEC'63'F2'26l, 0x75'6A'A3'9Cl, 0x02'6D'93'0Al, 0x9C'09'06'A9l, 0xEB'0E'36'3Fl,
+        0x72'07'67'85l, 0x05'00'57'13l, 0x95'BF'4A'82l, 0xE2'B8'7A'14l, 0x7B'B1'2B'AEl, 0x0C'B6'1B'38l,
+        0x92'D2'8E'9Bl, 0xE5'D5'BE'0Dl, 0x7C'DC'EF'B7l, 0x0B'DB'DF'21l, 0x86'D3'D2'D4l, 0xF1'D4'E2'42l,
+        0x68'DD'B3'F8l, 0x1F'DA'83'6El, 0x81'BE'16'CDl, 0xF6'B9'26'5Bl, 0x6F'B0'77'E1l, 0x18'B7'47'77l,
+        0x88'08'5A'E6l, 0xFF'0F'6A'70l, 0x66'06'3B'CAl, 0x11'01'0B'5Cl, 0x8F'65'9E'FFl, 0xF8'62'AE'69l,
+        0x61'6B'FF'D3l, 0x16'6C'CF'45l, 0xA0'0A'E2'78l, 0xD7'0D'D2'EEl, 0x4E'04'83'54l, 0x39'03'B3'C2l,
+        0xA7'67'26'61l, 0xD0'60'16'F7l, 0x49'69'47'4Dl, 0x3E'6E'77'DBl, 0xAE'D1'6A'4Al, 0xD9'D6'5A'DCl,
+        0x40'DF'0B'66l, 0x37'D8'3B'F0l, 0xA9'BC'AE'53l, 0xDE'BB'9E'C5l, 0x47'B2'CF'7Fl, 0x30'B5'FF'E9l,
+        0xBD'BD'F2'1Cl, 0xCA'BA'C2'8Al, 0x53'B3'93'30l, 0x24'B4'A3'A6l, 0xBA'D0'36'05l, 0xCD'D7'06'93l,
+        0x54'DE'57'29l, 0x23'D9'67'BFl, 0xB3'66'7A'2El, 0xC4'61'4A'B8l, 0x5D'68'1B'02l, 0x2A'6F'2B'94l,
+        0xB4'0B'BE'37l, 0xC3'0C'8E'A1l, 0x5A'05'DF'1Bl, 0x2D'02'EF'8Dl};
+
       constexpr std::uint32_t operator()(string_view value) const noexcept
       {
-        auto crc = static_cast<std::uint32_t>(0xff'ff'ff'ffL);
+        auto crc = static_cast<std::uint32_t>(0xFF'FF'FF'FFl);
         for (const auto c : value)
         {
-          crc = (crc >> 8) ^ crc_table[(crc ^ static_cast<std::uint32_t>(c)) & 0xff];
+          crc = (crc >> 8) ^ crc_table[(crc ^ static_cast<std::uint32_t>(c)) & 0xFF];
         }
-        return crc ^ 0xff'ff'ff'ffL;
+        return crc ^ 0xFF'FF'FF'FFl;
       }
 
       struct secondary_hash
       {
         constexpr std::uint32_t operator()(string_view value) const noexcept
         {
-          auto acc = static_cast<std::uint64_t>(2'166'136'261ULL);
+          auto acc = static_cast<std::uint64_t>(2'166'136'261ull);
           for (const auto c : value)
           {
-            acc = ((acc ^ static_cast<std::uint64_t>(c)) * static_cast<std::uint64_t>(16'777'619ULL))
+            acc = ((acc ^ static_cast<std::uint64_t>(c)) * static_cast<std::uint64_t>(16'777'619ull))
                   & (std::numeric_limits<std::uint32_t>::max)();
           }
           return static_cast<std::uint32_t>(acc);
@@ -1444,7 +1436,7 @@ namespace magic_enum
     enum class case_call_t
     {
       index,
-      value
+      value,
     };
 
     template <typename T = void>
@@ -1559,7 +1551,6 @@ constexpr auto default_result_type_lambda<void> = []() noexcept {};
   #undef MAGIC_ENUM_CASE
 
 #endif
-
   } // namespace magic_enum::detail
 
   // Checks is magic_enum supported compiler.
@@ -1973,7 +1964,6 @@ constexpr auto default_result_type_lambda<void> = []() noexcept {};
 
   namespace bitwise_operators
   {
-
     template <typename E, detail::enable_if_t<E, int> = 0>
     constexpr E operator~(E rhs) noexcept
     {
@@ -2015,9 +2005,7 @@ constexpr auto default_result_type_lambda<void> = []() noexcept {};
     {
       return lhs = (lhs ^ rhs);
     }
-
   } // namespace magic_enum::bitwise_operators
-
 } // namespace magic_enum
 
 #if defined(__clang__)

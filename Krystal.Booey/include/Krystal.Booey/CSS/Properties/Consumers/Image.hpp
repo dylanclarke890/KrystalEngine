@@ -35,7 +35,7 @@ namespace krys::boo::css::PropertyParserHelpers
     URLFunction = 1 << 0,
     RawStringAsURL = 1 << 1,
     ImageSet = 1 << 2,
-    GeneratedImage = 1 << 3
+    GeneratedImage = 1 << 3,
   };
 }
 

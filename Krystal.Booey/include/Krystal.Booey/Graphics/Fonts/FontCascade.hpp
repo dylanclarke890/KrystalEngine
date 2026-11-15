@@ -102,11 +102,11 @@ namespace krys::boo
       Auto,
       Simple,
       Complex,
-      SimpleWithGlyphOverflow
+      SimpleWithGlyphOverflow,
     };
 
   private:
-    static constexpr uint32 BitsPerCharacterInCanUseSimplifiedTextMeasuringForAutoVariantCache = 2;
+    constexpr static uint32 BitsPerCharacterInCanUseSimplifiedTextMeasuringForAutoVariantCache = 2;
 
     static CodePath s_codePath;
 
@@ -154,6 +154,7 @@ namespace krys::boo
     {
       return _fontDescription;
     }
+
     KRYS_NODISCARD FontCascadeDescription &MutableFontDescription() const noexcept
     {
       return _fontDescription;
@@ -167,7 +168,7 @@ namespace krys::boo
     enum class CustomFontNotReadyAction : bool
     {
       DoNotPaintIfFontNotReady,
-      UseFallbackIfFontNotReady
+      UseFallbackIfFontNotReady,
     };
     /// @brief Draws @p run from byte offset @p from to @p to at @p point (its start on the baseline).
     /// @return How far the first glyph drawn is from @p point (the width of the text before @p from).
@@ -236,22 +237,27 @@ namespace krys::boo
     {
       return _spacing.Letter;
     }
+
     KRYS_NODISCARD float WordSpacing() const noexcept
     {
       return _spacing.Word;
     }
+
     void SetLetterSpacing(float spacing) noexcept
     {
       _spacing.Letter = spacing;
     }
+
     void SetWordSpacing(float spacing) noexcept
     {
       _spacing.Word = spacing;
     }
+
     KRYS_NODISCARD boo::TextSpacingTrim GetTextSpacingTrim() const noexcept
     {
       return _fontDescription.GetTextSpacingTrim();
     }
+
     KRYS_NODISCARD boo::TextAutospace GetTextAutospace() const noexcept
     {
       return _fontDescription.GetTextAutospace();
@@ -261,6 +267,7 @@ namespace krys::boo
     {
       return _enableKerning;
     }
+
     KRYS_NODISCARD bool RequiresShaping() const noexcept
     {
       return _requiresShaping;
@@ -270,10 +277,12 @@ namespace krys::boo
     {
       return _fontDescription.FirstFamily();
     }
+
     KRYS_NODISCARD uint32 FamilyCount() const noexcept
     {
       return _fontDescription.FamilyCount();
     }
+
     KRYS_NODISCARD const StringAtom &FamilyAt(uint32 i) const noexcept
     {
       return _fontDescription.FamilyAt(i);
@@ -284,10 +293,12 @@ namespace krys::boo
     {
       return _fontDescription.FontStyleSlope();
     }
+
     KRYS_NODISCARD FontSelectionValue Weight() const noexcept
     {
       return _fontDescription.Weight();
     }
+
     KRYS_NODISCARD FontWidthVariant WidthVariant() const noexcept
     {
       return _fontDescription.WidthVariant();
@@ -474,6 +485,7 @@ namespace krys::boo
     {
       _enableKerning = ComputeEnableKerning();
     }
+
     void UpdateRequiresShaping() noexcept
     {
       _requiresShaping = ComputeRequiresShaping();
@@ -483,7 +495,7 @@ namespace krys::boo
     enum class ForTextEmphasisOrNot : bool
     {
       NotForTextEmphasis,
-      ForTextEmphasis
+      ForTextEmphasis,
     };
 
     /// @brief The glyphs of @p run from byte offset @p from to @p to, in visual order, the initial advance
@@ -529,6 +541,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD constexpr static bool CanExpandAroundIdeographsInComplexText() noexcept
     {
       return false;

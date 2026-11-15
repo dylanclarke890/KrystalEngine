@@ -49,16 +49,20 @@ namespace krys::boo::css
     {
       return _array.size();
     }
+
     /// @return Null if @p index is out of range.
     KRYS_NODISCARD RefPtr<CSSNumericValue> Item(size_t index) noexcept;
+
     KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept
     {
       return index < _array.size();
     }
+
     KRYS_NODISCARD const List<Ref<CSSNumericValue>> &Array() const noexcept
     {
       return _array;
     }
+
     void ForEach(const Func<void(const CSSNumericValue &, bool first)> &function) noexcept;
   };
 }

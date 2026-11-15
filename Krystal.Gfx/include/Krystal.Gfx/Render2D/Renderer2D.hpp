@@ -84,7 +84,7 @@ namespace krys::gfx
     DestinationOut,
     DestinationAtop,
     Xor,
-    PlusLighter
+    PlusLighter,
   };
 
   /// @brief What a layer's blur reads past the edges of what the layer holds.
@@ -93,7 +93,7 @@ namespace krys::gfx
     /// @brief Transparent black, as SVG's `edgeMode="none"`: the blur fades out at the edges.
     None,
     /// @brief The nearest edge pixel, as SVG's `edgeMode="duplicate"`: the blur stays solid to the edges.
-    Duplicate
+    Duplicate,
   };
 
   /// @brief What a layer does to what's drawn in it when it's composited: a colour matrix, a Gaussian blur,
@@ -104,7 +104,7 @@ namespace krys::gfx
     {
       ColourMatrix,
       Blur,
-      DropShadow
+      DropShadow,
     };
 
     Kind Type {Kind::ColourMatrix};
@@ -128,6 +128,7 @@ namespace krys::gfx
     {
       return {.Type = Kind::ColourMatrix, .Matrix = matrix};
     }
+
     /// @brief A luminance mask: alpha is the luminance of the premultiplied colour (so the luminance times
     /// the alpha), and the colour is black, as Skia's luma colour filter. The luminance is of the colour in
     /// @p colourSpace: linear sRGB for SVG's `color-interpolation: linearRGB`.
@@ -140,11 +141,13 @@ namespace krys::gfx
               .MatrixOnPremultiplied = true,
               .MatrixColourSpace = colourSpace};
     }
+
     KRYS_NODISCARD static LayerFilter2D Blur(float blurRadius,
                                              EdgeMode2D edgeMode = EdgeMode2D::None) noexcept
     {
       return {.Type = Kind::Blur, .BlurRadius = blurRadius, .BlurEdgeMode = edgeMode};
     }
+
     KRYS_NODISCARD static LayerFilter2D DropShadow(const DropShadow2D &shadow) noexcept
     {
       return {.Type = Kind::DropShadow, .Shadow = shadow};
@@ -271,6 +274,7 @@ namespace krys::gfx
       /// @brief The texel's colour is converted from sRGB to linear light before the colour matrix.
       LinearMatrix = 1u << 16u,
     };
+
     /// @brief The instance's `BlendMode` is in the flags from this bit, for five bits.
     constexpr static uint32 BlendModeShift = 8u;
 
@@ -362,6 +366,7 @@ namespace krys::gfx
       Array<int32, 4> MaskOrigin;
       Array<ClipData, MaxClips> Clips;
     };
+
     static_assert(sizeof(ClipData) == 64u, "ClipData mirrors the shader's std140 Clip.");
     static_assert(sizeof(ClipUniforms) == 48u + 64u * MaxClips,
                   "ClipUniforms mirrors the shader's std140 block.");
@@ -404,6 +409,7 @@ namespace krys::gfx
       Array<float, detail::MaxGradientStops> Offsets;
       Array<Array<float, 4>, detail::MaxGradientStops> Colours;
     };
+
     static_assert(sizeof(GradientUniforms) == 64u + 20u * detail::MaxGradientStops,
                   "GradientUniforms mirrors the shader's std140 block.");
 
@@ -441,6 +447,7 @@ namespace krys::gfx
       /// @brief `PatternFlags`, then padding.
       Array<uint32, 4> Flags;
     };
+
     static_assert(sizeof(PatternUniforms) == 64u, "PatternUniforms mirrors the shader's std140 block.");
 
     /// @brief Where a shape's shadow goes: the shape's transform moved by the offset, and the blur.
@@ -547,6 +554,7 @@ namespace krys::gfx
       Array<float, 16> Matrix;
       Array<float, 4> Offset;
     };
+
     static_assert(sizeof(ColourMatrixUniforms) == 80u,
                   "ColourMatrixUniforms mirrors the shader's std140 block.");
 
@@ -563,6 +571,7 @@ namespace krys::gfx
       int32 Duplicate;
       float Padding;
     };
+
     static_assert(sizeof(BlurUniforms) == 48u, "BlurUniforms mirrors the shader's std140 block.");
 
     struct FrameUniforms
@@ -712,6 +721,7 @@ namespace krys::gfx
       PixelRect2D Bounds {};
       uint32 Chain {NoChain};
     };
+
     /// @brief The clip in effect, which `SetClip` can bring back later in the same frame.
     KRYS_NODISCARD ClipState GetClip() const noexcept;
     /// @brief Replaces the clip with one `GetClip` returned earlier in the frame, widening it as well as

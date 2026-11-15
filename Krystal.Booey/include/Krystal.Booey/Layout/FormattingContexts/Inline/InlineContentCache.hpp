@@ -55,7 +55,7 @@ namespace krys::boo::layout
       enum class IsPopulatedFromCache : bool
       {
         No,
-        Yes
+        Yes,
       };
 
     private:
@@ -68,6 +68,7 @@ namespace krys::boo::layout
       {
         return _inlineItemList;
       }
+
       KRYS_NODISCARD const InlineItemList &Content() const noexcept
       {
         return _inlineItemList;
@@ -80,6 +81,7 @@ namespace krys::boo::layout
         _contentAttributes = contentAttributes;
         _isPopulatedFromCache = isPopulatedFromCache == IsPopulatedFromCache::Yes;
       }
+
       void Replace(size_t insertionPosition, InlineItemList &&inlineItemList,
                    ContentAttributes contentAttributes, IsPopulatedFromCache isPopulatedFromCache) noexcept
       {
@@ -92,6 +94,7 @@ namespace krys::boo::layout
           _isPopulatedFromCache = false;
         }
       }
+
       void ShrinkToFit() noexcept
       {
         _inlineItemList.shrink_to_fit();
@@ -101,6 +104,7 @@ namespace krys::boo::layout
       {
         return Content().empty();
       }
+
       KRYS_NODISCARD size_t Size() const noexcept
       {
         return Content().size();
@@ -110,22 +114,27 @@ namespace krys::boo::layout
       {
         return _contentAttributes.RequiresVisualReordering;
       }
+
       KRYS_NODISCARD bool HasTextAndLineBreakOnlyContent() const noexcept
       {
         return _contentAttributes.HasTextAndLineBreakOnlyContent;
       }
+
       KRYS_NODISCARD bool HasTextAutospace() const noexcept
       {
         return _contentAttributes.HasTextAutospace;
       }
+
       KRYS_NODISCARD bool HasInlineBoxes() const noexcept
       {
         return InlineBoxCount() != 0;
       }
+
       KRYS_NODISCARD size_t InlineBoxCount() const noexcept
       {
         return _contentAttributes.InlineBoxCount;
       }
+
       KRYS_NODISCARD bool IsPopulatedFromCache() const noexcept
       {
         return _isPopulatedFromCache;
@@ -147,6 +156,7 @@ namespace krys::boo::layout
     {
       return _inlineItems;
     }
+
     KRYS_NODISCARD InlineItems &GetInlineItems() noexcept
     {
       return _inlineItems;
@@ -156,10 +166,12 @@ namespace krys::boo::layout
     {
       _maximumIntrinsicWidthLineContent = krys::move(lineContent);
     }
+
     void ClearMaximumIntrinsicWidthLineContent() noexcept
     {
       _maximumIntrinsicWidthLineContent = {};
     }
+
     KRYS_NODISCARD Maybe<LineLayoutResult> &MaximumIntrinsicWidthLineContent() noexcept
     {
       return _maximumIntrinsicWidthLineContent;
@@ -169,18 +181,22 @@ namespace krys::boo::layout
     {
       _minimumContentSize = minimumContentSize;
     }
+
     void SetMaximumContentSize(InlineLayoutUnit maximumContentSize) noexcept
     {
       _maximumContentSize = maximumContentSize;
     }
+
     KRYS_NODISCARD Maybe<InlineLayoutUnit> MinimumContentSize() const noexcept
     {
       return _minimumContentSize;
     }
+
     KRYS_NODISCARD Maybe<InlineLayoutUnit> MaximumContentSize() const noexcept
     {
       return _maximumContentSize;
     }
+
     void ResetMinimumMaximumContentSizes() noexcept
     {
       _minimumContentSize = {};
@@ -192,14 +208,17 @@ namespace krys::boo::layout
     {
       return _textSpacingContext.InlineBoxBoundarySpacings;
     }
+
     void SetInlineBoxBoundaryTextSpacings(InlineBoxBoundaryTextSpacings &&spacings) noexcept
     {
       _textSpacingContext.InlineBoxBoundarySpacings = krys::move(spacings);
     }
+
     KRYS_NODISCARD const TrimmableTextSpacings &GetTrimmableTextSpacings() const noexcept
     {
       return _textSpacingContext.TrimmableSpacings;
     }
+
     void SetTrimmableTextSpacings(TrimmableTextSpacings &&spacings) noexcept
     {
       _textSpacingContext.TrimmableSpacings = krys::move(spacings);

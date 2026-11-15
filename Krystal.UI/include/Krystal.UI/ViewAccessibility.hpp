@@ -60,11 +60,13 @@ namespace krys::ui
     void Attach(pal::IWindow &window, const boo::IntPoint &origin) noexcept;
     /// @brief Stops exposing the page.
     void Detach() noexcept;
+
     /// @brief Moves the view's top left in the window's client area to @p origin.
     void SetOrigin(const boo::IntPoint &origin) noexcept
     {
       _origin = origin;
     }
+
     KRYS_NODISCARD pal::IWindow *Window() const noexcept
     {
       return _window;

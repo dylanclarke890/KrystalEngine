@@ -40,6 +40,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathMin>> Create(List<CSSNumberish> &&numberishes) noexcept;
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathMin>>
       Create(List<Ref<CSSNumericValue>> &&values) noexcept;
+
     KRYS_NODISCARD const CSSNumericArray &Values() const noexcept
     {
       return *_values;
@@ -52,12 +53,15 @@ namespace krys::boo::css
     {
       return CSSMathOperator::Min;
     }
+
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {
       return CSSStyleValueType::CSSMathMin;
     }
+
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept final;
     KRYS_NODISCARD Maybe<SumValue> ToSumValue() const noexcept final;
+
     KRYS_NODISCARD bool Equals(const CSSNumericValue &other) const noexcept final
     {
       return EqualsImpl<CSSMathMin>(other);

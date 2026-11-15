@@ -45,6 +45,7 @@ namespace krys::boo
     ~AXTableHeaderContainer() noexcept override;
 
     void AddChildren() noexcept override;
+
     /// @brief The headers' bounds, worked out when the children are added.
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override
     {
@@ -58,6 +59,7 @@ namespace krys::boo
     {
       return AXRole::TableHeaderContainer;
     }
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override
     {
       return true;

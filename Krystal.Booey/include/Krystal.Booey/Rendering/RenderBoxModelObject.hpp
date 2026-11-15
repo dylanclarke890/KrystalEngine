@@ -58,7 +58,7 @@ namespace krys::boo
   enum class LineDirection : bool
   {
     Horizontal,
-    Vertical
+    Vertical,
   };
 
   enum class ContentChangeType : uint8
@@ -71,7 +71,7 @@ namespace krys::boo
     CanvasPixels,
     Video,
     FullScreen,
-    Model
+    Model,
   };
 
   enum class BleedAvoidance : uint8
@@ -79,7 +79,7 @@ namespace krys::boo
     None,
     ShrinkBackground,
     UseTransparencyLayer,
-    BackgroundOverBorder
+    BackgroundOverBorder,
   };
 
   /// @brief A renderer that follows the CSS box model: a box or an inline box.
@@ -224,7 +224,7 @@ namespace krys::boo
     enum class ScaleByUsedZoom : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     /// @brief The size @p image is drawn at in a positioning area of @p positioningAreaSize, from its natural
@@ -290,6 +290,7 @@ namespace krys::boo
       }
       return style::EvaluateMinimum<LayoutUnit>(value, containerWidth, style::ZoomNeeded {});
     }
+
     KRYS_NODISCARD LayoutUnit ResolveLengthPercentageUsingContainerLogicalWidth(
       const auto &value, const style::ZoomFactor &zoomFactor) const noexcept
     {

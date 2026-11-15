@@ -74,6 +74,7 @@ namespace krys::boo
       {
         return _visited;
       }
+
       void Visit() noexcept
       {
         _visited = true;

@@ -39,7 +39,7 @@ namespace krys::boo::svg
     using Base::_value;
     using Base::Base;
 
-    static constexpr TDecoration OutOfRangeEnumValue = 0;
+    constexpr static TDecoration OutOfRangeEnumValue = 0;
 
   public:
     KRYS_NODISCARD static auto Create(const TEnum &value) noexcept

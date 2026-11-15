@@ -55,22 +55,26 @@ namespace krys::boo
     {
       return _lightingColor;
     }
+
     bool SetLightingColor(const Color &lightingColor) noexcept;
 
     KRYS_NODISCARD float SurfaceScale() const noexcept
     {
       return _surfaceScale;
     }
+
     bool SetSurfaceScale(float surfaceScale) noexcept;
 
     KRYS_NODISCARD float DiffuseConstant() const noexcept
     {
       return _diffuseConstant;
     }
+
     KRYS_NODISCARD float SpecularConstant() const noexcept
     {
       return _specularConstant;
     }
+
     KRYS_NODISCARD float SpecularExponent() const noexcept
     {
       return _specularExponent;
@@ -80,12 +84,14 @@ namespace krys::boo
     {
       return _kernelUnitLengthX;
     }
+
     bool SetKernelUnitLengthX(float kernelUnitLengthX) noexcept;
 
     KRYS_NODISCARD float KernelUnitLengthY() const noexcept
     {
       return _kernelUnitLengthY;
     }
+
     bool SetKernelUnitLengthY(float kernelUnitLengthY) noexcept;
 
     KRYS_NODISCARD LightSource &GetLightSource() const noexcept

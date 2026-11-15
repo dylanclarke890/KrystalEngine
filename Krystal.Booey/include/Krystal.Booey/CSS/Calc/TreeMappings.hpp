@@ -208,6 +208,7 @@ namespace krys::boo::css::calc
 
   template <typename>
   struct ToCalcMapping;
+
   template <>
 
   struct ToCalcMapping<style::calc::Sum>

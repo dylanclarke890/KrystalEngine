@@ -44,6 +44,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const Polygon &) const noexcept = default;
   };
+
   using PolygonFunction = css::FunctionNotation<css::ValueId::Polygon, Polygon>;
 
   template <size_t I>
@@ -66,6 +67,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD boo::Path operator()(const Polygon &, const FloatRect &) noexcept;
   };
+
   template <>
   struct WindRuleComputation<Polygon>
   {

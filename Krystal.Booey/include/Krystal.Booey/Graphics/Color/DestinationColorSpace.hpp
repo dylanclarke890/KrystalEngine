@@ -43,7 +43,7 @@ namespace krys::boo
     {
       SRGB,
       LinearSRGB,
-      DisplayP3
+      DisplayP3,
     };
 
   private:

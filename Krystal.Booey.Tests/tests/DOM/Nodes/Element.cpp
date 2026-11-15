@@ -731,6 +731,7 @@ namespace krys::boo::dom::tests
     CHECK_FALSE(button->HasAttribute(u8"commandfor"));
     CHECK_FALSE(button->ElementForAttributeInternal(u8"commandfor"));
   }
+
   TEST_CASE("Element: resolving the reference target goes into shadow roots that name one",
             "[DOM][Element][html:resolve-the-reference-target]")
   {

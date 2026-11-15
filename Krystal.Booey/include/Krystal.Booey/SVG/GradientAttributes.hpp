@@ -47,14 +47,17 @@ namespace krys::boo::svg
     {
       return _spreadMethod;
     }
+
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType GradientUnits() const noexcept
     {
       return _gradientUnits;
     }
+
     KRYS_NODISCARD const AffineTransform &GradientTransform() const noexcept
     {
       return _gradientTransform;
     }
+
     KRYS_NODISCARD const GradientColorStops &Stops() const noexcept
     {
       return _stops;
@@ -87,14 +90,17 @@ namespace krys::boo::svg
     {
       return _spreadMethodSet;
     }
+
     KRYS_NODISCARD bool HasGradientUnits() const noexcept
     {
       return _gradientUnitsSet;
     }
+
     KRYS_NODISCARD bool HasGradientTransform() const noexcept
     {
       return _gradientTransformSet;
     }
+
     KRYS_NODISCARD bool HasStops() const noexcept
     {
       return !_stops.IsEmpty();

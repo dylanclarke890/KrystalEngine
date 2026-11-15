@@ -58,10 +58,12 @@ namespace krys::boo
     {
       return !HasWBRLineBreakFlag();
     }
+
     KRYS_NODISCARD bool IsWBR() const noexcept
     {
       return HasWBRLineBreakFlag();
     }
+
     KRYS_NODISCARD bool IsLineBreakOpportunity() const noexcept
     {
       return IsWBR();
@@ -73,6 +75,7 @@ namespace krys::boo
     {
       return 0;
     }
+
     KRYS_NODISCARD int32 CaretMaxOffset() const noexcept final
     {
       return 1;
@@ -98,50 +101,62 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD LayoutUnit MarginTop() const noexcept final
     {
       return 0_lu;
     }
+
     KRYS_NODISCARD LayoutUnit MarginBottom() const noexcept final
     {
       return 0_lu;
     }
+
     KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept final
     {
       return 0_lu;
     }
+
     KRYS_NODISCARD LayoutUnit MarginRight() const noexcept final
     {
       return 0_lu;
     }
+
     KRYS_NODISCARD LayoutUnit MarginBefore(WritingMode) const noexcept final
     {
       return 0_lu;
     }
+
     KRYS_NODISCARD LayoutUnit MarginAfter(WritingMode) const noexcept final
     {
       return 0_lu;
     }
+
     KRYS_NODISCARD LayoutUnit MarginStart(WritingMode) const noexcept final
     {
       return 0_lu;
     }
+
     KRYS_NODISCARD LayoutUnit MarginEnd(WritingMode) const noexcept final
     {
       return 0_lu;
     }
+
     KRYS_NODISCARD LayoutUnit OffsetWidth() const noexcept final
     {
       return LayoutUnit(LinesBoundingBox().Width());
     }
+
     KRYS_NODISCARD LayoutUnit OffsetHeight() const noexcept final
     {
       return LayoutUnit(LinesBoundingBox().Height());
     }
+
     KRYS_NODISCARD LayoutRect BorderBoundingBox() const noexcept final
     {
       return LayoutRect(LayoutPoint(), LinesBoundingBox().Size());
     }
+
     /// @brief Line breaks aren't sticky.
     KRYS_NODISCARD LayoutRect FrameRectForStickyPositioning() const noexcept final
     {

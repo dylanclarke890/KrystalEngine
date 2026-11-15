@@ -36,12 +36,15 @@ namespace krys::boo::style
     OffsetPosition(css::keywords::Auto keyword) noexcept : _value {keyword}
     {
     }
+
     OffsetPosition(css::keywords::Normal keyword) noexcept : _value {keyword}
     {
     }
+
     OffsetPosition(Position &&position) noexcept : _value {krys::move(position)}
     {
     }
+
     OffsetPosition(const Position &position) noexcept : _value {position}
     {
     }
@@ -50,14 +53,17 @@ namespace krys::boo::style
     {
       return HoldsAlternative<css::keywords::Auto>();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsNormal() const noexcept
     {
       return HoldsAlternative<css::keywords::Normal>();
     }
+
     KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsPosition() const noexcept
     {
       return HoldsAlternative<Position>();
     }
+
     KRYS_NODISCARD Maybe<Position> TryPosition() const noexcept
     {
       return IsPosition() ? Maybe(std::get<Position>(_value)) : std::nullopt;

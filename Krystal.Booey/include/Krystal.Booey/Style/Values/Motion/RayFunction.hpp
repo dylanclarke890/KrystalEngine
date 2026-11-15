@@ -48,6 +48,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const Ray &) const noexcept = default;
   };
+
   using RayFunction = css::FunctionNotation<css::ValueId::Ray, Ray>;
 
   template <size_t I>

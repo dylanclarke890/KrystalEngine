@@ -54,6 +54,7 @@ namespace krys::boo
     {
       return _textChunks;
     }
+
     /// @brief In characters (code points).
     KRYS_NODISCARD uint32 TotalCharacters() const noexcept;
     KRYS_NODISCARD float TotalLength() const noexcept;

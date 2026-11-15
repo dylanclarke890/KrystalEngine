@@ -57,10 +57,12 @@ namespace krys::boo
     {
       return _attributes.GradientUnits();
     }
+
     KRYS_NODISCARD AffineTransform GradientTransform() const noexcept final
     {
       return _attributes.GradientTransform();
     }
+
     bool CollectGradientAttributes() noexcept final;
     KRYS_NODISCARD Ref<Gradient> BuildGradient() const noexcept final;
 

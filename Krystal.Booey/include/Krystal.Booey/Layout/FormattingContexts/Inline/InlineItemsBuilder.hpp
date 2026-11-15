@@ -90,6 +90,7 @@ namespace krys::boo::layout
     {
       return _root;
     }
+
     KRYS_NODISCARD InlineContentCache &GetInlineContentCache() noexcept
     {
       return _inlineContentCache;

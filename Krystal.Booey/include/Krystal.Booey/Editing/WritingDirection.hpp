@@ -34,6 +34,6 @@ namespace krys::boo
   {
     Natural,
     LeftToRight,
-    RightToLeft
+    RightToLeft,
   };
 }

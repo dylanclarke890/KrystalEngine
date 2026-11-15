@@ -73,7 +73,7 @@ namespace krys::boo
       LayoutAndBoundariesInvalidation,
       BoundariesInvalidation,
       RepaintInvalidation,
-      ParentOnlyInvalidation
+      ParentOnlyInvalidation,
     };
 
     // Used from the invalidateClient/invalidateClients methods from classes, inheriting from us.

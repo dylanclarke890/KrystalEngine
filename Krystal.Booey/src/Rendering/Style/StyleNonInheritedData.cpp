@@ -34,7 +34,6 @@
 
 namespace krys::boo
 {
-
   StyleNonInheritedData::StyleNonInheritedData() noexcept
       : BoxData(StyleBoxData::Create()), BackgroundData(StyleBackgroundData::Create()),
         SurroundData(StyleSurroundData::Create()), MiscData(StyleMiscNonInheritedData::Create()),

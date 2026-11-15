@@ -140,9 +140,13 @@ namespace krys
         T oldValue = load(std::memory_order_relaxed);
         T newValue = oldValue;
         if (!func(newValue))
+        {
           return false;
+        }
         if (compareExchangeWeak(oldValue, newValue, order))
+        {
           return true;
+        }
       }
     }
 
@@ -155,6 +159,7 @@ namespace krys
     }
 
     Atomic() = default;
+
     constexpr Atomic(T initial) : value(std::forward<T>(initial))
     {
     }

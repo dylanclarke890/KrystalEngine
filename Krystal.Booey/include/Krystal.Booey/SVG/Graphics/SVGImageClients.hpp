@@ -53,6 +53,7 @@ namespace krys::boo::svg
     {
       return true;
     }
+
     KRYS_NODISCARD SVGImage *Image() const noexcept
     {
       return _image.get();

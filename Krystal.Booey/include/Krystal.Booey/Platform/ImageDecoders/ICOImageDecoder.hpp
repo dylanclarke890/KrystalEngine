@@ -93,6 +93,7 @@ namespace krys::boo
     {
       return u8"ico";
     }
+
     void SetData(const SharedBuffer &data, bool allDataReceived) noexcept final;
     KRYS_NODISCARD IntSize Size() const noexcept final;
     KRYS_NODISCARD IntSize FrameSizeAtIndex(size_t index, SubsamplingLevel) const noexcept final;
@@ -107,6 +108,7 @@ namespace krys::boo
 
   private:
     ICOImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
+
     void TryDecodeSize(bool allDataReceived) noexcept final
     {
       Decode(0, true, allDataReceived);

@@ -48,7 +48,7 @@ namespace krys::boo::css
     {
       Unsupported = false,
       Supported = true,
-      Invalid
+      Invalid,
     };
 
     enum class ParsingMode : uint8

@@ -96,10 +96,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD EncodedDataStatus GetEncodedDataStatus() const noexcept;
+
     KRYS_NODISCARD bool IsSizeAvailable() const noexcept
     {
       return GetEncodedDataStatus() >= EncodedDataStatus::SizeAvailable;
     }
+
     KRYS_NODISCARD IntSize Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
     KRYS_NODISCARD
     IntSize SourceSize(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
@@ -126,6 +128,7 @@ namespace krys::boo
     {
       return _cachedFlags & static_cast<uint16>(flag);
     }
+
     void SetCached(CachedFlag flag) const noexcept
     {
       _cachedFlags |= static_cast<uint16>(flag);

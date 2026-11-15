@@ -53,6 +53,7 @@ namespace krys::boo
 
   public:
     FileList() noexcept = default;
+
     explicit FileList(List<Ref<File>> &&files) noexcept : _files(krys::move(files))
     {
     }
@@ -61,6 +62,7 @@ namespace krys::boo
     {
       return CreateRef<FileList>();
     }
+
     KRYS_NODISCARD static Ref<FileList> Create(List<Ref<File>> &&files) noexcept
     {
       return CreateRef<FileList>(krys::move(files));
@@ -71,6 +73,7 @@ namespace krys::boo
     {
       return static_cast<uint32>(_files.size());
     }
+
     /// @see https://w3c.github.io/FileAPI/#dfn-item
     KRYS_NODISCARD File *Item(uint32 index) const noexcept;
 
@@ -78,12 +81,14 @@ namespace krys::boo
     {
       return _files.empty();
     }
+
     KRYS_NODISCARD List<utf8_string> Paths() const noexcept;
 
     KRYS_NODISCARD const List<Ref<File>> &Files() const noexcept
     {
       return _files;
     }
+
     KRYS_NODISCARD const File &GetFile(uint32 index) const noexcept
     {
       return *_files[index];
@@ -94,6 +99,7 @@ namespace krys::boo
     {
       _files.push_back(krys::move(file));
     }
+
     void Clear() noexcept
     {
       _files.clear();

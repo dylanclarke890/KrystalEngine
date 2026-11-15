@@ -49,6 +49,7 @@ namespace krys::boo::inline_iterator
     List<TextBoxIterator> Boxes;
     size_t Index {0};
   };
+
   using TextLogicalOrderCache = UniquePtr<TextLogicalOrderCacheData>;
 
   /// @brief The first of a text renderer's boxes in logical order, and the cache to walk the rest with.
@@ -64,6 +65,7 @@ namespace krys::boo::inline_iterator
     List<LeafBoxIterator> Boxes;
     size_t Index {0};
   };
+
   using LineLogicalOrderCache = UniquePtr<LineLogicalOrderCacheData>;
 
   KRYS_NODISCARD LeafBoxIterator FirstLeafOnLineInLogicalOrder(const LineBoxIterator &lineBox,

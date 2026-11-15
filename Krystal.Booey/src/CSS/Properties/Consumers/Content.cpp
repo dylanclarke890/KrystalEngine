@@ -167,7 +167,7 @@ namespace krys::boo::css::PropertyParserHelpers
     enum class ContentListType : bool
     {
       VisibleContent,
-      AltText
+      AltText,
     };
 
     auto ConsumeContentList = [&](ValueListBuilder &values, ContentListType type) -> bool

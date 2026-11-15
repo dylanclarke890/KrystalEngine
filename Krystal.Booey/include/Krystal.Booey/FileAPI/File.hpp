@@ -79,6 +79,7 @@ namespace krys::boo
     /// (or now, if it can't be read).
     /// @see https://w3c.github.io/FileAPI/#dfn-lastModified
     KRYS_NODISCARD int64 LastModified() const noexcept;
+
     KRYS_NODISCARD const Maybe<int64> &LastModifiedOverride() const noexcept
     {
       return _lastModifiedDateOverride;

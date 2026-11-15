@@ -37,6 +37,7 @@ namespace krys::boo
   struct QuadraticBezier
   {
     QuadraticBezier() noexcept = default;
+
     QuadraticBezier(const FloatPoint &s, const FloatPoint &c, const FloatPoint &e) noexcept
         : Start(s), Control(c), End(e)
     {
@@ -72,6 +73,7 @@ namespace krys::boo
   struct CubicBezier
   {
     CubicBezier() noexcept = default;
+
     CubicBezier(const FloatPoint &s, const FloatPoint &c1, const FloatPoint &c2, const FloatPoint &e) noexcept
         : Start(s), Control1(c1), Control2(c2), End(e)
     {

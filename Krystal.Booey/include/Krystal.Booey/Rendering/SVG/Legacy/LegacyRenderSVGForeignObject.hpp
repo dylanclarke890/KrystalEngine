@@ -57,25 +57,30 @@ namespace krys::boo
     {
       return true;
     }
+
     void Layout() noexcept override;
 
     KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
     {
       return FloatRect(FloatPoint(), _viewport.Size());
     }
+
     KRYS_NODISCARD bool IsObjectBoundingBoxValid() const noexcept
     {
       return !_viewport.IsEmpty();
     }
+
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept override
     {
       return FloatRect(FloatPoint(), _viewport.Size());
     }
+
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept override
     {
       return FloatRect(FloatPoint(), _viewport.Size());
     }
+
     KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept override
     {
       return FloatRect(FloatPoint(), _viewport.Size());
@@ -91,6 +96,7 @@ namespace krys::boo
 
   private:
     void GraphicsElement() const = delete;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGForeignObject";
@@ -101,6 +107,7 @@ namespace krys::boo
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
 
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override;
+
     KRYS_NODISCARD AffineTransform LocalTransform() const noexcept override
     {
       return _localTransform;

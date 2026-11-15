@@ -55,7 +55,7 @@ namespace krys
   };
 
   /// @brief Hashes a string literal at compile time.
-  KRYS_NODISCARD constexpr uint32 operator""_sid(char const *s, size_t count) noexcept
+  KRYS_NODISCARD constexpr uint32 operator""_sid(const char *s, size_t count) noexcept
   {
     return StringId(s, count);
   }

@@ -47,7 +47,7 @@ namespace krys::boo::layout
       CanUseSimpleFontCodepath,
       ShouldUseSimpleGlyphOverflowCodePath,
       HasPositionDependentContentWidth,
-      HasStrongDirectionalityContent
+      HasStrongDirectionalityContent,
     };
 
   private:
@@ -65,6 +65,7 @@ namespace krys::boo::layout
     {
       return _content;
     }
+
     KRYS_NODISCARD bool IsCombined() const noexcept
     {
       return _isCombined;
@@ -75,18 +76,22 @@ namespace krys::boo::layout
     {
       return _contentCharacteristicSet.Contains(ContentCharacteristic::CanUseSimplifiedContentMeasuring);
     }
+
     KRYS_NODISCARD bool CanUseSimpleFontCodePath() const noexcept
     {
       return _contentCharacteristicSet.Contains(ContentCharacteristic::CanUseSimpleFontCodepath);
     }
+
     KRYS_NODISCARD bool ShouldUseSimpleGlyphOverflowCodePath() const noexcept
     {
       return _contentCharacteristicSet.Contains(ContentCharacteristic::ShouldUseSimpleGlyphOverflowCodePath);
     }
+
     KRYS_NODISCARD bool HasPositionDependentContentWidth() const noexcept
     {
       return _contentCharacteristicSet.Contains(ContentCharacteristic::HasPositionDependentContentWidth);
     }
+
     KRYS_NODISCARD bool HasStrongDirectionalityContent() const noexcept
     {
       return _contentCharacteristicSet.Contains(ContentCharacteristic::HasStrongDirectionalityContent);
@@ -97,6 +102,7 @@ namespace krys::boo::layout
       _content = krys::move(newContent);
       _contentCharacteristicSet = contentCharacteristicSet;
     }
+
     void SetContentCharacteristic(EnumSet<ContentCharacteristic> contentCharacteristicSet) noexcept
     {
       _contentCharacteristicSet = contentCharacteristicSet;

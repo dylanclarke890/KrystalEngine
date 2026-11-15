@@ -43,6 +43,7 @@ namespace krys::boo
     {
       return StyleSheetType;
     }
+
     KRYS_NODISCARD CachedResourceClientType ResourceClientType() const noexcept override
     {
       return ExpectedType();

@@ -59,7 +59,7 @@ namespace krys::boo::layout
     enum class IsEndOfLine : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     struct Result
@@ -73,9 +73,10 @@ namespace krys::boo::layout
                         // hyphen.
         // The current content overflows and can't get broken up into smaller bits.
         RevertToLastWrapOpportunity, // The content needs to be reverted back to the last wrap opportunity.
-        RevertToLastNonOverflowingWrapOpportunity // The content needs to be reverted back to a wrap
-                                                  // opportunity that still fits the line.
+        RevertToLastNonOverflowingWrapOpportunity, // The content needs to be reverted back to a wrap
+                                                   // opportunity that still fits the line.
       };
+
       struct PartialTrailingContent
       {
         size_t TrailingRunIndex {0};
@@ -84,6 +85,7 @@ namespace krys::boo::layout
         // InlineTextItems).
         Maybe<InlineLayoutUnit> HyphenWidth {};
       };
+
       Action ResultAction {Action::Keep};
       IsEndOfLine EndOfLine {IsEndOfLine::No};
       Maybe<PartialTrailingContent> PartialTrailing {};
@@ -115,10 +117,12 @@ namespace krys::boo::layout
         {
           return Offset + ContentWidth();
         }
+
         void AdjustContentWidth(InlineLayoutUnit contentWidth) noexcept
         {
           _contentWidth = contentWidth;
         }
+
         KRYS_NODISCARD InlineLayoutUnit ContentWidth() const noexcept
         {
           return _contentWidth;
@@ -131,13 +135,14 @@ namespace krys::boo::layout
         enum class ShapingBoundary : bool
         {
           Start,
-          End
+          End,
         };
         Maybe<ShapingBoundary> Shaping {};
 
       private:
         InlineLayoutUnit _contentWidth {0};
       };
+
       using RunList = SmallList<Run, 3>;
 
     private:
@@ -159,50 +164,62 @@ namespace krys::boo::layout
       {
         return _logicalWidth;
       }
+
       void AdjustLogicalWidth(InlineLayoutUnit logicalWidth) noexcept
       {
         _logicalWidth = logicalWidth;
       }
+
       KRYS_NODISCARD Maybe<InlineLayoutUnit> MinimumRequiredWidth() const noexcept
       {
         return _minimumRequiredWidth;
       }
+
       KRYS_NODISCARD InlineLayoutUnit LeadingTrimmableWidth() const noexcept
       {
         return _leadingTrimmableWidth;
       }
+
       KRYS_NODISCARD InlineLayoutUnit TrailingTrimmableWidth() const noexcept
       {
         return _trailingTrimmableWidth;
       }
+
       KRYS_NODISCARD InlineLayoutUnit HangingContentWidth() const noexcept
       {
         return _hangingContentWidth.value_or(0.f);
       }
+
       KRYS_NODISCARD bool HasTrimmableSpace() const noexcept
       {
         return TrailingTrimmableWidth() || LeadingTrimmableWidth();
       }
+
       KRYS_NODISCARD bool HasHangingSpace() const noexcept
       {
         return HangingContentWidth() != 0.f;
       }
+
       KRYS_NODISCARD bool HasTrailingSoftHyphen() const noexcept
       {
         return _hasTrailingSoftHyphen;
       }
+
       KRYS_NODISCARD bool HasTextContent() const noexcept
       {
         return _hasTextContent;
       }
+
       KRYS_NODISCARD bool IsTextOnlyContent() const noexcept
       {
         return _isTextOnlyContent;
       }
+
       KRYS_NODISCARD bool IsFullyTrimmable() const noexcept
       {
         return _isFullyTrimmable;
       }
+
       KRYS_NODISCARD bool IsHangingContent() const noexcept
       {
         return _hangingContentWidth && *_hangingContentWidth == LogicalWidth();
@@ -212,29 +229,36 @@ namespace krys::boo::layout
                   InlineLayoutUnit textSpacingAdjustment = 0.f) noexcept;
       void AppendTextContent(const InlineTextItem &inlineTextItem, const RenderStyle &style,
                              InlineLayoutUnit logicalWidth) noexcept;
+
       void SetHangingContentWidth(InlineLayoutUnit logicalWidth) noexcept
       {
         _hangingContentWidth = logicalWidth;
       }
+
       void SetTrailingSoftHyphenWidth(InlineLayoutUnit hyphenWidth) noexcept;
+
       void SetMinimumRequiredWidth(InlineLayoutUnit minimumRequiredWidth) noexcept
       {
         _minimumRequiredWidth = minimumRequiredWidth;
       }
+
       void SetHasShapedContent() noexcept
       {
         _hasShapedContent = true;
       }
+
       KRYS_NODISCARD bool HasShapedContent() const noexcept
       {
         return _hasShapedContent;
       }
+
       void Reset() noexcept;
 
       KRYS_NODISCARD const RunList &Runs() const noexcept
       {
         return _runs;
       }
+
       KRYS_NODISCARD RunList &Runs() noexcept
       {
         return _runs;
@@ -263,9 +287,11 @@ namespace krys::boo::layout
     struct OverflowingTextContent
     {
       size_t RunIndex {0}; // Overflowing run index. There's always an overflowing run.
+
       struct BreakingPosition
       {
         size_t RunIndex {0};
+
         struct TrailingContent
         {
           // Trailing content is either the run's left side (when we break the run somewhere in the middle) or
@@ -275,8 +301,10 @@ namespace krys::boo::layout
           Maybe<InlineContentBreaker::PartialRun> Partial {};
           Maybe<InlineLayoutUnit> HyphenWidth {};
         };
+
         Maybe<TrailingContent> Trailing {};
       };
+
       Maybe<BreakingPosition> Breaking {}; // Where we actually break this overflowing content.
     };
 
@@ -284,7 +312,7 @@ namespace krys::boo::layout
     {
       AtArbitraryPositionWithinWords,
       AtArbitraryPosition,
-      AtHyphenationOpportunities
+      AtHyphenationOpportunities,
     };
 
     bool _isMinimumInIntrinsicWidthMode {false};
@@ -293,10 +321,12 @@ namespace krys::boo::layout
   public:
     KRYS_NODISCARD Result ProcessInlineContent(const ContinuousContent &candidateContent,
                                                const LineStatus &lineStatus) noexcept;
+
     void SetHyphenationDisabled(bool hyphenationIsDisabled) noexcept
     {
       _hyphenationIsDisabled = hyphenationIsDisabled;
     }
+
     void SetIsMinimumInIntrinsicWidthMode(bool isMinimumInIntrinsicWidthMode) noexcept
     {
       _isMinimumInIntrinsicWidthMode = isMinimumInIntrinsicWidthMode;
@@ -332,6 +362,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD EnumSet<WordBreakRule>
       WordBreakBehavior(const RenderStyle &style, bool hasWrapOpportunityAtPreviousPosition) const noexcept;
+
     KRYS_NODISCARD bool IsMinimumInIntrinsicWidthMode() const noexcept
     {
       return _isMinimumInIntrinsicWidthMode;

@@ -60,6 +60,7 @@ namespace krys::boo
     {
       return u8"jpg";
     }
+
     ScalableImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept override;
     // CAUTION: setFailed() deletes |m_reader|.  Be careful to avoid
     // accessing deleted memory, especially when calling this from inside
@@ -74,6 +75,7 @@ namespace krys::boo
 
   private:
     JPEGImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
+
     void TryDecodeSize(bool allDataReceived) noexcept override
     {
       Decode(true, allDataReceived);

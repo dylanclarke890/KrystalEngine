@@ -82,6 +82,7 @@ namespace krys::boo::style
     constexpr TextEdge(Keyword keyword) noexcept : _value {keyword}
     {
     }
+
     constexpr TextEdge(TextEdgeOver over, TextEdgeUnder under) noexcept : _value {TextEdgePair {over, under}}
     {
     }
@@ -90,10 +91,12 @@ namespace krys::boo::style
     {
       return HoldsAlternative<Keyword>();
     }
+
     KRYS_NODISCARD constexpr bool IsTextEdgePair() const noexcept
     {
       return HoldsAlternative<TextEdgePair>();
     }
+
     KRYS_NODISCARD constexpr Maybe<TextEdgePair> TryTextEdgePair() const noexcept
     {
       return IsTextEdgePair() ? Maybe(std::get<TextEdgePair>(_value)) : null;

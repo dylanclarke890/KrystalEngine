@@ -240,6 +240,7 @@ namespace krys::boo::css
 
     return true;
   }
+
 #pragma endregion
 
 #pragma region Parser entry points

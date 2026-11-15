@@ -48,7 +48,7 @@ namespace krys::boo::layout
     {
       Block,
       Table,
-      Flex
+      Flex,
     };
 
   private:
@@ -68,6 +68,7 @@ namespace krys::boo::layout
     {
       _intrinsicWidthConstraints = intrinsicWidthConstraints;
     }
+
     KRYS_NODISCARD Maybe<layout::IntrinsicWidthConstraints> GetIntrinsicWidthConstraints() const noexcept
     {
       return _intrinsicWidthConstraints;
@@ -77,10 +78,12 @@ namespace krys::boo::layout
     {
       return _type == Type::Block;
     }
+
     KRYS_NODISCARD bool IsTableFormattingState() const noexcept
     {
       return _type == Type::Table;
     }
+
     KRYS_NODISCARD bool IsFlexFormattingState() const noexcept
     {
       return _type == Type::Flex;

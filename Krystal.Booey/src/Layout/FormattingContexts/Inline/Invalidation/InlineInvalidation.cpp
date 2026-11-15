@@ -51,7 +51,7 @@ namespace krys::boo::layout
       enum class Type : uint8
       {
         Insertion,
-        Removal
+        Removal,
       };
       Type ContentType {Type::Insertion};
     };

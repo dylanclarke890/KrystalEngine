@@ -47,6 +47,7 @@ namespace krys::boo::layout
     {
       return _startOrPosition;
     }
+
     KRYS_NODISCARD const InlineTextBox &GetInlineTextBox() const noexcept
     {
       return Downcast<InlineTextBox>(LayoutBox());

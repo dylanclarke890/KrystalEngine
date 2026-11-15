@@ -61,14 +61,17 @@ namespace krys::boo
       {
         return HoldsAlternative<Spaces>();
       }
+
       KRYS_NODISCARD constexpr bool IsLength() const noexcept
       {
         return HoldsAlternative<Length>();
       }
+
       KRYS_NODISCARD constexpr Maybe<Spaces> TrySpaces() const noexcept
       {
         return IsSpaces() ? Maybe(std::get<Spaces>(_value)) : null;
       }
+
       KRYS_NODISCARD constexpr Maybe<Length> TryLength() const noexcept
       {
         return IsLength() ? Maybe(std::get<Length>(_value)) : null;
@@ -92,6 +95,7 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD constexpr bool operator==(const TabSize &) const noexcept = default;
+
       KRYS_NODISCARD constexpr bool HasSameType(const TabSize &other) const noexcept
       {
         return _value.index() == other._value.index();
@@ -127,7 +131,6 @@ namespace krys::boo
     {
       KRYS_NODISCARD boo::TabSize operator()(const TabSize &) noexcept;
     };
-
   }
 }
 

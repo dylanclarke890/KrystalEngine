@@ -52,7 +52,7 @@ namespace krys::ui::tests
       /// @brief As a host does: `Paint`, which repaints what changed.
       Damage,
       /// @brief The whole page, every frame: `Record` and `Replay`.
-      Whole
+      Whole,
     };
 
     /// @brief Runs @p frames frames (after ten to warm up) of the page at @p path at 60 Hz, as a host would:

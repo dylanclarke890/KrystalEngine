@@ -62,10 +62,12 @@ namespace krys::boo::style
     {
       return _x;
     }
+
     KRYS_NODISCARD NumberOrPercentageResolvedToNumber<> Y() const noexcept
     {
       return _y;
     }
+
     KRYS_NODISCARD NumberOrPercentageResolvedToNumber<> Z() const noexcept
     {
       return _z;
@@ -75,10 +77,12 @@ namespace krys::boo::style
     {
       return _x == 1 && _y == 1 && _z == 1;
     }
+
     KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept override
     {
       return _z == 1;
     }
+
     KRYS_NODISCARD bool IsAffectedByTransformOrigin() const noexcept override
     {
       return !IsIdentity();

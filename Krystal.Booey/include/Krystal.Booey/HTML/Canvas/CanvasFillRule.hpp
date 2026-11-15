@@ -8,6 +8,6 @@ namespace krys::boo::html
   enum class CanvasFillRule : uint8
   {
     Nonzero,
-    Evenodd
+    Evenodd,
   };
 }

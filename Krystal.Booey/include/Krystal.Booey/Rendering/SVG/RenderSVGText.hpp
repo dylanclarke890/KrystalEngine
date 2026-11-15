@@ -76,10 +76,12 @@ namespace krys::boo
     {
       _needsPositioningValuesUpdate = true;
     }
+
     void SetNeedsTextMetricsUpdate() noexcept
     {
       _needsTextMetricsUpdate = true;
     }
+
     void SetNeedsTransformUpdate() noexcept override
     {
       _needsTransformUpdate = true;
@@ -92,6 +94,7 @@ namespace krys::boo
     {
       return _needsReordering;
     }
+
     KRYS_NODISCARD List<SVGTextLayoutAttributes *> &LayoutAttributes() noexcept
     {
       return _layoutAttributes;
@@ -107,6 +110,7 @@ namespace krys::boo
     {
       return _objectBoundingBox;
     }
+
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
     KRYS_NODISCARD bool IsObjectBoundingBoxValid() const noexcept;
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
@@ -140,6 +144,7 @@ namespace krys::boo
     {
       return false;
     }
+
     void Layout() noexcept override;
 
     void ComputePerCharacterLayoutInformation() noexcept;
@@ -155,10 +160,12 @@ namespace krys::boo
 
     bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
                           HitTestAction) noexcept override;
+
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override
     {
       return _localTransform;
     }
+
     KRYS_NODISCARD AffineTransform LocalTransform() const noexcept override
     {
       return _localTransform;

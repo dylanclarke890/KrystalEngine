@@ -57,7 +57,7 @@ namespace krys::boo
   enum class RequiresClipToRect : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   namespace display_list
@@ -82,7 +82,7 @@ namespace krys::boo
     enum class IsDeferred : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     using RequiresClipToRect = boo::RequiresClipToRect;
@@ -90,7 +90,7 @@ namespace krys::boo
     enum IncludeDeviceScale
     {
       DefinitelyIncludeDeviceScale,
-      PossiblyIncludeDeviceScale
+      PossiblyIncludeDeviceScale,
     };
 
   protected:
@@ -113,18 +113,22 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool PerformingPaintInvalidation() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool InvalidatingControlTints() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool InvalidatingImagesWithAsyncDecodes() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool DetectingContentfulPaint() const noexcept
     {
       return false;
@@ -136,37 +140,45 @@ namespace krys::boo
     {
       return _state.FillBrush();
     }
+
     KRYS_NODISCARD const Color &FillColor() const noexcept
     {
       return FillBrush().GetColor();
     }
+
     KRYS_NODISCARD Gradient *FillGradient() const noexcept
     {
       return FillBrush().GetGradient();
     }
+
     KRYS_NODISCARD Pattern *FillPattern() const noexcept
     {
       return FillBrush().GetPattern();
     }
+
     KRYS_NODISCARD const AffineTransform &FillGradientSpaceTransform() const noexcept
     {
       return FillBrush().GradientSpaceTransform();
     }
+
     void SetFillBrush(const SourceBrush &brush) noexcept
     {
       _state.SetFillBrush(brush);
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::FillBrush));
     }
+
     void SetFillColor(const Color &color) noexcept
     {
       _state.SetFillColor(color);
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::FillBrush));
     }
+
     void SetFillGradient(Ref<Gradient> &&gradient, const AffineTransform &spaceTransform = {}) noexcept
     {
       _state.SetFillGradient(krys::move(gradient), spaceTransform);
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::FillBrush));
     }
+
     void SetFillPattern(Ref<Pattern> &&pattern) noexcept
     {
       _state.SetFillPattern(krys::move(pattern));
@@ -177,6 +189,7 @@ namespace krys::boo
     {
       return _state.FillRule();
     }
+
     void SetFillRule(WindRule fillRule) noexcept
     {
       _state.SetFillRule(fillRule);
@@ -187,37 +200,45 @@ namespace krys::boo
     {
       return _state.StrokeBrush();
     }
+
     KRYS_NODISCARD const Color &StrokeColor() const noexcept
     {
       return StrokeBrush().GetColor();
     }
+
     KRYS_NODISCARD Gradient *StrokeGradient() const noexcept
     {
       return StrokeBrush().GetGradient();
     }
+
     KRYS_NODISCARD Pattern *StrokePattern() const noexcept
     {
       return StrokeBrush().GetPattern();
     }
+
     KRYS_NODISCARD const AffineTransform &StrokeGradientSpaceTransform() const noexcept
     {
       return StrokeBrush().GradientSpaceTransform();
     }
+
     void SetStrokeBrush(const SourceBrush &brush) noexcept
     {
       _state.SetStrokeBrush(brush);
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::StrokeBrush));
     }
+
     void SetStrokeColor(const Color &color) noexcept
     {
       _state.SetStrokeColor(color);
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::StrokeBrush));
     }
+
     void SetStrokeGradient(Ref<Gradient> &&gradient, const AffineTransform &spaceTransform = {}) noexcept
     {
       _state.SetStrokeGradient(krys::move(gradient), spaceTransform);
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::StrokeBrush));
     }
+
     void SetStrokePattern(Ref<Pattern> &&pattern) noexcept
     {
       _state.SetStrokePattern(krys::move(pattern));
@@ -228,6 +249,7 @@ namespace krys::boo
     {
       return _state.StrokeThickness();
     }
+
     void SetStrokeThickness(float thickness) noexcept
     {
       _state.SetStrokeThickness(thickness);
@@ -239,6 +261,7 @@ namespace krys::boo
     {
       return _state.GetStrokeStyle();
     }
+
     void SetStrokeStyle(boo::StrokeStyle style) noexcept
     {
       _state.SetStrokeStyle(style);
@@ -249,20 +272,24 @@ namespace krys::boo
     {
       return _state.DropShadow();
     }
+
     void SetDropShadow(const GraphicsDropShadow &dropShadow) noexcept
     {
       _state.SetDropShadow(dropShadow);
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::DropShadow));
     }
+
     void ClearDropShadow() noexcept
     {
       _state.SetDropShadow(std::nullopt);
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::DropShadow));
     }
+
     KRYS_NODISCARD bool HasBlurredDropShadow() const noexcept
     {
       return DropShadow() && DropShadow()->IsBlurred();
     }
+
     KRYS_NODISCARD bool HasDropShadow() const noexcept
     {
       return DropShadow() && DropShadow()->HasOutsets();
@@ -272,6 +299,7 @@ namespace krys::boo
     {
       return _state.Style();
     }
+
     void SetStyle(const Maybe<GraphicsStyle> &style) noexcept
     {
       _state.SetStyle(style);
@@ -282,20 +310,24 @@ namespace krys::boo
     {
       return _state.GetCompositeMode();
     }
+
     KRYS_NODISCARD CompositeOperator CompositeOperation() const noexcept
     {
       return GetCompositeMode().Operation;
     }
+
     KRYS_NODISCARD boo::BlendMode GetBlendMode() const noexcept
     {
       return GetCompositeMode().BlendMode;
     }
+
     void SetCompositeMode(boo::CompositeMode compositeMode) noexcept
     {
       _state.SetCompositeMode(compositeMode);
       DidUpdateSingleState(_state,
                            GraphicsContextState::ToIndex(GraphicsContextState::Change::CompositeMode));
     }
+
     void SetCompositeOperation(CompositeOperator operation,
                                boo::BlendMode blendMode = BlendMode::Normal) noexcept
     {
@@ -306,6 +338,7 @@ namespace krys::boo
     {
       return _state.Alpha();
     }
+
     void SetAlpha(float alpha) noexcept
     {
       _state.SetAlpha(alpha);
@@ -316,6 +349,7 @@ namespace krys::boo
     {
       return _state.GetTextDrawingMode();
     }
+
     void SetTextDrawingMode(TextDrawingModeFlags textDrawingMode) noexcept
     {
       _state.SetTextDrawingMode(textDrawingMode);
@@ -327,6 +361,7 @@ namespace krys::boo
     {
       return _state.ImageInterpolationQuality();
     }
+
     void SetImageInterpolationQuality(InterpolationQuality imageInterpolationQuality) noexcept
     {
       _state.SetImageInterpolationQuality(imageInterpolationQuality);
@@ -338,6 +373,7 @@ namespace krys::boo
     {
       return _state.ShouldAntialias();
     }
+
     void SetShouldAntialias(bool shouldAntialias) noexcept
     {
       _state.SetShouldAntialias(shouldAntialias);
@@ -349,6 +385,7 @@ namespace krys::boo
     {
       return _state.ShouldSmoothFonts();
     }
+
     void SetShouldSmoothFonts(bool shouldSmoothFonts) noexcept
     {
       _state.SetShouldSmoothFonts(shouldSmoothFonts);
@@ -362,6 +399,7 @@ namespace krys::boo
     {
       return _state.ShouldSubpixelQuantizeFonts();
     }
+
     void SetShouldSubpixelQuantizeFonts(bool shouldSubpixelQuantizeFonts) noexcept
     {
       _state.SetShouldSubpixelQuantizeFonts(shouldSubpixelQuantizeFonts);
@@ -373,18 +411,21 @@ namespace krys::boo
     {
       return _state.ShadowsIgnoreTransforms();
     }
+
     void SetShadowsIgnoreTransforms(bool shadowsIgnoreTransforms) noexcept
     {
       _state.SetShadowsIgnoreTransforms(shadowsIgnoreTransforms);
       DidUpdateSingleState(
         _state, GraphicsContextState::ToIndex(GraphicsContextState::Change::ShadowsIgnoreTransforms));
     }
+
     KRYS_NODISCARD FloatSize PlatformShadowOffset(const FloatSize &) const noexcept;
 
     KRYS_NODISCARD bool DrawLuminanceMask() const noexcept
     {
       return _state.DrawLuminanceMask();
     }
+
     void SetDrawLuminanceMask(bool drawLuminanceMask) noexcept
     {
       _state.SetDrawLuminanceMask(drawLuminanceMask);
@@ -396,6 +437,7 @@ namespace krys::boo
     {
       return _state;
     }
+
     void MergeLastChanges(const GraphicsContextState &,
                           const Maybe<GraphicsContextState> &lastDrawingState = std::nullopt) noexcept;
     void MergeAllChanges(const GraphicsContextState &) noexcept;
@@ -403,6 +445,7 @@ namespace krys::boo
     // Called *after* any change to GraphicsContextState; generally used to propagate changes
     // to the platform context's state.
     virtual void DidUpdateState(GraphicsContextState &) noexcept = 0;
+
     virtual void DidUpdateSingleState(GraphicsContextState &state, GraphicsContextState::ChangeIndex) noexcept
     {
       DidUpdateState(state);
@@ -445,6 +488,7 @@ namespace krys::boo
     {
       FillEllipseAsPath(ellipse);
     }
+
     virtual void StrokeEllipse(const FloatRect &ellipse) noexcept
     {
       StrokeEllipseAsPath(ellipse);
@@ -582,6 +626,7 @@ namespace krys::boo
     virtual void BeginTransparencyLayer(float opacity) noexcept;
     virtual void BeginTransparencyLayer(CompositeOperator, boo::BlendMode = BlendMode::Normal) noexcept;
     virtual void EndTransparencyLayer() noexcept;
+
     KRYS_NODISCARD bool IsInTransparencyLayer() const noexcept
     {
       return _transparencyLayerCount > 0;
@@ -599,16 +644,20 @@ namespace krys::boo
     {
       Scale(FloatSize {s, s});
     }
+
     virtual void Scale(const FloatSize &) noexcept = 0;
     virtual void Rotate(float angleInRadians) noexcept = 0;
+
     void Translate(const FloatSize &size) noexcept
     {
       Translate(size.Width(), size.Height());
     }
+
     void Translate(const FloatPoint &p) noexcept
     {
       Translate(p.X(), p.Y());
     }
+
     virtual void Translate(float x, float y) noexcept = 0;
 
     virtual void ConcatCTM(const AffineTransform &) noexcept = 0;
@@ -623,6 +672,7 @@ namespace krys::boo
     {
       Scale(factor);
     }
+
     KRYS_NODISCARD FloatSize ScaleFactor() const noexcept;
     KRYS_NODISCARD FloatSize ScaleFactorForDrawing(const FloatRect &destRect,
                                                    const FloatRect &srcRect) const noexcept;
@@ -631,6 +681,7 @@ namespace krys::boo
     virtual void BeginPage(const FloatRect &) noexcept
     {
     }
+
     virtual void EndPage() noexcept
     {
     }
@@ -644,6 +695,7 @@ namespace krys::boo
     virtual void SetDestinationForRect(const utf8_string &, const FloatRect &) noexcept
     {
     }
+
     virtual void AddDestinationAtPoint(const utf8_string &, const FloatPoint &) noexcept
     {
     }
@@ -659,6 +711,7 @@ namespace krys::boo
     {
       _contentfulPaintDetected = true;
     }
+
     KRYS_NODISCARD bool ContentfulPaintDetected() const noexcept
     {
       return _contentfulPaintDetected;
@@ -704,6 +757,7 @@ namespace krys::boo
       SmallList<FloatRect, 4> Rects;
       Color StrokeColor;
     };
+
     KRYS_NODISCARD RectsAndStrokeColor ComputeRectsAndStrokeColorForLinesForText(
       const FloatPoint &origin, float thickness, Span<const FloatSegment>, bool isPrinting, bool doubleLines,
       boo::StrokeStyle) noexcept;

@@ -37,7 +37,7 @@ namespace krys::boo::svg
   enum class SuffixSkippingPolicy : uint8
   {
     DontSkip,
-    Skip
+    Skip,
   };
 
   KRYS_NODISCARD Maybe<float> ParseNumber(dom::DOMStringView &buffer,

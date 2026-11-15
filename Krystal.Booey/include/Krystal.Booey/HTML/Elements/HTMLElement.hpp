@@ -426,7 +426,7 @@ namespace krys::boo::html
     enum class AllowZeroValue : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     KRYS_NODISCARD bool
@@ -1049,23 +1049,24 @@ namespace krys::boo::html
     }
 
 #pragma endregion
+
   private:
     enum class AllowPercentage : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class UseCSSPXAsUnitType : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class IsMultiLength : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,

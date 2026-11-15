@@ -40,7 +40,7 @@ namespace krys::boo::svg
   {
     RegularPropertyValue,
     CurrentColorValue,
-    InheritValue
+    InheritValue,
   };
 
   /// @brief An animation element: a SMIL timed element that interpolates between values over its interval.
@@ -54,7 +54,7 @@ namespace krys::boo::svg
     {
       CSS,
       XML,
-      Auto
+      Auto,
     };
 
   protected:

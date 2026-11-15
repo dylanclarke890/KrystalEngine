@@ -54,6 +54,7 @@ namespace krys::boo::tests
       Maybe<Rect> SecondLegend;
       Maybe<Rect> Content;
     };
+
     auto testCase = GENERATE(values<Case>({
       {u8"no legend", u8"", u8"<div id=c></div>", Rect {0, 0, 320, 50}, null, null, Rect {10, 10, 300, 30}},
       {u8"basic", u8"", u8"<legend id=l></legend><div id=c></div>", Rect {0, 0, 320, 60},

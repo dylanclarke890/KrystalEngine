@@ -51,7 +51,7 @@ namespace krys::boo::svg
       SVG_LENGTHTYPE_MM = static_cast<uint16>(SVGLengthType::Millimeters),
       SVG_LENGTHTYPE_IN = static_cast<uint16>(SVGLengthType::Inches),
       SVG_LENGTHTYPE_PT = static_cast<uint16>(SVGLengthType::Points),
-      SVG_LENGTHTYPE_PC = static_cast<uint16>(SVGLengthType::Picas)
+      SVG_LENGTHTYPE_PC = static_cast<uint16>(SVGLengthType::Picas),
     };
 
     KRYS_NODISCARD static Ref<SVGLength> Create() noexcept

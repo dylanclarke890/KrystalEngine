@@ -83,6 +83,7 @@ namespace krys::boo
 
     /// @see https://w3c.github.io/FileAPI/#dfn-size
     KRYS_NODISCARD uint64 Size() const noexcept;
+
     KRYS_NODISCARD virtual bool IsFile() const noexcept
     {
       return false;
@@ -119,7 +120,7 @@ namespace krys::boo
   protected:
     enum ReferencingExistingBlobConstructor : bool
     {
-      ReferencingExistingBlob
+      ReferencingExistingBlob,
     };
 
     Blob(Ref<BlobData> &&data, utf8_stringview type, Maybe<uint64> size, size_t memoryCost) noexcept;

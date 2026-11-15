@@ -51,10 +51,12 @@ namespace krys::boo::style
     {
       return _type == Type::Auto;
     }
+
     KRYS_NODISCARD constexpr bool IsStable() const noexcept
     {
       return _type == Type::Stable;
     }
+
     KRYS_NODISCARD constexpr bool IsStableBothEdges() const noexcept
     {
       return _type == Type::StableBothEdges;
@@ -82,8 +84,9 @@ namespace krys::boo::style
     {
       Auto,
       Stable,
-      StableBothEdges
+      StableBothEdges,
     };
+
     Type _type;
   };
 

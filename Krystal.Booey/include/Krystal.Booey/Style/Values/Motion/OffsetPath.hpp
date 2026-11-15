@@ -39,27 +39,35 @@ namespace krys::boo::style
     OffsetPath(css::keywords::None) noexcept : _operation {nullptr}
     {
     }
+
     OffsetPath(RayPath &&ray) noexcept : _operation {krys::move(ray._operation)}
     {
     }
+
     OffsetPath(const RayPath &ray) noexcept : _operation {ray._operation}
     {
     }
+
     OffsetPath(ReferencePath &&reference) noexcept : _operation {krys::move(reference._operation)}
     {
     }
+
     OffsetPath(const ReferencePath &reference) noexcept : _operation {reference._operation}
     {
     }
+
     OffsetPath(BasicShapePath &&basicShape) noexcept : _operation {krys::move(basicShape._operation)}
     {
     }
+
     OffsetPath(const BasicShapePath &basicShape) noexcept : _operation {basicShape._operation}
     {
     }
+
     OffsetPath(BoxPath &&box) noexcept : _operation {krys::move(box._operation)}
     {
     }
+
     OffsetPath(const BoxPath &box) noexcept : _operation {box._operation}
     {
     }
@@ -67,6 +75,7 @@ namespace krys::boo::style
     explicit OffsetPath(RefPtr<PathOperation> &&operation) noexcept : _operation {krys::move(operation)}
     {
     }
+
     explicit OffsetPath(const RefPtr<PathOperation> &operation) noexcept : _operation {operation}
     {
     }
@@ -75,18 +84,22 @@ namespace krys::boo::style
     {
       return !_operation;
     }
+
     KRYS_NODISCARD bool IsRay() const noexcept
     {
       return _operation && Is<RayPathOperation>(*_operation);
     }
+
     KRYS_NODISCARD bool IsReference() const noexcept
     {
       return _operation && Is<ReferencePathOperation>(*_operation);
     }
+
     KRYS_NODISCARD bool IsBasicShape() const noexcept
     {
       return _operation && Is<ShapePathOperation>(*_operation);
     }
+
     KRYS_NODISCARD bool IsBox() const noexcept
     {
       return _operation && Is<BoxPathOperation>(*_operation);
@@ -221,6 +234,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD OffsetPath operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<OffsetPath>
   {

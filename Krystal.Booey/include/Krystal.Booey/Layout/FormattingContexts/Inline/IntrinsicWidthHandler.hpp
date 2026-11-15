@@ -43,7 +43,7 @@ namespace krys::boo::layout
     enum class MayCacheLayoutResult : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -79,12 +79,15 @@ namespace krys::boo::layout
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const InlineFormattingContext &GetFormattingContext() const noexcept
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const ElementBox &FormattingContextRoot() const noexcept;
     KRYS_NODISCARD const ElementBox &LineBuilerRoot() const noexcept;
+
     KRYS_NODISCARD const InlineItemList &GetInlineItemList() const noexcept
     {
       return _inlineItems.Content();

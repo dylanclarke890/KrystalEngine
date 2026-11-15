@@ -40,21 +40,27 @@ namespace krys::boo::style
     ClipPath(css::keywords::None) noexcept : _operation {nullptr}
     {
     }
+
     ClipPath(ReferencePath &&reference) noexcept : _operation {krys::move(reference._operation)}
     {
     }
+
     ClipPath(const ReferencePath &reference) noexcept : _operation {reference._operation}
     {
     }
+
     ClipPath(BasicShapePath &&basicShape) noexcept : _operation {krys::move(basicShape._operation)}
     {
     }
+
     ClipPath(const BasicShapePath &basicShape) noexcept : _operation {basicShape._operation}
     {
     }
+
     ClipPath(BoxPath &&box) noexcept : _operation {krys::move(box._operation)}
     {
     }
+
     ClipPath(const BoxPath &box) noexcept : _operation {box._operation}
     {
     }
@@ -63,6 +69,7 @@ namespace krys::boo::style
     {
       krys_assert(IsValid(_operation));
     }
+
     explicit ClipPath(const RefPtr<PathOperation> &operation) noexcept : _operation {operation}
     {
       krys_assert(IsValid(_operation));
@@ -72,14 +79,17 @@ namespace krys::boo::style
     {
       return !_operation;
     }
+
     KRYS_NODISCARD bool IsReference() const noexcept
     {
       return _operation && Is<ReferencePathOperation>(*_operation);
     }
+
     KRYS_NODISCARD bool IsBasicShape() const noexcept
     {
       return _operation && Is<ShapePathOperation>(*_operation);
     }
+
     KRYS_NODISCARD bool IsBox() const noexcept
     {
       return _operation && Is<BoxPathOperation>(*_operation);

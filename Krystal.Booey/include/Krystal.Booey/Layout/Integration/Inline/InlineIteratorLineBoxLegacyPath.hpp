@@ -48,42 +48,52 @@ namespace krys::boo::inline_iterator
     {
       return _rootInlineBox->LineTop().ToFloat();
     }
+
     KRYS_NODISCARD float ContentLogicalBottom() const noexcept
     {
       return _rootInlineBox->LineBottom().ToFloat();
     }
+
     KRYS_NODISCARD float ContentLogicalTopAdjustedForPrecedingLineBox() const noexcept
     {
       return _rootInlineBox->SelectionTop().ToFloat();
     }
+
     KRYS_NODISCARD float ContentLogicalBottomAdjustedForFollowingLineBox() const noexcept
     {
       return _rootInlineBox->SelectionBottom().ToFloat();
     }
+
     KRYS_NODISCARD float LogicalTop() const noexcept
     {
       return _rootInlineBox->LineBoxTop().ToFloat();
     }
+
     KRYS_NODISCARD float LogicalBottom() const noexcept
     {
       return _rootInlineBox->LineBoxBottom().ToFloat();
     }
+
     KRYS_NODISCARD float LogicalWidth() const noexcept
     {
       return _rootInlineBox->LineBoxWidth().ToFloat();
     }
+
     KRYS_NODISCARD float InkOverflowLogicalTop() const noexcept
     {
       return _rootInlineBox->LogicalTopVisualOverflow().ToFloat();
     }
+
     KRYS_NODISCARD float InkOverflowLogicalBottom() const noexcept
     {
       return _rootInlineBox->LogicalBottomVisualOverflow().ToFloat();
     }
+
     KRYS_NODISCARD float ScrollableOverflowTop() const noexcept
     {
       return LogicalTop();
     }
+
     KRYS_NODISCARD float ScrollableOverflowBottom() const noexcept
     {
       return LogicalBottom();
@@ -93,6 +103,7 @@ namespace krys::boo::inline_iterator
     {
       return false;
     }
+
     KRYS_NODISCARD FloatRect EllipsisVisualRectIgnoringBlockDirection() const noexcept
     {
       krys_debug_assert(false);
@@ -109,14 +120,17 @@ namespace krys::boo::inline_iterator
     {
       return _rootInlineBox->LogicalLeft();
     }
+
     KRYS_NODISCARD float ContentLogicalRight() const noexcept
     {
       return _rootInlineBox->LogicalRight();
     }
+
     KRYS_NODISCARD bool IsHorizontal() const noexcept
     {
       return _rootInlineBox->IsHorizontal();
     }
+
     KRYS_NODISCARD FontBaseline BaselineType() const noexcept
     {
       return _rootInlineBox->BaselineType();
@@ -131,6 +145,7 @@ namespace krys::boo::inline_iterator
     {
       return false;
     }
+
     KRYS_NODISCARD bool HasBlockLevelBox() const noexcept
     {
       return false;

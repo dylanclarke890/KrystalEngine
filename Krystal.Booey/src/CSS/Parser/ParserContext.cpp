@@ -56,6 +56,7 @@ namespace krys::boo::css
 
     StaticValuePool::Init();
   }
+
   ParserContext::ParserContext(const dom::Document &document) noexcept
       : ParserContext(document.CssParserContext())
   {

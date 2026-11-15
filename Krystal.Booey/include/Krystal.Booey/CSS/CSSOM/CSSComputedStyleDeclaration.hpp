@@ -45,7 +45,7 @@ namespace krys::boo::css
     enum class IsEmpty : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     const Ref<dom::Element> _element;

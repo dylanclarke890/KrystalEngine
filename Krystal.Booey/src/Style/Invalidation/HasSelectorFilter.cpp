@@ -33,7 +33,7 @@
 namespace krys::boo::style
 {
   // FIXME: Support additional pseudo-classes.
-  static constexpr uint32 HoverSalt = 101;
+  constexpr static uint32 HoverSalt = 101;
 
   HasSelectorFilter::HasSelectorFilter(const dom::Element &element, Type type) noexcept : _type(type)
   {

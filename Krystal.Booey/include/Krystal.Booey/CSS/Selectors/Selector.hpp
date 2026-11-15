@@ -135,7 +135,7 @@ namespace krys::boo::css
     /// @brief `i`.
     Insensitive,
     /// @brief `s`.
-    Sensitive
+    Sensitive,
   };
 
   enum class IsCaseSensitive : bool
@@ -182,7 +182,7 @@ namespace krys::boo::css
   {
     ClassA = 0x10000,
     ClassB = 0x100,
-    ClassC = 1
+    ClassC = 1,
   };
 
   /// @brief Represents a simple CSS selector that is part of a SelectorList and may be part of a more
@@ -244,13 +244,13 @@ namespace krys::boo::css
     enum class VisitFunctionalPseudoClasses : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class VisitOnlySubject : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     using VisitFunc = Func<bool(const Selector &)>;
@@ -518,7 +518,7 @@ namespace krys::boo::css
   enum class ComplexSelectorsEqualMode : bool
   {
     Full,
-    IgnoreNonElementBackedPseudoElements
+    IgnoreNonElementBackedPseudoElements,
   };
 
   KRYS_NODISCARD bool

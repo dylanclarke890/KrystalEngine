@@ -78,7 +78,7 @@ namespace krys::boo::css
       return *this;
     }
 
-    constexpr ValueLiteral &operator+=(ConvertibleTo<double> auto const &rhs)
+    constexpr ValueLiteral &operator+=(const ConvertibleTo<double> auto &rhs)
     {
       Value += static_cast<double>(rhs);
       return *this;
@@ -89,12 +89,12 @@ namespace krys::boo::css
       return ValueLiteral {lhs.Value + rhs.Value};
     }
 
-    friend constexpr ValueLiteral operator+(const ValueLiteral &lhs, ConvertibleTo<double> auto const &rhs)
+    friend constexpr ValueLiteral operator+(const ValueLiteral &lhs, const ConvertibleTo<double> auto &rhs)
     {
       return ValueLiteral {lhs.Value + static_cast<double>(rhs)};
     }
 
-    friend constexpr ValueLiteral operator+(ConvertibleTo<double> auto const &lhs, const ValueLiteral &rhs)
+    friend constexpr ValueLiteral operator+(const ConvertibleTo<double> auto &lhs, const ValueLiteral &rhs)
     {
       return ValueLiteral {static_cast<double>(lhs) + rhs.Value};
     }
@@ -107,7 +107,7 @@ namespace krys::boo::css
       return *this;
     }
 
-    constexpr ValueLiteral &operator-=(ConvertibleTo<double> auto const &rhs)
+    constexpr ValueLiteral &operator-=(const ConvertibleTo<double> auto &rhs)
     {
       Value -= static_cast<double>(rhs);
       return *this;
@@ -118,43 +118,43 @@ namespace krys::boo::css
       return ValueLiteral {lhs.Value - rhs.Value};
     }
 
-    friend constexpr ValueLiteral operator-(const ValueLiteral &lhs, ConvertibleTo<double> auto const &rhs)
+    friend constexpr ValueLiteral operator-(const ValueLiteral &lhs, const ConvertibleTo<double> auto &rhs)
     {
       return ValueLiteral {lhs.Value - static_cast<double>(rhs)};
     }
 
-    friend constexpr ValueLiteral operator-(ConvertibleTo<double> auto const &lhs, const ValueLiteral &rhs)
+    friend constexpr ValueLiteral operator-(const ConvertibleTo<double> auto &lhs, const ValueLiteral &rhs)
     {
       return ValueLiteral {static_cast<double>(lhs) - rhs.Value};
     }
 
     // Support multiplication between `ValueLiteral` and machine numeric types.
 
-    constexpr ValueLiteral &operator*=(ConvertibleTo<double> auto const &rhs)
+    constexpr ValueLiteral &operator*=(const ConvertibleTo<double> auto &rhs)
     {
       Value *= static_cast<double>(rhs);
       return *this;
     }
 
-    friend constexpr ValueLiteral operator*(const ValueLiteral &lhs, ConvertibleTo<double> auto const &rhs)
+    friend constexpr ValueLiteral operator*(const ValueLiteral &lhs, const ConvertibleTo<double> auto &rhs)
     {
       return ValueLiteral {lhs.Value * static_cast<double>(rhs)};
     }
 
-    friend constexpr ValueLiteral operator*(ConvertibleTo<double> auto const &lhs, const ValueLiteral &rhs)
+    friend constexpr ValueLiteral operator*(const ConvertibleTo<double> auto &lhs, const ValueLiteral &rhs)
     {
       return ValueLiteral {static_cast<double>(lhs) * rhs.Value};
     }
 
     // Support division between `ValueLiteral` and machine numeric types.
 
-    constexpr ValueLiteral &operator/=(ConvertibleTo<double> auto const &rhs)
+    constexpr ValueLiteral &operator/=(const ConvertibleTo<double> auto &rhs)
     {
       Value /= static_cast<double>(rhs);
       return *this;
     }
 
-    friend constexpr ValueLiteral operator/(const ValueLiteral &lhs, ConvertibleTo<double> auto const &rhs)
+    friend constexpr ValueLiteral operator/(const ValueLiteral &lhs, const ConvertibleTo<double> auto &rhs)
     {
       return ValueLiteral {lhs.Value / static_cast<double>(rhs)};
     }
@@ -279,7 +279,7 @@ namespace krys::boo::css
 
   enum class IntegerUnit : uint8
   {
-    Integer
+    Integer,
   };
 
   KRYS_NODISCARD constexpr UnitType ToUnitType(IntegerUnit) noexcept
@@ -335,7 +335,7 @@ namespace krys::boo::css
 
   enum class NumberUnit : uint8
   {
-    Number
+    Number,
   };
 
   KRYS_NODISCARD constexpr UnitType ToUnitType(NumberUnit) noexcept
@@ -390,7 +390,7 @@ namespace krys::boo::css
 
   enum class PercentageUnit : uint8
   {
-    Percentage
+    Percentage,
   };
 
   KRYS_NODISCARD constexpr UnitType ToUnitType(PercentageUnit) noexcept
@@ -454,7 +454,7 @@ namespace krys::boo::css
     Deg,
     Rad,
     Grad,
-    Turn
+    Turn,
   };
 
   KRYS_NODISCARD constexpr UnitType ToUnitType(AngleUnit angleUnit) noexcept
@@ -567,6 +567,7 @@ namespace krys::boo::css
       return ConvertAngle<To, T>(value, unit);
     }
   };
+
   static_assert(UnitTraits<AngleUnit>::Count == ToUnderlying(AngleUnit::Turn) + 1uz);
 
   KRYS_DEFINE_CSS_UNIT_LITERAL(AngleUnit::Deg, deg)
@@ -637,7 +638,7 @@ namespace krys::boo::css
     Cqi,
     Cqb,
     Cqmin,
-    Cqmax
+    Cqmax,
   };
 
   KRYS_NODISCARD constexpr UnitType ToUnitType(LengthUnit lengthUnit) noexcept
@@ -1010,7 +1011,7 @@ namespace krys::boo::css
   enum class TimeUnit : uint8
   {
     S,
-    Ms
+    Ms,
   };
 
   KRYS_NODISCARD constexpr UnitType ToUnitType(TimeUnit timeUnit) noexcept
@@ -1102,7 +1103,7 @@ namespace krys::boo::css
   enum class FrequencyUnit : uint8
   {
     Hz,
-    Khz
+    Khz,
   };
 
   KRYS_NODISCARD constexpr UnitType ToUnitType(FrequencyUnit frequencyUnit) noexcept
@@ -1196,7 +1197,7 @@ namespace krys::boo::css
     Dppx,
     X,
     Dpi,
-    Dpcm
+    Dpcm,
   };
 
   KRYS_NODISCARD constexpr UnitType ToUnitType(ResolutionUnit resolutionUnit) noexcept
@@ -1321,7 +1322,7 @@ namespace krys::boo::css
 
   enum class FlexUnit : uint8
   {
-    Fr
+    Fr,
   };
 
   KRYS_NODISCARD constexpr UnitType ToUnitType(FlexUnit) noexcept
@@ -1385,7 +1386,7 @@ namespace krys::boo::css
     Rad,
     Grad,
     Turn,
-    Percentage
+    Percentage,
   };
 
   // Overload of `operator==` to allow comparing `AnglePercentageUnit` and `AngleUnit`.
@@ -1564,7 +1565,7 @@ namespace krys::boo::css
     Cqb,
     Cqmin,
     Cqmax,
-    Percentage
+    Percentage,
   };
 
   // Overload of `operator==` to allow comparing `LengthPercentageUnit` and `LengthUnit`.

@@ -2924,6 +2924,7 @@ namespace krys::boo
       // The targets involved in TouchList, in the order they were first seen.
       List<RefPtr<dom::EventTarget>> Targets;
     };
+
     std::array<Touches, PlatformTouchPoint::TouchStateEnd> changedTouches;
 
     const List<PlatformTouchPoint> &points = event.TouchPoints();

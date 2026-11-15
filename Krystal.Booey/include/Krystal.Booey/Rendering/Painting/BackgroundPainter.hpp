@@ -41,7 +41,7 @@ namespace krys::boo
   {
     BaseBackgroundColorUse,
     BaseBackgroundColorOnly,
-    BaseBackgroundColorSkip
+    BaseBackgroundColorSkip,
   };
 
   /// @brief Where a background image is drawn: the rect it covers, its tiles' size, the phase of the first
@@ -98,6 +98,7 @@ namespace krys::boo
     {
       _overrideClip = overrideClip;
     }
+
     void SetOverrideOrigin(FillBox overrideOrigin) noexcept
     {
       _overrideOrigin = overrideOrigin;

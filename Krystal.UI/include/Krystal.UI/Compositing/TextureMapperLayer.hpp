@@ -99,6 +99,7 @@ namespace krys::ui
     {
       return _children;
     }
+
     void SetChildren(const List<TextureMapperLayer *> &newChildren) noexcept;
     void SetMaskLayer(TextureMapperLayer *maskLayer) noexcept;
     void SetReplicaLayer(TextureMapperLayer *replicaLayer) noexcept;
@@ -119,22 +120,27 @@ namespace krys::ui
     {
       return _state.DrawsContent;
     }
+
     KRYS_NODISCARD bool ContentsAreVisible() const noexcept
     {
       return _state.ContentsVisible;
     }
+
     KRYS_NODISCARD boo::FloatSize Size() const noexcept
     {
       return _state.Size;
     }
+
     KRYS_NODISCARD float Opacity() const noexcept
     {
       return _state.Opacity;
     }
+
     KRYS_NODISCARD boo::TransformationMatrix Transform() const noexcept
     {
       return _state.Transform;
     }
+
     KRYS_NODISCARD const boo::TransformationMatrix &ToSurfaceTransform() const noexcept
     {
       return _layerTransforms.Combined;
@@ -164,18 +170,22 @@ namespace krys::ui
     {
       _state.ShowDebugBorders = showDebugBorder;
     }
+
     void SetDebugBorderColor(boo::Color debugBorderColor) noexcept
     {
       _state.DebugBorderColor = debugBorderColor;
     }
+
     void SetDebugBorderWidth(float debugBorderWidth) noexcept
     {
       _state.DebugBorderWidth = debugBorderWidth;
     }
+
     void SetShowRepaintCounter(bool showRepaintCounter) noexcept
     {
       _state.ShowRepaintCounter = showRepaintCounter;
     }
+
     void SetRepaintCount(int32 repaintCount) noexcept
     {
       _state.RepaintCount = repaintCount;
@@ -236,14 +246,17 @@ namespace krys::ui
 
     KRYS_NODISCARD bool IsVisible() const noexcept;
     KRYS_NODISCARD bool ShouldBlend() const noexcept;
+
     KRYS_NODISCARD bool Preserves3D() const noexcept
     {
       return _state.Preserves3D;
     }
+
     KRYS_NODISCARD bool HasMask() const noexcept
     {
       return _state.MaskLayer != nullptr;
     }
+
     KRYS_NODISCARD bool HasBackdrop() const noexcept
     {
       return _state.BackdropLayer != nullptr;

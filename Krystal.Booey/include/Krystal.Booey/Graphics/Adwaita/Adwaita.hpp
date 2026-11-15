@@ -115,7 +115,7 @@ namespace krys::boo::adwaita
   enum class PaintRounded : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   void PaintFocus(GraphicsContext &, const FloatRect &, int32 offset, const Color &,
@@ -127,7 +127,7 @@ namespace krys::boo::adwaita
   enum class ArrowDirection : uint8
   {
     Up,
-    Down
+    Down,
   };
 
   void PaintArrow(GraphicsContext &, const FloatRect &, ArrowDirection, bool useDarkAppearance) noexcept;

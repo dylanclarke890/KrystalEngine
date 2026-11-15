@@ -538,7 +538,7 @@ namespace krys::boo
       TopRight,
       BottomRight,
       BottomLeft,
-      Other
+      Other,
     };
 
     KRYS_NODISCARD CornerType GetCornerType(const FloatPointGraph::Edge &fromEdge,

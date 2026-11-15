@@ -11,7 +11,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-
 #pragma region Serialise
 
     void SerialiseNumericValue(const Token &token, dom::DOMString &output) noexcept

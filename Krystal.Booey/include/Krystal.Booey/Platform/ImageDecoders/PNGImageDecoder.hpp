@@ -93,10 +93,12 @@ namespace krys::boo
     {
       return u8"png";
     }
+
     KRYS_NODISCARD size_t FrameCount() const noexcept override
     {
       return _frameCount;
     }
+
     KRYS_NODISCARD RepetitionCount GetRepetitionCount() const noexcept override;
     ScalableImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept override;
     // CAUTION: setFailed() deletes |m_reader|.  Be careful to avoid
@@ -143,6 +145,7 @@ namespace krys::boo
 
   private:
     PNGImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
+
     void TryDecodeSize(bool allDataReceived) noexcept override
     {
       Decode(true, 0, allDataReceived);

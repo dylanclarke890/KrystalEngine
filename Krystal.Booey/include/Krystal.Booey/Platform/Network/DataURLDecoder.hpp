@@ -45,7 +45,7 @@ namespace krys::boo::data_url_decoder
   enum class ShouldValidatePadding : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Decodes a `data:` URL's media type and data; null if it's malformed.

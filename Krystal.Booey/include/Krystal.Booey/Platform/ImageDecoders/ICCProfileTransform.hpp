@@ -23,7 +23,7 @@ namespace krys::boo
       RGBA,
       BGRA,
       /// @brief Adobe's inverted CMYK, as JPEGs store it.
-      InvertedCMYK
+      InvertedCMYK,
     };
 
   private:

@@ -127,6 +127,7 @@ namespace krys::ui
                                     ContentsLayerPurpose purpose) noexcept;
     void SetContentsDisplayDelegate(RefPtr<boo::GraphicsLayerContentsDisplayDelegate> &&delegate,
                                     ContentsLayerPurpose purpose) noexcept override;
+
     KRYS_NODISCARD bool UsesContentsLayer() const noexcept override
     {
       return _contentsLayer != nullptr;
@@ -153,10 +154,12 @@ namespace krys::ui
     {
       return *_layer;
     }
+
     KRYS_NODISCARD boo::Color DebugBorderColor() const noexcept
     {
       return _debugBorderColor;
     }
+
     KRYS_NODISCARD float DebugBorderWidth() const noexcept
     {
       return _debugBorderWidth;
@@ -167,6 +170,7 @@ namespace krys::ui
     {
       return _visibleRect;
     }
+
     KRYS_NODISCARD TextureMapperTiledBackingStore *BackingStore() const noexcept
     {
       return _backingStore.get();
@@ -183,6 +187,7 @@ namespace krys::ui
     {
       SetContentsToPlatformLayer(nullptr, ContentsLayerPurpose::None);
     }
+
     void SetPlatformLayerNeedsDisplay() noexcept override
     {
       SetContentsNeedsDisplay();

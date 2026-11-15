@@ -37,7 +37,7 @@ namespace krys::boo
     FECOMPONENTTRANSFER_TYPE_TABLE = 2,
     FECOMPONENTTRANSFER_TYPE_DISCRETE = 3,
     FECOMPONENTTRANSFER_TYPE_LINEAR = 4,
-    FECOMPONENTTRANSFER_TYPE_GAMMA = 5
+    FECOMPONENTTRANSFER_TYPE_GAMMA = 5,
   };
 
   /// @brief How one channel is transferred.
@@ -64,7 +64,7 @@ namespace krys::boo
     Red,
     Green,
     Blue,
-    Alpha
+    Alpha,
   };
 
   /// @brief The functions of the red, green, blue and alpha channels.
@@ -94,14 +94,17 @@ namespace krys::boo
     {
       return FunctionOf(ComponentTransferChannel::Red);
     }
+
     KRYS_NODISCARD ComponentTransferFunction GreenFunction() const noexcept
     {
       return FunctionOf(ComponentTransferChannel::Green);
     }
+
     KRYS_NODISCARD ComponentTransferFunction BlueFunction() const noexcept
     {
       return FunctionOf(ComponentTransferChannel::Blue);
     }
+
     KRYS_NODISCARD ComponentTransferFunction AlphaFunction() const noexcept
     {
       return FunctionOf(ComponentTransferChannel::Alpha);
@@ -128,6 +131,7 @@ namespace krys::boo
     {
       return _functions[static_cast<size_t>(channel)];
     }
+
     KRYS_NODISCARD ComponentTransferFunction &FunctionOf(ComponentTransferChannel channel) noexcept
     {
       return _functions[static_cast<size_t>(channel)];

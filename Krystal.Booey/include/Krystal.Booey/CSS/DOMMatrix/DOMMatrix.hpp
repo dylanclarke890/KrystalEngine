@@ -71,22 +71,27 @@ namespace krys::boo::css
     {
       _matrix.SetA(f);
     }
+
     void SetB(double f) noexcept
     {
       _matrix.SetB(f);
     }
+
     void SetC(double f) noexcept
     {
       _matrix.SetC(f);
     }
+
     void SetD(double f) noexcept
     {
       _matrix.SetD(f);
     }
+
     void SetE(double f) noexcept
     {
       _matrix.SetE(f);
     }
+
     void SetF(double f) noexcept
     {
       _matrix.SetF(f);
@@ -96,34 +101,42 @@ namespace krys::boo::css
     {
       _matrix.SetM11(f);
     }
+
     void SetM12(double f) noexcept
     {
       _matrix.SetM12(f);
     }
+
     void SetM13(double f) noexcept;
     void SetM14(double f) noexcept;
+
     void SetM21(double f) noexcept
     {
       _matrix.SetM21(f);
     }
+
     void SetM22(double f) noexcept
     {
       _matrix.SetM22(f);
     }
+
     void SetM23(double f) noexcept;
     void SetM24(double f) noexcept;
     void SetM31(double f) noexcept;
     void SetM32(double f) noexcept;
     void SetM33(double f) noexcept;
     void SetM34(double f) noexcept;
+
     void SetM41(double f) noexcept
     {
       _matrix.SetM41(f);
     }
+
     void SetM42(double f) noexcept
     {
       _matrix.SetM42(f);
     }
+
     void SetM43(double f) noexcept;
     void SetM44(double f) noexcept;
 

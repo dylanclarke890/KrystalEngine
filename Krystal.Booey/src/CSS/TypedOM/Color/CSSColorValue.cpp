@@ -96,7 +96,7 @@ namespace krys::boo::css
         RGB,
         Percent,
         Number,
-        Angle
+        Angle,
       };
 
       Kind SlotKind {Kind::Percent};

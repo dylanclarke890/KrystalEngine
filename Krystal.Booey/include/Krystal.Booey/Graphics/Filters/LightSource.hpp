@@ -41,7 +41,7 @@ namespace krys::boo
   {
     LS_DISTANT,
     LS_POINT,
-    LS_SPOT
+    LS_SPOT,
   };
 
   class Filter;
@@ -100,6 +100,7 @@ namespace krys::boo
     {
       return false;
     }
+
     virtual bool SetElevation(float) noexcept
     {
       return false;
@@ -110,22 +111,27 @@ namespace krys::boo
     {
       return false;
     }
+
     virtual bool SetY(float) noexcept
     {
       return false;
     }
+
     virtual bool SetZ(float) noexcept
     {
       return false;
     }
+
     virtual bool SetPointsAtX(float) noexcept
     {
       return false;
     }
+
     virtual bool SetPointsAtY(float) noexcept
     {
       return false;
     }
+
     virtual bool SetPointsAtZ(float) noexcept
     {
       return false;
@@ -135,6 +141,7 @@ namespace krys::boo
     {
       return false;
     }
+
     virtual bool SetLimitingConeAngle(float) noexcept
     {
       return false;

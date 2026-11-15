@@ -51,6 +51,7 @@ namespace krys::boo::css
     {
       return Type::Computed;
     }
+
     /// @brief The number of exposed properties, then of the element's custom properties.
     KRYS_NODISCARD size_t Size() const noexcept final;
     /// @brief The exposed properties, then the custom properties, sorted as the specification says.

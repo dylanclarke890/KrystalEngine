@@ -33,6 +33,7 @@ namespace krys::boo::style
   {
     using Base::Base;
   };
+
   struct SVGStrokeDasharrayValue
   {
     using Fixed = SVGStrokeDasharrayValueLength::Fixed;
@@ -44,9 +45,11 @@ namespace krys::boo::style
     SVGStrokeDasharrayValue(SVGStrokeDasharrayValueLength &&length) noexcept : Value {krys::move(length)}
     {
     }
+
     SVGStrokeDasharrayValue(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept : Value {literal}
     {
     }
+
     SVGStrokeDasharrayValue(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept
         : Value {literal}
     {
@@ -60,6 +63,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const SVGStrokeDasharrayValue &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(SVGStrokeDasharrayValue, Value);
 
   // <dasharray> = [ <dasharray-value>+ ]#

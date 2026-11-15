@@ -37,14 +37,14 @@ namespace krys::boo
   enum class RelayoutChildren : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Whether an offset exactly on a page's (or column's) top edge belongs to the page before it.
   enum class PageBoundaryRule : bool
   {
     ExcludePageBoundary,
-    IncludePageBoundary
+    IncludePageBoundary,
   };
 
   using TrackedRendererListHashSet = ListHashSet<RenderBox *>;
@@ -57,7 +57,7 @@ namespace krys::boo
   enum class TextRunFlag : uint8
   {
     RespectDirection = 1 << 0,
-    RespectDirectionOverride = 1 << 1
+    RespectDirectionOverride = 1 << 1,
   };
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
@@ -87,7 +87,7 @@ namespace krys::boo
     enum ApplyLayoutDeltaMode
     {
       ApplyLayoutDelta,
-      DoNotApplyLayoutDelta
+      DoNotApplyLayoutDelta,
     };
 
     ~RenderBlock() noexcept override;
@@ -132,13 +132,14 @@ namespace krys::boo
     enum class ContainingBlockState : bool
     {
       NewContainingBlock,
-      SameContainingBlock
+      SameContainingBlock,
     };
     void RemoveOutOfFlowBoxes(
       const RenderBlock *newContainingBlockCandidate,
       ContainingBlockState containingBlockState = ContainingBlockState::SameContainingBlock) noexcept;
 
     KRYS_NODISCARD TrackedRendererListHashSet *OutOfFlowBoxes() const noexcept;
+
     KRYS_NODISCARD bool HasOutOfFlowBoxes() const noexcept
     {
       auto *renderers = OutOfFlowBoxes();
@@ -153,10 +154,12 @@ namespace krys::boo
     {
       SetRenderBlockHasMarginBeforeQuirk(b);
     }
+
     void SetHasMarginAfterQuirk(bool b) noexcept
     {
       SetRenderBlockHasMarginAfterQuirk(b);
     }
+
     void SetShouldForceRelayoutChildren(bool b) noexcept
     {
       SetRenderBlockShouldForceRelayoutChildren(b);
@@ -166,10 +169,12 @@ namespace krys::boo
     {
       return RenderBlockHasMarginBeforeQuirk();
     }
+
     KRYS_NODISCARD bool HasMarginAfterQuirk() const noexcept
     {
       return RenderBlockHasMarginAfterQuirk();
     }
+
     KRYS_NODISCARD bool HasBorderOrPaddingLogicalWidthChanged() const noexcept
     {
       return RenderBlockShouldForceRelayoutChildren();
@@ -186,11 +191,13 @@ namespace krys::boo
     void AddPercentHeightDescendant(RenderBox &descendant) noexcept;
     static void RemovePercentHeightDescendant(RenderBox &descendant) noexcept;
     KRYS_NODISCARD TrackedRendererListHashSet *PercentHeightDescendants() const noexcept;
+
     KRYS_NODISCARD bool HasPercentHeightDescendants() const noexcept
     {
       auto *renderers = PercentHeightDescendants();
       return renderers && !renderers->isEmpty();
     }
+
     KRYS_NODISCARD static bool HasPercentHeightContainerMap() noexcept;
     static void ClearPercentHeightDescendantsFrom(RenderBox &parent) noexcept;
 
@@ -214,62 +221,77 @@ namespace krys::boo
     {
       return IsHorizontalWritingMode() ? child.Width() : child.Height();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalHeightForChild(const RenderBox &child) const noexcept
     {
       return IsHorizontalWritingMode() ? child.Height() : child.Width();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalMarginBoxHeightForChild(const RenderBox &child) const noexcept
     {
       return IsHorizontalWritingMode() ? child.MarginBoxRect().Height() : child.MarginBoxRect().Width();
     }
+
     KRYS_NODISCARD LayoutSize LogicalSizeForChild(const RenderBox &child) const noexcept
     {
       return IsHorizontalWritingMode() ? child.Size() : child.Size().TransposedSize();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalTopForChild(const RenderBox &child) const noexcept
     {
       return IsHorizontalWritingMode() ? child.Y() : child.X();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalLeftForChild(const RenderBox &child) const noexcept
     {
       return IsHorizontalWritingMode() ? child.X() : child.Y();
     }
+
     void SetLogicalLeftForChild(RenderBox &child, LayoutUnit logicalLeft,
                                 ApplyLayoutDeltaMode applyDelta = DoNotApplyLayoutDelta) noexcept;
     void SetLogicalTopForChild(RenderBox &child, LayoutUnit logicalTop,
                                ApplyLayoutDeltaMode applyDelta = DoNotApplyLayoutDelta) noexcept;
+
     KRYS_NODISCARD LayoutUnit MarginBeforeForChild(const RenderBoxModelObject &child) const noexcept
     {
       return child.MarginBefore(Style().GetWritingMode());
     }
+
     KRYS_NODISCARD LayoutUnit MarginAfterForChild(const RenderBoxModelObject &child) const noexcept
     {
       return child.MarginAfter(Style().GetWritingMode());
     }
+
     KRYS_NODISCARD LayoutUnit MarginStartForChild(const RenderBoxModelObject &child) const noexcept
     {
       return child.MarginStart(Style().GetWritingMode());
     }
+
     KRYS_NODISCARD LayoutUnit MarginEndForChild(const RenderBoxModelObject &child) const noexcept
     {
       return child.MarginEnd(Style().GetWritingMode());
     }
+
     void SetMarginStartForChild(RenderBox &child, LayoutUnit value) const noexcept
     {
       child.SetMarginStart(value, Style().GetWritingMode());
     }
+
     void SetMarginEndForChild(RenderBox &child, LayoutUnit value) const noexcept
     {
       child.SetMarginEnd(value, Style().GetWritingMode());
     }
+
     void SetMarginBeforeForChild(RenderBox &child, LayoutUnit value) const noexcept
     {
       child.SetMarginBefore(value, Style().GetWritingMode());
     }
+
     void SetMarginAfterForChild(RenderBox &child, LayoutUnit value) const noexcept
     {
       child.SetMarginAfter(value, Style().GetWritingMode());
     }
+
     void SetTrimmedMarginForChild(RenderBox &child, style::MarginTrimSide side) noexcept;
     KRYS_NODISCARD LayoutUnit CollapsedMarginBeforeForChild(const RenderBox &child) const noexcept;
     KRYS_NODISCARD LayoutUnit CollapsedMarginAfterForChild(const RenderBox &child) const noexcept;
@@ -278,6 +300,7 @@ namespace krys::boo
     {
       return std::max(0_lu, LogicalRightOffsetForContent() - LogicalLeftOffsetForContent());
     }
+
     KRYS_NODISCARD LayoutUnit LogicalLeftOffsetForContent() const noexcept;
     KRYS_NODISCARD LayoutUnit LogicalRightOffsetForContent() const noexcept;
     KRYS_NODISCARD LayoutUnit StartOffsetForContent() const noexcept;
@@ -308,7 +331,7 @@ namespace krys::boo
     enum class FieldsetFindLegendOption : bool
     {
       IgnoreFloatingOrOutOfFlow,
-      IncludeFloatingOrOutOfFlow
+      IncludeFloatingOrOutOfFlow,
     };
     /// @brief A fieldset's rendered legend: its first child that's a legend, and neither floating nor
     /// positioned out of flow.
@@ -385,11 +408,13 @@ namespace krys::boo
     virtual bool HitTestContents(const HitTestRequest &request, HitTestResult &result,
                                  const HitTestLocation &locationInContainer,
                                  const LayoutPoint &accumulatedOffset, HitTestAction hitTestAction) noexcept;
+
     virtual bool HitTestFloats(const HitTestRequest &, HitTestResult &, const HitTestLocation &,
                                const LayoutPoint &) noexcept
     {
       return false;
     }
+
     virtual bool HitTestInlineChildren(const HitTestRequest &, HitTestResult &, const HitTestLocation &,
                                        const LayoutPoint &, HitTestAction) noexcept
     {
@@ -412,7 +437,7 @@ namespace krys::boo
     enum PaintBlockType
     {
       PaintAsBlock,
-      PaintAsInlineBlock
+      PaintAsInlineBlock,
     };
 
     virtual void PaintChildren(PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild) noexcept;
@@ -424,10 +449,13 @@ namespace krys::boo
     virtual void PaintFloats(PaintInfo &, const LayoutPoint &, bool) noexcept
     {
     }
+
     virtual void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept
     {
     }
+
     void PaintContents(PaintInfo &, const LayoutPoint &) noexcept;
+
     /// @brief Paints the rules between columns, for a column set.
     virtual void PaintColumnRules(PaintInfo &, const LayoutPoint &) noexcept
     {
@@ -515,6 +543,7 @@ namespace krys::boo
     {
       return SelectionGapRectsForRepaint(repaintContainer);
     }
+
     KRYS_NODISCARD bool ShouldPaintSelectionGaps() const noexcept final;
 
   protected:
@@ -523,7 +552,7 @@ namespace krys::boo
     enum class CaretType : bool
     {
       CursorCaret,
-      DragCaret
+      DragCaret,
     };
     void PaintCarets(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
     void PaintCaret(PaintInfo &paintInfo, const LayoutPoint &paintOffset, CaretType type) noexcept;
@@ -604,6 +633,7 @@ namespace krys::boo
     {
       return fixedOffset;
     }
+
     KRYS_NODISCARD virtual LayoutUnit LogicalLeftFloatOffsetForLine(LayoutUnit, LayoutUnit fixedOffset,
                                                                     LayoutUnit) const noexcept
     {

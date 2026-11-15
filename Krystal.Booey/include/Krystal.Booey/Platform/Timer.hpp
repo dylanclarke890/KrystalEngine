@@ -44,7 +44,7 @@ namespace krys::boo
     friend class ThreadTimers;
     KRYS_NON_COPY_MOVABLE(TimerBase);
 
-    static constexpr size_t NotInHeap = static_cast<size_t>(-1);
+    constexpr static size_t NotInHeap = static_cast<size_t>(-1);
 
   private:
     MonotonicTime::duration _nextFireTime {};
@@ -58,14 +58,17 @@ namespace krys::boo
 
     /// @brief Fires after @p nextFireInterval, then every @p repeatInterval if it isn't zero.
     void Start(MonotonicTime::duration nextFireInterval, MonotonicTime::duration repeatInterval) noexcept;
+
     void StartRepeating(MonotonicTime::duration repeatInterval) noexcept
     {
       Start(repeatInterval, repeatInterval);
     }
+
     void StartOneShot(MonotonicTime::duration delay) noexcept
     {
       Start(delay, {});
     }
+
     void Stop() noexcept;
 
     KRYS_NODISCARD bool IsActive() const noexcept
@@ -78,8 +81,10 @@ namespace krys::boo
     {
       return _nextFireTime;
     }
+
     /// @brief How long until the timer fires, from the host's current time; zero if it's due.
     KRYS_NODISCARD MonotonicTime::duration NextFireInterval() const noexcept;
+
     KRYS_NODISCARD MonotonicTime::duration RepeatInterval() const noexcept
     {
       return _repeatInterval;

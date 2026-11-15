@@ -62,38 +62,47 @@ namespace krys::boo::svg
     {
       return _x;
     }
+
     KRYS_NODISCARD SVGLengthValue Y() const noexcept
     {
       return _y;
     }
+
     KRYS_NODISCARD SVGLengthValue Width() const noexcept
     {
       return _width;
     }
+
     KRYS_NODISCARD SVGLengthValue Height() const noexcept
     {
       return _height;
     }
+
     KRYS_NODISCARD FloatRect ViewBox() const noexcept
     {
       return _viewBox;
     }
+
     KRYS_NODISCARD SVGPreserveAspectRatioValue PreserveAspectRatio() const noexcept
     {
       return _preserveAspectRatio;
     }
+
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType PatternUnits() const noexcept
     {
       return _patternUnits;
     }
+
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType PatternContentUnits() const noexcept
     {
       return _patternContentUnits;
     }
+
     KRYS_NODISCARD const AffineTransform &PatternTransform() const noexcept
     {
       return _patternTransform;
     }
+
     KRYS_NODISCARD const SVGPatternElement *PatternContentElement() const noexcept
     {
       return _patternContentElement.get();
@@ -163,38 +172,47 @@ namespace krys::boo::svg
     {
       return _xSet;
     }
+
     KRYS_NODISCARD bool HasY() const noexcept
     {
       return _ySet;
     }
+
     KRYS_NODISCARD bool HasWidth() const noexcept
     {
       return _widthSet;
     }
+
     KRYS_NODISCARD bool HasHeight() const noexcept
     {
       return _heightSet;
     }
+
     KRYS_NODISCARD bool HasViewBox() const noexcept
     {
       return _viewBoxSet;
     }
+
     KRYS_NODISCARD bool HasPreserveAspectRatio() const noexcept
     {
       return _preserveAspectRatioSet;
     }
+
     KRYS_NODISCARD bool HasPatternUnits() const noexcept
     {
       return _patternUnitsSet;
     }
+
     KRYS_NODISCARD bool HasPatternContentUnits() const noexcept
     {
       return _patternContentUnitsSet;
     }
+
     KRYS_NODISCARD bool HasPatternTransform() const noexcept
     {
       return _patternTransformSet;
     }
+
     KRYS_NODISCARD bool HasPatternContentElement() const noexcept
     {
       return _patternContentElementSet;

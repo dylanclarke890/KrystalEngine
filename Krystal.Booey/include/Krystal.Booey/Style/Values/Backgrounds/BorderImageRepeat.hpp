@@ -42,24 +42,30 @@ namespace krys::boo::style
         : Values {values}
     {
     }
+
     constexpr BorderImageRepeat(NinePieceImageRule horizontalRule, NinePieceImageRule verticalRule) noexcept
         : Values {horizontalRule, verticalRule}
     {
     }
+
     constexpr BorderImageRepeat(NinePieceImageRule rule) noexcept : Values {rule, rule}
     {
     }
+
     constexpr BorderImageRepeat(css::keywords::Stretch) noexcept
         : BorderImageRepeat {NinePieceImageRule::Stretch}
     {
     }
+
     constexpr BorderImageRepeat(css::keywords::Repeat) noexcept
         : BorderImageRepeat {NinePieceImageRule::Repeat}
     {
     }
+
     constexpr BorderImageRepeat(css::keywords::Round) noexcept : BorderImageRepeat {NinePieceImageRule::Round}
     {
     }
+
     constexpr BorderImageRepeat(css::keywords::Space) noexcept : BorderImageRepeat {NinePieceImageRule::Space}
     {
     }
@@ -68,6 +74,7 @@ namespace krys::boo::style
     {
       return Values.Width();
     }
+
     KRYS_NODISCARD constexpr NinePieceImageRule VerticalRule() const noexcept
     {
       return Values.Height();
@@ -75,6 +82,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD constexpr bool operator==(const BorderImageRepeat &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(BorderImageRepeat, Values);
 
   // MARK: - Conversion

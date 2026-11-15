@@ -121,7 +121,7 @@ namespace krys::boo::css::calc
     Time,
     Frequency,
     Resolution,
-    Flex
+    Flex,
   };
 
   struct CanonicalDimension
@@ -298,7 +298,7 @@ namespace krys::boo::css::calc
   enum class Stage : bool
   {
     Specified,
-    Computed
+    Computed,
   };
 
   struct Tree
@@ -1470,7 +1470,6 @@ namespace krys::boo::css::calc
 
 namespace std
 {
-
 #define OP_TUPLE_LIKE_CONFORMANCE(Op, numberOfArguments)                                                     \
   template <>                                                                                                \
   class tuple_size<krys::boo::css::calc::Op> : public std::integral_constant<size_t, numberOfArguments>      \

@@ -52,7 +52,7 @@ namespace krys::boo::layout
     enum class ShouldApplyRangeLayout : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     InlineDamage &_inlineDamage;
@@ -80,6 +80,7 @@ namespace krys::boo::layout
     {
       return inlineDamage && inlineDamage->LayoutStartPosition();
     }
+
     static void ResetInlineDamage(InlineDamage &inlineDamage) noexcept;
 
   private:
@@ -87,10 +88,12 @@ namespace krys::boo::layout
                             ShouldApplyRangeLayout shouldApplyRangeLayout = ShouldApplyRangeLayout::No,
                             LayoutUnit restartPaginationAdjustment = 0_lu) noexcept;
     bool SetFullLayoutIfNeeded(const Box &layoutBox) noexcept;
+
     KRYS_NODISCARD const inline_display::Boxes &DisplayBoxes() const noexcept
     {
       return _displayContent.BoxList;
     }
+
     KRYS_NODISCARD const inline_display::Lines &DisplayLines() const noexcept
     {
       return _displayContent.LineList;

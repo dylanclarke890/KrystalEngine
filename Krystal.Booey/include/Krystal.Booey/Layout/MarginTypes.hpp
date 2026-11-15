@@ -44,6 +44,7 @@ namespace krys::boo::layout
       LayoutUnit Before;
       LayoutUnit After;
     };
+
     NonCollapsedValues NonCollapsed;
 
     struct CollapsedValues
@@ -52,6 +53,7 @@ namespace krys::boo::layout
       Maybe<LayoutUnit> After;
       bool IsCollapsedThrough {false};
     };
+
     CollapsedValues Collapsed;
 
     // FIXME: This structure might need to change to indicate that the cached value is not necessarily the
@@ -75,9 +77,11 @@ namespace krys::boo::layout
         Maybe<LayoutUnit> Negative;
         bool IsQuirk {false};
       };
+
       Values Before;
       Values After;
     };
+
     PositiveAndNegativePair PositiveAndNegativeValues;
   };
 

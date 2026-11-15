@@ -91,6 +91,7 @@ namespace krys::ui
 
     /// @brief A press on the bubble hides it.
     void MouseReleased(const boo::IntPoint &point) noexcept final;
+
     bool MouseWheel(const boo::IntPoint &, float, float) noexcept final
     {
       return false;

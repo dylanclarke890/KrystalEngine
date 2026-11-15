@@ -48,9 +48,11 @@ namespace krys::boo::style
     StrokeWidth(StrokeWidthLength &&length) noexcept : Value {krys::move(length)}
     {
     }
+
     StrokeWidth(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept : Value {literal}
     {
     }
+
     StrokeWidth(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept : Value {literal}
     {
     }

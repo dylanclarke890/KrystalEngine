@@ -40,9 +40,9 @@ namespace krys::boo
 {
   enum class SecondFormat : uint8
   {
-    None,       // Suppress the second part and the millisecond part if they are 0.
-    Second,     // Always show the second part, and suppress the millisecond part if it is 0.
-    Millisecond // Always show the second part and the millisecond part.
+    None,        // Suppress the second part and the millisecond part if they are 0.
+    Second,      // Always show the second part, and suppress the millisecond part if it is 0.
+    Millisecond, // Always show the second part and the millisecond part.
   };
 
   enum class DateComponentsType : uint8

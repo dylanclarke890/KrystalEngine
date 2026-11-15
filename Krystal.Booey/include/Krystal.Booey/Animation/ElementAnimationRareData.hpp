@@ -65,6 +65,7 @@ namespace krys::boo
     {
       return _keyframeEffectStack.get();
     }
+
     KRYS_NODISCARD boo::KeyframeEffectStack &EnsureKeyframeEffectStack() noexcept;
 
     KRYS_NODISCARD AnimationCollection &Animations() noexcept
@@ -77,12 +78,14 @@ namespace krys::boo
     {
       return _animationsCreatedByMarkup;
     }
+
     void SetAnimationsCreatedByMarkup(CSSAnimationCollection &&animations) noexcept;
 
     KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &CompletedTransitionsByProperty() noexcept
     {
       return _completedTransitionsByProperty;
     }
+
     KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &RunningTransitionsByProperty() noexcept
     {
       return _runningTransitionsByProperty;
@@ -94,16 +97,19 @@ namespace krys::boo
     {
       return _lastStyleChangeEventStyle.get();
     }
+
     void SetLastStyleChangeEventStyle(UniquePtr<const RenderStyle> &&style) noexcept;
 
     void CSSAnimationsDidUpdate() noexcept
     {
       _hasPendingKeyframesUpdate = false;
     }
+
     void KeyframesRuleDidChange() noexcept
     {
       _hasPendingKeyframesUpdate = true;
     }
+
     KRYS_NODISCARD bool HasPendingKeyframesUpdate() const noexcept
     {
       return _hasPendingKeyframesUpdate;
@@ -113,6 +119,7 @@ namespace krys::boo
     {
       return _hasPropertiesOverridenAfterAnimation;
     }
+
     void SetHasPropertiesOverridenAfterAnimation(bool value) noexcept
     {
       _hasPropertiesOverridenAfterAnimation = value;

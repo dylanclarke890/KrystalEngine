@@ -43,6 +43,7 @@ namespace krys::boo::style
     GridTemplateAreas(css::keywords::None) noexcept
     {
     }
+
     GridTemplateAreas(GridNamedAreaMap &&map) noexcept;
     GridTemplateAreas(const GridNamedAreaMap &map) noexcept;
 
@@ -90,6 +91,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD GridTemplateAreas operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<GridTemplateAreas>
   {

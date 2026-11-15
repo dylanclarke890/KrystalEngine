@@ -41,14 +41,17 @@ namespace krys::boo::css
     /// @return A `TypeError` if the values' types can't be combined.
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathClamp>>
       Create(CSSNumberish &&lower, CSSNumberish &&value, CSSNumberish &&upper) noexcept;
+
     KRYS_NODISCARD const CSSNumericValue &Lower() const noexcept
     {
       return *_lower;
     }
+
     KRYS_NODISCARD const CSSNumericValue &Value() const noexcept
     {
       return *_value;
     }
+
     KRYS_NODISCARD const CSSNumericValue &Upper() const noexcept
     {
       return *_upper;
@@ -61,10 +64,12 @@ namespace krys::boo::css
     {
       return CSSMathOperator::Clamp;
     }
+
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {
       return CSSStyleValueType::CSSMathClamp;
     }
+
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept final;
     KRYS_NODISCARD Maybe<SumValue> ToSumValue() const noexcept final;
     KRYS_NODISCARD bool Equals(const CSSNumericValue &other) const noexcept final;

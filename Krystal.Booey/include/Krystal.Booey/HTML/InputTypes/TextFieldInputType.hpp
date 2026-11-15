@@ -60,6 +60,7 @@ namespace krys::boo::html
 
   public:
     ~TextFieldInputType() noexcept override;
+
     KRYS_NODISCARD bool ShouldRespectListAttribute() const noexcept override
     {
       return true;
@@ -143,7 +144,7 @@ namespace krys::boo::html
     enum class PreserveSelectionRange : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     void CreateContainer(PreserveSelectionRange preserveSelection = PreserveSelectionRange::Yes) noexcept;

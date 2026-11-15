@@ -46,7 +46,7 @@ namespace krys::boo::style
     Translate = 1 << 1,
     Rotate = 1 << 2,
     Scale = 1 << 3,
-    Offset = 1 << 4
+    Offset = 1 << 4,
   };
 
   /// @brief Computes the transformation matrix of a style's transform properties.
@@ -60,9 +60,9 @@ namespace krys::boo::style
     const ComputedStyle &_style;
 
   public:
-    static constexpr EnumSet<Option> AllTransformOperations {Option::TransformOrigin, Option::Translate,
+    constexpr static EnumSet<Option> AllTransformOperations {Option::TransformOrigin, Option::Translate,
                                                              Option::Rotate, Option::Scale, Option::Offset};
-    static constexpr EnumSet<Option> IndividualTransformOperations {Option::Translate, Option::Rotate,
+    constexpr static EnumSet<Option> IndividualTransformOperations {Option::Translate, Option::Rotate,
                                                                     Option::Scale, Option::Offset};
 
     explicit TransformResolver(TransformationMatrix &, const RenderStyle &) noexcept;

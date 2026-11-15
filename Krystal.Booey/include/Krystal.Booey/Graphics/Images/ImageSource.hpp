@@ -63,6 +63,7 @@ namespace krys::boo
       krys_assert_msg(false, "Not reached");
       return EncodedDataStatus::Unknown;
     }
+
     virtual void DestroyDecodedData(bool) noexcept
     {
       krys_assert_msg(false, "Not reached");
@@ -72,20 +73,25 @@ namespace krys::boo
     virtual void StartAnimation() noexcept
     {
     }
+
     virtual void StopAnimation() noexcept
     {
     }
+
     virtual void ResetAnimation() noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool IsAnimated() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsAnimating() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool HasEverAnimated() const noexcept
     {
       return false;
@@ -96,10 +102,12 @@ namespace krys::boo
     {
       return false;
     }
+
     virtual void StopDecodingWorkQueue() noexcept
     {
       krys_assert_msg(false, "Not reached");
     }
+
     virtual void Decode(Func<void(DecodingStatus)> &&) noexcept
     {
       krys_assert_msg(false, "Not reached");
@@ -112,6 +120,7 @@ namespace krys::boo
     }
 
     virtual const ImageFrame &PrimaryImageFrame(const Maybe<SubsamplingLevel> & = null) noexcept = 0;
+
     virtual const ImageFrame &
       CurrentImageFrame(const Maybe<SubsamplingLevel> &subsamplingLevel = null) noexcept
     {
@@ -120,14 +129,17 @@ namespace krys::boo
 
     // NativeImage
     KRYS_NODISCARD virtual RefPtr<NativeImage> PrimaryNativeImage() noexcept = 0;
+
     KRYS_NODISCARD virtual RefPtr<NativeImage> CurrentNativeImage() noexcept
     {
       return PrimaryNativeImage();
     }
+
     KRYS_NODISCARD virtual RefPtr<NativeImage> CurrentPreTransformedNativeImage(ImageOrientation) noexcept
     {
       return CurrentNativeImage();
     }
+
     /// @brief The current frame laid out as drawn with the orientation, at its full resolution: unlike the
     /// pre-transformed image, not scaled to a density-corrected size.
     KRYS_NODISCARD virtual RefPtr<NativeImage>
@@ -149,27 +161,33 @@ namespace krys::boo
     // Image Metadata
     KRYS_NODISCARD virtual IntSize
       Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept = 0;
+
     KRYS_NODISCARD virtual IntSize
       SourceSize(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept
     {
       return Size(orientation);
     }
+
     KRYS_NODISCARD virtual bool HasDensityCorrectedSize() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual ImageOrientation Orientation() const noexcept
     {
       return ImageOrientation::Orientation::None;
     }
+
     KRYS_NODISCARD virtual uint32 PrimaryFrameIndex() const noexcept
     {
       return 0;
     }
+
     KRYS_NODISCARD virtual uint32 FrameCount() const noexcept
     {
       return 1;
     }
+
     KRYS_NODISCARD virtual Maybe<Color> SinglePixelSolidColor() const noexcept = 0;
 
     KRYS_NODISCARD bool HasSolidColor() const noexcept;
@@ -178,10 +196,12 @@ namespace krys::boo
     {
       return {};
     }
+
     KRYS_NODISCARD virtual utf8_string AccessibilityDescription() const noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD virtual Maybe<IntPoint> HotSpot() const noexcept
     {
       return null;
@@ -199,11 +219,13 @@ namespace krys::boo
       krys_assert_msg(false, "Not reached");
       return {};
     }
+
     KRYS_NODISCARD virtual ImageOrientation FrameOrientationAtIndex(uint32) const noexcept
     {
       krys_assert_msg(false, "Not reached");
       return ImageOrientation::Orientation::None;
     }
+
     KRYS_NODISCARD virtual DecodingStatus FrameDecodingStatusAtIndex(uint32) const noexcept
     {
       krys_assert_msg(false, "Not reached");

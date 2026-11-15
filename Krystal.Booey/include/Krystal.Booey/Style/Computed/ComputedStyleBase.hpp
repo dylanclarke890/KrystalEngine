@@ -304,6 +304,7 @@ namespace krys::boo
     constexpr auto TextDecorationLineBits = 5;
     constexpr auto TextTransformBits = 6;
     constexpr auto PseudoElementTypeBits = 5;
+
     struct PseudoStyleCache
     {
       struct IdentifierHash
@@ -316,16 +317,18 @@ namespace krys::boo
 
       HashMap<PseudoElementIdentifier, UniquePtr<RenderStyle>, IdentifierHash> Styles;
     };
+
     class ComputedStyleBase
     {
     public:
       enum CloneTag
       {
-        Clone
+        Clone,
       };
+
       enum CreateDefaultStyleTag
       {
-        CreateDefaultStyle
+        CreateDefaultStyle,
       };
 
       ~ComputedStyleBase() noexcept;
@@ -457,6 +460,7 @@ namespace krys::boo
       {
         return _cachedPseudoStyles && _cachedPseudoStyles->Styles.size();
       }
+
       KRYS_NODISCARD const PseudoStyleCache *CachedPseudoStyles() const noexcept
       {
         return _cachedPseudoStyles.get();
@@ -678,6 +682,7 @@ namespace krys::boo
       {
         return _nonInheritedData;
       }
+
       const NonInheritedFlags &GetNonInheritedFlags() const
       {
         return _nonInheritedFlags;
@@ -687,10 +692,12 @@ namespace krys::boo
       {
         return _rareInheritedData;
       }
+
       const StyleInheritedData &InheritedData() const
       {
         return _inheritedData;
       }
+
       const InheritedFlags &GetInheritedFlags() const
       {
         return _inheritedFlags;

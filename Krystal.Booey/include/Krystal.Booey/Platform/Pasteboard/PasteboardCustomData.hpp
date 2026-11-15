@@ -52,9 +52,11 @@ namespace krys::boo
       PlatformData Data;
 
       Entry() noexcept = default;
+
       explicit Entry(utf8_stringview type) noexcept : Type(type)
       {
       }
+
       Entry(utf8_stringview type, Maybe<utf8_string> customData, PlatformData data) noexcept
           : Type(type), CustomData(krys::move(customData)), Data(krys::move(data))
       {
@@ -67,6 +69,7 @@ namespace krys::boo
 
   public:
     PasteboardCustomData() noexcept = default;
+
     PasteboardCustomData(utf8_string origin, List<Entry> &&data) noexcept
         : _origin(krys::move(origin)), _data(krys::move(data))
     {
@@ -76,6 +79,7 @@ namespace krys::boo
     {
       return _origin;
     }
+
     void SetOrigin(utf8_stringview origin) noexcept
     {
       _origin = utf8_string(origin);

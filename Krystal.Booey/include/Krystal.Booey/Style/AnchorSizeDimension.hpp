@@ -36,6 +36,6 @@ namespace krys::boo::style
     Block,
     Inline,
     SelfBlock,
-    SelfInline
+    SelfInline,
   };
 }

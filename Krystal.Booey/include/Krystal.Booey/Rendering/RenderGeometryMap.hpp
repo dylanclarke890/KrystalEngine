@@ -68,7 +68,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(RenderGeometryMap);
 
   private:
-    static constexpr size_t notFound = static_cast<size_t>(-1);
+    constexpr static size_t notFound = static_cast<size_t>(-1);
 
     size_t _insertionPosition {notFound};
     int32 _nonUniformStepsCount {0};
@@ -134,10 +134,12 @@ namespace krys::boo
     {
       return _nonUniformStepsCount;
     }
+
     KRYS_NODISCARD bool HasTransformStep() const noexcept
     {
       return _transformedStepsCount;
     }
+
     KRYS_NODISCARD bool HasFixedPositionStep() const noexcept
     {
       return _fixedStepsCount;

@@ -39,6 +39,6 @@ namespace krys::boo::css
     Invert,
     Min,
     Max,
-    Clamp
+    Clamp,
   };
 }

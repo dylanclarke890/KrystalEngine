@@ -56,45 +56,45 @@ namespace krys::boo
     NormalVariant,
     SmallCapsVariant,
     EmphasisMarkVariant,
-    BrokenIdeographVariant
+    BrokenIdeographVariant,
   };
 
   enum Pitch : uint8
   {
     UnknownPitch,
     FixedPitch,
-    VariablePitch
+    VariablePitch,
   };
 
   enum class IsForPlatformFont : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   // Used to create platform fonts.
   enum class FontOrigin : bool
   {
     Remote,
-    Local
+    Local,
   };
 
   enum class FontIsInterstitial : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class FontVisibility : bool
   {
     Visible,
-    Invisible
+    Invisible,
   };
 
   enum class FontIsOrientationFallback : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   struct FontInternalAttributes
@@ -117,19 +117,19 @@ namespace krys::boo
     using IsOrientationFallback = FontIsOrientationFallback;
     using Attributes = FontInternalAttributes;
 
-    static constexpr size_t InlineGlyphRunCapacity = 128;
+    constexpr static size_t InlineGlyphRunCapacity = 128;
 
     // Should the result of this function include the results of synthetic bold?
     enum class SyntheticBoldInclusion
     {
       Incorporate,
-      Exclude
+      Exclude,
     };
 
     enum class IsSystemFallbackFontPlaceholder : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:

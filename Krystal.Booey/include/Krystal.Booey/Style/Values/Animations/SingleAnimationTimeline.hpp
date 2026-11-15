@@ -58,31 +58,38 @@ namespace krys::boo::style
     {
       return std::holds_alternative<css::keywords::Auto>(_value);
     }
+
     KRYS_NODISCARD bool IsNone() const noexcept
     {
       return std::holds_alternative<css::keywords::None>(_value);
     }
+
     KRYS_NODISCARD bool IsCustomIdentifier() const noexcept
     {
       return std::holds_alternative<css::CustomIdentifier>(_value);
     }
+
     KRYS_NODISCARD Maybe<css::CustomIdentifier> TryCustomIdentifier() const noexcept
     {
       return IsCustomIdentifier() ? std::make_optional(std::get<css::CustomIdentifier>(_value))
                                   : std::nullopt;
     }
+
     KRYS_NODISCARD bool IsScrollFunction() const noexcept
     {
       return std::holds_alternative<ScrollFunction>(_value);
     }
+
     KRYS_NODISCARD Maybe<ScrollFunction> TryScrollFunction() const noexcept
     {
       return IsScrollFunction() ? std::make_optional(std::get<ScrollFunction>(_value)) : std::nullopt;
     }
+
     KRYS_NODISCARD bool IsViewFunction() const noexcept
     {
       return std::holds_alternative<ViewFunction>(_value);
     }
+
     KRYS_NODISCARD Maybe<ViewFunction> TryViewFunction() const noexcept
     {
       return IsViewFunction() ? std::make_optional(std::get<ViewFunction>(_value)) : std::nullopt;

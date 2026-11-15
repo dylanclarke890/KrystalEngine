@@ -44,14 +44,14 @@ namespace krys::boo
   class GraphicsLayerAnimation : public RefCounted<GraphicsLayerAnimation>
   {
   public:
-    static constexpr double IterationCountInfinite = -1;
+    constexpr static double IterationCountInfinite = -1;
 
     enum class Direction : uint8
     {
       Normal,
       Alternate,
       Reverse,
-      AlternateReverse
+      AlternateReverse,
     };
 
     enum class FillMode : uint8
@@ -59,13 +59,13 @@ namespace krys::boo
       None,
       Forwards,
       Backwards,
-      Both
+      Both,
     };
 
     enum class PlayState : bool
     {
       Running,
-      Paused
+      Paused,
     };
 
   private:
@@ -85,6 +85,7 @@ namespace krys::boo
     {
       return AdoptRef(*new GraphicsLayerAnimation);
     }
+
     KRYS_NODISCARD static Ref<GraphicsLayerAnimation> Create(const GraphicsLayerAnimation &other) noexcept
     {
       return AdoptRef(*new GraphicsLayerAnimation(other));
@@ -96,6 +97,7 @@ namespace krys::boo
     {
       return _compositeOperation;
     }
+
     void SetCompositeOperation(CompositeOperation compositeOperation) noexcept
     {
       _compositeOperation = compositeOperation;
@@ -105,6 +107,7 @@ namespace krys::boo
     {
       return _delay;
     }
+
     void SetDelay(double delay) noexcept
     {
       _delay = delay;
@@ -114,6 +117,7 @@ namespace krys::boo
     {
       return _direction;
     }
+
     void SetDirection(Direction direction) noexcept
     {
       _direction = direction;
@@ -124,6 +128,7 @@ namespace krys::boo
       krys_debug_assert(!duration || *duration >= 0);
       _duration = duration;
     }
+
     KRYS_NODISCARD Maybe<double> Duration() const noexcept
     {
       return _duration;
@@ -133,6 +138,7 @@ namespace krys::boo
     {
       return _fillMode;
     }
+
     void SetFillMode(FillMode fillMode) noexcept
     {
       _fillMode = fillMode;
@@ -142,6 +148,7 @@ namespace krys::boo
     {
       return _playbackRate;
     }
+
     void SetPlaybackRate(double playbackRate) noexcept
     {
       _playbackRate = playbackRate;
@@ -151,6 +158,7 @@ namespace krys::boo
     {
       return _iterationCount;
     }
+
     void SetIterationCount(double iterationCount) noexcept
     {
       _iterationCount = iterationCount;
@@ -160,6 +168,7 @@ namespace krys::boo
     {
       return _playState;
     }
+
     void SetPlayState(PlayState playState) noexcept
     {
       _playState = playState;
@@ -169,6 +178,7 @@ namespace krys::boo
     {
       return _timingFunction;
     }
+
     void SetTimingFunction(RefPtr<TimingFunction> &&function) noexcept
     {
       _timingFunction = krys::move(function);
@@ -178,6 +188,7 @@ namespace krys::boo
     {
       return _defaultTimingFunctionForKeyframes;
     }
+
     void SetDefaultTimingFunctionForKeyframes(RefPtr<TimingFunction> &&function) noexcept
     {
       _defaultTimingFunctionForKeyframes = krys::move(function);
@@ -187,14 +198,17 @@ namespace krys::boo
     {
       return (!_duration || !*_duration) && _delay <= 0;
     }
+
     KRYS_NODISCARD bool FillsBackwards() const noexcept
     {
       return _fillMode == FillMode::Backwards || _fillMode == FillMode::Both;
     }
+
     KRYS_NODISCARD bool FillsForwards() const noexcept
     {
       return _fillMode == FillMode::Forwards || _fillMode == FillMode::Both;
     }
+
     KRYS_NODISCARD bool DirectionIsForwards() const noexcept
     {
       return _direction == Direction::Normal || _direction == Direction::Alternate;

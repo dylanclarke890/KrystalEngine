@@ -50,13 +50,13 @@ namespace krys::boo
   enum class AvailableLogicalHeightType : bool
   {
     ExcludeMarginBorderPadding,
-    IncludeMarginBorderPadding
+    IncludeMarginBorderPadding,
   };
 
   enum class StretchingMode : uint8
   {
     Any,
-    Explicit
+    Explicit,
   };
 
   /// @brief A renderer that generates a box: its frame rect (relative to its container), margins, overflow
@@ -92,14 +92,17 @@ namespace krys::boo
     {
       return _frameRect.X();
     }
+
     KRYS_NODISCARD LayoutUnit Y() const noexcept
     {
       return _frameRect.Y();
     }
+
     KRYS_NODISCARD LayoutUnit Width() const noexcept
     {
       return _frameRect.Width();
     }
+
     KRYS_NODISCARD LayoutUnit Height() const noexcept
     {
       return _frameRect.Height();
@@ -111,6 +114,7 @@ namespace krys::boo
     {
       return TopLeftLocation().Y();
     }
+
     KRYS_NODISCARD LayoutUnit Left() const noexcept
     {
       return TopLeftLocation().X();
@@ -120,14 +124,17 @@ namespace krys::boo
     {
       _frameRect.SetX(x);
     }
+
     void SetY(LayoutUnit y) noexcept
     {
       _frameRect.SetY(y);
     }
+
     void SetWidth(LayoutUnit width) noexcept
     {
       _frameRect.SetWidth(width);
     }
+
     void SetHeight(LayoutUnit height) noexcept
     {
       _frameRect.SetHeight(height);
@@ -151,24 +158,29 @@ namespace krys::boo
     {
       return _frameRect.Location();
     }
+
     KRYS_NODISCARD LayoutSize LocationOffset() const noexcept
     {
       return {X(), Y()};
     }
+
     KRYS_NODISCARD LayoutSize Size() const noexcept
     {
       return _frameRect.Size();
     }
+
     KRYS_NODISCARD LayoutSize LogicalSize() const noexcept;
 
     void SetLocation(const LayoutPoint &location) noexcept
     {
       _frameRect.SetLocation(location);
     }
+
     void SetSize(const LayoutSize &size) noexcept
     {
       _frameRect.SetSize(size);
     }
+
     void Move(LayoutUnit dx, LayoutUnit dy) noexcept
     {
       _frameRect.Move(dx, dy);
@@ -178,20 +190,24 @@ namespace krys::boo
     {
       return _frameRect;
     }
+
     void SetFrameRect(const LayoutRect &rect) noexcept
     {
       _frameRect = rect;
     }
 
     KRYS_NODISCARD LayoutRect MarginBoxRect() const noexcept;
+
     KRYS_NODISCARD LayoutRect BorderBoxRect() const noexcept
     {
       return LayoutRect(LayoutPoint(), Size());
     }
+
     KRYS_NODISCARD LayoutRect BorderBoundingBox() const noexcept final
     {
       return BorderBoxRect();
     }
+
     KRYS_NODISCARD LayoutSize BorderBoxLogicalSize() const noexcept
     {
       return LogicalSize();
@@ -231,10 +247,12 @@ namespace krys::boo
     {
       return Parent() && Parent()->IsRenderGrid() && !IsExcludedFromNormalLayout();
     }
+
     KRYS_NODISCARD bool IsFlexItem() const noexcept
     {
       return Parent() && Parent()->IsRenderFlexibleBox() && !IsExcludedFromNormalLayout();
     }
+
     KRYS_NODISCARD bool IsColumnSpanner() const noexcept;
 
 #pragma endregion
@@ -247,10 +265,12 @@ namespace krys::boo
     // their physical counterparts.  For example minX is on the left in vertical-lr, but it is on the right in
     // vertical-rl.
     KRYS_NODISCARD LayoutRect FlippedClientBoxRect() const noexcept;
+
     KRYS_NODISCARD LayoutRect LayoutOverflowRect() const noexcept
     {
       return _overflow ? _overflow->LayoutOverflowRect() : FlippedClientBoxRect();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalLeftLayoutOverflow() const noexcept;
     KRYS_NODISCARD LayoutUnit LogicalRightLayoutOverflow() const noexcept;
 
@@ -258,6 +278,7 @@ namespace krys::boo
     {
       return _overflow ? _overflow->VisualOverflowRect() : BorderBoxRect();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalLeftVisualOverflow() const noexcept;
     KRYS_NODISCARD LayoutUnit LogicalRightVisualOverflow() const noexcept;
 
@@ -278,6 +299,7 @@ namespace krys::boo
     {
       return BorderBoxRect();
     }
+
     KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
     {
       return BorderBoxRect();
@@ -332,10 +354,12 @@ namespace krys::boo
     {
       return static_cast<bool>(_overflow);
     }
+
     KRYS_NODISCARD bool HasVisualOverflow() const noexcept
     {
       return _overflow && !BorderBoxRect().Contains(_overflow->VisualOverflowRect());
     }
+
     KRYS_NODISCARD bool HasHorizontalLayoutOverflow() const noexcept;
     KRYS_NODISCARD bool HasVerticalLayoutOverflow() const noexcept;
 
@@ -363,10 +387,12 @@ namespace krys::boo
     {
       return Width();
     }
+
     KRYS_NODISCARD LayoutUnit OffsetHeight() const noexcept override
     {
       return Height();
     }
+
     KRYS_NODISCARD LayoutUnit OffsetLeft() const noexcept override;
     KRYS_NODISCARD LayoutUnit OffsetTop() const noexcept override;
 
@@ -394,34 +420,42 @@ namespace krys::boo
     {
       return _marginBox;
     }
+
     KRYS_NODISCARD LayoutUnit MarginTop() const noexcept override
     {
       return _marginBox.Top();
     }
+
     KRYS_NODISCARD LayoutUnit MarginBottom() const noexcept override
     {
       return _marginBox.Bottom();
     }
+
     KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept override
     {
       return _marginBox.Left();
     }
+
     KRYS_NODISCARD LayoutUnit MarginRight() const noexcept override
     {
       return _marginBox.Right();
     }
+
     void SetMarginTop(LayoutUnit margin) noexcept
     {
       _marginBox.Top() = margin;
     }
+
     void SetMarginBottom(LayoutUnit margin) noexcept
     {
       _marginBox.Bottom() = margin;
     }
+
     void SetMarginLeft(LayoutUnit margin) noexcept
     {
       _marginBox.Left() = margin;
     }
+
     void SetMarginRight(LayoutUnit margin) noexcept
     {
       _marginBox.Right() = margin;
@@ -431,10 +465,12 @@ namespace krys::boo
     {
       return _marginBox.LogicalLeft(writingMode);
     }
+
     KRYS_NODISCARD LayoutUnit MarginLogicalRight(WritingMode writingMode) const noexcept
     {
       return _marginBox.LogicalRight(writingMode);
     }
+
     KRYS_NODISCARD LayoutUnit MarginLogicalLeft() const noexcept;
     KRYS_NODISCARD LayoutUnit MarginLogicalRight() const noexcept;
 
@@ -442,18 +478,22 @@ namespace krys::boo
     using RenderBoxModelObject::MarginBefore;
     using RenderBoxModelObject::MarginEnd;
     using RenderBoxModelObject::MarginStart;
+
     KRYS_NODISCARD LayoutUnit MarginBefore(WritingMode writingMode) const noexcept override
     {
       return _marginBox.Before(writingMode);
     }
+
     KRYS_NODISCARD LayoutUnit MarginAfter(WritingMode writingMode) const noexcept override
     {
       return _marginBox.After(writingMode);
     }
+
     KRYS_NODISCARD LayoutUnit MarginStart(WritingMode writingMode) const noexcept override
     {
       return _marginBox.Start(writingMode);
     }
+
     KRYS_NODISCARD LayoutUnit MarginEnd(WritingMode writingMode) const noexcept override
     {
       return _marginBox.End(writingMode);
@@ -465,18 +505,22 @@ namespace krys::boo
     {
       _marginBox.Before(writingMode) = value;
     }
+
     void SetMarginAfter(LayoutUnit value, WritingMode writingMode) noexcept
     {
       _marginBox.After(writingMode) = value;
     }
+
     void SetMarginStart(LayoutUnit value, WritingMode writingMode) noexcept
     {
       _marginBox.Start(writingMode) = value;
     }
+
     void SetMarginEnd(LayoutUnit value, WritingMode writingMode) noexcept
     {
       _marginBox.End(writingMode) = value;
     }
+
     void SetMarginBefore(LayoutUnit value) noexcept;
     void SetMarginAfter(LayoutUnit value) noexcept;
     void SetMarginStart(LayoutUnit value) noexcept;
@@ -486,10 +530,12 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual LayoutUnit CollapsedMarginBefore() const noexcept
     {
       return MarginBefore();
     }
+
     KRYS_NODISCARD virtual LayoutUnit CollapsedMarginAfter() const noexcept
     {
       return MarginAfter();
@@ -510,12 +556,14 @@ namespace krys::boo
       LayoutUnit Start;
       LayoutUnit End;
     };
+
     struct LogicalExtentComputedValues
     {
       LayoutUnit Extent;
       LayoutUnit Position;
       ComputedMarginValues Margins;
     };
+
     // Resolve auto margins in the inline direction of the containing block so that objects can be pushed to
     // the start, middle or end of the containing block.
     void ComputeInlineDirectionMargins(const RenderBlock &containingBlock, LayoutUnit containerWidth,
@@ -591,7 +639,7 @@ namespace krys::boo
     enum class AllowIntrinsic : bool
     {
       No,
-      Yes
+      Yes,
     };
     KRYS_NODISCARD LayoutUnit ConstrainLogicalWidthByMinMax(
       LayoutUnit logicalWidth, LayoutUnit availableWidth, const RenderBlock &containingBlock,
@@ -630,6 +678,7 @@ namespace krys::boo
     {
       return {};
     }
+
     KRYS_NODISCARD LayoutUnit IntrinsicLogicalWidth() const noexcept;
     KRYS_NODISCARD LayoutUnit IntrinsicLogicalHeight() const noexcept;
 
@@ -687,7 +736,7 @@ namespace krys::boo
     enum class UpdatePercentageHeightDescendants : bool
     {
       No,
-      Yes
+      Yes,
     };
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputePercentageLogicalHeight(const style::PreferredSize &logicalHeight,
@@ -723,6 +772,7 @@ namespace krys::boo
     {
       return null;
     }
+
     KRYS_NODISCARD virtual Maybe<LayoutUnit> LastLineBaseline() const noexcept
     {
       return null;
@@ -790,9 +840,11 @@ namespace krys::boo
     KRYS_NODISCARD IntSize CalculateAutoscrollDirection(const IntPoint &windowPoint) const noexcept;
     /// @brief @p renderer or its nearest ancestor that can autoscroll.
     KRYS_NODISCARD static RenderBox *FindAutoscrollable(RenderObject *renderer) noexcept;
+
     virtual void StopAutoscroll() noexcept
     {
     }
+
     /// @brief Scrolls the box towards @p mousePosition, the further from @p source the faster (both in the
     /// window).
     virtual void PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept;
@@ -896,6 +948,7 @@ namespace krys::boo
     {
       return FrameRect();
     }
+
     KRYS_NODISCARD LayoutRange ContainingBlockRangeForPositioned(const RenderBoxModelObject &container,
                                                                  BoxAxis physicalAxis) const noexcept;
 
@@ -923,12 +976,14 @@ namespace krys::boo
       const LayoutPoint &location,
       OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
       PaintPhase phase = PaintPhase::BlockBackground) const noexcept;
+
     KRYS_NODISCARD virtual LayoutRect
       OverflowClipRectForChildLayers(const LayoutPoint &location,
                                      OverlayScrollbarSizeRelevancy relevancy) const noexcept
     {
       return OverflowClipRect(location, relevancy);
     }
+
     KRYS_NODISCARD LayoutRect ClipRect(const LayoutPoint &location) const noexcept;
 
 #pragma region Fragmentation
@@ -943,21 +998,25 @@ namespace krys::boo
     /// @brief What the box has in @p fragment, if it has been laid out there.
     KRYS_NODISCARD RenderBoxFragmentInfo *
       GetRenderBoxFragmentInfo(RenderFragmentContainer *fragment) const noexcept;
+
     /// @brief Whether the box can extend outside its containing block's fragments.
     KRYS_NODISCARD bool CanHaveOutsideFragmentRange() const noexcept
     {
       return !IsRenderFragmentedFlow();
     }
+
     /// @brief Whether the box mustn't be split across columns (replaced boxes, form controls, scrollers,
     /// writing mode roots and size-contained boxes).
     KRYS_NODISCARD bool IsUnsplittableForPagination() const noexcept;
     /// @brief Whether the box scrolls its overflow in the block direction and has a specified height, so
     /// splitting it would split its scrollbar.
     KRYS_NODISCARD bool HasUnsplittableScrollingOverflow() const noexcept;
+
     /// @brief Marks the box for layout when it moved relative to its column, or the columns' height changed.
     virtual void MarkForPaginationRelayoutIfNeeded() noexcept
     {
     }
+
     /// @brief Whether the box must be laid out again when its range of fragments changes.
     KRYS_NODISCARD virtual bool NeedsLayoutAfterFragmentRangeChange() const noexcept
     {
@@ -991,6 +1050,7 @@ namespace krys::boo
     {
       krys_debug_assert(false);
     }
+
     virtual void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept;
     virtual void PaintMask(PaintInfo &, const LayoutPoint &) noexcept;
     /// @brief Paints the mask images and the mask border into @p paintRect: into a transparency layer that
@@ -1071,6 +1131,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldTrimChildMargin(style::MarginTrimSide type,
                                               const RenderBox &child) const noexcept;
+
     KRYS_NODISCARD virtual bool IsChildEligibleForMarginTrim(style::MarginTrimSide,
                                                              const RenderBox &) const noexcept
     {
@@ -1112,12 +1173,12 @@ namespace krys::boo
     enum class ConstrainDimension : uint8
     {
       Width,
-      Height
+      Height,
     };
     enum class MinimumSizeIsAutomaticContentBased : bool
     {
       No,
-      Yes
+      Yes,
     };
     void ConstrainLogicalMinMaxSizesByAspectRatio(LayoutUnit &computedMinSize, LayoutUnit &computedMaxSize,
                                                   LayoutUnit computedSize,
@@ -1198,7 +1259,7 @@ namespace krys::boo
       MinIntrinsic,
       MaxContent,
       MinContent,
-      FitContent
+      FitContent,
     };
     void ComputeIntrinsicKeywordLogicalWidths(IntrinsicKeyword keyword, LayoutUnit borderAndPadding,
                                               LayoutUnit &minLogicalWidth,

@@ -29,7 +29,6 @@
 
 namespace krys::boo
 {
-
   Ref<StyleBorderImageData> StyleBorderImageData::Copy() const noexcept
   {
     return AdoptRef(*new StyleBorderImageData(*this));

@@ -43,7 +43,7 @@ namespace krys::boo
   enum class ImageSizeChangeType : bool
   {
     None,
-    ForAltText
+    ForAltText,
   };
 
   /// @brief The renderer of an image: an `<img>`, or generated content (`content: url(...)`).
@@ -75,10 +75,12 @@ namespace krys::boo
     {
       return *_imageResource;
     }
+
     KRYS_NODISCARD const RenderImageResource &ImageResource() const noexcept
     {
       return *_imageResource;
     }
+
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept
     {
       return ImageResource().GetCachedImage();
@@ -95,6 +97,7 @@ namespace krys::boo
     {
       _isGeneratedContent = generated;
     }
+
     KRYS_NODISCARD bool IsGeneratedContent() const noexcept
     {
       return _isGeneratedContent;
@@ -104,12 +107,14 @@ namespace krys::boo
     {
       return _altText;
     }
+
     void SetAltText(utf8_string altText) noexcept
     {
       _altText = krys::move(altText);
     }
 
     void SetImageDevicePixelRatio(float factor) noexcept;
+
     KRYS_NODISCARD float ImageDevicePixelRatio() const noexcept
     {
       return _imageDevicePixelRatio;

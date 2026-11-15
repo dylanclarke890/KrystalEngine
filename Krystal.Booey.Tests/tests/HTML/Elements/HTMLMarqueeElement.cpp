@@ -133,6 +133,7 @@ namespace krys::boo::tests
       const char8_t *Size;
       std::string Loop;
     };
+
     const char8_t *box = u8"width: 400px; height: 40px";
     auto test = GENERATE_COPY(values<Case>({
       {u8"", box, "translateX(400px) translateX(-100px) 7083"},

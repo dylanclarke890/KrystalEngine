@@ -44,7 +44,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-event-at_target
     AT_TARGET = 2,
     /// @see https://dom.spec.whatwg.org/#dom-event-bubbling_phase
-    BUBBLING_PHASE = 3
+    BUBBLING_PHASE = 3,
   };
 }
 

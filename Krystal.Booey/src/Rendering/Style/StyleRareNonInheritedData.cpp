@@ -25,7 +25,6 @@
 
 namespace krys::boo
 {
-
   StyleRareNonInheritedData::StyleRareNonInheritedData() noexcept
       : ContainIntrinsicWidth(style::ComputedStyle::InitialContainIntrinsicWidth()),
         ContainIntrinsicHeight(style::ComputedStyle::InitialContainIntrinsicHeight()),

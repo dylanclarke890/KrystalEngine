@@ -53,6 +53,7 @@ namespace krys::boo::layout
     {
       return _visualLeft;
     }
+
     KRYS_NODISCARD LayoutSize FormattingRootBorderBoxSize() const noexcept
     {
       return _formattingRootBorderBoxSize;

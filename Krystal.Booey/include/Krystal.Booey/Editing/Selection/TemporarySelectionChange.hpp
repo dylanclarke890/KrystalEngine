@@ -53,7 +53,7 @@ namespace krys::boo
     RevealSelectionBounds,
     UserTriggered,
     ForceCenterScroll,
-    OnlyAllowForwardScrolling
+    OnlyAllowForwardScrolling,
   };
 }
 
@@ -70,7 +70,7 @@ namespace krys::boo
     enum class IsTemporarySelection : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     RefPtr<dom::Document> _document;

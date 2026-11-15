@@ -92,14 +92,17 @@ namespace krys::ui
     {
       return _view ? static_cast<int32>(_view->_displayColour.BitsPerComponent) : 8;
     }
+
     KRYS_NODISCARD bool ScreenSupportsExtendedColor() const noexcept override
     {
       return _view && _view->_displayColour.Gamut != pal::DisplayGamut::SRGB;
     }
+
     KRYS_NODISCARD bool ScreenSupportsRec2020Color() const noexcept override
     {
       return _view && _view->_displayColour.Gamut == pal::DisplayGamut::Rec2020;
     }
+
     KRYS_NODISCARD bool ScreenSupportsHighDynamicRange() const noexcept override
     {
       return _view && _view->_displayColour.HighDynamicRange;

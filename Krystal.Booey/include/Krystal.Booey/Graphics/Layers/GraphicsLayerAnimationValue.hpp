@@ -48,6 +48,7 @@ namespace krys::boo
     {
       return _keyTime;
     }
+
     KRYS_NODISCARD const TimingFunction *GetTimingFunction() const noexcept
     {
       return _timingFunction.get();
@@ -69,6 +70,7 @@ namespace krys::boo
                                                 : nullptr)
     {
     }
+
     GraphicsLayerAnimationValue(GraphicsLayerAnimationValue &&) noexcept = default;
   };
 }

@@ -36,10 +36,12 @@ namespace krys
     {
       return _low;
     }
+
     KRYS_NODISCARD const T &High() const noexcept
     {
       return _high;
     }
+
     KRYS_NODISCARD const TUserData &Data() const noexcept
     {
       return _data;
@@ -60,6 +62,7 @@ namespace krys
     {
       return _maxHigh;
     }
+
     void SetMaxHigh(const T &maxHigh) noexcept
     {
       _maxHigh = maxHigh;
@@ -153,10 +156,12 @@ namespace krys
       {
         return _interval.Low();
       }
+
       KRYS_NODISCARD const T &HighValue() const noexcept
       {
         return _interval.High();
       }
+
       void CollectIfNeeded(const IntervalType &data) const noexcept
       {
         if (data.Overlaps(_interval))

@@ -37,10 +37,14 @@ namespace krys::log
     SpdlogLogger(const LoggerSettings &settings) : _settings(settings), _logger(settings.Name)
     {
       if (_settings.OutputToConsole)
+      {
         AddConsoleSink();
+      }
 
       if (!_settings.FilePath.empty())
+      {
         AddFileSink(_settings.FilePath);
+      }
 
       _logger.set_pattern("[%H:%M:%S.%e] [%l] %v", spdlog::pattern_time_type::local);
       _logger.set_level(ToSpdLogLevel(_settings.Level));
@@ -92,10 +96,14 @@ namespace krys::log
   Expected<UniquePtr<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept
   {
     if (settings.Name.empty())
+    {
       return Unexpected("Logger name cannot be empty.");
+    }
 
     if (settings.FilePath.empty() && !settings.OutputToConsole)
+    {
       return Unexpected("At least one sink (console or file) must be enabled.");
+    }
 
     try
     {

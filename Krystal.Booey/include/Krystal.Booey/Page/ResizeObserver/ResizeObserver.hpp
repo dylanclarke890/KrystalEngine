@@ -86,6 +86,7 @@ namespace krys::boo
     {
       return !_observations.empty();
     }
+
     KRYS_NODISCARD bool HasActiveObservations() const noexcept
     {
       return !_activeObservations.empty();
@@ -119,6 +120,7 @@ namespace krys::boo
     {
       return _hasSkippedObservations;
     }
+
     void SetHasSkippedObservations(bool skipped) noexcept
     {
       _hasSkippedObservations = skipped;

@@ -40,7 +40,7 @@ namespace krys::boo::css
     enum class ValueType
     {
       Specified,
-      Computed
+      Computed,
     };
 
     // Take two keywords that make up a <position-area> and build a Value that

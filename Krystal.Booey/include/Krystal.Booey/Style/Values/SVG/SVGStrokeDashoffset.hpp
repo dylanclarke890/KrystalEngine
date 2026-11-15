@@ -46,13 +46,16 @@ namespace krys::boo::style
     SVGStrokeDashoffset(SVGStrokeDashoffsetLength &&length) noexcept : Value {krys::move(length)}
     {
     }
+
     SVGStrokeDashoffset(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept
         : Value {Fixed {static_cast<float>(literal.Value)}}
     {
     }
+
     SVGStrokeDashoffset(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept : Value {literal}
     {
     }
+
     SVGStrokeDashoffset(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept : Value {literal}
     {
     }
@@ -65,6 +68,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const SVGStrokeDashoffset &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(SVGStrokeDashoffset, Value);
 
   // MARK: - Conversion

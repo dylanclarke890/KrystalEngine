@@ -59,6 +59,7 @@ namespace krys::boo
     {
       return _legacyRootInlineBox.get();
     }
+
     void DeleteLegacyRootBox(bool runCleanup = false) noexcept;
 
     void LayoutLineBoxes() noexcept;

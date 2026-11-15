@@ -42,7 +42,7 @@ namespace krys::boo::dom
       Parsing,
       Stopping,
       Stopped,
-      Detached
+      Detached,
     };
 
     ParserState _state {ParserState::Parsing};
@@ -67,14 +67,17 @@ namespace krys::boo::dom
     {
       return _state == ParserState::Parsing;
     }
+
     KRYS_NODISCARD bool IsStopping() const noexcept
     {
       return _state == ParserState::Stopping;
     }
+
     KRYS_NODISCARD bool IsStopped() const noexcept
     {
       return _state >= ParserState::Stopped;
     }
+
     KRYS_NODISCARD bool IsDetached() const noexcept
     {
       return _state == ParserState::Detached;

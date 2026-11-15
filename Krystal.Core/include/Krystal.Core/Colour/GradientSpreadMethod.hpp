@@ -12,6 +12,6 @@ namespace krys
     /// @brief The gradient repeats, every other repetition reversed.
     Reflect,
     /// @brief The gradient repeats.
-    Repeat
+    Repeat,
   };
 }

@@ -37,7 +37,7 @@ namespace krys::boo::style
     Universal,
     ClassA,
     ClassB,
-    ClassC
+    ClassC,
   };
 
   enum class UsedRuleType : uint8
@@ -50,7 +50,7 @@ namespace krys::boo::style
   class RuleData
   {
   public:
-    static constexpr uint32 MaximumSelectorComponentCount = 8'192;
+    constexpr static uint32 MaximumSelectorComponentCount = 8'192;
 
   private:
     // Keep in sync with RuleFeature's selectorIndex and selectorListIndex size.

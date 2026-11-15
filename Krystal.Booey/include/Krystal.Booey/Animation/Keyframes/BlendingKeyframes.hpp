@@ -86,17 +86,21 @@ namespace krys::boo
     {
       return _computedOffset;
     }
+
     KRYS_NODISCARD Maybe<boo::CompositeOperation> CompositeOperation() const noexcept final
     {
       return _compositeOperation;
     }
+
     KRYS_NODISCARD bool AnimatesProperty(KeyframeInterpolation::Property property) const noexcept final;
+
     KRYS_NODISCARD bool IsBlendingKeyframe() const noexcept final
     {
       return true;
     }
 
     void AddProperty(const AnimatableCSSProperty &property) noexcept;
+
     KRYS_NODISCARD const AnimatableCSSPropertySet &Properties() const noexcept
     {
       return _properties;
@@ -106,11 +110,14 @@ namespace krys::boo
     {
       return _specifiedOffset;
     }
+
     void SetComputedOffset(double offset) noexcept
     {
       _computedOffset = offset;
     }
+
     KRYS_NODISCARD bool UsesRangeOffset() const noexcept;
+
     KRYS_NODISCARD bool HasResolvedOffset() const noexcept
     {
       return !std::isnan(_computedOffset);
@@ -120,6 +127,7 @@ namespace krys::boo
     {
       return _style.get();
     }
+
     void SetStyle(UniquePtr<RenderStyle> &&style) noexcept
     {
       _style = krys::move(style);
@@ -129,6 +137,7 @@ namespace krys::boo
     {
       return _timingFunction.get();
     }
+
     void SetTimingFunction(const RefPtr<boo::TimingFunction> &timingFunction) noexcept
     {
       _timingFunction = timingFunction;
@@ -143,6 +152,7 @@ namespace krys::boo
     {
       return _containsDirectionAwareProperty;
     }
+
     void SetContainsDirectionAwareProperty(bool containsDirectionAwareProperty) noexcept
     {
       _containsDirectionAwareProperty = containsDirectionAwareProperty;
@@ -195,6 +205,7 @@ namespace krys::boo
     {
       return _identifier;
     }
+
     KRYS_NODISCARD StringAtom KeyframesName() const noexcept;
     /// @brief The name the keyframes' animation has on a graphics layer.
     KRYS_NODISCARD const utf8_string &AcceleratedAnimationName() const noexcept;
@@ -203,22 +214,27 @@ namespace krys::boo
 
     void AddProperty(const AnimatableCSSProperty &property) noexcept;
     KRYS_NODISCARD bool ContainsProperty(const AnimatableCSSProperty &property) const noexcept;
+
     KRYS_NODISCARD const AnimatableCSSPropertySet &Properties() const noexcept
     {
       return _properties;
     }
+
     KRYS_NODISCARD bool ContainsAnimatableCSSProperty() const noexcept;
     KRYS_NODISCARD bool ContainsDirectionAwareProperty() const noexcept;
 
     void Clear() noexcept;
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _keyframes.empty();
     }
+
     KRYS_NODISCARD size_t Size() const noexcept
     {
       return _keyframes.size();
     }
+
     KRYS_NODISCARD const BlendingKeyframe &operator[](size_t index) const noexcept KRYS_LIFETIME_BOUND
     {
       return _keyframes[index];
@@ -234,6 +250,7 @@ namespace krys::boo
     {
       return _keyframes.begin();
     }
+
     KRYS_NODISCARD auto end() const noexcept KRYS_LIFETIME_BOUND
     {
       return _keyframes.end();
@@ -251,22 +268,27 @@ namespace krys::boo
     {
       return _hasWidthDependentTransform;
     }
+
     KRYS_NODISCARD bool HasHeightDependentTransform() const noexcept
     {
       return _hasHeightDependentTransform;
     }
+
     KRYS_NODISCARD bool HasDiscreteTransformInterval() const noexcept
     {
       return _hasDiscreteTransformInterval;
     }
+
     KRYS_NODISCARD bool HasExplicitlyInheritedKeyframeProperty() const noexcept
     {
       return _hasExplicitlyInheritedKeyframeProperty;
     }
+
     KRYS_NODISCARD bool UsesAnchorFunctions() const noexcept
     {
       return _usesAnchorFunctions;
     }
+
     KRYS_NODISCARD bool HasKeyframeNotUsingRangeOffset() const noexcept
     {
       return _hasKeyframeNotUsingRangeOffset;

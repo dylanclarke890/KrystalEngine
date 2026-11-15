@@ -621,6 +621,7 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
     CHECK(fixture.ById(u8"src").FirstChild()->CanStartSelection());
   }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "DragController: drag images", "[Page][DragController]")
   {
     SECTION("A draggable element is snapshotted, under the cursor where it was pressed")

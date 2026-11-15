@@ -48,7 +48,7 @@ namespace krys::boo::html
   enum class DateTimePlaceholderIfNoValue : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief What a date or time field is part of: a date or time input's editable fields.
@@ -78,7 +78,7 @@ namespace krys::boo::html
     enum class EventBehavior : bool
     {
       DispatchNoEvent,
-      DispatchInputAndChangeEvents
+      DispatchInputAndChangeEvents,
     };
 
   private:

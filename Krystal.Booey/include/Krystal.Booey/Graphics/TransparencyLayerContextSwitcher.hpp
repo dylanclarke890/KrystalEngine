@@ -43,6 +43,7 @@ namespace krys::boo
 
     void BeginClipAndDrawSourceImage(GraphicsContext &destinationContext, const FloatRect &repaintRect,
                                      const FloatRect &clipRect) noexcept override;
+
     void EndClipAndDrawSourceImage(GraphicsContext &destinationContext) noexcept override
     {
       EndDrawSourceImage(destinationContext);

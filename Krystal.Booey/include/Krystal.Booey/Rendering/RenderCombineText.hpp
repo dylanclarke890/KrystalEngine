@@ -56,20 +56,24 @@ namespace krys::boo
     {
       return _isCombined;
     }
+
     /// @brief How much the combined text is compressed horizontally to fit one em (1 if it isn't).
     KRYS_NODISCARD float HorizontalScale() const noexcept
     {
       return _horizontalScale;
     }
+
     /// @brief Combined text takes one em.
     KRYS_NODISCARD float CombinedTextWidth(const FontCascade &font) const noexcept
     {
       return font.Size();
     }
+
     KRYS_NODISCARD const FontCascade &OriginalFont() const noexcept
     {
       return Parent()->Style().GetFontCascade();
     }
+
     /// @brief The font the combined text is drawn with: horizontal, with narrower glyphs if they fit.
     KRYS_NODISCARD const FontCascade &TextCombineFont() const noexcept
     {

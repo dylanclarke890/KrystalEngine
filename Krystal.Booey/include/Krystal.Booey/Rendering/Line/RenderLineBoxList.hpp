@@ -57,6 +57,7 @@ namespace krys::boo
     {
       return _firstLineBox;
     }
+
     KRYS_NODISCARD LegacyInlineFlowBox *LastLegacyLineBox() const noexcept
     {
       return _lastLineBox;

@@ -72,10 +72,12 @@ namespace krys::boo
     /// @return Whether the effect qualified for membership: it has a target, an animation and is relevant.
     bool AddEffect(KeyframeEffect &effect) noexcept;
     void RemoveEffect(KeyframeEffect &effect) noexcept;
+
     KRYS_NODISCARD bool HasEffects() const noexcept
     {
       return !_effects.empty();
     }
+
     KRYS_NODISCARD const List<WeakPtr<KeyframeEffect>> &SortedEffects() noexcept;
 
     /// @brief The `animation` list of the target's last style change event, which orders its CSS animations.
@@ -83,6 +85,7 @@ namespace krys::boo
     {
       return _cssAnimationList;
     }
+
     void SetCSSAnimationList(Maybe<style::Animations> &&cssAnimationList) noexcept;
 
     KRYS_NODISCARD bool ContainsProperty(css::PropertyId property) const noexcept;

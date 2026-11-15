@@ -146,6 +146,7 @@ namespace krys::boo
     {
       return _backingSharingLayers;
     }
+
     void SetBackingSharingLayers(ListHashSet<RenderLayer *> &&sharingLayers) noexcept;
 
     KRYS_NODISCARD bool HasBackingSharingLayers() const noexcept
@@ -182,6 +183,7 @@ namespace krys::boo
     {
       return _childContainmentLayer && !_isFrameLayerWithTiledBacking;
     }
+
     KRYS_NODISCARD GraphicsLayer *ClippingLayer() const noexcept
     {
       return !_isFrameLayerWithTiledBacking ? _childContainmentLayer.get() : nullptr;
@@ -191,13 +193,16 @@ namespace krys::boo
     {
       return static_cast<bool>(_ancestorClippingStack);
     }
+
     KRYS_NODISCARD LayerAncestorClippingStack *AncestorClippingStack() const noexcept
     {
       return _ancestorClippingStack.get();
     }
+
     bool UpdateAncestorClippingStack(List<CompositedClipData> &&clippingData) noexcept;
 
     void EnsureOverflowControlsHostLayerAncestorClippingStack(const RenderLayer *compositedAncestor) noexcept;
+
     KRYS_NODISCARD LayerAncestorClippingStack *OverflowControlsHostLayerAncestorClippingStack() const noexcept
     {
       return _overflowControlsHostLayerAncestorClippingStack.get();
@@ -207,10 +212,12 @@ namespace krys::boo
     {
       return _contentsContainmentLayer.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *ViewportAnchorLayer() const noexcept
     {
       return _viewportAnchorLayer.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *ViewportClippingOrAnchorLayer() const noexcept
     {
       return _viewportClippingLayer ? _viewportClippingLayer.get() : ViewportAnchorLayer();
@@ -220,10 +227,12 @@ namespace krys::boo
     {
       return _foregroundLayer.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *BackgroundLayer() const noexcept
     {
       return _backgroundLayer.get();
     }
+
     KRYS_NODISCARD bool BackgroundLayerPaintsFixedRootBackground() const noexcept
     {
       return _backgroundLayerPaintsFixedRootBackground;
@@ -235,16 +244,19 @@ namespace krys::boo
     {
       return _requiresBackgroundLayer;
     }
+
     void SetRequiresBackgroundLayer(bool requiresBackgroundLayer) noexcept;
 
     KRYS_NODISCARD bool HasScrollingLayer() const noexcept
     {
       return _scrollContainerLayer != nullptr;
     }
+
     KRYS_NODISCARD GraphicsLayer *ScrollContainerLayer() const noexcept
     {
       return _scrollContainerLayer.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *ScrolledContentsLayer() const noexcept
     {
       return _scrolledContentsLayer.get();
@@ -365,14 +377,17 @@ namespace krys::boo
     {
       return _layerForHorizontalScrollbar.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *LayerForVerticalScrollbar() const noexcept
     {
       return _layerForVerticalScrollbar.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *LayerForScrollCorner() const noexcept
     {
       return _layerForScrollCorner.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *OverflowControlsContainer() const noexcept
     {
       return _overflowControlsContainer.get();
@@ -386,6 +401,7 @@ namespace krys::boo
     {
       return _canCompositeFilters;
     }
+
     KRYS_NODISCARD bool CanCompositeBackdropFilters() const noexcept
     {
       return _canCompositeBackdropFilters;
@@ -412,10 +428,12 @@ namespace krys::boo
     {
       return _owningLayer.Renderer();
     }
+
     KRYS_NODISCARD RenderBox *GetRenderBox() const noexcept
     {
       return _owningLayer.GetRenderBox();
     }
+
     KRYS_NODISCARD RenderLayerCompositor &Compositor() const noexcept
     {
       return _owningLayer.Compositor();
@@ -510,6 +528,7 @@ namespace krys::boo
     {
       return _childContainmentLayer && _isFrameLayerWithTiledBacking;
     }
+
     KRYS_NODISCARD GraphicsLayer *TileCacheFlatteningLayer() const noexcept
     {
       return _isFrameLayerWithTiledBacking ? _childContainmentLayer.get() : nullptr;
@@ -524,6 +543,7 @@ namespace krys::boo
     {
       return !PaintsIntoWindow() && !PaintsIntoCompositedAncestor();
     }
+
     KRYS_NODISCARD LayoutRect
       ComputeParentGraphicsLayerRect(const RenderLayer *compositedAncestor) const noexcept;
     KRYS_NODISCARD LayoutRect ComputePrimaryGraphicsLayerRect(
@@ -538,7 +558,7 @@ namespace krys::boo
     /// Painted into a compositing layer of its own.
     CanvasPaintedToLayer,
     /// Shown as its compositing layer's contents, drawn by its context.
-    CanvasAsLayerContents
+    CanvasAsLayerContents,
   };
   /// @brief How @p renderer, a canvas's, is composited.
   KRYS_NODISCARD CanvasCompositingStrategy

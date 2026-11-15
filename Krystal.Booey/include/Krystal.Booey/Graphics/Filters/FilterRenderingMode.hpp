@@ -36,7 +36,7 @@ namespace krys::boo
   {
     Software,
     Accelerated,
-    GraphicsContext
+    GraphicsContext,
   };
 }
 
@@ -44,6 +44,6 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::FilterRenderingMode, 3uz);
 
 namespace krys::boo
 {
-  inline constexpr EnumSet<FilterRenderingMode> AllFilterRenderingModes = {
+  constexpr inline EnumSet<FilterRenderingMode> AllFilterRenderingModes = {
     FilterRenderingMode::Software, FilterRenderingMode::Accelerated, FilterRenderingMode::GraphicsContext};
 }

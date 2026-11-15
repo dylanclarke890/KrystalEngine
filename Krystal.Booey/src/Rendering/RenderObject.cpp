@@ -1205,7 +1205,7 @@ namespace krys::boo
     enum class CoordinateSpace : uint8
     {
       Client,
-      Absolute
+      Absolute,
     };
 
     KRYS_NODISCARD List<FloatRect>

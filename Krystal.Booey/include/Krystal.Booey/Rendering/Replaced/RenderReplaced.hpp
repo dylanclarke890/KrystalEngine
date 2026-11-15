@@ -33,7 +33,7 @@ namespace krys::boo
   enum class ShouldComputePreferred : bool
   {
     ComputeActual,
-    ComputePreferred
+    ComputePreferred,
   };
 
   /// @brief A box whose content is outside CSS: images, media, frames, form controls.
@@ -70,10 +70,12 @@ namespace krys::boo
     KRYS_NODISCARD bool IsSelected() const noexcept;
     // This is in local coordinates, but it's a physical rect (so the top left corner is physical top left).
     KRYS_NODISCARD LayoutRect LocalSelectionRect(bool checkWhetherSelected = true) const noexcept;
+
     KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
                                                       bool clipToVisibleContent = true) noexcept final;
 
@@ -82,6 +84,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD LayoutRect ReplacedContentRect(const LayoutSize &intrinsicSize) const noexcept;
+
     KRYS_NODISCARD LayoutRect ReplacedContentRect() const noexcept
     {
       return ReplacedContentRect(IntrinsicSize());
@@ -159,7 +162,9 @@ namespace krys::boo
     {
       _intrinsicSize = intrinsicSize;
     }
+
     virtual void IntrinsicSizeChanged() noexcept;
+
     KRYS_NODISCARD virtual bool HasRelativeIntrinsicLogicalWidth() const noexcept
     {
       return false;

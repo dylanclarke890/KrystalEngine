@@ -39,7 +39,7 @@ namespace krys::boo::style
 {
   // macro(ownerType, property, type, lowercaseName, uppercaseName)
 
-// clang-format off
+  // clang-format off
 #define KRYS_FOR_EACH_TRANSITION_REFERENCE(macro)                                     \
   macro(Transition, TransitionProperty, SingleTransitionProperty, property, Property) \
   macro(Transition, TransitionTimingFunction, EasingFunction, timingFunction, TimingFunction)
@@ -55,7 +55,7 @@ namespace krys::boo::style
   KRYS_FOR_EACH_TRANSITION_REFERENCE(macro)      \
   KRYS_FOR_EACH_TRANSITION_VALUE(macro)          \
   KRYS_FOR_EACH_TRANSITION_ENUM(macro)
-// clang-format on
+  // clang-format on
 
   /// @brief One transition of an element's `transition-*` coordinated value list.
   struct Transition
@@ -75,6 +75,7 @@ namespace krys::boo::style
       {
         return AdoptRef(*new TransitionData());
       }
+
       KRYS_NODISCARD static Ref<TransitionData> Create(const TransitionData &other) noexcept
       {
         return AdoptRef(*new TransitionData(other));
@@ -96,18 +97,22 @@ namespace krys::boo::style
     {
       return _data->_property;
     }
+
     KRYS_NODISCARD SingleTransitionDelay GetDelay() const noexcept
     {
       return _data->_delay;
     }
+
     KRYS_NODISCARD SingleTransitionDuration GetDuration() const noexcept
     {
       return _data->_duration;
     }
+
     KRYS_NODISCARD const EasingFunction &GetTimingFunction() const noexcept
     {
       return _data->_timingFunction;
     }
+
     KRYS_NODISCARD TransitionBehavior GetBehavior() const noexcept
     {
       return static_cast<TransitionBehavior>(_data->_behavior);
@@ -117,18 +122,22 @@ namespace krys::boo::style
     {
       return css::keywords::All {};
     }
+
     KRYS_NODISCARD static SingleTransitionDelay InitialDelay() noexcept
     {
       return SingleTransitionDelay {0};
     }
+
     KRYS_NODISCARD static SingleTransitionDuration InitialDuration() noexcept
     {
       return SingleTransitionDuration {0};
     }
+
     KRYS_NODISCARD static EasingFunction InitialTimingFunction() noexcept
     {
       return EasingFunction {CubicBezierTimingFunction::Create()};
     }
+
     KRYS_NODISCARD static TransitionBehavior InitialBehavior() noexcept
     {
       return TransitionBehavior::Normal;
@@ -166,6 +175,7 @@ namespace krys::boo::style
     {
       return *_data;
     }
+
     KRYS_NODISCARD const TransitionData &Data() const noexcept
     {
       return *_data;

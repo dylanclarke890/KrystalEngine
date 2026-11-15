@@ -101,10 +101,12 @@ namespace krys::boo::dom
     /// @brief Removes the string item of @p type, or all the string items if none.
     void DidClearStringData(const Maybe<DOMString> &type) noexcept;
     void DidSetStringData(DOMStringView type) noexcept;
+
     KRYS_NODISCARD bool HasItems() const noexcept
     {
       return _items.has_value();
     }
+
     KRYS_NODISCARD const List<Ref<DataTransferItem>> &Items() const noexcept
     {
       krys_debug_assert(_items);

@@ -44,6 +44,7 @@ namespace krys::boo
     {
       return _azimuth;
     }
+
     KRYS_NODISCARD float Elevation() const noexcept
     {
       return _elevation;

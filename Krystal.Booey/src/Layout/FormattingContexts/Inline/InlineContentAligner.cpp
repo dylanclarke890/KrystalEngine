@@ -104,6 +104,7 @@ namespace krys::boo::layout
       size_t Index {0};
       InlineLayoutUnit Expansion {0.f};
     };
+
     KRYS_NODISCARD InlineBoxIndexAndExpansion
       ExpandInlineBoxWithDescendants(size_t inlineBoxIndex, inline_display::Boxes &displayBoxes,
                                      const HashMap<const Box *, InlineLayoutUnit> &alignmentOffsetList,
@@ -144,6 +145,7 @@ namespace krys::boo::layout
       size_t Index {0};
       InlineLayoutUnit Offset {0.f};
     };
+
     KRYS_NODISCARD BaseIndexAndOffset ShiftRubyBaseContentByAlignmentOffset(
       BaseIndexAndOffset baseIndexAndOffset, inline_display::Boxes &displayBoxes,
       const HashMap<const Box *, InlineLayoutUnit> &alignmentOffsetList,
@@ -217,8 +219,9 @@ namespace krys::boo::layout
     enum class IgnoreRubyRange : bool
     {
       No,
-      Yes
+      Yes,
     };
+
     void ComputedExpansions(const Line::RunList &runs, IndexRange runRange,
                             size_t hangingTrailingWhitespaceLength, ExpansionInfo &expansionInfo,
                             IgnoreRubyRange ignoreRuby) noexcept

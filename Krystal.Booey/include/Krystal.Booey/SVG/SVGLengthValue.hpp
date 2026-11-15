@@ -53,26 +53,26 @@ namespace krys::boo::svg
     Points,
     Picas,
     Lh,
-    Ch
+    Ch,
   };
 
   enum class SVGLengthMode : uint8
   {
     Width,
     Height,
-    Other
+    Other,
   };
 
   enum class SVGLengthNegativeValuesMode : uint8
   {
     Allow,
-    Forbid
+    Forbid,
   };
 
   enum class ShouldConvertNumberToPxLength : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   class SVGLengthValue
@@ -94,6 +94,7 @@ namespace krys::boo::svg
                 Maybe<dom::DOMStringView> fallbackValue = {}) noexcept;
 
     KRYS_NODISCARD SVGLengthType LengthType() const noexcept;
+
     KRYS_NODISCARD SVGLengthMode LengthMode() const noexcept
     {
       return _lengthMode;

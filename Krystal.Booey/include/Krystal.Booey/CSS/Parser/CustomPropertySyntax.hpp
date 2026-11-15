@@ -55,14 +55,14 @@ namespace krys::boo::css
       String,
       TransformFunction,
       TransformList,
-      Unknown
+      Unknown,
     };
 
     enum class Multiplier : uint8
     {
       Single,
       SpaceList,
-      CommaList
+      CommaList,
     };
 
     struct Component

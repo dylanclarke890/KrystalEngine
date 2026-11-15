@@ -24,6 +24,7 @@ namespace krys::boo::tests
       {
         return point + IntSize(100, 200);
       }
+
       KRYS_NODISCARD IntPoint ScreenToRootView(const IntPoint &point) const noexcept override
       {
         return point - IntSize(100, 200);

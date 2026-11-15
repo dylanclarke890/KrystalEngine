@@ -73,10 +73,12 @@ namespace krys::boo
     KRYS_NODISCARD RenderTableSection *Section() const noexcept;
 
     void SetRowIndex(uint32 rowIndex) noexcept;
+
     KRYS_NODISCARD bool RowIndexWasSet() const noexcept
     {
       return _rowIndex != UnsetRowIndex;
     }
+
     KRYS_NODISCARD uint32 RowIndex() const noexcept
     {
       krys_debug_assert(RowIndexWasSet());
@@ -94,6 +96,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return (IsAnonymous() || IsPseudoElement()) ? u8"RenderTableRow (anonymous)" : u8"RenderTableRow";

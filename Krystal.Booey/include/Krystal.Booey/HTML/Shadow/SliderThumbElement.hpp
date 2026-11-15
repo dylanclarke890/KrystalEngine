@@ -92,7 +92,7 @@ namespace krys::boo::html
     {
       NoMove,
       Horizontal,
-      Vertical
+      Vertical,
     };
 
   private:

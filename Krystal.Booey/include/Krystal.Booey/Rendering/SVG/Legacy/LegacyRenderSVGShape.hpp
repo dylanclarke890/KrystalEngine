@@ -50,7 +50,7 @@ namespace krys::boo
     Rectangle,
     RoundedRectangle,
     Ellipse,
-    Circle
+    Circle,
   };
 
   /// @brief The renderer of an SVG shape: it fills, strokes and hit tests the element's path.
@@ -66,7 +66,7 @@ namespace krys::boo
     enum PointCoordinateSpace
     {
       GlobalCoordinateSpace,
-      LocalCoordinateSpace
+      LocalCoordinateSpace,
     };
 
   protected:
@@ -99,14 +99,17 @@ namespace krys::boo
     {
       _needsShapeUpdate = true;
     }
+
     void SetNeedsBoundariesUpdate() noexcept final
     {
       _needsBoundariesUpdate = true;
     }
+
     void SetNeedsTransformUpdate() noexcept final
     {
       _needsTransformUpdate = true;
     }
+
     virtual void FillShape(GraphicsContext &) const noexcept;
     virtual void StrokeShape(GraphicsContext &) const noexcept;
     KRYS_NODISCARD virtual bool IsRenderingDisabled() const noexcept = 0;
@@ -121,11 +124,13 @@ namespace krys::boo
     {
       return static_cast<bool>(_path);
     }
+
     KRYS_NODISCARD Path &GetPath() const noexcept
     {
       krys_debug_assert(_path);
       return *_path;
     }
+
     void ClearPath() noexcept
     {
       _path = nullptr;
@@ -176,10 +181,12 @@ namespace krys::boo
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
     KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
+
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept final
     {
       return _localTransform;
     }
+
     KRYS_NODISCARD AffineTransform LocalTransform() const noexcept final
     {
       return _localTransform;
@@ -189,6 +196,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGShape";
@@ -206,6 +214,7 @@ namespace krys::boo
     {
       return _fillBoundingBox;
     }
+
     KRYS_NODISCARD FloatRect CalculateStrokeBoundingBox() const noexcept;
     void UpdateRepaintBoundingBox() noexcept;
 

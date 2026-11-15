@@ -73,6 +73,7 @@ namespace krys::boo::display_list
         : Recorder(IsDeferred::Yes, state, initialClip, transform)
     {
     }
+
     virtual ~Recorder() noexcept;
 
     void AppendDisplayList(const DisplayList &) noexcept;
@@ -85,6 +86,7 @@ namespace krys::boo::display_list
     {
       return _stateStack;
     }
+
     KRYS_NODISCARD const ContextState &CurrentState() const noexcept;
     KRYS_NODISCARD ContextState &CurrentState() noexcept;
 

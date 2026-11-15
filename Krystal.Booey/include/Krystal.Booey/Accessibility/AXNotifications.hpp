@@ -155,9 +155,11 @@ namespace krys::boo
 
   enum class AXNotification : uint8
   {
+  // clang-format off: the expansion already ends with a comma.
 #define KRYS_AX_DEFINE_NOTIFICATION(name) name,
     KRYS_AX_NOTIFICATIONS(KRYS_AX_DEFINE_NOTIFICATION)
 #undef KRYS_AX_DEFINE_NOTIFICATION
+    // clang-format on
   };
 
   /// @brief @p notification's enumerator name, as logs show it.

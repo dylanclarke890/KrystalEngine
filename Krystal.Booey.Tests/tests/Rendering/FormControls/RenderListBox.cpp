@@ -208,6 +208,7 @@ layer at (0,0) size 400x37
     CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down, {PlatformEvent::Modifier::ShiftKey}));
     CHECK(select.SelectedOptions()->Length() == 3uz);
   }
+
   TEST_CASE_METHOD(css::tests::ValueFixture,
                    "RenderListBox: items of both directions are drawn in visual order",
                    "[Rendering][RenderListBox]")

@@ -81,6 +81,7 @@ namespace krys::boo::layout
 
   public:
     InlineDamage() noexcept = default;
+
     ~InlineDamage() noexcept
     {
       _trailingDisplayBoxes.clear();
@@ -127,6 +128,7 @@ namespace krys::boo::layout
     {
       return _isInlineItemListDirty;
     }
+
     void SetInlineItemListClean() noexcept
     {
       _isInlineItemListDirty = false;
@@ -142,20 +144,24 @@ namespace krys::boo::layout
     {
       _damageReasons.Add(reason);
     }
+
     void SetLayoutStartPosition(LayoutPosition position) noexcept
     {
       _layoutStartPosition = position;
     }
+
     void ResetLayoutPosition() noexcept
     {
       _layoutStartPosition = {};
       _trailingDisplayBoxes.clear();
       // Never reset _detachedLayoutBoxes. We need to keep those layout boxes around until after layout.
     }
+
     void SetTrailingDisplayBoxes(TrailingDisplayBoxList &&trailingDisplayBoxes) noexcept
     {
       _trailingDisplayBoxes = krys::move(trailingDisplayBoxes);
     }
+
     void SetInlineItemListDirty() noexcept
     {
       _isInlineItemListDirty = true;

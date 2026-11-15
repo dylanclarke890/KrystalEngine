@@ -37,12 +37,15 @@ namespace krys::boo
     void RemoveAllClientsFromCache() noexcept override
     {
     }
+
     void RemoveAllClientsFromCacheAndMarkForInvalidationIfNeeded(bool, VisitedRenderers *) noexcept override
     {
     }
+
     void RemoveClientFromCache(RenderElement &) noexcept override
     {
     }
+
     void RemoveClientFromCacheAndMarkForInvalidation(RenderElement &, bool = true) noexcept override
     {
     }
@@ -51,6 +54,7 @@ namespace krys::boo
                                        EnumSet<RenderSVGResourceMode>) noexcept override;
     void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>, const Path *,
                            const RenderElement *) noexcept override;
+
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
                                                  RepaintRectCalculation) noexcept override
     {
@@ -66,6 +70,7 @@ namespace krys::boo
     {
       return _color;
     }
+
     void SetColor(const Color &color) noexcept
     {
       _color = color;

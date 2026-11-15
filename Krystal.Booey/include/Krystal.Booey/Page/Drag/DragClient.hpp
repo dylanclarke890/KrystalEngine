@@ -56,9 +56,11 @@ namespace krys::boo
                                                   const DragData &dragData) noexcept = 0;
     virtual void WillPerformDragSourceAction(DragSourceAction action, const IntPoint &point,
                                              dom::DataTransfer &dataTransfer) noexcept = 0;
+
     virtual void DidConcludeEditDrag() noexcept
     {
     }
+
     /// @brief The drags that may start at @p rootViewPoint.
     KRYS_NODISCARD virtual EnumSet<DragSourceAction>
       DragSourceActionMaskForPoint(const IntPoint &rootViewPoint) noexcept = 0;
@@ -66,6 +68,7 @@ namespace krys::boo
     /// @brief Runs a drag of @p dataTransfer's data from @p frame, as @p dragItem describes.
     virtual void StartDrag(DragItem dragItem, dom::DataTransfer &dataTransfer,
                            LocalFrame &frame) noexcept = 0;
+
     virtual void DragEnded() noexcept
     {
     }
@@ -78,13 +81,16 @@ namespace krys::boo
     void WillPerformDragDestinationAction(DragDestinationAction, const DragData &) noexcept final
     {
     }
+
     void WillPerformDragSourceAction(DragSourceAction, const IntPoint &, dom::DataTransfer &) noexcept final
     {
     }
+
     KRYS_NODISCARD EnumSet<DragSourceAction> DragSourceActionMaskForPoint(const IntPoint &) noexcept final
     {
       return {};
     }
+
     void StartDrag(DragItem, dom::DataTransfer &, LocalFrame &) noexcept final
     {
     }

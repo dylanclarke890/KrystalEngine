@@ -40,6 +40,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleSurroundData);
     }
+
     KRYS_NODISCARD Ref<StyleSurroundData> Copy() const noexcept;
 
     bool operator==(const StyleSurroundData &) const noexcept;

@@ -143,7 +143,7 @@ namespace krys::pal
   {
     Pressed,
     Held,
-    Released
+    Released,
   };
 
   /// @brief Supported keyboard keys.
@@ -268,7 +268,7 @@ namespace krys::pal
     Pause,
     ScrollLock,
     NumLock,
-    ContextMenu
+    ContextMenu,
   };
 }
 

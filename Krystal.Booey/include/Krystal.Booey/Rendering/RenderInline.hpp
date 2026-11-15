@@ -93,6 +93,7 @@ namespace krys::boo
     {
       return LayoutUnit(LinesBoundingBox().Width());
     }
+
     KRYS_NODISCARD LayoutUnit OffsetHeight() const noexcept final
     {
       return LayoutUnit(LinesBoundingBox().Height());
@@ -103,10 +104,12 @@ namespace krys::boo
     KRYS_NODISCARD LayoutPoint FirstInlineBoxTopLeft() const noexcept;
     KRYS_NODISCARD LayoutUnit OffsetLeft() const noexcept final;
     KRYS_NODISCARD LayoutUnit OffsetTop() const noexcept final;
+
     KRYS_NODISCARD LayoutRect FrameRectForStickyPositioning() const noexcept final
     {
       return LayoutRect(LinesBoundingBox());
     }
+
     /// @brief The bounding box of the inline's line boxes with their ink overflow.
     KRYS_NODISCARD LayoutRect LinesVisualOverflowBoundingBox() const noexcept;
     /// @brief Adds the rects of the inline's line boxes, moved by @p additionalOffset, skipping empty ones.
@@ -154,15 +157,19 @@ namespace krys::boo
     {
       return _legacyLineBoxes;
     }
+
     KRYS_NODISCARD const RenderLineBoxList &LegacyLineBoxes() const noexcept
     {
       return _legacyLineBoxes;
     }
+
     void DeleteLegacyLineBoxes() noexcept;
+
     KRYS_NODISCARD LegacyInlineFlowBox *FirstLegacyInlineBox() const noexcept
     {
       return _legacyLineBoxes.FirstLegacyLineBox();
     }
+
     KRYS_NODISCARD LegacyInlineFlowBox *LastLegacyInlineBox() const noexcept
     {
       return _legacyLineBoxes.LastLegacyLineBox();

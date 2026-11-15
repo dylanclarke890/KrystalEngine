@@ -51,6 +51,7 @@ namespace krys::boo::css
     {
       return *_hue;
     }
+
     /// @return A `SyntaxError` if @p hue isn't an angle.
     dom::ExceptionOr<void> SetH(Ref<CSSNumericValue> hue) noexcept;
     KRYS_NODISCARD CSSNumberish W() const noexcept;

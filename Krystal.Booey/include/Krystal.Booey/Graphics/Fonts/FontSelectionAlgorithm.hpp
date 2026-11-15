@@ -49,7 +49,7 @@ namespace krys::boo
   private:
     enum class RawTag
     {
-      RawTag
+      RawTag,
     };
 
     constexpr static int FractionalEntropy = 4;

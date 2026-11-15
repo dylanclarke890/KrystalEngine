@@ -101,26 +101,32 @@ namespace krys::boo::svg
     {
       return _type->CurrentValue<ComponentTransferType>();
     }
+
     KRYS_NODISCARD const SVGNumberList &TableValues() const noexcept
     {
       return _tableValues->CurrentValue();
     }
+
     KRYS_NODISCARD float Slope() const noexcept
     {
       return _slope->CurrentValue();
     }
+
     KRYS_NODISCARD float Intercept() const noexcept
     {
       return _intercept->CurrentValue();
     }
+
     KRYS_NODISCARD float Amplitude() const noexcept
     {
       return _amplitude->CurrentValue();
     }
+
     KRYS_NODISCARD float Exponent() const noexcept
     {
       return _exponent->CurrentValue();
     }
+
     KRYS_NODISCARD float Offset() const noexcept
     {
       return _offset->CurrentValue();
@@ -130,26 +136,32 @@ namespace krys::boo::svg
     {
       return *_type;
     }
+
     KRYS_NODISCARD SVGAnimatedNumberList &TableValuesAnimated() noexcept
     {
       return *_tableValues;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &SlopeAnimated() noexcept
     {
       return *_slope;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &InterceptAnimated() noexcept
     {
       return *_intercept;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &AmplitudeAnimated() noexcept
     {
       return *_amplitude;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &ExponentAnimated() noexcept
     {
       return *_exponent;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &OffsetAnimated() noexcept
     {
       return *_offset;

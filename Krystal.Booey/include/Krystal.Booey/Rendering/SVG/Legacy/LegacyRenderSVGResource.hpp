@@ -46,20 +46,20 @@ namespace krys::boo
     RadialGradientResourceType,
     SolidColorResourceType,
     FilterResourceType,
-    ClipperResourceType
+    ClipperResourceType,
   };
 
   enum class RenderSVGResourceMode : uint8
   {
     ApplyToFill,
     ApplyToStroke,
-    ApplyToText // used in combination with ApplyTo{Fill|Stroke}Mode
+    ApplyToText, // used in combination with ApplyTo{Fill|Stroke}Mode
   };
 
   enum class LegacyRenderSVGResourceApplyResult : uint8
   {
     ResourceApplied,
-    ClipContainsRendererContent
+    ClipContainsRendererContent,
   };
 }
 
@@ -88,10 +88,12 @@ namespace krys::boo
 
     virtual EnumSet<ApplyResult> ApplyResource(RenderElement &, const RenderStyle &, GraphicsContext *&,
                                                EnumSet<RenderSVGResourceMode>) noexcept = 0;
+
     virtual void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>,
                                    const Path *, const RenderElement * /* shape */) noexcept
     {
     }
+
     KRYS_NODISCARD virtual FloatRect ResourceBoundingBox(const RenderObject &,
                                                          RepaintRectCalculation) noexcept = 0;
 

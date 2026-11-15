@@ -51,7 +51,7 @@ namespace krys::boo
   enum class RelevantMutation : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class LazyImageLoadState : uint8
@@ -59,7 +59,7 @@ namespace krys::boo
     None,
     Deferred,
     LoadImmediately,
-    FullImage
+    FullImage,
   };
 
   /// @brief Loads the image of an element (`<img>`, `<input type=image>`, and later video posters and
@@ -116,6 +116,7 @@ namespace krys::boo
     {
       return _element;
     }
+
     KRYS_NODISCARD const dom::Element &GetElement() const noexcept
     {
       return _element;

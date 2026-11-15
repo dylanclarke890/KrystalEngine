@@ -73,7 +73,9 @@ namespace krys::boo
     {
       return _renderer;
     }
+
     KRYS_NODISCARD const RenderBoxModelObject &ParentRenderer() const noexcept;
+
     KRYS_NODISCARD EnumSet<RenderSVGResourceMode> PaintingResourceMode() const noexcept
     {
       return _paintingResourceMode;

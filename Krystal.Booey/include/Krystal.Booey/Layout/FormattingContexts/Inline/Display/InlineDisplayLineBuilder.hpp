@@ -76,14 +76,17 @@ namespace krys::boo::layout
     {
       return _constraints;
     }
+
     KRYS_NODISCARD const InlineFormattingContext &GetFormattingContext() const noexcept
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD InlineFormattingContext &GetFormattingContext() noexcept
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const Box &Root() const noexcept;
   };
 }

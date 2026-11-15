@@ -30,7 +30,6 @@
 
 namespace krys::boo
 {
-
   StyleFlexibleBoxData::StyleFlexibleBoxData() noexcept
       : FlexGrow(style::ComputedStyle::InitialFlexGrow()),
         FlexShrink(style::ComputedStyle::InitialFlexShrink()),

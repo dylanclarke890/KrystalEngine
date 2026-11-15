@@ -58,13 +58,13 @@ namespace krys::boo::style
     enum class ViewportUnitDependency : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class ParseInitialValueError : uint8
     {
       NotComputationallyIndependent,
-      DidNotParse
+      DidNotParse,
     };
 
   private:

@@ -9,6 +9,6 @@ namespace krys::boo::html
   {
     Round,
     Bevel,
-    Miter
+    Miter,
   };
 }

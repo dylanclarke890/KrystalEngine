@@ -36,7 +36,7 @@ namespace krys::boo::detail
     {
       Pending,
       Fulfilled,
-      Rejected
+      Rejected,
     };
 
     Status _status {Status::Pending};

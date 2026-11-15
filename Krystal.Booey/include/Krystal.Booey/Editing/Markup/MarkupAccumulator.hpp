@@ -68,20 +68,20 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::EntityMask, 8uz);
 
 namespace krys::boo
 {
-  inline constexpr EnumSet<EntityMask> EntityMaskInCDATA {};
-  inline constexpr EnumSet<EntityMask> EntityMaskInPCDATA {EntityMask::Amp, EntityMask::Lt, EntityMask::Gt};
+  constexpr inline EnumSet<EntityMask> EntityMaskInCDATA {};
+  constexpr inline EnumSet<EntityMask> EntityMaskInPCDATA {EntityMask::Amp, EntityMask::Lt, EntityMask::Gt};
   // Non-breaking space needs to be escaped in innerHTML for compatibility reason. See
   // http://trac.webkit.org/changeset/32879 However, we cannot do this in a XML document because it does not
   // have the entity reference defined (See the bug 19215).
-  inline constexpr EnumSet<EntityMask> EntityMaskInHTMLPCDATA {EntityMask::Amp, EntityMask::Lt,
+  constexpr inline EnumSet<EntityMask> EntityMaskInHTMLPCDATA {EntityMask::Amp, EntityMask::Lt,
                                                                EntityMask::Gt, EntityMask::Nbsp};
-  inline constexpr EnumSet<EntityMask> EntityMaskInAttributeValue {
+  constexpr inline EnumSet<EntityMask> EntityMaskInAttributeValue {
     EntityMask::Amp,           EntityMask::Lt,  EntityMask::Gt,
     EntityMask::Quot,          EntityMask::Tab, EntityMask::LineFeed,
     EntityMask::CarriageReturn};
-  inline constexpr EnumSet<EntityMask> EntityMaskInHTMLAttributeValue {
+  constexpr inline EnumSet<EntityMask> EntityMaskInHTMLAttributeValue {
     EntityMask::Amp, EntityMask::Lt, EntityMask::Gt, EntityMask::Quot, EntityMask::Nbsp};
-  inline constexpr EnumSet<EntityMask> EntityMaskInHTMLLegacyAttributeValue {
+  constexpr inline EnumSet<EntityMask> EntityMaskInHTMLLegacyAttributeValue {
     EntityMask::Amp, EntityMask::Quot, EntityMask::Nbsp};
 
   /// @brief Serializes nodes as HTML or XML.
@@ -131,6 +131,7 @@ namespace krys::boo
     {
       return _markup.size();
     }
+
     KRYS_NODISCARD bool ContainsOnlyASCII() const noexcept;
 
     KRYS_NODISCARD utf8_string TakeMarkup() noexcept;
@@ -173,10 +174,12 @@ namespace krys::boo
     KRYS_NODISCARD bool IncludeShadowRoot(const dom::ShadowRoot &shadowRoot) const noexcept;
     void SerializeNodesWithNamespaces(dom::Node &targetNode, SerializedNodes root,
                                       const Namespaces *namespaces) noexcept;
+
     KRYS_NODISCARD bool InXMLFragmentSerialization() const noexcept
     {
       return _serializationSyntax == SerializationSyntax::XML;
     }
+
     /// @brief Records that the serialization isn't well-formed unless @p wellFormed returns true, when it
     /// must be (only the XML serialization has error cases).
     template <Predicate TPredicate>
@@ -187,6 +190,7 @@ namespace krys::boo
         _wellFormed = wellFormed();
       }
     }
+
     KRYS_NODISCARD dom::DOMStringAtom GenerateUniquePrefix(const Namespaces &namespaces) noexcept;
     KRYS_NODISCARD utf8_string XMLAttributeSerialization(const dom::Attr &attribute, Namespaces *namespaces,
                                                          dom::DOMStringAtom &prefix) noexcept;

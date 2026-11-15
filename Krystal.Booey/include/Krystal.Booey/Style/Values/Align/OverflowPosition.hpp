@@ -37,7 +37,7 @@ namespace krys::boo::style
   {
     None,
     Unsafe,
-    Safe
+    Safe,
   };
 
   KRYS_NODISCARD constexpr OverflowPositionKind ComputeKind(Maybe<OverflowPosition> overflow) noexcept

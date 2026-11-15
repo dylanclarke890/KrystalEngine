@@ -38,7 +38,7 @@ namespace krys::boo::html
     {
       Submit,
       Reset,
-      Button
+      Button,
     };
 
     ButtonType _type {ButtonType::Submit};

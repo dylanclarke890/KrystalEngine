@@ -93,10 +93,10 @@ namespace krys::editor
     void Card(utf8_stringview title, float x, float y) noexcept
     {
       boo::GraphicsContextStateSaver saver(_context);
-      _context.SetDropShadow({.Offset = {0, 8}, .Radius = 24, .Color = Rgb(0x1a2240, 40)});
-      _context.FillRoundedRect(Rounded(x, y, 392, 616, 16), Rgb(0xffffff));
+      _context.SetDropShadow({.Offset = {0, 8}, .Radius = 24, .Color = Rgb(0x1A2240, 40)});
+      _context.FillRoundedRect(Rounded(x, y, 392, 616, 16), Rgb(0xFFFFFF));
       _context.ClearDropShadow();
-      Text(title, x + 24, y + 34, Rgb(0x5a6378), true);
+      Text(title, x + 24, y + 34, Rgb(0x5A6378), true);
     }
 
     /// @brief Boxes: rounded and elliptical corners, borders as rects with rounded holes, and border lines in
@@ -104,11 +104,11 @@ namespace krys::editor
     void DrawBoxes(float x, float y) noexcept
     {
       // Backgrounds: a plain box, circular corners, elliptical ones.
-      _context.FillRect({x + 24, y + 56, 104, 72}, Rgb(0x4f6df5));
-      _context.FillRoundedRect(Rounded(x + 144, y + 56, 104, 72, 16), Rgb(0x2bb673));
+      _context.FillRect({x + 24, y + 56, 104, 72}, Rgb(0x4F6DF5));
+      _context.FillRoundedRect(Rounded(x + 144, y + 56, 104, 72, 16), Rgb(0x2BB673));
       const boo::FloatSize ellipse {40, 24};
       _context.FillRoundedRect(
-        boo::FloatRoundedRect({x + 264, y + 56, 104, 72}, ellipse, ellipse, ellipse, ellipse), Rgb(0xf5a623));
+        boo::FloatRoundedRect({x + 264, y + 56, 104, 72}, ellipse, ellipse, ellipse, ellipse), Rgb(0xF5A623));
 
       // Borders, as the border painter fills a uniform one: clipped to the border box's rounded rect, its
       // rect with the padding box as a rounded hole, the inner radii the outer less the border's width.
@@ -124,7 +124,7 @@ namespace krys::editor
                                                  72 - 2 * width, std::max(0.f, radius - width)),
                                          Rgb(0x222733));
       }
-      Text(u8"Borders: rounded clips, rounded holes", x + 24, y + 248, Rgb(0x8a93a6));
+      Text(u8"Borders: rounded clips, rounded holes", x + 24, y + 248, Rgb(0x8A93A6));
 
       // Border lines in each style, as the border painter draws a side: between the corners of the side's
       // rect, top-left and bottom-right.
@@ -135,21 +135,21 @@ namespace krys::editor
       {
         const float row = y + 280 + static_cast<float>(i) * 40;
         boo::GraphicsContextStateSaver saver(_context);
-        _context.SetStrokeColor(Rgb(0xe0475b));
+        _context.SetStrokeColor(Rgb(0xE0475B));
         _context.SetStrokeThickness(4);
         _context.SetStrokeStyle(styles[i]);
         _context.DrawLine({x + 24, row - 2}, {x + 280, row + 2});
-        Text(names[i], x + 296, row + 8, Rgb(0x5a6378));
+        Text(names[i], x + 296, row + 8, Rgb(0x5A6378));
       }
 
       // A filled, outlined rect and list bullets.
-      _context.SetFillColor(Rgb(0xeef1f6));
-      _context.SetStrokeColor(Rgb(0x8a93a6));
+      _context.SetFillColor(Rgb(0xEEF1F6));
+      _context.SetStrokeColor(Rgb(0x8A93A6));
       _context.DrawRect({x + 24, y + 412, 344, 72}, 2);
       for (int i = 0; i < 3; ++i)
       {
         const float row = y + 432 + static_cast<float>(i) * 18;
-        _context.SetFillColor(Rgb(0x4f6df5));
+        _context.SetFillColor(Rgb(0x4F6DF5));
         _context.DrawEllipse({x + 40, row - 7, 6, 6});
         Text(i == 0   ? u8"Ellipses are list bullets"
              : i == 1 ? u8"DrawRect fills, then outlines"
@@ -165,7 +165,7 @@ namespace krys::editor
       for (int i = 0; i < 12; ++i)
       {
         _context.FillRect({x + 24 + static_cast<float>(i) * 29, y + 508, 29, 84},
-                          i % 2 ? Rgb(0xb04ff5) : Rgb(0x4f6df5));
+                          i % 2 ? Rgb(0xB04FF5) : Rgb(0x4F6DF5));
       }
     }
 
@@ -178,20 +178,20 @@ namespace krys::editor
         boo::GraphicsContextStateSaver saver(_context);
         _context.SetDropShadow(
           {.Offset = {0, 2 + 8 * lift}, .Radius = 6 + 18 * lift, .Color = Rgb(0x000000, 80)});
-        _context.FillRoundedRect(Rounded(x + 24, y + 60 - 4 * lift, 160, 72, 12), Rgb(0xffffff));
+        _context.FillRoundedRect(Rounded(x + 24, y + 60 - 4 * lift, 160, 72, 12), Rgb(0xFFFFFF));
       }
       Text(u8"Outset shadow", x + 40, y + 102 - 4 * lift, Rgb(0x222733), true);
 
       // An inset shadow: a rect with the box as its hole casts it, clipped to the box.
       {
         const auto well = Rounded(x + 208, y + 56, 160, 80, 12);
-        _context.FillRoundedRect(well, Rgb(0xeef1f6));
+        _context.FillRoundedRect(well, Rgb(0xEEF1F6));
         boo::GraphicsContextStateSaver saver(_context);
         _context.ClipRoundedRect(well);
         _context.SetDropShadow({.Offset = {0, 4}, .Radius = 12, .Color = Rgb(0x000000, 110)});
         _context.FillRectWithRoundedHole({x + 168, y + 16, 240, 160}, well, Rgb(0x000000));
       }
-      Text(u8"Inset shadow", x + 248, y + 102, Rgb(0x5a6378));
+      Text(u8"Inset shadow", x + 248, y + 102, Rgb(0x5A6378));
 
       // Text decorations, as text painting draws them.
       const boo::StrokeStyle styles[] {boo::StrokeStyle::SolidStroke, boo::StrokeStyle::DashedStroke,
@@ -202,44 +202,44 @@ namespace krys::editor
       {
         const float baseline = y + 186 + static_cast<float>(i) * 36;
         Text(labels[i], x + 24, baseline, Rgb(0x222733));
-        _context.SetStrokeColor(Rgb(0x4f6df5));
+        _context.SetStrokeColor(Rgb(0x4F6DF5));
         const boo::FloatSegment segment[] {{0, TextWidth(labels[i])}};
         _context.DrawLinesForText({x + 24, baseline + 3}, 1.5f, segment, false, i == 3, styles[i]);
       }
 
       // A line through, and text with a shadow, sharp and blurred.
-      Text(u8"Struck through", x + 224, y + 186, Rgb(0x8a93a6));
-      _context.SetStrokeColor(Rgb(0x8a93a6));
+      Text(u8"Struck through", x + 224, y + 186, Rgb(0x8A93A6));
+      _context.SetStrokeColor(Rgb(0x8A93A6));
       _context.DrawLineForText({x + 224, y + 181, TextWidth(u8"Struck through"), 1.5f}, false);
       {
         boo::GraphicsContextStateSaver saver(_context);
-        _context.SetDropShadow({.Offset = {2, 2}, .Radius = 0, .Color = Rgb(0xf5a623)});
+        _context.SetDropShadow({.Offset = {2, 2}, .Radius = 0, .Color = Rgb(0xF5A623)});
         Text(u8"Sharp text shadow", x + 224, y + 222, Rgb(0x222733), true);
-        _context.SetDropShadow({.Offset = {0, 0}, .Radius = 8, .Color = Rgb(0x4f6df5)});
-        Text(u8"Glowing text", x + 224, y + 258, Rgb(0x1a2240), true);
+        _context.SetDropShadow({.Offset = {0, 0}, .Radius = 8, .Color = Rgb(0x4F6DF5)});
+        Text(u8"Glowing text", x + 224, y + 258, Rgb(0x1A2240), true);
       }
 
       // A dark panel, translucent text over a gradient.
       auto gradient =
         boo::Gradient::Create(boo::Gradient::LinearData {{x + 24, 0}, {x + 368, 0}},
                               {ColourInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied});
-      gradient->AddColorStop({0, Rgb(0x1a2240)});
-      gradient->AddColorStop({1, Rgb(0x4f2a7a)});
+      gradient->AddColorStop({0, Rgb(0x1A2240)});
+      gradient->AddColorStop({1, Rgb(0x4F2A7A)});
       {
         boo::GraphicsContextStateSaver saver(_context);
         _context.ClipRoundedRect(Rounded(x + 24, y + 340, 344, 120, 14));
         _context.FillRect({x + 24, y + 340, 344, 120}, *gradient);
       }
-      Text(u8"Krystal UI replays Booey's", x + 44, y + 380, Rgb(0xffffff), true);
-      Text(u8"display lists into Render2D", x + 44, y + 404, Rgb(0xffffff, 200));
-      Text(u8"one item at a time", x + 44, y + 428, Rgb(0xffffff, 140));
+      Text(u8"Krystal UI replays Booey's", x + 44, y + 380, Rgb(0xFFFFFF), true);
+      Text(u8"display lists into Render2D", x + 44, y + 404, Rgb(0xFFFFFF, 200));
+      Text(u8"one item at a time", x + 44, y + 428, Rgb(0xFFFFFF, 140));
 
       // A focus ring around a button.
-      _context.FillRoundedRect(Rounded(x + 24, y + 500, 160, 48, 10), Rgb(0x4f6df5));
-      Text(u8"Focused", x + 74, y + 530, Rgb(0xffffff), true);
+      _context.FillRoundedRect(Rounded(x + 24, y + 500, 160, 48, 10), Rgb(0x4F6DF5));
+      Text(u8"Focused", x + 74, y + 530, Rgb(0xFFFFFF), true);
       boo::Path ring;
       ring.AddRoundedRect(Rounded(x + 20, y + 496, 168, 56, 13));
-      _context.DrawFocusRing(ring, 2, Rgb(0xf5a623));
+      _context.DrawFocusRing(ring, 2, Rgb(0xF5A623));
     }
 
     /// @brief Paths filled and clipped, gradients of each kind, and transparency layers.
@@ -249,23 +249,23 @@ namespace krys::editor
       auto linear =
         boo::Gradient::Create(boo::Gradient::LinearData {{x + 24, 0}, {x + 128, 0}},
                               {ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied});
-      linear->AddColorStop({0, Rgb(0x4f6df5)});
-      linear->AddColorStop({1, Rgb(0xb04ff5)});
+      linear->AddColorStop({0, Rgb(0x4F6DF5)});
+      linear->AddColorStop({1, Rgb(0xB04FF5)});
       _context.FillRect({x + 24, y + 56, 104, 80}, *linear);
 
       auto radial =
         boo::Gradient::Create(boo::Gradient::RadialData {{x + 196, y + 96}, {x + 196, y + 96}, 0, 52, 1},
                               {ColourInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied});
-      radial->AddColorStop({0, Rgb(0xffe08a)});
-      radial->AddColorStop({1, Rgb(0xe0475b)});
+      radial->AddColorStop({0, Rgb(0xFFE08A)});
+      radial->AddColorStop({1, Rgb(0xE0475B)});
       _context.FillRect({x + 144, y + 56, 104, 80}, *radial);
 
       auto conic =
         boo::Gradient::Create(boo::Gradient::ConicData {{x + 316, y + 96}, _time},
                               {ColourInterpolationMethod::OKLCH {}, AlphaPremultiplication::Premultiplied});
-      conic->AddColorStop({0, Rgb(0xff0000)});
-      conic->AddColorStop({0.5f, Rgb(0x00a0ff)});
-      conic->AddColorStop({1, Rgb(0xff0000)});
+      conic->AddColorStop({0, Rgb(0xFF0000)});
+      conic->AddColorStop({0.5f, Rgb(0x00A0FF)});
+      conic->AddColorStop({1, Rgb(0xFF0000)});
       {
         boo::GraphicsContextStateSaver saver(_context);
         boo::Path circle;
@@ -286,8 +286,8 @@ namespace krys::editor
           auto fill = boo::Gradient::Create(
             boo::Gradient::LinearData {{-64, -64}, {64, 64}},
             {ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied});
-          fill->AddColorStop({0, Rgb(0xf5a623)});
-          fill->AddColorStop({1, Rgb(0xe0475b)});
+          fill->AddColorStop({0, Rgb(0xF5A623)});
+          fill->AddColorStop({1, Rgb(0xE0475B)});
           _context.FillRect({-64, -64, 128, 128}, *fill);
         }
         _context.SetStrokeColor(Rgb(0x222733));
@@ -301,9 +301,9 @@ namespace krys::editor
         boo::GraphicsContextStateSaver saver(_context);
         _context.Translate(x + 290, y + 236);
         _context.SetFillRule(boo::WindRule::EvenOdd);
-        _context.SetFillColor(Rgb(0x2bb673));
+        _context.SetFillColor(Rgb(0x2BB673));
         _context.FillPath(Star(60));
-        _context.SetStrokeColor(Rgb(0x1a2240));
+        _context.SetStrokeColor(Rgb(0x1A2240));
         _context.SetStrokeThickness(2);
         _context.SetLineDash({8, 4}, _time * 10);
         _context.StrokePath(Star(60));
@@ -312,7 +312,7 @@ namespace krys::editor
       // Overlapping circles in a translucent layer: the layer fades as one.
       auto circles = [&](float left, float top)
       {
-        const uint32 colours[] {0xe0475b, 0x2bb673, 0x4f6df5};
+        const uint32 colours[] {0xE0475B, 0x2BB673, 0x4F6DF5};
         for (int i = 0; i < 3; ++i)
         {
           const float angle = static_cast<float>(i) * 2.0943951f - std::numbers::pi_v<float> / 2;
@@ -321,7 +321,7 @@ namespace krys::editor
             {left + 58 + 16 * std::cos(angle) - 26, top + 60 + 16 * std::sin(angle) - 26, 52, 52});
         }
       };
-      _context.FillRect({x + 24, y + 336, 344, 132}, Rgb(0xeef1f6));
+      _context.FillRect({x + 24, y + 336, 344, 132}, Rgb(0xEEF1F6));
       circles(x + 24, y + 346);
       {
         boo::TransparencyLayerScope layer(_context, 0.5f + 0.25f * std::sin(_time));
@@ -332,14 +332,14 @@ namespace krys::editor
         circles(x + 264, y + 346);
         _context.EndTransparencyLayer();
       }
-      Text(u8"Opaque", x + 50, y + 492, Rgb(0x5a6378));
-      Text(u8"A layer", x + 172, y + 492, Rgb(0x5a6378));
-      Text(u8"Multiplied", x + 286, y + 492, Rgb(0x5a6378));
+      Text(u8"Opaque", x + 50, y + 492, Rgb(0x5A6378));
+      Text(u8"A layer", x + 172, y + 492, Rgb(0x5A6378));
+      Text(u8"Multiplied", x + 286, y + 492, Rgb(0x5A6378));
 
       // A clip-out: a frame drawn around a hole.
       boo::GraphicsContextStateSaver saver(_context);
       _context.ClipOutRoundedRect(Rounded(x + 64, y + 528, 264, 44, 22));
-      _context.FillRoundedRect(Rounded(x + 24, y + 516, 344, 68, 18), Rgb(0x1a2240));
+      _context.FillRoundedRect(Rounded(x + 24, y + 516, 344, 68, 18), Rgb(0x1A2240));
     }
 
     KRYS_NODISCARD static boo::Path Star(float radius) noexcept

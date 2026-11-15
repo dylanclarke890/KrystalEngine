@@ -49,14 +49,14 @@ namespace krys::boo
     {
       Default,
       LeftToRight,
-      RightToLeft
+      RightToLeft,
     };
 
     enum class FormatType : uint8
     {
       Unspecified,
       Short,
-      Medium
+      Medium,
     };
 
   protected:
@@ -65,7 +65,7 @@ namespace krys::boo
       // 0-9 for digits.
       DecimalSeparatorIndex = 10,
       GroupSeparatorIndex = 11,
-      DecimalSymbolsSize
+      DecimalSymbolsSize,
     };
 
   private:

@@ -32,7 +32,7 @@ namespace krys::boo::svg
   enum class PathCoordinateMode : uint8
   {
     AbsoluteCoordinates,
-    RelativeCoordinates
+    RelativeCoordinates,
   };
 
   enum class PathParsingMode : uint8
@@ -40,7 +40,7 @@ namespace krys::boo::svg
     // Every segment is converted to an absolute move, line, cubic curve or close.
     NormalisedParsing,
     // Segments are passed on as written.
-    UnalteredParsing
+    UnalteredParsing,
   };
 
   /// @brief Receives the segments of a parsed SVG path.

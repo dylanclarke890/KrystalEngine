@@ -47,7 +47,7 @@ namespace krys::boo::style
   {
     None,
     Absolute,
-    AbsoluteAndRelative
+    AbsoluteAndRelative,
   };
 
   struct ComputedFontSize

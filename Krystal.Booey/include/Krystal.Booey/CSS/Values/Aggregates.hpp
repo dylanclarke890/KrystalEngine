@@ -60,7 +60,7 @@ namespace krys::boo::css
     None,
     Space,
     Comma,
-    Slash
+    Slash,
   };
 
   /// @brief Types that specialize TreatAsTupleLike or TreatAsRangeLike can specialize this to indicate how to
@@ -82,7 +82,7 @@ namespace krys::boo::css
   enum class SerialisationCoalescingType : uint8
   {
     None,
-    Minimal
+    Minimal,
   };
 
   /// @brief Types that specialize TreatAsTupleLike and have size 2 or 4 can specialize this to indicate how
@@ -307,6 +307,7 @@ namespace krys::boo::css
     CSSOMStringAtom Value;
 
     bool operator==(const CustomIdentifier &) const noexcept = default;
+
     bool operator==(const CSSOMStringAtom &other) const noexcept
     {
       return Value == other;
@@ -948,14 +949,17 @@ namespace krys::boo::css
     {
       return Value.begin();
     }
+
     const_iterator end() const KRYS_LIFETIME_BOUND
     {
       return Value.end();
     }
+
     const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
     {
       return Value.rbegin();
     }
+
     const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
     {
       return Value.rend();
@@ -965,10 +969,12 @@ namespace krys::boo::css
     {
       return Value.isEmpty();
     }
+
     size_t size() const
     {
       return Value.size();
     }
+
     const T &operator[](size_t i) const KRYS_LIFETIME_BOUND
     {
       return Value[i];
@@ -978,6 +984,7 @@ namespace krys::boo::css
     {
       return Value.first();
     }
+
     const T &last() const KRYS_LIFETIME_BOUND
     {
       return Value.last();
@@ -987,6 +994,7 @@ namespace krys::boo::css
     {
       return Value.contains(x);
     }
+
     template <typename Predicate>
     requires std::predicate<Predicate, const value_type &>
     bool containsIf(KRYS_NOESCAPE const Predicate &f) const
@@ -1057,14 +1065,17 @@ namespace krys::boo::css
     {
       return Value.begin();
     }
+
     const_iterator end() const KRYS_LIFETIME_BOUND
     {
       return Value.end();
     }
+
     const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
     {
       return Value.rbegin();
     }
+
     const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
     {
       return Value.rend();
@@ -1074,10 +1085,12 @@ namespace krys::boo::css
     {
       return Value.isEmpty();
     }
+
     size_t size() const
     {
       return Value.size();
     }
+
     const T &operator[](size_t i) const KRYS_LIFETIME_BOUND
     {
       return Value[i];
@@ -1087,6 +1100,7 @@ namespace krys::boo::css
     {
       return Value.first();
     }
+
     const T &last() const KRYS_LIFETIME_BOUND
     {
       return Value.last();
@@ -1096,6 +1110,7 @@ namespace krys::boo::css
     {
       return Value.contains(x);
     }
+
     template <typename Predicate>
     requires std::predicate<Predicate, const value_type &>
     bool containsIf(KRYS_NOESCAPE const Predicate &f) const
@@ -1160,14 +1175,17 @@ namespace krys::boo::css
     {
       return Value->begin();
     }
+
     const_iterator end() const KRYS_LIFETIME_BOUND
     {
       return Value->end();
     }
+
     const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
     {
       return Value->rbegin();
     }
+
     const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
     {
       return Value->rend();
@@ -1177,10 +1195,12 @@ namespace krys::boo::css
     {
       return Value->isEmpty();
     }
+
     size_t size() const
     {
       return Value->size();
     }
+
     const T &operator[](size_t i) const KRYS_LIFETIME_BOUND
     {
       return (*Value)[i];
@@ -1190,6 +1210,7 @@ namespace krys::boo::css
     {
       return Value->first();
     }
+
     const T &last() const KRYS_LIFETIME_BOUND
     {
       return Value->last();
@@ -1249,14 +1270,17 @@ namespace krys::boo::css
     {
       return Value->begin();
     }
+
     const_iterator end() const KRYS_LIFETIME_BOUND
     {
       return Value->end();
     }
+
     const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
     {
       return Value->rbegin();
     }
+
     const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
     {
       return Value->rend();
@@ -1266,10 +1290,12 @@ namespace krys::boo::css
     {
       return Value->isEmpty();
     }
+
     size_t size() const
     {
       return Value->size();
     }
+
     const T &operator[](size_t i) const KRYS_LIFETIME_BOUND
     {
       return (*Value)[i];
@@ -1279,6 +1305,7 @@ namespace krys::boo::css
     {
       return Value->first();
     }
+
     const T &last() const KRYS_LIFETIME_BOUND
     {
       return Value->last();
@@ -1878,6 +1905,7 @@ namespace krys::boo::css
     {
       return _value.rbegin();
     }
+
     KRYS_NODISCARD const_reverse_iterator rend() const noexcept
     {
       return _value.rend();
@@ -1887,6 +1915,7 @@ namespace krys::boo::css
     {
       return _value.first();
     }
+
     KRYS_NODISCARD const value_type &last() const noexcept
     {
       return _value.last();
@@ -1896,6 +1925,7 @@ namespace krys::boo::css
     {
       return _value.size();
     }
+
     KRYS_NODISCARD const value_type &operator[](size_t i) const noexcept
     {
       return _value[i];
@@ -1905,6 +1935,7 @@ namespace krys::boo::css
     {
       return _value.contains(item);
     }
+
     KRYS_NODISCARD bool containsIf(const auto &predicate) const noexcept
     {
       return _value.containsIf(predicate);
@@ -1916,6 +1947,7 @@ namespace krys::boo::css
     {
       return _value.isEmpty();
     }
+
     KRYS_NODISCARD bool IsList() const noexcept
     {
       return !_value.isEmpty();
@@ -1955,6 +1987,7 @@ namespace krys::boo::css
     struct DefaultValueToken
     {
     };
+
     constexpr static DefaultValueToken DefaultValue {};
 
     using List = T;
@@ -1977,7 +2010,9 @@ namespace krys::boo::css
       const value_type &operator*() const
       {
         if (owner->IsDefault())
+        {
           return owner->defaulter();
+        }
         return *it;
       }
 
@@ -2038,6 +2073,7 @@ namespace krys::boo::css
     {
       return IsDefault() ? (x == defaulter()) : Value.contains(x);
     }
+
     template <typename Predicate>
     requires std::predicate<Predicate, const value_type &>
     bool containsIf(const Predicate &f) const noexcept
@@ -2233,7 +2269,9 @@ namespace krys::boo::css
     constexpr static Derived FromRaw(typename EnumSet::StorageType rawValue) noexcept
     {
       if (!rawValue)
+      {
         return Keyword {};
+      }
       return EnumSet::FromRaw(rawValue);
     }
 
@@ -2503,19 +2541,19 @@ namespace krys::boo::css
       return Value.ContainsOnly(other);
     }
 
-    constexpr friend SpaceSeparatedEnumSet operator&(SpaceSeparatedEnumSet lhs,
+    friend constexpr SpaceSeparatedEnumSet operator&(SpaceSeparatedEnumSet lhs,
                                                      SpaceSeparatedEnumSet rhs) noexcept
     {
       return lhs.Value & rhs.Value;
     }
 
-    constexpr friend SpaceSeparatedEnumSet operator-(SpaceSeparatedEnumSet lhs,
+    friend constexpr SpaceSeparatedEnumSet operator-(SpaceSeparatedEnumSet lhs,
                                                      SpaceSeparatedEnumSet rhs) noexcept
     {
       return lhs.Value - rhs.Value;
     }
 
-    constexpr friend SpaceSeparatedEnumSet operator^(SpaceSeparatedEnumSet lhs,
+    friend constexpr SpaceSeparatedEnumSet operator^(SpaceSeparatedEnumSet lhs,
                                                      SpaceSeparatedEnumSet rhs) noexcept
     {
       return lhs.Value ^ rhs.Value;
@@ -2618,19 +2656,19 @@ namespace krys::boo::css
       return Value.ContainsOnly(other);
     }
 
-    constexpr friend CommaSeparatedEnumSet operator&(CommaSeparatedEnumSet lhs,
+    friend constexpr CommaSeparatedEnumSet operator&(CommaSeparatedEnumSet lhs,
                                                      CommaSeparatedEnumSet rhs) noexcept
     {
       return lhs.Value & rhs.Value;
     }
 
-    constexpr friend CommaSeparatedEnumSet operator-(CommaSeparatedEnumSet lhs,
+    friend constexpr CommaSeparatedEnumSet operator-(CommaSeparatedEnumSet lhs,
                                                      CommaSeparatedEnumSet rhs) noexcept
     {
       return lhs.Value - rhs.Value;
     }
 
-    constexpr friend CommaSeparatedEnumSet operator^(CommaSeparatedEnumSet lhs,
+    friend constexpr CommaSeparatedEnumSet operator^(CommaSeparatedEnumSet lhs,
                                                      CommaSeparatedEnumSet rhs) noexcept
     {
       return lhs.Value ^ rhs.Value;

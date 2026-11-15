@@ -59,6 +59,7 @@ namespace krys::boo
   namespace
   {
     using RepaintMap = HashMap<const GraphicsLayer *, List<FloatRect>>;
+
     RepaintMap &RepaintRectMap() noexcept
     {
       static NeverDestroyed<RepaintMap> map;

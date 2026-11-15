@@ -47,6 +47,7 @@ namespace krys::boo::css
     char32 Operation {0};
 
     SizesCalcValue() noexcept = default;
+
     SizesCalcValue(double numericValue, bool length) noexcept : Value(numericValue), IsLength(length)
     {
     }
@@ -66,6 +67,7 @@ namespace krys::boo::css
     SizesCalcParser(TokenRange range, const dom::Document &document) noexcept;
 
     KRYS_NODISCARD float Result() const noexcept;
+
     KRYS_NODISCARD bool IsValid() const noexcept
     {
       return _isValid;

@@ -45,6 +45,7 @@ namespace krys::boo::style
 
       KRYS_NODISCARD bool operator==(const ShapeAndShapeBox &) const noexcept = default;
     };
+
     struct Image
     {
       ImageWrapper Value;
@@ -57,15 +58,19 @@ namespace krys::boo::style
     ShapeOutside(css::keywords::None) noexcept
     {
     }
+
     ShapeOutside(Shape &&value) noexcept : _value {Value::Create(krys::move(value))}
     {
     }
+
     ShapeOutside(ShapeBox &&value) noexcept : _value {Value::Create(krys::move(value))}
     {
     }
+
     ShapeOutside(ShapeAndShapeBox &&value) noexcept : _value {Value::Create(krys::move(value))}
     {
     }
+
     ShapeOutside(Image &&value) noexcept : _value {Value::Create(krys::move(value))}
     {
     }
@@ -96,11 +101,13 @@ namespace krys::boo::style
       RefPtr value = _value;
       return value ? value->GetShape() : nullptr;
     }
+
     KRYS_NODISCARD CSSBoxType EffectiveCSSBox() const noexcept
     {
       RefPtr value = _value;
       return value ? value->EffectiveCSSBox() : CSSBoxType::BoxMissing;
     }
+
     KRYS_NODISCARD RefPtr<StyleImage> GetImage() const noexcept
     {
       RefPtr value = _value;

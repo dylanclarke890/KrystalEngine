@@ -12,7 +12,7 @@ namespace krys
   enum class RGBBoundedness
   {
     Bounded,
-    Extended
+    Extended,
   };
 
   template <typename, RGBBoundedness>
@@ -178,19 +178,19 @@ namespace krys
     Colourfulness, // chroma (LCHModel, OKLCHModel), saturation (HSLModel)
     Hue,           // hue (LCHModel, OKLCHModel, HSLModel, HWBModel)
     OpponentA,     // a (LabModel, OKLabModel)
-    OpponentB      // b (LabModel, OKLabModel)
+    OpponentB,     // b (LabModel, OKLabModel)
   };
 
   enum class ColourComponentType
   {
     Angle,
-    Number
+    Number,
   };
 
   enum class ColourSpaceCoordinateSystem
   {
     RectangularOrthogonal,
-    CylindricalPolar
+    CylindricalPolar,
   };
 
   template <typename T>

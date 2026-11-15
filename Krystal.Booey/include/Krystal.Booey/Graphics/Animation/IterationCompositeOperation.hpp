@@ -32,7 +32,7 @@ namespace krys::boo
   enum class IterationCompositeOperation : uint8
   {
     Replace,
-    Accumulate
+    Accumulate,
   };
 }
 

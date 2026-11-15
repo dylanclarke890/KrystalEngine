@@ -52,12 +52,14 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD TransformFunction operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<TransformFunction>
   {
     KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &,
                                               const TransformFunction &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<TransformationMatrix>
   {
@@ -73,6 +75,7 @@ namespace krys::boo::style
     void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const TransformFunction &) noexcept;
   };
+
   template <>
   struct Serialiser<TransformationMatrix>
   {

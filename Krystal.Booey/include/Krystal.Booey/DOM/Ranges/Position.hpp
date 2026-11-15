@@ -48,9 +48,9 @@ namespace krys::boo::dom
 
   enum class PositionMoveType : uint8
   {
-    CodePoint,       // Move by a single code point.
-    Character,       // Move to the next Unicode character break.
-    BackwardDeletion // Subject to platform conventions.
+    CodePoint,        // Move by a single code point.
+    Character,        // Move to the next Unicode character break.
+    BackwardDeletion, // Subject to platform conventions.
   };
 
   /// @brief A position in the DOM for editing: anchored at an offset in a node, or before or after a node or
@@ -75,7 +75,7 @@ namespace krys::boo::dom
     // editingIgnoresContent(node))
     enum class LegacyEditingPositionFlag
     {
-      On
+      On,
     };
 
     RefPtr<Node> _anchorNode;
@@ -181,10 +181,12 @@ namespace krys::boo::dom
     {
       return !_anchorNode;
     }
+
     KRYS_NODISCARD bool IsNotNull() const noexcept
     {
       return _anchorNode != nullptr;
     }
+
     KRYS_NODISCARD bool IsOrphan() const noexcept
     {
       return _anchorNode && !_anchorNode->IsConnected();
@@ -284,6 +286,7 @@ namespace krys::boo::dom
   {
     return {krys::move(node), offset, Position::AnchorType::PositionIsOffsetInAnchor};
   }
+
   KRYS_NODISCARD Position MakeContainerOffsetPosition(const BoundaryPoint &point) noexcept;
 
   KRYS_NODISCARD Position MakeDeprecatedLegacyPosition(RefPtr<Node> &&node, uint32 offset) noexcept;
@@ -334,6 +337,7 @@ namespace krys::boo::dom
 
   public:
     PositionWithAffinity() noexcept = default;
+
     PositionWithAffinity(const Position &position, Affinity affinity = Affinity::Downstream) noexcept
         : _position(position), _affinity(affinity)
     {
@@ -343,6 +347,7 @@ namespace krys::boo::dom
     {
       return _position;
     }
+
     KRYS_NODISCARD Affinity GetAffinity() const noexcept
     {
       return _affinity;

@@ -38,6 +38,6 @@ namespace krys::boo::css
     // Simplifications that might occur in other properties, such as dropping comments, normalizing
     // whitespace, reserializing numeric tokens from their value, etc., must not occur."
     // https://drafts.csswg.org/css-variables-2/#serializing-custom-props
-    CustomProperty
+    CustomProperty,
   };
 }

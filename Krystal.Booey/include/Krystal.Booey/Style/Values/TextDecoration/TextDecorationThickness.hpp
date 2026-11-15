@@ -59,10 +59,12 @@ namespace krys::boo
       {
         return krys::HoldsAlternative<css::keywords::Auto>(_value);
       }
+
       KRYS_NODISCARD bool IsFromFont() const noexcept
       {
         return krys::HoldsAlternative<css::keywords::FromFont>(_value);
       }
+
       KRYS_NODISCARD bool IsLength() const noexcept
       {
         return krys::HoldsAlternative<TextDecorationThicknessLength>(_value);
@@ -101,7 +103,6 @@ namespace krys::boo
                                                    const TextDecorationThickness &, const RenderStyle &,
                                                    const RenderStyle &, const BlendingContext &) noexcept;
     };
-
   }
 }
 

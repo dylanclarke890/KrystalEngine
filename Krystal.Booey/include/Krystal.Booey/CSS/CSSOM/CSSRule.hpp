@@ -54,6 +54,7 @@ namespace krys::boo::css
   private:
     mutable bool _hasCachedSelectorText : 1 {false};
     bool _parentIsRule : 1 {false};
+
     union
     {
       CSSRule *_parentRule;

@@ -9,7 +9,7 @@ namespace krys::boo::css::tests
     A,
     B,
     C,
-    D
+    D,
   };
 }
 

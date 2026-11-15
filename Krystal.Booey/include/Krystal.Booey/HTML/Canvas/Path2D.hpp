@@ -44,14 +44,17 @@ namespace krys::boo::html
     {
       return AdoptRef(*new Path2D);
     }
+
     KRYS_NODISCARD static Ref<Path2D> Create(const Path &path) noexcept
     {
       return AdoptRef(*new Path2D(path));
     }
+
     KRYS_NODISCARD static Ref<Path2D> Create(const Path2D &path) noexcept
     {
       return Create(path.GetPath());
     }
+
     /// @brief A path from SVG path data (`<path d>`'s syntax).
     KRYS_NODISCARD static Ref<Path2D> Create(dom::DOMStringView pathData) noexcept;
 
@@ -67,6 +70,7 @@ namespace krys::boo::html
 
   private:
     Path2D() noexcept = default;
+
     explicit Path2D(const Path &path) noexcept : CanvasPath(path)
     {
     }

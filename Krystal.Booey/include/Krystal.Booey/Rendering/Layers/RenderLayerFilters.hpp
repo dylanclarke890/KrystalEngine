@@ -91,6 +91,7 @@ namespace krys::boo
     {
       return _dirtySourceRect;
     }
+
     void ExpandDirtySourceRect(const LayoutRect &rect) noexcept
     {
       _dirtySourceRect.Unite(rect);
@@ -100,6 +101,7 @@ namespace krys::boo
     {
       return _filter.get();
     }
+
     void ClearFilter() noexcept;
 
     KRYS_NODISCARD bool HasFilterThatMovesPixels() const noexcept;

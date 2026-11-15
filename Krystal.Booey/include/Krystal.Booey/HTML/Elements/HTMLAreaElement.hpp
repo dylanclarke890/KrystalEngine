@@ -50,7 +50,7 @@ namespace krys::boo::html
       Default,
       Poly,
       Rect,
-      Circle
+      Circle,
     };
 
   private:

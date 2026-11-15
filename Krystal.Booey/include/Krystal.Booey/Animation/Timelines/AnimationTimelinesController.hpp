@@ -86,6 +86,7 @@ namespace krys::boo
 
     void SuspendAnimations() noexcept;
     void ResumeAnimations() noexcept;
+
     KRYS_NODISCARD bool AnimationsAreSuspended() const noexcept
     {
       return _isSuspended;

@@ -29,7 +29,7 @@ namespace krys::editor
 
   public:
     /// @brief How many events the log shows.
-    static constexpr size_t MaxLines {12};
+    constexpr static size_t MaxLines {12};
 
     explicit PageTextInput(boo::dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {

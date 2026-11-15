@@ -122,5 +122,4 @@ namespace krys::boo::style
                                           BlendScaleComponent(fromY, _y, context),
                                           BlendScaleComponent(fromZ, _z, context), *outputType);
   }
-
 }

@@ -51,11 +51,14 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD bool RequiresLayer() const noexcept override;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderHTMLCanvas";
     }
+
     void PaintReplaced(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void IntrinsicSizeChanged() noexcept override
     {
       CanvasSizeChanged();

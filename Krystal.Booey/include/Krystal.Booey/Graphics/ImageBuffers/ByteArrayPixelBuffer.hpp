@@ -54,10 +54,12 @@ namespace krys::boo
     {
       return const_cast<dom::Uint8ClampedArray &>(*_data);
     }
+
     KRYS_NODISCARD Ref<dom::Uint8ClampedArray> ProtectedData() const noexcept
     {
       return _data;
     }
+
     /// @brief The bytes, shared: what's written to them after shows in the buffer too.
     KRYS_NODISCARD Ref<dom::Uint8ClampedArray> TakeData() noexcept
     {
@@ -68,6 +70,7 @@ namespace krys::boo
     {
       return Type::ByteArray;
     }
+
     KRYS_NODISCARD RefPtr<PixelBuffer> CreateScratchPixelBuffer(const IntSize &) const noexcept override;
 
   private:

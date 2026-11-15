@@ -67,7 +67,7 @@ namespace krys::boo
       ForwardDeleteKey,
       InsertText,
       InsertLineBreak,
-      InsertParagraphSeparator
+      InsertParagraphSeparator,
     };
 
     enum class TextCompositionType : uint8
@@ -143,14 +143,17 @@ namespace krys::boo
     {
       _compositionType = type;
     }
+
     void SetIsAutocompletion(bool isAutocompletion) noexcept
     {
       _isAutocompletion = isAutocompletion;
     }
+
     KRYS_NODISCARD bool TriggeringEventIsUntrusted() const noexcept
     {
       return _triggeringEventIsUntrusted;
     }
+
     void SetTriggeringEventIsUntrusted(bool value) noexcept
     {
       _triggeringEventIsUntrusted = value;
@@ -171,10 +174,12 @@ namespace krys::boo
     {
       _smartDelete = smartDelete;
     }
+
     KRYS_NODISCARD bool IsOpenForMoreTyping() const noexcept
     {
       return _openForMoreTyping;
     }
+
     void CloseTyping() noexcept
     {
       _openForMoreTyping = false;
@@ -184,23 +189,28 @@ namespace krys::boo
       LastTypingCommandIfStillOpenForTyping(dom::Document &document) noexcept;
 
     void DoApply() noexcept final;
+
     KRYS_NODISCARD bool PreservesTypingStyle() const noexcept final
     {
       return _preservesTypingStyle;
     }
+
     KRYS_NODISCARD bool ShouldRetainAutocorrectionIndicator() const noexcept final
     {
       krys_debug_assert(IsTopLevelCommand());
       return _shouldRetainAutocorrectionIndicator;
     }
+
     void SetShouldRetainAutocorrectionIndicator(bool retain) noexcept final
     {
       _shouldRetainAutocorrectionIndicator = retain;
     }
+
     KRYS_NODISCARD bool ShouldStopCaretBlinking() const noexcept final
     {
       return true;
     }
+
     void SetShouldPreventSpellChecking(bool prevent) noexcept
     {
       _shouldPreventSpellChecking = prevent;

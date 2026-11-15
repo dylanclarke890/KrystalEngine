@@ -83,7 +83,7 @@ namespace krys::pal
   {
     Text,
     HTML,
-    Files
+    Files,
   };
 
   /// @brief Whether the system clipboard holds @p format.

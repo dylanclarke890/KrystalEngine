@@ -67,7 +67,7 @@ namespace krys::boo::dom
       Invalid,
       ReadWrite,
       Readonly,
-      Protected
+      Protected,
     };
 
   private:
@@ -76,7 +76,7 @@ namespace krys::boo::dom
       CopyAndPaste,
       DragAndDropData,
       DragAndDropFiles,
-      InputEvent
+      InputEvent,
     };
 
     DOMString _originIdentifier;
@@ -145,6 +145,7 @@ namespace krys::boo::dom
     {
       _shouldUpdateDragImage = true;
     }
+
     /// @brief Makes the drag image the page set, with where the cursor is in it in @p dragLocation; null if
     /// it set none.
     KRYS_NODISCARD DragImageRef CreateDragImage(const Document *document,
@@ -205,6 +206,7 @@ namespace krys::boo::dom
     {
       return *_pasteboard;
     }
+
     /// @brief Writes what the page put in this data transfer's static pasteboard to @p nativePasteboard.
     void CommitToPasteboard(Pasteboard &nativePasteboard) noexcept;
 
@@ -221,6 +223,7 @@ namespace krys::boo::dom
     {
       return _type == Type::DragAndDropData || _type == Type::DragAndDropFiles;
     }
+
     KRYS_NODISCARD bool ForFileDrag() const noexcept
     {
       return _type == Type::DragAndDropFiles;
@@ -233,7 +236,7 @@ namespace krys::boo::dom
     enum class AddFilesType : bool
     {
       No,
-      Yes
+      Yes,
     };
     KRYS_NODISCARD List<DOMString> Types(Document &document, AddFilesType addFilesType) const noexcept;
     KRYS_NODISCARD List<Ref<File>> FilesFromPasteboardAndItemList() const noexcept;

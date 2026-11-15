@@ -50,20 +50,25 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD AXMenuListPopup &Popup() const noexcept;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
       return true;
     }
+
     void AddChildren() noexcept override
     {
     }
+
     void UpdateChildrenIfNecessary() noexcept override;
+
     // The pop-up is the only child, for the menu list's life: changes are the pop-up's.
     void ClearChildren() noexcept override
     {
     }
+
     void SetNeedsToUpdateChildren() noexcept override
     {
     }
@@ -82,6 +87,7 @@ namespace krys::boo
     {
       return AXRole::PopUpButton;
     }
+
     void DetachRemoteParts(AXDetachmentType detachmentType) noexcept override;
   };
 }

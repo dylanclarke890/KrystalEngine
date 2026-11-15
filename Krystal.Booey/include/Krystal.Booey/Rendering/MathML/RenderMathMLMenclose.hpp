@@ -67,6 +67,7 @@ namespace krys::boo
     void Paint(PaintInfo &info, const LayoutPoint &paintOffset) noexcept final;
 
     KRYS_NODISCARD LayoutUnit RuleThickness() const noexcept;
+
     KRYS_NODISCARD bool
       HasNotation(mathml::MathMLMencloseElement::MencloseNotationFlag notationFlag) const noexcept
     {

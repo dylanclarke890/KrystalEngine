@@ -76,10 +76,12 @@ namespace krys::boo::layout
     {
       return _startOrPosition;
     }
+
     KRYS_NODISCARD uint32 End() const noexcept
     {
       return Start() + Length();
     }
+
     KRYS_NODISCARD uint32 Length() const noexcept
     {
       return _length;
@@ -89,21 +91,26 @@ namespace krys::boo::layout
     {
       return !Length() && _textItemType == TextItemType::Undefined;
     }
+
     KRYS_NODISCARD bool IsWhitespace() const noexcept
     {
       return _textItemType == TextItemType::Whitespace;
     }
+
     KRYS_NODISCARD bool IsWordSeparator() const noexcept
     {
       return _isWordSeparator;
     }
+
     KRYS_NODISCARD bool IsZeroWidthSpaceSeparator() const noexcept;
     KRYS_NODISCARD bool IsQuirkNonBreakingSpace() const noexcept;
     KRYS_NODISCARD bool IsFullyTrimmable() const noexcept;
+
     KRYS_NODISCARD bool HasTrailingSoftHyphen() const noexcept
     {
       return _hasTrailingSoftHyphen;
     }
+
     KRYS_NODISCARD Maybe<InlineLayoutUnit> Width() const noexcept
     {
       return _hasWidth ? Maybe<InlineLayoutUnit> {_width} : Maybe<InlineLayoutUnit> {};
@@ -118,6 +125,7 @@ namespace krys::boo::layout
     {
       return utf8_stringview {GetInlineTextBox().Content()}.substr(Start(), Length());
     }
+
     KRYS_NODISCARD TextDirection Direction() const noexcept
     {
       return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;

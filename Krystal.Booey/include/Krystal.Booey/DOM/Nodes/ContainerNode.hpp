@@ -54,7 +54,7 @@ namespace krys::boo::dom
         AllChildrenRemoved,
         NonContentsChildRemoved,
         NonContentsChildInserted,
-        AllChildrenReplaced
+        AllChildrenReplaced,
       };
 
       /// @brief The parser appends to elements whose children it's still parsing; everything else is the API.
@@ -62,14 +62,14 @@ namespace krys::boo::dom
       {
         Parser,
         API,
-        Clone
+        Clone,
       };
 
       enum class AffectsElements : uint8
       {
         Unknown,
         No,
-        Yes
+        Yes,
       };
 
       ChildChange::Type ChangeType;

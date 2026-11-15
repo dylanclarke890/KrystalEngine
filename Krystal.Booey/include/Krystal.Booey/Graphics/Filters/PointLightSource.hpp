@@ -44,6 +44,7 @@ namespace krys::boo
     {
       return _position;
     }
+
     bool SetX(float) noexcept override;
     bool SetY(float) noexcept override;
     bool SetZ(float) noexcept override;

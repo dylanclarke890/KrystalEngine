@@ -90,22 +90,27 @@ namespace krys::boo::html
     {
       return _size;
     }
+
     KRYS_NODISCARD int32 Width() const noexcept
     {
       return _size.Width();
     }
+
     KRYS_NODISCARD int32 Height() const noexcept
     {
       return _size.Height();
     }
+
     KRYS_NODISCARD const ImageDataArray &Data() const noexcept
     {
       return _data;
     }
+
     KRYS_NODISCARD PredefinedColorSpace ColorSpace() const noexcept
     {
       return _colorSpace;
     }
+
     KRYS_NODISCARD ImageDataPixelFormat PixelFormat() const noexcept
     {
       return _data.PixelFormat();

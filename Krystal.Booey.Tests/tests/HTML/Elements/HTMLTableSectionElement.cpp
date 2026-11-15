@@ -33,5 +33,4 @@ namespace krys::boo::html::tests
     REQUIRE(deleteResult.HasException());
     CHECK(deleteResult.GetException().Code() == dom::ExceptionCode::IndexSizeError);
   }
-
 }

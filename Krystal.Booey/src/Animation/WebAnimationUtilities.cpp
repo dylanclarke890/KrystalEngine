@@ -73,7 +73,7 @@ namespace krys::boo
         Checkmark,
         PickerIcon,
         After,
-        Other
+        Other,
       };
 
       auto sortingIndex =

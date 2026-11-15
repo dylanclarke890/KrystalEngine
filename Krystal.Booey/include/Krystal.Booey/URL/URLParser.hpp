@@ -101,13 +101,13 @@ namespace krys::boo::url
       DNSNameWithPort,
       DNSNameWithoutPort,
       NonSpecialHostWithoutPort,
-      NonSpecialHostWithPort
+      NonSpecialHostWithPort,
     };
 
     enum class ReportSyntaxViolation : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class URLPart;
@@ -166,8 +166,8 @@ namespace krys::boo::url
     void AppendToASCIIBuffer(utf8_stringview characters) noexcept;
     void CopyASCIIStringUntil(const utf8_string &string, size_t length) noexcept;
     KRYS_NODISCARD bool CopyBaseWindowsDriveLetter(const URL &base) noexcept;
-    KRYS_NODISCARD utf8_stringview ParsedDataView(size_t start,
-                                                  size_t length) const noexcept KRYS_LIFETIME_BOUND;
+    KRYS_NODISCARD utf8_stringview ParsedDataView(size_t start, size_t length) const noexcept
+      KRYS_LIFETIME_BOUND;
     KRYS_NODISCARD char8 ParsedDataView(size_t position) const noexcept;
     KRYS_NODISCARD bool SubdomainStartsWithXNDashDash(CodePointIterator iterator) noexcept;
     KRYS_NODISCARD bool SubdomainStartsWithXNDashDash(utf8_stringview host) noexcept;

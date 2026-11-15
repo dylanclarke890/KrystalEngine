@@ -40,7 +40,7 @@ namespace krys::boo
     {
       UntranslatedDefinite,
       TranslatedDefinite,
-      Indefinite
+      Indefinite,
     };
 
     int _startLine;

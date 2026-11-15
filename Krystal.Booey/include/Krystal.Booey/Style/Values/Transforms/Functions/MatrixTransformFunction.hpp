@@ -53,6 +53,7 @@ namespace krys::boo::style
     {
       return _a == 1 && _b == 0 && _c == 0 && _d == 1 && _e == 0 && _f == 0;
     }
+
     KRYS_NODISCARD bool IsAffectedByTransformOrigin() const noexcept override
     {
       return !IsIdentity();

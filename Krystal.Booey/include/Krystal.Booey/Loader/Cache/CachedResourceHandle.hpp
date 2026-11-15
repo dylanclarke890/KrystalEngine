@@ -45,15 +45,19 @@ namespace krys::boo
 
   public:
     CachedResourceHandle() noexcept = default;
+
     CachedResourceHandle(std::nullptr_t) noexcept
     {
     }
+
     CachedResourceHandle(R &resource) noexcept : _resource(ShareRefPtr(&resource))
     {
     }
+
     CachedResourceHandle(R *resource) noexcept : _resource(ShareRefPtr(resource))
     {
     }
+
     template <typename U>
     requires std::is_convertible_v<U *, R *>
     CachedResourceHandle(const CachedResourceHandle<U> &other) noexcept : _resource(other._resource)
@@ -64,14 +68,17 @@ namespace krys::boo
     {
       return _resource.get();
     }
+
     R *operator->() const noexcept
     {
       return get();
     }
+
     R &operator*() const noexcept
     {
       return *get();
     }
+
     explicit operator bool() const noexcept
     {
       return static_cast<bool>(_resource);
@@ -88,6 +95,7 @@ namespace krys::boo
     {
       return static_cast<const void *>(get()) == static_cast<const void *>(other.get());
     }
+
     KRYS_NODISCARD bool operator==(const R *resource) const noexcept
     {
       return get() == resource;

@@ -103,9 +103,9 @@ namespace krys::boo::dom::tests
       auto press = KeyboardEvent::Create(Key(PlatformEvent::Type::Char, u8"é", u8"é", u8"Digit2", '2'));
       CHECK(press->Type() == u8"keypress");
       // A keypress's codes are its character.
-      CHECK(press->CharCode() == 0xe9);
-      CHECK(press->KeyCode() == 0xe9);
-      CHECK(press->Which() == 0xe9);
+      CHECK(press->CharCode() == 0xE9);
+      CHECK(press->KeyCode() == 0xE9);
+      CHECK(press->Which() == 0xE9);
       CHECK(press->KeyCodeForKeyDown() == '2');
     }
 

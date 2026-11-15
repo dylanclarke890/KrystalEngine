@@ -465,7 +465,6 @@ namespace krys::boo
 
   namespace
   {
-
   }
 
   // https://html.spec.whatwg.org/#activation-notification

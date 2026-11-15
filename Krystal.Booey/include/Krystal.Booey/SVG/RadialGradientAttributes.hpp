@@ -49,22 +49,27 @@ namespace krys::boo::svg
     {
       return _cx;
     }
+
     KRYS_NODISCARD SVGLengthValue Cy() const noexcept
     {
       return _cy;
     }
+
     KRYS_NODISCARD SVGLengthValue R() const noexcept
     {
       return _r;
     }
+
     KRYS_NODISCARD SVGLengthValue Fx() const noexcept
     {
       return _fx;
     }
+
     KRYS_NODISCARD SVGLengthValue Fy() const noexcept
     {
       return _fy;
     }
+
     KRYS_NODISCARD SVGLengthValue Fr() const noexcept
     {
       return _fr;
@@ -75,26 +80,31 @@ namespace krys::boo::svg
       _cx = value;
       _cxSet = true;
     }
+
     void SetCy(SVGLengthValue value) noexcept
     {
       _cy = value;
       _cySet = true;
     }
+
     void SetR(SVGLengthValue value) noexcept
     {
       _r = value;
       _rSet = true;
     }
+
     void SetFx(SVGLengthValue value) noexcept
     {
       _fx = value;
       _fxSet = true;
     }
+
     void SetFy(SVGLengthValue value) noexcept
     {
       _fy = value;
       _fySet = true;
     }
+
     void SetFr(SVGLengthValue value) noexcept
     {
       _fr = value;
@@ -105,22 +115,27 @@ namespace krys::boo::svg
     {
       return _cxSet;
     }
+
     KRYS_NODISCARD bool HasCy() const noexcept
     {
       return _cySet;
     }
+
     KRYS_NODISCARD bool HasR() const noexcept
     {
       return _rSet;
     }
+
     KRYS_NODISCARD bool HasFx() const noexcept
     {
       return _fxSet;
     }
+
     KRYS_NODISCARD bool HasFy() const noexcept
     {
       return _fySet;
     }
+
     KRYS_NODISCARD bool HasFr() const noexcept
     {
       return _frSet;

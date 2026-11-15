@@ -54,7 +54,7 @@ namespace krys::boo::layout
     enum class AdjustContentOnlyInsideRubyBase : bool
     {
       No,
-      Yes
+      Yes,
     };
     static void
       ApplyRubyBaseAlignmentOffset(inline_display::Boxes &displayBoxes,

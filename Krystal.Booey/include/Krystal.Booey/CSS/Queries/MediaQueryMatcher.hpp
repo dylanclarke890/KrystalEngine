@@ -54,7 +54,7 @@ namespace krys::boo::css
     enum class EventMode : uint8
     {
       Schedule,
-      DispatchNow
+      DispatchNow,
     };
 
   private:

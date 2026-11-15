@@ -58,6 +58,7 @@ namespace krys::boo::svg
     {
       return _preserveAspectRatio->CurrentValue();
     }
+
     KRYS_NODISCARD SVGAnimatedPreserveAspectRatio &PreserveAspectRatioAnimated() noexcept
     {
       return *_preserveAspectRatio;
@@ -81,6 +82,7 @@ namespace krys::boo::svg
       RefPtr<ImageBuffer> Buffer;
       FloatRect ImageRect;
     };
+
     KRYS_NODISCARD ImageBufferForEffect
       GetImageBufferForEffect(const GraphicsContext &destinationContext) const noexcept;
     KRYS_NODISCARD RefPtr<FilterEffect>

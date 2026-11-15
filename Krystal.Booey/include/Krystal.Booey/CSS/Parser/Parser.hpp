@@ -78,7 +78,7 @@ namespace krys::boo::css
     {
       Changed,
       Unchanged,
-      Error
+      Error,
     };
 
     enum class AllowedRules : uint8

@@ -15,6 +15,6 @@ namespace krys::boo::html
     SemiExpanded,
     Expanded,
     ExtraExpanded,
-    UltraExpanded
+    UltraExpanded,
   };
 }

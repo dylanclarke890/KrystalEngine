@@ -40,7 +40,7 @@ namespace krys::boo
     Left,
     Right,
     Top,
-    Bottom
+    Bottom,
   };
 
   /// @brief What's needed to place again a box whose layout depends on the viewport rect (fixed and sticky
@@ -52,7 +52,7 @@ namespace krys::boo
     enum class ConstraintType : uint8
     {
       FixedPositionConstraint,
-      StickyPositionConstraint
+      StickyPositionConstraint,
     };
 
   protected:
@@ -70,14 +70,17 @@ namespace krys::boo
     {
       return _anchorEdges;
     }
+
     KRYS_NODISCARD bool HasAnchorEdge(AnchorEdge edge) const noexcept
     {
       return _anchorEdges.Contains(edge);
     }
+
     void AddAnchorEdge(AnchorEdge edge) noexcept
     {
       _anchorEdges.Add(edge);
     }
+
     void SetAnchorEdges(EnumSet<AnchorEdge> edges) noexcept
     {
       _anchorEdges = edges;
@@ -87,6 +90,7 @@ namespace krys::boo
     {
       return _alignmentOffset;
     }
+
     void SetAlignmentOffset(FloatSize offset) noexcept
     {
       _alignmentOffset = offset;
@@ -99,6 +103,7 @@ namespace krys::boo
     {
       return _viewportRectAtLastLayout;
     }
+
     void SetViewportRectAtLastLayout(const FloatRect &rect) noexcept
     {
       _viewportRectAtLastLayout = rect;
@@ -108,6 +113,7 @@ namespace krys::boo
     {
       return _layerPositionAtLastLayout;
     }
+
     void SetLayerPositionAtLastLayout(FloatPoint position) noexcept
     {
       _layerPositionAtLastLayout = position;
@@ -160,6 +166,7 @@ namespace krys::boo
     {
       return _anchorLayerOffsetAtLastLayout;
     }
+
     void SetAnchorLayerOffsetAtLastLayout(FloatSize offset) noexcept
     {
       _anchorLayerOffsetAtLastLayout = offset;
@@ -169,6 +176,7 @@ namespace krys::boo
     {
       return _stickyOffsetAtLastLayout;
     }
+
     void SetStickyOffsetAtLastLayout(FloatSize offset) noexcept
     {
       _stickyOffsetAtLastLayout = offset;
@@ -182,14 +190,17 @@ namespace krys::boo
     {
       return _leftOffset;
     }
+
     KRYS_NODISCARD float RightOffset() const noexcept
     {
       return _rightOffset;
     }
+
     KRYS_NODISCARD float TopOffset() const noexcept
     {
       return _topOffset;
     }
+
     KRYS_NODISCARD float BottomOffset() const noexcept
     {
       return _bottomOffset;
@@ -199,14 +210,17 @@ namespace krys::boo
     {
       _leftOffset = offset;
     }
+
     void SetRightOffset(float offset) noexcept
     {
       _rightOffset = offset;
     }
+
     void SetTopOffset(float offset) noexcept
     {
       _topOffset = offset;
     }
+
     void SetBottomOffset(float offset) noexcept
     {
       _bottomOffset = offset;
@@ -218,6 +232,7 @@ namespace krys::boo
     {
       return _constrainingRectAtLastLayout;
     }
+
     void SetConstrainingRectAtLastLayout(const FloatRect &rect) noexcept
     {
       _constrainingRectAtLastLayout = rect;
@@ -228,6 +243,7 @@ namespace krys::boo
     {
       return _containingBlockRect;
     }
+
     void SetContainingBlockRect(const FloatRect &rect) noexcept
     {
       _containingBlockRect = rect;
@@ -238,6 +254,7 @@ namespace krys::boo
     {
       return _stickyBoxRect;
     }
+
     void SetStickyBoxRect(const FloatRect &rect) noexcept
     {
       _stickyBoxRect = rect;

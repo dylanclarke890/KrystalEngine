@@ -55,10 +55,12 @@ namespace krys::boo
     {
       return AdoptRef(*new SharedBuffer({}));
     }
+
     KRYS_NODISCARD static Ref<SharedBuffer> Create(List<uint8> &&data) noexcept
     {
       return AdoptRef(*new SharedBuffer(krys::move(data)));
     }
+
     KRYS_NODISCARD static Ref<SharedBuffer> Create(Span<const uint8> data) noexcept
     {
       return AdoptRef(*new SharedBuffer(List<uint8>(data.begin(), data.end())));
@@ -68,14 +70,17 @@ namespace krys::boo
     {
       return {_data.data(), _data.size()};
     }
+
     KRYS_NODISCARD const uint8 *Data() const noexcept
     {
       return _data.data();
     }
+
     KRYS_NODISCARD size_t Size() const noexcept
     {
       return _data.size();
     }
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _data.empty();

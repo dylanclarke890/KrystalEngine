@@ -68,6 +68,7 @@ namespace krys::ui
     void DidUpdateState(boo::GraphicsContextState &) noexcept override
     {
     }
+
     void DidUpdateSingleState(boo::GraphicsContextState &,
                               boo::GraphicsContextState::ChangeIndex) noexcept override
     {

@@ -10,6 +10,6 @@ namespace krys::boo::html
     Auto,
     OptimizeSpeed,
     OptimizeLegibility,
-    GeometricPrecision
+    GeometricPrecision,
   };
 }

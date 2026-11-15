@@ -61,11 +61,13 @@ namespace krys::boo::css
   public:
     /// @see https://drafts.css-houdini.org/css-typed-om/#sum-value-value
     using UnitMap = HashMap<UnitType, int32>;
+
     struct Addend
     {
       double Value;
       UnitMap Units;
     };
+
     using SumValue = List<Addend>;
 
   protected:

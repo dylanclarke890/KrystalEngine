@@ -138,6 +138,7 @@ namespace krys::boo::html
       {
         return _font.GetFontSelector();
       }
+
       /// @brief Holds @p fontCascade, resolved against @p fontSelector.
       void Initialize(FontSelector &fontSelector, const FontCascade &fontCascade) noexcept;
       KRYS_NODISCARD const FontMetrics &MetricsOfPrimaryFont() const noexcept;
@@ -160,6 +161,7 @@ namespace krys::boo::html
       {
         return _font.LetterSpacing();
       }
+
       void SetLetterSpacing(float letterSpacing) noexcept
       {
         _font.SetLetterSpacing(letterSpacing);
@@ -169,6 +171,7 @@ namespace krys::boo::html
       {
         return _font.WordSpacing();
       }
+
       void SetWordSpacing(float wordSpacing) noexcept
       {
         _font.SetWordSpacing(wordSpacing);
@@ -246,14 +249,16 @@ namespace krys::boo::html
       PreserveCachedContents = 1 << 4,
     };
 
-    static constexpr uint32 MaxSaveCount = 1'024 * 16;
+    constexpr static uint32 MaxSaveCount = 1'024 * 16;
 
     struct CachedContentsTransparent
     {
     };
+
     struct CachedContentsUnknown
     {
     };
+
     struct CachedContentsImageData
     {
       CachedContentsImageData(CanvasRenderingContext2DBase &, Ref<ByteArrayPixelBuffer>) noexcept;
@@ -272,8 +277,8 @@ namespace krys::boo::html
       _cachedContents;
 
   protected:
-    static constexpr int32 DefaultFontSize = 10;
-    static constexpr std::u8string_view DefaultFontFamily = u8"sans-serif";
+    constexpr static int32 DefaultFontSize = 10;
+    constexpr static std::u8string_view DefaultFontFamily = u8"sans-serif";
 
   public:
     ~CanvasRenderingContext2DBase() noexcept override;
@@ -296,42 +301,49 @@ namespace krys::boo::html
     {
       return GetState().LineWidth;
     }
+
     void SetLineWidth(double) noexcept;
 
     KRYS_NODISCARD CanvasLineCap LineCap() const noexcept
     {
       return GetState().GetCanvasLineCap();
     }
+
     void SetLineCap(CanvasLineCap) noexcept;
 
     KRYS_NODISCARD CanvasLineJoin LineJoin() const noexcept
     {
       return GetState().GetCanvasLineJoin();
     }
+
     void SetLineJoin(CanvasLineJoin) noexcept;
 
     KRYS_NODISCARD double MiterLimit() const noexcept
     {
       return GetState().MiterLimit;
     }
+
     void SetMiterLimit(double) noexcept;
 
     KRYS_NODISCARD const List<double> &GetLineDash() const noexcept
     {
       return GetState().LineDash;
     }
+
     void SetLineDash(const List<double> &) noexcept;
 
     KRYS_NODISCARD double LineDashOffset() const noexcept
     {
       return GetState().LineDashOffset;
     }
+
     void SetLineDashOffset(double) noexcept;
 
     KRYS_NODISCARD const dom::DOMString &LetterSpacing() const noexcept
     {
       return GetState().LetterSpacing;
     }
+
     /// @brief Sets the spacing added after each character, a CSS length; ignored if it isn't one, or uses
     /// viewport, container or line-height units.
     void SetLetterSpacing(dom::DOMStringView) noexcept;
@@ -340,6 +352,7 @@ namespace krys::boo::html
     {
       return GetState().WordSpacing;
     }
+
     /// @brief Sets the spacing added after each space, a CSS length; ignored if it isn't one, or uses
     /// viewport, container or line-height units.
     void SetWordSpacing(dom::DOMStringView) noexcept;
@@ -352,24 +365,28 @@ namespace krys::boo::html
     {
       return GetState().ShadowOffset.Width();
     }
+
     void SetShadowOffsetX(float) noexcept;
 
     KRYS_NODISCARD float ShadowOffsetY() const noexcept
     {
       return GetState().ShadowOffset.Height();
     }
+
     void SetShadowOffsetY(float) noexcept;
 
     KRYS_NODISCARD float ShadowBlur() const noexcept
     {
       return GetState().ShadowBlur;
     }
+
     void SetShadowBlur(float) noexcept;
 
     KRYS_NODISCARD dom::DOMString ShadowColor() const noexcept
     {
       return GetState().ShadowColorString();
     }
+
     void SetShadowColor(dom::DOMStringView) noexcept;
 
 #pragma endregion
@@ -380,12 +397,14 @@ namespace krys::boo::html
     {
       return GetState().GlobalAlpha;
     }
+
     void SetGlobalAlpha(double) noexcept;
 
     KRYS_NODISCARD dom::DOMString GlobalCompositeOperation() const noexcept
     {
       return GetState().GlobalCompositeOperationString();
     }
+
     void SetGlobalCompositeOperation(dom::DOMStringView) noexcept;
 
 #pragma endregion
@@ -399,6 +418,7 @@ namespace krys::boo::html
     {
       ++_unrealizedSaveCount;
     }
+
     /// @see https://html.spec.whatwg.org/#dom-context-2d-restore
     void Restore() noexcept;
     /// @see https://html.spec.whatwg.org/#dom-context-2d-reset
@@ -500,6 +520,7 @@ namespace krys::boo::html
     {
       return GetState().FilterString;
     }
+
     /// @brief Sets the filter, a CSS `filter` value; ignored if it isn't one (or is empty).
     /// @see https://html.spec.whatwg.org/#dom-context-2d-filter
     void SetFilterString(dom::DOMStringView) noexcept;
@@ -512,12 +533,14 @@ namespace krys::boo::html
     {
       return GetState().ImageSmoothingEnabled;
     }
+
     void SetImageSmoothingEnabled(bool) noexcept;
 
     KRYS_NODISCARD ImageSmoothingQuality GetImageSmoothingQuality() const noexcept
     {
       return GetState().ImageSmoothingQuality;
     }
+
     void SetImageSmoothingQuality(ImageSmoothingQuality) noexcept;
 
 #pragma endregion
@@ -528,12 +551,14 @@ namespace krys::boo::html
     {
       return GetState().GetCanvasTextAlign();
     }
+
     void SetTextAlign(CanvasTextAlign) noexcept;
 
     KRYS_NODISCARD CanvasTextBaseline TextBaseline() const noexcept
     {
       return GetState().GetCanvasTextBaseline();
     }
+
     void SetTextBaseline(CanvasTextBaseline) noexcept;
 
     void SetDirection(Direction) noexcept;
@@ -548,6 +573,7 @@ namespace krys::boo::html
     {
       return GetState().Lang;
     }
+
     void SetLang(dom::DOMStringView) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-fontkerning
@@ -555,6 +581,7 @@ namespace krys::boo::html
     {
       return GetState().FontKerning;
     }
+
     void SetFontKerning(CanvasFontKerning) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-fontstretch
@@ -562,6 +589,7 @@ namespace krys::boo::html
     {
       return GetState().FontStretch;
     }
+
     void SetFontStretch(CanvasFontStretch) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-fontvariantcaps
@@ -569,6 +597,7 @@ namespace krys::boo::html
     {
       return GetState().FontVariantCaps;
     }
+
     void SetFontVariantCaps(CanvasFontVariantCaps) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-textrendering
@@ -576,6 +605,7 @@ namespace krys::boo::html
     {
       return GetState().TextRendering;
     }
+
     void SetTextRendering(CanvasTextRendering) noexcept;
 
 #pragma endregion
@@ -609,7 +639,9 @@ namespace krys::boo::html
     {
       return _stateStack.back();
     }
+
     void RealizeSaves() noexcept;
+
     KRYS_NODISCARD State &ModifiableState() noexcept
     {
       krys_debug_assert(!_unrealizedSaveCount || _stateStack.size() >= MaxSaveCount);
@@ -628,22 +660,25 @@ namespace krys::boo::html
     {
       return null;
     }
+
     /// @brief The filter that applies the state's filter to what's drawn within @p bounds; null if none can.
     KRYS_NODISCARD virtual RefPtr<boo::Filter> CreateFilter(const FloatRect &) const noexcept;
+
     /// @brief How far the state's filter reaches outside @p bounds.
     KRYS_NODISCARD virtual IntOutsets CalculateFilterOutsets(const FloatRect &) const noexcept
     {
       return {};
     }
+
     KRYS_NODISCARD virtual AffineTransform BaseTransform() const noexcept;
 
-    static constexpr EnumSet<DidDrawOption> DefaultDidDrawOptions() noexcept
+    constexpr static EnumSet<DidDrawOption> DefaultDidDrawOptions() noexcept
     {
       return {DidDrawOption::ApplyTransform, DidDrawOption::ApplyShadow, DidDrawOption::ApplyClip,
               DidDrawOption::ApplyPostProcessing};
     }
 
-    static constexpr EnumSet<DidDrawOption> DefaultDidDrawOptionsWithoutPostProcessing() noexcept
+    constexpr static EnumSet<DidDrawOption> DefaultDidDrawOptionsWithoutPostProcessing() noexcept
     {
       return {DidDrawOption::ApplyTransform, DidDrawOption::ApplyShadow, DidDrawOption::ApplyClip};
     }
@@ -699,6 +734,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool ShouldDrawShadows() const noexcept;
 
     KRYS_NODISCARD bool IsEntireBackingStoreDirty() const noexcept;
+
     KRYS_NODISCARD FloatRect BackingStoreBounds() const noexcept
     {
       return FloatRect {{}, FloatSize {GetCanvasBase().Size()}};

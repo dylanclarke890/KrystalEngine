@@ -47,7 +47,7 @@ namespace krys::boo
   enum class WordSide : bool
   {
     RightWordIfOnBoundary,
-    LeftWordIfOnBoundary
+    LeftWordIfOnBoundary,
   };
 
   // words
@@ -142,7 +142,7 @@ namespace krys::boo
   enum class BoundarySearchContextAvailability : bool
   {
     DontHaveMoreContext,
-    MayHaveMoreContext
+    MayHaveMoreContext,
   };
 
   using BoundarySearchFunction = uint32 (*)(utf8_stringview, uint32 offset, BoundarySearchContextAvailability,

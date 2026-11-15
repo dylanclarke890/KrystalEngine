@@ -38,7 +38,7 @@ namespace krys::boo::style
     None,
     Left,
     Right,
-    Center
+    Center,
   };
 
   KRYS_NODISCARD constexpr LegacyPositionKind ComputeKind(Maybe<LegacyPosition> position) noexcept

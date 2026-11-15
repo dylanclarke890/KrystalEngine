@@ -88,6 +88,7 @@ namespace krys::boo::html
       FormListedElement::ParseAttribute(localName, value);
     }
   }
+
 #pragma region HTMLObjectElement
 
   dom::USVString HTMLObjectElement::Data() const noexcept

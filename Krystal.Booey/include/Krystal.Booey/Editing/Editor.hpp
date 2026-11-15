@@ -89,13 +89,13 @@ namespace krys::boo
   {
     MenuOrKeyBinding,
     DOM,
-    DOMWithUserInterface
+    DOMWithUserInterface,
   };
 
   enum class EditorParagraphSeparator : bool
   {
     div,
-    p
+    p,
   };
 
   enum class EditorPasteOption : uint8
@@ -129,7 +129,7 @@ namespace krys::boo
   enum class EditorActionSpecifier : bool
   {
     CutAction,
-    CopyAction
+    CopyAction,
   };
 
   enum class ClipboardEventKind : uint8
@@ -142,7 +142,7 @@ namespace krys::boo
     PasteFont,
     BeforeCopy,
     BeforeCut,
-    BeforePaste
+    BeforePaste,
   };
 
   /// @brief A document's editor: the commands that act on its selection (moving and extending it, selecting
@@ -177,13 +177,13 @@ namespace krys::boo
     enum class FromMenuOrKeyBinding : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class RevealSelection : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     /// @brief An editor command by name, bound to the document and the source it came from.
@@ -259,10 +259,12 @@ namespace krys::boo
     void PasteAsPlainText(utf8_stringview pastingText, bool smartReplace) noexcept;
     void PasteAsFragment(Ref<dom::DocumentFragment> &&pastingFragment, bool smartReplace, bool matchStyle,
                          EditAction action = EditAction::Paste) noexcept;
+
     KRYS_NODISCARD bool IsPastingFromMenuOrKeyBinding() const noexcept
     {
       return _pastingFromMenuOrKeyBinding;
     }
+
     KRYS_NODISCARD bool IsCopyingFromMenuOrKeyBinding() const noexcept
     {
       return _copyingFromMenuOrKeyBinding;
@@ -306,6 +308,7 @@ namespace krys::boo
     {
       return _defaultParagraphSeparator;
     }
+
     void SetDefaultParagraphSeparator(EditorParagraphSeparator separator) noexcept
     {
       _defaultParagraphSeparator = separator;
@@ -396,6 +399,7 @@ namespace krys::boo
     {
       return _overwriteModeEnabled;
     }
+
     // FIXME: Showing a block cursor while overwriting (setShouldShowBlockCursor), with carets.
     void ToggleOverwriteModeEnabled() noexcept
     {
@@ -447,10 +451,12 @@ namespace krys::boo
     KRYS_NODISCARD uint32 CompositionStart() const noexcept;
     /// @brief The composition's end offset in its text node, or 0 if there's none.
     KRYS_NODISCARD uint32 CompositionEnd() const noexcept;
+
     KRYS_NODISCARD bool CompositionUsesCustomUnderlines() const noexcept
     {
       return !_customCompositionUnderlines.empty();
     }
+
     /// @brief The composition's underlines, with offsets in its text.
     KRYS_NODISCARD const List<CompositionUnderline> &CustomCompositionUnderlines() const noexcept
     {
@@ -460,6 +466,7 @@ namespace krys::boo
     /// @brief Ignores selection changes (they don't cancel the composition) until called with false.
     void SetIgnoreSelectionChanges(
       bool ignore, RevealSelection shouldRevealExistingSelection = RevealSelection::Yes) noexcept;
+
     KRYS_NODISCARD bool IgnoreSelectionChanges() const noexcept
     {
       return _ignoreSelectionChanges;
@@ -481,7 +488,7 @@ namespace krys::boo
     enum class SetCompositionMode : bool
     {
       ConfirmComposition,
-      CancelComposition
+      CancelComposition,
     };
 
     void SelectComposition() noexcept;

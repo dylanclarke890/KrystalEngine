@@ -63,6 +63,7 @@ namespace krys::boo
     {
       return _currentTime;
     }
+
     void SetCurrentTime(MonotonicTime::duration now) noexcept;
 
     /// @brief Fires the timers that are due at the current time, soonest first. Timers started while they

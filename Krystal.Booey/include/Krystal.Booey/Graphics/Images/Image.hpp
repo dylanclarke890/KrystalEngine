@@ -66,7 +66,7 @@ namespace krys::boo
       StretchTile,
       RoundTile,
       SpaceTile,
-      RepeatTile
+      RepeatTile,
     };
 
     virtual ~Image() noexcept;
@@ -78,26 +78,32 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsGeneratedImage() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsGradientImage() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsSVGImage() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsSVGImageForContainer() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsSVGResourceImage() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD bool DrawsSVGImage() const noexcept
     {
       return IsSVGImage() || IsSVGImageForContainer();
@@ -107,8 +113,10 @@ namespace krys::boo
     {
       return 1;
     }
+
     KRYS_NODISCARD virtual bool CurrentFrameKnownToBeOpaque() const noexcept = 0;
     KRYS_NODISCARD virtual bool CurrentFrameIsComplete() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsAnimated() const noexcept
     {
       return false;
@@ -124,6 +132,7 @@ namespace krys::boo
 
     /// @brief An empty image, drawn as nothing.
     KRYS_NODISCARD static Image &NullImage() noexcept;
+
     KRYS_NODISCARD bool IsNull() const noexcept
     {
       return Size().IsEmpty();
@@ -132,18 +141,22 @@ namespace krys::boo
     virtual void SetContainerSize(const FloatSize &) noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool UsesContainerSize() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool HasRelativeWidth() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool HasRelativeHeight() const noexcept
     {
       return false;
     }
+
     virtual void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
                                             FloatSize &intrinsicRatio) noexcept;
 
@@ -151,18 +164,22 @@ namespace krys::boo
       Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept = 0;
     KRYS_NODISCARD virtual FloatSize
       SourceSize(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
+
     KRYS_NODISCARD virtual bool HasDensityCorrectedSize() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD FloatRect Rect() const noexcept
     {
       return FloatRect(FloatPoint(), Size());
     }
+
     KRYS_NODISCARD float Width() const noexcept
     {
       return Size().Width();
     }
+
     KRYS_NODISCARD float Height() const noexcept
     {
       return Size().Height();
@@ -180,6 +197,7 @@ namespace krys::boo
 
     /// @brief Replaces the encoded data and tells the image it changed.
     EncodedDataStatus SetData(RefPtr<SharedBuffer> &&data, bool allDataReceived) noexcept;
+
     virtual EncodedDataStatus DataChanged(bool /*allDataReceived*/) noexcept
     {
       return EncodedDataStatus::Unknown;
@@ -190,6 +208,7 @@ namespace krys::boo
     {
       return {};
     }
+
     /// @brief A description of the image the data carries; empty if unknown.
     KRYS_NODISCARD virtual utf8_string AccessibilityDescription() const noexcept
     {
@@ -204,6 +223,7 @@ namespace krys::boo
     {
       return _encodedImageData.get();
     }
+
     KRYS_NODISCARD const SharedBuffer *Data() const noexcept
     {
       return _encodedImageData.get();
@@ -214,14 +234,18 @@ namespace krys::boo
     virtual void StartAnimation() noexcept
     {
     }
+
     /// @brief Starts the animation the next time the event loop runs its timers.
     void StartAnimationAsynchronously() noexcept;
+
     virtual void StopAnimation() noexcept
     {
     }
+
     virtual void ResetAnimation() noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool IsAnimating() const noexcept
     {
       return false;

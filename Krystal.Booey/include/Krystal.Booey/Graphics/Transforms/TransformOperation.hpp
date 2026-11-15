@@ -61,7 +61,7 @@ namespace krys::boo
     Matrix3D,
     Perspective,
     Identity,
-    None
+    None,
   };
 
   class TransformOperation : public RefCounted<TransformOperation>
@@ -72,6 +72,7 @@ namespace krys::boo
     explicit TransformOperation(Type type) noexcept : _type(type)
     {
     }
+
     virtual ~TransformOperation() noexcept = default;
 
     KRYS_NODISCARD virtual Ref<TransformOperation> Clone() const noexcept = 0;
@@ -80,9 +81,11 @@ namespace krys::boo
     {
       return Equals(other);
     }
+
     KRYS_NODISCARD virtual bool Equals(const TransformOperation &) const noexcept = 0;
 
     virtual void Apply(TransformationMatrix &) const noexcept = 0;
+
     virtual void ApplyUnrounded(TransformationMatrix &transform) const noexcept
     {
       Apply(transform);
@@ -96,6 +99,7 @@ namespace krys::boo
     {
       return _type;
     }
+
     KRYS_NODISCARD bool IsSameType(const TransformOperation &other) const noexcept
     {
       return GetType() == other.GetType();
@@ -105,6 +109,7 @@ namespace krys::boo
     {
       return _type;
     }
+
     KRYS_NODISCARD Maybe<Type> SharedPrimitiveType(Type other) const noexcept;
     KRYS_NODISCARD Maybe<Type> SharedPrimitiveType(const TransformOperation *other) const noexcept;
 

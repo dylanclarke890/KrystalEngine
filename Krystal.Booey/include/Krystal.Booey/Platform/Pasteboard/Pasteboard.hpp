@@ -47,13 +47,13 @@ namespace krys::boo
   enum class PlainTextURLReadingPolicy : bool
   {
     IgnoreURL,
-    AllowURL
+    AllowURL,
   };
 
   enum class WebContentReadingPolicy : bool
   {
     AnyType,
-    OnlyRichTextTypes
+    OnlyRichTextTypes,
   };
 
   // For writing to the pasteboard. Generally sorted with the richest formats on top.
@@ -103,6 +103,7 @@ namespace krys::boo
     {
       return _contentOrigin;
     }
+
     void SetContentOrigin(utf8_stringview contentOrigin) noexcept
     {
       _contentOrigin = utf8_string(contentOrigin);
@@ -119,10 +120,12 @@ namespace krys::boo
   {
     virtual ~PasteboardFileReader() noexcept = default;
     virtual void ReadFilename(utf8_stringview filename) noexcept = 0;
+
     KRYS_NODISCARD virtual bool ShouldReadBuffer(utf8_stringview /* type */) const noexcept
     {
       return true;
     }
+
     virtual void ReadBuffer(utf8_stringview filename, utf8_stringview type,
                             Ref<SharedBuffer> &&buffer) noexcept = 0;
   };
@@ -144,14 +147,14 @@ namespace krys::boo
     enum SmartReplaceOption : bool
     {
       CanSmartReplace,
-      CannotSmartReplace
+      CannotSmartReplace,
     };
 
     enum class FileContentState : uint8
     {
       NoFileOrImageData,
       InMemoryImage,
-      MayContainFilePaths
+      MayContainFilePaths,
     };
 
     Pasteboard() noexcept = default;
@@ -213,6 +216,7 @@ namespace krys::boo
     virtual void SetDragImage(DragImage, const IntPoint &hotSpot) noexcept;
 
     KRYS_NODISCARD int64 ChangeCount() const noexcept;
+
     KRYS_NODISCARD const utf8_string &Name() const noexcept
     {
       return _name;

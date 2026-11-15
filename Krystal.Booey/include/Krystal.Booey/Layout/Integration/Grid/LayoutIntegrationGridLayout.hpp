@@ -68,6 +68,7 @@ namespace krys::boo::layout_integration
     {
       return *_gridBox;
     }
+
     KRYS_NODISCARD layout::ElementBox &GridBox() noexcept
     {
       return *_gridBox;
@@ -80,6 +81,7 @@ namespace krys::boo::layout_integration
     {
       return *_layoutState;
     }
+
     KRYS_NODISCARD const layout::LayoutState &GetLayoutState() const noexcept
     {
       return *_layoutState;

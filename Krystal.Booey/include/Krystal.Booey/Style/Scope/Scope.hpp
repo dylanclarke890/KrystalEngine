@@ -104,7 +104,7 @@ namespace krys::boo::style
     enum class UpdateType : uint8
     {
       ActiveSet,
-      ContentsOrInterpretation
+      ContentsOrInterpretation,
     };
 
     struct ActiveStyleSheetCollection
@@ -117,7 +117,7 @@ namespace krys::boo::style
     {
       Reconstruct,
       Reset,
-      Additive
+      Additive,
     };
 
     struct StyleSheetChange
@@ -196,6 +196,7 @@ namespace krys::boo::style
 
       KRYS_NODISCARD bool operator==(const AnchorPosition &) const noexcept = default;
     };
+
     // Keyed by address, like the query containers' dimensions.
     HashMap<const RenderBoxModelObject *, Pair<WeakPtr<const RenderObject>, AnchorPosition>>
       _anchorPositionsOnLastUpdate;
@@ -368,10 +369,12 @@ namespace krys::boo::style
     {
       return _anchorPositionedToAnchorMap;
     }
+
     KRYS_NODISCARD const style::AnchorPositionedToAnchorMap &AnchorPositionedToAnchorMap() const noexcept
     {
       return _anchorPositionedToAnchorMap;
     }
+
     void UpdateAnchorPositioningStateAfterStyleResolution() noexcept;
 
     /// @brief The index of the position option @p styleable last chose, from the last rendering update.

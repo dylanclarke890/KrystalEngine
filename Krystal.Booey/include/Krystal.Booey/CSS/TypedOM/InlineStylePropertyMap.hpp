@@ -51,6 +51,7 @@ namespace krys::boo::css
     {
       return Type::Inline;
     }
+
     KRYS_NODISCARD size_t Size() const noexcept final;
     KRYS_NODISCARD List<Entry> Entries() const noexcept final;
     void Clear() noexcept final;

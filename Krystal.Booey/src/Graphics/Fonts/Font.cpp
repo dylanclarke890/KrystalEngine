@@ -810,6 +810,7 @@ namespace krys::boo
     float skew = _platformData.SyntheticOblique()
                    ? std::tan(FontCascade::SyntheticObliqueAngle() * std::numbers::pi_v<float> / 180.f)
                    : 0.f;
+
     struct Decomposer
     {
       Path &Target;

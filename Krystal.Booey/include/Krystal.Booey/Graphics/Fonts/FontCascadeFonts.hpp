@@ -81,7 +81,7 @@ namespace krys::boo
       }
     };
 
-    static constexpr size_t ResolvedEmojiPolicyCount = 3;
+    constexpr static size_t ResolvedEmojiPolicyCount = 3;
 
     SmallList<FontRanges, 1> _realizedFallbackRanges;
     uint32 _lastRealizedFallbackIndex {0};
@@ -137,6 +137,7 @@ namespace krys::boo
     {
       return _widthCache;
     }
+
     KRYS_NODISCARD const WidthCache &GetWidthCache() const noexcept
     {
       return _widthCache;

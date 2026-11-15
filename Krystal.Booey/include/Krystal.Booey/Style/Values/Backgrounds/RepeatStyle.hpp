@@ -40,6 +40,7 @@ namespace krys::boo::style
     {
       return Values.x();
     }
+
     KRYS_NODISCARD FillRepeat Y() const noexcept
     {
       return Values.y();
@@ -66,6 +67,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD bool operator==(const RepeatStyle &) const noexcept = default;
+
     bool operator==(FillRepeat other) const noexcept
     {
       return X() == other && Y() == other;

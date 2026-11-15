@@ -89,6 +89,7 @@ namespace krys::boo
       {
         return Equals(other);
       }
+
       KRYS_NODISCARD virtual bool Equals(const TransformFunctionBase &) const noexcept = 0;
 
       virtual void Apply(TransformationMatrix &, const FloatSize &borderBoxSize) const noexcept = 0;
@@ -101,6 +102,7 @@ namespace krys::boo
       {
         return _type;
       }
+
       KRYS_NODISCARD bool IsSameType(const TransformFunctionBase &other) const noexcept
       {
         return GetType() == other.GetType();
@@ -110,14 +112,17 @@ namespace krys::boo
       {
         return _type;
       }
+
       KRYS_NODISCARD Maybe<Type> SharedPrimitiveType(Type other) const noexcept;
       KRYS_NODISCARD Maybe<Type> SharedPrimitiveType(const TransformFunctionBase *other) const noexcept;
 
       KRYS_NODISCARD virtual bool IsIdentity() const noexcept = 0;
+
       KRYS_NODISCARD virtual bool IsAffectedByTransformOrigin() const noexcept
       {
         return false;
       }
+
       KRYS_NODISCARD virtual bool IsRepresentableIn2D() const noexcept
       {
         return true;
@@ -170,7 +175,6 @@ namespace krys::boo
     {
       KRYS_NODISCARD TransformOperationType operator()(TransformFunctionType) noexcept;
     };
-
   }
 }
 

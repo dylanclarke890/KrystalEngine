@@ -53,7 +53,7 @@ namespace krys::boo
   {
     Success,
     Failure,
-    Unsupported
+    Unsupported,
   };
 
   /// @brief The promise `requestPointerLock()` returns, as a callback: called once, as a microtask, with

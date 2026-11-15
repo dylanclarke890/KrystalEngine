@@ -42,26 +42,26 @@ namespace krys::boo
   enum class AnimationImpact : uint8
   {
     RequiresRecomposite,
-    ForcesStackingContext
+    ForcesStackingContext,
   };
 
   enum class UseCachedCurrentTime : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class EndpointInclusiveActiveInterval : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class WebAnimationType : uint8
   {
     CSSAnimation,
     CSSTransition,
-    WebAnimation
+    WebAnimation,
   };
 
   /// @brief Hashes an animatable property, for maps keyed by it.

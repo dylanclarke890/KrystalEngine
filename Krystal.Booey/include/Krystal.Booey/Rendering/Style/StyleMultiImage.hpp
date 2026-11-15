@@ -93,6 +93,7 @@ namespace krys::boo
     {
       return _selectedImage.get();
     }
+
     KRYS_NODISCARD StyleImage *SelectedImage() noexcept final
     {
       return _selectedImage.get();

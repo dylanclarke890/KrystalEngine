@@ -15,13 +15,13 @@ namespace krys::boo::dom
   enum class TraversalNextOrPrev
   {
     Next,
-    Previous
+    Previous,
   };
 
   enum class TraverseFirstOrLast
   {
     First,
-    Last
+    Last,
   };
 
   class IteratorAlgorithms

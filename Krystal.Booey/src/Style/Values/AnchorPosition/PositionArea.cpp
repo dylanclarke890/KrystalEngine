@@ -126,7 +126,7 @@ namespace krys::boo::style
   KRYS_NODISCARD static ItemPosition Flip(ItemPosition alignment) noexcept
   {
     return ItemPosition::Start == alignment ? ItemPosition::End : ItemPosition::Start;
-  };
+  }
 
   ItemPosition PositionAreaValue::DefaultAlignmentForAxis(BoxAxis physicalAxis,
                                                           WritingMode containerWritingMode,

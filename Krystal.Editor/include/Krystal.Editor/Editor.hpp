@@ -66,7 +66,7 @@ namespace krys
   {
   private:
     /// @brief The height of the header the views are drawn under.
-    static constexpr float HeaderHeight = 56.f;
+    constexpr static float HeaderHeight = 56.f;
 
     uint32 _width {0u};
     uint32 _height {0u};
@@ -1071,24 +1071,24 @@ namespace krys
       const float width = static_cast<float>(_width);
       const Gradient2D header {
         .Shape = LinearGradient2D {{0.f, 0.f}, {width, 0.f}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0x4f6df5)}, {.Offset = 1.f, .Colour = Hex(0xb04ff5)}}};
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0x4F6DF5)}, {.Offset = 1.f, .Colour = Hex(0xB04FF5)}}};
       _renderer->Save();
-      _renderer->SetDropShadow({.Offset = {0.f, 2.f}, .BlurRadius = 10.f, .Colour = Rgb(0x2a2050, 70)});
+      _renderer->SetDropShadow({.Offset = {0.f, 2.f}, .BlurRadius = 10.f, .Colour = Rgb(0x2A2050, 70)});
       _renderer->FillRect({0.f, 0.f, width, 56.f}, header);
       _renderer->Restore();
-      _renderer->FillRoundedRect(Rounded(20.f, 16.f, 24.f, 24.f, 12.f), Rgb(0xffffff));
+      _renderer->FillRoundedRect(Rounded(20.f, 16.f, 24.f, 24.f, 12.f), Rgb(0xFFFFFF));
       _renderer->Save();
-      _renderer->SetDropShadow({.Offset = {0.f, 1.f}, .BlurRadius = 4.f, .Colour = Rgb(0x1a1040, 120)});
-      DrawText(U"Krystal", 56.f, 36.f, 22.f, Rgb(0xffffff), true);
+      _renderer->SetDropShadow({.Offset = {0.f, 1.f}, .BlurRadius = 4.f, .Colour = Rgb(0x1A1040, 120)});
+      DrawText(U"Krystal", 56.f, 36.f, 22.f, Rgb(0xFFFFFF), true);
       _renderer->Restore();
       const char32_t *links[] {U"Page", U"Render2D", U"Booey scene"};
       for (int i = 0; i < 3; ++i)
       {
         const bool active = i == static_cast<int>(_view);
         DrawText(links[i], 170.f + static_cast<float>(i) * 96.f, 34.f, 15.f,
-                 Rgb(0xffffff, active ? 255 : 150), active);
+                 Rgb(0xFFFFFF, active ? 255 : 150), active);
       }
-      DrawText(U"F2 switches views, F5 reloads the page", width - 290.f, 34.f, 13.f, Rgb(0xffffff, 170));
+      DrawText(U"F2 switches views, F5 reloads the page", width - 290.f, 34.f, 13.f, Rgb(0xFFFFFF, 170));
 
       // The page's chapter most in view, from its intersection observer.
       if (_observers && _view == EditorView::Page && !_observers->CurrentChapter().empty())
@@ -1098,17 +1098,17 @@ namespace krys
         {
           chapter.push_back(*it);
         }
-        DrawText(chapter.c_str(), 480.f, 34.f, 15.f, Rgb(0xffffff), true);
+        DrawText(chapter.c_str(), 480.f, 34.f, 15.f, Rgb(0xFFFFFF), true);
       }
     }
 
     void DrawCard(const char32_t *title, float x, float y, float width, float height) noexcept
     {
       const auto card = Rounded(x, y, width, height, 16.f);
-      BoxShadow(card, {0.f, 2.f}, 6.f, Rgb(0x1a2240, 26));
-      BoxShadow(card, {0.f, 12.f}, 32.f, Rgb(0x1a2240, 30));
-      _renderer->FillRoundedRect(card, Rgb(0xffffff));
-      DrawText(title, x + 24.f, y + 34.f, 16.f, Rgb(0x5a6378), true);
+      BoxShadow(card, {0.f, 2.f}, 6.f, Rgb(0x1A2240, 26));
+      BoxShadow(card, {0.f, 12.f}, 32.f, Rgb(0x1A2240, 30));
+      _renderer->FillRoundedRect(card, Rgb(0xFFFFFF));
+      DrawText(title, x + 24.f, y + 34.f, 16.f, Rgb(0x5A6378), true);
     }
 
     /// @brief Mask clipping: a turning star window, a panel with orbiting holes, two path clips at once, a
@@ -1152,7 +1152,7 @@ namespace krys
       const Gradient2D panelFill {
         .Shape = LinearGradient2D {{panel.Rect.X, panel.Rect.Y},
                                    {panel.Rect.X + panel.Rect.Width, panel.Rect.Y + panel.Rect.Height}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0x06d6a0)}, {.Offset = 1.f, .Colour = Hex(0x118ab2)}}};
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0x06D6A0)}, {.Offset = 1.f, .Colour = Hex(0x118AB2)}}};
       _renderer->Save();
       _renderer->ClipOutPath(holes, FillRule::NonZero);
       _renderer->FillRoundedRect(panel, panelFill);
@@ -1163,10 +1163,10 @@ namespace krys
       Path2D circle;
       circle.AddEllipse(both, {80.f, 80.f});
       const Gradient2D wheel {.Shape = ConicGradient2D {both, 0.f},
-                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xef476f)},
-                                        {.Offset = 0.33f, .Colour = Hex(0xffd166)},
-                                        {.Offset = 0.66f, .Colour = Hex(0x06d6a0)},
-                                        {.Offset = 1.f, .Colour = Hex(0xef476f)}}};
+                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xEF476F)},
+                                        {.Offset = 0.33f, .Colour = Hex(0xFFD166)},
+                                        {.Offset = 0.66f, .Colour = Hex(0x06D6A0)},
+                                        {.Offset = 1.f, .Colour = Hex(0xEF476F)}}};
       _renderer->Save();
       _renderer->ClipPath(circle, FillRule::NonZero);
       _renderer->Translate(both.x, both.y);
@@ -1183,14 +1183,14 @@ namespace krys
       _renderer->Rotate(std::sin(_time * 0.8f) * 0.5f);
       _renderer->ClipRoundedRect(Rounded(-66.f, -52.f, 132.f, 104.f, 24.f));
       _renderer->SetTransform({});
-      _renderer->FillRect({rocking.x - 100.f, rocking.y - 100.f, 200.f, 200.f}, Rgb(0xffd166));
+      _renderer->FillRect({rocking.x - 100.f, rocking.y - 100.f, 200.f, 200.f}, Rgb(0xFFD166));
       const float shift = std::fmod(_time * 16.f, 28.f);
       for (int i = -8; i <= 8; ++i)
       {
         const float offset = static_cast<float>(i) * 28.f + shift;
         _renderer->StrokeLine({rocking.x + offset - 100.f, rocking.y - 100.f},
                               {rocking.x + offset + 100.f, rocking.y + 100.f}, {.Width = 10.f},
-                              Rgb(0xef476f));
+                              Rgb(0xEF476F));
       }
       _renderer->Restore();
 
@@ -1201,12 +1201,12 @@ namespace krys
       band.AddEllipse(ring, {38.f, 38.f});
       const float share = 0.35f + 0.15f * std::sin(_time * 0.7f);
       const Gradient2D chart {.Shape = ConicGradient2D {ring, 0.f},
-                              .Stops = {{.Offset = 0.f, .Colour = Hex(0x4f6df5)},
-                                        {.Offset = share, .Colour = Hex(0x4f6df5)},
-                                        {.Offset = share, .Colour = Hex(0xffd166)},
-                                        {.Offset = share + 0.25f, .Colour = Hex(0xffd166)},
-                                        {.Offset = share + 0.25f, .Colour = Hex(0xe3e7ef)},
-                                        {.Offset = 1.f, .Colour = Hex(0xe3e7ef)}}};
+                              .Stops = {{.Offset = 0.f, .Colour = Hex(0x4F6DF5)},
+                                        {.Offset = share, .Colour = Hex(0x4F6DF5)},
+                                        {.Offset = share, .Colour = Hex(0xFFD166)},
+                                        {.Offset = share + 0.25f, .Colour = Hex(0xFFD166)},
+                                        {.Offset = share + 0.25f, .Colour = Hex(0xE3E7EF)},
+                                        {.Offset = 1.f, .Colour = Hex(0xE3E7EF)}}};
       _renderer->Save();
       _renderer->ClipPath(band, FillRule::EvenOdd);
       _renderer->FillRect({ring.x - 64.f, ring.y - 64.f, 128.f, 128.f}, chart);
@@ -1214,11 +1214,11 @@ namespace krys
 
       // A progress bar: a gradient inside a rounded clip, with stripes sliding along it.
       const auto track = Rounded(x + 222.f, y + 480.f, 148.f, 20.f, 10.f);
-      _renderer->FillRoundedRect(track, Rgb(0xe3e7ef));
+      _renderer->FillRoundedRect(track, Rgb(0xE3E7EF));
       const float progress = 0.5f + 0.45f * std::sin(_time * 0.6f);
       const Gradient2D fill {
         .Shape = LinearGradient2D {{track.Rect.X, 0.f}, {track.Rect.X + track.Rect.Width, 0.f}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0x4f6df5)}, {.Offset = 1.f, .Colour = Hex(0xb04ff5)}}};
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0x4F6DF5)}, {.Offset = 1.f, .Colour = Hex(0xB04FF5)}}};
       _renderer->Save();
       _renderer->ClipRoundedRect(track);
       _renderer->FillRoundedRect(Rounded(track.Rect.X, track.Rect.Y, track.Rect.Width * progress, 20.f, 10.f),
@@ -1226,7 +1226,7 @@ namespace krys
       _renderer->StrokeLine({track.Rect.X - 20.f, track.Rect.Y + 10.f},
                             {track.Rect.X + track.Rect.Width * progress, track.Rect.Y + 10.f},
                             {.Width = 20.f, .Dashes = {6.f, 10.f}, .DashOffset = -_time * 30.f},
-                            Rgb(0xffffff, 60));
+                            Rgb(0xFFFFFF, 60));
       _renderer->Restore();
 
       // An avatar: the image clipped to a circle, with a ring and a shadow.
@@ -1235,7 +1235,7 @@ namespace krys
       face.AddEllipse(avatar, {32.f, 32.f});
       _renderer->Save();
       _renderer->SetDropShadow({.Offset = {0.f, 3.f}, .BlurRadius = 10.f, .Colour = Rgb(0x000000, 70)});
-      _renderer->FillPath(face, FillRule::NonZero, Rgb(0xffffff));
+      _renderer->FillPath(face, FillRule::NonZero, Rgb(0xFFFFFF));
       _renderer->Restore();
       if (_image.IsValid())
       {
@@ -1244,7 +1244,7 @@ namespace krys
         _renderer->DrawImage(_image, {avatar.x - 32.f, avatar.y - 32.f, 64.f, 64.f});
         _renderer->Restore();
       }
-      _renderer->StrokePath(face, {.Width = 3.f}, Rgb(0xffffff));
+      _renderer->StrokePath(face, {.Width = 3.f}, Rgb(0xFFFFFF));
     }
 
     /// @brief Shadows: elevations, sharp, inset, glowing and translucent shadows, shadows of paths and
@@ -1260,31 +1260,31 @@ namespace krys
       {
         const auto tile = Rounded(x + 24.f + static_cast<float>(i) * 90.f, y + 64.f, 74.f, 64.f, 10.f);
         BoxShadow(tile, {0.f, drops[i]}, blurs[i], Rgb(0x000000, 70));
-        _renderer->FillRoundedRect(tile, Rgb(0xffffff));
+        _renderer->FillRoundedRect(tile, Rgb(0xFFFFFF));
       }
 
       // Sharp, inset, glowing on a dark tile, and translucent (its shadow fades with it).
       const float row = y + 160.f;
       const auto sharp = Rounded(x + 24.f, row, 74.f, 64.f, 0.f);
-      BoxShadow(sharp, {6.f, 6.f}, 0.f, Rgb(0x4f6df5));
-      _renderer->FillRoundedRect(sharp, Rgb(0xffffff));
-      DrawText(U"Sharp", sharp.Rect.X + 12.f, row + 24.f, 13.f, Rgb(0x5a6378));
+      BoxShadow(sharp, {6.f, 6.f}, 0.f, Rgb(0x4F6DF5));
+      _renderer->FillRoundedRect(sharp, Rgb(0xFFFFFF));
+      DrawText(U"Sharp", sharp.Rect.X + 12.f, row + 24.f, 13.f, Rgb(0x5A6378));
 
       const auto well = Rounded(x + 114.f, row, 74.f, 64.f, 14.f);
-      _renderer->FillRoundedRect(well, Rgb(0xeef1f6));
+      _renderer->FillRoundedRect(well, Rgb(0xEEF1F6));
       InsetShadow(well, {0.f, 3.f}, 10.f, Rgb(0x000000, 110));
 
       const auto dark = Rounded(x + 204.f, row, 74.f, 64.f, 14.f);
       _renderer->Save();
       _renderer->SetDropShadow(
-        {.Offset = {}, .BlurRadius = 18.f + 6.f * std::sin(_time * 2.f), .Colour = Rgb(0x00e5ff, 200)});
-      _renderer->FillRoundedRect(dark, Rgb(0x23283a));
+        {.Offset = {}, .BlurRadius = 18.f + 6.f * std::sin(_time * 2.f), .Colour = Rgb(0x00E5FF, 200)});
+      _renderer->FillRoundedRect(dark, Rgb(0x23283A));
       _renderer->Restore();
 
       const auto glass = Rounded(x + 294.f, row, 74.f, 64.f, 14.f);
       _renderer->Save();
       _renderer->SetDropShadow({.Offset = {0.f, 6.f}, .BlurRadius = 12.f, .Colour = Rgb(0x000000, 160)});
-      _renderer->FillRoundedRect(glass, Rgb(0x4f6df5, 110));
+      _renderer->FillRoundedRect(glass, Rgb(0x4F6DF5, 110));
       _renderer->Restore();
 
       // Shadows of paths and strokes: a star, a zigzag, dots and a ring.
@@ -1293,7 +1293,7 @@ namespace krys
       _renderer->SetDropShadow({.Offset = {3.f, 5.f}, .BlurRadius = 8.f, .Colour = Rgb(0x000000, 90)});
       _renderer->Save();
       _renderer->Translate(x + 62.f, shapes);
-      _renderer->FillPath(Star(36.f), FillRule::NonZero, Rgb(0xffd166));
+      _renderer->FillPath(Star(36.f), FillRule::NonZero, Rgb(0xFFD166));
       _renderer->Restore();
       Path2D zigzag;
       zigzag.MoveTo({x + 110.f, shapes + 20.f});
@@ -1301,12 +1301,12 @@ namespace krys
       zigzag.LineTo({x + 160.f, shapes + 20.f});
       zigzag.LineTo({x + 185.f, shapes - 20.f});
       _renderer->StrokePath(zigzag, {.Width = 8.f, .Cap = LineCap::Round, .Join = LineJoin::Round},
-                            Rgb(0xef476f));
+                            Rgb(0xEF476F));
       _renderer->StrokeLine({x + 210.f, shapes}, {x + 280.f, shapes},
-                            {.Width = 10.f, .Cap = LineCap::Round, .Dashes = {0.f, 20.f}}, Rgb(0x06d6a0));
+                            {.Width = 10.f, .Cap = LineCap::Round, .Dashes = {0.f, 20.f}}, Rgb(0x06D6A0));
       Path2D ring;
       ring.AddEllipse({x + 330.f, shapes}, {26.f, 26.f});
-      _renderer->StrokePath(ring, {.Width = 6.f}, Rgb(0x4f6df5));
+      _renderer->StrokePath(ring, {.Width = 6.f}, Rgb(0x4F6DF5));
       _renderer->Restore();
 
       // Under transforms: the shadow turning with its card (current coordinates) and staying put
@@ -1319,31 +1319,31 @@ namespace krys
         _renderer->Rotate(std::sin(_time * 0.9f) * 0.6f);
         _renderer->SetShadowsIgnoreTransforms(i == 1);
         _renderer->SetDropShadow({.Offset = {0.f, 8.f}, .BlurRadius = 12.f, .Colour = Rgb(0x000000, 90)});
-        _renderer->FillRoundedRect(Rounded(-38.f, -28.f, 76.f, 56.f, 10.f), Rgb(0xffffff));
+        _renderer->FillRoundedRect(Rounded(-38.f, -28.f, 76.f, 56.f, 10.f), Rgb(0xFFFFFF));
         _renderer->Restore();
       }
       _renderer->Save();
       _renderer->Translate(x + 320.f, turned);
       _renderer->Scale(1.4f, 0.7f);
       _renderer->SetDropShadow({.Offset = {0.f, 8.f}, .BlurRadius = 12.f, .Colour = Rgb(0x000000, 90)});
-      _renderer->FillRoundedRect(Rounded(-26.f, -36.f, 52.f, 72.f, 10.f), Rgb(0xffffff));
+      _renderer->FillRoundedRect(Rounded(-26.f, -36.f, 52.f, 72.f, 10.f), Rgb(0xFFFFFF));
       _renderer->Restore();
 
       // A card lifting on its shadow, and a star whose shadow swings round it.
       const float lift = 0.5f + 0.5f * std::sin(_time * 1.7f);
       const auto lifted = Rounded(x + 24.f, y + 520.f - 4.f * lift, 160.f, 64.f, 12.f);
       BoxShadow(lifted, {0.f, 2.f + 8.f * lift}, 6.f + 18.f * lift, Rgb(0x000000, 80));
-      _renderer->FillRoundedRect(lifted, Rgb(0xffffff));
+      _renderer->FillRoundedRect(lifted, Rgb(0xFFFFFF));
       DrawText(U"Lifting card", lifted.Rect.X + 16.f, lifted.Rect.Y + 26.f, 14.f, Rgb(0x222733), true);
       DrawText(U"Its shadow grows as it rises", lifted.Rect.X + 16.f, lifted.Rect.Y + 46.f, 11.f,
-               Rgb(0x8a93a6));
+               Rgb(0x8A93A6));
 
       _renderer->Save();
       _renderer->SetDropShadow({.Offset = {8.f * std::cos(_time), 8.f * std::sin(_time)},
                                 .BlurRadius = 10.f,
-                                .Colour = Rgb(0x1a1040, 110)});
+                                .Colour = Rgb(0x1A1040, 110)});
       _renderer->Translate(x + 300.f, y + 552.f);
-      _renderer->FillPath(Star(36.f), FillRule::NonZero, Rgb(0xb04ff5));
+      _renderer->FillPath(Star(36.f), FillRule::NonZero, Rgb(0xB04FF5));
       _renderer->Restore();
     }
 
@@ -1369,18 +1369,18 @@ namespace krys
         _renderer->Save();
         _renderer->SetBlendMode(modes[i]);
         _renderer->FillRoundedRect(
-          Rounded(x + 36.f + static_cast<float>(i) * 56.f, y + 92.f + bob, 46.f, 46.f, 23.f), Rgb(0xff8c00));
+          Rounded(x + 36.f + static_cast<float>(i) * 56.f, y + 92.f + bob, 46.f, 46.f, 23.f), Rgb(0xFF8C00));
         _renderer->Restore();
       }
       _renderer->Restore();
 
       // Opacity per draw (the overlap mixes) and for a group (it fades as one).
       const float circles = y + 200.f;
-      _renderer->FillRoundedRect(Rounded(x + 24.f, circles, 56.f, 56.f, 28.f), Rgb(0xef476f, 128));
-      _renderer->FillRoundedRect(Rounded(x + 54.f, circles + 18.f, 56.f, 56.f, 28.f), Rgb(0x4f6df5, 128));
+      _renderer->FillRoundedRect(Rounded(x + 24.f, circles, 56.f, 56.f, 28.f), Rgb(0xEF476F, 128));
+      _renderer->FillRoundedRect(Rounded(x + 54.f, circles + 18.f, 56.f, 56.f, 28.f), Rgb(0x4F6DF5, 128));
       _renderer->BeginLayer(0.5f + 0.4f * std::sin(_time * 1.5f));
-      _renderer->FillRoundedRect(Rounded(x + 130.f, circles, 56.f, 56.f, 28.f), Rgb(0xef476f));
-      _renderer->FillRoundedRect(Rounded(x + 160.f, circles + 18.f, 56.f, 56.f, 28.f), Rgb(0x4f6df5));
+      _renderer->FillRoundedRect(Rounded(x + 130.f, circles, 56.f, 56.f, 28.f), Rgb(0xEF476F));
+      _renderer->FillRoundedRect(Rounded(x + 160.f, circles + 18.f, 56.f, 56.f, 28.f), Rgb(0x4F6DF5));
       _renderer->EndLayer();
 
       // A layer composited with multiply over stripes.
@@ -1390,23 +1390,23 @@ namespace krys
       for (int i = 0; i < 6; ++i)
       {
         _renderer->FillRect({stripes.Rect.X + static_cast<float>(i) * 21.f, stripes.Rect.Y, 21.f, 74.f},
-                            i % 2 == 0 ? Rgb(0xffd166) : Rgb(0x06d6a0));
+                            i % 2 == 0 ? Rgb(0xFFD166) : Rgb(0x06D6A0));
       }
       _renderer->BeginLayer(1.f, BlendMode::Multiply);
       _renderer->FillRoundedRect(Rounded(stripes.Rect.X + 18.f, circles + 12.f, 50.f, 50.f, 8.f),
-                                 Rgb(0x8ecae6));
+                                 Rgb(0x8ECAE6));
       _renderer->FillRoundedRect(Rounded(stripes.Rect.X + 52.f, circles + 12.f, 50.f, 50.f, 8.f),
-                                 Rgb(0xf4a6c6));
+                                 Rgb(0xF4A6C6));
       _renderer->EndLayer();
       _renderer->Restore();
 
       // Additive light (plus-lighter) on a dark tile.
       const auto night = Rounded(x + 24.f, y + 300.f, 344.f, 120.f, 14.f);
-      _renderer->FillRoundedRect(night, Rgb(0x14182a));
+      _renderer->FillRoundedRect(night, Rgb(0x14182A));
       _renderer->Save();
       _renderer->ClipRoundedRect(night);
       _renderer->SetBlendMode(BlendMode::PlusLighter);
-      const uint32 lights[] {0xd02020, 0x20c040, 0x2040e0};
+      const uint32 lights[] {0xD02020, 0x20C040, 0x2040E0};
       for (int i = 0; i < 3; ++i)
       {
         const float angle = _time * 0.8f + static_cast<float>(i) * 2.0944f;
@@ -1426,7 +1426,7 @@ namespace krys
       const Gradient2D linear {
         .Shape = LinearGradient2D {{linearCentre.x - along.x, linearCentre.y - along.y},
                                    {linearCentre.x + along.x, linearCentre.y + along.y}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0xff8c00)}, {.Offset = 1.f, .Colour = Hex(0x7333e6)}}};
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0xFF8C00)}, {.Offset = 1.f, .Colour = Hex(0x7333E6)}}};
       _renderer->FillRoundedRect(Rounded(x + 24.f, tiles, 66.f, 66.f, 12.f), linear);
 
       const Vec2f radialCentre {x + 143.f, tiles + 33.f};
@@ -1434,26 +1434,26 @@ namespace krys
                          radialCentre.y + 14.f * std::sin(_time * 1.3f)};
       const Gradient2D radial {
         .Shape = RadialGradient2D {focus, radialCentre, 0.f, 33.f},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0xffffff)}, {.Offset = 1.f, .Colour = Hex(0x1a4dcc)}}};
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0xFFFFFF)}, {.Offset = 1.f, .Colour = Hex(0x1A4DCC)}}};
       _renderer->FillRoundedRect(Rounded(x + 110.f, tiles, 66.f, 66.f, 33.f), radial);
 
       const Gradient2D conic {.Shape = ConicGradient2D {{x + 229.f, tiles + 33.f}, _time * 0.7f},
-                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xef476f)},
-                                        {.Offset = 0.5f, .Colour = Hex(0xffd166)},
-                                        {.Offset = 0.5f, .Colour = Hex(0x118ab2)},
-                                        {.Offset = 1.f, .Colour = Hex(0xef476f)}}};
+                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xEF476F)},
+                                        {.Offset = 0.5f, .Colour = Hex(0xFFD166)},
+                                        {.Offset = 0.5f, .Colour = Hex(0x118AB2)},
+                                        {.Offset = 1.f, .Colour = Hex(0xEF476F)}}};
       _renderer->FillRoundedRect(Rounded(x + 196.f, tiles, 66.f, 66.f, 33.f), conic);
 
       const Gradient2D hues {
         .Shape = LinearGradient2D {{x + 24.f, 0.f}, {x + 368.f, 0.f}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0xff0000)}, {.Offset = 1.f, .Colour = Hex(0x0000ff)}},
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0xFF0000)}, {.Offset = 1.f, .Colour = Hex(0x0000FF)}},
         .Interpolation = {.ColourSpace = ColourInterpolationMethod::OKLCH {HueInterpolationMethod::Longer},
                           .AlphaPremultiplication = AlphaPremultiplication::Premultiplied}};
       _renderer->FillRoundedRect(Rounded(x + 24.f, tiles + 86.f, 344.f, 20.f, 6.f), hues);
 
       const Gradient2D greys {
         .Shape = LinearGradient2D {{x + 24.f, 0.f}, {x + 368.f, 0.f}},
-        .Stops = {{.Offset = 0.f, .Colour = Hex(0xd8dce4)}, {.Offset = 1.f, .Colour = Hex(0xeef1f6)}}};
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0xD8DCE4)}, {.Offset = 1.f, .Colour = Hex(0xEEF1F6)}}};
       _renderer->FillRoundedRect(Rounded(x + 24.f, tiles + 116.f, 344.f, 20.f, 6.f), greys);
     }
 

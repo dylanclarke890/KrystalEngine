@@ -1098,7 +1098,7 @@ namespace krys::boo
       case TagName::nav:     return AXRole::LandmarkNavigation;
       case TagName::aside:
       {
-        static constexpr TagName sectioningElements[] = {TagName::aside, TagName::article, TagName::section,
+        constexpr static TagName sectioningElements[] = {TagName::aside, TagName::article, TagName::section,
                                                          TagName::nav};
         if (_ariaRole == AXRole::LandmarkComplementary || !IsDescendantOfElementType(sectioningElements))
         {
@@ -1139,7 +1139,7 @@ namespace krys::boo
         // A header or footer is the page's banner or content info landmark when scoped to the body, and a
         // section header or footer within sectioning content.
         // https://w3c.github.io/html-aam/#el-header-ancestorbody
-        static constexpr TagName sectioningElements[] = {TagName::article, TagName::aside, TagName::main,
+        constexpr static TagName sectioningElements[] = {TagName::article, TagName::aside, TagName::main,
                                                          TagName::nav, TagName::section};
         bool scopedToBody = !IsDescendantOfElementType(sectioningElements);
         if (tagName == TagName::header)
@@ -3328,6 +3328,7 @@ namespace krys::boo
       uint32 ColSpan;
       uint32 RemainingRowsToSpan;
     };
+
     List<DownwardGrowingCell> downwardGrowingCells;
 
     // https://html.spec.whatwg.org/#algorithm-for-growing-downward-growing-cells

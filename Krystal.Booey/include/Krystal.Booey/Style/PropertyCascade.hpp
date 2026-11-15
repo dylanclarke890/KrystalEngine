@@ -73,7 +73,7 @@ namespace krys::boo::style
       UserAgent,
       User,
       Author,
-      PositionFallback
+      PositionFallback,
     };
 
     KRYS_NODISCARD constexpr static EnumSet<PropertyType> NormalPropertyTypes() noexcept
@@ -191,6 +191,7 @@ namespace krys::boo::style
     KRYS_NODISCARD const Property &GetCustomProperty(const css::CSSOMStringAtom &name) const noexcept;
 
     KRYS_NODISCARD Span<const css::PropertyId> LogicalGroupPropertyIds() const noexcept;
+
     KRYS_NODISCARD const HashMap<css::CSSOMStringAtom, Property> &CustomProperties() const noexcept
     {
       return _customProperties;

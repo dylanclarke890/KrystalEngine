@@ -38,6 +38,7 @@ namespace krys::boo::style
     constexpr MaskBorderOutsetValue(Length length) noexcept : _value {length}
     {
     }
+
     constexpr MaskBorderOutsetValue(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept
         : _value {Length {literal}}
     {
@@ -46,6 +47,7 @@ namespace krys::boo::style
     constexpr MaskBorderOutsetValue(Number number) noexcept : _value {number}
     {
     }
+
     constexpr MaskBorderOutsetValue(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept
         : _value {Number {literal}}
     {
@@ -55,6 +57,7 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<Length>(_value);
     }
+
     KRYS_NODISCARD constexpr bool IsNumber() const noexcept
     {
       return krys::HoldsAlternative<Number>(_value);
@@ -96,23 +99,29 @@ namespace krys::boo::style
     MaskBorderOutset(Edges values) noexcept : Values {krys::move(values)}
     {
     }
+
     MaskBorderOutset(Value top, Value right, Value bottom, Value left) noexcept
         : Values {top, right, bottom, left}
     {
     }
+
     MaskBorderOutset(Value value) noexcept : Values {krys::move(value)}
     {
     }
+
     MaskBorderOutset(Value::Length length) noexcept : Values {length}
     {
     }
+
     MaskBorderOutset(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept
         : Values {Value::Length {literal}}
     {
     }
+
     MaskBorderOutset(Value::Number number) noexcept : Values {number}
     {
     }
+
     MaskBorderOutset(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept
         : Values {Value::Number {literal}}
     {
@@ -125,6 +134,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const MaskBorderOutset &) const noexcept = default;
   };
+
   DEFINE_TYPE_WRAPPER_GET(MaskBorderOutset, Values);
 
   // MARK: - Conversion
@@ -134,6 +144,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD MaskBorderOutset operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<MaskBorderOutset>
   {

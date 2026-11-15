@@ -48,6 +48,7 @@ namespace krys::boo::style
       : css::EnumSetOrKeywordBase<WebkitLineBoxContain, WebkitLineBoxContainValueEnumSet, css::keywords::None>
   {
     using Base::Base;
+
     KRYS_NODISCARD constexpr bool IsNone() const noexcept
     {
       return IsKeyword();

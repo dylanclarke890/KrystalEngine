@@ -40,6 +40,7 @@ namespace krys::ui
     {
       return AdoptRef(*new TextureMapperTiledBackingStore);
     }
+
     ~TextureMapperTiledBackingStore() noexcept override = default;
 
     void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,

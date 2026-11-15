@@ -33,7 +33,7 @@ namespace krys::boo
   {
     Alphabetic,
     Ideographic,
-    Central
+    Central,
   };
 
   /// @brief The edge of a box a baseline is synthesised from, when the box has none.
@@ -41,6 +41,6 @@ namespace krys::boo
   {
     ContentBox,
     BorderBox,
-    MarginBox
+    MarginBox,
   };
 }

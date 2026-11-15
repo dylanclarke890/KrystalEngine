@@ -49,6 +49,7 @@ namespace krys::boo
 
   public:
     constexpr IntRect() noexcept = default;
+
     constexpr IntRect(const IntPoint &location, const IntSize &size) noexcept
         : _location(location), _size(size)
     {

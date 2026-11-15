@@ -47,7 +47,7 @@ namespace krys::boo::css
     {
       NoChanges,
       StyleAttributeChanged,
-      PropertyChanged
+      PropertyChanged,
     };
 
     WeakPtr<CSSRule> _parentRule;

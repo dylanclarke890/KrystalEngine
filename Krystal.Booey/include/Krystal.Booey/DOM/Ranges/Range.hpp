@@ -173,10 +173,12 @@ namespace krys::boo::dom
     {
       return _isAssociatedWithSelection;
     }
+
     void DidAssociateWithSelection() noexcept
     {
       _isAssociatedWithSelection = true;
     }
+
     void DidDisassociateFromSelection() noexcept
     {
       _isAssociatedWithSelection = false;

@@ -33,7 +33,7 @@ namespace krys::boo
   {
     Replace,
     Add,
-    Accumulate
+    Accumulate,
   };
 }
 

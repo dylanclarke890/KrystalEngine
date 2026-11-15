@@ -17,7 +17,7 @@ namespace krys::tests
 
     enum class Colour : uint8
     {
-      Red = 3
+      Red = 3,
     };
 
     struct Bracketed

@@ -55,7 +55,7 @@ namespace krys::boo::mathml
       Symmetric = 0x40,
     };
 
-    static constexpr uint16 AllFlags =
+    constexpr static uint16 AllFlags =
       Accent | Fence | LargeOp | MovableLimits | Separator | Stretchy | Symmetric;
 
     struct Property

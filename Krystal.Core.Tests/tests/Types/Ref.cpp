@@ -155,5 +155,4 @@ namespace krys::tests
     raw->SubRef();
     REQUIRE(TestRefCounted::DestroyedAfterDeletionBegan);
   }
-
 }

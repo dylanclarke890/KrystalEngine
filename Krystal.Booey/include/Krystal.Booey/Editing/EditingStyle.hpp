@@ -67,13 +67,13 @@ namespace krys::boo
   {
     None,
     Add,
-    Remove
+    Remove,
   };
 
   enum class StandardFontFamilySerializationMode : uint8
   {
     Keep,
-    Strip
+    Strip,
   };
 
   /// @brief The style an edit applies, or the style at a position: a set of CSS properties, with a font size
@@ -92,31 +92,31 @@ namespace krys::boo
       AllProperties,
       OnlyEditingInheritableProperties,
       EditingPropertiesInEffect,
-      PostLayoutProperties
+      PostLayoutProperties,
     };
 
     enum class ShouldPreserveWritingDirection : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class ShouldExtractMatchingStyle : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class ShouldIgnoreTextOnlyProperties : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class CSSPropertyOverrideMode : bool
     {
       DoNotOverrideValues,
-      OverrideValues
+      OverrideValues,
     };
 
   private:
@@ -152,6 +152,7 @@ namespace krys::boo
     {
       return _mutableStyle.get();
     }
+
     KRYS_NODISCARD Ref<css::MutableStyleProperties> StyleWithResolvedTextDecorations() const noexcept;
     KRYS_NODISCARD Maybe<WritingDirection> TextDirection() const noexcept;
     KRYS_NODISCARD bool IsEmpty() const noexcept;
@@ -171,16 +172,19 @@ namespace krys::boo
 
     KRYS_NODISCARD TriState TriStateOfStyle(EditingStyle *style) const noexcept;
     KRYS_NODISCARD TriState TriStateOfStyle(const VisibleSelection &selection) const noexcept;
+
     KRYS_NODISCARD bool ConflictsWithInlineStyleOfElement(dom::StyledElement &element) const noexcept
     {
       return ConflictsWithInlineStyleOfElement(element, nullptr, nullptr);
     }
+
     KRYS_NODISCARD bool ConflictsWithInlineStyleOfElement(dom::StyledElement &element,
                                                           RefPtr<css::MutableStyleProperties> &newInlineStyle,
                                                           EditingStyle *extractedStyle) const noexcept
     {
       return ConflictsWithInlineStyleOfElement(element, &newInlineStyle, extractedStyle);
     }
+
     KRYS_NODISCARD bool ConflictsWithImplicitStyleOfElement(
       dom::Element &element, EditingStyle *extractedStyle = nullptr,
       ShouldExtractMatchingStyle shouldExtractMatchingStyle = ShouldExtractMatchingStyle::No) const noexcept;
@@ -213,6 +217,7 @@ namespace krys::boo
     bool ConvertPositionStyle() noexcept;
     KRYS_NODISCARD bool IsFloating() noexcept;
     KRYS_NODISCARD int32 LegacyFontSize(dom::Document &document) const noexcept;
+
     KRYS_NODISCARD bool ShouldUseFixedDefaultFontSize() const noexcept
     {
       return _shouldUseFixedDefaultFontSize;
@@ -222,14 +227,17 @@ namespace krys::boo
     {
       _underlineChange = change;
     }
+
     KRYS_NODISCARD TextDecorationChange UnderlineChange() const noexcept
     {
       return _underlineChange;
     }
+
     void SetStrikeThroughChange(TextDecorationChange change) noexcept
     {
       _strikeThroughChange = change;
     }
+
     KRYS_NODISCARD TextDecorationChange StrikeThroughChange() const noexcept
     {
       return _strikeThroughChange;
@@ -245,6 +253,7 @@ namespace krys::boo
     KRYS_NODISCARD static WritingDirection
       TextDirectionForSelection(const VisibleSelection &selection, EditingStyle *typingStyle,
                                 bool &hasNestedOrMultipleEmbeddings) noexcept;
+
     KRYS_NODISCARD static bool IsEmbedOrIsolate(css::ValueId unicodeBidi) noexcept
     {
       return unicodeBidi == css::ValueId::Isolate || unicodeBidi == css::ValueId::Embed;
@@ -299,50 +308,62 @@ namespace krys::boo
     {
       return _cssStyle.get();
     }
+
     KRYS_NODISCARD bool ApplyBold() const noexcept
     {
       return _applyBold;
     }
+
     KRYS_NODISCARD bool ApplyItalic() const noexcept
     {
       return _applyItalic;
     }
+
     KRYS_NODISCARD bool ApplyUnderline() const noexcept
     {
       return _applyUnderline;
     }
+
     KRYS_NODISCARD bool ApplyLineThrough() const noexcept
     {
       return _applyLineThrough;
     }
+
     KRYS_NODISCARD bool ApplySubscript() const noexcept
     {
       return _applySubscript;
     }
+
     KRYS_NODISCARD bool ApplySuperscript() const noexcept
     {
       return _applySuperscript;
     }
+
     KRYS_NODISCARD bool ApplyFontColor() const noexcept
     {
       return !_applyFontColor.empty();
     }
+
     KRYS_NODISCARD bool ApplyFontFace() const noexcept
     {
       return !_applyFontFace.empty();
     }
+
     KRYS_NODISCARD bool ApplyFontSize() const noexcept
     {
       return !_applyFontSize.empty();
     }
+
     KRYS_NODISCARD const dom::DOMString &FontColor() const noexcept
     {
       return _applyFontColor;
     }
+
     KRYS_NODISCARD const dom::DOMString &FontFace() const noexcept
     {
       return _applyFontFace;
     }
+
     KRYS_NODISCARD const dom::DOMString &FontSize() const noexcept
     {
       return _applyFontSize;

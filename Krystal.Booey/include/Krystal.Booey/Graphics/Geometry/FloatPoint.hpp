@@ -56,6 +56,7 @@ namespace krys::boo
 
   public:
     constexpr FloatPoint() noexcept = default;
+
     constexpr FloatPoint(float x, float y) noexcept : _x(x), _y(y)
     {
     }

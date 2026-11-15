@@ -72,6 +72,7 @@ namespace krys::boo::html
     {
       return *_fileList;
     }
+
     /// @brief Replaces the files with @p files (if not null); unless set by script, fires `input` and
     /// `change` if their paths changed, or else `cancel`.
     void SetFiles(RefPtr<FileList> &&files, WasSetByJavaScript wasSetByJavaScript) noexcept;

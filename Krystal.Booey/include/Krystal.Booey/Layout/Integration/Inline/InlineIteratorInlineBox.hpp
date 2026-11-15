@@ -78,9 +78,11 @@ namespace krys::boo::inline_iterator
   {
   public:
     InlineBoxIterator() noexcept = default;
+
     explicit InlineBoxIterator(Box::PathVariant &&path) noexcept : BoxIterator(krys::move(path))
     {
     }
+
     explicit InlineBoxIterator(const Box &box) noexcept : BoxIterator(box)
     {
     }
@@ -89,6 +91,7 @@ namespace krys::boo::inline_iterator
     {
       return Get();
     }
+
     KRYS_NODISCARD const InlineBox *operator->() const noexcept
     {
       return &Get();

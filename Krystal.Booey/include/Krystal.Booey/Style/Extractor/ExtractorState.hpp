@@ -53,7 +53,7 @@ namespace krys::boo::style
     enum class PropertyValueType : bool
     {
       Resolved,
-      Computed
+      Computed,
     };
     PropertyValueType ValueType;
 

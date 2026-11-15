@@ -689,15 +689,18 @@ namespace krys::boo
       {
         Style.Cap = lineCap;
       }
+
       void SetLineDash(const DashArray &dashes, float dashOffset) noexcept final
       {
         Style.Dashes = dashes;
         Style.DashOffset = dashOffset;
       }
+
       void SetLineJoin(LineJoin lineJoin) noexcept final
       {
         Style.Join = lineJoin;
       }
+
       void SetMiterLimit(float miterLimit) noexcept final
       {
         Style.MiterLimit = miterLimit;

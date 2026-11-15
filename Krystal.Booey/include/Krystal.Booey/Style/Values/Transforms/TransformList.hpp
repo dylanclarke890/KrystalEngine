@@ -47,6 +47,7 @@ namespace krys::boo
       using value_type = typename Container::value_type;
 
       TransformList() noexcept = default;
+
       TransformList(Container &&value) noexcept : _value {krys::move(value)}
       {
       }
@@ -59,14 +60,17 @@ namespace krys::boo
       {
         return _value.begin();
       }
+
       const_iterator end() const KRYS_LIFETIME_BOUND
       {
         return _value.end();
       }
+
       const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
       {
         return _value.rbegin();
       }
+
       const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
       {
         return _value.rend();
@@ -76,10 +80,12 @@ namespace krys::boo
       {
         return _value.isEmpty();
       }
+
       KRYS_NODISCARD size_t size() const noexcept
       {
         return _value.size();
       }
+
       const TransformFunction &operator[](size_t i) const KRYS_LIFETIME_BOUND
       {
         return _value[i];
@@ -132,7 +138,6 @@ namespace krys::boo
                                                               const BlendingContext &, LayoutSize boxSize,
                                                               Maybe<uint32> prefixLengthFromContext) noexcept;
     };
-
   }
 }
 

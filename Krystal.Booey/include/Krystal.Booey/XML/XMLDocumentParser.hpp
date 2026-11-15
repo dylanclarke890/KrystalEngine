@@ -61,6 +61,7 @@ namespace krys::boo::xml
     KRYS_NODISCARD static Ref<XMLParserContext> CreateStringParser(_xmlSAXHandler *, void *userData) noexcept;
     XMLParserContext() = delete;
     ~XMLParserContext() noexcept;
+
     KRYS_NODISCARD _xmlParserCtxt *Context() const noexcept
     {
       return _context;
@@ -99,6 +100,7 @@ namespace krys::boo::xml
     {
       return AdoptRef(*new XMLDocumentParser(document));
     }
+
     KRYS_NODISCARD static Ref<XMLDocumentParser>
       Create(dom::DocumentFragment &fragment,
              HashMap<dom::DOMStringAtom, dom::DOMStringAtom> &&prefixToNamespaceMap,
@@ -118,6 +120,7 @@ namespace krys::boo::xml
     {
       _isXHTMLDocument = isXHTML;
     }
+
     KRYS_NODISCARD bool IsXHTMLDocument() const noexcept
     {
       return _isXHTMLDocument;

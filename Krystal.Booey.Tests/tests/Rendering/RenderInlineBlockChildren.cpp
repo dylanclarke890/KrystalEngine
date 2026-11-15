@@ -50,6 +50,7 @@ namespace krys::boo::tests
       const char8_t *Body;
       const char8_t *Boxes;
     };
+
     auto testCase = GENERATE(values<Case>({
       {u8"plain", u8"span{border:5px solid #00f;padding:0 3px;margin:0 7px;background:#ff0}",
        u8"<div id=o style='width:300px'>aa<span id=s>bb<div id=b></div>cc</span>dd</div>",

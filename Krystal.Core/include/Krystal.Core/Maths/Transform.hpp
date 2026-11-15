@@ -245,6 +245,8 @@ namespace krys
       return Quaternion<T>(axis.x * sinHalfAngle, axis.y * sinHalfAngle, axis.z * sinHalfAngle, cosHalfAngle);
     }
     else
+    {
       return Quaternion<T>(1.0f, 0.0f, 0.0f, 0.0f);
+    }
   }
 }

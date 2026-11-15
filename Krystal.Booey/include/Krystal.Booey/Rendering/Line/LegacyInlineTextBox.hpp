@@ -62,14 +62,17 @@ namespace krys::boo
     {
       return _prevTextBox;
     }
+
     KRYS_NODISCARD LegacyInlineTextBox *NextTextBox() const noexcept
     {
       return _nextTextBox;
     }
+
     void SetNextTextBox(LegacyInlineTextBox *n) noexcept
     {
       _nextTextBox = n;
     }
+
     void SetPreviousTextBox(LegacyInlineTextBox *p) noexcept
     {
       _prevTextBox = p;
@@ -81,10 +84,12 @@ namespace krys::boo
     {
       return _start;
     }
+
     KRYS_NODISCARD uint32 End() const noexcept
     {
       return _start + _len;
     }
+
     KRYS_NODISCARD uint32 Len() const noexcept
     {
       return _len;
@@ -94,6 +99,7 @@ namespace krys::boo
     {
       _start = start;
     }
+
     void SetLen(uint32 len) noexcept
     {
       _len = len;

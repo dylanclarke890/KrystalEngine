@@ -39,7 +39,7 @@ namespace krys::boo
     HasX,
     HasY,
     HasWidth,
-    HasHeight
+    HasHeight,
   };
 }
 
@@ -59,6 +59,7 @@ namespace krys::boo
 
   public:
     FilterEffectGeometry() noexcept = default;
+
     FilterEffectGeometry(const FloatRect &boundaries, EnumSet<Flags> flags) noexcept
         : _boundaries(boundaries), _flags(flags)
     {
@@ -68,14 +69,17 @@ namespace krys::boo
     {
       return _flags.Contains(Flags::HasX) ? Maybe<float> {_boundaries.X()} : null;
     }
+
     KRYS_NODISCARD Maybe<float> Y() const noexcept
     {
       return _flags.Contains(Flags::HasY) ? Maybe<float> {_boundaries.Y()} : null;
     }
+
     KRYS_NODISCARD Maybe<float> Width() const noexcept
     {
       return _flags.Contains(Flags::HasWidth) ? Maybe<float> {_boundaries.Width()} : null;
     }
+
     KRYS_NODISCARD Maybe<float> Height() const noexcept
     {
       return _flags.Contains(Flags::HasHeight) ? Maybe<float> {_boundaries.Height()} : null;

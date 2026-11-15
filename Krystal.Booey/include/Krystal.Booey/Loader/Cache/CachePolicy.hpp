@@ -35,7 +35,7 @@ namespace krys::boo
     /// @brief Use cached resources.
     Use,
     /// @brief Load every resource again, as reloading a page does (so edited files load again).
-    Reload
+    Reload,
   };
 }
 

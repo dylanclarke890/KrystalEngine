@@ -32,6 +32,7 @@ namespace krys::boo
 {
   class ScrollableArea;
   class Scrollbar;
+
   /// @brief A frame's view: the root of its document's tree, above the web area and the view's scroll bars.
   class AXScrollView final : public AXObject
   {
@@ -48,10 +49,12 @@ namespace krys::boo
     ~AXScrollView() noexcept override;
 
     KRYS_NODISCARD bool IsDetached() const noexcept override;
+
     KRYS_NODISCARD bool IsScrollView() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD LocalFrameView *ScrollView() const noexcept;
     /// @brief The view's document's web area.
     KRYS_NODISCARD AXObject *WebAreaObject() const noexcept;
@@ -60,10 +63,12 @@ namespace krys::boo
 
     KRYS_NODISCARD dom::Document *GetDocument() const noexcept override;
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override;
+
     KRYS_NODISCARD bool IsEnabled() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD bool IsFocused() const noexcept override;
     KRYS_NODISCARD bool CanSetFocusAttribute() const noexcept override;
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
@@ -72,10 +77,12 @@ namespace krys::boo
     void AddChildren() noexcept override;
     void ClearChildren() noexcept override;
     void UpdateChildrenIfNecessary() noexcept override;
+
     void SetNeedsToUpdateChildren() noexcept override
     {
       _childrenDirty = true;
     }
+
     KRYS_NODISCARD bool NeedsToUpdateChildren() const noexcept override
     {
       return _childrenDirty;
@@ -88,6 +95,7 @@ namespace krys::boo
     {
       return AXRole::ScrollArea;
     }
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override;
     void DetachRemoteParts(AXDetachmentType detachmentType) noexcept override;
 

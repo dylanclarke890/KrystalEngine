@@ -76,8 +76,9 @@ namespace krys::boo
   enum FillColorType
   {
     UseNormalFillColor,
-    UseEmphasisMarkColor
+    UseEmphasisMarkColor,
   };
+
   /// @brief Sets @p context's text drawing mode, fill and stroke to paint with @p paintStyle.
   void UpdateGraphicsContext(GraphicsContext &context, const TextPaintStyle &paintStyle,
                              FillColorType fillColorType = UseNormalFillColor) noexcept;

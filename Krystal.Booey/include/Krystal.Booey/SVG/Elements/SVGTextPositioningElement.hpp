@@ -56,18 +56,22 @@ namespace krys::boo::svg
     {
       return _x->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthList &Y() const noexcept
     {
       return _y->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthList &Dx() const noexcept
     {
       return _dx->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthList &Dy() const noexcept
     {
       return _dy->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGNumberList &Rotate() const noexcept
     {
       return _rotate->CurrentValue();
@@ -77,18 +81,22 @@ namespace krys::boo::svg
     {
       return *_x;
     }
+
     KRYS_NODISCARD SVGAnimatedLengthList &YAnimated() noexcept
     {
       return *_y;
     }
+
     KRYS_NODISCARD SVGAnimatedLengthList &DxAnimated() noexcept
     {
       return *_dx;
     }
+
     KRYS_NODISCARD SVGAnimatedLengthList &DyAnimated() noexcept
     {
       return *_dy;
     }
+
     KRYS_NODISCARD SVGAnimatedNumberList &RotateAnimated() noexcept
     {
       return *_rotate;

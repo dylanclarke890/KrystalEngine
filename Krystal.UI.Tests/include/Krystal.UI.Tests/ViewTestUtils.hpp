@@ -40,6 +40,7 @@ namespace krys::ui::tests
     {
     }
   }
+
   /// @brief Loads the page at @p file into @p view and lets its resources load, as Chrome's capture does:
   /// images and style sheets load as networking tasks, and web fonts once laying text out asks for them.
   /// @return Whether the page loaded.

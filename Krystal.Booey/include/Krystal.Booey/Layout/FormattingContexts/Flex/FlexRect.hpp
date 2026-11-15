@@ -126,14 +126,17 @@ namespace krys::boo::layout
     {
       return _crossAxisMargins.Start;
     }
+
     KRYS_NODISCARD LayoutUnit MarginBottom() const noexcept
     {
       return _crossAxisMargins.End;
     }
+
     KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept
     {
       return _mainAxisMargins.Start;
     }
+
     KRYS_NODISCARD LayoutUnit MarginRight() const noexcept
     {
       return _mainAxisMargins.End;
@@ -202,14 +205,17 @@ namespace krys::boo::layout
     {
       _crossAxisMargins.Start = marginTop;
     }
+
     void SetMarginBottom(LayoutUnit marginBottom) noexcept
     {
       _crossAxisMargins.End = marginBottom;
     }
+
     void SetMarginLeft(LayoutUnit marginLeft) noexcept
     {
       _mainAxisMargins.Start = marginLeft;
     }
+
     void SetMarginRight(LayoutUnit marginRight) noexcept
     {
       _mainAxisMargins.End = marginRight;
@@ -245,10 +251,12 @@ namespace krys::boo::layout
     {
       return _hasValidTop && _hasValidLeft;
     }
+
     KRYS_NODISCARD bool HasValidSize() const noexcept
     {
       return _hasValidWidth && _hasValidHeight;
     }
+
     KRYS_NODISCARD bool HasValidGeometry() const noexcept
     {
       return HasValidPosition() && HasValidSize();

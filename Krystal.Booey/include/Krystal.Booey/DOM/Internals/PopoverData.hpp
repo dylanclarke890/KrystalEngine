@@ -47,28 +47,28 @@ namespace krys::boo::dom
     None,
     Auto,
     Manual,
-    Hint
+    Hint,
   };
 
   /// @see https://html.spec.whatwg.org/#popover-visibility-state
   enum class PopoverVisibilityState : bool
   {
     Hidden,
-    Showing
+    Showing,
   };
 
   /// @brief Whether hiding a popover returns the focus to the element focused before it showed.
   enum class FocusPreviousElement : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Whether showing or hiding a popover fires its `beforetoggle` and `toggle` events.
   enum class FireEvents : bool
   {
     No,
-    Yes
+    Yes,
   };
 }
 

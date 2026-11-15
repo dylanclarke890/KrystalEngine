@@ -66,6 +66,7 @@ namespace krys::boo::svg
     {
       return dom::DOMStringAtom {_target->CurrentValue()};
     }
+
     KRYS_NODISCARD Ref<SVGAnimatedString> &TargetAnimated() noexcept
     {
       return _target;
@@ -88,6 +89,7 @@ namespace krys::boo::svg
     {
       return SVGTests::IsValid();
     }
+
     void ActivationBehavior(dom::Event &event) noexcept final;
     void DefaultEventHandler(dom::Event &event) noexcept final;
 

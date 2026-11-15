@@ -51,18 +51,22 @@ namespace krys::boo::inline_iterator
     {
       return _inlineBox->IsInlineTextBox();
     }
+
     KRYS_NODISCARD bool IsInlineBox() const noexcept
     {
       return _inlineBox->IsInlineFlowBox();
     }
+
     KRYS_NODISCARD bool IsRootInlineBox() const noexcept
     {
       return _inlineBox->IsRootInlineBox();
     }
+
     KRYS_NODISCARD bool IsBlockLevelBox() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsAtomicInlineBox() const noexcept
     {
       return Renderer().IsBlockLevelReplacedOrAtomicInline();
@@ -77,6 +81,7 @@ namespace krys::boo::inline_iterator
     {
       return _inlineBox->IsHorizontal();
     }
+
     KRYS_NODISCARD bool IsLineBreak() const noexcept
     {
       return _inlineBox->IsLineBreak();
@@ -86,6 +91,7 @@ namespace krys::boo::inline_iterator
     {
       return static_cast<uint32>(_inlineBox->CaretMinOffset());
     }
+
     KRYS_NODISCARD uint32 MaximumCaretOffset() const noexcept
     {
       return static_cast<uint32>(_inlineBox->CaretMaxOffset());
@@ -100,11 +106,13 @@ namespace krys::boo::inline_iterator
     {
       return false;
     }
+
     KRYS_NODISCARD utf8_stringview OriginalText() const noexcept
     {
       return utf8_stringview(InlineTextBox()->Renderer().Text())
         .substr(InlineTextBox()->Start(), InlineTextBox()->Len());
     }
+
     KRYS_NODISCARD size_t LineIndex() const noexcept
     {
       size_t precedingLines = 0;
@@ -114,14 +122,17 @@ namespace krys::boo::inline_iterator
       }
       return precedingLines;
     }
+
     KRYS_NODISCARD uint32 Start() const noexcept
     {
       return InlineTextBox()->Start();
     }
+
     KRYS_NODISCARD uint32 End() const noexcept
     {
       return InlineTextBox()->End();
     }
+
     KRYS_NODISCARD uint32 Length() const noexcept
     {
       return InlineTextBox()->Len();
@@ -206,6 +217,7 @@ namespace krys::boo::inline_iterator
     {
       return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
     }
+
     KRYS_NODISCARD bool IsFirstFormattedLine() const noexcept
     {
       return !RootInlineBox().PrevRootBox();
@@ -222,6 +234,7 @@ namespace krys::boo::inline_iterator
     {
       return const_cast<LegacyInlineBox *>(_inlineBox);
     }
+
     KRYS_NODISCARD const LegacyRootInlineBox &RootInlineBox() const noexcept
     {
       return _inlineBox->Root();
@@ -265,10 +278,12 @@ namespace krys::boo::inline_iterator
     {
       return Downcast<LegacyInlineTextBox>(_inlineBox);
     }
+
     KRYS_NODISCARD const LegacyInlineFlowBox *InlineFlowBox() const noexcept
     {
       return Downcast<LegacyInlineFlowBox>(_inlineBox);
     }
+
     KRYS_NODISCARD const SVGInlineTextBox *SvgInlineTextBox() const noexcept
     {
       return Downcast<SVGInlineTextBox>(_inlineBox);

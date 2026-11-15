@@ -62,6 +62,7 @@ namespace krys::boo
       default: krys_debug_assert("Invalid ContentPosition"); return true;
     }
   }
+
   bool StyleContentAlignmentData::IsEndward(Maybe<TextDirection> leftRightAxisDirection,
                                             bool isFlexReverse) const noexcept
   {

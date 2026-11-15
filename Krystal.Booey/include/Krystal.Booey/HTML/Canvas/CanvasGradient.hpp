@@ -60,6 +60,7 @@ namespace krys::boo::html
     {
       return *_gradient;
     }
+
     KRYS_NODISCARD const Gradient &GetGradient() const noexcept
     {
       return *_gradient;

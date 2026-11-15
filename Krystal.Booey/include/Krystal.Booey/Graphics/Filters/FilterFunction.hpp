@@ -47,7 +47,7 @@ namespace krys::boo
   enum class FilterRepresentation : uint8
   {
     TestOutput,
-    Debugging
+    Debugging,
   };
 
   /// @brief A step of a filter: a whole filter (a chain of functions), or one filter effect.
@@ -78,7 +78,7 @@ namespace krys::boo
       FETile,
       FETurbulence,
       SourceAlpha,
-      SourceGraphic
+      SourceGraphic,
     };
 
   private:
@@ -88,6 +88,7 @@ namespace krys::boo
     explicit FilterFunction(Type type) noexcept : _filterType(type)
     {
     }
+
     virtual ~FilterFunction() noexcept = default;
 
     KRYS_NODISCARD Type FilterType() const noexcept
@@ -99,28 +100,34 @@ namespace krys::boo
     {
       return _filterType == Type::CSSFilterRenderer;
     }
+
     KRYS_NODISCARD bool IsSVGFilterRenderer() const noexcept
     {
       return _filterType == Type::SVGFilterRenderer;
     }
+
     KRYS_NODISCARD bool IsFilter() const noexcept
     {
       return _filterType == Type::CSSFilterRenderer || _filterType == Type::SVGFilterRenderer;
     }
+
     KRYS_NODISCARD bool IsFilterEffect() const noexcept
     {
       return _filterType >= Type::FEBlend && _filterType <= Type::SourceGraphic;
     }
 
     KRYS_NODISCARD static utf8_stringview FilterName(Type type) noexcept;
+
     KRYS_NODISCARD static utf8_stringview SourceAlphaName() noexcept
     {
       return FilterName(Type::SourceAlpha);
     }
+
     KRYS_NODISCARD static utf8_stringview SourceGraphicName() noexcept
     {
       return FilterName(Type::SourceGraphic);
     }
+
     KRYS_NODISCARD utf8_stringview FilterName() const noexcept
     {
       return FilterName(_filterType);
@@ -133,9 +140,11 @@ namespace krys::boo
     {
       return EnumSet<FilterRenderingMode> {FilterRenderingMode::Accelerated} & preferredFilterRenderingModes;
     }
+
     /// @brief The function applied to @p input; null when it can't be.
     KRYS_NODISCARD virtual RefPtr<FilterImage> Apply(const Filter &, FilterImage &input,
                                                      FilterResults &) noexcept;
+
     /// @brief The styles that apply the function in the graphics context, following @p input.
     KRYS_NODISCARD virtual FilterStyleVector CreateFilterStyles(GraphicsContext &, const Filter &,
                                                                 const FilterStyle & /*input*/) const noexcept

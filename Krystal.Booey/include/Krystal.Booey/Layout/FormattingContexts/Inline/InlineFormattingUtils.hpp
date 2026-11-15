@@ -56,18 +56,18 @@ namespace krys::boo::layout
     enum class IsIntrinsicWidthMode : bool
     {
       No,
-      Yes
+      Yes,
     };
     enum class LineEndsWithLineBreak : bool
     {
       No,
-      Yes
+      Yes,
     };
     enum class SnapDirection : uint8
     {
       Floor,
       Ceil,
-      Round
+      Round,
     };
 
   private:

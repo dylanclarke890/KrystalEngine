@@ -101,6 +101,7 @@ namespace krys::boo
                                         MonotonicTime::duration /*time*/) noexcept
     {
     }
+
     virtual void NotifyAnimationEnded(const GraphicsLayer *, const utf8_string & /*animationKey*/) noexcept
     {
     }
@@ -120,6 +121,7 @@ namespace krys::boo
                                EnumSet<GraphicsLayerPaintBehavior>) noexcept
     {
     }
+
     virtual void DidChangePlatformLayerForLayer(const GraphicsLayer *) noexcept
     {
     }
@@ -142,11 +144,13 @@ namespace krys::boo
     {
       return 1;
     }
+
     // Page scale factor.
     KRYS_NODISCARD virtual float PageScaleFactor() const noexcept
     {
       return 1;
     }
+
     KRYS_NODISCARD virtual float ZoomedOutPageScaleFactor() const noexcept
     {
       return 0;
@@ -166,6 +170,7 @@ namespace krys::boo
     {
       return 1;
     }
+
     KRYS_NODISCARD virtual bool PaintsOpaquelyAtNonIntegralScales(const GraphicsLayer *) const noexcept
     {
       return false;
@@ -175,6 +180,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsTrackingRepaints() const noexcept
     {
       return false;
@@ -185,6 +191,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool ShouldDumpPropertyForLayer(const GraphicsLayer *, utf8_stringview,
                                                            EnumSet<LayerTreeAsTextOptions>) const noexcept
     {
@@ -195,6 +202,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool ShouldTemporarilyRetainTileCohorts(const GraphicsLayer *) const noexcept
     {
       return true;
@@ -204,6 +212,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool CssUnprefixedBackdropFilterEnabled() const noexcept
     {
       return false;

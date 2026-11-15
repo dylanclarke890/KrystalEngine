@@ -191,7 +191,7 @@ namespace krys::boo::dom
   {
     NoQuirks,
     Quirks,
-    LimitedQuirks
+    LimitedQuirks,
   };
 
   /// @brief Why a document's tasks and active objects (its timers, its animation frame callbacks) are
@@ -201,7 +201,7 @@ namespace krys::boo::dom
     JavaScriptDebuggerPaused,
     WillDeferLoading,
     /// @brief The host suspended the page.
-    PageWillBeSuspended
+    PageWillBeSuspended,
   };
 }
 
@@ -234,7 +234,7 @@ namespace krys::boo::dom
   enum class ScrollEventType : bool
   {
     Scroll,
-    Scrollend
+    Scrollend,
   };
 
   class DocumentFontLoader;
@@ -299,7 +299,7 @@ namespace krys::boo::dom
     {
       Unspecified,
       Standalone,
-      NotStandalone
+      NotStandalone,
     };
 
   private:
@@ -516,6 +516,7 @@ namespace krys::boo::dom
     {
       ++_referencingNodeCount;
     }
+
     /// @brief A node stopped referring to the document: the last one, once the document has no references,
     /// deletes it.
     void DecrementReferencingNodeCount() noexcept;
@@ -677,6 +678,7 @@ namespace krys::boo::dom
     /// `MM/DD/YYYY hh:mm:ss`.
     /// @see https://html.spec.whatwg.org/#dom-document-lastmodified
     KRYS_NODISCARD DOMString LastModified() const noexcept;
+
     /// @brief When the document's source was last modified (its response's `Last-Modified`); unknown, the
     /// document's `lastModified` is the current time.
     void SetLastModified(Maybe<std::chrono::sys_seconds> lastModified) noexcept
@@ -1017,7 +1019,7 @@ namespace krys::boo::dom
     enum class CaptureChange : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     /// @brief Updates the hover and active state for a pointer over @p innerElement (or outside the document,
@@ -1088,10 +1090,12 @@ namespace krys::boo::dom
 
     void AddIntersectionObserver(IntersectionObserver &observer) noexcept;
     void RemoveIntersectionObserver(IntersectionObserver &observer) noexcept;
+
     KRYS_NODISCARD size_t NumberOfIntersectionObservers() const noexcept
     {
       return _intersectionObservers.size();
     }
+
     /// @brief The rendering update's intersection observations step: updates the observations of the
     /// intersection observers the document tracks, and notifies those with new entries.
     /// @see https://html.spec.whatwg.org/#update-the-rendering
@@ -1111,15 +1115,18 @@ namespace krys::boo::dom
     void ScheduleInitialIntersectionObservationUpdate() noexcept;
     /// @brief The intersection observers whose root the document is.
     IntersectionObserverData &EnsureIntersectionObserverData() noexcept;
+
     KRYS_NODISCARD IntersectionObserverData *IntersectionObserverDataIfExists() const noexcept
     {
       return _intersectionObserverData.get();
     }
+
     /// @brief What the document keeps for its SVG content, made on first use.
     KRYS_NODISCARD svg::SVGDocumentExtensions *SVGExtensionsIfExists() const noexcept
     {
       return _svgExtensions.get();
     }
+
     KRYS_NODISCARD svg::SVGDocumentExtensions &SVGExtensions() noexcept;
     /// @brief The observer that loads the document's lazily loaded images, made on first use.
     KRYS_NODISCARD html::LazyLoadImageObserver &GetLazyLoadImageObserver() noexcept;
@@ -1129,7 +1136,7 @@ namespace krys::boo::dom
     enum class UpdateLayoutIfContentVisibilityChanged : bool
     {
       No,
-      Yes
+      Yes,
     };
     /// @brief The rendering update's content relevancy step: checks the relevancy of the elements with
     /// `content-visibility: auto` for the reasons scheduled, laying out if any changed (unless
@@ -1247,6 +1254,7 @@ namespace krys::boo::dom
     {
       return _openDialogs;
     }
+
     void AddOpenDialog(html::HTMLDialogElement &dialog) noexcept;
     void RemoveOpenDialog(html::HTMLDialogElement &dialog) noexcept;
 
@@ -1288,6 +1296,7 @@ namespace krys::boo::dom
     {
       return _hintStackParent.get();
     }
+
     void SetHintStackParent(html::HTMLElement *element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#hiding-popover-nesting-count
@@ -1295,10 +1304,12 @@ namespace krys::boo::dom
     {
       return _hidingPopoverNestingCount;
     }
+
     void IncrementHidingPopoverNestingCount() noexcept
     {
       ++_hidingPopoverNestingCount;
     }
+
     void DecrementHidingPopoverNestingCount() noexcept
     {
       krys_debug_assert(_hidingPopoverNestingCount);
@@ -1310,6 +1321,7 @@ namespace krys::boo::dom
     {
       return _isShowingPopover;
     }
+
     void SetIsShowingPopover(bool value) noexcept
     {
       _isShowingPopover = value;
@@ -1323,6 +1335,7 @@ namespace krys::boo::dom
     {
       return _gotoAnchorNeededAfterStylesheetsLoad;
     }
+
     void SetGotoAnchorNeededAfterStylesheetsLoad(bool value) noexcept
     {
       _gotoAnchorNeededAfterStylesheetsLoad = value;
@@ -1377,7 +1390,7 @@ namespace krys::boo::dom
     enum class ResolveStyleType : bool
     {
       Normal,
-      Rebuild
+      Rebuild,
     };
 
     /// @brief Resolves the styles of the elements that need resolving and applies them.
@@ -1478,6 +1491,7 @@ namespace krys::boo::dom
     {
       return _parsing;
     }
+
     void SetParsing(bool parsing) noexcept
     {
       _parsing = parsing;
@@ -1488,10 +1502,12 @@ namespace krys::boo::dom
     {
       return _loadEventDelayCount != 0;
     }
+
     void IncrementLoadEventDelayCount() noexcept
     {
       ++_loadEventDelayCount;
     }
+
     /// @brief Ends a delay of the load event; the last one has the frame check whether the document loaded.
     void DecrementLoadEventDelayCount() noexcept;
 
@@ -1533,6 +1549,7 @@ namespace krys::boo::dom
     {
       return _contentLanguage;
     }
+
     void SetContentLanguage(DOMString language) noexcept;
 
     /// @brief Whether an element with a `dir` attribute or a `<bdi>` has been made in the document.
@@ -1540,6 +1557,7 @@ namespace krys::boo::dom
     {
       return _isDirAttributeDirty;
     }
+
     void SetIsDirAttributeDirty() noexcept
     {
       _isDirAttributeDirty = true;
@@ -1556,10 +1574,12 @@ namespace krys::boo::dom
     {
       return _unloadCounter;
     }
+
     void IncrementUnloadCounter() noexcept
     {
       ++_unloadCounter;
     }
+
     void DecrementUnloadCounter() noexcept
     {
       krys_debug_assert(_unloadCounter);
@@ -1648,11 +1668,13 @@ namespace krys::boo::dom
     {
       return _autofocusCandidates;
     }
+
     /// @see https://html.spec.whatwg.org/#autofocus-processed-flag
     KRYS_NODISCARD bool AutofocusProcessed() const noexcept
     {
       return _autofocusProcessed;
     }
+
     void SetAutofocusProcessed() noexcept
     {
       _autofocusProcessed = true;
@@ -1675,11 +1697,13 @@ namespace krys::boo::dom
     /// @brief The document's accessibility cache, created if accessibility is enabled and the document is in
     /// a frame; null otherwise.
     KRYS_NODISCARD AXObjectCache *AxObjectCache() noexcept;
+
     /// @brief The document's accessibility cache, if it has created one.
     KRYS_NODISCARD AXObjectCache *ExistingAXObjectCache() const noexcept
     {
       return _axObjectCache.get();
     }
+
     /// @brief Destroys the accessibility cache (with the render tree it describes).
     void ClearAXObjectCache() noexcept;
 
@@ -1737,7 +1761,7 @@ namespace krys::boo::dom
     enum class UpdateLayoutResult : bool
     {
       NoChange,
-      ChangesDone
+      ChangesDone,
     };
 
     /// @brief Lays the document out, then hit tests its layers at the result's location.
@@ -1797,18 +1821,21 @@ namespace krys::boo::dom
     /// @brief Notes a listener for @p type added to one of the document's nodes or to its window. A type the
     /// document has had a listener for stays noted.
     void AddListenerTypeIfNeeded(DOMStringAtom type) noexcept;
+
     /// @brief Whether an `animationiteration` listener was ever added to the document's nodes or window, so
     /// CSS animations wake for each iteration to fire the event.
     KRYS_NODISCARD bool HasAnimationIterationListener() const noexcept
     {
       return _hasAnimationIterationListener;
     }
+
     /// @brief Whether a `pointermove` listener was ever added to the document's nodes or window; without one,
     /// moves don't create the event.
     KRYS_NODISCARD bool HasPointerMoveListener() const noexcept
     {
       return _hasPointerMoveListener;
     }
+
     void LiveCollectionCacheAdded(LiveCollectionInvalidation invalidation) noexcept
     {
       ++_liveCollectionCacheCounts[static_cast<size_t>(invalidation)];
@@ -1842,12 +1869,14 @@ namespace krys::boo::dom
     {
       return _hasTouchRelatedListener;
     }
+
     /// @brief Whether a `pointerrawupdate` listener was ever added to the document's nodes or window; without
     /// one, moves don't create the event.
     KRYS_NODISCARD bool HasPointerRawUpdateListener() const noexcept
     {
       return _hasPointerRawUpdateListener;
     }
+
     /// @brief The relevant animations whose effects target elements in the document (outside shadow trees),
     /// in composite order.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-documentorshadowroot-getanimations
@@ -1856,15 +1885,19 @@ namespace krys::boo::dom
     /// @p function is true, in composite order.
     KRYS_NODISCARD List<RefPtr<WebAnimation>>
       MatchingAnimations(KRYS_NOESCAPE const Func<bool(Element &)> &function) noexcept;
+
     KRYS_NODISCARD AnimationTimelinesController *TimelinesController() const noexcept
     {
       return _timelinesController.get();
     }
+
     KRYS_NODISCARD AnimationTimelinesController &EnsureTimelinesController() noexcept;
+
     KRYS_NODISCARD StyleOriginatedTimelinesController *GetStyleOriginatedTimelinesController() const noexcept
     {
       return _styleOriginatedTimelinesController.get();
     }
+
     KRYS_NODISCARD StyleOriginatedTimelinesController &EnsureStyleOriginatedTimelinesController() noexcept;
     /// @see https://drafts.csswg.org/web-animations-1/#update-animations-and-send-events
     void UpdateAnimationsAndSendEvents() noexcept;
@@ -2074,18 +2107,22 @@ namespace krys::boo::dom
     {
       return _xmlEncoding;
     }
+
     KRYS_NODISCARD const DOMString &XMLVersion() const noexcept
     {
       return _xmlVersion;
     }
+
     KRYS_NODISCARD bool XMLStandalone() const noexcept
     {
       return _xmlStandalone == StandaloneStatus::Standalone;
     }
+
     KRYS_NODISCARD StandaloneStatus XMLStandaloneStatus() const noexcept
     {
       return _xmlStandalone;
     }
+
     KRYS_NODISCARD bool HasXMLDeclaration() const noexcept
     {
       return _hasXMLDeclaration;
@@ -2096,11 +2133,14 @@ namespace krys::boo::dom
     {
       _xmlEncoding = krys::move(encoding);
     }
+
     ExceptionOr<void> SetXMLVersion(DOMString version) noexcept;
+
     void SetXMLStandalone(bool standalone) noexcept
     {
       _xmlStandalone = standalone ? StandaloneStatus::Standalone : StandaloneStatus::NotStandalone;
     }
+
     void SetHasXMLDeclaration(bool hasXMLDeclaration) noexcept
     {
       _hasXMLDeclaration = hasXMLDeclaration;

@@ -54,6 +54,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool SupportsFocusRing(const RenderElement &, const RenderStyle &) const noexcept final;
+
     KRYS_NODISCARD bool SupportsSelectionForegroundColors(style::ColorOptions) const noexcept final
     {
       return false;

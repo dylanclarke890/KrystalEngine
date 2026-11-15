@@ -46,6 +46,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD bool IsIgnoredElementWithinMathTree() const noexcept final;
 
     KRYS_NODISCARD bool IsMathFraction() const noexcept final;

@@ -88,7 +88,7 @@ namespace krys::boo::layout_integration
     enum class ForceFullLayout : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -163,18 +163,22 @@ namespace krys::boo::layout_integration
     KRYS_NODISCARD bool Contains(const RenderElement &renderer) const noexcept;
 
     KRYS_NODISCARD bool IsPaginated() const noexcept;
+
     KRYS_NODISCARD bool IsDamaged() const noexcept
     {
       return static_cast<bool>(_lineDamage);
     }
+
     KRYS_NODISCARD const layout::InlineDamage *Damage() const noexcept
     {
       return _lineDamage.get();
     }
+
     KRYS_NODISCARD bool HasDetachedContent() const noexcept
     {
       return _lineDamage && _lineDamage->HasDetachedContent();
     }
+
     KRYS_NODISCARD size_t LineCount() const noexcept;
     KRYS_NODISCARD bool HasContentfulInlineOrBlockLine() const noexcept;
     KRYS_NODISCARD bool HasContentfulInlineLine() const noexcept;
@@ -224,6 +228,7 @@ namespace krys::boo::layout_integration
     {
       return *_layoutState;
     }
+
     KRYS_NODISCARD const layout::LayoutState &GetLayoutState() const noexcept
     {
       return *_layoutState;
@@ -233,6 +238,7 @@ namespace krys::boo::layout_integration
     {
       return *_rootLayoutBox;
     }
+
     KRYS_NODISCARD layout::ElementBox &RootLayoutBox() noexcept
     {
       return *_rootLayoutBox;

@@ -35,26 +35,26 @@ namespace krys::boo::css
 
     /// @brief An <eof-token> is a conceptual token, not actually produced by the tokenizer, used to indicate
     /// that the token stream has been exhausted.
-    EndOfFile
+    EndOfFile,
   };
 
   enum class HashTokenType : uint8
   {
     Unrestricted,
-    Id
+    Id,
   };
 
   enum class NumericValueType : uint8
   {
     Number,
-    Integer
+    Integer,
   };
 
   enum class NumericSignChar : uint8
   {
     Missing,
     Plus,
-    Minus
+    Minus,
   };
 
   enum class BlockTokenType : uint8

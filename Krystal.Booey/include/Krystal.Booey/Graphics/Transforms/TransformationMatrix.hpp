@@ -84,7 +84,7 @@ namespace krys::boo
     {
       IdentityOrTranslation,
       Affine,
-      Other
+      Other,
     };
 
     alignas(16) Matrix4 _matrix;
@@ -617,5 +617,5 @@ namespace krys::boo
     }
   };
 
-  inline constexpr TransformationMatrix TransformationMatrix::Identity {};
+  constexpr inline TransformationMatrix TransformationMatrix::Identity {};
 }

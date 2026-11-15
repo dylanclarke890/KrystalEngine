@@ -321,6 +321,7 @@ namespace krys::boo
       }
       return BackingSharingSnapshot {_sequenceIdentifier, _backingProviderCandidates.size()};
     }
+
     KRYS_NODISCARD uint64 SequenceIdentifier() const noexcept
     {
       return _sequenceIdentifier;
@@ -2399,7 +2400,7 @@ namespace krys::boo
     enum class AncestorTraversal : bool
     {
       Continue,
-      Stop
+      Stop,
     };
 
     // This is a simplified version of containing block walking that only handles absolute and fixed position.

@@ -51,7 +51,7 @@ namespace krys::boo
   enum class AllowPasswordEcho : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief An edit: a change to the document that's applied once, then undone and redone through the
@@ -78,6 +78,7 @@ namespace krys::boo
     {
       return _startingSelection;
     }
+
     KRYS_NODISCARD const VisibleSelection &EndingSelection() const noexcept
     {
       return _endingSelection;
@@ -87,14 +88,17 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsSimpleEditCommand() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsCompositeEditCommand() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsTopLevelCommand() const noexcept
     {
       return !_parent;
@@ -118,10 +122,12 @@ namespace krys::boo
     void PostTextStateChangeNotification(AXTextChange change, utf8_stringview text) noexcept;
     void PostTextStateChangeNotification(AXTextChange change, utf8_stringview text,
                                          const VisiblePosition &position) noexcept;
+
     KRYS_NODISCARD CompositeEditCommand *Parent() const noexcept
     {
       return _parent.get();
     }
+
     void SetStartingSelection(const VisibleSelection &selection) noexcept;
     void SetEndingSelection(const VisibleSelection &selection) noexcept;
 

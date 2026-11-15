@@ -52,7 +52,7 @@ namespace krys::boo
     EndOpacityLayer,
     EndFilterLayer,
     EndCSSFilterLayer,
-    PrepareToRenderSVGContentWasCalled
+    PrepareToRenderSVGContentWasCalled,
   };
 }
 
@@ -70,7 +70,7 @@ namespace krys::boo
     enum class NeedsGraphicsContextSave : bool
     {
       SaveGraphicsContext,
-      DontSaveGraphicsContext
+      DontSaveGraphicsContext,
     };
 
   private:
@@ -114,6 +114,7 @@ namespace krys::boo
     void PrepareToRenderSVGContent(
       RenderElement &, PaintInfo &,
       NeedsGraphicsContextSave = NeedsGraphicsContextSave::DontSaveGraphicsContext) noexcept;
+
     KRYS_NODISCARD bool IsRenderingPrepared() const noexcept
     {
       return _renderingFlags.Contains(RenderingFlag::RenderingPrepared);

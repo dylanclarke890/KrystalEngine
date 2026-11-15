@@ -28,7 +28,7 @@ namespace krys::Serialisation
         StartObject,
         InObject,
         StartArray,
-        InArray
+        InArray,
       } NodeType {Type::StartObject};
 
       uint32 NameCounter {0u};
@@ -207,7 +207,7 @@ namespace krys::Serialisation
       }
 
       /// @brief Get the value of the current node
-      GenericValue const &Value()
+      const GenericValue &Value()
       {
         if (_index >= _size)
         {
@@ -262,7 +262,7 @@ namespace krys::Serialisation
       {
         Value,
         Member,
-        null
+        null,
       } _type {Type::null}; /// @brief Whether this holds values (array) or members (objects) or nothing
     };
 

@@ -97,9 +97,11 @@ namespace krys
     constexpr Vector() noexcept : x(T(0))
     {
     }
+
     constexpr explicit Vector(T value) noexcept : x(value)
     {
     }
+
     template <ConvertibleTo<T> U>
     constexpr Vector(const Vector<U, 1> &other) noexcept : x(static_cast<T>(other.x))
     {
@@ -130,12 +132,15 @@ namespace krys
     constexpr Vector() noexcept : x(T(0)), y(T(0))
     {
     }
+
     constexpr explicit Vector(T value) noexcept : x(value), y(value)
     {
     }
+
     constexpr Vector(T xValue, T yValue) noexcept : x(xValue), y(yValue)
     {
     }
+
     template <ConvertibleTo<T> U>
     constexpr Vector(const Vector<U, 2> &other) noexcept
         : x(static_cast<T>(other.x)), y(static_cast<T>(other.y))
@@ -146,18 +151,26 @@ namespace krys
     {
       krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
+      {
         return x;
+      }
       else
+      {
         return y;
+      }
     }
 
     KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
       krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
+      {
         return x;
+      }
       else
+      {
         return y;
+      }
     }
 
     VECTOR_COMMON_MEMBER_FUNCTIONS()
@@ -200,22 +213,34 @@ namespace krys
     {
       krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
+      {
         return x;
+      }
       else if (index == 1)
+      {
         return y;
+      }
       else
+      {
         return z;
+      }
     }
 
     KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
       krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
+      {
         return x;
+      }
       else if (index == 1)
+      {
         return y;
+      }
       else
+      {
         return z;
+      }
     }
 
     VECTOR_COMMON_MEMBER_FUNCTIONS()
@@ -261,26 +286,42 @@ namespace krys
     {
       krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
+      {
         return x;
+      }
       else if (index == 1)
+      {
         return y;
+      }
       else if (index == 2)
+      {
         return z;
+      }
       else
+      {
         return w;
+      }
     }
 
     KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
       krys_debug_assert(index >= 0 && index < Length);
       if (index == 0)
+      {
         return x;
+      }
       else if (index == 1)
+      {
         return y;
+      }
       else if (index == 2)
+      {
         return z;
+      }
       else
+      {
         return w;
+      }
     }
 
     VECTOR_COMMON_MEMBER_FUNCTIONS()
@@ -489,15 +530,25 @@ namespace krys
   constexpr bool AnyOf(const VECTOR_TYPE &v, const Func &predicate) noexcept
   {
     if constexpr (N == 1)
+    {
       return predicate(v.x);
+    }
     else if constexpr (N == 2)
+    {
       return predicate(v.x) || predicate(v.y);
+    }
     else if constexpr (N == 3)
+    {
       return predicate(v.x) || predicate(v.y) || predicate(v.z);
+    }
     else if constexpr (N == 4)
+    {
       return predicate(v.x) || predicate(v.y) || predicate(v.z) || predicate(v.w);
+    }
     else
+    {
       static_assert(false, "Unsupported number of components.");
+    }
   }
 
   /// @brief Checks if all of the components in `v` satisfy the predicate.
@@ -505,15 +556,25 @@ namespace krys
   constexpr bool AllOf(const VECTOR_TYPE &v, const Func &predicate) noexcept
   {
     if constexpr (N == 1)
+    {
       return predicate(v.x);
+    }
     else if constexpr (N == 2)
+    {
       return predicate(v.x) && predicate(v.y);
+    }
     else if constexpr (N == 3)
+    {
       return predicate(v.x) && predicate(v.y) && predicate(v.z);
+    }
     else if constexpr (N == 4)
+    {
       return predicate(v.x) && predicate(v.y) && predicate(v.z) && predicate(v.w);
+    }
     else
+    {
       static_assert(false, "Unsupported number of components.");
+    }
   }
 
   /// @brief Checks if none of the components in `v` satisfy the predicate.
@@ -521,15 +582,25 @@ namespace krys
   constexpr bool NoneOf(const VECTOR_TYPE &v, const Func &predicate) noexcept
   {
     if constexpr (N == 1)
+    {
       return !predicate(v.x);
+    }
     else if constexpr (N == 2)
+    {
       return !predicate(v.x) && !predicate(v.y);
+    }
     else if constexpr (N == 3)
+    {
       return !predicate(v.x) && !predicate(v.y) && !predicate(v.z);
+    }
     else if constexpr (N == 4)
+    {
       return !predicate(v.x) && !predicate(v.y) && !predicate(v.z) && !predicate(v.w);
+    }
     else
+    {
       static_assert(false, "Unsupported number of components.");
+    }
   }
 
   VECTOR_BINARY_OPERATOR(+);
@@ -626,7 +697,9 @@ namespace krys
     T dot = Dot(v, n);
     T k = T(1) - eta * eta * (T(1) - dot * dot);
     if (k < T(0))
+    {
       return VECTOR_TYPE(0); // Total internal reflection
+    }
     return eta * v - (eta * dot + std::sqrt(k)) * n;
   }
 

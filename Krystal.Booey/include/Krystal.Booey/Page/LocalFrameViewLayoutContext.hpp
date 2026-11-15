@@ -76,7 +76,7 @@ namespace krys::boo
       InPreLayout,
       InRenderTreeLayout,
       InViewSizeAdjust,
-      InPostLayout
+      InPostLayout,
     };
 
     /// @brief The `text-box-trim` sides in effect for the block container being laid out: whether the first
@@ -101,7 +101,7 @@ namespace krys::boo
     {
       NotInLayout,
       NotNested,
-      Nested
+      Nested,
     };
 
     /// @brief The renderers the render tree builder detached and destroyed, kept until they're deleted
@@ -166,12 +166,14 @@ namespace krys::boo
     {
       _needsFullRepaint = true;
     }
+
     KRYS_NODISCARD bool NeedsFullRepaint() const noexcept
     {
       return _needsFullRepaint;
     }
 
     KRYS_NODISCARD RenderLayoutState *LayoutState() const noexcept;
+
     // Returns true if layoutState should be used for its cached offset and clip.
     KRYS_NODISCARD bool IsPaintOffsetCacheEnabled() const noexcept
     {
@@ -212,6 +214,7 @@ namespace krys::boo
     {
       return _textBoxTrim;
     }
+
     void SetTextBoxTrim(Maybe<TextBoxTrim> textBoxTrim) noexcept
     {
       _textBoxTrim = krys::move(textBoxTrim);
@@ -226,6 +229,7 @@ namespace krys::boo
       }
       return *_updateScrollInfoAfterLayoutTransaction;
     }
+
     KRYS_NODISCARD UpdateScrollInfoAfterLayoutTransaction *
       UpdateScrollInfoAfterLayoutTransactionIfExists() noexcept
     {
@@ -234,10 +238,12 @@ namespace krys::boo
 
     /// @brief The renderer the next layout starts from, if it's a subtree layout.
     KRYS_NODISCARD RenderElement *SubtreeLayoutRoot() const noexcept;
+
     void ClearSubtreeLayoutRoot() noexcept
     {
       _subtreeLayoutRoot = nullptr;
     }
+
     void ConvertSubtreeLayoutToFullLayout() noexcept;
 
     KRYS_NODISCARD LayoutPhase GetLayoutPhase() const noexcept
@@ -300,6 +306,7 @@ namespace krys::boo
     {
       return _detachedRendererList.Append(krys::move(renderer));
     }
+
     void DeleteDetachedRenderersNow() const noexcept
     {
       _detachedRendererList.Clear();
@@ -309,6 +316,7 @@ namespace krys::boo
     {
       return _anchorScrollAdjusters;
     }
+
     KRYS_NODISCARD const AnchorScrollAdjuster *
       AnchorScrollAdjusterFor(const RenderBox &anchored) const noexcept;
     AnchorScrollAdjuster::Diff RegisterAnchorScrollAdjuster(AnchorScrollAdjuster &&) noexcept;
@@ -335,6 +343,7 @@ namespace krys::boo
     {
       return _visiblityHiddenIsIgnored;
     }
+
     void SetIsVisiblityHiddenIgnored(bool ignored) noexcept
     {
       _visiblityHiddenIsIgnored = ignored;
@@ -344,6 +353,7 @@ namespace krys::boo
     {
       return _visiblityAutoIsIgnored;
     }
+
     void SetIsVisiblityAutoIgnored(bool ignored) noexcept
     {
       _visiblityAutoIsIgnored = ignored;
@@ -353,6 +363,7 @@ namespace krys::boo
     {
       return _revealedWhenFoundIgnored;
     }
+
     void SetIsRevealedWhenFoundIgnored(bool ignored) noexcept
     {
       _revealedWhenFoundIgnored = ignored;
@@ -362,6 +373,7 @@ namespace krys::boo
     {
       _paintOffsetCacheDisableCount++;
     }
+
     void EnablePaintOffsetCache() noexcept
     {
       krys_debug_assert(_paintOffsetCacheDisableCount > 0);

@@ -41,7 +41,7 @@ namespace krys::boo::style
     Calculation,
     Empty,
     HashTableEmpty,
-    HashTableDeleted
+    HashTableDeleted,
   };
 
   enum class LengthWrapperDataEvaluationKind : uint8
@@ -49,7 +49,7 @@ namespace krys::boo::style
     Fixed,
     Percentage,
     Calculation,
-    Flag
+    Flag,
   };
 
   /// @brief A length, percentage, flag or calculation tagged with an opaque type, stored in 8 bytes.
@@ -62,6 +62,7 @@ namespace krys::boo::style
       float _floatValue {0.0f};
       uint32 _calculationValueHandle;
     };
+
     uint8 _opaqueType {0};
     LengthWrapperDataKind _kind;
     bool _hasQuirk {false};

@@ -35,13 +35,13 @@ namespace krys::editor
       float Normal[3];
     };
 
-    static constexpr uint32 TextureSize = 480u;
+    constexpr static uint32 TextureSize = 480u;
     /// @brief Radians a second the cube turns while it isn't dragged.
-    static constexpr float IdleSpeed = 0.6f;
+    constexpr static float IdleSpeed = 0.6f;
     /// @brief Radians the cube turns per CSS pixel dragged.
-    static constexpr float DragSpeed = 0.012f;
+    constexpr static float DragSpeed = 0.012f;
 
-    static constexpr utf8_stringview VertexSource = u8R"(#version 450
+    constexpr static utf8_stringview VertexSource = u8R"(#version 450
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColour;
 layout(location = 2) in vec3 inNormal;
@@ -56,7 +56,7 @@ void main()
 }
 )";
 
-    static constexpr utf8_stringview FragmentSource = u8R"(#version 450
+    constexpr static utf8_stringview FragmentSource = u8R"(#version 450
 layout(location = 0) in vec3 colour;
 layout(location = 1) in vec3 normal;
 layout(location = 0) out vec4 outColour;

@@ -42,6 +42,7 @@ namespace krys::boo::svg
     {
       return _in1->CurrentValue();
     }
+
     KRYS_NODISCARD SVGAnimatedString &In1Animated() noexcept
     {
       return *_in1;

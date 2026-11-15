@@ -44,7 +44,7 @@ namespace krys::boo::css
     enum class Status : uint8
     {
       Loading,
-      Loaded
+      Loaded,
     };
 
   private:
@@ -89,10 +89,12 @@ namespace krys::boo::css
     {
       RefCounted::AddRef();
     }
+
     void SubRef() const noexcept final
     {
       RefCounted::SubRef();
     }
+
     KRYS_NODISCARD uint32 GetRefCount() const noexcept final
     {
       return RefCounted::GetRefCount();
@@ -102,10 +104,12 @@ namespace krys::boo::css
     void UpdateStyleIfNeeded() noexcept;
 
     KRYS_NODISCARD bool HasFace(const CSSFontFace &face) const noexcept;
+
     KRYS_NODISCARD size_t FaceCount() const noexcept
     {
       return _faces.size();
     }
+
     void Add(CSSFontFace &face) noexcept;
     void Remove(const CSSFontFace &face) noexcept;
     void Purge() noexcept;
@@ -123,6 +127,7 @@ namespace krys::boo::css
     {
       return _status;
     }
+
     KRYS_NODISCARD bool HasActiveFontFaces() const noexcept
     {
       return GetStatus() == Status::Loading;

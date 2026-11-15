@@ -46,7 +46,7 @@ namespace krys::boo::html
     {
       Runnable,
       Suspended,
-      Dropped
+      Dropped,
     };
 
     template <typename TTask>

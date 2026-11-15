@@ -442,6 +442,7 @@ namespace krys::boo::style::interpolation
     explicit CoordinatedValueListPropertyWrapperBase(css::PropertyId property) noexcept : _property(property)
     {
     }
+
     virtual ~CoordinatedValueListPropertyWrapperBase() noexcept = default;
 
     KRYS_NODISCARD css::PropertyId Property() const noexcept
@@ -452,6 +453,7 @@ namespace krys::boo::style::interpolation
     KRYS_NODISCARD virtual bool Equals(const TListValue &, const TListValue &) const noexcept = 0;
     virtual void Interpolate(TListValue &, const TListValue &, const TListValue &,
                              const Context &) const noexcept = 0;
+
     KRYS_NODISCARD virtual bool CanInterpolate(const TListValue &, const TListValue &) const noexcept
     {
       return true;

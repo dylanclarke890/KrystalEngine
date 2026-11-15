@@ -48,7 +48,7 @@ namespace krys::boo
     class SmallStringKey
     {
     private:
-      static constexpr uint32 Capacity = 16;
+      constexpr static uint32 Capacity = 16;
 
       Array<char8, Capacity> _characters {};
       uint32 _length {0};
@@ -86,9 +86,9 @@ namespace krys::boo
     using Map = HashMap<SmallStringKey, float, SmallStringKeyHash>;
     using SingleCharMap = HashMap<char32, float>;
 
-    static constexpr int32 MinInterval = -3;   // A cache hit pays for about 3 cache misses.
-    static constexpr int32 MaxInterval = 20;   // Sampling at this interval has almost no overhead.
-    static constexpr uint32 MaxSize = 500'000; // Just enough to guard against pathological growth.
+    constexpr static int32 MinInterval = -3;   // A cache hit pays for about 3 cache misses.
+    constexpr static int32 MaxInterval = 20;   // Sampling at this interval has almost no overhead.
+    constexpr static uint32 MaxSize = 500'000; // Just enough to guard against pathological growth.
 
     int32 _interval {MaxInterval};
     int32 _countdown {_interval};

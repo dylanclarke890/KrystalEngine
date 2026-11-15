@@ -88,6 +88,7 @@ namespace krys::boo
     {
       return _borderRect.Rect();
     }
+
     KRYS_NODISCARD LayoutRect InnerEdgeRect() const noexcept
     {
       return _innerEdgeRect.Rect();
@@ -113,6 +114,7 @@ namespace krys::boo
     {
       return _borderRect.GetRadii();
     }
+
     void SetRadii(const LayoutRoundedRectRadii &radii) noexcept
     {
       _borderRect.SetRadii(radii);

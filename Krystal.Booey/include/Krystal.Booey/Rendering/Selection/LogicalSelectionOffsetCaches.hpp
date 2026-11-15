@@ -58,10 +58,12 @@ namespace krys::boo
       {
         return _block;
       }
+
       KRYS_NODISCARD const LogicalSelectionOffsetCaches *Cache() const noexcept
       {
         return _cache;
       }
+
       KRYS_NODISCARD bool HasFloatsOrFragmentedFlows() const noexcept
       {
         return _hasFloatsOrFragmentedFlows;

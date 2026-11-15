@@ -48,6 +48,7 @@ namespace krys::boo
     {
       return _columnIndex;
     }
+
     void SetColumnIndex(uint32 columnIndex) noexcept
     {
       _columnIndex = columnIndex;
@@ -64,6 +65,7 @@ namespace krys::boo
     {
       return AXRole::Column;
     }
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override
     {
       return true;

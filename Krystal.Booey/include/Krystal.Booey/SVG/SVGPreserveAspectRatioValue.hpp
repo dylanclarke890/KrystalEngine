@@ -53,14 +53,14 @@ namespace krys::boo::svg
       SVG_PRESERVEASPECTRATIO_XMAXYMID = 7,
       SVG_PRESERVEASPECTRATIO_XMINYMAX = 8,
       SVG_PRESERVEASPECTRATIO_XMIDYMAX = 9,
-      SVG_PRESERVEASPECTRATIO_XMAXYMAX = 10
+      SVG_PRESERVEASPECTRATIO_XMAXYMAX = 10,
     };
 
     enum SVGMeetOrSliceType : uint8
     {
       SVG_MEETORSLICE_UNKNOWN = 0,
       SVG_MEETORSLICE_MEET = 1,
-      SVG_MEETORSLICE_SLICE = 2
+      SVG_MEETORSLICE_SLICE = 2,
     };
 
   private:
@@ -75,12 +75,14 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool operator==(const SVGPreserveAspectRatioValue &) const noexcept = default;
 
     dom::ExceptionOr<void> SetAlign(uint16) noexcept;
+
     KRYS_NODISCARD uint16 Align() const noexcept
     {
       return _align;
     }
 
     dom::ExceptionOr<void> SetMeetOrSlice(uint16) noexcept;
+
     KRYS_NODISCARD uint16 MeetOrSlice() const noexcept
     {
       return _meetOrSlice;
@@ -108,16 +110,19 @@ namespace krys::boo::svg
     {
       return SVGPreserveAspectRatioValue();
     }
+
     KRYS_NODISCARD static SVGPreserveAspectRatioValue FromString(dom::DOMStringView string) noexcept
     {
       return SVGPreserveAspectRatioValue(string);
     }
+
     KRYS_NODISCARD static Maybe<SVGPreserveAspectRatioValue> Parse(const dom::QualifiedName &,
                                                                    dom::DOMStringView) noexcept
     {
       krys_assert_msg(false, "Not reached");
       return InitialValue();
     }
+
     KRYS_NODISCARD static dom::DOMString ToString(const SVGPreserveAspectRatioValue &type) noexcept
     {
       return type.ValueAsString();

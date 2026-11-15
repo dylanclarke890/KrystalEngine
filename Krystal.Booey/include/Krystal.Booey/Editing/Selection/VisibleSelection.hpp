@@ -43,7 +43,7 @@ namespace krys::boo
   enum class Directionality : uint8
   {
     None,
-    Strong
+    Strong,
   };
 
   /// @brief Which way a selection is modified.
@@ -52,7 +52,7 @@ namespace krys::boo
     Forward,
     Backward,
     Right,
-    Left
+    Left,
   };
 
   /// @brief A selection: an anchor and a focus, canonicalised to candidate positions and expanded to a
@@ -65,7 +65,7 @@ namespace krys::boo
     {
       None,
       Caret,
-      Range
+      Range,
     };
 
     // We store only Positions because VisibleSelection is used to store values in
@@ -90,7 +90,7 @@ namespace krys::boo
     boo::Directionality _directionality {boo::Directionality::None};
 
   public:
-    static constexpr auto DefaultAffinity = VisiblePosition::DefaultAffinity;
+    constexpr static auto DefaultAffinity = VisiblePosition::DefaultAffinity;
 
     VisibleSelection() noexcept = default;
     VisibleSelection(const dom::Position &anchor, const dom::Position &focus,
@@ -116,6 +116,7 @@ namespace krys::boo
     {
       _affinity = affinity;
     }
+
     KRYS_NODISCARD Affinity GetAffinity() const noexcept
     {
       return _affinity;
@@ -133,28 +134,34 @@ namespace krys::boo
     // FIXME: Replace start/range/base/end/firstRange with these, renaming these to the shorter names.
     KRYS_NODISCARD const dom::Position &UncanonicalizedStart() const noexcept;
     KRYS_NODISCARD const dom::Position &UncanonicalizedEnd() const noexcept;
+
     KRYS_NODISCARD const dom::Position &Anchor() const noexcept
     {
       return _anchor;
     }
+
     KRYS_NODISCARD const dom::Position &Focus() const noexcept
     {
       return _focus;
     }
+
     KRYS_NODISCARD Maybe<dom::SimpleRange> Range() const noexcept;
 
     KRYS_NODISCARD const dom::Position &CanonicalAnchor() const noexcept
     {
       return _canonicalAnchor;
     }
+
     KRYS_NODISCARD const dom::Position &CanonicalFocus() const noexcept
     {
       return _canonicalFocus;
     }
+
     KRYS_NODISCARD const dom::Position &Start() const noexcept
     {
       return _start;
     }
+
     KRYS_NODISCARD const dom::Position &End() const noexcept
     {
       return _end;
@@ -164,16 +171,19 @@ namespace krys::boo
     {
       return VisiblePosition(_start, IsRange() ? Affinity::Downstream : _affinity);
     }
+
     KRYS_NODISCARD VisiblePosition VisibleEnd() const noexcept
     {
       return VisiblePosition(_end, IsRange() ? Affinity::Upstream : _affinity);
     }
+
     KRYS_NODISCARD VisiblePosition VisibleBase() const noexcept
     {
       return VisiblePosition(_canonicalAnchor, IsRange()
                                                  ? (IsBaseFirst() ? Affinity::Upstream : Affinity::Downstream)
                                                  : _affinity);
     }
+
     KRYS_NODISCARD VisiblePosition VisibleExtent() const noexcept
     {
       return VisiblePosition(
@@ -189,26 +199,32 @@ namespace krys::boo
     {
       return _type == Type::None;
     }
+
     KRYS_NODISCARD bool IsCaret() const noexcept
     {
       return _type == Type::Caret;
     }
+
     KRYS_NODISCARD bool IsRange() const noexcept
     {
       return _type == Type::Range;
     }
+
     KRYS_NODISCARD bool IsCaretOrRange() const noexcept
     {
       return !IsNone();
     }
+
     KRYS_NODISCARD bool IsNonOrphanedRange() const noexcept
     {
       return IsRange() && !_start.IsOrphan() && !_end.IsOrphan();
     }
+
     KRYS_NODISCARD bool IsNoneOrOrphaned() const noexcept
     {
       return IsNone() || _start.IsOrphan() || _end.IsOrphan();
     }
+
     KRYS_NODISCARD bool IsOrphan() const noexcept;
     KRYS_NODISCARD RefPtr<dom::Document> GetDocument() const noexcept;
 
@@ -221,6 +237,7 @@ namespace krys::boo
     {
       return _directionality;
     }
+
     void SetDirectionality(boo::Directionality directionality) noexcept
     {
       _directionality = directionality;
@@ -250,6 +267,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsContentEditable() const noexcept;
     KRYS_NODISCARD bool HasEditableStyle() const noexcept;
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;

@@ -38,8 +38,8 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLProgressElement);
 
   public:
-    static constexpr double IndeterminatePosition = -1;
-    static constexpr double InvalidPosition = -2;
+    constexpr static double IndeterminatePosition = -1;
+    constexpr static double InvalidPosition = -2;
 
   private:
     WeakPtr<ProgressValueElement> _valueElement;

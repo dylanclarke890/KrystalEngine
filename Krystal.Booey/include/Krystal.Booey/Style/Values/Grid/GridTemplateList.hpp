@@ -84,6 +84,7 @@ namespace krys::boo::style
     GridTemplateList(css::keywords::None) noexcept
     {
     }
+
     GridTemplateList(GridTrackList &&entries) noexcept;
 
     KRYS_NODISCARD bool IsNone() const noexcept

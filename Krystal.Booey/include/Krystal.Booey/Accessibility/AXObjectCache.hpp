@@ -88,6 +88,7 @@ namespace krys::boo
     Maybe<AXId> _scrollViewID;
 
     List<Pair<Ref<AXObject>, AXNotification>> _notificationsToPost;
+
     // Text inserted or deleted, posted with the notifications.
     struct TextChange
     {
@@ -96,6 +97,7 @@ namespace krys::boo
       uint64 Offset;
       dom::DOMString Text;
     };
+
     List<TextChange> _textChangesToPost;
     Timer _notificationPostTimer;
 
@@ -173,26 +175,31 @@ namespace krys::boo
     /// It's the active modal `dialog`; otherwise the deepest `aria-modal` dialog with the focus in it, if
     /// it's visible and has something to expose.
     KRYS_NODISCARD dom::Node *ModalNode() noexcept;
+
     /// @brief Whether the cache is working out which dialog is the modal one (when whether an object is
     /// ignored mustn't depend on it).
     KRYS_NODISCARD bool IsRetrievingCurrentModalNode() const noexcept
     {
       return _isRetrievingCurrentModalNode;
     }
+
     /// @brief Whether objects' ignored states are being cached (while a tree is being built).
     KRYS_NODISCARD bool IsCachingComputedIgnoredStates() const noexcept
     {
       return _computedIgnoredStates.has_value();
     }
+
     /// @brief Starts caching objects' ignored states, until stopped or the tree changes.
     void StartCachingComputedObjectAttributesUntilTreeMutates() noexcept
     {
       _computedIgnoredStates.emplace();
     }
+
     void StopCachingComputedObjectAttributes() noexcept
     {
       _computedIgnoredStates.reset();
     }
+
     /// @brief The cached ignored state of the object with @p id, if it's cached.
     KRYS_NODISCARD Maybe<bool> CachedIgnoredState(AXId id) const noexcept;
     /// @brief Caches the ignored state of the object with @p id, if caching.
@@ -211,16 +218,20 @@ namespace krys::boo
     /// accessibility needs it anyway (`display: contents`, canvas fallback content, a focused node,
     /// @p isPartOfRelation).
     AXObject *GetOrCreate(dom::Node &node, IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept;
+
     AXObject *GetOrCreate(dom::Node *node, IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept
     {
       return node ? GetOrCreate(*node, isPartOfRelation) : nullptr;
     }
+
     /// @brief The object for @p renderer (its node's, if it has one), created if needed.
     AXObject *GetOrCreate(RenderObject &renderer) noexcept;
+
     AXObject *GetOrCreate(RenderObject *renderer) noexcept
     {
       return renderer ? GetOrCreate(*renderer) : nullptr;
     }
+
     /// @brief The object for the document's view (its scroll view), made if needed.
     AXObject *GetOrCreate(LocalFrameView &view) noexcept;
     /// @brief A new object for one of the view's scroll bars; its maker sets its parent.
@@ -245,6 +256,7 @@ namespace krys::boo
     /// @brief Tells the platform @p object's role changed from @p previousRole.
     void HandleRoleChanged(AXObject &object, AXRole previousRole) noexcept;
     void RecomputeIsIgnored(dom::Node &node) noexcept;
+
     void RecomputeIsIgnored(dom::Node *node) noexcept
     {
       if (node)
@@ -252,6 +264,7 @@ namespace krys::boo
         RecomputeIsIgnored(*node);
       }
     }
+
     void RecomputeIsIgnored(RenderObject &renderer) noexcept;
     /// @brief Works out again (once the tree is next updated) whether @p element's object is ignored.
     void DeferRecomputeIsIgnored(dom::Element *element) noexcept;
@@ -337,6 +350,7 @@ namespace krys::boo
     /// @brief @p origin's @p attribute (a relation attribute) changed its targets: the relation is set up
     /// again.
     void UpdateRelations(dom::Element &origin, dom::DOMStringView attribute) noexcept;
+
     /// @brief The relations need working out again (an ID changed, so attributes may refer to other
     /// elements).
     void RelationsNeedUpdate() noexcept
@@ -373,6 +387,7 @@ namespace krys::boo
     {
       return static_cast<AXId>(_nextID++);
     }
+
     KRYS_NODISCARD Ref<AXRenderObject> CreateObjectFromRenderer(RenderObject &renderer) noexcept;
     KRYS_NODISCARD Ref<AXNodeObject> CreateFromNode(dom::Node &node) noexcept;
     void CacheAndInitializeWrapper(AXObject &object, const dom::Node *node,
@@ -451,6 +466,7 @@ namespace krys::boo
     void DeferRecomputeTableCellSlots(AXNodeObject &table) noexcept;
     void StartPerformCacheUpdateTimer() noexcept;
     void NotificationPostTimerFired() noexcept;
+
     void PerformCacheUpdateTimerFired() noexcept
     {
       PerformDeferredCacheUpdate();
@@ -511,6 +527,7 @@ namespace krys::boo
     /// @brief @p insertedText replaced the text (if there was any), leaving @p selection.
     void PostTextStateChangeNotification(AXObjectCache *cache, dom::DOMStringView insertedText,
                                          const VisibleSelection &selection) const noexcept;
+
     KRYS_NODISCARD const VisiblePositionIndexRange &ReplacedRange() const noexcept
     {
       return _replacedRange;

@@ -46,7 +46,7 @@ namespace krys::boo::style
   public:
     enum AnyValueTag
     {
-      AnyValue
+      AnyValue,
     };
 
   private:
@@ -54,7 +54,7 @@ namespace krys::boo::style
     {
       False,
       True,
-      Any
+      Any,
     };
 
     const bool _isEnabled;

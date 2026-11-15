@@ -62,6 +62,7 @@ namespace krys::boo
     void BeginDrawSourceImage(GraphicsContext &, float = 1.f) noexcept override
     {
     }
+
     void EndDrawSourceImage(GraphicsContext &destinationContext) noexcept override;
   };
 }

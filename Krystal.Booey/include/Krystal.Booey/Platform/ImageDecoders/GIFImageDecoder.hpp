@@ -40,7 +40,7 @@ namespace krys::boo
     {
       GIFFullQuery,
       GIFSizeQuery,
-      GIFFrameCountQuery
+      GIFFrameCountQuery,
     };
 
   private:
@@ -62,6 +62,7 @@ namespace krys::boo
     {
       return u8"gif";
     }
+
     void SetData(const SharedBuffer &data, bool allDataReceived) noexcept final;
     bool SetSize(const IntSize &size) noexcept final;
     KRYS_NODISCARD size_t FrameCount() const noexcept final;
@@ -82,10 +83,12 @@ namespace krys::boo
 
   private:
     GIFImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
+
     void TryDecodeSize(bool allDataReceived) noexcept final
     {
       Decode(0, GIFSizeQuery, allDataReceived);
     }
+
     KRYS_NODISCARD size_t FindFirstRequiredFrameToDecode(size_t frameIndex) noexcept;
 
     // If the query is GIFFullQuery, decodes the image up to (but not

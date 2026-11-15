@@ -41,26 +41,26 @@ namespace krys::boo::dom
   enum class DidUpdateAnyContentRelevancy : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class IsSkippedContent : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @see https://drafts.csswg.org/css-contain/#proximity-to-the-viewport
   enum class ViewportProximity : bool
   {
     Far,
-    Near
+    Near,
   };
 
   enum class HadInitialVisibleContentVisibilityDetermination : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Keeps the relevancy to the user of a document's elements with `content-visibility: auto`: their

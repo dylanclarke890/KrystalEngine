@@ -36,10 +36,12 @@ namespace krys::ui
     {
       return _size;
     }
+
     KRYS_NODISCARD EnumSet<Flags> GetFlags() const noexcept
     {
       return _flags;
     }
+
     KRYS_NODISCARD bool IsOpaque() const noexcept
     {
       return !_flags.Contains(Flags::SupportsAlpha);

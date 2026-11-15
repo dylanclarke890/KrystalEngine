@@ -77,7 +77,6 @@ namespace krys::boo
 
   namespace
   {
-
     KRYS_NODISCARD bool IsSkippedContentRootOrSkippedContent(const RenderBlockFlow &blockFlow) noexcept
     {
       auto *element = blockFlow.GetElement();
@@ -4622,12 +4621,14 @@ namespace krys::boo
     bool canHangPunctuationAtEnd =
       styleToUse.GetHangingPunctuation().Contains(style::HangingPunctuationValue::Last);
     RenderText *lastText = nullptr;
+
     struct RubyBaseContent
     {
       float MinimumWidth {0.f};
       float MaxiumumWidth {0.f};
       bool HasBreakingPositionAfter {false};
     };
+
     List<RubyBaseContent> rubyBaseContentStack;
 
     bool addedStartPunctuationHang = false;

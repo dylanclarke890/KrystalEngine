@@ -47,18 +47,21 @@ namespace krys::boo::svg
 
     bool ParseViewSpec(dom::DOMStringView) noexcept;
     void Reset() noexcept;
+
     void ResetContextElement() noexcept
     {
       _contextElement = nullptr;
     }
 
     KRYS_NODISCARD RefPtr<SVGElement> ViewTarget() const noexcept;
+
     KRYS_NODISCARD const dom::DOMString &ViewTargetString() const noexcept
     {
       return _viewTargetString;
     }
 
     KRYS_NODISCARD dom::DOMString TransformString() const noexcept;
+
     KRYS_NODISCARD Ref<SVGTransformList> &Transform() noexcept
     {
       return _transform;

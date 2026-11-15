@@ -29,7 +29,6 @@
 
 namespace krys::boo
 {
-
   Ref<StyleMaskBorderData> StyleMaskBorderData::Copy() const noexcept
   {
     return AdoptRef(*new StyleMaskBorderData(*this));

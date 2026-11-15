@@ -41,16 +41,11 @@ namespace krys::boo
   class PathSegment
   {
   public:
-    using Data = Variant<PathMoveTo,
+    using Data =
+      Variant<PathMoveTo, PathLineTo, PathQuadCurveTo, PathBezierCurveTo, PathArcTo, PathArc, PathClosedArc,
+              PathEllipse, PathEllipseInRect, PathRect, PathRoundedRect, PathContinuousRoundedRect,
 
-                         PathLineTo, PathQuadCurveTo, PathBezierCurveTo, PathArcTo,
-
-                         PathArc, PathClosedArc, PathEllipse, PathEllipseInRect, PathRect, PathRoundedRect,
-                         PathContinuousRoundedRect,
-
-                         PathDataLine, PathDataQuadCurve, PathDataBezierCurve, PathDataArc,
-
-                         PathCloseSubpath>;
+              PathDataLine, PathDataQuadCurve, PathDataBezierCurve, PathDataArc, PathCloseSubpath>;
 
     PathSegment(Data &&) noexcept;
 
@@ -60,10 +55,12 @@ namespace krys::boo
     {
       return _data;
     }
+
     KRYS_NODISCARD Data &&GetData() && noexcept
     {
       return krys::move(_data);
     }
+
     KRYS_NODISCARD bool ClosesSubpath() const noexcept
     {
       return std::holds_alternative<PathCloseSubpath>(_data) || std::holds_alternative<PathClosedArc>(_data);

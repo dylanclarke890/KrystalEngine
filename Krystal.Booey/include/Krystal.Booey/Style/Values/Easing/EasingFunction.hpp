@@ -61,6 +61,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD EasingFunction operator()(BuilderState &, const css::Value &) noexcept;
     };
+
     template <>
     struct CSSValueCreation<EasingFunction>
     {

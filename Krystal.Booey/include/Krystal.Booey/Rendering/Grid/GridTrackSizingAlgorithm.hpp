@@ -50,12 +50,12 @@ namespace krys::boo
   class RenderBox;
   class RenderGrid;
 
-  inline constexpr int infinity = -1;
+  constexpr inline int infinity = -1;
 
   enum class SizingOperation : uint8
   {
     TrackSizing,
-    IntrinsicSizeComputation
+    IntrinsicSizeComputation,
   };
 
   enum class TrackSizeComputationVariant : uint8
@@ -103,22 +103,26 @@ namespace krys::boo
     void SetBaseSize(LayoutUnit baseSize) noexcept;
 
     KRYS_NODISCARD const LayoutUnit &GrowthLimit() const noexcept;
+
     KRYS_NODISCARD bool GrowthLimitIsInfinite() const noexcept
     {
       return _growthLimit == infinity;
     }
+
     void SetGrowthLimit(LayoutUnit growthLimit) noexcept;
 
     KRYS_NODISCARD bool InfiniteGrowthPotential() const noexcept
     {
       return GrowthLimitIsInfinite() || _infinitelyGrowable;
     }
+
     KRYS_NODISCARD LayoutUnit GrowthLimitIfNotInfinite() const noexcept;
 
     KRYS_NODISCARD const LayoutUnit &PlannedSize() const noexcept
     {
       return _plannedSize;
     }
+
     void SetPlannedSize(LayoutUnit plannedSize) noexcept
     {
       _plannedSize = plannedSize;
@@ -128,6 +132,7 @@ namespace krys::boo
     {
       return _tempSize;
     }
+
     void SetTempSize(const LayoutUnit &tempSize) noexcept;
     void GrowTempSize(const LayoutUnit &tempSize) noexcept;
 
@@ -135,12 +140,14 @@ namespace krys::boo
     {
       return _infinitelyGrowable;
     }
+
     void SetInfinitelyGrowable(bool infinitelyGrowable) noexcept
     {
       _infinitelyGrowable = infinitelyGrowable;
     }
 
     void SetGrowthLimitCap(Maybe<LayoutUnit> growthLimitCap) noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> GrowthLimitCap() const noexcept
     {
       return _growthLimitCap;
@@ -191,7 +198,7 @@ namespace krys::boo
       RowSizingFirstIteration,
       RowSizingExtraIterationForSizeContainment,
       ColumnSizingSecondIteration,
-      RowSizingSecondIteration
+      RowSizingSecondIteration,
     };
 
     // Keyed by address: the caches are cleared at the end of each layout of the grid.
@@ -282,6 +289,7 @@ namespace krys::boo
     {
       return _minContentSize;
     }
+
     KRYS_NODISCARD LayoutUnit MaxContentSize() const noexcept
     {
       return _maxContentSize;
@@ -309,6 +317,7 @@ namespace krys::boo
     {
       return direction == style::GridTrackSizingDirection::Columns ? _columns : _rows;
     }
+
     KRYS_NODISCARD const Tracks &GetTracks(style::GridTrackSizingDirection direction) const noexcept
     {
       return direction == style::GridTrackSizingDirection::Columns ? _columns : _rows;
@@ -318,6 +327,7 @@ namespace krys::boo
     {
       return direction == style::GridTrackSizingDirection::Columns ? _freeSpaceColumns : _freeSpaceRows;
     }
+
     void SetFreeSpace(style::GridTrackSizingDirection direction, Maybe<LayoutUnit> freeSpace) noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> AvailableSpace(style::GridTrackSizingDirection direction) const noexcept
@@ -325,20 +335,24 @@ namespace krys::boo
       return direction == style::GridTrackSizingDirection::Columns ? _availableSpaceColumns
                                                                    : _availableSpaceRows;
     }
+
     void SetAvailableSpace(style::GridTrackSizingDirection direction,
                            Maybe<LayoutUnit> availableSpace) noexcept;
 
     KRYS_NODISCARD LayoutUnit ComputeTrackBasedSize() const noexcept;
 
     KRYS_NODISCARD bool HasAllLengthRowSizes() const noexcept;
+
     KRYS_NODISCARD bool HasAnyPercentSizedRowsIndefiniteHeight() const noexcept
     {
       return _hasPercentSizedRowsIndefiniteHeight;
     }
+
     KRYS_NODISCARD bool HasAnyFlexibleMaxTrackBreadth() const noexcept
     {
       return _hasFlexibleMaxTrackBreadth;
     }
+
     KRYS_NODISCARD bool HasAnyBaselineAlignmentItem() const noexcept
     {
       return !_baselineAlignmentItemsForRows.empty() || !_baselineAlignmentItemsForColumns.empty();
@@ -567,28 +581,34 @@ namespace krys::boo
     {
       return _algorithm.ComputeTrackBasedSize();
     }
+
     KRYS_NODISCARD style::GridTrackSizingDirection Direction() const noexcept
     {
       return _algorithm._direction;
     }
+
     KRYS_NODISCARD GridTrackSizingAlgorithm::SizingState GetSizingState() const noexcept
     {
       return _algorithm._sizingState;
     }
+
     KRYS_NODISCARD double FindFrUnitSize(const GridSpan &tracksSpan, LayoutUnit leftOverSpace) const noexcept
     {
       return _algorithm.FindFrUnitSize(tracksSpan, leftOverSpace);
     }
+
     void DistributeSpaceToTracks(List<GridTrack *> &tracks, LayoutUnit &availableLogicalSpace) const noexcept
     {
       _algorithm.DistributeSpaceToTracks<TrackSizeComputationVariant::NotCrossingFlexibleTracks,
                                          TrackSizeComputationPhase::MaximizeTracks>(tracks, nullptr,
                                                                                     availableLogicalSpace);
     }
+
     KRYS_NODISCARD const RenderGrid *GetRenderGrid() const noexcept
     {
       return _algorithm._renderGrid;
     }
+
     KRYS_NODISCARD Maybe<LayoutUnit> AvailableSpace() const noexcept
     {
       return _algorithm.AvailableSpace();

@@ -330,10 +330,12 @@ namespace krys::boo::svg
     {
       return HasNodeFlag(dom::NodeFlags::HasPendingResources);
     }
+
     void SetHasPendingResources() noexcept
     {
       SetNodeFlag(dom::NodeFlags::HasPendingResources);
     }
+
     void ClearHasPendingResources() noexcept
     {
       ClearNodeFlag(dom::NodeFlags::HasPendingResources);
@@ -470,6 +472,7 @@ namespace krys::boo::svg
     {
       return true;
     }
+
     void OnChildrenChanged() noexcept override;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override;

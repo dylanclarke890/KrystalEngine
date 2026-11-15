@@ -161,6 +161,7 @@ namespace krys::boo::svg
     {
       return _useCurrentView;
     }
+
     /// @brief The view a fragment identifier gives the `<svg>`, created when first asked for.
     SVGViewSpec &CurrentView() noexcept;
 

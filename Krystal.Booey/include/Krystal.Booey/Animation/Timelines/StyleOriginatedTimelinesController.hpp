@@ -66,7 +66,7 @@ namespace krys::boo
     enum class AllowsDeferral : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     List<Ref<CSSAnimation>> _cssAnimationsPendingAttachment;

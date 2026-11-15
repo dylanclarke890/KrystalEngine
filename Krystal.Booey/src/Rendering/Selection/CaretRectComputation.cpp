@@ -68,8 +68,9 @@ namespace krys::boo
       {
         AlignLogicalLeft,
         AlignLogicalRight,
-        AlignCenter
+        AlignCenter,
       };
+
       CaretAlignment alignment = AlignLogicalLeft;
       switch (currentStyle.GetTextAlign())
       {

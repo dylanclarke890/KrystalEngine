@@ -176,27 +176,33 @@ namespace krys::boo
     {
       return _parameters.LogicalSize;
     }
+
     KRYS_NODISCARD IntSize TruncatedLogicalSize() const noexcept // You probably should be calling
                                                                  // logicalSize() instead.
     {
       return IntSize(_parameters.LogicalSize);
     }
+
     KRYS_NODISCARD float ResolutionScale() const noexcept
     {
       return _parameters.ResolutionScale;
     }
+
     KRYS_NODISCARD const Parameters &GetParameters() const noexcept
     {
       return _parameters;
     }
+
     KRYS_NODISCARD RenderingPurpose Purpose() const noexcept
     {
       return _parameters.Purpose;
     }
+
     KRYS_NODISCARD RenderingMode GetRenderingMode() const noexcept
     {
       return _backendInfo.Mode;
     }
+
     KRYS_NODISCARD AffineTransform BaseTransform() const noexcept
     {
       return _backendInfo.BaseTransform;

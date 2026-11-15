@@ -26,7 +26,6 @@
 
 namespace krys::boo
 {
-
   StyleMultiColData::StyleMultiColData() noexcept
       : ColumnWidth(style::ComputedStyle::InitialColumnWidth()),
         ColumnCount(style::ComputedStyle::InitialColumnCount()),

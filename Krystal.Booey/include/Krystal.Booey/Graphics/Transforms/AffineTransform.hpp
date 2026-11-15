@@ -277,7 +277,7 @@ namespace krys::boo
     void Recompose(const DecomposedType &decomp) noexcept;
   };
 
-  inline constexpr AffineTransform AffineTransform::Identity {};
+  constexpr inline AffineTransform AffineTransform::Identity {};
 
   KRYS_NODISCARD AffineTransform MakeMapBetweenRects(const FloatRect &source, const FloatRect &dest) noexcept;
 }

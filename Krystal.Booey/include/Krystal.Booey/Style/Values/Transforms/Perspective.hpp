@@ -44,11 +44,13 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsLength() const noexcept
     {
       return IsValue();
     }
   };
+
   static_assert(sizeof(Perspective) == sizeof(float));
 
   // MARK: - Conversion

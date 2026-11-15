@@ -52,46 +52,57 @@ namespace krys::boo::style
     {
       return Primary() == PrimaryKind::Normal;
     }
+
     KRYS_NODISCARD constexpr bool IsSpaceBetween() const noexcept
     {
       return Primary() == PrimaryKind::SpaceBetween;
     }
+
     KRYS_NODISCARD constexpr bool IsSpaceAround() const noexcept
     {
       return Primary() == PrimaryKind::SpaceAround;
     }
+
     KRYS_NODISCARD constexpr bool IsSpaceEvenly() const noexcept
     {
       return Primary() == PrimaryKind::SpaceEvenly;
     }
+
     KRYS_NODISCARD constexpr bool IsStretch() const noexcept
     {
       return Primary() == PrimaryKind::Stretch;
     }
+
     KRYS_NODISCARD constexpr bool IsCenter() const noexcept
     {
       return Primary() == PrimaryKind::Center;
     }
+
     KRYS_NODISCARD constexpr bool IsStart() const noexcept
     {
       return Primary() == PrimaryKind::Start;
     }
+
     KRYS_NODISCARD constexpr bool IsEnd() const noexcept
     {
       return Primary() == PrimaryKind::End;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexStart() const noexcept
     {
       return Primary() == PrimaryKind::FlexStart;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexEnd() const noexcept
     {
       return Primary() == PrimaryKind::FlexEnd;
     }
+
     KRYS_NODISCARD constexpr bool IsLeft() const noexcept
     {
       return Primary() == PrimaryKind::Left;
     }
+
     KRYS_NODISCARD constexpr bool IsRight() const noexcept
     {
       return Primary() == PrimaryKind::Right;
@@ -132,6 +143,7 @@ namespace krys::boo::style
     uint8 _primary : 4 {static_cast<uint8>(PrimaryKind::Normal)};
     uint8 _secondary : 2 {0}; // unused or OverflowPositionKind, depending on value of _primary
   };
+
   static_assert(sizeof(JustifyContent) == 1);
 
   constexpr JustifyContent::JustifyContent(css::keywords::Normal) noexcept

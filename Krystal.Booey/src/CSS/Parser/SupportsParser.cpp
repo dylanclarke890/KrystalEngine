@@ -92,7 +92,7 @@ namespace krys::boo::css
     {
       Unresolved,
       Conjunction,
-      Disjunction
+      Disjunction,
     };
   }
 

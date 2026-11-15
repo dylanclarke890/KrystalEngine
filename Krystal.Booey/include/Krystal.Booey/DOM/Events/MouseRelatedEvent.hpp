@@ -46,7 +46,7 @@ namespace krys::boo::dom
     enum class Simulated : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -71,6 +71,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD virtual double ScreenX() const noexcept;
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-screeny
     KRYS_NODISCARD virtual double ScreenY() const noexcept;
+
     KRYS_NODISCARD const DoublePoint &ScreenLocation() const noexcept
     {
       return _screenLocation;
@@ -80,6 +81,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD virtual double ClientX() const noexcept;
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-clienty
     KRYS_NODISCARD virtual double ClientY() const noexcept;
+
     KRYS_NODISCARD const DoublePoint &ClientLocation() const noexcept
     {
       return _clientLocation;
@@ -90,6 +92,7 @@ namespace krys::boo::dom
     {
       return _movementX;
     }
+
     /// @see https://w3c.github.io/pointerlock/#dom-mouseevent-movementy
     KRYS_NODISCARD double MovementY() const noexcept
     {
@@ -126,6 +129,7 @@ namespace krys::boo::dom
     {
       return ClientX();
     }
+
     /// @see https://drafts.csswg.org/cssom-view/#dom-mouseevent-y
     KRYS_NODISCARD double Y() const noexcept
     {

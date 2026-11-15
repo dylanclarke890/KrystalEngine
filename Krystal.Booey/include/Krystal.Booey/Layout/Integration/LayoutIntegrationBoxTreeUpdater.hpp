@@ -80,10 +80,12 @@ namespace krys::boo::layout_integration
     {
       return _rootRenderer;
     }
+
     KRYS_NODISCARD RenderBlock &RootRenderer() noexcept
     {
       return _rootRenderer;
     }
+
     KRYS_NODISCARD const layout::ElementBox &RootLayoutBox() const noexcept;
     KRYS_NODISCARD layout::ElementBox &RootLayoutBox() noexcept;
     KRYS_NODISCARD layout::InitialContainingBlock &GetInitialContainingBlock() noexcept;

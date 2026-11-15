@@ -71,14 +71,17 @@ namespace krys::boo
     {
       return _positiveMarginBefore;
     }
+
     KRYS_NODISCARD LayoutUnit NegativeMarginBefore() const noexcept
     {
       return _negativeMarginBefore;
     }
+
     KRYS_NODISCARD LayoutUnit PositiveMarginAfter() const noexcept
     {
       return _positiveMarginAfter;
     }
+
     KRYS_NODISCARD LayoutUnit NegativeMarginAfter() const noexcept
     {
       return _negativeMarginAfter;
@@ -88,14 +91,17 @@ namespace krys::boo
     {
       _positiveMarginBefore = pos;
     }
+
     void SetNegativeMarginBefore(LayoutUnit neg) noexcept
     {
       _negativeMarginBefore = neg;
     }
+
     void SetPositiveMarginAfter(LayoutUnit pos) noexcept
     {
       _positiveMarginAfter = pos;
     }
+
     void SetNegativeMarginAfter(LayoutUnit neg) noexcept
     {
       _negativeMarginAfter = neg;
@@ -121,14 +127,17 @@ namespace krys::boo
     {
       return std::max<LayoutUnit>(block.MarginBefore(), 0_lu);
     }
+
     KRYS_NODISCARD static LayoutUnit NegativeMarginBeforeDefault(const RenderBlock &block) noexcept
     {
       return std::max<LayoutUnit>(-block.MarginBefore(), 0_lu);
     }
+
     KRYS_NODISCARD static LayoutUnit PositiveMarginAfterDefault(const RenderBlock &block) noexcept
     {
       return std::max<LayoutUnit>(block.MarginAfter(), 0_lu);
     }
+
     KRYS_NODISCARD static LayoutUnit NegativeMarginAfterDefault(const RenderBlock &block) noexcept
     {
       return std::max<LayoutUnit>(-block.MarginAfter(), 0_lu);
@@ -150,14 +159,14 @@ namespace krys::boo
     {
       InternalMove,       // (anon) block is moved or collapsed
       InsertionOrRemoval, // child renderer gets constructed/goes away
-      ContentChange       // existing renderer gets changed (text content only atm)
+      ContentChange,      // existing renderer gets changed (text content only atm)
     };
 
     enum class LineLayoutPath : uint8
     {
       UndeterminedPath,
       InlinePath,
-      SvgTextPath
+      SvgTextPath,
     };
 
   protected:
@@ -232,15 +241,19 @@ namespace krys::boo
     {
       return HasRareBlockFlowData() && RareBlockFlowData()->LineBreakToAvoidWidow >= 0;
     }
+
     void ClearShouldBreakAtLineToAvoidWidow() const noexcept;
+
     /// @brief The 1-based number of the line moved to the next column for widows, -1 for none.
     KRYS_NODISCARD int32 LineBreakToAvoidWidow() const noexcept
     {
       return HasRareBlockFlowData() ? RareBlockFlowData()->LineBreakToAvoidWidow : -1;
     }
+
     void SetBreakAtLineToAvoidWidow(int32 lineToBreak) noexcept;
     void ClearDidBreakAtLineToAvoidWidow() noexcept;
     void SetDidBreakAtLineToAvoidWidow() noexcept;
+
     KRYS_NODISCARD bool DidBreakAtLineToAvoidWidow() const noexcept
     {
       return HasRareBlockFlowData() && RareBlockFlowData()->DidBreakAtLineToAvoidWidow;
@@ -252,6 +265,7 @@ namespace krys::boo
       LayoutUnit Strut {0_lu};
       bool IsFirstAfterPageBreak {false};
     };
+
     /// @brief How far @p lineBox, already moved down by @p deltaOffset, moves down to fit in its column with
     /// the floats it places down to @p floatMinimumBottom.
     KRYS_NODISCARD LinePaginationAdjustment
@@ -269,6 +283,7 @@ namespace krys::boo
     {
       return _lineLayoutPath;
     }
+
     void SetLineLayoutPath(LineLayoutPath path) noexcept
     {
       _lineLayoutPath = path;
@@ -280,23 +295,28 @@ namespace krys::boo
     {
       return std::holds_alternative<UniquePtr<LegacyLineLayout>>(_lineLayout);
     }
+
     KRYS_NODISCARD const LegacyLineLayout *SvgTextLayout() const noexcept
     {
       return HasSvgTextLayout() ? std::get<UniquePtr<LegacyLineLayout>>(_lineLayout).get() : nullptr;
     }
+
     KRYS_NODISCARD LegacyLineLayout *SvgTextLayout() noexcept
     {
       return HasSvgTextLayout() ? std::get<UniquePtr<LegacyLineLayout>>(_lineLayout).get() : nullptr;
     }
+
     KRYS_NODISCARD bool HasInlineLayout() const noexcept
     {
       return std::holds_alternative<UniquePtr<layout_integration::LineLayout>>(_lineLayout);
     }
+
     KRYS_NODISCARD const layout_integration::LineLayout *InlineLayout() const noexcept
     {
       return HasInlineLayout() ? std::get<UniquePtr<layout_integration::LineLayout>>(_lineLayout).get()
                                : nullptr;
     }
+
     KRYS_NODISCARD layout_integration::LineLayout *InlineLayout() noexcept
     {
       return HasInlineLayout() ? std::get<UniquePtr<layout_integration::LineLayout>>(_lineLayout).get()
@@ -314,7 +334,7 @@ namespace krys::boo
       enum class IgnoreScrollbarForAfterMargin : bool
       {
         No,
-        Yes
+        Yes,
       };
 
     private:
@@ -364,48 +384,59 @@ namespace krys::boo
       {
         _atBeforeSideOfBlock = atBeforeSideOfBlock;
       }
+
       void SetAtAfterSideOfBlock(bool atAfterSideOfBlock) noexcept
       {
         _atAfterSideOfBlock = atAfterSideOfBlock;
       }
+
       void ClearMargin() noexcept
       {
         _positiveMargin = 0_lu;
         _negativeMargin = 0_lu;
       }
+
       void SetHasMarginBeforeQuirk(bool hasMarginBeforeQuirk) noexcept
       {
         _hasMarginBeforeQuirk = hasMarginBeforeQuirk;
       }
+
       void SetHasMarginAfterQuirk(bool hasMarginAfterQuirk) noexcept
       {
         _hasMarginAfterQuirk = hasMarginAfterQuirk;
       }
+
       void SetDeterminedMarginBeforeQuirk(bool determinedMarginBeforeQuirk) noexcept
       {
         _determinedMarginBeforeQuirk = determinedMarginBeforeQuirk;
       }
+
       void SetPositiveMargin(LayoutUnit positiveMargin) noexcept
       {
         _positiveMargin = positiveMargin;
       }
+
       void SetNegativeMargin(LayoutUnit negativeMargin) noexcept
       {
         _negativeMargin = negativeMargin;
       }
+
       void SetPositiveMarginIfLarger(LayoutUnit positiveMargin) noexcept
       {
         _positiveMargin = std::max(positiveMargin, _positiveMargin);
       }
+
       void SetNegativeMarginIfLarger(LayoutUnit negativeMargin) noexcept
       {
         _negativeMargin = std::max(negativeMargin, _negativeMargin);
       }
+
       void SetMargin(LayoutUnit positiveMargin, LayoutUnit negativeMargin) noexcept
       {
         SetPositiveMargin(positiveMargin);
         SetNegativeMargin(negativeMargin);
       }
+
       void SetCanCollapseMarginAfterWithChildren(bool canCollapse) noexcept
       {
         _canCollapseMarginAfterWithChildren = canCollapse;
@@ -415,54 +446,67 @@ namespace krys::boo
       {
         return _atBeforeSideOfBlock;
       }
+
       KRYS_NODISCARD bool AtAfterSideOfBlock() const noexcept
       {
         return _atAfterSideOfBlock;
       }
+
       KRYS_NODISCARD bool CanCollapseWithMarginBefore() const noexcept
       {
         return _atBeforeSideOfBlock && _canCollapseMarginBeforeWithChildren;
       }
+
       KRYS_NODISCARD bool CanCollapseWithMarginAfter() const noexcept
       {
         return _atAfterSideOfBlock && _canCollapseMarginAfterWithChildren;
       }
+
       KRYS_NODISCARD bool CanCollapseMarginBeforeWithChildren() const noexcept
       {
         return _canCollapseMarginBeforeWithChildren;
       }
+
       KRYS_NODISCARD bool CanCollapseMarginAfterWithChildren() const noexcept
       {
         return _canCollapseMarginAfterWithChildren;
       }
+
       KRYS_NODISCARD bool CanCollapseWithChildren() const noexcept
       {
         return _canCollapseWithChildren;
       }
+
       KRYS_NODISCARD bool QuirkContainer() const noexcept
       {
         return _quirkContainer;
       }
+
       KRYS_NODISCARD bool DeterminedMarginBeforeQuirk() const noexcept
       {
         return _determinedMarginBeforeQuirk;
       }
+
       KRYS_NODISCARD bool HasMarginBeforeQuirk() const noexcept
       {
         return _hasMarginBeforeQuirk;
       }
+
       KRYS_NODISCARD bool HasMarginAfterQuirk() const noexcept
       {
         return _hasMarginAfterQuirk;
       }
+
       KRYS_NODISCARD LayoutUnit PositiveMargin() const noexcept
       {
         return _positiveMargin;
       }
+
       KRYS_NODISCARD LayoutUnit NegativeMargin() const noexcept
       {
         return _negativeMargin;
       }
+
       KRYS_NODISCARD LayoutUnit Margin() const noexcept
       {
         return _positiveMargin - _negativeMargin;
@@ -484,6 +528,7 @@ namespace krys::boo
       LayoutUnit ContainerLogicalBottom;
       MarginInfo ChildMarginInfo;
     };
+
     /// @brief Lays out a block in inline content, called from the inline formatting context.
     BlockPositionAndMargin LayoutBlockChildFromInlineLayout(RenderBox &child, LayoutUnit blockLogicalTop,
                                                             MarginInfo marginInfo) noexcept;
@@ -517,6 +562,7 @@ namespace krys::boo
     {
       return _floatingObjects && !_floatingObjects->Set().isEmpty();
     }
+
     KRYS_NODISCARD bool ContainsFloat(const RenderBox &renderer) const noexcept;
     KRYS_NODISCARD bool SubtreeContainsFloats() const noexcept;
     KRYS_NODISCARD bool SubtreeContainsFloat(const RenderBox &renderer) const noexcept;
@@ -540,22 +586,27 @@ namespace krys::boo
     {
       return IsHorizontalWritingMode() ? floatingObject.Y() : floatingObject.X();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalBottomForFloat(const FloatingObject &floatingObject) const noexcept
     {
       return IsHorizontalWritingMode() ? floatingObject.MaxY() : floatingObject.MaxX();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalLeftForFloat(const FloatingObject &floatingObject) const noexcept
     {
       return IsHorizontalWritingMode() ? floatingObject.X() : floatingObject.Y();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalRightForFloat(const FloatingObject &floatingObject) const noexcept
     {
       return IsHorizontalWritingMode() ? floatingObject.MaxX() : floatingObject.MaxY();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalWidthForFloat(const FloatingObject &floatingObject) const noexcept
     {
       return IsHorizontalWritingMode() ? floatingObject.Width() : floatingObject.Height();
     }
+
     KRYS_NODISCARD LayoutUnit LogicalHeightForFloat(const FloatingObject &floatingObject) const noexcept
     {
       return IsHorizontalWritingMode() ? floatingObject.Height() : floatingObject.Width();
@@ -572,6 +623,7 @@ namespace krys::boo
         floatingObject.SetX(logicalTop);
       }
     }
+
     void SetLogicalLeftForFloat(FloatingObject &floatingObject, LayoutUnit logicalLeft) const noexcept
     {
       if (IsHorizontalWritingMode())
@@ -583,6 +635,7 @@ namespace krys::boo
         floatingObject.SetY(logicalLeft);
       }
     }
+
     void SetLogicalHeightForFloat(FloatingObject &floatingObject, LayoutUnit logicalHeight) const noexcept
     {
       if (IsHorizontalWritingMode())
@@ -594,6 +647,7 @@ namespace krys::boo
         floatingObject.SetWidth(logicalHeight);
       }
     }
+
     void SetLogicalWidthForFloat(FloatingObject &floatingObject, LayoutUnit logicalWidth) const noexcept
     {
       if (IsHorizontalWritingMode())
@@ -605,6 +659,7 @@ namespace krys::boo
         floatingObject.SetHeight(logicalWidth);
       }
     }
+
     void SetLogicalMarginsForFloat(FloatingObject &floatingObject, LayoutUnit logicalLeftMargin,
                                    LayoutUnit logicalBeforeMargin) const noexcept
     {
@@ -636,11 +691,13 @@ namespace krys::boo
     {
       return static_cast<bool>(_rareBlockFlowData);
     }
+
     KRYS_NODISCARD RenderBlockFlowRareData *RareBlockFlowData() const noexcept
     {
       krys_assert(HasRareBlockFlowData());
       return _rareBlockFlowData.get();
     }
+
     RenderBlockFlowRareData &EnsureRareBlockFlowData() noexcept;
     void MaterializeRareBlockFlowData() noexcept;
 
@@ -685,6 +742,7 @@ namespace krys::boo
                                  const PaintInfo *paintInfo) noexcept override;
 
   public:
+
   protected:
     void LayoutBlockWithNoChildren() noexcept;
 
@@ -715,6 +773,7 @@ namespace krys::boo
     {
       return MaxPositiveMarginBefore() - MaxNegativeMarginBefore();
     }
+
     KRYS_NODISCARD LayoutUnit CollapsedMarginAfter() const noexcept final
     {
       return MaxPositiveMarginAfter() - MaxNegativeMarginAfter();
@@ -757,16 +816,19 @@ namespace krys::boo
       return HasRareBlockFlowData() ? RareBlockFlowData()->Margins.PositiveMarginBefore()
                                     : RenderBlockFlowRareData::PositiveMarginBeforeDefault(*this);
     }
+
     KRYS_NODISCARD LayoutUnit MaxNegativeMarginBefore() const noexcept
     {
       return HasRareBlockFlowData() ? RareBlockFlowData()->Margins.NegativeMarginBefore()
                                     : RenderBlockFlowRareData::NegativeMarginBeforeDefault(*this);
     }
+
     KRYS_NODISCARD LayoutUnit MaxPositiveMarginAfter() const noexcept
     {
       return HasRareBlockFlowData() ? RareBlockFlowData()->Margins.PositiveMarginAfter()
                                     : RenderBlockFlowRareData::PositiveMarginAfterDefault(*this);
     }
+
     KRYS_NODISCARD LayoutUnit MaxNegativeMarginAfter() const noexcept
     {
       return HasRareBlockFlowData() ? RareBlockFlowData()->Margins.NegativeMarginAfter()
@@ -825,6 +887,7 @@ namespace krys::boo
       bool HasSimpleOutOfFlowContentOnly {false};
       Maybe<bool> OnlyBlockContentNeedsLayout {};
     };
+
     void LayoutInlineContent(RelayoutChildren relayoutChildren, LayoutUnit previousHeight,
                              LayoutUnit &repaintLogicalTop, LayoutUnit &repaintLogicalBottom) noexcept;
     InlineContentStatus MarkInlineContentDirtyForLayout(RelayoutChildren relayoutChildren) noexcept;
@@ -874,6 +937,7 @@ namespace krys::boo
     {
       return Parent() && ContainsFloats() && LowestFloatLogicalBottom() > LogicalHeight();
     }
+
     KRYS_NODISCARD LayoutUnit ComputedClearDeltaForChild(RenderBox &child, LayoutUnit yPos) noexcept;
 
     void

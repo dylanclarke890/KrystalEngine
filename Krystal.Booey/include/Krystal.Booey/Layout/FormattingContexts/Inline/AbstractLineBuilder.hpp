@@ -91,6 +91,7 @@ namespace krys::boo::layout
     {
       return _intrinsicWidthMode;
     }
+
     KRYS_NODISCARD bool IsInIntrinsicWidthMode() const noexcept
     {
       return GetIntrinsicWidthMode().has_value();
@@ -110,28 +111,35 @@ namespace krys::boo::layout
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const InlineFormattingContext &GetFormattingContext() const noexcept
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const HorizontalConstraints &RootHorizontalConstraints() const noexcept
     {
       return _rootHorizontalConstraints;
     }
+
     KRYS_NODISCARD const InlineLayoutState &GetLayoutState() const noexcept;
     KRYS_NODISCARD InlineLayoutState &GetLayoutState() noexcept;
+
     KRYS_NODISCARD const BlockLayoutState &GetBlockLayoutState() const noexcept
     {
       return GetLayoutState().ParentBlockLayoutState();
     }
+
     KRYS_NODISCARD BlockLayoutState &GetBlockLayoutState() noexcept
     {
       return GetLayoutState().ParentBlockLayoutState();
     }
+
     KRYS_NODISCARD const ElementBox &Root() const noexcept
     {
       return _rootBox;
     }
+
     KRYS_NODISCARD const RenderStyle &RootStyle() const noexcept;
   };
 }

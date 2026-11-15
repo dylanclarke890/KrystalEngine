@@ -30,7 +30,9 @@ namespace krys
   KRYS_NODISCARD constexpr T Step(T x, T y, U t) noexcept
   {
     if (t < Half<U>())
+    {
       return x;
+    }
     return y;
   }
 
@@ -38,7 +40,9 @@ namespace krys
   KRYS_NODISCARD constexpr T Step(T edge, U x) noexcept
   {
     if (x < static_cast<U>(edge))
+    {
       return Zero<T>();
+    }
     return One<T>();
   }
 

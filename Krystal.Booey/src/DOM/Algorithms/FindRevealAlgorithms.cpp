@@ -42,7 +42,7 @@ namespace krys::boo::dom
     enum class RevealType : bool
     {
       ClosedDetails,
-      HiddenUntilFound
+      HiddenUntilFound,
     };
 
     KRYS_NODISCARD RefPtr<html::HTMLDetailsElement> ClosedDetailsElementAncestor(const Node &node) noexcept

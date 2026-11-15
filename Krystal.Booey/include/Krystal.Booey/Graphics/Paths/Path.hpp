@@ -117,6 +117,7 @@ namespace krys::boo
     {
       return AsSingle();
     }
+
     KRYS_NODISCARD const List<PathSegment> *SegmentsIfExists() const noexcept;
     KRYS_NODISCARD List<PathSegment> Segments() const noexcept;
 
@@ -142,6 +143,7 @@ namespace krys::boo
     {
       return std::get_if<PathSegment>(&_data);
     }
+
     KRYS_NODISCARD const PathSegment *AsSingle() const noexcept
     {
       return std::get_if<PathSegment>(&_data);

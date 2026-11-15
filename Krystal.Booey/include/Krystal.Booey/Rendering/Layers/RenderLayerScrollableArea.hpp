@@ -110,6 +110,7 @@ namespace krys::boo
 
     void SetPostLayoutScrollPosition(Maybe<ScrollPosition> position) noexcept;
     void ApplyPostLayoutScrollPositionIfNeeded() noexcept;
+
     KRYS_NODISCARD bool HasPostLayoutScrollPosition() const noexcept
     {
       return static_cast<bool>(_postLayoutScrollPosition);
@@ -150,18 +151,22 @@ namespace krys::boo
     /// scrollbars or scrolls smoothly, and removes it otherwise.
     void UpdateScrollableAreaSet(bool hasOverflow) noexcept;
     KRYS_NODISCARD bool HasScrollableVerticalOverflow() const noexcept;
+
     KRYS_NODISCARD bool HasScrollbars() const noexcept
     {
       return HorizontalScrollbar() || VerticalScrollbar();
     }
+
     KRYS_NODISCARD bool HasHorizontalScrollbar() const noexcept
     {
       return HorizontalScrollbar();
     }
+
     KRYS_NODISCARD bool HasVerticalScrollbar() const noexcept
     {
       return VerticalScrollbar();
     }
+
     void SetHasHorizontalScrollbar(bool hasScrollbar) noexcept;
     void SetHasVerticalScrollbar(bool hasScrollbar) noexcept;
 
@@ -174,6 +179,7 @@ namespace krys::boo
     {
       return _requiresScrollPositionReconciliation;
     }
+
     void SetRequiresScrollPositionReconciliation(bool requiresReconciliation = true) noexcept
     {
       _requiresScrollPositionReconciliation = requiresReconciliation;
@@ -183,6 +189,7 @@ namespace krys::boo
     // scrollable overflow.
     KRYS_NODISCARD bool CanUseCompositedScrolling() const noexcept;
     KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
+
     // Returns true when there is actually scrollable overflow (requires layout to be up-to-date).
     KRYS_NODISCARD bool HasCompositedScrollableOverflow() const noexcept
     {
@@ -214,10 +221,12 @@ namespace krys::boo
     {
       return _hBar.get();
     }
+
     KRYS_NODISCARD Scrollbar *VerticalScrollbar() const noexcept final
     {
       return _vBar.get();
     }
+
     KRYS_NODISCARD ScrollableArea *EnclosingScrollableArea() const noexcept final;
 
     KRYS_NODISCARD bool ShouldPlaceVerticalScrollbarOnLeft() const noexcept final;
@@ -226,10 +235,12 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD ScrollAnchoringController *GetScrollAnchoringController() const noexcept final
     {
       return _scrollAnchoringController.get();
     }
+
     KRYS_NODISCARD bool IsScrollCornerVisible() const noexcept final;
     KRYS_NODISCARD IntRect ScrollCornerRect() const noexcept final;
     void SetScrollOffset(const ScrollOffset &offset) noexcept final;
@@ -282,14 +293,17 @@ namespace krys::boo
     void PaintOverlayScrollbars(GraphicsContext &context, const LayoutRect &damageRect,
                                 EnumSet<PaintBehavior> paintBehavior,
                                 RenderObject *subtreePaintRoot = nullptr) noexcept;
+
     KRYS_NODISCARD bool ContainsDirtyOverlayScrollbars() const noexcept
     {
       return _containsDirtyOverlayScrollbars;
     }
+
     void SetContainsDirtyOverlayScrollbars(bool dirtyScrollbars) noexcept
     {
       _containsDirtyOverlayScrollbars = dirtyScrollbars;
     }
+
     void PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
                            const IntRect &damageRect) noexcept;
     /// @brief Paints the grip of a box the user can resize, in its bottom corner.

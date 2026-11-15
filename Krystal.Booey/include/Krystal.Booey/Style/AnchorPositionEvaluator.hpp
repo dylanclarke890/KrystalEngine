@@ -86,7 +86,7 @@ namespace krys::boo
     {
       New,
       SnapshotsDiffer,
-      SnapshotsMatch
+      SnapshotsMatch,
     };
 
   private:
@@ -114,14 +114,17 @@ namespace krys::boo
     KRYS_NODISCARD RenderBox *Anchored() const noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept;
+
     KRYS_NODISCARD bool MayNeedAdjustment() const noexcept
     {
       return _needsXAdjustment || _needsYAdjustment;
     }
+
     KRYS_NODISCARD bool MayNeedXAdjustment() const noexcept
     {
       return _needsXAdjustment;
     }
+
     KRYS_NODISCARD bool MayNeedYAdjustment() const noexcept
     {
       return _needsYAdjustment;
@@ -131,6 +134,7 @@ namespace krys::boo
     {
       return _isHidden;
     }
+
     void SetHidden(bool hide) noexcept
     {
       _isHidden = hide;
@@ -138,6 +142,7 @@ namespace krys::boo
 
     void AddSnapshot(const RenderBox &scroller) noexcept;
     void AddViewportSnapshot(const RenderView &) noexcept;
+
     KRYS_NODISCARD bool HasViewportSnapshot() const noexcept
     {
       return _adjustForViewport;
@@ -147,10 +152,12 @@ namespace krys::boo
     KRYS_NODISCARD bool RecaptureDiffers(const AnchorScrollAdjuster &) const noexcept;
 
     void SetFallbackLimits(const RenderBox &anchored) noexcept;
+
     KRYS_NODISCARD bool HasFallbackLimits() const noexcept
     {
       return _hasFallback;
     }
+
     KRYS_NODISCARD bool ExceedsFallbackLimits(LayoutSize adjustment) const noexcept
     {
       return !_fallbackLimits.Fits(adjustment);

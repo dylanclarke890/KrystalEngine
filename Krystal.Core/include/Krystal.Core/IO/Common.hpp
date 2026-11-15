@@ -9,15 +9,15 @@ namespace krys::io
   enum class ReadFlags : uint8
   {
     None = 0,
-    OpenAtEnd = 1 << 0 // Open the file and move the read position to the end
+    OpenAtEnd = 1 << 0, // Open the file and move the read position to the end
   };
 
   enum class WriteFlags : uint8
   {
     None = 0,
-    Create = 1 << 0,   // Create the file if it does not exist
-    Truncate = 1 << 1, // Truncate the file to zero length if it already exists
-    OpenAtEnd = 1 << 2 // Open the file and move the write position to the end
+    Create = 1 << 0,    // Create the file if it does not exist
+    Truncate = 1 << 1,  // Truncate the file to zero length if it already exists
+    OpenAtEnd = 1 << 2, // Open the file and move the write position to the end
   };
 
   /// @brief Specifies the reference point used to obtain the new position in a stream.
@@ -28,7 +28,7 @@ namespace krys::io
     /// @brief The current position within a stream.
     Current = 1,
     /// @brief The end of a stream.
-    End = 2
+    End = 2,
   };
 
   struct VFSFileEntry

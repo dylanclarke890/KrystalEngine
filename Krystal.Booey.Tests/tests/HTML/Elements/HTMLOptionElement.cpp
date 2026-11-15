@@ -133,5 +133,4 @@ namespace krys::boo::tests
     CHECK(matches(u8"r", u8":disabled"));
     CHECK_FALSE(OptionById(fixture, u8"r").IsDisabledFormControl());
   }
-
 }

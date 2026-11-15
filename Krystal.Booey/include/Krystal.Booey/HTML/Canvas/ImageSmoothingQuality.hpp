@@ -9,6 +9,6 @@ namespace krys::boo::html
   {
     Low,
     Medium,
-    High
+    High,
   };
 }

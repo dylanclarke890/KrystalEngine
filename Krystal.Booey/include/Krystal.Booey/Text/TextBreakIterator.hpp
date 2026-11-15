@@ -200,7 +200,7 @@ namespace krys::boo
     friend class CachedTextBreakIterator;
     KRYS_NON_COPY_MOVABLE(TextBreakIteratorCache);
 
-    static constexpr uint32 Capacity = 2;
+    constexpr static uint32 Capacity = 2;
 
     // FIXME: Break this up into different Vectors per mode.
     SmallList<TextBreakIterator, Capacity> _unused;
@@ -268,7 +268,7 @@ namespace krys::boo
     class PriorContext
     {
     public:
-      static constexpr uint32 Length = 2;
+      constexpr static uint32 Length = 2;
 
     private:
       Array<char32, Length> _priorContext;

@@ -36,13 +36,13 @@ namespace krys::ui
     enum class WrapMode : uint8
     {
       Stretch,
-      Repeat
+      Repeat,
     };
 
     enum class AllEdgesExposed : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -121,6 +121,7 @@ namespace krys::ui
     {
       _wrapMode = mode;
     }
+
     /// @brief How the textures drawn next are sampled where they're shown smaller and larger than they are.
     void SetScalingFilters(boo::GraphicsLayerScalingFilter minification,
                            boo::GraphicsLayerScalingFilter magnification) noexcept
@@ -128,6 +129,7 @@ namespace krys::ui
       _minificationFilter = minification;
       _magnificationFilter = magnification;
     }
+
     void SetPatternTransform(const boo::TransformationMatrix &transform) noexcept
     {
       _patternTransform = transform;

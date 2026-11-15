@@ -56,14 +56,17 @@ namespace krys::boo::style
     {
       return _x;
     }
+
     KRYS_NODISCARD Number<> Y() const noexcept
     {
       return _y;
     }
+
     KRYS_NODISCARD Number<> Z() const noexcept
     {
       return _z;
     }
+
     KRYS_NODISCARD Angle<> GetAngle() const noexcept
     {
       return _angle;
@@ -80,10 +83,12 @@ namespace krys::boo::style
     {
       return _angle.IsZero();
     }
+
     KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept override
     {
       return (_x.IsZero() && _y.IsZero()) || _angle.IsZero();
     }
+
     KRYS_NODISCARD bool IsAffectedByTransformOrigin() const noexcept override
     {
       return !IsIdentity();

@@ -68,7 +68,7 @@ namespace krys::boo::layout
     enum class Type : uint8
     {
       Primary,
-      Secondary
+      Secondary,
     };
 
     using FormattingContextLayoutFunction =
@@ -84,7 +84,7 @@ namespace krys::boo::layout
     {
       No,
       Limited,
-      Yes
+      Yes,
     };
 
   private:
@@ -145,10 +145,12 @@ namespace krys::boo::layout
     {
       return _quirksMode == QuirksMode::Yes;
     }
+
     KRYS_NODISCARD bool InLimitedQuirksMode() const noexcept
     {
       return _quirksMode == QuirksMode::Limited;
     }
+
     KRYS_NODISCARD bool InStandardsMode() const noexcept
     {
       return _quirksMode == QuirksMode::No;

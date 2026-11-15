@@ -55,6 +55,7 @@ namespace krys::boo::svg
     {
       return _pathLength->CurrentValue();
     }
+
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__pathLength
     KRYS_NODISCARD SVGAnimatedNumber &PathLengthAnimated() noexcept
     {

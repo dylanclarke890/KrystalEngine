@@ -60,7 +60,7 @@ namespace krys::boo::layout
     enum class UseTrailingWhitespaceMeasuringOptimization : bool
     {
       No,
-      Yes
+      Yes,
     };
     KRYS_NODISCARD static InlineLayoutUnit Width(const InlineTextItem &inlineTextItem,
                                                  const FontCascade &fontCascade,
@@ -87,7 +87,7 @@ namespace krys::boo::layout
     enum class IncludeHyphen : bool
     {
       No,
-      Yes
+      Yes,
     };
     KRYS_NODISCARD static FallbackFontList FallbackFontsForText(utf8_stringview textContent,
                                                                 const RenderStyle &style,
@@ -101,7 +101,7 @@ namespace krys::boo::layout
     enum class ShouldUseSimpleGlyphOverflowCodePath : bool
     {
       No,
-      Yes
+      Yes,
     };
     KRYS_NODISCARD static EnclosingAscentDescent EnclosingGlyphBoundsForText(
       utf8_stringview textContent, const RenderStyle &style,
@@ -112,6 +112,7 @@ namespace krys::boo::layout
       size_t Length {0};
       InlineLayoutUnit LogicalWidth {0};
     };
+
     KRYS_NODISCARD static WordBreakLeft BreakWord(const InlineTextBox &inlineTextBox, size_t start,
                                                   size_t length, InlineLayoutUnit width,
                                                   InlineLayoutUnit availableWidth,

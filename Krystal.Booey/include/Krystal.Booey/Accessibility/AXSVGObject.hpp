@@ -51,23 +51,28 @@ namespace krys::boo
     {
       return true;
     }
+
     /// @brief Whether this is an `svg` root's object.
     KRYS_NODISCARD bool IsAccessibilitySVGRoot() const noexcept final
     {
       return _isSVGRoot;
     }
+
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override;
+
     /// @brief The object of the image showing this SVG image's root, if one is (its parent then).
     KRYS_NODISCARD AXObject *RemoteParent() const noexcept
     {
       return _remoteParent.get();
     }
+
     /// @brief Makes @p parent (an image's object) the parent of this SVG image's root.
     void SetRemoteParent(AXObject *parent) noexcept
     {
       krys_debug_assert(_isSVGRoot);
       _remoteParent = parent ? CreateWeakPtr(parent) : nullptr;
     }
+
     /// @brief Whether this is a root with something to expose: a title, description, text, role or label in
     /// it.
     KRYS_NODISCARD bool IsRootWithAccessibleContent() const noexcept;

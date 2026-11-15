@@ -40,10 +40,12 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsLength() const noexcept
     {
       return IsValue();
     }
+
     KRYS_NODISCARD Maybe<Length> TryLength() const noexcept
     {
       return TryValue();

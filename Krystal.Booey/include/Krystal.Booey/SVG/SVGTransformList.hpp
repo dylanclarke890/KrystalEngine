@@ -37,7 +37,7 @@ namespace krys::boo::svg
     enum class ListReplacement : bool
     {
       Append,
-      Replace
+      Replace,
     };
 
   public:

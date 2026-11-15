@@ -89,6 +89,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD css::BorderRadius operator()(const BorderRadius &, const RenderStyle &) noexcept;
     };
+
     template <>
     struct ToStyle<css::BorderRadius>
     {
@@ -108,13 +109,13 @@ namespace krys::boo
     {
       KRYS_NODISCARD FloatRoundedRect::Radii operator()(const BorderRadius &, FloatSize, ZoomNeeded) noexcept;
     };
+
     template <>
     struct Evaluation<BorderRadius, LayoutRoundedRect::Radii>
     {
       KRYS_NODISCARD LayoutRoundedRect::Radii operator()(const BorderRadius &, LayoutSize,
                                                          ZoomNeeded) noexcept;
     };
-
   }
 }
 

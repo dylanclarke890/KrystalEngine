@@ -12,7 +12,7 @@ namespace krys
   enum class HexConversionMode : bool
   {
     Lowercase,
-    Uppercase
+    Uppercase,
   };
 
   /// @brief A number written in hexadecimal by a string builder, padded with zeros to a minimum number of

@@ -72,10 +72,12 @@ namespace krys::boo
     {
       _fragmentedFlowPortionRect = rect;
     }
+
     KRYS_NODISCARD LayoutRect FragmentedFlowPortionRect() const noexcept
     {
       return _fragmentedFlowPortionRect;
     }
+
     KRYS_NODISCARD LayoutRect FragmentedFlowPortionOverflowRect() const noexcept;
 
     KRYS_NODISCARD LayoutPoint FragmentedFlowPortionLocation() const noexcept;
@@ -91,6 +93,7 @@ namespace krys::boo
     {
       return _isValid;
     }
+
     void SetIsValid(bool valid) noexcept
     {
       _isValid = valid;
@@ -118,10 +121,12 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit LogicalTopOfFragmentedFlowContentRect(const LayoutRect &rect) const noexcept;
     KRYS_NODISCARD LayoutUnit LogicalBottomOfFragmentedFlowContentRect(const LayoutRect &rect) const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalTopForFragmentedFlowContent() const noexcept
     {
       return LogicalTopOfFragmentedFlowContentRect(FragmentedFlowPortionRect());
     }
+
     KRYS_NODISCARD LayoutUnit LogicalBottomForFragmentedFlowContent() const noexcept
     {
       return LogicalBottomOfFragmentedFlowContentRect(FragmentedFlowPortionRect());
@@ -162,10 +167,12 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool CanHaveGeneratedChildren() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD dom::PositionWithAffinity
       PositionForPoint(const LayoutPoint &point, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept override;
@@ -173,6 +180,7 @@ namespace krys::boo
     /// @brief Where @p contentRect (in the flow's coordinates) is shown in the fragment.
     KRYS_NODISCARD virtual List<LayoutRect>
       FragmentRectsForFlowContentRect(const LayoutRect &contentRect) const noexcept;
+
     KRYS_NODISCARD virtual bool ContentRectSpansFragments(const LayoutRect &) const noexcept
     {
       return false;

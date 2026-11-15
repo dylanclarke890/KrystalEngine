@@ -96,6 +96,7 @@ namespace krys::boo
     // Turn the cache on and off.  Disabling the cache will remove all resources from the cache.  They may
     // still live on if they are referenced by some Web page though.
     void SetDisabled(bool) noexcept;
+
     KRYS_NODISCARD bool Disabled() const noexcept
     {
       return _disabled;
@@ -105,14 +106,17 @@ namespace krys::boo
 
     void Prune() noexcept;
     void PruneSoon() noexcept;
+
     KRYS_NODISCARD uint32 Size() const noexcept
     {
       return _liveSize + _deadSize;
     }
+
     KRYS_NODISCARD uint32 LiveSize() const noexcept
     {
       return _liveSize;
     }
+
     KRYS_NODISCARD uint32 DeadSize() const noexcept
     {
       return _deadSize;
@@ -122,6 +126,7 @@ namespace krys::boo
     {
       _deadDecodedDataDeletionInterval = interval;
     }
+
     KRYS_NODISCARD MonotonicTime::duration DeadDecodedDataDeletionInterval() const noexcept
     {
       return _deadDecodedDataDeletionInterval;

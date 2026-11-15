@@ -39,20 +39,25 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD bool IsEnabled() const noexcept override;
     void AddChildren() noexcept override;
+
     void SetNeedsToUpdateChildren() noexcept override
     {
       _childrenDirty = true;
     }
+
     void SetNeedsToUpdateSubtree() noexcept override
     {
       _subtreeDirty = true;
     }
+
     KRYS_NODISCARD bool NeedsToUpdateChildren() const noexcept override
     {
       return _childrenDirty;
     }
+
     void UpdateChildrenIfNecessary() noexcept override;
     /// @brief The select's options changed: removes the objects of the options no longer in the document and
     /// adds the children again.

@@ -82,7 +82,7 @@ namespace krys::boo::layout
     enum class RubyBasesMayNeedResizing : bool
     {
       No,
-      Yes
+      Yes,
     };
     static void ApplyAlignmentOffsetList(inline_display::Boxes &displayBoxes,
                                          const HashMap<const Box *, InlineLayoutUnit> &alignmentOffsetList,

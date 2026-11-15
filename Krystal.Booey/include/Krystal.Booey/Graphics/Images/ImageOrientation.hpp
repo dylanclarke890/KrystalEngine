@@ -50,14 +50,14 @@ namespace krys::boo
       OriginRightBottom = 7, // mirror along x-axis + 90 degree CW rotation
       OriginLeftBottom = 8,  // 270 degree CW rotation
 
-      None = OriginTopLeft
+      None = OriginTopLeft,
     };
 
   private:
-    static constexpr auto EXIFFirst = Orientation::OriginTopLeft;
-    static constexpr auto EXIFLast = Orientation::OriginLeftBottom;
-    static constexpr auto First = Orientation::FromImage;
-    static constexpr auto Last = EXIFLast;
+    constexpr static auto EXIFFirst = Orientation::OriginTopLeft;
+    constexpr static auto EXIFLast = Orientation::OriginLeftBottom;
+    constexpr static auto First = Orientation::FromImage;
+    constexpr static auto Last = EXIFLast;
 
     Orientation _orientation {Orientation::None};
 

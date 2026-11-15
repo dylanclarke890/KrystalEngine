@@ -117,10 +117,12 @@ namespace krys::boo
     {
       return _extraOffset;
     }
+
     KRYS_NODISCARD bool NothingToDraw() const noexcept
     {
       return _nothingToDraw;
     }
+
     KRYS_NODISCARD bool DidSaveContext() const noexcept
     {
       return _didSaveContext;

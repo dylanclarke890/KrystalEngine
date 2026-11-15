@@ -247,11 +247,13 @@ namespace krys::boo::layout
 
     auto availableWidth = intrinsicWidthMode == IntrinsicWidthMode::Maximum ? MaxInlineLayoutUnit() : 0.f;
     auto maximumContentWidth = InlineLayoutUnit {};
+
     struct ContentWidthBetweenLineBreaks
     {
       InlineLayoutUnit Maximum {};
       InlineLayoutUnit Current {};
     };
+
     auto contentWidthBetweenLineBreaks = ContentWidthBetweenLineBreaks {};
     auto previousLineEnd = Maybe<InlineItemPosition> {};
     auto previousLine = Maybe<PreviousLine> {};

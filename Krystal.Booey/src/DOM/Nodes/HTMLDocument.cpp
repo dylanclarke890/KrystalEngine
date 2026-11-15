@@ -58,7 +58,7 @@ namespace krys::boo::dom
   bool HTMLDocument::IsCaseSensitiveAttribute(const QualifiedName &attributeName) noexcept
   {
     // https://html.spec.whatwg.org/multipage/semantics-other.html#case-sensitivity-of-selectors
-    static constexpr DOMStringView names[] {
+    constexpr static DOMStringView names[] {
       u8"accept-charset", u8"accept",    u8"align",     u8"alink",      u8"axis",     u8"bgcolor",
       u8"charset",        u8"checked",   u8"clear",     u8"codetype",   u8"color",    u8"compact",
       u8"declare",        u8"defer",     u8"dir",       u8"direction",  u8"disabled", u8"enctype",

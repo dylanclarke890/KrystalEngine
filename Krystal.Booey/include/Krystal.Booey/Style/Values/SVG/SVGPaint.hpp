@@ -29,7 +29,6 @@
 
 namespace krys::boo::style
 {
-
   // <paint> = none | <color> | <url> [none | <color>]? | context-fill | context-stroke
   // NOTE: `context-fill` and `context-stroke` are not implemented.
   // https://svgwg.org/svg2-draft/painting.html#SpecifyingPaint
@@ -42,6 +41,7 @@ namespace krys::boo::style
 
       KRYS_NODISCARD bool operator==(const URLNone &) const noexcept = default;
     };
+
     struct URLColor
     {
       URL Url;
@@ -53,15 +53,19 @@ namespace krys::boo::style
     SVGPaint(css::keywords::None) noexcept : _type {Type::None}
     {
     }
+
     SVGPaint(Color &&value) noexcept : _type {Type::Color}, _color {krys::move(value)}
     {
     }
+
     SVGPaint(URL &&value) noexcept : _type {Type::URL}, _url {krys::move(value)}
     {
     }
+
     SVGPaint(URLNone &&value) noexcept : _type {Type::URLNone}, _url {krys::move(value.Url)}
     {
     }
+
     SVGPaint(URLColor &&value) noexcept
         : _type {Type::URLColor}, _url {krys::move(value.Url)}, _color {krys::move(value.Color)}
     {
@@ -71,12 +75,15 @@ namespace krys::boo::style
     SVGPaint(css::keywords::Currentcolor keyword) noexcept : SVGPaint {Color {keyword}}
     {
     }
+
     SVGPaint(css::keywords::Transparent keyword) noexcept : SVGPaint {Color {keyword}}
     {
     }
+
     SVGPaint(css::keywords::Black keyword) noexcept : SVGPaint {Color {keyword}}
     {
     }
+
     SVGPaint(css::keywords::White keyword) noexcept : SVGPaint {Color {keyword}}
     {
     }
@@ -85,18 +92,22 @@ namespace krys::boo::style
     {
       return _type == Type::None;
     }
+
     KRYS_NODISCARD bool IsColor() const noexcept
     {
       return _type == Type::Color;
     }
+
     KRYS_NODISCARD bool IsURL() const noexcept
     {
       return _type == Type::URL;
     }
+
     KRYS_NODISCARD bool IsURLNone() const noexcept
     {
       return _type == Type::URLNone;
     }
+
     KRYS_NODISCARD bool IsURLColor() const noexcept
     {
       return _type == Type::URLColor;
@@ -106,6 +117,7 @@ namespace krys::boo::style
     {
       return IsColor() || IsURLColor();
     }
+
     KRYS_NODISCARD bool HasURL() const noexcept
     {
       return IsURL() || IsURLNone() || IsURLColor();
@@ -115,14 +127,17 @@ namespace krys::boo::style
     {
       return IsColor() ? Maybe(_color) : std::nullopt;
     }
+
     KRYS_NODISCARD Maybe<URL> TryURL() const noexcept
     {
       return IsURL() ? Maybe(_url) : std::nullopt;
     }
+
     KRYS_NODISCARD Maybe<URLNone> TryURLNone() const noexcept
     {
       return IsURLNone() ? Maybe(URLNone {_url, css::keywords::None {}}) : std::nullopt;
     }
+
     KRYS_NODISCARD Maybe<URLColor> TryURLColor() const noexcept
     {
       return IsURLColor() ? Maybe(URLColor {_url, _color}) : std::nullopt;
@@ -132,6 +147,7 @@ namespace krys::boo::style
     {
       return HasColor() ? Maybe(_color) : std::nullopt;
     }
+
     KRYS_NODISCARD Maybe<URL> TryAnyURL() const noexcept
     {
       return HasURL() ? Maybe(_url) : std::nullopt;
@@ -141,6 +157,7 @@ namespace krys::boo::style
     {
       return _color;
     }
+
     KRYS_NODISCARD const URL &UrlDisregardingType() const noexcept
     {
       return _url;
@@ -176,7 +193,7 @@ namespace krys::boo::style
       Color,
       URL,
       URLNone,
-      URLColor
+      URLColor,
     };
 
     Type _type;

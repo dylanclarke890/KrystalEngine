@@ -683,6 +683,7 @@ namespace krys::boo::layout
           // to each other.
           return index;
         }
+
         // There's a soft wrap opportunity between 'previousInlineItemIndex' and 'index'.
         // Now forward-find from the start position to see where we can actually wrap.
         // [ex-][ample] vs. [ex-][inline box start][inline box end][ample]
@@ -700,6 +701,7 @@ namespace krys::boo::layout
           const Box *InlineBox {nullptr};
           size_t Index {0};
         };
+
         List<InlineBoxPosition> inlineBoxStack;
         auto start = *previousInlineItemIndex;
         auto end = index;

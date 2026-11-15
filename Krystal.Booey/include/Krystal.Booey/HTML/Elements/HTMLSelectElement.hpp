@@ -55,7 +55,7 @@ namespace krys::boo::html
     enum class ExcludeOptGroup : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -80,7 +80,7 @@ namespace krys::boo::html
     enum class SkipDirection : int8
     {
       Backwards = -1,
-      Forwards = 1
+      Forwards = 1,
     };
 
     /// @brief The options, optgroups and hrs of the select, in order.
@@ -244,6 +244,7 @@ namespace krys::boo::html
     {
       return _contentsUseBaseAppearance;
     }
+
     /// @return Whether it changed.
     bool SetContentsUseBaseAppearance(bool value) noexcept;
 

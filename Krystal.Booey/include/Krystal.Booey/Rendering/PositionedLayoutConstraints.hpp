@@ -82,50 +82,61 @@ namespace krys::boo
     {
       return *_container;
     }
+
     KRYS_NODISCARD LayoutUnit ContainingSize() const noexcept
     {
       return _containingRange.Size();
     }
+
     KRYS_NODISCARD LayoutUnit ContainingInlineSize() const noexcept
     {
       return _containingInlineSize;
     }
+
     KRYS_NODISCARD LayoutRange ContainingRange() const noexcept
     {
       return _containingRange;
     }
+
     KRYS_NODISCARD LayoutRange OriginalContainingRange() const noexcept
     {
       return _originalContainingRange;
     }
+
     KRYS_NODISCARD LayoutRange ExtractRange(LayoutRect anchorRect) noexcept;
 
     KRYS_NODISCARD BoxAxis PhysicalAxis() const noexcept
     {
       return _physicalAxis;
     }
+
     KRYS_NODISCARD LogicalBoxAxis ContainingAxis() const noexcept
     {
       return _containingAxis;
     }
+
     KRYS_NODISCARD WritingMode ContainingWritingMode() const noexcept
     {
       return _containingWritingMode;
     }
+
     KRYS_NODISCARD WritingMode SelfWritingMode() const noexcept
     {
       return _writingMode;
     }
 
     KRYS_NODISCARD bool NeedsAnchor() const noexcept;
+
     KRYS_NODISCARD const RenderBoxModelObject *DefaultAnchorBox() const noexcept
     {
       return _defaultAnchorBox;
     }
+
     KRYS_NODISCARD const StyleSelfAlignmentData &Alignment() const noexcept
     {
       return _alignment;
     }
+
     KRYS_NODISCARD ItemPosition ResolveAlignmentValue() const noexcept; // Convert auto/normal as necessary.
     KRYS_NODISCARD bool AlignmentAppliesStretch(ItemPosition normalAlignment) const noexcept;
 
@@ -133,19 +144,23 @@ namespace krys::boo
     {
       return _containingWritingMode.IsOrthogonal(_writingMode);
     }
+
     KRYS_NODISCARD bool IsOpposing() const noexcept
     {
       return _containingAxis == LogicalBoxAxis::Inline ? _containingWritingMode.IsInlineOpposing(_writingMode)
                                                        : _containingWritingMode.IsBlockOpposing(_writingMode);
     }
+
     KRYS_NODISCARD bool IsBlockOpposing() const noexcept
     {
       return _containingWritingMode.IsBlockOpposing(_writingMode);
     }
+
     KRYS_NODISCARD bool IsBlockFlipped() const noexcept
     {
       return _containingWritingMode.IsBlockFlipped();
     }
+
     KRYS_NODISCARD bool StartIsBefore() const noexcept
     {
       return _containingAxis == LogicalBoxAxis::Block || _containingWritingMode.IsLogicalLeftInlineStart();
@@ -159,22 +174,27 @@ namespace krys::boo
     {
       return _bordersPlusPadding;
     }
+
     KRYS_NODISCARD const style::MarginEdge &MarginBefore() const noexcept
     {
       return _marginBefore;
     }
+
     KRYS_NODISCARD const style::MarginEdge &MarginAfter() const noexcept
     {
       return _marginAfter;
     }
+
     KRYS_NODISCARD const style::InsetEdge &InsetBefore() const noexcept
     {
       return _insetBefore;
     }
+
     KRYS_NODISCARD const style::InsetEdge &InsetAfter() const noexcept
     {
       return _insetAfter;
     }
+
     KRYS_NODISCARD LayoutUnit MarginBeforeValue() const noexcept;
     KRYS_NODISCARD LayoutUnit MarginAfterValue() const noexcept;
     KRYS_NODISCARD LayoutUnit InsetBeforeValue() const noexcept;
@@ -185,10 +205,12 @@ namespace krys::boo
     {
       return _insetModifiedContainingRange.Size();
     }
+
     KRYS_NODISCARD LayoutRange InsetModifiedContainingRange() const noexcept
     {
       return _insetModifiedContainingRange;
     }
+
     KRYS_NODISCARD LayoutUnit AvailableContentSpace() const noexcept // This may be negative.
     {
       return InsetModifiedContainingSize() - MarginBeforeValue() - BordersPlusPadding() - MarginAfterValue();

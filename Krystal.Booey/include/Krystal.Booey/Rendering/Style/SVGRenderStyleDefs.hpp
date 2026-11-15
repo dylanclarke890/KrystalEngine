@@ -56,6 +56,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleFillData);
     }
+
     KRYS_NODISCARD Ref<StyleFillData> Copy() const noexcept;
 
     bool operator==(const StyleFillData &) const noexcept;
@@ -67,6 +68,7 @@ namespace krys::boo
     StyleFillData() noexcept;
     StyleFillData(const StyleFillData &) noexcept;
   };
+
   class StyleStrokeData : public RefCounted<StyleStrokeData>
   {
   public:
@@ -74,6 +76,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleStrokeData);
     }
+
     KRYS_NODISCARD Ref<StyleStrokeData> Copy() const noexcept;
 
     bool operator==(const StyleStrokeData &) const noexcept;
@@ -87,6 +90,7 @@ namespace krys::boo
     StyleStrokeData() noexcept;
     StyleStrokeData(const StyleStrokeData &) noexcept;
   };
+
   class StyleStopData : public RefCounted<StyleStopData>
   {
   public:
@@ -94,6 +98,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleStopData);
     }
+
     KRYS_NODISCARD Ref<StyleStopData> Copy() const noexcept;
 
     bool operator==(const StyleStopData &) const noexcept;
@@ -114,6 +119,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleMiscData);
     }
+
     KRYS_NODISCARD Ref<StyleMiscData> Copy() const noexcept;
 
     bool operator==(const StyleMiscData &) const noexcept;
@@ -137,6 +143,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleInheritedResourceData);
     }
+
     KRYS_NODISCARD Ref<StyleInheritedResourceData> Copy() const noexcept;
 
     bool operator==(const StyleInheritedResourceData &) const noexcept;
@@ -158,6 +165,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleLayoutData);
     }
+
     KRYS_NODISCARD Ref<StyleLayoutData> Copy() const noexcept;
 
     bool operator==(const StyleLayoutData &) const noexcept;

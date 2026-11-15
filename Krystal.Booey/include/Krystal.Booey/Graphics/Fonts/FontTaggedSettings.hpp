@@ -105,6 +105,7 @@ namespace krys::boo
 
   public:
     FontTaggedSetting() = delete;
+
     FontTaggedSetting(FontTag tag, T value) noexcept : _tag(tag), _value(value)
     {
     }

@@ -49,7 +49,7 @@ namespace krys::boo
     Exclude,
     Select,
     Descend,
-    Skip
+    Skip,
   };
 
   /// @brief A scroller's scroll anchoring: it keeps an element in its scrollport (the anchor node) where it

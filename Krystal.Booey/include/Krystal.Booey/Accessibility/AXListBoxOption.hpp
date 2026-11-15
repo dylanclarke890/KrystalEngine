@@ -51,11 +51,14 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override;
+
     void AddChildren() noexcept override
     {
       _childrenInitialized = true;
     }
+
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
       return false;
@@ -75,6 +78,7 @@ namespace krys::boo
     {
       return AXRole::ListBoxOption;
     }
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override;
 
     KRYS_NODISCARD html::HTMLSelectElement *ListBoxOptionParentNode() const noexcept;

@@ -644,7 +644,7 @@ namespace krys::boo::xml
       StandaloneUnspecified = -2,
       NoXMlDeclaration,
       StandaloneNo,
-      StandaloneYes
+      StandaloneYes,
     };
   }
 
@@ -1016,5 +1016,4 @@ namespace krys::boo::xml
     // No error if the chunk is well formed or it is not but we have no error.
     return Context()->wellFormed || !xmlCtxtGetLastError(Context());
   }
-
 }

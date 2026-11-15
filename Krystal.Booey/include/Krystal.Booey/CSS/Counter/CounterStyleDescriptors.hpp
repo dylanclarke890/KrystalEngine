@@ -70,7 +70,7 @@ namespace krys::boo::css
     TraditionalChineseInformal,
     TraditionalChineseFormal,
     EthiopicNumeric,
-    Extends
+    Extends,
   };
 
   enum class CounterStyleSpeakAs : uint8
@@ -115,7 +115,7 @@ namespace krys::boo::css
     Fallback = 1 << 6,
     Symbols = 1 << 7,
     AdditiveSymbols = 1 << 8,
-    SpeakAs = 1 << 9
+    SpeakAs = 1 << 9,
   };
 }
 

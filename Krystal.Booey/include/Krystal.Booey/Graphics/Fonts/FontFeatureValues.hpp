@@ -48,7 +48,7 @@ namespace krys::boo
     CharacterVariant,
     Swash,
     Ornaments,
-    Annotation
+    Annotation,
   };
 
   /// @brief The named feature values defined by `@font-feature-values` for a font family.

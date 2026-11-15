@@ -80,10 +80,12 @@ namespace krys::boo
     KRYS_NODISCARD RenderMultiColumnSet *FirstMultiColumnSet() const noexcept;
     KRYS_NODISCARD RenderMultiColumnSet *LastMultiColumnSet() const noexcept;
     KRYS_NODISCARD RenderBox *FirstColumnSetOrSpanner() const noexcept;
+
     KRYS_NODISCARD bool HasColumnSpanner() const noexcept
     {
       return !_spannerMap.empty();
     }
+
     KRYS_NODISCARD static RenderBox *NextColumnSetOrSpannerSiblingOf(const RenderBox *child) noexcept;
     KRYS_NODISCARD static RenderBox *PreviousColumnSetOrSpannerSiblingOf(const RenderBox *child) noexcept;
 
@@ -96,30 +98,37 @@ namespace krys::boo
     {
       return _columnCount;
     }
+
     KRYS_NODISCARD LayoutUnit ColumnWidth() const noexcept
     {
       return _columnWidth;
     }
+
     KRYS_NODISCARD LayoutUnit ColumnHeightAvailable() const noexcept
     {
       return _columnHeightAvailable;
     }
+
     void SetColumnHeightAvailable(LayoutUnit available) noexcept
     {
       _columnHeightAvailable = available;
     }
+
     KRYS_NODISCARD bool InBalancingPass() const noexcept
     {
       return _inBalancingPass;
     }
+
     void SetInBalancingPass(bool balancing) noexcept
     {
       _inBalancingPass = balancing;
     }
+
     KRYS_NODISCARD bool NeedsHeightsRecalculation() const noexcept
     {
       return _needsHeightsRecalculation;
     }
+
     void SetNeedsHeightsRecalculation(bool recalculate) noexcept
     {
       _needsHeightsRecalculation = recalculate;
@@ -175,6 +184,7 @@ namespace krys::boo
     {
       return u8"RenderMultiColumnFlowThread";
     }
+
     void AddFragmentToThread(RenderFragmentContainer *fragmentContainer) noexcept override;
     void WillBeRemovedFromTree() noexcept override;
     void FragmentedFlowDescendantBoxLaidOut(RenderBox *descendant) noexcept override;

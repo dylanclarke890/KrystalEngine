@@ -34,8 +34,7 @@ namespace krys::boo::tests
     // │ └ a2
     // │   └ a21
     // └ b
-    ResolverFixture fixture {
-      u8R"(<!DOCTYPE html><body id=r><div id=a><div id=a1></div><div id=a2><div id=a21>
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><body id=r><div id=a><div id=a1></div><div id=a2><div id=a21>
       </div></div></div><div id=b></div></body>)"};
     fixture.Document->UpdateStyleIfNeeded();
 

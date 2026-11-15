@@ -37,7 +37,7 @@ namespace krys::boo::css::cq
   enum class ContainsUnknownFeature : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief The prelude of an `@container` rule: an optional container name and a condition.

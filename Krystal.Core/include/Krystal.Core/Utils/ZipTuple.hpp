@@ -21,7 +21,6 @@ namespace krys
       return std::tuple<zip_tuple_at_index_t<I, TupleLikes...>...> {
         zip_tuple_at_index<I>(std::forward<TupleLikes>(tupleLikes)...)...};
     }
-
   } // namespace detail
 
   template <typename Head, typename... Tail>

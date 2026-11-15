@@ -50,36 +50,42 @@ namespace krys::boo
     {
       return _stdX;
     }
+
     bool SetStdDeviationX(float stdX) noexcept;
 
     KRYS_NODISCARD float StdDeviationY() const noexcept
     {
       return _stdY;
     }
+
     bool SetStdDeviationY(float stdY) noexcept;
 
     KRYS_NODISCARD float Dx() const noexcept
     {
       return _dx;
     }
+
     bool SetDx(float dx) noexcept;
 
     KRYS_NODISCARD float Dy() const noexcept
     {
       return _dy;
     }
+
     bool SetDy(float dy) noexcept;
 
     KRYS_NODISCARD const Color &ShadowColor() const noexcept
     {
       return _shadowColor;
     }
+
     bool SetShadowColor(const Color &shadowColor) noexcept;
 
     KRYS_NODISCARD float ShadowOpacity() const noexcept
     {
       return _shadowOpacity;
     }
+
     bool SetShadowOpacity(float shadowOpacity) noexcept;
 
     /// @brief How far a shadow at `offset`, blurred by `stdDeviation`, spreads past each edge.

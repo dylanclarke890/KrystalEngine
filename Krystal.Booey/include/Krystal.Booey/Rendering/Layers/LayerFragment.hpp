@@ -70,10 +70,12 @@ namespace krys::boo
       {
         return BackgroundRect;
       }
+
       KRYS_NODISCARD ClipRect DirtyBackgroundRect() const noexcept
       {
         return Intersection(PaintDirtyRect, BackgroundRect);
       }
+
       KRYS_NODISCARD ClipRect DirtyForegroundRect() const noexcept
       {
         return Intersection(PaintDirtyRect, ForegroundRect);
@@ -140,10 +142,12 @@ namespace krys::boo
     {
       return FragmentRects.GetBackgroundRect();
     }
+
     KRYS_NODISCARD ClipRect DirtyBackgroundRect() const noexcept
     {
       return FragmentRects.DirtyBackgroundRect();
     }
+
     KRYS_NODISCARD ClipRect DirtyForegroundRect() const noexcept
     {
       return FragmentRects.DirtyForegroundRect();
@@ -164,6 +168,7 @@ namespace krys::boo
     {
       FragmentRects.Intersect(rect);
     }
+
     void Intersect(const ClipRect &clipRect) noexcept
     {
       FragmentRects.Intersect(clipRect);

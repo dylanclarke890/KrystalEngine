@@ -58,18 +58,22 @@ namespace krys::boo::style
     {
       return krys::HoldsAlternative<css::keywords::Baseline>(_value);
     }
+
     KRYS_NODISCARD bool IsSub() const noexcept
     {
       return krys::HoldsAlternative<css::keywords::Sub>(_value);
     }
+
     KRYS_NODISCARD bool IsSuper() const noexcept
     {
       return krys::HoldsAlternative<css::keywords::Super>(_value);
     }
+
     KRYS_NODISCARD bool IsLength() const noexcept
     {
       return krys::HoldsAlternative<Length>(_value);
     }
+
     KRYS_NODISCARD Maybe<Length> TryLength() const noexcept
     {
       return IsLength() ? Maybe(std::get<Length>(_value)) : std::nullopt;

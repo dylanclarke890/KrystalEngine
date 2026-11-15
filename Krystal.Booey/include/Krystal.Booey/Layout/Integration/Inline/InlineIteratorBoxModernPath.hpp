@@ -46,7 +46,7 @@ namespace krys::boo::inline_iterator
   enum class TextRunMode : bool
   {
     Painting,
-    Editing
+    Editing,
   };
 
   /// @brief A position in a block container's display boxes, with the traversals the box iterators are built
@@ -60,11 +60,13 @@ namespace krys::boo::inline_iterator
   public:
     /// @brief An iterator at the end, with no content.
     BoxModernPath() noexcept = default;
+
     explicit BoxModernPath(const layout_integration::InlineContent &inlineContent) noexcept
         : _inlineContent(CreateWeakPtr(&inlineContent))
     {
       SetAtEnd();
     }
+
     BoxModernPath(const layout_integration::InlineContent &inlineContent, size_t startIndex) noexcept
         : _inlineContent(CreateWeakPtr(&inlineContent)), _boxIndex(startIndex)
     {
@@ -74,19 +76,23 @@ namespace krys::boo::inline_iterator
     {
       return GetBox().IsTextOrSoftLineBreak();
     }
+
     KRYS_NODISCARD bool IsInlineBox() const noexcept
     {
       return GetBox().IsInlineBox();
     }
+
     KRYS_NODISCARD bool IsRootInlineBox() const noexcept
     {
       return GetBox().IsRootInlineBox();
     }
+
     // Blocks-in-inline.
     KRYS_NODISCARD bool IsBlockLevelBox() const noexcept
     {
       return GetBox().IsBlockLevelBox();
     }
+
     KRYS_NODISCARD bool IsAtomicInlineBox() const noexcept
     {
       return GetBox().IsAtomicInlineBox();
@@ -101,10 +107,12 @@ namespace krys::boo::inline_iterator
     {
       return GetBox().IsHorizontal();
     }
+
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept
     {
       return GetBox().GetWritingMode();
     }
+
     KRYS_NODISCARD bool IsLineBreak() const noexcept
     {
       return GetBox().IsLineBreak();
@@ -114,6 +122,7 @@ namespace krys::boo::inline_iterator
     {
       return IsText() ? Start() : 0;
     }
+
     KRYS_NODISCARD uint32 MaximumCaretOffset() const noexcept
     {
       return IsText() ? End() : 1;
@@ -128,22 +137,27 @@ namespace krys::boo::inline_iterator
     {
       return GetBox().GetText().HasHyphen();
     }
+
     KRYS_NODISCARD utf8_stringview OriginalText() const noexcept
     {
       return GetBox().GetText().OriginalContent();
     }
+
     KRYS_NODISCARD uint32 Start() const noexcept
     {
       return static_cast<uint32>(GetBox().GetText().Start());
     }
+
     KRYS_NODISCARD uint32 End() const noexcept
     {
       return static_cast<uint32>(GetBox().GetText().End());
     }
+
     KRYS_NODISCARD uint32 Length() const noexcept
     {
       return static_cast<uint32>(GetBox().GetText().Length());
     }
+
     KRYS_NODISCARD size_t LineIndex() const noexcept
     {
       return GetBox().LineIndex();
@@ -157,6 +171,7 @@ namespace krys::boo::inline_iterator
     {
       return *GetBox().LayoutBox().RendererForIntegration();
     }
+
     KRYS_NODISCARD bool HasRenderer() const noexcept
     {
       return GetBox().LayoutBox().RendererForIntegration();
@@ -332,6 +347,7 @@ namespace krys::boo::inline_iterator
     {
       return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
     }
+
     KRYS_NODISCARD bool IsFirstFormattedLine() const noexcept
     {
       return GetBox().IsFirstFormattedLine();
@@ -351,14 +367,17 @@ namespace krys::boo::inline_iterator
     {
       return !_inlineContent || _boxIndex == Boxes().size();
     }
+
     KRYS_NODISCARD const inline_display::Box &GetBox() const noexcept
     {
       return Boxes()[_boxIndex];
     }
+
     KRYS_NODISCARD const layout_integration::InlineContent &GetInlineContent() const noexcept
     {
       return *_inlineContent;
     }
+
     KRYS_NODISCARD size_t BoxIndex() const noexcept
     {
       return _boxIndex;
@@ -435,10 +454,12 @@ namespace krys::boo::inline_iterator
     {
       return _inlineContent->DisplayContent().BoxList;
     }
+
     KRYS_NODISCARD const inline_display::Line &GetLine() const noexcept
     {
       return _inlineContent->LineForBox(GetBox());
     }
+
     KRYS_NODISCARD const RenderText &GetRenderText() const noexcept;
   };
 }

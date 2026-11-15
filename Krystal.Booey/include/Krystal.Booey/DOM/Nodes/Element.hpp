@@ -129,7 +129,7 @@ namespace krys::boo::dom
     Failed,
     Uncustomized,
     Precustomized,
-    Custom
+    Custom,
   };
 
   /// @brief The state of a button's `command` attribute: the command it sends its `commandfor` element.
@@ -147,7 +147,7 @@ namespace krys::boo::dom
 
     ShowModal,
     Close,
-    RequestClose
+    RequestClose,
   };
 
   /// @see https://dom.spec.whatwg.org/#insert-adjacent
@@ -156,7 +156,7 @@ namespace krys::boo::dom
     BeforeBegin,
     AfterBegin,
     BeforeEnd,
-    AfterEnd
+    AfterEnd,
   };
 }
 
@@ -939,7 +939,7 @@ namespace krys::boo::dom
     {
       Normal,
       RenderedOnly,
-      Editability
+      Editability,
     };
 
     using Node::ComputedStyle;
@@ -1093,6 +1093,7 @@ namespace krys::boo::dom
     virtual void DidBlur() noexcept
     {
     }
+
     /// @brief Shows that the element is focused: places a caret at the start of an editing host (unless the
     /// selection is already in it), and scrolls the element (or the caret) into view.
     virtual void UpdateFocusAppearance(SelectionRestorationMode restorationMode,
@@ -1366,13 +1367,13 @@ namespace krys::boo::dom
     enum class EventIsDispatched : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class EventIsDefaultPrevented : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     struct DispatchMouseEventResult

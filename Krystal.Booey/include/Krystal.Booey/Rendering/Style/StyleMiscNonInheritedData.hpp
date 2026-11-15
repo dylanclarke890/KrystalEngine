@@ -56,6 +56,7 @@ namespace krys::boo
   class StyleFlexibleBoxData;
   class StyleMultiColData;
   class StyleTransformData;
+
   class StyleMiscNonInheritedData : public RefCounted<StyleMiscNonInheritedData>
   {
   public:
@@ -63,6 +64,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleMiscNonInheritedData);
     }
+
     KRYS_NODISCARD Ref<StyleMiscNonInheritedData> Copy() const noexcept;
     ~StyleMiscNonInheritedData() noexcept;
 

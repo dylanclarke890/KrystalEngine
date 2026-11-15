@@ -36,10 +36,12 @@ namespace krys::boo
   {
   public:
     KRYS_NODISCARD static Ref<SVGRenderStyle> CreateDefaultStyle() noexcept;
+
     KRYS_NODISCARD static Ref<SVGRenderStyle> Create() noexcept
     {
       return AdoptRef(*new SVGRenderStyle);
     }
+
     KRYS_NODISCARD Ref<SVGRenderStyle> Copy() const noexcept;
     ~SVGRenderStyle() noexcept;
 
@@ -94,8 +96,9 @@ namespace krys::boo
 
     enum CreateDefaultType
     {
-      CreateDefault
+      CreateDefault,
     };
+
     SVGRenderStyle(CreateDefaultType) noexcept; // Used to create the default style.
 
     void SetBitDefaults() noexcept;

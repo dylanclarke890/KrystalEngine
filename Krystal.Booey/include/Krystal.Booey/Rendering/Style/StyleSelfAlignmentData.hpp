@@ -54,10 +54,12 @@ namespace krys::boo
     {
       _position = ToUnderlying(position);
     }
+
     void SetPositionType(ItemPositionType positionType) noexcept
     {
       _positionType = ToUnderlying(positionType);
     }
+
     void SetOverflow(OverflowAlignment overflow) noexcept
     {
       _overflow = ToUnderlying(overflow);
@@ -67,10 +69,12 @@ namespace krys::boo
     {
       return static_cast<ItemPosition>(_position);
     }
+
     KRYS_NODISCARD ItemPositionType PositionType() const noexcept
     {
       return static_cast<ItemPositionType>(_positionType);
     }
+
     KRYS_NODISCARD OverflowAlignment Overflow() const noexcept
     {
       return static_cast<OverflowAlignment>(_overflow);

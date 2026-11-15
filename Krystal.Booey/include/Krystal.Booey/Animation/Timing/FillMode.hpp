@@ -12,6 +12,6 @@ namespace krys::boo
     Forwards,
     Backwards,
     Both,
-    Auto
+    Auto,
   };
 }

@@ -73,7 +73,7 @@ namespace krys::boo::style
     enum class UpdateLayout : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     /// @brief Extract a css::Value for the specified property.

@@ -45,6 +45,7 @@ namespace krys::boo::svg
     {
       return _in1->CurrentValue();
     }
+
     KRYS_NODISCARD SVGAnimatedString &In1Animated() noexcept
     {
       return *_in1;
@@ -69,6 +70,7 @@ namespace krys::boo::svg
     {
       return {dom::DOMStringAtom(In1())};
     }
+
     KRYS_NODISCARD RefPtr<FilterEffect>
       CreateFilterEffect(const FilterEffectVector &inputs,
                          const GraphicsContext &destinationContext) const noexcept final;

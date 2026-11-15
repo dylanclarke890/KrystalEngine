@@ -42,6 +42,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const Circle &) const noexcept = default;
   };
+
   using CircleFunction = css::FunctionNotation<css::ValueId::Circle, Circle>;
 
   template <size_t I>

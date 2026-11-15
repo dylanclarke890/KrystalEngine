@@ -37,7 +37,7 @@ namespace krys::boo::html
   class DateTimeSymbolicFieldElement : public DateTimeFieldElement, public TypeAheadDataSource
   {
   private:
-    static constexpr int InvalidIndex = -1;
+    constexpr static int InvalidIndex = -1;
 
     const List<utf8_string> _symbols;
     int _selectedIndex {InvalidIndex};

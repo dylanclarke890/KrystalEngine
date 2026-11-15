@@ -59,22 +59,27 @@ namespace krys::boo
     {
       return Style() > BorderStyle::Hidden ? _width : 0_lu;
     }
+
     KRYS_NODISCARD BorderStyle Style() const noexcept
     {
       return static_cast<BorderStyle>(_style);
     }
+
     KRYS_NODISCARD bool Exists() const noexcept
     {
       return Precedence() != BorderPrecedence::Off;
     }
+
     KRYS_NODISCARD const Color &GetColor() const noexcept
     {
       return _color;
     }
+
     KRYS_NODISCARD bool IsTransparent() const noexcept
     {
       return _transparent;
     }
+
     KRYS_NODISCARD BorderPrecedence Precedence() const noexcept
     {
       return static_cast<BorderPrecedence>(_precedence);

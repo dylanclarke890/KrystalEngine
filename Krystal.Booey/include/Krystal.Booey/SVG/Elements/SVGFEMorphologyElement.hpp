@@ -80,14 +80,17 @@ namespace krys::boo::svg
     {
       return _in1->CurrentValue();
     }
+
     KRYS_NODISCARD MorphologyOperatorType SVGOperator() const noexcept
     {
       return _svgOperator->CurrentValue<MorphologyOperatorType>();
     }
+
     KRYS_NODISCARD float RadiusX() const noexcept
     {
       return _radiusX->CurrentValue();
     }
+
     KRYS_NODISCARD float RadiusY() const noexcept
     {
       return _radiusY->CurrentValue();
@@ -97,14 +100,17 @@ namespace krys::boo::svg
     {
       return *_in1;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &SVGOperatorAnimated() noexcept
     {
       return *_svgOperator;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &RadiusXAnimated() noexcept
     {
       return *_radiusX;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &RadiusYAnimated() noexcept
     {
       return *_radiusY;
@@ -120,10 +126,12 @@ namespace krys::boo::svg
 
     bool SetFilterEffectAttribute(FilterEffect &effect,
                                   const dom::QualifiedName &attributeName) noexcept final;
+
     KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
       return {dom::DOMStringAtom(In1())};
     }
+
     KRYS_NODISCARD bool IsIdentity() const noexcept final;
     KRYS_NODISCARD IntOutsets Outsets(const FloatRect &targetBoundingBox,
                                       SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept final;

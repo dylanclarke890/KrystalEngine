@@ -37,13 +37,13 @@ namespace krys::boo
   enum class SendCallbackPolicy : bool
   {
     SendCallbacks,
-    DoNotSendCallbacks
+    DoNotSendCallbacks,
   };
 
   enum class DataBufferingPolicy : bool
   {
     BufferData,
-    DoNotBufferData
+    DoNotBufferData,
   };
 
   enum class CachingPolicy : uint8
@@ -56,7 +56,7 @@ namespace krys::boo
   enum class ContentSecurityPolicyImposition : bool
   {
     SkipPolicyCheck,
-    DoPolicyCheck
+    DoPolicyCheck,
   };
 
   /// @brief How a resource is loaded: its fetch options and the loader's policies.

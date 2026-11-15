@@ -46,6 +46,7 @@ namespace krys::boo
     KRYS_NODISCARD PasteboardCustomData TakeCustomData() noexcept;
 
     KRYS_NODISCARD bool HasNonDefaultData() const noexcept;
+
     KRYS_NODISCARD bool IsStatic() const noexcept final
     {
       return true;
@@ -53,10 +54,12 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasData() noexcept final;
     KRYS_NODISCARD List<utf8_string> TypesSafeForBindings(utf8_stringview origin) noexcept final;
+
     KRYS_NODISCARD utf8_string ReadOrigin() noexcept final
     {
       return {};
     }
+
     KRYS_NODISCARD utf8_string ReadString(utf8_stringview type) noexcept final;
     KRYS_NODISCARD Maybe<utf8_string> ReadStringInCustomData(utf8_stringview type) noexcept final;
 
@@ -70,10 +73,12 @@ namespace krys::boo
               PlainTextURLReadingPolicy = PlainTextURLReadingPolicy::AllowURL) noexcept final
     {
     }
+
     void Read(PasteboardWebContentReader &,
               WebContentReadingPolicy = WebContentReadingPolicy::AnyType) noexcept final
     {
     }
+
     using Pasteboard::Read;
 
     void Write(const PasteboardURL &url) noexcept final;
@@ -94,6 +99,7 @@ namespace krys::boo
     {
       return _fileContentState;
     }
+
     KRYS_NODISCARD bool CanSmartReplaceContents() noexcept final
     {
       return false;

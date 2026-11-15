@@ -60,10 +60,12 @@ namespace krys::boo::html
     /// @brief Where the button was clicked, as `"x,y"`.
     KRYS_NODISCARD Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept final;
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
+
     KRYS_NODISCARD bool SupportsValidationForBindings() const noexcept
     {
       return false;
     }
+
     void HandleActivationBehavior(dom::Event &event) noexcept final;
     KRYS_NODISCARD bool ShouldRespectHeightAndWidthAttributes() noexcept final;
     KRYS_NODISCARD bool CanBeSuccessfulSubmitButton() noexcept final;

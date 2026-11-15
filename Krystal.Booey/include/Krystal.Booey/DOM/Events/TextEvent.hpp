@@ -97,38 +97,47 @@ namespace krys::boo::dom
     {
       return _data;
     }
+
     KRYS_NODISCARD bool IsLineBreak() const noexcept
     {
       return _inputType == TextEventInputType::LineBreak;
     }
+
     KRYS_NODISCARD bool IsComposition() const noexcept
     {
       return _inputType == TextEventInputType::Composition;
     }
+
     KRYS_NODISCARD bool IsBackTab() const noexcept
     {
       return _inputType == TextEventInputType::BackTab;
     }
+
     KRYS_NODISCARD bool IsPaste() const noexcept
     {
       return _inputType == TextEventInputType::Paste;
     }
+
     KRYS_NODISCARD bool IsDrop() const noexcept
     {
       return _inputType == TextEventInputType::Drop;
     }
+
     KRYS_NODISCARD bool IsDictation() const noexcept
     {
       return _inputType == TextEventInputType::Dictation;
     }
+
     KRYS_NODISCARD bool IsAutocompletion() const noexcept
     {
       return _inputType == TextEventInputType::Autocompletion;
     }
+
     KRYS_NODISCARD bool IsKeyboard() const noexcept
     {
       return _inputType == TextEventInputType::Keyboard;
     }
+
     KRYS_NODISCARD bool IsRemoveBackground() const noexcept
     {
       return _inputType == TextEventInputType::RemoveBackground;
@@ -138,10 +147,12 @@ namespace krys::boo::dom
     {
       return _shouldSmartReplace;
     }
+
     KRYS_NODISCARD bool ShouldMatchStyle() const noexcept
     {
       return _shouldMatchStyle;
     }
+
     KRYS_NODISCARD DocumentFragment *PastingFragment() const noexcept;
   };
 }

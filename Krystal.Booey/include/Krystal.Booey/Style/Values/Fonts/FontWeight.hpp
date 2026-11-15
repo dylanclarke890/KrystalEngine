@@ -41,9 +41,11 @@ namespace krys::boo::style
     FontWeight(css::keywords::Normal) noexcept : _platform {NormalWeightValue()}
     {
     }
+
     FontWeight(css::keywords::Bold) noexcept : _platform {BoldWeightValue()}
     {
     }
+
     FontWeight(Number number) noexcept
         : _platform {FontSelectionValue::ClampFloat(static_cast<float>(number.Value))}
     {
@@ -57,6 +59,7 @@ namespace krys::boo::style
     {
       return _platform == NormalWeightValue();
     }
+
     KRYS_NODISCARD bool IsBold() const noexcept
     {
       return _platform == BoldWeightValue();

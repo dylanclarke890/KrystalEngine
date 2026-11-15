@@ -59,18 +59,22 @@ namespace krys::boo
     {
       return _x2 < _x1;
     }
+
     KRYS_NODISCARD constexpr T X1() const noexcept
     {
       return IsUndefined() ? 0 : _x1;
     }
+
     KRYS_NODISCARD constexpr T X2() const noexcept
     {
       return IsUndefined() ? 0 : _x2;
     }
+
     KRYS_NODISCARD constexpr T Width() const noexcept
     {
       return IsUndefined() ? 0 : _x2 - _x1;
     }
+
     KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
     {
       return IsUndefined() ? true : _x1 == _x2;

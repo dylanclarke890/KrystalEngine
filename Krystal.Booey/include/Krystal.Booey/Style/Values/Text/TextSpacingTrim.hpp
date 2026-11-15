@@ -38,10 +38,12 @@ namespace krys::boo::style
         : Value {boo::TextSpacingTrim::TrimType::SpaceAll}
     {
     }
+
     constexpr TextSpacingTrim(css::keywords::TrimAll) noexcept
         : Value {boo::TextSpacingTrim::TrimType::TrimAll}
     {
     }
+
     constexpr TextSpacingTrim(css::keywords::Auto) noexcept : Value {boo::TextSpacingTrim::TrimType::Auto}
     {
     }
@@ -49,6 +51,7 @@ namespace krys::boo::style
     constexpr TextSpacingTrim(boo::TextSpacingTrim platform) noexcept : Value {platform.Type()}
     {
     }
+
     constexpr TextSpacingTrim(boo::TextSpacingTrim::TrimType platformType) noexcept : Value {platformType}
     {
     }
@@ -62,6 +65,7 @@ namespace krys::boo::style
 
     boo::TextSpacingTrim::TrimType Value;
   };
+
   DEFINE_TYPE_WRAPPER_GET(TextSpacingTrim, Value);
 }
 

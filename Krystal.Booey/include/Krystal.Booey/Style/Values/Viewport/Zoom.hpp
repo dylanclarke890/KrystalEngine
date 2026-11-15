@@ -42,18 +42,23 @@ namespace krys::boo::style
     constexpr Zoom(Representation value) noexcept : Value {value}
     {
     }
+
     constexpr Zoom(Number number) noexcept : Value {number}
     {
     }
+
     constexpr Zoom(Percentage percentage) noexcept : Value {percentage}
     {
     }
+
     constexpr Zoom(typename Number::ResolvedValueType value) noexcept : Value {value}
     {
     }
+
     constexpr Zoom(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept : Value {literal}
     {
     }
+
     constexpr Zoom(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept : Value {literal}
     {
     }
@@ -64,6 +69,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD constexpr bool operator==(const Zoom &) const noexcept = default;
+
     KRYS_NODISCARD constexpr bool operator==(typename Number::ResolvedValueType other) const noexcept
     {
       return Value == other;

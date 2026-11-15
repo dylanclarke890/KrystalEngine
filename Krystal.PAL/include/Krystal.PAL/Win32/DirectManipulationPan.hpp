@@ -27,7 +27,7 @@ namespace krys::pal::win32
     /// @brief The phase and the content's movement (as `TouchpadPanInput`'s) of each step of a pan.
     using Handler = Func<void(TouchpadPanPhase, float, float)>;
     /// @brief The id of the window's timer that updates the viewport.
-    static constexpr UINT_PTR TimerId = 0x4B504E;
+    constexpr static UINT_PTR TimerId = 0x4B504E;
 
   private:
     /// @brief What the content is doing: nothing yet, following the fingers, or coasting after a flick.

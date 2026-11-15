@@ -54,6 +54,7 @@ namespace krys::boo
     {
       return _logicalLeft;
     }
+
     KRYS_NODISCARD LayoutUnit LogicalWidth() const noexcept
     {
       return _logicalWidth;
@@ -74,10 +75,12 @@ namespace krys::boo
     {
       _overflow = CreateUnique<RenderOverflow>(layoutOverflow, visualOverflow);
     }
+
     KRYS_NODISCARD RenderOverflow *Overflow() const noexcept
     {
       return _overflow.get();
     }
+
     void ClearOverflow() noexcept
     {
       _overflow = nullptr;

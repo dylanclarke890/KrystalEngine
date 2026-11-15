@@ -43,7 +43,7 @@ namespace krys::boo::svg
       SVG_ANGLETYPE_DEG = 2,
       SVG_ANGLETYPE_RAD = 3,
       SVG_ANGLETYPE_GRAD = 4,
-      SVG_ANGLETYPE_TURN = 5
+      SVG_ANGLETYPE_TURN = 5,
     };
 
   private:
@@ -63,6 +63,7 @@ namespace krys::boo::svg
     {
       _valueInSpecifiedUnits = valueInSpecifiedUnits;
     }
+
     KRYS_NODISCARD float ValueInSpecifiedUnits() const noexcept
     {
       return _valueInSpecifiedUnits;

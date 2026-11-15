@@ -46,14 +46,14 @@ namespace krys::boo::css
     enum class AllowEmpty : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum TrackListType : uint8
     {
       GridTemplate,
       GridTemplateNoRepeat,
-      GridAuto
+      GridAuto,
     };
 
     KRYS_NODISCARD bool IsGridBreadthIdent(ValueId) noexcept;

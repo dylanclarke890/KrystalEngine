@@ -42,30 +42,39 @@ namespace krys::boo::style
     FontWidth(css::keywords::Normal) noexcept : _platform {NormalWidthValue()}
     {
     }
+
     FontWidth(css::keywords::UltraCondensed) noexcept : _platform {UltraCondensedWidthValue()}
     {
     }
+
     FontWidth(css::keywords::ExtraCondensed) noexcept : _platform {ExtraCondensedWidthValue()}
     {
     }
+
     FontWidth(css::keywords::Condensed) noexcept : _platform {CondensedWidthValue()}
     {
     }
+
     FontWidth(css::keywords::SemiCondensed) noexcept : _platform {SemiCondensedWidthValue()}
     {
     }
+
     FontWidth(css::keywords::SemiExpanded) noexcept : _platform {SemiExpandedWidthValue()}
     {
     }
+
     FontWidth(css::keywords::Expanded) noexcept : _platform {ExpandedWidthValue()}
     {
     }
+
     FontWidth(css::keywords::ExtraExpanded) noexcept : _platform {ExtraExpandedWidthValue()}
     {
     }
+
     FontWidth(css::keywords::UltraExpanded) noexcept : _platform {UltraExpandedWidthValue()}
     {
     }
+
     FontWidth(Percentage percentage) noexcept
         : _platform {FontSelectionValue::ClampFloat(static_cast<float>(percentage.Value))}
     {

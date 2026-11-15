@@ -42,7 +42,7 @@ namespace krys::boo::layout
   {
     CollapseAll,
     CollapseWhitespaceSequence,
-    Preserve
+    Preserve,
   };
 
   KRYS_NODISCARD constexpr WhiteSpaceCollapseBehavior

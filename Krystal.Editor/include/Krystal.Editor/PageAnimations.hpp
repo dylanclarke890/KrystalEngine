@@ -25,7 +25,7 @@ namespace krys::editor
 
   public:
     /// @brief How long the ball takes to cross its track, in milliseconds.
-    static constexpr double Duration = 2'000;
+    constexpr static double Duration = 2'000;
 
   private:
     WeakPtr<boo::dom::Document> _document;

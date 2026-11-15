@@ -37,20 +37,25 @@ namespace krys::boo::style
     constexpr TextAutospace(css::keywords::Normal) noexcept : _value {boo::TextAutospace::Type::Normal}
     {
     }
+
     constexpr TextAutospace(css::keywords::Auto) noexcept : _value {boo::TextAutospace::Type::Auto}
     {
     }
+
     constexpr TextAutospace(css::keywords::NoAutospace) noexcept : _value {}
     {
     }
+
     constexpr TextAutospace(css::keywords::IdeographAlpha) noexcept
         : _value {boo::TextAutospace::Type::IdeographAlpha}
     {
     }
+
     constexpr TextAutospace(css::keywords::IdeographNumeric) noexcept
         : _value {boo::TextAutospace::Type::IdeographNumeric}
     {
     }
+
     constexpr TextAutospace(css::keywords::IdeographAlpha, css::keywords::IdeographNumeric) noexcept
         : _value {{boo::TextAutospace::Type::IdeographAlpha, boo::TextAutospace::Type::IdeographNumeric}}
     {
@@ -64,18 +69,22 @@ namespace krys::boo::style
     {
       return _value.IsNormal();
     }
+
     KRYS_NODISCARD constexpr bool IsAuto() const noexcept
     {
       return _value.IsAuto();
     }
+
     KRYS_NODISCARD constexpr bool IsNoAutospace() const noexcept
     {
       return _value.IsNoAutospace();
     }
+
     KRYS_NODISCARD constexpr bool HasIdeographAlpha() const noexcept
     {
       return _value.HasIdeographAlpha();
     }
+
     KRYS_NODISCARD constexpr bool HasIdeographNumeric() const noexcept
     {
       return _value.HasIdeographNumeric();

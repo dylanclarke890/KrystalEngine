@@ -110,7 +110,7 @@ namespace krys::boo::style
       Auto,
       Explicit,
       Span,
-      NamedGridArea
+      NamedGridArea,
     };
 
     GridPositionType _type {GridPositionType::Auto};

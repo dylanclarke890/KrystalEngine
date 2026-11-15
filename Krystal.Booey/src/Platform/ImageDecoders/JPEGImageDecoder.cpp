@@ -103,7 +103,7 @@ namespace krys::boo
       DecompressProgressive, // Output progressive pixels
       DecompressSequential,  // Output sequential pixels
       Done,
-      Error
+      Error,
     };
 
     void InitSource(j_decompress_ptr jd);
@@ -418,7 +418,7 @@ namespace krys::boo
                 }
               }
 
-              if (_info.output_scanline == 0xffffff)
+              if (_info.output_scanline == 0xFFFFFF)
               {
                 _info.output_scanline = 0;
               }
@@ -438,7 +438,7 @@ namespace krys::boo
                   // Didn't manage to read any lines - flag so we
                   // don't call jpeg_start_output() multiple times for
                   // the same scan.
-                  _info.output_scanline = 0xffffff;
+                  _info.output_scanline = 0xFFFFFF;
                 }
                 return false; // I/O suspension.
               }
@@ -479,10 +479,12 @@ namespace krys::boo
     {
       return &_info;
     }
+
     KRYS_NODISCARD JSAMPARRAY Samples() const noexcept
     {
       return _samples;
     }
+
     KRYS_NODISCARD JPEGImageDecoder *Decoder() noexcept
     {
       return _decoder;

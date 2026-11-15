@@ -38,7 +38,7 @@
 
 namespace krys::boo::style
 {
-  static constexpr float textDecorationBaseFontSize = 16;
+  constexpr static float textDecorationBaseFontSize = 16;
 
   float TextDecorationThickness::Resolve(const RenderStyle &style) const noexcept
   {

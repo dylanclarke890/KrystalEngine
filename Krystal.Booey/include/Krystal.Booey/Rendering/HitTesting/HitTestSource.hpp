@@ -31,6 +31,6 @@ namespace krys::boo
   enum class HitTestSource : bool
   {
     Script,
-    User
+    User,
   };
 }

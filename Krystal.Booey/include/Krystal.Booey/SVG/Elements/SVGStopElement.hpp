@@ -45,6 +45,7 @@ namespace krys::boo::svg
     {
       return _offset->CurrentValue();
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &OffsetAnimated() noexcept
     {
       return *_offset;

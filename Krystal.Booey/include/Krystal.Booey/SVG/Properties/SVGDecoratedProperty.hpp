@@ -42,6 +42,7 @@ namespace krys::boo::svg
     virtual ~SVGDecoratedProperty() noexcept = default;
 
     virtual void SetValueInternal(const TDecoration &) noexcept = 0;
+
     virtual bool SetValue(const TDecoration &value) noexcept
     {
       SetValueInternal(value);

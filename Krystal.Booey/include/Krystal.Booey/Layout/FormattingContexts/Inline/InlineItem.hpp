@@ -53,7 +53,7 @@ namespace krys::boo::layout
       InlineBoxEnd,
       Float,
       Block,
-      Opaque
+      Opaque,
     };
 
   private:
@@ -79,7 +79,7 @@ namespace krys::boo::layout
     {
       Undefined,
       Whitespace,
-      NonWhitespace
+      NonWhitespace,
     };
 
     TextItemType _textItemType : 2 {TextItemType::Undefined};
@@ -97,19 +97,24 @@ namespace krys::boo::layout
     {
       return _type;
     }
-    static constexpr UBiDiLevel OpaqueBidiLevel = 0xff;
+
+    constexpr static UBiDiLevel OpaqueBidiLevel = 0xFF;
+
     KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
     {
       return _bidiLevel;
     }
+
     KRYS_NODISCARD const Box &LayoutBox() const noexcept
     {
       return *_layoutBox;
     }
+
     KRYS_NODISCARD const RenderStyle &Style() const noexcept
     {
       return LayoutBox().Style();
     }
+
     KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept
     {
       return LayoutBox().FirstLineStyle();
@@ -119,46 +124,57 @@ namespace krys::boo::layout
     {
       return GetType() == Type::Text;
     }
+
     KRYS_NODISCARD bool IsAtomicInlineBox() const noexcept
     {
       return GetType() == Type::AtomicInlineBox;
     }
+
     KRYS_NODISCARD bool IsFloat() const noexcept
     {
       return GetType() == Type::Float;
     }
+
     KRYS_NODISCARD bool IsLineBreak() const noexcept
     {
       return IsSoftLineBreak() || IsHardLineBreak();
     }
+
     KRYS_NODISCARD bool IsWordBreakOpportunity() const noexcept
     {
       return GetType() == Type::WordBreakOpportunity;
     }
+
     KRYS_NODISCARD bool IsSoftLineBreak() const noexcept
     {
       return GetType() == Type::SoftLineBreak;
     }
+
     KRYS_NODISCARD bool IsHardLineBreak() const noexcept
     {
       return GetType() == Type::HardLineBreak;
     }
+
     KRYS_NODISCARD bool IsInlineBoxStart() const noexcept
     {
       return GetType() == Type::InlineBoxStart;
     }
+
     KRYS_NODISCARD bool IsInlineBoxEnd() const noexcept
     {
       return GetType() == Type::InlineBoxEnd;
     }
+
     KRYS_NODISCARD bool IsInlineBoxStartOrEnd() const noexcept
     {
       return IsInlineBoxStart() || IsInlineBoxEnd();
     }
+
     KRYS_NODISCARD bool IsOpaque() const noexcept
     {
       return GetType() == Type::Opaque;
     }
+
     KRYS_NODISCARD bool IsBlock() const noexcept
     {
       return GetType() == Type::Block;
@@ -169,6 +185,7 @@ namespace krys::boo::layout
     {
       _bidiLevel = bidiLevel;
     }
+
     void SetWidth(InlineLayoutUnit width) noexcept
     {
       _width = width;

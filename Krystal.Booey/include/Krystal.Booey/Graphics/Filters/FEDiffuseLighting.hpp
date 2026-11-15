@@ -44,6 +44,7 @@ namespace krys::boo
     {
       return _diffuseConstant;
     }
+
     bool SetDiffuseConstant(float diffuseConstant) noexcept;
 
     TextStream &ExternalRepresentation(TextStream &ts,

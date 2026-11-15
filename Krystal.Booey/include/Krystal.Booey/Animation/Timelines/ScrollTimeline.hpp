@@ -95,6 +95,7 @@ namespace krys::boo
     {
       return _source;
     }
+
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-scrolltimeline-source
     KRYS_NODISCARD virtual RefPtr<dom::Element> BindingsSource() const noexcept;
     KRYS_NODISCARD virtual RefPtr<dom::Element> Source() const noexcept;
@@ -105,6 +106,7 @@ namespace krys::boo
     {
       return _axis;
     }
+
     void SetAxis(ScrollAxis axis) noexcept
     {
       _axis = axis;
@@ -114,6 +116,7 @@ namespace krys::boo
     {
       return _name;
     }
+
     void SetName(const css::CSSOMStringAtom &name) noexcept
     {
       _name = name;
@@ -133,11 +136,14 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<WebAnimationTime>
       CurrentTime(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) noexcept override;
     KRYS_NODISCARD style::SingleAnimationRange DefaultRange() const noexcept override;
+
     KRYS_NODISCARD const WeakPtr<dom::Element> &TimelineScopeDeclaredElement() const noexcept
     {
       return _timelineScopeElement;
     }
+
     void SetTimelineScopeElement(const dom::Element &element) noexcept;
+
     void ClearTimelineScopeDeclaredElement() noexcept
     {
       _timelineScopeElement = nullptr;

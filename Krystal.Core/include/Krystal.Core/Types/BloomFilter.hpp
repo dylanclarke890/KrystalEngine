@@ -16,11 +16,11 @@ namespace krys
   class BloomFilter
   {
   public:
-    static constexpr size_t TableSize = size_t {1} << TKeyBits;
+    constexpr static size_t TableSize = size_t {1} << TKeyBits;
 
   private:
-    static constexpr uint32 BitsPerPosition = 8 * sizeof(uint32);
-    static constexpr uint32 KeyMask = (uint32 {1} << TKeyBits) - 1;
+    constexpr static uint32 BitsPerPosition = 8 * sizeof(uint32);
+    constexpr static uint32 KeyMask = (uint32 {1} << TKeyBits) - 1;
 
     std::array<uint32, TableSize / BitsPerPosition> _bitArray {};
 
@@ -89,10 +89,10 @@ namespace krys
   class CountingBloomFilter
   {
   public:
-    static constexpr size_t TableSize = size_t {1} << TKeyBits;
+    constexpr static size_t TableSize = size_t {1} << TKeyBits;
 
   private:
-    static constexpr uint32 KeyMask = (uint32 {1} << TKeyBits) - 1;
+    constexpr static uint32 KeyMask = (uint32 {1} << TKeyBits) - 1;
 
     std::array<uint8, TableSize> _buckets {};
 

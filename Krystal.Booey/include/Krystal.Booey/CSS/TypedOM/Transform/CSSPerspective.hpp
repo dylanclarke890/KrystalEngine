@@ -57,6 +57,7 @@ namespace krys::boo::css
     {
       return _length;
     }
+
     /// @return A `TypeError` if @p length isn't a length or `none`.
     dom::ExceptionOr<void> SetLength(CSSPerspectiveValue length) noexcept;
 
@@ -73,6 +74,7 @@ namespace krys::boo::css
     {
       return CSSTransformType::Perspective;
     }
+
     KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
 
   private:

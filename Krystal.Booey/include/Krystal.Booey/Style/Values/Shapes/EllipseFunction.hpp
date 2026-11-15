@@ -42,6 +42,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const Ellipse &) const noexcept = default;
   };
+
   using EllipseFunction = css::FunctionNotation<css::ValueId::Ellipse, Ellipse>;
 
   template <size_t I>

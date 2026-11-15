@@ -49,10 +49,10 @@ namespace krys::boo
   class Decimal
   {
   public:
-    static constexpr int ExponentMax = 1'023;
-    static constexpr int ExponentMin = -1'023;
-    static constexpr int Precision = 18;
-    static constexpr uint64 MaxCoefficient = 0xD'E0'B6'B3'A7'63'FF'FFull; // 999999999999999999 == 18 9's
+    constexpr static int ExponentMax = 1'023;
+    constexpr static int ExponentMin = -1'023;
+    constexpr static int Precision = 18;
+    constexpr static uint64 MaxCoefficient = 0xD'E0'B6'B3'A7'63'FF'FFull; // 999999999999999999 == 18 9's
 
     enum Sign
     {
@@ -264,12 +264,12 @@ namespace krys::boo
     }
   };
 
-  inline constexpr Decimal::EncodedData::EncodedData(Sign sign, FormatClass formatClass) noexcept
+  constexpr inline Decimal::EncodedData::EncodedData(Sign sign, FormatClass formatClass) noexcept
       : _coefficient(0), _exponent(0), _formatClass(formatClass), _sign(sign)
   {
   }
 
-  inline constexpr Decimal::EncodedData::EncodedData(Sign sign, int exponent, uint64 coefficient) noexcept
+  constexpr inline Decimal::EncodedData::EncodedData(Sign sign, int exponent, uint64 coefficient) noexcept
       : _formatClass(coefficient ? ClassNormal : ClassZero), _sign(sign)
   {
     if (exponent >= ExponentMin && exponent <= ExponentMax)
@@ -301,13 +301,13 @@ namespace krys::boo
     _exponent = static_cast<int16>(exponent);
   }
 
-  inline constexpr Decimal::Decimal(int32 i32) noexcept
+  constexpr inline Decimal::Decimal(int32 i32) noexcept
       : _data(i32 < 0 ? Negative : Positive, 0,
               i32 < 0 ? static_cast<uint64>(-static_cast<int64>(i32)) : static_cast<uint64>(i32))
   {
   }
 
-  inline constexpr Decimal::Decimal(Sign sign, int exponent, uint64 coefficient) noexcept
+  constexpr inline Decimal::Decimal(Sign sign, int exponent, uint64 coefficient) noexcept
       : _data(sign, exponent, coefficient)
   {
   }
@@ -345,22 +345,22 @@ namespace krys::boo
     return result.IsNegative() ? std::partial_ordering::less : std::partial_ordering::greater;
   }
 
-  inline constexpr Decimal Decimal::Infinity(Sign sign) noexcept
+  constexpr inline Decimal Decimal::Infinity(Sign sign) noexcept
   {
     return Decimal(EncodedData(sign, EncodedData::ClassInfinity));
   }
 
-  inline constexpr Decimal Decimal::NaN() noexcept
+  constexpr inline Decimal Decimal::NaN() noexcept
   {
     return Decimal(EncodedData(Positive, EncodedData::ClassNaN));
   }
 
-  inline constexpr Decimal Decimal::Zero(Sign sign) noexcept
+  constexpr inline Decimal Decimal::Zero(Sign sign) noexcept
   {
     return Decimal(EncodedData(sign, EncodedData::ClassZero));
   }
 
-  inline constexpr Decimal Decimal::DoubleMax() noexcept
+  constexpr inline Decimal Decimal::DoubleMax() noexcept
   {
     return Decimal(EncodedData(Sign::Positive, 292, 17'976'931'348'623'157));
   }

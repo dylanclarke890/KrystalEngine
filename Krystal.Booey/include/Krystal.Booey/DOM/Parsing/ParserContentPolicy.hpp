@@ -35,6 +35,6 @@ namespace krys::boo::dom
     /// @brief `template` elements with a `shadowrootmode` attach declarative shadow roots.
     AllowDeclarativeShadowRoots,
     /// @brief The markup is parsed as HTML even in an XML document.
-    AlwaysParseAsHTML
+    AlwaysParseAsHTML,
   };
 }

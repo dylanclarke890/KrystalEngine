@@ -58,13 +58,13 @@ namespace krys::boo
   {
     GridAxisStart,
     GridAxisEnd,
-    GridAxisCenter
+    GridAxisCenter,
   };
 
   enum class SubgridDidChange : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief The logical heights of a grid's items, kept between layouts for the first row sizing pass.
@@ -95,7 +95,7 @@ namespace krys::boo
     enum class ShouldUpdateGridAreaLogicalSize : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     using AutoPlacementCursor = Pair<uint32, uint32>;
@@ -167,10 +167,12 @@ namespace krys::boo
     {
       return _columnPositions;
     }
+
     KRYS_NODISCARD const List<LayoutUnit> &RowPositions() const noexcept
     {
       return _rowPositions;
     }
+
     KRYS_NODISCARD const List<LayoutUnit> &Positions(style::GridTrackSizingDirection direction) const noexcept
     {
       return direction == style::GridTrackSizingDirection::Columns ? ColumnPositions() : RowPositions();
@@ -181,6 +183,7 @@ namespace krys::boo
     {
       return CurrentGrid().AutoRepeatTracks(direction);
     }
+
     KRYS_NODISCARD uint32
       ExplicitGridStartForDirection(style::GridTrackSizingDirection direction) const noexcept
     {
@@ -222,14 +225,17 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsSubgrid() const noexcept;
     KRYS_NODISCARD bool IsSubgrid(style::GridTrackSizingDirection direction) const noexcept;
+
     KRYS_NODISCARD bool IsSubgridRows() const noexcept
     {
       return IsSubgrid(style::GridTrackSizingDirection::Rows);
     }
+
     KRYS_NODISCARD bool IsSubgridColumns() const noexcept
     {
       return IsSubgrid(style::GridTrackSizingDirection::Columns);
     }
+
     KRYS_NODISCARD bool
       IsSubgridInParentDirection(style::GridTrackSizingDirection parentDirection) const noexcept;
 
@@ -241,10 +247,12 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsMasonry() const noexcept;
     KRYS_NODISCARD bool IsMasonry(style::GridTrackSizingDirection direction) const noexcept;
+
     KRYS_NODISCARD bool AreMasonryRows() const noexcept
     {
       return IsMasonry(style::GridTrackSizingDirection::Rows);
     }
+
     KRYS_NODISCARD bool AreMasonryColumns() const noexcept
     {
       return IsMasonry(style::GridTrackSizingDirection::Columns);
@@ -446,6 +454,7 @@ namespace krys::boo
       return direction == style::GridTrackSizingDirection::Columns ? _offsetBetweenColumns
                                                                    : _offsetBetweenRows;
     }
+
     KRYS_NODISCARD const ContentAlignmentData &
       OffsetBetweenTracks(style::GridTrackSizingDirection direction) const noexcept
     {

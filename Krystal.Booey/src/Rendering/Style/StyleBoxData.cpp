@@ -26,7 +26,6 @@
 
 namespace krys::boo
 {
-
   StyleBoxData::StyleBoxData() noexcept
       : Width(style::ComputedStyle::InitialWidth()), Height(style::ComputedStyle::InitialHeight()),
         MinWidth(style::ComputedStyle::InitialMinWidth()),

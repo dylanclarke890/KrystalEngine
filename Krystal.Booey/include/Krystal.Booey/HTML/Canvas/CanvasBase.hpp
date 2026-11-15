@@ -77,10 +77,12 @@ namespace krys::boo::html
     {
       return static_cast<uint32>(_size.Width());
     }
+
     KRYS_NODISCARD virtual uint32 Height() const noexcept
     {
       return static_cast<uint32>(_size.Height());
     }
+
     KRYS_NODISCARD const IntSize &Size() const noexcept
     {
       return _size;
@@ -91,6 +93,7 @@ namespace krys::boo::html
     /// @brief The image buffer a 2D context draws into, made on the first call; null if the canvas is empty
     /// or too large.
     KRYS_NODISCARD ImageBuffer *Buffer() const noexcept;
+
     KRYS_NODISCARD bool HasCreatedImageBuffer() const noexcept
     {
       return _hasCreatedImageBuffer;

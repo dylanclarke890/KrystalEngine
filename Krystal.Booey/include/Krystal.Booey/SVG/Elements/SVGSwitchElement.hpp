@@ -20,6 +20,7 @@ namespace krys::boo::svg
     {
       return SVGTests::IsValid();
     }
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept final;
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
   };

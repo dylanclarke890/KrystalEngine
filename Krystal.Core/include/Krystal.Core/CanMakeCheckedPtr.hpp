@@ -128,8 +128,10 @@ namespace krys::detail
 
 /// @note KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in the most derived subclass.
 #define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                                      \
+                                                                                                             \
 public:                                                                                                      \
   KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(ClassName)                                                       \
+                                                                                                             \
 private:                                                                                                     \
   using _forceSemicolonAfterKrysOverrideDeleteCheckedPtr = int
 

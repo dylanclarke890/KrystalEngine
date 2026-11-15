@@ -8,7 +8,6 @@
 
 namespace krys::boo::css::tests
 {
-
   TEST_CASE("ParserContext(ParserMode, URL)", "[CSS][Parser][ParserContext]")
   {
     SECTION("Defaults")

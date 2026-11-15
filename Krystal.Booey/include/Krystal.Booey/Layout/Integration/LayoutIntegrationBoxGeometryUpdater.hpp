@@ -114,14 +114,17 @@ namespace krys::boo::layout_integration
     {
       return *_layoutState;
     }
+
     KRYS_NODISCARD const layout::LayoutState &GetLayoutState() const noexcept
     {
       return *_layoutState;
     }
+
     KRYS_NODISCARD const layout::ElementBox &RootLayoutBox() const noexcept
     {
       return *_rootLayoutBox;
     }
+
     KRYS_NODISCARD const RenderBlock &RootRenderer() const noexcept;
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
   };

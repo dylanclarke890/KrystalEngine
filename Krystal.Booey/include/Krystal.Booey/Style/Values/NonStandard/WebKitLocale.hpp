@@ -37,9 +37,11 @@ namespace krys::boo::style
     WebkitLocale(css::keywords::Auto) noexcept : _platform {null}
     {
     }
+
     WebkitLocale(const css::CSSOMStringAtom &value) noexcept : _platform {value}
     {
     }
+
     WebkitLocale(css::CSSOMStringAtom &&value) noexcept : _platform {krys::move(value)}
     {
     }
@@ -48,6 +50,7 @@ namespace krys::boo::style
     {
       return _platform;
     }
+
     KRYS_NODISCARD css::CSSOMStringAtom TakePlatform() noexcept
     {
       return krys::move(_platform);

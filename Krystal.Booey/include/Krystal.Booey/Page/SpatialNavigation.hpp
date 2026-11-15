@@ -41,7 +41,6 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
-
   class LocalFrame;
 
   KRYS_NODISCARD constexpr inline int64 MaxDistance() noexcept
@@ -101,7 +100,7 @@ namespace krys::boo
   {
     None = 0,
     Partial,
-    Full
+    Full,
   };
 
   /// @brief An element that directional focus navigation could move to, with its rect and how it lies from

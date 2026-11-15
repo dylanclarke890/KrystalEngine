@@ -19,7 +19,6 @@
 
 namespace krys::boo::html::tests
 {
-
   TEST_CASE_METHOD(CustomElementFixture, "CustomElementRegistry defines elements",
                    "[HTML][CustomElement][html:valid-custom-element-name]"
                    "[html:dom-customelementregistry-define][html:dom-customelementregistry-get]"
@@ -262,16 +261,19 @@ namespace krys::boo::html::tests
     SECTION("a callback's own changes call back before the methods it calls return")
     {
       Calls.clear();
+
       struct Reenter : dom::EventListenerCallback
       {
         dom::Element *Target {nullptr};
         Log *Calls {nullptr};
+
         void HandleEvent(dom::Event &) noexcept override
         {
           (void)Target->SetAttribute(u8"value", u8"from-listener");
           Calls->push_back(u8"returned");
         }
       };
+
       auto listener = CreateRef<Reenter>();
       listener->Target = &element;
       listener->Calls = &Calls;

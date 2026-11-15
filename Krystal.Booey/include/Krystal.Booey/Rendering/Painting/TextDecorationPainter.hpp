@@ -60,12 +60,14 @@ namespace krys::boo
         Color DecorationColor;
         TextDecorationStyle DecorationStyle {TextDecorationStyle::Solid};
       };
+
       DecorationStyleAndColor Underline;
       DecorationStyleAndColor Overline;
       DecorationStyleAndColor Linethrough;
 
       KRYS_NODISCARD bool operator==(const Styles &other) const noexcept;
     };
+
     struct BackgroundDecorationGeometry
     {
       FloatPoint TextOrigin;
@@ -78,6 +80,7 @@ namespace krys::boo
       float ClippingOffset {0.f};
       WavyStrokeParameters WavyParameters;
     };
+
     struct ForegroundDecorationGeometry
     {
       FloatPoint BoxOrigin;

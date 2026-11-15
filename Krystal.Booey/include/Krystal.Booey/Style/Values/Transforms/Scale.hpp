@@ -44,9 +44,11 @@ namespace krys::boo::style
     Scale(css::keywords::None) noexcept : _value {nullptr}
     {
     }
+
     Scale(Function &&value) noexcept : _value {krys::move(value.Value)}
     {
     }
+
     Scale(Ref<const ScaleTransformFunction> &&value) noexcept : _value {krys::move(value)}
     {
     }
@@ -55,10 +57,12 @@ namespace krys::boo::style
     {
       return _value && !_value->IsIdentity();
     }
+
     KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept
     {
       return !_value || _value->IsRepresentableIn2D();
     }
+
     KRYS_NODISCARD bool Is3DOperation() const noexcept
     {
       return _value && _value->Is3DOperation();
@@ -70,6 +74,7 @@ namespace krys::boo::style
     {
       return !_value;
     }
+
     KRYS_NODISCARD bool IsFunction() const noexcept
     {
       return !!_value;

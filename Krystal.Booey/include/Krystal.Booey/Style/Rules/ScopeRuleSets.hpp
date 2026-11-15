@@ -68,7 +68,7 @@ namespace krys::boo::style
   {
     None,
     SubjectPositionOnly,
-    NonSubjectPosition
+    NonSubjectPosition,
   };
 
   /// @brief The rule sets of a resolver: author, user and the document-dependent user agent rules, and the

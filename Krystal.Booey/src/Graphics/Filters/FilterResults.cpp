@@ -63,7 +63,7 @@ namespace krys::boo
 
   bool FilterResults::CanCacheResult(const FilterImage &result) const noexcept
   {
-    static constexpr size_t maxAllowedMemoryCost = 100u * 1'024u * 1'024u;
+    constexpr static size_t maxAllowedMemoryCost = 100u * 1'024u * 1'024u;
     return MemoryCost() + result.MemoryCost() <= maxAllowedMemoryCost;
   }
 

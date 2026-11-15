@@ -992,6 +992,7 @@ namespace krys::gfx::tests
       StrokeStyle Style;
       int Tolerance;
     };
+
     const Case cases[] = {
       {{2.f, 8.f}, {14.f, 8.f}, {.Width = 3.f, .Cap = LineCap::Butt}, 2},
       {{2.f, 8.f}, {14.f, 8.f}, {.Width = 3.f, .Cap = LineCap::Square}, 2},
@@ -1449,6 +1450,7 @@ namespace krys::gfx::tests
       Pixel OverBlue;
       Pixel OverClear;
     };
+
     const Pixel source {128, 0, 0, 128};
     const Pixel none {0, 0, 0, 0};
     const Pixel opaqueBlue {0, 0, 255, 255};

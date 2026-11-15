@@ -51,6 +51,7 @@ namespace krys::boo
 
   public:
     LayoutRoundedRectRadii() noexcept = default;
+
     LayoutRoundedRectRadii(const LayoutSize &topLeft, const LayoutSize &topRight,
                            const LayoutSize &bottomLeft, const LayoutSize &bottomRight) noexcept
         : _topLeft(topLeft), _topRight(topRight), _bottomLeft(bottomLeft), _bottomRight(bottomRight)
@@ -61,30 +62,37 @@ namespace krys::boo
     {
       _topLeft = size;
     }
+
     void SetTopRight(const LayoutSize &size) noexcept
     {
       _topRight = size;
     }
+
     void SetBottomLeft(const LayoutSize &size) noexcept
     {
       _bottomLeft = size;
     }
+
     void SetBottomRight(const LayoutSize &size) noexcept
     {
       _bottomRight = size;
     }
+
     KRYS_NODISCARD const LayoutSize &TopLeft() const noexcept
     {
       return _topLeft;
     }
+
     KRYS_NODISCARD const LayoutSize &TopRight() const noexcept
     {
       return _topRight;
     }
+
     KRYS_NODISCARD const LayoutSize &BottomLeft() const noexcept
     {
       return _bottomLeft;
     }
+
     KRYS_NODISCARD const LayoutSize &BottomRight() const noexcept
     {
       return _bottomRight;
@@ -100,15 +108,18 @@ namespace krys::boo
     void Scale(float factor) noexcept;
     void Expand(LayoutUnit topWidth, LayoutUnit bottomWidth, LayoutUnit leftWidth,
                 LayoutUnit rightWidth) noexcept;
+
     void Expand(LayoutUnit size) noexcept
     {
       Expand(size, size, size, size);
     }
+
     void Shrink(LayoutUnit topWidth, LayoutUnit bottomWidth, LayoutUnit leftWidth,
                 LayoutUnit rightWidth) noexcept
     {
       Expand(-topWidth, -bottomWidth, -leftWidth, -rightWidth);
     }
+
     void Shrink(LayoutUnit size) noexcept
     {
       Shrink(size, size, size, size);
@@ -125,6 +136,7 @@ namespace krys::boo
       return std::min({_topLeft.MinDimension(), _topRight.MinDimension(), _bottomLeft.MinDimension(),
                        _bottomRight.MinDimension()});
     }
+
     KRYS_NODISCARD LayoutUnit MaximumRadius() const noexcept
     {
       return std::max({_topLeft.MinDimension(), _topRight.MinDimension(), _bottomLeft.MinDimension(),
@@ -154,14 +166,17 @@ namespace krys::boo
     {
       return _rect;
     }
+
     KRYS_NODISCARD const Radii &GetRadii() const noexcept
     {
       return _radii;
     }
+
     KRYS_NODISCARD bool IsRounded() const noexcept
     {
       return !_radii.IsZero();
     }
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _rect.IsEmpty();
@@ -171,10 +186,12 @@ namespace krys::boo
     {
       _rect = rect;
     }
+
     void SetRadii(const Radii &radii) noexcept
     {
       _radii = radii;
     }
+
     void SetRadiiForEdges(const Radii &radii, RectEdges<bool> includeEdges) noexcept
     {
       _radii.SetRadiiForEdges(radii, includeEdges);
@@ -184,19 +201,24 @@ namespace krys::boo
     {
       _rect.Move(size);
     }
+
     void MoveBy(const LayoutPoint &offset) noexcept
     {
       _rect.MoveBy(offset);
     }
+
     void Inflate(LayoutUnit size) noexcept
     {
       _rect.Inflate(size);
     }
+
     void InflateWithRadii(LayoutUnit size) noexcept;
+
     void ExpandRadii(LayoutUnit size) noexcept
     {
       _radii.Expand(size);
     }
+
     void ShrinkRadii(LayoutUnit size) noexcept
     {
       _radii.Shrink(size);

@@ -93,7 +93,7 @@ namespace krys::boo::css
     {
       NoChanges,
       StyleAttributeChanged,
-      PropertyChanged
+      PropertyChanged,
     };
 
     MutableStyleProperties *_propertySet;

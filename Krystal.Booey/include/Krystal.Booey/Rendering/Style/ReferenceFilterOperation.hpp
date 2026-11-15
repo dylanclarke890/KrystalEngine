@@ -60,10 +60,12 @@ namespace krys::boo::style
     {
       return true;
     }
+
     KRYS_NODISCARD bool MovesPixels() const noexcept override
     {
       return true;
     }
+
     // FIXME: This only needs to return true for graphs that include ConvolveMatrix, DisplacementMap,
     // Morphology and possibly Lighting. https://bugs.webkit.org/show_bug.cgi?id=171753
     KRYS_NODISCARD bool ShouldBeRestrictedBySecurityOrigin() const noexcept override
@@ -75,6 +77,7 @@ namespace krys::boo::style
     {
       return _url;
     }
+
     KRYS_NODISCARD const StringAtom &Fragment() const noexcept
     {
       return _fragment;

@@ -52,7 +52,7 @@ namespace krys::boo::css
     /// @brief Indicates that at parse time, an out of range lower or upper value should
     /// clamp instead of invalidating the parse. Out of range values at style building
     /// always clamp.
-    ClampBoth
+    ClampBoth,
   };
 
   // Options to indicate how the primitive should consider its value with regards to zoom.
@@ -64,7 +64,7 @@ namespace krys::boo::css
     Default,
 
     // `Unzoomed` indicates the value held in the primitive has NOT had zoom applied to it.
-    Unzoomed
+    Unzoomed,
   };
 
   /// @brief Representation for `CSS bracketed range notation`. Represents a closed range between (and

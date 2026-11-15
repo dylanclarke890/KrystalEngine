@@ -94,6 +94,7 @@ namespace krys::boo
       {
         return _name;
       }
+
       KRYS_NODISCARD const Kind &GetValue() const noexcept
       {
         return _value;

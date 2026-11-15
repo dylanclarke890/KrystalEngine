@@ -202,7 +202,7 @@ namespace krys::boo::html
       Groups,
       Rows,
       Cols,
-      All
+      All,
     };
 
     enum class CellBorders : uint8
@@ -211,7 +211,7 @@ namespace krys::boo::html
       Inset,
       Solid,
       SolidColsOnly,
-      SolidRowsOnly
+      SolidRowsOnly,
     };
 
     KRYS_NODISCARD CellBorders GetCellBorders() const noexcept;

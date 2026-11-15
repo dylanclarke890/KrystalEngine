@@ -43,6 +43,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleGridItemData);
     }
+
     KRYS_NODISCARD Ref<StyleGridItemData> Copy() const noexcept;
 
     bool operator==(const StyleGridItemData &o) const noexcept

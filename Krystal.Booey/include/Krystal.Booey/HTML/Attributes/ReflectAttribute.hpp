@@ -68,6 +68,7 @@ namespace krys::boo::html
     T Value {};
 
     constexpr ReflectDefault() noexcept = default;
+
     explicit constexpr ReflectDefault(T value) noexcept : Value(value)
     {
     }

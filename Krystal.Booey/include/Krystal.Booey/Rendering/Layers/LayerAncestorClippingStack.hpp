@@ -105,6 +105,7 @@ namespace krys::boo
     {
       return _stack;
     }
+
     KRYS_NODISCARD const List<ClippingStackEntry> &Stack() const noexcept
     {
       return _stack;

@@ -52,6 +52,7 @@ namespace krys::boo::dom
       {
         return !(*this == other);
       }
+
       /// @see https://webidl.spec.whatwg.org/#dfn-iterable
     };
 

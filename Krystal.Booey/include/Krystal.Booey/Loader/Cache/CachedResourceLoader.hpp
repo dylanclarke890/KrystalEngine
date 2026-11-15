@@ -58,7 +58,7 @@ namespace krys::boo
   enum class ImageLoading : uint8
   {
     Immediate,
-    DeferredUntilVisible
+    DeferredUntilVisible,
   };
 
   // The CachedResourceLoader provides a per-context interface to the MemoryCache
@@ -79,7 +79,7 @@ namespace krys::boo
     {
       Use,
       Reload,
-      Load
+      Load,
     };
 
     mutable DocumentResourceMap _documentResources;
@@ -96,6 +96,7 @@ namespace krys::boo
     {
       return AdoptRef(*new CachedResourceLoader(document));
     }
+
     ~CachedResourceLoader() noexcept;
 
     ResourceErrorOr<CachedResourceHandle<CachedImage>>
@@ -124,12 +125,14 @@ namespace krys::boo
     {
       return _autoLoadImages;
     }
+
     void SetAutoLoadImages(bool) noexcept;
 
     KRYS_NODISCARD bool ImagesEnabled() const noexcept
     {
       return _imagesEnabled;
     }
+
     void SetImagesEnabled(bool) noexcept;
 
     KRYS_NODISCARD bool ShouldDeferImageLoad(const url::URL &) const noexcept;

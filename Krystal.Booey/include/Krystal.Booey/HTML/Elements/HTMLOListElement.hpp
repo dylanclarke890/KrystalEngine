@@ -95,10 +95,12 @@ namespace krys::boo::html
       // 3. Return 1.
       return 1;
     }
+
     KRYS_NODISCARD bool IsReversed() const noexcept
     {
       return _isReversed;
     }
+
     void ItemCountChanged() noexcept
     {
       _itemCount = null;

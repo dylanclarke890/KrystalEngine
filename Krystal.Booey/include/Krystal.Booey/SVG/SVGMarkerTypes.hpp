@@ -45,7 +45,7 @@ namespace krys::boo::svg
     SVGMarkerOrientUnknown = 0,
     SVGMarkerOrientAuto,
     SVGMarkerOrientAngle,
-    SVGMarkerOrientAutoStartReverse
+    SVGMarkerOrientAutoStartReverse,
   };
 
   template <>

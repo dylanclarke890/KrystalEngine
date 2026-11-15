@@ -44,6 +44,7 @@ namespace krys::ui
     {
       return _texture;
     }
+
     KRYS_NODISCARD AlphaPremultiplication Alpha() const noexcept
     {
       return _alpha;
@@ -53,6 +54,7 @@ namespace krys::ui
     {
       return _size;
     }
+
     KRYS_NODISCARD RefPtr<boo::GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() noexcept override;
     KRYS_NODISCARD RefPtr<boo::NativeImage> GetNativeImage() noexcept override;

@@ -66,7 +66,7 @@ namespace krys::boo
   enum class ApplyStylePropertyLevel : bool
   {
     Default,
-    ForceBlock
+    ForceBlock,
   };
 
   /// @brief What accessibility needs to tell the host what text an undo or redo replaces: the ranges the edit
@@ -103,7 +103,7 @@ namespace krys::boo
     enum class AddToUndoStack : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -128,11 +128,14 @@ namespace krys::boo
     void Unapply() noexcept override;
     void Unapply(AddToUndoStack addToUndoStack) noexcept;
     void Reapply() noexcept override;
+
     KRYS_NODISCARD EditAction EditingAction() const noexcept override
     {
       return _editAction;
     }
+
     void Append(SimpleEditCommand *command) noexcept;
+
     KRYS_NODISCARD bool WasCreateLinkCommand() const noexcept
     {
       return _editAction == EditAction::CreateLink;
@@ -142,21 +145,26 @@ namespace krys::boo
     {
       return _startingSelection;
     }
+
     KRYS_NODISCARD const VisibleSelection &EndingSelection() const noexcept
     {
       return _endingSelection;
     }
+
     void SetStartingSelection(const VisibleSelection &selection) noexcept;
     void SetEndingSelection(const VisibleSelection &selection) noexcept;
+
     /// @brief The range the edit replaced, for accessibility to tell the host what an undo puts back.
     void SetRangeDeletedByUnapply(const VisiblePositionIndexRange &range) noexcept
     {
       _replacedText.SetRangeDeletedByUnapply(range);
     }
+
     KRYS_NODISCARD dom::Element *StartingRootEditableElement() const noexcept
     {
       return _startingRootEditableElement.get();
     }
+
     KRYS_NODISCARD dom::Element *EndingRootEditableElement() const noexcept
     {
       return _endingRootEditableElement.get();
@@ -164,6 +172,7 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD utf8_string Label() const noexcept final;
+
     void DidRemoveFromUndoManager() noexcept final
     {
     }
@@ -185,41 +194,52 @@ namespace krys::boo
     ~CompositeEditCommand() noexcept override;
 
     void Apply() noexcept;
+
     KRYS_NODISCARD bool IsFirstCommand(EditCommand *command) const noexcept
     {
       return !_commands.empty() && _commands.front().get() == command;
     }
+
     KRYS_NODISCARD EditCommandComposition *Composition() const noexcept;
     Ref<EditCommandComposition> EnsureComposition() noexcept;
 
     KRYS_NODISCARD virtual bool IsTypingCommand() const noexcept;
+
     KRYS_NODISCARD virtual bool IsDictationCommand() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool PreservesTypingStyle() const noexcept;
     KRYS_NODISCARD virtual bool ShouldRetainAutocorrectionIndicator() const noexcept;
     virtual void SetShouldRetainAutocorrectionIndicator(bool) noexcept;
+
     KRYS_NODISCARD virtual bool ShouldStopCaretBlinking() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual dom::DOMString InputEventTypeName() const noexcept;
     KRYS_NODISCARD virtual bool IsInputMethodComposing() const noexcept;
+
     KRYS_NODISCARD virtual dom::DOMString InputEventData() const noexcept
     {
       return {};
     }
+
     /// @brief The data transfer the command's input events carry: what it pastes or drops, if anything.
     KRYS_NODISCARD virtual RefPtr<dom::DataTransfer> InputEventDataTransfer() const noexcept;
+
     KRYS_NODISCARD virtual bool IsBeforeInputEventCancelable() const noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD virtual bool ShouldDispatchInputEvents() const noexcept
     {
       return true;
     }
+
     KRYS_NODISCARD List<RefPtr<dom::StaticRange>> TargetRangesForBindings() const noexcept;
 
   protected:

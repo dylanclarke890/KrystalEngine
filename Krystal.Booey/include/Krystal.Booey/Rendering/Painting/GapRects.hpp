@@ -40,10 +40,12 @@ namespace krys::boo
     {
       return _left;
     }
+
     KRYS_NODISCARD const LayoutRect &Center() const noexcept
     {
       return _center;
     }
+
     KRYS_NODISCARD const LayoutRect &Right() const noexcept
     {
       return _right;
@@ -53,14 +55,17 @@ namespace krys::boo
     {
       _left.Unite(r);
     }
+
     void UniteCenter(const LayoutRect &r) noexcept
     {
       _center.Unite(r);
     }
+
     void UniteRight(const LayoutRect &r) noexcept
     {
       _right.Unite(r);
     }
+
     void Unite(const GapRects &o) noexcept
     {
       UniteLeft(o.Left());

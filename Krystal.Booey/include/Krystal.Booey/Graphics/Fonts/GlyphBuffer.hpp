@@ -56,7 +56,7 @@ namespace krys::boo
     GlyphBufferAdvance _initialAdvance {MakeGlyphBufferAdvance()};
 
   public:
-    static constexpr GlyphBufferStringOffset NoOffset = std::numeric_limits<GlyphBufferStringOffset>::max();
+    constexpr static GlyphBufferStringOffset NoOffset = std::numeric_limits<GlyphBufferStringOffset>::max();
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
@@ -81,45 +81,54 @@ namespace krys::boo
     {
       return Span<const Font *> {_fonts}.subspan(from, count);
     }
+
     KRYS_NODISCARD Span<GlyphBufferGlyph> Glyphs(size_t from = 0, size_t count = std::dynamic_extent) noexcept
     {
       return Span<GlyphBufferGlyph> {_glyphs}.subspan(from, count);
     }
+
     KRYS_NODISCARD Span<GlyphBufferAdvance> Advances(size_t from = 0,
                                                      size_t count = std::dynamic_extent) noexcept
     {
       return Span<GlyphBufferAdvance> {_advances}.subspan(from, count);
     }
+
     KRYS_NODISCARD Span<GlyphBufferOrigin> Origins(size_t from = 0,
                                                    size_t count = std::dynamic_extent) noexcept
     {
       return Span<GlyphBufferOrigin> {_origins}.subspan(from, count);
     }
+
     KRYS_NODISCARD Span<GlyphBufferStringOffset> OffsetsInString(size_t from = 0,
                                                                  size_t count = std::dynamic_extent) noexcept
     {
       return Span<GlyphBufferStringOffset> {_offsetsInString}.subspan(from, count);
     }
+
     KRYS_NODISCARD Span<const Font *const> Fonts(size_t from = 0,
                                                  size_t count = std::dynamic_extent) const noexcept
     {
       return Span<const Font *const> {_fonts}.subspan(from, count);
     }
+
     KRYS_NODISCARD Span<const GlyphBufferGlyph> Glyphs(size_t from = 0,
                                                        size_t count = std::dynamic_extent) const noexcept
     {
       return Span<const GlyphBufferGlyph> {_glyphs}.subspan(from, count);
     }
+
     KRYS_NODISCARD Span<const GlyphBufferAdvance> Advances(size_t from = 0,
                                                            size_t count = std::dynamic_extent) const noexcept
     {
       return Span<const GlyphBufferAdvance> {_advances}.subspan(from, count);
     }
+
     KRYS_NODISCARD Span<const GlyphBufferOrigin> Origins(size_t from = 0,
                                                          size_t count = std::dynamic_extent) const noexcept
     {
       return Span<const GlyphBufferOrigin> {_origins}.subspan(from, count);
     }
+
     KRYS_NODISCARD Span<const GlyphBufferStringOffset>
       OffsetsInString(size_t from = 0, size_t count = std::dynamic_extent) const noexcept
     {
@@ -131,26 +140,32 @@ namespace krys::boo
       krys_debug_assert(_fonts[index]);
       return *_fonts[index];
     }
+
     KRYS_NODISCARD GlyphBufferGlyph GlyphAt(size_t index) const noexcept
     {
       return _glyphs[index];
     }
+
     KRYS_NODISCARD GlyphBufferAdvance &AdvanceAt(size_t index) noexcept
     {
       return _advances[index];
     }
+
     KRYS_NODISCARD GlyphBufferAdvance AdvanceAt(size_t index) const noexcept
     {
       return _advances[index];
     }
+
     KRYS_NODISCARD GlyphBufferOrigin OriginAt(size_t index) const noexcept
     {
       return _origins[index];
     }
+
     KRYS_NODISCARD GlyphBufferStringOffset UncheckedStringOffsetAt(size_t index) const noexcept
     {
       return _offsetsInString[index];
     }
+
     KRYS_NODISCARD Maybe<GlyphBufferStringOffset> CheckedStringOffsetAt(size_t index,
                                                                         uint32 stringLength) const noexcept
     {
@@ -166,14 +181,17 @@ namespace krys::boo
     {
       _initialAdvance = initialAdvance;
     }
+
     KRYS_NODISCARD const GlyphBufferAdvance &InitialAdvance() const noexcept
     {
       return _initialAdvance;
     }
+
     void ExpandInitialAdvance(float width) noexcept
     {
       SetWidth(_initialAdvance, Width(_initialAdvance) + width);
     }
+
     void ExpandInitialAdvance(GlyphBufferAdvance additionalAdvance) noexcept
     {
       SetWidth(_initialAdvance, Width(_initialAdvance) + Width(additionalAdvance));

@@ -78,6 +78,7 @@ namespace krys::boo
     {
       return Downcast<RenderBoxModelObject>(LegacyInlineBox::Renderer());
     }
+
     KRYS_NODISCARD const RenderStyle &LineStyle() const noexcept
     {
       return IsFirstLine() ? Renderer().FirstLineStyle() : Renderer().Style();
@@ -87,14 +88,17 @@ namespace krys::boo
     {
       return _prevLineBox;
     }
+
     KRYS_NODISCARD LegacyInlineFlowBox *NextLineBox() const noexcept
     {
       return _nextLineBox;
     }
+
     void SetNextLineBox(LegacyInlineFlowBox *n) noexcept
     {
       _nextLineBox = n;
     }
+
     void SetPreviousLineBox(LegacyInlineFlowBox *p) noexcept
     {
       _prevLineBox = p;
@@ -104,6 +108,7 @@ namespace krys::boo
     {
       return _firstChild;
     }
+
     KRYS_NODISCARD LegacyInlineBox *LastChild() const noexcept
     {
       return _lastChild;
@@ -143,15 +148,18 @@ namespace krys::boo
     {
       return _hasTextChildren;
     }
+
     KRYS_NODISCARD bool HasTextDescendants() const noexcept
     {
       return _hasTextDescendants;
     }
+
     void SetHasTextChildren() noexcept
     {
       _hasTextChildren = true;
       SetHasTextDescendants();
     }
+
     void SetHasTextDescendants() noexcept
     {
       _hasTextDescendants = true;
@@ -162,18 +170,21 @@ namespace krys::boo
       return _overflow ? _overflow->VisualOverflowRect()
                        : EnclosingLayoutRect(FrameRectIncludingLineHeight(lineTop, lineBottom));
     }
+
     KRYS_NODISCARD LayoutUnit LogicalLeftVisualOverflow() const noexcept
     {
       return _overflow
                ? (IsHorizontal() ? _overflow->VisualOverflowRect().X() : _overflow->VisualOverflowRect().Y())
                : LayoutUnit(LogicalLeft());
     }
+
     KRYS_NODISCARD LayoutUnit LogicalRightVisualOverflow() const noexcept
     {
       return _overflow ? (IsHorizontal() ? _overflow->VisualOverflowRect().MaxX()
                                          : _overflow->VisualOverflowRect().MaxY())
                        : LayoutUnit(std::ceil(LogicalRight()));
     }
+
     KRYS_NODISCARD LayoutUnit LogicalTopVisualOverflow(LayoutUnit lineTop) const noexcept
     {
       if (_overflow)
@@ -182,6 +193,7 @@ namespace krys::boo
       }
       return lineTop;
     }
+
     KRYS_NODISCARD LayoutUnit LogicalBottomVisualOverflow(LayoutUnit lineBottom) const noexcept
     {
       if (_overflow)
@@ -191,6 +203,7 @@ namespace krys::boo
       }
       return lineBottom;
     }
+
     KRYS_NODISCARD LayoutRect LogicalVisualOverflowRect(LayoutUnit lineTop,
                                                         LayoutUnit lineBottom) const noexcept
     {
@@ -232,6 +245,7 @@ namespace krys::boo
     {
       return true;
     }
+
     void BoxModelObject() const = delete;
 
     void AddTextBoxVisualOverflow(LegacyInlineTextBox &, GlyphOverflowAndFallbackFontsMap &,

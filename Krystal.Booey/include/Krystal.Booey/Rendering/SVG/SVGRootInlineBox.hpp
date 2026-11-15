@@ -44,6 +44,7 @@ namespace krys::boo
     {
       return _logicalHeight;
     }
+
     void SetLogicalHeight(float height) noexcept
     {
       _logicalHeight = height;

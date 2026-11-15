@@ -67,7 +67,7 @@ namespace krys::boo::css
       Pending,
       Loading,
       Success,
-      Failure
+      Failure,
     };
 
   private:
@@ -105,6 +105,7 @@ namespace krys::boo::css
     {
       return _fontRequest.get();
     }
+
     KRYS_NODISCARD bool RequiresExternalResource() const noexcept
     {
       return _fontRequest.get();

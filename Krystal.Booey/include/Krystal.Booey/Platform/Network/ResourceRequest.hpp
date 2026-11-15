@@ -40,6 +40,7 @@ namespace krys::boo
 
   public:
     ResourceRequest() noexcept = default;
+
     explicit ResourceRequest(url::URL url) noexcept : _url(krys::move(url))
     {
     }
@@ -48,10 +49,12 @@ namespace krys::boo
     {
       return _url;
     }
+
     void SetURL(url::URL url) noexcept
     {
       _url = krys::move(url);
     }
+
     void RemoveFragmentIdentifier() noexcept
     {
       _url.RemoveFragmentIdentifier();
@@ -61,6 +64,7 @@ namespace krys::boo
     {
       return _httpMethod;
     }
+
     void SetHTTPMethod(utf8_string method) noexcept
     {
       _httpMethod = krys::move(method);

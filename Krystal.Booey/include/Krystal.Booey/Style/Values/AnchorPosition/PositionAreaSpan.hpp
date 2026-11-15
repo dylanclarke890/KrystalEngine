@@ -66,10 +66,12 @@ namespace krys::boo::style
     {
       return static_cast<PositionAreaAxis>(_axis);
     }
+
     KRYS_NODISCARD constexpr PositionAreaTrack Track() const noexcept
     {
       return static_cast<PositionAreaTrack>(_track);
     }
+
     KRYS_NODISCARD constexpr PositionAreaSelf Self() const noexcept
     {
       return static_cast<PositionAreaSelf>(_self);

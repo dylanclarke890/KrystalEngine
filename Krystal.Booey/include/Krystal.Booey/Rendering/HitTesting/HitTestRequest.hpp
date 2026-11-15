@@ -59,7 +59,7 @@ namespace krys::boo
       SkipTransformToRootFrameCoordinates,
     };
 
-    static constexpr EnumSet<Type> DefaultTypes {Type::ReadOnly, Type::Active,
+    constexpr static EnumSet<Type> DefaultTypes {Type::ReadOnly, Type::Active,
                                                  Type::DisallowUserAgentShadowContent};
 
   private:

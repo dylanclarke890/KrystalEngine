@@ -40,7 +40,7 @@ namespace krys::boo
       Normal,
       Light,
       Dark,
-      Custom
+      Custom,
     };
 
     Type PaletteType {Type::Normal};

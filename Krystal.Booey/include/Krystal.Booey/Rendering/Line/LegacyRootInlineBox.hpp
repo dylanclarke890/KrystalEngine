@@ -54,6 +54,7 @@ namespace krys::boo
     {
       return Downcast<LegacyRootInlineBox>(_nextLineBox);
     }
+
     KRYS_NODISCARD LegacyRootInlineBox *PrevRootBox() const noexcept
     {
       return Downcast<LegacyRootInlineBox>(_prevLineBox);
@@ -65,20 +66,24 @@ namespace krys::boo
     {
       return _lineTop;
     }
+
     KRYS_NODISCARD LayoutUnit LineBottom() const noexcept
     {
       return _lineBottom;
     }
+
     KRYS_NODISCARD LayoutUnit LineBoxWidth() const noexcept;
 
     KRYS_NODISCARD LayoutUnit LineBoxTop() const noexcept
     {
       return _lineBoxTop;
     }
+
     KRYS_NODISCARD LayoutUnit LineBoxBottom() const noexcept
     {
       return _lineBoxBottom;
     }
+
     KRYS_NODISCARD LayoutUnit LineBoxHeight() const noexcept
     {
       return LineBoxBottom() - LineBoxTop();
@@ -86,12 +91,14 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit SelectionTop() const noexcept;
     KRYS_NODISCARD LayoutUnit SelectionBottom() const noexcept;
+
     KRYS_NODISCARD LayoutUnit SelectionHeight() const noexcept
     {
       return std::max<LayoutUnit>(LayoutUnit(), SelectionBottom() - SelectionTop());
     }
 
     KRYS_NODISCARD LayoutUnit SelectionTopAdjustedForPrecedingBlock() const noexcept;
+
     KRYS_NODISCARD LayoutUnit SelectionHeightAdjustedForPrecedingBlock() const noexcept
     {
       return std::max<LayoutUnit>(LayoutUnit(), SelectionBottom() - SelectionTopAdjustedForPrecedingBlock());
@@ -121,6 +128,7 @@ namespace krys::boo
     {
       return LegacyInlineFlowBox::LogicalTopVisualOverflow(LineTop());
     }
+
     KRYS_NODISCARD LayoutUnit LogicalBottomVisualOverflow() const noexcept
     {
       return LegacyInlineFlowBox::LogicalBottomVisualOverflow(LineBottom());

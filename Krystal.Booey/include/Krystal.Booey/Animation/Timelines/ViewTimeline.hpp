@@ -56,7 +56,7 @@ namespace krys::boo
       DuringEntry,
       WhileContained,
       DuringExit,
-      AfterExit
+      AfterExit,
     };
 
     float StickyTopOrLeftAdjustment {0};
@@ -115,10 +115,12 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-subject
     KRYS_NODISCARD const dom::Element *Subject() const noexcept;
+
     KRYS_NODISCARD const style::WeakStyleable &SubjectStyleable() const noexcept
     {
       return _subject;
     }
+
     void SetSubject(dom::Element *subject) noexcept;
     void SetSubject(const style::Styleable &styleable) noexcept;
 
@@ -126,6 +128,7 @@ namespace krys::boo
     {
       return _insets;
     }
+
     void SetInsets(const style::ViewTimelineInsetItem &insets) noexcept
     {
       _insets = insets;

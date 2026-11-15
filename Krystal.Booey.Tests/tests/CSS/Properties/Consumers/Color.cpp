@@ -170,7 +170,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(Parse(u8"-1", quirks));
 
       // Dimensions keep their unit: `0001ff` is the number 1 with the unit `ff`.
-      CHECK(Parse(u8"0001ff", quirks)->Hex()->Value == SRGBA<uint8> {0, 0x01, 0xff});
+      CHECK(Parse(u8"0001ff", quirks)->Hex()->Value == SRGBA<uint8> {0, 0x01, 0xFF});
       CHECK(Parse(u8"ff0000", Quirks(PropertyId::BackgroundColor)));
 
       // Never inside another colour.

@@ -49,14 +49,17 @@ namespace krys::boo
     {
       return _position;
     }
+
     KRYS_NODISCARD const FloatPoint3D &Direction() const noexcept
     {
       return _pointsAt;
     }
+
     KRYS_NODISCARD float SpecularExponent() const noexcept
     {
       return _specularExponent;
     }
+
     KRYS_NODISCARD float LimitingConeAngle() const noexcept
     {
       return _limitingConeAngle;

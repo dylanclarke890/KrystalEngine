@@ -12,7 +12,7 @@ namespace krys
   enum class TransferFunctionMode : uint8
   {
     Clamped,
-    Unclamped
+    Unclamped,
   };
 
   template <typename T, TransferFunctionMode mode>

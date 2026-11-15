@@ -107,14 +107,17 @@ namespace krys::boo
     {
       return ForceBlackText() || ForceWhiteText();
     }
+
     KRYS_NODISCARD bool ForceBlackText() const noexcept
     {
       return PaintBehavior.Contains(boo::PaintBehavior::ForceBlackText);
     }
+
     KRYS_NODISCARD bool ForceWhiteText() const noexcept
     {
       return PaintBehavior.Contains(boo::PaintBehavior::ForceWhiteText);
     }
+
     KRYS_NODISCARD Color ForcedTextColor() const noexcept
     {
       return ForceBlackText() ? Color::black : Color::white;
@@ -124,6 +127,7 @@ namespace krys::boo
     {
       return PaintBehavior.Contains(boo::PaintBehavior::SkipRootBackground);
     }
+
     KRYS_NODISCARD bool PaintRootBackgroundOnly() const noexcept
     {
       return PaintBehavior.Contains(boo::PaintBehavior::RootBackgroundOnly);

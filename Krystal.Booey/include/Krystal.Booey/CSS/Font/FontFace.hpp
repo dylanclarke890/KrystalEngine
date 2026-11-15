@@ -84,7 +84,7 @@ namespace krys::boo::css
       Loading,
       TimedOut,
       Success,
-      Failure
+      Failure,
     };
 
     struct UnicodeRange
@@ -155,6 +155,7 @@ namespace krys::boo::css
     {
       _fontSelectionCapabilities = capabilities;
     }
+
     KRYS_NODISCARD FontSelectionCapabilities GetFontSelectionCapabilities() const noexcept
     {
       krys_debug_assert(_status != Status::Failure);
@@ -165,10 +166,12 @@ namespace krys::boo::css
     {
       return _isLocalFallback;
     }
+
     KRYS_NODISCARD Status GetStatus() const noexcept
     {
       return _status;
     }
+
     KRYS_NODISCARD FontFaceRule *CssConnection() const noexcept;
 
     void AddClient(CSSFontFaceClient &client) noexcept;
@@ -179,10 +182,12 @@ namespace krys::boo::css
     void OpportunisticallyStartFontDataURLLoading() noexcept;
 
     void AdoptSource(UniquePtr<CSSFontFaceSource> &&source) noexcept;
+
     void SourcesPopulated() noexcept
     {
       _sourcesPopulated = true;
     }
+
     KRYS_NODISCARD size_t SourceCount() const noexcept
     {
       return _sources.size();
@@ -203,6 +208,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool RangesMatchCodePoint(char32 character) const noexcept;
 
     KRYS_NODISCARD FontLoadTiming GetFontLoadTiming() const noexcept;
+
     KRYS_NODISCARD bool ShouldIgnoreFontLoadCompletions() const noexcept
     {
       return false;
@@ -242,13 +248,16 @@ namespace krys::boo::css
     virtual void FontLoaded(CSSFontFace &) noexcept
     {
     }
+
     virtual void FontStateChanged(CSSFontFace &, CSSFontFace::Status /* oldState */,
                                   CSSFontFace::Status /* newState */) noexcept
     {
     }
+
     virtual void FontPropertyChanged(CSSFontFace &, Value * /* oldFamily */ = nullptr) noexcept
     {
     }
+
     virtual void UpdateStyleIfNeeded(CSSFontFace &) noexcept
     {
     }

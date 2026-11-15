@@ -76,10 +76,12 @@ namespace krys::boo
       {
         return !_firstNodeInserted;
       }
+
       KRYS_NODISCARD dom::Node *FirstNodeInserted() const noexcept
       {
         return _firstNodeInserted.get();
       }
+
       KRYS_NODISCARD dom::Node *LastLeafInserted() const noexcept;
       KRYS_NODISCARD dom::Node *PastLastLeaf() const noexcept;
     };
@@ -113,10 +115,12 @@ namespace krys::boo
     {
       return _visibleSelectionForInsertedText;
     }
+
     KRYS_NODISCARD const utf8_string &DocumentFragmentPlainText() const noexcept
     {
       return _documentFragmentPlainText;
     }
+
     KRYS_NODISCARD Maybe<dom::SimpleRange> InsertedContentRange() const noexcept;
 
   private:

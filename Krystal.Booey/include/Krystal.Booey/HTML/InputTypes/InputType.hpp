@@ -71,7 +71,7 @@ namespace krys::boo::html
   enum class WasSetByJavaScript : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class InputTypeKind : uint8
@@ -117,7 +117,7 @@ namespace krys::boo::html
     enum class ShouldCallBaseEventHandler : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -356,6 +356,7 @@ namespace krys::boo::html
     virtual void HandleMouseDownEvent(dom::MouseEvent &) noexcept
     {
     }
+
     virtual void HandleClickEvent(dom::MouseEvent &) noexcept
     {
     }
@@ -377,9 +378,11 @@ namespace krys::boo::html
     virtual ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept;
     virtual void HandleKeypressEvent(dom::KeyboardEvent &event) noexcept;
     virtual void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept;
+
     virtual void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &) noexcept
     {
     }
+
     virtual void ForwardEvent(dom::Event &) noexcept
     {
     }
@@ -387,10 +390,13 @@ namespace krys::boo::html
     virtual void HandleFocusEvent(dom::Node * /* oldFocusedNode */) noexcept
     {
     }
+
     virtual void HandleBlurEvent() noexcept
     {
     }
+
     virtual void SubtreeHasChanged() noexcept;
+
     virtual void ElementDidBlur() noexcept
     {
     }
@@ -424,48 +430,60 @@ namespace krys::boo::html
     // Shadow tree handling.
 
     void CreateShadowSubtreeIfNeeded() noexcept;
+
     virtual void CreateShadowSubtree() noexcept
     {
     }
+
     virtual void RemoveShadowSubtree() noexcept;
 
     KRYS_NODISCARD virtual HTMLElement *ContainerElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *InnerBlockElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept;
+
     KRYS_NODISCARD virtual HTMLElement *InnerSpinButtonElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *DataListButtonElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *SliderThumbElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *SliderTrackElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *ResultsButtonElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *CancelButtonElement() const noexcept
     {
       return nullptr;
     }
+
     KRYS_NODISCARD virtual HTMLElement *PlaceholderElement() const noexcept
     {
       return nullptr;
     }
+
     RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept;
 
     KRYS_NODISCARD virtual RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept;
@@ -473,6 +491,7 @@ namespace krys::boo::html
     virtual void UpdateInnerTextValue() noexcept
     {
     }
+
     virtual void UpdatePlaceholderText() noexcept
     {
     }

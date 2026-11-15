@@ -59,6 +59,7 @@ namespace krys::boo::html
     {
       return _width;
     }
+
     void SetWidth(double width) noexcept
     {
       _width = width;
@@ -68,6 +69,7 @@ namespace krys::boo::html
     {
       return _actualBoundingBoxLeft;
     }
+
     void SetActualBoundingBoxLeft(double value) noexcept
     {
       _actualBoundingBoxLeft = value;
@@ -77,6 +79,7 @@ namespace krys::boo::html
     {
       return _actualBoundingBoxRight;
     }
+
     void SetActualBoundingBoxRight(double value) noexcept
     {
       _actualBoundingBoxRight = value;
@@ -86,6 +89,7 @@ namespace krys::boo::html
     {
       return _fontBoundingBoxAscent;
     }
+
     void SetFontBoundingBoxAscent(double value) noexcept
     {
       _fontBoundingBoxAscent = value;
@@ -95,6 +99,7 @@ namespace krys::boo::html
     {
       return _fontBoundingBoxDescent;
     }
+
     void SetFontBoundingBoxDescent(double value) noexcept
     {
       _fontBoundingBoxDescent = value;
@@ -104,6 +109,7 @@ namespace krys::boo::html
     {
       return _actualBoundingBoxAscent;
     }
+
     void SetActualBoundingBoxAscent(double value) noexcept
     {
       _actualBoundingBoxAscent = value;
@@ -113,6 +119,7 @@ namespace krys::boo::html
     {
       return _actualBoundingBoxDescent;
     }
+
     void SetActualBoundingBoxDescent(double value) noexcept
     {
       _actualBoundingBoxDescent = value;
@@ -122,6 +129,7 @@ namespace krys::boo::html
     {
       return _emHeightAscent;
     }
+
     void SetEmHeightAscent(double value) noexcept
     {
       _emHeightAscent = value;
@@ -131,6 +139,7 @@ namespace krys::boo::html
     {
       return _emHeightDescent;
     }
+
     void SetEmHeightDescent(double value) noexcept
     {
       _emHeightDescent = value;
@@ -140,6 +149,7 @@ namespace krys::boo::html
     {
       return _hangingBaseline;
     }
+
     void SetHangingBaseline(double value) noexcept
     {
       _hangingBaseline = value;
@@ -149,6 +159,7 @@ namespace krys::boo::html
     {
       return _alphabeticBaseline;
     }
+
     void SetAlphabeticBaseline(double value) noexcept
     {
       _alphabeticBaseline = value;
@@ -158,6 +169,7 @@ namespace krys::boo::html
     {
       return _ideographicBaseline;
     }
+
     void SetIdeographicBaseline(double value) noexcept
     {
       _ideographicBaseline = value;

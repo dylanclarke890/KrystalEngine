@@ -155,6 +155,7 @@ namespace krys::boo
     {
       return _computedStyle._cachedPseudoStyles && _computedStyle._cachedPseudoStyles->Styles.size();
     }
+
     const style::PseudoStyleCache *CachedPseudoStyles() const
     {
       return _computedStyle._cachedPseudoStyles.get();
@@ -306,6 +307,7 @@ namespace krys::boo
     {
       return _computedStyle.NonInheritedData();
     }
+
     const NonInheritedFlags &GetNonInheritedFlags() const
     {
       return _computedStyle.GetNonInheritedFlags();
@@ -315,10 +317,12 @@ namespace krys::boo
     {
       return _computedStyle.RareInheritedData();
     }
+
     const StyleInheritedData &InheritedData() const
     {
       return _computedStyle.InheritedData();
     }
+
     const InheritedFlags &GetInheritedFlags() const
     {
       return _computedStyle.GetInheritedFlags();
@@ -339,11 +343,12 @@ namespace krys::boo
 
     enum CloneTag
     {
-      Clone
+      Clone,
     };
+
     enum CreateDefaultStyleTag
     {
-      CreateDefaultStyle
+      CreateDefaultStyle,
     };
 
     RenderStyleBase(RenderStyleBase &&) noexcept;

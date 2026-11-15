@@ -35,8 +35,8 @@ namespace krys::ui::tests
       FontFaceCache _fonts;
       UniquePtr<ImageBufferTextures> _imageBuffers;
       gfx::TextureHandle _target {};
-      static constexpr uint32 Width = 96u;
-      static constexpr uint32 Height = 64u;
+      constexpr static uint32 Width = 96u;
+      constexpr static uint32 Height = 64u;
 
     public:
       ReplayFixture() : _device(gfx::tests::CreateTestDevice())

@@ -58,7 +58,7 @@ namespace krys::boo
   {
     Inline,
     ListItem,
-    TableOrTablePart
+    TableOrTablePart,
   };
 }
 
@@ -135,6 +135,7 @@ namespace krys::boo
     {
       return _hasCounterNodeMap;
     }
+
     void SetHasCounterNodeMap(bool f) noexcept
     {
       _hasCounterNodeMap = f;
@@ -145,6 +146,7 @@ namespace krys::boo
     {
       return _isFirstLetter;
     }
+
     void SetIsFirstLetter() noexcept
     {
       _isFirstLetter = true;
@@ -168,6 +170,7 @@ namespace krys::boo
     {
       return _firstChild;
     }
+
     KRYS_NODISCARD RenderObject *LastChild() const noexcept
     {
       return _lastChild;
@@ -180,6 +183,7 @@ namespace krys::boo
     {
       return FirstChild();
     }
+
     KRYS_NODISCARD RenderObject *LastChildSlow() const noexcept final
     {
       return LastChild();
@@ -253,15 +257,19 @@ namespace krys::boo
     {
       return false;
     }
+
     virtual void AnimationPaused(double /*timeOffset*/, const BlendingKeyframes &) noexcept
     {
     }
+
     virtual void AnimationFinished(const BlendingKeyframes &) noexcept
     {
     }
+
     virtual void TransformRelatedPropertyDidChange() noexcept
     {
     }
+
     virtual void SuspendAnimations(MonotonicTime::duration = {}) noexcept
     {
     }
@@ -271,10 +279,12 @@ namespace krys::boo
     /// @return Whether it resumed.
     bool RepaintForPausedImageAnimationsIfNeeded(const IntRect &visibleRect,
                                                  CachedImage &cachedImage) noexcept;
+
     KRYS_NODISCARD bool HasPausedImageAnimations() const noexcept
     {
       return _hasPausedImageAnimations;
     }
+
     void SetHasPausedImageAnimations(bool b) noexcept
     {
       _hasPausedImageAnimations = b;
@@ -284,6 +294,7 @@ namespace krys::boo
     {
       _hasCachedSVGResource = b;
     }
+
     KRYS_NODISCARD bool HasCachedSVGResource() const noexcept
     {
       return _hasCachedSVGResource;
@@ -412,6 +423,7 @@ namespace krys::boo
     {
       return {};
     }
+
     KRYS_NODISCARD bool HasClip() const noexcept;
     KRYS_NODISCARD bool HasClipOrNonVisibleOverflow() const noexcept;
 
@@ -424,6 +436,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsTransparent() const noexcept;
     KRYS_NODISCARD bool HasHiddenBackface() const noexcept;
     KRYS_NODISCARD static bool CreatesGroupForStyle(const RenderStyle &style) noexcept;
+
     KRYS_NODISCARD bool CreatesGroup() const noexcept
     {
       return CreatesGroupForStyle(Style());
@@ -489,7 +502,7 @@ namespace krys::boo
     enum class StylePropagationType
     {
       AllChildren,
-      BlockAndRubyChildren
+      BlockAndRubyChildren,
     };
     void PropagateStyleToAnonymousChildren(StylePropagationType propagationType) noexcept;
 
@@ -501,30 +514,37 @@ namespace krys::boo
     {
       _renderBlockHasMarginBeforeQuirk = b;
     }
+
     void SetRenderBlockHasMarginAfterQuirk(bool b) noexcept
     {
       _renderBlockHasMarginAfterQuirk = b;
     }
+
     void SetRenderBlockShouldForceRelayoutChildren(bool b) noexcept
     {
       _renderBlockShouldForceRelayoutChildren = b;
     }
+
     KRYS_NODISCARD bool RenderBlockHasMarginBeforeQuirk() const noexcept
     {
       return _renderBlockHasMarginBeforeQuirk;
     }
+
     KRYS_NODISCARD bool RenderBlockHasMarginAfterQuirk() const noexcept
     {
       return _renderBlockHasMarginAfterQuirk;
     }
+
     KRYS_NODISCARD bool RenderBlockShouldForceRelayoutChildren() const noexcept
     {
       return _renderBlockShouldForceRelayoutChildren;
     }
+
     void SetRenderBoxHasShapeOutsideInfo(bool b) noexcept
     {
       _renderBoxHasShapeOutsideInfo = b;
     }
+
     KRYS_NODISCARD bool RenderBoxHasShapeOutsideInfo() const noexcept
     {
       return _renderBoxHasShapeOutsideInfo;

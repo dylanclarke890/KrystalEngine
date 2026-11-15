@@ -42,6 +42,7 @@ namespace krys::boo::svg
     {
       return _clipPathUnits->CurrentValue<SVGUnitTypes::SVGUnitType>();
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &ClipPathUnitsAnimated() noexcept
     {
       return *_clipPathUnits;
@@ -59,6 +60,7 @@ namespace krys::boo::svg
     {
       return SVGTests::IsValid();
     }
+
     KRYS_NODISCARD bool NeedsPendingResourceHandling() const noexcept final
     {
       return false;

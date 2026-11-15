@@ -46,18 +46,22 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual url::URL SourceUrl() const noexcept = 0;
     KRYS_NODISCARD virtual utf8_string MimeType() const noexcept = 0;
+
     KRYS_NODISCARD virtual uint32 NumberOfClients() const noexcept
     {
       return 0;
     }
+
     KRYS_NODISCARD virtual int64 ExpectedContentLength() const noexcept = 0;
 
     virtual void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept
     {
     }
+
     virtual void DecodedSizeChanged(const Image &, int64 delta) noexcept = 0;
 
     virtual void DidDraw(const Image &) noexcept = 0;
+
     KRYS_NODISCARD virtual bool CanDestroyDecodedData(const Image &) const noexcept
     {
       return true;

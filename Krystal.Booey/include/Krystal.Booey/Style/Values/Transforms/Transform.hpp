@@ -30,7 +30,6 @@
 
 namespace krys::boo
 {
-
   namespace style
   {
     // <'transform'> = none | <transform-list>
@@ -114,6 +113,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD Transform operator()(BuilderState &, const css::Value &) noexcept;
     };
+
     template <>
     struct CSSValueCreation<Transform>
     {
@@ -127,11 +127,13 @@ namespace krys::boo
     struct Blending<Transform>
     {
       KRYS_NODISCARD bool CanBlend(const Transform &, const Transform &, CompositeOperation) noexcept;
+
       KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const Transform &,
                                                                                   const Transform &) noexcept
       {
         return true;
       }
+
       KRYS_NODISCARD Transform Blend(const Transform &, const Transform &, const BlendingContext &) noexcept;
       KRYS_NODISCARD Transform Blend(const Transform &, const Transform &,
                                      const interpolation::Context &) noexcept;
@@ -144,7 +146,6 @@ namespace krys::boo
     {
       KRYS_NODISCARD TransformOperations operator()(const Transform &, const FloatSize &) noexcept;
     };
-
   }
 }
 

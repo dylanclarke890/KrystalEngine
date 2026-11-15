@@ -48,7 +48,7 @@ namespace krys::boo
     Before,
     After,
     Start,
-    End
+    End,
   };
 
   /// @brief A run of rows or columns, from `Start` up to `End`.
@@ -82,6 +82,7 @@ namespace krys::boo
       {
         return HasCells() ? Cells.back() : nullptr;
       }
+
       KRYS_NODISCARD bool HasCells() const noexcept
       {
         return !Cells.empty();
@@ -102,13 +103,13 @@ namespace krys::boo
     enum class BlockBorderSide : bool
     {
       BorderBefore,
-      BorderAfter
+      BorderAfter,
     };
 
     enum class InlineBorderSide : bool
     {
       BorderStart,
-      BorderEnd
+      BorderEnd,
     };
 
   private:
@@ -169,16 +170,19 @@ namespace krys::boo
       RecalcCellsIfNeeded();
       return _grid[row].Row[col];
     }
+
     KRYS_NODISCARD const CellStruct &CellAt(uint32 row, uint32 col) const noexcept
     {
       krys_debug_assert(!_needsCellRecalc);
       return _grid[row].Row[col];
     }
+
     KRYS_NODISCARD RenderTableCell *PrimaryCellAt(uint32 row, uint32 col) noexcept
     {
       RecalcCellsIfNeeded();
       return _grid[row].Row[col].PrimaryCell();
     }
+
     KRYS_NODISCARD RenderTableRow *RowRendererAt(uint32 row) const noexcept
     {
       krys_debug_assert(!_needsCellRecalc);
@@ -196,14 +200,17 @@ namespace krys::boo
     {
       return _outerBorderBefore;
     }
+
     KRYS_NODISCARD LayoutUnit OuterBorderAfter() const noexcept
     {
       return _outerBorderAfter;
     }
+
     KRYS_NODISCARD LayoutUnit OuterBorderStart() const noexcept
     {
       return _outerBorderStart;
     }
+
     KRYS_NODISCARD LayoutUnit OuterBorderEnd() const noexcept
     {
       return _outerBorderEnd;
@@ -219,8 +226,10 @@ namespace krys::boo
       krys_debug_assert(!_needsCellRecalc);
       return static_cast<uint32>(_grid.size());
     }
+
     KRYS_NODISCARD uint32 NumColumns() const noexcept;
     void RecalcCells() noexcept;
+
     void RecalcCellsIfNeeded() noexcept
     {
       if (_needsCellRecalc)
@@ -228,12 +237,14 @@ namespace krys::boo
         RecalcCells();
       }
     }
+
     void RemoveRedundantColumns() noexcept;
 
     KRYS_NODISCARD bool NeedsCellRecalc() const noexcept
     {
       return _needsCellRecalc;
     }
+
     void SetNeedsCellRecalc() noexcept;
 
     KRYS_NODISCARD LayoutUnit RowBaseline(uint32 row) noexcept
@@ -241,6 +252,7 @@ namespace krys::boo
       RecalcCellsIfNeeded();
       return _grid[row].Baseline;
     }
+
     void RowLogicalHeightChanged(uint32 rowIndex) noexcept;
 
     void ClearCachedCollapsedBorders() noexcept;
@@ -266,8 +278,9 @@ namespace krys::boo
     enum ShouldIncludeAllIntersectingCells
     {
       IncludeAllIntersectingCells,
-      DoNotIncludeAllIntersectingCells
+      DoNotIncludeAllIntersectingCells,
     };
+
     KRYS_NODISCARD CellSpan SpannedRows(const LayoutRect &flippedRect,
                                         ShouldIncludeAllIntersectingCells shouldInclude) const noexcept;
     KRYS_NODISCARD CellSpan SpannedColumns(const LayoutRect &flippedRect,
@@ -285,6 +298,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return (IsAnonymous() || IsPseudoElement()) ? u8"RenderTableSection (anonymous)"

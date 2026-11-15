@@ -45,28 +45,28 @@ namespace krys::boo::html
   enum class ForBindings : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class TextFieldSelectionDirection : uint8
   {
     SelectionHasNoDirection,
     SelectionHasForwardDirection,
-    SelectionHasBackwardDirection
+    SelectionHasBackwardDirection,
   };
 
   enum class TextFieldEventBehavior : uint8
   {
     DispatchNoEvent,
     DispatchChangeEvent,
-    DispatchInputAndChangeEvent
+    DispatchInputAndChangeEvent,
   };
 
   enum class TextControlSetValueSelection : uint8
   {
     SetSelectionToEnd,
     Clamp,
-    DoNotSet
+    DoNotSet,
   };
 
   /// @brief A form control whose value is text: an input or a textarea. Its text is in an inner text element
@@ -99,7 +99,7 @@ namespace krys::boo::html
     enum NeedsToCheckDirtyFlag
     {
       CheckDirtyFlag,
-      IgnoreDirtyFlag
+      IgnoreDirtyFlag,
     };
 
     ~HTMLTextFormControlElement() noexcept override;
@@ -290,11 +290,13 @@ namespace krys::boo::html
 
     // Returns true if user-editable value is empty. Used to check placeholder visibility.
     KRYS_NODISCARD virtual bool IsEmptyValue() const noexcept = 0;
+
     // Called in DispatchFocusEvent(), after placeholder process, before calling parent's
     // DispatchFocusEvent().
     virtual void HandleFocusEvent(dom::Node * /* oldFocusedNode */) noexcept
     {
     }
+
     // Called in DispatchBlurEvent(), after placeholder process, before calling parent's DispatchBlurEvent().
     virtual void HandleBlurEvent() noexcept
     {

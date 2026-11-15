@@ -69,48 +69,48 @@ namespace krys::boo
       Idle,
       Running,
       Paused,
-      Finished
+      Finished,
     };
 
     enum class ReplaceState : uint8
     {
       Active,
       Removed,
-      Persisted
+      Persisted,
     };
 
     enum class Silently : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
     enum class DidSeek : bool
     {
       No,
-      Yes
+      Yes,
     };
     enum class SynchronouslyNotify : bool
     {
       No,
-      Yes
+      Yes,
     };
     enum class RespectHoldTime : bool
     {
       No,
-      Yes
+      Yes,
     };
     enum class AutoRewind : bool
     {
       No,
-      Yes
+      Yes,
     };
     enum class TimeToRunPendingTask : uint8
     {
       NotScheduled,
       ASAP,
-      WhenReady
+      WhenReady,
     };
 
     RefPtr<AnimationEffect> _effect;
@@ -165,10 +165,12 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsCSSAnimation() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsCSSTransition() const noexcept
     {
       return false;
@@ -181,18 +183,22 @@ namespace krys::boo
     {
       return _id;
     }
+
     void SetId(dom::DOMString id) noexcept;
 
     KRYS_NODISCARD AnimationEffect *BindingsEffect() const noexcept
     {
       return Effect();
     }
+
     /// @brief Sets the effect, as `effect` does.
     virtual void SetBindingsEffect(RefPtr<AnimationEffect> &&newEffect) noexcept;
+
     KRYS_NODISCARD AnimationEffect *Effect() const noexcept
     {
       return _effect.get();
     }
+
     /// @see https://drafts.csswg.org/web-animations-1/#setting-the-associated-effect
     void SetEffect(RefPtr<AnimationEffect> &&newEffect) noexcept;
     KRYS_NODISCARD KeyframeEffect *GetKeyframeEffect() const noexcept;
@@ -201,12 +207,15 @@ namespace krys::boo
     {
       return Timeline();
     }
+
     /// @brief Sets the timeline, as `timeline` does.
     virtual void SetBindingsTimeline(RefPtr<AnimationTimeline> &&timeline) noexcept;
+
     KRYS_NODISCARD AnimationTimeline *Timeline() const noexcept
     {
       return _timeline.get();
     }
+
     /// @see https://drafts.csswg.org/web-animations-1/#setting-the-timeline
     virtual void SetTimeline(RefPtr<AnimationTimeline> &&timeline) noexcept;
 
@@ -220,6 +229,7 @@ namespace krys::boo
     {
       return _playbackRate + 0;
     }
+
     /// @see https://drafts.csswg.org/web-animations-1/#setting-the-playback-rate-of-an-animation
     void SetPlaybackRate(double newPlaybackRate) noexcept;
 
@@ -230,6 +240,7 @@ namespace krys::boo
     {
       return _replaceState;
     }
+
     void SetReplaceState(ReplaceState replaceState) noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#pending-play-task
@@ -287,44 +298,54 @@ namespace krys::boo
     {
       return StartTime();
     }
+
     /// @return A `TypeError` if @p startTime isn't valid for the timeline: a percentage on a monotonic
     /// timeline, or a time on a progress-based one.
     virtual dom::ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept;
+
     KRYS_NODISCARD virtual Maybe<WebAnimationTime> BindingsCurrentTime() const noexcept
     {
       return CurrentTime();
     }
+
     /// @return A `TypeError` if @p currentTime isn't valid for the timeline, or if it's unresolved while the
     /// current time is resolved.
     virtual dom::ExceptionOr<void>
       SetBindingsCurrentTime(const Maybe<WebAnimationTime> &currentTime) noexcept;
+
     KRYS_NODISCARD virtual PlayState BindingsPlayState() const noexcept
     {
       return GetPlayState();
     }
+
     KRYS_NODISCARD virtual ReplaceState BindingsReplaceState() const noexcept
     {
       return GetReplaceState();
     }
+
     KRYS_NODISCARD virtual bool BindingsPending() const noexcept
     {
       return Pending();
     }
+
     /// @brief Waits on the ready promise, as `ready` does.
     virtual void BindingsWhenReady(ReadyCallback onReady, ErrorCallback onError = nullptr) noexcept
     {
       WhenReady(krys::move(onReady), krys::move(onError));
     }
+
     /// @brief Waits on the finished promise, as `finished` does.
     virtual void BindingsWhenFinished(ReadyCallback onFinished, ErrorCallback onError = nullptr) noexcept
     {
       WhenFinished(krys::move(onFinished), krys::move(onError));
     }
+
     /// @brief Plays the animation, as `play()` does.
     virtual dom::ExceptionOr<void> BindingsPlay() noexcept
     {
       return Play();
     }
+
     /// @brief Pauses the animation, as `pause()` does.
     virtual dom::ExceptionOr<void> BindingsPause() noexcept
     {
@@ -335,6 +356,7 @@ namespace krys::boo
     {
       return _startTime;
     }
+
     /// @see https://drafts.csswg.org/web-animations-2/#setting-the-start-time-of-an-animation
     void SetStartTime(Maybe<WebAnimationTime> newStartTime) noexcept;
 
@@ -346,11 +368,13 @@ namespace krys::boo
     {
       return _timelineRange.Start.ToTimelineRangeValue();
     }
+
     /// @see https://drafts.csswg.org/web-animations-2/#dom-animation-rangeend
     KRYS_NODISCARD TimelineRangeValue BindingsRangeEnd() const noexcept
     {
       return _timelineRange.End.ToTimelineRangeValue();
     }
+
     virtual void SetBindingsRangeStart(TimelineRangeValue &&rangeStartValue) noexcept;
     virtual void SetBindingsRangeEnd(TimelineRangeValue &&rangeEndValue) noexcept;
     void SetRangeStart(style::SingleAnimationRangeStart &&rangeStart) noexcept;
@@ -386,10 +410,12 @@ namespace krys::boo
     {
       return _isRelevant;
     }
+
     KRYS_NODISCARD bool HasPendingFinishNotification() const noexcept
     {
       return _finishNotificationStepsMicrotaskPending;
     }
+
     void UpdateRelevance() noexcept;
     void EffectTimingDidChange() noexcept;
     /// @brief The scroll metrics of the source of the animation's progress-based timeline changed.
@@ -399,6 +425,7 @@ namespace krys::boo
     /// created during style resolution.
     void SuspendEffectInvalidation() noexcept;
     void UnsuspendEffectInvalidation() noexcept;
+
     KRYS_NODISCARD bool IsEffectInvalidationSuspended() const noexcept
     {
       return _suspendCount;
@@ -408,6 +435,7 @@ namespace krys::boo
     /// @brief Tells the timeline the effect's accelerated actions changed, to apply them at the rendering
     /// update.
     void AcceleratedStateDidChange() noexcept;
+
     KRYS_NODISCARD bool IsSuspended() const noexcept
     {
       return _isSuspended;
@@ -428,10 +456,12 @@ namespace krys::boo
     {
       return _globalPosition;
     }
+
     void SetGlobalPosition(uint64 globalPosition) noexcept
     {
       _globalPosition = globalPosition;
     }
+
     KRYS_NODISCARD virtual bool CanHaveGlobalPosition() noexcept
     {
       return true;
@@ -460,14 +490,17 @@ namespace krys::boo
     dom::ExceptionOr<void> SilentlySetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept;
     /// @see https://drafts.csswg.org/web-animations-1/#finish-notification-steps
     void FinishNotificationSteps() noexcept;
+
     KRYS_NODISCARD bool HasPendingPauseTask() const noexcept
     {
       return _timeToRunPendingPauseTask != TimeToRunPendingTask::NotScheduled;
     }
+
     KRYS_NODISCARD bool HasPendingPlayTask() const noexcept
     {
       return _timeToRunPendingPlayTask != TimeToRunPendingTask::NotScheduled;
     }
+
     dom::ExceptionOr<void> Play(AutoRewind autoRewind) noexcept;
     void RunPendingPauseTask() noexcept;
     void RunPendingPlayTask() noexcept;

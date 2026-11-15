@@ -50,7 +50,7 @@ namespace krys::boo
     enum RebalanceType : bool
     {
       RebalanceLeadingAndTrailingWhitespaces,
-      RebalanceAllWhitespaces
+      RebalanceAllWhitespaces,
     };
 
   private:
@@ -79,6 +79,7 @@ namespace krys::boo
 
   private:
     void DoApply() noexcept override;
+
     KRYS_NODISCARD bool IsInsertTextCommand() const noexcept override
     {
       return true;

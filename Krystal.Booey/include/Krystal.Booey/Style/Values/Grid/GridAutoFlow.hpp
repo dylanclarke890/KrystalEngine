@@ -36,32 +36,37 @@ namespace krys::boo::style
     {
       Normal,
       Row,
-      Column
+      Column,
     };
     enum class Packing : bool
     {
       Dense,
-      Sparse
+      Sparse,
     };
 
     constexpr GridAutoFlow(css::keywords::Normal) noexcept
     {
     }
+
     constexpr GridAutoFlow(css::keywords::Row) noexcept : _direction {static_cast<uint8>(Direction::Row)}
     {
     }
+
     constexpr GridAutoFlow(css::keywords::Row, css::keywords::Dense) noexcept
         : _direction {static_cast<uint8>(Direction::Row)}, _packing {static_cast<uint8>(Packing::Dense)}
     {
     }
+
     constexpr GridAutoFlow(css::keywords::Column) noexcept
         : _direction {static_cast<uint8>(Direction::Column)}
     {
     }
+
     constexpr GridAutoFlow(css::keywords::Column, css::keywords::Dense) noexcept
         : _direction {static_cast<uint8>(Direction::Column)}, _packing {static_cast<uint8>(Packing::Dense)}
     {
     }
+
     constexpr GridAutoFlow(css::keywords::Dense) noexcept : _packing {static_cast<uint8>(Packing::Dense)}
     {
     }
@@ -70,6 +75,7 @@ namespace krys::boo::style
     {
       return static_cast<Direction>(_direction);
     }
+
     KRYS_NODISCARD constexpr Packing GetPacking() const noexcept
     {
       return static_cast<Packing>(_packing);
@@ -79,14 +85,17 @@ namespace krys::boo::style
     {
       return GetDirection() == Direction::Row;
     }
+
     KRYS_NODISCARD constexpr bool IsColumn() const noexcept
     {
       return GetDirection() == Direction::Column;
     }
+
     KRYS_NODISCARD constexpr bool IsDense() const noexcept
     {
       return GetPacking() == Packing::Dense;
     }
+
     KRYS_NODISCARD constexpr bool IsSparse() const noexcept
     {
       return GetPacking() == Packing::Sparse;

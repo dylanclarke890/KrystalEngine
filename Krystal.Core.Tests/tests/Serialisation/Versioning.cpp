@@ -39,7 +39,6 @@ namespace krys::tests
     float B {0};
     string C {};
   };
-
 }
 
 KRYS_CLASS_VERSION_TRAIT(krys::tests::VersionedType2, 2);

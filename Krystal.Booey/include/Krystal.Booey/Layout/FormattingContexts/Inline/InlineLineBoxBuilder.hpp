@@ -84,6 +84,7 @@ namespace krys::boo::layout
     {
       return GetLineLayoutResult().FirstLast.FirstFormattedLine == IsFirstFormattedLine::Yes;
     }
+
     KRYS_NODISCARD bool IsLastLine() const noexcept
     {
       return GetLineLayoutResult().FirstLast.IsLastLineWithInlineContent;
@@ -93,10 +94,12 @@ namespace krys::boo::layout
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const LineLayoutResult &GetLineLayoutResult() const noexcept
     {
       return _lineLayoutResult;
     }
+
     KRYS_NODISCARD const ElementBox &RootBox() const noexcept;
     KRYS_NODISCARD const RenderStyle &RootStyle() const noexcept;
     KRYS_NODISCARD const InlineLayoutState &GetLayoutState() const noexcept;

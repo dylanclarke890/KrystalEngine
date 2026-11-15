@@ -30,7 +30,7 @@ namespace krys::boo::html
     {
       Scroll,
       Slide,
-      Alternate
+      Alternate,
     };
 
     enum class MarqueeDirection : uint8
@@ -38,7 +38,7 @@ namespace krys::boo::html
       Left,
       Right,
       Up,
-      Down
+      Down,
     };
 
     /// @see https://html.spec.whatwg.org/#attr-marquee-behavior

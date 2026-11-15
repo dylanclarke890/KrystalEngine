@@ -85,6 +85,7 @@ namespace krys::boo
     {
       return _target.get();
     }
+
     KRYS_NODISCARD ResizeObserverBoxOptions ObservedBox() const noexcept
     {
       return _observedBox;

@@ -88,6 +88,7 @@ namespace krys::boo::html
     }
 
     void ReleaseCapture() noexcept;
+
     void RemoveSpinButtonOwner() noexcept
     {
       _spinButtonOwner = nullptr;

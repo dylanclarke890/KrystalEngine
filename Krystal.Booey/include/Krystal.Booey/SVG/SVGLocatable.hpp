@@ -32,7 +32,7 @@ namespace krys::boo::svg
   enum class CTMScope : bool
   {
     NearestViewportScope, // Used for getCTM()
-    ScreenScope           // Used for getScreenCTM()
+    ScreenScope,          // Used for getScreenCTM()
   };
 
   /// @brief The elements with a place in a coordinate system: their viewport elements, bounding box and
@@ -49,7 +49,7 @@ namespace krys::boo::svg
     enum StyleUpdateStrategy : uint8
     {
       AllowStyleUpdate,
-      DisallowStyleUpdate
+      DisallowStyleUpdate,
     };
 
     KRYS_NODISCARD virtual FloatRect GetBBox(StyleUpdateStrategy) noexcept = 0;

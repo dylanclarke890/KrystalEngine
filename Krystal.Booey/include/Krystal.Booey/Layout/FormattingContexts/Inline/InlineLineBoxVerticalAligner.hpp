@@ -62,7 +62,7 @@ namespace krys::boo::layout
     enum class IsInlineLevelBoxAlignment : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -90,10 +90,12 @@ namespace krys::boo::layout
       IsInlineLevelBoxAlignment isInlineLevelBoxAlignment = IsInlineLevelBoxAlignment::No) const noexcept;
 
     KRYS_NODISCARD const InlineFormattingUtils &FormattingUtils() const noexcept;
+
     KRYS_NODISCARD const InlineFormattingContext &GetFormattingContext() const noexcept
     {
       return _inlineFormattingContext;
     }
+
     KRYS_NODISCARD const ElementBox &RootBox() const noexcept;
     KRYS_NODISCARD const InlineLayoutState &GetLayoutState() const noexcept;
   };

@@ -23,7 +23,7 @@ namespace krys::ui
     {
       Playing,
       Paused,
-      Stopped
+      Stopped,
     };
 
     /// @brief The values a layer's animations produce at a time.
@@ -38,7 +38,7 @@ namespace krys::ui
     enum class KeepInternalState : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -84,14 +84,17 @@ namespace krys::ui
     {
       return _name;
     }
+
     KRYS_NODISCARD const boo::GraphicsLayerKeyframeValueList &Keyframes() const noexcept
     {
       return _keyframes;
     }
+
     KRYS_NODISCARD State GetState() const noexcept
     {
       return _state;
     }
+
     KRYS_NODISCARD boo::TimingFunction *GetTimingFunction() const noexcept
     {
       return _timingFunction.get();
@@ -119,14 +122,17 @@ namespace krys::ui
     {
       _translate = transform;
     }
+
     void SetRotate(const boo::TransformationMatrix &transform) noexcept
     {
       _rotate = transform;
     }
+
     void SetScale(const boo::TransformationMatrix &transform) noexcept
     {
       _scale = transform;
     }
+
     void SetTransform(const boo::TransformationMatrix &transform) noexcept
     {
       _transform = transform;
@@ -147,14 +153,17 @@ namespace krys::ui
     {
       return _animations.empty();
     }
+
     KRYS_NODISCARD size_t Size() const noexcept
     {
       return _animations.size();
     }
+
     KRYS_NODISCARD const List<TextureMapperAnimation> &Animations() const noexcept
     {
       return _animations;
     }
+
     KRYS_NODISCARD List<TextureMapperAnimation> &Animations() noexcept
     {
       return _animations;

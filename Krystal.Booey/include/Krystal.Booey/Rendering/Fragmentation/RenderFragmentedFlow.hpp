@@ -64,6 +64,7 @@ namespace krys::boo
 
     public:
       RenderFragmentContainerRange() noexcept = default;
+
       RenderFragmentContainerRange(RenderFragmentContainer *start, RenderFragmentContainer *end) noexcept
       {
         SetRange(start, end);
@@ -73,10 +74,12 @@ namespace krys::boo
 
       KRYS_NODISCARD RenderFragmentContainer *StartFragment() const noexcept;
       KRYS_NODISCARD RenderFragmentContainer *EndFragment() const noexcept;
+
       KRYS_NODISCARD bool RangeInvalidated() const noexcept
       {
         return _rangeInvalidated;
       }
+
       void ClearRangeInvalidated() noexcept
       {
         _rangeInvalidated = false;
@@ -116,6 +119,7 @@ namespace krys::boo
 
     virtual void AddFragmentToThread(RenderFragmentContainer *fragment) noexcept = 0;
     void RemoveFragmentFromThread(RenderFragmentContainer &fragment) noexcept;
+
     KRYS_NODISCARD Span<RenderFragmentContainer *const> RenderFragmentContainerList() const noexcept
     {
       return _fragmentList;
@@ -133,6 +137,7 @@ namespace krys::boo
     {
       return !_fragmentList.empty();
     }
+
     virtual void FragmentChangedWritingMode(RenderFragmentContainer *) noexcept
     {
     }
@@ -140,6 +145,7 @@ namespace krys::boo
     void ValidateFragments() noexcept;
     void InvalidateFragments(
       MarkingBehavior markingParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
+
     KRYS_NODISCARD bool HasValidFragmentInfo() const noexcept
     {
       return !_fragmentsInvalidated && !_fragmentList.empty();
@@ -166,10 +172,12 @@ namespace krys::boo
                               LayoutUnit /*spaceShortage*/) noexcept
     {
     }
+
     virtual void UpdateMinimumPageHeight(const RenderBlock *, LayoutUnit /*offset*/,
                                          LayoutUnit /*minHeight*/) noexcept
     {
     }
+
     virtual void UpdateSpaceShortageForSizeContainment(const RenderBlock *, LayoutUnit /*offset*/,
                                                        LayoutUnit /*shortage*/) noexcept
     {
@@ -184,6 +192,7 @@ namespace krys::boo
     {
       return _fragmentsHaveUniformLogicalWidth;
     }
+
     KRYS_NODISCARD bool FragmentsHaveUniformLogicalHeight() const noexcept
     {
       return _fragmentsHaveUniformLogicalHeight;
@@ -222,6 +231,7 @@ namespace krys::boo
     virtual bool AddForcedFragmentBreak(const RenderBlock *block, LayoutUnit offsetBreakInFragmentedFlow,
                                         RenderBox *breakChild, bool isBefore,
                                         LayoutUnit *offsetBreakAdjustment = nullptr) noexcept;
+
     virtual void ApplyBreakAfterContent(LayoutUnit) noexcept
     {
     }
@@ -230,6 +240,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD bool PageLogicalSizeChanged() const noexcept
     {
       return _pageLogicalSizeChanged;
@@ -283,6 +294,7 @@ namespace krys::boo
     {
       _currentFragmentMaintainer = currentFragmentMaintainer;
     }
+
     KRYS_NODISCARD RenderFragmentContainer *CurrentFragment() const noexcept;
 
     KRYS_NODISCARD bool CachedEnclosingFragmentedFlowNeedsUpdate() const noexcept override

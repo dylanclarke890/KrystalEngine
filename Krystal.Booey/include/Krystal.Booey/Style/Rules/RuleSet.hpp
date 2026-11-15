@@ -64,7 +64,7 @@ namespace krys::boo::style
     enum class Type : uint8
     {
       InvalidateStyle,
-      ResetStyle
+      ResetStyle,
     };
 
     Type ChangeType;
@@ -84,7 +84,7 @@ namespace krys::boo::style
           InvalidationRuleSets.push_back(krys::move(ruleSet));
         }
       }
-    };
+    }
   };
 
   /// @brief The style rules of a set of style sheets, bucketed by the rightmost compound selector of each
@@ -98,9 +98,9 @@ namespace krys::boo::style
     using RuleDataVector = SmallList<RuleData, 1>;
     using AtomRuleMap = HashMap<css::CSSOMStringAtom, UniquePtr<RuleDataVector>>;
 
-    static constexpr auto CascadeLayerPriorityForPresentationalHints =
+    constexpr static auto CascadeLayerPriorityForPresentationalHints =
       std::numeric_limits<CascadeLayerPriority>::min();
-    static constexpr auto CascadeLayerPriorityForUnlayered = std::numeric_limits<CascadeLayerPriority>::max();
+    constexpr static auto CascadeLayerPriorityForUnlayered = std::numeric_limits<CascadeLayerPriority>::max();
 
   private:
     using CascadeLayerIdentifier = uint32;

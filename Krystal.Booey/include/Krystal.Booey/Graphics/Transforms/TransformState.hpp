@@ -44,20 +44,20 @@ namespace krys::boo
     enum class TransformDirection : bool
     {
       ApplyTransform,
-      UnapplyInverseTransform
+      UnapplyInverseTransform,
     };
 
     enum class TransformAccumulation : bool
     {
       FlattenTransform,
-      AccumulateTransform
+      AccumulateTransform,
     };
 
     enum class TransformMatrixTracking : uint8
     {
       DoNotTrackTransformMatrix,
       TrackSVGCTMMatrix,
-      TrackSVGScreenCTMMatrix
+      TrackSVGScreenCTMMatrix,
     };
 
   private:
@@ -92,6 +92,7 @@ namespace krys::boo
     {
       *this = other;
     }
+
     TransformState &operator=(const TransformState &other) noexcept;
 
     void Reset(const FloatQuad &quad, const Maybe<FloatQuad> &secondaryQuad = null) noexcept;
@@ -102,6 +103,7 @@ namespace krys::boo
     {
       _tracking = tracking;
     }
+
     KRYS_NODISCARD TransformMatrixTracking GetTransformMatrixTracking() const noexcept
     {
       return _tracking;
@@ -112,6 +114,7 @@ namespace krys::boo
     {
       Move(LayoutSize(x, y), accumulate);
     }
+
     void Move(const LayoutSize &offset,
               TransformAccumulation accumulate = TransformAccumulation::FlattenTransform) noexcept;
 
@@ -137,11 +140,14 @@ namespace krys::boo
     {
       return _accumulatedOffset;
     }
+
     KRYS_NODISCARD TransformationMatrix *AccumulatedTransform() const noexcept
     {
       return _accumulatedTransform.get();
     }
+
     KRYS_NODISCARD UniquePtr<TransformationMatrix> ReleaseTrackedTransform() const noexcept;
+
     KRYS_NODISCARD TransformDirection Direction() const noexcept
     {
       return _direction;
@@ -157,11 +163,13 @@ namespace krys::boo
       return accumulate == TransformAccumulation::FlattenTransform
              && _direction != TransformDirection::ApplyTransform;
     }
+
     KRYS_NODISCARD bool ShouldFlattenAfter(TransformAccumulation accumulate) const noexcept
     {
       return accumulate == TransformAccumulation::FlattenTransform
              && _direction == TransformDirection::ApplyTransform;
     }
+
     KRYS_NODISCARD TransformDirection InverseDirection() const noexcept
     {
       return _direction == TransformDirection::ApplyTransform ? TransformDirection::UnapplyInverseTransform

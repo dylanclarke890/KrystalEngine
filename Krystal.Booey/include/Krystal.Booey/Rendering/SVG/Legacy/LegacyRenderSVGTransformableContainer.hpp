@@ -52,14 +52,17 @@ namespace krys::boo
     {
       return _localTransform;
     }
+
     void SetNeedsTransformUpdate() noexcept override
     {
       _needsTransformUpdate = true;
     }
+
     KRYS_NODISCARD bool DidTransformToRootUpdate() noexcept override
     {
       return _didTransformToRootUpdate;
     }
+
     KRYS_NODISCARD const FloatSize &AdditionalTranslation() const noexcept
     {
       return _additionalTranslation;
@@ -70,6 +73,7 @@ namespace krys::boo
     void GetElement() const = delete;
 
     bool CalculateLocalTransform() noexcept override;
+
     KRYS_NODISCARD AffineTransform LocalTransform() const noexcept override
     {
       return _localTransform;

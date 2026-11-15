@@ -13,6 +13,6 @@ namespace krys::boo::html
     PetiteCaps,
     AllPetiteCaps,
     Unicase,
-    TitlingCaps
+    TitlingCaps,
   };
 }

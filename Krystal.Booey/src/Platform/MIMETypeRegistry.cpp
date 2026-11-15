@@ -89,7 +89,8 @@ namespace krys::boo
       utf8_stringview Extension;
       utf8_stringview Type;
     };
-    static constexpr Mapping mappings[] = {
+
+    constexpr static Mapping mappings[] = {
       {u8"html", u8"text/html"},
       {u8"htm", u8"text/html"},
       {u8"shtml", u8"text/html"},

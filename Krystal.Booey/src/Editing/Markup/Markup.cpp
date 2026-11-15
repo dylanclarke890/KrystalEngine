@@ -157,7 +157,7 @@ namespace krys::boo
     enum class MSOListMode : bool
     {
       Preserve,
-      DoNotPreserve
+      DoNotPreserve,
     };
 
     /// @brief Serializes a range with the styles that give it its appearance inlined.
@@ -167,7 +167,7 @@ namespace krys::boo
       enum RangeFullySelectsNode : bool
       {
         DoesFullySelectNode,
-        DoesNotFullySelectNode
+        DoesNotFullySelectNode,
       };
 
     private:
@@ -180,7 +180,7 @@ namespace krys::boo
       enum class NodeTraversalMode : bool
       {
         EmitString,
-        DoNotEmitString
+        DoNotEmitString,
       };
 
       dom::Position _start;
@@ -232,6 +232,7 @@ namespace krys::boo
       {
         return _needRelativeStyleWrapper;
       }
+
       KRYS_NODISCARD bool NeedClearingDiv() const noexcept
       {
         return _needClearingDiv;
@@ -308,6 +309,7 @@ namespace krys::boo
       KRYS_NODISCARD bool ContainsOnlyASCII() const noexcept;
       void AppendStyleNodeOpenTag(utf8_string &out, css::StyleProperties *style, bool isBlock = false,
                                   Maybe<TextDirection> directionToAppend = null) noexcept;
+
       KRYS_NODISCARD static utf8_stringview StyleNodeCloseTag(bool isBlock = false) noexcept
       {
         return isBlock ? u8"</div>" : u8"</span>";
@@ -327,6 +329,7 @@ namespace krys::boo
                                   Namespaces *namespaces) noexcept override;
 
       void AppendText(utf8_string &out, const dom::Text &text) noexcept override;
+
       void AppendStartTag(utf8_string &out, const dom::Element &element, Namespaces *) noexcept override
       {
         AppendStartTag(out, element, false, DoesFullySelectNode);
@@ -1543,7 +1546,7 @@ namespace krys::boo
     auto &frame = page->MainFrame();
     frame.CreateView(IntSize {800, 600});
 
-    static constexpr utf8_stringview markup = u8"<!DOCTYPE html><html><head><meta name='color-scheme' "
+    constexpr static utf8_stringview markup = u8"<!DOCTYPE html><html><head><meta name='color-scheme' "
                                               u8"content='light dark'/></head><body></body></html>";
     DocumentWriter writer;
     writer.SetFrame(frame);

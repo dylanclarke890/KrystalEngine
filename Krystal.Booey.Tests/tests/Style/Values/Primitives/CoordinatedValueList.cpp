@@ -101,7 +101,6 @@ namespace krys::boo::style::tests
       return _image == InitialImage();
     }
   };
-
 }
 
 namespace krys::boo::style
@@ -112,7 +111,6 @@ namespace krys::boo::style
 
 namespace krys::boo::style::tests
 {
-
 #undef KRYS_FOR_EACH_TEST_LAYER_REFERENCE
 #undef KRYS_FOR_EACH_TEST_LAYER_ENUM
 #undef KRYS_FOR_EACH_TEST_LAYER_PROPERTY

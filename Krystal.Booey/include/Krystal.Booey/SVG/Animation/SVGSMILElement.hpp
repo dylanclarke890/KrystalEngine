@@ -54,13 +54,13 @@ namespace krys::boo::svg
     {
       RestartAlways,
       RestartWhenNotActive,
-      RestartNever
+      RestartNever,
     };
 
     enum FillMode : uint8
     {
       FillRemove,
-      FillFreeze
+      FillFreeze,
     };
 
   protected:
@@ -68,13 +68,13 @@ namespace krys::boo::svg
     {
       Inactive,
       Active,
-      Frozen
+      Frozen,
     };
 
     enum BeginOrEnd : uint8
     {
       Begin,
-      End
+      End,
     };
 
   private:
@@ -86,7 +86,7 @@ namespace krys::boo::svg
       {
         EventBase,
         Syncbase,
-        AccessKey
+        AccessKey,
       };
 
       Condition(Type, BeginOrEnd, dom::DOMString baseID, dom::DOMStringAtom name, SMILTime offset,

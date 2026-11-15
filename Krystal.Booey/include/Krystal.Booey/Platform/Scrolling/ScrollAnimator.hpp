@@ -76,14 +76,17 @@ namespace krys::boo
     /// @brief Scrolls to @p destinationOffset, from where a running animation has got to.
     /// @return Whether it's animating: false if it's already there.
     bool ScrollToOffsetWithAnimation(const FloatPoint &destinationOffset, ScrollType scrollType) noexcept;
+
     void StopAnimation() noexcept
     {
       _isAnimating = false;
     }
+
     KRYS_NODISCARD bool IsAnimating() const noexcept
     {
       return _isAnimating;
     }
+
     KRYS_NODISCARD const FloatPoint &DestinationOffset() const noexcept
     {
       return _destinationOffset;
@@ -97,14 +100,17 @@ namespace krys::boo
     {
       return _snapOffsetsInfo.has_value();
     }
+
     KRYS_NODISCARD const ScrollSnapOffsetsInfo *SnapOffsetsInfo() const noexcept
     {
       return _snapOffsetsInfo ? &*_snapOffsetsInfo : nullptr;
     }
+
     void SetSnapOffsetsInfo(ScrollSnapOffsetsInfo info) noexcept
     {
       _snapOffsetsInfo = krys::move(info);
     }
+
     void ClearSnapOffsetsInfo() noexcept;
 
     /// @brief @p offset, moved to where a scroll to it snaps.

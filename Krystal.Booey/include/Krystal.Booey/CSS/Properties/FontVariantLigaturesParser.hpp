@@ -47,7 +47,7 @@ namespace krys::boo::css
     {
       ConsumedValue,
       DisallowedValue,
-      UnknownValue
+      UnknownValue,
     };
 
     FontVariantLigaturesParser() noexcept = default;
@@ -121,5 +121,4 @@ namespace krys::boo::css
       return ValueList::CreateSpaceSeparated(krys::move(_result));
     }
   };
-
 }

@@ -39,7 +39,7 @@ namespace krys::boo
   enum class LogicalBoxAxis : uint8
   {
     Inline,
-    Block
+    Block,
   };
 
   enum class BoxAxis : uint8
@@ -300,9 +300,12 @@ namespace krys::boo
     }
 
     if (isTop)
+    {
       return isLeft ? BoxCorner::TopLeft : BoxCorner::TopRight;
+    }
     return isLeft ? BoxCorner::BottomLeft : BoxCorner::BottomRight;
   }
+
   KRYS_NODISCARD constexpr LogicalBoxCorner MapCornerPhysicalToLogical(const WritingMode writingMode,
                                                                        const BoxCorner boxCorner) noexcept
   {
@@ -322,7 +325,9 @@ namespace krys::boo
     }
 
     if (isBlockStart)
+    {
       return isInlineStart ? LogicalBoxCorner::StartStart : LogicalBoxCorner::StartEnd;
+    }
     return isInlineStart ? LogicalBoxCorner::EndStart : LogicalBoxCorner::EndEnd;
   }
 

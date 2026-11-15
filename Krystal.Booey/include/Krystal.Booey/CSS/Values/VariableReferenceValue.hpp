@@ -63,7 +63,7 @@ namespace krys::boo::css
     {
       None,
       Valid,
-      Invalid
+      Invalid,
     };
 
     const Ref<VariableData> _data;

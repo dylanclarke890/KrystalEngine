@@ -102,6 +102,7 @@ namespace krys::boo
                                        EnumSet<RenderSVGResourceMode>) noexcept final;
     void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>, const Path *,
                            const RenderElement *) noexcept final;
+
     KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &, RepaintRectCalculation) noexcept final
     {
       return FloatRect();

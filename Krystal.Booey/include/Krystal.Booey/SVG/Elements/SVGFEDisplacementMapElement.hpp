@@ -90,18 +90,22 @@ namespace krys::boo::svg
     {
       return _in1->CurrentValue();
     }
+
     KRYS_NODISCARD dom::DOMString In2() const noexcept
     {
       return _in2->CurrentValue();
     }
+
     KRYS_NODISCARD ChannelSelectorType XChannelSelector() const noexcept
     {
       return _xChannelSelector->CurrentValue<ChannelSelectorType>();
     }
+
     KRYS_NODISCARD ChannelSelectorType YChannelSelector() const noexcept
     {
       return _yChannelSelector->CurrentValue<ChannelSelectorType>();
     }
+
     KRYS_NODISCARD float Scale() const noexcept
     {
       return _scale->CurrentValue();
@@ -111,18 +115,22 @@ namespace krys::boo::svg
     {
       return *_in1;
     }
+
     KRYS_NODISCARD SVGAnimatedString &In2Animated() noexcept
     {
       return *_in2;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &XChannelSelectorAnimated() noexcept
     {
       return *_xChannelSelector;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &YChannelSelectorAnimated() noexcept
     {
       return *_yChannelSelector;
     }
+
     KRYS_NODISCARD SVGAnimatedNumber &ScaleAnimated() noexcept
     {
       return *_scale;
@@ -138,10 +146,12 @@ namespace krys::boo::svg
 
     bool SetFilterEffectAttribute(FilterEffect &effect,
                                   const dom::QualifiedName &attributeName) noexcept final;
+
     KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
       return {dom::DOMStringAtom(In1()), dom::DOMStringAtom(In2())};
     }
+
     KRYS_NODISCARD IntOutsets Outsets(const FloatRect &targetBoundingBox,
                                       SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept final;
     KRYS_NODISCARD RefPtr<FilterEffect>

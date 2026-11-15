@@ -80,7 +80,7 @@ namespace krys::boo::style
     enum class CheckDescendants : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     RefPtr<RuleSet> _ownedRuleSet;

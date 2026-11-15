@@ -118,11 +118,13 @@ namespace krys::boo::dom
 #pragma endregion
 
 #pragma region Node
+
     /// @see - https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
       return _target;
     }
+
 #pragma endregion
 
     void SetCreatedByParser(bool createdByParser) noexcept

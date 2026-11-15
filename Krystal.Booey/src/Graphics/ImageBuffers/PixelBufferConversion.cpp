@@ -39,7 +39,7 @@ namespace krys::boo
     enum class PixelFormatConversion : uint8
     {
       None,
-      Permute
+      Permute,
     };
 
     using SourcePixel = Span<const uint8, 4>;

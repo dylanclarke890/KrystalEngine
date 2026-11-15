@@ -80,6 +80,7 @@ namespace krys::boo::html
 
   protected:
     CanvasPath() noexcept = default;
+
     explicit CanvasPath(const Path &path) noexcept : _path(path)
     {
     }

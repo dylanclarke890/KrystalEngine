@@ -44,6 +44,7 @@ namespace krys::boo
 
       KRYS_NODISCARD bool operator==(const Inset &) const noexcept = default;
     };
+
     using InsetFunction = css::FunctionNotation<css::ValueId::Inset, Inset>;
 
     template <size_t I>
@@ -66,7 +67,6 @@ namespace krys::boo
     {
       KRYS_NODISCARD boo::Path operator()(const Inset &, const FloatRect &) noexcept;
     };
-
   }
 }
 

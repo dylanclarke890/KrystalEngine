@@ -55,10 +55,12 @@ namespace krys::pal::win32
     {
       return _window;
     }
+
     KRYS_NODISCARD IAccessibilityTree &Tree() const noexcept
     {
       return _tree;
     }
+
     /// @brief The window's element.
     KRYS_NODISCARD UIAElement &Root() noexcept;
     /// @brief @p node's element (made if it has none); the window's for 0.

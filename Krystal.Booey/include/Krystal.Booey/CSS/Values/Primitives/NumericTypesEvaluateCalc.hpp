@@ -34,7 +34,7 @@ namespace krys::boo::css
 
   // MARK: - Requires Conversion Data
 
-  KRYS_NODISCARD inline bool RequiresConversionData(Numeric auto const &primitive) noexcept
+  KRYS_NODISCARD inline bool RequiresConversionData(const Numeric auto &primitive) noexcept
   {
     return krys::SwitchOn(primitive, [&](const auto &value) { return RequiresConversionData(value); });
   }
@@ -100,7 +100,7 @@ namespace krys::boo::css
                      : null;
   }
 
-  KRYS_NODISCARD inline bool IsUnevaluatedCalc(Numeric auto const &value) noexcept
+  KRYS_NODISCARD inline bool IsUnevaluatedCalc(const Numeric auto &value) noexcept
   {
     return krys::SwitchOn(value, [&](const auto &alternative) { return IsUnevaluatedCalc(alternative); });
   }

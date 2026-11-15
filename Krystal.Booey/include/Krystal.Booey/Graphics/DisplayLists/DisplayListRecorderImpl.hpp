@@ -40,9 +40,11 @@ namespace krys::boo::display_list
   public:
     RecorderImpl(const GraphicsContextState &, const FloatRect &initialClip,
                  const AffineTransform &) noexcept;
+
     explicit RecorderImpl(FloatSize initialClipSize) noexcept : RecorderImpl({}, {{}, initialClipSize}, {})
     {
     }
+
     virtual ~RecorderImpl() noexcept;
 
     KRYS_NODISCARD Ref<const DisplayList> TakeDisplayList() noexcept;

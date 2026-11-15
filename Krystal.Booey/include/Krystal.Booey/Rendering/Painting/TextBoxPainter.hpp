@@ -106,6 +106,7 @@ namespace krys::boo
     {
       return _textBox;
     }
+
     KRYS_NODISCARD inline_iterator::TextBoxIterator MakeIterator() const noexcept;
 
     void PaintBackgroundFill() noexcept;
@@ -149,6 +150,7 @@ namespace krys::boo
       TextDecorationPainter::Styles TextDecorationStyles;
       FloatPoint Location;
     };
+
     using DecoratingBoxList = List<DecoratingBox>;
     /// @brief The inline boxes whose underlines and overlines @p textBox paints: its parent and the ancestors
     /// that decorate it, innermost first.

@@ -66,14 +66,14 @@ namespace krys::boo::layout
   enum class IsFirstFormattedLine : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class LineEndingTruncationPolicy : uint8
   {
     NoTruncation,
     WhenContentOverflowsInInlineDirection,
-    WhenContentOverflowsInBlockDirection
+    WhenContentOverflowsInBlockDirection,
   };
 
   struct ExpansionInfo
@@ -90,6 +90,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD friend bool operator==(const InlineItemPosition &,
                                           const InlineItemPosition &) noexcept = default;
+
     KRYS_NODISCARD explicit operator bool() const noexcept
     {
       return Index || Offset;
@@ -101,19 +102,23 @@ namespace krys::boo::layout
     InlineItemRange(InlineItemPosition start, InlineItemPosition end) noexcept : Start(start), End(end)
     {
     }
+
     InlineItemRange(size_t startIndex, size_t endIndex) noexcept : Start {startIndex, {}}, End {endIndex, {}}
     {
     }
+
     InlineItemRange() noexcept = default;
 
     KRYS_NODISCARD size_t StartIndex() const noexcept
     {
       return Start.Index;
     }
+
     KRYS_NODISCARD size_t EndIndex() const noexcept
     {
       return End.Index;
     }
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return StartIndex() == EndIndex() && Start.Offset == End.Offset;
@@ -133,6 +138,7 @@ namespace krys::boo::layout
 
   public:
     IndexRange() noexcept = default;
+
     IndexRange(size_t begin, size_t end) noexcept : _begin(begin), _end(end)
     {
       krys_debug_assert(_end >= _begin);
@@ -147,18 +153,22 @@ namespace krys::boo::layout
     {
       return _begin;
     }
+
     KRYS_NODISCARD size_t End() const noexcept
     {
       return _end;
     }
+
     KRYS_NODISCARD size_t Distance() const noexcept
     {
       return _end - _begin;
     }
+
     KRYS_NODISCARD explicit operator bool() const noexcept
     {
       return _begin != _end;
     }
+
     KRYS_NODISCARD friend bool operator==(const IndexRange &, const IndexRange &) noexcept = default;
   };
 

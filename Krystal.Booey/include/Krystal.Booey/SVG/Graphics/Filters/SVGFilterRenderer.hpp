@@ -79,6 +79,7 @@ namespace krys::boo
     {
       return _expression;
     }
+
     KRYS_NODISCARD const FilterEffectVector &Effects() const noexcept
     {
       return _effects;
@@ -118,10 +119,12 @@ namespace krys::boo
     KRYS_NODISCARD static Maybe<BuiltExpression>
       BuildExpression(svg::SVGElement *contextElement, svg::SVGFilterElement &filterElement,
                       const SVGFilterRenderer &filter, const GraphicsContext &destinationContext) noexcept;
+
     void SetExpression(SVGFilterExpression &&expression) noexcept
     {
       _expression = krys::move(expression);
     }
+
     void SetEffects(FilterEffectVector &&effects) noexcept
     {
       _effects = krys::move(effects);

@@ -35,7 +35,7 @@ namespace krys::boo::style
   enum class ShadowStyle : bool
   {
     Normal,
-    Inset
+    Inset,
   };
 
   template <typename T>
@@ -47,13 +47,14 @@ namespace krys::boo::style
 
   template <typename ShadowType>
   using ShadowList = css::CommaSeparatedFixedList<ShadowType>;
+
   template <typename ShadowType>
   struct Shadows : css::ListOrNone<ShadowList<ShadowType>>
   {
     using css::ListOrNone<ShadowList<ShadowType>>::ListOrNone;
   };
 
-  KRYS_NODISCARD LayoutUnit PaintingExtent(Shadow auto const &shadow,
+  KRYS_NODISCARD LayoutUnit PaintingExtent(const Shadow auto &shadow,
                                            const style::ZoomFactor &zoomFactor) noexcept
   {
     // Blurring uses a Gaussian function whose std. deviation is _radius/2, and which in theory
@@ -63,7 +64,7 @@ namespace krys::boo::style
     return LayoutUnit {std::ceil(shadow.Blur.ResolveZoom(zoomFactor) * radiusExtentMultiplier)};
   }
 
-  KRYS_NODISCARD LayoutUnit PaintingExtentAndSpread(Shadow auto const &shadow,
+  KRYS_NODISCARD LayoutUnit PaintingExtentAndSpread(const Shadow auto &shadow,
                                                     const style::ZoomFactor &zoomFactor) noexcept
   {
     return PaintingExtent(shadow, zoomFactor) + PaintingSpread(shadow, zoomFactor);

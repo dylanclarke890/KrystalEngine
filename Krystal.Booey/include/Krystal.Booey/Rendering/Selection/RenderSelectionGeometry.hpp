@@ -56,6 +56,7 @@ namespace krys::boo
     {
       return _repaintContainer;
     }
+
     KRYS_NODISCARD RenderObject::HighlightState State() const noexcept
     {
       return _state;
@@ -77,10 +78,12 @@ namespace krys::boo
     RenderSelectionGeometry(RenderObject &renderer, bool clipToVisibleContent) noexcept;
 
     void Repaint() noexcept;
+
     KRYS_NODISCARD const List<FloatQuad> &CollectedSelectionQuads() const noexcept
     {
       return _collectedSelectionQuads;
     }
+
     KRYS_NODISCARD LayoutRect Rect() const noexcept
     {
       return _rect;
@@ -98,6 +101,7 @@ namespace krys::boo
     explicit RenderBlockSelectionGeometry(RenderBlock &renderer) noexcept;
 
     void Repaint() noexcept;
+
     KRYS_NODISCARD GapRects Rects() const noexcept
     {
       return _rects;

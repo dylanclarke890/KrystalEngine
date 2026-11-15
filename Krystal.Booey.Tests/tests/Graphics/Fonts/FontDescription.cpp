@@ -326,5 +326,4 @@ namespace krys::boo::tests
       CHECK(cascade.IsSmallCaps());
     }
   }
-
 }

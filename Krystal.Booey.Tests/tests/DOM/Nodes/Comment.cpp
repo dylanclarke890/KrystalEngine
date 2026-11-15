@@ -24,8 +24,8 @@ namespace krys::boo::dom::tests
       {
       }
     };
-
   }
+
   TEST_CASE("Comment: constructed, or created as a comment node, with the data in the document",
             "[DOM][Comment][dom:interface-comment][dom:dom-comment-comment][dom:create-a-comment-node]")
   {

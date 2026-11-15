@@ -42,9 +42,11 @@ namespace krys::boo::style
     FontFeatureSettings(css::keywords::Normal) noexcept : _platform {}
     {
     }
+
     FontFeatureSettings(boo::FontFeatureSettings &&platform) noexcept : _platform {krys::move(platform)}
     {
     }
+
     FontFeatureSettings(const boo::FontFeatureSettings &platform) noexcept : _platform {platform}
     {
     }
@@ -53,6 +55,7 @@ namespace krys::boo::style
     {
       return _platform;
     }
+
     KRYS_NODISCARD boo::FontFeatureSettings TakePlatform() noexcept
     {
       return krys::move(_platform);
@@ -71,6 +74,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD FontFeatureSettings operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   template <>
   struct CSSValueCreation<FontFeatureSettings>
   {

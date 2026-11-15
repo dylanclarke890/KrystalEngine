@@ -60,21 +60,27 @@ namespace krys::boo
     virtual void WillPaintScrollbar(GraphicsContext &, Scrollbar &) noexcept
     {
     }
+
     virtual void DidPaintScrollbar(GraphicsContext &, Scrollbar &) noexcept
     {
     }
+
     virtual void PaintScrollbarBackground(GraphicsContext &, Scrollbar &) noexcept
     {
     }
+
     virtual void PaintTrackBackground(GraphicsContext &, Scrollbar &, const IntRect &) noexcept
     {
     }
+
     virtual void PaintTrackPiece(GraphicsContext &, Scrollbar &, const IntRect &, ScrollbarPart) noexcept
     {
     }
+
     virtual void PaintButton(GraphicsContext &, Scrollbar &, const IntRect &, ScrollbarPart) noexcept
     {
     }
+
     virtual void PaintThumb(GraphicsContext &, Scrollbar &, const IntRect &) noexcept
     {
     }

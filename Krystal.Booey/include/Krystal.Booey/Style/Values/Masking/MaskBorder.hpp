@@ -57,7 +57,7 @@ namespace krys::boo::style
   enum class MaskBorderSliceOverride : bool
   {
     None,
-    AlwaysFill
+    AlwaysFill,
   };
 
   template <>

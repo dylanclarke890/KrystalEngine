@@ -42,14 +42,17 @@ namespace krys::boo::style
         : _platformSlope {std::nullopt}, _platformAxis {FontStyleAxis::slnt}
     {
     }
+
     FontStyle(css::keywords::Italic) noexcept
         : _platformSlope {ItalicValue()}, _platformAxis {FontStyleAxis::ital}
     {
     }
+
     FontStyle(css::keywords::Oblique) noexcept
         : _platformSlope {ItalicValue()}, _platformAxis {FontStyleAxis::slnt}
     {
     }
+
     FontStyle(Angle angle) noexcept
         : _platformSlope {FontSelectionValue::ClampFloat(static_cast<float>(angle.Value))},
           _platformAxis {FontStyleAxis::slnt}
@@ -65,10 +68,12 @@ namespace krys::boo::style
     {
       return !_platformSlope && _platformAxis == FontStyleAxis::slnt;
     }
+
     KRYS_NODISCARD bool IsItalic() const noexcept
     {
       return _platformSlope == ItalicValue() && _platformAxis == FontStyleAxis::ital;
     }
+
     KRYS_NODISCARD bool IsOblique() const noexcept
     {
       return _platformSlope.has_value() && _platformAxis == FontStyleAxis::slnt;
@@ -104,6 +109,7 @@ namespace krys::boo::style
     {
       return _platformSlope;
     }
+
     KRYS_NODISCARD FontStyleAxis PlatformAxis() const noexcept
     {
       return _platformAxis;
@@ -130,6 +136,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD FontStyle operator()(BuilderState &, const css::Value &) noexcept;
   };
+
   // `FontStyle` is special-cased to return a `css::FontStyleWithAngleValue`.
   template <>
   struct CSSValueCreation<FontStyle>

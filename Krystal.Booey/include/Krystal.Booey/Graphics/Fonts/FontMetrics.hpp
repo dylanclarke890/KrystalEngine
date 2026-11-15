@@ -64,6 +64,7 @@ namespace krys::boo
     {
       return _unitsPerEm;
     }
+
     void SetUnitsPerEm(unsigned unitsPerEm) noexcept
     {
       _unitsPerEm = unitsPerEm;
@@ -73,6 +74,7 @@ namespace krys::boo
     {
       return Ascent(baselineType) + Descent(baselineType);
     }
+
     KRYS_NODISCARD int IntHeight(FontBaseline baselineType = FontBaseline::Alphabetic) const noexcept
     {
       return IntAscent(baselineType) + IntDescent(baselineType);
@@ -86,6 +88,7 @@ namespace krys::boo
       }
       return Height() / 2;
     }
+
     KRYS_NODISCARD int IntAscent(FontBaseline baselineType = FontBaseline::Alphabetic) const noexcept
     {
       if (baselineType == FontBaseline::Alphabetic)
@@ -94,6 +97,7 @@ namespace krys::boo
       }
       return IntHeight() - IntHeight() / 2;
     }
+
     void SetAscent(float ascent) noexcept
     {
       _ascent = ascent;
@@ -108,6 +112,7 @@ namespace krys::boo
       }
       return Height() / 2;
     }
+
     KRYS_NODISCARD int IntDescent(FontBaseline baselineType = FontBaseline::Alphabetic) const noexcept
     {
       if (baselineType == FontBaseline::Alphabetic)
@@ -116,6 +121,7 @@ namespace krys::boo
       }
       return IntHeight() / 2;
     }
+
     void SetDescent(float descent) noexcept
     {
       _descent = descent;
@@ -126,10 +132,12 @@ namespace krys::boo
     {
       return _lineGap.value_or(0.f);
     }
+
     KRYS_NODISCARD int IntLineGap() const noexcept
     {
       return _intLineGap;
     }
+
     void SetLineGap(float lineGap) noexcept
     {
       _lineGap = lineGap;
@@ -140,10 +148,12 @@ namespace krys::boo
     {
       return _lineSpacing.value_or(0.f);
     }
+
     KRYS_NODISCARD int IntLineSpacing() const noexcept
     {
       return _intLineSpacing;
     }
+
     void SetLineSpacing(float lineSpacing) noexcept
     {
       _lineSpacing = lineSpacing;
@@ -154,6 +164,7 @@ namespace krys::boo
     {
       return _xHeight;
     }
+
     void SetXHeight(float xHeight) noexcept
     {
       _xHeight = xHeight;
@@ -163,10 +174,12 @@ namespace krys::boo
     {
       return _capHeight;
     }
+
     KRYS_NODISCARD int IntCapHeight() const noexcept
     {
       return _intCapHeight;
     }
+
     void SetCapHeight(float capHeight) noexcept
     {
       _capHeight = capHeight;
@@ -177,6 +190,7 @@ namespace krys::boo
     {
       return _zeroWidth;
     }
+
     void SetZeroWidth(float zeroWidth) noexcept
     {
       _zeroWidth = zeroWidth;
@@ -186,6 +200,7 @@ namespace krys::boo
     {
       return _ideogramWidth;
     }
+
     void SetIdeogramWidth(float ideogramWidth) noexcept
     {
       _ideogramWidth = ideogramWidth;
@@ -195,6 +210,7 @@ namespace krys::boo
     {
       return _underlinePosition;
     }
+
     void SetUnderlinePosition(float underlinePosition) noexcept
     {
       _underlinePosition = underlinePosition;
@@ -204,6 +220,7 @@ namespace krys::boo
     {
       return _underlineThickness;
     }
+
     void SetUnderlineThickness(float underlineThickness) noexcept
     {
       _underlineThickness = underlineThickness;

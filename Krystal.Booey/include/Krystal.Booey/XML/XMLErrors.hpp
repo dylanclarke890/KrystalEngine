@@ -50,7 +50,7 @@ namespace krys::boo::xml
     {
       Warning,
       NonFatal,
-      Fatal
+      Fatal,
     };
 
   private:

@@ -66,7 +66,7 @@ namespace krys::boo::css
     enum class IncludeRightmost : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     struct ParentStackFrame
@@ -78,7 +78,7 @@ namespace krys::boo::css
     List<ParentStackFrame> _parentStack;
 
     // With 100 unique strings in the filter, 2^12 slot table has false positive rate of ~0.2%.
-    static constexpr uint32 BloomFilterKeyBits = 12;
+    constexpr static uint32 BloomFilterKeyBits = 12;
     CountingBloomFilter<BloomFilterKeyBits> _ancestorIdentifierFilter;
 
   public:

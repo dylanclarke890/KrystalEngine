@@ -10,7 +10,7 @@ namespace krys::pal
   {
     SRGB,
     DisplayP3,
-    Rec2020
+    Rec2020,
   };
 
   /// @brief A colour's chromaticity: its CIE 1931 x and y.

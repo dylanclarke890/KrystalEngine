@@ -37,6 +37,7 @@
 namespace krys::boo
 {
   class RenderStyle;
+
   class StyleGridData : public RefCounted<StyleGridData>
   {
   public:
@@ -44,6 +45,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleGridData);
     }
+
     KRYS_NODISCARD Ref<StyleGridData> Copy() const noexcept;
 
     bool operator==(const StyleGridData &) const noexcept;

@@ -45,7 +45,7 @@ namespace krys::boo::svg
   {
     SVGLengthAdjustUnknown,
     SVGLengthAdjustSpacing,
-    SVGLengthAdjustSpacingAndGlyphs
+    SVGLengthAdjustSpacingAndGlyphs,
   };
 
   template <>
@@ -110,7 +110,7 @@ namespace krys::boo::svg
     {
       LENGTHADJUST_UNKNOWN = SVGLengthAdjustUnknown,
       LENGTHADJUST_SPACING = SVGLengthAdjustSpacing,
-      LENGTHADJUST_SPACINGANDGLYPHS = SVGLengthAdjustSpacingAndGlyphs
+      LENGTHADJUST_SPACINGANDGLYPHS = SVGLengthAdjustSpacingAndGlyphs,
     };
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getNumberOfChars
@@ -140,16 +140,19 @@ namespace krys::boo::svg
     {
       return _specifiedTextLength;
     }
+
     KRYS_NODISCARD const SVGLengthValue &TextLength() const noexcept
     {
       return _textLength->CurrentValue();
     }
+
     KRYS_NODISCARD SVGLengthAdjustType LengthAdjust() const noexcept
     {
       return _lengthAdjust->CurrentValue<SVGLengthAdjustType>();
     }
 
     KRYS_NODISCARD SVGAnimatedLength &TextLengthAnimated() noexcept;
+
     KRYS_NODISCARD SVGAnimatedEnumeration &LengthAdjustAnimated() noexcept
     {
       return *_lengthAdjust;

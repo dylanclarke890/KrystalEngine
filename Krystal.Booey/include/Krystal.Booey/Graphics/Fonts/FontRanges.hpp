@@ -36,13 +36,13 @@ namespace krys::boo
   enum class ExternalResourceDownloadPolicy : bool
   {
     Forbid,
-    Allow
+    Allow,
   };
 
   enum class IsGenericFontFamily : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Gives the font of a range of a family, which may still be loading.

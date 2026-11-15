@@ -77,7 +77,7 @@ namespace krys::boo::html
     // 6. second
     // 7. millisecond
     // 8. AM/PM
-    static constexpr size_t MaximumNumberOfFields = 8;
+    constexpr static size_t MaximumNumberOfFields = 8;
 
     SmallList<Ref<DateTimeFieldElement>, MaximumNumberOfFields> _fields;
     // The owner clears this when it goes (RemoveEditControlOwner).

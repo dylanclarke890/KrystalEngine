@@ -86,6 +86,7 @@ namespace krys::boo::inline_iterator
     {
       return Get();
     }
+
     KRYS_NODISCARD const SVGTextBox *operator->() const noexcept
     {
       return &Get();

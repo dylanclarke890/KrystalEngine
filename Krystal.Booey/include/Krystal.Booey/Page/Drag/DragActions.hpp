@@ -37,7 +37,7 @@ namespace krys::boo
   enum class DragDestinationAction : uint8
   {
     DHTML,
-    Edit
+    Edit,
   };
 }
 
@@ -58,7 +58,7 @@ namespace krys::boo
     Image,
     Link,
     Selection,
-    Color
+    Color,
   };
 }
 
@@ -80,7 +80,7 @@ namespace krys::boo
     Generic,
     Private,
     Move,
-    Delete
+    Delete,
   };
 }
 
@@ -97,13 +97,13 @@ namespace krys::boo
   enum class MayExtendDragSession : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class HasNonDefaultPasteboardData : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief How a drag over a page is handled: not at all, by editing plain or rich text, by a file input
@@ -115,6 +115,6 @@ namespace krys::boo
     EditRichText,
     UploadFile,
     SetColor,
-    NonDefault
+    NonDefault,
   };
 }

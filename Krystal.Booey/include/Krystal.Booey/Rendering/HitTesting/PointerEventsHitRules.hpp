@@ -31,7 +31,7 @@ namespace krys::boo
   {
     SVGImage,
     SVGPath,
-    SVGText
+    SVGText,
   };
 
   /// @brief What `pointer-events` lets SVG graphics be hit by: their fill, stroke or bounding box, and

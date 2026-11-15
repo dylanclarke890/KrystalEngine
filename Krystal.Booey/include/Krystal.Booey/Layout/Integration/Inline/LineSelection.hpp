@@ -41,6 +41,7 @@ namespace krys::boo
     {
       return lineBox.ContentLogicalTopAdjustedForPrecedingLineBox();
     }
+
     KRYS_NODISCARD static float LogicalBottom(const inline_iterator::LineBox &lineBox) noexcept
     {
       return lineBox.ContentLogicalBottomAdjustedForFollowingLineBox();

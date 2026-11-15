@@ -48,7 +48,7 @@ namespace krys::boo
   enum class HitTestProgress
   {
     Stop,
-    Continue
+    Continue,
   };
 
   /// @brief What a hit test found: the innermost node under the point, the link element it's in, the point in
@@ -85,6 +85,7 @@ namespace krys::boo
     {
       return _scrollbar.get();
     }
+
     void SetScrollbar(RefPtr<Scrollbar> &&scrollbar) noexcept
     {
       _scrollbar = krys::move(scrollbar);
@@ -100,12 +101,14 @@ namespace krys::boo
     HitTestResult &operator=(const HitTestResult &other) noexcept;
 
     void SetInnerNode(dom::Node *node) noexcept;
+
     KRYS_NODISCARD dom::Node *InnerNode() const noexcept
     {
       return _innerNode.get();
     }
 
     void SetInnerNonSharedNode(dom::Node *node) noexcept;
+
     KRYS_NODISCARD dom::Node *InnerNonSharedNode() const noexcept
     {
       return _innerNonSharedNode.get();
@@ -114,6 +117,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::Element *InnerNonSharedElement() const noexcept;
 
     void SetURLElement(dom::Element *element) noexcept;
+
     KRYS_NODISCARD dom::Element *URLElement() const noexcept
     {
       return _innerURLElement.get();
@@ -123,6 +127,7 @@ namespace krys::boo
     {
       return _isOverWidget;
     }
+
     void SetIsOverWidget(bool isOverWidget) noexcept
     {
       _isOverWidget = isOverWidget;
@@ -132,6 +137,7 @@ namespace krys::boo
     {
       return _pseudoElementIdentifier;
     }
+
     void SetPseudoElementIdentifier(Maybe<style::PseudoElementIdentifier> pseudoElementIdentifier) noexcept
     {
       _pseudoElementIdentifier = pseudoElementIdentifier;
@@ -148,6 +154,7 @@ namespace krys::boo
     {
       return _hitTestLocation.Point();
     }
+
     KRYS_NODISCARD IntPoint RoundedPointInMainFrame() const noexcept
     {
       return RoundedIntPoint(PointInMainFrame());
@@ -158,10 +165,12 @@ namespace krys::boo
     {
       return LayoutPoint(_doublePointInInnerNodeFrame);
     }
+
     KRYS_NODISCARD const DoublePoint &DoublePointInInnerNodeFrame() const noexcept
     {
       return _doublePointInInnerNodeFrame;
     }
+
     KRYS_NODISCARD LocalFrame *InnerNodeFrame() const noexcept;
 
     /// @brief The hit-tested point in the coordinates of the inner node's renderer.
@@ -169,6 +178,7 @@ namespace krys::boo
     {
       return _localPoint;
     }
+
     void SetLocalPoint(const LayoutPoint &point) noexcept;
 
     /// @brief Moves the inner nodes out of user agent shadow trees, to their hosts.
@@ -213,6 +223,7 @@ namespace krys::boo
     {
       return InnerNode();
     }
+
     /// @brief The inner node, or the nearest element above it.
     KRYS_NODISCARD dom::Element *TargetElement() const noexcept;
 

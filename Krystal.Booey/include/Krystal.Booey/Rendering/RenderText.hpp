@@ -121,6 +121,7 @@ namespace krys::boo
       bool HasBreak {false};
       bool EndsWithBreak {false};
     };
+
     KRYS_NODISCARD Widths TrimmedPreferredWidths(float leadWidth, bool &stripFrontSpaces) noexcept;
 
     KRYS_NODISCARD float HangablePunctuationStartWidth(size_t index) const noexcept;
@@ -131,6 +132,7 @@ namespace krys::boo
 
     KRYS_NODISCARD float MinLogicalWidth() const noexcept;
     KRYS_NODISCARD float MaxLogicalWidth() const noexcept;
+
     void ResetMinMaxWidth() noexcept
     {
       _minWidth = null;
@@ -201,6 +203,7 @@ namespace krys::boo
     {
       return true;
     }
+
     void SetSelectionState(HighlightState state) noexcept final;
     KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
                                                       bool clipToVisibleContent = true) noexcept final;
@@ -220,10 +223,12 @@ namespace krys::boo
     {
       return _fontCodePath;
     }
+
     KRYS_NODISCARD bool CanUseSimpleFontCodePath() const noexcept
     {
       return FontCodePath() == FontCascade::CodePath::Simple;
     }
+
     KRYS_NODISCARD bool ShouldUseSimpleGlyphOverflowCodePath() const noexcept
     {
       return FontCodePath() == FontCascade::CodePath::SimpleWithGlyphOverflow;
@@ -233,6 +238,7 @@ namespace krys::boo
     {
       return _needsVisualReordering;
     }
+
     void SetNeedsVisualReordering() noexcept
     {
       _needsVisualReordering = true;
@@ -242,26 +248,32 @@ namespace krys::boo
     {
       _canUseSimplifiedTextMeasuring = canUseSimplifiedTextMeasuring;
     }
+
     KRYS_NODISCARD Maybe<bool> CanUseSimplifiedTextMeasuring() const noexcept
     {
       return _canUseSimplifiedTextMeasuring;
     }
+
     void SetHasPositionDependentContentWidth(bool hasPositionDependentContentWidth) noexcept
     {
       _hasPositionDependentContentWidth = hasPositionDependentContentWidth;
     }
+
     KRYS_NODISCARD Maybe<bool> HasPositionDependentContentWidth() const noexcept
     {
       return _hasPositionDependentContentWidth;
     }
+
     void SetHasStrongDirectionalityContent(bool hasStrongDirectionalityContent) noexcept
     {
       _hasStrongDirectionalityContent = hasStrongDirectionalityContent;
     }
+
     KRYS_NODISCARD Maybe<bool> HasStrongDirectionalityContent() const noexcept
     {
       return _hasStrongDirectionalityContent;
     }
+
     KRYS_NODISCARD bool ContainsOnlyCSSWhitespace(size_t from, size_t length) const noexcept;
 
     /// @brief The rendered text, but with backslashes rather than yen signs.
@@ -274,6 +286,7 @@ namespace krys::boo
     {
       return _inlineWrapperForDisplayContents;
     }
+
     void SetInlineWrapperForDisplayContents(RenderInline *wrapper) noexcept;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept final

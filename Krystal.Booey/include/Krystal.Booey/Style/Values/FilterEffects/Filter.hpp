@@ -55,10 +55,12 @@ namespace krys::boo
       {
         return *Value;
       }
+
       KRYS_NODISCARD const FilterOperation &Platform() const noexcept
       {
         return *Value;
       }
+
       KRYS_NODISCARD const FilterOperation *operator->() const noexcept
       {
         return Value.get();
@@ -110,6 +112,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD css::FilterData operator()(const FilterValue &, const RenderStyle &) noexcept;
     };
+
     template <>
     struct ToStyle<css::FilterData>
     {
@@ -121,16 +124,19 @@ namespace krys::boo
     {
       KRYS_NODISCARD css::Filter operator()(const Filter &, const RenderStyle &) noexcept;
     };
+
     template <>
     struct ToStyle<css::Filter>
     {
       KRYS_NODISCARD Filter operator()(const css::Filter &, const BuilderState &) noexcept;
     };
+
     template <>
     struct CSSValueConversion<Filter>
     {
       KRYS_NODISCARD Filter operator()(BuilderState &, const css::Value &) noexcept;
     };
+
     template <>
     struct CSSValueCreation<Filter>
     {
@@ -153,11 +159,13 @@ namespace krys::boo
     struct Blending<Filter>
     {
       KRYS_NODISCARD bool CanBlend(const Filter &, const Filter &, CompositeOperation) noexcept;
+
       KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const Filter &,
                                                                                   const Filter &) noexcept
       {
         return true;
       }
+
       KRYS_NODISCARD Filter Blend(const Filter &, const Filter &, const BlendingContext &) noexcept;
     };
 
@@ -168,6 +176,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD Ref<FilterOperation> operator()(const FilterValue &) noexcept;
     };
+
     template <>
     struct ToPlatform<Filter>
     {

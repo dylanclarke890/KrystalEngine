@@ -68,6 +68,7 @@ namespace krys::boo::layout
       krys_debug_assert(verticalGap >= 0);
       _clearGapAfterLastLine = verticalGap;
     }
+
     KRYS_NODISCARD InlineLayoutUnit ClearGapAfterLastLine() const noexcept
     {
       return _clearGapAfterLastLine;
@@ -77,6 +78,7 @@ namespace krys::boo::layout
     {
       _clearGapBeforeFirstLine = verticalGap;
     }
+
     KRYS_NODISCARD InlineLayoutUnit ClearGapBeforeFirstLine() const noexcept
     {
       return _clearGapBeforeFirstLine;
@@ -86,6 +88,7 @@ namespace krys::boo::layout
     {
       return _parentBlockLayoutState;
     }
+
     KRYS_NODISCARD BlockLayoutState &ParentBlockLayoutState() noexcept
     {
       return _parentBlockLayoutState;
@@ -95,6 +98,7 @@ namespace krys::boo::layout
     {
       return _parentBlockLayoutState.GetPlacedFloats();
     }
+
     KRYS_NODISCARD PlacedFloats &GetPlacedFloats() noexcept
     {
       return _parentBlockLayoutState.GetPlacedFloats();
@@ -104,6 +108,7 @@ namespace krys::boo::layout
     {
       _availableLineWidthOverride = krys::move(availableLineWidthOverride);
     }
+
     KRYS_NODISCARD const AvailableLineWidthOverride &GetAvailableLineWidthOverride() const noexcept
     {
       return _availableLineWidthOverride;
@@ -113,6 +118,7 @@ namespace krys::boo::layout
     {
       _lineCount = lineCount;
     }
+
     KRYS_NODISCARD size_t LineCount() const noexcept
     {
       return _lineCount;
@@ -122,6 +128,7 @@ namespace krys::boo::layout
     {
       _lineCountWithInlineContentIncludingNestedBlocks = lineCount;
     }
+
     KRYS_NODISCARD size_t LineCountWithInlineContentIncludingNestedBlocks() const noexcept
     {
       return _lineCountWithInlineContentIncludingNestedBlocks;
@@ -131,14 +138,17 @@ namespace krys::boo::layout
     {
       _hyphenateLimitLines = hyphenateLimitLines;
     }
+
     void IncrementSuccessiveHyphenatedLineCount() noexcept
     {
       ++_successiveHyphenatedLineCount;
     }
+
     void ResetSuccessiveHyphenatedLineCount() noexcept
     {
       _successiveHyphenatedLineCount = 0;
     }
+
     KRYS_NODISCARD bool IsHyphenationDisabled() const noexcept
     {
       return _hyphenateLimitLines && *_hyphenateLimitLines <= _successiveHyphenatedLineCount;
@@ -148,6 +158,7 @@ namespace krys::boo::layout
     {
       _firstLineStartTrimForInitialLetter = trimmedThisMuch;
     }
+
     KRYS_NODISCARD InlineLayoutUnit FirstLineStartTrimForInitialLetter() const noexcept
     {
       return _firstLineStartTrimForInitialLetter;
@@ -157,6 +168,7 @@ namespace krys::boo::layout
     {
       _inStandardsMode = true;
     }
+
     KRYS_NODISCARD bool InStandardsMode() const noexcept
     {
       return _inStandardsMode;
@@ -166,6 +178,7 @@ namespace krys::boo::layout
     {
       _shouldShapeTextAcrossInlineBoxes = true;
     }
+
     KRYS_NODISCARD bool ShouldShapeTextAcrossInlineBoxes() const noexcept
     {
       return _shouldShapeTextAcrossInlineBoxes;
@@ -177,15 +190,18 @@ namespace krys::boo::layout
     {
       _nestedListMarkerOffsets = krys::move(nestedListMarkerOffsets);
     }
+
     KRYS_NODISCARD LayoutUnit NestedListMarkerOffset(const ElementBox &listMarkerBox) const noexcept
     {
       auto it = _nestedListMarkerOffsets.find(&listMarkerBox);
       return it == _nestedListMarkerOffsets.end() ? LayoutUnit {} : it->second;
     }
+
     void SetShouldNotSynthesizeInlineBlockBaseline() noexcept
     {
       _shouldNotSynthesizeInlineBlockBaseline = true;
     }
+
     KRYS_NODISCARD bool ShouldNotSynthesizeInlineBlockBaseline() const noexcept
     {
       return _shouldNotSynthesizeInlineBlockBaseline;

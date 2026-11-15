@@ -59,10 +59,12 @@ namespace krys::boo::layout
     {
       return _mainAxisGeometry;
     }
+
     KRYS_NODISCARD const AxisGeometry &CrossAxis() const noexcept
     {
       return _crossAxisGeometry;
     }
+
     KRYS_NODISCARD bool IsSizedUnderMinMax() const noexcept
     {
       return _isSizedUnderMinMax;

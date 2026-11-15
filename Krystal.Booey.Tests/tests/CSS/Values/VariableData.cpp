@@ -8,7 +8,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-
     Ref<VariableData> MakeData(utf8_stringview css, const ParserContext &context = StrictParserContext())
     {
       if (css.empty())

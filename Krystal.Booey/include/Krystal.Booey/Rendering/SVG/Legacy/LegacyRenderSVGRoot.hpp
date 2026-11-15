@@ -74,14 +74,17 @@ namespace krys::boo
     {
       return _isLayoutSizeChanged;
     }
+
     KRYS_NODISCARD bool IsInLayout() const noexcept
     {
       return _inLayout;
     }
+
     void SetNeedsBoundariesUpdate() noexcept override
     {
       _needsBoundariesOrTransformUpdate = true;
     }
+
     void SetNeedsTransformUpdate() noexcept override
     {
       _needsBoundariesOrTransformUpdate = true;
@@ -91,6 +94,7 @@ namespace krys::boo
     {
       return _containerSize;
     }
+
     void SetContainerSize(const IntSize &containerSize) noexcept
     {
       _containerSize = containerSize;
@@ -135,6 +139,7 @@ namespace krys::boo
     {
       return _objectBoundingBox.value_or(FloatRect());
     }
+
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept override;
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept override;
@@ -165,6 +170,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
       return true;

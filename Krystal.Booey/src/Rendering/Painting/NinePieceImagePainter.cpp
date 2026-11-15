@@ -51,7 +51,7 @@ namespace krys::boo
       TopPiece,
       BottomPiece,
       MiddlePiece,
-      MaxPiece
+      MaxPiece,
     };
 
     using PieceRects = Array<FloatRect, MaxPiece>;

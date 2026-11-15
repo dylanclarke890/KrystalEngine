@@ -100,5 +100,4 @@ namespace krys::boo::css::PropertyParserHelpers
 
     return ConsumeTextEdge(range);
   }
-
 }

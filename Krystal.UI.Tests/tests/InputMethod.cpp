@@ -226,5 +226,4 @@ namespace krys::ui::tests
       CHECK(discarded == 0);
     }
   }
-
 }

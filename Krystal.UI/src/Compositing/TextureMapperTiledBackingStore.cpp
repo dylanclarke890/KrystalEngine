@@ -325,7 +325,7 @@ namespace krys::ui
   {
     // Tiles are painted by the GPU: tiles as wide as the viewport (or half of it), and a quarter of its
     // height.
-    static constexpr int32 minGPUTileHeight = 256;
+    constexpr static int32 minGPUTileHeight = 256;
 
     auto gpuTileSize = [&](const boo::IntSize &baseSize) -> boo::IntSize
     {
@@ -365,7 +365,7 @@ namespace krys::ui
   Pair<boo::IntRect, boo::IntRect>
     TextureMapperTiledBackingStore::ComputeCoverAndKeepRect(const boo::IntRect &contentsRect) const noexcept
   {
-    static constexpr float coverAreaMultiplier = 2.0f;
+    constexpr static float coverAreaMultiplier = 2.0f;
 
     boo::IntRect coverRect = _visibleRect;
     boo::IntRect keepRect = _visibleRect;

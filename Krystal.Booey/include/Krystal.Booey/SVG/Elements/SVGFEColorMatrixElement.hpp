@@ -89,10 +89,12 @@ namespace krys::boo::svg
     {
       return _in1->CurrentValue();
     }
+
     KRYS_NODISCARD ColorMatrixType GetType() const noexcept
     {
       return _type->CurrentValue<ColorMatrixType>();
     }
+
     KRYS_NODISCARD List<float> Values() const noexcept
     {
       return _values->CurrentValue();
@@ -102,10 +104,12 @@ namespace krys::boo::svg
     {
       return *_in1;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &TypeAnimated() noexcept
     {
       return *_type;
     }
+
     KRYS_NODISCARD SVGAnimatedNumberList &ValuesAnimated() noexcept
     {
       return *_values;
@@ -123,10 +127,12 @@ namespace krys::boo::svg
 
     bool SetFilterEffectAttribute(FilterEffect &effect,
                                   const dom::QualifiedName &attributeName) noexcept final;
+
     KRYS_NODISCARD List<dom::DOMStringAtom> FilterEffectInputsNames() const noexcept final
     {
       return {dom::DOMStringAtom(In1())};
     }
+
     KRYS_NODISCARD RefPtr<FilterEffect>
       CreateFilterEffect(const FilterEffectVector &inputs,
                          const GraphicsContext &destinationContext) const noexcept final;

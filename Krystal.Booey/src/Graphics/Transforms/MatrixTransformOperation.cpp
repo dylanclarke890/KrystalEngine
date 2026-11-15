@@ -78,5 +78,4 @@ namespace krys::boo
     }
     return createOperation(toT, fromT, context);
   }
-
 }

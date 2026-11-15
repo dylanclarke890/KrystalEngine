@@ -63,6 +63,7 @@ namespace krys::boo::svg
     {
       return SVGTests::IsValid();
     }
+
     KRYS_NODISCARD bool SupportsMarkers() const noexcept final
     {
       return true;

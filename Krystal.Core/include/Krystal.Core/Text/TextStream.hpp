@@ -40,7 +40,7 @@ namespace krys
     enum class LineMode : bool
     {
       SingleLine,
-      MultipleLine
+      MultipleLine,
     };
 
     struct Repeat
@@ -141,10 +141,12 @@ namespace krys
     {
       return _formattingFlags;
     }
+
     void SetFormattingFlags(EnumSet<Formatting> flags) noexcept
     {
       _formattingFlags = flags;
     }
+
     KRYS_NODISCARD bool HasFormattingFlag(Formatting flag) const noexcept
     {
       return _formattingFlags.Contains(flag);
@@ -170,14 +172,17 @@ namespace krys
     {
       return _indent;
     }
+
     void SetIndent(int32 indent) noexcept
     {
       _indent = indent;
     }
+
     void IncreaseIndent(int32 amount = 1) noexcept
     {
       _indent += amount;
     }
+
     void DecreaseIndent(int32 amount = 1) noexcept
     {
       _indent -= amount;

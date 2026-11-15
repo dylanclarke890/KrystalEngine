@@ -82,18 +82,22 @@ namespace krys::boo
     // It stores an alignment subject(if not already present) and update the max_ascent
     // associated to this baseline-sharing group.
     void Update(const RenderBox &alignmentSubject, LayoutUnit ascent) noexcept;
+
     KRYS_NODISCARD LayoutUnit MaxAscent() const noexcept
     {
       return _maxAscent;
     }
+
     KRYS_NODISCARD size_t ComputeSize() const noexcept
     {
       return _alignmentSubjects.size();
     }
+
     KRYS_NODISCARD auto begin() const noexcept
     {
       return _alignmentSubjects.begin();
     }
+
     KRYS_NODISCARD auto end() const noexcept
     {
       return _alignmentSubjects.end();
@@ -148,6 +152,7 @@ namespace krys::boo
 
     void UpdateSharedGroup(const RenderBox &alignmentSubject, ItemPosition preference,
                            LayoutUnit ascent) noexcept;
+
     KRYS_NODISCARD List<BaselineGroup> &SharedGroups() noexcept
     {
       return _sharedGroups;

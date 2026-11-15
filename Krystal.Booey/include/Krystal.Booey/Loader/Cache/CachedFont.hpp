@@ -53,6 +53,7 @@ namespace krys::boo
     ~CachedFont() noexcept override;
 
     void BeginLoadIfNeeded(CachedResourceLoader &loader) noexcept;
+
     KRYS_NODISCARD bool StillNeedsLoad() const noexcept override
     {
       return !_loadInitiated;

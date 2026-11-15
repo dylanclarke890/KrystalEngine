@@ -49,7 +49,7 @@ namespace krys
 
   public:
     /// @brief How many workers the pool starts beyond its count, at most, for the jobs that may block.
-    static constexpr uint32 MaximumExtraWorkers = 32;
+    constexpr static uint32 MaximumExtraWorkers = 32;
 
     /// @brief Starts @p workerCount workers, or by default one fewer than the machine has cores (at least
     /// one), leaving a core for the main thread. They're named @p name, numbered if there's more than one.

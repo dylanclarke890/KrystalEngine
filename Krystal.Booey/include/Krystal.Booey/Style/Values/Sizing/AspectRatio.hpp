@@ -56,14 +56,17 @@ namespace krys::boo::style
     {
       return _type == AspectRatioType::Auto;
     }
+
     KRYS_NODISCARD bool IsAutoAndRatio() const noexcept
     {
       return _type == AspectRatioType::AutoAndRatio;
     }
+
     KRYS_NODISCARD bool IsAutoZero() const noexcept
     {
       return _type == AspectRatioType::AutoZero;
     }
+
     KRYS_NODISCARD bool IsRatio() const noexcept
     {
       return _type == AspectRatioType::Ratio;
@@ -87,6 +90,7 @@ namespace krys::boo::style
     {
       return _ratio.Numerator;
     }
+
     KRYS_NODISCARD Number<css::NonNegative> Height() const noexcept
     {
       return _ratio.Denominator;

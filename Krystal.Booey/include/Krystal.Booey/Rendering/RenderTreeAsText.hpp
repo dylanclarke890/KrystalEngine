@@ -80,6 +80,7 @@ namespace krys::boo
     // FIXME: This is a cheesy hack to allow easy access to RenderStyle colors.  It won't be needed if we
     // convert it to use visitedDependentColor instead. (This just involves rebaselining many results though,
     // so for now it's not being done).
+
   public:
     static void WriteRenderObject(TextStream &ts, const RenderObject &o,
                                   EnumSet<RenderAsTextFlag> behavior) noexcept;

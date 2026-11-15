@@ -59,7 +59,7 @@ namespace krys::boo
     No,
     NoExcludingURLsForPrivacy,
     Yes,
-    YesExcludingURLsForPrivacy
+    YesExcludingURLsForPrivacy,
   };
 
   /// @brief Whether nodes, and everything under them, are `user-select: none`, remembered as nodes are asked
@@ -71,7 +71,7 @@ namespace krys::boo
     {
       NotUserSelectNone,
       Mixed,
-      OnlyUserSelectNone
+      OnlyUserSelectNone,
     };
 
     HashMap<const dom::Node *, State> _cache;
@@ -121,31 +121,31 @@ namespace krys::boo
   enum class ConvertBlocksToInlines : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class SerializeComposedTree : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class IgnoreUserSelectNone : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class PreserveBaseElement : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class PreserveDirectionForInlineText : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief The range's markup, with the styles that make it look as it does inlined, so it looks the same
@@ -166,27 +166,27 @@ namespace krys::boo
   enum class SerializedNodes : uint8
   {
     SubtreeIncludingNode,
-    SubtreesOfChildren
+    SubtreesOfChildren,
   };
 
   enum class SerializationSyntax : uint8
   {
     HTML,
     XML,
-    HTMLLegacyAttributeValue
+    HTMLLegacyAttributeValue,
   };
 
   enum class SerializeShadowRoots : uint8
   {
     Explicit,
     Serializable,
-    AllForInterchange
+    AllForInterchange,
   };
 
   enum class RequireWellFormed : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @see https://html.spec.whatwg.org/#serialising-html-fragments
@@ -212,7 +212,7 @@ namespace krys::boo
   enum class MSOListQuirks : bool
   {
     CheckIfNeeded,
-    Disabled
+    Disabled,
   };
 
   /// @brief @p rawHTML parsed in a staging page and serialised again with its styles inlined, which leaves

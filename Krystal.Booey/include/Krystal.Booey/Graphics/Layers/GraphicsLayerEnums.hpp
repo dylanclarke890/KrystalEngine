@@ -38,13 +38,13 @@ namespace krys::boo
     TiledBacking,
     ScrollContainer,
     ScrolledContents,
-    Shape
+    Shape,
   };
 
   enum class GraphicsLayerMode : uint8
   {
     PlatformLayer,
-    LayerHostingContextId
+    LayerHostingContextId,
   };
 
   enum class GraphicsLayerContentsLayerPurpose : uint8
@@ -63,31 +63,31 @@ namespace krys::boo
   enum class GraphicsLayerShouldSetNeedsDisplay : bool
   {
     DoNotSet,
-    Set
+    Set,
   };
 
   enum class GraphicsLayerShouldClipToLayer : bool
   {
     DoNotClip,
-    Clip
+    Clip,
   };
 
   enum class GraphicsLayerCompositingCoordinatesOrientation : uint8
   {
     TopDown,
-    BottomUp
+    BottomUp,
   };
 
   enum class GraphicsLayerScalingFilter : uint8
   {
     Linear,
     Nearest,
-    Trilinear
+    Trilinear,
   };
 
   enum class GraphicsLayerCustomAppearance : bool
   {
     None,
-    ScrollingShadow
+    ScrollingShadow,
   };
 }

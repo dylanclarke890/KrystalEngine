@@ -70,6 +70,7 @@ namespace krys::boo
     /// @brief Starts a new gesture's state, or forgets it for an event that isn't part of one; and adds up
     /// the gesture's deltas.
     void ReceivedWheelEvent(const PlatformWheelEvent &wheelEvent) noexcept;
+
     /// @brief The deltas of the gesture so far.
     KRYS_NODISCARD FloatSize CumulativeEventDelta() const noexcept
     {

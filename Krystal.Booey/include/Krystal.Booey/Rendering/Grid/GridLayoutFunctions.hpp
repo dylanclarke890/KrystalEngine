@@ -54,10 +54,12 @@ namespace krys::boo
     {
       return ExtraMargins.first;
     }
+
     KRYS_NODISCARD LayoutUnit ExtraTrackEndMargin() const noexcept
     {
       return ExtraMargins.second;
     }
+
     KRYS_NODISCARD LayoutUnit ExtraTotalMargin() const noexcept
     {
       return ExtraMargins.first + ExtraMargins.second;
@@ -74,6 +76,7 @@ namespace krys::boo
     {
       ExtraMargins.first += extraMargin;
     }
+
     void AddTrackEndMargin(LayoutUnit extraMargin) noexcept
     {
       ExtraMargins.second += extraMargin;

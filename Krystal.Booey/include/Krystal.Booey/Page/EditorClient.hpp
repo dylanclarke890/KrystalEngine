@@ -81,6 +81,7 @@ namespace krys::boo
     /// @brief Called before a `keydown` is dispatched: marks it handled (its default handled) if an input
     /// method handled the key, so it goes out with key code 229 and no `keypress`.
     virtual void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept = 0;
+
     /// @brief Called after a `keydown` an input method handled was dispatched, to apply what it made of the
     /// key: the composition, or the text it confirmed.
     virtual void DidDispatchInputMethodKeydown(dom::KeyboardEvent &) noexcept
@@ -177,9 +178,11 @@ namespace krys::boo
     void RegisterUndoStep(UndoStep &) noexcept final
     {
     }
+
     void RegisterRedoStep(UndoStep &) noexcept final
     {
     }
+
     void ClearUndoRedoOperations() noexcept final
     {
     }
@@ -188,13 +191,16 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool CanRedo() const noexcept final
     {
       return false;
     }
+
     void Undo() noexcept final
     {
     }
+
     void Redo() noexcept final
     {
     }

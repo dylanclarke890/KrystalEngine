@@ -53,14 +53,17 @@ namespace krys::boo::css
     {
       return *_x;
     }
+
     KRYS_NODISCARD const CSSNumericValue &Y() const noexcept
     {
       return *_y;
     }
+
     KRYS_NODISCARD const CSSNumericValue &Z() const noexcept
     {
       return *_z;
     }
+
     /// @return A `TypeError` if @p x isn't a number.
     dom::ExceptionOr<void> SetX(CSSNumberish x) noexcept;
     /// @return A `TypeError` if @p y isn't a number.
@@ -75,6 +78,7 @@ namespace krys::boo::css
     {
       return CSSTransformType::Scale;
     }
+
     KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
 
   private:

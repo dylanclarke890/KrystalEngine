@@ -59,7 +59,7 @@
 namespace krys::boo::style
 {
   // The maximum depth of the render tree; deeper elements aren't styled.
-  static constexpr uint32 DefaultMaximumRenderTreeDepth = 512;
+  constexpr static uint32 DefaultMaximumRenderTreeDepth = 512;
 
   TreeResolver::TreeResolver(dom::Document &document, UniquePtr<Update> update) noexcept
       : _document(ShareRef(document)), _update(krys::move(update))
@@ -2181,6 +2181,7 @@ namespace krys::boo::style
         PositionOption Option;
         LayoutUnit ContainingBlockSize;
       };
+
       List<SortingOption> optionsForSorting;
       optionsForSorting.reserve(options.OptionStyles.size());
 

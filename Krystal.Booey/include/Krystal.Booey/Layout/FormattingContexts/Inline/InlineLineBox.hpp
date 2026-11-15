@@ -90,15 +90,18 @@ namespace krys::boo::layout
     {
       return _hasContent;
     }
+
     KRYS_NODISCARD bool HasInlineBox() const noexcept
     {
       return _boxTypes.Contains(InlineLevelBox::Type::InlineBox);
     }
+
     KRYS_NODISCARD bool HasNonInlineBox() const noexcept
     {
       return _boxTypes.ContainsAny({InlineLevelBox::Type::AtomicInlineBox, InlineLevelBox::Type::LineBreakBox,
                                     InlineLevelBox::Type::GenericInlineLevelBox});
     }
+
     KRYS_NODISCARD bool HasAtomicInlineBox() const noexcept
     {
       return _boxTypes.Contains(InlineLevelBox::Type::AtomicInlineBox);
@@ -106,10 +109,12 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD InlineRect LogicalRectForTextRun(const Line::Run &run) const noexcept;
     KRYS_NODISCARD InlineRect LogicalRectForLineBreakBox(const Box &layoutBox) const noexcept;
+
     KRYS_NODISCARD InlineRect LogicalRectForRootInlineBox() const noexcept
     {
       return _rootInlineBox.LogicalRect();
     }
+
     KRYS_NODISCARD InlineRect
       LogicalBorderBoxForAtomicInlineBox(const Box &layoutBox, const BoxGeometry &boxGeometry) const noexcept;
     KRYS_NODISCARD InlineRect LogicalBorderBoxForInlineBox(const Box &layoutBox,
@@ -120,6 +125,7 @@ namespace krys::boo::layout
     {
       return const_cast<LineBox &>(*this).InlineLevelBoxFor(layoutBox);
     }
+
     KRYS_NODISCARD const InlineLevelBox &InlineLevelBoxFor(const Line::Run &lineRun) const noexcept
     {
       return const_cast<LineBox &>(*this).InlineLevelBoxFor(lineRun);
@@ -129,6 +135,7 @@ namespace krys::boo::layout
     {
       return _rootInlineBox;
     }
+
     KRYS_NODISCARD const InlineLevelBoxList &NonRootInlineLevelBoxes() const noexcept
     {
       return _nonRootInlineLevelBoxList;
@@ -156,6 +163,7 @@ namespace krys::boo::layout
 
   private:
     void AddInlineLevelBox(InlineLevelBox &&inlineLevelBox) noexcept;
+
     KRYS_NODISCARD InlineLevelBoxList &NonRootInlineLevelBoxes() noexcept
     {
       return _nonRootInlineLevelBoxList;
@@ -170,6 +178,7 @@ namespace krys::boo::layout
     {
       return const_cast<LineBox &>(*this).ParentInlineBox(inlineLevelBox);
     }
+
     KRYS_NODISCARD InlineLevelBox &ParentInlineBox(const InlineLevelBox &inlineLevelBox) noexcept
     {
       return *InlineLevelBoxFor(inlineLevelBox.LayoutBox().Parent());
@@ -179,6 +188,7 @@ namespace krys::boo::layout
     {
       return const_cast<LineBox &>(*this).ParentInlineBox(lineRun);
     }
+
     KRYS_NODISCARD InlineLevelBox &ParentInlineBox(const Line::Run &lineRun) noexcept
     {
       return *InlineLevelBoxFor(lineRun.LayoutBox().Parent());
@@ -188,6 +198,7 @@ namespace krys::boo::layout
     {
       return *InlineLevelBoxFor(lineRun.LayoutBox());
     }
+
     KRYS_NODISCARD InlineLevelBox *InlineLevelBoxFor(const Box &layoutBox) noexcept
     {
       if (&layoutBox == &_rootInlineBox.LayoutBox())
@@ -208,10 +219,12 @@ namespace krys::boo::layout
     {
       _logicalRect = logicalRect;
     }
+
     void SetHasContent(bool hasContent) noexcept
     {
       _hasContent = hasContent;
     }
+
     void SetBaselineType(FontBaseline baselineType) noexcept
     {
       _baselineType = baselineType;

@@ -52,6 +52,7 @@ namespace krys::boo::css
     {
       return _value;
     }
+
     /// @return A `TypeError`, leaving the value unchanged, if @p value is empty.
     dom::ExceptionOr<void> SetValue(const CSSOMString &value) noexcept;
 

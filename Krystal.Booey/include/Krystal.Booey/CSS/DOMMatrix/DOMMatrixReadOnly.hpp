@@ -60,7 +60,7 @@ namespace krys::boo::css
     enum class Is2D : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-dommatrixreadonly
@@ -87,22 +87,27 @@ namespace krys::boo::css
     {
       return _matrix.A();
     }
+
     KRYS_NODISCARD double B() const noexcept
     {
       return _matrix.B();
     }
+
     KRYS_NODISCARD double C() const noexcept
     {
       return _matrix.C();
     }
+
     KRYS_NODISCARD double D() const noexcept
     {
       return _matrix.D();
     }
+
     KRYS_NODISCARD double E() const noexcept
     {
       return _matrix.E();
     }
+
     KRYS_NODISCARD double F() const noexcept
     {
       return _matrix.F();
@@ -112,62 +117,77 @@ namespace krys::boo::css
     {
       return _matrix.M11();
     }
+
     KRYS_NODISCARD double M12() const noexcept
     {
       return _matrix.M12();
     }
+
     KRYS_NODISCARD double M13() const noexcept
     {
       return _matrix.M13();
     }
+
     KRYS_NODISCARD double M14() const noexcept
     {
       return _matrix.M14();
     }
+
     KRYS_NODISCARD double M21() const noexcept
     {
       return _matrix.M21();
     }
+
     KRYS_NODISCARD double M22() const noexcept
     {
       return _matrix.M22();
     }
+
     KRYS_NODISCARD double M23() const noexcept
     {
       return _matrix.M23();
     }
+
     KRYS_NODISCARD double M24() const noexcept
     {
       return _matrix.M24();
     }
+
     KRYS_NODISCARD double M31() const noexcept
     {
       return _matrix.M31();
     }
+
     KRYS_NODISCARD double M32() const noexcept
     {
       return _matrix.M32();
     }
+
     KRYS_NODISCARD double M33() const noexcept
     {
       return _matrix.M33();
     }
+
     KRYS_NODISCARD double M34() const noexcept
     {
       return _matrix.M34();
     }
+
     KRYS_NODISCARD double M41() const noexcept
     {
       return _matrix.M41();
     }
+
     KRYS_NODISCARD double M42() const noexcept
     {
       return _matrix.M42();
     }
+
     KRYS_NODISCARD double M43() const noexcept
     {
       return _matrix.M43();
     }
+
     KRYS_NODISCARD double M44() const noexcept
     {
       return _matrix.M44();
@@ -177,6 +197,7 @@ namespace krys::boo::css
     {
       return _is2D;
     }
+
     KRYS_NODISCARD bool IsIdentity() const noexcept;
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrix-setmatrixvalue

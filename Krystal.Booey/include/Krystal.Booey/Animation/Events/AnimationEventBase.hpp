@@ -59,10 +59,12 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsCSSAnimationEvent() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsCSSTransitionEvent() const noexcept
     {
       return false;
@@ -72,6 +74,7 @@ namespace krys::boo
     {
       return _animation.get();
     }
+
     KRYS_NODISCARD Maybe<Seconds> ScheduledTime() const noexcept
     {
       return _scheduledTime;

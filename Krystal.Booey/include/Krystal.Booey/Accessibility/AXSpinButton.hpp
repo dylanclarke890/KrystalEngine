@@ -58,10 +58,12 @@ namespace krys::boo
     void Step(int32 amount) noexcept;
 
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
+
     /// @brief The parts, made with the spin button, stay its children.
     void ClearChildren() noexcept override
     {
     }
+
     void AddChildren() noexcept override;
 
   private:
@@ -71,6 +73,7 @@ namespace krys::boo
     {
       return AXRole::SpinButton;
     }
+
     /// @brief Removes the parts from the cache with the spin button.
     void DetachRemoteParts(AXDetachmentType detachmentType) noexcept override;
   };

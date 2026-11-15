@@ -53,6 +53,7 @@ namespace krys::boo::html
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
+
 namespace krys::boo::html::detail
 {
   /// @brief A new HTML element named @p localName in @p document, for the table members that create rows,

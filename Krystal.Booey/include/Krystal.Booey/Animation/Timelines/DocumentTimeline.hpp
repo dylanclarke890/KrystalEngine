@@ -110,6 +110,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD AnimationTimelinesController *Controller() const noexcept override;
 
     void ScheduleAnimationResolution() noexcept;

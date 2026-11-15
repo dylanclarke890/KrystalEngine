@@ -85,7 +85,7 @@ namespace krys::boo
     enum class PreferColoredFont : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:

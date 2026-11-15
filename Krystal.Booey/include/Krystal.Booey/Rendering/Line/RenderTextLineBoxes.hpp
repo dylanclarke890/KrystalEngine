@@ -50,6 +50,7 @@ namespace krys::boo
     {
       return _first;
     }
+
     KRYS_NODISCARD LegacyInlineTextBox *Last() const noexcept
     {
       return _last;

@@ -59,30 +59,36 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/css-transitions-2/#dom-csstransition-transitionproperty
     KRYS_NODISCARD css::CSSOMStringAtom TransitionProperty() const noexcept;
+
     KRYS_NODISCARD AnimatableCSSProperty Property() const noexcept
     {
       return _property;
     }
+
     /// @brief When the transition was generated, in the host's time.
     /// @see https://drafts.csswg.org/css-transitions-2/#transition-generation
     KRYS_NODISCARD Seconds GenerationTime() const noexcept
     {
       return _generationTime;
     }
+
     KRYS_NODISCARD const RenderStyle &TargetStyle() const noexcept
     {
       return *_targetStyle;
     }
+
     /// @see https://drafts.csswg.org/css-transitions-1/#reversing-adjusted-start-value
     KRYS_NODISCARD const RenderStyle &ReversingAdjustedStartStyle() const noexcept
     {
       return *_reversingAdjustedStartStyle;
     }
+
     /// @see https://drafts.csswg.org/css-transitions-1/#reversing-shortening-factor
     KRYS_NODISCARD double ReversingShorteningFactor() const noexcept
     {
       return _reversingShorteningFactor;
     }
+
     KRYS_NODISCARD const style::Transition &BackingStyleTransition() const noexcept
     {
       return _backingStyleTransition;
@@ -94,10 +100,12 @@ namespace krys::boo
       CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                   const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
     void AnimationDidFinish() noexcept final;
+
     KRYS_NODISCARD bool IsCSSTransition() const noexcept final
     {
       return true;
     }
+
     KRYS_NODISCARD AnimationPlayState BackingAnimationPlayState() const noexcept final;
     KRYS_NODISCARD boo::TimingFunction *BackingAnimationTimingFunction() const noexcept final;
   };

@@ -27,7 +27,7 @@ namespace krys::log
     Warn,
     Error,
     Critical,
-    Off
+    Off,
   };
 
   struct LoggerSettings
@@ -84,7 +84,6 @@ namespace krys::log
 
     virtual void LogImpl(Level level, const string &message) noexcept = 0;
   };
-
 }
 
 #ifdef KRYS_LOGGING_DISABLED

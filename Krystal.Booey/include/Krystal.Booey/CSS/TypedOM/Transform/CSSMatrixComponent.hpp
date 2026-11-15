@@ -62,6 +62,7 @@ namespace krys::boo::css
     {
       return *_matrix;
     }
+
     void SetMatrix(Ref<DOMMatrix> matrix) noexcept;
 
     void Serialise(StringBuilder &builder) const noexcept final;
@@ -71,6 +72,7 @@ namespace krys::boo::css
     {
       return CSSTransformType::MatrixComponent;
     }
+
     KRYS_NODISCARD RefPtr<Value> ToCSSValue() const noexcept final;
 
   private:

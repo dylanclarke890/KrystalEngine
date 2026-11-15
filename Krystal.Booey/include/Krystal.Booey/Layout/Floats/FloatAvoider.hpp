@@ -54,6 +54,7 @@ namespace krys::boo::layout
 
     void SetInlineStart(LayoutUnit inlineStart) noexcept;
     void SetBlockStart(LayoutUnit blockStart) noexcept;
+
     void ResetInlineStart() noexcept
     {
       _absoluteTopLeft.SetX(InitialInlineStart());
@@ -101,24 +102,29 @@ namespace krys::boo::layout
     {
       return _borderBoxWidth;
     }
+
     KRYS_NODISCARD LayoutUnit InitialInlineStart() const noexcept;
 
     KRYS_NODISCARD LayoutUnit MarginBefore() const noexcept
     {
       return _margin.Vertical.Before;
     }
+
     KRYS_NODISCARD LayoutUnit MarginAfter() const noexcept
     {
       return _margin.Vertical.After;
     }
+
     KRYS_NODISCARD LayoutUnit MarginStart() const noexcept
     {
       return _margin.Horizontal.Start;
     }
+
     KRYS_NODISCARD LayoutUnit MarginEnd() const noexcept
     {
       return _margin.Horizontal.End;
     }
+
     KRYS_NODISCARD LayoutUnit MarginBoxWidth() const noexcept
     {
       return MarginStart() + BorderBoxWidth() + MarginEnd();

@@ -48,7 +48,7 @@ namespace krys::boo::layout
     enum class TextBoxTrimSide : bool
     {
       Start,
-      End
+      End,
     };
     using TextBoxTrim = EnumSet<TextBoxTrimSide>;
 
@@ -112,22 +112,27 @@ namespace krys::boo::layout
     {
       return _placedFloats;
     }
+
     KRYS_NODISCARD const PlacedFloats &GetPlacedFloats() const noexcept
     {
       return _placedFloats;
     }
+
     KRYS_NODISCARD Maybe<LineClamp> GetLineClamp() const noexcept
     {
       return _lineClamp;
     }
+
     KRYS_NODISCARD TextBoxTrim GetTextBoxTrim() const noexcept
     {
       return _textBoxTrim;
     }
+
     KRYS_NODISCARD style::TextBoxEdge GetTextBoxEdge() const noexcept
     {
       return _textBoxEdge;
     }
+
     KRYS_NODISCARD Maybe<LayoutUnit> IntrusiveInitialLetterLogicalBottom() const noexcept
     {
       return _intrusiveInitialLetterLogicalBottom;
@@ -137,6 +142,7 @@ namespace krys::boo::layout
     {
       return _marginState;
     }
+
     KRYS_NODISCARD const MarginState &GetMarginState() const noexcept
     {
       return _marginState;

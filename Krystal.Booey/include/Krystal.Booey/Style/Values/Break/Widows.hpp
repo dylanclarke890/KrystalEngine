@@ -41,10 +41,12 @@ namespace krys::boo::style
     {
       return IsKeyword();
     }
+
     KRYS_NODISCARD bool IsInteger() const noexcept
     {
       return IsValue();
     }
+
     KRYS_NODISCARD Maybe<Integer> TryInteger() const noexcept
     {
       return TryValue();

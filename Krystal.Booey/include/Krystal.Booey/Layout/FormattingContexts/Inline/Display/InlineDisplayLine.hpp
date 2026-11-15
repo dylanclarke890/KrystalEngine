@@ -50,7 +50,7 @@ namespace krys::boo::inline_display
       enum class Type : uint8
       {
         Inline,
-        Block
+        Block,
       };
       Type EllipsisType {Type::Inline};
       // This is visual rect ignoring block direction.
@@ -112,18 +112,22 @@ namespace krys::boo::inline_display
     {
       return _lineBoxRect.X();
     }
+
     KRYS_NODISCARD float Right() const noexcept
     {
       return _lineBoxRect.MaxX();
     }
+
     KRYS_NODISCARD float Top() const noexcept
     {
       return _lineBoxRect.Y();
     }
+
     KRYS_NODISCARD float Bottom() const noexcept
     {
       return _lineBoxRect.MaxY();
     }
+
     KRYS_NODISCARD FloatPoint TopLeft() const noexcept
     {
       return _lineBoxRect.Location();
@@ -133,22 +137,27 @@ namespace krys::boo::inline_display
     {
       return _lineBoxRect.Y();
     }
+
     KRYS_NODISCARD float LineBoxBottom() const noexcept
     {
       return _lineBoxRect.MaxY();
     }
+
     KRYS_NODISCARD float LineBoxLeft() const noexcept
     {
       return _lineBoxRect.X();
     }
+
     KRYS_NODISCARD float LineBoxRight() const noexcept
     {
       return _lineBoxRect.MaxX();
     }
+
     KRYS_NODISCARD float LineBoxHeight() const noexcept
     {
       return _lineBoxRect.Height();
     }
+
     KRYS_NODISCARD float LineBoxWidth() const noexcept
     {
       return _lineBoxRect.Width();
@@ -158,18 +167,22 @@ namespace krys::boo::inline_display
     {
       return _lineBoxRect;
     }
+
     KRYS_NODISCARD const FloatRect &LineBoxLogicalRect() const noexcept
     {
       return _lineBoxLogicalRect;
     }
+
     KRYS_NODISCARD const FloatRect &ScrollableOverflow() const noexcept
     {
       return _scrollableOverflow;
     }
+
     KRYS_NODISCARD const FloatRect &ContentOverflow() const noexcept
     {
       return _contentOverflow;
     }
+
     KRYS_NODISCARD const FloatRect &InkOverflow() const noexcept
     {
       return _inkOverflow;
@@ -199,6 +212,7 @@ namespace krys::boo::inline_display
     {
       return _enclosingLogicalTopAndBottom.Top;
     }
+
     KRYS_NODISCARD float EnclosingContentLogicalBottom() const noexcept
     {
       return _enclosingLogicalTopAndBottom.Bottom;
@@ -208,6 +222,7 @@ namespace krys::boo::inline_display
     {
       return _alignmentBaseline;
     }
+
     KRYS_NODISCARD FontBaseline BaselineType() const noexcept
     {
       return _baselineType;
@@ -217,6 +232,7 @@ namespace krys::boo::inline_display
     {
       return _isHorizontal;
     }
+
     KRYS_NODISCARD bool IsLeftToRightInlineDirection() const noexcept
     {
       return _isLeftToRightDirection;
@@ -226,12 +242,14 @@ namespace krys::boo::inline_display
     {
       return _contentLogicalLeft;
     }
+
     // This is "visual" left in inline direction (it is still considered logical as there's no flip for
     // writing mode).
     KRYS_NODISCARD float ContentLogicalLeftIgnoringInlineDirection() const noexcept
     {
       return _contentLogicalLeftIgnoringInlineDirection;
     }
+
     KRYS_NODISCARD float ContentLogicalWidth() const noexcept
     {
       return _contentLogicalWidth;
@@ -241,10 +259,12 @@ namespace krys::boo::inline_display
     {
       return _firstBoxIndex;
     }
+
     KRYS_NODISCARD size_t LastBoxIndex() const noexcept
     {
       return FirstBoxIndex() + BoxCount() - 1;
     }
+
     KRYS_NODISCARD size_t BoxCount() const noexcept
     {
       return _boxCount;
@@ -298,14 +318,17 @@ namespace krys::boo::inline_display
     {
       _ellipsis = ellipsis;
     }
+
     KRYS_NODISCARD Maybe<Ellipsis> GetEllipsis() const noexcept
     {
       return _ellipsis;
     }
+
     KRYS_NODISCARD bool HasEllipsis() const noexcept
     {
       return _ellipsis.has_value();
     }
+
     KRYS_NODISCARD bool IsFullyTruncatedInBlockDirection() const noexcept
     {
       return _isFullyTruncatedInBlockDirection;
@@ -315,18 +338,22 @@ namespace krys::boo::inline_display
     {
       return _hasInflowBox;
     }
+
     KRYS_NODISCARD bool HasContentfulInFlowBox() const noexcept
     {
       return _hasContentfulBox && _hasInflowBox;
     }
+
     KRYS_NODISCARD bool HasInlineLevelBox() const noexcept
     {
       return HasInflowBox() && !HasBlockLevelBox();
     }
+
     KRYS_NODISCARD bool HasContentfulInlineLevelBox() const noexcept
     {
       return HasContentfulInFlowBox() && HasInlineLevelBox();
     }
+
     KRYS_NODISCARD bool HasBlockLevelBox() const noexcept
     {
       return _hasBlockLevelBox;
@@ -336,18 +363,22 @@ namespace krys::boo::inline_display
     {
       _firstBoxIndex = firstBoxIndex;
     }
+
     void SetBoxCount(size_t boxCount) noexcept
     {
       _boxCount = boxCount;
     }
+
     void SetIsFirstAfterPageBreak() noexcept
     {
       _isFirstAfterPageBreak = true;
     }
+
     void SetInkOverflow(const FloatRect &inkOverflowRect) noexcept
     {
       _inkOverflow = inkOverflowRect;
     }
+
     void SetScrollableOverflow(const FloatRect &scrollableOverflow) noexcept
     {
       _scrollableOverflow = scrollableOverflow;

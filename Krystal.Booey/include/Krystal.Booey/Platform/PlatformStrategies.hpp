@@ -56,6 +56,7 @@ namespace krys::boo
     {
       return _loaderStrategy;
     }
+
     void SetLoaderStrategy(LoaderStrategy *loaderStrategy) noexcept
     {
       _loaderStrategy = loaderStrategy;
@@ -67,6 +68,7 @@ namespace krys::boo
     {
       return _pasteboardStrategy;
     }
+
     void SetPasteboardStrategy(PasteboardStrategy *pasteboardStrategy) noexcept
     {
       _pasteboardStrategy = pasteboardStrategy;
@@ -78,6 +80,7 @@ namespace krys::boo
     {
       return _pathStrokeStrategy;
     }
+
     void SetPathStrokeStrategy(PathStrokeStrategy *pathStrokeStrategy) noexcept
     {
       _pathStrokeStrategy = pathStrokeStrategy;

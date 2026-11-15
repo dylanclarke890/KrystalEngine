@@ -177,6 +177,7 @@ namespace krys::boo::layout
       bool IsLeftToRightDirection {false};
       bool IsBlockLevel {false};
     };
+
     using BidiContextStack = List<BidiContext>;
 
     enum class EnterExitType : uint8
@@ -184,8 +185,9 @@ namespace krys::boo::layout
       EnteringBlock,
       ExitingBlock,
       EnteringInlineBox,
-      ExitingInlineBox
+      ExitingInlineBox,
     };
+
     inline void HandleEnterExitBidiContext(StringBuilder &paragraphContentBuilder, UnicodeBidi unicodeBidi,
                                            bool isLTR, EnterExitType enterExitType,
                                            BidiContextStack &bidiContextStack) noexcept
@@ -318,6 +320,7 @@ namespace krys::boo::layout
     }
 
     using InlineItemOffsetList = List<Maybe<size_t>>;
+
     inline void HandleBidiParagraphStart(StringBuilder &paragraphContentBuilder,
                                          InlineItemOffsetList &inlineItemOffsetList,
                                          BidiContextStack &bidiContextStack) noexcept
@@ -895,6 +898,7 @@ namespace krys::boo::layout
     struct CloseUBiDiOnExit
     {
       UBiDi *UBiDi;
+
       ~CloseUBiDiOnExit() noexcept
       {
         ubidi_close(UBiDi);
@@ -987,7 +991,7 @@ namespace krys::boo::layout
       enum class InlineBoxHasContent : bool
       {
         No,
-        Yes
+        Yes,
       };
       List<InlineBoxHasContent> inlineBoxContentFlagStack;
       inlineBoxContentFlagStack.reserve(inlineItemList.size());

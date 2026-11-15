@@ -40,7 +40,7 @@ namespace krys::boo
     enum class ValueType : bool
     {
       Number,
-      FromFont
+      FromFont,
     };
     enum class Metric : uint8
     {
@@ -48,7 +48,7 @@ namespace krys::boo
       CapHeight,
       ChWidth,
       IcWidth,
-      IcHeight
+      IcHeight,
     };
 
     Metric MetricType {Metric::ExHeight};
@@ -79,10 +79,12 @@ namespace krys::boo
     {
       return !Value && Type != ValueType::FromFont;
     }
+
     KRYS_NODISCARD bool IsFromFont() const noexcept
     {
       return Type == ValueType::FromFont;
     }
+
     KRYS_NODISCARD bool ShouldResolveFromFont() const noexcept
     {
       return IsFromFont() && !Value;

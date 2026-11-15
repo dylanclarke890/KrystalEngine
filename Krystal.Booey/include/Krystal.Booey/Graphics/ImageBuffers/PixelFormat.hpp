@@ -48,7 +48,7 @@ namespace krys::boo
   enum class UseLosslessCompression : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   KRYS_NODISCARD constexpr ContentsFormat ConvertToContentsFormat(PixelFormat format) noexcept

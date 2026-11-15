@@ -52,7 +52,7 @@ namespace krys::gfx
     size_t seed = static_cast<size_t>(key.Rule);
     auto mix = [&](uint32 value)
     {
-      seed ^= value + 0x9e'37'79'b9u + (seed << 6u) + (seed >> 2u);
+      seed ^= value + 0x9E'37'79'B9u + (seed << 6u) + (seed >> 2u);
     };
     for (const auto verb : key.Path.Verbs())
     {

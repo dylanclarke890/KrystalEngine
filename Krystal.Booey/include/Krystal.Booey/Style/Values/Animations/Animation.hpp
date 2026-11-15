@@ -44,7 +44,7 @@ namespace krys::boo::style
 {
   // macro(ownerType, property, type, lowercaseName, uppercaseName)
 
-// clang-format off
+  // clang-format off
 #define KRYS_FOR_EACH_ANIMATION_REFERENCE(macro)                                            \
   macro(Animation, AnimationName, SingleAnimationName, name, Name)                          \
   macro(Animation, AnimationTimeline, SingleAnimationTimeline, timeline, Timeline)          \
@@ -70,7 +70,7 @@ namespace krys::boo::style
   KRYS_FOR_EACH_ANIMATION_REFERENCE(macro)      \
   KRYS_FOR_EACH_ANIMATION_VALUE(macro)          \
   KRYS_FOR_EACH_ANIMATION_ENUM(macro)
-// clang-format on
+  // clang-format on
 
   /// @brief One animation of an element's `animation-*` coordinated value list.
   struct Animation
@@ -98,6 +98,7 @@ namespace krys::boo::style
       {
         return AdoptRef(*new AnimationData());
       }
+
       KRYS_NODISCARD static Ref<AnimationData> Create(const AnimationData &other) noexcept
       {
         return AdoptRef(*new AnimationData(other));
@@ -119,46 +120,57 @@ namespace krys::boo::style
     {
       return _data->_name;
     }
+
     KRYS_NODISCARD SingleAnimationDelay GetDelay() const noexcept
     {
       return _data->_delay;
     }
+
     KRYS_NODISCARD AnimationDirection GetDirection() const noexcept
     {
       return static_cast<AnimationDirection>(_data->_direction);
     }
+
     KRYS_NODISCARD SingleAnimationDuration GetDuration() const noexcept
     {
       return _data->_duration;
     }
+
     KRYS_NODISCARD AnimationFillMode GetFillMode() const noexcept
     {
       return static_cast<AnimationFillMode>(_data->_fillMode);
     }
+
     KRYS_NODISCARD SingleAnimationIterationCount GetIterationCount() const noexcept
     {
       return _data->_iterationCount;
     }
+
     KRYS_NODISCARD AnimationPlayState GetPlayState() const noexcept
     {
       return static_cast<AnimationPlayState>(_data->_playState);
     }
+
     KRYS_NODISCARD const SingleAnimationTimeline &GetTimeline() const noexcept
     {
       return _data->_timeline;
     }
+
     KRYS_NODISCARD const EasingFunction &GetTimingFunction() const noexcept
     {
       return _data->_timingFunction;
     }
+
     KRYS_NODISCARD CompositeOperation GetCompositeOperation() const noexcept
     {
       return static_cast<CompositeOperation>(_data->_compositeOperation);
     }
+
     KRYS_NODISCARD const SingleAnimationRangeStart &GetRangeStart() const noexcept
     {
       return _data->_rangeStart;
     }
+
     KRYS_NODISCARD const SingleAnimationRangeEnd &GetRangeEnd() const noexcept
     {
       return _data->_rangeEnd;
@@ -168,46 +180,57 @@ namespace krys::boo::style
     {
       return css::keywords::None {};
     }
+
     KRYS_NODISCARD static SingleAnimationDelay InitialDelay() noexcept
     {
       return SingleAnimationDelay {0};
     }
+
     KRYS_NODISCARD static AnimationDirection InitialDirection() noexcept
     {
       return AnimationDirection::Normal;
     }
+
     KRYS_NODISCARD static SingleAnimationDuration InitialDuration() noexcept
     {
       return css::keywords::Auto {};
     }
+
     KRYS_NODISCARD static AnimationFillMode InitialFillMode() noexcept
     {
       return AnimationFillMode::None;
     }
+
     KRYS_NODISCARD static SingleAnimationIterationCount InitialIterationCount() noexcept
     {
       return 1.0;
     }
+
     KRYS_NODISCARD static AnimationPlayState InitialPlayState() noexcept
     {
       return AnimationPlayState::Running;
     }
+
     KRYS_NODISCARD static CompositeOperation InitialCompositeOperation() noexcept
     {
       return CompositeOperation::Replace;
     }
+
     KRYS_NODISCARD static SingleAnimationTimeline InitialTimeline() noexcept
     {
       return css::keywords::Auto {};
     }
+
     KRYS_NODISCARD static EasingFunction InitialTimingFunction() noexcept
     {
       return EasingFunction {CubicBezierTimingFunction::Create()};
     }
+
     KRYS_NODISCARD static SingleAnimationRangeStart InitialRangeStart() noexcept
     {
       return css::keywords::Normal {};
     }
+
     KRYS_NODISCARD static SingleAnimationRangeEnd InitialRangeEnd() noexcept
     {
       return css::keywords::Normal {};
@@ -217,6 +240,7 @@ namespace krys::boo::style
     {
       return _data->_defaultTimingFunctionForKeyframes;
     }
+
     void SetDefaultTimingFunctionForKeyframes(Maybe<EasingFunction> &&function) noexcept
     {
       _data->_defaultTimingFunctionForKeyframes = krys::move(function);
@@ -231,33 +255,40 @@ namespace krys::boo::style
     {
       return {InitialRangeStart(), InitialRangeEnd()};
     }
+
     KRYS_NODISCARD SingleAnimationRange GetRange() const noexcept
     {
       return {GetRangeStart(), GetRangeEnd()};
     }
+
     void SetRange(SingleAnimationRange &&range) noexcept
     {
       SetRangeStart(krys::move(range.Start));
       SetRangeEnd(krys::move(range.End));
     }
+
     void FillRange(SingleAnimationRange &&range) noexcept
     {
       FillRangeStart(krys::move(range.Start));
       FillRangeEnd(krys::move(range.End));
     }
+
     void ClearRange() noexcept
     {
       ClearRangeStart();
       ClearRangeEnd();
     }
+
     KRYS_NODISCARD bool IsRangeUnset() const noexcept
     {
       return IsRangeStartUnset() && IsRangeEndUnset();
     }
+
     KRYS_NODISCARD bool IsRangeSet() const noexcept
     {
       return IsRangeStartSet() || IsRangeEndSet();
     }
+
     KRYS_NODISCARD bool IsRangeFilled() const noexcept
     {
       return IsRangeStartFilled() || IsRangeEndFilled();
@@ -298,6 +329,7 @@ namespace krys::boo::style
     {
       return *_data;
     }
+
     KRYS_NODISCARD const AnimationData &Data() const noexcept
     {
       return *_data;

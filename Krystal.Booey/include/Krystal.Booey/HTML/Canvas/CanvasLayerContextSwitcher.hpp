@@ -62,6 +62,7 @@ namespace krys::boo::html
 
     /// @brief Where the context draws while the switcher is in place.
     KRYS_NODISCARD GraphicsContext *DrawingContext() const noexcept;
+
     /// @brief The bounds, with the filter's outsets.
     KRYS_NODISCARD FloatRect ExpandedBounds() const noexcept
     {

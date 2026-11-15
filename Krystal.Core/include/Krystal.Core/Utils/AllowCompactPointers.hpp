@@ -15,6 +15,7 @@ namespace krys
 #define KRYS_ENABLE_COMPACT_POINTERS_IMPL constexpr static bool EnableCompactPointers = true
 
 #define KRYS_ENABLE_COMPACT_POINTERS                                                                         \
+                                                                                                             \
 public:                                                                                                      \
   KRYS_ENABLE_COMPACT_POINTERS_IMPL;                                                                         \
                                                                                                              \
@@ -22,6 +23,7 @@ private:                                                                        
   using _forceSemicolonAllowCompactPointers = int
 
 #define KRYS_ALLOW_STRUCT_COMPACT_POINTERS                                                                   \
+                                                                                                             \
 public:                                                                                                      \
   KRYS_ALLOW_COMPACT_POINTERS_IMPL;                                                                          \
   using _forceSemicolonAllowCompactPointers = int

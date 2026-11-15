@@ -48,12 +48,12 @@ namespace krys::boo
     friend class BlobData;
 
   public:
-    static constexpr int64 ToEndOfFile {-1};
+    constexpr static int64 ToEndOfFile {-1};
 
     enum class Type : bool
     {
       Data,
-      File
+      File,
     };
 
   private:

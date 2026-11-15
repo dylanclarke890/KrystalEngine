@@ -107,6 +107,7 @@ namespace krys::boo
     bool PerformDragOperation(DragData &&dragData) noexcept;
 
     KRYS_NODISCARD bool MouseIsOverFileInput() const noexcept;
+
     KRYS_NODISCARD uint32 NumberOfItemsToBeAccepted() const noexcept
     {
       return _numberOfItemsToBeAccepted;
@@ -118,38 +119,47 @@ namespace krys::boo
     {
       _didInitiateDrag = initiated;
     }
+
     KRYS_NODISCARD bool DidInitiateDrag() const noexcept
     {
       return _didInitiateDrag;
     }
+
     KRYS_NODISCARD EnumSet<DragOperation> SourceDragOperationMask() const noexcept
     {
       return _sourceDragOperationMask;
     }
+
     KRYS_NODISCARD const url::URL &DraggingImageURL() const noexcept
     {
       return _draggingImageURL;
     }
+
     void SetDragOffset(const IntPoint &offset) noexcept
     {
       _dragOffset = offset;
     }
+
     KRYS_NODISCARD const IntPoint &DragOffset() const noexcept
     {
       return _dragOffset;
     }
+
     KRYS_NODISCARD EnumSet<boo::DragSourceAction> GetDragSourceAction() const noexcept
     {
       return _dragSourceAction;
     }
+
     KRYS_NODISCARD DragHandlingMethod GetDragHandlingMethod() const noexcept
     {
       return _dragHandlingMethod;
     }
+
     KRYS_NODISCARD dom::Document *DocumentUnderMouse() const noexcept
     {
       return _documentUnderMouse.get();
     }
+
     KRYS_NODISCARD EnumSet<DragDestinationAction> DragDestinationActionMask() const noexcept
     {
       return _dragDestinationActionMask;
@@ -182,10 +192,10 @@ namespace krys::boo
 
     // FIXME: These values are straight out of DragControllerMac, so probably have
     // little correlation with Gdk standards...
-    static constexpr int32 MaxOriginalImageArea = 1'500 * 1'500;
-    static constexpr int32 DragIconRightInset = 7;
-    static constexpr int32 DragIconBottomInset = 3;
-    static constexpr float DragImageAlpha = 0.75f;
+    constexpr static int32 MaxOriginalImageArea = 1'500 * 1'500;
+    constexpr static int32 DragIconRightInset = 7;
+    constexpr static int32 DragIconBottomInset = 3;
+    constexpr static float DragImageAlpha = 0.75f;
 
   private:
     bool DispatchTextInputEventFor(LocalFrame *innerFrame, const DragData &dragData) noexcept;

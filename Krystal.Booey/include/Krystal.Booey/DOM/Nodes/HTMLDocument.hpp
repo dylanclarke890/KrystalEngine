@@ -36,6 +36,7 @@ namespace krys::boo::dom
     HTMLDocument() noexcept : Document(DocumentFlags::IsHTMLDocument)
     {
     }
+
     explicit HTMLDocument(DocumentFlags flags) noexcept : Document(flags | DocumentFlags::IsHTMLDocument)
     {
     }

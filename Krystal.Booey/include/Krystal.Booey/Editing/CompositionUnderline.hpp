@@ -35,7 +35,7 @@ namespace krys::boo
   enum class CompositionUnderlineColor : bool
   {
     GivenColor,
-    TextColor
+    TextColor,
   };
 
   /// @brief An underline under part of the text being composed with an input method (a clause), thick for the

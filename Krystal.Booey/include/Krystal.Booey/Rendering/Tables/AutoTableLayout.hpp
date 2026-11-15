@@ -59,10 +59,12 @@ namespace krys::boo
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minWidth, LayoutUnit &maxWidth,
                                        TableIntrinsics intrinsics) noexcept override;
+
     KRYS_NODISCARD LayoutUnit ScaledWidthFromPercentColumns() const noexcept override
     {
       return _scaledWidthFromPercentColumns;
     }
+
     void ApplyPreferredLogicalWidthQuirks(LayoutUnit &minWidth, LayoutUnit &maxWidth) const noexcept override;
     void Layout() noexcept override;
 

@@ -15,8 +15,8 @@ namespace krys::io
   enum class FileSearchFlags : uint8
   {
     None = 0,
-    Recursive = 1 << 0,      // Search recursively in subdirectories
-    ExcludeReadOnly = 1 << 1 // Filter out read-only files
+    Recursive = 1 << 0,       // Search recursively in subdirectories
+    ExcludeReadOnly = 1 << 1, // Filter out read-only files
   };
 
   /// @brief Interface for file backend operations.

@@ -39,6 +39,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleBackdropFilterData);
     }
+
     KRYS_NODISCARD Ref<StyleBackdropFilterData> Copy() const noexcept;
 
     bool operator==(const StyleBackdropFilterData &) const noexcept;

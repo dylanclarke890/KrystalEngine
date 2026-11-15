@@ -46,17 +46,19 @@ namespace krys::boo::layout
     enum class SkipFloats : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     struct Result
     {
       InlineContentBreaker::IsEndOfLine EndOfLine {InlineContentBreaker::IsEndOfLine::No};
+
       struct CommittedContentCount
       {
         size_t Value {0};
         bool IsRevert {false};
       };
+
       CommittedContentCount CommittedCount {};
       size_t PartialTrailingContentLength {0};
       Maybe<InlineLayoutUnit> OverflowLogicalWidth {};
@@ -66,7 +68,7 @@ namespace krys::boo::layout
     {
       No,
       Yes,
-      OnlyWhenFirstFloatOnLine
+      OnlyWhenFirstFloatOnLine,
     };
 
     struct RectAndFloatConstraints
@@ -167,6 +169,7 @@ namespace krys::boo::layout
     {
       return !_suspendedFloats.empty();
     }
+
     KRYS_NODISCARD bool ShouldTryToPlaceFloatBox(const Box &floatBox, LayoutUnit floatBoxMarginBoxWidth,
                                                  MayOverConstrainLine mayOverConstrainLine) const noexcept;
 
@@ -174,6 +177,7 @@ namespace krys::boo::layout
     {
       return !_lineIsConstrainedByFloat.IsEmpty();
     }
+
     KRYS_NODISCARD const FloatingContext &GetFloatingContext() const noexcept
     {
       return _floatingContext;

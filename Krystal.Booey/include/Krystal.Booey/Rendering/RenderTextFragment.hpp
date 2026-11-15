@@ -67,6 +67,7 @@ namespace krys::boo
     {
       return _start;
     }
+
     /// @brief The length of the fragment, in bytes.
     KRYS_NODISCARD size_t End() const noexcept
     {
@@ -79,6 +80,7 @@ namespace krys::boo
     KRYS_NODISCARD RenderBlock *BlockForAccompanyingFirstLetter() noexcept;
 
     void SetContentString(utf8_string text) noexcept;
+
     KRYS_NODISCARD const utf8_string &ContentString() const noexcept
     {
       return _contentString;
@@ -89,6 +91,7 @@ namespace krys::boo
     {
       return _altText;
     }
+
     void SetAltText(Maybe<utf8_string> altText) noexcept
     {
       _altText = krys::move(altText);

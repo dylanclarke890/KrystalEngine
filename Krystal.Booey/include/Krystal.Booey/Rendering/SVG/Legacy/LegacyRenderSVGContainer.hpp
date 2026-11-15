@@ -45,18 +45,22 @@ namespace krys::boo
     ~LegacyRenderSVGContainer() noexcept override;
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void SetNeedsBoundariesUpdate() noexcept final
     {
       _needsBoundariesUpdate = true;
     }
+
     KRYS_NODISCARD virtual bool DidTransformToRootUpdate() noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD bool IsObjectBoundingBoxValid() const noexcept
     {
       return static_cast<bool>(_objectBoundingBox);
     }
+
     KRYS_NODISCARD bool IsRepaintSuspendedForChildren() const noexcept
     {
       return _repaintIsSuspendedForChildrenDuringLayout;
@@ -105,9 +109,11 @@ namespace krys::boo
     virtual void CalcViewport() noexcept
     {
     }
+
     virtual void ApplyViewportClip(PaintInfo &) noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool PointIsInsideViewportClip(const FloatPoint & /*pointInParent*/) noexcept
     {
       return true;

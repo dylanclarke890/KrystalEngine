@@ -53,6 +53,7 @@ namespace krys::boo
     {
       return _vertex1;
     }
+
     KRYS_NODISCARD const FloatPoint &Vertex2() const noexcept override
     {
       return _vertex2;
@@ -62,10 +63,12 @@ namespace krys::boo
     {
       return y1 <= MinY() && y2 >= MaxY();
     }
+
     KRYS_NODISCARD bool OverlapsYRange(float y1, float y2) const noexcept
     {
       return y2 >= MinY() && y1 <= MaxY();
     }
+
     KRYS_NODISCARD float XIntercept(float y) const noexcept;
     KRYS_NODISCARD FloatShapeInterval ClippedEdgeXRange(float y1, float y2) const noexcept;
   };
@@ -86,10 +89,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutRect ShapeMarginLogicalBoundingBox() const noexcept override;
+
     KRYS_NODISCARD bool IsEmpty() const noexcept override
     {
       return _polygon.IsEmpty();
     }
+
     KRYS_NODISCARD LineSegment GetExcludedInterval(LayoutUnit logicalTop,
                                                    LayoutUnit logicalHeight) const noexcept override;
   };

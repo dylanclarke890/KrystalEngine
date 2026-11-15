@@ -44,6 +44,7 @@ namespace krys::boo::style
       : css::EnumSetOrKeywordBase<PositionVisibility, PositionVisibilityValueEnumSet, css::keywords::Always>
   {
     using Base::Base;
+
     KRYS_NODISCARD constexpr bool IsAlways() const noexcept
     {
       return IsKeyword();

@@ -18,7 +18,7 @@ namespace krys::boo::tests
     /// images load as they're inserted.
     struct LazyImageFixture : css::tests::ValueFixture
     {
-      static constexpr IntSize ViewSize {200, 100};
+      constexpr static IntSize ViewSize {200, 100};
       Ref<Page> TestPage;
       Ref<dom::HTMLDocument> Document;
 

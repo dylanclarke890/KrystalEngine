@@ -52,14 +52,17 @@ namespace krys::boo
     void SetContainerSize(const FloatSize &) noexcept override
     {
     }
+
     KRYS_NODISCARD bool UsesContainerSize() const noexcept override
     {
       return false;
     }
+
     KRYS_NODISCARD bool HasRelativeWidth() const noexcept override
     {
       return false;
     }
+
     KRYS_NODISCARD bool HasRelativeHeight() const noexcept override
     {
       return false;

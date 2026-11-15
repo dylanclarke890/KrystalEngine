@@ -82,6 +82,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleRareInheritedData);
     }
+
     KRYS_NODISCARD Ref<StyleRareInheritedData> Copy() const noexcept;
     ~StyleRareInheritedData() noexcept;
 

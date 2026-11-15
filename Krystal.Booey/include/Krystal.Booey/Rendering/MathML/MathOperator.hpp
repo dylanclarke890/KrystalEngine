@@ -49,7 +49,7 @@ namespace krys::boo
       NormalOperator,
       DisplayOperator,
       VerticalOperator,
-      HorizontalOperator
+      HorizontalOperator,
     };
 
   private:
@@ -68,6 +68,7 @@ namespace krys::boo
       {
         return ExtensionCodePoint || ExtensionFallbackGlyph;
       }
+
       KRYS_NODISCARD bool HasMiddle() const noexcept
       {
         return MiddleCodePoint || MiddleFallbackGlyph;
@@ -78,7 +79,7 @@ namespace krys::boo
     {
       Unstretched,
       SizeVariant,
-      GlyphAssembly
+      GlyphAssembly,
     };
 
     enum class GlyphPaintTrimming : uint8
@@ -88,7 +89,7 @@ namespace krys::boo
       TrimTopAndBottom,
       TrimLeft,
       TrimRight,
-      TrimLeftAndRight
+      TrimLeftAndRight,
     };
 
     char32 _baseCharacter {0};
@@ -113,18 +114,22 @@ namespace krys::boo
     {
       return _width;
     }
+
     KRYS_NODISCARD LayoutUnit MaxPreferredWidth() const noexcept
     {
       return _maxPreferredWidth;
     }
+
     KRYS_NODISCARD LayoutUnit Ascent() const noexcept
     {
       return _ascent;
     }
+
     KRYS_NODISCARD LayoutUnit Descent() const noexcept
     {
       return _descent;
     }
+
     KRYS_NODISCARD LayoutUnit ItalicCorrection() const noexcept
     {
       return _italicCorrection;
@@ -138,10 +143,12 @@ namespace krys::boo
   private:
     KRYS_NODISCARD LayoutUnit StretchSize() const noexcept;
     KRYS_NODISCARD bool GetGlyph(const RenderStyle &style, char32 character, GlyphData &glyph) const noexcept;
+
     KRYS_NODISCARD bool GetBaseGlyph(const RenderStyle &style, GlyphData &baseGlyph) const noexcept
     {
       return GetGlyph(style, _baseCharacter, baseGlyph);
     }
+
     void SetSizeVariant(const GlyphData &sizeVariant) noexcept;
     void SetGlyphAssembly(const RenderStyle &style, const GlyphAssemblyData &assemblyData) noexcept;
     void GetMathVariantsWithFallback(const RenderStyle &style, bool isVertical, List<Glyph> &sizeVariants,

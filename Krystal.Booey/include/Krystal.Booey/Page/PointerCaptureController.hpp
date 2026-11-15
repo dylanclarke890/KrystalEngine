@@ -125,6 +125,7 @@ namespace krys::boo
 
     /// @brief Releases every capture, as a pointer lock does.
     void PointerLockWasApplied() noexcept;
+
     void ElementWasRemoved(dom::Element &element) noexcept
     {
       if (_haveAnyCapturingElement)

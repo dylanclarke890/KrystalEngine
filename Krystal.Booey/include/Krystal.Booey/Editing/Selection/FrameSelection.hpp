@@ -62,13 +62,13 @@ namespace krys::boo
   enum class UserTriggered : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   enum class CaretVisibility : bool
   {
     Visible,
-    Hidden
+    Hidden,
   };
 
   enum class CaretVisibilitySuppressionReason : uint8
@@ -80,13 +80,13 @@ namespace krys::boo
   enum class RevealExtentOption : bool
   {
     RevealExtent,
-    DoNotRevealExtent
+    DoNotRevealExtent,
   };
 
   enum class ForceCenterScroll : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   struct RevealSelectionOptions
@@ -116,7 +116,7 @@ namespace krys::boo
     ForBindings,
     DoNotNotifyEditorClients,
     MaintainLiveRange,
-    OnlyAllowForwardScrolling
+    OnlyAllowForwardScrolling,
   };
 }
 
@@ -169,6 +169,7 @@ namespace krys::boo
     {
       return _caretRectNeedsUpdate;
     }
+
     void SetCaretRectNeedsUpdate() noexcept
     {
       _caretRectNeedsUpdate = true;
@@ -178,10 +179,12 @@ namespace krys::boo
     {
       _caretVisibility = visibility;
     }
+
     KRYS_NODISCARD bool CaretIsVisible() const noexcept
     {
       return _caretVisibility == CaretVisibility::Visible;
     }
+
     KRYS_NODISCARD CaretVisibility GetCaretVisibility() const noexcept
     {
       return _caretVisibility;
@@ -210,10 +213,12 @@ namespace krys::boo
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
 
     KRYS_NODISCARD bool HasCaret() const noexcept;
+
     KRYS_NODISCARD const VisiblePosition &CaretPosition() const noexcept
     {
       return _position;
     }
+
     void SetCaretPosition(const VisiblePosition &position) noexcept;
     void Clear() noexcept;
 
@@ -241,43 +246,43 @@ namespace krys::boo
     enum class CursorAlignOnScroll : bool
     {
       IfNeeded,
-      Always
+      Always,
     };
 
     enum class EndPointsAdjustmentMode : bool
     {
       DoNotAdjust,
-      AdjustAtBidiBoundary
+      AdjustAtBidiBoundary,
     };
 
     enum class ShouldCloseTyping : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class ClipToVisibleContent : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     enum class Alteration : bool
     {
       Move,
-      Extend
+      Extend,
     };
 
     enum class VerticalDirection : bool
     {
       Up,
-      Down
+      Down,
     };
 
     enum class ShouldUpdateAppearance : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:
@@ -285,7 +290,7 @@ namespace krys::boo
     {
       Start,
       End,
-      Extent
+      Extent,
     };
 
   private:
@@ -347,6 +352,7 @@ namespace krys::boo
     {
       return _selection;
     }
+
     void SetSelection(const VisibleSelection &selection,
                       EnumSet<SetSelectionOption> options = DefaultSetSelectionOptions(),
                       CursorAlignOnScroll align = CursorAlignOnScroll::IfNeeded,
@@ -395,18 +401,22 @@ namespace krys::boo
     {
       return _selection.IsNone();
     }
+
     KRYS_NODISCARD bool IsCaret() const noexcept
     {
       return _selection.IsCaret();
     }
+
     KRYS_NODISCARD bool IsRange() const noexcept
     {
       return _selection.IsRange();
     }
+
     KRYS_NODISCARD bool IsCaretOrRange() const noexcept
     {
       return _selection.IsCaretOrRange();
     }
+
     KRYS_NODISCARD bool IsAll(EditingBoundaryCrossingRule rule =
                                 EditingBoundaryCrossingRule::CannotCrossEditingBoundary) const noexcept
     {
@@ -420,10 +430,12 @@ namespace krys::boo
                          uint32 newLength) noexcept;
 
     void SetFocused(bool isFocused) noexcept;
+
     KRYS_NODISCARD bool IsFocused() const noexcept
     {
       return _focused;
     }
+
     KRYS_NODISCARD bool IsFocusedAndActive() const noexcept;
 
     /// @brief Sets the render tree's selection from the selection.
@@ -443,6 +455,7 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<css::MutableStyleProperties> CopyTypingStyle() const noexcept;
     void SetTypingStyle(RefPtr<EditingStyle> &&style) noexcept;
     void ClearTypingStyle() noexcept;
+
     void SetCaretRectNeedsUpdate() noexcept
     {
       CaretBase::SetCaretRectNeedsUpdate();
@@ -459,6 +472,7 @@ namespace krys::boo
     {
       return CaretBase::CaretIsVisible();
     }
+
     void PaintCaret(GraphicsContext &context, const LayoutPoint &paintOffset) noexcept;
 
     /// @brief Used to suspend caret blinking while the mouse is down.
@@ -469,6 +483,7 @@ namespace krys::boo
     {
       return *_caretAnimator;
     }
+
     KRYS_NODISCARD const CaretAnimator &GetCaretAnimator() const noexcept
     {
       return *_caretAnimator;
@@ -511,6 +526,7 @@ namespace krys::boo
 
     void CaretAnimationDidUpdate(CaretAnimator &animator) noexcept override;
     KRYS_NODISCARD dom::Node *CaretNode() noexcept override;
+
     KRYS_NODISCARD LayoutRect LocalCaretRect() const noexcept override
     {
       return LocalCaretRectWithoutUpdate();

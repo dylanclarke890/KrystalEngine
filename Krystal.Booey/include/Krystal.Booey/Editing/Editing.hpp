@@ -144,7 +144,7 @@ namespace krys::boo
   enum class SkipDisplayContents : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   KRYS_NODISCARD dom::Position NextVisuallyDistinctCandidate(

@@ -58,9 +58,11 @@ namespace krys::boo
     {
       Initialize(renderer, nullptr);
     }
+
     virtual void Shutdown() noexcept;
 
     void SetCachedImage(CachedResourceHandle<CachedImage> &&newImage) noexcept;
+
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept
     {
       return _cachedImage.get();
@@ -70,6 +72,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual RefPtr<Image> GetImage(const IntSize &size = {}) const noexcept;
     KRYS_NODISCARD virtual bool CurrentFrameIsComplete() const noexcept;
+
     KRYS_NODISCARD virtual bool ErrorOccurred() const noexcept
     {
       return _cachedImage && _cachedImage->ErrorOccurred();
@@ -81,6 +84,7 @@ namespace krys::boo
     {
       return _cachedImage && _cachedImage->ImageHasRelativeWidth();
     }
+
     KRYS_NODISCARD virtual bool ImageHasRelativeHeight() const noexcept
     {
       return _cachedImage && _cachedImage->ImageHasRelativeHeight();
@@ -90,6 +94,7 @@ namespace krys::boo
     {
       return ImageSize(multiplier, CachedImage::UsedSize);
     }
+
     KRYS_NODISCARD LayoutSize IntrinsicSize(float multiplier) const noexcept
     {
       return ImageSize(multiplier, CachedImage::IntrinsicSize);
@@ -105,6 +110,7 @@ namespace krys::boo
     {
       return _renderer;
     }
+
     void Initialize(RenderElement &renderer, CachedImage *styleCachedImage) noexcept;
 
   private:

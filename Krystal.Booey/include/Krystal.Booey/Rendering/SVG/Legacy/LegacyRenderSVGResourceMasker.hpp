@@ -80,6 +80,7 @@ namespace krys::boo
 
   private:
     void GetElement() const = delete;
+
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGResourceMasker";

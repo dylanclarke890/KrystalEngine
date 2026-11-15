@@ -37,7 +37,7 @@ namespace krys::boo
       TouchMoved,
       TouchStationary,
       TouchCancelled,
-      TouchStateEnd // Placeholder: must remain the last item.
+      TouchStateEnd, // Placeholder: must remain the last item.
     };
 
   protected:

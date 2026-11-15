@@ -46,7 +46,7 @@ namespace krys::boo::css::PropertyParserHelpers
     enum class RestrictedToZeroToHundredRange : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     auto ConsumeAndConvertPercentage = [&](TokenRange &tokens,

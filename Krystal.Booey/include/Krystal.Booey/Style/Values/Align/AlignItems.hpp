@@ -55,42 +55,52 @@ namespace krys::boo::style
     {
       return Primary() == PrimaryKind::Normal;
     }
+
     KRYS_NODISCARD constexpr bool IsStretch() const noexcept
     {
       return Primary() == PrimaryKind::Stretch;
     }
+
     KRYS_NODISCARD constexpr bool IsBaseline() const noexcept
     {
       return Primary() == PrimaryKind::Baseline;
     }
+
     KRYS_NODISCARD constexpr bool IsCenter() const noexcept
     {
       return Primary() == PrimaryKind::Center;
     }
+
     KRYS_NODISCARD constexpr bool IsStart() const noexcept
     {
       return Primary() == PrimaryKind::Start;
     }
+
     KRYS_NODISCARD constexpr bool IsEnd() const noexcept
     {
       return Primary() == PrimaryKind::End;
     }
+
     KRYS_NODISCARD constexpr bool IsSelfStart() const noexcept
     {
       return Primary() == PrimaryKind::SelfStart;
     }
+
     KRYS_NODISCARD constexpr bool IsSelfEnd() const noexcept
     {
       return Primary() == PrimaryKind::SelfEnd;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexStart() const noexcept
     {
       return Primary() == PrimaryKind::FlexStart;
     }
+
     KRYS_NODISCARD constexpr bool IsFlexEnd() const noexcept
     {
       return Primary() == PrimaryKind::FlexEnd;
     }
+
     KRYS_NODISCARD constexpr bool IsAnchorCenter() const noexcept
     {
       return Primary() == PrimaryKind::AnchorCenter;
@@ -101,6 +111,7 @@ namespace krys::boo::style
       return Primary() == PrimaryKind::Baseline
              && GetBaselineAlignmentPreference() == BaselineAlignmentPreferenceKind::First;
     }
+
     KRYS_NODISCARD constexpr bool IsLastBaseline() const noexcept
     {
       return Primary() == PrimaryKind::Baseline
@@ -145,6 +156,7 @@ namespace krys::boo::style
     uint8 _secondary : 2 {
       0}; // unused, BaselineAlignmentPreferenceKind or OverflowPositionKind, depending on value of _primary
   };
+
   static_assert(sizeof(AlignItems) == 1);
 
   constexpr AlignItems::AlignItems(css::keywords::Normal) noexcept : AlignItems {PrimaryKind::Normal}

@@ -51,7 +51,7 @@ namespace krys::boo
     {
       LayoutPhase,
       MinContentPhase,
-      MaxContentPhase
+      MaxContentPhase,
     };
 
   private:
@@ -80,10 +80,12 @@ namespace krys::boo
                                  style::GridTrackSizingDirection masonryAxisDirection,
                                  MasonryLayoutPhase layoutPhase) noexcept;
     KRYS_NODISCARD LayoutUnit OffsetForGridItem(const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD LayoutUnit GridContentSize() const noexcept
     {
       return _gridContentSize;
     }
+
     KRYS_NODISCARD LayoutUnit GridGap() const noexcept
     {
       return _masonryAxisGridGap;

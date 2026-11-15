@@ -46,13 +46,14 @@ namespace krys::boo
     bool _inputImageIsReady {false};
 
   public:
-    static constexpr bool IsFixedSize = true;
+    constexpr static bool IsFixedSize = true;
 
     KRYS_NODISCARD static Ref<StyleFilterImage> Create(RefPtr<StyleImage> image,
                                                        style::Filter filter) noexcept
     {
       return AdoptRef(*new StyleFilterImage(krys::move(image), krys::move(filter)));
     }
+
     ~StyleFilterImage() noexcept override;
 
     KRYS_NODISCARD bool Equals(const StyleImage &other) const noexcept final;
@@ -63,6 +64,7 @@ namespace krys::boo
     {
       return _image;
     }
+
     KRYS_NODISCARD const style::Filter &GetFilter() const noexcept
     {
       return _filter;
@@ -77,10 +79,12 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &,
                                           const GraphicsContext &destinationContext,
                                           bool isForFirstLine) const noexcept final;
+
     KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &) const noexcept final
     {
       return false;
     }
+
     KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final;
 
     // CachedImageClient.

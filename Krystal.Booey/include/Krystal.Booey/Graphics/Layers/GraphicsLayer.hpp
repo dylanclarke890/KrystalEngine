@@ -214,6 +214,7 @@ namespace krys::boo
     {
       return null;
     }
+
     KRYS_NODISCARD virtual Maybe<PlatformLayerIdentifier> LayerIDIgnoringStructuralLayer() const noexcept
     {
       return PrimaryLayerID();
@@ -229,16 +230,19 @@ namespace krys::boo
     {
       return _name;
     }
+
     virtual void SetName(const utf8_string &name) noexcept
     {
       _name = name;
     }
+
     KRYS_NODISCARD virtual utf8_string DebugName() const noexcept;
 
     KRYS_NODISCARD GraphicsLayer *Parent() const noexcept
     {
       return _parent;
     }
+
     void SetParent(GraphicsLayer *layer) noexcept; // Internal use only.
 
     // Returns true if the layer has the given layer as an ancestor (excluding self).
@@ -248,6 +252,7 @@ namespace krys::boo
     {
       return _children;
     }
+
     KRYS_NODISCARD List<Ref<GraphicsLayer>> &Children() noexcept
     {
       return _children;
@@ -271,12 +276,14 @@ namespace krys::boo
     {
       return _maskLayer.get();
     }
+
     virtual void SetMaskLayer(RefPtr<GraphicsLayer> &&layer) noexcept;
 
     void SetIsMaskLayer(bool isMask) noexcept
     {
       _isMaskLayer = isMask;
     }
+
     KRYS_NODISCARD bool IsMaskLayer() const noexcept
     {
       return _isMaskLayer;
@@ -286,6 +293,7 @@ namespace krys::boo
     {
       _isBackdropRoot = isBackdropRoot;
     }
+
     KRYS_NODISCARD bool IsBackdropRoot() const noexcept
     {
       return _isBackdropRoot;
@@ -293,11 +301,13 @@ namespace krys::boo
 
     // The given layer will replicate this layer and its children; the replica renders behind this layer.
     virtual void SetReplicatedByLayer(RefPtr<GraphicsLayer> &&layer) noexcept;
+
     // Whether this layer is being replicated by another layer.
     KRYS_NODISCARD bool IsReplicated() const noexcept
     {
       return _replicaLayer != nullptr;
     }
+
     // The layer that replicates this layer (if any).
     KRYS_NODISCARD GraphicsLayer *ReplicaLayer() const noexcept
     {
@@ -308,6 +318,7 @@ namespace krys::boo
     {
       return _replicatedLayerPosition;
     }
+
     void SetReplicatedLayerPosition(const FloatPoint &p) noexcept
     {
       _replicatedLayerPosition = p;
@@ -318,6 +329,7 @@ namespace krys::boo
     {
       return _offsetFromRenderer;
     }
+
     void SetOffsetFromRenderer(const FloatSize &offset, ShouldSetNeedsDisplay shouldSetNeedsDisplay =
                                                           ShouldSetNeedsDisplay::Set) noexcept;
 
@@ -326,6 +338,7 @@ namespace krys::boo
     {
       return _scrollOffset;
     }
+
     void SetScrollOffset(const ScrollOffset &offset,
                          ShouldSetNeedsDisplay shouldSetNeedsDisplay = ShouldSetNeedsDisplay::Set) noexcept;
 
@@ -334,6 +347,7 @@ namespace krys::boo
     {
       return _position;
     }
+
     virtual void SetPosition(const FloatPoint &p) noexcept
     {
       _approximatePosition = null;
@@ -345,6 +359,7 @@ namespace krys::boo
     {
       return _approximatePosition ? _approximatePosition.value() : _position;
     }
+
     virtual void SetApproximatePosition(const FloatPoint &p) noexcept
     {
       _approximatePosition = p;
@@ -364,6 +379,7 @@ namespace krys::boo
     {
       return _anchorPoint;
     }
+
     virtual void SetAnchorPoint(const FloatPoint3D &p) noexcept
     {
       _anchorPoint = p;
@@ -374,6 +390,7 @@ namespace krys::boo
     {
       return _size;
     }
+
     virtual void SetSize(const FloatSize &size) noexcept;
 
     // The boundOrigin affects the offset at which content is rendered, and sublayers are positioned.
@@ -381,6 +398,7 @@ namespace krys::boo
     {
       return _boundsOrigin;
     }
+
     virtual void SetBoundsOrigin(const FloatPoint &origin) noexcept
     {
       _boundsOrigin = origin;
@@ -395,6 +413,7 @@ namespace krys::boo
 
     KRYS_NODISCARD const TransformationMatrix &Transform() const noexcept;
     virtual void SetTransform(const TransformationMatrix &matrix) noexcept;
+
     KRYS_NODISCARD bool HasNonIdentityTransform() const noexcept
     {
       return _transform && !_transform->IsIdentity();
@@ -402,6 +421,7 @@ namespace krys::boo
 
     KRYS_NODISCARD const TransformationMatrix &ChildrenTransform() const noexcept;
     virtual void SetChildrenTransform(const TransformationMatrix &matrix) noexcept;
+
     KRYS_NODISCARD bool HasNonIdentityChildrenTransform() const noexcept
     {
       return _childrenTransform && !_childrenTransform->IsIdentity();
@@ -411,24 +431,28 @@ namespace krys::boo
     {
       return _preserves3D;
     }
+
     virtual void SetPreserves3D(bool b) noexcept;
 
     KRYS_NODISCARD bool MasksToBounds() const noexcept
     {
       return _masksToBounds;
     }
+
     virtual void SetMasksToBounds(bool b) noexcept;
 
     KRYS_NODISCARD bool DrawsContent() const noexcept
     {
       return _drawsContent;
     }
+
     virtual void SetDrawsContent(bool b) noexcept;
 
     KRYS_NODISCARD bool ContentsAreVisible() const noexcept
     {
       return _contentsVisible;
     }
+
     virtual void SetContentsVisible(bool b) noexcept
     {
       _contentsVisible = b;
@@ -438,6 +462,7 @@ namespace krys::boo
     {
       return _userInteractionEnabled;
     }
+
     virtual void SetUserInteractionEnabled(bool b) noexcept
     {
       _userInteractionEnabled = b;
@@ -447,6 +472,7 @@ namespace krys::boo
     {
       return _acceleratesDrawing;
     }
+
     virtual void SetAcceleratesDrawing(bool b) noexcept
     {
       _acceleratesDrawing = b;
@@ -456,6 +482,7 @@ namespace krys::boo
     {
       return _usesDisplayListDrawing;
     }
+
     virtual void SetUsesDisplayListDrawing(bool b) noexcept
     {
       _usesDisplayListDrawing = b;
@@ -469,6 +496,7 @@ namespace krys::boo
     {
       return _backgroundColor;
     }
+
     virtual void SetBackgroundColor(const Color &color) noexcept;
 
     // opaque means that we know the layer contents have no alpha
@@ -476,6 +504,7 @@ namespace krys::boo
     {
       return _contentsOpaque;
     }
+
     virtual void SetContentsOpaque(bool b) noexcept
     {
       _contentsOpaque = b;
@@ -485,6 +514,7 @@ namespace krys::boo
     {
       return _backfaceVisibility;
     }
+
     virtual void SetBackfaceVisibility(bool b) noexcept
     {
       _backfaceVisibility = b;
@@ -494,12 +524,14 @@ namespace krys::boo
     {
       return _opacity;
     }
+
     virtual void SetOpacity(float opacity) noexcept;
 
     KRYS_NODISCARD const FilterOperations &Filters() const noexcept
     {
       return _filters;
     }
+
     // Returns true if filter can be rendered by the compositor.
     virtual bool SetFilters(const FilterOperations &filters) noexcept;
 
@@ -507,6 +539,7 @@ namespace krys::boo
     {
       return _backdropFilters;
     }
+
     virtual bool SetBackdropFilters(const FilterOperations &filters) noexcept
     {
       _backdropFilters = filters;
@@ -517,6 +550,7 @@ namespace krys::boo
     {
       _backdropFiltersRect = backdropFiltersRect;
     }
+
     KRYS_NODISCARD const FloatRoundedRect &BackdropFiltersRect() const noexcept
     {
       return _backdropFiltersRect;
@@ -526,6 +560,7 @@ namespace krys::boo
     {
       return _blendMode;
     }
+
     virtual void SetBlendMode(BlendMode blendMode) noexcept
     {
       _blendMode = blendMode;
@@ -536,6 +571,7 @@ namespace krys::boo
     {
       return _paintingPhase;
     }
+
     void SetPaintingPhase(EnumSet<GraphicsLayerPaintingPhase> phase) noexcept;
 
     virtual void SetNeedsDisplay() noexcept = 0;
@@ -546,6 +582,7 @@ namespace krys::boo
     virtual void SetContentsNeedsDisplay() noexcept
     {
     }
+
     virtual void SetContentsNeedsDisplayInRect(const FloatRect &) noexcept
     {
       SetContentsNeedsDisplay();
@@ -556,6 +593,7 @@ namespace krys::boo
     {
       _contentsTilePhase = p;
     }
+
     KRYS_NODISCARD FloatSize ContentsTilePhase() const noexcept
     {
       return _contentsTilePhase;
@@ -565,10 +603,12 @@ namespace krys::boo
     {
       _contentsTileSize = s;
     }
+
     KRYS_NODISCARD FloatSize ContentsTileSize() const noexcept
     {
       return _contentsTileSize;
     }
+
     KRYS_NODISCARD bool HasContentsTiling() const noexcept
     {
       return !_contentsTileSize.IsEmpty();
@@ -579,6 +619,7 @@ namespace krys::boo
     {
       return _contentsRect;
     }
+
     virtual void SetContentsRect(const FloatRect &r) noexcept
     {
       _contentsRect = r;
@@ -589,6 +630,7 @@ namespace krys::boo
     {
       return _contentsClippingRect;
     }
+
     virtual void SetContentsClippingRect(const FloatRoundedRect &roundedRect) noexcept
     {
       _contentsClippingRect = roundedRect;
@@ -599,6 +641,7 @@ namespace krys::boo
     {
       return _contentsRectClipsDescendants;
     }
+
     virtual void SetContentsRectClipsDescendants(bool b) noexcept
     {
       _contentsRectClipsDescendants = b;
@@ -619,15 +662,19 @@ namespace krys::boo
     {
       return false;
     }
+
     virtual void PauseAnimation(const utf8_string & /*animationName*/, double /*timeOffset*/) noexcept
     {
     }
+
     virtual void RemoveAnimation(const utf8_string & /*animationName*/, Maybe<AnimatedProperty>) noexcept
     {
     }
+
     virtual void TransformRelatedPropertyDidChange() noexcept
     {
     }
+
     virtual void SuspendAnimations(MonotonicTime::duration) noexcept;
     virtual void ResumeAnimations() noexcept;
 
@@ -641,6 +688,7 @@ namespace krys::boo
     virtual void SetContentsToImage(Image *) noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool ShouldDirectlyCompositeImage(Image *) const noexcept
     {
       return true;
@@ -651,6 +699,7 @@ namespace krys::boo
     virtual void SetContentsToImageBuffer(ImageBuffer *) noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool ShouldDirectlyCompositeImageBuffer(ImageBuffer *) const noexcept
     {
       return false;
@@ -666,6 +715,7 @@ namespace krys::boo
                                             ContentsLayerPurpose) noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool UsesContentsLayer() const noexcept
     {
       return false;
@@ -681,6 +731,7 @@ namespace krys::boo
     {
       _contentsOrientation = orientation;
     }
+
     KRYS_NODISCARD CompositingCoordinatesOrientation ContentsOrientation() const noexcept
     {
       return _contentsOrientation;
@@ -690,14 +741,17 @@ namespace krys::boo
     {
       _contentsMinificationFilter = filter;
     }
+
     KRYS_NODISCARD ScalingFilter ContentsMinificationFilter() const noexcept
     {
       return _contentsMinificationFilter;
     }
+
     virtual void SetContentsMagnificationFilter(ScalingFilter filter) noexcept
     {
       _contentsMagnificationFilter = filter;
     }
+
     KRYS_NODISCARD ScalingFilter ContentsMagnificationFilter() const noexcept
     {
       return _contentsMagnificationFilter;
@@ -709,6 +763,7 @@ namespace krys::boo
     {
       _showDebugBorder = show;
     }
+
     KRYS_NODISCARD bool IsShowingDebugBorder() const noexcept
     {
       return _showDebugBorder;
@@ -718,6 +773,7 @@ namespace krys::boo
     {
       _showRepaintCounter = show;
     }
+
     KRYS_NODISCARD bool IsShowingRepaintCounter() const noexcept
     {
       return _showRepaintCounter;
@@ -727,6 +783,7 @@ namespace krys::boo
     {
       _showFrameProcessBorders = show;
     }
+
     KRYS_NODISCARD bool IsShowingFrameProcessBorders() const noexcept
     {
       return _showFrameProcessBorders;
@@ -737,6 +794,7 @@ namespace krys::boo
     {
       return _repaintCount;
     }
+
     int32 IncrementRepaintCount() noexcept
     {
       return ++_repaintCount;
@@ -745,6 +803,7 @@ namespace krys::boo
     virtual void SetDebugBackgroundColor(const Color &) noexcept
     {
     }
+
     virtual void SetDebugBorder(const Color &, float /*borderWidth*/) noexcept
     {
     }
@@ -753,6 +812,7 @@ namespace krys::boo
     {
       _customAppearance = customAppearance;
     }
+
     KRYS_NODISCARD CustomAppearance GetCustomAppearance() const noexcept
     {
       return _customAppearance;
@@ -763,6 +823,7 @@ namespace krys::boo
     {
       return _zPosition;
     }
+
     virtual void SetZPosition(float position) noexcept;
 
     KRYS_NODISCARD virtual FloatSize PixelAlignmentOffset() const noexcept
@@ -774,6 +835,7 @@ namespace krys::boo
     {
       _appliesPageScale = appliesScale;
     }
+
     KRYS_NODISCARD virtual bool AppliesPageScale() const noexcept
     {
       return _appliesPageScale;
@@ -783,6 +845,7 @@ namespace krys::boo
     {
       _appliesDeviceScale = appliesScale;
     }
+
     KRYS_NODISCARD bool AppliesDeviceScale() const noexcept
     {
       return _appliesDeviceScale;
@@ -792,6 +855,7 @@ namespace krys::boo
     {
       return Client().PageScaleFactor();
     }
+
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept
     {
       return AppliesDeviceScale() ? Client().DeviceScaleFactor() : 1.f;
@@ -802,6 +866,7 @@ namespace krys::boo
     virtual void SetAllowsBackingStoreDetaching(bool) noexcept
     {
     }
+
     KRYS_NODISCARD virtual bool AllowsBackingStoreDetaching() const noexcept
     {
       return true;
@@ -811,6 +876,7 @@ namespace krys::boo
     {
       _allowsTiling = allowsTiling;
     }
+
     KRYS_NODISCARD virtual bool AllowsTiling() const noexcept
     {
       return _allowsTiling;
@@ -819,6 +885,7 @@ namespace krys::boo
     virtual void DeviceOrPageScaleFactorChanged() noexcept
     {
     }
+
     virtual void SetShouldUpdateRootRelativeScaleFactor(bool) noexcept
     {
     }
@@ -833,6 +900,7 @@ namespace krys::boo
     virtual void FlushCompositingState(const FloatRect & /* clipRect */) noexcept
     {
     }
+
     virtual void FlushCompositingStateForThisLayerOnly() noexcept
     {
     }
@@ -864,6 +932,7 @@ namespace krys::boo
     {
       _isTrackingDisplayListReplay = isTracking;
     }
+
     KRYS_NODISCARD virtual bool IsTrackingDisplayListReplay() const noexcept
     {
       return _isTrackingDisplayListReplay;
@@ -876,6 +945,7 @@ namespace krys::boo
     {
       return true;
     }
+
     KRYS_NODISCARD virtual bool BackingStoreAttachedForTesting() const noexcept
     {
       return BackingStoreAttached();
@@ -900,6 +970,7 @@ namespace krys::boo
     {
       return _shouldPaintUsingCompositeCopy;
     }
+
     void SetShouldPaintUsingCompositeCopy(bool copy) noexcept
     {
       _shouldPaintUsingCompositeCopy = copy;
@@ -909,6 +980,7 @@ namespace krys::boo
     {
       return _renderingIsSuppressedIncludingDescendants;
     }
+
     void SetRenderingIsSuppressedIncludingDescendants(bool suppressed) noexcept
     {
       _renderingIsSuppressedIncludingDescendants = suppressed;
@@ -918,6 +990,7 @@ namespace krys::boo
     {
       return _animationExtent;
     }
+
     void SetAnimationExtent(Maybe<FloatRect> animationExtent) noexcept
     {
       _animationExtent = animationExtent;
@@ -930,6 +1003,7 @@ namespace krys::boo
 
     // Should be called from derived class destructors. Should call willBeDestroyed() on super.
     void WillBeDestroyed() noexcept;
+
     KRYS_NODISCARD bool BeingDestroyed() const noexcept
     {
       return _beingDestroyed;
@@ -946,6 +1020,7 @@ namespace krys::boo
     {
       _filters = {};
     }
+
     void ClearBackdropFilters() noexcept
     {
       _backdropFilters = {};
@@ -968,12 +1043,14 @@ namespace krys::boo
     {
       return _replicatedLayer;
     }
+
     virtual void SetReplicatedLayer(GraphicsLayer *layer) noexcept
     {
       _replicatedLayer = layer;
     }
 
     void DumpProperties(TextStream &ts, EnumSet<LayerTreeAsTextOptions> options) const noexcept;
+
     virtual void DumpAdditionalProperties(TextStream &, EnumSet<LayerTreeAsTextOptions>) const noexcept
     {
     }

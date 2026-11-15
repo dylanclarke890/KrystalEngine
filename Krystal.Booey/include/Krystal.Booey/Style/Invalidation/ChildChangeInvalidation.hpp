@@ -48,7 +48,7 @@ namespace krys::boo::style
     enum class ChangedElementRelation : uint8
     {
       SelfOrDescendant,
-      Sibling
+      Sibling,
     };
 
   private:

@@ -56,8 +56,10 @@ namespace krys::boo::css
     {
       return _variable;
     }
+
     /// @return A `TypeError`, leaving the variable unchanged, if @p variable isn't a custom property name.
     dom::ExceptionOr<void> SetVariable(CSSOMString variable) noexcept;
+
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssvariablereferencevalue-fallback
     KRYS_NODISCARD CSSUnparsedValue *Fallback() const noexcept
     {

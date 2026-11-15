@@ -41,12 +41,13 @@ namespace krys::boo
     bool _knownCacheableBarringFilter {false};
 
   public:
-    static constexpr bool IsFixedSize = false;
+    constexpr static bool IsFixedSize = false;
 
     KRYS_NODISCARD static Ref<StyleGradientImage> Create(style::Gradient gradient) noexcept
     {
       return AdoptRef(*new StyleGradientImage(krys::move(gradient)));
     }
+
     ~StyleGradientImage() noexcept override;
 
     KRYS_NODISCARD bool Equals(const StyleImage &) const noexcept final;
@@ -57,6 +58,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
     KRYS_NODISCARD bool IsPending() const noexcept final;
+
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final
     {
     }

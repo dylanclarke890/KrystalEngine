@@ -51,7 +51,7 @@ namespace krys::boo
   enum class IncludeBorderColor : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief A table cell: its place in the grid, its spans, its collapsed borders and its layout.
@@ -95,6 +95,7 @@ namespace krys::boo
       }
       return ParseColSpanFromDOM();
     }
+
     KRYS_NODISCARD uint32 RowSpan() const noexcept
     {
       if (!_hasRowSpan)
@@ -115,6 +116,7 @@ namespace krys::boo
       }
       _column = column;
     }
+
     KRYS_NODISCARD uint32 Col() const noexcept
     {
       krys_debug_assert(_column != UnsetColumnIndex);
@@ -159,6 +161,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsBaselineAligned() const noexcept;
 
     bool ComputeIntrinsicPadding(LayoutUnit heightConstraint) noexcept;
+
     void ClearIntrinsicPadding() noexcept
     {
       SetIntrinsicPadding(0_lu, 0_lu);
@@ -168,6 +171,7 @@ namespace krys::boo
     {
       return _intrinsicPaddingBefore;
     }
+
     KRYS_NODISCARD LayoutUnit IntrinsicPaddingAfter() const noexcept
     {
       return _intrinsicPaddingAfter;
@@ -193,6 +197,7 @@ namespace krys::boo
     {
       return _cellWidthChanged;
     }
+
     void SetCellWidthChanged(bool b = true) noexcept
     {
       _cellWidthChanged = b;
@@ -217,9 +222,11 @@ namespace krys::boo
       _hasEmptyCollapsedStartBorder = false;
       _hasEmptyCollapsedEndBorder = false;
     }
+
     void SetHasEmptyCollapsedBorder(CollapsedBorderSide side, bool empty) const noexcept;
 
     KRYS_NODISCARD bool IsOrthogonal() const noexcept;
+
     KRYS_NODISCARD bool IsComputingPreferredSize() const noexcept
     {
       return _isComputingPreferredSize;
@@ -283,10 +290,12 @@ namespace krys::boo
     {
       _intrinsicPaddingBefore = p;
     }
+
     void SetIntrinsicPaddingAfter(LayoutUnit p) noexcept
     {
       _intrinsicPaddingAfter = p;
     }
+
     void SetIntrinsicPadding(LayoutUnit before, LayoutUnit after) noexcept
     {
       SetIntrinsicPaddingBefore(before);

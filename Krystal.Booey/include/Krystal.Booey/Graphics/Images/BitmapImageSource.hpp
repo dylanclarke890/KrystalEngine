@@ -74,6 +74,7 @@ namespace krys::boo
     // State
     KRYS_NODISCARD ImageDecoder *Decoder(SharedBuffer * = nullptr) const noexcept;
     KRYS_NODISCARD ImageFrameAnimator *FrameAnimator() const noexcept;
+
     KRYS_NODISCARD ImageDecoder *DecoderIfExists() const noexcept
     {
       return _decoder.get();
@@ -82,10 +83,12 @@ namespace krys::boo
     // Encoded and decoded data
     void DestroyDecodedData(bool destroyAll) noexcept final;
     void ResetData() noexcept;
+
     KRYS_NODISCARD uint32 DecodedSize() const noexcept
     {
       return _decodedSize;
     }
+
     void DidDecodeProperties(uint32 decodedPropertiesSize) noexcept;
 
     // Animation
@@ -123,6 +126,7 @@ namespace krys::boo
     {
       return _frames;
     }
+
     const ImageFrame &PrimaryImageFrame(const Maybe<SubsamplingLevel> &subsamplingLevel = null) noexcept final
     {
       return FrameAtIndexCacheIfNeeded(PrimaryFrameIndex(), subsamplingLevel);
@@ -133,6 +137,7 @@ namespace krys::boo
     {
       return FrameAtIndex(PrimaryFrameIndex()).GetNativeImage();
     }
+
     KRYS_NODISCARD RefPtr<NativeImage> PrimaryNativeImage() noexcept final
     {
       return NativeImageAtIndex(PrimaryFrameIndex());
@@ -143,6 +148,7 @@ namespace krys::boo
     {
       return _descriptor.FrameCount();
     }
+
     KRYS_NODISCARD RepetitionCount GetRepetitionCount() const noexcept
     {
       return _descriptor.GetRepetitionCount();
@@ -184,10 +190,12 @@ namespace krys::boo
     KRYS_NODISCARD bool CanDecodeAsynchronously() const noexcept;
     /// @brief A decoder of the work queue's own, over all the image's data; null if there's none to decode.
     KRYS_NODISCARD RefPtr<ImageDecoder> CreateWorkQueueDecoder() const noexcept;
+
     KRYS_NODISCARD BitmapImage *Image() const noexcept
     {
       return _bitmapImage.get();
     }
+
     DecodingStatus RequestNativeImageAtIndex(uint32 index, SubsamplingLevel, ImageAnimatingState,
                                              const DecodingOptions &) noexcept;
     DecodingStatus RequestNativeImageAtIndexIfNeeded(uint32 index, SubsamplingLevel, ImageAnimatingState,
@@ -205,6 +213,7 @@ namespace krys::boo
     KRYS_NODISCARD const ImageFrame &FrameAtIndex(uint32 index) const noexcept;
     const ImageFrame &FrameAtIndexCacheIfNeeded(uint32 index,
                                                 const Maybe<SubsamplingLevel> & = null) noexcept;
+
     const ImageFrame &CurrentImageFrame(const Maybe<SubsamplingLevel> &subsamplingLevel = null) noexcept final
     {
       return FrameAtIndexCacheIfNeeded(CurrentFrameIndex(), subsamplingLevel);
@@ -233,11 +242,13 @@ namespace krys::boo
     {
       return NativeImageAtIndex(CurrentFrameIndex());
     }
+
     KRYS_NODISCARD RefPtr<NativeImage>
       CurrentPreTransformedNativeImage(ImageOrientation orientation) noexcept final
     {
       return PreTransformedNativeImageAtIndex(CurrentFrameIndex(), orientation);
     }
+
     KRYS_NODISCARD RefPtr<NativeImage> CurrentOrientedNativeImage(ImageOrientation orientation) noexcept final
     {
       return PreTransformedNativeImageAtIndex(CurrentFrameIndex(), orientation, false);
@@ -247,28 +258,34 @@ namespace krys::boo
     {
       return _descriptor.GetEncodedDataStatus();
     }
+
     KRYS_NODISCARD IntSize
       Size(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept final
     {
       return _descriptor.Size(orientation);
     }
+
     KRYS_NODISCARD IntSize
       SourceSize(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept final
     {
       return _descriptor.SourceSize(orientation);
     }
+
     KRYS_NODISCARD Maybe<IntSize> DensityCorrectedSize() const noexcept
     {
       return _descriptor.DensityCorrectedSize();
     }
+
     KRYS_NODISCARD bool HasDensityCorrectedSize() const noexcept final
     {
       return DensityCorrectedSize().has_value();
     }
+
     KRYS_NODISCARD ImageOrientation Orientation() const noexcept final
     {
       return _descriptor.Orientation();
     }
+
     KRYS_NODISCARD Maybe<Color> SinglePixelSolidColor() const noexcept final
     {
       return _descriptor.SinglePixelSolidColor();
@@ -278,18 +295,22 @@ namespace krys::boo
     {
       return _descriptor.FilenameExtension();
     }
+
     KRYS_NODISCARD utf8_string AccessibilityDescription() const noexcept final
     {
       return _descriptor.AccessibilityDescription();
     }
+
     KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept final
     {
       return _descriptor.HotSpot();
     }
+
     KRYS_NODISCARD SubsamplingLevel MaximumSubsamplingLevel() const noexcept
     {
       return _descriptor.MaximumSubsamplingLevel();
     }
+
     KRYS_NODISCARD SubsamplingLevel
       SubsamplingLevelForScaleFactor(GraphicsContext &context, const FloatSize &scaleFactor,
                                      AllowImageSubsampling allowImageSubsampling) noexcept final

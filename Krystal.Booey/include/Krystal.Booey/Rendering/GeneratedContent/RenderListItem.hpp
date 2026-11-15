@@ -68,6 +68,7 @@ namespace krys::boo
       }
       return *_value;
     }
+
     void UpdateValue() noexcept;
 
     KRYS_NODISCARD utf8_string MarkerTextWithoutSuffix() const noexcept;

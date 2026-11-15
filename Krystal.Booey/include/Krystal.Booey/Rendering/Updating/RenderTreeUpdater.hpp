@@ -86,7 +86,7 @@ namespace krys::boo
       Full,
       FullAfterSlotOrShadowRootChange,
       RendererUpdate,
-      RendererUpdateCancelingAnimations
+      RendererUpdateCancelingAnimations,
     };
 
   private:
@@ -132,6 +132,7 @@ namespace krys::boo
     {
       return _parentStack.back();
     }
+
     KRYS_NODISCARD Parent &RenderingParent() noexcept;
     KRYS_NODISCARD RenderTreePosition &GetRenderTreePosition() noexcept;
 
@@ -157,7 +158,7 @@ namespace krys::boo
     enum class NeedsRepaintAndLayout : bool
     {
       No,
-      Yes
+      Yes,
     };
     static void
       TearDownTextRenderer(dom::Text &text, const dom::ContainerNode *root, RenderTreeBuilder &builder,

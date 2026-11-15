@@ -2582,10 +2582,10 @@ namespace krys::boo::style
       state, builder, context, state.Style.GetAnimations(), mapper);
   }
 
-  inline constexpr Array<css::PropertyId, 4> BackgroundPropertiesBeforeSlashSeparator {
+  constexpr inline Array<css::PropertyId, 4> BackgroundPropertiesBeforeSlashSeparator {
     css::PropertyId::BackgroundImage, css::PropertyId::BackgroundRepeat,
     css::PropertyId::BackgroundAttachment, css::PropertyId::BackgroundPosition};
-  inline constexpr Array<css::PropertyId, 3> BackgroundPropertiesAfterSlashSeparator {
+  constexpr inline Array<css::PropertyId, 3> BackgroundPropertiesAfterSlashSeparator {
     css::PropertyId::BackgroundSize, css::PropertyId::BackgroundOrigin, css::PropertyId::BackgroundClip};
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractBackgroundShorthand(ExtractorState &state) noexcept
@@ -2682,12 +2682,12 @@ namespace krys::boo::style
 
 #undef KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND
 
-  inline constexpr Array<css::PropertyId, 4> BorderSections {
+  constexpr inline Array<css::PropertyId, 4> BorderSections {
     css::PropertyId::BorderTop, css::PropertyId::BorderRight, css::PropertyId::BorderBottom,
     css::PropertyId::BorderLeft};
-  inline constexpr Array<css::PropertyId, 2> BorderBlockSections {css::PropertyId::BorderBlockStart,
+  constexpr inline Array<css::PropertyId, 2> BorderBlockSections {css::PropertyId::BorderBlockStart,
                                                                   css::PropertyId::BorderBlockEnd};
-  inline constexpr Array<css::PropertyId, 2> BorderInlineSections {css::PropertyId::BorderInlineStart,
+  constexpr inline Array<css::PropertyId, 2> BorderInlineSections {css::PropertyId::BorderInlineStart,
                                                                    css::PropertyId::BorderInlineEnd};
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractBorderShorthand(ExtractorState &state) noexcept
@@ -2970,9 +2970,9 @@ namespace krys::boo::style
     builder.Append(ExtractFontVariantShorthand(state)->CssText(context));
   }
 
-  inline constexpr Array<css::PropertyId, 2> MaskPropertiesBeforeSlashSeparator {
+  constexpr inline Array<css::PropertyId, 2> MaskPropertiesBeforeSlashSeparator {
     css::PropertyId::MaskImage, css::PropertyId::MaskPosition};
-  inline constexpr Array<css::PropertyId, 6> MaskPropertiesAfterSlashSeparator {
+  constexpr inline Array<css::PropertyId, 6> MaskPropertiesAfterSlashSeparator {
     css::PropertyId::MaskSize, css::PropertyId::MaskRepeat,    css::PropertyId::MaskOrigin,
     css::PropertyId::MaskClip, css::PropertyId::MaskComposite, css::PropertyId::MaskMode};
 

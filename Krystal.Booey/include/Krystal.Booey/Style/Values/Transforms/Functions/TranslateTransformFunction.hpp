@@ -72,10 +72,12 @@ namespace krys::boo::style
     {
       return _x;
     }
+
     const LengthPercentage &Y() const
     {
       return _y;
     }
+
     KRYS_NODISCARD Length Z() const noexcept
     {
       return _z;
@@ -85,6 +87,7 @@ namespace krys::boo::style
     {
       return _x.IsKnownZero() && _y.IsKnownZero() && _z.IsZero();
     }
+
     KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept override
     {
       return _z.IsZero();

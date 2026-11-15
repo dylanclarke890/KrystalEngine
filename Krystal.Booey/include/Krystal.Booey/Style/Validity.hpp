@@ -46,14 +46,14 @@ namespace krys::boo::style
     Normal,
     RecompositeLayer,
     RebuildRenderer,
-    InsertedIntoAncestor
+    InsertedIntoAncestor,
   };
 
   enum class InvalidationScope : uint8
   {
     All,
     SelfChildrenAndSiblings,
-    Descendants
+    Descendants,
   };
 }
 

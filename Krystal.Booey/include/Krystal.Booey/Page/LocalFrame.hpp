@@ -88,6 +88,7 @@ namespace krys::boo
     {
       return _subresourceCachePolicy;
     }
+
     void SetSubresourceCachePolicy(CachePolicy policy) noexcept
     {
       _subresourceCachePolicy = policy;

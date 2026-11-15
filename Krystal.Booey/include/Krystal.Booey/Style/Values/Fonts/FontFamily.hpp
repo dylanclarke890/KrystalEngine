@@ -36,7 +36,7 @@ namespace krys::boo::style
   enum class FontFamilyKind : bool
   {
     Specified,
-    Generic
+    Generic,
   };
 
   // <single-font-family> = [ <family-name> | <generic-family> ]
@@ -126,6 +126,7 @@ namespace krys::boo::style
 
     public:
       const_iterator() noexcept = default;
+
       const_iterator(inner_iterator it) noexcept : _it {it}
       {
       }
@@ -140,6 +141,7 @@ namespace krys::boo::style
         ++_it;
         return *this;
       }
+
       const_iterator operator++(int) noexcept
       {
         auto result = *this;
@@ -154,6 +156,7 @@ namespace krys::boo::style
     {
       return const_iterator(_families.begin());
     }
+
     KRYS_NODISCARD const_iterator end() const noexcept KRYS_LIFETIME_BOUND
     {
       return const_iterator(_families.end());
@@ -168,6 +171,7 @@ namespace krys::boo::style
     {
       return SingleFontFamily {_families.front()};
     }
+
     KRYS_NODISCARD SingleFontFamily Last() const noexcept
     {
       return SingleFontFamily {_families.back()};
@@ -177,10 +181,12 @@ namespace krys::boo::style
     {
       return _families;
     }
+
     KRYS_NODISCARD const List<css::CSSOMStringAtom> &ToPlatform() const noexcept KRYS_LIFETIME_BOUND
     {
       return _families;
     }
+
     KRYS_NODISCARD List<css::CSSOMStringAtom> TakePlatform() noexcept
     {
       return krys::move(_families);
@@ -190,6 +196,7 @@ namespace krys::boo::style
     {
       return _firstFontKind;
     }
+
     KRYS_NODISCARD bool IsSpecifiedFont() const noexcept
     {
       return _firstFontKind == FontFamilyKind::Specified;

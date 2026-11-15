@@ -89,5 +89,4 @@ namespace krys::boo
     }
     return PerspectiveTransformOperation::Create(p);
   }
-
 }

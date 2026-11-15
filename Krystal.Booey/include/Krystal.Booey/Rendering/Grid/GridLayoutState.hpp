@@ -61,6 +61,7 @@ namespace krys::boo
     {
       return _needsSecondTrackSizingPass;
     }
+
     void SetNeedsSecondTrackSizingPass() noexcept
     {
       _needsSecondTrackSizingPass = true;
@@ -70,6 +71,7 @@ namespace krys::boo
     {
       _hasAspectRatioBlockSizeDependentItem = true;
     }
+
     KRYS_NODISCARD bool HasAspectRatioBlockSizeDependentItem() const noexcept
     {
       return _hasAspectRatioBlockSizeDependentItem;

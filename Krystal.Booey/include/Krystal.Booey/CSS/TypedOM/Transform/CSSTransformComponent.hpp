@@ -49,7 +49,7 @@ namespace krys::boo::css
     Skew,
     SkewX,
     SkewY,
-    Translate
+    Translate,
   };
 
   /// @brief A transform function in a transform value.
@@ -73,6 +73,7 @@ namespace krys::boo::css
     {
       return _is2D;
     }
+
     virtual void SetIs2D(bool is2D) noexcept
     {
       _is2D = is2D;

@@ -50,7 +50,7 @@ namespace krys::boo
     enum class MIMETypeCheckHint : bool
     {
       Strict,
-      Lax
+      Lax,
     };
     /// @brief The sheet's text, or null if it can't be used as a sheet (a load error, or a type that isn't
     /// CSS when @p mimeTypeCheckHint is strict).

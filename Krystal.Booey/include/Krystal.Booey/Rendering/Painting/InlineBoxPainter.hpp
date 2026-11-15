@@ -85,11 +85,13 @@ namespace krys::boo
     void PaintBoxShadow(style::ShadowStyle shadowStyle, const LayoutRect &paintRect) noexcept;
 
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
+
     // FIXME: Make RenderBoxModelObject functions const.
     KRYS_NODISCARD RenderBoxModelObject &Renderer() const noexcept
     {
       return const_cast<RenderBoxModelObject &>(_renderer);
     }
+
     KRYS_NODISCARD bool IsHorizontal() const noexcept
     {
       return _isHorizontal;

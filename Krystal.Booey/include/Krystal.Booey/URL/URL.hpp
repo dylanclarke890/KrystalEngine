@@ -155,8 +155,8 @@ namespace krys::boo::url
     KRYS_NODISCARD utf8_stringview FragmentIdentifier() const noexcept KRYS_LIFETIME_BOUND;
 
     KRYS_NODISCARD utf8_stringview QueryWithLeadingQuestionMark() const noexcept KRYS_LIFETIME_BOUND;
-    KRYS_NODISCARD utf8_stringview
-      FragmentIdentifierWithLeadingNumberSign() const noexcept KRYS_LIFETIME_BOUND;
+    KRYS_NODISCARD utf8_stringview FragmentIdentifierWithLeadingNumberSign() const noexcept
+      KRYS_LIFETIME_BOUND;
     KRYS_NODISCARD utf8_stringview ViewWithoutQueryOrFragmentIdentifier() const noexcept KRYS_LIFETIME_BOUND;
     KRYS_NODISCARD utf8_stringview ViewWithoutFragmentIdentifier() const noexcept KRYS_LIFETIME_BOUND;
     KRYS_NODISCARD utf8_string StringWithoutFragmentIdentifier() const noexcept;

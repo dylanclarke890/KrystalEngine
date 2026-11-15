@@ -44,7 +44,6 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
-
   /// @brief The style sheet of an element whose sheet is its own text (a `style` element): creates the sheet
   /// from the element's child text and keeps it, and the element's place among its scope's style sheet
   /// candidates, up to date.

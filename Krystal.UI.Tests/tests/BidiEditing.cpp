@@ -414,7 +414,6 @@ namespace krys::ui::tests
       INFO(count << " actions differ from Chrome's:\n" << mismatches);
       CHECK(count == 0u);
     }
-
   }
 
   TEST_CASE("Bidi editing: the caret moves through mixed text as Chrome's does", "[UI][Editing][Bidi]")
@@ -595,5 +594,4 @@ namespace krys::ui::tests
       CHECK_FALSE(isRightToLeft(paragraph));
     }
   }
-
 }

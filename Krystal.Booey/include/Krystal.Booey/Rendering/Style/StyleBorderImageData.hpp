@@ -38,6 +38,7 @@ namespace krys::boo
     {
       return AdoptRef(*new StyleBorderImageData);
     }
+
     KRYS_NODISCARD Ref<StyleBorderImageData> Copy() const noexcept;
 
     bool operator==(const StyleBorderImageData &) const noexcept;

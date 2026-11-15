@@ -35,7 +35,7 @@ namespace krys::boo::html
   enum class DateTimeMeridiem : bool
   {
     AM,
-    PM
+    PM,
   };
 
   /// @brief The values of a date or time input's fields, each missing until its field has one.

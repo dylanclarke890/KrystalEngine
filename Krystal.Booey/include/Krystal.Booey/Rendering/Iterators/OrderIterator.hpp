@@ -64,6 +64,7 @@ namespace krys::boo
     {
       return _currentChild;
     }
+
     RenderBox *First() noexcept;
     RenderBox *Next() noexcept;
     KRYS_NODISCARD OrderIterator Reverse() const noexcept;

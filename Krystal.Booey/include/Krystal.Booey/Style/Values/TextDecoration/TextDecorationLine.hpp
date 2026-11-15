@@ -50,18 +50,18 @@ namespace krys::boo::style
     enum class Type : uint8
     {
       SingleValue = 0,
-      Flags = 1 << 4
+      Flags = 1 << 4,
     };
 
-    static constexpr uint8 TypeMask = 1 << 4; // 0001 0000
-    static constexpr uint8 ValuesMask = 0x0F;
+    constexpr static uint8 TypeMask = 1 << 4; // 0001 0000
+    constexpr static uint8 ValuesMask = 0x0F;
 
     // Values when Type is SingleValue
     enum class SingleValue : uint8
     {
       None = 0,
       SpellingError,
-      GrammarError
+      GrammarError,
     };
 
     // Ordinal, for `EnumSet`: each flag's bit is `1 << value`.
@@ -74,16 +74,16 @@ namespace krys::boo::style
     };
 
     // Values when Type is Flags
-    static constexpr uint8 UnderlineBit = 1 << ToUnderlying(TextDecorationLine::Flag::Underline);
-    static constexpr uint8 OverlineBit = 1 << ToUnderlying(TextDecorationLine::Flag::Overline);
-    static constexpr uint8 LineThroughBit = 1 << ToUnderlying(TextDecorationLine::Flag::LineThrough);
-    static constexpr uint8 BlinkBit = 1 << ToUnderlying(TextDecorationLine::Flag::Blink);
+    constexpr static uint8 UnderlineBit = 1 << ToUnderlying(TextDecorationLine::Flag::Underline);
+    constexpr static uint8 OverlineBit = 1 << ToUnderlying(TextDecorationLine::Flag::Overline);
+    constexpr static uint8 LineThroughBit = 1 << ToUnderlying(TextDecorationLine::Flag::LineThrough);
+    constexpr static uint8 BlinkBit = 1 << ToUnderlying(TextDecorationLine::Flag::Blink);
 
-    static constexpr uint8 SingleValueNone =
+    constexpr static uint8 SingleValueNone =
       static_cast<uint8>(Type::SingleValue) | static_cast<uint8>(SingleValue::None);
-    static constexpr uint8 SingleValueSpellingError =
+    constexpr static uint8 SingleValueSpellingError =
       static_cast<uint8>(Type::SingleValue) | static_cast<uint8>(SingleValue::SpellingError);
-    static constexpr uint8 SingleValueGrammarError =
+    constexpr static uint8 SingleValueGrammarError =
       static_cast<uint8>(Type::SingleValue) | static_cast<uint8>(SingleValue::GrammarError);
 
     constexpr TextDecorationLine() noexcept = default;
@@ -114,6 +114,7 @@ namespace krys::boo::style
     {
       return TextDecorationLine(rawValue);
     }
+
     KRYS_NODISCARD constexpr uint8 ToRaw() const noexcept
     {
       return _packed;
@@ -123,18 +124,22 @@ namespace krys::boo::style
     {
       return static_cast<Type>(_packed & TypeMask);
     }
+
     KRYS_NODISCARD constexpr bool IsNone() const noexcept
     {
       return _packed == SingleValueNone;
     }
+
     KRYS_NODISCARD constexpr bool IsSpellingError() const noexcept
     {
       return _packed == SingleValueSpellingError;
     }
+
     KRYS_NODISCARD constexpr bool IsGrammarError() const noexcept
     {
       return _packed == SingleValueGrammarError;
     }
+
     KRYS_NODISCARD constexpr bool IsFlags() const noexcept
     {
       return GetType() == Type::Flags;
@@ -223,14 +228,17 @@ namespace krys::boo::style
     {
       _packed = SingleValueNone;
     }
+
     constexpr void SetSpellingError() noexcept
     {
       _packed = SingleValueSpellingError;
     }
+
     constexpr void SetGrammarError() noexcept
     {
       _packed = SingleValueGrammarError;
     }
+
     constexpr void SetFlags(EnumSet<TextDecorationLine::Flag> flags) noexcept
     {
       if (IsFlags())
@@ -247,6 +255,7 @@ namespace krys::boo::style
     {
       return !IsNone();
     }
+
     KRYS_NODISCARD constexpr bool operator==(const TextDecorationLine &) const noexcept = default;
 
     KRYS_NODISCARD constexpr static uint8 PackFlags(EnumSet<TextDecorationLine::Flag> flags) noexcept

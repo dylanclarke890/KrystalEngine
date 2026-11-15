@@ -60,7 +60,7 @@ namespace krys::boo::style
   enum class IsInDisplayNoneTree : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief Resolves the styles of a document's elements that need resolving, walking the composed tree.
@@ -76,13 +76,13 @@ namespace krys::boo::style
       AnimationOnly,
       FastPathInherit,
       FullWithMatchResultCache,
-      Full
+      Full,
     };
 
     enum class LayoutInterleavingAction : uint8
     {
       None,
-      SkipDescendants
+      SkipDescendants,
     };
 
     enum class DescendantsToResolve : uint8
@@ -91,7 +91,7 @@ namespace krys::boo::style
       RebuildAllUsingExisting,
       ChildrenWithExplicitInherit,
       Children,
-      All
+      All,
     };
 
     struct Scope : RefCounted<Scope>
@@ -374,7 +374,7 @@ namespace krys::boo::style
     enum class DrainCallbacks : bool
     {
       No,
-      Yes
+      Yes,
     };
 
   private:

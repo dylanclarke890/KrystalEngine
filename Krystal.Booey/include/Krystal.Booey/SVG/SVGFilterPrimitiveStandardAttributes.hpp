@@ -62,18 +62,22 @@ namespace krys::boo::svg
     {
       return _x->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Y() const noexcept
     {
       return _y->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Width() const noexcept
     {
       return _width->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Height() const noexcept
     {
       return _height->CurrentValue();
     }
+
     KRYS_NODISCARD dom::DOMString Result() const noexcept
     {
       return _result->CurrentValue();
@@ -83,18 +87,22 @@ namespace krys::boo::svg
     {
       return *_x;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &YAnimated() noexcept
     {
       return *_y;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &WidthAnimated() noexcept
     {
       return *_width;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &HeightAnimated() noexcept
     {
       return *_height;
     }
+
     KRYS_NODISCARD SVGAnimatedString &ResultAnimated() noexcept
     {
       return *_result;
@@ -106,10 +114,12 @@ namespace krys::boo::svg
     {
       return {};
     }
+
     KRYS_NODISCARD virtual bool IsIdentity() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual IntOutsets Outsets(const FloatRect &, SVGUnitTypes::SVGUnitType) const noexcept
     {
       return {};
@@ -141,6 +151,7 @@ namespace krys::boo::svg
     {
       return false;
     }
+
     virtual bool SetFilterEffectAttributeFromChild(FilterEffect &, const dom::Element &,
                                                    const dom::QualifiedName &) noexcept
     {
@@ -159,6 +170,7 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override;
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept override
     {
       return false;

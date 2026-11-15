@@ -35,7 +35,7 @@ namespace krys::boo::html
   enum class AllowStyleInvalidation : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @see https://html.spec.whatwg.org/#htmloptionelement

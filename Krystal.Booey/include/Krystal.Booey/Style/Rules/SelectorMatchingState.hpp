@@ -42,7 +42,7 @@ namespace krys::boo::style
     None,
     Matches,
     Fails,
-    FailsSubtree
+    FailsSubtree,
   };
 
   struct HasPseudoClassKeyHash

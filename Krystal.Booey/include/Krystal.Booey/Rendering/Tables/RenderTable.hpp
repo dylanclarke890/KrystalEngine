@@ -46,7 +46,7 @@ namespace krys::boo
   enum class SkipEmptySections : bool
   {
     No,
-    Yes
+    Yes,
   };
 
   /// @brief A table: its sections, columns and captions, its column structure and its collapsed borders.
@@ -109,6 +109,7 @@ namespace krys::boo
     {
       return _hSpacing;
     }
+
     KRYS_NODISCARD LayoutUnit VBorderSpacing() const noexcept
     {
       return _vSpacing;
@@ -150,10 +151,12 @@ namespace krys::boo
     {
       return _columns;
     }
+
     KRYS_NODISCARD const List<LayoutUnit> &ColumnPositions() const noexcept
     {
       return _columnPos;
     }
+
     void SetColumnPosition(uint32 index, LayoutUnit position) noexcept
     {
       // Note that if our horizontal border-spacing changed, our position will change but not
@@ -181,10 +184,12 @@ namespace krys::boo
 
     void SplitColumn(uint32 position, uint32 firstSpan) noexcept;
     void AppendColumn(uint32 span) noexcept;
+
     KRYS_NODISCARD uint32 NumEffCols() const noexcept
     {
       return static_cast<uint32>(_columns.size());
     }
+
     KRYS_NODISCARD uint32 SpanOfEffCol(uint32 effCol) const noexcept
     {
       return _columns[effCol].Span;
@@ -262,6 +267,7 @@ namespace krys::boo
     {
       return _needsSectionRecalc;
     }
+
     void SetNeedsSectionRecalc() noexcept;
 
     KRYS_NODISCARD RenderTableSection *
@@ -280,10 +286,12 @@ namespace krys::boo
     {
       return _collapsedBordersValid;
     }
+
     void InvalidateCollapsedBorders(RenderTableCell *cellWithStyleChange = nullptr) noexcept;
     void InvalidateCollapsedBordersAfterStyleChangeIfNeeded(
       const RenderStyle &oldStyle, const RenderStyle &newStyle,
       RenderTableCell *cellWithStyleChange = nullptr) noexcept;
+
     void SetCollapsedEmptyBorderIsPresent() noexcept
     {
       _collapsedEmptyBorderIsPresent = true;
@@ -307,6 +315,7 @@ namespace krys::boo
     {
       return _currentBorder;
     }
+
     /// @brief Collects the cells' distinct collapsed borders, sorted by precedence, if they're out of date.
     void RecalcCollapsedBorders() noexcept;
 
@@ -373,6 +382,7 @@ namespace krys::boo
       const LayoutPoint &location,
       OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
       PaintPhase phase = PaintPhase::BlockBackground) const noexcept final;
+
     KRYS_NODISCARD LayoutRect OverflowClipRectForChildLayers(
       const LayoutPoint &location, OverlayScrollbarSizeRelevancy relevancy) const noexcept override
     {
@@ -386,7 +396,7 @@ namespace krys::boo
     enum class BottomCaptionLayoutPhase : bool
     {
       No,
-      Yes
+      Yes,
     };
     void LayoutCaptions(
       BottomCaptionLayoutPhase bottomCaptionLayoutPhase = BottomCaptionLayoutPhase::No) noexcept;

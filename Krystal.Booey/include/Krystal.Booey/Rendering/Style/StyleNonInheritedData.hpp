@@ -36,6 +36,7 @@ namespace krys::boo
   class StyleSurroundData;
   class StyleMiscNonInheritedData;
   class StyleRareNonInheritedData;
+
   class StyleNonInheritedData : public RefCounted<StyleNonInheritedData>
   {
   public:

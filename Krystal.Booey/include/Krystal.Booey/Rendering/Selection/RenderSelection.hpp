@@ -47,14 +47,14 @@ namespace krys::boo
     {
       NewXOROld,
       NewMinusOld,
-      Nothing
+      Nothing,
     };
 
   private:
     enum class ClipToVisibleContent : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     const RenderView &_renderView;
@@ -71,6 +71,7 @@ namespace krys::boo
     {
       return CollectBounds(ClipToVisibleContent::No);
     }
+
     KRYS_NODISCARD IntRect BoundsClippedToVisibleContent() const noexcept
     {
       return CollectBounds(ClipToVisibleContent::Yes);

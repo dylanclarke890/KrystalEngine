@@ -51,22 +51,27 @@ namespace krys::boo::svg
     {
       return _filterUnits->CurrentValue<SVGUnitTypes::SVGUnitType>();
     }
+
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType PrimitiveUnits() const noexcept
     {
       return _primitiveUnits->CurrentValue<SVGUnitTypes::SVGUnitType>();
     }
+
     KRYS_NODISCARD const SVGLengthValue &X() const noexcept
     {
       return _x->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Y() const noexcept
     {
       return _y->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Width() const noexcept
     {
       return _width->CurrentValue();
     }
+
     KRYS_NODISCARD const SVGLengthValue &Height() const noexcept
     {
       return _height->CurrentValue();
@@ -76,22 +81,27 @@ namespace krys::boo::svg
     {
       return *_filterUnits;
     }
+
     KRYS_NODISCARD SVGAnimatedEnumeration &PrimitiveUnitsAnimated() noexcept
     {
       return *_primitiveUnits;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &XAnimated() noexcept
     {
       return *_x;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &YAnimated() noexcept
     {
       return *_y;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &WidthAnimated() noexcept
     {
       return *_width;
     }
+
     KRYS_NODISCARD SVGAnimatedLength &HeightAnimated() noexcept
     {
       return *_height;

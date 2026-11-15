@@ -44,13 +44,13 @@ namespace krys::boo::css
   enum class ColorFunctionSyntax
   {
     Legacy,
-    Modern
+    Modern,
   };
 
   enum class ColorFunctionForm
   {
     Relative,
-    Absolute
+    Absolute,
   };
 
   template <typename... Ts>

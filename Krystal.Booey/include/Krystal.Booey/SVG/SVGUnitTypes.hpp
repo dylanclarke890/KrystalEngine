@@ -12,7 +12,7 @@ namespace krys::boo::svg
     {
       SVG_UNIT_TYPE_UNKNOWN = 0,
       SVG_UNIT_TYPE_USERSPACEONUSE = 1,
-      SVG_UNIT_TYPE_OBJECTBOUNDINGBOX = 2
+      SVG_UNIT_TYPE_OBJECTBOUNDINGBOX = 2,
     };
 
   private:

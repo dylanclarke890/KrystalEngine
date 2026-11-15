@@ -47,7 +47,7 @@ namespace krys::boo
       RightToLeftText = 1 << 3,
       VerticalText = 1 << 4,
       LengthAdjustSpacing = 1 << 5,
-      LengthAdjustSpacingAndGlyphs = 1 << 6
+      LengthAdjustSpacingAndGlyphs = 1 << 6,
     };
 
   private:
@@ -81,6 +81,7 @@ namespace krys::boo
     {
       return _chunkStyle & VerticalText;
     }
+
     KRYS_NODISCARD float DesiredTextLength() const noexcept
     {
       return _desiredTextLength;
@@ -91,15 +92,18 @@ namespace krys::boo
       return _desiredTextLength > 0
              && ((_chunkStyle & LengthAdjustSpacing) || (_chunkStyle & LengthAdjustSpacingAndGlyphs));
     }
+
     KRYS_NODISCARD bool HasTextAnchor() const noexcept
     {
       return _chunkStyle & RightToLeftText ? !(_chunkStyle & EndAnchor)
                                            : (_chunkStyle & (MiddleAnchor | EndAnchor));
     }
+
     KRYS_NODISCARD bool HasLengthAdjustSpacing() const noexcept
     {
       return _chunkStyle & LengthAdjustSpacing;
     }
+
     KRYS_NODISCARD bool HasLengthAdjustSpacingAndGlyphs() const noexcept
     {
       return _chunkStyle & LengthAdjustSpacingAndGlyphs;

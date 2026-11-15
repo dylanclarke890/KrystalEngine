@@ -69,6 +69,7 @@ namespace krys::boo
       {
         return Value.first();
       }
+
       KRYS_NODISCARD const Length &End() const noexcept
       {
         return Value.second();
@@ -76,6 +77,7 @@ namespace krys::boo
 
       KRYS_NODISCARD bool operator==(const ViewTimelineInsetItem &) const noexcept = default;
     };
+
     DEFINE_TYPE_WRAPPER_GET(ViewTimelineInsetItem, Value);
 
     // <view-timeline-inset-list> = <single-view-timeline-inset-item>#
@@ -110,12 +112,12 @@ namespace krys::boo
       KRYS_NODISCARD ViewTimelineInsetItem operator()(BuilderState &, const css::PrimitiveValue &) noexcept;
       KRYS_NODISCARD ViewTimelineInsetItem operator()(BuilderState &, const css::ValuePair &) noexcept;
     };
+
     template <>
     struct CSSValueConversion<ViewTimelineInsets>
     {
       KRYS_NODISCARD ViewTimelineInsets operator()(BuilderState &, const css::Value &) noexcept;
     };
-
   }
 }
 

@@ -54,6 +54,7 @@ namespace krys::boo
 
   public:
     constexpr LayoutRect() noexcept = default;
+
     constexpr LayoutRect(const LayoutPoint &location, const LayoutSize &size) noexcept
         : _location(location), _size(size)
     {

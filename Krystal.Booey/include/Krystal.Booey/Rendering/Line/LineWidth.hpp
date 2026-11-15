@@ -64,19 +64,23 @@ namespace krys::boo
     {
       return _committedWidth + _uncommittedWidth;
     }
+
     // FIXME: We should eventually replace these three functions by ones that work on a higher abstraction.
     KRYS_NODISCARD float UncommittedWidth() const noexcept
     {
       return _uncommittedWidth;
     }
+
     KRYS_NODISCARD float CommittedWidth() const noexcept
     {
       return _committedWidth;
     }
+
     KRYS_NODISCARD float AvailableWidth() const noexcept
     {
       return _availableWidth;
     }
+
     KRYS_NODISCARD float LogicalLeftOffset() const noexcept
     {
       return _left;
@@ -86,21 +90,25 @@ namespace krys::boo
     {
       return _hasCommitted;
     }
+
     KRYS_NODISCARD bool HasCommittedReplaced() const noexcept
     {
       return _hasCommittedReplaced;
     }
 
     void UpdateAvailableWidth() noexcept;
+
     void AddUncommittedWidth(float delta) noexcept
     {
       _uncommittedWidth += delta;
     }
+
     void AddUncommittedReplacedWidth(float delta) noexcept
     {
       AddUncommittedWidth(delta);
       _hasUncommittedReplaced = true;
     }
+
     void Commit() noexcept;
     void SetTrailingWhitespaceWidth(float collapsedWhitespace, float borderPaddingMargin = 0) noexcept;
 

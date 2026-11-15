@@ -40,14 +40,17 @@ namespace krys::boo
     {
       _size = size;
     }
+
     KRYS_NODISCARD bool UsesContainerSize() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD bool HasRelativeWidth() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD bool HasRelativeHeight() const noexcept override
     {
       return true;
@@ -76,6 +79,7 @@ namespace krys::boo
     {
       return false;
     }
+
     KRYS_NODISCARD bool CurrentFrameIsComplete() const noexcept override
     {
       return true;

@@ -57,6 +57,7 @@ namespace krys::boo
   private:
     void DoApply() noexcept override;
     KRYS_NODISCARD EditAction EditingAction() const noexcept override;
+
     KRYS_NODISCARD bool ShouldDispatchInputEvents() const noexcept final
     {
       return false;

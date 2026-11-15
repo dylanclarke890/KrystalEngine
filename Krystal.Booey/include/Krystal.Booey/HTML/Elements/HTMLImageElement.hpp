@@ -66,6 +66,7 @@ namespace krys::boo::html
     {
       return false;
     }
+
     KRYS_NODISCARD bool CanStartSelection() const noexcept override
     {
       if (ShadowRoot())
@@ -287,6 +288,7 @@ namespace krys::boo::html
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
+
     KRYS_NODISCARD HTMLElement &AsHTMLElement() noexcept final
     {
       return *this;

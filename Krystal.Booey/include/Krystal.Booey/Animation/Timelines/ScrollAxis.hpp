@@ -9,6 +9,6 @@ namespace krys::boo
     Block,
     Inline,
     X,
-    Y
+    Y,
   };
 }

@@ -30,19 +30,19 @@ namespace krys::boo
 {
   const DestinationColorSpace &DestinationColorSpace::SRGB() noexcept
   {
-    static constexpr DestinationColorSpace srgb(Space::SRGB);
+    constexpr static DestinationColorSpace srgb(Space::SRGB);
     return srgb;
   }
 
   const DestinationColorSpace &DestinationColorSpace::LinearSRGB() noexcept
   {
-    static constexpr DestinationColorSpace linearSRGB(Space::LinearSRGB);
+    constexpr static DestinationColorSpace linearSRGB(Space::LinearSRGB);
     return linearSRGB;
   }
 
   const DestinationColorSpace &DestinationColorSpace::DisplayP3() noexcept
   {
-    static constexpr DestinationColorSpace displayP3(Space::DisplayP3);
+    constexpr static DestinationColorSpace displayP3(Space::DisplayP3);
     return displayP3;
   }
 

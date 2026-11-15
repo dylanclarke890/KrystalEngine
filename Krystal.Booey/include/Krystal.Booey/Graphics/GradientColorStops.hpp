@@ -97,6 +97,7 @@ namespace krys::boo
     {
       return _stops.size();
     }
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _stops.empty();
@@ -106,6 +107,7 @@ namespace krys::boo
     {
       return _stops.begin();
     }
+
     KRYS_NODISCARD StopVector::const_iterator end() const noexcept KRYS_LIFETIME_BOUND
     {
       return _stops.end();

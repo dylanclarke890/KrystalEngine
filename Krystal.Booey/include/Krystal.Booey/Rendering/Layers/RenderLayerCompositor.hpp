@@ -61,7 +61,7 @@ namespace krys::boo
     AfterStyleChange,
     AfterLayout,
     OnScroll,
-    OnCompositedScroll
+    OnCompositedScroll,
   };
 
   enum class CompositingReason : uint8
@@ -137,7 +137,7 @@ namespace krys::boo
     enum RootLayerAttachment : uint8
     {
       RootLayerUnattached,
-      RootLayerAttachedViaChromeClient
+      RootLayerAttachedViaChromeClient,
     };
 
     class BackingSharingState;
@@ -153,7 +153,7 @@ namespace krys::boo
     {
       No,
       Yes,
-      Unknown
+      Unknown,
     };
 
     enum class UpdateLevel : uint8
@@ -216,6 +216,7 @@ namespace krys::boo
     {
       return _compositing;
     }
+
     // This will make a compositing layer at the root automatically, and hook up to the native view/window
     // system.
     void EnableCompositingMode(bool enable = true) noexcept;
@@ -333,18 +334,22 @@ namespace krys::boo
     {
       return _scrollContainerLayer.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *ScrolledContentsLayer() const noexcept
     {
       return _scrolledContentsLayer.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *ClipLayer() const noexcept
     {
       return _clipLayer.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *RootContentsLayer() const noexcept
     {
       return _rootContentsLayer.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *LayerForClipping() const noexcept
     {
       return _clipLayer ? _clipLayer.get() : _scrollContainerLayer.get();
@@ -354,6 +359,7 @@ namespace krys::boo
     {
       return _rootLayerAttachment;
     }
+
     void UpdateRootLayerAttachment() noexcept;
     void UpdateRootLayerPosition() noexcept;
 
@@ -384,6 +390,7 @@ namespace krys::boo
     KRYS_NODISCARD float PageScaleFactor() const noexcept override;
     KRYS_NODISCARD float ZoomedOutPageScaleFactor() const noexcept override;
     KRYS_NODISCARD FloatSize EnclosingFrameViewVisibleSize() const noexcept override;
+
     void DidChangePlatformLayerForLayer(const GraphicsLayer *) noexcept override
     {
     }
@@ -399,10 +406,12 @@ namespace krys::boo
     {
       return _layerForHorizontalScrollbar.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *LayerForVerticalScrollbar() const noexcept
     {
       return _layerForVerticalScrollbar.get();
     }
+
     KRYS_NODISCARD GraphicsLayer *LayerForScrollCorner() const noexcept
     {
       return _layerForScrollCorner.get();
@@ -419,6 +428,7 @@ namespace krys::boo
       const RenderLayer &layer, const RenderLayer *compositingAncestor) const noexcept;
 
     void ResetTrackedRepaintRects() noexcept;
+
     void SetTracksRepaints(bool tracksRepaints) noexcept
     {
       _isTrackingRepaints = tracksRepaints;
@@ -444,6 +454,7 @@ namespace krys::boo
     {
       _layerFlushCount = 0;
     }
+
     KRYS_NODISCARD uint32 LayerFlushCount() const noexcept
     {
       return _layerFlushCount;
@@ -453,6 +464,7 @@ namespace krys::boo
     {
       _compositingUpdateCount = 0;
     }
+
     KRYS_NODISCARD uint32 CompositingUpdateCount() const noexcept
     {
       return _compositingUpdateCount;
@@ -465,10 +477,12 @@ namespace krys::boo
     KRYS_NODISCARD bool ShouldDumpPropertyForLayer(const GraphicsLayer *layer, utf8_stringview propertyName,
                                                    EnumSet<LayerTreeAsTextOptions>) const noexcept override;
     KRYS_NODISCARD bool BackdropRootIsOpaque(const GraphicsLayer *layer) const noexcept override;
+
     KRYS_NODISCARD bool IsFlushingLayers() const noexcept override
     {
       return _flushingLayers;
     }
+
     KRYS_NODISCARD bool IsTrackingRepaints() const noexcept override
     {
       return _isTrackingRepaints;

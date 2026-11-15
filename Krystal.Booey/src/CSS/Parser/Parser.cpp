@@ -628,7 +628,7 @@ namespace krys::boo::css
     enum class AllowAnonymous : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     Maybe<CascadeLayerName> ConsumeCascadeLayerName(TokenRange &tokens,
@@ -768,7 +768,7 @@ namespace krys::boo::css
   {
     NestingLevelIncrementer incrementer {_ruleListNestingLevel};
 
-    static constexpr auto MaximumRuleListNestingLevel = 128u;
+    constexpr static auto MaximumRuleListNestingLevel = 128u;
     if (_ruleListNestingLevel > MaximumRuleListNestingLevel)
     {
       return {};

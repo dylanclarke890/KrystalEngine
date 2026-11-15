@@ -106,6 +106,7 @@ namespace krys::boo
     {
       return _selection;
     }
+
     KRYS_NODISCARD const RenderSelection &Selection() const noexcept
     {
       return _selection;
@@ -121,10 +122,12 @@ namespace krys::boo
     {
       return *_initialContainingBlock;
     }
+
     KRYS_NODISCARD const layout::InitialContainingBlock &GetInitialContainingBlock() const noexcept
     {
       return *_initialContainingBlock;
     }
+
     KRYS_NODISCARD layout::LayoutState &GetLayoutState() noexcept
     {
       return *_layoutState;
@@ -136,10 +139,12 @@ namespace krys::boo
     {
       return _rendererCount;
     }
+
     void DidCreateRenderer() noexcept
     {
       ++_rendererCount;
     }
+
     void WillDestroyRenderer() noexcept
     {
       --_rendererCount;
@@ -200,6 +205,7 @@ namespace krys::boo
     {
       return _hasQuotesNeedingUpdate;
     }
+
     void SetHasQuotesNeedingUpdate(bool b) noexcept
     {
       _hasQuotesNeedingUpdate = b;
@@ -217,10 +223,12 @@ namespace krys::boo
     {
       _boxesWithScrollSnapPositions.insert(&box);
     }
+
     void UnregisterBoxWithScrollSnapPositions(const RenderBox &box) noexcept
     {
       _boxesWithScrollSnapPositions.erase(&box);
     }
+
     KRYS_NODISCARD const HashSet<const RenderBox *> &BoxesWithScrollSnapPositions() const noexcept
     {
       return _boxesWithScrollSnapPositions;
@@ -230,10 +238,12 @@ namespace krys::boo
     {
       _containerQueryBoxes.insert(&box);
     }
+
     void UnregisterContainerQueryBox(const RenderBox &box) noexcept
     {
       _containerQueryBoxes.erase(&box);
     }
+
     /// @brief The boxes of the query containers.
     KRYS_NODISCARD const HashSet<const RenderBox *> &ContainerQueryBoxes() const noexcept
     {
@@ -244,10 +254,12 @@ namespace krys::boo
     {
       _anchors.insert(&renderer);
     }
+
     void UnregisterAnchor(const RenderBoxModelObject &renderer) noexcept
     {
       _anchors.erase(&renderer);
     }
+
     /// @brief The renderers that are anchors: they have an anchor name or are an implicit anchor.
     KRYS_NODISCARD const HashSet<const RenderBoxModelObject *> &Anchors() const noexcept
     {
@@ -258,7 +270,9 @@ namespace krys::boo
     {
       _positionTryBoxes.insert(&box);
     }
+
     void UnregisterPositionTryBox(const RenderBox &box) noexcept;
+
     /// @brief The out-of-flow boxes with position-try fallbacks.
     KRYS_NODISCARD const HashSet<const RenderBox *> &PositionTryBoxes() const noexcept
     {

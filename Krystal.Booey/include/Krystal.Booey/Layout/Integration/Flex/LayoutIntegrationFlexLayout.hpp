@@ -81,6 +81,7 @@ namespace krys::boo::layout_integration
     {
       return *_flexBox;
     }
+
     KRYS_NODISCARD layout::ElementBox &FlexBox() noexcept
     {
       return *_flexBox;
@@ -93,6 +94,7 @@ namespace krys::boo::layout_integration
     {
       return *_layoutState;
     }
+
     KRYS_NODISCARD const layout::LayoutState &GetLayoutState() const noexcept
     {
       return *_layoutState;

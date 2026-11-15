@@ -96,6 +96,7 @@ namespace krys::boo::tests
           event.PreventDefault();
         }
       };
+
       fixture.Document->AddEventListener(u8"keydown", CreateRef<Canceller>(), false);
       CHECK(fixture.Press(u8"b") == Strings {"focus:plain", "click:plain"});
     }

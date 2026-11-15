@@ -72,7 +72,7 @@ namespace krys::boo
     SliderThumbVertical,
     Switch,
     SwitchThumb,
-    SwitchTrack
+    SwitchTrack,
   };
 
   constexpr int AppearanceBitWidth = 7;

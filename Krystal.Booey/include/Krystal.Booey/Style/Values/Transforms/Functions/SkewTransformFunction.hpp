@@ -50,6 +50,7 @@ namespace krys::boo::style
     {
       return _angleX;
     }
+
     KRYS_NODISCARD Angle<> AngleY() const noexcept
     {
       return _angleY;
@@ -59,6 +60,7 @@ namespace krys::boo::style
     {
       return _angleX.IsZero() && _angleY.IsZero();
     }
+
     KRYS_NODISCARD bool IsAffectedByTransformOrigin() const noexcept override
     {
       return !IsIdentity();

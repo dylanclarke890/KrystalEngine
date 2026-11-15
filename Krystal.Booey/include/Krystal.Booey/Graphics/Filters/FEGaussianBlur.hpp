@@ -49,18 +49,21 @@ namespace krys::boo
     {
       return _stdX;
     }
+
     bool SetStdDeviationX(float stdX) noexcept;
 
     KRYS_NODISCARD float StdDeviationY() const noexcept
     {
       return _stdY;
     }
+
     bool SetStdDeviationY(float stdY) noexcept;
 
     KRYS_NODISCARD EdgeModeType EdgeMode() const noexcept
     {
       return _edgeMode;
     }
+
     bool SetEdgeMode(EdgeModeType edgeMode) noexcept;
 
     KRYS_NODISCARD static IntSize CalculateKernelSize(const Filter &filter, FloatSize stdDeviation) noexcept;

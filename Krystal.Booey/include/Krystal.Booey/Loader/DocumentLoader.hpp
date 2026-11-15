@@ -130,6 +130,7 @@ namespace krys::boo
     {
       return _triggeringAction;
     }
+
     void SetTriggeringAction(NavigationAction &&action) noexcept
     {
       _triggeringAction = krys::move(action);
@@ -169,6 +170,7 @@ namespace krys::boo
                                    Func<void(const SharedBuffer *)> completionHandler) noexcept;
     /// @brief @p loader finished, with @p data or none.
     void FinishedLoadingIcon(IconLoader &loader, const SharedBuffer *data) noexcept;
+
     /// @brief The icons the client was last told of.
     KRYS_NODISCARD const List<LinkIcon> &LinkIcons() const noexcept
     {

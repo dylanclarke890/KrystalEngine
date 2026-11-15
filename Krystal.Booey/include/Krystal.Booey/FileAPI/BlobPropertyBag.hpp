@@ -12,7 +12,7 @@ namespace krys::boo
     /// @brief As they are.
     Transparent,
     /// @brief Converted to the platform's (CRLF on Windows, LF elsewhere).
-    Native
+    Native,
   };
 
   /// @see https://w3c.github.io/FileAPI/#dfn-BlobPropertyBag

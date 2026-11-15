@@ -81,13 +81,13 @@ namespace krys::boo::layout
       ListMarker,
       // These boxes are implicit flex boxes with no flex display type and they should probably turned into
       // proper flex boxes.
-      ImplicitFlexBox
+      ImplicitFlexBox,
     };
 
     enum class AnonymousBox : bool
     {
       No,
-      Yes
+      Yes,
     };
 
     struct ElementAttributes
@@ -154,18 +154,22 @@ namespace krys::boo::layout
     {
       return !IsFloatingOrOutOfFlowPositioned();
     }
+
     KRYS_NODISCARD bool IsPositioned() const noexcept
     {
       return IsInFlowPositioned() || IsOutOfFlowPositioned();
     }
+
     KRYS_NODISCARD bool IsInFlowPositioned() const noexcept
     {
       return IsRelativelyPositioned() || IsStickyPositioned();
     }
+
     KRYS_NODISCARD bool IsOutOfFlowPositioned() const noexcept
     {
       return IsAbsolutelyPositioned();
     }
+
     KRYS_NODISCARD bool IsRelativelyPositioned() const noexcept;
     KRYS_NODISCARD bool IsStickyPositioned() const noexcept;
     KRYS_NODISCARD bool IsAbsolutelyPositioned() const noexcept;
@@ -200,10 +204,12 @@ namespace krys::boo::layout
     KRYS_NODISCARD bool IsAtomicInlineBox() const noexcept;
     KRYS_NODISCARD bool IsInlineBlockBox() const noexcept;
     KRYS_NODISCARD bool IsInlineTableBox() const noexcept;
+
     KRYS_NODISCARD bool IsInitialContainingBlock() const noexcept
     {
       return BaseTypeFlags().Contains(InitialContainingBlockFlag);
     }
+
     KRYS_NODISCARD bool IsLayoutContainmentBox() const noexcept;
     KRYS_NODISCARD bool IsSizeContainmentBox() const noexcept;
     KRYS_NODISCARD bool IsInternalRubyBox() const noexcept;
@@ -214,43 +220,53 @@ namespace krys::boo::layout
     {
       return _nodeType == NodeType::DocumentElement;
     }
+
     KRYS_NODISCARD bool IsTableWrapperBox() const noexcept
     {
       return _nodeType == NodeType::TableWrapperBox;
     }
+
     KRYS_NODISCARD bool IsTableBox() const noexcept
     {
       return _nodeType == NodeType::TableBox;
     }
+
     KRYS_NODISCARD bool IsBodyBox() const noexcept
     {
       return _nodeType == NodeType::Body;
     }
+
     KRYS_NODISCARD bool IsLineBreakBox() const noexcept
     {
       return _nodeType == NodeType::LineBreak || _nodeType == NodeType::WordBreakOpportunity;
     }
+
     KRYS_NODISCARD bool IsIFrame() const noexcept
     {
       return _nodeType == NodeType::IFrame;
     }
+
     KRYS_NODISCARD bool IsImage() const noexcept
     {
       return _nodeType == NodeType::Image;
     }
+
     KRYS_NODISCARD bool IsListMarkerBox() const noexcept
     {
       return _nodeType == NodeType::ListMarker;
     }
+
     KRYS_NODISCARD bool IsReplacedBox() const noexcept
     {
       return _nodeType == NodeType::ReplacedElement || _nodeType == NodeType::Image
              || _nodeType == NodeType::ListMarker;
     }
+
     KRYS_NODISCARD bool IsWordBreakOpportunity() const noexcept
     {
       return _nodeType == NodeType::WordBreakOpportunity;
     }
+
     KRYS_NODISCARD bool IsInternalTableBox() const noexcept;
     KRYS_NODISCARD inline bool IsRuby() const noexcept;
     KRYS_NODISCARD inline bool IsRubyBase() const noexcept;
@@ -275,23 +291,28 @@ namespace krys::boo::layout
     {
       return _isInlineIntegrationRoot;
     }
+
     KRYS_NODISCARD bool IsAnonymousTextIndentCandidateForIntegration() const noexcept
     {
       return _isAnonymousTextIndentCandidateForIntegration;
     }
 
     KRYS_NODISCARD const ElementBox &Parent() const noexcept;
+
     KRYS_NODISCARD const Box *NextSibling() const noexcept
     {
       return _nextSibling.get();
     }
+
     KRYS_NODISCARD const Box *NextInFlowSibling() const noexcept;
     KRYS_NODISCARD const Box *NextInFlowOrFloatingSibling() const noexcept;
     KRYS_NODISCARD const Box *NextOutOfFlowSibling() const noexcept;
+
     KRYS_NODISCARD const Box *PreviousSibling() const noexcept
     {
       return _previousSibling.get();
     }
+
     KRYS_NODISCARD const Box *PreviousInFlowSibling() const noexcept;
     KRYS_NODISCARD const Box *PreviousInFlowOrFloatingSibling() const noexcept;
     KRYS_NODISCARD const Box *PreviousOutOfFlowSibling() const noexcept;
@@ -310,6 +331,7 @@ namespace krys::boo::layout
     {
       return BaseTypeFlags().Contains(ElementBoxFlag);
     }
+
     KRYS_NODISCARD bool IsInlineTextBox() const noexcept
     {
       return BaseTypeFlags().Contains(InlineTextBoxFlag);
@@ -319,14 +341,17 @@ namespace krys::boo::layout
     KRYS_NODISCARD bool IsOverflowVisible() const noexcept;
 
     void UpdateStyle(RenderStyle &&newStyle, UniquePtr<RenderStyle> &&newFirstLineStyle) noexcept;
+
     KRYS_NODISCARD const RenderStyle &Style() const noexcept
     {
       return _style;
     }
+
     KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept
     {
       return HasRareData() && RareData().FirstLineStyle ? *RareData().FirstLineStyle : _style;
     }
+
     KRYS_NODISCARD boo::WritingMode GetWritingMode() const noexcept
     {
       return Style().GetWritingMode();
@@ -346,6 +371,7 @@ namespace krys::boo::layout
     {
       _isInlineIntegrationRoot = true;
     }
+
     void SetIsAnonymousTextIndentCandidateForIntegration(bool value) noexcept
     {
       _isAnonymousTextIndentCandidateForIntegration = value;
@@ -370,10 +396,12 @@ namespace krys::boo::layout
     {
       return _hasRareData;
     }
+
     void SetHasRareData(bool hasRareData) noexcept
     {
       _hasRareData = hasRareData;
     }
+
     KRYS_NODISCARD const BoxRareData &RareData() const noexcept;
     KRYS_NODISCARD BoxRareData &RareData() noexcept;
     BoxRareData &EnsureRareData() noexcept;

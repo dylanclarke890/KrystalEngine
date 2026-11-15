@@ -54,7 +54,7 @@ namespace krys::boo::css
     enum class Default : bool
     {
       SRGB,
-      OKLab
+      OKLab,
     };
 
     ColourInterpolationMethod Method;

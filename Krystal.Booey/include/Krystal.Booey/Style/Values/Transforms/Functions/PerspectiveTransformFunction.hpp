@@ -52,10 +52,12 @@ namespace krys::boo::style
     {
       return _p.IsNone();
     }
+
     KRYS_NODISCARD bool IsAffectedByTransformOrigin() const noexcept override
     {
       return !IsIdentity();
     }
+
     KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept override
     {
       return false;

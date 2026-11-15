@@ -262,6 +262,7 @@ namespace krys::boo::layout
       InlineLayoutUnit Top {0};
       InlineLayoutUnit Bottom {0};
     };
+
     HashMap<const InlineLevelBox *, AbsoluteTopAndBottom> inlineLevelBoxAbsoluteTopAndBottomMap;
 
     auto minimumLogicalTop = Maybe<InlineLayoutUnit> {};

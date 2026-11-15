@@ -32,7 +32,6 @@
 
 namespace krys::boo
 {
-
   StyleFillData::StyleFillData() noexcept
       : FillOpacity(style::ComputedStyle::InitialFillOpacity()), Fill(style::ComputedStyle::InitialFill())
   {

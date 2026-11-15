@@ -1054,7 +1054,6 @@ namespace krys::boo::style::calc
 
 namespace std
 {
-
 #define OP_TUPLE_LIKE_CONFORMANCE(Op, numberOfArguments)                                                     \
   template <>                                                                                                \
   class tuple_size<krys::boo::style::calc::Op> : public std::integral_constant<size_t, numberOfArguments>    \

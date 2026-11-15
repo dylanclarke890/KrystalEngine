@@ -56,7 +56,7 @@ namespace krys::boo
     enum class GapType : uint8
     {
       BetweenLines,
-      BetweenItems
+      BetweenItems,
     };
 
   private:
@@ -94,7 +94,7 @@ namespace krys::boo
     {
       Definite,
       Indefinite,
-      Unknown
+      Unknown,
     };
 
     using FlexItemFrameRects = List<LayoutRect>;
@@ -172,6 +172,7 @@ namespace krys::boo
     {
       return false;
     }
+
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override;
@@ -420,6 +421,7 @@ namespace krys::boo
     {
       _hasDefiniteHeight = SizeDefiniteness::Unknown;
     }
+
     KRYS_NODISCARD const RenderBox *FlexItemForFirstBaseline() const noexcept;
     KRYS_NODISCARD const RenderBox *FlexItemForLastBaseline() const noexcept;
     KRYS_NODISCARD const RenderBox *FirstBaselineCandidateOnLine(OrderIterator flexItemIterator,

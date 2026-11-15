@@ -73,10 +73,12 @@ namespace krys::boo::css
       {
         _owner.AddRef();
       }
+
       void SubRef() const noexcept final
       {
         _owner.SubRef();
       }
+
       KRYS_NODISCARD uint32 GetRefCount() const noexcept final
       {
         return _owner.GetRefCount();

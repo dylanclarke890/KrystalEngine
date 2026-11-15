@@ -10,7 +10,7 @@ namespace krys
   {
     bool HasFractions(double val) noexcept
     {
-      static constexpr double epsilon = 0.0001;
+      constexpr static double epsilon = 0.0001;
       int32 ival = static_cast<int32>(val);
       double dval = static_cast<double>(ival);
       return std::abs(val - dval) > epsilon;

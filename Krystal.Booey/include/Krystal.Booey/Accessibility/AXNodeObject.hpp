@@ -61,14 +61,17 @@ namespace krys::boo
     ~AXNodeObject() noexcept override;
 
     void Init() noexcept override;
+
     KRYS_NODISCARD bool IsDetached() const noexcept override
     {
       return !_node;
     }
+
     KRYS_NODISCARD bool IsAccessibilityNodeObject() const noexcept override
     {
       return true;
     }
+
     KRYS_NODISCARD dom::Node *GetNode() const noexcept override
     {
       return _node.get();
@@ -81,14 +84,17 @@ namespace krys::boo
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override;
     void UpdateChildrenIfNecessary() noexcept override;
     void ClearChildren() noexcept override;
+
     void SetNeedsToUpdateChildren() noexcept override
     {
       _childrenDirty = true;
     }
+
     void SetNeedsToUpdateSubtree() noexcept override
     {
       _subtreeDirty = true;
     }
+
     KRYS_NODISCARD bool NeedsToUpdateChildren() const noexcept override
     {
       return _childrenDirty;
@@ -154,6 +160,7 @@ namespace krys::boo
     KRYS_NODISCARD float MaxValueForRange() const noexcept override;
     KRYS_NODISCARD float MinValueForRange() const noexcept override;
     KRYS_NODISCARD dom::DOMString ValueDescription() const noexcept override;
+
     KRYS_NODISCARD Maybe<AXOrientation> ExplicitOrientation() const noexcept override
     {
       return OrientationFromARIA();
@@ -218,10 +225,12 @@ namespace krys::boo
     void UpdateOwnedChildrenIfNecessary() noexcept;
 
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override;
+
     void RecomputeAriaRole() noexcept override
     {
       _ariaRole = DetermineAriaRoleAttribute();
     }
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override;
     void DetachRemoteParts(AXDetachmentType detachmentType) noexcept override;
 
@@ -255,6 +264,7 @@ namespace krys::boo
     /// @brief An exposed table's rows, then its columns and header container (which are ignored), working
     /// out its cell slots.
     void AddTableChildrenAndCellSlots() noexcept;
+
     /// @brief Whether the table is exposed: an ARIA table, or a data table rather than one for layout.
     KRYS_NODISCARD bool ComputeIsTableExposableThroughAccessibility() const noexcept
     {

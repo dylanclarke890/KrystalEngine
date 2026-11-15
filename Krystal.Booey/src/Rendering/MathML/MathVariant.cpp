@@ -111,6 +111,7 @@ namespace krys::boo
       return entry != table.end() && entry->first == key ? entry->second : 0;
     }
   }
+
   // Performs the character mapping needed to implement MathML's mathvariant attribute.
   // It takes a unicode character and maps it to its appropriate mathvariant counterpart specified by
   // mathvariant. The mapped character is typically located within Unicode's mathematical blocks (0x1D***,

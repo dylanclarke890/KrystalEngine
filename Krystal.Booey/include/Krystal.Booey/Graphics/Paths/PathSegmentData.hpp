@@ -41,8 +41,8 @@ namespace krys::boo
   {
     FloatPoint Point;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathMoveTo &) const noexcept = default;
 
@@ -64,8 +64,8 @@ namespace krys::boo
   {
     FloatPoint Point;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathLineTo &) const noexcept = default;
 
@@ -88,8 +88,8 @@ namespace krys::boo
     FloatPoint ControlPoint;
     FloatPoint EndPoint;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathQuadCurveTo &) const noexcept = default;
 
@@ -113,8 +113,8 @@ namespace krys::boo
     FloatPoint ControlPoint2;
     FloatPoint EndPoint;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathBezierCurveTo &) const noexcept = default;
 
@@ -138,8 +138,8 @@ namespace krys::boo
     FloatPoint ControlPoint2;
     float Radius;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathArcTo &) const noexcept = default;
 
@@ -166,8 +166,8 @@ namespace krys::boo
     float EndAngle;
     RotationDirection Direction;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathArc &) const noexcept = default;
 
@@ -190,8 +190,8 @@ namespace krys::boo
   {
     PathArc Arc;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathClosedArc &) const noexcept = default;
 
@@ -220,8 +220,8 @@ namespace krys::boo
     float EndAngle;
     RotationDirection Direction;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathEllipse &) const noexcept = default;
 
@@ -244,8 +244,8 @@ namespace krys::boo
   {
     FloatRect Rect;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathEllipseInRect &) const noexcept = default;
 
@@ -263,8 +263,8 @@ namespace krys::boo
   {
     FloatRect Rect;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathRect &) const noexcept = default;
 
@@ -283,14 +283,14 @@ namespace krys::boo
     enum class Strategy : uint8
     {
       PreferNative,
-      PreferBezier
+      PreferBezier,
     };
 
     FloatRoundedRect RoundedRect;
     Strategy RoundingStrategy;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathRoundedRect &) const noexcept = default;
 
@@ -310,8 +310,8 @@ namespace krys::boo
     float CornerWidth;
     float CornerHeight;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathContinuousRoundedRect &) const noexcept = default;
 
@@ -331,6 +331,7 @@ namespace krys::boo
         : _values {{start.X(), start.Y(), end.X(), end.Y()}}
     {
     }
+
     PathDataLine(std::span<const float, 4> values) noexcept
         : _values {values[0], values[1], values[2], values[3]}
     {
@@ -340,26 +341,31 @@ namespace krys::boo
     {
       return {_values[0], _values[1]};
     }
+
     void SetStart(FloatPoint p) noexcept
     {
       _values[0] = p.X();
       _values[1] = p.Y();
     }
+
     KRYS_NODISCARD FloatPoint End() const noexcept
     {
       return {_values[2], _values[3]};
     }
+
     void SetEnd(FloatPoint p) noexcept
     {
       _values[2] = p.X();
       _values[3] = p.Y();
     }
+
     std::span<const float, 4> span() const KRYS_LIFETIME_BOUND
     {
       return _values;
     }
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathDataLine &) const noexcept = default;
 
@@ -386,8 +392,8 @@ namespace krys::boo
     FloatPoint ControlPoint;
     FloatPoint EndPoint;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathDataQuadCurve &) const noexcept = default;
 
@@ -412,8 +418,8 @@ namespace krys::boo
     FloatPoint ControlPoint2;
     FloatPoint EndPoint;
 
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathDataBezierCurve &) const noexcept = default;
 
@@ -438,8 +444,8 @@ namespace krys::boo
     FloatPoint ControlPoint2;
     float Radius;
 
-    static constexpr bool CanApplyElements = false;
-    static constexpr bool CanTransform = false;
+    constexpr static bool CanApplyElements = false;
+    constexpr static bool CanTransform = false;
 
     KRYS_NODISCARD bool operator==(const PathDataArc &) const noexcept = default;
 
@@ -460,8 +466,8 @@ namespace krys::boo
 
   struct PathCloseSubpath
   {
-    static constexpr bool CanApplyElements = true;
-    static constexpr bool CanTransform = true;
+    constexpr static bool CanApplyElements = true;
+    constexpr static bool CanTransform = true;
 
     KRYS_NODISCARD bool operator==(const PathCloseSubpath &) const noexcept = default;
 

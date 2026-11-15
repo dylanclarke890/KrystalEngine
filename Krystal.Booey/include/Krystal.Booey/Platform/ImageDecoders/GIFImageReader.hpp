@@ -76,7 +76,7 @@ namespace krys::boo
     GIFApplicationExtension,
     GIFNetscapeExtensionBlock,
     GIFConsumeNetscapeExtension,
-    GIFConsumeComment
+    GIFConsumeComment,
   };
 
   struct GIFFrameContext;
@@ -118,6 +118,7 @@ namespace krys::boo
     bool PrepareToDecode() noexcept;
     bool OutputRow() noexcept;
     bool DoLZW(Span<const uint8> block) noexcept;
+
     KRYS_NODISCARD bool HasRemainingRows() const noexcept
     {
       return _rowsRemaining;
@@ -179,22 +180,27 @@ namespace krys::boo
     {
       return _isComplete;
     }
+
     void SetComplete() noexcept
     {
       _isComplete = true;
     }
+
     KRYS_NODISCARD bool IsHeaderDefined() const noexcept
     {
       return _isHeaderDefined;
     }
+
     void SetHeaderDefined() noexcept
     {
       _isHeaderDefined = true;
     }
+
     KRYS_NODISCARD bool IsDataSizeDefined() const noexcept
     {
       return _isDataSizeDefined;
     }
+
     void SetDataSize(int size) noexcept
     {
       Datasize = size;
@@ -239,6 +245,7 @@ namespace krys::boo
     {
       _data = krys::move(data);
     }
+
     // FIXME: haltAtFrame should be size_t.
     bool Decode(GIFImageDecoder::GIFQuery query, unsigned haltAtFrame) noexcept;
 
@@ -254,6 +261,7 @@ namespace krys::boo
       // FIXME: This extra complexity is not necessary and we should just report m_frames.size().
       return _frames.back()->IsHeaderDefined() ? _frames.size() : _frames.size() - 1;
     }
+
     KRYS_NODISCARD int LoopCount() const noexcept
     {
       return _loopCount;
@@ -293,6 +301,7 @@ namespace krys::boo
     }
 
     void AddFrameIfNecessary() noexcept;
+
     KRYS_NODISCARD bool CurrentFrameIsFirstFrame() const noexcept
     {
       return _frames.empty() || (_frames.size() == 1u && !_frames[0]->IsComplete());

@@ -50,6 +50,7 @@ namespace krys::boo
       {
         return _blockOrXAxis;
       }
+
       KRYS_NODISCARD constexpr PositionAreaSpan InlineOrYAxis() const noexcept
       {
         return _inlineOrYAxis;
@@ -80,6 +81,7 @@ namespace krys::boo
       PositionArea(css::keywords::None) noexcept : _value {}
       {
       }
+
       PositionArea(PositionAreaValue value) noexcept : _value {value}
       {
       }
@@ -88,10 +90,12 @@ namespace krys::boo
       {
         return !_value;
       }
+
       KRYS_NODISCARD bool IsValue() const noexcept
       {
         return !!_value;
       }
+
       KRYS_NODISCARD Maybe<PositionAreaValue> TryValue() const noexcept
       {
         return _value;
@@ -121,6 +125,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD PositionArea operator()(BuilderState &, const css::Value &) noexcept;
     };
+
     template <>
     struct CSSValueCreation<PositionAreaValue>
     {
@@ -136,7 +141,6 @@ namespace krys::boo
       void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                       const PositionAreaValue &) noexcept;
     };
-
   }
 }
 

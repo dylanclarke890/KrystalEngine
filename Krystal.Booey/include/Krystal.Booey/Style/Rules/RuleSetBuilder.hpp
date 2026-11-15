@@ -49,7 +49,7 @@ namespace krys::boo::style
     enum class ShrinkToFit : bool
     {
       Enable,
-      Disable
+      Disable,
     };
 
   private:
@@ -60,7 +60,7 @@ namespace krys::boo::style
         size_t seed = name.size();
         for (auto &segment : name)
         {
-          seed ^= std::hash<css::CSSOMStringAtom> {}(segment) + 0x9e'37'79'b9 + (seed << 6) + (seed >> 2);
+          seed ^= std::hash<css::CSSOMStringAtom> {}(segment) + 0x9E'37'79'B9 + (seed << 6) + (seed >> 2);
         }
         return seed;
       }

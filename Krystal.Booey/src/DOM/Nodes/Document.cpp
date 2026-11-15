@@ -4743,9 +4743,11 @@ namespace krys::boo::dom
       return false;
     }
     _isRunningExecCommand = true;
+
     struct ResetRunning
     {
       bool &Running;
+
       ~ResetRunning() noexcept
       {
         Running = false;

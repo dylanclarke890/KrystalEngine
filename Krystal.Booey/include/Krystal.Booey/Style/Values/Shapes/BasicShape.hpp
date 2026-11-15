@@ -55,6 +55,7 @@ namespace krys::boo::style
     KRYS_NODISCARD css::BasicShape operator()(const BasicShape &, const RenderStyle &,
                                               PathConversion = PathConversion::None) noexcept;
   };
+
   template <>
   struct ToStyle<css::BasicShape>
   {
@@ -68,6 +69,7 @@ namespace krys::boo::style
     KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &, const BasicShape &,
                                               PathConversion = PathConversion::None) noexcept;
   };
+
   template <>
   struct CSSValueConversion<BasicShape>
   {
