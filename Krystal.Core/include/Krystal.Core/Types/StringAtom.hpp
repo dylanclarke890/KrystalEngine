@@ -1,108 +1,137 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/String.hpp"
-#include <xutility>
+#include "Krystal.Core/Utils/Move.hpp"
+#include <utility>
 
 namespace krys
 {
-  using StringAtomStorage = const utf8_string *;
+  class StringAtomPool;
 
-  class StringAtomPool
+  /// @brief An interned string and the number of atoms that refer to it.
+  class StringAtomImpl
   {
-  public:
-    struct UTF8Hash
-    {
-      using is_transparent = void;
-
-      size_t operator()(utf8_stringview v) const noexcept
-      {
-        return std::hash<utf8_stringview> {}(v);
-      }
-
-      size_t operator()(const utf8_string &s) const noexcept
-      {
-        return (*this)(utf8_stringview {s});
-      }
-    };
-
-    struct UTF8KeyEqual
-    {
-      using is_transparent = void;
-
-      bool operator()(utf8_stringview a, utf8_stringview b) const noexcept
-      {
-        return a == b;
-      }
-
-      bool operator()(const utf8_string &a, utf8_stringview b) const noexcept
-      {
-        return utf8_stringview {a} == b;
-      }
-
-      bool operator()(utf8_stringview a, const utf8_string &b) const noexcept
-      {
-        return a == utf8_stringview {b};
-      }
-
-      bool operator()(const utf8_string &a, const utf8_string &b) const noexcept
-      {
-        return a == b;
-      }
-    };
+    friend class StringAtom;
+    friend class StringAtomPool;
+    KRYS_NON_COPY_MOVABLE(StringAtomImpl);
 
   private:
-    HashSet<utf8_string, UTF8Hash, UTF8KeyEqual> _strings;
+    utf8_string _string;
+    // Of the string's contents, so an atom made again after its string left the pool hashes the same.
+    size_t _hash;
+    // Not atomic: an atom is only used on the thread that made it.
+    mutable uint32 _refCount {0};
+    // The pool the string is interned in; null once the pool is gone (its thread has ended).
+    StringAtomPool *_pool {nullptr};
+
+  public:
+    StringAtomImpl(utf8_string string, StringAtomPool &pool) noexcept
+        : _string(krys::move(string)), _hash(std::hash<utf8_stringview> {}(_string)), _pool(&pool)
+    {
+    }
+
+    KRYS_NODISCARD utf8_stringview View() const noexcept
+    {
+      return _string;
+    }
+
+    /// @brief A hash of the string's contents.
+    KRYS_NODISCARD size_t Hash() const noexcept
+    {
+      return _hash;
+    }
+  };
+
+  /// @brief An atom's string, for keeping an atom in raw memory such as a union (see
+  /// `StringAtom::LeakStorage`).
+  using StringAtomStorage = const StringAtomImpl *;
+
+  /// @brief The strings interned on one thread. An atom's string leaves its pool when the last atom that
+  /// refers to it goes, as WebKit's `AtomStringImpl`s leave their `AtomStringTable`.
+  class StringAtomPool
+  {
+    KRYS_NON_COPY_MOVABLE(StringAtomPool);
+
+  private:
+    // Keyed by a view of each atom's string, which stays put as the atoms are on the heap.
+    HashMap<utf8_stringview, StringAtomImpl *> _atoms;
 
   public:
     StringAtomPool() noexcept = default;
 
-    KRYS_NODISCARD StringAtomStorage GetOrAdd(utf8_stringview v) noexcept
+    ~StringAtomPool() noexcept
     {
-      if (auto it = _strings.find(v); it != _strings.end())
+      // Atoms can outlive their thread's pool (a static atom is destroyed after the main thread's
+      // thread-local storage), so they free their string themselves from now on.
+      for (auto &[view, atom] : _atoms)
       {
-        return std::addressof(*it);
+        atom->_pool = nullptr;
       }
-
-      // Only allocate when inserting a new unique string.
-      auto [insertedIt, wasInserted] = _strings.insert(utf8_string(v));
-      return std::addressof(*insertedIt);
     }
-
-    KRYS_NODISCARD StringAtomStorage GetOrAdd(const utf8_string &s) noexcept
-    {
-      return GetOrAdd(utf8_stringview {s});
-    }
-
-    KRYS_NODISCARD StringAtomStorage GetOrAdd(utf8_string &&s) noexcept
-    {
-      if (auto it = _strings.find(utf8_stringview {s}); it != _strings.end())
-      {
-        return std::addressof(*it);
-      }
-
-      auto [insertedIt, wasInserted] = _strings.insert(std::move(s));
-      return std::addressof(*insertedIt);
-    }
-  };
-
-  class StringAtom
-  {
-  private:
-    StringAtomStorage _ptr {nullptr};
 
     /// @brief The calling thread's pool. Atoms belong to the thread that made them, as WebKit's do: two
-    /// atoms for the same string made on different threads aren't equal, and an atom shouldn't be used on
-    /// another thread.
-    static StringAtomPool &Pool()
+    /// atoms for the same string made on different threads aren't equal, and an atom mustn't be copied or
+    /// destroyed on another thread.
+    KRYS_NODISCARD static StringAtomPool &Current() noexcept
     {
       thread_local StringAtomPool pool {};
       return pool;
     }
+
+    KRYS_NODISCARD StringAtomImpl &GetOrAdd(utf8_stringview string) noexcept
+    {
+      if (auto it = _atoms.find(string); it != _atoms.end())
+      {
+        return *it->second;
+      }
+
+      return Add(utf8_string(string));
+    }
+
+    KRYS_NODISCARD StringAtomImpl &GetOrAdd(utf8_string &&string) noexcept
+    {
+      if (auto it = _atoms.find(utf8_stringview {string}); it != _atoms.end())
+      {
+        return *it->second;
+      }
+
+      return Add(krys::move(string));
+    }
+
+    /// @brief Forgets @p atom's string, as the last atom that referred to it has gone.
+    void Remove(const StringAtomImpl &atom) noexcept
+    {
+      _atoms.erase(atom.View());
+    }
+
+    /// @brief The number of strings interned on this thread.
+    KRYS_NODISCARD size_t Size() const noexcept
+    {
+      return _atoms.size();
+    }
+
+  private:
+    KRYS_NODISCARD StringAtomImpl &Add(utf8_string string) noexcept
+    {
+      auto *atom = new StringAtomImpl(krys::move(string), *this);
+      _atoms.emplace(atom->View(), atom);
+      return *atom;
+    }
+  };
+
+  /// @brief An interned string: atoms for the same string (made on the same thread) share it, so they compare
+  /// and hash as pointers. The null atom has no string.
+  class StringAtom
+  {
+  private:
+    const StringAtomImpl *_impl {nullptr};
 
     struct NullTag
     {
@@ -112,64 +141,171 @@ namespace krys
     {
     };
 
-    StringAtom(NullTag) noexcept : _ptr(nullptr)
+    struct AdoptTag
+    {
+    };
+
+    StringAtom(NullTag) noexcept
     {
     }
 
-    StringAtom(EmptyTag) noexcept : _ptr(Pool().GetOrAdd(utf8_stringview {u8""}))
+    StringAtom(EmptyTag) noexcept : StringAtom(StringAtomPool::Current().GetOrAdd(utf8_stringview {u8""}))
     {
+    }
+
+    StringAtom(const StringAtomImpl *impl, AdoptTag) noexcept : _impl(impl)
+    {
+    }
+
+    explicit StringAtom(const StringAtomImpl &impl) noexcept : _impl(&impl)
+    {
+      Ref(_impl);
+    }
+
+    static void Ref(const StringAtomImpl *impl) noexcept
+    {
+      if (impl)
+      {
+        krys_debug_assert(!impl->_pool || impl->_pool == &StringAtomPool::Current());
+        ++impl->_refCount;
+      }
+    }
+
+    static void Deref(const StringAtomImpl *impl) noexcept
+    {
+      if (!impl)
+      {
+        return;
+      }
+
+      krys_debug_assert(!impl->_pool || impl->_pool == &StringAtomPool::Current());
+      krys_debug_assert(impl->_refCount);
+      if (--impl->_refCount == 0)
+      {
+        if (impl->_pool)
+        {
+          impl->_pool->Remove(*impl);
+        }
+        delete impl;
+      }
     }
 
   public:
     KRYS_NODISCARD static const StringAtom &Null() noexcept
     {
-      static StringAtom nullAtom = StringAtom(NullTag {});
+      static const StringAtom nullAtom = StringAtom(NullTag {});
       return nullAtom;
     }
 
+    /// @brief The calling thread's empty atom.
     KRYS_NODISCARD static const StringAtom &Empty() noexcept
     {
-      thread_local StringAtom emptyAtom = StringAtom(EmptyTag {});
+      thread_local const StringAtom emptyAtom = StringAtom(EmptyTag {});
       return emptyAtom;
     }
 
-    StringAtom(const char8 *str) noexcept : _ptr(Pool().GetOrAdd(utf8_stringview {str}))
+    StringAtom(const char8 *str) noexcept
+        : StringAtom(StringAtomPool::Current().GetOrAdd(utf8_stringview {str}))
     {
     }
 
-    StringAtom(utf8_stringview str) noexcept : _ptr(Pool().GetOrAdd(str))
+    StringAtom(utf8_stringview str) noexcept : StringAtom(StringAtomPool::Current().GetOrAdd(str))
     {
     }
 
-    StringAtom(const utf8_string &str) noexcept : _ptr(Pool().GetOrAdd(str))
+    StringAtom(const utf8_string &str) noexcept
+        : StringAtom(StringAtomPool::Current().GetOrAdd(utf8_stringview {str}))
     {
     }
 
-    StringAtom(utf8_string &&str) noexcept : _ptr(Pool().GetOrAdd(std::move(str)))
+    StringAtom(utf8_string &&str) noexcept : StringAtom(StringAtomPool::Current().GetOrAdd(krys::move(str)))
     {
     }
 
-    StringAtom(StringAtomStorage ptr) noexcept : _ptr(ptr)
+    StringAtom(const StringAtom &other) noexcept : _impl(other._impl)
+    {
+      Ref(_impl);
+    }
+
+    StringAtom(StringAtom &&other) noexcept : _impl(std::exchange(other._impl, nullptr))
     {
     }
 
-    KRYS_NODISCARD friend bool operator==(StringAtom a, StringAtom b) noexcept
+    StringAtom &operator=(const StringAtom &other) noexcept
     {
-      return a._ptr == b._ptr;
+      Ref(other._impl);
+      Deref(_impl);
+      _impl = other._impl;
+      return *this;
+    }
+
+    StringAtom &operator=(StringAtom &&other) noexcept
+    {
+      if (this != &other)
+      {
+        Deref(_impl);
+        _impl = std::exchange(other._impl, nullptr);
+      }
+      return *this;
+    }
+
+    ~StringAtom() noexcept
+    {
+      Deref(_impl);
+    }
+
+    /// @brief Takes back an atom given up with `LeakStorage`.
+    KRYS_NODISCARD static StringAtom AdoptStorage(StringAtomStorage storage) noexcept
+    {
+      return StringAtom(storage, AdoptTag {});
+    }
+
+    /// @brief Adds a reference to an atom kept as storage, for copying it.
+    static void RefStorage(StringAtomStorage storage) noexcept
+    {
+      Ref(storage);
+    }
+
+    /// @brief Releases an atom kept as storage, as its destructor would.
+    static void DerefStorage(StringAtomStorage storage) noexcept
+    {
+      Deref(storage);
+    }
+
+    KRYS_NODISCARD friend bool operator==(const StringAtom &a, const StringAtom &b) noexcept
+    {
+      return a._impl == b._impl;
     }
 
     /// @brief The interned string; empty for the null atom.
     KRYS_NODISCARD utf8_stringview View() const noexcept
     {
-      return _ptr ? utf8_stringview {*_ptr} : utf8_stringview {};
+      return _impl ? _impl->View() : utf8_stringview {};
     }
 
-    /// @brief The interned string. Stays valid for the lifetime of the program.
+    /// @brief A hash of the string's contents (zero for the null atom). Unlike the atom's address, it's the
+    /// same for every atom made from the string, even after the string has left the pool and come back.
+    KRYS_NODISCARD size_t ExistingHash() const noexcept
+    {
+      return _impl ? _impl->Hash() : 0uz;
+    }
+
+    /// @brief The atom's string, which stays valid while an atom refers to it.
     KRYS_NODISCARD StringAtomStorage Storage() const noexcept
     {
-      return _ptr;
+      return _impl;
+    }
+
+    /// @brief Gives up the atom's reference to its string, for keeping it in raw memory: the storage must
+    /// later be passed to `AdoptStorage` or `DerefStorage`.
+    KRYS_NODISCARD StringAtomStorage LeakStorage() && noexcept
+    {
+      return std::exchange(_impl, nullptr);
     }
   };
+
+  // Selectors and CSS values keep atoms in unions and cast them back.
+  static_assert(sizeof(StringAtom) == sizeof(StringAtomStorage));
 
   /// @brief The null atom marks an empty `Markable<StringAtom>`.
   template <>
@@ -192,14 +328,9 @@ namespace std
   template <>
   struct hash<krys::StringAtom>
   {
-    constexpr size_t operator()(const krys::StringAtom &qName) const noexcept
+    size_t operator()(const krys::StringAtom &atom) const noexcept
     {
-      if (qName == krys::StringAtom::Null())
-      {
-        return 0;
-      }
-
-      return krys::Hash::Combine(qName.View().data());
+      return atom.ExistingHash();
     }
   };
 }

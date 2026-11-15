@@ -66,7 +66,7 @@ namespace krys::boo::css
     }
 
     // Move the value to the rare data stucture.
-    _data.Rare = CreateRef<RareData>(CSSOMStringAtom(_data.Value)).release();
+    _data.Rare = CreateRef<RareData>(CSSOMStringAtom::AdoptStorage(_data.Value)).release();
     SetFlag(SelectorFlag::HasRareData, true);
   }
 
@@ -1032,6 +1032,7 @@ namespace krys::boo::css
     else
     {
       _data.Value = other._data.Value;
+      CSSOMStringAtom::RefStorage(_data.Value);
     }
   }
 
@@ -1277,12 +1278,12 @@ namespace krys::boo::css
         case SelectorMatch::AttributeSuffix:
         case SelectorMatch::AttributeSubstring:
         {
-          seed = Hash::Combine(seed, simpleSelector.Attribute().get(), simpleSelector.Value().Storage());
+          seed = Hash::Combine(seed, simpleSelector.Attribute().get(), simpleSelector.Value().ExistingHash());
           break;
         }
         default:
         {
-          seed = Hash::Combine(seed, simpleSelector.Value().Storage());
+          seed = Hash::Combine(seed, simpleSelector.Value().ExistingHash());
           break;
         }
       }

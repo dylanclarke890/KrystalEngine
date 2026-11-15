@@ -52,7 +52,8 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD DOMStringAtom Type() const noexcept override
     {
-      return u8"childList";
+      static const DOMStringAtom type {u8"childList"};
+      return type;
     }
 
     KRYS_NODISCARD Ref<Node> Target() const noexcept override

@@ -54,7 +54,7 @@ namespace krys
 
     KRYS_NODISCARD static size_t Hash(const boo::style::PseudoElementIdentifier &identifier) noexcept
     {
-      return krys::Hash::Combine(identifier.Type, identifier.NameArgument.Storage());
+      return krys::Hash::Combine(identifier.Type, identifier.NameArgument.ExistingHash());
     }
 
     KRYS_NODISCARD static bool Equal(const boo::style::PseudoElementIdentifier &a,

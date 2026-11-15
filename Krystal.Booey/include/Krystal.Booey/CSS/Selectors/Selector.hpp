@@ -598,7 +598,10 @@ namespace krys::boo::css
 
     if (!HasRareData())
     {
-      _data.Value = value.Storage();
+      // Copy before releasing the old value, which `value` may be.
+      auto storage = CSSOMStringAtom(value).LeakStorage();
+      CSSOMStringAtom::DerefStorage(_data.Value);
+      _data.Value = storage;
       return;
     }
 
@@ -620,7 +623,11 @@ namespace krys::boo::css
       _data.TagQualifiedName = nullptr;
       _match = SelectorMatch::None;
     }
-    // Atoms are interned for the lifetime of the program, so a plain value has nothing to release.
+    else
+    {
+      CSSOMStringAtom::DerefStorage(_data.Value);
+      _data.Value = nullptr;
+    }
   }
 
   inline const dom::QualifiedName &Selector::TagQualifiedName() const noexcept

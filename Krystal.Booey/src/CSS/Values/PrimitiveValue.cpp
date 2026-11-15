@@ -110,7 +110,7 @@ namespace krys::boo::css
   {
     krys_debug_assert(IsStringType(type));
     SetPrimitiveUnitType(type);
-    _value.String = CSSOMStringAtom(string).Storage();
+    _value.String = CSSOMStringAtom(string).LeakStorage();
   }
 
   PrimitiveValue::PrimitiveValue(StaticValueTag, css::ValueId valueId) noexcept
@@ -148,10 +148,11 @@ namespace krys::boo::css
 
   PrimitiveValue::~PrimitiveValue() noexcept
   {
-    // Strings are interned atoms that live for the whole program, so only the reference-counted members need
-    // releasing.
     switch (PrimitiveUnitType())
     {
+      case UnitType::String:
+      case UnitType::CustomIdent:
+      case UnitType::FontFamily:               CSSOMStringAtom::DerefStorage(_value.String); break;
       case UnitType::Attr:                     _value.Attr->SubRef(); break;
       case UnitType::Calc:                     _value.Calc->SubRef(); break;
       case UnitType::CalcPercentageWithAngle:
@@ -701,7 +702,7 @@ namespace krys::boo::css
     {
       case UnitType::String:
       case UnitType::CustomIdent:
-      case UnitType::FontFamily:  return *_value.String;
+      case UnitType::FontFamily:  return CSSOMString(_value.String->View());
       case UnitType::ValueId:     return CSSOMString(ToString(_value.ValueId));
       case UnitType::PropertyId:  return CSSOMString(ToString(_value.PropertyId));
       case UnitType::Attr:        return ProtectedCSSAttrValue()->CssText(DefaultSerialisationContext());
@@ -735,14 +736,14 @@ namespace krys::boo::css
       case UnitType::Calc:       return ProtectedCSSCalcValue()->CssText(context);
       // FIXME: This isn't correct.
       case UnitType::Dimension:  return FormatNumberValue(u8"");
-      case UnitType::FontFamily: return SerialiseFontFamily(*_value.String);
+      case UnitType::FontFamily: return SerialiseFontFamily(CSSOMString(_value.String->View()));
       case UnitType::Integer:    return FormatIntegerValue(u8"");
       case UnitType::QuirkyEm:   return FormatNumberValue(u8"em");
-      case UnitType::String:     return SerialiseString(*_value.String);
+      case UnitType::String:     return SerialiseString(CSSOMString(_value.String->View()));
       case UnitType::CustomIdent:
       {
         StringBuilder builder;
-        SerialiseIdentifier(*_value.String, builder);
+        SerialiseIdentifier(CSSOMString(_value.String->View()), builder);
         return krys::move(builder).ToString();
       }
 
@@ -822,7 +823,7 @@ namespace krys::boo::css
       case UnitType::ValueId:                  seed = Hash::Combine(seed, _value.ValueId); break;
       case UnitType::String:
       case UnitType::CustomIdent:
-      case UnitType::FontFamily:               seed = Hash::Combine(seed, _value.String); break;
+      case UnitType::FontFamily:               seed = Hash::Combine(seed, _value.String->Hash()); break;
       case UnitType::Attr:                     seed = Hash::Combine(seed, _value.Attr); break;
       case UnitType::Calc:                     seed = Hash::Combine(seed, _value.Calc); break;
       case UnitType::Ident:

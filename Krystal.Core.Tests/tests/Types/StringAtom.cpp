@@ -78,4 +78,37 @@ namespace krys::tests
     CHECK_FALSE(sameOnOtherThread);
     CHECK(equalWithinOtherThread);
   }
+
+  TEST_CASE("StringAtom - a string leaves its pool with its last atom", "[StringAtom]")
+  {
+    auto &pool = StringAtomPool::Current();
+    auto before = pool.Size();
+    {
+      StringAtom first = u8"short-lived";
+      CHECK(pool.Size() == before + 1);
+      {
+        StringAtom copy = first;
+        StringAtom moved = krys::move(copy);
+        CHECK(moved == first);
+        CHECK(copy == StringAtom::Null());
+      }
+      CHECK(pool.Size() == before + 1);
+    }
+    CHECK(pool.Size() == before);
+  }
+
+  TEST_CASE("StringAtom - storage given up and taken back keeps the string", "[StringAtom]")
+  {
+    auto &pool = StringAtomPool::Current();
+    auto before = pool.Size();
+    StringAtomStorage storage = StringAtom(u8"stored").LeakStorage();
+    CHECK(pool.Size() == before + 1);
+    StringAtom::RefStorage(storage);
+    StringAtom::DerefStorage(storage);
+    {
+      auto atom = StringAtom::AdoptStorage(storage);
+      CHECK(atom.View() == u8"stored");
+    }
+    CHECK(pool.Size() == before);
+  }
 }
