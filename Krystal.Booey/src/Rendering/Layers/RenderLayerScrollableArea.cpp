@@ -1343,9 +1343,13 @@ namespace krys::boo
       (void)ScrollToPositionWithoutAnimation(IntPoint(GetScrollPosition()));
     }
 
-    ResnapAfterLayout();
+    // The scrolled contents' layer follows the scroll dimensions, which may have changed.
+    if (_layer.IsComposited())
+    {
+      _layer.SetNeedsCompositingGeometryUpdate();
+    }
 
-    // FIXME: The compositing updates and the inspector, once there are any.
+    ResnapAfterLayout();
   }
 
   bool RenderLayerScrollableArea::OverflowControlsIntersectRect(const IntRect &localRect) const noexcept

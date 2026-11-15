@@ -400,6 +400,42 @@ namespace krys::boo::tests
     CHECK(graphicsLayer.NeedsDisplayRects.empty());
   }
 
+  TEST_CASE("RenderLayerCompositor: a box's scrolled contents follow its content's layout",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(u8"<div id=scroller style='width:100px;height:40px;overflow:auto'>"
+                               u8"<div id=content style='height:200px'></div></div>");
+    auto &backing = *fixture.LayerOf(u8"scroller").Backing();
+    REQUIRE(backing.ScrolledContentsLayer());
+    CHECK(backing.ScrolledContentsLayer()->Size().Height() == 200);
+
+    REQUIRE_FALSE(fixture.ById(u8"content").SetAttribute(u8"style", u8"height:400px").HasException());
+    fixture.TestPage->UpdateRendering();
+    CHECK(backing.ScrolledContentsLayer()->Size().Height() == 400);
+
+    SECTION("and a scrollbar it comes to need gets a layer")
+    {
+      CHECK_FALSE(backing.LayerForHorizontalScrollbar());
+      REQUIRE_FALSE(
+        fixture.ById(u8"content").SetAttribute(u8"style", u8"height:400px;width:300px").HasException());
+      fixture.TestPage->UpdateRendering();
+      CHECK(backing.LayerForHorizontalScrollbar());
+    }
+  }
+
+  TEST_CASE("RenderLayerCompositor: a box whose content comes to overflow it scrolls on a layer",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(u8"<div id=scroller style='width:100px;height:40px;overflow:auto'>"
+                               u8"<div id=content style='height:10px'></div></div>");
+    CHECK_FALSE(fixture.LayerOf(u8"scroller").IsComposited());
+
+    REQUIRE_FALSE(fixture.ById(u8"content").SetAttribute(u8"style", u8"height:200px").HasException());
+    fixture.TestPage->UpdateRendering();
+    CHECK(fixture.LayerOf(u8"scroller").IsComposited());
+    CHECK(fixture.LayerOf(u8"scroller").UsesCompositedScrolling());
+  }
+
   TEST_CASE("RenderLayerCompositor: fixed elements composite for their position",
             "[Rendering][RenderLayerCompositor]")
   {
