@@ -44,6 +44,7 @@ namespace krys::boo
     explicit Inline(RenderTreeBuilder &builder) noexcept;
 
     void Attach(RenderInline &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
+
     void AttachIgnoringContinuation(RenderInline &parent, RenderPtr<RenderObject> child,
                                     RenderObject *beforeChild = nullptr) noexcept;
 

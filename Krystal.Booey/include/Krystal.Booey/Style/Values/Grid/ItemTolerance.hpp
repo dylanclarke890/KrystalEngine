@@ -63,6 +63,7 @@ namespace krys::boo::style
   struct Blending<ItemTolerance>
   {
     KRYS_NODISCARD bool CanBlend(const ItemTolerance &, const ItemTolerance &) noexcept;
+
     KRYS_NODISCARD ItemTolerance Blend(const ItemTolerance &, const ItemTolerance &,
                                        const BlendingContext &) noexcept;
   };

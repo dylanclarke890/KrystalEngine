@@ -40,14 +40,20 @@ namespace krys::boo::css
 
   protected:
     ValueContainingList(ValueType type, ValueSeparator separator) noexcept;
+
     ValueContainingList(ValueType type, ValueSeparator separator, ValueListBuilder values) noexcept;
+
     ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value) noexcept;
+
     ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value1,
                         Ref<Value> value2) noexcept;
+
     ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value1, Ref<Value> value2,
                         Ref<Value> value3) noexcept;
+
     ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value1, Ref<Value> value2,
                         Ref<Value> value3, Ref<Value> value4) noexcept;
+
     ~ValueContainingList() noexcept;
 
   public:
@@ -110,12 +116,15 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD bool HasValue(const Value &value) const noexcept;
+
     KRYS_NODISCARD bool HasValue(css::ValueId value) const noexcept;
 
     void SerialiseItems(StringBuilder &builder, const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD CSSOMString SerialiseItems(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD bool ItemsEqual(const ValueContainingList &other) const noexcept;
+
     KRYS_NODISCARD bool ContainsSingleEqualItem(const Value &other) const noexcept;
 
     using Value::Separator;
@@ -161,8 +170,11 @@ namespace krys::boo::css
   {
   private:
     ValueList(ValueSeparator separator, ValueListBuilder values) noexcept;
+
     ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2) noexcept;
+
     ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2, Ref<Value> value3) noexcept;
+
     ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2, Ref<Value> value3,
               Ref<Value> value4) noexcept;
 
@@ -173,16 +185,21 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<ValueList> CreateCommaSeparated(ValueListBuilder values) noexcept;
 
     KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(ValueListBuilder values) noexcept;
+
     KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2) noexcept;
+
     KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2,
                                                               Ref<Value> value3) noexcept;
+
     KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2,
                                                               Ref<Value> value3, Ref<Value> value4) noexcept;
 
     KRYS_NODISCARD static Ref<ValueList> CreateSlashSeparated(ValueListBuilder values) noexcept;
+
     KRYS_NODISCARD static Ref<ValueList> CreateSlashSeparated(Ref<Value> value1, Ref<Value> value2) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const ValueList &other) const noexcept;
   };
 }

@@ -38,6 +38,7 @@ namespace krys
 
   public:
     KRYS_ALWAYS_INLINE constexpr CompactPtr() noexcept = default;
+
     KRYS_ALWAYS_INLINE constexpr ~CompactPtr() noexcept = default;
 
     KRYS_ALWAYS_INLINE constexpr CompactPtr(std::nullptr_t) noexcept

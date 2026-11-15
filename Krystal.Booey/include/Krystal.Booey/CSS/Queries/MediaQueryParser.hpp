@@ -34,6 +34,7 @@ namespace krys::boo::css::mq
   struct MediaQueryParser : public GenericMediaQueryParser<MediaQueryParser>
   {
     KRYS_NODISCARD static MediaQueryList Parse(CSSOMStringView string, const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static MediaQueryList Parse(TokenRange tokens, const ParserContext &context) noexcept;
 
     /// @brief Parses a bare `<media-condition>` (as in `@import ... supports() <condition>`); an empty range
@@ -44,6 +45,7 @@ namespace krys::boo::css::mq
     /// @brief Consumes a comma-separated list. A query that doesn't parse becomes `not all`.
     KRYS_NODISCARD static MediaQueryList ConsumeMediaQueryList(TokenRange &tokens,
                                                                const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static Maybe<MediaQuery> ConsumeMediaQuery(TokenRange &tokens,
                                                               const ParserContext &context) noexcept;
 
@@ -51,5 +53,6 @@ namespace krys::boo::css::mq
   };
 
   void Serialise(StringBuilder &builder, const MediaQueryList &list) noexcept;
+
   void Serialise(StringBuilder &builder, const MediaQuery &query) noexcept;
 }

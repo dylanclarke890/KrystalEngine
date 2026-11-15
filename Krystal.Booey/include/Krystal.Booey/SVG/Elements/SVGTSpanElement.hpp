@@ -37,7 +37,9 @@ namespace krys::boo::svg
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept final;
+
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final;
   };
 }

@@ -38,7 +38,9 @@ namespace krys::boo
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minWidth, LayoutUnit &maxWidth,
                                        TableIntrinsics intrinsics) noexcept override;
+
     void ApplyPreferredLogicalWidthQuirks(LayoutUnit &minWidth, LayoutUnit &maxWidth) const noexcept override;
+
     void Layout() noexcept override;
 
   private:

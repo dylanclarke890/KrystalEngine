@@ -59,10 +59,10 @@ namespace krys::boo
 {
   class GraphicsContext;
   class GraphicsLayerAnimation;
+  class GraphicsLayerContentsDisplayDelegate;
   class GraphicsLayerFactory;
   class GraphicsLayerKeyframeValueList;
   class Image;
-  class GraphicsLayerContentsDisplayDelegate;
   class ImageBuffer;
 
   using TileCoverage = uint32;
@@ -195,10 +195,12 @@ namespace krys::boo
 
     // Unparent, clear the client, and clear the RefPtr.
     static void UnparentAndClear(RefPtr<GraphicsLayer> &layer) noexcept;
+
     // Clear the client, and clear the RefPtr, but leave parented.
     static void Clear(RefPtr<GraphicsLayer> &layer) noexcept;
 
     void ClearClient() noexcept;
+
     void SetClient(GraphicsLayerClient &client) noexcept;
 
     KRYS_NODISCARD Type GetType() const noexcept
@@ -263,12 +265,17 @@ namespace krys::boo
 
     // Add child layers. If the child is already parented, it will be removed from its old parent.
     virtual void AddChild(Ref<GraphicsLayer> &&childLayer) noexcept;
+
     virtual void AddChildAtIndex(Ref<GraphicsLayer> &&childLayer, int32 index) noexcept;
+
     virtual void AddChildAbove(Ref<GraphicsLayer> &&childLayer, GraphicsLayer *sibling) noexcept;
+
     virtual void AddChildBelow(Ref<GraphicsLayer> &&childLayer, GraphicsLayer *sibling) noexcept;
+
     virtual bool ReplaceChild(GraphicsLayer *oldChild, Ref<GraphicsLayer> &&newChild) noexcept;
 
     void RemoveAllChildren() noexcept;
+
     void RemoveFromParent() noexcept;
 
     // The parent() of a maskLayer is set to the layer being masked.
@@ -412,6 +419,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD const TransformationMatrix &Transform() const noexcept;
+
     virtual void SetTransform(const TransformationMatrix &matrix) noexcept;
 
     KRYS_NODISCARD bool HasNonIdentityTransform() const noexcept
@@ -420,6 +428,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD const TransformationMatrix &ChildrenTransform() const noexcept;
+
     virtual void SetChildrenTransform(const TransformationMatrix &matrix) noexcept;
 
     KRYS_NODISCARD bool HasNonIdentityChildrenTransform() const noexcept
@@ -575,6 +584,7 @@ namespace krys::boo
     void SetPaintingPhase(EnumSet<GraphicsLayerPaintingPhase> phase) noexcept;
 
     virtual void SetNeedsDisplay() noexcept = 0;
+
     // mark the given rect (in layer coords) as needing dispay. Never goes deep.
     virtual void SetNeedsDisplayInRect(const FloatRect &rect,
                                        ShouldClipToLayer shouldClip = ShouldClipToLayer::Clip) noexcept = 0;
@@ -648,9 +658,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Path ShapeLayerPath() const noexcept;
+
     virtual void SetShapeLayerPath(const Path &path) noexcept;
 
     KRYS_NODISCARD WindRule ShapeLayerWindRule() const noexcept;
+
     virtual void SetShapeLayerWindRule(WindRule windRule) noexcept;
 
     // Transitions are identified by a special animation name that cannot clash with a keyframe identifier.
@@ -676,6 +688,7 @@ namespace krys::boo
     }
 
     virtual void SuspendAnimations(MonotonicTime::duration) noexcept;
+
     virtual void ResumeAnimations() noexcept;
 
     KRYS_NODISCARD virtual List<AcceleratedAnimationForTesting>
@@ -954,9 +967,11 @@ namespace krys::boo
     virtual void SetTileCoverage(TileCoverage) noexcept;
 
     void ResetTrackedRepaints() noexcept;
+
     void AddRepaintRect(const FloatRect &repaintRect) noexcept;
 
     KRYS_NODISCARD static bool SupportsLayerType(Type type) noexcept;
+
     KRYS_NODISCARD static bool SupportsContentsTiling() noexcept;
 
     void UpdateDebugIndicators() noexcept;
@@ -1059,6 +1074,7 @@ namespace krys::boo
   };
 
   TextStream &operator<<(TextStream &ts, const List<PlatformLayerIdentifier> &layers) noexcept;
+
   TextStream &operator<<(TextStream &ts, const GraphicsLayer::CustomAppearance &customAppearance) noexcept;
 }
 

@@ -91,11 +91,14 @@ namespace krys::boo::layout
       }
 
       KRYS_NODISCARD const PlacedFloats::Item *InlineStart() const noexcept;
+
       KRYS_NODISCARD const PlacedFloats::Item *InlineEnd() const noexcept;
 
       KRYS_NODISCARD bool Intersects(const FloatAvoider &floatAvoider) const noexcept;
+
       KRYS_NODISCARD bool
         Intersects(BoxGeometry::HorizontalEdges containingBlockContentBoxEdges) const noexcept;
+
       KRYS_NODISCARD bool ContainsFloatFromFormattingContext() const noexcept;
 
       KRYS_NODISCARD PositionInContextRoot HighestBlockAxisPosition() const noexcept

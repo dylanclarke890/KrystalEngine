@@ -72,6 +72,7 @@ namespace krys::boo::layout
     TextBreakingPositionCache() noexcept = default;
 
     void Set(const Key &key, List &&breakingPositionList) noexcept;
+
     KRYS_NODISCARD const List *Get(const Key &key) const noexcept;
 
     void Clear() noexcept;

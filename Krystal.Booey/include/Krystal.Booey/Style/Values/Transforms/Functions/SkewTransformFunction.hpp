@@ -44,6 +44,7 @@ namespace krys::boo::style
                                                                   TransformFunctionBase::Type) noexcept;
 
     KRYS_NODISCARD Ref<const TransformFunctionBase> Clone() const noexcept override;
+
     KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const FloatSize &) const noexcept override;
 
     KRYS_NODISCARD Angle<> AngleX() const noexcept

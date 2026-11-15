@@ -51,12 +51,14 @@ namespace krys::boo::css
     List<RefPtr<StyleSheet>> _detachedStyleSheets;
 
     explicit StyleSheetList(dom::Document &document) noexcept;
+
     explicit StyleSheetList(dom::ShadowRoot &shadowRoot) noexcept;
 
   public:
     ~StyleSheetList() noexcept;
 
     KRYS_NODISCARD static Ref<StyleSheetList> Create(dom::Document &document) noexcept;
+
     KRYS_NODISCARD static Ref<StyleSheetList> Create(dom::ShadowRoot &shadowRoot) noexcept;
 
 #pragma region StyleSheetList - https://drafts.csswg.org/cssom/#the-stylesheetlist-interface

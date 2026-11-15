@@ -42,6 +42,7 @@ namespace krys::boo
       Number,
       FromFont,
     };
+
     enum class Metric : uint8
     {
       ExHeight,

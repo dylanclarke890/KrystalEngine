@@ -99,6 +99,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD bool CanBlend(const TextDecorationThickness &, const TextDecorationThickness &,
                                    const RenderStyle &, const RenderStyle &) noexcept;
+
       KRYS_NODISCARD TextDecorationThickness Blend(const TextDecorationThickness &,
                                                    const TextDecorationThickness &, const RenderStyle &,
                                                    const RenderStyle &, const BlendingContext &) noexcept;

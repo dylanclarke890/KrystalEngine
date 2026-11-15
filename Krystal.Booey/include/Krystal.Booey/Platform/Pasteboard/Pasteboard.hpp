@@ -93,9 +93,13 @@ namespace krys::boo
     virtual ~PasteboardWebContentReader() noexcept = default;
 
     virtual bool ReadFilePath(utf8_stringview path, utf8_stringview contentType = {}) noexcept = 0;
+
     virtual bool ReadFilePaths(const List<utf8_string> &paths) noexcept = 0;
+
     virtual bool ReadHTML(utf8_stringview markup) noexcept = 0;
+
     virtual bool ReadURL(const url::URL &url, utf8_stringview title) noexcept = 0;
+
     virtual bool ReadPlainText(utf8_stringview text) noexcept = 0;
 
     /// @brief The identifier of the origin that wrote the content, or empty if it wasn't a page.
@@ -119,6 +123,7 @@ namespace krys::boo
   struct PasteboardFileReader
   {
     virtual ~PasteboardFileReader() noexcept = default;
+
     virtual void ReadFilename(utf8_stringview filename) noexcept = 0;
 
     KRYS_NODISCARD virtual bool ShouldReadBuffer(utf8_stringview /* type */) const noexcept
@@ -158,20 +163,27 @@ namespace krys::boo
     };
 
     Pasteboard() noexcept = default;
+
     /// @brief The system clipboard named @p name.
     explicit Pasteboard(utf8_stringview name) noexcept;
+
     /// @brief A pasteboard holding @p selectionData.
     explicit Pasteboard(SelectionData &&selectionData) noexcept;
+
     explicit Pasteboard(const SelectionData &selectionData) noexcept;
+
     virtual ~Pasteboard() noexcept = default;
 
     KRYS_NODISCARD static UniquePtr<Pasteboard> CreateForCopyAndPaste() noexcept;
+
     /// @brief An empty pasteboard for a drag that starts in a page.
     KRYS_NODISCARD static UniquePtr<Pasteboard> CreateForDragAndDrop() noexcept;
+
     /// @brief A pasteboard holding the data of @p dragData.
     KRYS_NODISCARD static UniquePtr<Pasteboard> Create(const DragData &dragData) noexcept;
 
     KRYS_NODISCARD static bool IsSafeTypeForDOMToReadAndWrite(utf8_stringview type) noexcept;
+
     KRYS_NODISCARD static bool
       CanExposeURLToDOMWhenPasteboardContainsFiles(utf8_stringview urlString) noexcept;
 
@@ -181,34 +193,47 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual bool HasData() noexcept;
+
     KRYS_NODISCARD virtual List<utf8_string> TypesSafeForBindings(utf8_stringview origin) noexcept;
+
     KRYS_NODISCARD virtual utf8_string ReadOrigin() noexcept;
+
     KRYS_NODISCARD virtual utf8_string ReadString(utf8_stringview type) noexcept;
+
     KRYS_NODISCARD virtual Maybe<utf8_string> ReadStringInCustomData(utf8_stringview type) noexcept;
+
     KRYS_NODISCARD virtual List<utf8_string> ReadAllStrings(utf8_stringview type) noexcept;
 
     virtual void WriteString(utf8_stringview type, utf8_stringview data) noexcept;
+
     virtual void Clear() noexcept;
+
     virtual void Clear(utf8_stringview type) noexcept;
 
     virtual void Read(PasteboardPlainText &text,
                       PlainTextURLReadingPolicy policy = PlainTextURLReadingPolicy::AllowURL) noexcept;
+
     virtual void Read(PasteboardWebContentReader &reader,
                       WebContentReadingPolicy policy = WebContentReadingPolicy::AnyType) noexcept;
+
     virtual void Read(PasteboardFileReader &reader) noexcept;
 
     virtual void Write(const PasteboardURL &pasteboardURL) noexcept;
+
     virtual void Write(const PasteboardImage &pasteboardImage) noexcept;
+
     virtual void Write(const PasteboardWebContent &pasteboardContent) noexcept;
 
     virtual void WriteCustomData(const List<PasteboardCustomData> &data) noexcept;
 
     KRYS_NODISCARD virtual FileContentState GetFileContentState() noexcept;
+
     /// @brief Whether the pasteboard's contents were copied as whole words, so pasting them adds spaces
     /// around them.
     KRYS_NODISCARD virtual bool CanSmartReplaceContents() noexcept;
 
     virtual void WriteMarkup(utf8_stringview markup) noexcept;
+
     virtual void WritePlainText(utf8_stringview text, SmartReplaceOption smartReplaceOption) noexcept;
 
     /// @brief Changes the image of the drag in progress: nothing, as the host draws the image it started

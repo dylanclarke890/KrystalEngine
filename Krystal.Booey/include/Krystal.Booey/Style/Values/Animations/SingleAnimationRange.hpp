@@ -47,6 +47,7 @@ namespace krys::boo::style
     using Base::Base;
 
     KRYS_NODISCARD static SingleAnimationRangeLength DefaultValue(SingleAnimationRangeType) noexcept;
+
     KRYS_NODISCARD bool IsDefault(SingleAnimationRangeType) const noexcept;
   };
 
@@ -183,6 +184,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const SingleAnimationRange &) const noexcept = default;
 
     KRYS_NODISCARD static SingleAnimationRange DefaultForScrollTimeline() noexcept;
+
     KRYS_NODISCARD static SingleAnimationRange DefaultForViewTimeline() noexcept;
 
     KRYS_NODISCARD bool IsDefault() const noexcept

@@ -49,7 +49,9 @@ namespace krys::boo::inline_iterator
     explicit SVGTextBox(PathVariant &&path) noexcept;
 
     KRYS_NODISCARD FloatRect CalculateBoundariesIncludingSVGTransform() const noexcept;
+
     KRYS_NODISCARD LayoutRect LocalSelectionRect(uint32 start, uint32 end) const noexcept;
+
     KRYS_NODISCARD const List<SVGTextFragment> &TextFragments() const noexcept;
 
     KRYS_NODISCARD const RenderSVGInlineText &Renderer() const noexcept
@@ -74,7 +76,9 @@ namespace krys::boo::inline_iterator
   {
   public:
     SVGTextBoxIterator() noexcept = default;
+
     explicit SVGTextBoxIterator(Box::PathVariant &&path) noexcept;
+
     explicit SVGTextBoxIterator(const Box &box) noexcept;
 
     SVGTextBoxIterator &operator++() noexcept
@@ -100,8 +104,11 @@ namespace krys::boo::inline_iterator
   };
 
   KRYS_NODISCARD SVGTextBoxIterator FirstSVGTextBoxFor(const RenderSVGInlineText &text) noexcept;
+
   KRYS_NODISCARD BoxRange<SVGTextBoxIterator> SVGTextBoxesFor(const RenderSVGInlineText &text) noexcept;
+
   KRYS_NODISCARD SVGTextBoxIterator SVGTextBoxFor(const SVGInlineTextBox *box) noexcept;
+
   KRYS_NODISCARD SVGTextBoxIterator SVGTextBoxFor(const layout_integration::InlineContent &inlineContent,
                                                   size_t boxIndex) noexcept;
 

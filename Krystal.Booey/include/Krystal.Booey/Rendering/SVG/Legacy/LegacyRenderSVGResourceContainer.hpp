@@ -47,22 +47,28 @@ namespace krys::boo
     ~LegacyRenderSVGResourceContainer() noexcept override;
 
     void Layout() noexcept override;
+
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept final;
 
     KRYS_NODISCARD static float ComputeTextPaintingScale(const RenderElement &) noexcept;
+
     KRYS_NODISCARD static AffineTransform
       TransformOnNonScalingStroke(RenderObject *, const AffineTransform &resourceTransform) noexcept;
 
     void RemoveClientFromCacheAndMarkForInvalidation(RenderElement &,
                                                      bool markForInvalidation = true) noexcept override;
+
     void RemoveAllClientsFromCacheAndMarkForInvalidationIfNeeded(
       bool markForInvalidation, VisitedRenderers *visitedRenderers) noexcept override;
 
     void IdChanged() noexcept;
+
     void MarkAllClientsForRepaint() noexcept;
 
     void AddClientRenderLayer(RenderLayer &) noexcept;
+
     void RemoveClientRenderLayer(RenderLayer &) noexcept;
+
     void MarkAllClientLayersForInvalidation() noexcept;
 
   protected:
@@ -83,14 +89,18 @@ namespace krys::boo
     }
 
     void MarkAllClientsForInvalidation(InvalidationMode) noexcept;
+
     void MarkAllClientsForInvalidationIfNeeded(InvalidationMode, VisitedRenderers *visitedRenderers) noexcept;
+
     void MarkClientForInvalidation(RenderObject &, InvalidationMode) noexcept;
 
   private:
     void AddClient(RenderElement &) noexcept;
+
     void RemoveClient(RenderElement &) noexcept;
 
     void WillBeDestroyed() noexcept final;
+
     void RegisterResource() noexcept;
   };
 

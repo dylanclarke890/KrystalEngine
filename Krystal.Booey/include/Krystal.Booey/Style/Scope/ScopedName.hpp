@@ -65,6 +65,7 @@ namespace krys::boo::style
   struct CSSValueConversion<ScopedName>
   {
     KRYS_NODISCARD ScopedName operator()(BuilderState &, const css::PrimitiveValue &) noexcept;
+
     KRYS_NODISCARD ScopedName operator()(BuilderState &, const css::Value &) noexcept;
   };
 }

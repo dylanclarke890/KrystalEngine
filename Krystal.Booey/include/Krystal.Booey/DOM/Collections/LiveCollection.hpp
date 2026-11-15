@@ -77,6 +77,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD Node &Root() const noexcept;
 
     void RegisterCache() const noexcept;
+
     void UnregisterCache() const noexcept;
   };
 }

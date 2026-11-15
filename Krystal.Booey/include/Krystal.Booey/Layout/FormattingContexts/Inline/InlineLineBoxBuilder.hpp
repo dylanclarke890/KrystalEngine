@@ -60,24 +60,35 @@ namespace krys::boo::layout
   private:
     void SetVerticalPropertiesForInlineLevelBox(const LineBox &lineBox,
                                                 InlineLevelBox &inlineLevelBox) const noexcept;
+
     void SetLayoutBoundsForInlineBox(InlineLevelBox &inlineBox, FontBaseline fontBaseline) const noexcept;
+
     void AdjustInlineBoxHeightsForLineBoxContainIfApplicable(LineBox &lineBox) noexcept;
+
     void ComputeLineBoxGeometry(LineBox &lineBox) const noexcept;
+
     KRYS_NODISCARD InlineLevelBox::AscentAndDescent
       EnclosingAscentDescentWithFallbackFonts(const InlineLevelBox &inlineBox,
                                               const TextUtil::FallbackFontList &fallbackFontsForContent,
                                               FontBaseline fontBaseline) const noexcept;
+
     KRYS_NODISCARD TextUtil::FallbackFontList CollectFallbackFonts(const InlineLevelBox &parentInlineBox,
                                                                    const Line::Run &run,
                                                                    const RenderStyle &style) noexcept;
+
     void AdjustMarginStartForListMarker(const ElementBox &listMarkerBox,
                                         LayoutUnit nestedListMarkerMarginStart,
                                         InlineLayoutUnit rootInlineBoxOffset) const noexcept;
+
     KRYS_NODISCARD InlineLayoutUnit ApplyTextBoxTrimOnLineBoxIfNeeded(InlineLayoutUnit lineBoxLogicalHeight,
                                                                       LineBox &lineBox) const noexcept;
+
     void ConstructInlineLevelBoxes(LineBox &lineBox) noexcept;
+
     void ConstructBlockContent(LineBox &lineBox) noexcept;
+
     void AdjustIdeographicBaselineIfApplicable(LineBox &lineBox) noexcept;
+
     void AdjustOutsideListMarkersPosition(LineBox &lineBox) noexcept;
 
     KRYS_NODISCARD bool IsFirstFormattedLine() const noexcept
@@ -101,8 +112,11 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const ElementBox &RootBox() const noexcept;
+
     KRYS_NODISCARD const RenderStyle &RootStyle() const noexcept;
+
     KRYS_NODISCARD const InlineLayoutState &GetLayoutState() const noexcept;
+
     KRYS_NODISCARD const BlockLayoutState &GetBlockLayoutState() const noexcept;
   };
 }

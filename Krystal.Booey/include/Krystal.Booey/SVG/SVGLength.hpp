@@ -96,6 +96,7 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD dom::ExceptionOr<float> ValueForBindings() noexcept;
+
     dom::ExceptionOr<void> SetValueForBindings(float) noexcept;
 
     KRYS_NODISCARD float ValueInSpecifiedUnits() noexcept

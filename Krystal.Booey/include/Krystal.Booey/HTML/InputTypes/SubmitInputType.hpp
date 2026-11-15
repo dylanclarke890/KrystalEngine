@@ -49,9 +49,13 @@ namespace krys::boo::html
     }
 
     bool AppendFormData(DOMFormData &formData) const noexcept final;
+
     KRYS_NODISCARD bool SupportsRequired() const noexcept final;
+
     void HandleActivationBehavior(dom::Event &event) noexcept final;
+
     KRYS_NODISCARD bool CanBeSuccessfulSubmitButton() noexcept final;
+
     KRYS_NODISCARD Maybe<dom::DOMString> DefaultValue() const noexcept final;
   };
 }

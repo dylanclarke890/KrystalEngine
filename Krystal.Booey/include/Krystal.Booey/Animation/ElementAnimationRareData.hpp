@@ -59,6 +59,7 @@ namespace krys::boo
 
   public:
     ElementAnimationRareData() noexcept;
+
     ~ElementAnimationRareData() noexcept;
 
     KRYS_NODISCARD boo::KeyframeEffectStack *KeyframeEffectStack() const noexcept

@@ -89,9 +89,11 @@ namespace krys::boo
 
   public:
     RenderLayoutState() noexcept = default;
+
     RenderLayoutState(const LocalFrameViewLayoutContext::LayoutStateStack &layoutStateStack,
                       RenderBox &renderer, const LayoutSize &offset, LayoutUnit pageLogicalHeight,
                       bool pageLogicalHeightChanged, Maybe<LineClamp> lineClamp) noexcept;
+
     explicit RenderLayoutState(RenderElement &renderer) noexcept;
 
     KRYS_NODISCARD bool IsPaginated() const noexcept
@@ -182,7 +184,9 @@ namespace krys::boo
 
   private:
     void ComputeOffsets(const RenderLayoutState &ancestor, RenderBox &renderer, LayoutSize offset) noexcept;
+
     void ComputeClipRect(const RenderLayoutState &ancestor, RenderBox &renderer) noexcept;
+
     // FIXME: webkit.org/b/179440 these functions should be part of the pagination
     // code/LocalFrameViewLayoutContext.
     void ComputePaginationInformation(const LocalFrameViewLayoutContext::LayoutStateStack &layoutStateStack,
@@ -203,6 +207,7 @@ namespace krys::boo
   public:
     explicit LayoutStateMaintainer(RenderBox &root, LayoutSize offset, bool disablePaintOffsetCache = false,
                                    LayoutUnit pageHeight = 0_lu, bool pageHeightChanged = false) noexcept;
+
     ~LayoutStateMaintainer() noexcept;
   };
 
@@ -217,6 +222,7 @@ namespace krys::boo
 
   public:
     explicit SubtreeLayoutStateMaintainer(RenderElement *subtreeLayoutRoot) noexcept;
+
     ~SubtreeLayoutStateMaintainer() noexcept;
   };
 
@@ -230,6 +236,7 @@ namespace krys::boo
 
   public:
     explicit LayoutStateDisabler(LocalFrameViewLayoutContext &context) noexcept;
+
     ~LayoutStateDisabler() noexcept;
   };
 
@@ -245,6 +252,7 @@ namespace krys::boo
   public:
     FlexPercentResolveDisabler(LocalFrameViewLayoutContext &layoutContext,
                                const RenderBox &flexItem) noexcept;
+
     ~FlexPercentResolveDisabler() noexcept;
   };
 
@@ -268,6 +276,7 @@ namespace krys::boo
   public:
     ContentVisibilityOverrideScope(LocalFrameViewLayoutContext &layoutContext,
                                    EnumSet<OverrideType> overrideTypes) noexcept;
+
     ~ContentVisibilityOverrideScope() noexcept;
   };
 }

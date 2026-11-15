@@ -67,6 +67,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString ToString() const noexcept;
+
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments = {}) const noexcept;
 
   private:

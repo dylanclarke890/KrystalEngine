@@ -58,6 +58,7 @@ namespace krys::boo
     /// @brief Whether the content came from another origin than the frame's document, so its markup must be
     /// sanitised.
     KRYS_NODISCARD bool ShouldSanitize() const noexcept;
+
     KRYS_NODISCARD MSOListQuirks MSOListQuirksForMarkup() const noexcept;
   };
 
@@ -74,9 +75,11 @@ namespace krys::boo
 
   public:
     WebContentReader(LocalFrame &frame, const dom::SimpleRange &context, bool allowPlainText) noexcept;
+
     ~WebContentReader() noexcept;
 
     void AddFragment(Ref<dom::DocumentFragment> &&fragment) noexcept;
+
     KRYS_NODISCARD RefPtr<dom::DocumentFragment> TakeFragment() noexcept;
 
     KRYS_NODISCARD dom::DocumentFragment *Fragment() const noexcept
@@ -91,9 +94,13 @@ namespace krys::boo
 
   private:
     bool ReadFilePath(utf8_stringview path, utf8_stringview contentType = {}) noexcept override;
+
     bool ReadFilePaths(const List<utf8_string> &paths) noexcept override;
+
     bool ReadHTML(utf8_stringview markup) noexcept override;
+
     bool ReadURL(const url::URL &url, utf8_stringview title) noexcept override;
+
     bool ReadPlainText(utf8_stringview text) noexcept override;
   };
 

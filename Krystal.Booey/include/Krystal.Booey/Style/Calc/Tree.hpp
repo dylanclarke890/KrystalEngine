@@ -46,37 +46,37 @@ namespace krys::boo::style::calc
   struct Tree;
 
   // Math Operators.
-  struct Sum;
-  struct Product;
-  struct Negate;
   struct Invert;
+  struct Negate;
+  struct Product;
+  struct Sum;
 
   // Math Functions.
-  struct Min;
-  struct Max;
-  struct Clamp;
-  struct RoundNearest;
-  struct RoundUp;
-  struct RoundDown;
-  struct RoundToZero;
-  struct Mod;
-  struct Rem;
-  struct Sin;
-  struct Cos;
-  struct Tan;
-  struct Exp;
-  struct Log;
-  struct Asin;
+  struct Abs;
   struct Acos;
+  struct Asin;
   struct Atan;
   struct Atan2;
-  struct Pow;
-  struct Sqrt;
+  struct Clamp;
+  struct Cos;
+  struct Exp;
   struct Hypot;
-  struct Abs;
-  struct Sign;
+  struct Log;
+  struct Max;
+  struct Min;
+  struct Mod;
+  struct Pow;
   struct Progress;
   struct Random;
+  struct Rem;
+  struct RoundDown;
+  struct RoundNearest;
+  struct RoundToZero;
+  struct RoundUp;
+  struct Sign;
+  struct Sin;
+  struct Sqrt;
+  struct Tan;
 
   // Non-standard
   struct Blend;
@@ -188,6 +188,7 @@ namespace krys::boo::style::calc
     Variant<Child, css::keywords::None> Value;
 
     ChildOrNone(Child &&) noexcept;
+
     ChildOrNone(css::keywords::None) noexcept;
 
     KRYS_FORWARD_VARIANT_FUNCTIONS(ChildOrNone, Value)
@@ -206,24 +207,35 @@ namespace krys::boo::style::calc
     List<Child> Value;
 
     Children(Children &&) noexcept;
+
     Children(List<Child> &&) noexcept;
+
     Children &operator=(Children &&) noexcept;
+
     Children &operator=(List<Child> &&) noexcept;
 
     KRYS_NODISCARD iterator begin() noexcept;
+
     KRYS_NODISCARD iterator end() noexcept;
+
     KRYS_NODISCARD reverse_iterator rbegin() noexcept;
+
     KRYS_NODISCARD reverse_iterator rend() noexcept;
 
     KRYS_NODISCARD const_iterator begin() const noexcept;
+
     KRYS_NODISCARD const_iterator end() const noexcept;
+
     KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept;
+
     KRYS_NODISCARD const_reverse_iterator rend() const noexcept;
 
     KRYS_NODISCARD bool empty() const noexcept;
+
     KRYS_NODISCARD size_t size() const noexcept;
 
     KRYS_NODISCARD Child &operator[](size_t i) noexcept;
+
     KRYS_NODISCARD const Child &operator[](size_t i) const noexcept;
 
     KRYS_NODISCARD bool operator==(const Children &) const noexcept = default;

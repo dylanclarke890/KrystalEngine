@@ -38,6 +38,7 @@ namespace krys::boo
 
   public:
     RenderSVGGradientStop(svg::SVGStopElement &, RenderStyle &&) noexcept;
+
     ~RenderSVGGradientStop() noexcept override;
 
     KRYS_NODISCARD svg::SVGStopElement &GetElement() const noexcept;

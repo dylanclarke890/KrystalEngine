@@ -48,9 +48,12 @@ namespace krys::boo
   }
 
   KRYS_NODISCARD uint32 EndOfFirstWordBoundaryContext(utf8_stringview text) noexcept;
+
   KRYS_NODISCARD uint32 StartOfLastWordBoundaryContext(utf8_stringview text) noexcept;
 
   void FindWordBoundary(utf8_stringview text, int32 position, int32 *start, int32 *end) noexcept;
+
   void FindEndWordBoundary(utf8_stringview text, int32 position, int32 *end) noexcept;
+
   KRYS_NODISCARD int32 FindNextWordFromIndex(utf8_stringview text, int32 position, bool forward) noexcept;
 }

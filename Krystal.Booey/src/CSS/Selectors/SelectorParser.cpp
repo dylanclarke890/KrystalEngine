@@ -46,6 +46,7 @@ namespace krys::boo::css
   namespace
   {
     KRYS_NODISCARD CSSOMStringAtom SerialiseANPlusB(const Pair<int32, int32> &ab) noexcept;
+
     KRYS_NODISCARD bool ConsumeANPlusB(TokenRange &tokens, Pair<int32, int32> &result) noexcept;
 
     void AppendImplicitSelectorPseudoClassScopeIfNeeded(MutableSelector &selector) noexcept

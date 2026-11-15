@@ -40,6 +40,7 @@ namespace krys::boo::css
     /// @return A `TypeError` if @p ay isn't an angle.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssskewy-cssskewy
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSSkewY>> Create(Ref<CSSNumericValue> ay) noexcept;
+
     /// @brief Reifies a `skewY()` function.
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSSkewY>> Create(const FunctionValue &function,
                                                                  dom::Document &document) noexcept;
@@ -58,6 +59,7 @@ namespace krys::boo::css
     }
 
     void Serialise(StringBuilder &builder) const noexcept final;
+
     KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final

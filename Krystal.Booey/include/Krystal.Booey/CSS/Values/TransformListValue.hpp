@@ -41,10 +41,12 @@ namespace krys::boo::css
   {
   private:
     explicit TransformListValue(ValueListBuilder builder) noexcept;
+
     explicit TransformListValue(Ref<Value> value) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<TransformListValue> Create(ValueListBuilder builder) noexcept;
+
     KRYS_NODISCARD static Ref<TransformListValue> Create(Ref<Value> value) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept

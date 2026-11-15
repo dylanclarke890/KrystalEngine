@@ -52,6 +52,7 @@ namespace krys::boo::layout
         bool HasTextAutospace {false};
         size_t InlineBoxCount {0};
       };
+
       enum class IsPopulatedFromCache : bool
       {
         No,

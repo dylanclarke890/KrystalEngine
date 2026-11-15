@@ -31,8 +31,8 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <array>
 
-struct png_struct_def;
 struct png_info_def;
+struct png_struct_def;
 struct png_unknown_chunk_t;
 
 namespace krys::boo
@@ -100,7 +100,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RepetitionCount GetRepetitionCount() const noexcept override;
+
     ScalableImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept override;
+
     // CAUTION: setFailed() deletes |m_reader|.  Be careful to avoid
     // accessing deleted memory, especially when calling this from inside
     // PNGImageReader!
@@ -108,9 +110,13 @@ namespace krys::boo
 
     // Callbacks from libpng
     void HeaderAvailable();
+
     void RowAvailable(unsigned char *rowBuffer, unsigned rowIndex, int interlacePass);
+
     void PngComplete();
+
     void ReadChunks(png_unknown_chunk_t *chunk);
+
     void FrameHeader();
 
     /// @brief @p row of @p pixelCount decoded pixels, converted from the image's colour profile if it has
@@ -118,6 +124,7 @@ namespace krys::boo
     KRYS_NODISCARD unsigned char *ColorManagedRow(unsigned char *row, uint32 pixelCount) noexcept;
 
     void Init() noexcept;
+
     void ClearFrameBufferCache(size_t clearBeforeFrame) noexcept override;
 
     KRYS_NODISCARD bool IsComplete() const noexcept
@@ -155,10 +162,15 @@ namespace krys::boo
     // calculating the image size.  If decoding fails but there is no more
     // data coming, sets the "decode failure" flag.
     void Decode(bool onlySize, unsigned haltAtFrame, bool allDataReceived) noexcept;
+
     void InitFrameBuffer(size_t frameIndex);
+
     void FrameComplete();
+
     int ProcessingStart(png_unknown_chunk_t *chunk);
+
     int ProcessingFinish();
+
     void FallbackNotAnimated() noexcept;
 
     void Clear() noexcept;

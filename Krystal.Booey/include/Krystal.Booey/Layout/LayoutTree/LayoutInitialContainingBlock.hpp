@@ -40,16 +40,24 @@ namespace krys::boo::layout
   public:
     explicit InitialContainingBlock(RenderStyle &&style,
                                     UniquePtr<RenderStyle> &&firstLineStyle = nullptr) noexcept;
+
     ~InitialContainingBlock() noexcept override = default;
 
   private:
     const ElementBox &Parent() const = delete;
+
     const Box *NextSibling() const = delete;
+
     const Box *NextInFlowSibling() const = delete;
+
     const Box *NextInFlowOrFloatingSibling() const = delete;
+
     const Box *PreviousSibling() const = delete;
+
     const Box *PreviousInFlowSibling() const = delete;
+
     const Box *PreviousInFlowOrFloatingSibling() const = delete;
+
     Box *NextSibling() = delete;
   };
 }

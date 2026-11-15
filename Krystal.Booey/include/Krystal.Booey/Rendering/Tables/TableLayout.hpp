@@ -65,6 +65,7 @@ namespace krys::boo
 
     virtual void ApplyPreferredLogicalWidthQuirks(LayoutUnit &minWidth,
                                                   LayoutUnit &maxWidth) const noexcept = 0;
+
     virtual void Layout() noexcept = 0;
   };
 }

@@ -101,19 +101,25 @@ namespace krys::boo
 
     ResourceErrorOr<CachedResourceHandle<CachedImage>>
       RequestImage(CachedResourceRequest &&, ImageLoading = ImageLoading::Immediate) noexcept;
+
     ResourceErrorOr<CachedResourceHandle<CachedCSSStyleSheet>>
       RequestCSSStyleSheet(CachedResourceRequest &&) noexcept;
+
     ResourceErrorOr<CachedResourceHandle<CachedFont>> RequestFont(CachedResourceRequest &&) noexcept;
+
     ResourceErrorOr<CachedResourceHandle<CachedSVGDocument>>
       RequestSVGDocument(CachedResourceRequest &&) noexcept;
+
     /// @brief An icon (`<link rel=icon>`), kept as its bytes.
     ResourceErrorOr<CachedResourceHandle<CachedRawResource>> RequestIcon(CachedResourceRequest &&) noexcept;
+
     /// @brief An image whose data its requester gives it (an image document's), loading until it's finished;
     /// it's one of the document's resources but not in the memory cache.
     KRYS_NODISCARD CachedResourceHandle<CachedImage>
       CreateManuallyLoadedImage(CachedResourceRequest &&) noexcept;
 
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(utf8_stringview url) const noexcept;
+
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(const url::URL &url) const noexcept;
 
     KRYS_NODISCARD const DocumentResourceMap &AllCachedResources() const noexcept
@@ -136,10 +142,13 @@ namespace krys::boo
     void SetImagesEnabled(bool) noexcept;
 
     KRYS_NODISCARD bool ShouldDeferImageLoad(const url::URL &) const noexcept;
+
     KRYS_NODISCARD bool ShouldPerformImageLoad(const url::URL &) const noexcept;
 
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept;          // Can be null
+    KRYS_NODISCARD LocalFrame *Frame() const noexcept; // Can be null
+
     KRYS_NODISCARD dom::Document *GetDocument() const noexcept; // Can be null
+
     void SetDocument(dom::Document *) noexcept;
 
     void GarbageCollectDocumentResources() noexcept;
@@ -151,6 +160,7 @@ namespace krys::boo
     }
 
     void IncrementRequestCount(const CachedResource &resource) noexcept;
+
     void DecrementRequestCount(const CachedResource &resource) noexcept;
 
     /// @brief A load is done: the frame checks whether its document has loaded.
@@ -172,11 +182,13 @@ namespace krys::boo
                                                            CachedResourceRequest &&) noexcept;
 
     KRYS_NODISCARD CachePolicy GetCachePolicy(boo::CachedResource::Type type) const noexcept;
+
     KRYS_NODISCARD RevalidationPolicy DetermineRevalidationPolicy(boo::CachedResource::Type,
                                                                   boo::CachedResource *existingResource,
                                                                   ImageLoading) const noexcept;
 
     KRYS_NODISCARD ImageLoading ClientDefersImage(const url::URL &) const noexcept;
+
     void ReloadImagesIfNotDeferred() noexcept;
   };
 }

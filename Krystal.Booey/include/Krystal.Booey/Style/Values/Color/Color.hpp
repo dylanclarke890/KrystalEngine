@@ -101,46 +101,75 @@ namespace krys::boo::style
     ColorKind _value;
 
     explicit Color(EmptyToken) noexcept;
+
     explicit Color(ColorKind &&kind) noexcept;
 
   public:
     // The default constructor initializes to style::CurrentColor to preserve old behavior,
     // we might want to remove it entirely at some point.
     Color() noexcept;
+
     Color(css::keywords::Currentcolor) noexcept;
 
     // Convenience constructors that create style::ResolvedColor.
     Color(boo::Color color) noexcept;
+
     Color(SRGBA<uint8> color) noexcept;
+
     Color(css::keywords::Transparent) noexcept;
+
     Color(css::keywords::Black) noexcept;
+
     Color(css::keywords::White) noexcept;
 
     Color(ResolvedColor &&color) noexcept;
+
     Color(CurrentColor &&color) noexcept;
+
     explicit Color(ColorLayers &&color) noexcept;
+
     explicit Color(ColorMix &&color) noexcept;
+
     explicit Color(ContrastColor &&color) noexcept;
+
     explicit Color(RelativeColor<css::RGBFunctionModernRelative> &&color) noexcept;
+
     explicit Color(RelativeColor<css::HSLFunctionModern> &&color) noexcept;
+
     explicit Color(RelativeColor<css::HWBFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<css::LabFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<css::LCHFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<css::OKLabFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<css::OKLCHFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedA98RGB<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedDisplayP3<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedLinearDisplayP3<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedProPhotoRGB<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedRec2020<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedSRGBA<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedLinearSRGBA<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<css::ColorXYZFunction<XYZA<float, WhitePoint::D50>>> &&color) noexcept;
+
     explicit Color(RelativeColor<css::ColorXYZFunction<XYZA<float, WhitePoint::D65>>> &&color) noexcept;
 
     Color(const Color &other) noexcept;
+
     Color &operator=(const Color &other) noexcept;
+
     Color(Color &&) noexcept;
+
     Color &operator=(Color &&) noexcept;
 
     ~Color() noexcept;
@@ -150,10 +179,15 @@ namespace krys::boo::style
     KRYS_NODISCARD static const Color &GetCurrentColor() noexcept;
 
     KRYS_NODISCARD bool ContainsCurrentColor() const noexcept;
+
     KRYS_NODISCARD bool IsCurrentColor() const noexcept;
+
     KRYS_NODISCARD bool IsColorMix() const noexcept;
+
     KRYS_NODISCARD bool IsContrastColor() const noexcept;
+
     KRYS_NODISCARD bool IsRelativeColor() const noexcept;
+
     KRYS_NODISCARD bool IsResolvedColor() const noexcept;
 
     /// @attention The colour must be a resolved colour (`IsResolvedColor()`).
@@ -169,14 +203,17 @@ namespace krys::boo::style
   private:
     template <typename T>
     KRYS_NODISCARD static ColorKind CreateIndirectColor(T &&color) noexcept;
+
     KRYS_NODISCARD static ColorKind Copy(const ColorKind &other) noexcept;
   };
 
   KRYS_NODISCARD boo::Color ResolveColor(const Color &value, const boo::Color &currentColor) noexcept;
+
   KRYS_NODISCARD bool ContainsCurrentColor(const Color &value) noexcept;
 
   void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const Color &value) noexcept;
+
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const Color &value) noexcept;
 
@@ -192,9 +229,11 @@ namespace krys::boo::style
   struct ColorResolutionState;
 
   KRYS_NODISCARD Color ToStyleColor(const css::Color &value, ColorResolutionState &state) noexcept;
+
   KRYS_NODISCARD Color ToStyleColor(const css::Color &value, Ref<const dom::Document> document,
                                     const RenderStyle &style,
                                     const css::ToLengthConversionData &conversionData) noexcept;
+
   KRYS_NODISCARD Color ToStyleColor(const css::Color &value, const BuilderState &builderState) noexcept;
 
   template <>
@@ -229,6 +268,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool Equals(const Color &a, const Color &b, const RenderStyle &aStyle,
                                const RenderStyle &bStyle) noexcept;
+
     KRYS_NODISCARD bool CanBlend(const Color &a, const Color &b) noexcept;
 
     KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const Color &,

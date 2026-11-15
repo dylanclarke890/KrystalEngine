@@ -64,6 +64,7 @@ namespace krys::boo::style::calc
     ~Value() noexcept;
 
     KRYS_NODISCARD double Evaluate(double percentResolutionLength, const ZoomFactor &usedZoom) const noexcept;
+
     KRYS_NODISCARD double Evaluate(double percentResolutionLength, const ZoomNeeded &) const noexcept;
 
     KRYS_NODISCARD css::Category GetCategory() const noexcept
@@ -82,6 +83,7 @@ namespace krys::boo::style::calc
     }
 
     KRYS_NODISCARD calc::Tree CopyTree() const noexcept;
+
     KRYS_NODISCARD Child CopyRoot() const noexcept;
 
     KRYS_NODISCARD bool operator==(const Value &) const noexcept;

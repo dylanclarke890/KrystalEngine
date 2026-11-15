@@ -119,6 +119,7 @@ namespace krys::boo::html
     /// @p element or one of its flat tree ancestors, or the viewport if there's none.
     /// @see https://html.spec.whatwg.org/#click-focusable
     static void FocusForClick(dom::Element &element) noexcept;
+
     /// @brief The nearest click focusable area that is @p element or one of its flat tree ancestors, if any.
     KRYS_NODISCARD static dom::Element *ClickFocusableInclusiveAncestor(dom::Element &element) noexcept;
 

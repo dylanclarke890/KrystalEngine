@@ -44,13 +44,18 @@ namespace krys::boo
 
   public:
     HitTestLocation() noexcept = default;
+
     explicit HitTestLocation(const LayoutPoint &point) noexcept;
+
     HitTestLocation(const FloatPoint &point, const FloatQuad &quad) noexcept;
+
     explicit HitTestLocation(const LayoutRect &rect) noexcept;
 
     /// @brief A copy of @p other moved by @p offset, into another coordinate space.
     HitTestLocation(const HitTestLocation &other, const LayoutSize &offset) noexcept;
+
     HitTestLocation(const HitTestLocation &other) noexcept = default;
+
     HitTestLocation &operator=(const HitTestLocation &other) noexcept = default;
 
     KRYS_NODISCARD const LayoutPoint &Point() const noexcept
@@ -80,7 +85,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool Intersects(const LayoutRect &rect) const noexcept;
+
     KRYS_NODISCARD bool Intersects(const FloatRect &rect) const noexcept;
+
     KRYS_NODISCARD bool Intersects(const LayoutRoundedRect &rect) const noexcept;
 
     KRYS_NODISCARD const FloatPoint &TransformedPoint() const noexcept

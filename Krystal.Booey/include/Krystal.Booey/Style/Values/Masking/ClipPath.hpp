@@ -96,11 +96,14 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD Maybe<ReferencePath> TryReference() const noexcept;
+
     KRYS_NODISCARD Maybe<BasicShapePath> TryBasicShape() const noexcept;
+
     KRYS_NODISCARD Maybe<BoxPath> TryBox() const noexcept;
 
     template <typename>
     KRYS_NODISCARD bool HoldsAlternative() const noexcept;
+
     template <typename... F>
     KRYS_NODISCARD decltype(auto) SwitchOn(F &&...) const noexcept;
 
@@ -111,7 +114,9 @@ namespace krys::boo::style
 
   private:
     friend struct Blending<ClipPath>;
+
     friend CSSBoxType ReferenceBox(const ClipPath &) noexcept;
+
     friend Maybe<boo::Path> TryPath(const ClipPath &, const TransformOperationData &) noexcept;
 
     KRYS_NODISCARD static bool IsValid(const RefPtr<PathOperation> &operation) noexcept
@@ -217,6 +222,7 @@ namespace krys::boo::style
   struct Blending<ClipPath>
   {
     KRYS_NODISCARD bool CanBlend(const ClipPath &, const ClipPath &) noexcept;
+
     KRYS_NODISCARD ClipPath Blend(const ClipPath &, const ClipPath &, const BlendingContext &) noexcept;
   };
 }

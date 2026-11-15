@@ -44,17 +44,25 @@ namespace krys::boo::css
   };
 
   KRYS_NODISCARD bool IsAbsoluteColorKeyword(ValueId) noexcept;
+
   KRYS_NODISCARD bool IsCurrentColorKeyword(ValueId) noexcept;
+
   KRYS_NODISCARD bool IsSystemColorKeyword(ValueId) noexcept;
+
   KRYS_NODISCARD bool IsDeprecatedSystemColorKeyword(ValueId) noexcept;
+
   KRYS_NODISCARD bool IsColorKeyword(ValueId) noexcept;
+
   KRYS_NODISCARD bool IsColorKeyword(ValueId, ColorType allowedColorTypes) noexcept;
 
   KRYS_NODISCARD boo::Color ColorFromAbsoluteKeyword(ValueId) noexcept;
+
   KRYS_NODISCARD boo::Color ColorFromKeyword(ValueId, style::ColorOptions) noexcept;
 
   KRYS_NODISCARD boo::Color CreateColor(const KeywordColor &, PlatformColorResolutionState &) noexcept;
+
   KRYS_NODISCARD bool ContainsCurrentColor(const KeywordColor &) noexcept;
+
   KRYS_NODISCARD bool ContainsColorSchemeDependentColor(const KeywordColor &) noexcept;
 
   template <>

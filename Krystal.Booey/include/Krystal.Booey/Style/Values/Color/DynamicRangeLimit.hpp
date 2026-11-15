@@ -56,13 +56,19 @@ namespace krys::boo::style
 
   public:
     DynamicRangeLimit(css::keywords::Standard keyword) noexcept;
+
     DynamicRangeLimit(css::keywords::Constrained keyword) noexcept;
+
     DynamicRangeLimit(css::keywords::NoLimit keyword) noexcept;
+
     DynamicRangeLimit(DynamicRangeLimitMixFunction &&mix) noexcept;
 
     DynamicRangeLimit(DynamicRangeLimit &&) noexcept = default;
+
     DynamicRangeLimit &operator=(DynamicRangeLimit &&) noexcept = default;
+
     DynamicRangeLimit(const DynamicRangeLimit &other) noexcept;
+
     DynamicRangeLimit &operator=(const DynamicRangeLimit &other) noexcept;
 
     template <typename... F>
@@ -143,6 +149,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD DynamicRangeLimit operator()(const css::DynamicRangeLimit &limit,
                                                 const BuilderState &state) noexcept;
+
     KRYS_NODISCARD DynamicRangeLimit operator()(const css::DynamicRangeLimit &limit,
                                                 const css::ToLengthConversionData &conversionData) noexcept;
   };

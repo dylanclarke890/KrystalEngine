@@ -49,17 +49,20 @@ namespace krys::boo
     explicit Block(RenderTreeBuilder &builder) noexcept;
 
     void Attach(RenderBlock &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
+
     void AttachIgnoringContinuation(RenderBlock &parent, RenderPtr<RenderObject> child,
                                     RenderObject *beforeChild) noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderObject>
       Detach(RenderBlock &parent, RenderObject &child, WillBeDestroyed willBeDestroyed,
              CanCollapseAnonymousBlock canCollapseAnonymousBlock) noexcept;
+
     KRYS_NODISCARD RenderPtr<RenderObject>
       Detach(RenderBlockFlow &parent, RenderObject &child, WillBeDestroyed willBeDestroyed,
              CanCollapseAnonymousBlock canCollapseAnonymousBlock) noexcept;
 
     void DropAnonymousBoxChild(RenderBlock &parent, RenderBlock &child) noexcept;
+
     void ChildBecameNonInline(RenderBlock &parent, RenderElement &child) noexcept;
 
     KRYS_NODISCARD static RenderPtr<RenderBlockFlow>

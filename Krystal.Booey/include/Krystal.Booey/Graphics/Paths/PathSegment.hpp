@@ -68,18 +68,23 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     KRYS_NODISCARD FloatRect FastBoundingRect() const noexcept;
+
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
     KRYS_NODISCARD bool CanApplyElements() const noexcept;
+
     KRYS_NODISCARD bool ApplyElements(const PathElementApplier &) const noexcept;
 
     KRYS_NODISCARD bool CanTransform() const noexcept;
+
     KRYS_NODISCARD bool Transform(const AffineTransform &) noexcept;
 
   private:

@@ -54,8 +54,10 @@ namespace krys::boo
 
     /// @brief Makes @p value the header's only value.
     void Set(utf8_stringview name, utf8_stringview value) noexcept;
+
     /// @brief Adds @p value to the header's values (after a ", "), or adds the header.
     void Add(utf8_stringview name, utf8_stringview value) noexcept;
+
     void Remove(utf8_stringview name) noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept

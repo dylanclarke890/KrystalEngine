@@ -29,18 +29,27 @@
 namespace krys::boo::css::calc
 {
   KRYS_NODISCARD static auto Copy(const Random::SharingType &) noexcept -> Random::SharingType;
+
   KRYS_NODISCARD static auto Copy(const ValueId &) noexcept -> ValueId;
+
   KRYS_NODISCARD static auto Copy(const keywords::None &) noexcept -> keywords::None;
+
   KRYS_NODISCARD static auto Copy(const Maybe<Child> &root) noexcept -> Maybe<Child>;
+
   KRYS_NODISCARD static auto Copy(const ChildOrNone &) noexcept -> ChildOrNone;
+
   KRYS_NODISCARD static auto Copy(const Children &) noexcept -> Children;
+
   KRYS_NODISCARD static auto Copy(const Child &) noexcept -> Child;
 
   template <Leaf Op>
   static Child Copy(const Op &) noexcept;
+
   template <typename Op>
   static auto Copy(const IndirectNode<Op> &) noexcept -> Child;
+
   static auto Copy(const IndirectNode<Anchor> &) noexcept -> Child;
+
   static auto Copy(const IndirectNode<AnchorSize> &) noexcept -> Child;
 
   // MARK: Copying

@@ -228,7 +228,9 @@ namespace krys::boo::layout
       }
 
       KRYS_NODISCARD TextDirection InlineDirection() const noexcept;
+
       KRYS_NODISCARD InlineLayoutUnit LetterSpacing() const noexcept;
+
       KRYS_NODISCARD bool HasTextCombine() const noexcept;
 
       KRYS_NODISCARD InlineLayoutUnit TextSpacingAdjustment() const noexcept
@@ -264,8 +266,10 @@ namespace krys::boo::layout
       // FIXME: Maybe add create functions intead?
       Run(const InlineItem &zeroWidthInlineItem, const RenderStyle &style,
           InlineLayoutUnit logicalLeft) noexcept;
+
       Run(const InlineItem &lineSpanningInlineBoxItem, InlineLayoutUnit logicalLeft,
           InlineLayoutUnit logicalWidth, InlineLayoutUnit textSpacingAdjustment = 0.f) noexcept;
+
       Run(const InlineTextItem &inlineTextItem, const RenderStyle &style, InlineLayoutUnit logicalLeft,
           InlineLayoutUnit logicalWidth, InlineLayoutUnit textSpacingAdjustment = 0.f,
           Maybe<Line::ShapingBoundary> shapingBoundary = null) noexcept;
@@ -288,6 +292,7 @@ namespace krys::boo::layout
           Collapsible,
           Collapsed,
         };
+
         Type WhitespaceType {Type::NotCollapsible};
         InlineLayoutUnit Width {0};
         size_t Length {0};
@@ -308,6 +313,7 @@ namespace krys::boo::layout
 
       Run(const InlineSoftLineBreakItem &softLineBreakItem, const RenderStyle &style,
           InlineLayoutUnit logicalLeft) noexcept;
+
       Run(const InlineItem &inlineItem, const RenderStyle &style, InlineLayoutUnit logicalLeft,
           InlineLayoutUnit logicalWidth, InlineLayoutUnit textSpacingAdjustment = 0.f) noexcept;
 
@@ -355,12 +361,15 @@ namespace krys::boo::layout
 
       KRYS_NODISCARD static Maybe<TrailingWhitespace::Type>
         TrailingWhitespaceType(const InlineTextItem &inlineTextItem) noexcept;
+
       InlineLayoutUnit RemoveTrailingWhitespace() noexcept;
 
       KRYS_NODISCARD Maybe<Run> DetachTrailingWhitespace() noexcept;
 
       KRYS_NODISCARD bool HasTrailingLetterSpacing() const noexcept;
+
       KRYS_NODISCARD InlineLayoutUnit TrailingLetterSpacing() const noexcept;
+
       InlineLayoutUnit RemoveTrailingLetterSpacing() noexcept;
     };
 
@@ -396,8 +405,11 @@ namespace krys::boo::layout
 
       void AddFullyTrimmableContent(size_t runIndex, InlineLayoutUnit trimmableContentOffset,
                                     InlineLayoutUnit trimmableWidth) noexcept;
+
       void AddPartiallyTrimmableContent(size_t runIndex, InlineLayoutUnit trimmableWidth) noexcept;
+
       InlineLayoutUnit Remove() noexcept;
+
       InlineLayoutUnit RemovePartiallyTrimmableContent() noexcept;
 
       KRYS_NODISCARD InlineLayoutUnit Width() const noexcept
@@ -532,6 +544,7 @@ namespace krys::boo::layout
           StopOrComma,
           Punctuation,
         };
+
         Type ContentType {Type::Whitespace};
 
         enum class IsConditional : uint8
@@ -540,6 +553,7 @@ namespace krys::boo::layout
           No,
           WhenFollowedByForcedLineBreak,
         };
+
         IsConditional Conditional {IsConditional::No};
         size_t Length {0};
         InlineLayoutUnit Width {0.f};
@@ -564,6 +578,7 @@ namespace krys::boo::layout
 
   public:
     explicit Line(const InlineFormattingContext &inlineFormattingContext) noexcept;
+
     KRYS_NON_COPY_MOVABLE(Line);
 
     void Initialize(const SmallList<InlineItem, 1> &lineSpanningInlineBoxes,
@@ -571,18 +586,26 @@ namespace krys::boo::layout
 
     void AppendText(const InlineTextItem &inlineTextItem, const RenderStyle &style,
                     InlineLayoutUnit logicalWidth, Maybe<ShapingBoundary> shapingBoundary) noexcept;
+
     // Reserved for TextOnlySimpleLineBuilder
     void AppendTextFast(const InlineTextItem &inlineTextItem, const RenderStyle &style,
                         InlineLayoutUnit logicalWidth) noexcept;
+
     void AppendAtomicInlineBox(const InlineItem &inlineItem, const RenderStyle &style,
                                InlineLayoutUnit marginBoxLogicalWidth) noexcept;
+
     void AppendInlineBoxStart(const InlineItem &inlineItem, const RenderStyle &style,
                               InlineLayoutUnit logicalWidth, InlineLayoutUnit textSpacingAdjustment) noexcept;
+
     void AppendInlineBoxEnd(const InlineItem &inlineItem, const RenderStyle &style,
                             InlineLayoutUnit logicalWidth) noexcept;
+
     void AppendLineBreak(const InlineItem &inlineItem, const RenderStyle &style) noexcept;
+
     void AppendWordBreakOpportunity(const InlineItem &inlineItem, const RenderStyle &style) noexcept;
+
     void AppendOpaqueBox(const InlineItem &inlineItem, const RenderStyle &style) noexcept;
+
     void AppendBlock(const InlineItem &blockItem, InlineLayoutUnit marginBoxLogicalWidth) noexcept;
 
     void SetContentNeedsBidiReordering() noexcept
@@ -591,6 +614,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD bool HasContent() const noexcept;
+
     KRYS_NODISCARD bool HasContentOrListMarker() const noexcept;
 
     KRYS_NODISCARD bool HasRubyContent() const noexcept
@@ -652,12 +676,16 @@ namespace krys::boo::layout
 
     InlineLayoutUnit
       HandleTrailingTrimmableContent(TrailingContentAction trailingTrimmableContentAction) noexcept;
+
     void HandleTrailingHangingContent(Maybe<IntrinsicWidthMode> intrinsicWidthMode,
                                       InlineLayoutUnit horizontalAvailableSpaceForContent,
                                       bool isLastFormattedLine) noexcept;
+
     void HandleOverflowingNonBreakingSpace(TrailingContentAction trailingContentAction,
                                            InlineLayoutUnit overflowingWidth) noexcept;
+
     const Box *RemoveOverflowingOutOfFlowContent() noexcept;
+
     void ResetBidiLevelForTrailingWhitespace(UBiDiLevel rootBidiLevel) noexcept;
 
     KRYS_NODISCARD const RunList &Runs() const noexcept
@@ -692,6 +720,7 @@ namespace krys::boo::layout
     static bool RestoreTrimmedTrailingWhitespace(InlineLayoutUnit trimmedTrailingWhitespaceWidth,
                                                  RunList &runs, InlineItemRange inlineItemRange,
                                                  const InlineItemList &inlineItems) noexcept;
+
     KRYS_NODISCARD static bool HasTrailingForcedLineBreak(const RunList &runs) noexcept;
 
   private:

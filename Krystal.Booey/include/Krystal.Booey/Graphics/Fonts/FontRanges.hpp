@@ -52,6 +52,7 @@ namespace krys::boo
     virtual ~FontAccessor() noexcept = default;
 
     KRYS_NODISCARD virtual const Font *GetFont(ExternalResourceDownloadPolicy policy) const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsLoading() const noexcept = 0;
   };
 
@@ -97,13 +98,19 @@ namespace krys::boo
 
   public:
     FontRanges() noexcept = default;
+
     explicit FontRanges(RefPtr<Font> &&font) noexcept;
+
     FontRanges(FontRanges &&other, boo::IsGenericFontFamily isGenericFontFamily) noexcept;
+
     ~FontRanges() noexcept;
 
     FontRanges(const FontRanges &) noexcept = default;
+
     FontRanges(FontRanges &&) noexcept = default;
+
     FontRanges &operator=(const FontRanges &) noexcept = default;
+
     FontRanges &operator=(FontRanges &&) noexcept = default;
 
     KRYS_NODISCARD bool IsNull() const noexcept
@@ -128,8 +135,11 @@ namespace krys::boo
 
     KRYS_NODISCARD GlyphData GlyphDataForCharacter(char32 character,
                                                    ExternalResourceDownloadPolicy policy) const noexcept;
+
     KRYS_NODISCARD const Font *FontForCharacter(char32 character) const noexcept;
+
     KRYS_NODISCARD const Font &FontForFirstRange() const noexcept;
+
     KRYS_NODISCARD bool IsLoading() const noexcept;
 
     KRYS_NODISCARD bool IsGenericFontFamily() const noexcept

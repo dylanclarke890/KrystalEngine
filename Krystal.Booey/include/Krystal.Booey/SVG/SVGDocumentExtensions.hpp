@@ -57,6 +57,7 @@ namespace krys::boo::svg
 
   public:
     explicit SVGDocumentExtensions(dom::Document &) noexcept;
+
     ~SVGDocumentExtensions() noexcept;
 
     KRYS_NODISCARD SVGResourcesCache &ResourcesCache() noexcept
@@ -67,18 +68,26 @@ namespace krys::boo::svg
     /// @brief Remembers @p element, whose reference target was removed, to look its target up again after the
     /// tree mutation.
     void AddElementToRebuild(SVGElement &element) noexcept;
+
     void RemoveElementToRebuild(SVGElement &element) noexcept;
+
     void RebuildElements() noexcept;
 
     void AddTimeContainer(SVGSvgElement &) noexcept;
+
     void RemoveTimeContainer(SVGSvgElement &) noexcept;
+
     KRYS_NODISCARD List<Ref<SVGSvgElement>> TimeContainers() const noexcept;
 
     void StartAnimations() noexcept;
+
     void PauseAnimations() noexcept;
+
     void UnpauseAnimations() noexcept;
+
     /// @brief Samples the animations of the time containers that asked for this rendering update.
     void ServiceAnimations() noexcept;
+
     void DispatchLoadEventToOutermostSVGElements() noexcept;
 
     KRYS_NODISCARD bool AreAnimationsPaused() const noexcept
@@ -87,6 +96,7 @@ namespace krys::boo::svg
     }
 
     void ClearTargetDependencies(SVGElement &referencedElement) noexcept;
+
     void RebuildAllElementReferencesForTarget(SVGElement &referencedElement) noexcept;
   };
 }

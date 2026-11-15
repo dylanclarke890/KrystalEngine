@@ -67,15 +67,19 @@ namespace krys::boo::css
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-get
     KRYS_NODISCARD dom::ExceptionOr<RefPtr<CSSStyleValue>> Get(CSSOMStringView property) const noexcept;
+
     /// @brief The values of @p property.
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-getall
     KRYS_NODISCARD dom::ExceptionOr<List<Ref<CSSStyleValue>>> GetAll(CSSOMStringView property) const noexcept;
+
     /// @return A `TypeError` if @p property isn't a property.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-has
     KRYS_NODISCARD dom::ExceptionOr<bool> Has(CSSOMStringView property) const noexcept;
+
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-stylepropertymapreadonly-size
     KRYS_NODISCARD virtual size_t Size() const noexcept = 0;
+
     /// @brief The properties and their values, as the map iterates over them.
     /// @see https://drafts.css-houdini.org/css-typed-om/#the-stylepropertymap
     KRYS_NODISCARD virtual List<Entry> Entries() const noexcept = 0;
@@ -83,6 +87,7 @@ namespace krys::boo::css
     /// @brief @p value reified for @p property, or null if there's no value or it can't be.
     KRYS_NODISCARD static RefPtr<CSSStyleValue> ReifyValue(dom::Document &document, RefPtr<Value> value,
                                                            Maybe<PropertyId> property) noexcept;
+
     /// @brief @p value reified for @p property, its items each reified if it's a list-valued property's list.
     KRYS_NODISCARD static List<Ref<CSSStyleValue>>
       ReifyValueToList(dom::Document &document, RefPtr<Value> value, Maybe<PropertyId> property) noexcept;
@@ -98,8 +103,11 @@ namespace krys::boo::css
     /// @brief The document to reify values in, or null if there's none (the rule was removed, or the element
     /// destroyed).
     KRYS_NODISCARD virtual dom::Document *Document() const noexcept = 0;
+
     KRYS_NODISCARD virtual RefPtr<Value> PropertyValue(PropertyId property) const noexcept = 0;
+
     KRYS_NODISCARD virtual CSSOMString ShorthandPropertySerialisation(PropertyId property) const noexcept = 0;
+
     KRYS_NODISCARD virtual RefPtr<Value>
       CustomPropertyValue(const CSSOMStringAtom &property) const noexcept = 0;
   };

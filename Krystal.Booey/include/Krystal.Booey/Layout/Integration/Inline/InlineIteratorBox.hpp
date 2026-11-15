@@ -247,17 +247,24 @@ namespace krys::boo::inline_iterator
 
     // Text-relative left/right
     KRYS_NODISCARD LeafBoxIterator NextLineRightwardOnLine() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLineLeftwardOnLine() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLineRightwardOnLineIgnoringLineBreak() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLineLeftwardOnLineIgnoringLineBreak() const noexcept;
 
     // Coordinate-relative left/right
     KRYS_NODISCARD LeafBoxIterator NextLogicalRightwardOnLine() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLogicalLeftwardOnLine() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLogicalRightwardOnLineIgnoringLineBreak() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator NextLogicalLeftwardOnLineIgnoringLineBreak() const noexcept;
 
     KRYS_NODISCARD InlineBoxIterator ParentInlineBox() const noexcept;
+
     KRYS_NODISCARD LineBoxIterator GetLineBox() const noexcept;
 
     KRYS_NODISCARD size_t LineIndex() const noexcept
@@ -329,6 +336,7 @@ namespace krys::boo::inline_iterator
     }
 
     BoxIterator &TraverseLineRightwardOnLine() noexcept;
+
     BoxIterator &TraverseLineRightwardOnLineSkippingChildren() noexcept;
 
     BoxIterator &operator++() noexcept
@@ -358,14 +366,20 @@ namespace krys::boo::inline_iterator
 
     // Text-relative left/right
     LeafBoxIterator &TraverseLineRightwardOnLine() noexcept;
+
     LeafBoxIterator &TraverseLineLeftwardOnLine() noexcept;
+
     LeafBoxIterator &TraverseLineRightwardOnLineIgnoringLineBreak() noexcept;
+
     LeafBoxIterator &TraverseLineLeftwardOnLineIgnoringLineBreak() noexcept;
 
     // Coordinate-relative left/right
     LeafBoxIterator &TraverseLogicalRightwardOnLine() noexcept;
+
     LeafBoxIterator &TraverseLogicalLeftwardOnLine() noexcept;
+
     LeafBoxIterator &TraverseLogicalRightwardOnLineIgnoringLineBreak() noexcept;
+
     LeafBoxIterator &TraverseLogicalLeftwardOnLineIgnoringLineBreak() noexcept;
 
     LeafBoxIterator &operator++() noexcept
@@ -398,7 +412,9 @@ namespace krys::boo::inline_iterator
   };
 
   KRYS_NODISCARD LeafBoxIterator BoxFor(const RenderLineBreak &renderer) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator BoxFor(const RenderBox &renderer) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator BoxFor(const layout_integration::InlineContent &content,
                                         size_t boxIndex) noexcept;
 }

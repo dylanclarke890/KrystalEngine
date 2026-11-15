@@ -11,8 +11,8 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
-  class CustomElementRegistry;
   class CustomElementInterface;
+  class CustomElementRegistry;
 
   class CustomElementAlgorithms
   {

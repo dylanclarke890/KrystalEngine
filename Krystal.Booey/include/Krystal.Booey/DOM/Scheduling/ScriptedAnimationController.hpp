@@ -72,10 +72,12 @@ namespace krys::boo::dom
 
   public:
     explicit ScriptedAnimationController(Document &document) noexcept;
+
     ~ScriptedAnimationController() noexcept;
 
     /// @return The callback's handle, positive.
     CallbackId RegisterCallback(FrameRequestCallback &&callback) noexcept;
+
     void CancelCallback(CallbackId callbackId) noexcept;
 
     /// @brief Runs the callbacks registered before this frame, with @p timestamp (milliseconds since the
@@ -85,6 +87,7 @@ namespace krys::boo::dom
 
     /// @brief Holds the callbacks back (while the document is suspended), until as many resumes.
     void Suspend() noexcept;
+
     void Resume() noexcept;
 
     KRYS_NODISCARD bool HasCallbacks() const noexcept

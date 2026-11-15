@@ -111,6 +111,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Maybe<Type> SharedPrimitiveType(Type other) const noexcept;
+
     KRYS_NODISCARD Maybe<Type> SharedPrimitiveType(const TransformOperation *other) const noexcept;
 
     KRYS_NODISCARD static bool IsRotateTransformOperationType(Type type) noexcept

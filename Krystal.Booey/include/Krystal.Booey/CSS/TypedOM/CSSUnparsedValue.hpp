@@ -51,6 +51,7 @@ namespace krys::boo::css
   public:
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssunparsedvalue-cssunparsedvalue
     KRYS_NODISCARD static Ref<CSSUnparsedValue> Create(List<CSSUnparsedSegment> segments) noexcept;
+
     /// @brief Splits @p tokens into string segments and the variable references (`var()`) in them.
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-list-of-component-values
     KRYS_NODISCARD static Ref<CSSUnparsedValue> Create(TokenRange tokens) noexcept;
@@ -72,6 +73,7 @@ namespace krys::boo::css
 
     /// @return Nothing if @p index is out of range.
     KRYS_NODISCARD Maybe<CSSUnparsedSegment> Item(size_t index) const noexcept;
+
     /// @brief Replaces the segment at @p index, or appends one at the end.
     /// @return A `RangeError` if @p index is past the end.
     dom::ExceptionOr<CSSUnparsedSegment> SetItem(size_t index, CSSUnparsedSegment segment) noexcept;

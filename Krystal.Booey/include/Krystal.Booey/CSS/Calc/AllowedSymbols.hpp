@@ -27,9 +27,11 @@ namespace krys::boo::css
     }
 
     AllowedSymbols &operator=(const AllowedSymbols &) noexcept = default;
+
     AllowedSymbols(const AllowedSymbols &) noexcept = default;
 
     AllowedSymbols &operator=(AllowedSymbols &&) noexcept = default;
+
     AllowedSymbols(AllowedSymbols &&) noexcept = default;
 
     KRYS_NODISCARD Maybe<UnitType> Get(ValueId id) const noexcept

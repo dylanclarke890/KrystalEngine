@@ -41,13 +41,14 @@ namespace krys::boo::layout
 {
   class AbstractLineBuilder;
   class InlineContentCache;
-  class LayoutState;
   class InlineDamage;
+  class LayoutState;
   class LineBox;
 
   struct InlineLayoutResult
   {
     inline_display::Content DisplayContent;
+
     enum class Range : uint8
     {
       Full, // Display content represents the complete inline content -result of full layout
@@ -59,6 +60,7 @@ namespace krys::boo::layout
       // -result of partial layout with damage that does not cover the entire inline content
       PartialFromDamage,
     };
+
     Range ContentRange {Range::Full};
     bool DidDiscardContent {false};
   };
@@ -94,7 +96,9 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD std::pair<LayoutUnit, LayoutUnit>
       MinimumMaximumContentSize(InlineDamage *lineDamage = nullptr) noexcept;
+
     KRYS_NODISCARD LayoutUnit MinimumContentSize(InlineDamage *lineDamage = nullptr) noexcept;
+
     KRYS_NODISCARD LayoutUnit MaximumContentSize(InlineDamage *lineDamage = nullptr) noexcept;
 
     KRYS_NODISCARD const ElementBox &Root() const noexcept
@@ -129,6 +133,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD const BoxGeometry &GeometryForBox(const Box &layoutBox,
                                                      Maybe<EscapeReason> escapeReason = null) const noexcept;
+
     KRYS_NODISCARD BoxGeometry &GeometryForBox(const Box &layoutBox) noexcept;
 
     KRYS_NODISCARD const IntegrationUtils &GetIntegrationUtils() const noexcept
@@ -143,27 +148,35 @@ namespace krys::boo::layout
                                                  Maybe<PreviousLine> previousLine,
                                                  const ConstraintsForInlineContent &constraints,
                                                  const InlineDamage *lineDamage) noexcept;
+
     void LayoutFloatContentOnly(const ConstraintsForInlineContent &constraints) noexcept;
 
     InlineRect CreateDisplayContentForInlineContent(const LineBox &lineBox,
                                                     const LineLayoutResult &lineLayoutResult,
                                                     const ConstraintsForInlineContent &constraints,
                                                     inline_display::Content &displayContent) noexcept;
+
     void UpdateLayoutStateWithLineLayoutResult(const LineLayoutResult &lineLayoutResult,
                                                const InlineRect &lineLogicalRect,
                                                const FloatingContext &floatingContext) noexcept;
+
     void UpdateBoxGeometryForPlacedFloats(const LineLayoutResult::PlacedFloatList &placedFloats) noexcept;
+
     void ResetBoxGeometriesForDiscardedContent(
       const InlineItemRange &discardedRange,
       const LineLayoutResult::SuspendedFloatList &suspendedFloats) noexcept;
+
     KRYS_NODISCARD bool
       CreateDisplayContentForLineFromCachedContent(const ConstraintsForInlineContent &constraints,
                                                    InlineLayoutResult &layoutResult) noexcept;
+
     KRYS_NODISCARD bool
       CreateDisplayContentForEmptyInlineContent(const ConstraintsForInlineContent &constraints,
                                                 const InlineItemList &inlineItemList,
                                                 InlineLayoutResult &layoutResult) noexcept;
+
     void InitializeInlineLayoutState(const LayoutState &globalLayoutState) noexcept;
+
     void RebuildInlineItemListIfNeeded(InlineDamage *lineDamage) noexcept;
 
     KRYS_NODISCARD InlineContentCache &GetInlineContentCache() noexcept

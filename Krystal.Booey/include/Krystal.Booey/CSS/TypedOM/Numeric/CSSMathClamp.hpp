@@ -71,7 +71,9 @@ namespace krys::boo::css
     }
 
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept final;
+
     KRYS_NODISCARD Maybe<SumValue> ToSumValue() const noexcept final;
+
     KRYS_NODISCARD bool Equals(const CSSNumericValue &other) const noexcept final;
 
     CSSMathClamp(CSSNumericType &&type, Ref<CSSNumericValue> &&lower, Ref<CSSNumericValue> &&value,

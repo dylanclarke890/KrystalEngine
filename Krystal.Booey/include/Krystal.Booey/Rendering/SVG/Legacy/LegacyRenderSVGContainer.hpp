@@ -91,8 +91,10 @@ namespace krys::boo
                            const RenderLayerModelObject *paintContainer = nullptr) const noexcept final;
 
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
+
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
+
     KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
 
     bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
@@ -124,6 +126,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool SelfWillPaint() noexcept;
+
     void UpdateCachedBoundaries() noexcept;
   };
 }

@@ -183,6 +183,7 @@ namespace krys::boo::style
       Length,
       Flex,
     };
+
     GridTrackBreadthType _type;
   };
 

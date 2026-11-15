@@ -99,7 +99,9 @@ namespace krys::boo
 
   public:
     RenderTable(Type type, dom::Element &element, RenderStyle &&style) noexcept;
+
     RenderTable(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderTable() noexcept override;
 
     // Per CSS 3 writing-mode: "The first and second values of the 'border-spacing' property represent spacing
@@ -118,27 +120,41 @@ namespace krys::boo
     KRYS_NODISCARD bool CollapseBorders() const noexcept;
 
     KRYS_NODISCARD LayoutUnit BorderStart() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit BorderEnd() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit BorderBefore() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit BorderAfter() const noexcept final;
 
     KRYS_NODISCARD RectEdges<LayoutUnit> BorderWidths() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit BorderLeft() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit BorderRight() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit BorderTop() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit BorderBottom() const noexcept final;
 
     KRYS_NODISCARD LayoutUnit OuterBorderBefore() const noexcept;
+
     KRYS_NODISCARD LayoutUnit OuterBorderAfter() const noexcept;
+
     KRYS_NODISCARD LayoutUnit OuterBorderStart() const noexcept;
+
     KRYS_NODISCARD LayoutUnit OuterBorderEnd() const noexcept;
 
     KRYS_NODISCARD LayoutUnit OuterBorderLeft() const noexcept;
+
     KRYS_NODISCARD LayoutUnit OuterBorderRight() const noexcept;
+
     KRYS_NODISCARD LayoutUnit OuterBorderTop() const noexcept;
+
     KRYS_NODISCARD LayoutUnit OuterBorderBottom() const noexcept;
 
     KRYS_NODISCARD LayoutUnit CalcBorderStart() const noexcept;
+
     KRYS_NODISCARD LayoutUnit CalcBorderEnd() const noexcept;
 
     void ForceSectionsRecalc() noexcept
@@ -166,15 +182,19 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderTableSection *Header() const noexcept;
+
     KRYS_NODISCARD RenderTableSection *Footer() const noexcept;
+
     KRYS_NODISCARD RenderTableSection *FirstBody() const noexcept;
 
     /// @return The top section, or null if the table has no section.
     KRYS_NODISCARD RenderTableSection *TopSection() const noexcept;
+
     KRYS_NODISCARD RenderTableSection *BottomSection() const noexcept;
 
     /// @return The top section with rows, or null if the table has no non-empty section.
     KRYS_NODISCARD RenderTableSection *TopNonEmptySection() const noexcept;
+
     KRYS_NODISCARD RenderTableSection *BottomNonEmptySection() const noexcept;
 
     KRYS_NODISCARD uint32 LastColumnIndex() const noexcept
@@ -183,6 +203,7 @@ namespace krys::boo
     }
 
     void SplitColumn(uint32 position, uint32 firstSpan) noexcept;
+
     void AppendColumn(uint32 span) noexcept;
 
     KRYS_NODISCARD uint32 NumEffCols() const noexcept
@@ -239,12 +260,19 @@ namespace krys::boo
     // override those functions.
     // See http://www.w3.org/TR/CSS2/tables.html#collapsing-borders
     KRYS_NODISCARD LayoutUnit PaddingTop() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingBottom() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingLeft() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingRight() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingAfter() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingBefore() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingStart() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingEnd() const noexcept override;
 
     KRYS_NODISCARD LayoutUnit BordersPaddingAndSpacingInRowDirection() const noexcept;
@@ -273,13 +301,17 @@ namespace krys::boo
     KRYS_NODISCARD RenderTableSection *
       SectionAbove(const RenderTableSection *section,
                    SkipEmptySections skipEmptySections = SkipEmptySections::No) const noexcept;
+
     KRYS_NODISCARD RenderTableSection *
       SectionBelow(const RenderTableSection *section,
                    SkipEmptySections skipEmptySections = SkipEmptySections::No) const noexcept;
 
     KRYS_NODISCARD RenderTableCell *CellAbove(const RenderTableCell *cell) const noexcept;
+
     KRYS_NODISCARD RenderTableCell *CellBelow(const RenderTableCell *cell) const noexcept;
+
     KRYS_NODISCARD RenderTableCell *CellBefore(const RenderTableCell *cell) const noexcept;
+
     KRYS_NODISCARD RenderTableCell *CellAfter(const RenderTableCell *cell) const noexcept;
 
     KRYS_NODISCARD bool CollapsedBordersAreValid() const noexcept
@@ -288,6 +320,7 @@ namespace krys::boo
     }
 
     void InvalidateCollapsedBorders(RenderTableCell *cellWithStyleChange = nullptr) noexcept;
+
     void InvalidateCollapsedBordersAfterStyleChangeIfNeeded(
       const RenderStyle &oldStyle, const RenderStyle &newStyle,
       RenderTableCell *cellWithStyleChange = nullptr) noexcept;
@@ -302,12 +335,17 @@ namespace krys::boo
     using CollapsedBorderValues = List<CollapsedBorderValue>;
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction action) noexcept override;
+
     void PaintObject(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void PaintMask(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void AdjustBorderBoxRectForPainting(LayoutRect &) noexcept override;
 
     /// @brief The collapsed border cells paint in the current pass of the collapsed borders phase.
@@ -328,16 +366,23 @@ namespace krys::boo
     }
 
     void AddCaption(RenderTableCaption &caption) noexcept;
+
     void RemoveCaption(RenderTableCaption &oldCaption) noexcept;
+
     void AddColumn(const RenderTableCol *column) noexcept;
+
     void InvalidateColumns() noexcept;
 
     KRYS_NODISCARD LayoutUnit OffsetTopForColumn(const RenderTableCol &column) const noexcept;
+
     KRYS_NODISCARD LayoutUnit OffsetLeftForColumn(const RenderTableCol &column) const noexcept;
+
     KRYS_NODISCARD LayoutUnit OffsetWidthForColumn(const RenderTableCol &column) const noexcept;
+
     KRYS_NODISCARD LayoutUnit OffsetHeightForColumn(const RenderTableCol &column) const noexcept;
 
     void WillInsertTableColumn(RenderTableCol &child, RenderObject *beforeChild) noexcept;
+
     void WillInsertTableSection(RenderTableSection &child, RenderObject *beforeChild) noexcept;
 
     KRYS_NODISCARD LayoutUnit SumCaptionsLogicalHeight() const noexcept;
@@ -349,24 +394,33 @@ namespace krys::boo
 
   protected:
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept final;
+
     void SimplifiedNormalFlowLayout() noexcept final;
 
     void Layout() noexcept final;
+
     void MarkForPaginationRelayoutIfNeeded() noexcept final;
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minWidth, LayoutUnit &maxWidth,
                                        TableIntrinsics intrinsics) const noexcept;
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minWidth, LayoutUnit &maxWidth) const noexcept final;
+
     void ComputeIntrinsicKeywordLogicalWidths(LayoutUnit &minWidth,
                                               LayoutUnit &maxWidth) const noexcept final;
+
     void ComputePreferredLogicalWidths() noexcept override;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override;
+
     KRYS_NODISCARD Maybe<LayoutUnit> LastLineBaseline() const noexcept override;
 
     KRYS_NODISCARD RenderTableCol *SlowColElement(uint32 col, bool *startEdge, bool *endEdge) const noexcept;
 
     void UpdateColumnCache() const noexcept;
+
     void InvalidateCachedColumns() noexcept;
+
     void InvalidateCachedColumnOffsets() noexcept;
 
     void UpdateLogicalWidth() noexcept final;
@@ -374,6 +428,7 @@ namespace krys::boo
     template <typename TSize>
     KRYS_NODISCARD LayoutUnit ConvertStyleLogicalWidthToComputedWidth(const TSize &styleLogicalWidth,
                                                                       LayoutUnit availableWidth) noexcept;
+
     template <typename TSize>
     KRYS_NODISCARD LayoutUnit
       ConvertStyleLogicalHeightToComputedHeight(const TSize &styleLogicalHeight) noexcept;
@@ -398,8 +453,10 @@ namespace krys::boo
       No,
       Yes,
     };
+
     void LayoutCaptions(
       BottomCaptionLayoutPhase bottomCaptionLayoutPhase = BottomCaptionLayoutPhase::No) noexcept;
+
     void LayoutCaption(RenderTableCaption &caption) noexcept;
 
     void DistributeExtraLogicalHeight(LayoutUnit extraLogicalHeight) noexcept;

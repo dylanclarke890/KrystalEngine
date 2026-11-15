@@ -9,8 +9,8 @@ namespace krys::boo::css
 
 namespace krys::boo::style
 {
-  class BuilderState;
   enum class ApplyValueType : uint8;
+  class BuilderState;
 
   /// @brief Applies a longhand's initial, inherited or specified value to the style being built.
   class BuilderGenerated

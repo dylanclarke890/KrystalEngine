@@ -47,6 +47,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGViewportContainer(svg::SVGSvgElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGViewportContainer() noexcept override;
 
     KRYS_NODISCARD svg::SVGSvgElement &SvgSvgElement() const noexcept;
@@ -91,9 +92,11 @@ namespace krys::boo
     }
 
     void CalcViewport() noexcept override;
+
     bool CalculateLocalTransform() noexcept override;
 
     void ApplyViewportClip(PaintInfo &) noexcept override;
+
     KRYS_NODISCARD bool PointIsInsideViewportClip(const FloatPoint &pointInParent) noexcept override;
   };
 }

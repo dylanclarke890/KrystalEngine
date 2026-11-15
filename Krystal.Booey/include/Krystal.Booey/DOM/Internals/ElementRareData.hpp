@@ -40,8 +40,8 @@
 namespace krys::boo
 {
   class ElementAnimationRareData;
-  class RenderStyle;
   struct IntersectionObserverData;
+  class RenderStyle;
   struct ResizeObserverData;
 }
 
@@ -117,6 +117,7 @@ namespace krys::boo::dom
 
   public:
     ElementRareData() noexcept;
+
     ~ElementRareData() noexcept override;
 
     KRYS_NODISCARD html::CustomElementReactionQueue *CustomElementReactionQueue() const noexcept
@@ -332,6 +333,7 @@ namespace krys::boo::dom
     /// @brief The animation state of the element (or one of its pseudo-elements), if it has any.
     KRYS_NODISCARD ElementAnimationRareData *
       AnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     KRYS_NODISCARD ElementAnimationRareData &
       EnsureAnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
   };

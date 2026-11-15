@@ -163,9 +163,13 @@ namespace krys::boo
   }
 
   AnchorScrollAdjuster::AnchorScrollAdjuster(const AnchorScrollAdjuster &) noexcept = default;
+
   AnchorScrollAdjuster::AnchorScrollAdjuster(AnchorScrollAdjuster &&) noexcept = default;
+
   AnchorScrollAdjuster::~AnchorScrollAdjuster() noexcept = default;
+
   AnchorScrollAdjuster &AnchorScrollAdjuster::operator=(const AnchorScrollAdjuster &) noexcept = default;
+
   AnchorScrollAdjuster &AnchorScrollAdjuster::operator=(AnchorScrollAdjuster &&) noexcept = default;
 
   RenderBox *AnchorScrollAdjuster::Anchored() const noexcept

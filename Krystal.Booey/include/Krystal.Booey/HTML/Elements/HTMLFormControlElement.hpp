@@ -97,8 +97,11 @@ namespace krys::boo::html
     void SetChangedSinceLastFormControlChangeEvent(bool changed) noexcept;
 
     virtual void DispatchFormControlChangeEvent() noexcept;
+
     void DispatchChangeEvent() noexcept;
+
     void DispatchCancelEvent() noexcept;
+
     void DispatchFormControlInputEvent() noexcept;
 
     KRYS_NODISCARD bool IsRequired() const noexcept
@@ -140,13 +143,16 @@ namespace krys::boo::html
     /// @brief The popover the control (a button) shows or hides, if it can.
     /// @see https://html.spec.whatwg.org/#popover-target-element
     KRYS_NODISCARD RefPtr<HTMLElement> PopoverTargetElement() const noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-popovertargetelement
     KRYS_NODISCARD RefPtr<dom::Element> PopoverTargetElementForBindings() const noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-popovertargetelement
     void PopoverTargetElementForBindings(dom::Element *element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
     KRYS_NODISCARD dom::DOMString PopoverTargetAction() const noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
     void PopoverTargetAction(dom::DOMString value) noexcept;
 
@@ -185,18 +191,27 @@ namespace krys::boo::html
                            HTMLElementFlags flags = HTMLElementFlags::None) noexcept;
 
     void OnInsert() noexcept override;
+
     void OnPostConnection() noexcept override;
+
     void DidAttachRenderers() noexcept override;
+
     void DidRecalcStyle(EnumSet<style::Change>) noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnAdopt(dom::Document &oldDocument) noexcept override;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
 
     void DisabledStateChanged() noexcept override;
+
     void ReadOnlyStateChanged() noexcept override;
+
     virtual void RequiredStateChanged() noexcept;
 
     /// @brief Losing the focus hides the control's validation message.

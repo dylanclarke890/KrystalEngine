@@ -156,7 +156,9 @@ namespace krys
 
   public:
     virtual void AddRefChecked() const noexcept = 0;
+
     virtual void SubRefChecked() const noexcept = 0;
+
     KRYS_NODISCARD virtual uint32 GetRefCountChecked() const noexcept = 0;
   };
 }

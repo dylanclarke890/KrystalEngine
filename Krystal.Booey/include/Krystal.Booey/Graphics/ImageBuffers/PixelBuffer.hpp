@@ -74,10 +74,13 @@ namespace krys::boo
 
     /// @brief The pixels in @p size; empty if they don't fit in an `int32`.
     KRYS_NODISCARD static Maybe<uint32> ComputePixelCount(const IntSize &size) noexcept;
+
     /// @brief The channels in @p size's pixels; empty if they don't fit in an `int32`.
     KRYS_NODISCARD static Maybe<uint32> ComputePixelComponentCount(PixelFormat, const IntSize &size) noexcept;
+
     /// @brief The bytes in @p size's pixels; empty if they don't fit in an `int32`.
     KRYS_NODISCARD static Maybe<uint32> ComputeBufferSize(PixelFormat, const IntSize &size) noexcept;
+
     KRYS_NODISCARD static bool SupportedPixelFormat(PixelFormat) noexcept;
 
     KRYS_NODISCARD const PixelBufferFormat &Format() const noexcept
@@ -103,6 +106,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual RefPtr<PixelBuffer> CreateScratchPixelBuffer(const IntSize &) const noexcept = 0;
 
     bool SetRange(Span<const uint8> data, size_t byteOffset) noexcept;
+
     bool ZeroRange(size_t byteOffset, size_t rangeByteLength) noexcept;
 
     void ZeroFill() noexcept
@@ -111,6 +115,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD uint8 Item(size_t index) const noexcept;
+
     void Set(size_t index, double value) noexcept;
 
   protected:

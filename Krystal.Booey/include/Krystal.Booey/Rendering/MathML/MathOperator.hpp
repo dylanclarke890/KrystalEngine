@@ -108,6 +108,7 @@ namespace krys::boo
     MathOperator() noexcept = default;
 
     void SetOperator(const RenderStyle &style, char32 baseCharacter, Type operatorType) noexcept;
+
     void Reset(const RenderStyle &style) noexcept;
 
     KRYS_NODISCARD LayoutUnit Width() const noexcept
@@ -142,6 +143,7 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD LayoutUnit StretchSize() const noexcept;
+
     KRYS_NODISCARD bool GetGlyph(const RenderStyle &style, char32 character, GlyphData &glyph) const noexcept;
 
     KRYS_NODISCARD bool GetBaseGlyph(const RenderStyle &style, GlyphData &baseGlyph) const noexcept
@@ -150,24 +152,33 @@ namespace krys::boo
     }
 
     void SetSizeVariant(const GlyphData &sizeVariant) noexcept;
+
     void SetGlyphAssembly(const RenderStyle &style, const GlyphAssemblyData &assemblyData) noexcept;
+
     void GetMathVariantsWithFallback(const RenderStyle &style, bool isVertical, List<Glyph> &sizeVariants,
                                      List<OpenTypeMathData::AssemblyPart> &assemblyParts) const noexcept;
+
     void CalculateDisplayStyleLargeOperator(const RenderStyle &style) noexcept;
+
     void CalculateStretchyData(const RenderStyle &style, bool calculateMaxPreferredWidth,
                                LayoutUnit targetSize = 0_lu) noexcept;
+
     KRYS_NODISCARD bool
       CalculateGlyphAssemblyFallback(const List<OpenTypeMathData::AssemblyPart> &assemblyParts,
                                      GlyphAssemblyData &assemblyData) const noexcept;
 
     LayoutRect PaintGlyph(const RenderStyle &style, PaintInfo &info, const GlyphData &data,
                           const LayoutPoint &origin, GlyphPaintTrimming trim) noexcept;
+
     void FillWithVerticalExtensionGlyph(const RenderStyle &style, PaintInfo &info, const LayoutPoint &from,
                                         const LayoutPoint &to) noexcept;
+
     void FillWithHorizontalExtensionGlyph(const RenderStyle &style, PaintInfo &info, const LayoutPoint &from,
                                           const LayoutPoint &to) noexcept;
+
     void PaintVerticalGlyphAssembly(const RenderStyle &style, PaintInfo &info,
                                     const LayoutPoint &paintOffset) noexcept;
+
     void PaintHorizontalGlyphAssembly(const RenderStyle &style, PaintInfo &info,
                                       const LayoutPoint &paintOffset) noexcept;
   };

@@ -48,10 +48,10 @@ namespace krys::boo::dom
 namespace krys::boo::html
 {
   class CustomStateSet;
+  class ElementInternals;
   class FormAssociatedCustomElement;
   class HTMLElement;
   class HTMLFormElement;
-  class ElementInternals;
 
   namespace detail
   {
@@ -77,6 +77,7 @@ namespace krys::boo::html
 
   public:
     explicit ElementInternals(HTMLElement &element) noexcept;
+
     ~ElementInternals() noexcept;
 
     KRYS_NODISCARD static Ref<ElementInternals> Create(HTMLElement &element) noexcept
@@ -166,6 +167,7 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD FormAssociatedCustomElement *ElementAsFormAssociatedCustom() const noexcept;
+
     /// @brief Tells accessibility the default for @p name changed from @p oldValue, unless the element's own
     /// attribute overrides it.
     void InternalContentAttributeChanged(dom::DOMStringAtom name,

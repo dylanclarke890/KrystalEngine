@@ -111,13 +111,17 @@ namespace krys::boo
     }
 
     virtual void FillShape(GraphicsContext &) const noexcept;
+
     virtual void StrokeShape(GraphicsContext &) const noexcept;
+
     KRYS_NODISCARD virtual bool IsRenderingDisabled() const noexcept = 0;
 
     KRYS_NODISCARD bool IsPointInFill(const FloatPoint &) noexcept;
+
     KRYS_NODISCARD bool IsPointInStroke(const FloatPoint &) noexcept;
 
     KRYS_NODISCARD float GetTotalLength() const noexcept;
+
     KRYS_NODISCARD FloatPoint GetPointAtLength(float distance) const noexcept;
 
     KRYS_NODISCARD bool HasPath() const noexcept
@@ -147,14 +151,20 @@ namespace krys::boo
     Path &EnsurePath() noexcept;
 
     virtual void UpdateShapeFromElement() noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsEmpty() const noexcept;
+
     KRYS_NODISCARD virtual bool
       ShapeDependentStrokeContains(const FloatPoint &, PointCoordinateSpace = GlobalCoordinateSpace) noexcept;
+
     KRYS_NODISCARD virtual bool ShapeDependentFillContains(const FloatPoint &, const WindRule) const noexcept;
+
     KRYS_NODISCARD float StrokeWidth() const noexcept;
 
     KRYS_NODISCARD bool HasNonScalingStroke() const noexcept;
+
     KRYS_NODISCARD AffineTransform NonScalingStrokeTransform() const noexcept;
+
     KRYS_NODISCARD Path *NonScalingStrokePath(const Path *, const AffineTransform &) const noexcept;
 
     KRYS_NODISCARD virtual FloatRect
@@ -165,6 +175,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
+
     KRYS_NODISCARD FloatRect ApproximateStrokeBoundingBox() const noexcept;
 
     KRYS_NODISCARD bool FillRequiresClip() const noexcept
@@ -176,10 +187,12 @@ namespace krys::boo
     // Hit-detection separated for the fill and the stroke
     KRYS_NODISCARD bool FillContains(const FloatPoint &, bool requiresFill = true,
                                      const WindRule fillRule = WindRule::NonZero) noexcept;
+
     KRYS_NODISCARD bool StrokeContains(const FloatPoint &, bool requiresStroke = true) noexcept;
 
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
+
     KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
 
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept final
@@ -203,7 +216,9 @@ namespace krys::boo
     }
 
     void Layout() noexcept final;
+
     void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
+
     void AddFocusRingRects(List<LayoutRect> &, const LayoutPoint &additionalOffset,
                            const RenderLayerModelObject *paintContainer = nullptr) const noexcept final;
 
@@ -216,6 +231,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatRect CalculateStrokeBoundingBox() const noexcept;
+
     void UpdateRepaintBoundingBox() noexcept;
 
     KRYS_NODISCARD bool SetupNonScalingStrokeContext(AffineTransform &, GraphicsContextStateSaver &) noexcept;
@@ -225,8 +241,11 @@ namespace krys::boo
     KRYS_NODISCARD UniquePtr<Path> CreatePath() const noexcept;
 
     void FillShape(const RenderStyle &, GraphicsContext &) noexcept;
+
     void StrokeShapeInternal(const RenderStyle &, GraphicsContext &) noexcept;
+
     void StrokeShape(const RenderStyle &, GraphicsContext &) noexcept;
+
     void FillStrokeMarkers(PaintInfo &) noexcept;
 
     virtual void DrawMarkers(PaintInfo &) noexcept

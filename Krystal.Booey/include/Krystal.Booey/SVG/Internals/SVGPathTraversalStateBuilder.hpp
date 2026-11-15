@@ -49,6 +49,7 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD float TotalLength() const noexcept;
+
     KRYS_NODISCARD FloatPoint CurrentPoint() const noexcept;
 
     void IncrementPathSegmentCount() noexcept final
@@ -61,9 +62,12 @@ namespace krys::boo::svg
   private:
     // Used in UnalteredParsing/NormalizedParsing modes.
     void MoveTo(const FloatPoint &, bool closed, PathCoordinateMode) noexcept final;
+
     void LineTo(const FloatPoint &, PathCoordinateMode) noexcept final;
+
     void CurveToCubic(const FloatPoint &, const FloatPoint &, const FloatPoint &,
                       PathCoordinateMode) noexcept final;
+
     void ClosePath() noexcept final;
 
     // Not used for PathTraversalState.

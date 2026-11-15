@@ -55,6 +55,7 @@ namespace krys::boo::style
       Resolved,
       Computed,
     };
+
     PropertyValueType ValueType;
 
     const RenderStyle &Style;

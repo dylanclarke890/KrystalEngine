@@ -128,12 +128,17 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD bool IsZero() const noexcept;
+
       KRYS_NODISCARD bool HasEvenCorners() const noexcept;
+
       KRYS_NODISCARD bool IsUniformCornerRadius() const noexcept; // Including no radius.
 
       void Scale(float factor) noexcept;
+
       void Scale(float horizontalFactor, float verticalFactor) noexcept;
+
       void ExpandEvenIfZero(float size) noexcept;
+
       void Expand(float topWidth, float bottomWidth, float leftWidth, float rightWidth) noexcept;
 
       void Expand(float size) noexcept
@@ -160,9 +165,12 @@ namespace krys::boo
 
   public:
     explicit FloatRoundedRect(const FloatRect & = FloatRect(), const Radii & = Radii()) noexcept;
+
     FloatRoundedRect(const FloatRect &, const FloatSize &topLeft, const FloatSize &topRight,
                      const FloatSize &bottomLeft, const FloatSize &bottomRight) noexcept;
+
     explicit FloatRoundedRect(const LayoutRoundedRect &) noexcept;
+
     FloatRoundedRect(float x, float y, float width, float height) noexcept;
 
     KRYS_NODISCARD const FloatRect &Rect() const noexcept
@@ -221,6 +229,7 @@ namespace krys::boo
     }
 
     void InflateWithRadii(float size) noexcept;
+
     void AdjustRadii() noexcept;
 
     KRYS_NODISCARD FloatRect TopLeftCorner() const noexcept
@@ -248,6 +257,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsRenderable() const noexcept;
+
     KRYS_NODISCARD bool XInterceptsAtY(float y, float &minXIntercept, float &maxXIntercept) const noexcept;
 
     KRYS_NODISCARD bool IntersectionIsRectangular(const FloatRect &) const noexcept;

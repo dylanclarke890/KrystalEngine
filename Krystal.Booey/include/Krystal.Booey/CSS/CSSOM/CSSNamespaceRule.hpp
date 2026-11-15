@@ -49,6 +49,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<CSSNamespaceRule> Create(NamespaceRule &rule, CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSOMStringAtom NamespaceURI() const noexcept;
+
     KRYS_NODISCARD CSSOMStringAtom Prefix() const noexcept;
 
   private:
@@ -58,6 +59,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     void Reattach(Rule &rule) noexcept final;
   };
 }

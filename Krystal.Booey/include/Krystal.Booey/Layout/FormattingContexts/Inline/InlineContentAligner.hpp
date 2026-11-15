@@ -56,11 +56,13 @@ namespace krys::boo::layout
       No,
       Yes,
     };
+
     static void
       ApplyRubyBaseAlignmentOffset(inline_display::Boxes &displayBoxes,
                                    const HashMap<const Box *, InlineLayoutUnit> &alignmentOffsetList,
                                    AdjustContentOnlyInsideRubyBase adjustContentOnlyInsideRubyBase,
                                    InlineFormattingContext &inlineFormattingContext) noexcept;
+
     static void ApplyRubyAnnotationAlignmentOffset(inline_display::Boxes &displayBoxes,
                                                    InlineLayoutUnit alignmentOffset,
                                                    InlineFormattingContext &inlineFormattingContext) noexcept;

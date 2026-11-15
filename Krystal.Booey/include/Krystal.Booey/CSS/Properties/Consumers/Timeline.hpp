@@ -35,9 +35,9 @@ namespace krys::boo::style
 
 namespace krys::boo::css
 {
-  class TokenRange;
-  struct PropertyParserState;
   struct ParserContext;
+  struct PropertyParserState;
+  class TokenRange;
   class Value;
 
   enum class ValueId : uint16;

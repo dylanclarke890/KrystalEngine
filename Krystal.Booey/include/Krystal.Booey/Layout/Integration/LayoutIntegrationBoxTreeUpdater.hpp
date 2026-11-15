@@ -62,17 +62,22 @@ namespace krys::boo::layout_integration
 
   public:
     explicit BoxTreeUpdater(RenderBlock &rootRenderer) noexcept;
+
     BoxTreeUpdater(RenderBlock &rootRenderer, const dom::Document &document) noexcept;
+
     ~BoxTreeUpdater() noexcept;
 
     CheckedRef<layout::ElementBox> Build() noexcept;
+
     void TearDown() noexcept;
 
     static void UpdateStyle(const RenderObject &renderer) noexcept;
+
     static void UpdateContent(const RenderText &textRenderer) noexcept;
 
     const layout::Box &Insert(const RenderElement &parent, RenderObject &child,
                               const RenderObject *beforeChild = nullptr) noexcept;
+
     UniquePtr<layout::Box> Remove(const RenderElement &parent, RenderObject &child) noexcept;
 
   private:
@@ -87,16 +92,22 @@ namespace krys::boo::layout_integration
     }
 
     KRYS_NODISCARD const layout::ElementBox &RootLayoutBox() const noexcept;
+
     KRYS_NODISCARD layout::ElementBox &RootLayoutBox() noexcept;
+
     KRYS_NODISCARD layout::InitialContainingBlock &GetInitialContainingBlock() noexcept;
 
     KRYS_NODISCARD static UniquePtr<layout::Box> CreateLayoutBox(RenderObject &renderer) noexcept;
+
     static void AdjustStyleIfNeeded(const RenderElement &renderer, RenderStyle &style,
                                     RenderStyle *firstLineStyle) noexcept;
 
     void BuildTreeForInlineContent() noexcept;
+
     void BuildTreeForFlexContent() noexcept;
+
     void BuildTreeForGridContent() noexcept;
+
     void InsertChild(UniquePtr<layout::Box> childBox, RenderObject &childRenderer,
                      const RenderObject *beforeChild = nullptr) noexcept;
   };

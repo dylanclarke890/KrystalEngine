@@ -58,6 +58,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static SVGTextMetrics MeasureCharacterRange(const RenderSVGInlineText &, uint32 position,
                                                                uint32 length) noexcept;
+
     KRYS_NODISCARD static TextRun
       ConstructTextRun(const RenderSVGInlineText &, uint32 position = 0,
                        uint32 length = std::numeric_limits<uint32>::max()) noexcept;

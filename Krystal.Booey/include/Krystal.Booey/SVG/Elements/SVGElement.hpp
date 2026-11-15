@@ -128,14 +128,14 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 67uz);
 
 namespace krys::boo::svg
 {
-  class SVGAnimatedProperty;
-  class SVGAttributeAnimator;
-  class SVGPropertyAnimatorFactory;
   enum class AnimationMode : uint8;
   enum class CalcMode : uint8;
   enum class CTMScope : bool;
+  class SVGAnimatedProperty;
+  class SVGAttributeAnimator;
   class SVGConditionalProcessingAttributes;
   class SVGElementRareData;
+  class SVGPropertyAnimatorFactory;
   class SVGResourceElementClient;
   class SVGSvgElement;
   class SVGUseElement;
@@ -181,6 +181,7 @@ namespace krys::boo::svg
 
   public:
     explicit SVGElement(dom::Document &document) noexcept;
+
     ~SVGElement() noexcept override;
 
     /// @brief The element's interface, which its tag name selects.
@@ -271,7 +272,9 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool HasRelativeLengths() const noexcept;
 
     KRYS_NODISCARD bool InstanceUpdatesBlocked() const noexcept;
+
     void SetInstanceUpdatesBlocked(bool value) noexcept;
+
     KRYS_NODISCARD virtual AffineTransform LocalCoordinateSpaceTransform(CTMScope) const noexcept;
 
     // For SVGTests
@@ -298,11 +301,14 @@ namespace krys::boo::svg
     }
 
     void SetAnimatedSVGAttributesAreDirty() noexcept;
+
     void SetPresentationalHintStyleIsDirty() noexcept;
+
     void UpdateSVGRendererForElementChange() noexcept;
 
     /// @brief The object bounding box of a rendered graphics element, in its renderer's local coordinates.
     KRYS_NODISCARD Maybe<FloatRect> GetBoundingBox() const noexcept;
+
     /// @brief Whether the element's renderer is one inside an SVG renderer tree (not the outermost `<svg>`'s
     /// box), whose bounds come from SVG geometry rather than the box model.
     KRYS_NODISCARD bool HasAssociatedSVGLayoutBox() const noexcept;
@@ -311,16 +317,24 @@ namespace krys::boo::svg
     KRYS_NODISCARD List<Ref<SVGElement>> Instances() const noexcept;
 
     KRYS_NODISCARD List<Ref<SVGElement>> ReferencingElements() const noexcept;
+
     KRYS_NODISCARD List<WeakPtr<SVGResourceElementClient>> ReferencingCSSClients() const noexcept;
+
     void AddReferencingCSSClient(SVGResourceElementClient &) noexcept;
+
     void RemoveReferencingCSSClient(SVGResourceElementClient &) noexcept;
+
     void AddReferencingElement(SVGElement &element) noexcept;
+
     void RemoveReferencingElement(SVGElement &element) noexcept;
+
     void RemoveElementReference() noexcept;
 
     /// @brief The element this is an instance of, if it's in a `<use>` element's shadow tree.
     KRYS_NODISCARD SVGElement *CorrespondingElement() const noexcept;
+
     KRYS_NODISCARD SVGUseElement *CorrespondingUseElement() const noexcept;
+
     void SetCorrespondingElement(SVGElement *correspondingElement) noexcept;
 
     KRYS_NODISCARD virtual bool HaveLoadedRequiredResources() noexcept;
@@ -359,7 +373,9 @@ namespace krys::boo::svg
 #endif
 
     KRYS_NODISCARD css::MutableStyleProperties *AnimatedSMILStyleProperties() const noexcept;
+
     KRYS_NODISCARD css::MutableStyleProperties &EnsureAnimatedSMILStyleProperties() noexcept;
+
     void SetUseOverrideComputedStyle(bool) noexcept;
 
     void CallClearTarget() noexcept
@@ -367,8 +383,8 @@ namespace krys::boo::svg
       ClearTarget();
     }
 
-    class InstanceUpdateBlocker;
     class InstanceInvalidationGuard;
+    class InstanceUpdateBlocker;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGElement>;
 
@@ -380,7 +396,9 @@ namespace krys::boo::svg
     void DetachAllProperties() noexcept;
 
     KRYS_NODISCARD bool IsAnimatedPropertyAttribute(const dom::QualifiedName &attributeName) const noexcept;
+
     KRYS_NODISCARD bool IsAnimatedAttribute(const dom::QualifiedName &attributeName) const noexcept;
+
     KRYS_NODISCARD bool IsAnimatedStyleAttribute(const dom::QualifiedName &attributeName) const noexcept;
 
     /// @brief Writes the property that reflects @p name back to the attribute, if it has changed.
@@ -390,6 +408,7 @@ namespace krys::boo::svg
     void SynchronizeAllSVGAttributes() noexcept;
 
     void CommitPropertyChange(SVGProperty *property) noexcept override;
+
     void CommitPropertyChange(SVGAnimatedProperty &animatedProperty) noexcept;
 
     KRYS_NODISCARD SVGPropertyAnimatorFactory &PropertyAnimatorFactory() noexcept
@@ -400,9 +419,11 @@ namespace krys::boo::svg
     KRYS_NODISCARD RefPtr<SVGAttributeAnimator> CreateAnimator(const dom::QualifiedName &, AnimationMode,
                                                                CalcMode, bool isAccumulated,
                                                                bool isAdditive) noexcept;
+
     void AnimatorWillBeDeleted(const dom::QualifiedName &) noexcept;
 
     using Node::ComputedStyle;
+
     KRYS_NODISCARD const RenderStyle *
       ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
 
@@ -420,6 +441,7 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD SVGConditionalProcessingAttributes &ConditionalProcessingAttributes() noexcept;
+
     KRYS_NODISCARD SVGConditionalProcessingAttributes *
       ConditionalProcessingAttributesIfExists() const noexcept;
 
@@ -454,6 +476,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
@@ -462,10 +485,13 @@ namespace krys::boo::svg
 
     /// @brief Focuses the element if it's focusable, and clicks it, as in Chrome.
     bool AccessKeyAction(bool sendMouseEvents) noexcept override;
+
     void OnPostConnection() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
     void DidAddEventListener(const dom::EventListener &listener) noexcept override;
+
     void DidRemoveEventListener(const dom::EventListener &listener) noexcept override;
 
     KRYS_NODISCARD virtual bool NeedsPendingResourceHandling() const noexcept
@@ -483,6 +509,7 @@ namespace krys::boo::svg
     }
 
     void UpdateRelativeLengthsInformation() noexcept;
+
     void UpdateRelativeLengthsInformationForChild(bool hasRelativeLengths, SVGElement &element) noexcept;
 
   public:

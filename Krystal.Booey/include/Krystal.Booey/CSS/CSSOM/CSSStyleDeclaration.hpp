@@ -69,9 +69,13 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD virtual CSSRule *ParentRule() const noexcept = 0;
+
     KRYS_NODISCARD virtual CSSOMString CssText() const noexcept = 0;
+
     virtual dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept = 0;
+
     KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;
+
     KRYS_NODISCARD virtual CSSOMString Item(uint32 index) const noexcept = 0;
 
     KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept
@@ -80,11 +84,16 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD virtual CSSOMString GetPropertyValue(const CSSOMString &propertyName) noexcept = 0;
+
     KRYS_NODISCARD virtual CSSOMString GetPropertyPriority(const CSSOMString &propertyName) noexcept = 0;
+
     KRYS_NODISCARD virtual CSSOMString GetPropertyShorthand(const CSSOMString &propertyName) noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept = 0;
+
     virtual dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
                                                const CSSOMString &priority) noexcept = 0;
+
     virtual dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept = 0;
 
     KRYS_NODISCARD virtual CSSStyleSheet *ParentStyleSheet() const noexcept

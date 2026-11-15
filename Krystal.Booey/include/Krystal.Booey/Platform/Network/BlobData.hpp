@@ -133,9 +133,12 @@ namespace krys::boo
     }
 
     void AppendData(Ref<SharedBuffer> &&data) noexcept;
+
     void AppendFile(utf8_stringview path) noexcept;
+
     /// @brief Appends the items of another blob's data.
     void AppendItems(const BlobDataItemList &items) noexcept;
+
     /// @brief Appends @p length bytes of @p items, from @p offset.
     void AppendStorageItems(const BlobDataItemList &items, int64 offset, int64 length) noexcept;
 
@@ -149,6 +152,7 @@ namespace krys::boo
 
   private:
     void AppendData(Ref<SharedBuffer> &&data, int64 offset, int64 length) noexcept;
+
     void AppendFile(utf8_stringview path, int64 offset, int64 length) noexcept;
   };
 }

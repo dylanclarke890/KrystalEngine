@@ -65,7 +65,9 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool SupportsRequired() const noexcept final;
+
     KRYS_NODISCARD Maybe<dom::DOMString> FallbackValue() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept final;
 
     /// @brief The value as a colour.
@@ -75,26 +77,38 @@ namespace krys::boo::html
 
     // ColorChooserClient functions:
     KRYS_NODISCARD bool SupportsAlpha() const noexcept final;
+
     KRYS_NODISCARD bool IsElementRTL() const noexcept final;
+
     KRYS_NODISCARD List<Color> SuggestedColors() const noexcept final;
 
   private:
     void DidChooseColor(const Color &color) noexcept final;
+
     void DidEndChooser() noexcept final;
+
     KRYS_NODISCARD IntRect ElementRectRelativeToRootView() const noexcept final;
 
     // InputType functions:
     KRYS_NODISCARD bool IsPresentingAttachedView() const noexcept final;
+
     void CreateShadowSubtree() noexcept final;
+
     void SetValue(dom::DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
+
     void AttributeChanged(dom::DOMStringAtom name) noexcept final;
+
     void HandleActivationBehavior(dom::Event &event) noexcept final;
+
     void ShowPicker() noexcept final;
+
     void ElementDidBlur() noexcept final;
 
     void EndColorChooser() noexcept;
+
     void UpdateColorSwatch() noexcept;
+
     KRYS_NODISCARD HTMLElement *ShadowColorSwatch() const noexcept;
   };
 }

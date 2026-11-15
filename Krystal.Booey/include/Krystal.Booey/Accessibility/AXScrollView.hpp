@@ -46,6 +46,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<AXScrollView> Create(AXId id, LocalFrameView &view,
                                                    AXObjectCache &cache) noexcept;
+
     ~AXScrollView() noexcept override;
 
     KRYS_NODISCARD bool IsDetached() const noexcept override;
@@ -56,12 +57,15 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LocalFrameView *ScrollView() const noexcept;
+
     /// @brief The view's document's web area.
     KRYS_NODISCARD AXObject *WebAreaObject() const noexcept;
+
     /// @brief The view's scroll bar running in @p orientation (vertical if undefined), if it has one.
     KRYS_NODISCARD AXObject *ScrollBar(AXOrientation orientation) noexcept;
 
     KRYS_NODISCARD dom::Document *GetDocument() const noexcept override;
+
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override;
 
     KRYS_NODISCARD bool IsEnabled() const noexcept override
@@ -70,12 +74,17 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsFocused() const noexcept override;
+
     KRYS_NODISCARD bool CanSetFocusAttribute() const noexcept override;
+
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
+
     KRYS_NODISCARD AXObject *AccessibilityHitTest(const IntPoint &point) const noexcept override;
 
     void AddChildren() noexcept override;
+
     void ClearChildren() noexcept override;
+
     void UpdateChildrenIfNecessary() noexcept override;
 
     void SetNeedsToUpdateChildren() noexcept override
@@ -97,12 +106,15 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override;
+
     void DetachRemoteParts(AXDetachmentType detachmentType) noexcept override;
 
     /// @brief Adds the view's scroll bars as children, making or removing their objects as the view gains or
     /// loses them.
     void UpdateScrollbars() noexcept;
+
     void UpdateScrollbar(RefPtr<AXObject> &object, Scrollbar *scrollbar) noexcept;
+
     void RemoveScrollbar(RefPtr<AXObject> &object) noexcept;
   };
 }

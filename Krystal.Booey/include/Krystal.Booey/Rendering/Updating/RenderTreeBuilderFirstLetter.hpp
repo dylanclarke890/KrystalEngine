@@ -46,10 +46,12 @@ namespace krys::boo
     explicit FirstLetter(RenderTreeBuilder &builder) noexcept;
 
     void UpdateAfterDescendants(RenderBlock &block) noexcept;
+
     void CleanupOnDestroy(RenderTextFragment &textFragment) noexcept;
 
   private:
     void UpdateStyle(RenderBlock &firstLetterBlock, RenderObject &currentChild) noexcept;
+
     void CreateRenderers(RenderText &currentTextChild) noexcept;
   };
 }

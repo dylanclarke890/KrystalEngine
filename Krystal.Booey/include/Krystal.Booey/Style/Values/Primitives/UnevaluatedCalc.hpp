@@ -31,8 +31,8 @@
 
 namespace krys::boo::style::calc
 {
-  class Value;
   struct Child;
+  class Value;
 }
 
 namespace krys::boo::style
@@ -45,12 +45,17 @@ namespace krys::boo::style
 
   public:
     explicit UnevaluatedCalcBase(calc::Value &) noexcept;
+
     explicit UnevaluatedCalcBase(Ref<calc::Value> &&) noexcept;
+
     explicit UnevaluatedCalcBase(calc::Child &&, css::Category, css::Range) noexcept;
 
     UnevaluatedCalcBase(const UnevaluatedCalcBase &) noexcept;
+
     UnevaluatedCalcBase(UnevaluatedCalcBase &&) noexcept;
+
     UnevaluatedCalcBase &operator=(const UnevaluatedCalcBase &) noexcept;
+
     UnevaluatedCalcBase &operator=(UnevaluatedCalcBase &&) noexcept;
 
     ~UnevaluatedCalcBase() noexcept;

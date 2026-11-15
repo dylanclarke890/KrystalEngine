@@ -111,10 +111,15 @@ namespace krys::boo::css
     }
 
     void Add(CSSFontFace &face) noexcept;
+
     void Remove(const CSSFontFace &face) noexcept;
+
     void Purge() noexcept;
+
     void EmptyCaches() noexcept;
+
     void Clear() noexcept;
+
     KRYS_NODISCARD CSSFontFace &operator[](size_t i) noexcept;
 
     KRYS_NODISCARD CSSFontFace *LookUpByCSSConnection(FontFaceRule &target) noexcept;
@@ -145,16 +150,20 @@ namespace krys::boo::css
 
   private:
     void RemoveFromFacesLookupTable(const CSSFontFace &face, const Value &familyToSearchFor) noexcept;
+
     void AddToFacesLookupTable(CSSFontFace &face) noexcept;
 
     void IncrementActiveCount() noexcept;
+
     void DecrementActiveCount() noexcept;
 
     void FontStateChanged(CSSFontFace &face, CSSFontFace::Status oldState,
                           CSSFontFace::Status newState) noexcept final;
+
     void FontPropertyChanged(CSSFontFace &face, Value *oldFamily = nullptr) noexcept final;
 
     void EnsureLocalFontFacesForFamilyRegistered(const StringAtom &familyName) noexcept;
+
     void NotifyFontModified() noexcept;
 
     KRYS_NODISCARD static StringAtom FamilyNameFromPrimitive(const PrimitiveValue &value) noexcept;

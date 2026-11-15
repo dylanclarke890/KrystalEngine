@@ -30,6 +30,7 @@
 namespace krys::boo
 {
   inline RenderStyleBase::RenderStyleBase(RenderStyleBase &&) noexcept = default;
+
   inline RenderStyleBase &RenderStyleBase::operator=(RenderStyleBase &&) noexcept = default;
 
   inline RenderStyleBase::RenderStyleBase(CreateDefaultStyleTag) noexcept

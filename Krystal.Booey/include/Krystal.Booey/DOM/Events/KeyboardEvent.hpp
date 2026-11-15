@@ -147,12 +147,15 @@ namespace krys::boo::dom
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-keycode
     KRYS_NODISCARD int32 KeyCode() const noexcept;
+
     /// @brief The key code for the `keydown` that matches a `keypress`.
     KRYS_NODISCARD int32 KeyCodeForKeyDown() const noexcept;
+
     /// @brief The character code for `keypress`, 0 for `keydown` and `keyup`.
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-charcode
     KRYS_NODISCARD int32 CharCode() const noexcept;
+
     /// @note Legacy: the same as `KeyCode()`.
     /// @see https://w3c.github.io/uievents/#dom-uievent-which
     KRYS_NODISCARD uint32 Which() const noexcept;

@@ -49,6 +49,7 @@ namespace krys::boo
     static void Paint(const style::BorderImage &, GraphicsContext &, const RenderElement *,
                       const RenderStyle &, const LayoutRect &destination, const LayoutSize &source,
                       float deviceScaleFactor, ImagePaintingOptions) noexcept;
+
     static void Paint(const style::MaskBorder &, GraphicsContext &, const RenderElement *,
                       const RenderStyle &, const LayoutRect &destination, const LayoutSize &source,
                       float deviceScaleFactor, ImagePaintingOptions) noexcept;

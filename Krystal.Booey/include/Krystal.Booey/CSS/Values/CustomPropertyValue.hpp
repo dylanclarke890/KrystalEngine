@@ -79,7 +79,9 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsCurrentColor() const noexcept;
 
     KRYS_NODISCARD bool IsVariableReference() const noexcept;
+
     KRYS_NODISCARD bool IsVariableData() const noexcept;
+
     KRYS_NODISCARD bool IsGlobalKeyword() const noexcept;
 
     KRYS_NODISCARD Maybe<GlobalKeyword> TryGlobalKeyword() const noexcept;

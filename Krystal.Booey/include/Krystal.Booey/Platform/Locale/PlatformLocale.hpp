@@ -78,6 +78,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static UniquePtr<Locale> Create(utf8_stringview localeIdentifier) noexcept;
+
     KRYS_NODISCARD static UniquePtr<Locale> CreateDefault() noexcept;
 
     virtual ~Locale() noexcept;
@@ -149,7 +150,9 @@ namespace krys::boo
 
   protected:
     Locale() noexcept = default;
+
     virtual void InitializeLocaleData() noexcept = 0;
+
     void SetLocaleData(const std::array<utf8_string, DecimalSymbolsSize> &symbols,
                        utf8_stringview positivePrefix, utf8_stringview positiveSuffix,
                        utf8_stringview negativePrefix, utf8_stringview negativeSuffix) noexcept;
@@ -157,6 +160,7 @@ namespace krys::boo
   private:
     KRYS_NODISCARD bool DetectSignAndGetDigitRange(utf8_stringview input, bool &isNegative,
                                                    size_t &startIndex, size_t &endIndex) const noexcept;
+
     KRYS_NODISCARD size_t MatchedDecimalSymbolIndex(utf8_stringview input, size_t &position) const noexcept;
   };
 }

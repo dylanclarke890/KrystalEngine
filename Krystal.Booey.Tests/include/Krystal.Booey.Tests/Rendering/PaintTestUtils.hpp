@@ -37,6 +37,7 @@ namespace krys::boo::tests
   /// @brief The start of a 200x100 view's display list: the view's base colour, then the root's background of
   /// @p rootColour over the canvas.
   KRYS_NODISCARD utf8_string Canvas(utf8_stringview rootColour = u8"#FFFFFF") noexcept;
+
   /// @brief The text @p displayList's glyph runs draw, in drawing order, read back through each run's font as
   /// characters of @p alphabet; runs are separated by `|`. A glyph that's none of @p alphabet's characters
   /// reads as `?`, and runs with none of them are left out.

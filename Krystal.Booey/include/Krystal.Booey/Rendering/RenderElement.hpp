@@ -48,8 +48,8 @@ namespace krys::boo::layout
 
 namespace krys::boo::style
 {
-  class PseudoElementRequest;
   struct PseudoElementIdentifier;
+  class PseudoElementRequest;
 }
 
 namespace krys::boo
@@ -68,11 +68,11 @@ namespace krys::boo
 {
   class BlendingKeyframes;
   class GraphicsLayerAnimation;
+  struct PaintInfo;
   class RenderBlock;
   class RenderBoxModelObject;
   class RenderLayer;
   class StyleImage;
-  struct PaintInfo;
 
   /// @brief A renderer with its own style: an element's, or an anonymous box's.
   class RenderElement : public RenderObject
@@ -164,6 +164,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::Element *GetElement() const noexcept;
 
     KRYS_NODISCARD layout::ElementBox *LayoutBox() noexcept;
+
     KRYS_NODISCARD const layout::ElementBox *LayoutBox() const noexcept;
 
     KRYS_NODISCARD RenderObject *FirstChild() const noexcept
@@ -177,6 +178,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderObject *FirstInFlowChild() const noexcept;
+
     KRYS_NODISCARD RenderObject *LastInFlowChild() const noexcept;
 
     KRYS_NODISCARD RenderObject *FirstChildSlow() const noexcept final
@@ -202,16 +204,19 @@ namespace krys::boo
     }
 
     void InsertedIntoTree() noexcept override;
+
     void WillBeRemovedFromTree() noexcept override;
 
     /// @brief Takes the element and its descendants out of their fragmented flows.
     void RemoveFromRenderFragmentedFlow() noexcept;
+
     /// @brief Drops the box info @p fragmentedFlow keeps for the element and its descendants, and the blocks'
     /// cached enclosing flows.
     virtual void ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(
       RenderFragmentedFlow *fragmentedFlow) noexcept;
 
     KRYS_NODISCARD bool IsFixedPositioned() const noexcept;
+
     KRYS_NODISCARD bool IsAbsolutelyPositioned() const noexcept;
 
     KRYS_NODISCARD bool IsWritingModeRoot() const noexcept;
@@ -239,8 +244,10 @@ namespace krys::boo
 
     /// @brief Whether the renderer can be seen at all: it's visible and its document's frame is on screen.
     KRYS_NODISCARD bool IsVisibleIgnoringGeometry() const noexcept;
+
     /// @brief Whether the renderer can be seen in @p documentRect, in document coordinates.
     KRYS_NODISCARD bool IsVisibleInDocumentRect(const IntRect &documentRect) const noexcept;
+
     /// @brief Whether the renderer can be seen in its frame's visible content.
     KRYS_NODISCARD bool IsVisibleInViewport() const noexcept;
 
@@ -305,16 +312,20 @@ namespace krys::boo
     bool RepaintAfterLayoutIfNeeded(const RenderLayerModelObject *repaintContainer,
                                     RequiresFullRepaint requiresFullRepaint, const RepaintRects &oldRects,
                                     const RepaintRects &newRects) noexcept;
+
     /// @brief Whether layout checks if the renderer needs repainting (a `LayoutRepainter`), rather than
     /// leaving it to its layer or a full repaint.
     KRYS_NODISCARD bool CheckForRepaintDuringLayout() const noexcept;
+
     /// @brief Whether the renderer is invisible and so is everything in its enclosing layer.
     KRYS_NODISCARD bool IsInsideEntirelyHiddenLayer() const noexcept;
 
     VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                const IntRect *) noexcept override;
+
     KRYS_NODISCARD VisibleInViewportState
       ImageVisibleInViewport(const dom::Document &) const noexcept override;
+
     void DidRemoveCachedImageClient(CachedImage &) noexcept override;
 
     KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept;
@@ -326,21 +337,29 @@ namespace krys::boo
     /// @brief Paints every phase at once, as though this renderer established its own stacking context (as
     /// inline blocks, flex items and grid items paint).
     void PaintOutline(PaintInfo &, const LayoutRect &) noexcept;
+
     void PaintAsInlineBlock(PaintInfo &, const LayoutPoint &childPoint) noexcept;
 
     /// @brief Lays out this renderer and its descendants that need layout.
     virtual void Layout() noexcept;
+
     void LayoutIfNeeded() noexcept;
+
     /// @brief Clears the layout bits of this renderer and its descendants, whose layout content-visibility
     /// skips.
     void ClearNeedsLayoutForSkippedContent() noexcept;
 
     void
       SetChildNeedsLayout(MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
+
     void ClearChildNeedsLayout() noexcept;
+
     void SetNeedsOutOfFlowMovementLayout(const RenderStyle *oldStyle) noexcept;
+
     void SetNeedsLayoutForStyleDifference(style::Difference diff, const RenderStyle *oldStyle) noexcept;
+
     void SetNeedsLayoutForOverflowChange() noexcept;
+
     void SetOutOfFlowChildNeedsStaticPositionLayout() noexcept;
 
     KRYS_NODISCARD virtual bool OverflowChangesMayAffectLayout() const noexcept
@@ -355,14 +374,22 @@ namespace krys::boo
 
     // block-level boxes are boxes that participate in a block formatting context.
     KRYS_NODISCARD bool IsBlockLevelBox() const noexcept;
+
     KRYS_NODISCARD bool IsAnonymousBlock() const noexcept;
+
     KRYS_NODISCARD bool IsBlockContainer() const noexcept;
+
     // A block-level box that is also a block container.
     KRYS_NODISCARD bool IsBlockBox() const noexcept;
+
     KRYS_NODISCARD bool IsBeforeContent() const noexcept;
+
     KRYS_NODISCARD bool IsAfterContent() const noexcept;
+
     KRYS_NODISCARD bool IsBeforeOrAfterContent() const noexcept;
+
     KRYS_NODISCARD static bool IsBeforeContent(const RenderObject *renderer) noexcept;
+
     KRYS_NODISCARD static bool IsAfterContent(const RenderObject *renderer) noexcept;
 
     /// @brief The style of the pseudo-element @p pseudoElementIdentifier of this renderer's element,
@@ -370,6 +397,7 @@ namespace krys::boo
     KRYS_NODISCARD const RenderStyle *
       GetCachedPseudoStyle(const style::PseudoElementIdentifier &pseudoElementIdentifier,
                            const RenderStyle *parentStyle = nullptr) const noexcept;
+
     KRYS_NODISCARD UniquePtr<RenderStyle>
       GetUncachedPseudoStyle(const style::PseudoElementRequest &pseudoElementRequest,
                              const RenderStyle *parentStyle = nullptr,
@@ -379,9 +407,12 @@ namespace krys::boo
     KRYS_NODISCARD dom::Element *GeneratingElement() const noexcept;
 
     KRYS_NODISCARD Color SelectionColor(css::PropertyId colorProperty) const noexcept;
+
     KRYS_NODISCARD UniquePtr<RenderStyle> SelectionPseudoStyle() const noexcept;
+
     /// @brief The style of the element's `::target-text`, or its shadow host's; null if there's none.
     KRYS_NODISCARD const RenderStyle *TargetTextPseudoStyle() const noexcept;
+
     /// @brief The style of a pseudo-element of text segments (`::target-text`, `::spelling-error`,
     /// `::grammar-error`) of @p pseudoElementType, or its shadow host's.
     KRYS_NODISCARD const RenderStyle *
@@ -393,28 +424,39 @@ namespace krys::boo
 
     // Obtains the selection colors that should be used when painting a selection.
     KRYS_NODISCARD Color SelectionBackgroundColor() const noexcept;
+
     KRYS_NODISCARD Color SelectionForegroundColor() const noexcept;
+
     KRYS_NODISCARD Color SelectionEmphasisMarkColor() const noexcept;
 
     KRYS_NODISCARD Overflow EffectiveOverflowX() const noexcept;
+
     KRYS_NODISCARD Overflow EffectiveOverflowY() const noexcept;
+
     KRYS_NODISCARD Overflow EffectiveOverflowBlockDirection() const noexcept;
+
     KRYS_NODISCARD Overflow EffectiveOverflowInlineDirection() const noexcept;
+
     KRYS_NODISCARD bool HasPotentiallyScrollableOverflow() const noexcept;
 
     /// @brief The absolute rect a fragment link or scrollIntoView() scrolls to: from the leading corner of
     /// the renderer to its trailing corner.
     KRYS_NODISCARD LayoutRect AbsoluteAnchorRect(bool *insideFixed = nullptr) const noexcept;
+
     /// @brief The anchor rect expanded by the scroll margin, and the anchor rect.
     KRYS_NODISCARD Pair<LayoutRect, LayoutRect>
       AbsoluteAnchorRectWithScrollMargin(bool *insideFixed = nullptr) const noexcept;
 
     KRYS_NODISCARD bool HasBackground() const noexcept;
+
     KRYS_NODISCARD bool BorderImageIsLoadedAndCanBeRendered() const noexcept;
+
     KRYS_NODISCARD bool HasOutline() const noexcept;
+
     /// @brief Whether hit tests (@p request's, or user-triggered ones) can hit the renderer: visible, not
     /// skipped, and taking pointer events.
     KRYS_NODISCARD bool VisibleToHitTesting(const HitTestRequest *request = nullptr) const noexcept;
+
     /// @brief Whether a link's outline carries its URL as an annotation (painting PDFs).
     KRYS_NODISCARD bool HasOutlineAnnotation() const noexcept;
 
@@ -425,16 +467,25 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool HasClip() const noexcept;
+
     KRYS_NODISCARD bool HasClipOrNonVisibleOverflow() const noexcept;
 
     KRYS_NODISCARD bool HasClipPath() const noexcept;
+
     KRYS_NODISCARD bool HasFilter() const noexcept;
+
     KRYS_NODISCARD bool HasMask() const noexcept;
+
     KRYS_NODISCARD bool HasShapeOutside() const noexcept;
+
     KRYS_NODISCARD bool HasBackdropFilter() const noexcept;
+
     KRYS_NODISCARD bool HasBlendMode() const noexcept;
+
     KRYS_NODISCARD bool IsTransparent() const noexcept;
+
     KRYS_NODISCARD bool HasHiddenBackface() const noexcept;
+
     KRYS_NODISCARD static bool CreatesGroupForStyle(const RenderStyle &style) noexcept;
 
     KRYS_NODISCARD bool CreatesGroup() const noexcept
@@ -443,35 +494,51 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatRect TransformReferenceBoxRect() const noexcept;
+
     KRYS_NODISCARD FloatRect TransformReferenceBoxRect(const RenderStyle &style) const noexcept;
+
     KRYS_NODISCARD virtual FloatRect ReferenceBoxRect(CSSBoxType boxType) const noexcept;
 
     KRYS_NODISCARD RenderLayer *LayerParent() const noexcept;
+
     KRYS_NODISCARD RenderLayer *LayerNextSibling(RenderLayer &parentLayer) const noexcept;
 
     /// @brief The renderer of the element's `::backdrop`, while the element is in the top layer.
     KRYS_NODISCARD RenderBlockFlow *BackdropRenderer() const noexcept;
+
     void SetBackdropRenderer(RenderBlockFlow &renderer) noexcept;
 
     KRYS_NODISCARD ReferencedSVGResources &EnsureReferencedSVGResources() noexcept;
+
     void RemoveLayers() noexcept;
+
     void MoveLayers(RenderLayer &newParent) noexcept;
 
     KRYS_NODISCARD bool CanEstablishContainingBlockWithTransform() const noexcept;
+
     KRYS_NODISCARD bool
       MayContainOutOfFlowPositionedObjects(const RenderStyle *styleToUse = nullptr) const noexcept;
+
     KRYS_NODISCARD bool
       CanContainFixedPositionObjects(const RenderStyle *styleToUse = nullptr) const noexcept;
+
     KRYS_NODISCARD bool
       CanContainAbsolutelyPositionedObjects(const RenderStyle *styleToUse = nullptr) const noexcept;
 
     KRYS_NODISCARD bool ShouldApplyAnyContainment() const noexcept;
+
     KRYS_NODISCARD bool ShouldApplySizeOrInlineSizeContainment() const noexcept;
+
     KRYS_NODISCARD bool ShouldApplyLayoutContainment(const RenderStyle *styleToUse = nullptr) const noexcept;
+
     KRYS_NODISCARD bool ShouldApplySizeContainment() const noexcept;
+
     KRYS_NODISCARD bool ShouldApplyInlineSizeContainment() const noexcept;
+
     KRYS_NODISCARD bool ShouldApplyStyleContainment() const noexcept;
+
     KRYS_NODISCARD bool ShouldApplyPaintContainment(const RenderStyle *styleToUse = nullptr) const noexcept;
+
     KRYS_NODISCARD bool HasEligibleContainmentForSizeQuery() const noexcept;
 
   protected:
@@ -480,6 +547,7 @@ namespace krys::boo
 
     RenderElement(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
                   TypeSpecificFlags typeSpecificFlags) noexcept;
+
     RenderElement(Type type, dom::Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
                   TypeSpecificFlags typeSpecificFlags) noexcept;
 
@@ -491,11 +559,14 @@ namespace krys::boo
                                                                   const RenderStyle &newStyle) noexcept;
 
     virtual void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept;
+
     virtual void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept;
 
     template <typename TFillLayers>
     void UpdateFillImages(const TFillLayers *oldLayers, const TFillLayers *newLayers) noexcept;
+
     void UpdateImage(StyleImage *oldImage, StyleImage *newImage) noexcept;
+
     void UpdateShapeImage(const style::ShapeOutside *oldShapeValue,
                           const style::ShapeOutside *newShapeValue) noexcept;
 
@@ -504,6 +575,7 @@ namespace krys::boo
       AllChildren,
       BlockAndRubyChildren,
     };
+
     void PropagateStyleToAnonymousChildren(StylePropagationType propagationType) noexcept;
 
     virtual void UpdateAnonymousChildStyle(RenderStyle &) const noexcept
@@ -558,6 +630,7 @@ namespace krys::boo
 
     // Called by RenderTreeBuilder: they take and give up ownership of the child.
     RenderObject *AttachRendererInternal(RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
+
     KRYS_NODISCARD RenderPtr<RenderObject> DetachRendererInternal(RenderObject &renderer) noexcept;
 
     KRYS_NODISCARD style::Difference AdjustStyleDifference(style::Difference diff) const noexcept;
@@ -566,11 +639,15 @@ namespace krys::boo
     /// @return Whether it repainted.
     bool RepaintBeforeStyleChange(style::Difference diff, const RenderStyle &oldStyle,
                                   const RenderStyle &newStyle) noexcept;
+
     KRYS_NODISCARD bool ShouldRepaintForStyleDifference(style::Difference diff) const noexcept;
 
     void UpdateReferencedSVGResources() noexcept;
+
     void ClearReferencedSVGResources() noexcept;
+
     void UpdateOutlineAutoAncestor(bool hasOutlineAuto) noexcept;
+
     void IssueRepaintForOutlineAuto(float outlineSize) noexcept;
   };
 }

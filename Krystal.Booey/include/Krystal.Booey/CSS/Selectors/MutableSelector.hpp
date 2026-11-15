@@ -58,6 +58,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static UniquePtr<MutableSelector>
       ParsePseudoClassSelector(CSSOMStringView name, const SelectorParserContext &context) noexcept;
+
     KRYS_NODISCARD static UniquePtr<MutableSelector>
       ParsePseudoElementSelector(CSSOMStringView name, const SelectorParserContext &context) noexcept;
 
@@ -137,9 +138,13 @@ namespace krys::boo::css
     }
 
     void AdoptSelectorVector(MutableSelectorList &&selectorVector) noexcept;
+
     void SetArgumentList(FixedVector<CSSOMStringAtom> list) noexcept;
+
     void SetLangList(FixedVector<PossiblyQuotedIdentifier> list) noexcept;
+
     void SetIntegerList(FixedVector<int32> list) noexcept;
+
     void SetSubSelectors(UniquePtr<SelectorList> selectorList) noexcept;
 
     void SetImplicit() noexcept
@@ -160,6 +165,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD bool HasExplicitNestingParent() const noexcept;
+
     KRYS_NODISCARD bool HasExplicitPseudoClassScope() const noexcept;
 
     // FIXME: "slotted" was removed here for now, since it leads to a combinator connection of
@@ -181,7 +187,9 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD MutableSelector *LeftmostSimpleSelector() noexcept;
+
     KRYS_NODISCARD const MutableSelector *LeftmostSimpleSelector() const noexcept;
+
     KRYS_NODISCARD bool StartsWithExplicitCombinator() const noexcept;
 
     void SetPrecedingComplexSelectorComponent(UniquePtr<MutableSelector> selector) noexcept
@@ -191,9 +199,12 @@ namespace krys::boo::css
 
     void PrependComplexSelectorComponent(SelectorRelation relation,
                                          UniquePtr<MutableSelector> selector) noexcept;
+
     void PrependComplexSelectorComponentAsRelative(UniquePtr<MutableSelector> selector) noexcept;
+
     void AppendTagInComplexSelector(const dom::QualifiedName &tagQualifiedName,
                                     bool tagIsForNamespaceRule = false) noexcept;
+
     KRYS_NODISCARD UniquePtr<MutableSelector> ReleaseFromComplexSelector() noexcept;
   };
 }

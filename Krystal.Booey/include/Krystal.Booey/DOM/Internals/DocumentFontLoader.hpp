@@ -60,18 +60,22 @@ namespace krys::boo
 
     public:
       explicit DocumentFontLoader(Document &document) noexcept;
+
       ~DocumentFontLoader() noexcept;
 
       /// @brief The cached font for the file at @p url, or null if it can't be requested. Its file doesn't
       /// load until `BeginLoadingFontSoon`.
       KRYS_NODISCARD CachedFont *GetCachedFont(url::URL url,
                                                bool isInitiatingElementInUserAgentShadowTree) noexcept;
+
       void BeginLoadingFontSoon(CachedFont &font) noexcept;
 
       void LoadPendingFonts() noexcept;
+
       void StopLoadingAndClearFonts() noexcept;
 
       void SuspendFontLoading() noexcept;
+
       void ResumeFontLoading() noexcept;
 
     private:

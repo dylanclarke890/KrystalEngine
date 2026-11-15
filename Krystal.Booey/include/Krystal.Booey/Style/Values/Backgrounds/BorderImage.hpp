@@ -45,6 +45,7 @@ namespace krys::boo::style
     BorderImageRepeat Repeat;
 
     BorderImage() noexcept;
+
     BorderImage(BorderImageSource &&, BorderImageSlice &&, BorderImageWidth &&, BorderImageOutset &&,
                 BorderImageRepeat &&) noexcept;
 

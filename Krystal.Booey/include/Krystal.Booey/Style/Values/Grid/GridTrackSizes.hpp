@@ -35,6 +35,7 @@ namespace krys::boo::style
   struct GridTrackSizeDefaulter
   {
     KRYS_NODISCARD const GridTrackSize &operator()() const noexcept;
+
     KRYS_NODISCARD bool operator==(const GridTrackSizeDefaulter &) const noexcept = default;
   };
 

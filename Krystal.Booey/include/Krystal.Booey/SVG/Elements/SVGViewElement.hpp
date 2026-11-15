@@ -23,12 +23,15 @@ namespace krys::boo::svg
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGViewElement, SVGElement, SVGFitToViewBox>;
 
     KRYS_NODISCARD const SVGSvgElement *TargetElement() const noexcept;
+
     void SetTargetElement(const SVGSvgElement &targetElement) noexcept;
+
     void ResetTargetElement() noexcept;
 
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final

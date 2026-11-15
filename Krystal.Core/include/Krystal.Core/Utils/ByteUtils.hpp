@@ -15,6 +15,7 @@ namespace krys
   class ByteUtils
   {
     ByteUtils() = delete;
+
     ~ByteUtils() = delete;
 
   public:

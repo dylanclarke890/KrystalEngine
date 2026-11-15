@@ -36,16 +36,27 @@ namespace krys::boo::style
   struct JustifyContent
   {
     constexpr JustifyContent(css::keywords::Normal) noexcept;
+
     constexpr JustifyContent(css::keywords::SpaceBetween) noexcept;
+
     constexpr JustifyContent(css::keywords::SpaceAround) noexcept;
+
     constexpr JustifyContent(css::keywords::SpaceEvenly) noexcept;
+
     constexpr JustifyContent(css::keywords::Stretch) noexcept;
+
     constexpr JustifyContent(css::keywords::Center, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyContent(css::keywords::Start, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyContent(css::keywords::End, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyContent(css::keywords::FlexStart, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyContent(css::keywords::FlexEnd, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyContent(css::keywords::Left, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyContent(css::keywords::Right, Maybe<OverflowPosition> = null) noexcept;
 
     KRYS_NODISCARD constexpr bool IsNormal() const noexcept
@@ -135,9 +146,11 @@ namespace krys::boo::style
     KRYS_NODISCARD constexpr static bool IsContentPosition(PrimaryKind) noexcept;
 
     constexpr JustifyContent(PrimaryKind) noexcept;
+
     constexpr JustifyContent(PrimaryKind, Maybe<OverflowPosition>) noexcept;
 
     KRYS_NODISCARD constexpr PrimaryKind Primary() const noexcept;
+
     KRYS_NODISCARD constexpr OverflowPositionKind GetOverflowPosition() const noexcept;
 
     uint8 _primary : 4 {static_cast<uint8>(PrimaryKind::Normal)};

@@ -41,7 +41,9 @@ namespace krys::boo
     KRYS_NODISCARD constexpr bool operator==(const Quaternion &other) const noexcept = default;
 
     KRYS_NODISCARD Quaternion Slerp(const Quaternion &other, double progress) const noexcept;
+
     KRYS_NODISCARD Quaternion Accumulate(const Quaternion &other) const noexcept;
+
     KRYS_NODISCARD Quaternion Interpolate(const Quaternion &other, double progress,
                                           CompositeOperation compositeOperation) const noexcept;
   };

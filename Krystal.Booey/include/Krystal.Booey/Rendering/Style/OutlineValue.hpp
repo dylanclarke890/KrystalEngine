@@ -40,7 +40,9 @@ namespace krys::boo
     uint8 OutlineStyle : 4 {static_cast<uint8>(boo::OutlineStyle::None)};
 
     KRYS_NODISCARD bool IsVisible() const noexcept;
+
     KRYS_NODISCARD bool NonZero() const noexcept;
+
     KRYS_NODISCARD bool IsTransparent() const noexcept;
 
     KRYS_NODISCARD bool operator==(const OutlineValue &) const noexcept = default;

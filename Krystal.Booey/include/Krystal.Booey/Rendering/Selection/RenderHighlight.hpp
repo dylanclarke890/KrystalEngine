@@ -141,6 +141,7 @@ namespace krys::boo
     }
 
     void SetRenderRange(const RenderRange &renderRange) noexcept;
+
     /// @brief The render range a highlight range's positions cover.
     /// @return Whether it has one: both positions are set and their containers have renderers.
     bool SetRenderRange(const dom::HighlightRange &highlightRange) noexcept;
@@ -172,9 +173,11 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderObject::HighlightState
       HighlightStateForRenderer(const RenderObject &renderer) const noexcept;
+
     KRYS_NODISCARD RenderObject::HighlightState
       HighlightStateForTextBox(const RenderText &renderer,
                                const TextBoxSelectableRange &textBoxRange) const noexcept;
+
     KRYS_NODISCARD std::pair<uint32, uint32>
       RangeForTextBox(const RenderText &renderer, const TextBoxSelectableRange &textBoxRange) const noexcept;
   };

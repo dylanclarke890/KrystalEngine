@@ -30,6 +30,7 @@ namespace krys::ui
                                                   bool stillSelecting) noexcept override;
 
     KRYS_NODISCARD bool CanCopyCut(boo::LocalFrame *frame, bool defaultValue) const noexcept override;
+
     KRYS_NODISCARD bool CanPaste(boo::LocalFrame *frame, bool defaultValue) const noexcept override;
 
     bool HandleKeyboardEvent(boo::dom::KeyboardEvent &event) noexcept override;
@@ -39,6 +40,7 @@ namespace krys::ui
     }
 
     void RespondToChangedSelection(boo::LocalFrame *frame) noexcept override;
+
     void DiscardedComposition(const boo::dom::Document &document) noexcept override;
 
     void DidUpdateComposition() noexcept override
@@ -46,7 +48,9 @@ namespace krys::ui
     }
 
     void HandleInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept override;
+
     void DidDispatchInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept override;
+
     void SetInputMethodState(boo::dom::Element *element) noexcept override;
 
     /// @brief Whether the focused element takes text from the input method.
@@ -68,12 +72,17 @@ namespace krys::ui
     }
 
     void RegisterUndoStep(boo::UndoStep &step) noexcept override;
+
     void RegisterRedoStep(boo::UndoStep &step) noexcept override;
+
     void ClearUndoRedoOperations() noexcept override;
 
     KRYS_NODISCARD bool CanUndo() const noexcept override;
+
     KRYS_NODISCARD bool CanRedo() const noexcept override;
+
     void Undo() noexcept override;
+
     void Redo() noexcept override;
 
     // There's no autofill (not planned, see Krystal.Booey's OVERVIEW.md).

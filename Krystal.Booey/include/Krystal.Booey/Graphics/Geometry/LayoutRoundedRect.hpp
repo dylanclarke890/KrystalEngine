@@ -103,9 +103,11 @@ namespace krys::boo
     KRYS_NODISCARD bool IsZero() const noexcept;
 
     KRYS_NODISCARD bool AreRenderableInRect(const LayoutRect &) const noexcept;
+
     void MakeRenderableInRect(const LayoutRect &) noexcept;
 
     void Scale(float factor) noexcept;
+
     void Expand(LayoutUnit topWidth, LayoutUnit bottomWidth, LayoutUnit leftWidth,
                 LayoutUnit rightWidth) noexcept;
 
@@ -158,7 +160,9 @@ namespace krys::boo
 
   public:
     explicit LayoutRoundedRect(const LayoutRect &, const Radii & = Radii()) noexcept;
+
     LayoutRoundedRect(LayoutUnit, LayoutUnit, LayoutUnit width, LayoutUnit height) noexcept;
+
     LayoutRoundedRect(const LayoutRect &, const LayoutSize &topLeft, const LayoutSize &topRight,
                       const LayoutSize &bottomLeft, const LayoutSize &bottomRight) noexcept;
 
@@ -225,11 +229,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsRenderable() const noexcept;
+
     void AdjustRadii() noexcept;
 
     // Tests whether the quad intersects any part of this rounded rectangle.
     // This only works for convex quads.
     KRYS_NODISCARD bool IntersectsQuad(const FloatQuad &) const noexcept;
+
     KRYS_NODISCARD bool Contains(const LayoutRect &) const noexcept;
 
     KRYS_NODISCARD FloatRoundedRect

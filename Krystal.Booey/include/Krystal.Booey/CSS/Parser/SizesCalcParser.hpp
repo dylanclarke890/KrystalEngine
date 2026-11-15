@@ -75,10 +75,15 @@ namespace krys::boo::css
 
   private:
     KRYS_NODISCARD bool CalcToReversePolishNotation(TokenRange range) noexcept;
+
     KRYS_NODISCARD bool Calculate() noexcept;
+
     void AppendNumber(const Token &token) noexcept;
+
     KRYS_NODISCARD bool AppendLength(const Token &token) noexcept;
+
     KRYS_NODISCARD bool HandleOperator(List<Token> &stack, const Token &token) noexcept;
+
     void AppendOperator(const Token &token) noexcept;
   };
 }

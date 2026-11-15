@@ -66,27 +66,35 @@ namespace krys::boo::style
                                                                     Option::Scale, Option::Offset};
 
     explicit TransformResolver(TransformationMatrix &, const RenderStyle &) noexcept;
+
     explicit TransformResolver(TransformationMatrix &, const ComputedStyle &) noexcept;
 
     KRYS_NODISCARD static bool AffectedByTransformOrigin(const RenderStyle &) noexcept;
+
     KRYS_NODISCARD static bool AffectedByTransformOrigin(const ComputedStyle &) noexcept;
+
     KRYS_NODISCARD bool AffectedByTransformOrigin() const noexcept;
 
     KRYS_NODISCARD static FloatPoint3D ComputeTransformOrigin(const RenderStyle &,
                                                               const FloatRect &boundingBox) noexcept;
+
     KRYS_NODISCARD static FloatPoint3D ComputeTransformOrigin(const ComputedStyle &,
                                                               const FloatRect &boundingBox) noexcept;
+
     KRYS_NODISCARD FloatPoint3D ComputeTransformOrigin(const FloatRect &boundingBox) const noexcept;
 
     KRYS_NODISCARD static FloatPoint ComputePerspectiveOrigin(const RenderStyle &,
                                                               const FloatRect &boundingBox) noexcept;
+
     KRYS_NODISCARD static FloatPoint ComputePerspectiveOrigin(const ComputedStyle &,
                                                               const FloatRect &boundingBox) noexcept;
+
     KRYS_NODISCARD FloatPoint ComputePerspectiveOrigin(const FloatRect &boundingBox) const noexcept;
 
     void ApplyPerspective(const FloatPoint &originTranslate) noexcept;
 
     void ApplyTransformOrigin(const FloatPoint3D &originTranslate) noexcept;
+
     void UnapplyTransformOrigin(const FloatPoint3D &originTranslate) noexcept;
 
     void ApplyCSSTransform(const TransformOperationData &, EnumSet<Option> = AllTransformOperations) noexcept;
@@ -100,12 +108,14 @@ namespace krys::boo::style
 
     static void ApplyTransform(TransformationMatrix &, const ComputedStyle &, const TransformOperationData &,
                                EnumSet<Option> = AllTransformOperations) noexcept;
+
     static void ApplyTransform(TransformationMatrix &, const RenderStyle &, const TransformOperationData &,
                                EnumSet<Option> = AllTransformOperations) noexcept;
 
     KRYS_NODISCARD static TransformationMatrix
       ComputeTransform(const ComputedStyle &, const TransformOperationData &,
                        EnumSet<Option> = AllTransformOperations) noexcept;
+
     KRYS_NODISCARD static TransformationMatrix
       ComputeTransform(const RenderStyle &, const TransformOperationData &,
                        EnumSet<Option> = AllTransformOperations) noexcept;

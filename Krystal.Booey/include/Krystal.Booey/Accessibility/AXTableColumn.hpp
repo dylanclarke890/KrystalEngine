@@ -42,6 +42,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<AXTableColumn> Create(AXId id, AXObjectCache &cache) noexcept;
+
     ~AXTableColumn() noexcept override;
 
     KRYS_NODISCARD uint32 ColumnIndex() const noexcept override
@@ -55,7 +56,9 @@ namespace krys::boo
     }
 
     void AddChildren() noexcept override;
+
     void SetParent(AXObject *parent) noexcept override;
+
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
 
   private:

@@ -82,6 +82,7 @@ namespace krys::boo::dom
     /// @brief Starts observing @p element, which has `content-visibility: auto`, with its document's
     /// observer.
     static void Observe(Element &element) noexcept;
+
     /// @brief Stops observing @p element, and forgets its relevancy.
     static void Unobserve(Element &element) noexcept;
 
@@ -98,6 +99,7 @@ namespace krys::boo::dom
     /// relevancy changed.
     DidUpdateAnyContentRelevancy
       UpdateRelevancyOfContentVisibilityElements(EnumSet<ContentRelevancy> relevancyToCheck) const noexcept;
+
     /// @brief Finds whether the observed elements that haven't had their first observation are on screen.
     /// @return Whether any of them became relevant.
     HadInitialVisibleContentVisibilityDetermination DetermineInitialVisibleContentVisibility() const noexcept;

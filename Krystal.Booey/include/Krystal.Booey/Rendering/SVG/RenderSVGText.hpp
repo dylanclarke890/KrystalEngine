@@ -66,6 +66,7 @@ namespace krys::boo
 
   public:
     RenderSVGText(svg::SVGTextElement &, RenderStyle &&) noexcept;
+
     ~RenderSVGText() noexcept override;
 
     KRYS_NODISCARD svg::SVGTextElement &TextElement() const noexcept;
@@ -88,6 +89,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static RenderSVGText *LocateRenderSVGTextAncestor(RenderObject &) noexcept;
+
     KRYS_NODISCARD static const RenderSVGText *LocateRenderSVGTextAncestor(const RenderObject &) noexcept;
 
     KRYS_NODISCARD bool NeedsReordering() const noexcept
@@ -101,9 +103,12 @@ namespace krys::boo
     }
 
     void SubtreeChildWasAdded(RenderObject *) noexcept;
+
     void SubtreeChildWillBeRemoved(RenderObject *,
                                    SmallList<SVGTextLayoutAttributes *, 2> &affectedAttributes) noexcept;
+
     void SubtreeChildWasRemoved(const SmallList<SVGTextLayoutAttributes *, 2> &affectedAttributes) noexcept;
+
     void SubtreeTextDidChange(RenderSVGInlineText *) noexcept;
 
     KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept final
@@ -112,9 +117,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
+
     KRYS_NODISCARD bool IsObjectBoundingBoxValid() const noexcept;
+
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
+
     KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
 
     void UpdatePositionAndOverflow(const FloatRect &) noexcept;
@@ -130,6 +138,7 @@ namespace krys::boo
     }
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept override;
 
     bool HitTestInlineChildren(const HitTestRequest &, HitTestResult &,
@@ -148,10 +157,14 @@ namespace krys::boo
     void Layout() noexcept override;
 
     void ComputePerCharacterLayoutInformation() noexcept;
+
     void LayoutCharactersInTextBoxes(const inline_iterator::InlineBoxIterator &,
                                      SVGTextLayoutEngine &) noexcept;
+
     FloatRect LayoutChildBoxes(LegacyInlineFlowBox *, SVGTextFragmentMap &) noexcept;
+
     void LayoutRootBox(const FloatRect &) noexcept;
+
     void ReorderValueListsToLogicalOrder() noexcept;
 
     void WillBeDestroyed() noexcept override;

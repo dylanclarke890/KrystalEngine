@@ -88,21 +88,28 @@ namespace krys::boo
     KRYS_NODISCARD const BaselineGroup &
       BaselineGroupForGridItem(ItemPosition preference, uint32 sharedContext, const RenderBox &gridItem,
                                style::GridTrackSizingDirection alignmentContextType) const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalAscentForGridItem(const RenderBox &gridItem,
                                                        style::GridTrackSizingDirection alignmentContextType,
                                                        ItemPosition position) const noexcept;
+
     KRYS_NODISCARD LayoutUnit AscentForGridItem(const RenderBox &gridItem,
                                                 style::GridTrackSizingDirection alignmentContextType,
                                                 ItemPosition position) const noexcept;
+
     KRYS_NODISCARD LayoutUnit DescentForGridItem(
       const RenderBox &gridItem, LayoutUnit ascent, style::GridTrackSizingDirection alignmentContextType,
       ExtraMarginsFromSubgrids extraMarginsFromAncestorSubgrids) const noexcept;
+
     KRYS_NODISCARD bool
       IsDescentBaselineForGridItem(const RenderBox &gridItem,
                                    style::GridTrackSizingDirection alignmentContextType) const noexcept;
+
     KRYS_NODISCARD bool
       IsVerticalAlignmentContext(style::GridTrackSizingDirection alignmentContextType) const noexcept;
+
     KRYS_NODISCARD bool IsOrthogonalGridItemForBaseline(const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD bool IsParallelToAlignmentAxisForGridItem(
       const RenderBox &gridItem, style::GridTrackSizingDirection alignmentContextType) const noexcept;
   };

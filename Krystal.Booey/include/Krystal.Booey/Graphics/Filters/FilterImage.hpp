@@ -63,6 +63,7 @@ namespace krys::boo
                                                   const IntRect &absoluteImageRect, bool isAlphaImage,
                                                   bool isValidPremultiplied,
                                                   const DestinationColorSpace &colorSpace) noexcept;
+
     KRYS_NODISCARD static Ref<FilterImage> Create(const FloatRect &primitiveSubregion,
                                                   const FloatRect &imageRect,
                                                   const IntRect &absoluteImageRect,
@@ -88,6 +89,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD IntRect AbsoluteImageRectRelativeTo(const FilterImage &origin) const noexcept;
+
     KRYS_NODISCARD FloatPoint MappedAbsolutePoint(const FloatPoint &point) const noexcept;
 
     KRYS_NODISCARD bool IsAlphaImage() const noexcept
@@ -135,6 +137,7 @@ namespace krys::boo
     FilterImage(const FloatRect &primitiveSubregion, const FloatRect &imageRect,
                 const IntRect &absoluteImageRect, bool isAlphaImage, bool isValidPremultiplied,
                 const DestinationColorSpace &colorSpace) noexcept;
+
     FilterImage(const FloatRect &primitiveSubregion, const FloatRect &imageRect,
                 const IntRect &absoluteImageRect, Ref<ImageBuffer> &&imageBuffer) noexcept;
   };

@@ -60,11 +60,15 @@ namespace krys::boo::inline_iterator
     KRYS_NODISCARD RectEdges<bool> ClosedEdges() const noexcept;
 
     KRYS_NODISCARD InlineBoxIterator NextInlineBoxLineRightward() const noexcept;
+
     KRYS_NODISCARD InlineBoxIterator NextInlineBoxLineLeftward() const noexcept;
+
     KRYS_NODISCARD InlineBoxIterator Iterator() const noexcept;
 
     KRYS_NODISCARD LeafBoxIterator FirstLeafBox() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator LastLeafBox() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator EndLeafBox() const noexcept;
 
     KRYS_NODISCARD bool IsSplit() const noexcept;
@@ -98,6 +102,7 @@ namespace krys::boo::inline_iterator
     }
 
     InlineBoxIterator &TraverseInlineBoxLineRightward() noexcept;
+
     InlineBoxIterator &TraverseInlineBoxLineLeftward() noexcept;
 
   private:
@@ -108,10 +113,14 @@ namespace krys::boo::inline_iterator
   };
 
   KRYS_NODISCARD InlineBoxIterator LineLeftmostInlineBoxFor(const RenderInline &renderInline) noexcept;
+
   KRYS_NODISCARD InlineBoxIterator FirstRootInlineBoxFor(const RenderBlockFlow &block) noexcept;
+
   KRYS_NODISCARD InlineBoxIterator InlineBoxFor(const LegacyInlineFlowBox &legacyInlineFlowBox) noexcept;
+
   KRYS_NODISCARD InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content,
                                                 const inline_display::Box &box) noexcept;
+
   KRYS_NODISCARD InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content,
                                                 size_t boxIndex) noexcept;
 }

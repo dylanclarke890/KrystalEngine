@@ -50,10 +50,12 @@ namespace krys::boo
 
   public:
     DragClient() noexcept = default;
+
     virtual ~DragClient() noexcept = default;
 
     virtual void WillPerformDragDestinationAction(DragDestinationAction action,
                                                   const DragData &dragData) noexcept = 0;
+
     virtual void WillPerformDragSourceAction(DragSourceAction action, const IntPoint &point,
                                              dom::DataTransfer &dataTransfer) noexcept = 0;
 

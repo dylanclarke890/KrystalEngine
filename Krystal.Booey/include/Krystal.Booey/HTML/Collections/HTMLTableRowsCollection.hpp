@@ -55,6 +55,7 @@ namespace krys::boo::html
 
   protected:
     KRYS_NODISCARD dom::Element *CollectionBegin() const noexcept override;
+
     KRYS_NODISCARD dom::Element *CollectionNext(dom::Element &element) const noexcept override;
   };
 }

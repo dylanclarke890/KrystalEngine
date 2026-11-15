@@ -103,8 +103,11 @@ namespace krys::boo::style
     // <counter-style> specific predicates.
 
     KRYS_NODISCARD bool IsCircle() const noexcept;
+
     KRYS_NODISCARD bool IsDisc() const noexcept;
+
     KRYS_NODISCARD bool IsDecimal() const noexcept;
+
     KRYS_NODISCARD bool IsSquare() const noexcept;
 
     KRYS_NODISCARD Maybe<CounterStyle> TryCounterStyle() const noexcept

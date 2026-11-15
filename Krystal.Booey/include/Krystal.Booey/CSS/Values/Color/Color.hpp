@@ -102,55 +102,100 @@ namespace krys::boo::css
     ColorKind _value;
 
     explicit Color(EmptyToken) noexcept;
+
     explicit Color(ColorKind &&kind) noexcept;
 
   public:
     explicit Color(ResolvedColor &&color) noexcept;
+
     explicit Color(KeywordColor &&color) noexcept;
+
     explicit Color(HexColor &&color) noexcept;
+
     explicit Color(ColorLayers &&color) noexcept;
+
     explicit Color(ColorMix &&color) noexcept;
+
     explicit Color(ContrastColor &&color) noexcept;
+
     explicit Color(LightDarkColor &&color) noexcept;
+
     explicit Color(AbsoluteColor<RGBFunctionLegacy<Number<>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<RGBFunctionLegacy<Percentage<>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<RGBFunctionModernAbsolute> &&color) noexcept;
+
     explicit Color(AbsoluteColor<HSLFunctionLegacy> &&color) noexcept;
+
     explicit Color(AbsoluteColor<HSLFunctionModern> &&color) noexcept;
+
     explicit Color(AbsoluteColor<HWBFunction> &&color) noexcept;
+
     explicit Color(AbsoluteColor<LabFunction> &&color) noexcept;
+
     explicit Color(AbsoluteColor<LCHFunction> &&color) noexcept;
+
     explicit Color(AbsoluteColor<OKLabFunction> &&color) noexcept;
+
     explicit Color(AbsoluteColor<OKLCHFunction> &&color) noexcept;
+
     explicit Color(AbsoluteColor<ColorRGBFunction<ExtendedA98RGB<float>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<ColorRGBFunction<ExtendedDisplayP3<float>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<ColorRGBFunction<ExtendedLinearDisplayP3<float>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<ColorRGBFunction<ExtendedProPhotoRGB<float>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<ColorRGBFunction<ExtendedRec2020<float>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<ColorRGBFunction<ExtendedSRGBA<float>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<ColorRGBFunction<ExtendedLinearSRGBA<float>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<ColorXYZFunction<XYZA<float, WhitePoint::D50>>> &&color) noexcept;
+
     explicit Color(AbsoluteColor<ColorXYZFunction<XYZA<float, WhitePoint::D65>>> &&color) noexcept;
+
     explicit Color(RelativeColor<RGBFunctionModernRelative> &&color) noexcept;
+
     explicit Color(RelativeColor<HSLFunctionModern> &&color) noexcept;
+
     explicit Color(RelativeColor<HWBFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<LabFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<LCHFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<OKLabFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<OKLCHFunction> &&color) noexcept;
+
     explicit Color(RelativeColor<ColorRGBFunction<ExtendedA98RGB<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<ColorRGBFunction<ExtendedDisplayP3<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<ColorRGBFunction<ExtendedLinearDisplayP3<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<ColorRGBFunction<ExtendedProPhotoRGB<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<ColorRGBFunction<ExtendedRec2020<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<ColorRGBFunction<ExtendedSRGBA<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<ColorRGBFunction<ExtendedLinearSRGBA<float>>> &&color) noexcept;
+
     explicit Color(RelativeColor<ColorXYZFunction<XYZA<float, WhitePoint::D50>>> &&color) noexcept;
+
     explicit Color(RelativeColor<ColorXYZFunction<XYZA<float, WhitePoint::D65>>> &&color) noexcept;
 
     Color(const Color &other) noexcept;
+
     Color &operator=(const Color &other) noexcept;
+
     Color(Color &&) noexcept;
+
     Color &operator=(Color &&) noexcept;
 
     ~Color() noexcept;
@@ -158,10 +203,15 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const Color &other) const noexcept;
 
     KRYS_NODISCARD bool IsResolved() const noexcept;
+
     KRYS_NODISCARD Maybe<ResolvedColor> Resolved() const noexcept;
+
     KRYS_NODISCARD bool IsKeyword() const noexcept;
+
     KRYS_NODISCARD Maybe<KeywordColor> Keyword() const noexcept;
+
     KRYS_NODISCARD bool IsHex() const noexcept;
+
     KRYS_NODISCARD Maybe<HexColor> Hex() const noexcept;
 
     /// @brief Return an absolute color if possible, otherwise an invalid color.
@@ -176,11 +226,14 @@ namespace krys::boo::css
   private:
     template <typename T>
     KRYS_NODISCARD static ColorKind CreateIndirectColor(T &&color) noexcept;
+
     KRYS_NODISCARD static ColorKind Copy(const ColorKind &other) noexcept;
   };
 
   KRYS_NODISCARD boo::Color CreateColor(const Color &value, PlatformColorResolutionState &state) noexcept;
+
   KRYS_NODISCARD bool ContainsCurrentColor(const Color &value) noexcept;
+
   KRYS_NODISCARD bool ContainsColorSchemeDependentColor(const Color &value) noexcept;
 
   template <>

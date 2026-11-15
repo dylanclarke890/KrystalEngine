@@ -61,10 +61,12 @@ namespace krys::boo
     KRYS_NODISCARD static utf8_string TreeAsText(AXObject &root,
                                                  EnumSet<AXStreamOption> options = {
                                                    AXStreamOption::Role, AXStreamOption::Name}) noexcept;
+
     /// @brief The tree from @p cache's root.
     KRYS_NODISCARD static utf8_string TreeAsText(AXObjectCache &cache,
                                                  EnumSet<AXStreamOption> options = {
                                                    AXStreamOption::Role, AXStreamOption::Name}) noexcept;
+
     /// @brief One line describing @p object.
     KRYS_NODISCARD static utf8_string ObjectAsText(AXObject &object,
                                                    EnumSet<AXStreamOption> options) noexcept;

@@ -120,6 +120,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LegacyInlineBox *FirstLeafDescendant() const noexcept;
+
     KRYS_NODISCARD LegacyInlineBox *LastLeafDescendant() const noexcept;
 
     void SetConstructed() noexcept final
@@ -132,7 +133,9 @@ namespace krys::boo
     }
 
     void AddToLine(LegacyInlineBox *child) noexcept;
+
     void DeleteLine() noexcept final;
+
     void AdjustPosition(float dx, float dy) noexcept override;
 
     virtual void RemoveLineBoxFromRenderObject() noexcept;
@@ -217,6 +220,7 @@ namespace krys::boo
 
     void SetOverflowFromLogicalRects(const LayoutRect &logicalVisualOverflow, LayoutUnit lineTop,
                                      LayoutUnit lineBottom) noexcept;
+
     void SetVisualOverflow(const LayoutRect &, LayoutUnit lineTop, LayoutUnit lineBottom) noexcept;
 
     KRYS_NODISCARD FloatRect FrameRectIncludingLineHeight(LayoutUnit lineTop,

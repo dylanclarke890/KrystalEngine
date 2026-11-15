@@ -43,9 +43,11 @@ namespace krys::boo::html
 
   public:
     HTMLMaybeFormAssociatedCustomElement(dom::Document &document, dom::DOMStringAtom localName) noexcept;
+
     ~HTMLMaybeFormAssociatedCustomElement() noexcept override;
 
     KRYS_NODISCARD bool IsFormListedElement() const noexcept final;
+
     KRYS_NODISCARD bool IsValidatedFormListedElement() const noexcept final;
 
     /// @brief Whether the element is a defined custom element whose definition is form-associated.
@@ -53,7 +55,9 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsFormAssociatedCustomElement() const noexcept;
 
     KRYS_NODISCARD FormAssociatedElement *AsFormAssociatedElement() noexcept final;
+
     KRYS_NODISCARD FormListedElement *AsFormListedElement() noexcept final;
+
     KRYS_NODISCARD ValidatedFormListedElement *AsValidatedFormListedElement() noexcept final;
 
     /// @brief The form-associated half that the element's internals act on: present once the element is
@@ -62,11 +66,15 @@ namespace krys::boo::html
       FormAssociatedCustomElementForElementInternals() const noexcept;
 
     KRYS_NODISCARD bool MatchesValidPseudoClass() const noexcept final;
+
     KRYS_NODISCARD bool MatchesInvalidPseudoClass() const noexcept final;
+
     KRYS_NODISCARD bool MatchesUserValidPseudoClass() const noexcept final;
+
     KRYS_NODISCARD bool MatchesUserInvalidPseudoClass() const noexcept final;
 
     KRYS_NODISCARD bool IsLabelable() const noexcept final;
+
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final;
 
     /// @brief Makes the element form-associated, for a form-associated definition.
@@ -78,14 +86,20 @@ namespace krys::boo::html
     }
 
     void WillUpgradeFormAssociated() noexcept;
+
     void DidUpgradeFormAssociated() noexcept;
 
   private:
     void OnInsert() noexcept final;
+
     void OnPostConnection() noexcept final;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+
     void OnAdopt(dom::Document &oldDocument) noexcept final;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
   };

@@ -43,9 +43,9 @@ KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::AllowedImag
 
 namespace krys::boo::css
 {
-  class Value;
-  class TokenRange;
   struct PropertyParserState;
+  class TokenRange;
+  class Value;
 
   namespace PropertyParserHelpers
   {

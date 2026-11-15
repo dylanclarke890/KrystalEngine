@@ -87,13 +87,16 @@ namespace krys::boo
       KRYS_NODISCARD bool HasFilterThatRequiresRepaintForCurrentColorChange() const noexcept;
 
       KRYS_NODISCARD bool HasFilterThatAffectsOpacity() const noexcept;
+
       KRYS_NODISCARD bool HasFilterThatMovesPixels() const noexcept;
+
       KRYS_NODISCARD bool HasFilterThatShouldBeRestrictedBySecurityOrigin() const noexcept;
 
       template <FilterOperation::Type Type>
       KRYS_NODISCARD bool HasFilterOfType() const noexcept;
 
       KRYS_NODISCARD bool HasReferenceFilter() const noexcept;
+
       KRYS_NODISCARD bool IsReferenceFilter() const noexcept;
 
       KRYS_NODISCARD IntOutsets Outsets() const noexcept;

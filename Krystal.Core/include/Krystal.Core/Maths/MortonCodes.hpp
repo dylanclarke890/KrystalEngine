@@ -14,6 +14,7 @@ namespace krys
     KRYS_NON_COPY_MOVABLE(Morton);
 
     Morton() = delete;
+
     ~Morton() = delete;
 
   public:

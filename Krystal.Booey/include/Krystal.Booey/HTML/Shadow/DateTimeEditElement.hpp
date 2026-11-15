@@ -38,13 +38,20 @@ namespace krys::boo::html
   {
   public:
     virtual ~DateTimeEditElementEditControlOwner() noexcept = default;
+
     virtual void DidBlurFromControl() noexcept = 0;
+
     virtual void DidChangeValueFromControl() noexcept = 0;
+
     virtual void DidReceiveSpaceKeyFromControl() noexcept = 0;
+
     KRYS_NODISCARD virtual dom::DOMString
       FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsEditControlOwnerDisabled() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsEditControlOwnerReadOnly() const noexcept = 0;
+
     KRYS_NODISCARD virtual dom::DOMString LocaleIdentifier() const noexcept = 0;
   };
 
@@ -87,19 +94,28 @@ namespace krys::boo::html
   public:
     DateTimeEditElement(dom::Document &document,
                         DateTimeEditElementEditControlOwner &editControlOwner) noexcept;
+
     ~DateTimeEditElement() noexcept override;
 
     KRYS_NODISCARD static Ref<DateTimeEditElement>
       Create(dom::Document &document, DateTimeEditElementEditControlOwner &editControlOwner) noexcept;
 
     void AddField(Ref<DateTimeFieldElement> field) noexcept;
+
     KRYS_NODISCARD dom::Element &FieldsWrapperElement() const noexcept;
+
     void FocusByOwner() noexcept;
+
     void ResetFields() noexcept;
+
     void SetEmptyValue(const LayoutParameters &layoutParameters) noexcept;
+
     void SetValueAsDate(const LayoutParameters &layoutParameters, const DateComponents &date) noexcept;
+
     KRYS_NODISCARD dom::DOMString Value() const noexcept;
+
     KRYS_NODISCARD dom::DOMString PlaceholderValue() const noexcept;
+
     KRYS_NODISCARD bool EditableFieldsHaveValues() const noexcept;
 
     void RemoveEditControlOwner() noexcept
@@ -117,8 +133,11 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD size_t FieldIndexOf(const DateTimeFieldElement &field) const noexcept;
+
     KRYS_NODISCARD DateTimeFieldElement *FocusedFieldElement() const noexcept;
+
     void Layout(const LayoutParameters &layoutParameters) noexcept;
+
     KRYS_NODISCARD DateTimeFieldsState ValueAsDateTimeFieldsState(
       DateTimePlaceholderIfNoValue placeholderIfNoValue = DateTimePlaceholderIfNoValue::No) const noexcept;
 
@@ -126,13 +145,21 @@ namespace krys::boo::html
 
     // DateTimeFieldElementFieldOwner functions:
     void DidBlurFromField(dom::Event &event) noexcept final;
+
     void FieldValueChanged() noexcept final;
+
     bool FocusOnNextField(const DateTimeFieldElement &field) noexcept final;
+
     bool FocusOnPreviousField(const DateTimeFieldElement &field) noexcept final;
+
     KRYS_NODISCARD bool IsFieldOwnerDisabled() const noexcept final;
+
     KRYS_NODISCARD bool IsFieldOwnerReadOnly() const noexcept final;
+
     KRYS_NODISCARD bool IsFieldOwnerHorizontal() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString LocaleIdentifier() const noexcept final;
+
     KRYS_NODISCARD const DateComponents &PlaceholderDate() const noexcept final;
   };
 }

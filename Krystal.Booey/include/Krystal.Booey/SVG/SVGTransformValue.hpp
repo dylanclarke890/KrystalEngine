@@ -223,14 +223,20 @@ namespace krys::boo::svg
 
   private:
     static void AppendFixedPrecisionNumbers(StringBuilder &) noexcept;
+
     template <typename TNumber, typename... TNumbers>
     static void AppendFixedPrecisionNumbers(StringBuilder &, TNumber, TNumbers...) noexcept;
 
     void AppendMatrix(StringBuilder &) const noexcept;
+
     void AppendTranslate(StringBuilder &) const noexcept;
+
     void AppendScale(StringBuilder &) const noexcept;
+
     void AppendRotate(StringBuilder &) const noexcept;
+
     void AppendSkewX(StringBuilder &) const noexcept;
+
     void AppendSkewY(StringBuilder &) const noexcept;
   };
 }

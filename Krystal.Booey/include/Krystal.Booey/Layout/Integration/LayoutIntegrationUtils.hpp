@@ -54,10 +54,15 @@ namespace krys::boo::layout
 
     void LayoutWithFormattingContextForBox(const ElementBox &box, Maybe<LayoutUnit> widthConstraint = null,
                                            Maybe<LayoutUnit> heightConstraint = null) const noexcept;
+
     KRYS_NODISCARD LayoutUnit MaxContentWidth(const ElementBox &box) const noexcept;
+
     KRYS_NODISCARD LayoutUnit MinContentWidth(const ElementBox &box) const noexcept;
+
     KRYS_NODISCARD LayoutUnit MinContentHeight(const ElementBox &box) const noexcept;
+
     KRYS_NODISCARD LayoutUnit PreferredMinWidth(const ElementBox &box) const noexcept;
+
     KRYS_NODISCARD LayoutUnit PreferredMaxWidth(const ElementBox &box) const noexcept;
 
     void
@@ -68,8 +73,10 @@ namespace krys::boo::layout
     KRYS_NODISCARD static BlockLayoutState::MarginState
       ToMarginState(const RenderBlockFlow::MarginInfo &marginInfo,
                     LayoutUnit contentOffsetAfterSelfCollapsingBlock) noexcept;
+
     KRYS_NODISCARD static RenderBlockFlow::MarginInfo
       ToMarginInfo(const BlockLayoutState::MarginState &marginState) noexcept;
+
     KRYS_NODISCARD static Pair<LayoutRect, LayoutRect>
       ToMarginAndBorderBoxVisualRect(const BoxGeometry &logicalGeometry, const LayoutSize &containerSize,
                                      WritingMode writingMode) noexcept;

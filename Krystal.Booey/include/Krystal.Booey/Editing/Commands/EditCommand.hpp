@@ -46,6 +46,7 @@ namespace krys::boo
 
   /// @brief The `inputType` of the input events for an edit of @p action; empty for actions that have none.
   KRYS_NODISCARD utf8_stringview InputTypeNameForEditingAction(EditAction action) noexcept;
+
   KRYS_NODISCARD bool IsInputMethodComposingForEditingAction(EditAction action) noexcept;
 
   enum class AllowPasswordEcho : bool
@@ -109,6 +110,7 @@ namespace krys::boo
   protected:
     explicit EditCommand(dom::Document &document,
                          EditAction editingAction = EditAction::Unspecified) noexcept;
+
     EditCommand(dom::Document &document, const VisibleSelection &startingSelection,
                 const VisibleSelection &endingSelection) noexcept;
 
@@ -120,6 +122,7 @@ namespace krys::boo
     /// @brief Tells accessibility @p text was inserted or deleted at @p position (the selection's start if
     /// it isn't given).
     void PostTextStateChangeNotification(AXTextChange change, utf8_stringview text) noexcept;
+
     void PostTextStateChangeNotification(AXTextChange change, utf8_stringview text,
                                          const VisiblePosition &position) noexcept;
 
@@ -129,6 +132,7 @@ namespace krys::boo
     }
 
     void SetStartingSelection(const VisibleSelection &selection) noexcept;
+
     void SetEndingSelection(const VisibleSelection &selection) noexcept;
 
     KRYS_NODISCARD bool IsEditingTextAreaOrTextInput() const noexcept;
@@ -145,6 +149,7 @@ namespace krys::boo
   {
   public:
     virtual void DoUnapply() noexcept = 0;
+
     virtual void DoReapply() noexcept; // calls DoApply()
 
   protected:

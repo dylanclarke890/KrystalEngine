@@ -43,11 +43,11 @@ KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::AllowedURLM
 
 namespace krys::boo::css
 {
-  class Value;
   class TokenRange;
+  class Value;
 
-  struct PropertyParserState;
   struct CSSURL;
+  struct PropertyParserState;
 
   namespace PropertyParserHelpers
   {

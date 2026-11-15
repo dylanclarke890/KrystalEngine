@@ -51,6 +51,7 @@ namespace krys::boo::layout_integration
 
   public:
     explicit GridLayout(RenderGrid &renderGrid) noexcept;
+
     ~GridLayout() noexcept;
 
     /// @brief Whether the grid formatting context supports the grid container's content.
@@ -62,6 +63,7 @@ namespace krys::boo::layout_integration
 
   private:
     void UpdateGridItemRenderers() noexcept;
+
     void UpdateFormattingContextRootRenderer() noexcept;
 
     KRYS_NODISCARD const layout::ElementBox &GridBox() const noexcept
@@ -75,6 +77,7 @@ namespace krys::boo::layout_integration
     }
 
     KRYS_NODISCARD const RenderGrid &GridBoxRenderer() const noexcept;
+
     KRYS_NODISCARD RenderGrid &GridBoxRenderer() noexcept;
 
     KRYS_NODISCARD layout::LayoutState &GetLayoutState() noexcept

@@ -50,6 +50,7 @@ namespace krys::boo
     virtual ~VertexPair() noexcept = default;
 
     KRYS_NODISCARD virtual const FloatPoint &Vertex1() const noexcept = 0;
+
     KRYS_NODISCARD virtual const FloatPoint &Vertex2() const noexcept = 0;
 
     KRYS_NODISCARD float MinX() const noexcept

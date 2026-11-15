@@ -32,8 +32,8 @@
 
 namespace krys::boo
 {
-  class CachedImage;
   struct BlendingContext;
+  class CachedImage;
 
   /// @brief A `cross-fade()` image. It follows its input images' cached images, so its renderers hear when
   /// they change.
@@ -62,7 +62,9 @@ namespace krys::boo
                                                      const BlendingContext &) const noexcept;
 
     KRYS_NODISCARD bool Equals(const StyleImage &) const noexcept final;
+
     KRYS_NODISCARD bool Equals(const StyleCrossfadeImage &) const noexcept;
+
     KRYS_NODISCARD bool EqualInputImages(const StyleCrossfadeImage &) const noexcept;
 
     KRYS_NODISCARD RefPtr<StyleImage> From() const noexcept
@@ -84,12 +86,17 @@ namespace krys::boo
     StyleCrossfadeImage(RefPtr<StyleImage> &&, RefPtr<StyleImage> &&, double) noexcept;
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
+
     KRYS_NODISCARD bool IsPending() const noexcept final;
+
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final;
+
     KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &,
                                           const GraphicsContext &destinationContext,
                                           bool isForFirstLine) const noexcept final;
+
     KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &) const noexcept final;
+
     KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final;
 
     // CachedImageClient.

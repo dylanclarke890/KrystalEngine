@@ -55,6 +55,7 @@ namespace krys::boo
 
   private:
     StyleTransformData() noexcept;
+
     StyleTransformData(const StyleTransformData &) noexcept;
   };
 }

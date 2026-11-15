@@ -472,6 +472,7 @@ namespace krys::boo::dom
     /// @brief The node's directionality: its own if it keeps one, otherwise the document element's.
     /// @see https://html.spec.whatwg.org/#the-directionality
     KRYS_NODISCARD TextDirection EffectiveTextDirection() const noexcept;
+
     void SetEffectiveTextDirection(TextDirection direction) noexcept;
 
     /// @brief Whether the node keeps a directionality of its own.
@@ -564,13 +565,16 @@ namespace krys::boo::dom
     /// @brief The computed style of the node: an element's own, or else its parent element's in the composed
     /// tree.
     KRYS_NODISCARD const RenderStyle *ComputedStyle() noexcept;
+
     KRYS_NODISCARD virtual const RenderStyle *
       ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
     /// @brief The parent in the composed (flat) tree: the assigned slot, the host of a shadow root, or else
     /// the parent.
     KRYS_NODISCARD ContainerNode *ParentInComposedTree() const noexcept;
+
     KRYS_NODISCARD Element *ParentElementInComposedTree() const noexcept;
+
     KRYS_NODISCARD bool IsComposedTreeDescendantOf(const Node &node) const noexcept;
 
 #pragma endregion
@@ -578,18 +582,25 @@ namespace krys::boo::dom
 #pragma region Tree Helpers
 
     KRYS_NODISCARD uint32 CountChildNodes() const noexcept;
+
     /// @brief The child at @p index, or null if there are fewer children.
     KRYS_NODISCARD Node *TraverseToChildAt(uint32 index) const noexcept;
+
     /// @brief The node's index among its siblings.
     KRYS_NODISCARD uint32 ComputeNodeIndex() const noexcept;
+
     /// @see https://dom.spec.whatwg.org/#concept-node-length
     KRYS_NODISCARD uint32 Length() const noexcept;
+
     /// @brief The parent, or a shadow root's host.
     KRYS_NODISCARD ContainerNode *ParentOrShadowHostNode() const noexcept;
+
     /// @brief The parent, unless it's a shadow root.
     KRYS_NODISCARD ContainerNode *NonShadowBoundaryParentNode() const noexcept;
+
     /// @brief The ancestor that's a child of a shadow root, or null outside shadow trees.
     KRYS_NODISCARD Node *NonBoundaryShadowTreeRootNode() noexcept;
+
     KRYS_NODISCARD bool IsDescendantOf(const Node *other) const noexcept;
 
     KRYS_NODISCARD bool IsDescendantOf(const Node &other) const noexcept
@@ -603,6 +614,7 @@ namespace krys::boo::dom
     }
 
     KRYS_NODISCARD bool IsShadowIncludingDescendantOf(const Node *other) const noexcept;
+
     /// @brief The last node in the subtree, in tree order.
     KRYS_NODISCARD Node *LastDescendant() const noexcept;
 
@@ -631,6 +643,7 @@ namespace krys::boo::dom
 
     /// @brief Whether the node is editable, resolving style first if it's out of date.
     KRYS_NODISCARD bool IsContentEditable() const noexcept;
+
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
 
     /// @brief Whether the node is editable, by the style it has (`-internal-user-modify`, which
@@ -650,6 +663,7 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD Editability ComputeEditability(UserSelectAllTreatment treatment,
                                                   ShouldUpdateStyle shouldUpdateStyle) const noexcept;
+
     KRYS_NODISCARD Editability
       ComputeEditabilityWithStyle(const RenderStyle *incomingStyle, UserSelectAllTreatment treatment,
                                   ShouldUpdateStyle shouldUpdateStyle) const noexcept;
@@ -657,6 +671,7 @@ namespace krys::boo::dom
     /// @brief Whether the node is an editing host: an editable element whose parent isn't editable (or the
     /// body).
     KRYS_NODISCARD bool IsRootEditableElement() const noexcept;
+
     /// @brief The editing host the node is in, or null if it isn't editable.
     KRYS_NODISCARD Element *RootEditableElement() const noexcept;
 
@@ -704,6 +719,7 @@ namespace krys::boo::dom
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
+
     void DidAddEventListener(const EventListener &listener) noexcept override;
 
   public:
@@ -758,6 +774,7 @@ namespace krys::boo::dom
     /// @brief Whether an image has been painted for the node (as its content or a background): a later decode
     /// of a visible one is synchronous, so the image doesn't flicker.
     KRYS_NODISCARD bool HasEverPaintedImages() const noexcept;
+
     void SetHasEverPaintedImages(bool hasEverPaintedImages) noexcept;
 
   protected:
@@ -958,7 +975,9 @@ namespace krys::boo::dom
     /// resolve.
     void InvalidateStyle(style::Validity validity,
                          style::InvalidationMode mode = style::InvalidationMode::Normal) noexcept;
+
     void UpdateAncestorsForStyleRecalc() noexcept;
+
     void MarkAncestorsForInvalidatedStyle() noexcept;
 
     KRYS_NODISCARD bool HasStyleFlag(NodeStyleFlags flag) const noexcept
@@ -1015,8 +1034,10 @@ namespace krys::boo::dom
 
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD ContainerNode *Parent(const Node &node) noexcept;
+
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD Node *CommonInclusiveAncestor(const Node &a, const Node &b) noexcept;
+
   /// @brief The order of @p a and @p b in the tree, or unordered if they aren't in the same one.
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD std::partial_ordering TreeOrder(const Node &a, const Node &b) noexcept;

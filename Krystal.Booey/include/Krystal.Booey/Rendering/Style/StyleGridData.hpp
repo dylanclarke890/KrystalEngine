@@ -59,6 +59,7 @@ namespace krys::boo
 
   private:
     StyleGridData() noexcept;
+
     StyleGridData(const StyleGridData &) noexcept;
   };
 }

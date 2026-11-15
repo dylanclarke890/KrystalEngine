@@ -49,6 +49,7 @@ namespace krys::boo::style::calc
       RefPtr<Value> Value;
 
       Entry() noexcept = default;
+
       explicit Entry(Ref<calc::Value> &&value) noexcept;
     };
 
@@ -59,7 +60,9 @@ namespace krys::boo::style::calc
     KRYS_NODISCARD static ValueMap &CalculationValues() noexcept;
 
     KRYS_NODISCARD uint32 Insert(Ref<Value> &&) noexcept;
+
     void AddRef(uint32 handle) noexcept;
+
     void SubRef(uint32 handle) noexcept;
 
     KRYS_NODISCARD Value &Get(uint32 handle) const noexcept;

@@ -41,6 +41,7 @@ namespace krys::boo
 
   public:
     CachedSVGDocument(CachedResourceRequest &&, Ref<Settings> &&) noexcept;
+
     ~CachedSVGDocument() noexcept override;
 
     KRYS_NODISCARD svg::SVGDocument *Document() const noexcept

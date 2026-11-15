@@ -47,6 +47,7 @@ namespace krys::boo::html
 
   public:
     HTMLStyleElement(dom::Document &document) noexcept;
+
     ~HTMLStyleElement() noexcept override;
 
 #pragma region HTMLStyleElement - https://html.spec.whatwg.org/#htmlstyleelement
@@ -90,9 +91,13 @@ namespace krys::boo::html
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
+
     void OnInsert() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnChildrenChanged() noexcept override;
+
     void FinishParsingChildren() noexcept override;
 
   public:
@@ -100,11 +105,14 @@ namespace krys::boo::html
     /// has `render`, or the parser made it) and its `media` matches the environment.
     /// @see https://html.spec.whatwg.org/#update-a-style-block
     void PotentiallyBlockRendering(const css::mq::MediaQueryList &mediaQueries) noexcept;
+
     /// @see https://html.spec.whatwg.org/#unblock-rendering
     void UnblockRendering() noexcept;
 
     bool SheetLoaded() noexcept override;
+
     void NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept override;
+
     void StartLoadingDynamicSheet() noexcept override;
   };
 }

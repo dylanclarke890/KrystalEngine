@@ -77,6 +77,7 @@ namespace krys::boo::html
     }
 
     HTMLImageElement(dom::Document &document) noexcept;
+
     ~HTMLImageElement() noexcept override;
 
     /// @brief An image is interactive content when it has a `usemap` attribute.
@@ -261,17 +262,22 @@ namespace krys::boo::html
     KRYS_NODISCARD Maybe<dom::DOMString> AltText() const noexcept;
 
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
+
     KRYS_NODISCARD Image *GetImage() const noexcept;
+
     KRYS_NODISCARD ImageLoader &GetImageLoader() const noexcept;
 
     /// @brief Starts the deferred load of the image, if it's lazily loaded.
     void LoadDeferredImage() noexcept;
+
     /// @brief Whether the image is lazily loaded, and its load is deferred until it intersects the viewport.
     KRYS_NODISCARD bool IsDeferred() const noexcept;
+
     /// @brief Whether the image will load lazily: its `loading` attribute is `lazy`, and scripting is
     /// enabled.
     /// @see https://html.spec.whatwg.org/#will-lazy-load-element-steps
     KRYS_NODISCARD bool IsLazyLoadable() const noexcept;
+
     KRYS_NODISCARD static bool
       HasLazyLoadableAttributeValue(Maybe<dom::DOMStringView> attributeValue) noexcept;
 
@@ -280,9 +286,11 @@ namespace krys::boo::html
     KRYS_NODISCARD Maybe<dom::DOMString> ImageSourceURL() const noexcept override;
 
     KRYS_NODISCARD HTMLPictureElement *PictureElement() const noexcept;
+
     KRYS_NODISCARD bool UsesSrcsetOrPicture() const noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+
     void DidAttachRenderers() noexcept override;
 
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
@@ -314,33 +322,46 @@ namespace krys::boo::html
     void FormOwnerRemovedFromTree(const dom::Node &formRoot) noexcept;
 
     void OnInsert() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnAdopt(dom::Document &oldDocument) noexcept override;
 
   private:
     void SetPictureElement(HTMLPictureElement *pictureElement) noexcept;
+
     KRYS_NODISCARD HTMLSourceElement *SourceElement() const noexcept;
+
     void SetSourceElement(HTMLSourceElement *sourceElement) noexcept;
+
     void InvalidateAttributeMapping() noexcept;
 
     void SelectImageSource(RelevantMutation relevantMutation) noexcept;
+
     KRYS_NODISCARD ImageCandidate BestFitSourceFromPictureElement() noexcept;
+
     void SetBestFitURLAndDPRFromImageCandidate(const ImageCandidate &candidate) noexcept;
+
     KRYS_NODISCARD float EffectiveImageDevicePixelRatio() const noexcept;
+
     void UpdatePictureElement() noexcept;
 
   protected:
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
+
     void CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept override;
 
   protected:
     void ResetFormOwner() noexcept override;
+
     void SetFormInternal(HTMLFormElement *newForm) noexcept override;
   };
 }

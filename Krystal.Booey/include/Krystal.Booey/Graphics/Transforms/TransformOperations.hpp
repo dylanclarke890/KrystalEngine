@@ -46,7 +46,9 @@ namespace krys::boo
 
   public:
     TransformOperations() noexcept = default;
+
     explicit TransformOperations(Ref<TransformOperation> &&) noexcept;
+
     explicit TransformOperations(List<Ref<TransformOperation>> &&) noexcept;
 
     KRYS_NODISCARD bool operator==(const TransformOperations &) const noexcept;
@@ -112,6 +114,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsInvertible() const noexcept;
+
     KRYS_NODISCARD bool ContainsNonInvertibleMatrix() const noexcept;
   };
 

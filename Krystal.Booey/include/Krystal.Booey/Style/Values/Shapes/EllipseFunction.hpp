@@ -61,7 +61,9 @@ namespace krys::boo::style
   DEFINE_TYPE_MAPPING(css::Ellipse, Ellipse)
 
   KRYS_NODISCARD FloatPoint ResolvePosition(const Ellipse &value, FloatSize boxSize) noexcept;
+
   KRYS_NODISCARD FloatSize ResolveRadii(const Ellipse &, FloatSize boxSize, FloatPoint center) noexcept;
+
   KRYS_NODISCARD boo::Path PathForCenterCoordinate(const Ellipse &, const FloatRect &, FloatPoint) noexcept;
 
   template <>
@@ -74,6 +76,7 @@ namespace krys::boo::style
   struct Blending<Ellipse>
   {
     KRYS_NODISCARD bool CanBlend(const Ellipse &, const Ellipse &) noexcept;
+
     KRYS_NODISCARD Ellipse Blend(const Ellipse &, const Ellipse &, const BlendingContext &) noexcept;
   };
 }

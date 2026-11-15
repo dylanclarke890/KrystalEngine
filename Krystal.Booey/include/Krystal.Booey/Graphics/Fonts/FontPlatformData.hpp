@@ -66,20 +66,26 @@ namespace krys::boo
 
   public:
     explicit FontPlatformData(HashTableDeletedValueTag) noexcept;
+
     FontPlatformData() noexcept;
+
     FontPlatformData(Ref<text::FreeTypeFace> face, float size, bool syntheticBold, bool syntheticOblique,
                      FontOrientation orientation = FontOrientation::Horizontal,
                      FontWidthVariant widthVariant = FontWidthVariant::RegularWidth,
                      TextRenderingMode textRenderingMode = TextRenderingMode::Auto) noexcept;
 
     FontPlatformData(const FontPlatformData &) noexcept;
+
     FontPlatformData &operator=(const FontPlatformData &) noexcept;
+
     ~FontPlatformData() noexcept;
 
     KRYS_NODISCARD static FontPlatformData CloneWithOrientation(const FontPlatformData &source,
                                                                 FontOrientation orientation) noexcept;
+
     KRYS_NODISCARD static FontPlatformData CloneWithSyntheticOblique(const FontPlatformData &source,
                                                                      bool syntheticOblique) noexcept;
+
     KRYS_NODISCARD static FontPlatformData CloneWithSize(const FontPlatformData &source, float size) noexcept;
 
     /// @brief Resizes the font so that the metric @p fontSizeAdjust names is its aspect value times

@@ -56,6 +56,7 @@ namespace krys::boo
     }
 
     RectCorners(const RectCorners &) noexcept = default;
+
     RectCorners &operator=(const RectCorners &) noexcept = default;
 
     template <typename U>

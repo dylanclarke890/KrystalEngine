@@ -69,15 +69,21 @@ namespace krys::boo::style
 
   public:
     LengthWrapperData(uint8 opaqueType) noexcept;
+
     LengthWrapperData(uint8 opaqueType, float value, bool hasQuirk = false) noexcept;
+
     explicit LengthWrapperData(uint8 opaqueType, Ref<calc::Value> &&) noexcept;
 
     explicit LengthWrapperData(HashTableEmptyValueTag) noexcept;
+
     explicit LengthWrapperData(HashTableDeletedValueTag) noexcept;
 
     LengthWrapperData(const LengthWrapperData &) noexcept;
+
     LengthWrapperData(LengthWrapperData &&) noexcept;
+
     LengthWrapperData &operator=(const LengthWrapperData &) noexcept;
+
     LengthWrapperData &operator=(LengthWrapperData &&) noexcept;
 
     ~LengthWrapperData() noexcept;
@@ -101,14 +107,19 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD calc::Value &CalculationValue() const noexcept;
+
     KRYS_NODISCARD Ref<calc::Value> ProtectedCalculationValue() const noexcept;
 
     KRYS_NODISCARD bool IsKnownZero(LengthWrapperDataEvaluationKind) const noexcept;
+
     KRYS_NODISCARD bool IsKnownPositive(LengthWrapperDataEvaluationKind) const noexcept;
+
     KRYS_NODISCARD bool IsKnownNegative(LengthWrapperDataEvaluationKind) const noexcept;
 
     KRYS_NODISCARD bool IsPossiblyZero(LengthWrapperDataEvaluationKind) const noexcept;
+
     KRYS_NODISCARD bool IsPossiblyPositive(LengthWrapperDataEvaluationKind) const noexcept;
+
     KRYS_NODISCARD bool IsPossiblyNegative(LengthWrapperDataEvaluationKind) const noexcept;
 
     template <typename ReturnType, typename MaximumType, typename F>
@@ -135,13 +146,17 @@ namespace krys::boo::style
 
   private:
     KRYS_NODISCARD float NonNanCalculatedValue(float maxValue, const ZoomFactor &usedZoom) const noexcept;
+
     KRYS_NODISCARD float NonNanCalculatedValue(float maxValue, const ZoomNeeded &) const noexcept;
+
     KRYS_NODISCARD bool IsCalculatedEqual(const LengthWrapperData &) const noexcept;
 
     void Initialise(const LengthWrapperData &) noexcept;
+
     void Initialise(LengthWrapperData &&) noexcept;
 
     void AddRef() const noexcept;
+
     void SubRef() const noexcept;
   };
 

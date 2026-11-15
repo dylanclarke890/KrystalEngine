@@ -802,6 +802,7 @@ namespace krys::pal
           break;
         }
 #pragma region Input Messages
+
         // Pens and touches; the mouse's come as the mouse messages.
         case WM_POINTERENTER:
         case WM_POINTERDOWN:
@@ -1115,6 +1116,7 @@ namespace krys::pal
           }
           break;
         }
+
 #pragma endregion
         case WM_DISPLAYCHANGE:
         {

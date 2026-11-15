@@ -28,8 +28,8 @@ namespace krys::boo
 {
   class FontCascade;
   class RenderElement;
-  class RenderSVGInlineText;
   class RenderStyle;
+  class RenderSVGInlineText;
   class SVGTextMetrics;
 
   /// @brief Helper used by SVGTextLayoutEngine to handle 'alignment-baseline' / 'dominant-baseline' and
@@ -45,11 +45,14 @@ namespace krys::boo
     explicit SVGTextLayoutEngineBaseline(const FontCascade &) noexcept;
 
     KRYS_NODISCARD float CalculateBaselineShift(const RenderStyle &) const noexcept;
+
     KRYS_NODISCARD float
       CalculateAlignmentBaselineShift(bool isVerticalText,
                                       const RenderSVGInlineText &textRenderer) const noexcept;
+
     KRYS_NODISCARD float CalculateGlyphOrientationAngle(bool isVerticalText, const RenderStyle &,
                                                         char32 character) const noexcept;
+
     KRYS_NODISCARD float CalculateGlyphAdvanceAndOrientation(bool isVerticalText, SVGTextMetrics &,
                                                              float angle, float &xOrientationShift,
                                                              float &yOrientationShift) const noexcept;

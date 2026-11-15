@@ -51,16 +51,24 @@ namespace krys::boo::html
     }
 
     void Add(HTMLInputElement &button) noexcept;
+
     void UpdateCheckedState(HTMLInputElement &button) noexcept;
+
     void RequiredStateChanged(HTMLInputElement &button) noexcept;
+
     void Remove(HTMLInputElement &button) noexcept;
+
     KRYS_NODISCARD bool Contains(const HTMLInputElement &button) const noexcept;
+
     KRYS_NODISCARD List<Ref<HTMLInputElement>> Members() const noexcept;
 
   private:
     void SetNeedsStyleRecalcForAllButtons() noexcept;
+
     void UpdateValidityForAllButtons() noexcept;
+
     KRYS_NODISCARD bool IsValid() const noexcept;
+
     void SetCheckedButton(HTMLInputElement *button) noexcept;
   };
 

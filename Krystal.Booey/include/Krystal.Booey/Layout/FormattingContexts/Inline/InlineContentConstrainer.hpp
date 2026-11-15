@@ -89,8 +89,11 @@ namespace krys::boo::layout
 
   private:
     void Initialize() noexcept;
+
     void UpdateCachedWidths() noexcept;
+
     void CheckCanConstrainInlineItems() noexcept;
+
     KRYS_NODISCARD EntryPretty LayoutSingleLineForPretty(InlineItemRange layoutRange,
                                                          InlineLayoutUnit idealLineWidth,
                                                          const EntryPretty &lastValidEntry,
@@ -100,22 +103,30 @@ namespace krys::boo::layout
                                                                            InlineLayoutUnit idealLineWidth,
                                                                            size_t numberOfLines,
                                                                            bool isFirstChunk) noexcept;
+
     KRYS_NODISCARD Maybe<List<LayoutUnit>> BalanceRangeWithNoLineRequirement(InlineItemRange range,
                                                                              InlineLayoutUnit idealLineWidth,
                                                                              bool isFirstChunk) noexcept;
+
     KRYS_NODISCARD Maybe<List<LayoutUnit>>
       PrettifyRange(InlineItemRange range, InlineLayoutUnit idealLineWidth, bool isFirstChunk) noexcept;
 
     KRYS_NODISCARD InlineLayoutUnit InlineItemWidth(size_t inlineItemIndex,
                                                     bool useFirstLineStyle) const noexcept;
+
     KRYS_NODISCARD bool ShouldTrimLeading(size_t inlineItemIndex, bool useFirstLineStyle,
                                           bool isFirstLineInChunk) const noexcept;
+
     KRYS_NODISCARD bool ShouldTrimTrailing(size_t inlineItemIndex, bool useFirstLineStyle) const noexcept;
+
     KRYS_NODISCARD List<size_t> ComputeBreakOpportunities(InlineItemRange range) const noexcept;
+
     KRYS_NODISCARD List<LayoutUnit> ComputeLineWidthsFromBreaks(InlineItemRange inlineItems,
                                                                 const List<size_t> &breaks,
                                                                 bool isFirstChunk) const noexcept;
+
     KRYS_NODISCARD InlineLayoutUnit ComputeMaxTextIndent() const noexcept;
+
     KRYS_NODISCARD InlineLayoutUnit ComputedTextIndent(
       IsFirstFormattedLine isFirstFormattedLine,
       Maybe<InlineFormattingUtils::LineEndsWithLineBreak> previousLineEndsWithLineBreak) const noexcept;
@@ -142,10 +153,15 @@ namespace krys::boo::layout
     SlidingWidth(const InlineContentConstrainer &inlineContentConstrainer,
                  const InlineItemList &inlineItemList, size_t start, size_t end, bool useFirstLineStyle,
                  bool isFirstLineInChunk) noexcept;
+
     KRYS_NODISCARD InlineLayoutUnit Width() const noexcept;
+
     void AdvanceStart() noexcept;
+
     void AdvanceStartTo(size_t newStart) noexcept;
+
     void AdvanceEnd() noexcept;
+
     void AdvanceEndTo(size_t newEnd) noexcept;
   };
 }

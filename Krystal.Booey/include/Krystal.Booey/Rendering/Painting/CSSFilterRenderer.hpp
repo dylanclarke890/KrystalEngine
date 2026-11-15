@@ -56,6 +56,7 @@ namespace krys::boo
       Create(RenderElement &renderer, const style::Filter &filter, const FilterGeometry &geometry,
              EnumSet<FilterRenderingMode> preferredRenderingModes,
              const GraphicsContext &destinationContext) noexcept;
+
     KRYS_NODISCARD static RefPtr<CSSFilterRenderer>
       Create(RenderElement &renderer, const FilterOperations &operations, const FilterGeometry &geometry,
              EnumSet<FilterRenderingMode> preferredRenderingModes,
@@ -85,14 +86,18 @@ namespace krys::boo
     KRYS_NODISCARD FilterEffectVector EffectsOfType(FilterFunction::Type filterType) const noexcept final;
 
     KRYS_NODISCARD RefPtr<FilterImage> Apply(FilterImage *sourceImage, FilterResults &results) noexcept final;
+
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context,
                                                         const FilterStyle &sourceStyle) const noexcept final;
 
     KRYS_NODISCARD static bool IsIdentity(RenderElement &renderer, const style::Filter &filter) noexcept;
+
     KRYS_NODISCARD static bool IsIdentity(RenderElement &renderer,
                                           const FilterOperations &operations) noexcept;
+
     KRYS_NODISCARD static IntOutsets CalculateOutsets(RenderElement &renderer, const style::Filter &filter,
                                                       const FloatRect &targetBoundingBox) noexcept;
+
     KRYS_NODISCARD static IntOutsets CalculateOutsets(RenderElement &renderer,
                                                       const FilterOperations &operations,
                                                       const FloatRect &targetBoundingBox) noexcept;
@@ -106,12 +111,14 @@ namespace krys::boo
 
     CSSFilterRenderer(const FilterGeometry &geometry, bool hasFilterThatMovesPixels,
                       bool hasFilterThatShouldBeRestrictedBySecurityOrigin) noexcept;
+
     CSSFilterRenderer(List<Ref<FilterFunction>> &&functions, const FilterGeometry &geometry) noexcept;
 
     KRYS_NODISCARD RefPtr<FilterFunction>
       BuildFilterFunction(RenderElement &renderer, const FilterOperation &operation,
                           EnumSet<FilterRenderingMode> preferredRenderingModes,
                           const GraphicsContext &destinationContext) noexcept;
+
     template <typename TFilter>
     bool BuildFilterFunctions(RenderElement &renderer, const TFilter &filter,
                               EnumSet<FilterRenderingMode> preferredRenderingModes,

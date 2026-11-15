@@ -36,8 +36,8 @@
 
 namespace krys::boo
 {
-  class RenderStyle;
   enum class CompositeOperation : uint8;
+  class RenderStyle;
 }
 
 namespace krys::boo::style::interpolation

@@ -49,6 +49,7 @@ namespace krys::boo::html
     }
 
     void HandleActivationBehavior(dom::Event &event) noexcept final;
+
     KRYS_NODISCARD Maybe<dom::DOMString> DefaultValue() const noexcept final;
   };
 }

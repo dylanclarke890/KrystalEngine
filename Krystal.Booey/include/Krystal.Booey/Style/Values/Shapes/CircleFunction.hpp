@@ -61,7 +61,9 @@ namespace krys::boo::style
   DEFINE_TYPE_MAPPING(css::Circle, Circle)
 
   KRYS_NODISCARD FloatPoint ResolvePosition(const Circle &value, FloatSize boxSize) noexcept;
+
   KRYS_NODISCARD float ResolveRadius(const Circle &value, FloatSize boxSize, FloatPoint center) noexcept;
+
   KRYS_NODISCARD boo::Path PathForCenterCoordinate(const Circle &, const FloatRect &, FloatPoint) noexcept;
 
   template <>
@@ -74,6 +76,7 @@ namespace krys::boo::style
   struct Blending<Circle>
   {
     KRYS_NODISCARD bool CanBlend(const Circle &, const Circle &) noexcept;
+
     KRYS_NODISCARD Circle Blend(const Circle &, const Circle &, const BlendingContext &) noexcept;
   };
 }

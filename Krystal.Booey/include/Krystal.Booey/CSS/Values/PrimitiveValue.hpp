@@ -759,8 +759,11 @@ namespace krys::boo::css
     // These return null for calc, for which range checking is not done at parse time:
     // <https://www.w3.org/TR/css3-values/#calc-range>.
     KRYS_NODISCARD Maybe<bool> IsZero() const noexcept;
+
     KRYS_NODISCARD Maybe<bool> IsOne() const noexcept;
+
     KRYS_NODISCARD Maybe<bool> IsPositive() const noexcept;
+
     KRYS_NODISCARD Maybe<bool> IsNegative() const noexcept;
 
     KRYS_NODISCARD const calc::Value *CSSCalcValue() const noexcept
@@ -808,7 +811,9 @@ namespace krys::boo::css
 #pragma region Arbitrarily converting
 
     KRYS_NODISCARD double DoubleValue(UnitType targetUnit, const ToLengthConversionData &) const noexcept;
+
     KRYS_NODISCARD double DoubleValueNoConversionDataRequired(UnitType targetUnit) const noexcept;
+
     KRYS_NODISCARD double DoubleValueDeprecated(UnitType targetUnit) const noexcept;
 
     template <typename T = double>
@@ -842,8 +847,11 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD double DoubleValueDeprecated() const noexcept;
+
     KRYS_NODISCARD double DoubleValueDividingBy100IfPercentage(const ToLengthConversionData &) const noexcept;
+
     KRYS_NODISCARD double DoubleValueDividingBy100IfPercentageNoConversionDataRequired() const noexcept;
+
     KRYS_NODISCARD double DoubleValueDividingBy100IfPercentageDeprecated() const noexcept;
 
     template <typename T = double>
@@ -859,12 +867,15 @@ namespace krys::boo::css
 
     KRYS_NODISCARD Maybe<double> DoubleValueInternal(UnitType targetUnit,
                                                      const ToLengthConversionData &) const noexcept;
+
     KRYS_NODISCARD Maybe<double> DoubleValueInternalDeprecated(UnitType targetUnit) const noexcept;
 
     KRYS_NODISCARD bool AddDerivedHash(size_t &seed) const noexcept;
 
     KRYS_NODISCARD CSSOMString SerialiseInternal(const SerialisationContext &) const noexcept;
+
     KRYS_NODISCARD CSSOMString FormatNumberValue(CSSOMStringView suffix) const noexcept;
+
     KRYS_NODISCARD CSSOMString FormatIntegerValue(CSSOMStringView suffix) const noexcept;
 
   public:

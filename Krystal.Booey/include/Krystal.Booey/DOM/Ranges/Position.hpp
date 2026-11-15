@@ -37,14 +37,14 @@
 
 namespace krys::boo
 {
-  class RenderElement;
   struct InlineBoxAndOffset;
+  class RenderElement;
 }
 
 namespace krys::boo::dom
 {
-  class Text;
   struct SimpleRange;
+  class Text;
 
   enum class PositionMoveType : uint8
   {
@@ -91,6 +91,7 @@ namespace krys::boo::dom
 
     // For creating before/after positions:
     Position(RefPtr<Node> &&anchorNode, AnchorType anchorType) noexcept;
+
     Position(RefPtr<Text> &&textNode, uint32 offset) noexcept;
 
     // For creating offset positions:
@@ -114,11 +115,14 @@ namespace krys::boo::dom
     // will return img->parentNode() and img->computeNodeIndex() from these functions.
     /// @brief Null for a before/after position anchored to a node with no parent.
     KRYS_NODISCARD Node *GetContainerNode() const noexcept;
+
     KRYS_NODISCARD Text *ContainerText() const noexcept;
+
     KRYS_NODISCARD Element *ContainerOrParentElement() const noexcept;
 
     /// @brief O(n) for before/after-anchored positions, O(1) for parent-anchored positions.
     KRYS_NODISCARD int32 ComputeOffsetInContainerNode() const noexcept;
+
     /// @brief Convenience method for DOM positions that also fixes up some positions for editing.
     KRYS_NODISCARD Position ParentAnchoredEquivalent() const noexcept;
 
@@ -146,6 +150,7 @@ namespace krys::boo::dom
     // These are convenience methods which are smart about whether the position is neighbor anchored or parent
     // anchored
     KRYS_NODISCARD Node *ComputeNodeBeforePosition() const noexcept;
+
     KRYS_NODISCARD Node *ComputeNodeAfterPosition() const noexcept;
 
     KRYS_NODISCARD Node *AnchorNode() const noexcept
@@ -175,6 +180,7 @@ namespace krys::boo::dom
     // These should only be used for PositionIsOffsetInAnchor positions, unless
     // the position is a legacy editing position.
     void MoveToPosition(Node *anchorNode, uint32 offset) noexcept;
+
     void MoveToOffset(uint32 offset) noexcept;
 
     KRYS_NODISCARD bool IsNull() const noexcept
@@ -199,29 +205,37 @@ namespace krys::boo::dom
     // using composed characters, the result may be inside a single user-visible character if a ligature is
     // formed.
     KRYS_NODISCARD Position Previous(PositionMoveType moveType = PositionMoveType::CodePoint) const noexcept;
+
     KRYS_NODISCARD Position Next(PositionMoveType moveType = PositionMoveType::CodePoint) const noexcept;
+
     KRYS_NODISCARD static int32 UncheckedPreviousOffset(const Node *node, uint32 current) noexcept;
+
     KRYS_NODISCARD static int32 UncheckedPreviousOffsetForBackwardDeletion(const Node *node,
                                                                            uint32 current) noexcept;
+
     KRYS_NODISCARD static int32 UncheckedNextOffset(const Node *node, uint32 current) noexcept;
 
     // These can be either inside or just before/after the node, depending on
     // if the node is ignored by editing or not.
     // FIXME: These should go away. They only make sense for legacy positions.
     KRYS_NODISCARD bool AtFirstEditingPositionForNode() const noexcept;
+
     KRYS_NODISCARD bool AtLastEditingPositionForNode() const noexcept;
 
     // Returns true if the visually equivalent positions around have different editability
     KRYS_NODISCARD bool AtEditingBoundary() const noexcept;
+
     KRYS_NODISCARD RefPtr<Node> ParentEditingBoundary() const noexcept;
 
     KRYS_NODISCARD bool AtStartOfTree() const noexcept;
+
     KRYS_NODISCARD bool AtEndOfTree() const noexcept;
 
     // FIXME: Make these non-member functions and put them somewhere in the editing directory.
     // These aren't really basic "position" operations. More high level editing helper functions.
     KRYS_NODISCARD Position LeadingWhitespacePosition(
       Affinity affinity, bool considerNonCollapsibleWhitespace = false) const noexcept;
+
     KRYS_NODISCARD Position TrailingWhitespacePosition(
       Affinity affinity, bool considerNonCollapsibleWhitespace = false) const noexcept;
 
@@ -229,15 +243,19 @@ namespace krys::boo::dom
     KRYS_NODISCARD Position
       Upstream(EditingBoundaryCrossingRule rule =
                  EditingBoundaryCrossingRule::CannotCrossEditingBoundary) const noexcept;
+
     KRYS_NODISCARD Position
       Downstream(EditingBoundaryCrossingRule rule =
                    EditingBoundaryCrossingRule::CannotCrossEditingBoundary) const noexcept;
 
     KRYS_NODISCARD bool IsCandidate() const noexcept;
+
     KRYS_NODISCARD bool IsRenderedCharacter() const noexcept;
+
     KRYS_NODISCARD bool RendersInDifferentPosition(const Position &position) const noexcept;
 
     KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset(Affinity affinity) const noexcept;
+
     KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset(Affinity affinity,
                                                             TextDirection primaryDirection) const noexcept;
 
@@ -248,8 +266,11 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD static bool
       HasRenderedNonAnonymousDescendantsWithHeight(const RenderElement &renderer) noexcept;
+
     KRYS_NODISCARD static bool NodeIsUserSelectNone(const Node *node) noexcept;
+
     KRYS_NODISCARD static bool NodeIsUserSelectAll(const Node *node) noexcept;
+
     KRYS_NODISCARD static RefPtr<Node> RootUserSelectAllForNode(Node *node) noexcept;
 
     // This is a tentative enhancement of operator== to account for different position types.
@@ -280,6 +301,7 @@ namespace krys::boo::dom
 
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD std::partial_ordering TreeOrder(const Position &a, const Position &b) noexcept;
+
   KRYS_NODISCARD std::partial_ordering operator<=>(const Position &a, const Position &b) noexcept;
 
   KRYS_NODISCARD inline Position MakeContainerOffsetPosition(RefPtr<Node> &&node, uint32 offset) noexcept
@@ -290,11 +312,13 @@ namespace krys::boo::dom
   KRYS_NODISCARD Position MakeContainerOffsetPosition(const BoundaryPoint &point) noexcept;
 
   KRYS_NODISCARD Position MakeDeprecatedLegacyPosition(RefPtr<Node> &&node, uint32 offset) noexcept;
+
   KRYS_NODISCARD Position MakeDeprecatedLegacyPosition(const BoundaryPoint &point) noexcept;
 
   KRYS_NODISCARD Maybe<BoundaryPoint> MakeBoundaryPoint(const Position &position) noexcept;
 
   KRYS_NODISCARD Position PositionInParentBeforeNode(Node *node) noexcept;
+
   KRYS_NODISCARD Position PositionInParentAfterNode(Node *node) noexcept;
 
   // PositionBeforeNode and PositionAfterNode return neighbor-anchored positions, construction is O(1)
@@ -313,6 +337,7 @@ namespace krys::boo::dom
   // FirstPositionInNode and LastPositionInNode return parent-anchored positions, LastPositionInNode
   // construction is O(n) due to CountChildNodes()
   KRYS_NODISCARD Position FirstPositionInNode(Node *anchorNode) noexcept;
+
   KRYS_NODISCARD Position LastPositionInNode(Node *anchorNode) noexcept;
 
   KRYS_NODISCARD bool OffsetIsBeforeLastNodeOffset(uint32 offset, Node *anchorNode) noexcept;

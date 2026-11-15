@@ -28,6 +28,7 @@ namespace krys::boo::dom
 
     /// @see https://w3c.github.io/uievents/#dom-compositionevent-compositionevent
     CompositionEvent(DOMStringAtom type, const CompositionEventInit &initializer = {}) noexcept;
+
     ~CompositionEvent() noexcept override;
 
     /// @brief A trusted composition event with @p data, which bubbles, can be cancelled and crosses shadow

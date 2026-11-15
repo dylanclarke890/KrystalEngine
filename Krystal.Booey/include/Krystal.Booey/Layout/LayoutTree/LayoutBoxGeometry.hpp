@@ -96,7 +96,9 @@ namespace krys::boo::layout
 
   public:
     BoxGeometry() noexcept = default;
+
     BoxGeometry(const BoxGeometry &) noexcept = default;
+
     BoxGeometry &operator=(const BoxGeometry &) noexcept = default;
 
     KRYS_NODISCARD static LayoutUnit BorderBoxTop(const BoxGeometry &box) noexcept
@@ -392,8 +394,11 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD Rect MarginBox() const noexcept;
+
     KRYS_NODISCARD Rect BorderBox() const noexcept;
+
     KRYS_NODISCARD Rect PaddingBox() const noexcept;
+
     KRYS_NODISCARD Rect ContentBox() const noexcept;
 
 #if KRYS_DEBUG

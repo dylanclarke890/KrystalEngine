@@ -57,7 +57,9 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD virtual double Offset() const noexcept = 0;
+
       KRYS_NODISCARD virtual Maybe<boo::CompositeOperation> CompositeOperation() const noexcept = 0;
+
       KRYS_NODISCARD virtual bool AnimatesProperty(Property) const noexcept = 0;
 
       KRYS_NODISCARD virtual bool IsAcceleratedEffectKeyframe() const noexcept
@@ -87,6 +89,7 @@ namespace krys::boo
     virtual ~KeyframeInterpolation() noexcept = default;
 
     KRYS_NODISCARD virtual boo::CompositeOperation CompositeOperation() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsPropertyAdditiveOrCumulative(Property) const noexcept = 0;
 
     KRYS_NODISCARD virtual boo::IterationCompositeOperation IterationCompositeOperation() const noexcept
@@ -95,7 +98,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual const Keyframe &KeyframeAtIndex(size_t) const noexcept = 0;
+
     KRYS_NODISCARD virtual size_t NumberOfKeyframes() const noexcept = 0;
+
     KRYS_NODISCARD virtual const TimingFunction *
       TimingFunctionForKeyframe(const Keyframe &) const noexcept = 0;
 

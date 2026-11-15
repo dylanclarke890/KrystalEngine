@@ -46,6 +46,7 @@ namespace krys::boo::css
 
   public:
     KRYS_NODISCARD static Ref<ViewValue> Create() noexcept;
+
     KRYS_NODISCARD static Ref<ViewValue> Create(RefPtr<Value> &&axis, RefPtr<Value> &&startInset,
                                                 RefPtr<Value> &&endInset) noexcept;
 

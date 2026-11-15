@@ -84,6 +84,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Ref<StyleRareInheritedData> Copy() const noexcept;
+
     ~StyleRareInheritedData() noexcept;
 
     bool operator==(const StyleRareInheritedData &) const noexcept;
@@ -178,6 +179,7 @@ namespace krys::boo
 
   private:
     StyleRareInheritedData() noexcept;
+
     StyleRareInheritedData(const StyleRareInheritedData &) noexcept;
   };
 }

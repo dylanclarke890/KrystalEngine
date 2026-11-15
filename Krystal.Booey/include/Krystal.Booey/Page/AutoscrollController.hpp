@@ -72,30 +72,40 @@ namespace krys::boo
 
   public:
     AutoscrollController() noexcept;
+
     ~AutoscrollController() noexcept;
 
     KRYS_NODISCARD RenderBox *AutoscrollRenderer() const noexcept;
+
     KRYS_NODISCARD bool AutoscrollInProgress() const noexcept;
+
     KRYS_NODISCARD bool PanScrollInProgress() const noexcept;
 
     void StartAutoscrollForSelection(RenderObject *renderer) noexcept;
+
     /// @brief Finds the box to autoscroll again after a scroll passed on to an enclosing box: the nearest one
     /// that can autoscroll from what's under the pan's start (or the box itself, for other autoscrolls).
     void UpdateAutoscrollRenderer() noexcept;
+
     /// @brief Starts panning @p scrollable from @p lastKnownMousePosition (in the window).
     void StartPanScrolling(RenderBox &scrollable, const IntPoint &lastKnownMousePosition) noexcept;
+
     /// @brief A mouse button was released: stops panning, unless it's the release of the press that started
     /// it and the mouse hasn't moved away.
     void HandleMouseReleaseEvent(const PlatformMouseEvent &mouseEvent) noexcept;
+
     /// @brief A drag and drop moved over @p targetNode at @p eventPosition (in the window): scrolls the box
     /// it's near the edge of, after a moment.
     void UpdateDragAndDrop(dom::Node *targetNode, const IntPoint &eventPosition,
                            MonotonicTime::duration eventTime) noexcept;
+
     void StopAutoscrollTimer(bool rendererIsBeingDestroyed = false) noexcept;
 
   private:
     void AutoscrollTimerFired() noexcept;
+
     void StartAutoscrollTimer() noexcept;
+
     void UpdatePanScrollState(LocalFrame &frame, const IntPoint &lastKnownMousePosition) noexcept;
   };
 }

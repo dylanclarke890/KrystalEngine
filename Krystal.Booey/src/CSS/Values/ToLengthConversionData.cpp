@@ -39,10 +39,14 @@
 namespace krys::boo::css
 {
   ToLengthConversionData::ToLengthConversionData() noexcept = default;
+
   ToLengthConversionData::ToLengthConversionData(const ToLengthConversionData &) noexcept = default;
+
   ToLengthConversionData::ToLengthConversionData(ToLengthConversionData &&) noexcept = default;
+
   ToLengthConversionData &
     ToLengthConversionData::operator=(const ToLengthConversionData &) noexcept = default;
+
   ToLengthConversionData &ToLengthConversionData::operator=(ToLengthConversionData &&) noexcept = default;
 
   ToLengthConversionData::ToLengthConversionData(const RenderStyle &style,

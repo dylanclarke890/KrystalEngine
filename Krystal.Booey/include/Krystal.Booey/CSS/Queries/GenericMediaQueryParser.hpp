@@ -39,12 +39,16 @@ namespace krys::boo::css::mq
   {
     KRYS_NODISCARD static Maybe<Feature> ConsumeFeature(TokenRange &tokens,
                                                         const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static Maybe<Feature> ConsumeBooleanOrPlainFeature(TokenRange &tokens,
                                                                       const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static Maybe<Feature> ConsumeRangeFeature(TokenRange &tokens,
                                                              const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static RefPtr<Value> ConsumeValue(TokenRange &tokens,
                                                      const ParserContext &context) noexcept;
+
     /// @brief Consumes an `<mf-comparison>` and the whitespace after it.
     KRYS_NODISCARD static Maybe<ComparisonOperator> ConsumeComparisonOperator(TokenRange &tokens) noexcept;
 

@@ -41,12 +41,16 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<StyleCursorImage> Create(const Ref<StyleImage> &, Maybe<IntPoint>,
                                                        const style::URL &) noexcept;
+
     KRYS_NODISCARD static Ref<StyleCursorImage> Create(Ref<StyleImage> &&, Maybe<IntPoint>,
                                                        style::URL &&) noexcept;
+
     ~StyleCursorImage() noexcept override;
 
     KRYS_NODISCARD bool Equals(const StyleImage &) const noexcept final;
+
     KRYS_NODISCARD bool Equals(const StyleCursorImage &) const noexcept;
+
     KRYS_NODISCARD bool EqualInputImages(const StyleCursorImage &) const noexcept;
 
     KRYS_NODISCARD bool UsesDataProtocol() const noexcept final;
@@ -58,9 +62,11 @@ namespace krys::boo
 
   private:
     StyleCursorImage(const Ref<StyleImage> &, Maybe<IntPoint> hotSpot, const style::URL &) noexcept;
+
     StyleCursorImage(Ref<StyleImage> &&, Maybe<IntPoint> hotSpot, style::URL &&) noexcept;
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
+
     KRYS_NODISCARD ImageWithScale SelectBestFitImage(const dom::Document &) noexcept final;
   };
 }

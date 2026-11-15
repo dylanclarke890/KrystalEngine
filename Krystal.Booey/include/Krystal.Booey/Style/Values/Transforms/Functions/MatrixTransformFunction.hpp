@@ -37,11 +37,14 @@ namespace krys::boo::style
   {
   public:
     KRYS_NODISCARD static Ref<const MatrixTransformFunction> CreateIdentity() noexcept;
+
     KRYS_NODISCARD static Ref<const MatrixTransformFunction> Create(Number<>, Number<>, Number<>, Number<>,
                                                                     Number<>, Number<>) noexcept;
+
     KRYS_NODISCARD static Ref<const MatrixTransformFunction> Create(const TransformationMatrix &) noexcept;
 
     KRYS_NODISCARD Ref<const TransformFunctionBase> Clone() const noexcept override;
+
     KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const FloatSize &) const noexcept override;
 
     KRYS_NODISCARD TransformationMatrix Matrix() const noexcept
@@ -69,6 +72,7 @@ namespace krys::boo::style
 
   private:
     MatrixTransformFunction(Number<>, Number<>, Number<>, Number<>, Number<>, Number<>) noexcept;
+
     MatrixTransformFunction(const TransformationMatrix &) noexcept;
 
     Number<> _a;

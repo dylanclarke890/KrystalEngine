@@ -55,11 +55,13 @@ namespace krys::ui
 
   public:
     DateTimeChooserOverlay(View &owner, boo::DateTimeChooserClient &client) noexcept;
+
     ~DateTimeChooserOverlay() noexcept override;
 
 #pragma region DateTimeChooser
 
     void EndChooser() noexcept override;
+
     void ShowChooser(const boo::DateTimeChooserParameters &parameters) noexcept override;
 
 #pragma endregion
@@ -92,11 +94,15 @@ namespace krys::ui
     }
 
     void Hide() noexcept final;
+
     /// @brief Highlights the day or month under @p point.
     void MouseMoved(const boo::IntPoint &point) noexcept final;
+
     /// @brief Chooses the day or month under @p point, or turns the page.
     void MouseReleased(const boo::IntPoint &point) noexcept final;
+
     bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept final;
+
     /// @brief The arrow keys move the highlight, Page Up and Page Down turn the page, Home and End go to its
     /// start and end; Enter and Space choose; Escape and Tab hide the picker.
     bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers) noexcept final;
@@ -119,20 +125,29 @@ namespace krys::ui
   private:
     /// @brief Shows the calendar for the input's type, at its value or today.
     void SetUpCalendar() noexcept;
+
     /// @brief Fills the picker's page with the suggestions or the page of days or months shown, and places
     /// it.
     void Build() noexcept;
+
     /// @brief Highlights @p value, turning the page to it if it's on another.
     void Highlight(int32 value) noexcept;
+
     /// @brief Highlights @p value on the page shown.
     void MoveHighlight(int32 value) noexcept;
+
     void SetHighlightedClass(int32 value, bool on) noexcept;
+
     void Choose(int32 value) noexcept;
+
     /// @brief Turns the page by @p pages, keeping the highlight on it.
     void TurnPage(int32 pages) noexcept;
+
     KRYS_NODISCARD bool IsEnabled(int32 value) const noexcept;
+
     /// @brief The value the day or month @p value chooses.
     KRYS_NODISCARD utf8_string ValueFor(int32 value) const noexcept;
+
     /// @brief The page (month or year) @p value is on.
     KRYS_NODISCARD int32 PageOf(int32 value) const noexcept;
   };

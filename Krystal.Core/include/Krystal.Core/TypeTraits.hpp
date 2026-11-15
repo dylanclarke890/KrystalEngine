@@ -157,6 +157,7 @@ namespace krys
     {
       template <typename... Args>
       static std::true_type Test(Base<Args...> *);
+
       static std::false_type Test(void *);
 
       constexpr static const bool value =

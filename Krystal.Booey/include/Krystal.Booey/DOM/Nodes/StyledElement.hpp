@@ -90,21 +90,30 @@ namespace krys::boo::dom
 
     bool SetInlineStyleProperty(css::PropertyId property, css::ValueId identifier,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
+
     bool SetInlineStyleProperty(css::PropertyId property, css::PropertyId identifier,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
+
     bool SetInlineStyleProperty(css::PropertyId property, double value, css::UnitType unit,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
+
     bool SetInlineStyleProperty(css::PropertyId property, const css::CSSOMString &value,
                                 css::IsImportant important = css::IsImportant::No,
                                 bool *didFailParsing = nullptr) noexcept;
+
     bool SetInlineStyleProperty(css::PropertyId property, Ref<css::Value> &&value,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
+
     bool SetInlineStyleCustomProperty(const css::CSSOMStringAtom &property, const css::CSSOMString &value,
                                       css::IsImportant important = css::IsImportant::No) noexcept;
+
     bool SetInlineStyleCustomProperty(Ref<css::Value> &&customPropertyValue,
                                       css::IsImportant important = css::IsImportant::No) noexcept;
+
     bool RemoveInlineStyleProperty(css::PropertyId property) noexcept;
+
     bool RemoveInlineStyleCustomProperty(const css::CSSOMStringAtom &property) noexcept;
+
     void RemoveAllInlineStyleProperties() noexcept;
 
     /// @brief The declarations the element's presentational attributes map to, rebuilt when one changes.
@@ -148,10 +157,13 @@ namespace krys::boo::dom
 
     void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                               css::ValueId identifier) noexcept;
+
     void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                               double value, css::UnitType unit) noexcept;
+
     void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                               const css::CSSOMString &value) noexcept;
+
     void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                               Ref<css::Value> &&value) noexcept;
 
@@ -170,9 +182,13 @@ namespace krys::boo::dom
     void SynchronizeStyleAttributeWithInvalidation() noexcept;
 
     void StyleAttributeChanged(Maybe<DOMStringView> newStyleString) noexcept;
+
     void InlineStyleChanged() noexcept;
+
     void SetInlineStyleFromString(DOMStringView newStyleString) noexcept;
+
     KRYS_NODISCARD Ref<css::MutableStyleProperties> EnsureMutableInlineStyle() noexcept;
+
     void RebuildPresentationalHintStyle() noexcept;
   };
 }

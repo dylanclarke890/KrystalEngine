@@ -374,6 +374,7 @@ namespace krys::ui
     /// @brief A view of an empty document, with a viewport of @p viewportSize (at a device scale factor of
     /// 1).
     explicit View(const boo::IntSize &viewportSize) noexcept;
+
     ~View() noexcept;
 
     /// @brief Starts loading a document parsed from @p markup, at @p url (which relative URLs resolve
@@ -383,25 +384,32 @@ namespace krys::ui
     /// loads them again, as reloading a page does.
     void LoadHTML(utf8_string &&markup, boo::url::URL &&url = {},
                   boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
+
     /// @brief Starts loading the UTF-8 file at @p path, at the file's URL, through the loader strategy; as
     /// `LoadHTML`, it replaces the current document on a later task.
     /// @param cachePolicy As for `LoadHTML`.
     /// @return An error if the file doesn't exist.
     KRYS_NODISCARD Expected<void> LoadFile(const std::filesystem::path &path,
                                            boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
+
     /// @brief Starts loading @p url through the loader strategy.
     /// @param cachePolicy As for `LoadHTML`.
     void Load(boo::url::URL &&url, boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
+
     /// @brief Whether a document is loading.
     KRYS_NODISCARD bool IsLoading() const noexcept;
+
     /// @brief Stops the loading document, if any: the view keeps its current one.
     void Stop() noexcept;
+
     /// @brief Calls @p handler as loads start, commit, finish and fail.
     void SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept;
+
     /// @brief Loads the icons the page names once it's loaded, and again as they change, calling @p handler
     /// with each that loads. Without a handler, none are loaded (a handler set later loads the next ones);
     /// `Settings::IconLoadingEnabled` turns them off for every view.
     void SetIconHandler(Func<void(const PageIcon &)> &&handler) noexcept;
+
     /// @brief Loads the current document again, its resources revalidated, without its form state.
     void Reload() noexcept;
 
@@ -421,6 +429,7 @@ namespace krys::ui
     /// @brief Resizes the viewport to @p viewportSize view pixels; the document is laid out again at its
     /// next update.
     void Resize(const boo::IntSize &viewportSize) noexcept;
+
     /// @brief The viewport's size, in CSS pixels.
     KRYS_NODISCARD boo::IntSize ViewportSize() const noexcept;
 
@@ -428,6 +437,7 @@ namespace krys::ui
     /// over 96 on Windows): the page lays out the viewport's view pixels over it, and paints at it.
     /// `devicePixelRatio` and the `resolution` media feature follow it. It starts at 1.
     void SetDeviceScaleFactor(float scale) noexcept;
+
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
 
     /// @brief Runs a frame of the page at the host's time @p now: Booey's event loop (the timers that are
@@ -444,6 +454,7 @@ namespace krys::ui
 
     /// @brief How far the viewport is scrolled into the document, in CSS pixels.
     KRYS_NODISCARD boo::IntPoint ScrollPosition() const noexcept;
+
     /// @brief Scrolls the viewport to @p position (in CSS pixels), within the document; `scroll` fires at the
     /// next rendering update.
     void ScrollTo(const boo::IntPoint &position) noexcept;
@@ -455,10 +466,12 @@ namespace krys::ui
     /// @brief Paints the page into @p renderer, between its `Begin` and `End`: the page's layer tree is
     /// flushed, the parts of its layers that changed are painted again, and the layers are composited.
     void Paint(gfx::Renderer2D &renderer) noexcept;
+
     /// @brief Gives the view the device it will paint with before it first paints, so that the page's
     /// canvases can be read back (`getImageData`) and drawn into each other from the start; without it, they
     /// can be once the view has painted. The view keeps the first device it's given or painted with.
     void SetDevice(gfx::Device &device) noexcept;
+
     /// @brief Whether the page has changed since it was last painted (or never was).
     KRYS_NODISCARD bool NeedsPaint() const noexcept;
 
@@ -472,17 +485,21 @@ namespace krys::ui
     /// @brief Moves the mouse to @p point (in viewport coordinates): mouse events fire at the elements it
     /// leaves and enters, the elements under it become `:hover`, and the cursor follows.
     void MouseMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers = {}) noexcept;
+
     /// @brief Presses @p button at @p point: `mousedown` fires, and the element under the mouse and its
     /// ancestors become `:active` until the release. A press soon after the last and near it is a double
     /// click.
     void MousePressed(const boo::IntPoint &point, pal::MouseButton button,
                       pal::KeyModifiers modifiers = {}) noexcept;
+
     /// @brief Releases @p button at @p point: `mouseup` fires, then `click` (`auxclick` for other buttons)
     /// and `dblclick` for a double click, and `:active` is cleared.
     void MouseReleased(const boo::IntPoint &point, pal::MouseButton button,
                        pal::KeyModifiers modifiers = {}) noexcept;
+
     /// @brief The mouse left the page: it leaves the element it was over, and nothing is `:hover`.
     void MouseLeft() noexcept;
+
     /// @brief Turns the wheel at @p point by @p notchesX and @p notchesY (positive is away from the user, or
     /// to the right): `wheel` fires at the element under the mouse, then, unless it's cancelled, the nearest
     /// box that can scroll that way scrolls, or else the viewport. A notch is @p settings' lines (or a page),
@@ -491,6 +508,7 @@ namespace krys::ui
     bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY,
                     pal::KeyModifiers modifiers = {},
                     const pal::WheelScrollSettings &settings = pal::GetWheelScrollSettings()) noexcept;
+
     /// @brief A step of a touchpad's pan at @p point: the content follows the fingers, then any momentum,
     /// as the wheel scrolls (`wheel` fires for each step that moves), and what it scrolled snaps once the pan
     /// and its momentum end. Over an overlay, the steps are its wheel's notches, at 100 pixels a notch.
@@ -502,6 +520,7 @@ namespace krys::ui
     /// `pen` (and their compatibility mouse events). Its tip presses the left button, with the barrel button
     /// held the right, and its eraser the eraser button (5); leaving the page leaves the element it was over.
     void PenInput(const boo::DoublePoint &point, const pal::PointerInput &input) noexcept;
+
     /// @brief A touch's input at @p point (in viewport coordinates): `touchstart`, `touchmove`, `touchend` or
     /// `touchcancel` at the element it began on, with every touch on the screen, each preceded by the touch's
     /// pointer events of type `touch`. While an overlay is open, touches are ignored.
@@ -602,6 +621,7 @@ namespace krys::ui
     /// @return Whether the page cancelled the key or handled it (Tab and Shift+Tab move the focus).
     bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers = {}, const pal::KeyText &text = {},
                     bool isAutoRepeat = false) noexcept;
+
     /// @brief Releases @p key: `keyup` fires at the focused element (or the body).
     /// @return Whether the page cancelled the key.
     bool KeyReleased(pal::Key key, pal::KeyModifiers modifiers = {}) noexcept;
@@ -610,21 +630,26 @@ namespace krys::ui
     /// `keypress` fires with them, and they're typed unless it's cancelled.
     /// @return Whether the page cancelled or handled it.
     bool InsertText(const utf8_string &text) noexcept;
+
     /// @brief The input method composes @p text, with @p clauses (the one being converted thick) and the
     /// caret at @p caret (UTF-8 offsets in it): as a key press the input method handled (`keydown` with key
     /// code 229), the focused element's composition becomes it, starting one if there's none; empty text
     /// removes it.
     void SetComposition(const utf8_string &text, Span<const pal::CompositionClause> clauses,
                         uint32 caret) noexcept;
+
     /// @brief The input method committed @p text: as a key press it handled, the text takes the composition's
     /// place (or is typed, without one).
     void ConfirmComposition(const utf8_string &text) noexcept;
+
     /// @brief Whether the focused element takes text from the input method (it's editable, or a text field
     /// other than a password field), so the host turns its input method on.
     KRYS_NODISCARD bool AcceptsTextInput() const noexcept;
+
     /// @brief Where the composition starts (its first line), or else the caret, in viewport coordinates, for
     /// placing the input method's windows; null without either.
     KRYS_NODISCARD Maybe<boo::IntRect> TextInputRect() noexcept;
+
     /// @brief Calls @p handler when the page drops the composition itself (confirming it as the mouse
     /// presses or the window loses focus, or cancelling it as the selection leaves it), so the host's input
     /// method drops its own (`pal::IWindow::CancelComposition()`).
@@ -639,6 +664,7 @@ namespace krys::ui
     /// focus visible. While an overlay is open, the pads drive it as its keys do. Call it once a frame; it
     /// does nothing while the mapping is off or the window doesn't have focus.
     void GamepadInput(Span<const pal::Gamepad> gamepads, MonotonicTime::duration now) noexcept;
+
     /// @brief Turns the pads' mapping onto the page on or off (for pages that read the pads themselves); it
     /// starts on.
     void SetGamepadNavigationEnabled(bool enabled) noexcept;
@@ -687,6 +713,7 @@ namespace krys::ui
     /// it.
     /// @note A shown overlay's page (a menu list's popup, a picker) is the tree's root's last child.
     void AttachAccessibility(pal::IWindow &window, const boo::IntPoint &origin = {}) noexcept;
+
     /// @brief Stops exposing the page to assistive technology.
     void DetachAccessibility() noexcept;
 
@@ -728,6 +755,7 @@ namespace krys::ui
     /// @brief Confirms the composition, if there is one, and tells the host to drop the input method's: the
     /// mouse pressed, or the window lost focus.
     void ConfirmCompositionForHost() noexcept;
+
     /// @brief Whether a modal overlay is open, which takes the keys and text input.
     KRYS_NODISCARD bool HasModalOverlay() const noexcept;
 
@@ -739,13 +767,18 @@ namespace krys::ui
     void ReplaceDocument(utf8_string &&markup) noexcept;
 
     void ShowOverlay(Overlay &overlay) noexcept;
+
     void OverlayHidden(Overlay &overlay) noexcept;
+
     /// @brief Paints the open overlay over the page, at its place in the viewport.
     void PaintOverlay(gfx::Renderer2D &renderer) noexcept;
+
     /// @brief Paints the drag's image under the cursor, over the page and the overlay.
     void PaintDragImage(gfx::Renderer2D &renderer) noexcept;
+
     /// @brief Draws the drag's image into @p context, if the drag has one.
     void DrawDragImage(boo::GraphicsContext &context) const noexcept;
+
     /// @param movement For a move, how far the mouse moved since the last (@p unadjustedMovement, before the
     /// system's acceleration, while the pointer is locked).
     KRYS_NODISCARD boo::PlatformMouseEvent
@@ -753,22 +786,30 @@ namespace krys::ui
                  int32 clickCount, EnumSet<boo::PlatformEvent::Modifier> modifiers,
                  const boo::DoublePoint &movement = {},
                  const boo::DoublePoint &unadjustedMovement = {}) const noexcept;
+
     /// @brief The button a move carries: the one held, as Windows' do (the left, then the middle, then the
     /// right).
     KRYS_NODISCARD boo::MouseButton HeldButton() const noexcept;
+
     /// @brief The drag @p item describes, of @p dataTransfer's data, started in the page.
     void DragStarted(boo::DragItem &&item, boo::dom::DataTransfer &dataTransfer) noexcept;
+
     /// @brief The drag moved to @p point (in viewport coordinates), with @p modifiers held: over the page,
     /// it's entered or updated, and off it, it's left.
     void DragMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers) noexcept;
+
     /// @brief Ends the drag at @p point: drops it there if @p drop and the page would take it, else cancels
     /// it.
     void EndDrag(const boo::IntPoint &point, bool drop) noexcept;
+
     /// @brief Asks the host to lock the pointer for the page.
     KRYS_NODISCARD boo::PointerLockRequestResult LockPointer() noexcept;
+
     /// @brief Asks the host to unlock the pointer.
     bool UnlockPointer() noexcept;
+
     static void PerformMicrotaskCheckpoint() noexcept;
+
     /// @brief @p button's bit in the DOM's `buttons` bit set.
     KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;
 
@@ -786,17 +827,24 @@ namespace krys::ui
 
     /// @brief The topmost element at @p point, in the viewport's CSS pixels.
     KRYS_NODISCARD boo::dom::Element *HitTestInPage(const boo::IntPoint &point) noexcept;
+
     /// @brief `MouseWheel` at @p point, in the viewport's CSS pixels.
     bool MouseWheelInPage(const boo::IntPoint &point, float notchesX, float notchesY,
                           pal::KeyModifiers modifiers, const pal::WheelScrollSettings &settings) noexcept;
+
     /// @brief @p point, in view pixels, in CSS pixels.
     KRYS_NODISCARD boo::IntPoint ToPage(const boo::IntPoint &point) const noexcept;
+
     KRYS_NODISCARD boo::DoublePoint ToPage(const boo::DoublePoint &point) const noexcept;
+
     /// @brief @p input, its sizes in CSS pixels.
     KRYS_NODISCARD pal::PointerInput ToPage(const pal::PointerInput &input) const noexcept;
+
     KRYS_NODISCARD pal::TouchpadPanInput ToPage(const pal::TouchpadPanInput &input) const noexcept;
+
     /// @brief @p rect, in CSS pixels, in view pixels (the smallest rect of whole view pixels holding it).
     KRYS_NODISCARD boo::IntRect ToViewPixels(const boo::IntRect &rect) const noexcept;
+
     /// @brief Resizes the viewport to @p size CSS pixels: an overlay's, which lays out at its owner's
     /// scale.
     void ResizeToLayoutSize(const boo::IntSize &size) noexcept;
@@ -805,6 +853,7 @@ namespace krys::ui
                                                     const boo::DoublePoint &point, boo::MouseButton button,
                                                     int32 clickCount,
                                                     const pal::PointerInput &input) const noexcept;
+
     /// @brief Counts a press of @p button at @p point on from the last, if it's soon after it and within
     /// @p distance of it.
     KRYS_NODISCARD int32 CountClick(const boo::IntPoint &point, boo::MouseButton button,
@@ -813,13 +862,17 @@ namespace krys::ui
     /// @brief A press on the pad, as a key press would be: an activation of the page unless it's a close
     /// request (@p activates), and the focused element becomes focus visible.
     void GamepadInteraction(bool activates) noexcept;
+
     /// @brief Presses @p key in the open overlay, if there is one.
     /// @return Whether an overlay was open.
     bool GamepadOverlayKey(pal::Key key, pal::KeyModifiers modifiers = {}) noexcept;
+
     /// @brief The pad moves the focus in @p direction (or an overlay's highlight, as its arrow key does).
     void GamepadMove(boo::dom::FocusDirection direction) noexcept;
+
     /// @brief Forgets the pads' held direction and scroll.
     void ResetGamepadState() noexcept;
+
     /// @brief The right stick scrolled by @p delta pixels.
     void GamepadScroll(const boo::DoubleSize &delta) noexcept;
 
@@ -827,29 +880,40 @@ namespace krys::ui
     /// at @p position, which the page cancelled if @p cancelled.
     void RecogniseGesture(uint32 id, pal::PointerAction action, const boo::DoublePoint &position,
                           bool cancelled) noexcept;
+
     /// @brief The used `touch-action` of the element at @p point.
     KRYS_NODISCARD EnumSet<boo::TouchAction> TouchActionsAt(const boo::DoublePoint &point) noexcept;
+
     /// @brief Ends the gesture, without its default action.
     void ResetGesture() noexcept;
+
     /// @brief The touch @p id's pointer events end, as the page loses the touch to a pan or a pinch
     /// (`pointercancel`).
     void CancelTouchPointer(uint32 id, const boo::DoublePoint &position) noexcept;
+
     /// @brief The pan moved to @p position: what's under its start scrolls by the movement, on the axes it
     /// scrolls.
     void PanTo(const boo::DoublePoint &position) noexcept;
+
     /// @brief Scrolls what's under @p position by @p delta (the content moving with the touch).
     /// @return Whether something scrolled.
     bool ScrollForTouch(const boo::DoublePoint &position, const boo::DoubleSize &delta) noexcept;
+
     /// @brief The pan lifted: it flings on if it was moving fast enough.
     void StartFling() noexcept;
+
     /// @brief Moves the fling on to the host's time @p now.
     void StepFling(MonotonicTime::duration now) noexcept;
+
     /// @brief The two touches moved: the page scales by how far apart they are, about the point between them.
     void UpdatePinch() noexcept;
+
     /// @brief A touch tapped at @p position: a click there, with its compatibility mouse events.
     void Tap(uint32 id, const boo::DoublePoint &position) noexcept;
+
     /// @brief The long press timer fired: the touch is a long press.
     void LongPressed() noexcept;
+
     /// @brief A long press of the touch @p id lifted at @p position: the page gets `contextmenu` there.
     void RequestContextMenu(uint32 id, const boo::DoublePoint &position) noexcept;
   };

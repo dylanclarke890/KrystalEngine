@@ -86,20 +86,28 @@ namespace krys::boo
 
   public:
     ScrollbarsController() noexcept;
+
     ~ScrollbarsController() noexcept;
 
     /// @brief Starts fading @p scrollbar with the other one, if it's an overlay scrollbar.
     void DidAddScrollbar(Scrollbar &scrollbar, ScrollbarOrientation orientation) noexcept;
+
     void WillRemoveScrollbar(Scrollbar &scrollbar, ScrollbarOrientation orientation) noexcept;
 
     void MouseEnteredContentArea() noexcept;
+
     void MouseExitedContentArea() noexcept;
+
     void MouseMovedInContentArea() noexcept;
+
     /// @brief The page was shown: the scrollbars show, then fade.
     void ContentAreaDidShow() noexcept;
+
     /// @brief The page was hidden: the scrollbars hide at once.
     void ContentAreaDidHide() noexcept;
+
     void NotifyContentAreaScrolled() noexcept;
+
     /// @brief Keeps the overlay scrollbars hidden (@p shouldLockState) while the document is suspended, or
     /// lets them show again.
     void LockOverlayScrollbarStateToHidden(bool shouldLockState) noexcept;
@@ -117,8 +125,11 @@ namespace krys::boo
     }
 
     void AnimationTimerFired() noexcept;
+
     void ShowOverlayScrollbars() noexcept;
+
     void HideOverlayScrollbars() noexcept;
+
     void UpdateOverlayScrollbarsOpacity() noexcept;
   };
 }

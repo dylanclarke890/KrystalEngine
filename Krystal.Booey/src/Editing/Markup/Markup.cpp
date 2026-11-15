@@ -223,9 +223,12 @@ namespace krys::boo
       }
 
       RefPtr<dom::Node> SerializeNodes(const dom::Position &start, const dom::Position &end) noexcept;
+
       void WrapWithNode(dom::Node &node, bool convertBlocksToInlines = false,
                         RangeFullySelectsNode rangeFullySelectsNode = DoesFullySelectNode) noexcept;
+
       void WrapWithStyleNode(css::StyleProperties *style, bool isBlock = false) noexcept;
+
       KRYS_NODISCARD utf8_string TakeResults() noexcept;
 
       KRYS_NODISCARD bool NeedRelativeStyleWrapper() const noexcept
@@ -307,6 +310,7 @@ namespace krys::boo
 
     private:
       KRYS_NODISCARD bool ContainsOnlyASCII() const noexcept;
+
       void AppendStyleNodeOpenTag(utf8_string &out, css::StyleProperties *style, bool isBlock = false,
                                   Maybe<TextDirection> directionToAppend = null) noexcept;
 
@@ -316,6 +320,7 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD utf8_string RenderedTextRespectingRange(const dom::Text &text) noexcept;
+
       KRYS_NODISCARD utf8_string TextContentRespectingRange(const dom::Text &text) noexcept;
 
       KRYS_NODISCARD bool ShouldPreserveMSOListStyleForElement(const dom::Element &element) noexcept;
@@ -324,7 +329,9 @@ namespace krys::boo
 
       void AppendStartTag(utf8_string &out, const dom::Element &element, bool addDisplayInline,
                           RangeFullySelectsNode rangeFullySelectsNode) noexcept;
+
       void AppendEndTag(utf8_string &out, const dom::Element &element) noexcept override;
+
       void AppendCustomAttributes(utf8_string &out, const dom::Element &element,
                                   Namespaces *namespaces) noexcept override;
 

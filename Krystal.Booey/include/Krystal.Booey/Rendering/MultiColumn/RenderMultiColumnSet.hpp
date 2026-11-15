@@ -115,17 +115,21 @@ namespace krys::boo
 
   public:
     RenderMultiColumnSet(RenderFragmentedFlow &fragmentedFlow, RenderStyle &&style) noexcept;
+
     ~RenderMultiColumnSet() noexcept override;
 
     /// @brief The multi-column container.
     KRYS_NODISCARD RenderBlockFlow *MultiColumnBlockFlow() const noexcept;
+
     KRYS_NODISCARD RenderMultiColumnFlow *MultiColumnFlow() const noexcept;
 
     KRYS_NODISCARD RenderMultiColumnSet *NextSiblingMultiColumnSet() const noexcept;
+
     KRYS_NODISCARD RenderMultiColumnSet *PreviousSiblingMultiColumnSet() const noexcept;
 
     /// @brief The first object in the flow that's rendered inside this set.
     KRYS_NODISCARD RenderObject *FirstRendererInFragmentedFlow() const noexcept;
+
     /// @brief The last object in the flow that's rendered inside this set.
     KRYS_NODISCARD RenderObject *LastRendererInFragmentedFlow() const noexcept;
 
@@ -207,6 +211,7 @@ namespace krys::boo
     }
 
     void ClearForcedBreaks() noexcept;
+
     void AddForcedBreak(LayoutUnit offsetFromFirstPage) noexcept;
 
     /// @brief (Re-)calculates the column height: for balancing, or to fit a constrained multicol height. With
@@ -222,9 +227,11 @@ namespace krys::boo
     void UpdateLogicalWidth() noexcept override;
 
     void PrepareForLayout(bool initial) noexcept;
+
     /// @brief Begins laying out content for this column set. This happens at the beginning of flow layout,
     /// and when advancing from a previous column set or spanner to this one.
     void BeginFlow(RenderBlock *container) noexcept;
+
     /// @brief Finishes laying out content for this column set. This happens at the end of flow layout, and
     /// when advancing to the next column set or spanner.
     void EndFlow(RenderBlock *container, LayoutUnit bottomInContainer) noexcept;
@@ -247,6 +254,7 @@ namespace krys::boo
         ColumnHitTestTranslationMode::DoNotClampHitTestTranslationToColumns) const noexcept;
 
     KRYS_NODISCARD LayoutRect ColumnRectAt(uint32 index) const noexcept;
+
     KRYS_NODISCARD uint32 ColumnCount() const noexcept;
 
     KRYS_NODISCARD LayoutUnit ColumnGap() const noexcept;
@@ -287,6 +295,7 @@ namespace krys::boo
 
     KRYS_NODISCARD List<LayoutRect>
       FragmentRectsForFlowContentRect(const LayoutRect &rect) const noexcept final;
+
     KRYS_NODISCARD bool ContentRectSpansFragments(const LayoutRect &rect) const noexcept final;
 
     KRYS_NODISCARD dom::PositionWithAffinity
@@ -303,6 +312,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit ColumnLogicalLeft(uint32 index) const noexcept;
 
     KRYS_NODISCARD LayoutRect FragmentedFlowPortionRectAt(uint32 index) const noexcept;
+
     KRYS_NODISCARD LayoutRect FragmentedFlowPortionOverflowRect(const LayoutRect &fragmentedFlowPortion,
                                                                 uint32 index,
                                                                 uint32 columnCount) const noexcept;

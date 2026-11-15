@@ -41,6 +41,7 @@ namespace krys::boo
 
   public:
     ScrollbarThemeAdwaita() noexcept = default;
+
     ~ScrollbarThemeAdwaita() noexcept override = default;
 
     /// @brief Chooses overlay scrollbars (@p overlay) or classic ones, for every page: the pages showing
@@ -56,19 +57,28 @@ namespace krys::boo
     }
 
     bool Paint(Scrollbar &, GraphicsContext &, const IntRect &) noexcept override;
+
     void PaintScrollCorner(ScrollableArea &, GraphicsContext &, const IntRect &) noexcept override;
+
     KRYS_NODISCARD ScrollbarButtonPressAction HandleMousePressEvent(Scrollbar &, const PlatformMouseEvent &,
                                                                     ScrollbarPart) noexcept override;
+
     KRYS_NODISCARD int32 ScrollbarThickness(
       ScrollbarWidth, OverlayScrollbarSizeRelevancy =
                         OverlayScrollbarSizeRelevancy::IncludeOverlayScrollbarSize) const noexcept override;
+
     KRYS_NODISCARD int32 MinimumThumbLength(Scrollbar &) noexcept override;
+
     KRYS_NODISCARD bool HasButtons(Scrollbar &) noexcept override;
+
     KRYS_NODISCARD bool HasThumb(Scrollbar &) noexcept override;
+
     KRYS_NODISCARD IntRect BackButtonRect(Scrollbar &, ScrollbarPart,
                                           bool painting = false) noexcept override;
+
     KRYS_NODISCARD IntRect ForwardButtonRect(Scrollbar &, ScrollbarPart,
                                              bool painting = false) noexcept override;
+
     KRYS_NODISCARD IntRect TrackRect(Scrollbar &, bool painting = false) noexcept override;
   };
 }

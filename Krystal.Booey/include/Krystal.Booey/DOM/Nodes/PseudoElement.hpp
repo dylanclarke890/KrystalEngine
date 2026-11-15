@@ -58,6 +58,7 @@ namespace krys::boo::dom
     }
 
     PseudoElement(Element &host, PseudoElementType pseudoElementType) noexcept;
+
     ~PseudoElement() noexcept override;
 
     KRYS_NODISCARD static Ref<PseudoElement> Create(Element &host,

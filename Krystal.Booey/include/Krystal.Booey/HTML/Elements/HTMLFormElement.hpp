@@ -38,13 +38,13 @@ namespace krys::boo::dom
 namespace krys::boo::html
 {
   class DOMFormData;
-  enum class RadioNodeListCandidates : uint8;
   class FormAssociatedElement;
-  class HTMLImageElement;
   class FormListedElement;
   class HTMLFormControlElement;
   class HTMLFormControlsCollection;
+  class HTMLImageElement;
   class RadioNodeList;
+  enum class RadioNodeListCandidates : uint8;
   class ValidatedFormListedElement;
 
   /// @see https://html.spec.whatwg.org/#htmlformelement
@@ -78,6 +78,7 @@ namespace krys::boo::html
 
   public:
     HTMLFormElement(dom::Document &document) noexcept;
+
     ~HTMLFormElement() noexcept override;
 
 #pragma region HTMLFormElement - https://html.spec.whatwg.org/#htmlformelement
@@ -183,15 +184,18 @@ namespace krys::boo::html
     KRYS_NODISCARD bool ShouldAutocomplete() const noexcept;
 
     void RegisterImageElement(HTMLImageElement &element) noexcept;
+
     void UnregisterImageElement(HTMLImageElement &element) noexcept;
 
     /// @brief The images whose form owner this is with an ID or name of @p name, in tree order.
     KRYS_NODISCARD List<Ref<dom::Element>> NamedImages(dom::DOMStringView name) const noexcept;
 
     void RegisterFormListedElement(FormListedElement &element) noexcept;
+
     void UnregisterFormListedElement(FormListedElement &element) noexcept;
 
     void AddInvalidFormControl(const HTMLElement &formControlElement) noexcept;
+
     void RemoveInvalidFormControlIfNeeded(const HTMLElement &formControlElement) noexcept;
 
     /// @see https://html.spec.whatwg.org/#form-submission-algorithm
@@ -223,6 +227,7 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#default-button
     KRYS_NODISCARD HTMLFormControlElement *DefaultButton() const noexcept;
+
     void ResetDefaultButton() noexcept;
 
     KRYS_NODISCARD html::RadioButtonGroups &RadioButtonGroups() noexcept
@@ -231,6 +236,7 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD List<Ref<HTMLElement>> CopyListedElementsVector() const noexcept;
+
     KRYS_NODISCARD List<Ref<HTMLElement>> CopyValidatedListedElementsVector() const noexcept;
 
     /// @brief The names and values of the form's text fields.
@@ -260,15 +266,19 @@ namespace krys::boo::html
     void RadioNodeListDestroyed(dom::DOMStringView name, RadioNodeListCandidates candidates) noexcept;
 
     KRYS_NODISCARD Ref<RadioNodeList> RadioNodeListForName(dom::DOMStringView name) noexcept;
+
     KRYS_NODISCARD Ref<RadioNodeList> RadioNodeListForName(dom::DOMStringView name,
                                                            RadioNodeListCandidates candidates) noexcept;
 
     KRYS_NODISCARD bool MatchesValidPseudoClass() const noexcept final;
+
     KRYS_NODISCARD bool MatchesInvalidPseudoClass() const noexcept final;
 
   protected:
     void OnInsert() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
@@ -276,10 +286,12 @@ namespace krys::boo::html
   private:
     void Submit(dom::Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
                 HTMLFormControlElement *submitter = nullptr) noexcept;
+
     void SubmitDialog(Ref<FormSubmission> &&formSubmission) noexcept;
 
     KRYS_NODISCARD uint32 FormElementIndexWithFormAttribute(dom::Element &element, uint32 rangeStart,
                                                             uint32 rangeEnd) noexcept;
+
     KRYS_NODISCARD uint32 FormElementIndex(FormListedElement &listedElement) noexcept;
 
     bool ValidateInteractively() noexcept;
@@ -289,7 +301,9 @@ namespace krys::boo::html
     bool CheckInvalidControlsAndCollectUnhandled(List<Ref<HTMLElement>> &unhandledInvalidControls) noexcept;
 
     KRYS_NODISCARD HTMLElement *ElementFromPastNamesMap(dom::DOMStringView pastName) const noexcept;
+
     void AddToPastNamesMap(FormAssociatedElement &element, dom::DOMStringView pastName) noexcept;
+
     void RemoveFromPastNamesMap(FormAssociatedElement &element) noexcept;
 
     void ResetListedFormControlElements() noexcept;

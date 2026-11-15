@@ -320,8 +320,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FontVariantEastAsianValues VariantEastAsian() const noexcept;
+
     KRYS_NODISCARD FontVariantNumericValues VariantNumeric() const noexcept;
+
     KRYS_NODISCARD FontVariantLigaturesValues VariantLigatures() const noexcept;
+
     KRYS_NODISCARD FontVariantSettings VariantSettings() const noexcept;
 
     KRYS_NODISCARD FontOpticalSizing OpticalSizing() const noexcept
@@ -529,7 +532,9 @@ namespace krys::boo
     }
 
     void SetVariantEastAsian(FontVariantEastAsianValues) noexcept;
+
     void SetVariantNumeric(FontVariantNumericValues) noexcept;
+
     void SetVariantLigatures(FontVariantLigaturesValues) noexcept;
 
     void SetOpticalSizing(FontOpticalSizing sizing) noexcept

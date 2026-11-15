@@ -406,10 +406,12 @@ namespace krys::boo
     }
 
     void RemoveNode(dom::Node &node) noexcept;
+
     void RemoveNodePreservingChildren(dom::Node &node) noexcept;
 
   private:
     void RemoveContentsWithSideEffects() noexcept;
+
     void RemoveInterchangeNodes(dom::Node *container) noexcept;
 
     void InsertNodeBefore(dom::Node &node, dom::Node &refNode) noexcept;

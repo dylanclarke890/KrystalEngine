@@ -53,9 +53,11 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSRuleList &CssRules() const noexcept;
 
     dom::ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
+
     dom::ExceptionOr<void> DeleteRule(uint32 index) noexcept;
 
     KRYS_NODISCARD uint32 Length() const noexcept;
+
     KRYS_NODISCARD CSSRule *Item(uint32 index) const noexcept;
 
     KRYS_NODISCARD virtual bool IsCSSConditionRule() const noexcept
@@ -77,6 +79,7 @@ namespace krys::boo::css
     void Reattach(Rule &rule) noexcept override;
 
     void AppendCSSTextForItems(StringBuilder &builder) const noexcept;
+
     void AppendCSSTextWithReplacementURLsForItems(StringBuilder &builder,
                                                   const SerialisationContext &context) const noexcept;
 
@@ -90,7 +93,9 @@ namespace krys::boo::css
     }
 
     static void AppendCSSTextForItemsInternal(StringBuilder &builder, const StringBuilder &rules) noexcept;
+
     void CssTextForRules(StringBuilder &rules) const noexcept;
+
     void CssTextForRulesWithReplacementURLs(StringBuilder &rules,
                                             const SerialisationContext &context) const noexcept;
   };

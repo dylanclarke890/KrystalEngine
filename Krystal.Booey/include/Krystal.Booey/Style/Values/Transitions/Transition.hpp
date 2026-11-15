@@ -82,6 +82,7 @@ namespace krys::boo::style
       }
 
       TransitionData() noexcept;
+
       TransitionData(const TransitionData &) noexcept;
 
       KRYS_NODISCARD bool operator==(const TransitionData &) const noexcept;
@@ -91,6 +92,7 @@ namespace krys::boo::style
 
   public:
     Transition() noexcept;
+
     Transition(SingleTransitionProperty &&) noexcept;
 
     KRYS_NODISCARD const SingleTransitionProperty &GetProperty() const noexcept

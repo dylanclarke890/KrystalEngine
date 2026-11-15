@@ -35,6 +35,7 @@ namespace krys::boo::css
     struct SameSizeAsCSSRule : public RefCounted<SameSizeAsCSSRule>, public CanMakeWeakPtr<SameSizeAsCSSRule>
     {
       virtual ~SameSizeAsCSSRule() noexcept;
+
       uint8 Bitfields;
       void *PointerUnion;
     };

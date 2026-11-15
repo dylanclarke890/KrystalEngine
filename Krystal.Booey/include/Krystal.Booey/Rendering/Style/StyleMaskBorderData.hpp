@@ -47,6 +47,7 @@ namespace krys::boo
 
   private:
     StyleMaskBorderData() noexcept;
+
     StyleMaskBorderData(const StyleMaskBorderData &) noexcept;
   };
 }

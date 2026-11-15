@@ -164,6 +164,7 @@ namespace krys
     struct AllOverloads : Bases...
     {
       void operator()() const;
+
       using Bases::operator()...;
     };
 

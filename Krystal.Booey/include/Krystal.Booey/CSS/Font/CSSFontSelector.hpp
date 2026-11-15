@@ -85,6 +85,7 @@ namespace krys::boo::css
       }
 
       void FontLoaded(CSSFontFace &fontFace) noexcept final;
+
       void UpdateStyleIfNeeded(CSSFontFace &fontFace) noexcept final;
     };
 
@@ -144,19 +145,25 @@ namespace krys::boo::css
 
     KRYS_NODISCARD FontRanges FontRangesForFamily(const FontDescription &description,
                                                   const StringAtom &family) noexcept final;
+
     KRYS_NODISCARD size_t FallbackFontCount() noexcept final;
+
     KRYS_NODISCARD RefPtr<Font> FallbackFontAt(const FontDescription &description,
                                                size_t index) noexcept final;
 
     void ClearFonts() noexcept;
+
     void EmptyCaches() noexcept;
 
     /// @brief Adds the faces of an `@font-face` rule (staged until the build completes, during one).
     void AddFontFaceRule(FontFaceRule &fontFaceRule, bool isInitiatingElementInUserAgentShadowTree) noexcept;
+
     void AddFontPaletteValuesRule(const FontPaletteValuesRule &fontPaletteValuesRule) noexcept;
+
     void AddFontFeatureValuesRule(const FontFeatureValuesRule &fontFeatureValuesRule) noexcept;
 
     void BuildStarted() noexcept;
+
     void BuildCompleted() noexcept;
 
     void FontCacheInvalidated() noexcept final;
@@ -164,6 +171,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsEmpty() const noexcept;
 
     void RegisterForInvalidationCallbacks(FontSelectorClient &client) noexcept final;
+
     void UnregisterForInvalidationCallbacks(FontSelectorClient &client) noexcept final;
 
     KRYS_NODISCARD bool IsSimpleFontSelectorForDescription() const noexcept final;
@@ -220,6 +228,7 @@ namespace krys::boo::css
     KRYS_NODISCARD const FontPaletteValues &
       LookupFontPaletteValues(const StringAtom &familyName,
                               const FontDescription &description) const noexcept;
+
     KRYS_NODISCARD RefPtr<FontFeatureValues>
       LookupFontFeatureValues(const StringAtom &familyName) const noexcept;
   };

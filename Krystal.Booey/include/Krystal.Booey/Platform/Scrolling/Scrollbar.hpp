@@ -81,6 +81,7 @@ namespace krys::boo
 
     Scrollbar(ScrollableArea &scrollableArea, ScrollbarOrientation orientation,
               ScrollbarWidth widthStyle) noexcept;
+
     ~Scrollbar() noexcept;
 
     // Called by the ScrollableArea when the scroll offset changes.
@@ -191,6 +192,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD int32 OccupiedWidth() const noexcept;
+
     KRYS_NODISCARD int32 OccupiedHeight() const noexcept;
 
     KRYS_NODISCARD int32 LineStep() const noexcept
@@ -209,6 +211,7 @@ namespace krys::boo
     }
 
     void SetSteps(int32 lineStep, int32 pageStep, int32 pixelsPerStep = 1) noexcept;
+
     void SetProportion(int32 visibleSize, int32 totalSize) noexcept;
 
     /// @brief Whether the scrollbar asks its scrollable area to repaint it: not while it's suppressed.
@@ -230,6 +233,7 @@ namespace krys::boo
     void SetEnabled(bool enabled) noexcept;
 
     KRYS_NODISCARD bool IsOverlayScrollbar() const noexcept;
+
     KRYS_NODISCARD bool ShouldParticipateInHitTesting() const noexcept;
 
     KRYS_NODISCARD ScrollbarTheme &Theme() const noexcept
@@ -277,6 +281,7 @@ namespace krys::boo
     }
 
     void SetHoveredPart(ScrollbarPart part) noexcept;
+
     void SetPressedPart(ScrollbarPart part) noexcept;
 
     /// @brief Paints the scrollbar where it intersects @p damageRect, through its theme.
@@ -286,11 +291,14 @@ namespace krys::boo
     // the mouse went down in a scrollbar, since it is assumed the scrollbar will start grabbing all events in
     // that case anyway.
     bool MouseMoved(const PlatformMouseEvent &event) noexcept;
+
     void MouseEntered() noexcept;
+
     bool MouseExited() noexcept;
 
     // Used by some platform scrollbars to know when they've been released from capture.
     bool MouseUp(const PlatformMouseEvent &event) noexcept;
+
     bool MouseDown(const PlatformMouseEvent &event) noexcept;
 
     /// @brief Moves the thumb by where the mouse is (@p pos, along the scrollbar) from where it was pressed.
@@ -311,12 +319,19 @@ namespace krys::boo
 
   private:
     void UpdateThumb() noexcept;
+
     void AutoscrollTimerFired() noexcept;
+
     void AutoscrollPressedPart(MonotonicTime::duration delay) noexcept;
+
     void StartTimerIfNeeded(MonotonicTime::duration delay) noexcept;
+
     void StopTimerIfNeeded() noexcept;
+
     KRYS_NODISCARD ScrollDirection PressedPartScrollDirection() const noexcept;
+
     KRYS_NODISCARD ScrollGranularity PressedPartScrollGranularity() const noexcept;
+
     KRYS_NODISCARD bool ThumbUnderMouse() const noexcept;
   };
 }

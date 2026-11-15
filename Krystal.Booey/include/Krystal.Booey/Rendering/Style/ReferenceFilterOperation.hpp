@@ -87,7 +87,9 @@ namespace krys::boo::style
     ReferenceFilterOperation(URL &&, StringAtom &&) noexcept;
 
     KRYS_NODISCARD bool Equals(const FilterOperation &) const noexcept override;
+
     KRYS_NODISCARD bool IsIdentity() const noexcept override;
+
     KRYS_NODISCARD IntOutsets Outsets() const noexcept override;
   };
 }

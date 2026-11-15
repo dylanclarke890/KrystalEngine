@@ -128,6 +128,7 @@ namespace krys::boo::tests
     }
 
     PathStrokeStrategyScope(const PathStrokeStrategyScope &) = delete;
+
     PathStrokeStrategyScope &operator=(const PathStrokeStrategyScope &) = delete;
   };
 }

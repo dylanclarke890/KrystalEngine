@@ -39,8 +39,8 @@
 
 namespace krys::boo::dom
 {
-  class Element;
   class Document;
+  class Element;
 
   /// @brief Whether a token, in ASCII lowercase, is one of the supported tokens of a list's element and
   /// attribute name. Empty when they define no supported tokens.

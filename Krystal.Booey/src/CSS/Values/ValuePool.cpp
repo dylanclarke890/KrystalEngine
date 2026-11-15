@@ -84,6 +84,7 @@ namespace krys::boo::css
 
   // Defined here, where `ValueList` is complete.
   ValuePool::ValuePool() noexcept = default;
+
   ValuePool::~ValuePool() noexcept = default;
 
   Ref<ColorValue> ValuePool::CreateColorValue(const boo::Color &color) noexcept

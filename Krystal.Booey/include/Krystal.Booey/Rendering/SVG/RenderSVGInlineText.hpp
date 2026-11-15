@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     RenderSVGInlineText(dom::Text &, const utf8_string &) noexcept;
+
     ~RenderSVGInlineText() noexcept override;
 
     KRYS_NODISCARD dom::Text &TextNode() const noexcept
@@ -81,6 +82,7 @@ namespace krys::boo
     }
 
     void UpdateScaledFont() noexcept;
+
     static bool ComputeNewScaledFontForStyle(const RenderObject &, const RenderStyle &, float &scalingFactor,
                                              FontCascade &scaledFont) noexcept;
 
@@ -106,6 +108,7 @@ namespace krys::boo
     }
 
     void RemoveAndDestroyLegacyTextBoxes() noexcept;
+
     KRYS_NODISCARD UniquePtr<LegacyInlineTextBox> CreateTextBox() noexcept;
 
   private:
@@ -117,6 +120,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string OriginalText() const noexcept override;
+
     void StyleDidChange(style::Difference, const RenderStyle *) noexcept override;
 
     KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
@@ -127,6 +131,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::PositionWithAffinity
       PositionForPoint(const LayoutPoint &, HitTestSource,
                        const RenderFragmentContainer * = nullptr) noexcept override;
+
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept override;
 
     void SetTextInternal(utf8_string, bool force) noexcept final;

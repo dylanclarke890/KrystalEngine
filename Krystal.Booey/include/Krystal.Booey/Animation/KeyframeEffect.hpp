@@ -106,8 +106,11 @@ namespace krys::boo
       Ref<css::MutableStyleProperties> Style;
 
       ParsedKeyframe() noexcept;
+
       ~ParsedKeyframe() noexcept;
+
       ParsedKeyframe(ParsedKeyframe &&) noexcept;
+
       ParsedKeyframe &operator=(ParsedKeyframe &&) noexcept;
     };
 
@@ -132,12 +135,14 @@ namespace krys::boo
       TransformChange,
       Stop,
     };
+
     enum class AcceleratedPropertiesState : uint8
     {
       None,
       Some,
       All,
     };
+
     enum class RunningAccelerated : uint8
     {
       NotStarted,
@@ -157,6 +162,7 @@ namespace krys::boo
 
     public:
       explicit CanBeAcceleratedMutationScope(KeyframeEffect *effect) noexcept;
+
       ~CanBeAcceleratedMutationScope() noexcept;
     };
 
@@ -204,9 +210,11 @@ namespace krys::boo
     KRYS_NODISCARD static dom::ExceptionOr<Ref<KeyframeEffect>>
       Create(dom::Document &document, dom::Element *target, KeyframesInput &&keyframes,
              Maybe<Variant<double, KeyframeEffectOptions>> &&options = null) noexcept;
+
     /// @brief The `KeyframeEffect(source)` constructor: a copy of @p source.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-keyframeeffect-source
     KRYS_NODISCARD static Ref<KeyframeEffect> Create(Ref<KeyframeEffect> &&source) noexcept;
+
     KRYS_NODISCARD static Ref<KeyframeEffect>
       Create(const dom::Element &target,
              const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
@@ -222,20 +230,26 @@ namespace krys::boo
     }
 
     void SetTarget(RefPtr<dom::Element> &&newTarget) noexcept;
+
     KRYS_NODISCARD bool TargetsPseudoElement() const noexcept;
+
     KRYS_NODISCARD css::CSSOMString PseudoElement() const noexcept;
+
     /// @return A `SyntaxError` if @p pseudoElement isn't a pseudo-element selector.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-pseudoelement
     dom::ExceptionOr<void> SetPseudoElement(const css::CSSOMString &pseudoElement) noexcept;
+
     KRYS_NODISCARD Maybe<style::Styleable> TargetStyleable() const noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-getkeyframes
     KRYS_NODISCARD List<ComputedKeyframe> GetKeyframes() noexcept;
+
     /// @brief Replaces the keyframes, as `setKeyframes()` does: a CSS animation's then no longer follow its
     /// `@keyframes` rule.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-setkeyframes
     dom::ExceptionOr<void> SetBindingsKeyframes(dom::Document &document,
                                                 KeyframesInput &&keyframesInput) noexcept;
+
     dom::ExceptionOr<void> SetKeyframes(dom::Document &document, KeyframesInput &&keyframesInput) noexcept;
 
     KRYS_NODISCARD boo::IterationCompositeOperation IterationComposite() const noexcept
@@ -251,9 +265,11 @@ namespace krys::boo
     }
 
     void SetComposite(boo::CompositeOperation compositeOperation) noexcept;
+
     /// @brief The composite operation, as `composite` gives it: the style of a style-originated animation is
     /// brought up to date first.
     KRYS_NODISCARD boo::CompositeOperation BindingsComposite() const noexcept;
+
     /// @brief Sets the composite operation, as `composite` does: a CSS animation's then no longer follows its
     /// style.
     void SetBindingsComposite(boo::CompositeOperation compositeOperation) noexcept;
@@ -263,11 +279,14 @@ namespace krys::boo
                                    const style::ResolutionContext &resolutionContext,
                                    EndpointInclusiveActiveInterval endpointInclusiveActiveInterval =
                                      EndpointInclusiveActiveInterval::No) noexcept;
+
     /// @brief Applies the effect at the animation's current time to @p animatedStyle, creating it from the
     /// target's style if it's null.
     void GetAnimatedStyle(UniquePtr<RenderStyle> &animatedStyle) noexcept;
+
     /// @brief Invalidates the target's style.
     void Invalidate() noexcept;
+
     /// @brief Recomputes the keyframes at the next opportunity if they animate @p customProperty, whose
     /// registration (and so its initial value or inheritance) changed.
     void CustomPropertyRegistrationDidChange(const css::CSSOMStringAtom &customProperty) noexcept;
@@ -282,12 +301,16 @@ namespace krys::boo
                                     const style::ResolutionContext &resolutionContext) noexcept;
 
     void WillChangeRenderer() noexcept;
+
     /// @brief Clears the keyframes, so they're computed again when the effect is next applied.
     void RecomputeKeyframesAtNextOpportunity() noexcept;
 
     KRYS_NODISCARD dom::Document *Document() const noexcept final;
+
     KRYS_NODISCARD RenderElement *Renderer() const noexcept final;
+
     KRYS_NODISCARD const RenderStyle &CurrentStyle() const noexcept final;
+
     KRYS_NODISCARD Maybe<uint32> TransformFunctionListPrefix() const noexcept override;
 
     KRYS_NODISCARD bool TriggersStackingContext() const noexcept
@@ -307,15 +330,19 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD const AnimatableCSSPropertySet &AnimatedProperties() noexcept;
+
     KRYS_NODISCARD bool AnimatesProperty(const AnimatableCSSProperty &property) const noexcept;
 
     KRYS_NODISCARD bool
       IsCurrentlyAffectingProperty(css::PropertyId property,
                                    Accelerated accelerated = Accelerated::No) const noexcept;
+
     KRYS_NODISCARD bool IsRunningAcceleratedAnimationForProperty(css::PropertyId property) const noexcept;
+
     KRYS_NODISCARD bool IsRunningAcceleratedTransformRelatedAnimation() const noexcept;
 
     void ApplyPendingAcceleratedActions() noexcept;
+
     void ApplyPendingAcceleratedActionsOrUpdateTimingProperties() noexcept;
 
     KRYS_NODISCARD bool IsRunningAccelerated() const noexcept;
@@ -345,13 +372,18 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool PreventsAcceleration() const noexcept;
+
     void EffectStackNoLongerPreventsAcceleration() noexcept;
+
     void EffectStackNoLongerAllowsAcceleration() noexcept;
+
     void EffectStackNoLongerAllowsAccelerationDuringAcceleratedActionApplication() noexcept;
 
     void LastStyleChangeEventStyleDidChange(const RenderStyle *previousStyle,
                                             const RenderStyle *currentStyle) noexcept;
+
     void AcceleratedPropertiesOverriddenByCascadeDidChange() noexcept;
+
     void TransformRelatedPropertyDidChange() noexcept;
 
     /// @brief Lays out the document when the keyframes depend on the target's size, before accelerated
@@ -361,9 +393,11 @@ namespace krys::boo
     /// @brief Grows @p bounds to cover each keyframe's transform of them.
     /// @return False if a keyframe's transform isn't affine or can't be decomposed.
     KRYS_NODISCARD bool ComputeExtentOfTransformAnimation(LayoutRect &bounds) const noexcept;
+
     KRYS_NODISCARD bool RequiresPseudoElement() const noexcept;
 
     void WasAddedToEffectStack() noexcept;
+
     void WasRemovedFromEffectStack() noexcept;
 
     KRYS_NODISCARD WebAnimationType AnimationType() const noexcept
@@ -376,9 +410,11 @@ namespace krys::boo
 
   private:
     void CopyPropertiesFromSource(Ref<KeyframeEffect> &&source) noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-1/#processing-a-keyframes-argument
     dom::ExceptionOr<void> ProcessKeyframes(dom::Document &document,
                                             KeyframesInput &&keyframesInput) noexcept;
+
     void UpdateBlendingKeyframes(RenderStyle &elementStyle,
                                  const style::ResolutionContext &resolutionContext) noexcept;
 
@@ -390,35 +426,59 @@ namespace krys::boo
     }
 
     void UpdateAcceleratedActions() noexcept;
+
     KRYS_NODISCARD Ref<const GraphicsLayerAnimation> BackingAnimationForCompositedRenderer() noexcept;
+
     void ComputeAcceleratedPropertiesState() noexcept;
+
     void ComputeHasImplicitKeyframeForAcceleratedProperty() noexcept;
+
     void ComputeHasKeyframeComposingAcceleratedProperty() noexcept;
+
     void ComputeHasAcceleratedPropertyOverriddenByCascadeProperty() noexcept;
+
     void ComputeHasReferenceFilter() noexcept;
+
     void ComputeHasSizeDependentTransform() noexcept;
+
     void ComputedNeedsForcedLayout() noexcept;
+
     void AnalyzeAcceleratedProperties() noexcept;
+
     void CheckForMatchingTransformFunctionLists() noexcept;
+
     void AbilityToBeAcceleratedDidChange() noexcept;
+
     void UpdateAcceleratedAnimationIfNecessary() noexcept;
+
     void UpdateIsAssociatedWithProgressBasedTimeline() noexcept;
+
     KRYS_NODISCARD bool AnimatesMotionPath() const noexcept;
 
     void UpdateEffectStackMembership() noexcept;
+
     void DidChangeTargetStyleable(const Maybe<style::Styleable> &previousTargetStyleable) noexcept;
+
     void SetAnimatedPropertiesInStyle(RenderStyle &targetStyle,
                                       const ComputedEffectTiming &computedTiming) const noexcept;
+
     KRYS_NODISCARD const boo::TimingFunction *TimingFunctionForKeyframeAtIndex(size_t index) const noexcept;
+
     KRYS_NODISCARD const boo::TimingFunction *
       TimingFunctionForBlendingKeyframe(const BlendingKeyframe &keyframe) const noexcept;
+
     void ComputeStackingContextImpact() noexcept;
+
     void ComputeSomeKeyframesUseStepsOrLinearTimingFunctionWithPoints() noexcept;
+
     void ClearBlendingKeyframes() noexcept;
+
     void ComputeCSSAnimationBlendingKeyframes(const RenderStyle &unanimatedStyle,
                                               const style::ResolutionContext &resolutionContext) noexcept;
+
     void ComputeCSSTransitionBlendingKeyframes(const RenderStyle &oldStyle,
                                                const RenderStyle &newStyle) noexcept;
+
     void SetBlendingKeyframes(BlendingKeyframes &&blendingKeyframes) noexcept;
 
     // AnimationEffect
@@ -428,21 +488,33 @@ namespace krys::boo
     }
 
     void AnimationDidTick() noexcept final;
+
     void AnimationDidChangeTimingProperties() noexcept final;
+
     void AnimationWasCanceled() noexcept final;
+
     void AnimationSuspensionStateDidChange(bool animationIsSuspended) noexcept final;
+
     void AnimationPlaybackRateDidChange() noexcept final;
+
     void AnimationTimelineDidChange() noexcept final;
+
     void AnimationProgressBasedTimelineSourceDidChangeMetrics(
       const style::SingleAnimationRange &animationAttachmentRange) noexcept final;
+
     void SetAnimation(WebAnimation *animation) noexcept final;
 
     /// @brief The animation's view timeline, if it has one and it's active.
     KRYS_NODISCARD RefPtr<const ViewTimeline> ActiveViewTimeline() const noexcept;
+
     void UpdateComputedKeyframeOffsetsIfNeeded() noexcept;
+
     KRYS_NODISCARD Seconds TimeToNextTick(const BasicEffectTiming &timing) noexcept final;
+
     KRYS_NODISCARD bool TicksContinuouslyWhileActive() const noexcept final;
+
     KRYS_NODISCARD Maybe<double> ProgressUntilNextStep(double iterationProgress) const noexcept final;
+
     KRYS_NODISCARD bool PreventsAnimationReadiness() const noexcept final;
 
     // KeyframeInterpolation
@@ -465,6 +537,7 @@ namespace krys::boo
 
     KRYS_NODISCARD const boo::TimingFunction *
       TimingFunctionForKeyframe(const KeyframeInterpolation::Keyframe &keyframe) const noexcept final;
+
     KRYS_NODISCARD bool
       IsPropertyAdditiveOrCumulative(KeyframeInterpolation::Property property) const noexcept final;
   };

@@ -46,6 +46,7 @@ namespace krys::boo::css
     /// @return A `TypeError` if @p length isn't a length or `none`.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssperspective-cssperspective
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSPerspective>> Create(CSSPerspectiveValue length) noexcept;
+
     /// @brief Reifies a `perspective()` function.
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSPerspective>> Create(const FunctionValue &function,
                                                                        dom::Document &document) noexcept;
@@ -68,6 +69,7 @@ namespace krys::boo::css
     }
 
     void Serialise(StringBuilder &builder) const noexcept final;
+
     KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final

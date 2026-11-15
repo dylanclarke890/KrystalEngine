@@ -56,24 +56,39 @@ namespace krys::boo
     KRYS_NODISCARD virtual Ref<PathImpl> Copy() const noexcept = 0;
 
     void AddSegment(PathSegment) noexcept;
+
     virtual void Add(PathMoveTo) noexcept = 0;
+
     virtual void Add(PathLineTo) noexcept = 0;
+
     virtual void Add(PathQuadCurveTo) noexcept = 0;
+
     virtual void Add(PathBezierCurveTo) noexcept = 0;
+
     virtual void Add(PathArcTo) noexcept = 0;
+
     virtual void Add(PathArc) noexcept = 0;
+
     virtual void Add(PathClosedArc) noexcept = 0;
+
     virtual void Add(PathEllipse) noexcept = 0;
+
     virtual void Add(PathEllipseInRect) noexcept = 0;
+
     virtual void Add(PathRect) noexcept = 0;
+
     virtual void Add(PathRoundedRect) noexcept = 0;
+
     virtual void Add(PathContinuousRoundedRect) noexcept = 0;
+
     virtual void Add(PathCloseSubpath) noexcept = 0;
 
     void AddLinesForRect(const FloatRect &) noexcept;
+
     KRYS_NODISCARD static SmallList<PathSegment, 10> BeziersForRoundedRect(const FloatRoundedRect &) noexcept;
 
     virtual void ApplySegments(const PathSegmentApplier &) const noexcept;
+
     KRYS_NODISCARD virtual bool ApplyElements(const PathElementApplier &) const noexcept = 0;
 
     KRYS_NODISCARD virtual bool Transform(const AffineTransform &) noexcept = 0;
@@ -90,6 +105,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual FloatPoint CurrentPoint() const noexcept = 0;
 
     KRYS_NODISCARD virtual FloatRect FastBoundingRect() const noexcept = 0;
+
     KRYS_NODISCARD virtual FloatRect BoundingRect() const noexcept = 0;
 
   protected:

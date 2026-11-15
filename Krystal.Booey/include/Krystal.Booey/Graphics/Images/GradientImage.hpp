@@ -59,6 +59,7 @@ namespace krys::boo
 
     ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
                          ImagePaintingOptions = {}) noexcept override;
+
     void DrawPattern(GraphicsContext &, const FloatRect &destRect, const FloatRect &srcRect,
                      const AffineTransform &patternTransform, const FloatPoint &phase,
                      const FloatSize &spacing, ImagePaintingOptions = {}) noexcept override;

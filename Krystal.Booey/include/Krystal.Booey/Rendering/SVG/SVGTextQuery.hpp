@@ -50,30 +50,46 @@ namespace krys::boo
     explicit SVGTextQuery(RenderObject *) noexcept;
 
     KRYS_NODISCARD uint32 NumberOfCharacters() const noexcept;
+
     KRYS_NODISCARD float TextLength() const noexcept;
+
     KRYS_NODISCARD float SubStringLength(uint32 startPosition, uint32 length) const noexcept;
+
     KRYS_NODISCARD FloatPoint StartPositionOfCharacter(uint32 position) const noexcept;
+
     KRYS_NODISCARD FloatPoint EndPositionOfCharacter(uint32 position) const noexcept;
+
     KRYS_NODISCARD float RotationOfCharacter(uint32 position) const noexcept;
+
     KRYS_NODISCARD FloatRect ExtentOfCharacter(uint32 position) const noexcept;
+
     KRYS_NODISCARD int32 CharacterNumberAtPosition(const FloatPoint &) const noexcept;
 
   private:
     bool ExecuteQuery(Data *, ProcessTextFragmentCallback) const noexcept;
 
     void CollectTextBoxesInInlineBox(inline_iterator::InlineBoxIterator) noexcept;
+
     bool MapStartEndPositionsIntoFragmentCoordinates(Data *, const SVGTextFragment &, uint32 &startPosition,
                                                      uint32 &endPosition) const noexcept;
+
     void ModifyStartEndPositionsRespectingLigatures(Data *, const SVGTextFragment &, uint32 &startPosition,
                                                     uint32 &endPosition) const noexcept;
 
     bool NumberOfCharactersCallback(Data *, const SVGTextFragment &) const noexcept;
+
     bool TextLengthCallback(Data *, const SVGTextFragment &) const noexcept;
+
     bool SubStringLengthCallback(Data *, const SVGTextFragment &) const noexcept;
+
     bool StartPositionOfCharacterCallback(Data *, const SVGTextFragment &) const noexcept;
+
     bool EndPositionOfCharacterCallback(Data *, const SVGTextFragment &) const noexcept;
+
     bool RotationOfCharacterCallback(Data *, const SVGTextFragment &) const noexcept;
+
     bool ExtentOfCharacterCallback(Data *, const SVGTextFragment &) const noexcept;
+
     bool CharacterNumberAtPositionCallback(Data *, const SVGTextFragment &) const noexcept;
   };
 }

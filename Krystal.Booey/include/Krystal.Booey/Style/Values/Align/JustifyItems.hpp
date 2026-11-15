@@ -41,18 +41,31 @@ namespace krys::boo::style
   struct JustifyItems
   {
     constexpr JustifyItems(css::keywords::Normal) noexcept;
+
     constexpr JustifyItems(css::keywords::Stretch) noexcept;
+
     constexpr JustifyItems(css::keywords::Baseline, Maybe<BaselineAlignmentPreference> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::Center, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::Start, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::End, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::SelfStart, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::SelfEnd, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::FlexStart, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::FlexEnd, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::Left, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::Right, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::AnchorCenter, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr JustifyItems(css::keywords::Legacy, Maybe<LegacyPosition> = null) noexcept;
 
     KRYS_NODISCARD constexpr bool IsNormal() const noexcept
@@ -184,17 +197,25 @@ namespace krys::boo::style
     };
 
     KRYS_NODISCARD constexpr static bool CanHaveBaselinePosition(PrimaryKind) noexcept;
+
     KRYS_NODISCARD constexpr static bool CanHaveOverflowPosition(PrimaryKind) noexcept;
+
     KRYS_NODISCARD constexpr static bool CanHaveLegacyPosition(PrimaryKind) noexcept;
 
     constexpr JustifyItems(PrimaryKind) noexcept;
+
     constexpr JustifyItems(PrimaryKind, Maybe<BaselineAlignmentPreference>) noexcept;
+
     constexpr JustifyItems(PrimaryKind, Maybe<OverflowPosition>) noexcept;
+
     constexpr JustifyItems(PrimaryKind, Maybe<LegacyPosition>) noexcept;
 
     KRYS_NODISCARD constexpr PrimaryKind Primary() const noexcept;
+
     KRYS_NODISCARD constexpr BaselineAlignmentPreferenceKind GetBaselineAlignmentPreference() const noexcept;
+
     KRYS_NODISCARD constexpr OverflowPositionKind GetOverflowPosition() const noexcept;
+
     KRYS_NODISCARD constexpr LegacyPositionKind GetLegacyPosition() const noexcept;
 
     uint8 _primary : 4 {static_cast<uint8>(PrimaryKind::Normal)};

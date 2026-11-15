@@ -451,6 +451,7 @@ namespace krys::boo::style::interpolation
     }
 
     KRYS_NODISCARD virtual bool Equals(const TListValue &, const TListValue &) const noexcept = 0;
+
     virtual void Interpolate(TListValue &, const TListValue &, const TListValue &,
                              const Context &) const noexcept = 0;
 

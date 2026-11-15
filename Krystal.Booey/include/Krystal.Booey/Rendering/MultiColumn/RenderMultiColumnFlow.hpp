@@ -72,13 +72,16 @@ namespace krys::boo
 
   public:
     RenderMultiColumnFlow(dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderMultiColumnFlow() noexcept override;
 
     /// @brief The multi-column container.
     KRYS_NODISCARD RenderBlockFlow *MultiColumnBlockFlow() const noexcept;
 
     KRYS_NODISCARD RenderMultiColumnSet *FirstMultiColumnSet() const noexcept;
+
     KRYS_NODISCARD RenderMultiColumnSet *LastMultiColumnSet() const noexcept;
+
     KRYS_NODISCARD RenderBox *FirstColumnSetOrSpanner() const noexcept;
 
     KRYS_NODISCARD bool HasColumnSpanner() const noexcept
@@ -87,6 +90,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static RenderBox *NextColumnSetOrSpannerSiblingOf(const RenderBox *child) noexcept;
+
     KRYS_NODISCARD static RenderBox *PreviousColumnSetOrSpannerSiblingOf(const RenderBox *child) noexcept;
 
     KRYS_NODISCARD RenderMultiColumnSpannerPlaceholder *
@@ -165,6 +169,7 @@ namespace krys::boo
 
     void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
                                  TransformState &transformState) const noexcept override;
+
     KRYS_NODISCARD LayoutSize
       OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
                           bool *offsetDependsOnPoint = nullptr) const noexcept override;
@@ -186,24 +191,35 @@ namespace krys::boo
     }
 
     void AddFragmentToThread(RenderFragmentContainer *fragmentContainer) noexcept override;
+
     void WillBeRemovedFromTree() noexcept override;
+
     void FragmentedFlowDescendantBoxLaidOut(RenderBox *descendant) noexcept override;
+
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit InitialLogicalWidth() const noexcept override;
+
     void SetPageBreak(const RenderBlock *block, LayoutUnit offset,
                       LayoutUnit spaceShortage) noexcept override;
+
     void UpdateMinimumPageHeight(const RenderBlock *block, LayoutUnit offset,
                                  LayoutUnit minHeight) noexcept override;
+
     void UpdateSpaceShortageForSizeContainment(const RenderBlock *block, LayoutUnit offset,
                                                LayoutUnit shortage) noexcept override;
+
     KRYS_NODISCARD RenderFragmentContainer *
       FragmentAtBlockOffset(const RenderBox *box, LayoutUnit offset,
                             bool extendLastFragment = false) const noexcept override;
+
     void SetFragmentRangeForBox(const RenderBox &box, RenderFragmentContainer *startFragment,
                                 RenderFragmentContainer *endFragment) noexcept override;
+
     bool AddForcedFragmentBreak(const RenderBlock *block, LayoutUnit offset, RenderBox *breakChild,
                                 bool isBefore, LayoutUnit *offsetBreakAdjustment = nullptr) noexcept override;
+
     KRYS_NODISCARD bool IsPageLogicalHeightKnown() const noexcept override;
   };
 }

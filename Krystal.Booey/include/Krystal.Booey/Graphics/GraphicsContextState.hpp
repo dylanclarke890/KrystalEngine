@@ -130,6 +130,7 @@ namespace krys::boo
                          InterpolationQuality = InterpolationQuality::Default) noexcept;
 
     void Repurpose(Purpose) noexcept;
+
     KRYS_NODISCARD GraphicsContextState Clone(Purpose) const noexcept;
 
     KRYS_NODISCARD ChangeFlags Changes() const noexcept
@@ -351,8 +352,10 @@ namespace krys::boo
 
     void MergeLastChanges(const GraphicsContextState &,
                           const Maybe<GraphicsContextState> &lastDrawingState = std::nullopt) noexcept;
+
     void MergeSingleChange(const GraphicsContextState &, ChangeIndex,
                            const Maybe<GraphicsContextState> &lastDrawingState = std::nullopt) noexcept;
+
     void MergeAllChanges(const GraphicsContextState &) noexcept;
 
     KRYS_NODISCARD Purpose GetPurpose() const noexcept
@@ -376,5 +379,6 @@ namespace krys::boo
   };
 
   TextStream &operator<<(TextStream &ts, GraphicsContextState::Change change) noexcept;
+
   TextStream &operator<<(TextStream &ts, const GraphicsContextState &state) noexcept;
 }

@@ -52,6 +52,7 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD virtual Ref<LightSource> GetLightSource() const noexcept = 0;
+
     KRYS_NODISCARD static SVGFELightElement *FindLightElement(const SVGElement *svgElement) noexcept;
 
     KRYS_NODISCARD float Azimuth() const noexcept
@@ -167,7 +168,9 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+
     void OnChildrenChanged() noexcept override;
   };
 }

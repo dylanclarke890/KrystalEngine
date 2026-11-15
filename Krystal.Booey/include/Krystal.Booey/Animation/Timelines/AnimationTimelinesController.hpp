@@ -69,14 +69,18 @@ namespace krys::boo
 
   public:
     explicit AnimationTimelinesController(dom::Document &document) noexcept;
+
     ~AnimationTimelinesController() noexcept;
 
     void AddTimeline(AnimationTimeline &timeline) noexcept;
+
     void RemoveTimeline(AnimationTimeline &timeline) noexcept;
+
     void DetachFromDocument() noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#update-animations-and-send-events
     void UpdateAnimationsAndSendEvents(Seconds timestamp) noexcept;
+
     void RunPostRenderingUpdateTasks() noexcept;
 
     void AddPendingAnimation(WebAnimation &animation) noexcept;
@@ -85,6 +89,7 @@ namespace krys::boo
       CurrentTime(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) noexcept;
 
     void SuspendAnimations() noexcept;
+
     void ResumeAnimations() noexcept;
 
     KRYS_NODISCARD bool AnimationsAreSuspended() const noexcept
@@ -94,10 +99,15 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD Seconds LiveCurrentTime() const noexcept;
+
     void CacheCurrentTime(Seconds newCurrentTime) noexcept;
+
     void ClearCachedCurrentTime() noexcept;
+
     void ProcessPendingAnimations() noexcept;
+
     void CancelPendingAnimationsProcessingTask() noexcept;
+
     KRYS_NODISCARD bool IsPendingTimelineAttachment(const WebAnimation &animation) const noexcept;
   };
 }

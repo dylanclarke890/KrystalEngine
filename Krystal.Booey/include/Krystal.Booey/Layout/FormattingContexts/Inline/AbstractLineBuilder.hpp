@@ -72,6 +72,7 @@ namespace krys::boo::layout
     KRYS_NODISCARD virtual LineLayoutResult
       LayoutInlineContent(const LineInput &lineInput, const Maybe<PreviousLine> &previousLine,
                           bool isFirstFormattedLineCandidate) noexcept = 0;
+
     virtual ~AbstractLineBuilder() noexcept = default;
 
     void SetIntrinsicWidthMode(IntrinsicWidthMode intrinsicWidthMode) noexcept;
@@ -123,6 +124,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const InlineLayoutState &GetLayoutState() const noexcept;
+
     KRYS_NODISCARD InlineLayoutState &GetLayoutState() noexcept;
 
     KRYS_NODISCARD const BlockLayoutState &GetBlockLayoutState() const noexcept

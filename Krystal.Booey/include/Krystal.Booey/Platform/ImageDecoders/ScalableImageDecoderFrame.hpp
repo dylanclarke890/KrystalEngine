@@ -72,9 +72,11 @@ namespace krys::boo
     void Clear() noexcept;
 
     bool Initialize(const ImageBackingStore &backingStore) noexcept;
+
     bool Initialize(const IntSize &size, bool premultiplyAlpha) noexcept;
 
     void SetDecodingStatus(DecodingStatus decodingStatus) noexcept;
+
     KRYS_NODISCARD DecodingStatus GetDecodingStatus() const noexcept;
 
     KRYS_NODISCARD bool IsInvalid() const noexcept

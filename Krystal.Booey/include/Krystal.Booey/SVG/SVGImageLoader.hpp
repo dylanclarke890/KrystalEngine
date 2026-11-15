@@ -31,6 +31,7 @@ namespace krys::boo::svg
   {
   public:
     explicit SVGImageLoader(SVGImageElement &element) noexcept;
+
     ~SVGImageLoader() noexcept override;
 
   private:

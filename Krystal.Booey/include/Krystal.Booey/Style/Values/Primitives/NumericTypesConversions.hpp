@@ -41,7 +41,9 @@ namespace krys::boo::style
 {
   // Out of line to avoid inclusion of the `RenderStyle` getters.
   KRYS_NODISCARD float AdjustForZoom(float, const RenderStyle &) noexcept;
+
   KRYS_NODISCARD bool EvaluationTimeZoomEnabled(const RenderStyle &) noexcept;
+
   KRYS_NODISCARD bool EvaluationTimeZoomEnabled(const BuilderState &) noexcept;
 
 #pragma region Conversion Data specialization
@@ -175,11 +177,15 @@ namespace krys::boo::style
 
   KRYS_NODISCARD double CanonicalizeLength(double, css::LengthUnit,
                                            css::NoConversionDataRequiredTag) noexcept;
+
   KRYS_NODISCARD double CanonicalizeLength(double, css::LengthUnit,
                                            const css::ToLengthConversionData &) noexcept;
+
   KRYS_NODISCARD float ClampLengthToAllowedLimits(double) noexcept;
+
   KRYS_NODISCARD float CanonicalizeAndClampLength(double, css::LengthUnit,
                                                   css::NoConversionDataRequiredTag) noexcept;
+
   KRYS_NODISCARD float CanonicalizeAndClampLength(double, css::LengthUnit,
                                                   const css::ToLengthConversionData &) noexcept;
 

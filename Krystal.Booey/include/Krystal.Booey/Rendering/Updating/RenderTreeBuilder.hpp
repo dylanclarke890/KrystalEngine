@@ -56,16 +56,19 @@ namespace krys::boo
       No,
       Yes,
     };
+
     enum class WillBeDestroyed : bool
     {
       No,
       Yes,
     };
+
     enum class CanCollapseAnonymousBlock : bool
     {
       No,
       Yes,
     };
+
     enum class TearDownType : uint8
     {
       Root,                         // destroy root renderer
@@ -74,6 +77,7 @@ namespace krys::boo
       SubtreeWithRootAlreadyDetached, // subtree teardown when destroy root gets detached first followed by
                                       // destroying renderers (e.g. pseudo subtree)
     };
+
     // NormalizeAfterInsertion::Yes ensures that the destination subtree is consistent after the insertion
     // (anonymous wrappers etc).
     enum class NormalizeAfterInsertion : bool
@@ -117,6 +121,7 @@ namespace krys::boo
 
   public:
     explicit RenderTreeBuilder(RenderView &view) noexcept;
+
     ~RenderTreeBuilder() noexcept;
 
     // This avoids having to convert all sites that need RenderTreeBuilder in one go.
@@ -148,8 +153,10 @@ namespace krys::boo
               NormalizeAfterInsertion normalizeAfterInsertion) noexcept;
 
     void UpdateAfterDescendants(RenderElement &renderer) noexcept;
+
     void DestroyAndCleanUpAnonymousWrappers(RenderObject &rendererToDestroy,
                                             const RenderElement *subtreeDestroyRoot) noexcept;
+
     void NormalizeTreeAfterStyleChange(RenderElement &renderer, RenderStyle &oldStyle) noexcept;
 
   private:
@@ -159,34 +166,45 @@ namespace krys::boo
                         RenderObject *beforeChild) noexcept;
 
     void ChildFlowStateChangesAndAffectsParentBlock(RenderElement &child) noexcept;
+
     void ChildFlowStateChangesAndNoLongerAffectsParentBlock(RenderElement &child) noexcept;
+
     void AttachIgnoringContinuation(RenderElement &parent, RenderPtr<RenderObject> child,
                                     RenderObject *beforeChild = nullptr) noexcept;
+
     void AttachToRenderGrid(RenderGrid &parent, RenderPtr<RenderObject> child,
                             RenderObject *beforeChild = nullptr) noexcept;
+
     void AttachToRenderElement(RenderElement &parent, RenderPtr<RenderObject> child,
                                RenderObject *beforeChild = nullptr) noexcept;
+
     void AttachToRenderElementInternal(RenderElement &parent, RenderPtr<RenderObject> child,
                                        RenderObject *beforeChild = nullptr) noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderObject> DetachFromRenderElement(RenderElement &parent, RenderObject &child,
                                                                    WillBeDestroyed willBeDestroyed) noexcept;
+
     KRYS_NODISCARD RenderPtr<RenderObject> DetachFromRenderGrid(RenderGrid &parent, RenderObject &child,
                                                                 WillBeDestroyed willBeDestroyed) noexcept;
 
     void Move(RenderBoxModelObject &from, RenderBoxModelObject &to, RenderObject &child,
               RenderObject *beforeChild, NormalizeAfterInsertion normalizeAfterInsertion) noexcept;
+
     // Move all of the kids from |startChild| up to but excluding |endChild|. 0 can be passed as the
     // |endChild| to denote that all the kids from |startChild| onwards should be moved.
     void MoveChildren(RenderBoxModelObject &from, RenderBoxModelObject &to, RenderObject *startChild,
                       RenderObject *endChild, NormalizeAfterInsertion normalizeAfterInsertion) noexcept;
+
     void MoveChildren(RenderBoxModelObject &from, RenderBoxModelObject &to, RenderObject *startChild,
                       RenderObject *endChild, RenderObject *beforeChild,
                       NormalizeAfterInsertion normalizeAfterInsertion) noexcept;
+
     void MoveAllChildrenIncludingFloats(RenderBlock &from, RenderBlock &toBlock,
                                         NormalizeAfterInsertion normalizeAfterInsertion) noexcept;
+
     void MoveAllChildren(RenderBoxModelObject &from, RenderBoxModelObject &to,
                          NormalizeAfterInsertion normalizeAfterInsertion) noexcept;
+
     void MoveAllChildren(RenderBoxModelObject &from, RenderBoxModelObject &to, RenderObject *beforeChild,
                          NormalizeAfterInsertion normalizeAfterInsertion) noexcept;
 
@@ -194,8 +212,10 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderObject *SplitAnonymousBoxesAroundChild(RenderBoxModelObject &parent,
                                                                 RenderObject &originalBeforeChild) noexcept;
+
     void CreateAnonymousWrappersForInlineContent(RenderBlock &parent,
                                                  RenderObject *insertionPoint = nullptr) noexcept;
+
     void RemoveAnonymousWrappersForInlineChildrenIfNeeded(RenderElement &parent) noexcept;
 
     KRYS_NODISCARD static RenderPtr<RenderBox>

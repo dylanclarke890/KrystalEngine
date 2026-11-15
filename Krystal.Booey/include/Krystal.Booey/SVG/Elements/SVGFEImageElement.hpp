@@ -50,6 +50,7 @@ namespace krys::boo::svg
 
   public:
     explicit SVGFEImageElement(dom::Document &document) noexcept;
+
     ~SVGFEImageElement() noexcept override;
 
     KRYS_NODISCARD bool RenderingTaintsOrigin() const noexcept;
@@ -70,11 +71,13 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     void NotifyFinished(CachedResource &) noexcept final;
 
     void OnPostConnection() noexcept final;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
 
     struct ImageBufferForEffect
@@ -85,12 +88,15 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD ImageBufferForEffect
       GetImageBufferForEffect(const GraphicsContext &destinationContext) const noexcept;
+
     KRYS_NODISCARD RefPtr<FilterEffect>
       CreateFilterEffect(const FilterEffectVector &inputs,
                          const GraphicsContext &destinationContext) const noexcept final;
 
     void ClearResourceReferences() noexcept;
+
     void RequestImageResource() noexcept;
+
     void BuildPendingResource() noexcept final;
   };
 }

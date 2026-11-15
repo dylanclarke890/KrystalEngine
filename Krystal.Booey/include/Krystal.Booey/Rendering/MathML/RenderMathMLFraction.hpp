@@ -49,10 +49,13 @@ namespace krys::boo
 
   public:
     RenderMathMLFraction(mathml::MathMLFractionElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLFraction() noexcept override;
 
     KRYS_NODISCARD LayoutUnit DefaultLineThickness() const noexcept;
+
     KRYS_NODISCARD LayoutUnit LineThickness() const noexcept;
+
     KRYS_NODISCARD float RelativeLineThickness() const noexcept;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
@@ -68,9 +71,13 @@ namespace krys::boo
     };
 
     void ComputePreferredLogicalWidths() noexcept final;
+
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
+
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;
+
     void Paint(PaintInfo &info, const LayoutPoint &paintOffset) noexcept final;
+
     KRYS_NODISCARD RenderMathMLOperator *UnembellishedOperator() const noexcept final;
 
     KRYS_NODISCARD bool IsMathContentCentered() const noexcept final
@@ -81,11 +88,17 @@ namespace krys::boo
     KRYS_NODISCARD mathml::MathMLFractionElement &GetElement() const noexcept;
 
     KRYS_NODISCARD bool IsValid() const noexcept;
+
     KRYS_NODISCARD RenderBox &Numerator() const noexcept;
+
     KRYS_NODISCARD RenderBox &Denominator() const noexcept;
+
     KRYS_NODISCARD LayoutUnit HorizontalOffset(const RenderBox &child) const noexcept;
+
     KRYS_NODISCARD FractionParameters GetFractionParameters() const noexcept;
+
     KRYS_NODISCARD FractionParameters GetStackParameters() const noexcept;
+
     KRYS_NODISCARD LayoutUnit FractionAscent() const noexcept;
   };
 }

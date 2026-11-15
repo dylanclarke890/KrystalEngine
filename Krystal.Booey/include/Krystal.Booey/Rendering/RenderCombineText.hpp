@@ -45,10 +45,12 @@ namespace krys::boo
 
   public:
     RenderCombineText(dom::Text &textNode, utf8_string text) noexcept;
+
     ~RenderCombineText() noexcept override;
 
     /// @brief Combines the text again if its font or text changed since it last did.
     void CombineTextIfNeeded() noexcept;
+
     /// @brief Where to draw the combined text so it's centred in @p boxRect, if it's combined.
     KRYS_NODISCARD Maybe<FloatPoint> ComputeTextOrigin(const FloatRect &boxRect) const noexcept;
 

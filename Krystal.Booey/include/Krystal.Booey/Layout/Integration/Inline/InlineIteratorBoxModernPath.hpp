@@ -164,6 +164,7 @@ namespace krys::boo::inline_iterator
     }
 
     KRYS_NODISCARD TextRun GetTextRun(TextRunMode mode = TextRunMode::Painting) const noexcept;
+
     /// @brief The part of the renderer's text the text box shows, for clamping offsets to it.
     KRYS_NODISCARD TextBoxSelectableRange SelectableRange() const noexcept;
 

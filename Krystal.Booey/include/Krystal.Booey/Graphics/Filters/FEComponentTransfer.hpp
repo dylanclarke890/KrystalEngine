@@ -84,6 +84,7 @@ namespace krys::boo
       Create(const ComponentTransferFunction &redFunction, const ComponentTransferFunction &greenFunction,
              const ComponentTransferFunction &blueFunction, const ComponentTransferFunction &alphaFunction,
              const DestinationColorSpace &colorSpace = DestinationColorSpace::SRGB()) noexcept;
+
     KRYS_NODISCARD static Ref<FEComponentTransfer> Create(ComponentTransferFunctions &&functions) noexcept;
 
     KRYS_NODISCARD static LookupTable ComputeLookupTable(const ComponentTransferFunction &function) noexcept;
@@ -111,11 +112,17 @@ namespace krys::boo
     }
 
     bool SetType(ComponentTransferChannel channel, ComponentTransferType type) noexcept;
+
     bool SetSlope(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetIntercept(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetAmplitude(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetExponent(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetOffset(ComponentTransferChannel channel, float value) noexcept;
+
     bool SetTableValues(ComponentTransferChannel channel, List<float> &&values) noexcept;
 
   private:
@@ -124,6 +131,7 @@ namespace krys::boo
                         const ComponentTransferFunction &blueFunction,
                         const ComponentTransferFunction &alphaFunction,
                         const DestinationColorSpace &colorSpace) noexcept;
+
     explicit FEComponentTransfer(ComponentTransferFunctions &&functions) noexcept;
 
     KRYS_NODISCARD const ComponentTransferFunction &

@@ -6,8 +6,8 @@
 
 namespace krys::boo::dom
 {
-  class EventTarget;
   class EventListener;
+  class EventTarget;
 
   /// @brief Implementations of the EventTarget interface algorithms.
   /// @see https://dom.spec.whatwg.org/#eventtarget

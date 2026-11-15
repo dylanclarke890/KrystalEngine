@@ -40,8 +40,11 @@ namespace krys::boo::html
   {
   public:
     KRYS_NODISCARD bool PatternMismatch(dom::DOMStringView value) const noexcept override;
+
     KRYS_NODISCARD bool SupportsPlaceholder() const noexcept override;
+
     KRYS_NODISCARD bool SupportsSelectionAPI() const noexcept override;
+
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept override;
 
   protected:

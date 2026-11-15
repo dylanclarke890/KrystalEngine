@@ -70,12 +70,15 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static UniquePtr<FloatingObject> Create(RenderBox &renderer) noexcept;
+
     KRYS_NODISCARD UniquePtr<FloatingObject> CopyToNewContainer(LayoutSize offset, bool shouldPaint = false,
                                                                 bool isDescendant = false,
                                                                 bool overflowClipped = false) const noexcept;
+
     KRYS_NODISCARD UniquePtr<FloatingObject> CloneForNewParent() const noexcept;
 
     explicit FloatingObject(RenderBox &renderer) noexcept;
+
     FloatingObject(RenderBox &renderer, Type type, const LayoutRect &frameRect,
                    const LayoutSize &marginOffset, bool shouldPaint, bool isDescendant,
                    bool overflowClipped) noexcept;
@@ -312,6 +315,7 @@ namespace krys::boo
     /// @brief Adds @p floatingObject, unless its renderer already has one.
     /// @return The renderer's floating object.
     FloatingObject *add(UniquePtr<FloatingObject> floatingObject) noexcept;
+
     void remove(FloatingObject *floatingObject) noexcept;
 
     void clear() noexcept
@@ -342,12 +346,17 @@ namespace krys::boo
 
   public:
     explicit FloatingObjects(const RenderBlockFlow &renderer) noexcept;
+
     ~FloatingObjects() noexcept;
 
     void Clear() noexcept;
+
     FloatingObject *Add(UniquePtr<FloatingObject> floatingObject) noexcept;
+
     void Remove(FloatingObject *floatingObject) noexcept;
+
     void AddPlacedObject(FloatingObject *floatingObject) noexcept;
+
     void RemovePlacedObject(FloatingObject *floatingObject) noexcept;
 
     void SetHorizontalWritingMode(bool b = true) noexcept
@@ -372,17 +381,20 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit LogicalLeftOffset(LayoutUnit fixedOffset, LayoutUnit logicalTop,
                                                 LayoutUnit logicalHeight) noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalRightOffset(LayoutUnit fixedOffset, LayoutUnit logicalTop,
                                                  LayoutUnit logicalHeight) noexcept;
 
     KRYS_NODISCARD LayoutUnit LogicalLeftOffsetForPositioningFloat(LayoutUnit fixedOffset,
                                                                    LayoutUnit logicalTop,
                                                                    LayoutUnit *heightRemaining) noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalRightOffsetForPositioningFloat(LayoutUnit fixedOffset,
                                                                     LayoutUnit logicalTop,
                                                                     LayoutUnit *heightRemaining) noexcept;
 
     KRYS_NODISCARD LayoutUnit FindNextFloatLogicalBottomBelow(LayoutUnit logicalHeight) noexcept;
+
     KRYS_NODISCARD LayoutUnit FindNextFloatLogicalBottomBelowForBlock(LayoutUnit logicalHeight) noexcept;
 
     void ShiftFloatsBy(LayoutUnit blockShift) noexcept;
@@ -394,9 +406,13 @@ namespace krys::boo
     }
 
     void ComputePlacedFloatsTree() noexcept;
+
     KRYS_NODISCARD const FloatingObjectTree *PlacedFloatsTree() noexcept;
+
     void IncreaseObjectsCount(FloatingObject::Type type) noexcept;
+
     void DecreaseObjectsCount(FloatingObject::Type type) noexcept;
+
     KRYS_NODISCARD FloatingObjectInterval
       IntervalForFloatingObject(FloatingObject *floatingObject) const noexcept;
   };

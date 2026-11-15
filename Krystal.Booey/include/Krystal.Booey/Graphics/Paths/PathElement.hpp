@@ -40,6 +40,7 @@ namespace krys::boo
       AddCurveToPoint,
       CloseSubpath,
     };
+
     Type ElementType;
     std::array<FloatPoint, 3> Points;
   };

@@ -96,6 +96,7 @@ namespace krys::boo
     }
 
     virtual void AnimationTimingDidChange(WebAnimation &animation) noexcept;
+
     virtual void RemoveAnimation(WebAnimation &animation) noexcept;
 
     KRYS_NODISCARD virtual Maybe<WebAnimationTime>
@@ -124,7 +125,9 @@ namespace krys::boo
     }
 
     virtual void SuspendAnimations() noexcept;
+
     virtual void ResumeAnimations() noexcept;
+
     KRYS_NODISCARD bool AnimationsAreSuspended() const noexcept;
 
     KRYS_NODISCARD virtual AnimationTimelinesController *Controller() const noexcept

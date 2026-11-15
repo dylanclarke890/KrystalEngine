@@ -104,6 +104,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD LayoutUnit operator()(const ScrollMarginEdge &, LayoutUnit referenceLength,
                                            ZoomNeeded) noexcept;
+
       KRYS_NODISCARD LayoutUnit operator()(const ScrollMarginEdge &, ZoomNeeded) noexcept;
     };
 
@@ -111,6 +112,7 @@ namespace krys::boo
     struct Evaluation<ScrollMarginEdge, float>
     {
       KRYS_NODISCARD float operator()(const ScrollMarginEdge &, float referenceLength, ZoomNeeded) noexcept;
+
       KRYS_NODISCARD float operator()(const ScrollMarginEdge &, ZoomNeeded) noexcept;
     };
 

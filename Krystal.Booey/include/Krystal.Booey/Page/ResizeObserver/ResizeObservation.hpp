@@ -67,18 +67,24 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<ResizeObservation> Create(dom::Element &target,
                                                         ResizeObserverBoxOptions observedBox) noexcept;
+
     ~ResizeObservation() noexcept;
 
     /// @brief The target's current sizes, if the observed box's size differs from the last reported one.
     /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobservation-isactive
     KRYS_NODISCARD Maybe<BoxSizes> ElementSizeChanged() const noexcept;
+
     void UpdateObservationSize(const BoxSizes &boxSizes) noexcept;
+
     /// @brief Forgets the last reported sizes, so the next gathering reports the target.
     void ResetObservationSize() noexcept;
 
     KRYS_NODISCARD FloatRect ComputeContentRect() const noexcept;
+
     KRYS_NODISCARD FloatSize BorderBoxSize() const noexcept;
+
     KRYS_NODISCARD FloatSize ContentBoxSize() const noexcept;
+
     KRYS_NODISCARD FloatSize DevicePixelContentBoxSize() const noexcept;
 
     KRYS_NODISCARD dom::Element *Target() const noexcept
@@ -96,6 +102,7 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD Maybe<BoxSizes> ComputeObservedSizes() const noexcept;
+
     KRYS_NODISCARD LayoutPoint ComputeTargetLocation() const noexcept;
   };
 }

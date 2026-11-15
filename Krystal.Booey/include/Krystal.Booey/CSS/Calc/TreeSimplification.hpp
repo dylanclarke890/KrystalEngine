@@ -43,8 +43,8 @@ namespace krys::boo::css::calc
   struct Anchor;
   struct AnchorSize;
   struct Asin;
-  struct Atan2;
   struct Atan;
+  struct Atan2;
   struct CanonicalDimension;
   struct Clamp;
   struct Cos;

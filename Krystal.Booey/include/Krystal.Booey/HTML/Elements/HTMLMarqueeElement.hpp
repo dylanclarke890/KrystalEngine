@@ -31,7 +31,9 @@ namespace krys::boo::html
 
   public:
     HTMLMarqueeElement(dom::Document &document) noexcept;
+
     ~HTMLMarqueeElement() noexcept override;
+
     KRYS_NODISCARD static Ref<HTMLMarqueeElement> Create(dom::Document &document) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-marquee-behavior
@@ -119,12 +121,15 @@ namespace krys::boo::html
 
   protected:
     void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+
     void OnInsert() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
@@ -132,6 +137,7 @@ namespace krys::boo::html
   private:
     /// @brief Plays the next loop, if the marquee loops again, or plays on a paused one.
     void ContinueAnimation() noexcept;
+
     /// @brief Whether the marquee has loops left: a slide loops once unless it says otherwise.
     KRYS_NODISCARD bool ShouldContinue() const noexcept;
   };

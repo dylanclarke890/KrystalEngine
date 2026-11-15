@@ -183,7 +183,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldApplySpacing(text_spacing::CharacterClass firstCharacterClass,
                                            text_spacing::CharacterClass secondCharacterClass) const noexcept;
+
     KRYS_NODISCARD bool ShouldApplySpacing(char32_t firstCharacter, char32_t secondCharacter) const noexcept;
+
     /// @brief The space added between ideographs and non-ideographs: 1/8 of @p font's CJK advance.
     KRYS_NODISCARD static float TextAutospaceSize(const Font &font) noexcept;
   };

@@ -51,6 +51,7 @@ namespace krys::boo::css
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssmatrixcomponent-cssmatrixcomponent
     KRYS_NODISCARD static Ref<CSSMatrixComponent> Create(const DOMMatrixReadOnly &matrix,
                                                          CSSMatrixComponentOptions options = {}) noexcept;
+
     /// @brief Reifies a `matrix()` or `matrix3d()` function.
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMatrixComponent>> Create(const FunctionValue &function,
                                                                            dom::Document &document) noexcept;
@@ -66,6 +67,7 @@ namespace krys::boo::css
     void SetMatrix(Ref<DOMMatrix> matrix) noexcept;
 
     void Serialise(StringBuilder &builder) const noexcept final;
+
     KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final

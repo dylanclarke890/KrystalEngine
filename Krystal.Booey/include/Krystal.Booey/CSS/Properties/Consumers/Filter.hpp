@@ -46,11 +46,11 @@ namespace krys::boo::style
 
 namespace krys::boo::css
 {
+  struct Filter;
   struct ParserContext;
+  struct PropertyParserState;
   class TokenRange;
   class Value;
-  struct PropertyParserState;
-  struct Filter;
 
   namespace PropertyParserHelpers
   {

@@ -71,27 +71,34 @@ namespace krys::boo
 
   public:
     explicit ScrollAnchoringController(ScrollableArea &owningScrollableArea) noexcept;
+
     ~ScrollAnchoringController() noexcept = default;
 
     /// @brief Forgets the anchor node, and the anchor node of the scroller around this one if its chain
     /// passes through this scroller.
     void InvalidateAnchorElement() noexcept;
+
     /// @brief Scrolls by as far as the anchor node moved since it was chosen, unless a suppression trigger
     /// happened, which chooses a new anchor node instead.
     /// @see https://drafts.csswg.org/css-scroll-anchoring/#scroll-adjustment
     void AdjustScrollPositionForAnchoring() noexcept;
+
     /// @brief Chooses the anchor node: a priority candidate, or the first element the candidate examination
     /// selects.
     /// @see https://drafts.csswg.org/css-scroll-anchoring/#anchor-node-selection
     void ChooseAnchorElement(dom::Document &document) noexcept;
+
     /// @see https://drafts.csswg.org/css-scroll-anchoring/#candidate-examination
     KRYS_NODISCARD CandidateExaminationResult ExamineAnchorCandidate(dom::Element &element) noexcept;
+
     /// @brief Chooses an anchor node if there's none and the scroller is scrolled, and queues the scroller
     /// for an adjustment after the next layout.
     void UpdateAnchorElement() noexcept;
+
     /// @brief Notes a suppression trigger: the next adjustment chooses a new anchor node instead.
     /// @see https://drafts.csswg.org/css-scroll-anchoring/#suppression-triggers
     void NotifyChildHadSuppressingStyleChange() noexcept;
+
     /// @brief Whether @p object renders the anchor node or one of its ancestors within this scroller.
     KRYS_NODISCARD bool IsInScrollAnchoringAncestorChain(const RenderObject &object) const noexcept;
 
@@ -102,9 +109,12 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD dom::Element *FindAnchorElementRecursive(dom::Element *element) noexcept;
+
     /// @see https://drafts.csswg.org/css-scroll-anchoring/#priority-candidates
     KRYS_NODISCARD bool DidFindPriorityCandidate(dom::Document &document) noexcept;
+
     KRYS_NODISCARD FloatPoint ComputeOffsetFromOwningScroller(const RenderObject &candidate) const noexcept;
+
     KRYS_NODISCARD LocalFrameView &FrameView() const noexcept;
   };
 }

@@ -62,6 +62,7 @@ namespace krys::boo::style
 
     template <typename>
     KRYS_NODISCARD bool HoldsAlternative() const noexcept;
+
     template <typename... F>
     KRYS_NODISCARD decltype(auto) SwitchOn(F &&...) const noexcept;
 
@@ -97,8 +98,10 @@ namespace krys::boo::style
   struct Blending<OffsetAnchor>
   {
     KRYS_NODISCARD bool CanBlend(const OffsetAnchor &, const OffsetAnchor &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const OffsetAnchor &,
                                                                       const OffsetAnchor &) noexcept;
+
     KRYS_NODISCARD OffsetAnchor Blend(const OffsetAnchor &, const OffsetAnchor &,
                                       const BlendingContext &) noexcept;
   };

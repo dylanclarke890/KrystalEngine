@@ -36,6 +36,7 @@ namespace krys::boo
     constexpr static bool IsFixedSize = true;
 
     KRYS_NODISCARD static Ref<StyleInvalidImage> Create() noexcept;
+
     ~StyleInvalidImage() noexcept override;
 
     KRYS_NODISCARD bool Equals(const StyleImage &) const noexcept final

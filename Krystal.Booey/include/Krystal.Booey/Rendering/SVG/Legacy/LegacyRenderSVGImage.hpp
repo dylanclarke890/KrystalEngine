@@ -52,6 +52,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGImage(svg::SVGImageElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGImage() noexcept override;
 
     KRYS_NODISCARD svg::SVGImageElement &ImageElement() const noexcept;
@@ -137,6 +138,7 @@ namespace krys::boo
     void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
 
     void Layout() noexcept override;
+
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
 
     bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,

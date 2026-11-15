@@ -56,6 +56,7 @@ namespace krys::boo
     struct CSSValueConversion<ScrollFunction>
     {
       KRYS_NODISCARD ScrollFunction operator()(BuilderState &, const css::Value &) noexcept;
+
       KRYS_NODISCARD ScrollFunction operator()(BuilderState &, const css::ScrollValue &) noexcept;
     };
 

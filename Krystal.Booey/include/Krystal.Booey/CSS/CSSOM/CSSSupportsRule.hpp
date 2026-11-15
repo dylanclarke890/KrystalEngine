@@ -49,7 +49,9 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<CSSSupportsRule> Create(SupportsRule &rule, CSSStyleSheet *parent) noexcept;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept final;
+
     KRYS_NODISCARD CSSOMString ConditionText() const noexcept final;
 
   private:

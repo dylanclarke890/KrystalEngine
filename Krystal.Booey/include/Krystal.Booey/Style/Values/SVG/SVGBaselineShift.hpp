@@ -107,8 +107,10 @@ namespace krys::boo::style
   struct Blending<SVGBaselineShift>
   {
     KRYS_NODISCARD bool CanBlend(const SVGBaselineShift &, const SVGBaselineShift &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const SVGBaselineShift &,
                                                                       const SVGBaselineShift &) noexcept;
+
     KRYS_NODISCARD SVGBaselineShift Blend(const SVGBaselineShift &, const SVGBaselineShift &,
                                           const BlendingContext &) noexcept;
   };

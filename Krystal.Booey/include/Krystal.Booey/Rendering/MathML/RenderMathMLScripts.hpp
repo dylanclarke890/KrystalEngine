@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     RenderMathMLScripts(Type type, mathml::MathMLScriptsElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLScripts() noexcept override;
 
     KRYS_NODISCARD RenderMathMLOperator *UnembellishedOperator() const noexcept final;
@@ -56,7 +57,9 @@ namespace krys::boo
 
   protected:
     KRYS_NODISCARD mathml::MathMLScriptsElement::ScriptType GetScriptType() const noexcept;
+
     void ComputePreferredLogicalWidths() noexcept override;
+
     void LayoutBlock(RelayoutChildren relayoutChildren,
                      LayoutUnit pageLogicalHeight = 0_lu) noexcept override;
 
@@ -90,11 +93,17 @@ namespace krys::boo
     };
 
     KRYS_NODISCARD mathml::MathMLScriptsElement &GetElement() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;
+
     KRYS_NODISCARD Maybe<ReferenceChildren> ValidateAndGetReferenceChildren() const noexcept;
+
     KRYS_NODISCARD LayoutUnit SpaceAfterScript() const noexcept;
+
     KRYS_NODISCARD static LayoutUnit ItalicCorrection(const ReferenceChildren &reference) noexcept;
+
     KRYS_NODISCARD VerticalParameters GetVerticalParameters() const noexcept;
+
     KRYS_NODISCARD VerticalMetrics GetVerticalMetrics(const ReferenceChildren &reference) const noexcept;
   };
 }

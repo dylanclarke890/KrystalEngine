@@ -62,6 +62,7 @@ namespace krys::boo
 
     // Lossy, so not implicit.
     explicit IntRect(const FloatRect &rect) noexcept;
+
     explicit IntRect(const LayoutRect &rect) noexcept;
 
     KRYS_NODISCARD constexpr IntPoint Location() const noexcept
@@ -259,6 +260,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool Intersects(const IntRect &other) const noexcept;
+
     KRYS_NODISCARD bool Contains(const IntRect &other) const noexcept;
 
     // This checks to see if the rect contains x,y in the traditional sense.
@@ -274,7 +276,9 @@ namespace krys::boo
     }
 
     void Intersect(const IntRect &other) noexcept;
+
     void Unite(const IntRect &other) noexcept;
+
     void UniteIfNonZero(const IntRect &other) noexcept;
 
     constexpr void InflateX(int32 dx) noexcept

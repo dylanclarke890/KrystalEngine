@@ -49,11 +49,15 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<AXSpinButton> Create(AXId id, AXObjectCache &cache) noexcept;
+
     ~AXSpinButton() noexcept override;
 
     void SetSpinButtonElement(html::SpinButtonElement *spinButton) noexcept;
+
     KRYS_NODISCARD AXSpinButtonPart *IncrementButton() const noexcept;
+
     KRYS_NODISCARD AXSpinButtonPart *DecrementButton() const noexcept;
+
     /// @brief Steps the input's value up (a positive @p amount) or down.
     void Step(int32 amount) noexcept;
 

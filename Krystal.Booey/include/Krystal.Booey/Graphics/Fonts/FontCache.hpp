@@ -114,6 +114,7 @@ namespace krys::boo
 
   public:
     FontCache() noexcept;
+
     ~FontCache() noexcept;
 
     KRYS_NODISCARD static FontCache &Singleton() noexcept;
@@ -149,6 +150,7 @@ namespace krys::boo
                                            AllowUserInstalledFonts allowUserInstalledFonts) const noexcept;
 
     void AddClient(FontSelector &client) noexcept;
+
     void RemoveClient(FontSelector &client) noexcept;
 
     KRYS_NODISCARD uint16 Generation() const noexcept
@@ -160,10 +162,14 @@ namespace krys::boo
     static void InvalidateAllFontCaches() noexcept;
 
     KRYS_NODISCARD size_t FontCount() const noexcept;
+
     KRYS_NODISCARD size_t InactiveFontCount() const noexcept;
+
     void PurgeInactiveFontData(uint32 count = UINT32_MAX) noexcept;
+
     /// @brief Purges inactive fonts once there are more than a limit, down to a target.
     void PurgeInactiveFontDataIfNeeded() noexcept;
+
     /// @brief Purges the inactive fonts and clears the width caches.
     void ReleaseNoncriticalMemory() noexcept;
 
@@ -194,6 +200,7 @@ namespace krys::boo
     KRYS_NODISCARD FontPlatformData *CachedFontPlatformData(const FontDescription &description,
                                                             const StringAtom &family,
                                                             EnumSet<FontLookupOptions> options) noexcept;
+
     KRYS_NODISCARD UniquePtr<FontPlatformData>
       CreateFontPlatformData(const FontDescription &description, const StringAtom &family,
                              EnumSet<FontLookupOptions> options) noexcept;

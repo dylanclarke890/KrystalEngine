@@ -131,23 +131,31 @@ namespace krys::boo
 
   public:
     FontCascade() noexcept;
+
     explicit FontCascade(FontCascadeDescription &&) noexcept;
+
     FontCascade(FontCascadeDescription &&, const FontCascade &) noexcept;
+
     /// @brief A cascade with only the font of @p platformData.
     explicit FontCascade(const FontPlatformData &platformData,
                          FontSmoothingMode fontSmoothingMode = FontSmoothingMode::Auto) noexcept;
 
     FontCascade(const FontCascade &) noexcept;
+
     FontCascade &operator=(const FontCascade &) noexcept;
+
     ~FontCascade() noexcept;
 
     KRYS_NODISCARD bool operator==(const FontCascade &other) const noexcept;
 
     /// @brief Whether the cascade's fonts are up to date with the font cache and @p fontSelector.
     KRYS_NODISCARD bool IsCurrent(const FontSelector &fontSelector) const noexcept;
+
     void UpdateFonts(Ref<FontCascadeFonts> &&fonts) const noexcept;
+
     /// @brief Resolves the cascade's fonts again, with @p fontSelector.
     void Update(RefPtr<FontSelector> &&fontSelector = nullptr) const noexcept;
+
     KRYS_NODISCARD uint32 FontSelectorVersion() const noexcept;
 
     KRYS_NODISCARD const FontCascadeDescription &GetFontDescription() const noexcept
@@ -170,16 +178,19 @@ namespace krys::boo
       DoNotPaintIfFontNotReady,
       UseFallbackIfFontNotReady,
     };
+
     /// @brief Draws @p run from byte offset @p from to @p to at @p point (its start on the baseline).
     /// @return How far the first glyph drawn is from @p point (the width of the text before @p from).
     FloatSize DrawText(GraphicsContext &context, const TextRun &run, const FloatPoint &point, uint32 from = 0,
                        Maybe<uint32> to = null,
                        CustomFontNotReadyAction customFontNotReadyAction =
                          CustomFontNotReadyAction::DoNotPaintIfFontNotReady) const noexcept;
+
     /// @brief Draws @p mark over each character of @p run from byte offset @p from to @p to that can take
     /// one, @p point being the run's start on the baseline the marks are drawn on.
     void DrawEmphasisMarks(GraphicsContext &context, const TextRun &run, const StringAtom &mark,
                            const FloatPoint &point, uint32 from = 0, Maybe<uint32> to = null) const noexcept;
+
     /// @brief Where @p run's glyphs, drawn from @p textOrigin, cross @p lineExtents (an underline or
     /// overline), as spans along the line from its left: each glyph's outline where it crosses the line's top
     /// and bottom, for decorations that skip ink.
@@ -193,18 +204,23 @@ namespace krys::boo
     KRYS_NODISCARD float WidthOfTextRange(const TextRun &run, uint32 from, uint32 to,
                                           float &outWidthBeforeRange,
                                           float &outWidthAfterRange) const noexcept;
+
     /// @brief The width of @p run.
     /// @param fallbackFonts If not null, the fonts other than the primary font that the run uses are added to
     /// it.
     /// @param glyphOverflow If not null, set to how far the run's glyphs reach outside its box.
     KRYS_NODISCARD float Width(const TextRun &run, HashSet<RefPtr<const Font>> *fallbackFonts = nullptr,
                                GlyphOverflow *glyphOverflow = nullptr) const noexcept;
+
     KRYS_NODISCARD float Width(utf8_stringview text) const noexcept;
+
     KRYS_NODISCARD float
       WidthForTextUsingSimplifiedMeasuring(utf8_stringview text,
                                            TextDirection = TextDirection::LTR) const noexcept;
+
     KRYS_NODISCARD float WidthForSimpleTextWithFixedPitch(utf8_stringview text,
                                                           bool whitespaceIsCollapsed) const noexcept;
+
     /// @brief The width of the character at byte offset @p characterPosition of @p run.
     KRYS_NODISCARD float WidthForCharacterInRun(const TextRun &run, uint32 characterPosition) const noexcept;
 
@@ -217,10 +233,12 @@ namespace krys::boo
     /// @param includePartialGlyphs Whether a position past the middle of a glyph is after it.
     KRYS_NODISCARD int32 OffsetForPosition(const TextRun &run, float position,
                                            bool includePartialGlyphs) const noexcept;
+
     /// @brief Moves and sizes @p selectionRect to the text of @p run from byte offset @p from to @p to.
     void AdjustSelectionRectForText(bool canUseSimplifiedTextMeasuring, const TextRun &run,
                                     LayoutRect &selectionRect, uint32 from = 0,
                                     Maybe<uint32> to = null) const noexcept;
+
     /// @brief The selection rect of each byte from @p from to @p to (the rects of a character's continuation
     /// bytes are empty, at the character's end).
     KRYS_NODISCARD List<LayoutRect> CharacterSelectionRectsForText(const TextRun &run,
@@ -305,6 +323,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsFixedPitch() const noexcept;
+
     KRYS_NODISCARD bool CanTakeFixedPitchFastContentMeasuring() const noexcept;
 
     KRYS_NODISCARD bool IsPlatformFont() const noexcept
@@ -320,21 +339,28 @@ namespace krys::boo
 
     /// @brief The advance of the `0` glyph, or 0.5em when it can't be determined.
     KRYS_NODISCARD float ZeroWidth() const noexcept;
+
     KRYS_NODISCARD float TabWidth(const Font &font, const boo::TabSize &tabSize, float position,
                                   Font::SyntheticBoldInclusion syntheticBoldInclusion) const noexcept;
 
     KRYS_NODISCARD bool HasValidAverageCharWidth() const noexcept;
+
     /// @brief Sets @p width to the primary font's average character width if the first family's is valid.
     KRYS_NODISCARD bool FastAverageCharWidthIfAvailable(float &width) const noexcept;
 
     KRYS_NODISCARD int32 EmphasisMarkAscent(const StringAtom &mark) const noexcept;
+
     KRYS_NODISCARD int32 EmphasisMarkDescent(const StringAtom &mark) const noexcept;
+
     KRYS_NODISCARD int32 EmphasisMarkHeight(const StringAtom &mark) const noexcept;
+
     KRYS_NODISCARD float FloatEmphasisMarkHeight(const StringAtom &mark) const noexcept;
 
     /// @brief The font of the first family that has a font, which the cascade's metrics come from.
     KRYS_NODISCARD Ref<const Font> PrimaryFont() const noexcept;
+
     KRYS_NODISCARD const FontRanges &FallbackRangesAt(uint32 index) const noexcept;
+
     KRYS_NODISCARD GlyphData
       GlyphDataForCharacter(char32 character, bool mirror, FontVariant variant = AutoVariant,
                             Maybe<ResolvedEmojiPolicy> resolvedEmojiPolicy = null) const noexcept;
@@ -347,6 +373,7 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<const Font> FontForCombiningCharacterSequence(utf8_stringview text) const noexcept;
 
     KRYS_NODISCARD static bool IsCJKIdeograph(char32 c) noexcept;
+
     KRYS_NODISCARD static bool IsCJKIdeographOrSymbol(char32 c) noexcept;
 
     /// @brief The number of expansion opportunities in @p text (UTF-8), and whether the last expansion is a
@@ -360,16 +387,19 @@ namespace krys::boo
     /// @note This does not take an isAfterExpansion flag; this assumes that isAfterExpansion is false.
     KRYS_NODISCARD static bool LeftExpansionOpportunity(utf8_stringview text,
                                                         TextDirection direction) noexcept;
+
     KRYS_NODISCARD static bool RightExpansionOpportunity(utf8_stringview text,
                                                          TextDirection direction) noexcept;
 
     /// @brief The code path @p run (from byte offset @p from to @p to) is measured on.
     KRYS_NODISCARD CodePath GetCodePath(const TextRun &run, Maybe<uint32> from = null,
                                         Maybe<uint32> to = null) const noexcept;
+
     KRYS_NODISCARD static CodePath CharacterRangeCodePath(utf8_stringview text) noexcept;
 
     // Useful for debugging the different font rendering code paths.
     static void SetCodePath(CodePath codePath) noexcept;
+
     KRYS_NODISCARD static CodePath GetCodePath() noexcept;
 
     KRYS_NODISCARD static ResolvedEmojiPolicy ResolveEmojiPolicy(FontVariantEmoji fontVariantEmoji,
@@ -503,38 +533,49 @@ namespace krys::boo
     KRYS_NODISCARD GlyphBuffer LayoutText(
       CodePath codePath, const TextRun &run, uint32 from, uint32 to,
       ForTextEmphasisOrNot forTextEmphasis = ForTextEmphasisOrNot::NotForTextEmphasis) const noexcept;
+
     KRYS_NODISCARD GlyphBuffer LayoutSimpleText(
       const TextRun &run, uint32 from, uint32 to,
       ForTextEmphasisOrNot forTextEmphasis = ForTextEmphasisOrNot::NotForTextEmphasis) const noexcept;
+
     KRYS_NODISCARD GlyphBuffer LayoutComplexText(
       const TextRun &run, uint32 from, uint32 to,
       ForTextEmphasisOrNot forTextEmphasis = ForTextEmphasisOrNot::NotForTextEmphasis) const noexcept;
+
     /// @brief Draws @p glyphBuffer's glyphs from @p point, one run per font, moving @p point past them.
     /// @note @p point already includes the glyph buffer's initial advance.
     void DrawGlyphBuffer(GraphicsContext &context, const GlyphBuffer &glyphBuffer, FloatPoint &point,
                          CustomFontNotReadyAction customFontNotReadyAction) const noexcept;
+
     void DrawEmphasisMarks(GraphicsContext &context, const GlyphBuffer &glyphBuffer, const StringAtom &mark,
                            const FloatPoint &point) const noexcept;
 
     KRYS_NODISCARD int32 OffsetForPositionForSimpleText(const TextRun &run, float position,
                                                         bool includePartialGlyphs) const noexcept;
+
     KRYS_NODISCARD int32 OffsetForPositionForComplexText(const TextRun &run, float position,
                                                          bool includePartialGlyphs) const noexcept;
+
     void AdjustSelectionRectForSimpleText(const TextRun &run, LayoutRect &selectionRect, uint32 from,
                                           uint32 to) const noexcept;
+
     void AdjustSelectionRectForSimpleTextWithFixedPitch(const TextRun &run, LayoutRect &selectionRect,
                                                         uint32 from, uint32 to) const noexcept;
+
     void AdjustSelectionRectForComplexText(const TextRun &run, LayoutRect &selectionRect, uint32 from,
                                            uint32 to) const noexcept;
 
     KRYS_NODISCARD float Width(CodePath codePath, const TextRun &run,
                                HashSet<RefPtr<const Font>> *fallbackFonts = nullptr,
                                GlyphOverflow *glyphOverflow = nullptr) const noexcept;
+
     KRYS_NODISCARD float WidthForSimpleTextSlow(utf8_stringview text, TextDirection textDirection,
                                                 float *cacheEntry) const noexcept;
+
     KRYS_NODISCARD bool CanHandleRunAsSimpleText(const TextRun &run, uint32 from, uint32 to) const noexcept;
 
     KRYS_NODISCARD Maybe<GlyphData> GetEmphasisMarkGlyphData(const StringAtom &mark) const noexcept;
+
     KRYS_NODISCARD const Font *FontForEmphasisMark(const StringAtom &mark) const noexcept;
 
     KRYS_NODISCARD constexpr static bool CanReturnFallbackFontsForComplexText() noexcept
@@ -604,6 +645,7 @@ namespace krys::boo
                                                 char32 baseCharacter, Maybe<char32> capitalizedBase,
                                                 FontVariantCaps fontVariantCaps,
                                                 bool engageAllSmallCapsProcessing) noexcept;
+
   // FIXME: Capitalization is language-dependent and context-dependent and should operate on grapheme clusters
   // instead of codepoints.
   KRYS_NODISCARD Maybe<char32> Capitalized(char32 baseCharacter) noexcept;

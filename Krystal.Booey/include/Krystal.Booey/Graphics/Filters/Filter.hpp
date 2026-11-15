@@ -100,10 +100,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatPoint ScaledByFilterScale(const FloatPoint &point) const noexcept;
+
     KRYS_NODISCARD FloatSize ScaledByFilterScale(const FloatSize &size) const noexcept;
+
     KRYS_NODISCARD FloatRect ScaledByFilterScale(const FloatRect &rect) const noexcept;
 
     KRYS_NODISCARD FloatRect MaxEffectRect(const FloatRect &primitiveSubregion) const noexcept;
+
     KRYS_NODISCARD FloatRect ClipToMaxEffectRect(const FloatRect &imageRect,
                                                  const FloatRect &primitiveSubregion) const noexcept;
 
@@ -128,9 +131,11 @@ namespace krys::boo
 
   protected:
     explicit Filter(FilterFunction::Type type) noexcept;
+
     Filter(FilterFunction::Type type, const FilterGeometry &geometry) noexcept;
 
     KRYS_NODISCARD virtual RefPtr<FilterImage> Apply(FilterImage *sourceImage, FilterResults &) noexcept = 0;
+
     KRYS_NODISCARD virtual FilterStyleVector
       CreateFilterStyles(GraphicsContext &, const FilterStyle &sourceStyle) const noexcept = 0;
 

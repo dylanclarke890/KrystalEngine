@@ -106,8 +106,11 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD Maybe<RayPath> TryRay() const noexcept;
+
     KRYS_NODISCARD Maybe<ReferencePath> TryReference() const noexcept;
+
     KRYS_NODISCARD Maybe<BasicShapePath> TryBasicShape() const noexcept;
+
     KRYS_NODISCARD Maybe<BoxPath> TryBox() const noexcept;
 
     KRYS_NODISCARD bool AffectedByTransformOrigin() const noexcept
@@ -117,6 +120,7 @@ namespace krys::boo::style
 
     template <typename>
     KRYS_NODISCARD bool HoldsAlternative() const noexcept;
+
     template <typename... F>
     KRYS_NODISCARD decltype(auto) SwitchOn(F &&...) const noexcept;
 
@@ -128,6 +132,7 @@ namespace krys::boo::style
   private:
     friend struct Blending<OffsetPath>;
     friend struct ToPlatform<OffsetPath>;
+
     friend Maybe<boo::Path> TryPath(const OffsetPath &, const TransformOperationData &) noexcept;
 
     RefPtr<PathOperation> _operation;
@@ -257,6 +262,7 @@ namespace krys::boo::style
   struct Blending<OffsetPath>
   {
     KRYS_NODISCARD bool CanBlend(const OffsetPath &, const OffsetPath &) noexcept;
+
     KRYS_NODISCARD OffsetPath Blend(const OffsetPath &, const OffsetPath &, const BlendingContext &) noexcept;
   };
 

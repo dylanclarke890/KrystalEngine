@@ -93,6 +93,7 @@ namespace krys::boo::css
 
   public:
     ValuePool() noexcept;
+
     ~ValuePool() noexcept;
 
     // FIXME: This function needs a name that make it clear that this is not the one and only CSSValuePool,
@@ -104,7 +105,9 @@ namespace krys::boo::css
     void Drain() noexcept;
 
     KRYS_NODISCARD Ref<ColorValue> CreateColorValue(const boo::Color &color) noexcept;
+
     KRYS_NODISCARD RefPtr<ValueList> CreateFontFaceValue(const CSSOMStringAtom &string) noexcept;
+
     KRYS_NODISCARD Ref<PrimitiveValue> CreateFontFamilyValue(const CSSOMStringAtom &familyName) noexcept;
   };
 

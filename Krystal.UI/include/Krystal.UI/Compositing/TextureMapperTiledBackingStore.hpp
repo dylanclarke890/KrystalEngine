@@ -45,21 +45,26 @@ namespace krys::ui
 
     void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,
                               const boo::TransformationMatrix &transform, float opacity) noexcept override;
+
     void DrawBorder(TextureMapper &textureMapper, const boo::Color &borderColor, float borderWidth,
                     const boo::FloatRect &targetRect,
                     const boo::TransformationMatrix &transform) noexcept override;
+
     void DrawRepaintCounter(TextureMapper &textureMapper, int32 repaintCount, const boo::Color &borderColor,
                             const boo::FloatRect &targetRect,
                             const boo::TransformationMatrix &transform) noexcept override;
 
     void UpdateContentsScale(float scale) noexcept;
+
     void UpdateContents(TextureMapper &textureMapper, boo::Image *image, const boo::FloatSize &totalSize,
                         const boo::IntRect &dirtyRect) noexcept;
+
     /// @brief Covers `visibleRect` (in the layer's coordinates) and a margin around it with tiles for a
     /// viewport of `viewportSize`, and paints what's dirty of them: `dirtyRect` (scaled), and new tiles.
     void UpdateContents(TextureMapper &textureMapper, const boo::GraphicsLayer &sourceLayer,
                         const boo::FloatSize &totalSize, const boo::IntRect &dirtyRect,
                         const boo::IntRect &visibleRect, const boo::IntSize &viewportSize) noexcept;
+
     void SetContentsToImage(boo::Image *image) noexcept;
 
     KRYS_NODISCARD const List<TextureMapperTile> &Tiles() const noexcept
@@ -72,18 +77,24 @@ namespace krys::ui
 
     void CreateOrDestroyTilesIfNeeded(const boo::FloatSize &backingStoreSize, const boo::IntSize &tileSize,
                                       bool hasAlpha) noexcept;
+
     void CreateOrDestroyCoveringTiles(const boo::FloatSize &backingStoreSize, const boo::IntRect &visibleRect,
                                       const boo::IntSize &viewportSize, int32 maxTextureSize) noexcept;
+
     void UpdateContentsFromImageIfNeeded(TextureMapper &textureMapper) noexcept;
+
     KRYS_NODISCARD boo::TransformationMatrix
       AdjustedTransformForRect(const boo::FloatRect &targetRect) noexcept;
 
     KRYS_NODISCARD boo::IntSize ComputeTileSize(const boo::IntSize &viewportSize, int32 maxTextureSize,
                                                 const boo::IntRect &contentsRect) const noexcept;
+
     KRYS_NODISCARD Pair<boo::IntRect, boo::IntRect>
       ComputeCoverAndKeepRect(const boo::IntRect &contentsRect) const noexcept;
+
     KRYS_NODISCARD boo::IntRect TileRectForPosition(const boo::IntPoint &position,
                                                     const boo::IntRect &contentsRect) const noexcept;
+
     KRYS_NODISCARD boo::IntPoint TilePositionForPoint(const boo::IntPoint &point) const noexcept;
 
     KRYS_NODISCARD boo::FloatRect Rect() const noexcept

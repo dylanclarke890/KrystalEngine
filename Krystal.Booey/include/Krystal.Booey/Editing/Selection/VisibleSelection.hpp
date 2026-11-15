@@ -93,23 +93,29 @@ namespace krys::boo
     constexpr static auto DefaultAffinity = VisiblePosition::DefaultAffinity;
 
     VisibleSelection() noexcept = default;
+
     VisibleSelection(const dom::Position &anchor, const dom::Position &focus,
                      Affinity affinity = DefaultAffinity,
                      boo::Directionality directionality = boo::Directionality::None) noexcept;
+
     // FIXME: A caret selection never has direction so we should remove the Directionality argument from this
     // function.
     VisibleSelection(const dom::Position &position, Affinity affinity,
                      boo::Directionality directionality = boo::Directionality::None) noexcept;
+
     explicit VisibleSelection(const dom::SimpleRange &range, Affinity affinity = DefaultAffinity,
                               boo::Directionality directionality = boo::Directionality::None) noexcept;
+
     // FIXME: A caret selection never has direction so we should remove the Directionality argument from this
     // function.
     explicit VisibleSelection(const VisiblePosition &position,
                               boo::Directionality directionality = boo::Directionality::None) noexcept;
+
     VisibleSelection(const VisiblePosition &anchor, const VisiblePosition &focus,
                      boo::Directionality directionality = boo::Directionality::None) noexcept;
 
     KRYS_NODISCARD static const VisibleSelection &EmptySelection() noexcept;
+
     KRYS_NODISCARD static VisibleSelection SelectionFromContentsOfNode(dom::Node *node) noexcept;
 
     void SetAffinity(Affinity affinity) noexcept
@@ -123,8 +129,11 @@ namespace krys::boo
     }
 
     void SetAnchor(const dom::Position &position) noexcept;
+
     void SetAnchor(const VisiblePosition &visiblePosition) noexcept;
+
     void SetFocus(const dom::Position &position) noexcept;
+
     void SetFocus(const VisiblePosition &visiblePosition) noexcept;
 
     // These functions return the values that were passed in, without the canonicalization done by
@@ -133,6 +142,7 @@ namespace krys::boo
     // canonical.
     // FIXME: Replace start/range/base/end/firstRange with these, renaming these to the shorter names.
     KRYS_NODISCARD const dom::Position &UncanonicalizedStart() const noexcept;
+
     KRYS_NODISCARD const dom::Position &UncanonicalizedEnd() const noexcept;
 
     KRYS_NODISCARD const dom::Position &Anchor() const noexcept
@@ -226,6 +236,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsOrphan() const noexcept;
+
     KRYS_NODISCARD RefPtr<dom::Document> GetDocument() const noexcept;
 
     KRYS_NODISCARD bool IsBaseFirst() const noexcept
@@ -269,7 +280,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsContentEditable() const noexcept;
+
     KRYS_NODISCARD bool HasEditableStyle() const noexcept;
+
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
 
     // Returns a child of the ShadowRoot node for shadow trees, or null for non-shadow trees.
@@ -277,6 +290,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static dom::Position AdjustPositionForEnd(const dom::Position &currentPosition,
                                                              dom::Node *startContainerNode) noexcept;
+
     KRYS_NODISCARD static dom::Position AdjustPositionForStart(const dom::Position &currentPosition,
                                                                dom::Node *endContainerNode) noexcept;
 
@@ -293,9 +307,13 @@ namespace krys::boo
 
     // Support methods for Validate()
     void SetCanonicalAnchorAndFocusToDeepEquivalents() noexcept;
+
     void AdjustSelectionRespectingGranularity(TextGranularity granularity) noexcept;
+
     void AdjustSelectionToAvoidCrossingShadowBoundaries() noexcept;
+
     void AdjustSelectionToAvoidCrossingEditingBoundaries() noexcept;
+
     void UpdateSelectionType() noexcept;
   };
 }

@@ -103,18 +103,28 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD IntSize Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
+
     KRYS_NODISCARD
     IntSize SourceSize(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
+
     KRYS_NODISCARD Maybe<IntSize> DensityCorrectedSize() const noexcept;
+
     KRYS_NODISCARD ImageOrientation Orientation() const noexcept;
+
     KRYS_NODISCARD uint32 PrimaryFrameIndex() const noexcept;
+
     KRYS_NODISCARD uint32 FrameCount() const noexcept;
+
     KRYS_NODISCARD RepetitionCount GetRepetitionCount() const noexcept;
+
     KRYS_NODISCARD Maybe<Color> SinglePixelSolidColor() const noexcept;
 
     KRYS_NODISCARD utf8_string FilenameExtension() const noexcept;
+
     KRYS_NODISCARD utf8_string AccessibilityDescription() const noexcept;
+
     KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept;
+
     KRYS_NODISCARD SubsamplingLevel MaximumSubsamplingLevel() const noexcept;
 
     KRYS_NODISCARD SubsamplingLevel SubsamplingLevelForScaleFactor(GraphicsContext &,

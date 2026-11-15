@@ -250,6 +250,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsIdentity() const noexcept override;
+
     KRYS_NODISCARD bool TransformColor(SRGBA<float> &) const noexcept override;
 
     double _amount;
@@ -290,6 +291,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsIdentity() const noexcept override;
+
     KRYS_NODISCARD bool TransformColor(SRGBA<float> &) const noexcept override;
 
     double _amount;
@@ -335,6 +337,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsIdentity() const noexcept override;
+
     KRYS_NODISCARD IntOutsets Outsets() const noexcept override;
 
     float _stdDeviation;
@@ -382,6 +385,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsIdentity() const noexcept override;
+
     KRYS_NODISCARD IntOutsets Outsets() const noexcept override;
 
     IntPoint _location; // FIXME: Should _location be a FloatPoint?

@@ -773,20 +773,28 @@ namespace krys::boo::style
 
     // Custom handling of initial setting only.
     static void ApplyInitialBorderTopWidth(BuilderState &) noexcept;
+
     static void ApplyInitialBorderRightWidth(BuilderState &) noexcept;
+
     static void ApplyInitialBorderBottomWidth(BuilderState &) noexcept;
+
     static void ApplyInitialBorderLeftWidth(BuilderState &) noexcept;
+
     static void ApplyInitialOutlineWidth(BuilderState &) noexcept;
+
     static void ApplyInitialColumnRuleWidth(BuilderState &) noexcept;
 
     // Custom handling of value setting only.
     static void ApplyValueDirection(BuilderState &, css::Value &) noexcept;
+
     static void ApplyValueTextOrientation(BuilderState &, css::Value &) noexcept;
+
     static void ApplyValueWritingMode(BuilderState &, css::Value &) noexcept;
 
     static void ApplyValueColorScheme(BuilderState &, css::Value &) noexcept;
 
     static void ApplyValueStrokeWidth(BuilderState &, css::Value &) noexcept;
+
     static void ApplyValueStrokeColor(BuilderState &, css::Value &) noexcept;
 
   private:
@@ -801,12 +809,16 @@ namespace krys::boo::style
 
     template <CounterBehavior>
     static void ApplyInheritCounter(BuilderState &) noexcept;
+
     template <CounterBehavior>
     static void ApplyValueCounter(BuilderState &, css::Value &) noexcept;
 
     KRYS_NODISCARD static float LargerFontSize(float size) noexcept;
+
     KRYS_NODISCARD static float SmallerFontSize(float size) noexcept;
+
     KRYS_NODISCARD static float DetermineRubyTextSizeMultiplier(BuilderState &) noexcept;
+
     KRYS_NODISCARD static float DetermineMathDepthScale(BuilderState &) noexcept;
   };
 

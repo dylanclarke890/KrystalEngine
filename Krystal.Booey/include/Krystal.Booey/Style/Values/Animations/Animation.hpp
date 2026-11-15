@@ -105,6 +105,7 @@ namespace krys::boo::style
       }
 
       AnimationData() noexcept;
+
       AnimationData(const AnimationData &) noexcept;
 
       KRYS_NODISCARD bool operator==(const AnimationData &) const noexcept;
@@ -114,6 +115,7 @@ namespace krys::boo::style
 
   public:
     Animation() noexcept;
+
     Animation(SingleAnimationName &&) noexcept;
 
     KRYS_NODISCARD const SingleAnimationName &GetName() const noexcept

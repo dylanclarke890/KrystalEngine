@@ -77,6 +77,7 @@ namespace krys::boo::layout_integration
       NodeRemoval,
       NodeMutation,
     };
+
     KRYS_NODISCARD bool CanUseForLineLayout(const RenderBlockFlow &) noexcept;
 
     KRYS_NODISCARD bool

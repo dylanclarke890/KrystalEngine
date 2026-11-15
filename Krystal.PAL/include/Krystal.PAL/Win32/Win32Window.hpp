@@ -97,9 +97,11 @@ namespace krys::pal::win32
     void SetCallbacks(WindowCallbacks &&callbacks) noexcept override;
 
     void SetCursor(CursorShape cursor) noexcept override;
+
     void SetCursorImage(Ref<CursorImage> image) noexcept override;
 
     KRYS_NODISCARD CursorShape GetCursor() const noexcept override;
+
     KRYS_NODISCARD CursorImage *GetCursorImage() const noexcept override;
 
     bool SetPointerLocked(bool locked) noexcept override;
@@ -133,44 +135,63 @@ namespace krys::pal::win32
 
   private:
     void CreateWindowClass(HMODULE instance);
+
     void CreateWindowHandle(HMODULE instance);
+
     void RegisterRawInput() const;
+
     /// @brief Reports a pen's or a touch's pointer message.
     /// @return Whether it was a pen's or a touch's, which the system then doesn't turn into mouse input.
     bool HandlePointerMessage(HWND window, UINT message, WPARAM wParam) const noexcept;
+
     /// @brief Shows the window's cursor, as the mouse is over the client area (none while the pointer is
     /// locked).
     void ApplyCursor() const noexcept;
+
     /// @brief Applies the cursor now if it's showing: while the window captures the mouse, or under it.
     void CursorChanged() const noexcept;
+
     /// @brief Destroys the system cursor made from the cursor image, and forgets the image.
     void ClearCursorImage() noexcept;
+
     /// @brief Keeps the cursor in the client area, at its centre, while the pointer is locked.
     void ConfinePointer() const noexcept;
+
     /// @brief Unlocks the pointer, putting the cursor back where it was.
     void ReleasePointerLock() const noexcept;
+
     /// @brief Reports a key press, with the characters the system translated it to.
     void HandleKeyDown(UINT message, WPARAM keyCode, LPARAM lParam) const noexcept;
+
     /// @brief Reports a character that came without a key press.
     void HandleCharacter(wchar_t character) const noexcept;
+
     /// @brief Reports the input method's composition changing, as @p changes (`GCS_*` flags) say.
     void HandleComposition(LPARAM changes) const noexcept;
+
     /// @brief Reports a change to the composition, if the host takes them.
     void ReportComposition(const CompositionInput &input) const noexcept;
+
     /// @brief Places the input method's windows by the text input rect, and the system caret (which some
     /// input methods and accessibility tools follow) at it.
     void PlaceInputMethodWindows() const noexcept;
+
     /// @brief Destroys the system caret, if the window made it.
     void DestroyCaret() const noexcept;
+
     /// @brief Registers the window's drop target if the host takes drops, or revokes it if not.
     void UpdateDropTarget() noexcept;
+
     /// @brief Revokes the window's drop target, if it has one.
     void RevokeDropTarget() noexcept;
+
     /// @brief Makes the window's DirectManipulation viewport if the host takes touchpad pans, or destroys it
     /// if not.
     void UpdateTouchpadPan() noexcept;
+
     /// @brief Destroys the window's DirectManipulation viewport, if it has one.
     void DestroyTouchpadPan() noexcept;
+
     /// @brief Reports a step of a touchpad's pan, where the cursor is.
     void ReportTouchpadPan(TouchpadPanPhase phase, float deltaX, float deltaY) const noexcept;
   };

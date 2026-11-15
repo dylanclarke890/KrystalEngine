@@ -37,10 +37,10 @@
 namespace krys::boo
 {
   class AffineTransform;
+  class FloatQuad;
+  class FloatRect;
   class IntRect;
   class LayoutRect;
-  class FloatRect;
-  class FloatQuad;
 
   /// @brief A 4x4 transform matrix. The first index is the column, the second the row.
   class TransformationMatrix
@@ -143,6 +143,7 @@ namespace krys::boo
     KRYS_NODISCARD static TransformationMatrix FromProjection(double fovUp, double fovDown, double fovLeft,
                                                               double fovRight, double depthNear,
                                                               double depthFar) noexcept;
+
     KRYS_NODISCARD static TransformationMatrix FromProjection(double fovy, double aspect, double depthNear,
                                                               double depthFar) noexcept;
 
@@ -200,6 +201,7 @@ namespace krys::boo
     // Rounds the resulting mapped rectangle out. This is helpful for bounding
     // box computations but may not be what is wanted in other contexts.
     KRYS_NODISCARD IntRect MapRect(const IntRect &r) const noexcept;
+
     KRYS_NODISCARD LayoutRect MapRect(const LayoutRect &r) const noexcept;
 
     // If the matrix has 3D components, the z component of the result is
@@ -446,15 +448,20 @@ namespace krys::boo
     TransformationMatrix &MultiplyAffineTransform(const AffineTransform &matrix) noexcept;
 
     TransformationMatrix &Scale(double s) noexcept;
+
     TransformationMatrix &ScaleNonUniform(double sx, double sy) noexcept;
+
     TransformationMatrix &Scale3d(double sx, double sy, double sz) noexcept;
 
     // Angle is in degrees.
     TransformationMatrix &Rotate(double angle,
                                  RotationSnapping snapping = RotationSnapping::Snap90degRotations) noexcept;
+
     TransformationMatrix &
       RotateRadians(double angle, RotationSnapping snapping = RotationSnapping::Snap90degRotations) noexcept;
+
     TransformationMatrix &RotateFromVector(double x, double y) noexcept;
+
     TransformationMatrix &Rotate3d(double rx, double ry, double rz,
                                    RotationSnapping snapping = RotationSnapping::Snap90degRotations) noexcept;
 
@@ -463,14 +470,18 @@ namespace krys::boo
                                    RotationSnapping snapping = RotationSnapping::Snap90degRotations) noexcept;
 
     TransformationMatrix &Translate(double tx, double ty) noexcept;
+
     TransformationMatrix &Translate3d(double tx, double ty, double tz) noexcept;
 
     // translation added with a post-multiply
     TransformationMatrix &TranslateRight(double tx, double ty) noexcept;
+
     TransformationMatrix &TranslateRight3d(double tx, double ty, double tz) noexcept;
 
     TransformationMatrix &FlipX() noexcept;
+
     TransformationMatrix &FlipY() noexcept;
+
     TransformationMatrix &Skew(double angleX, double angleY) noexcept;
 
     TransformationMatrix &SkewX(double angle) noexcept
@@ -505,17 +516,23 @@ namespace krys::boo
     TransformationMatrix &Zoom(double zoomFactor) noexcept;
 
     KRYS_NODISCARD bool IsInvertible() const noexcept;
+
     KRYS_NODISCARD Maybe<TransformationMatrix> Inverse() const noexcept;
 
     KRYS_NODISCARD bool Decompose2(Decomposed2Type &decomp) const noexcept;
+
     void Recompose2(const Decomposed2Type &decomp) noexcept;
+
     KRYS_NODISCARD bool Decompose4(Decomposed4Type &decomp) const noexcept;
+
     void Recompose4(const Decomposed4Type &decomp) noexcept;
 
     void Blend(const TransformationMatrix &from, double progress,
                CompositeOperation compositeOperation = CompositeOperation::Replace) noexcept;
+
     void Blend2(const TransformationMatrix &from, double progress,
                 CompositeOperation compositeOperation = CompositeOperation::Replace) noexcept;
+
     void Blend4(const TransformationMatrix &from, double progress,
                 CompositeOperation compositeOperation = CompositeOperation::Replace) noexcept;
 
@@ -561,6 +578,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsIntegerTranslation() const noexcept;
+
     KRYS_NODISCARD bool ContainsOnlyFiniteValues() const noexcept;
 
     // Returns the matrix without 3D components.

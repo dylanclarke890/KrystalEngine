@@ -49,12 +49,14 @@ namespace krys::boo::svg
 
   public:
     explicit SVGImageCache(SVGImage *) noexcept;
+
     ~SVGImageCache() noexcept;
 
     void RemoveClientFromCache(const CachedImageClient *) noexcept;
 
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
                                       const url::URL &) noexcept;
+
     KRYS_NODISCARD FloatSize ImageSizeForRenderer(const RenderObject *) const noexcept;
 
     KRYS_NODISCARD Image *ImageForRenderer(const RenderObject *) const noexcept;

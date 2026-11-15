@@ -49,6 +49,7 @@ namespace krys::boo::html
 
   public:
     explicit HTMLDetailsElement(dom::Document &document) noexcept;
+
     ~HTMLDetailsElement() noexcept override;
 
     KRYS_NODISCARD static Ref<HTMLDetailsElement> Create(dom::Document &document) noexcept;
@@ -97,6 +98,7 @@ namespace krys::boo::html
 
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+
     void OnPostConnection() noexcept final;
 
 #pragma endregion

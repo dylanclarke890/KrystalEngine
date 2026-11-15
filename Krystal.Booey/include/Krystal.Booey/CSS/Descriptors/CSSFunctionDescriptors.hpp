@@ -52,6 +52,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString Result() const noexcept;
+
     dom::ExceptionOr<void> SetResult(const CSSOMString &value) noexcept;
 
   private:

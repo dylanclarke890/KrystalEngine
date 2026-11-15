@@ -107,9 +107,13 @@ namespace krys::boo
     };
 
     void InitSource(j_decompress_ptr jd);
+
     boolean FillInputBuffer(j_decompress_ptr jd);
+
     void SkipInputData(j_decompress_ptr jd, long numBytes);
+
     void TermSource(j_decompress_ptr jd);
+
     void ErrorExit(j_common_ptr cinfo);
 
     /// @brief The EXIF metadata of an image of @p size, from its first APP1 block that holds it.

@@ -108,6 +108,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD InlineRect LogicalRectForTextRun(const Line::Run &run) const noexcept;
+
     KRYS_NODISCARD InlineRect LogicalRectForLineBreakBox(const Box &layoutBox) const noexcept;
 
     KRYS_NODISCARD InlineRect LogicalRectForRootInlineBox() const noexcept
@@ -117,8 +118,10 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD InlineRect
       LogicalBorderBoxForAtomicInlineBox(const Box &layoutBox, const BoxGeometry &boxGeometry) const noexcept;
+
     KRYS_NODISCARD InlineRect LogicalBorderBoxForInlineBox(const Box &layoutBox,
                                                            const BoxGeometry &boxGeometry) const noexcept;
+
     KRYS_NODISCARD InlineRect LogicalContentBoxForInlineBox(const Box &layoutBox) const noexcept;
 
     KRYS_NODISCARD const InlineLevelBox *InlineLevelBoxFor(const Box &layoutBox) const noexcept

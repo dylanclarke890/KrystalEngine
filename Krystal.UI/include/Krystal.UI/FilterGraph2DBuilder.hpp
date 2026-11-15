@@ -40,6 +40,7 @@ namespace krys::ui
 
   public:
     FilterGraph2DBuilder(ImageBufferTextures &imageBuffers, gfx::CommandBuffer &commands) noexcept;
+
     ~FilterGraph2DBuilder() noexcept;
 
     /// @brief The applier of @p effect, which appends its nodes; null for an effect it can't apply.
@@ -63,9 +64,11 @@ namespace krys::ui
   private:
     /// @brief What reads @p image: the node computing it, or a source holding its image buffer.
     KRYS_NODISCARD Maybe<gfx::FilterInput2D> InputFor(boo::FilterImage &image) noexcept;
+
     /// @brief A source holding @p buffer over @p region.
     KRYS_NODISCARD Maybe<gfx::FilterInput2D> SourceFor(boo::ImageBuffer &buffer,
                                                        const gfx::PixelRect2D &region) noexcept;
+
     /// @brief Appends @p node, returning its index.
     uint32 AddNode(gfx::FilterNode2D &&node) noexcept;
   };

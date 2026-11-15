@@ -298,6 +298,7 @@ namespace krys::boo::inline_display
     }
 
     KRYS_NODISCARD bool IsVisible() const noexcept;
+
     // Inline boxes around blocks are visible to hit testing but don't paint.
     KRYS_NODISCARD bool IsVisibleIgnoringUsedVisibility() const noexcept;
 

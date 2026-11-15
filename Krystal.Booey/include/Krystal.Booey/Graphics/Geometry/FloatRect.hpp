@@ -296,17 +296,26 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool Intersects(const FloatRect &other) const noexcept;
+
     KRYS_NODISCARD bool InclusivelyIntersects(const FloatRect &other) const noexcept;
+
     KRYS_NODISCARD bool Contains(const FloatRect &other) const noexcept;
+
     KRYS_NODISCARD bool Contains(const FloatPoint &point,
                                  ContainsMode containsMode = ContainsMode::InsideOrOnStroke) const noexcept;
 
     void Intersect(const FloatRect &other) noexcept;
+
     bool EdgeInclusiveIntersect(const FloatRect &other) noexcept;
+
     void Unite(const FloatRect &other) noexcept;
+
     void UniteEvenIfEmpty(const FloatRect &other) noexcept;
+
     void UniteIfNonZero(const FloatRect &other) noexcept;
+
     void Extend(FloatPoint point) noexcept;
+
     void Extend(FloatPoint minPoint, FloatPoint maxPoint) noexcept;
 
     // Note, this doesn't match what IntRect::contains(IntPoint&) does; the int version
@@ -466,9 +475,13 @@ namespace krys::boo
   }
 
   KRYS_NODISCARD FloatRect NormaliseRect(const FloatRect &rect) noexcept;
+
   KRYS_NODISCARD FloatRect EncloseRectToDevicePixels(const FloatRect &rect, float deviceScaleFactor) noexcept;
+
   KRYS_NODISCARD IntRect EnclosingIntRect(const FloatRect &rect) noexcept;
+
   KRYS_NODISCARD IntRect EnclosingIntRectPreservingEmptyRects(const FloatRect &rect) noexcept;
+
   KRYS_NODISCARD IntRect RoundedIntRect(const FloatRect &rect) noexcept;
 
   TextStream &operator<<(TextStream &ts, const FloatRect &value) noexcept;

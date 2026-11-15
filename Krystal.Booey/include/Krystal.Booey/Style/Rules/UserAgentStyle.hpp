@@ -60,6 +60,7 @@ namespace krys::boo::style
     static css::StyleSheetContents *CounterStylesStyleSheet;
 
     static void InitDefaultStyleSheet() noexcept;
+
     static void EnsureDefaultStyleSheetsForElement(const dom::Element &element) noexcept;
 
   private:

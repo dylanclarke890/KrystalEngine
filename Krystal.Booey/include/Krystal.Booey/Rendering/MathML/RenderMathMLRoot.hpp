@@ -68,6 +68,7 @@ namespace krys::boo
 
   public:
     RenderMathMLRoot(mathml::MathMLRootElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLRoot() noexcept override;
 
     void ResetRadicalOperator() noexcept
@@ -82,18 +83,25 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD bool IsValid() const noexcept;
+
     KRYS_NODISCARD RenderBox &GetBase() const noexcept;
+
     KRYS_NODISCARD RenderBox &GetIndex() const noexcept;
+
     KRYS_NODISCARD mathml::MathMLRootElement &GetElement() const noexcept;
+
     KRYS_NODISCARD mathml::RootType GetRootType() const noexcept;
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept final;
 
     void ComputePreferredLogicalWidths() noexcept final;
+
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
+
     void Paint(PaintInfo &info, const LayoutPoint &paintOffset) noexcept final;
 
     KRYS_NODISCARD HorizontalParameters GetHorizontalParameters(LayoutUnit indexWidth) const noexcept;
+
     KRYS_NODISCARD VerticalParameters GetVerticalParameters() const noexcept;
   };
 }

@@ -40,13 +40,17 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGResourceRadialGradient(svg::SVGRadialGradientElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGResourceRadialGradient() noexcept override;
 
     KRYS_NODISCARD svg::SVGRadialGradientElement &RadialGradientElement() const noexcept;
 
     KRYS_NODISCARD FloatPoint CenterPoint(const svg::RadialGradientAttributes &) const noexcept;
+
     KRYS_NODISCARD FloatPoint FocalPoint(const svg::RadialGradientAttributes &) const noexcept;
+
     KRYS_NODISCARD float Radius(const svg::RadialGradientAttributes &) const noexcept;
+
     KRYS_NODISCARD float FocalRadius(const svg::RadialGradientAttributes &) const noexcept;
 
   private:

@@ -220,8 +220,10 @@ namespace krys::boo::style
   struct Blending<BorderImageWidthValue>
   {
     KRYS_NODISCARD bool CanBlend(const BorderImageWidthValue &, const BorderImageWidthValue &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BorderImageWidthValue &,
                                                                       const BorderImageWidthValue &) noexcept;
+
     KRYS_NODISCARD BorderImageWidthValue Blend(const BorderImageWidthValue &, const BorderImageWidthValue &,
                                                const BlendingContext &) noexcept;
   };
@@ -230,8 +232,10 @@ namespace krys::boo::style
   struct Blending<BorderImageWidth>
   {
     KRYS_NODISCARD bool CanBlend(const BorderImageWidth &, const BorderImageWidth &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BorderImageWidth &,
                                                                       const BorderImageWidth &) noexcept;
+
     KRYS_NODISCARD BorderImageWidth Blend(const BorderImageWidth &, const BorderImageWidth &,
                                           const BlendingContext &) noexcept;
   };

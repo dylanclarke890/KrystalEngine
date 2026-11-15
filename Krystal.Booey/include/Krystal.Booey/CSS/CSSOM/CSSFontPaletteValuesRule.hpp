@@ -50,8 +50,11 @@ namespace krys::boo::css
                                                                CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSOMString Name() const noexcept;
+
     KRYS_NODISCARD CSSOMString FontFamily() const noexcept;
+
     KRYS_NODISCARD CSSOMString BasePalette() const noexcept;
+
     KRYS_NODISCARD CSSOMString OverrideColors() const noexcept;
 
   private:
@@ -61,6 +64,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     void Reattach(Rule &rule) noexcept final;
   };
 }

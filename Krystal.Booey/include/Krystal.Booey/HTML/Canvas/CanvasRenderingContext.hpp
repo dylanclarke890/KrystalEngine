@@ -118,13 +118,16 @@ namespace krys::boo::html
 
     /// @brief The image buffer holding @p buffer's pixels: the canvas's, unless the context keeps its own.
     KRYS_NODISCARD virtual RefPtr<ImageBuffer> SurfaceBufferToImageBuffer(SurfaceBuffer) noexcept;
+
     /// @brief The pixels of @p buffer, as an image, or null if there are none.
     KRYS_NODISCARD virtual RefPtr<NativeImage> SurfaceBufferToNativeImage(SurfaceBuffer) noexcept;
+
     KRYS_NODISCARD virtual bool IsSurfaceBufferTransparentBlack(SurfaceBuffer) const noexcept;
 
     /// @brief What shows the context's pixels as a layer's contents.
     KRYS_NODISCARD virtual RefPtr<GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() noexcept;
+
     virtual void SetContentsToLayer(GraphicsLayer &layer) noexcept;
 
     /// @brief Whether drawing waits to be flushed in the rendering update.
@@ -165,6 +168,7 @@ namespace krys::boo::html
 
     // FIXME: The pixel format (sRGB, 8 bits a channel).
     KRYS_NODISCARD virtual DestinationColorSpace ColorSpace() const noexcept;
+
     KRYS_NODISCARD virtual bool WillReadFrequently() const noexcept;
 
   protected:

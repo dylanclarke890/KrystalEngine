@@ -57,6 +57,7 @@ namespace krys::boo
     }
 
     void MarkFilterEffectForRepaint(FilterEffect *) noexcept;
+
     void MarkFilterEffectForRebuild() noexcept;
 
   private:

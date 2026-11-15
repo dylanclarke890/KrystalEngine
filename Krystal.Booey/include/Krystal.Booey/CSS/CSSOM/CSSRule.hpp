@@ -41,11 +41,11 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   class CSSStyleSheet;
+  struct ParserContext;
   class Rule;
+  struct SerialisationContext;
   class StyleRule;
   class StyleRuleWithNesting;
-  struct ParserContext;
-  struct SerialisationContext;
 
   /// @brief The base of the rules exposed to scripts. Each wraps a rule of the internal rule model.
   /// @see https://drafts.csswg.org/cssom/#the-cssrule-interface

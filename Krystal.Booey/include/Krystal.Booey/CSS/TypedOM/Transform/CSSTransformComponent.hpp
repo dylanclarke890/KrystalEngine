@@ -66,6 +66,7 @@ namespace krys::boo::css
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tostring
     KRYS_NODISCARD CSSOMString ToString() const noexcept;
+
     virtual void Serialise(StringBuilder &builder) const noexcept = 0;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-is2d
@@ -84,6 +85,7 @@ namespace krys::boo::css
     KRYS_NODISCARD virtual dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept = 0;
 
     KRYS_NODISCARD virtual CSSTransformType TransformType() const noexcept = 0;
+
     /// @brief The transform function as a CSS value, or null if a numeric value in it has no CSS value.
     KRYS_NODISCARD virtual RefPtr<Value> ToCSSValue() const noexcept = 0;
 

@@ -114,7 +114,9 @@ namespace krys::boo::inline_iterator
     }
 
     KRYS_NODISCARD float ContentLogicalTopAdjustedForPrecedingLineBox() const noexcept;
+
     KRYS_NODISCARD float ContentLogicalBottomAdjustedForFollowingLineBox() const noexcept;
+
     KRYS_NODISCARD float ContentLogicalLeft() const noexcept;
 
     KRYS_NODISCARD float ContentLogicalRight() const noexcept
@@ -181,6 +183,7 @@ namespace krys::boo::inline_iterator
     }
 
     KRYS_NODISCARD BoxModernPath FirstLeafBox() const noexcept;
+
     KRYS_NODISCARD BoxModernPath LastLeafBox() const noexcept;
 
   private:
@@ -312,14 +315,17 @@ namespace krys::boo::inline_iterator
     {
       return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.HasEllipsis(); });
     }
+
     enum class AdjustedForSelection : bool
     {
       No,
       Yes,
     };
+
     /// @brief The ellipsis' rect; adjusted for selection, it spans the line's selection height.
     KRYS_NODISCARD FloatRect
       EllipsisVisualRect(AdjustedForSelection adjustedForSelection = AdjustedForSelection::No) const noexcept;
+
     /// @brief Whether the selection covers the ellipsis' truncation point.
     KRYS_NODISCARD RenderObjectHighlightState EllipsisSelectionState() const noexcept;
 
@@ -363,13 +369,16 @@ namespace krys::boo::inline_iterator
 
     // Text-relative left/right
     KRYS_NODISCARD LeafBoxIterator LineLeftmostLeafBox() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator LineRightmostLeafBox() const noexcept;
 
     // Coordinate-relative left/right
     KRYS_NODISCARD LeafBoxIterator LogicalLeftmostLeafBox() const noexcept;
+
     KRYS_NODISCARD LeafBoxIterator LogicalRightmostLeafBox() const noexcept;
 
     KRYS_NODISCARD LineBoxIterator Next() const noexcept;
+
     KRYS_NODISCARD LineBoxIterator Previous() const noexcept;
 
     KRYS_NODISCARD size_t LineIndex() const noexcept
@@ -413,6 +422,7 @@ namespace krys::boo::inline_iterator
     }
 
     LineBoxIterator &TraverseNext() noexcept;
+
     LineBoxIterator &TraversePrevious() noexcept;
 
     KRYS_NODISCARD explicit operator bool() const noexcept
@@ -447,11 +457,14 @@ namespace krys::boo::inline_iterator
   };
 
   KRYS_NODISCARD LineBoxIterator FirstLineBoxFor(const RenderBlockFlow &flow) noexcept;
+
   KRYS_NODISCARD LineBoxIterator LastLineBoxFor(const RenderBlockFlow &flow) noexcept;
+
   KRYS_NODISCARD LineBoxIterator LineBoxFor(const layout_integration::InlineContent &inlineContent,
                                             size_t lineIndex) noexcept;
 
   KRYS_NODISCARD float PreviousLineBoxContentBottomOrBorderAndPadding(const LineBox &lineBox) noexcept;
+
   KRYS_NODISCARD float ContentStartInBlockDirection(const LineBox &lineBox) noexcept;
 
   /// @brief The leaf box on @p lineBox nearest @p horizontalPosition (logical, in the formatting context

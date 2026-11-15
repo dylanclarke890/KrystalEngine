@@ -13,7 +13,7 @@ C++ game engine (latest standard, CMake + vcpkg). Each module has its own `CMake
 - **Class layout**, where it fits: friends, private aliases, copy/move macros; then `private:` data members (brace-initialised); then `public:` constructors and destructor, then the public interface; then private helpers. `struct` for all-public policy, trait and plain-data types.
 - **Files:** UTF-8 with BOM, kept when rewriting; LF line endings (`.gitattributes` enforces this). Headers: the original copyright notice for ported files (verbatim), `#pragma once`, project includes (`"Krystal.Core/..."`), then std headers. Third-party sources outside vcpkg go in `third-party/`, included with `<...>`.
 - **Comments:** Doxygen `///` with `@brief` (plus `@param`/`@return`/`@note` where they add something); `//` for implementation notes. Open work is a plain `// FIXME:`, never `TODO`.
-- **Formatting** is `.clang-format`'s: run Visual Studio's `C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/Llvm/x64/bin/clang-format.exe -i <files>` on code files only, never by hand.
+- **Formatting** is `.clang-format`'s: run Visual Studio's `C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/Llvm/x64/bin/clang-format.exe -i <files>` on code files only, never by hand. It can't enforce these, so keep them by hand: a blank line between a function declaration and the declarations next to it (a doc comment stays with its declaration), and around an enum definition; runs of forward declarations sorted by name; a blank line after `#pragma region` and before `#pragma endregion`. If it adds a lone `,` line to an enum in a file with `#if`/`#else` (it adds the trailing comma once per branch), delete it.
 
 ## Building and testing
 

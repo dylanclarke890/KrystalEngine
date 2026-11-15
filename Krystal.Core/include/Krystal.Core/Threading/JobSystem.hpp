@@ -57,11 +57,13 @@ namespace krys
     /// before it stops.
     explicit JobSystem(Maybe<uint32> workerCount = null, utf8_stringview name = u8"Worker",
                        std::chrono::milliseconds extraWorkerIdleTimeout = std::chrono::seconds(10)) noexcept;
+
     /// @brief Stops taking jobs, lets the Normal jobs already queued run, destroys the Background ones unrun,
     /// and waits for the workers to finish.
     ~JobSystem() noexcept override;
 
     using WorkQueue::Dispatch;
+
     /// @brief Runs @p job on a worker. While the system is shutting down, the job is destroyed unrun.
     void Dispatch(MoveOnlyFunc<void()> job, JobTraits traits = {}) noexcept override;
 
@@ -80,9 +82,11 @@ namespace krys
   private:
     /// @brief Starts a worker; under the lock.
     void StartWorker() noexcept;
+
     /// @brief What each worker runs: the next job, until the system stops and no Normal job is left, or the
     /// worker is an extra one left idle.
     void RunWorker() noexcept;
+
     /// @brief Whether more workers run than the pool's count and the jobs that may block need; under the
     /// lock.
     KRYS_NODISCARD bool HasSpareWorker() const noexcept;

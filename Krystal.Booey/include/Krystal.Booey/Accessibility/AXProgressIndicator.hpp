@@ -36,13 +36,18 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<AXProgressIndicator> Create(AXId id, RenderObject &renderer,
                                                           AXObjectCache &cache) noexcept;
+
     KRYS_NODISCARD static Ref<AXProgressIndicator> Create(AXId id, dom::Element &element,
                                                           AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD bool IsIndeterminate() const noexcept override;
+
     KRYS_NODISCARD float ValueForRange() const noexcept override;
+
     KRYS_NODISCARD float MaxValueForRange() const noexcept override;
+
     KRYS_NODISCARD float MinValueForRange() const noexcept override;
+
     KRYS_NODISCARD dom::DOMString ValueDescription() const noexcept override;
 
   private:
@@ -56,6 +61,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD html::HTMLProgressElement *ProgressElement() const noexcept;
+
     KRYS_NODISCARD html::HTMLMeterElement *MeterElement() const noexcept;
   };
 }

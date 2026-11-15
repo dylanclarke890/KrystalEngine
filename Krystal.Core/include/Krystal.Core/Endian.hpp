@@ -10,6 +10,7 @@ namespace krys
   class Endian
   {
     Endian() = delete;
+
     ~Endian() = delete;
 
   public:

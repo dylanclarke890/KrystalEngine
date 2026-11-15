@@ -37,9 +37,9 @@ namespace krys::boo
   class CachedImage;
   class CachedResourceLoader;
   class GraphicsContext;
-  struct ResourceLoaderOptions;
   class RenderElement;
   class RenderStyle;
+  struct ResourceLoaderOptions;
 
   /// @brief An opaque pointer identifying the image data behind a style image.
   using WrappedImagePtr = const void *;
@@ -83,6 +83,7 @@ namespace krys::boo
 
     // Loading.
     KRYS_NODISCARD virtual bool IsPending() const noexcept = 0;
+
     virtual void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept = 0;
 
     KRYS_NODISCARD virtual bool ErrorOccurred() const noexcept
@@ -107,12 +108,16 @@ namespace krys::boo
 
     // Clients.
     virtual void AddClient(RenderElement &) noexcept = 0;
+
     virtual void RemoveClient(RenderElement &) noexcept = 0;
+
     KRYS_NODISCARD virtual bool HasClient(RenderElement &) const noexcept = 0;
 
     // Size / scale.
     KRYS_NODISCARD virtual bool UsesImageContainerSize() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool ImageHasRelativeWidth() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool ImageHasRelativeHeight() const noexcept = 0;
 
     KRYS_NODISCARD virtual float ImageScaleFactor() const noexcept

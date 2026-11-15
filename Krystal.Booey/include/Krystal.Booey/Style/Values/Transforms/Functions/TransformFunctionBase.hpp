@@ -114,6 +114,7 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD Maybe<Type> SharedPrimitiveType(Type other) const noexcept;
+
       KRYS_NODISCARD Maybe<Type> SharedPrimitiveType(const TransformFunctionBase *other) const noexcept;
 
       KRYS_NODISCARD virtual bool IsIdentity() const noexcept = 0;

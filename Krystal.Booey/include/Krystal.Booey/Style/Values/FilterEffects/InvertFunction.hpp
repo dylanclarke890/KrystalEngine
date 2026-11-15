@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::Invert ToCSSInvert(const BasicComponentTransferFilterOperation &,
                                            const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::Invert &,
                                                               const BuilderState &) noexcept;
   }

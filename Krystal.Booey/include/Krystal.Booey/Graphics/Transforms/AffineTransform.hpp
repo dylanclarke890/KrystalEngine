@@ -79,9 +79,11 @@ namespace krys::boo
 
     // Rounds the mapped point to the nearest integer value.
     KRYS_NODISCARD IntPoint MapPoint(const IntPoint &point) const noexcept;
+
     KRYS_NODISCARD FloatPoint MapPoint(const FloatPoint &point) const noexcept;
 
     KRYS_NODISCARD IntSize MapSize(const IntSize &size) const noexcept;
+
     KRYS_NODISCARD FloatSize MapSize(const FloatSize &size) const noexcept;
 
     // Rounds the resulting mapped rectangle out. This is helpful for bounding
@@ -89,6 +91,7 @@ namespace krys::boo
     KRYS_NODISCARD IntRect MapRect(const IntRect &rect) const noexcept;
 
     KRYS_NODISCARD FloatRect MapRect(const FloatRect &rect) const noexcept;
+
     KRYS_NODISCARD FloatQuad MapQuad(const FloatQuad &quad) const noexcept;
 
     KRYS_NODISCARD Region MapRegion(const Region &region) const noexcept;
@@ -158,31 +161,49 @@ namespace krys::boo
     void MakeIdentity() noexcept;
 
     AffineTransform &Multiply(const AffineTransform &other) noexcept;
+
     AffineTransform &Scale(double s) noexcept;
+
     AffineTransform &Scale(double sx, double sy) noexcept;
+
     // Same as Scale(sx, sy).
     AffineTransform &ScaleNonUniform(double sx, double sy) noexcept;
+
     AffineTransform &Scale(const FloatSize &s) noexcept;
+
     AffineTransform &Rotate(double angleInDegrees) noexcept;
+
     AffineTransform &RotateRadians(double angle) noexcept;
+
     AffineTransform &RotateFromVector(double x, double y) noexcept;
+
     AffineTransform &Translate(double tx, double ty) noexcept;
+
     AffineTransform &Translate(const FloatPoint &t) noexcept;
+
     AffineTransform &Translate(const FloatSize &t) noexcept;
+
     AffineTransform &Shear(double sx, double sy) noexcept;
+
     AffineTransform &FlipX() noexcept;
+
     AffineTransform &FlipY() noexcept;
+
     AffineTransform &Skew(double angleX, double angleY) noexcept;
+
     AffineTransform &SkewX(double angle) noexcept;
+
     AffineTransform &SkewY(double angle) noexcept;
 
     // These functions get the length of an axis-aligned unit vector
     // once it has been mapped through the transform
     KRYS_NODISCARD double XScale() const noexcept;
+
     KRYS_NODISCARD double YScale() const noexcept;
 
     // If you call this, you're probably doing it wrong.
     KRYS_NODISCARD bool IsInvertible() const noexcept;
+
     KRYS_NODISCARD Maybe<AffineTransform> Inverse() const noexcept;
 
     void Blend(const AffineTransform &from, double progress,
@@ -257,6 +278,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static AffineTransform MakeRotation(double angleInDegrees, FloatPoint center) noexcept;
+
     KRYS_NODISCARD static AffineTransform MakeRotation(double angleInDegrees) noexcept;
 
     // decompose the matrix into its component parts
@@ -274,6 +296,7 @@ namespace krys::boo
     };
 
     bool Decompose(DecomposedType &decomp) const noexcept;
+
     void Recompose(const DecomposedType &decomp) noexcept;
   };
 

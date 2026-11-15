@@ -41,6 +41,7 @@ namespace krys::boo::dom
 
   public:
     explicit BeforeTextInsertedEvent(DOMStringView text) noexcept;
+
     ~BeforeTextInsertedEvent() noexcept override;
 
     KRYS_NODISCARD static Ref<BeforeTextInsertedEvent> Create(DOMStringView text) noexcept;

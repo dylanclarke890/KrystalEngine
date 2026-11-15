@@ -39,9 +39,9 @@
 
 namespace krys::boo
 {
+  struct BorderValue;
   class RenderTableCell;
   class RenderTableRow;
-  struct BorderValue;
 
   enum class CollapsedBorderSide : uint8
   {
@@ -66,7 +66,9 @@ namespace krys::boo
 
   public:
     void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
+
     void PaintObject(PaintInfo &, const LayoutPoint &) noexcept final;
+
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction action) noexcept final;
@@ -142,27 +144,37 @@ namespace krys::boo
 
   public:
     RenderTableSection(dom::Element &element, RenderStyle &&style) noexcept;
+
     RenderTableSection(dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderTableSection() noexcept override;
 
     KRYS_NODISCARD RenderTableRow *FirstRow() const noexcept;
+
     KRYS_NODISCARD RenderTableRow *LastRow() const noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override;
+
     KRYS_NODISCARD Maybe<LayoutUnit> LastLineBaseline() const noexcept override;
+
     KRYS_NODISCARD Maybe<LayoutUnit> BaselineFromCellContentEdges(ItemPosition alignment) const noexcept;
 
     void AddCell(RenderTableCell *cell, RenderTableRow *row) noexcept;
 
     KRYS_NODISCARD LayoutUnit CalcRowLogicalHeight() noexcept;
+
     void LayoutRows() noexcept;
+
     void ComputeOverflowFromCells() noexcept;
 
     KRYS_NODISCARD RenderTable *Table() const noexcept;
 
     KRYS_NODISCARD const BorderValue &BorderAdjoiningTableStart() const noexcept;
+
     KRYS_NODISCARD const BorderValue &BorderAdjoiningTableEnd() const noexcept;
+
     KRYS_NODISCARD const BorderValue &BorderAdjoiningStartCell(const RenderTableCell &cell) const noexcept;
+
     KRYS_NODISCARD const BorderValue &BorderAdjoiningEndCell(const RenderTableCell &cell) const noexcept;
 
     KRYS_NODISCARD CellStruct &CellAt(uint32 row, uint32 col) noexcept
@@ -190,10 +202,13 @@ namespace krys::boo
     }
 
     void AppendColumn(uint32 pos) noexcept;
+
     void SplitColumn(uint32 pos, uint32 first) noexcept;
 
     KRYS_NODISCARD LayoutUnit CalcBlockDirectionOuterBorder(BlockBorderSide side) const noexcept;
+
     KRYS_NODISCARD LayoutUnit CalcInlineDirectionOuterBorder(InlineBorderSide side) const noexcept;
+
     void RecalcOuterBorder() noexcept;
 
     KRYS_NODISCARD LayoutUnit OuterBorderBefore() const noexcept
@@ -217,8 +232,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit OuterBorderLeft(WritingMode writingMode) const noexcept;
+
     KRYS_NODISCARD LayoutUnit OuterBorderRight(WritingMode writingMode) const noexcept;
+
     KRYS_NODISCARD LayoutUnit OuterBorderTop(WritingMode writingMode) const noexcept;
+
     KRYS_NODISCARD LayoutUnit OuterBorderBottom(WritingMode writingMode) const noexcept;
 
     KRYS_NODISCARD uint32 NumRows() const noexcept
@@ -228,6 +246,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD uint32 NumColumns() const noexcept;
+
     void RecalcCells() noexcept;
 
     void RecalcCellsIfNeeded() noexcept
@@ -256,9 +275,12 @@ namespace krys::boo
     void RowLogicalHeightChanged(uint32 rowIndex) noexcept;
 
     void ClearCachedCollapsedBorders() noexcept;
+
     void RemoveCachedCollapsedBorders(const RenderTableCell &cell) noexcept;
+
     void SetCachedCollapsedBorder(const RenderTableCell &cell, CollapsedBorderSide side,
                                   CollapsedBorderValue border) noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue CachedCollapsedBorder(const RenderTableCell &cell,
                                                               CollapsedBorderSide side) const noexcept;
 
@@ -269,10 +291,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD CellSpan FullTableRowSpan() const noexcept;
+
     KRYS_NODISCARD CellSpan FullTableColumnSpan() const noexcept;
+
     /// @brief The rows and columns @p damageRect (aligned with the table's rows and columns) reaches, and
     /// those whose borders may reach into it.
     KRYS_NODISCARD CellSpan DirtiedRows(const LayoutRect &damageRect) const noexcept;
+
     KRYS_NODISCARD CellSpan DirtiedColumns(const LayoutRect &damageRect) const noexcept;
 
     enum ShouldIncludeAllIntersectingCells
@@ -283,6 +308,7 @@ namespace krys::boo
 
     KRYS_NODISCARD CellSpan SpannedRows(const LayoutRect &flippedRect,
                                         ShouldIncludeAllIntersectingCells shouldInclude) const noexcept;
+
     KRYS_NODISCARD CellSpan SpannedColumns(const LayoutRect &flippedRect,
                                            ShouldIncludeAllIntersectingCells shouldInclude) const noexcept;
 
@@ -309,7 +335,9 @@ namespace krys::boo
 
   private:
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
     void WillBeRemovedFromTree() noexcept override;
+
     void Layout() noexcept override;
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
@@ -319,20 +347,26 @@ namespace krys::boo
     void EnsureRows(uint32 numRows) noexcept;
 
     void PaintCell(RenderTableCell *cell, PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+
     void PaintRowGroupBorder(const PaintInfo &paintInfo, bool antialias, LayoutRect rect, BoxSide side,
                              css::PropertyId borderColor, BorderStyle borderStyle,
                              BorderStyle tableBorderStyle) noexcept;
+
     void PaintRowGroupBorderIfRequired(const PaintInfo &paintInfo, const LayoutPoint &paintOffset, uint32 row,
                                        uint32 column, BoxSide borderSide,
                                        RenderTableCell *cell = nullptr) noexcept;
+
     KRYS_NODISCARD LayoutUnit OffsetLeftForRowGroupBorder(RenderTableCell *cell,
                                                           const LayoutRect &rowGroupRect,
                                                           uint32 row) noexcept;
+
     KRYS_NODISCARD LayoutUnit OffsetTopForRowGroupBorder(RenderTableCell *cell, BoxSide borderSide,
                                                          uint32 row) noexcept;
+
     KRYS_NODISCARD LayoutUnit VerticalRowGroupBorderHeight(RenderTableCell *cell,
                                                            const LayoutRect &rowGroupRect,
                                                            uint32 row) noexcept;
+
     KRYS_NODISCARD LayoutUnit HorizontalRowGroupBorderWidth(RenderTableCell *cell,
                                                             const LayoutRect &rowGroupRect, uint32 row,
                                                             uint32 column) noexcept;
@@ -341,13 +375,16 @@ namespace krys::boo
 
     void DistributeExtraLogicalHeightToPercentRows(LayoutUnit &extraLogicalHeight,
                                                    int32 totalPercent) noexcept;
+
     void DistributeExtraLogicalHeightToAutoRows(LayoutUnit &extraLogicalHeight,
                                                 uint32 autoRowsCount) noexcept;
+
     void DistributeRemainingExtraLogicalHeight(LayoutUnit &extraLogicalHeight) noexcept;
 
     void ComputeOverflowFromCells(uint32 totalRows, uint32 nEffCols) noexcept;
 
     void SetLogicalPositionForCell(RenderTableCell *cell, uint32 effectiveColumn) const noexcept;
+
     KRYS_NODISCARD LayoutUnit CellLogicalWidthInTableDirectionIncludingColumnSpan(
       const RenderTableCell &cell, size_t startColumn, size_t numberOfColumns) const noexcept;
   };

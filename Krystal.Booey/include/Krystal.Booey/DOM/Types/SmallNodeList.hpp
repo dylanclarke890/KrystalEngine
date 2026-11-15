@@ -5,8 +5,8 @@
 
 namespace krys::boo::dom
 {
-  class Node;
   class Element;
+  class Node;
   class Text;
 
   /// @brief Covers 99.5%. See webkit.org/b/80706

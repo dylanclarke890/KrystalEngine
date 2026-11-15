@@ -46,16 +46,17 @@ namespace krys::boo::css::calc
 
 namespace krys::boo::css
 {
-  class SymbolTable;
-  class ToLengthConversionData;
   struct ComputedStyleDependencies;
   struct NoConversionDataRequiredTag;
+  class SymbolTable;
+  class ToLengthConversionData;
 
   enum class Category : uint8;
 
   // Type-erased helpers to allow for shared code.
 
   void UnevaluatedCalcRef(calc::Value *) noexcept;
+
   void UnevaluatedCalcDeref(calc::Value *) noexcept;
 
   // `UnevaluatedCalc` annotates a `calc::Value` with the raw value type that it
@@ -69,31 +70,43 @@ namespace krys::boo::css
 
   public:
     UnevaluatedCalcBase(calc::Value &) noexcept;
+
     UnevaluatedCalcBase(Ref<calc::Value> &&) noexcept;
 
     UnevaluatedCalcBase(const UnevaluatedCalcBase &) noexcept;
+
     UnevaluatedCalcBase(UnevaluatedCalcBase &&) noexcept;
+
     UnevaluatedCalcBase &operator=(const UnevaluatedCalcBase &) noexcept;
+
     UnevaluatedCalcBase &operator=(UnevaluatedCalcBase &&) noexcept;
+
     ~UnevaluatedCalcBase() noexcept;
 
     KRYS_NODISCARD Ref<calc::Value> ProtectedCalc() const noexcept;
+
     KRYS_NODISCARD calc::Value &LeakRef() noexcept;
 
     KRYS_NODISCARD bool RequiresConversionData() const noexcept;
 
     void SerialisationForCSS(StringBuilder &, const SerialisationContext &) const noexcept;
+
     void CollectComputedStyleDependencies(ComputedStyleDependencies &) const noexcept;
 
     KRYS_NODISCARD UnevaluatedCalcBase SimplifyBase(const ToLengthConversionData &,
                                                     const SymbolTable &) const noexcept;
 
     KRYS_NODISCARD double Evaluate(Category, const style::BuilderState &) const noexcept;
+
     KRYS_NODISCARD double Evaluate(Category, const style::BuilderState &, const SymbolTable &) const noexcept;
+
     KRYS_NODISCARD double Evaluate(Category, const ToLengthConversionData &) const noexcept;
+
     KRYS_NODISCARD double Evaluate(Category, const ToLengthConversionData &,
                                    const SymbolTable &) const noexcept;
+
     KRYS_NODISCARD double Evaluate(Category, NoConversionDataRequiredTag) const noexcept;
+
     KRYS_NODISCARD double Evaluate(Category, NoConversionDataRequiredTag, const SymbolTable &) const noexcept;
 
     KRYS_NODISCARD bool Equal(const UnevaluatedCalcBase &) const noexcept;

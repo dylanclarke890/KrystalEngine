@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::HueRotate ToCSSHueRotate(const BasicColorMatrixFilterOperation &,
                                                  const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::HueRotate &,
                                                               const BuilderState &) noexcept;
   }

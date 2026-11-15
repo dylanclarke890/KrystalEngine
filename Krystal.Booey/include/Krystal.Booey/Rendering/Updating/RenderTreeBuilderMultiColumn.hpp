@@ -47,21 +47,26 @@ namespace krys::boo
 
     /// @brief Makes or removes @p flow's multi-column flow, as its style asks for columns or not.
     void UpdateAfterDescendants(RenderBlockFlow &flow) noexcept;
+
     /// @brief Some renderers (column spanners) are moved out of the flow to live among column sets. If
     /// @p beforeChild is such a renderer, resolves it to the placeholder that lives at its original place in
     /// the tree.
     KRYS_NODISCARD RenderObject *ResolveMovedChild(RenderFragmentedFlow &enclosingFragmentedFlow,
                                                    RenderObject *beforeChild) noexcept;
+
     /// @brief Moves the spanners whose placeholders are in @p container back to their placeholders.
     void RestoreColumnSpannersForContainer(RenderMultiColumnFlow &multiColumnFlow,
                                            const RenderElement &container) noexcept;
+
     /// @brief Moves out any spanners in @p newDescendant's subtree, just inserted into @p flow, and makes the
     /// column sets it needs.
     void MultiColumnDescendantInserted(RenderMultiColumnFlow &flow, RenderObject &newDescendant) noexcept;
+
     /// @brief Forgets @p relative, a child of @p flow's container about to be removed: a placeholder, or a
     /// spanner (merging the sets either side of it).
     void MultiColumnRelativeWillBeRemoved(RenderMultiColumnFlow &flow, RenderObject &relative,
                                           CanCollapseAnonymousBlock canCollapseAnonymousBlock) noexcept;
+
     /// @brief The placeholder of @p beforeChild, a spanner just before a column set; @p beforeChild
     /// otherwise.
     KRYS_NODISCARD static RenderObject *
@@ -69,9 +74,12 @@ namespace krys::boo
 
   private:
     void CreateFragmentedFlow(RenderBlockFlow &flow) noexcept;
+
     void DestroyFragmentedFlow(RenderBlockFlow &flow) noexcept;
+
     RenderObject *ProcessPossibleSpannerDescendant(RenderMultiColumnFlow &flow, RenderObject *&subtreeRoot,
                                                    RenderObject &descendant) noexcept;
+
     void HandleSpannerRemoval(RenderMultiColumnFlow &flow, RenderObject &spanner,
                               CanCollapseAnonymousBlock canCollapseAnonymousBlock) noexcept;
   };

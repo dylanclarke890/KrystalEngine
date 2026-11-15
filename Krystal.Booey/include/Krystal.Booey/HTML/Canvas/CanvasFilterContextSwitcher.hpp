@@ -54,6 +54,7 @@ namespace krys::boo::html
                                                                         const FloatRect &bounds) noexcept;
 
     explicit CanvasFilterContextSwitcher(CanvasRenderingContext2DBase &) noexcept;
+
     ~CanvasFilterContextSwitcher() noexcept;
 
     /// @brief The bounds drawn within, with the filter's outsets.

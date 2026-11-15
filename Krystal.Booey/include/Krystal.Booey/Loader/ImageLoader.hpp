@@ -169,16 +169,20 @@ namespace krys::boo
     virtual void DispatchLoadEvent() noexcept = 0;
 
     void UpdatedHasPendingEvent() noexcept;
+
     void DidUpdateCachedImage(RelevantMutation relevantMutation,
                               CachedResourceHandle<CachedImage> &&newImage) noexcept;
 
     void DispatchPendingLoadEvent() noexcept;
+
     void DispatchPendingErrorEvent() noexcept;
 
     KRYS_NODISCARD RenderImageResource *GetRenderImageResource() noexcept;
+
     void UpdateRenderer() noexcept;
 
     void ClearImageWithoutConsideringPendingLoadEvent() noexcept;
+
     void ClearFailedLoadURL() noexcept;
 
     void TimerFired() noexcept;
@@ -189,7 +193,9 @@ namespace krys::boo
 
     /// @brief Decodes the loaded image for the waiting `decode()` promises, settling them once it's decoded.
     void DecodeImage() noexcept;
+
     void ResolveDecodePromises() noexcept;
+
     void RejectDecodePromises(utf8_stringview message) noexcept;
   };
 }

@@ -44,5 +44,6 @@ namespace krys::boo::html
   };
 
   KRYS_NODISCARD DestinationColorSpace ToDestinationColorSpace(PredefinedColorSpace) noexcept;
+
   KRYS_NODISCARD Maybe<PredefinedColorSpace> ToPredefinedColorSpace(const DestinationColorSpace &) noexcept;
 }

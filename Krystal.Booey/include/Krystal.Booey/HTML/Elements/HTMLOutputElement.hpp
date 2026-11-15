@@ -51,6 +51,7 @@ namespace krys::boo::html
     }
 
     HTMLOutputElement(dom::Document &document) noexcept;
+
     ~HTMLOutputElement() noexcept override;
 
 #pragma region HTMLOutputElement - https://html.spec.whatwg.org/#htmloutputelement

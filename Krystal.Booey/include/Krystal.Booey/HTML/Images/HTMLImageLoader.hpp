@@ -31,10 +31,12 @@ namespace krys::boo::html
   {
   public:
     explicit HTMLImageLoader(dom::Element &element) noexcept;
+
     ~HTMLImageLoader() noexcept override;
 
   private:
     void DispatchLoadEvent() noexcept override;
+
     void NotifyFinished(CachedResource &resource) noexcept override;
   };
 }

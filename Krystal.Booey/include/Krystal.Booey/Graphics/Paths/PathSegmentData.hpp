@@ -48,10 +48,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -71,10 +73,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -95,10 +99,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -120,10 +126,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -145,10 +153,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -173,10 +183,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -197,10 +209,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -227,10 +241,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -251,10 +267,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
   };
@@ -270,10 +288,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
   };
@@ -296,10 +316,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
   };
@@ -317,10 +339,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
   };
@@ -371,10 +395,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -399,10 +425,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -425,10 +453,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -451,10 +481,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -473,10 +505,12 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
+
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
 
@@ -489,20 +523,36 @@ namespace krys::boo
 namespace krys::boo
 {
   TextStream &operator<<(TextStream &ts, const PathMoveTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathLineTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathQuadCurveTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathBezierCurveTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathArcTo &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathArc &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathClosedArc &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathEllipse &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathEllipseInRect &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathRect &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathRoundedRect &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathContinuousRoundedRect &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathDataLine &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathDataQuadCurve &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathDataBezierCurve &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathDataArc &data) noexcept;
+
   TextStream &operator<<(TextStream &ts, const PathCloseSubpath &data) noexcept;
 }

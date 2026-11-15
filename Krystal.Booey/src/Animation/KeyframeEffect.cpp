@@ -900,7 +900,9 @@ namespace krys::boo
   }
 
   KeyframeEffect::ParsedKeyframe::~ParsedKeyframe() noexcept = default;
+
   KeyframeEffect::ParsedKeyframe::ParsedKeyframe(ParsedKeyframe &&) noexcept = default;
+
   KeyframeEffect::ParsedKeyframe &
     KeyframeEffect::ParsedKeyframe::operator=(ParsedKeyframe &&) noexcept = default;
 

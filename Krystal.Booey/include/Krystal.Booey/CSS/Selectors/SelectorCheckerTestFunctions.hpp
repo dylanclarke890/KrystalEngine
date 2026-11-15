@@ -47,12 +47,16 @@ namespace krys::boo::css
 
   /// @brief Whether @p element's document is focused and active (its window has system focus).
   KRYS_NODISCARD bool IsFrameFocused(const dom::Element &element) noexcept;
+
   /// @see https://drafts.csswg.org/selectors/#focus-pseudo
   KRYS_NODISCARD bool MatchesFocusPseudoClass(const dom::Element &element) noexcept;
+
   /// @see https://drafts.csswg.org/selectors/#focus-visible-pseudo
   KRYS_NODISCARD bool MatchesFocusVisiblePseudoClass(const dom::Element &element) noexcept;
+
   /// @see https://drafts.csswg.org/selectors/#focus-within-pseudo
   KRYS_NODISCARD bool MatchesFocusWithinPseudoClass(const dom::Element &element) noexcept;
+
   /// @see https://html.spec.whatwg.org/#selector-default
   KRYS_NODISCARD bool MatchesDefaultPseudoClass(const dom::Element &element) noexcept;
 

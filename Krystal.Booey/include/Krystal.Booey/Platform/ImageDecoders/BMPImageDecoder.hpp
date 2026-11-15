@@ -61,7 +61,9 @@ namespace krys::boo
     }
 
     void SetData(const SharedBuffer &data, bool allDataReceived) noexcept final;
+
     ScalableImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept final;
+
     // CAUTION: setFailed() deletes |m_reader|. Be careful to avoid
     // accessing deleted memory, especially when calling this from inside
     // BMPImageReader!

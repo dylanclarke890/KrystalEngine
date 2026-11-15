@@ -56,26 +56,33 @@ namespace krys::boo::html
     /// @brief Image data sharing @p pixelBuffer's bytes.
     KRYS_NODISCARD static Ref<ImageData> Create(Ref<ByteArrayPixelBuffer> &&pixelBuffer,
                                                 Maybe<ImageDataPixelFormat> = {}) noexcept;
+
     KRYS_NODISCARD static RefPtr<ImageData> Create(Ref<PixelBuffer> &&pixelBuffer,
                                                    Maybe<ImageDataPixelFormat> = {}) noexcept;
+
     KRYS_NODISCARD static RefPtr<ImageData> Create(RefPtr<ByteArrayPixelBuffer> &&pixelBuffer,
                                                    Maybe<ImageDataPixelFormat> = {}) noexcept;
+
     /// @brief Transparent black image data of @p size; null if it's too big.
     KRYS_NODISCARD static RefPtr<ImageData>
       Create(const IntSize &size, PredefinedColorSpace,
              ImageDataPixelFormat = ImageDataPixelFormat::RgbaUnorm8) noexcept;
+
     /// @brief Image data of @p size holding @p array; null if it's not as long as @p size's pixels.
     KRYS_NODISCARD static RefPtr<ImageData> Create(const IntSize &size, ImageDataArray &&array,
                                                    PredefinedColorSpace) noexcept;
+
     /// @brief `new ImageData(sw, sh, settings)` in @p defaultColorSpace, a copy of @p bytes or transparent
     /// black when it's empty.
     KRYS_NODISCARD static dom::ExceptionOr<Ref<ImageData>> Create(uint32 sw, uint32 sh,
                                                                   PredefinedColorSpace defaultColorSpace,
                                                                   Maybe<ImageDataSettings> = {},
                                                                   Span<const uint8> bytes = {}) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-imagedata
     KRYS_NODISCARD static dom::ExceptionOr<Ref<ImageData>> Create(uint32 sw, uint32 sh,
                                                                   Maybe<ImageDataSettings>) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-imagedata-with-data
     KRYS_NODISCARD static dom::ExceptionOr<Ref<ImageData>>
       Create(ImageDataArray &&, uint32 sw, Maybe<uint32> sh, Maybe<ImageDataSettings>) noexcept;
@@ -118,10 +125,12 @@ namespace krys::boo::html
 
     /// @brief A pixel buffer sharing the pixels.
     KRYS_NODISCARD Ref<ByteArrayPixelBuffer> GetByteArrayPixelBuffer() const noexcept;
+
     KRYS_NODISCARD Ref<PixelBuffer> GetPixelBuffer() const noexcept;
 
   private:
     ImageData(const IntSize &, ImageDataArray &&, PredefinedColorSpace) noexcept;
+
     ImageData(const IntSize &, ImageDataArray &&, PredefinedColorSpace, Maybe<ImageDataPixelFormat>) noexcept;
   };
 

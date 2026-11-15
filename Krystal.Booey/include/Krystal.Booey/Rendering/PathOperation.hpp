@@ -127,6 +127,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<ReferencePathOperation>
       Create(const style::URL &, const css::CSSOMStringAtom &fragment, const svg::SVGElement *) noexcept;
+
     KRYS_NODISCARD static Ref<ReferencePathOperation> Create(Maybe<Path> &&) noexcept;
 
     KRYS_NODISCARD Ref<PathOperation> Clone() const noexcept override;
@@ -156,6 +157,7 @@ namespace krys::boo
   private:
     ReferencePathOperation(const style::URL &, const css::CSSOMStringAtom &fragment,
                            const svg::SVGElement *) noexcept;
+
     explicit ReferencePathOperation(Maybe<Path> &&) noexcept;
   };
 
@@ -172,6 +174,7 @@ namespace krys::boo
     KRYS_NODISCARD Ref<PathOperation> Clone() const noexcept override;
 
     KRYS_NODISCARD bool CanBlend(const PathOperation &) const noexcept override;
+
     KRYS_NODISCARD RefPtr<PathOperation> Blend(const PathOperation *,
                                                const BlendingContext &) const noexcept override;
 
@@ -231,6 +234,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<RayPathOperation> Create(style::RayFunction &&,
                                                        CSSBoxType = CSSBoxType::BoxMissing) noexcept;
+
     KRYS_NODISCARD static Ref<RayPathOperation> Create(const style::RayFunction &,
                                                        CSSBoxType = CSSBoxType::BoxMissing) noexcept;
 
@@ -242,6 +246,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool CanBlend(const PathOperation &) const noexcept override;
+
     KRYS_NODISCARD RefPtr<PathOperation> Blend(const PathOperation *,
                                                const BlendingContext &) const noexcept override;
 

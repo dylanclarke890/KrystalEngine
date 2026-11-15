@@ -46,6 +46,7 @@ namespace krys::boo
       No,
       Yes,
     };
+
     enum class ShouldAlwaysIssueFullRepaint : uint8
     {
       No,

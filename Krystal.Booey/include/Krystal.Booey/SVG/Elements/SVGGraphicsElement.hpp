@@ -53,13 +53,16 @@ namespace krys::boo::svg
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGraphicsElement__getCTM
     KRYS_NODISCARD Ref<SVGMatrix> GetCTMForBindings() noexcept;
+
     KRYS_NODISCARD AffineTransform GetCTM(StyleUpdateStrategy = AllowStyleUpdate) noexcept override;
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGraphicsElement__getScreenCTM
     KRYS_NODISCARD Ref<SVGMatrix> GetScreenCTMForBindings() noexcept;
+
     KRYS_NODISCARD AffineTransform GetScreenCTM(StyleUpdateStrategy = AllowStyleUpdate) noexcept override;
 
     KRYS_NODISCARD SVGElement *NearestViewportElement() const noexcept override;
+
     KRYS_NODISCARD SVGElement *FarthestViewportElement() const noexcept override;
 
     KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(CTMScope mode) const noexcept override
@@ -68,6 +71,7 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD AffineTransform AnimatedLocalTransform() const noexcept override;
+
     KRYS_NODISCARD AffineTransform *EnsureSupplementalTransform() noexcept override;
 
     KRYS_NODISCARD AffineTransform *SupplementalTransform() const noexcept override
@@ -82,6 +86,7 @@ namespace krys::boo::svg
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGraphicsElement__getBBox
     KRYS_NODISCARD Ref<SVGRect> GetBBoxForBindings() noexcept;
+
     KRYS_NODISCARD FloatRect GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept override;
 
     KRYS_NODISCARD bool ShouldIsolateBlending() const noexcept
@@ -96,6 +101,7 @@ namespace krys::boo::svg
 
     // "base class" methods for all the elements which render as paths
     KRYS_NODISCARD virtual Path ToClipPath() noexcept;
+
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGGraphicsElement, SVGElement, SVGTests>;
@@ -117,6 +123,7 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
   };
 }

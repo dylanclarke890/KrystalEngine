@@ -56,6 +56,7 @@ namespace krys::boo::layout
 
   public:
     BlockFormattingState(LayoutState &layoutState, const ElementBox &blockFormattingContextRoot) noexcept;
+
     ~BlockFormattingState() noexcept;
 
     KRYS_NODISCARD const PlacedFloats &GetPlacedFloats() const noexcept

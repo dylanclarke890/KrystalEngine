@@ -48,8 +48,8 @@ namespace krys::boo
   class IntRect;
   class NativeImage;
   class PixelBuffer;
-  class PixelBufferSourceView;
   struct PixelBufferFormat;
+  class PixelBufferSourceView;
 
   /// @brief What an image buffer is made with: its logical size, how many backend pixels a unit has, and what
   /// it's for.
@@ -84,6 +84,7 @@ namespace krys::boo
                                                      RenderingPurpose purpose, float resolutionScale,
                                                      const DestinationColorSpace &colorSpace,
                                                      GraphicsClient *graphicsClient = nullptr) noexcept;
+
     /// @brief An unaccelerated buffer for no purpose in particular, in sRGB.
     KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const FloatSize &size, float resolutionScale) noexcept;
 
@@ -114,18 +115,23 @@ namespace krys::boo
     ~ImageBuffer() noexcept;
 
     KRYS_NODISCARD static IntSize CalculateBackendSize(FloatSize logicalSize, float resolutionScale) noexcept;
+
     KRYS_NODISCARD static ImageBufferBackendParameters BackendParameters(const Parameters &) noexcept;
 
     KRYS_NODISCARD static bool SizeNeedsClamping(const FloatSize &) noexcept;
+
     KRYS_NODISCARD static bool SizeNeedsClamping(const FloatSize &, FloatSize &scale) noexcept;
 
     KRYS_NODISCARD GraphicsContext &Context() const noexcept;
+
     void FlushDrawingContext() noexcept;
+
     /// @brief Flushes what's been drawn without waiting for it to be done; returns whether it was flushed.
     bool FlushDrawingContextAsync() noexcept;
 
     /// @brief Makes what's been drawn ready for the compositor, before it composites.
     void PrepareForDisplay() noexcept;
+
     /// @brief What shows the buffer as a layer's contents; null when it's painted instead.
     KRYS_NODISCARD RefPtr<GraphicsLayerContentsDisplayDelegate> LayerContentsDisplayDelegate() const noexcept;
 
@@ -133,25 +139,32 @@ namespace krys::boo
 
     /// @brief An immutable copy of what's been drawn; null if the backend can't make one.
     KRYS_NODISCARD RefPtr<NativeImage> CopyNativeImage() const noexcept;
+
     /// @brief An image of what's been drawn that may follow later drawing; for uses that end before the next
     /// draw.
     KRYS_NODISCARD RefPtr<NativeImage> CreateNativeImageReference() const noexcept;
+
     /// @brief An image of what's been drawn, as the buffer goes.
     KRYS_NODISCARD RefPtr<NativeImage> SinkIntoNativeImage() noexcept;
+
     KRYS_NODISCARD static RefPtr<NativeImage> SinkIntoNativeImage(RefPtr<ImageBuffer>) noexcept;
 
     /// @brief Reads @p srcRect (in logical units) into a new pixel buffer of @p outputFormat; what's outside
     /// the buffer is transparent black. Null if the pixel buffer can't be made.
     KRYS_NODISCARD RefPtr<PixelBuffer> GetPixelBuffer(const PixelBufferFormat &outputFormat,
                                                       const IntRect &srcRect) const noexcept;
+
     /// @brief What's been drawn, encoded as @p mimeType (PNG, JPEG or WebP; a JPEG is drawn over black) as a
     /// `data:` URL; `data:,` if it can't be.
     KRYS_NODISCARD utf8_string ToDataURL(utf8_stringview mimeType, Maybe<double> quality = {}) const noexcept;
+
     /// @brief What's been drawn, encoded as @p mimeType (PNG, JPEG or WebP; a JPEG is drawn over black);
     /// empty if it can't be.
     KRYS_NODISCARD List<uint8> ToData(utf8_stringview mimeType, Maybe<double> quality = {}) const noexcept;
+
     KRYS_NODISCARD static utf8_string ToDataURL(Ref<ImageBuffer> source, utf8_stringview mimeType,
                                                 Maybe<double> quality = {}) noexcept;
+
     KRYS_NODISCARD static List<uint8> ToData(Ref<ImageBuffer> source, utf8_stringview mimeType,
                                              Maybe<double> quality = {}) noexcept;
 
@@ -165,6 +178,7 @@ namespace krys::boo
     /// @brief Turns what's drawn into a luminance mask: alpha is the luminance of the colours, converted to
     /// @p colorSpace (linear sRGB for SVG's `color-interpolation: linearRGB`), times the alpha.
     void ConvertToLuminanceMask(const DestinationColorSpace &colorSpace) noexcept;
+
     void ConvertToLuminanceMask() noexcept;
 
     KRYS_NODISCARD RenderingResourceIdentifier GetRenderingResourceIdentifier() const noexcept

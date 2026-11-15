@@ -49,8 +49,10 @@ namespace krys::boo::html
 
   public:
     KRYS_NODISCARD static Ref<CanvasGradient> Create(const FloatPoint &p0, const FloatPoint &p1) noexcept;
+
     KRYS_NODISCARD static Ref<CanvasGradient> Create(const FloatPoint &p0, float r0, const FloatPoint &p1,
                                                      float r1) noexcept;
+
     KRYS_NODISCARD static Ref<CanvasGradient> Create(const FloatPoint &centerPoint,
                                                      float angleInRadians) noexcept;
 
@@ -71,7 +73,9 @@ namespace krys::boo::html
 
   private:
     CanvasGradient(const FloatPoint &p0, const FloatPoint &p1) noexcept;
+
     CanvasGradient(const FloatPoint &p0, float r0, const FloatPoint &p1, float r1) noexcept;
+
     CanvasGradient(const FloatPoint &centerPoint, float angleInRadians) noexcept;
   };
 }

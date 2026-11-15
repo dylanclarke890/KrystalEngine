@@ -30,10 +30,10 @@
 
 namespace krys::boo
 {
-  class WritingMode;
   enum class BoxAxis : uint8;
   enum class ItemPosition : uint8;
   enum class LogicalBoxAxis : uint8;
+  class WritingMode;
 
   namespace style
   {
@@ -58,6 +58,7 @@ namespace krys::boo
 
       KRYS_NODISCARD PositionAreaSpan SpanForAxis(BoxAxis physicalAxis, WritingMode containerWritingMode,
                                                   WritingMode selfWritingMode) const noexcept;
+
       KRYS_NODISCARD PositionAreaSpan SpanForAxis(LogicalBoxAxis logicalAxis,
                                                   WritingMode containerWritingMode,
                                                   WritingMode selfWritingMode) const noexcept;

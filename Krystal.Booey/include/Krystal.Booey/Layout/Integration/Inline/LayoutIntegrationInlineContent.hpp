@@ -92,6 +92,7 @@ namespace krys::boo::layout_integration
     }
 
     KRYS_NODISCARD bool HasContentfulInFlowBox() const noexcept;
+
     KRYS_NODISCARD bool HasContentfulInlineLevelBox() const noexcept;
 
     KRYS_NODISCARD FloatRect ScrollableOverflow() const noexcept
@@ -150,11 +151,13 @@ namespace krys::boo::layout_integration
 
     KRYS_NODISCARD const inline_display::Box *
       FirstBoxForLayoutBox(const layout::Box &layoutBox) const noexcept;
+
     KRYS_NODISCARD Maybe<size_t> FirstBoxIndexForLayoutBox(const layout::Box &layoutBox) const noexcept;
 
     /// @brief The block level box of the line, if the line is for block-in-inline.
     KRYS_NODISCARD const inline_display::Box *
       BlockLevelBoxForLine(const inline_display::Line &line) const noexcept;
+
     KRYS_NODISCARD bool IsInlineBoxWrapperForBlockLevelBox(const inline_display::Box &box) const noexcept;
 
     template <typename TFunction>
@@ -179,6 +182,7 @@ namespace krys::boo::layout_integration
     }
 
     void ShrinkToFit() noexcept;
+
     void ReleaseCaches() noexcept;
 
   private:

@@ -51,9 +51,9 @@ namespace krys::boo
     {
       friend class Region;
 
-      struct UnionOperation;
       struct IntersectOperation;
       struct SubtractOperation;
+      struct UnionOperation;
 
     private:
       SmallList<int, 32> _segments;
@@ -61,6 +61,7 @@ namespace krys::boo
 
     public:
       Shape() noexcept = default;
+
       Shape(const IntRect &rect) noexcept;
 
       KRYS_NODISCARD IntRect Bounds() const noexcept;
@@ -88,7 +89,9 @@ namespace krys::boo
       KRYS_NODISCARD krys::Span<const int> Segments(krys::Span<const Span> spans) const noexcept;
 
       KRYS_NODISCARD static Shape UnionShapes(const Shape &shape1, const Shape &shape2) noexcept;
+
       KRYS_NODISCARD static Shape IntersectShapes(const Shape &shape1, const Shape &shape2) noexcept;
+
       KRYS_NODISCARD static Shape SubtractShapes(const Shape &shape1, const Shape &shape2) noexcept;
 
       void Translate(const IntSize &offset) noexcept;
@@ -122,8 +125,11 @@ namespace krys::boo
       KRYS_NODISCARD static Shape ShapeOperation(const Shape &shape1, const Shape &shape2) noexcept;
 
       void AppendSpan(int y) noexcept;
+
       void AppendSpan(int y, krys::Span<const int> segments) noexcept;
+
       void AppendSpans(const Shape &shape, krys::Span<const Span> spans) noexcept;
+
       KRYS_NODISCARD bool CanCoalesce(krys::Span<const int> segments) const noexcept;
     };
 
@@ -133,12 +139,17 @@ namespace krys::boo
 
   public:
     Region() noexcept;
+
     Region(const IntRect &rect) noexcept;
+
     Region(const Region &other) noexcept;
+
     Region(Region &&other) noexcept;
+
     ~Region() noexcept;
 
     Region &operator=(const Region &other) noexcept;
+
     Region &operator=(Region &&other) noexcept;
 
     KRYS_NODISCARD IntRect Bounds() const noexcept
@@ -159,13 +170,16 @@ namespace krys::boo
     KRYS_NODISCARD SmallList<IntRect, 1> Rects() const noexcept;
 
     void Unite(const Region &region) noexcept;
+
     void Intersect(const Region &region) noexcept;
+
     void Subtract(const Region &region) noexcept;
 
     void Translate(const IntSize &offset) noexcept;
 
     // Returns true if the query region is a subset of this region.
     KRYS_NODISCARD bool Contains(const Region &region) const noexcept;
+
     KRYS_NODISCARD bool Contains(const IntPoint &point) const noexcept;
 
     // Returns true if the query region intersects any part of this region.

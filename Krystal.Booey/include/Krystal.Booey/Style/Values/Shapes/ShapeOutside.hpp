@@ -137,7 +137,9 @@ namespace krys::boo::style
       }
 
       inline const BasicShape *GetShape() const;
+
       KRYS_NODISCARD inline CSSBoxType EffectiveCSSBox() const noexcept;
+
       KRYS_NODISCARD inline RefPtr<StyleImage> GetImage() const noexcept;
 
       bool operator==(const Value &other) const noexcept
@@ -212,6 +214,7 @@ namespace krys::boo::style
   struct Blending<ShapeOutside>
   {
     KRYS_NODISCARD bool CanBlend(const ShapeOutside &, const ShapeOutside &) noexcept;
+
     KRYS_NODISCARD ShapeOutside Blend(const ShapeOutside &, const ShapeOutside &,
                                       const BlendingContext &) noexcept;
   };

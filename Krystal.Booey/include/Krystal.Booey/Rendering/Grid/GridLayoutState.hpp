@@ -39,6 +39,7 @@ namespace krys::boo
     NeedsColumnAxisStretchAlignment,
     MinContentContributionForSecondColumnPass,
   };
+
   // Keyed by address: the state lives for one layout of the grid.
   using ItemsLayoutRequirements = HashMap<const RenderBox *, EnumSet<ItemLayoutRequirement>>;
 
@@ -54,6 +55,7 @@ namespace krys::boo
     KRYS_NODISCARD bool
       ContainsLayoutRequirementForGridItem(const RenderBox &gridItem,
                                            ItemLayoutRequirement layoutRequirement) const noexcept;
+
     void SetLayoutRequirementForGridItem(const RenderBox &gridItem,
                                          ItemLayoutRequirement layoutRequirement) noexcept;
 

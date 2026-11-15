@@ -89,15 +89,19 @@ namespace krys::boo::css
 
     StyleSheetContents(ImportRule *ownerRule, const CSSOMString &originalURL,
                        const ParserContext &context) noexcept;
+
     StyleSheetContents(const StyleSheetContents &other) noexcept;
 
   public:
     ~StyleSheetContents() noexcept;
 
     KRYS_NODISCARD static Ref<StyleSheetContents> Create() noexcept;
+
     KRYS_NODISCARD static Ref<StyleSheetContents> Create(const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static Ref<StyleSheetContents> Create(const CSSOMString &originalURL,
                                                          const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static Ref<StyleSheetContents>
       Create(ImportRule *ownerRule, const CSSOMString &originalURL, const ParserContext &context) noexcept;
 
@@ -119,21 +123,28 @@ namespace krys::boo::css
     /// @brief Parses the text of a loaded sheet into this sheet.
     /// @return False if the sheet can't be used (a load error, or a type that isn't CSS).
     bool ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept;
+
     void NotifyLoadedSheet(const CachedCSSStyleSheet *sheet) noexcept;
+
     /// @brief Whether a parsed sheet can be used again: none of its subresources failed.
     KRYS_NODISCARD bool SubresourcesAllowReuse() const noexcept;
+
     KRYS_NODISCARD bool IsLoadingSubresources() const noexcept;
 
     KRYS_NODISCARD bool IsCacheable() const noexcept;
+
     KRYS_NODISCARD bool IsCacheableWithNoBaseURLDependency() const noexcept;
 
     KRYS_NODISCARD bool IsLoading() const noexcept;
 
     void CheckLoaded() noexcept;
+
     void StartLoadingDynamicSheet() noexcept;
 
     KRYS_NODISCARD StyleSheetContents *RootStyleSheet() const noexcept;
+
     KRYS_NODISCARD dom::Node *SingleOwnerNode() const noexcept;
+
     KRYS_NODISCARD dom::Document *SingleOwnerDocument() const noexcept;
 
     KRYS_NODISCARD utf8_stringview Charset() const noexcept
@@ -178,7 +189,9 @@ namespace krys::boo::css
     }
 
     void ParserAddNamespace(const CSSOMStringAtom &prefix, const CSSOMStringAtom &uri) noexcept;
+
     void ParserAppendRule(Ref<Rule> &&rule) noexcept;
+
     void ParserSetEncodingFromCharsetRule(const CSSOMString &encoding) noexcept;
 
     void ClearRules() noexcept;
@@ -256,6 +269,7 @@ namespace krys::boo::css
     KRYS_NODISCARD Ref<StyleSheetContents> Copy() const noexcept;
 
     void RegisterClient(CSSStyleSheet *sheet) noexcept;
+
     void UnregisterClient(CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD bool HasOneClient() const noexcept
@@ -291,6 +305,7 @@ namespace krys::boo::css
     }
 
     void AddedToMemoryCache() noexcept;
+
     void RemovedFromMemoryCache() noexcept;
 
     void ShrinkToFit() noexcept;

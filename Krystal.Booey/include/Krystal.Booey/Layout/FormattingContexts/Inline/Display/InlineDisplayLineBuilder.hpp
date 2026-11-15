@@ -64,6 +64,7 @@ namespace krys::boo::layout
     static void ApplyEllipsisIfNeeded(LineEndingTruncationPolicy truncationPolicy,
                                       inline_display::Line &displayLine,
                                       inline_display::Boxes &displayBoxes) noexcept;
+
     KRYS_NODISCARD static bool
       HasTrailingLineWithBlockContent(const inline_display::Lines &displayLines) noexcept;
 

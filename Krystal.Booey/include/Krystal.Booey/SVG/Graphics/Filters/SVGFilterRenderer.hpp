@@ -61,12 +61,14 @@ namespace krys::boo
       Create(svg::SVGElement *contextElement, svg::SVGFilterElement &filterElement,
              const FilterGeometry &geometry, EnumSet<FilterRenderingMode> preferredRenderingModes,
              const GraphicsContext &destinationContext) noexcept;
+
     KRYS_NODISCARD static Ref<SVGFilterRenderer>
       Create(svg::SVGUnitTypes::SVGUnitType primitiveUnits, SVGFilterExpression &&expression,
              FilterEffectVector &&effects, const FilterGeometry &geometry,
              EnumSet<FilterRenderingMode> preferredRenderingModes) noexcept;
 
     KRYS_NODISCARD static bool IsIdentity(svg::SVGFilterElement &filterElement) noexcept;
+
     KRYS_NODISCARD static IntOutsets CalculateOutsets(svg::SVGFilterElement &filterElement,
                                                       const FloatRect &targetBoundingBox) noexcept;
 
@@ -88,10 +90,13 @@ namespace krys::boo
     KRYS_NODISCARD FilterEffectVector EffectsOfType(FilterFunction::Type filterType) const noexcept final;
 
     FilterResults &EnsureResults(const FilterResultsCreator &resultsCreator) noexcept;
+
     void ClearEffectResult(FilterEffect &effect) noexcept;
+
     void MergeEffects(const FilterEffectVector &effects) noexcept;
 
     KRYS_NODISCARD RefPtr<FilterImage> Apply(FilterImage *sourceImage, FilterResults &results) noexcept final;
+
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context,
                                                         const FilterStyle &sourceStyle) const noexcept final;
 
@@ -107,6 +112,7 @@ namespace krys::boo
 
   private:
     SVGFilterRenderer(const FilterGeometry &geometry, svg::SVGUnitTypes::SVGUnitType primitiveUnits) noexcept;
+
     SVGFilterRenderer(const FilterGeometry &geometry, svg::SVGUnitTypes::SVGUnitType primitiveUnits,
                       SVGFilterExpression &&expression, FilterEffectVector &&effects) noexcept;
 
@@ -131,6 +137,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatSize ResolvedSize(const FloatSize &size) const noexcept final;
+
     KRYS_NODISCARD FloatPoint3D ResolvedPoint3D(const FloatPoint3D &point) const noexcept final;
 
     KRYS_NODISCARD EnumSet<FilterRenderingMode> SupportedFilterRenderingModes(
@@ -138,6 +145,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RefPtr<FilterImage> Apply(const Filter &, FilterImage &sourceImage,
                                              FilterResults &results) noexcept final;
+
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context, const Filter &,
                                                         const FilterStyle &sourceStyle) const noexcept final;
   };

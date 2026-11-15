@@ -32,9 +32,9 @@
 namespace krys::boo
 {
   class Color;
+  struct PaintInfo;
   class RenderBoxModelObject;
   class RenderStyle;
-  struct PaintInfo;
   template <typename TLayer>
   struct FillLayerToPaint;
 
@@ -66,6 +66,7 @@ namespace krys::boo
   public:
     InlineBoxPainter(const layout_integration::InlineContent &inlineContent, const inline_display::Box &box,
                      PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+
     ~InlineBoxPainter() noexcept;
 
     void Paint() noexcept;
@@ -75,13 +76,17 @@ namespace krys::boo
                      const LayoutPoint &paintOffset) noexcept;
 
     void PaintMask() noexcept;
+
     void PaintDecorations() noexcept;
+
     template <typename TLayers>
     void PaintFillLayers(const Color &color, const TLayers &fillLayers, const LayoutRect &paintRect,
                          CompositeOperator op) noexcept;
+
     template <typename TLayer>
     void PaintFillLayer(const Color &color, const FillLayerToPaint<TLayer> &fillLayer,
                         const LayoutRect &paintRect, CompositeOperator op) noexcept;
+
     void PaintBoxShadow(style::ShadowStyle shadowStyle, const LayoutRect &paintRect) noexcept;
 
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;

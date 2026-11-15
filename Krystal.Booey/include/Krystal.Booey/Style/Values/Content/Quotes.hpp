@@ -60,6 +60,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD const css::CSSOMString &OpenQuote(unsigned index) const noexcept;
+
     KRYS_NODISCARD const css::CSSOMString &CloseQuote(unsigned index) const noexcept;
 
     template <typename... F>

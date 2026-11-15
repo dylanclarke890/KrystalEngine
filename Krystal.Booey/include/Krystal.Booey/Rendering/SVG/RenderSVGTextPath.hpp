@@ -39,12 +39,15 @@ namespace krys::boo
 
   public:
     RenderSVGTextPath(svg::SVGTextPathElement &, RenderStyle &&) noexcept;
+
     ~RenderSVGTextPath() noexcept override;
 
     KRYS_NODISCARD svg::SVGTextPathElement &TextPathElement() const noexcept;
+
     KRYS_NODISCARD svg::SVGGeometryElement *TargetElement() const noexcept;
 
     KRYS_NODISCARD Path LayoutPath() const noexcept;
+
     KRYS_NODISCARD const svg::SVGLengthValue &StartOffset() const noexcept;
 
   private:

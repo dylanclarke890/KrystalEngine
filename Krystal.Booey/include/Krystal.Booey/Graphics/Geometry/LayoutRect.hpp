@@ -197,6 +197,7 @@ namespace krys::boo
     }
 
     void ExpandToInfiniteY() noexcept;
+
     void ExpandToInfiniteX() noexcept;
 
     template <typename T, typename U>
@@ -335,6 +336,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool Intersects(const LayoutRect &other) const noexcept;
+
     KRYS_NODISCARD bool Contains(const LayoutRect &other) const noexcept;
 
     // This checks to see if the rect contains x,y in the traditional sense.
@@ -350,10 +352,15 @@ namespace krys::boo
     }
 
     void Intersect(const LayoutRect &other) noexcept;
+
     bool EdgeInclusiveIntersect(const LayoutRect &other) noexcept;
+
     void Unite(const LayoutRect &other) noexcept;
+
     void UniteEvenIfEmpty(const LayoutRect &other) noexcept;
+
     void UniteIfNonZero(const LayoutRect &other) noexcept;
+
     KRYS_NODISCARD bool CheckedUnite(const LayoutRect &other) noexcept;
 
     constexpr void InflateX(LayoutUnit dx) noexcept
@@ -394,6 +401,7 @@ namespace krys::boo
     }
 
     void Scale(float scaleValue) noexcept;
+
     void Scale(float xScale, float yScale) noexcept;
 
     KRYS_NODISCARD constexpr LayoutRect TransposedRect() const noexcept
@@ -458,6 +466,7 @@ namespace krys::boo
   }
 
   KRYS_NODISCARD IntRect EnclosingIntRect(const LayoutRect &rect) noexcept;
+
   KRYS_NODISCARD LayoutRect EnclosingLayoutRect(const FloatRect &rect) noexcept;
 
   // Device pixel snapping functions.

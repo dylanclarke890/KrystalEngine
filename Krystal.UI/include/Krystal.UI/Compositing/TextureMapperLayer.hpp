@@ -93,6 +93,7 @@ namespace krys::ui
 
   public:
     TextureMapperLayer() noexcept;
+
     virtual ~TextureMapperLayer() noexcept;
 
     KRYS_NODISCARD const List<TextureMapperLayer *> &Children() const noexcept
@@ -101,19 +102,33 @@ namespace krys::ui
     }
 
     void SetChildren(const List<TextureMapperLayer *> &newChildren) noexcept;
+
     void SetMaskLayer(TextureMapperLayer *maskLayer) noexcept;
+
     void SetReplicaLayer(TextureMapperLayer *replicaLayer) noexcept;
+
     void SetBackdropLayer(TextureMapperLayer *backdropLayer) noexcept;
+
     void SetBackdropFiltersRect(const boo::FloatRoundedRect &backdropFiltersRect) noexcept;
+
     void SetPosition(const boo::FloatPoint &position) noexcept;
+
     void SetBoundsOrigin(const boo::FloatPoint &boundsOrigin) noexcept;
+
     void SetSize(const boo::FloatSize &size) noexcept;
+
     void SetAnchorPoint(const boo::FloatPoint3D &anchorPoint) noexcept;
+
     void SetPreserves3D(bool preserves3D) noexcept;
+
     void SetTransform(const boo::TransformationMatrix &transform) noexcept;
+
     void SetChildrenTransform(const boo::TransformationMatrix &childrenTransform) noexcept;
+
     void SetContentsRect(const boo::FloatRect &contentsRect) noexcept;
+
     void SetMasksToBounds(bool masksToBounds) noexcept;
+
     void SetDrawsContent(bool drawsContent) noexcept;
 
     KRYS_NODISCARD bool DrawsContent() const noexcept
@@ -147,18 +162,29 @@ namespace krys::ui
     }
 
     void SetContentsVisible(bool contentsVisible) noexcept;
+
     /// @brief How its contents layer's textures are sampled where they're shown smaller and larger.
     void SetContentsScalingFilters(boo::GraphicsLayerScalingFilter minification,
                                    boo::GraphicsLayerScalingFilter magnification) noexcept;
+
     void SetContentsOpaque(bool contentsOpaque) noexcept;
+
     void SetBackfaceVisibility(bool backfaceVisibility) noexcept;
+
     void SetOpacity(float opacity) noexcept;
+
     void SetSolidColor(const boo::Color &color) noexcept;
+
     void SetBackgroundColor(const boo::Color &color) noexcept;
+
     void SetContentsTileSize(const boo::FloatSize &size) noexcept;
+
     void SetContentsTilePhase(const boo::FloatSize &phase) noexcept;
+
     void SetContentsClippingRect(const boo::FloatRoundedRect &contentsClippingRect) noexcept;
+
     void SetContentsRectClipsDescendants(bool clips) noexcept;
+
     void SetFilters(const boo::FilterOperations &filters) noexcept;
 
     KRYS_NODISCARD bool HasFilters() const noexcept
@@ -192,14 +218,19 @@ namespace krys::ui
     }
 
     void SetContentsLayer(TextureMapperPlatformLayer *platformLayer) noexcept;
+
     void SetAnimations(const TextureMapperAnimations &animations) noexcept;
+
     void SetBackingStore(TextureMapperBackingStore *backingStore) noexcept;
 
     KRYS_NODISCARD bool DescendantsOrSelfHaveRunningAnimations() const noexcept;
+
     bool ApplyAnimationsRecursively(MonotonicTime::duration time) noexcept;
+
     bool SyncAnimations(MonotonicTime::duration time) noexcept;
 
     void PrepareForPainting(TextureMapper &textureMapper) noexcept;
+
     void Paint(TextureMapper &textureMapper) noexcept;
 
     void AddChild(TextureMapperLayer *childLayer) noexcept;
@@ -210,15 +241,23 @@ namespace krys::ui
     void ComputeTransformsRecursive() noexcept;
 
     void RemoveFromParent() noexcept;
+
     void RemoveAllChildren() noexcept;
 
     void PaintRecursive(TextureMapperPaintOptions &options) noexcept;
+
     void PaintSelfChildrenReplicaFilterAndMask(TextureMapperPaintOptions &options) noexcept;
+
     void PaintWithGroup(TextureMapperPaintOptions &options) noexcept;
+
     void PaintSelf(TextureMapperPaintOptions &options) noexcept;
+
     void PaintSelfAndChildren(TextureMapperPaintOptions &options) noexcept;
+
     void PaintSelfAndChildrenWithReplica(TextureMapperPaintOptions &options) noexcept;
+
     void PaintBackdrop(TextureMapperPaintOptions &options) noexcept;
+
     /// @brief Paints this mask layer onto what its layer's group drew, keeping it only where the mask is.
     void ApplyMask(TextureMapperPaintOptions &options) noexcept;
 
@@ -245,6 +284,7 @@ namespace krys::ui
     }
 
     KRYS_NODISCARD bool IsVisible() const noexcept;
+
     KRYS_NODISCARD bool ShouldBlend() const noexcept;
 
     KRYS_NODISCARD bool Preserves3D() const noexcept

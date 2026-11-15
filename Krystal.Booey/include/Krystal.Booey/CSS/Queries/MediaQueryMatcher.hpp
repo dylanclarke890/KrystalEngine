@@ -74,7 +74,9 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<MediaQueryMatcher> Create(dom::Document &document) noexcept;
 
     void DocumentDestroyed() noexcept;
+
     void AddMediaQueryList(MediaQueryList &list) noexcept;
+
     void RemoveMediaQueryList(MediaQueryList &list) noexcept;
 
     /// @brief A new `MediaQueryList` for @p query, or null if the document is gone.

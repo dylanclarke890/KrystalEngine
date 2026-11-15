@@ -121,6 +121,7 @@ namespace krys::boo
     void ApplyTransform(const AffineTransform &transformFromContainer,
                         TransformAccumulation accumulate = TransformAccumulation::FlattenTransform,
                         bool *wasClamped = nullptr) noexcept;
+
     void ApplyTransform(const TransformationMatrix &transformFromContainer,
                         TransformAccumulation accumulate = TransformAccumulation::FlattenTransform,
                         bool *wasClamped = nullptr) noexcept;
@@ -132,8 +133,10 @@ namespace krys::boo
 
     /// @brief The point mapped through the current transform.
     KRYS_NODISCARD FloatPoint MappedPoint() const noexcept;
+
     /// @brief The quad mapped through the current transform.
     KRYS_NODISCARD FloatQuad MappedQuad(bool *wasClamped = nullptr) const noexcept;
+
     KRYS_NODISCARD Maybe<FloatQuad> MappedSecondaryQuad(bool *wasClamped = nullptr) const noexcept;
 
     KRYS_NODISCARD LayoutSize AccumulatedOffset() const noexcept

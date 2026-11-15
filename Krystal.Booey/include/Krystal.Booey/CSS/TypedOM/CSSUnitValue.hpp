@@ -62,6 +62,7 @@ namespace krys::boo::css
 
     /// @brief The unit as `unit` gives it: `number`, `percent`, or the unit's name.
     KRYS_NODISCARD CSSOMStringView Unit() const noexcept;
+
     /// @brief The unit as it's written after the number.
     KRYS_NODISCARD CSSOMStringView UnitSerialisation() const noexcept;
 
@@ -73,11 +74,14 @@ namespace krys::boo::css
     /// @return Null if @p unit isn't compatible with this value's unit.
     /// @see https://drafts.css-houdini.org/css-typed-om/#convert-a-cssunitvalue
     KRYS_NODISCARD RefPtr<CSSUnitValue> ConvertTo(UnitType unit) const noexcept;
+
     /// @return `UnitType::Unknown` if @p unit isn't a unit.
     KRYS_NODISCARD static UnitType ParseUnit(const CSSOMString &unit) noexcept;
 
     KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
+
     KRYS_NODISCARD RefPtr<css::Value> ToCSSValueWithProperty(PropertyId propertyId) const noexcept final;
+
     KRYS_NODISCARD Maybe<calc::Child> ToCalcTreeNode() const noexcept final;
 
   private:
@@ -89,6 +93,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD Maybe<SumValue> ToSumValue() const noexcept final;
+
     KRYS_NODISCARD bool Equals(const CSSNumericValue &other) const noexcept final;
   };
 }

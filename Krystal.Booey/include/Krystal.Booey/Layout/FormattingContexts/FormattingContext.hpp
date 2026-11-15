@@ -42,6 +42,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD static const InitialContainingBlock &
       GetInitialContainingBlock(const Box &layoutBox) noexcept;
+
     KRYS_NODISCARD static const ElementBox &ContainingBlock(const Box &layoutBox) noexcept;
 #if KRYS_DEBUG
     KRYS_NODISCARD static const ElementBox &FormattingContextRoot(const Box &layoutBox) noexcept;

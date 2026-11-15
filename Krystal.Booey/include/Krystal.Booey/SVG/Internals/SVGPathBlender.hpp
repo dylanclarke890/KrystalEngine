@@ -40,6 +40,7 @@ namespace krys::boo::svg
   public:
     KRYS_NODISCARD static bool AddAnimatedPath(SVGPathSource &from, SVGPathSource &to, SVGPathConsumer &,
                                                unsigned repeatCount) noexcept;
+
     KRYS_NODISCARD static bool BlendAnimatedPath(SVGPathSource &from, SVGPathSource &to, SVGPathConsumer &,
                                                  float) noexcept;
 
@@ -51,20 +52,30 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool CanBlendPaths() noexcept;
 
     KRYS_NODISCARD bool AddAnimatedPath(unsigned repeatCount) noexcept;
+
     KRYS_NODISCARD bool BlendAnimatedPath(float progress) noexcept;
 
     KRYS_NODISCARD bool BlendMoveToSegment(float progress) noexcept;
+
     KRYS_NODISCARD bool BlendLineToSegment(float progress) noexcept;
+
     KRYS_NODISCARD bool BlendLineToHorizontalSegment(float progress) noexcept;
+
     KRYS_NODISCARD bool BlendLineToVerticalSegment(float progress) noexcept;
+
     KRYS_NODISCARD bool BlendCurveToCubicSegment(float progress) noexcept;
+
     KRYS_NODISCARD bool BlendCurveToCubicSmoothSegment(float progress) noexcept;
+
     KRYS_NODISCARD bool BlendCurveToQuadraticSegment(float progress) noexcept;
+
     KRYS_NODISCARD bool BlendCurveToQuadraticSmoothSegment(float progress) noexcept;
+
     KRYS_NODISCARD bool BlendArcToSegment(float progress) noexcept;
 
     KRYS_NODISCARD float BlendAnimatedDimensonalFloat(float from, float to, FloatBlendMode,
                                                       float progress) noexcept;
+
     KRYS_NODISCARD FloatPoint BlendAnimatedFloatPoint(const FloatPoint &from, const FloatPoint &to,
                                                       float progress) noexcept;
 

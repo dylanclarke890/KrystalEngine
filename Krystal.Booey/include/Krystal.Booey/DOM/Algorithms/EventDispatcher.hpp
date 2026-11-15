@@ -35,9 +35,9 @@ namespace krys::boo
 namespace krys::boo::dom
 {
   class Element;
-  class EventTarget;
-  class EventPathItem;
   class EventListener;
+  class EventPathItem;
+  class EventTarget;
 
   /// @see https://dom.spec.whatwg.org/#dispatching-events
   class EventDispatcher

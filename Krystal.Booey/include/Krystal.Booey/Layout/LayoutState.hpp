@@ -45,8 +45,8 @@ namespace krys::boo::dom
 
 namespace krys::boo::layout_integration
 {
-  enum class LogicalWidthType : uint8;
   enum class LogicalHeightType : uint8;
+  enum class LogicalWidthType : uint8;
 }
 
 namespace krys::boo::layout
@@ -110,6 +110,7 @@ namespace krys::boo::layout
                 FormattingContextLogicalHeightFunction &&formattingContextLogicalHeightFunction,
                 FormattingContextLayoutForBlockInInlineFunction
                   &&formattingContextLayoutForBlockInInlineFunction) noexcept;
+
     ~LayoutState() noexcept;
 
     KRYS_NODISCARD Type GetType() const noexcept
@@ -131,12 +132,15 @@ namespace krys::boo::layout
       FormattingStateForFormattingContext(const ElementBox &formattingRoot) const noexcept;
 
     void DestroyBlockFormattingState(const ElementBox &formattingContextRoot) noexcept;
+
     void DestroyInlineContentCache(const ElementBox &formattingContextRoot) noexcept;
 
     KRYS_NODISCARD bool HasFormattingState(const ElementBox &formattingRoot) const noexcept;
 
     BoxGeometry &GeometryForRootBox() noexcept;
+
     BoxGeometry &EnsureGeometryForBox(const Box &layoutBox) noexcept;
+
     KRYS_NODISCARD const BoxGeometry &GeometryForBox(const Box &layoutBox) const noexcept;
 
     KRYS_NODISCARD bool HasBoxGeometry(const Box &layoutBox) const noexcept;
@@ -170,8 +174,10 @@ namespace krys::boo::layout
     // one for grid items in many cases which drives the use of setOverridingBorderBoxLogicalHeight.
     void LayoutWithFormattingContextForBox(const ElementBox &box, Maybe<LayoutUnit> widthConstraint,
                                            Maybe<LayoutUnit> heightConstraint) const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalWidthWithFormattingContextForBox(
       const ElementBox &box, layout_integration::LogicalWidthType logicalWidthType) const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalHeightWithFormattingContextForBox(
       const ElementBox &box, layout_integration::LogicalHeightType logicalHeightType) const noexcept;
 

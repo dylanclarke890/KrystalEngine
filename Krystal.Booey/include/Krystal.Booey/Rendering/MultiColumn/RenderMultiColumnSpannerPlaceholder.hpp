@@ -56,6 +56,7 @@ namespace krys::boo
     /// @brief Use CreateAnonymous.
     RenderMultiColumnSpannerPlaceholder(RenderMultiColumnFlow &fragmentedFlow, RenderBox &spanner,
                                         RenderStyle &&style) noexcept;
+
     ~RenderMultiColumnSpannerPlaceholder() noexcept override;
 
     KRYS_NODISCARD static RenderPtr<RenderMultiColumnSpannerPlaceholder>

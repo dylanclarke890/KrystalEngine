@@ -69,6 +69,7 @@ namespace krys::ui
   public:
     KRYS_NODISCARD static Expected<UniquePtr<TextureMapper>> Create(gfx::Device &device,
                                                                     FontFaceCache &fonts) noexcept;
+
     ~TextureMapper() noexcept;
 
     KRYS_NODISCARD gfx::Device &Device() const noexcept
@@ -79,29 +80,36 @@ namespace krys::ui
     /// @brief Starts drawing into the frame `renderer` draws, whose clip is `bounds` (in the view's
     /// coordinates). Layers are drawn under the renderer's current transform.
     void BeginPainting(gfx::Renderer2D &renderer, const boo::IntRect &bounds) noexcept;
+
     void EndPainting() noexcept;
 
     void DrawBorder(const boo::Color &color, float borderWidth, const boo::FloatRect &targetRect,
                     const boo::TransformationMatrix &modelViewMatrix) noexcept;
+
     void DrawNumber(int32 number, const boo::Color &color, const boo::FloatPoint &targetPoint,
                     const boo::TransformationMatrix &modelViewMatrix) noexcept;
 
     void DrawTexture(const BitmapTexture &texture, const boo::FloatRect &target,
                      const boo::TransformationMatrix &modelViewMatrix = {}, float opacity = 1.0f,
                      AllEdgesExposed allEdgesExposed = AllEdgesExposed::Yes) noexcept;
+
     /// @brief Draws a texture of @p textureSize the mapper doesn't own, whose alpha is @p alpha.
     void DrawTexture(gfx::TextureHandle texture, const boo::IntSize &textureSize,
                      const boo::FloatRect &target, const boo::TransformationMatrix &modelViewMatrix,
                      float opacity, AlphaPremultiplication alpha) noexcept;
+
     /// @brief The texture an accelerated image buffer keeps, with what's been flushed rendered into it ahead
     /// of the frame's passes; invalid if it can't be. Between `BeginPainting` and `EndPainting`.
     KRYS_NODISCARD gfx::TextureHandle RenderImageBuffer(ImageBufferRender2DBackend &backend) noexcept;
+
     void DrawSolidColor(const boo::FloatRect &rect, const boo::TransformationMatrix &matrix,
                         const boo::Color &color, bool isBlendingAllowed) noexcept;
 
     void BeginClip(const boo::TransformationMatrix &modelViewMatrix,
                    const boo::FloatRoundedRect &rect) noexcept;
+
     void EndClip() noexcept;
+
     KRYS_NODISCARD boo::IntRect ClipBounds() const noexcept;
 
     /// @brief Starts drawing into a group composited at `opacity` with `blendMode` through `filters` (the
@@ -113,6 +121,7 @@ namespace krys::ui
 
     void BeginGroup(float opacity, BlendMode blendMode, const boo::FilterOperations &filters,
                     gfx::EdgeMode2D blurEdgeMode = gfx::EdgeMode2D::None) noexcept;
+
     void EndGroup() noexcept;
 
     KRYS_NODISCARD boo::IntSize MaxTextureSize() const noexcept;
@@ -143,6 +152,7 @@ namespace krys::ui
     void UpdateContents(BitmapTexture &texture, const boo::GraphicsLayer &sourceLayer,
                         const boo::IntRect &targetRect, const boo::IntPoint &sourceOffset,
                         float scale = 1) noexcept;
+
     /// @brief Draws `image` at `sourceOffset` into `targetRect` of `texture`, replacing what was there.
     void UpdateContents(BitmapTexture &texture, boo::Image &image, const boo::IntRect &targetRect,
                         const boo::IntPoint &sourceOffset) noexcept;
@@ -153,6 +163,7 @@ namespace krys::ui
 
     /// @brief Draws under `matrix`, from the view's coordinates, after the base transform.
     void SetTransform(const boo::TransformationMatrix &matrix) noexcept;
+
     /// @brief How a texture of @p textureSize drawn into @p targetRect is sampled.
     KRYS_NODISCARD gfx::SamplerFilter
       ScalingFilter(const boo::IntSize &textureSize, const boo::FloatRect &targetRect,

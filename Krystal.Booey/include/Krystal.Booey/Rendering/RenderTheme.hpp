@@ -56,6 +56,7 @@ namespace krys::boo
   }
 
   class ControlPart;
+  enum class DocumentMarkerLineStyleMode : uint8;
   class FileList;
   class FontCascade;
   class FontCascadeDescription;
@@ -70,7 +71,6 @@ namespace krys::boo
   class RenderStyle;
   class RenderText;
   struct Settings;
-  enum class DocumentMarkerLineStyleMode : uint8;
 
   /// @brief Decides which elements have a native appearance, adjusts their styles and sizes, and paints them;
   /// also the platform's colours (selections, focus rings, system colours).
@@ -118,6 +118,7 @@ namespace krys::boo
 
   protected:
     RenderTheme() noexcept;
+
     virtual ~RenderTheme() noexcept;
 
   public:
@@ -163,9 +164,11 @@ namespace krys::boo
     // foreground, e.g., the text of a button, is always rendered by the engine itself. The boolean return
     // value indicates whether the CSS border/background should also be painted.
     bool Paint(const RenderBox &, ControlPart &, const PaintInfo &, const LayoutRect &) noexcept;
+
     bool Paint(const RenderBox &, const PaintInfo &, const LayoutRect &) noexcept;
 
     bool PaintBorderOnly(const RenderBox &, const PaintInfo &) noexcept;
+
     void PaintDecorations(const RenderBox &, const PaintInfo &, const LayoutRect &) noexcept;
 
     // The remaining methods should be implemented by the platform-specific portion of the theme.
@@ -254,16 +257,23 @@ namespace krys::boo
 
     // Text selection colors.
     KRYS_NODISCARD Color ActiveSelectionBackgroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD Color InactiveSelectionBackgroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color TransformSelectionBackgroundColor(const Color &,
                                                                    style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD Color ActiveSelectionForegroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD Color InactiveSelectionForegroundColor(style::ColorOptions) const noexcept;
 
     // List box selection colors
     KRYS_NODISCARD Color ActiveListBoxSelectionBackgroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD Color ActiveListBoxSelectionForegroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD Color InactiveListBoxSelectionBackgroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD Color InactiveListBoxSelectionForegroundColor(style::ColorOptions) const noexcept;
 
     // Highlighting color for search matches.
@@ -271,6 +281,7 @@ namespace krys::boo
 
     // Default highlighting color for app highlights.
     KRYS_NODISCARD Color AnnotationHighlightBackgroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD Color AnnotationHighlightForegroundColor(style::ColorOptions) const noexcept;
 
     KRYS_NODISCARD Color DefaultButtonTextColor(style::ColorOptions) const noexcept;
@@ -405,6 +416,7 @@ namespace krys::boo
 
     /// @brief What a file input shows when it has no files.
     KRYS_NODISCARD virtual utf8_string FileListDefaultLabel(bool multipleFilesAllowed) const noexcept;
+
     /// @brief What a file input shows for @p fileList, truncated to @p width in @p font.
     KRYS_NODISCARD virtual utf8_string FileListNameForWidth(const FileList *fileList, const FontCascade &font,
                                                             int32 width,
@@ -421,6 +433,7 @@ namespace krys::boo
 
     virtual void PaintPlatformResizer(const RenderLayerModelObject &, GraphicsContext &,
                                       const LayoutRect &resizerCornerRect) noexcept;
+
     virtual void PaintPlatformResizerFrame(const RenderLayerModelObject &, GraphicsContext &,
                                            const LayoutRect &resizerAbsRect) noexcept;
 
@@ -461,18 +474,31 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsWindowActive(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsChecked(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsIndeterminate(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsEnabled(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsFocused(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsPressed(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsSpinUpButtonPartPressed(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsHovered(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsSpinUpButtonPartHovered(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsPresenting(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsReadOnlyControl(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool IsDefault(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool HasListButton(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool HasListButtonPressed(const RenderElement &) const noexcept;
 
   protected:
@@ -485,29 +511,39 @@ namespace krys::boo
 
     // The platform selection color.
     KRYS_NODISCARD virtual Color PlatformActiveSelectionBackgroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color PlatformInactiveSelectionBackgroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color PlatformActiveSelectionForegroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color PlatformInactiveSelectionForegroundColor(style::ColorOptions) const noexcept;
 
     KRYS_NODISCARD virtual Color
       PlatformActiveListBoxSelectionBackgroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color
       PlatformInactiveListBoxSelectionBackgroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color
       PlatformActiveListBoxSelectionForegroundColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color
       PlatformInactiveListBoxSelectionForegroundColor(style::ColorOptions) const noexcept;
 
     KRYS_NODISCARD virtual Color PlatformTextSearchHighlightColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color
       PlatformAnnotationHighlightBackgroundColor(style::ColorOptions) const noexcept;
 
     KRYS_NODISCARD virtual Color PlatformDefaultButtonTextColor(style::ColorOptions) const noexcept;
 
     KRYS_NODISCARD virtual Color PlatformSpellingMarkerColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color PlatformDictationAlternativesMarkerColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color
       PlatformAutocorrectionReplacementMarkerColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD virtual Color PlatformGrammarMarkerColor(style::ColorOptions) const noexcept;
 
     KRYS_NODISCARD virtual bool SupportsSelectionForegroundColors(style::ColorOptions) const noexcept
@@ -779,12 +815,15 @@ namespace krys::boo
 
     KRYS_NODISCARD StyleAppearance AutoAppearanceForElement(RenderStyle &,
                                                             const dom::Element *) const noexcept;
+
     KRYS_NODISCARD StyleAppearance AdjustAppearanceForElement(RenderStyle &, const RenderStyle &parentStyle,
                                                               const dom::Element *,
                                                               StyleAppearance) const noexcept;
 
     KRYS_NODISCARD Color SpellingMarkerColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD Color DictationAlternativesMarkerColor(style::ColorOptions) const noexcept;
+
     KRYS_NODISCARD Color GrammarMarkerColor(style::ColorOptions) const noexcept;
   };
 }

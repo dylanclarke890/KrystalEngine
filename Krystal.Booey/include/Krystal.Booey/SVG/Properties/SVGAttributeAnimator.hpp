@@ -92,8 +92,11 @@ namespace krys::boo::svg
     }
 
     virtual void Start(SVGElement &) noexcept = 0;
+
     virtual void Animate(SVGElement &, float progress, uint32 repeatCount) noexcept = 0;
+
     virtual void Apply(SVGElement &) noexcept = 0;
+
     virtual void Stop(SVGElement &targetElement) noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<float> CalculateDistance(SVGElement &, dom::DOMStringView,
@@ -106,13 +109,18 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool IsAnimatedStylePropertyAnimator(const SVGElement &) const noexcept;
 
     static void InvalidateStyle(SVGElement &) noexcept;
+
     static void ApplyAnimatedStylePropertyChange(SVGElement &, css::PropertyId,
                                                  dom::DOMStringView value) noexcept;
+
     static void RemoveAnimatedStyleProperty(SVGElement &, css::PropertyId) noexcept;
+
     static void ApplyAnimatedPropertyChange(SVGElement &, const dom::QualifiedName &) noexcept;
 
     void ApplyAnimatedStylePropertyChange(SVGElement &, dom::DOMStringView value) noexcept;
+
     void RemoveAnimatedStyleProperty(SVGElement &) noexcept;
+
     void ApplyAnimatedPropertyChange(SVGElement &) noexcept;
   };
 }

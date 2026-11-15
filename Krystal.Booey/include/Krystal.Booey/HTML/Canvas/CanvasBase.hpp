@@ -104,10 +104,12 @@ namespace krys::boo::html
 
     /// @brief An image of what's drawn, copied when it's first asked for after a draw.
     KRYS_NODISCARD virtual Image *CopiedImage() const noexcept = 0;
+
     virtual void ClearCopiedImage() const noexcept = 0;
 
     /// @brief The parser context colours given to the context are parsed in.
     KRYS_NODISCARD virtual const css::ParserContext &CssParserContext() const noexcept = 0;
+
     /// @brief The document the canvas belongs to (its script execution context), if any.
     KRYS_NODISCARD virtual dom::Document *CanvasDocument() const noexcept = 0;
 
@@ -128,6 +130,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool ShouldAccelerate(uint64 area) const noexcept;
 
     void AddCanvasNeedingPreparationForDisplayOrFlush() noexcept;
+
     void RemoveCanvasNeedingPreparationForDisplayOrFlush() noexcept;
 
     /// @brief A new buffer of the canvas's size for its context, or null if the canvas is empty or too large.

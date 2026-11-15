@@ -67,9 +67,11 @@ namespace krys::boo
     virtual void BeginClipAndDrawSourceImage(GraphicsContext &destinationContext,
                                              const FloatRect &repaintRect,
                                              const FloatRect &clipRect) noexcept = 0;
+
     virtual void EndClipAndDrawSourceImage(GraphicsContext &destinationContext) noexcept = 0;
 
     virtual void BeginDrawSourceImage(GraphicsContext &destinationContext, float opacity = 1.f) noexcept = 0;
+
     virtual void EndDrawSourceImage(GraphicsContext &destinationContext) noexcept = 0;
 
   protected:

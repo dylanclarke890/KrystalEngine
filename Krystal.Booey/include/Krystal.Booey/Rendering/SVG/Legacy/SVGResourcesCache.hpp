@@ -43,6 +43,7 @@ namespace krys::boo
 
   public:
     SVGResourcesCache() noexcept;
+
     ~SVGResourcesCache() noexcept;
 
     KRYS_NODISCARD static SVGResources *CachedResourcesForRenderer(const RenderElement &) noexcept;
@@ -78,6 +79,7 @@ namespace krys::boo
 
     public:
       SetStyleForScope(RenderElement &, const RenderStyle &scopedStyle, const RenderStyle &newStyle) noexcept;
+
       ~SetStyleForScope() noexcept;
 
     private:
@@ -86,6 +88,7 @@ namespace krys::boo
 
   private:
     void AddResourcesFromRenderer(RenderElement &, const RenderStyle &) noexcept;
+
     void RemoveResourcesFromRenderer(RenderElement &) noexcept;
   };
 }

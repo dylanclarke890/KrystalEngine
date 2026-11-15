@@ -63,6 +63,7 @@ namespace krys::boo
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
   KRYS_NODISCARD LayoutUnit BlockDirectionOffset(const RenderBlock &rootBlock,
                                                  const LayoutSize &offsetFromRootBlock) noexcept;
+
   KRYS_NODISCARD LayoutUnit InlineDirectionOffset(const RenderBlock &rootBlock,
                                                   const LayoutSize &offsetFromRootBlock) noexcept;
 
@@ -111,16 +112,20 @@ namespace krys::boo
 
     KRYS_NODISCARD bool
       EstablishesIndependentFormattingContextIgnoringDisplayType(const RenderStyle &style) const noexcept;
+
     KRYS_NODISCARD bool EstablishesIndependentFormattingContext() const noexcept;
+
     KRYS_NODISCARD bool CreatesNewFormattingContext() const noexcept;
 
     KRYS_NODISCARD static TextRun
       ConstructTextRun(utf8_stringview stringView, const RenderStyle &style,
                        ExpansionBehavior expansion = ExpansionBehavior::DefaultBehavior(),
                        EnumSet<TextRunFlag> flags = {}) noexcept;
+
     KRYS_NODISCARD static TextRun
       ConstructTextRun(const RenderText &text, const RenderStyle &style,
                        ExpansionBehavior expansion = ExpansionBehavior::DefaultBehavior()) noexcept;
+
     KRYS_NODISCARD static TextRun
       ConstructTextRun(const RenderText &text, size_t offset, size_t length, const RenderStyle &style,
                        ExpansionBehavior expansion = ExpansionBehavior::DefaultBehavior()) noexcept;
@@ -128,12 +133,15 @@ namespace krys::boo
     virtual void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept;
 
     void AddOutOfFlowBox(RenderBox &outOfFlowBox) noexcept;
+
     static void RemoveOutOfFlowBox(const RenderBox &rendererToRemove) noexcept;
+
     enum class ContainingBlockState : bool
     {
       NewContainingBlock,
       SameContainingBlock,
     };
+
     void RemoveOutOfFlowBoxes(
       const RenderBlock *newContainingBlockCandidate,
       ContainingBlockState containingBlockState = ContainingBlockState::SameContainingBlock) noexcept;
@@ -181,6 +189,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool HasMarginBeforeQuirk(const RenderBox &child) const noexcept;
+
     KRYS_NODISCARD bool HasMarginAfterQuirk(const RenderBox &child) const noexcept;
 
     virtual void ScrollbarsChanged(bool /*horizontalScrollbarChanged*/,
@@ -189,7 +198,9 @@ namespace krys::boo
     }
 
     void AddPercentHeightDescendant(RenderBox &descendant) noexcept;
+
     static void RemovePercentHeightDescendant(RenderBox &descendant) noexcept;
+
     KRYS_NODISCARD TrackedRendererListHashSet *PercentHeightDescendants() const noexcept;
 
     KRYS_NODISCARD bool HasPercentHeightDescendants() const noexcept
@@ -199,6 +210,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static bool HasPercentHeightContainerMap() noexcept;
+
     static void ClearPercentHeightDescendantsFrom(RenderBox &parent) noexcept;
 
     KRYS_NODISCARD virtual bool ContainsFloats() const noexcept
@@ -208,12 +220,16 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit AvailableLogicalWidthForLine(LayoutUnit position,
                                                            LayoutUnit logicalHeight) const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalRightOffsetForLine(LayoutUnit position,
                                                         LayoutUnit logicalHeight = 0_lu) const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalLeftOffsetForLine(LayoutUnit position,
                                                        LayoutUnit logicalHeight = 0_lu) const noexcept;
+
     KRYS_NODISCARD LayoutUnit StartOffsetForLine(LayoutUnit position,
                                                  LayoutUnit logicalHeight) const noexcept;
+
     KRYS_NODISCARD LayoutUnit EndOffsetForLine(LayoutUnit position, LayoutUnit logicalHeight) const noexcept;
 
     // Accessors for logical width/height and margins in the containing block's block-flow direction.
@@ -249,6 +265,7 @@ namespace krys::boo
 
     void SetLogicalLeftForChild(RenderBox &child, LayoutUnit logicalLeft,
                                 ApplyLayoutDeltaMode applyDelta = DoNotApplyLayoutDelta) noexcept;
+
     void SetLogicalTopForChild(RenderBox &child, LayoutUnit logicalTop,
                                ApplyLayoutDeltaMode applyDelta = DoNotApplyLayoutDelta) noexcept;
 
@@ -293,7 +310,9 @@ namespace krys::boo
     }
 
     void SetTrimmedMarginForChild(RenderBox &child, style::MarginTrimSide side) noexcept;
+
     KRYS_NODISCARD LayoutUnit CollapsedMarginBeforeForChild(const RenderBox &child) const noexcept;
+
     KRYS_NODISCARD LayoutUnit CollapsedMarginAfterForChild(const RenderBox &child) const noexcept;
 
     KRYS_NODISCARD LayoutUnit AvailableLogicalWidthForContent() const noexcept
@@ -302,11 +321,15 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit LogicalLeftOffsetForContent() const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalRightOffsetForContent() const noexcept;
+
     KRYS_NODISCARD LayoutUnit StartOffsetForContent() const noexcept;
+
     KRYS_NODISCARD LayoutUnit EndOffsetForContent() const noexcept;
 
     KRYS_NODISCARD bool HasDefiniteLogicalHeight() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> AvailableLogicalHeightForPercentageComputation() const noexcept;
 
     void ComputeChildPreferredLogicalWidths(RenderBox &childBox, LayoutUnit &minPreferredLogicalWidth,
@@ -333,28 +356,40 @@ namespace krys::boo
       IgnoreFloatingOrOutOfFlow,
       IncludeFloatingOrOutOfFlow,
     };
+
     /// @brief A fieldset's rendered legend: its first child that's a legend, and neither floating nor
     /// positioned out of flow.
     KRYS_NODISCARD RenderBox *FindFieldsetLegend(
       FieldsetFindLegendOption option = FieldsetFindLegendOption::IgnoreFloatingOrOutOfFlow) const noexcept;
 
     KRYS_NODISCARD RectEdges<LayoutUnit> BorderWidths() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderTop() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderBottom() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderLeft() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderRight() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderBefore() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       AdjustBorderBoxLogicalHeightForBoxSizing(LayoutUnit height) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       AdjustContentBoxLogicalHeightForBoxSizing(Maybe<LayoutUnit> height) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       AdjustIntrinsicLogicalHeightForBoxSizing(LayoutUnit height) const noexcept override;
+
     void AdjustBorderBoxRectForPainting(LayoutRect &paintRect) noexcept override;
+
     KRYS_NODISCARD LayoutRect PaintRectToClipOutFromBorder(const LayoutRect &paintRect) noexcept override;
 
     /// @brief Lays out the children that normal layout skips: a fieldset's legend.
     virtual void LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept;
+
     /// @brief Computes the preferred widths of the children that normal layout skips.
     /// @return Whether there were any.
     KRYS_NODISCARD virtual bool
@@ -369,6 +404,7 @@ namespace krys::boo
     // beginUpdateScrollInfoAfterLayoutTransaction() then endAndCommitUpdateScrollInfoAfterLayoutTransaction()
     // will do nothing until it is called the same number of times.
     void BeginUpdateScrollInfoAfterLayoutTransaction() noexcept;
+
     void EndAndCommitUpdateScrollInfoAfterLayoutTransaction() noexcept;
 
     void RemoveFromUpdateScrollInfoAfterLayoutTransaction() noexcept;
@@ -387,24 +423,29 @@ namespace krys::boo
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction hitTestAction) noexcept override;
+
     /// @brief Moves @p offset by the block's scroll position, in its writing mode.
     void OffsetForContents(LayoutPoint &offset) const noexcept;
+
     /// @brief The block's `text-indent`, resolved against its content box.
     KRYS_NODISCARD LayoutUnit TextIndentOffset() const noexcept;
 
     KRYS_NODISCARD dom::PositionWithAffinity
       PositionForPoint(const LayoutPoint &point, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept override;
+
     /// @brief The position nearest @p pointInLogicalContents among the block's lines.
     KRYS_NODISCARD virtual dom::PositionWithAffinity
       PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
                                          HitTestSource source) noexcept;
+
     KRYS_NODISCARD dom::Node *NodeForHitTest() const noexcept override;
 
   protected:
     virtual bool HitTestChildren(const HitTestRequest &request, HitTestResult &result,
                                  const HitTestLocation &locationInContainer,
                                  const LayoutPoint &adjustedLocation, HitTestAction hitTestAction) noexcept;
+
     virtual bool HitTestContents(const HitTestRequest &request, HitTestResult &result,
                                  const HitTestLocation &locationInContainer,
                                  const LayoutPoint &accumulatedOffset, HitTestAction hitTestAction) noexcept;
@@ -427,6 +468,7 @@ namespace krys::boo
 #pragma region Painting
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void PaintObject(PaintInfo &, const LayoutPoint &) noexcept override;
 
     /// @brief @p paintInfo as passed to this block's children: the child phases mapped to the phases children
@@ -441,6 +483,7 @@ namespace krys::boo
     };
 
     virtual void PaintChildren(PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild) noexcept;
+
     /// @brief Paints @p child unless it paints itself (a self-painting layer or a float); false stops
     /// painting the remaining children.
     bool PaintChild(RenderBox &, PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild,
@@ -468,8 +511,11 @@ namespace krys::boo
   public:
     /// @brief The enclosing fragmented flow found last, if it's still known.
     KRYS_NODISCARD RenderFragmentedFlow *CachedEnclosingFragmentedFlow() const noexcept;
+
     void SetCachedEnclosingFragmentedFlowNeedsUpdate() noexcept;
+
     KRYS_NODISCARD virtual bool CachedEnclosingFragmentedFlowNeedsUpdate() const noexcept;
+
     void ResetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(
       RenderFragmentedFlow *fragmentedFlow) noexcept final;
 
@@ -478,15 +524,20 @@ namespace krys::boo
     /// @brief How far the block's first unsplittable content was pushed down to the next column, for its
     /// parent to move the block instead, when the block starts at its parent's top.
     KRYS_NODISCARD LayoutUnit PaginationStrut() const noexcept;
+
     void SetPaginationStrut(LayoutUnit strut) noexcept;
+
     /// @brief The block's offset from the top of its column when it was last laid out.
     KRYS_NODISCARD LayoutUnit PageLogicalOffset() const noexcept;
+
     void SetPageLogicalOffset(LayoutUnit logicalOffset) noexcept;
+
     void MarkForPaginationRelayoutIfNeeded() noexcept override;
 
     /// @brief The fragment showing the block's content at @p blockOffset, if the block is in a fragmented
     /// flow.
     KRYS_NODISCARD RenderFragmentContainer *FragmentAtBlockOffset(LayoutUnit blockOffset) const noexcept;
+
     /// @brief Whether @p child mustn't be split across fragments.
     KRYS_NODISCARD bool ChildBoxIsUnsplittableForFragmentation(const RenderBox &child) const noexcept;
 
@@ -495,14 +546,17 @@ namespace krys::boo
 
     /// @brief Lets fragments of different widths make the block lay out its children again.
     void PreparePaginationBeforeBlockLayout(RelayoutChildren &relayoutChildren) noexcept;
+
     /// @brief Gives @p box the fragments it's estimated to cover, before it's laid out.
     void EstimateFragmentRangeForBoxChild(const RenderBox &box) const noexcept;
+
     /// @brief Gives @p box the fragments it covers after layout, and whether it must lay out again.
     bool UpdateFragmentRangeForBoxChild(const RenderBox &box) const noexcept;
 
   private:
     RenderFragmentedFlow *
       UpdateCachedEnclosingFragmentedFlow(RenderFragmentedFlow *fragmentedFlow) const noexcept;
+
     void ComputeFragmentRangeForBoxChild(const RenderBox &box) const noexcept;
 
 #pragma endregion
@@ -512,6 +566,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD GapRects
       SelectionGapRectsForRepaint(const RenderLayerModelObject *repaintContainer) noexcept;
+
     KRYS_NODISCARD LayoutRect LogicalLeftSelectionGap(RenderBlock &rootBlock,
                                                       const LayoutPoint &rootBlockPhysicalPosition,
                                                       const LayoutSize &offsetFromRootBlock,
@@ -519,6 +574,7 @@ namespace krys::boo
                                                       LayoutUnit logicalTop, LayoutUnit logicalHeight,
                                                       const LogicalSelectionOffsetCaches &cache,
                                                       const PaintInfo *paintInfo) noexcept;
+
     KRYS_NODISCARD LayoutRect LogicalRightSelectionGap(RenderBlock &rootBlock,
                                                        const LayoutPoint &rootBlockPhysicalPosition,
                                                        const LayoutSize &offsetFromRootBlock,
@@ -526,12 +582,15 @@ namespace krys::boo
                                                        LayoutUnit logicalTop, LayoutUnit logicalHeight,
                                                        const LogicalSelectionOffsetCaches &cache,
                                                        const PaintInfo *paintInfo) noexcept;
+
     void GetSelectionGapInfo(HighlightState state, bool &leftGap, bool &rightGap) const noexcept;
+
     /// @brief Whether the block fills the selection gaps of its descendants itself.
     KRYS_NODISCARD bool IsSelectionRoot() const noexcept;
 
     KRYS_NODISCARD LayoutUnit LogicalLeftSelectionOffset(RenderBlock &rootBlock, LayoutUnit position,
                                                          const LogicalSelectionOffsetCaches &cache) noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalRightSelectionOffset(RenderBlock &rootBlock, LayoutUnit position,
                                                           const LogicalSelectionOffsetCaches &cache) noexcept;
 
@@ -554,7 +613,9 @@ namespace krys::boo
       CursorCaret,
       DragCaret,
     };
+
     void PaintCarets(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+
     void PaintCaret(PaintInfo &paintInfo, const LayoutPoint &paintOffset, CaretType type) noexcept;
 
     GapRects SelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
@@ -562,16 +623,19 @@ namespace krys::boo
                            LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
                            const LogicalSelectionOffsetCaches &cache,
                            const PaintInfo *paintInfo = nullptr) noexcept;
+
     virtual GapRects InlineSelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
                                          const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
                                          LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
                                          const LogicalSelectionOffsetCaches &cache,
                                          const PaintInfo *paintInfo) noexcept;
+
     GapRects BlockSelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
                                 const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
                                 LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
                                 const LogicalSelectionOffsetCaches &cache,
                                 const PaintInfo *paintInfo) noexcept;
+
     LayoutRect BlockSelectionGap(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
                                  const LayoutSize &offsetFromRootBlock, LayoutUnit lastLogicalTop,
                                  LayoutUnit lastLogicalLeft, LayoutUnit lastLogicalRight,
@@ -588,6 +652,7 @@ namespace krys::boo
   protected:
     RenderBlock(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
                 TypeSpecificFlags typeSpecificFlags = {}) noexcept;
+
     RenderBlock(Type type, dom::Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
                 TypeSpecificFlags typeSpecificFlags = {}) noexcept;
 
@@ -597,20 +662,25 @@ namespace krys::boo
 
     void LayoutOutOfFlowBoxes(RelayoutChildren relayoutChildren,
                               bool fixedPositionObjectsOnly = false) noexcept;
+
     virtual void LayoutOutOfFlowBox(RenderBox &outOfFlowBox, RelayoutChildren relayoutChildren,
                                     bool fixedPositionObjectsOnly) noexcept;
 
     void MarkFixedPositionBoxForLayoutIfNeeded(RenderBox &positionedChild) noexcept;
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
+
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
 
     bool SimplifiedLayout() noexcept;
+
     virtual void SimplifiedNormalFlowLayout() noexcept;
 
     virtual void ComputeOverflow(LayoutUnit oldClientAfterEdge,
                                  EnumSet<ComputeOverflowOptions> options = {}) noexcept;
+
     void AddOverflowFromOutOfFlowBoxes() noexcept;
+
     void AddVisualOverflowFromTheme() noexcept;
 
     void UpdateBlockChildDirtyBitsBeforeLayout(RelayoutChildren relayoutChildren, RenderBox &child) noexcept;
@@ -618,13 +688,17 @@ namespace krys::boo
     bool RecomputeLogicalWidth() noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override;
+
     KRYS_NODISCARD Maybe<LayoutUnit> LastLineBaseline() const noexcept override;
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
+
     void ComputePreferredLogicalWidths() noexcept override;
+
     void ComputeBlockPreferredLogicalWidths(LayoutUnit &minLogicalWidth,
                                             LayoutUnit &maxLogicalWidth) const noexcept;
+
     virtual void ComputeChildIntrinsicLogicalWidths(RenderBox &child, LayoutUnit &minPreferredLogicalWidth,
                                                     LayoutUnit &maxPreferredLogicalWidth) const noexcept;
 
@@ -642,18 +716,22 @@ namespace krys::boo
 
   private:
     void PaintExcludedChildrenInBorder(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+
     KRYS_NODISCARD bool HitTestExcludedChildrenInBorder(const HitTestRequest &request, HitTestResult &result,
                                                         const HitTestLocation &locationInContainer,
                                                         const LayoutPoint &accumulatedOffset,
                                                         HitTestAction hitTestAction) noexcept;
 
     KRYS_NODISCARD bool IsSelfCollapsingBlock() const noexcept override;
+
     KRYS_NODISCARD virtual bool ChildrenPreventSelfCollapsing() const noexcept;
 
     KRYS_NODISCARD bool ContentBoxLogicalWidthChanged(const RenderStyle &oldStyle,
                                                       const RenderStyle &newStyle) const noexcept;
+
     KRYS_NODISCARD bool PaddingBoxLogicaHeightChanged(const RenderStyle &oldStyle,
                                                       const RenderStyle &newStyle) const noexcept;
+
     KRYS_NODISCARD bool ScrollbarWidthDidChange(const RenderStyle &oldStyle, const RenderStyle &newStyle,
                                                 ScrollbarOrientation orientation) const noexcept;
   };

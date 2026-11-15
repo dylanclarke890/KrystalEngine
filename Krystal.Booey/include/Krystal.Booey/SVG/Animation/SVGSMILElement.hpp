@@ -141,12 +141,15 @@ namespace krys::boo::svg
 
   public:
     SVGSMILElement(dom::Document &, UniquePtr<SVGPropertyRegistry> &&, SVGElementInterface) noexcept;
+
     ~SVGSMILElement() noexcept override;
 
     void SVGAttributeChanged(const dom::QualifiedName &) noexcept override;
 
     KRYS_NODISCARD virtual bool HasValidAttributeType() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool HasValidAttributeName() const noexcept;
+
     virtual void AnimationAttributeChanged() noexcept = 0;
 
     KRYS_NODISCARD SMILTimeContainer *TimeContainer() noexcept;
@@ -164,12 +167,17 @@ namespace krys::boo::svg
     void BeginByLinkActivation() noexcept;
 
     KRYS_NODISCARD Restart GetRestart() const noexcept;
+
     KRYS_NODISCARD FillMode Fill() const noexcept;
 
     KRYS_NODISCARD SMILTime Dur() const noexcept;
+
     KRYS_NODISCARD SMILTime RepeatDur() const noexcept;
+
     KRYS_NODISCARD SMILTime RepeatCount() const noexcept;
+
     KRYS_NODISCARD SMILTime MaxValue() const noexcept;
+
     KRYS_NODISCARD SMILTime MinValue() const noexcept;
 
     KRYS_NODISCARD SMILTime Elapsed() const noexcept;
@@ -187,15 +195,19 @@ namespace krys::boo::svg
     KRYS_NODISCARD SMILTime SimpleDuration() const noexcept;
 
     void SeekToIntervalCorrespondingToTime(SMILTime elapsed) noexcept;
+
     bool Progress(SMILTime elapsed, SVGSMILElement &firstAnimation, bool seekToTime) noexcept;
+
     KRYS_NODISCARD SMILTime NextProgressTime() const noexcept;
 
     void Reset() noexcept;
 
     KRYS_NODISCARD static SMILTime ParseClockValue(Maybe<dom::DOMStringView>) noexcept;
+
     KRYS_NODISCARD static SMILTime ParseOffsetValue(dom::DOMStringView) noexcept;
 
     KRYS_NODISCARD bool IsContributing(SMILTime elapsed) const noexcept;
+
     KRYS_NODISCARD bool IsFrozen() const noexcept;
 
     KRYS_NODISCARD uint32 DocumentOrderIndex() const noexcept
@@ -209,8 +221,11 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD virtual bool IsAdditive() const noexcept = 0;
+
     virtual void StartAnimation() noexcept = 0;
+
     virtual void StopAnimation(SVGElement *targetElement) noexcept = 0;
+
     virtual void ApplyResultsToTarget() noexcept = 0;
 
     void ConnectConditions() noexcept;
@@ -235,8 +250,11 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void OnInsert() noexcept override;
+
     void OnPostConnection() noexcept override;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override
@@ -246,6 +264,7 @@ namespace krys::boo::svg
 
     // Sub-classes may need to take action when the target is changed.
     virtual void SetTargetElement(SVGElement *) noexcept;
+
     virtual void SetAttributeName(const dom::QualifiedName &) noexcept;
 
     void AddInstanceTime(BeginOrEnd, SMILTime,
@@ -256,45 +275,66 @@ namespace krys::boo::svg
 
   private:
     void BuildPendingResource() noexcept override;
+
     void ClearResourceReferences() noexcept;
 
     void ClearTarget() noexcept override;
 
     virtual void StartedActiveInterval() noexcept = 0;
+
     void EndedActiveInterval() noexcept;
+
     virtual void UpdateAnimation(float percent, uint32 repeat) noexcept = 0;
 
     KRYS_NODISCARD static bool IsSupportedAttribute(const dom::QualifiedName &) noexcept;
+
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     KRYS_NODISCARD dom::QualifiedName ConstructAttributeName() const noexcept;
+
     void UpdateAttributeName() noexcept;
 
     KRYS_NODISCARD SMILTime FindInstanceTime(BeginOrEnd, SMILTime minimumTime,
                                              bool equalsMinimumOK) const noexcept;
+
     void ResolveFirstInterval() noexcept;
+
     bool ResolveNextInterval() noexcept;
+
     void ResolveInterval(bool first, SMILTime &beginResult, SMILTime &endResult) const noexcept;
+
     KRYS_NODISCARD SMILTime ResolveActiveEnd(SMILTime resolvedBegin, SMILTime resolvedEnd) const noexcept;
+
     KRYS_NODISCARD SMILTime RepeatingDuration() const noexcept;
+
     void CheckRestart(SMILTime elapsed) noexcept;
+
     void BeginListChanged(SMILTime eventTime) noexcept;
+
     void EndListChanged(SMILTime eventTime) noexcept;
 
     bool ParseCondition(dom::DOMStringView, BeginOrEnd) noexcept;
+
     void ParseBeginOrEnd(dom::DOMStringView, BeginOrEnd) noexcept;
+
     KRYS_NODISCARD RefPtr<dom::Element> EventBaseFor(const Condition &) noexcept;
 
     void DisconnectConditions() noexcept;
 
     void NotifyDependentsIntervalChanged() noexcept;
+
     void CreateInstanceTimesFromSyncbase(SVGSMILElement *syncbase) noexcept;
+
     void AddTimeDependent(SVGSMILElement *) noexcept;
+
     void RemoveTimeDependent(SVGSMILElement *) noexcept;
 
     KRYS_NODISCARD ActiveState DetermineActiveState(SMILTime elapsed) const noexcept;
+
     KRYS_NODISCARD float CalculateAnimationPercentAndRepeat(SMILTime elapsed, uint32 &repeat) const noexcept;
+
     KRYS_NODISCARD SMILTime CalculateNextProgressTime(SMILTime elapsed) const noexcept;
 
     KRYS_NODISCARD bool IsSMILElement() const noexcept final

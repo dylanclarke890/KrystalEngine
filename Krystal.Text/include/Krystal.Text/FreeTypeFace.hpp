@@ -59,11 +59,13 @@ namespace krys::text
     Span<const byte> _bytes;
 
     FontFileData(List<byte> &&owned) noexcept;
+
     explicit FontFileData(Span<const byte> external) noexcept;
 
   public:
     /// @brief Font data that the object owns.
     KRYS_NODISCARD static Ref<FontFileData> Create(List<byte> &&bytes) noexcept;
+
     /// @brief Font data that lives as long as the program (such as a bundled font).
     KRYS_NODISCARD static Ref<FontFileData> CreateStatic(Span<const byte> bytes) noexcept;
 

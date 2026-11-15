@@ -71,6 +71,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<const LayoutShape>
       CreateShape(const style::BasicShape &basicShape, const LayoutPoint &borderBoxOffset,
                   const LayoutSize &logicalBoxSize, WritingMode writingMode, float logicalMargin) noexcept;
+
     KRYS_NODISCARD static Ref<const LayoutShape> CreateBoxShape(const LayoutRoundedRect &roundedRect,
                                                                 WritingMode writingMode,
                                                                 float logicalMargin) noexcept;
@@ -78,7 +79,9 @@ namespace krys::boo
     virtual ~LayoutShape() noexcept = default;
 
     KRYS_NODISCARD virtual LayoutRect ShapeMarginLogicalBoundingBox() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsEmpty() const noexcept = 0;
+
     KRYS_NODISCARD virtual LineSegment GetExcludedInterval(LayoutUnit logicalTop,
                                                            LayoutUnit logicalHeight) const noexcept = 0;
 

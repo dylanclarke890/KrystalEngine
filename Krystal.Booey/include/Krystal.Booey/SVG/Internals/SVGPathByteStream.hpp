@@ -114,6 +114,7 @@ namespace krys::boo::svg
     }
 
     SVGPathByteStream(const SVGPathByteStream &) noexcept = default;
+
     SVGPathByteStream &operator=(const SVGPathByteStream &) noexcept = default;
 
     /// @note A moved-from stream is empty.

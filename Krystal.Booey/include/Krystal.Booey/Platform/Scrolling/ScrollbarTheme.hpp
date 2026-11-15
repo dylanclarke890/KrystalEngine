@@ -49,6 +49,7 @@ namespace krys::boo
 
   public:
     ScrollbarTheme() noexcept = default;
+
     virtual ~ScrollbarTheme() noexcept = default;
 
     KRYS_NODISCARD static ScrollbarTheme &Theme() noexcept;

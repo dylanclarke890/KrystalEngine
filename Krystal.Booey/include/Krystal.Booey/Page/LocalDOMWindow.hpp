@@ -211,6 +211,7 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-window-scroll
     void ScrollTo(double x, double y) const noexcept;
+
     /// @brief As `ScrollTo`, choosing the snap position by @p snapPointSelectionMethod.
     void ScrollTo(const ScrollToOptions &options,
                   ScrollSnapPointSelectionMethod snapPointSelectionMethod) const noexcept;
@@ -300,6 +301,7 @@ namespace krys::boo
 
     /// @brief Freezes the timestamp for the rendering update in progress: its steps all see the same time.
     void FreezeNowTimestamp() noexcept;
+
     void UnfreezeNowTimestamp() noexcept;
 
     /// @brief The frozen timestamp during a rendering update; the current one otherwise.

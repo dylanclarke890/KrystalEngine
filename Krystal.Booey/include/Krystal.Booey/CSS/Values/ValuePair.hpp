@@ -52,8 +52,10 @@ namespace krys::boo::css
   public:
     /// @brief A space-separated pair that serialises as a single value when both values serialise the same.
     KRYS_NODISCARD static Ref<ValuePair> Create(Ref<Value> first, Ref<Value> second) noexcept;
+
     /// @brief A slash-separated pair that always serialises both values.
     KRYS_NODISCARD static Ref<ValuePair> CreateSlashSeparated(Ref<Value> first, Ref<Value> second) noexcept;
+
     /// @brief A space-separated pair that always serialises both values.
     KRYS_NODISCARD static Ref<ValuePair> CreateNonCoalescing(Ref<Value> first, Ref<Value> second) noexcept;
 
@@ -78,6 +80,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const ValuePair &other) const noexcept;
 
     /// @brief Whether the pair coalesces identical values and its values are equal.

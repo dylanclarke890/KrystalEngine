@@ -56,9 +56,12 @@ namespace krys::boo::svg
 
     // Used in UnalteredParsing/NormalizedParsing modes.
     void MoveTo(const FloatPoint &, bool closed, PathCoordinateMode) noexcept final;
+
     void LineTo(const FloatPoint &, PathCoordinateMode) noexcept final;
+
     void CurveToCubic(const FloatPoint &, const FloatPoint &, const FloatPoint &,
                       PathCoordinateMode) noexcept final;
+
     void ClosePath() noexcept final;
 
     // Only used in UnalteredParsing mode.

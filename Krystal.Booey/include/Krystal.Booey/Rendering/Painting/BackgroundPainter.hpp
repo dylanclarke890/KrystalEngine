@@ -34,8 +34,8 @@ namespace krys::boo
 {
   class FloatRoundedRect;
   class GraphicsContext;
-  class RenderView;
   struct PaintInfo;
+  class RenderView;
 
   enum BaseBackgroundColorUsage
   {
@@ -108,6 +108,7 @@ namespace krys::boo
 
     void PaintFillLayers(const Color &, const style::BackgroundLayers &, const LayoutRect &, BleedAvoidance,
                          CompositeOperator, RenderElement *backgroundObject = nullptr) const noexcept;
+
     void PaintFillLayer(const Color &, const FillLayerToPaint<style::BackgroundLayer> &, const LayoutRect &,
                         BleedAvoidance, const inline_iterator::InlineBoxIterator &,
                         const LayoutRect &backgroundImageStrip = {},
@@ -117,6 +118,7 @@ namespace krys::boo
 
     void PaintFillLayers(const Color &, const style::MaskLayers &, const LayoutRect &, BleedAvoidance,
                          CompositeOperator, RenderElement *backgroundObject = nullptr) const noexcept;
+
     void PaintFillLayer(const Color &, const FillLayerToPaint<style::MaskLayer> &, const LayoutRect &,
                         BleedAvoidance, const inline_iterator::InlineBoxIterator &,
                         const LayoutRect &backgroundImageStrip = {},
@@ -133,6 +135,7 @@ namespace krys::boo
       const RenderBoxModelObject &, const RenderLayerModelObject *paintContainer,
       const style::BackgroundLayer &, const LayoutPoint &paintOffset, const LayoutRect &borderBoxRect,
       Maybe<FillBox> overrideOrigin = std::nullopt) noexcept;
+
     KRYS_NODISCARD static BackgroundImageGeometry
       CalculateFillLayerImageGeometry(const RenderBoxModelObject &,
                                       const RenderLayerModelObject *paintContainer, const style::MaskLayer &,
@@ -152,6 +155,7 @@ namespace krys::boo
     template <typename TLayers>
     void PaintFillLayersImpl(const Color &, const TLayers &, const LayoutRect &, BleedAvoidance,
                              CompositeOperator, RenderElement *backgroundObject = nullptr) const noexcept;
+
     template <typename TLayer>
     void PaintFillLayerImpl(const Color &, const FillLayerToPaint<TLayer> &, const LayoutRect &,
                             BleedAvoidance, const inline_iterator::InlineBoxIterator &,
@@ -166,11 +170,13 @@ namespace krys::boo
                                           const RenderLayerModelObject *paintContainer, const TLayer &,
                                           const LayoutPoint &paintOffset, const LayoutRect &borderBoxRect,
                                           Maybe<FillBox> overrideOrigin = std::nullopt) noexcept;
+
     template <typename TLayer>
     KRYS_NODISCARD static LayoutSize CalculateFillTileSize(const RenderBoxModelObject &, const TLayer &,
                                                            const LayoutSize &positioningAreaSize) noexcept;
 
     KRYS_NODISCARD const dom::Document &Document() const noexcept;
+
     KRYS_NODISCARD const RenderView &View() const noexcept;
   };
 }

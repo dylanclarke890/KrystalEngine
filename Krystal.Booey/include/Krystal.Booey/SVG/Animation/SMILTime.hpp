@@ -139,7 +139,9 @@ namespace krys::boo::svg
   };
 
   KRYS_NODISCARD SMILTime operator+(const SMILTime &, const SMILTime &) noexcept;
+
   KRYS_NODISCARD SMILTime operator-(const SMILTime &, const SMILTime &) noexcept;
+
   // So multiplying times does not make too much sense but SMIL defines it for duration * repeatCount
   KRYS_NODISCARD SMILTime operator*(const SMILTime &, const SMILTime &) noexcept;
 }

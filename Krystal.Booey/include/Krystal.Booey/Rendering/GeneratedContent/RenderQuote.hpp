@@ -46,6 +46,7 @@ namespace krys::boo
 
   public:
     RenderQuote(dom::Document &document, RenderStyle &&style, QuoteType quote) noexcept;
+
     ~RenderQuote() noexcept override;
 
     void UpdateRenderer(RenderTreeBuilder &builder, RenderQuote *previousQuote) noexcept;
@@ -57,11 +58,15 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD bool IsOpen() const noexcept;
+
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
     void InsertedIntoTree() noexcept override;
+
     void WillBeRemovedFromTree() noexcept override;
 
     KRYS_NODISCARD utf8_string ComputeText() const noexcept;
+
     void UpdateTextRenderer(RenderTreeBuilder &builder) noexcept;
   };
 }

@@ -41,6 +41,7 @@ namespace krys::boo::style
     KRYS_NODISCARD static Ref<const Matrix3DTransformFunction> Create(const TransformationMatrix &) noexcept;
 
     KRYS_NODISCARD Ref<const TransformFunctionBase> Clone() const noexcept override;
+
     KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const FloatSize &) const noexcept override;
 
     KRYS_NODISCARD TransformationMatrix Matrix() const noexcept

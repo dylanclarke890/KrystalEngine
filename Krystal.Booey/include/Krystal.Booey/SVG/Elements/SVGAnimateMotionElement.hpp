@@ -61,25 +61,35 @@ namespace krys::boo::svg
 
   private:
     KRYS_NODISCARD bool HasValidAttributeType() const noexcept override;
+
     KRYS_NODISCARD bool HasValidAttributeName() const noexcept override;
 
     void AttributeChanged(const dom::QualifiedName &, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
 
     void StartAnimation() noexcept override;
+
     void StopAnimation(SVGElement *targetElement) noexcept override;
+
     bool SetFromAndToValues(dom::DOMStringView fromString, dom::DOMStringView toString) noexcept override;
+
     bool SetFromAndByValues(dom::DOMStringView fromString, dom::DOMStringView byString) noexcept override;
+
     bool SetToAtEndOfDurationValue(dom::DOMStringView toAtEndOfDurationString) noexcept override;
+
     void CalculateAnimatedValue(float percentage, uint32 repeatCount) noexcept override;
+
     void ApplyResultsToTarget() noexcept override;
+
     KRYS_NODISCARD Maybe<float> CalculateDistance(dom::DOMStringView fromString,
                                                   dom::DOMStringView toString) noexcept override;
 
     KRYS_NODISCARD RotateMode GetRotateMode() const noexcept;
+
     void BuildTransformForProgress(AffineTransform *, float percentage) const noexcept;
 
     void UpdateAnimationMode() noexcept override;
+
     void OnChildrenChanged() noexcept final;
   };
 }

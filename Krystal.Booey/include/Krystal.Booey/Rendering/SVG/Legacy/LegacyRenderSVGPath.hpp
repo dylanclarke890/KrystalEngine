@@ -42,9 +42,11 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGPath(svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGPath() noexcept override;
 
     void DrawMarkers(PaintInfo &) noexcept final;
+
     KRYS_NODISCARD FloatRect AdjustStrokeBoundingBoxForMarkersAndZeroLengthLinecaps(
       RepaintRectCalculation, FloatRect strokeBoundingBox) const noexcept override;
 
@@ -57,6 +59,7 @@ namespace krys::boo
     void UpdateShapeFromElement() noexcept override;
 
     void StrokeShape(GraphicsContext &) const noexcept override;
+
     KRYS_NODISCARD bool
       ShapeDependentStrokeContains(const FloatPoint &,
                                    PointCoordinateSpace = GlobalCoordinateSpace) noexcept override;
@@ -64,13 +67,19 @@ namespace krys::boo
     void StyleDidChange(style::Difference, const RenderStyle *) noexcept final;
 
     KRYS_NODISCARD bool ShouldStrokeZeroLengthSubpath() const noexcept;
+
     KRYS_NODISCARD Path *ZeroLengthLinecapPath(const FloatPoint &) const noexcept;
+
     KRYS_NODISCARD FloatRect ZeroLengthSubpathRect(const FloatPoint &, float) const noexcept;
+
     void UpdateZeroLengthSubpaths() noexcept;
+
     void StrokeZeroLengthSubpaths(GraphicsContext &) const noexcept;
 
     KRYS_NODISCARD bool ShouldGenerateMarkerPositions() const noexcept;
+
     void ProcessMarkerPositions() noexcept;
+
     KRYS_NODISCARD FloatRect MarkerRect(RepaintRectCalculation, float strokeWidth) const noexcept;
 
     KRYS_NODISCARD bool IsRenderingDisabled() const noexcept override;

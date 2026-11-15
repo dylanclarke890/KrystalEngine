@@ -51,7 +51,9 @@ namespace krys::boo::css
                                                       CSSStyleSheet *parent) noexcept;
 
     KRYS_NODISCARD CSSOMString Name() const noexcept;
+
     KRYS_NODISCARD CSSOMString Syntax() const noexcept;
+
     KRYS_NODISCARD bool Inherits() const noexcept;
 
     /// @brief The initial value, or null if the rule has none.

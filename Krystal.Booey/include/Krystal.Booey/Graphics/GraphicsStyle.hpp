@@ -95,7 +95,10 @@ namespace krys::boo
   using GraphicsStyle = Variant<GraphicsDropShadow, GraphicsGaussianBlur, GraphicsColorMatrix>;
 
   TextStream &operator<<(TextStream &ts, const GraphicsDropShadow &dropShadow) noexcept;
+
   TextStream &operator<<(TextStream &ts, const GraphicsGaussianBlur &gaussianBlur) noexcept;
+
   TextStream &operator<<(TextStream &ts, const GraphicsColorMatrix &colorMatrix) noexcept;
+
   TextStream &operator<<(TextStream &ts, const GraphicsStyle &style) noexcept;
 }

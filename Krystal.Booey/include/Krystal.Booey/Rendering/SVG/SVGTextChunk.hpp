@@ -68,13 +68,18 @@ namespace krys::boo
 
     /// @brief In characters (code points).
     KRYS_NODISCARD uint32 TotalCharacters() const noexcept;
+
     KRYS_NODISCARD float TotalLength() const noexcept;
+
     KRYS_NODISCARD float TotalAnchorShift() const noexcept;
+
     void Layout(SVGChunkTransformMap &) const noexcept;
 
   private:
     void ProcessTextAnchorCorrection() const noexcept;
+
     void BuildBoxTransformations(SVGChunkTransformMap &) const noexcept;
+
     void ProcessTextLengthSpacingCorrection() const noexcept;
 
     KRYS_NODISCARD bool IsVerticalText() const noexcept

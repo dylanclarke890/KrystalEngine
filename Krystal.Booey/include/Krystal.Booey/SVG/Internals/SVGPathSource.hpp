@@ -89,28 +89,39 @@ namespace krys::boo::svg
     };
 
     SVGPathSource() noexcept = default;
+
     virtual ~SVGPathSource() noexcept = default;
 
     KRYS_NODISCARD virtual bool HasMoreData() const noexcept = 0;
+
     virtual bool MoveToNextToken() noexcept = 0;
+
     KRYS_NODISCARD virtual SVGPathSegType NextCommand(SVGPathSegType previousCommand) noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<SVGPathSegType> ParseSVGSegmentType() noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<MoveToSegment> ParseMoveToSegment(FloatPoint currentPoint) noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<LineToSegment> ParseLineToSegment(FloatPoint currentPoint) noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<LineToHorizontalSegment>
       ParseLineToHorizontalSegment(FloatPoint currentPoint) noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<LineToVerticalSegment>
       ParseLineToVerticalSegment(FloatPoint currentPoint) noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<CurveToCubicSegment>
       ParseCurveToCubicSegment(FloatPoint currentPoint) noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<CurveToCubicSmoothSegment>
       ParseCurveToCubicSmoothSegment(FloatPoint currentPoint) noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<CurveToQuadraticSegment>
       ParseCurveToQuadraticSegment(FloatPoint currentPoint) noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<CurveToQuadraticSmoothSegment>
       ParseCurveToQuadraticSmoothSegment(FloatPoint currentPoint) noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<ArcToSegment> ParseArcToSegment(FloatPoint currentPoint) noexcept = 0;
   };
 }

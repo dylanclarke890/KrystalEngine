@@ -5,8 +5,8 @@
 
 namespace krys::boo
 {
-  class RenderBlock;
   class ElementBox;
+  class RenderBlock;
 }
 
 namespace krys::boo::layout::tests

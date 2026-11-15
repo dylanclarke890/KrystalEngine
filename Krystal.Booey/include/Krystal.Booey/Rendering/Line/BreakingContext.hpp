@@ -139,7 +139,9 @@ namespace krys::boo
     void Increment() noexcept;
 
     void HandleEmptyInline() noexcept;
+
     bool HandleText() noexcept;
+
     void TrailingSpacesHang(LegacyInlineIterator &, RenderObject &, bool canBreakMidWord,
                             bool previousCharacterIsSpace) noexcept;
 
@@ -149,6 +151,7 @@ namespace krys::boo
     }
 
     void CommitAndUpdateLineBreakIfNeeded() noexcept;
+
     KRYS_NODISCARD LegacyInlineIterator HandleEndOfLine() noexcept;
 
     void ClearLineBreakIfFitsOnLine(bool ignoringTrailingSpace = false) noexcept

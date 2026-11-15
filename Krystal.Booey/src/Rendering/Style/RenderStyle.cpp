@@ -57,6 +57,7 @@
 namespace krys::boo
 {
   RenderStyle::RenderStyle(RenderStyle &&) noexcept = default;
+
   RenderStyle &RenderStyle::operator=(RenderStyle &&) noexcept = default;
 
   RenderStyle::RenderStyle(CreateDefaultStyleTag tag) noexcept : RenderStyleProperties {tag}

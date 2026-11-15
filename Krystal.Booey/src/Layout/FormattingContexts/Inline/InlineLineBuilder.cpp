@@ -50,11 +50,13 @@ namespace krys::boo::layout
     Maybe<InlineLayoutUnit> OverflowLogicalWidth {};
     HashMap<const Box *, InlineLayoutUnit> RubyBaseAlignmentOffsetList {};
     InlineLayoutUnit RubyAnnotationOffset {0.f};
+
     enum class LineBreakReason : uint8
     {
       ForcedLineBreakByBlockContent,
       Other,
     };
+
     LineBreakReason BreakReason {LineBreakReason::Other};
   };
 
@@ -87,6 +89,7 @@ namespace krys::boo::layout
       void AppendInlineItem(const InlineItem &inlineItem, const RenderStyle &style,
                             InlineLayoutUnit logicalWidth,
                             InlineLayoutUnit textSpacingAdjustment = 0) noexcept;
+
       void Reset() noexcept;
 
       KRYS_NODISCARD bool IsEmpty() const noexcept

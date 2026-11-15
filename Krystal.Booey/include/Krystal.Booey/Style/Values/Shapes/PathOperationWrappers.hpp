@@ -32,8 +32,8 @@
 
 namespace krys::boo::style
 {
-  struct OffsetPath;
   struct ClipPath;
+  struct OffsetPath;
 
   enum class SupportRayPathOperation : bool
   {
@@ -82,6 +82,7 @@ namespace krys::boo::style
   private:
     friend ClipPath;
     friend OffsetPath;
+
     friend Maybe<boo::Path> TryPath(const RayPath &, const TransformOperationData &) noexcept;
 
     Ref<RayPathOperation> _operation;
@@ -134,6 +135,7 @@ namespace krys::boo::style
   private:
     friend ClipPath;
     friend OffsetPath;
+
     friend Maybe<boo::Path> TryPath(const ReferencePath &, const TransformOperationData &) noexcept;
 
     Ref<ReferencePathOperation> _operation;
@@ -180,6 +182,7 @@ namespace krys::boo::style
   private:
     friend ClipPath;
     friend OffsetPath;
+
     friend Maybe<boo::Path> TryPath(const BasicShapePath &, const TransformOperationData &) noexcept;
 
     Ref<ShapePathOperation> _operation;
@@ -216,6 +219,7 @@ namespace krys::boo::style
   private:
     friend ClipPath;
     friend OffsetPath;
+
     friend Maybe<boo::Path> TryPath(const BoxPath &, const TransformOperationData &) noexcept;
 
     Ref<BoxPathOperation> _operation;

@@ -46,8 +46,11 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<BitmapImage>
       Create(ImageObserver * = nullptr, AlphaOption = AlphaOption::Premultiplied,
              GammaAndColorProfileOption = GammaAndColorProfileOption::Applied) noexcept;
+
     KRYS_NODISCARD static Ref<BitmapImage> Create(Ref<NativeImage> &&) noexcept;
+
     KRYS_NODISCARD static RefPtr<BitmapImage> Create(RefPtr<NativeImage> &&) noexcept;
+
     KRYS_NODISCARD static RefPtr<BitmapImage> Create(PlatformImagePtr &&) noexcept;
 
     // Animation
@@ -166,6 +169,7 @@ namespace krys::boo
 
     // Encoded and decoded data
     EncodedDataStatus DataChanged(bool allDataReceived) noexcept final;
+
     void DestroyDecodedData(bool destroyAll = true) noexcept final;
 
     // Image Metadata
@@ -215,6 +219,7 @@ namespace krys::boo
                                      const FloatRect &tileRect, const AffineTransform &,
                                      const FloatPoint &phase, const FloatSize &spacing,
                                      ImagePaintingOptions) noexcept;
+
     void DrawPattern(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &tileRect,
                      const AffineTransform &patternTransform, const FloatPoint &phase,
                      const FloatSize &spacing, ImagePaintingOptions = {}) noexcept final;
@@ -228,6 +233,7 @@ namespace krys::boo
     void DrawLuminanceMaskPattern(GraphicsContext &, const FloatRect &destinationRect,
                                   const FloatRect &tileRect, const AffineTransform &, const FloatPoint &phase,
                                   const FloatSize &spacing, ImagePaintingOptions) noexcept;
+
     explicit BitmapImage(Ref<NativeImage> &&) noexcept;
 
     // Current NativeImage

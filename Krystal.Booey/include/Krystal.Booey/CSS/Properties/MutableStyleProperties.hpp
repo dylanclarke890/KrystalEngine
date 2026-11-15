@@ -50,7 +50,9 @@ namespace krys::boo::css
     UniquePtr<CSSStyleProperties> _cssomWrapper;
 
     explicit MutableStyleProperties(css::ParserMode mode) noexcept;
+
     explicit MutableStyleProperties(const StyleProperties &other) noexcept;
+
     explicit MutableStyleProperties(List<Property> &&properties) noexcept;
 
   public:

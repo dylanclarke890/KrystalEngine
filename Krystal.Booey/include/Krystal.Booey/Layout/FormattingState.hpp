@@ -60,8 +60,10 @@ namespace krys::boo::layout
   public:
     void SetIntrinsicWidthConstraintsForBox(const Box &layoutBox,
                                             IntrinsicWidthConstraints intrinsicWidthConstraints) noexcept;
+
     KRYS_NODISCARD Maybe<IntrinsicWidthConstraints>
       IntrinsicWidthConstraintsForBox(const Box &layoutBox) const noexcept;
+
     void ClearIntrinsicWidthConstraints(const Box &layoutBox) noexcept;
 
     void SetIntrinsicWidthConstraints(IntrinsicWidthConstraints intrinsicWidthConstraints) noexcept
@@ -99,6 +101,7 @@ namespace krys::boo::layout
 
   protected:
     FormattingState(Type type, LayoutState &layoutState) noexcept;
+
     ~FormattingState() noexcept;
   };
 }

@@ -96,48 +96,68 @@ namespace krys::boo::css::calc
 
   // https://drafts.csswg.org/css-values-4/#serialize-a-math-function
   static void SerialiseMathFunction(StringBuilder &, const Child &, SerialisationState &) noexcept;
+
   static void SerialiseMathFunction(StringBuilder &, const Symbol &, SerialisationState &) noexcept;
+
   static void SerialiseMathFunction(StringBuilder &, const SiblingCount &, SerialisationState &) noexcept;
+
   static void SerialiseMathFunction(StringBuilder &, const SiblingIndex &, SerialisationState &) noexcept;
+
   template <Numeric Op>
   static void SerialiseMathFunction(StringBuilder &, const Op &, SerialisationState &) noexcept;
+
   template <typename Op>
   static void SerialiseMathFunction(StringBuilder &, const IndirectNode<Op> &, SerialisationState &) noexcept;
 
   static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Sum> &,
                                           SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Product> &,
                                           SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Negate> &,
                                           SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Invert> &,
                                           SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<RoundNearest> &,
                                           SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<RoundUp> &,
                                           SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<RoundDown> &,
                                           SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<RoundToZero> &,
                                           SerialisationState &) noexcept;
+
   template <typename Op>
   static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Op> &,
                                           SerialisationState &) noexcept;
 
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Sum> &,
                                              SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Product> &,
                                              SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Negate> &,
                                              SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Invert> &,
                                              SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Random> &,
                                              SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Anchor> &,
                                              SerialisationState &) noexcept;
+
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<AnchorSize> &,
                                              SerialisationState &) noexcept;
+
   template <typename Op>
   static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Op> &,
                                              SerialisationState &) noexcept;
@@ -146,22 +166,33 @@ namespace krys::boo::css::calc
 
   // https://drafts.csswg.org/css-values-4/#serialize-a-calculation-tree
   static void SerialiseCalculationTree(StringBuilder &, const Child &, SerialisationState &) noexcept;
+
   static void SerialiseCalculationTree(StringBuilder &, const ChildOrNone &, SerialisationState &) noexcept;
+
   static void SerialiseCalculationTree(StringBuilder &, const keywords::None &,
                                        SerialisationState &) noexcept;
+
   static void SerialiseCalculationTree(StringBuilder &, const Symbol &, SerialisationState &) noexcept;
+
   static void SerialiseCalculationTree(StringBuilder &, const SiblingCount &, SerialisationState &) noexcept;
+
   static void SerialiseCalculationTree(StringBuilder &, const SiblingIndex &, SerialisationState &) noexcept;
+
   static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Sum> &,
                                        SerialisationState &) noexcept;
+
   static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Product> &,
                                        SerialisationState &) noexcept;
+
   static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Negate> &,
                                        SerialisationState &) noexcept;
+
   static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Invert> &,
                                        SerialisationState &) noexcept;
+
   template <Numeric Op>
   static void SerialiseCalculationTree(StringBuilder &, const Op &, SerialisationState &) noexcept;
+
   template <typename Op>
   static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Op> &,
                                        SerialisationState &) noexcept;

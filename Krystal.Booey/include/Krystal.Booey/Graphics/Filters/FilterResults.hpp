@@ -57,18 +57,22 @@ namespace krys::boo
 
   public:
     explicit FilterResults(AcceleratedApplierCreator &&acceleratedApplierCreator = nullptr) noexcept;
+
     ~FilterResults() noexcept;
 
     KRYS_NODISCARD UniquePtr<FilterEffectApplier>
       CreateAcceleratedApplier(const FilterEffect &effect) const noexcept;
 
     KRYS_NODISCARD FilterImage *EffectResult(FilterEffect &effect) const noexcept;
+
     void SetEffectResult(FilterEffect &effect, Span<const Ref<FilterImage>> inputs,
                          Ref<FilterImage> &&result) noexcept;
+
     void ClearEffectResult(FilterEffect &effect) noexcept;
 
   private:
     KRYS_NODISCARD size_t MemoryCost() const noexcept;
+
     KRYS_NODISCARD bool CanCacheResult(const FilterImage &result) const noexcept;
   };
 }

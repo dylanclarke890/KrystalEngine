@@ -58,6 +58,7 @@ namespace krys::boo::mathml
 
     KRYS_NODISCARD BooleanValue CachedBooleanAttribute(const dom::QualifiedName &name,
                                                        Maybe<BooleanValue> &attribute) const noexcept;
+
     KRYS_NODISCARD const Length &CachedMathMLLength(const dom::QualifiedName &name,
                                                     Maybe<Length> &length) const noexcept;
 

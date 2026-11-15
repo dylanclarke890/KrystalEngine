@@ -67,6 +67,7 @@ namespace krys::boo::dom
     RefPtr<File> _file;
 
     DataTransferItem(WeakPtr<DataTransferItemList> &&list, DOMStringView type, Kind kind) noexcept;
+
     DataTransferItem(WeakPtr<DataTransferItemList> &&list, DOMStringView type, Ref<File> &&file) noexcept;
 
   public:
@@ -74,6 +75,7 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD static Ref<DataTransferItem> Create(WeakPtr<DataTransferItemList> &&list,
                                                        DOMStringView type, Kind kind) noexcept;
+
     KRYS_NODISCARD static Ref<DataTransferItem> Create(WeakPtr<DataTransferItemList> &&list,
                                                        DOMStringView type, Ref<File> &&file) noexcept;
 
@@ -86,14 +88,18 @@ namespace krys::boo::dom
     void ClearListAndPutIntoDisabledMode() noexcept;
 
     KRYS_NODISCARD bool IsFile() const noexcept;
+
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-kind
     KRYS_NODISCARD DOMString GetKind() const noexcept;
+
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-type
     KRYS_NODISCARD DOMString Type() const noexcept;
+
     /// @brief Queues a task that calls @p callback with the item's string, if it's a string the data
     /// transfer can read.
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-getasstring
     void GetAsString(Document &document, Func<void(const DOMString &)> &&callback) const noexcept;
+
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-getasfile
     KRYS_NODISCARD RefPtr<File> GetAsFile() const noexcept;
 

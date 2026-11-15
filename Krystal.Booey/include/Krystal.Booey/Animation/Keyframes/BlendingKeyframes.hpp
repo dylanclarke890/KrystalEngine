@@ -77,8 +77,11 @@ namespace krys::boo
 
   public:
     BlendingKeyframe(KeyframeOffset &&offset, UniquePtr<RenderStyle> &&style) noexcept;
+
     BlendingKeyframe(const BlendingKeyframe &source) noexcept;
+
     BlendingKeyframe(BlendingKeyframe &&) noexcept = default;
+
     BlendingKeyframe &operator=(BlendingKeyframe &&) noexcept = default;
 
     // KeyframeInterpolation::Keyframe
@@ -197,6 +200,7 @@ namespace krys::boo
     ~BlendingKeyframes() noexcept;
 
     BlendingKeyframes(BlendingKeyframes &&) noexcept = default;
+
     BlendingKeyframes &operator=(BlendingKeyframes &&) noexcept = default;
 
     KRYS_NODISCARD bool operator==(const BlendingKeyframes &other) const noexcept;
@@ -207,12 +211,14 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD StringAtom KeyframesName() const noexcept;
+
     /// @brief The name the keyframes' animation has on a graphics layer.
     KRYS_NODISCARD const utf8_string &AcceleratedAnimationName() const noexcept;
 
     void Insert(BlendingKeyframe &&keyframe) noexcept;
 
     void AddProperty(const AnimatableCSSProperty &property) noexcept;
+
     KRYS_NODISCARD bool ContainsProperty(const AnimatableCSSProperty &property) const noexcept;
 
     KRYS_NODISCARD const AnimatableCSSPropertySet &Properties() const noexcept
@@ -221,6 +227,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool ContainsAnimatableCSSProperty() const noexcept;
+
     KRYS_NODISCARD bool ContainsDirectionAwareProperty() const noexcept;
 
     void Clear() noexcept;
@@ -241,8 +248,11 @@ namespace krys::boo
     }
 
     void CopyKeyframes(const BlendingKeyframes &other) noexcept;
+
     KRYS_NODISCARD bool HasImplicitKeyframes() const noexcept;
+
     KRYS_NODISCARD bool HasImplicitKeyframeForProperty(const AnimatableCSSProperty &property) const noexcept;
+
     /// @brief Adds the 0% and 100% keyframes the properties without one there take from @p underlyingStyle.
     void FillImplicitKeyframes(const KeyframeEffect &effect, const RenderStyle &underlyingStyle) noexcept;
 
@@ -257,11 +267,17 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool UsesContainerUnits() const noexcept;
+
     KRYS_NODISCARD bool UsesRelativeFontWeight() const noexcept;
+
     KRYS_NODISCARD bool HasCSSVariableReferences() const noexcept;
+
     KRYS_NODISCARD bool HasColorSetToCurrentColor() const noexcept;
+
     KRYS_NODISCARD bool HasPropertySetToCurrentColor() const noexcept;
+
     KRYS_NODISCARD const AnimatableCSSPropertySet &PropertiesSetToInherit() const noexcept;
+
     void UpdatePropertiesMetadata(const css::StyleProperties &properties) noexcept;
 
     KRYS_NODISCARD bool HasWidthDependentTransform() const noexcept
@@ -299,6 +315,7 @@ namespace krys::boo
 
   private:
     void AnalyzeKeyframe(const BlendingKeyframe &keyframe) noexcept;
+
     KRYS_NODISCARD static uint64 NextAnonymousIdentifier() noexcept;
   };
 }

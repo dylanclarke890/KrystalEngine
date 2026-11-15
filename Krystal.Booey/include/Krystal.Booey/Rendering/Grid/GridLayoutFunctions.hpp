@@ -91,38 +91,51 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit ComputeMarginLogicalSizeForGridItem(const RenderGrid &grid,
                                                                   style::GridTrackSizingDirection direction,
                                                                   const RenderBox &gridItem) noexcept;
+
     KRYS_NODISCARD LayoutUnit MarginLogicalSizeForGridItem(const RenderGrid &grid,
                                                            style::GridTrackSizingDirection direction,
                                                            const RenderBox &gridItem) noexcept;
+
     void SetOverridingContentSizeForGridItem(const RenderGrid &renderGrid, RenderBox &gridItem,
                                              LayoutUnit logicalSize,
                                              style::GridTrackSizingDirection direction) noexcept;
+
     void ClearOverridingContentSizeForGridItem(const RenderGrid &renderGrid, RenderBox &gridItem,
                                                style::GridTrackSizingDirection direction) noexcept;
+
     KRYS_NODISCARD bool IsOrthogonalGridItem(const RenderGrid &grid, const RenderBox &gridItem) noexcept;
+
     KRYS_NODISCARD bool
       IsGridItemInlineSizeDependentOnBlockConstraints(const RenderBox &gridItem, const RenderGrid &parentGrid,
                                                       ItemPosition gridItemAlignSelf) noexcept;
+
     KRYS_NODISCARD bool IsOrthogonalParent(const RenderGrid &grid, const RenderElement &parent) noexcept;
+
     KRYS_NODISCARD bool IsAspectRatioBlockSizeDependentGridItem(const RenderBox &gridItem) noexcept;
+
     KRYS_NODISCARD style::GridTrackSizingDirection
       FlowAwareDirectionForGridItem(const RenderGrid &grid, const RenderBox &gridItem,
                                     style::GridTrackSizingDirection direction) noexcept;
+
     KRYS_NODISCARD style::GridTrackSizingDirection
       FlowAwareDirectionForParent(const RenderGrid &grid, const RenderElement &parent,
                                   style::GridTrackSizingDirection direction) noexcept;
+
     KRYS_NODISCARD Maybe<RenderBox::GridAreaSize>
       OverridingContainingBlockContentSizeForGridItem(const RenderBox &gridItem,
                                                       style::GridTrackSizingDirection direction) noexcept;
+
     KRYS_NODISCARD bool
       HasRelativeOrIntrinsicSizeForGridItem(const RenderBox &gridItem,
                                             style::GridTrackSizingDirection direction) noexcept;
 
     KRYS_NODISCARD bool IsFlippedDirection(const RenderGrid &grid,
                                            style::GridTrackSizingDirection direction) noexcept;
+
     KRYS_NODISCARD bool IsSubgridReversedDirection(const RenderGrid &grid,
                                                    style::GridTrackSizingDirection outerDirection,
                                                    const RenderGrid &subgrid) noexcept;
+
     KRYS_NODISCARD ExtraMarginsFromSubgrids ExtraMarginForSubgridAncestors(
       style::GridTrackSizingDirection direction, const RenderBox &gridItem) noexcept;
 
@@ -131,17 +144,20 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasAutoMarginsInColumnAxis(const RenderBox &gridItem,
                                                    WritingMode parentWritingMode) noexcept;
+
     KRYS_NODISCARD bool HasAutoMarginsInRowAxis(const RenderBox &gridItem,
                                                 WritingMode parentWritingMode) noexcept;
 
     KRYS_NODISCARD bool HasAutoSizeInColumnAxis(const RenderBox &gridItem,
                                                 WritingMode parentWritingMode) noexcept;
+
     KRYS_NODISCARD bool HasAutoSizeInRowAxis(const RenderBox &gridItem,
                                              WritingMode parentWritingMode) noexcept;
 
     KRYS_NODISCARD bool AllowedToStretchGridItemAlongColumnAxis(const RenderBox &gridItem,
                                                                 ItemPosition alignSelf,
                                                                 WritingMode writingMode) noexcept;
+
     KRYS_NODISCARD bool AllowedToStretchGridItemAlongRowAxis(const RenderBox &gridItem,
                                                              ItemPosition justifySelf,
                                                              WritingMode writingMode) noexcept;
@@ -151,11 +167,14 @@ namespace krys::boo
       style::GridTrackSizingDirection direction) noexcept;
 
     void UpdateAutoMarginsIfNeeded(RenderBox &gridItem, WritingMode writingMode) noexcept;
+
     void UpdateAutoMarginsInRowAxisIfNeeded(RenderBox &gridItem, WritingMode writingMode) noexcept;
+
     void UpdateAutoMarginsInColumnAxisIfNeeded(RenderBox &gridItem, WritingMode writingMode) noexcept;
 
     KRYS_NODISCARD bool IsRelativeGridTrackBreadthAsAuto(const style::GridTrackFitContentLength &length,
                                                          Maybe<LayoutUnit> availableSpace) noexcept;
+
     KRYS_NODISCARD bool IsRelativeGridTrackBreadthAsAuto(const style::GridTrackBreadth &length,
                                                          Maybe<LayoutUnit> availableSpace) noexcept;
   }

@@ -38,6 +38,7 @@ namespace krys::boo
     constexpr static int32 DefaultTrackLength = 129;
 
     RenderSlider(html::HTMLInputElement &, RenderStyle &&) noexcept;
+
     ~RenderSlider() noexcept override;
 
     KRYS_NODISCARD html::HTMLInputElement &InputElement() const noexcept;
@@ -48,6 +49,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool InDragMode() const noexcept;
+
     KRYS_NODISCARD double ValueRatio() const noexcept;
 
     /// @brief The content height a horizontal slider with a datalist's ticks needs to fit them; none
@@ -65,6 +67,7 @@ namespace krys::boo
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
+
     void ComputePreferredLogicalWidths() noexcept override;
 
     KRYS_NODISCARD bool IsFlexibleBoxImpl() const noexcept override

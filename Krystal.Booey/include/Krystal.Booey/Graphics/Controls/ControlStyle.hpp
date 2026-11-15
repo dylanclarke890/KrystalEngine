@@ -79,5 +79,6 @@ namespace krys::boo
   };
 
   TextStream &operator<<(TextStream &ts, ControlStyleState state) noexcept;
+
   TextStream &operator<<(TextStream &ts, const ControlStyle &style) noexcept;
 }

@@ -54,5 +54,6 @@ namespace krys::boo::css::cq
   using ContainerQueryList = List<ContainerQuery>;
 
   void Serialise(StringBuilder &builder, const ContainerQuery &query) noexcept;
+
   void Serialise(StringBuilder &builder, const ContainerQueryList &queries) noexcept;
 }

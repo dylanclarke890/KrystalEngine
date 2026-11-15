@@ -143,11 +143,17 @@ namespace krys::boo::layout
     virtual ~Box() noexcept;
 
     KRYS_NODISCARD bool EstablishesFormattingContext() const noexcept;
+
     KRYS_NODISCARD bool EstablishesBlockFormattingContext() const noexcept;
+
     KRYS_NODISCARD bool EstablishesInlineFormattingContext() const noexcept;
+
     KRYS_NODISCARD bool EstablishesTableFormattingContext() const noexcept;
+
     KRYS_NODISCARD bool EstablishesFlexFormattingContext() const noexcept;
+
     KRYS_NODISCARD bool EstablishesGridFormattingContext() const noexcept;
+
     KRYS_NODISCARD bool EstablishesIndependentFormattingContext() const noexcept;
 
     KRYS_NODISCARD bool IsInFlow() const noexcept
@@ -171,11 +177,17 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD bool IsRelativelyPositioned() const noexcept;
+
     KRYS_NODISCARD bool IsStickyPositioned() const noexcept;
+
     KRYS_NODISCARD bool IsAbsolutelyPositioned() const noexcept;
+
     KRYS_NODISCARD bool IsFixedPositioned() const noexcept;
+
     KRYS_NODISCARD bool IsFloatingPositioned() const noexcept;
+
     KRYS_NODISCARD bool HasFloatClear() const noexcept;
+
     KRYS_NODISCARD bool IsFloatAvoider() const noexcept;
 
     KRYS_NODISCARD bool IsFloatingOrOutOfFlowPositioned() const noexcept
@@ -184,7 +196,9 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD bool IsContainingBlockForInFlow() const noexcept;
+
     KRYS_NODISCARD inline bool IsContainingBlockForFixedPosition() const noexcept;
+
     KRYS_NODISCARD inline bool IsContainingBlockForOutOfFlowPosition() const noexcept;
 
     KRYS_NODISCARD bool IsAnonymous() const noexcept
@@ -194,15 +208,22 @@ namespace krys::boo::layout
 
     // Block level elements generate block level boxes.
     KRYS_NODISCARD bool IsBlockLevelBox() const noexcept;
+
     // A block-level box that is also a block container.
     KRYS_NODISCARD bool IsBlockBox() const noexcept;
+
     // A block-level box is also a block container box unless it is a table box or the principal box of a
     // replaced element.
     KRYS_NODISCARD bool IsBlockContainer() const noexcept;
+
     KRYS_NODISCARD bool IsInlineLevelBox() const noexcept;
+
     KRYS_NODISCARD bool IsInlineBox() const noexcept;
+
     KRYS_NODISCARD bool IsAtomicInlineBox() const noexcept;
+
     KRYS_NODISCARD bool IsInlineBlockBox() const noexcept;
+
     KRYS_NODISCARD bool IsInlineTableBox() const noexcept;
 
     KRYS_NODISCARD bool IsInitialContainingBlock() const noexcept
@@ -211,9 +232,13 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD bool IsLayoutContainmentBox() const noexcept;
+
     KRYS_NODISCARD bool IsSizeContainmentBox() const noexcept;
+
     KRYS_NODISCARD bool IsInternalRubyBox() const noexcept;
+
     KRYS_NODISCARD bool IsRubyAnnotationBox() const noexcept;
+
     KRYS_NODISCARD bool IsInterlinearRubyAnnotationBox() const noexcept;
 
     KRYS_NODISCARD bool IsDocumentBox() const noexcept
@@ -268,23 +293,41 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD bool IsInternalTableBox() const noexcept;
+
     KRYS_NODISCARD inline bool IsRuby() const noexcept;
+
     KRYS_NODISCARD inline bool IsRubyBase() const noexcept;
+
     KRYS_NODISCARD inline bool IsRubyInlineBox() const noexcept;
+
     KRYS_NODISCARD inline bool IsTableCaption() const noexcept;
+
     KRYS_NODISCARD inline bool IsTableHeader() const noexcept;
+
     KRYS_NODISCARD inline bool IsTableBody() const noexcept;
+
     KRYS_NODISCARD inline bool IsTableFooter() const noexcept;
+
     KRYS_NODISCARD inline bool IsTableRow() const noexcept;
+
     KRYS_NODISCARD inline bool IsTableColumnGroup() const noexcept;
+
     KRYS_NODISCARD inline bool IsTableColumn() const noexcept;
+
     KRYS_NODISCARD inline bool IsTableCell() const noexcept;
+
     KRYS_NODISCARD inline bool IsFlexBox() const noexcept;
+
     KRYS_NODISCARD bool IsFlexItem() const noexcept;
+
     KRYS_NODISCARD inline bool IsGridFormattingContext() const noexcept;
+
     KRYS_NODISCARD inline bool IsGridBox() const noexcept;
+
     KRYS_NODISCARD inline bool IsGridLanesBox() const noexcept;
+
     KRYS_NODISCARD bool IsGridItem() const noexcept;
+
     KRYS_NODISCARD inline bool IsListItem() const noexcept;
 
     KRYS_NODISCARD bool IsInlineIntegrationRoot() const noexcept
@@ -305,7 +348,9 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const Box *NextInFlowSibling() const noexcept;
+
     KRYS_NODISCARD const Box *NextInFlowOrFloatingSibling() const noexcept;
+
     KRYS_NODISCARD const Box *NextOutOfFlowSibling() const noexcept;
 
     KRYS_NODISCARD const Box *PreviousSibling() const noexcept
@@ -314,10 +359,15 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const Box *PreviousInFlowSibling() const noexcept;
+
     KRYS_NODISCARD const Box *PreviousInFlowOrFloatingSibling() const noexcept;
+
     KRYS_NODISCARD const Box *PreviousOutOfFlowSibling() const noexcept;
+
     KRYS_NODISCARD bool IsDescendantOf(const Box &box) const noexcept;
+
     KRYS_NODISCARD bool IsDescendantOfWithinFormattingContext(const Box &box) const noexcept;
+
     KRYS_NODISCARD bool
       IsInFormattingContextEstablishedBy(const ElementBox &formattingContextRoot) const noexcept;
 
@@ -338,6 +388,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD bool IsPaddingApplicable() const noexcept;
+
     KRYS_NODISCARD bool IsOverflowVisible() const noexcept;
 
     void UpdateStyle(RenderStyle &&newStyle, UniquePtr<RenderStyle> &&newFirstLineStyle) noexcept;
@@ -359,12 +410,15 @@ namespace krys::boo::layout
 
     // FIXME: Find a better place for random DOM things.
     void SetRowSpan(size_t rowSpan) noexcept;
+
     KRYS_NODISCARD size_t RowSpan() const noexcept;
 
     void SetColumnSpan(size_t columnSpan) noexcept;
+
     KRYS_NODISCARD size_t ColumnSpan() const noexcept;
 
     void SetColumnWidth(LayoutUnit columnWidth) noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> ColumnWidth() const noexcept;
 
     void SetIsInlineIntegrationRoot() noexcept
@@ -378,11 +432,13 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const LayoutShape *Shape() const noexcept;
+
     void SetShape(RefPtr<const LayoutShape> shape) noexcept;
 
     KRYS_NODISCARD const ElementBox *AssociatedRubyAnnotationBox() const noexcept;
 
     KRYS_NODISCARD RenderObject *RendererForIntegration() const noexcept;
+
     void SetRendererForIntegration(RenderObject *renderer) noexcept;
 
     KRYS_NODISCARD UniquePtr<Box> RemoveFromParent() noexcept;
@@ -403,8 +459,11 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const BoxRareData &RareData() const noexcept;
+
     KRYS_NODISCARD BoxRareData &RareData() noexcept;
+
     BoxRareData &EnsureRareData() noexcept;
+
     void RemoveRareData() noexcept;
 
     KRYS_NODISCARD EnumSet<BaseTypeFlag> BaseTypeFlags() const noexcept

@@ -92,18 +92,24 @@ namespace krys::boo
 
   public:
     ImageFrame() noexcept = default;
+
     explicit ImageFrame(Ref<NativeImage> &&nativeImage) noexcept;
+
     ImageFrame(const ImageFrame &other) noexcept = default;
+
     ImageFrame &operator=(const ImageFrame &other) noexcept = default;
+
     ~ImageFrame() noexcept;
 
     KRYS_NODISCARD static const ImageFrame &DefaultFrame() noexcept;
 
     /// @return The bytes freed.
     uint32 ClearImage() noexcept;
+
     uint32 Clear() noexcept;
 
     void SetDecodingStatus(DecodingStatus decodingStatus) noexcept;
+
     KRYS_NODISCARD DecodingStatus GetDecodingStatus() const noexcept;
 
     KRYS_NODISCARD bool IsInvalid() const noexcept
@@ -197,7 +203,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool HasNativeImage(SubsamplingLevel subsamplingLevel) const noexcept;
+
     KRYS_NODISCARD bool HasFullSizeNativeImage(SubsamplingLevel subsamplingLevel) const noexcept;
+
     KRYS_NODISCARD bool
       HasDecodedNativeImageCompatibleWithOptions(const DecodingOptions &options,
                                                  SubsamplingLevel subsamplingLevel) const noexcept;

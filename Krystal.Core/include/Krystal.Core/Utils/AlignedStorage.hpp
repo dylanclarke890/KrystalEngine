@@ -19,9 +19,11 @@ namespace krys
     AlignedStorage() noexcept = default;
 
     AlignedStorage(AlignedStorage &&) = delete;
+
     AlignedStorage &operator=(AlignedStorage &&) = delete;
 
     AlignedStorage(const AlignedStorage &) = delete;
+
     AlignedStorage &operator=(const AlignedStorage &) = delete;
 
     KRYS_NODISCARD T *get() noexcept

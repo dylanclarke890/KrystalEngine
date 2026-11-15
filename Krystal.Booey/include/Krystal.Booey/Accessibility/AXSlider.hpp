@@ -46,11 +46,17 @@ namespace krys::boo
                                                AXObjectCache &cache) noexcept;
 
     void AddChildren() noexcept override;
+
     KRYS_NODISCARD float ValueForRange() const noexcept override;
+
     KRYS_NODISCARD float MaxValueForRange() const noexcept override;
+
     KRYS_NODISCARD float MinValueForRange() const noexcept override;
+
     KRYS_NODISCARD Maybe<AXOrientation> ExplicitOrientation() const noexcept override;
+
     using AXRenderObject::SetValue;
+
     bool SetValue(dom::DOMStringView value) noexcept override;
 
   private:

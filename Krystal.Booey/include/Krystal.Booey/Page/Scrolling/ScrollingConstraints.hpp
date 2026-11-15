@@ -184,6 +184,7 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint
       AnchorLayerPositionForConstrainingRect(const FloatRect &constrainingRect) const noexcept;
+
     KRYS_NODISCARD FloatPoint AnchorLayerPositionAtLastLayout() const noexcept;
 
     KRYS_NODISCARD float LeftOffset() const noexcept

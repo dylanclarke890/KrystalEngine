@@ -142,10 +142,12 @@ namespace krys::boo::dom
   // FIXME: Would like these two functions to have shorter names; another option is to change prefix to
   // makeSimpleRange.
   KRYS_NODISCARD Maybe<SimpleRange> MakeRangeSelectingNode(Node &node) noexcept;
+
   KRYS_NODISCARD SimpleRange MakeRangeSelectingNodeContents(Node &node) noexcept;
 
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD Node *CommonInclusiveAncestor(const SimpleRange &range) noexcept;
+
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD bool Contains(const SimpleRange &range, const BoundaryPoint &point) noexcept;
 
@@ -157,11 +159,13 @@ namespace krys::boo::dom
 
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD bool Contains(const SimpleRange &outerRange, const SimpleRange &innerRange) noexcept;
+
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD bool Contains(const SimpleRange &range, const Node &node) noexcept;
 
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD bool Intersects(const SimpleRange &a, const SimpleRange &b) noexcept;
+
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD bool Intersects(const SimpleRange &range, const Node &node) noexcept;
 
@@ -169,6 +173,7 @@ namespace krys::boo::dom
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD std::partial_ordering TreeOrder(const SimpleRange &range,
                                                  const BoundaryPoint &point) noexcept;
+
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD std::partial_ordering TreeOrder(const BoundaryPoint &point,
                                                  const SimpleRange &range) noexcept;
@@ -184,6 +189,7 @@ namespace krys::boo::dom
 
   // FIXME: Start of functions that are deprecated since they silently default to ComposedTree.
   KRYS_NODISCARD SimpleRange UnionRange(const SimpleRange &a, const SimpleRange &b) noexcept;
+
   KRYS_NODISCARD Maybe<SimpleRange> Intersection(const Maybe<SimpleRange> &a,
                                                  const Maybe<SimpleRange> &b) noexcept;
 
@@ -209,6 +215,7 @@ namespace krys::boo::dom
     };
 
     explicit IntersectingNodeIterator(const SimpleRange &range) noexcept;
+
     IntersectingNodeIterator(const SimpleRange &range, QuirkFlag) noexcept;
 
     KRYS_NODISCARD Node &operator*() const noexcept
@@ -238,6 +245,7 @@ namespace krys::boo::dom
     }
 
     void Advance() noexcept;
+
     void AdvanceSkippingChildren() noexcept;
 
   private:

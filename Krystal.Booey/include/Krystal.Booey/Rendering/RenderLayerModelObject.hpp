@@ -57,23 +57,30 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<LayoutRect> CachedLayerClippedOverflowRect() const noexcept;
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
+
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
 
     KRYS_NODISCARD virtual bool RequiresLayer() const noexcept = 0;
 
     bool StartAnimation(double timeOffset, const GraphicsLayerAnimation &animation,
                         const BlendingKeyframes &keyframes) noexcept override;
+
     void AnimationPaused(double timeOffset, const BlendingKeyframes &keyframes) noexcept override;
+
     void AnimationFinished(const BlendingKeyframes &keyframes) noexcept override;
+
     void TransformRelatedPropertyDidChange() noexcept override;
+
     void SuspendAnimations(MonotonicTime::duration time = {}) noexcept override;
 
     KRYS_NODISCARD TransformationMatrix *LayerTransform() const noexcept;
 
     virtual void UpdateLayerTransform() noexcept;
+
     virtual void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
                                 const FloatRect &boundingBox,
                                 EnumSet<style::TransformResolverOption> options) const noexcept = 0;
+
     void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
                         const FloatRect &boundingBox) const noexcept;
 
@@ -93,10 +100,12 @@ namespace krys::boo
   protected:
     RenderLayerModelObject(Type type, dom::Element &element, RenderStyle &&style,
                            EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
+
     RenderLayerModelObject(Type type, dom::Document &document, RenderStyle &&style,
                            EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
 
     void CreateLayer() noexcept;
+
     void WillBeDestroyed() noexcept override;
 
     /// @brief Sets the state bits that follow from the renderer's style.
@@ -108,6 +117,7 @@ namespace krys::boo
   /// @brief Snaps @p rect to device pixels, as every renderer is (there are no layer-aware SVG renderers).
   KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
                                                           const RenderLayerModelObject &renderer) noexcept;
+
   KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const FloatRect &rect,
                                                           const RenderLayerModelObject &renderer) noexcept;
 }

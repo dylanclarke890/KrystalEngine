@@ -34,6 +34,7 @@ namespace krys::boo
   {
   public:
     virtual ~TextInsertionMarkerSupplier() noexcept = default;
+
     virtual void AddMarkersToTextNode(dom::Text &text, uint32 offsetOfInsertion,
                                       utf8_stringview textInserted) noexcept = 0;
 
@@ -63,6 +64,7 @@ namespace krys::boo
   public:
     InsertTextCommand(dom::Document &document, utf8_stringview text,
                       Ref<TextInsertionMarkerSupplier> &&markerSupplier, EditAction editingAction) noexcept;
+
     InsertTextCommand(dom::Document &document, utf8_stringview text, AllowPasswordEcho allowPasswordEcho,
                       bool selectInsertedText, RebalanceType rebalanceType,
                       EditAction editingAction) noexcept;
@@ -72,6 +74,7 @@ namespace krys::boo
              bool selectInsertedText = false,
              RebalanceType rebalanceType = RebalanceLeadingAndTrailingWhitespaces,
              EditAction editingAction = EditAction::Insert) noexcept;
+
     KRYS_NODISCARD static Ref<InsertTextCommand>
       CreateWithMarkerSupplier(dom::Document &document, utf8_stringview text,
                                Ref<TextInsertionMarkerSupplier> &&markerSupplier,
@@ -86,10 +89,13 @@ namespace krys::boo
     }
 
     dom::Position PositionInsideTextNode(const dom::Position &position) noexcept;
+
     dom::Position InsertTab(const dom::Position &position) noexcept;
 
     bool PerformTrivialReplace(utf8_stringview text, bool selectInsertedText) noexcept;
+
     bool PerformOverwrite(utf8_stringview text, bool selectInsertedText) noexcept;
+
     void SetEndingSelectionWithoutValidation(const dom::Position &startPosition,
                                              const dom::Position &endPosition) noexcept;
   };

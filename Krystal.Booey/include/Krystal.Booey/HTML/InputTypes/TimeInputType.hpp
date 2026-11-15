@@ -54,15 +54,18 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept final;
+
     KRYS_NODISCARD Decimal DefaultValueForStepUp() const noexcept final;
 
   private:
     KRYS_NODISCARD Maybe<DateComponents>
       ParseToDateComponents(dom::DOMStringView source) const noexcept final;
+
     KRYS_NODISCARD Maybe<DateComponents> SetMillisecondToDateComponents(double value) const noexcept final;
 
     // Time inputs have no picker.
     void HandleActivationBehavior(dom::Event &event) noexcept final;
+
     void ShowPicker() noexcept final;
 
     // DateTimeEditElementEditControlOwner functions:
@@ -72,6 +75,7 @@ namespace krys::boo::html
     // BaseDateAndTimeInputType functions:
     void SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,
                                const DateComponents &date) const noexcept final;
+
     KRYS_NODISCARD bool IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept final;
   };
 }

@@ -62,9 +62,9 @@ namespace krys::boo::dom
   class Element;
   class Event;
   class KeyboardEvent;
-  class WheelEvent;
   class Node;
   enum class TextEventInputType : uint8;
+  class WheelEvent;
 }
 
 namespace krys::boo
@@ -74,10 +74,10 @@ namespace krys::boo
   class FloatQuad;
   class LocalFrame;
   class LocalFrameView;
-  class Pasteboard;
-  class RenderLayer;
   class MouseEventWithHitTestResults;
+  class Pasteboard;
   class RenderBox;
+  class RenderLayer;
   class VisiblePosition;
   class VisibleSelection;
 
@@ -86,6 +86,7 @@ namespace krys::boo
     ShouldAppendTrailingWhitespace,
     DontAppendTrailingWhitespace,
   };
+
   class ScrollableArea;
   class Scrollbar;
 
@@ -273,6 +274,7 @@ namespace krys::boo
 
   public:
     explicit EventHandler(LocalFrame &frame) noexcept;
+
     ~EventHandler() noexcept;
 
     /// @brief Drops the elements of @p chain, the elements an enter or leave event goes to (deepest first,
@@ -360,14 +362,18 @@ namespace krys::boo
                                          const Func<UniquePtr<Pasteboard>()> &makePasteboard,
                                          EnumSet<DragOperation> sourceOperationMask,
                                          bool draggingFiles) noexcept;
+
     /// @brief A drag left the frame: `dragleave` at its target.
     void CancelDragAndDrop(const PlatformMouseEvent &event, UniquePtr<Pasteboard> &&pasteboard,
                            EnumSet<DragOperation> sourceOperationMask, bool draggingFiles) noexcept;
+
     /// @brief A drag dropped on the frame: `drop` at its target.
     /// @return Whether the page cancelled it, doing the drop itself.
     bool PerformDragAndDrop(const PlatformMouseEvent &event, UniquePtr<Pasteboard> &&pasteboard,
                             EnumSet<DragOperation> sourceOperationMask, bool draggingFiles) noexcept;
+
     void UpdateDragStateAfterEditDragIfNeeded(dom::Element &rootEditableElement) noexcept;
+
     /// @brief The element being dragged, if a drag started in a page.
     KRYS_NODISCARD static dom::Element *DraggedElement() noexcept;
 
@@ -375,7 +381,9 @@ namespace krys::boo
     KRYS_NODISCARD bool EventMayStartDrag(const PlatformMouseEvent &event) const noexcept;
 
     void DidStartDrag() noexcept;
+
     void DragCancelled() noexcept;
+
     /// @brief The drag that started in the frame ended at @p event, with @p dragOperationMask done: `dragend`
     /// at the source.
     void DragSourceEndedAt(const PlatformMouseEvent &event, EnumSet<DragOperation> dragOperationMask,
@@ -386,9 +394,13 @@ namespace krys::boo
 
     /// @brief Extends the selection to the last known mouse position, as dragging (and autoscrolling) does.
     void UpdateSelectionForMouseDrag() noexcept;
+
     KRYS_NODISCARD bool ShouldUpdateAutoscroll() const noexcept;
+
     KRYS_NODISCARD IntPoint TargetPositionInWindowForSelectionAutoscroll() const noexcept;
+
     KRYS_NODISCARD RenderBox *AutoscrollRenderer() const noexcept;
+
     /// @brief Finds the box to autoscroll again, after a scroll passed on from it to an enclosing box.
     void UpdateAutoscrollRenderer() noexcept;
 
@@ -398,11 +410,15 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool AutoscrollInProgress() const noexcept;
+
     /// @brief Whether any autoscroll (a selection's, a drag's, or a pan) is scrolling something.
     KRYS_NODISCARD bool IsAutoscrolling() const noexcept;
+
     KRYS_NODISCARD bool PanScrollInProgress() const noexcept;
+
     /// @brief Starts pan scrolling @p renderer from the mouse's position.
     void StartPanScrolling(RenderBox &renderer) noexcept;
+
     void StopAutoscrollTimer(bool rendererIsBeingDestroyed = false) noexcept;
 
     KRYS_NODISCARD static DragState &GetDragState() noexcept;
@@ -458,11 +474,14 @@ namespace krys::boo
     /// @brief Chooses the cursor again for the last known mouse position, as after the page changes under a
     /// still mouse.
     void UpdateCursor() noexcept;
+
     /// @brief Asks for the cursor to be chosen again in the next rendering update, as after a style change.
     void ScheduleCursorUpdate() noexcept;
+
     /// @brief Updates the hover and active states for the last known mouse position soon, as after the
     /// hovered element is removed.
     void ScheduleHoverStateUpdate() noexcept;
+
     /// @brief Chooses the cursor again if an update was scheduled (the rendering update's cursor step).
     void UpdateCursorIfNeeded() noexcept;
 
@@ -470,8 +489,10 @@ namespace krys::boo
     /// so the hover state, the element under the mouse and the cursor follow content that moved under it, as
     /// after a scroll.
     void DispatchFakeMouseMoveEventSoon() noexcept;
+
     /// @brief As `DispatchFakeMouseMoveEventSoon`, if the mouse is in @p quad (in absolute coordinates).
     void DispatchFakeMouseMoveEventSoonInQuad(const FloatQuad &quad) noexcept;
+
     void CancelFakeMouseMoveEvent() noexcept;
 
     /// @brief Handles a key event: a key up becomes `keyup` and a char `keypress`; a raw key down becomes
@@ -487,20 +508,24 @@ namespace krys::boo
     /// @note A touchpad's pan scrolls freely, and what it scrolled snaps once it and its momentum end. Its
     /// events go to the element it started over, and scroll only the scroller its first step found.
     bool HandleWheelEvent(const PlatformWheelEvent &event) noexcept;
+
     /// @brief The default action of a `wheel` event at @p startNode: scrolls the nearest enclosing box that
     /// can scroll by the event's deltas, passing over boxes at their end unless `overscroll-behavior` stops
     /// it.
     /// @return Whether it scrolled (or `overscroll-behavior` stopped the scroll there).
     bool DefaultWheelEventHandler(dom::Node *startNode, dom::WheelEvent &wheelEvent) noexcept;
+
     /// @brief Scrolls for a touch's pan, or the fling after it, by @p event's delta from where the touch
     /// began (its position): the nearest box under it that can scroll that way, passing over boxes at their
     /// end unless `overscroll-behavior` stops it, then the view, as the wheel scrolls; unlike the wheel's, no
     /// event fires.
     /// @return Whether it scrolled (or `overscroll-behavior` stopped the scroll there).
     bool HandleTouchScroll(const PlatformWheelEvent &event) noexcept;
+
     /// @brief A gesture (a touch's pan and its fling, or a touchpad's pan and its momentum) has ended: what
     /// it scrolled snaps.
     void DidEndGestureScroll() noexcept;
+
     KRYS_NODISCARD ScrollIsAnimated KeyboardScrollIsAnimated() const noexcept;
 
     KRYS_NODISCARD bool IsHandlingWheelEvent() const noexcept
@@ -531,12 +556,15 @@ namespace krys::boo
     /// @return Whether it scrolled.
     bool ScrollOverflow(ScrollDirection direction, ScrollGranularity granularity,
                         dom::Node *startingNode = nullptr) noexcept;
+
     bool LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
                                dom::Node *startingNode = nullptr,
                                ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
+
     /// @brief As `ScrollOverflow`, or else scrolls the view.
     bool ScrollRecursively(ScrollDirection direction, ScrollGranularity granularity,
                            dom::Node *startingNode = nullptr) noexcept;
+
     bool LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,
                                   dom::Node *startingNode = nullptr,
                                   ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
@@ -545,9 +573,11 @@ namespace krys::boo
     /// @brief Whether @p element has a listener for one of @p types, or its shadow root a capturing one.
     KRYS_NODISCARD static bool HasBoundaryListener(const dom::Element &element,
                                                    Span<const dom::DOMStringAtom> types) noexcept;
+
     /// @brief Whether @p element, or its shadow root, has a capturing listener for one of @p types.
     KRYS_NODISCARD static bool HasCapturingBoundaryListener(const dom::Element &element,
                                                             Span<const dom::DOMStringAtom> types) noexcept;
+
     /// @brief Whether an ancestor of @p element (with their shadow roots), its document or its window has a
     /// capturing listener for one of @p types.
     KRYS_NODISCARD static bool
@@ -555,16 +585,23 @@ namespace krys::boo
                                         Span<const dom::DOMStringAtom> types) noexcept;
 
     bool InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept;
+
     bool DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept;
+
     bool DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &event, ScrollLogicalDirection direction,
                                            ScrollGranularity granularity) noexcept;
+
     bool DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept;
+
     bool DefaultHomeEndEventHandler(dom::KeyboardEvent &event) noexcept;
+
     bool DefaultSpaceEventHandler(dom::KeyboardEvent &event) noexcept;
+
     /// @brief Runs the access key action of the element @p event's key is the access key of, if it's pressed
     /// with Alt (and perhaps Shift).
     /// @return Whether there was such an element.
     bool HandleAccessKey(const PlatformKeyboardEvent &event) noexcept;
+
     bool DefaultArrowEventHandler(dom::FocusDirection focusDirection, dom::KeyboardEvent &event) noexcept;
 
     KRYS_NODISCARD MouseEventWithHitTestResults
@@ -573,34 +610,45 @@ namespace krys::boo
 #pragma region Drag and drop
 
     void SetDragStateSource(dom::Element *element) const noexcept;
+
     KRYS_NODISCARD EnumSet<DragSourceAction> UpdateDragSourceActionsAllowed() const noexcept;
+
     KRYS_NODISCARD bool ShouldAllowMouseDownToStartDrag() const noexcept;
 
     bool DispatchDragEvent(dom::DOMStringAtom eventType, dom::Element &target,
                            const PlatformMouseEvent &event, dom::DataTransfer &dataTransfer) noexcept;
+
     DragTargetResponse DispatchDragEnterOrDragOverEvent(dom::DOMStringAtom eventType, dom::Element &target,
                                                         const PlatformMouseEvent &event,
                                                         UniquePtr<Pasteboard> &&pasteboard,
                                                         EnumSet<DragOperation> sourceOperationMask,
                                                         bool draggingFiles) noexcept;
+
     bool HandleDrag(const MouseEventWithHitTestResults &event,
                     CheckDragHysteresis checkDragHysteresis) noexcept;
+
     void ClearDragState() noexcept;
 
     KRYS_NODISCARD static bool ShouldDispatchEventsToDragSourceElement() noexcept;
+
     void DispatchEventToDragSourceElement(dom::DOMStringAtom eventType,
                                           const PlatformMouseEvent &event) noexcept;
+
     bool DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept;
 
     KRYS_NODISCARD bool DragHysteresisExceeded(const FloatPoint &dragViewportLocation) const noexcept;
+
     KRYS_NODISCARD bool MouseMovementExceedsThreshold(const FloatPoint &viewportLocation,
                                                       int32 pointsThreshold) const noexcept;
+
     static void InvalidateDataTransfer() noexcept;
 
 #pragma endregion
 
     void SetLastKnownMousePosition(DoublePoint position, DoublePoint globalPosition) noexcept;
+
     void InvalidateClick() noexcept;
+
     bool SwallowAnyClickEvent(const PlatformMouseEvent &platformMouseEvent,
                               const MouseEventWithHitTestResults &mouseEvent,
                               IgnoreAncestorNodesForClickEvent ignoreAncestorNodesForClickEvent) noexcept;
@@ -608,83 +656,115 @@ namespace krys::boo
     /// @return Whether the click was dispatched without being cancelled.
     bool DispatchAnyClickEvent(dom::DOMStringAtom eventType, dom::Node *clickNode, int32 clickCount,
                                const PlatformMouseEvent &platformMouseEvent) noexcept;
+
     /// @return Whether the event was dispatched without being cancelled.
     bool DispatchMouseEvent(dom::DOMStringAtom eventType, dom::Node *targetNode, int32 clickCount,
                             const PlatformMouseEvent &platformMouseEvent,
                             FireMouseOverOut fireMouseOverOut) noexcept;
+
     void UpdateMouseEventTargetNode(dom::DOMStringAtom eventType, dom::Node *targetNode,
                                     const PlatformMouseEvent &platformMouseEvent,
                                     FireMouseOverOut fireMouseOverOut) noexcept;
+
     /// @brief The scrollers and list boxes that scroll @p node, innermost first, then the frame view; none
     /// without a node.
     KRYS_NODISCARD List<ScrollableArea *> ScrollableAreasEnclosing(dom::Node *node) const noexcept;
+
     /// @brief Tells the scrollable areas the mouse moved over, entered or left, which show their overlay
     /// scrollbars: the mouse is in a scroller and in each one around it.
     void NotifyScrollableAreasOfMouseEvents(dom::DOMStringAtom eventType, dom::Element *lastElementUnderMouse,
                                             dom::Element *elementUnderMouse) noexcept;
+
     void ClearElementUnderMouse() noexcept;
+
     KRYS_NODISCARD bool IsElementAnAncestorOfLastElementUnderMouse(dom::Element *element) const noexcept;
 
     void UpdateCursor(LocalFrameView &view, const HitTestResult &result, bool shiftKey) noexcept;
+
     KRYS_NODISCARD Maybe<Cursor> SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept;
+
     KRYS_NODISCARD bool UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) const noexcept;
 
     void FakeMouseMoveEventTimerFired() noexcept;
+
     void HoverTimerFired() noexcept;
 
     bool HandleWheelEventInternal(const PlatformWheelEvent &event, EnumSet<EventHandling> &handling) noexcept;
+
     /// @brief The element and scroller @p wheelEvent goes to: those it's over, or its gesture's latched ones.
     void DetermineWheelEventTarget(const PlatformWheelEvent &wheelEvent,
                                    RefPtr<dom::Element> &wheelEventTarget,
                                    WeakPtr<ScrollableArea> &scrollableArea) noexcept;
+
     bool ProcessWheelEventForScrolling(const PlatformWheelEvent &event,
                                        const WeakPtr<ScrollableArea> &scrollableArea) noexcept;
+
     void ClearLatchedState() noexcept;
+
     /// @param biasedDelta The delta whose axes `overscroll-behavior` may stop from passing to the boxes
     /// further out.
     bool HandleWheelEventInAppropriateEnclosingBox(dom::Node *startNode, const PlatformWheelEvent &event,
                                                    FloatSize biasedDelta) noexcept;
+
     bool HandleWheelEventInAppropriateEnclosingBox(dom::Node *startNode, const dom::WheelEvent &wheelEvent,
                                                    const FloatSize &filteredPlatformDelta) noexcept;
+
     KRYS_NODISCARD static bool ScrollableAreaCanHandleEvent(const PlatformWheelEvent &wheelEvent,
                                                             ScrollableArea &scrollableArea) noexcept;
+
     bool HandleWheelEventInScrollableArea(const PlatformWheelEvent &wheelEvent,
                                           ScrollableArea &scrollableArea) noexcept;
 
     bool PassMousePressEventToScrollbar(MouseEventWithHitTestResults &mouseEvent,
                                         Scrollbar *scrollbar) noexcept;
+
     /// @brief Sends `MouseExited` to the last scrollbar under the mouse if @p scrollbar is a different one,
     /// and `MouseEntered` to @p scrollbar if it's set as the new one.
     void UpdateLastScrollbarUnderMouse(Scrollbar *scrollbar, SetOrClearLastScrollbar setOrClear) noexcept;
+
     KRYS_NODISCARD bool IsInsideScrollbar(const IntPoint &windowPoint) const noexcept;
 
 #pragma region Selection
 
     bool HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept;
+
     bool HandleMousePressEventSingleClick(const MouseEventWithHitTestResults &event) noexcept;
+
     bool HandleMousePressEventDoubleClick(const MouseEventWithHitTestResults &event) noexcept;
+
     bool HandleMousePressEventTripleClick(const MouseEventWithHitTestResults &event) noexcept;
+
     KRYS_NODISCARD bool CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) const noexcept;
+
     KRYS_NODISCARD bool MouseDownMayStartSelect() const noexcept;
+
     bool ExpandAndUpdateSelectionForMouseDownIfNeeded(dom::Node &targetNode,
                                                       const VisibleSelection &selection,
                                                       TextGranularity granularity) noexcept;
+
     bool UpdateSelectionForMouseDownDispatchingSelectStart(dom::Node *targetNode,
                                                            const VisibleSelection &selection,
                                                            TextGranularity granularity) noexcept;
+
     void SelectClosestWordFromHitTestResult(const HitTestResult &result,
                                             AppendTrailingWhitespace appendTrailingWhitespace) noexcept;
+
     void SelectClosestContextualWordFromHitTestResult(
       const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept;
+
     void SelectClosestContextualWordOrLinkFromHitTestResult(
       const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept;
+
     KRYS_NODISCARD VisiblePosition SelectionExtentRespectingEditingBoundary(const VisibleSelection &selection,
                                                                             const LayoutPoint &localPoint,
                                                                             dom::Node *targetNode) noexcept;
+
     bool
       HandleMouseDraggedEvent(const MouseEventWithHitTestResults &event,
                               CheckDragHysteresis checkDragHysteresis = ShouldCheckDragHysteresis) noexcept;
+
     void UpdateSelectionForMouseDrag(const HitTestResult &hitTestResult) noexcept;
+
     bool HandleMouseReleaseEvent(const MouseEventWithHitTestResults &event) noexcept;
 
 #pragma endregion

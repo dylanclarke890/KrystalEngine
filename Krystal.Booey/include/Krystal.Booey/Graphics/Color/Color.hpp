@@ -67,8 +67,11 @@ namespace krys::boo
 
     // Out of line and inline colors will always be non-equal.
     friend bool operator==(const Color &a, const Color &b) noexcept;
+
     friend bool EqualIgnoringSemanticColor(const Color &a, const Color &b) noexcept;
+
     friend bool OutOfLineComponentsEqual(const Color &, const Color &) noexcept;
+
     friend bool OutOfLineComponentsEqualIgnoringSemanticColor(const Color &, const Color &) noexcept;
 
     class OutOfLineComponents : public ThreadSafeRefCounted<OutOfLineComponents>

@@ -47,17 +47,23 @@ namespace krys::boo
 
     void Attach(LegacyRenderSVGRoot &parent, RenderPtr<RenderObject> child,
                 RenderObject *beforeChild) noexcept;
+
     void Attach(LegacyRenderSVGContainer &parent, RenderPtr<RenderObject> child,
                 RenderObject *beforeChild) noexcept;
+
     void Attach(RenderSVGInline &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
+
     void Attach(RenderSVGText &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderObject> Detach(LegacyRenderSVGRoot &parent, RenderObject &child,
                                                   WillBeDestroyed willBeDestroyed) noexcept;
+
     KRYS_NODISCARD RenderPtr<RenderObject> Detach(LegacyRenderSVGContainer &parent, RenderObject &child,
                                                   WillBeDestroyed willBeDestroyed) noexcept;
+
     KRYS_NODISCARD RenderPtr<RenderObject> Detach(RenderSVGText &parent, RenderObject &child,
                                                   WillBeDestroyed willBeDestroyed) noexcept;
+
     KRYS_NODISCARD RenderPtr<RenderObject> Detach(RenderSVGInline &parent, RenderObject &child,
                                                   WillBeDestroyed willBeDestroyed) noexcept;
   };

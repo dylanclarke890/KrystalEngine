@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::DropShadow ToCSSDropShadow(const DropShadowFilterOperationWithStyleColor &,
                                                    const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::DropShadow &,
                                                               const BuilderState &) noexcept;
   }

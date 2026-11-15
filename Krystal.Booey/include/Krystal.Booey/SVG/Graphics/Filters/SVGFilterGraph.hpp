@@ -53,6 +53,7 @@ namespace krys::boo
     virtual ~SVGFilterGraph() noexcept = default;
 
     virtual void AddNamedNode(const dom::DOMStringAtom &id, Ref<TNode> &&) noexcept = 0;
+
     KRYS_NODISCARD virtual RefPtr<TNode> GetNamedNode(const dom::DOMStringAtom &id) const noexcept = 0;
 
     /// @brief The nodes named @p names; none if one isn't a node or a source.

@@ -72,8 +72,10 @@ namespace krys::boo
 
   public:
     PositionedLayoutConstraints(const RenderBox &renderer, LogicalBoxAxis selfAxis) noexcept;
+
     PositionedLayoutConstraints(const RenderBox &renderer, const RenderStyle &selfStyleOverride,
                                 LogicalBoxAxis selfAxis) noexcept;
+
     void ComputeInsets() noexcept;
 
     /*** The following are available without calling computeInsets(). ***/
@@ -138,6 +140,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD ItemPosition ResolveAlignmentValue() const noexcept; // Convert auto/normal as necessary.
+
     KRYS_NODISCARD bool AlignmentAppliesStretch(ItemPosition normalAlignment) const noexcept;
 
     KRYS_NODISCARD bool IsOrthogonal() const noexcept
@@ -196,9 +199,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit MarginBeforeValue() const noexcept;
+
     KRYS_NODISCARD LayoutUnit MarginAfterValue() const noexcept;
+
     KRYS_NODISCARD LayoutUnit InsetBeforeValue() const noexcept;
+
     KRYS_NODISCARD LayoutUnit InsetAfterValue() const noexcept;
+
     KRYS_NODISCARD bool InsetFitsContent() const noexcept; // One or both insets are auto for sizing purposes.
 
     KRYS_NODISCARD LayoutUnit InsetModifiedContainingSize() const noexcept
@@ -217,10 +224,12 @@ namespace krys::boo
     }
 
     void ResolvePosition(RenderBox::LogicalExtentComputedValues &computedValues) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ResolveAlignmentShift(LayoutUnit unusedSpace,
                                                     LayoutUnit itemSize) const noexcept;
 
     void FixupLogicalLeftPosition(RenderBox::LogicalExtentComputedValues &computedValues) const noexcept;
+
     void AdjustLogicalTopWithLogicalHeightIfNeeded(
       RenderBox::LogicalExtentComputedValues &computedValues) const noexcept;
 
@@ -228,18 +237,27 @@ namespace krys::boo
     KRYS_NODISCARD bool ContainingCoordsAreFlipped() const noexcept;
 
     void CaptureInsets() noexcept;
+
     void CaptureGridArea() noexcept;
+
     void CaptureAnchorGeometry() noexcept;
+
     void ExpandToScrollableArea(LayoutRange &containingRange,
                                 Maybe<ScrollPosition> fromScrollPosition = null) const noexcept;
+
     KRYS_NODISCARD LayoutRange AdjustForPositionArea(LayoutRange rangeToAdjust, LayoutRange anchorArea,
                                                      BoxAxis containerAxis) noexcept;
+
     KRYS_NODISCARD Pair<bool, bool> ContainerAllowsInfiniteOverflow() const noexcept;
 
     KRYS_NODISCARD bool NeedsGridAreaAdjustmentBeforeStaticPositioning() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> RemainingSpaceForStaticAlignment(LayoutUnit itemSize) const noexcept;
+
     void ComputeStaticPosition() noexcept;
+
     void ComputeInlineStaticDistance() noexcept;
+
     void ComputeBlockStaticDistance() noexcept;
   };
 }

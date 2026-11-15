@@ -43,6 +43,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Ref<TimingFunction> CreateTimingFunction(const BuilderState &,
                                                             const css::SpringEasingFunction &) noexcept;
+
     KRYS_NODISCARD Ref<TimingFunction>
       CreateTimingFunctionDeprecated(const css::SpringEasingFunction &) noexcept;
   }

@@ -56,11 +56,13 @@ namespace krys::boo
 
   public:
     RenderMathMLOperator(mathml::MathMLOperatorElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLOperator() noexcept override;
 
     KRYS_NODISCARD mathml::MathMLOperatorElement &GetElement() const noexcept;
 
     void StretchTo(LayoutUnit heightAboveBaseline, LayoutUnit depthBelowBaseline) noexcept;
+
     void StretchTo(LayoutUnit width) noexcept;
 
     KRYS_NODISCARD LayoutUnit StretchSize() const noexcept
@@ -81,6 +83,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool HasOperatorFlag(mathml::MathMLOperatorDictionary::Flag flag) const noexcept;
+
     KRYS_NODISCARD bool IsLargeOperatorInDisplayStyle() const noexcept;
 
     KRYS_NODISCARD bool ShouldMoveLimits() const noexcept
@@ -96,7 +99,9 @@ namespace krys::boo
     }
 
     void UpdateTokenContent() noexcept final;
+
     void UpdateFromElement() noexcept final;
+
     KRYS_NODISCARD char32 TextContent() const noexcept;
 
     KRYS_NODISCARD bool IsStretchy() const noexcept
@@ -111,19 +116,28 @@ namespace krys::boo
 
   private:
     void UpdateMathOperator() noexcept;
+
     KRYS_NODISCARD LayoutUnit LeadingSpace() const noexcept;
+
     KRYS_NODISCARD LayoutUnit TrailingSpace() const noexcept;
+
     KRYS_NODISCARD LayoutUnit MinSize() const noexcept;
+
     KRYS_NODISCARD LayoutUnit MaxSize() const noexcept;
+
     KRYS_NODISCARD bool UseMathOperator() const noexcept;
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept final;
+
     void ComputePreferredLogicalWidths() noexcept final;
+
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
+
     void Paint(PaintInfo &info, const LayoutPoint &paintOffset) noexcept final;
 
     void PaintChildren(PaintInfo &forSelf, const LayoutPoint &paintOffset,
                        PaintInfo &forChild) noexcept final;
+
     KRYS_NODISCARD bool IsInvisibleOperator() const noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;

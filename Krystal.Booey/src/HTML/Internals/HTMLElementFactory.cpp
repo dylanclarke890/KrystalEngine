@@ -429,6 +429,7 @@ namespace krys::boo::html
         return CreateRefPtr<HTMLVideoElement>(document);
       }
 #pragma region Obsolete elements
+
       // 1. If name is applet, bgsound, blink, isindex, keygen, multicol, nextid, or spacer, then return
       //    HTMLUnknownElement.
       case TagName::applet:
@@ -465,6 +466,7 @@ namespace krys::boo::html
       {
         return CreateRefPtr<HTMLPreElement>(document);
       }
+
 #pragma endregion
     }
 

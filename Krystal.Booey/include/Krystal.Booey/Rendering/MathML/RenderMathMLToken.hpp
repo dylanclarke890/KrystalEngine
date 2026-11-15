@@ -48,13 +48,16 @@ namespace krys::boo
 
   public:
     RenderMathMLToken(Type type, mathml::MathMLTokenElement &element, RenderStyle &&style) noexcept;
+
     RenderMathMLToken(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderMathMLToken() noexcept override;
 
     KRYS_NODISCARD mathml::MathMLTokenElement &GetElement() const noexcept;
 
     /// @brief Updates the renderer after the token's content changed.
     virtual void UpdateTokenContent() noexcept;
+
     void UpdateFromElement() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override

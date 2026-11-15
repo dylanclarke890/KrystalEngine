@@ -147,6 +147,7 @@ namespace krys::boo
     BaselineAlignmentState(const RenderBox &alignmentSubject, ItemPosition preference, LayoutUnit ascent,
                            LogicalBoxAxis alignmentContextAxis,
                            WritingMode alignmentContainerWritingMode) noexcept;
+
     KRYS_NODISCARD const BaselineGroup &SharedGroup(const RenderBox &alignmentSubject,
                                                     ItemPosition preference) const noexcept;
 
@@ -159,10 +160,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static FontBaseline DominantBaseline(WritingMode writingMode) noexcept;
+
     KRYS_NODISCARD static WritingMode
       UsedWritingModeForBaselineAlignment(LogicalBoxAxis alignmentContextAxis,
                                           WritingMode alignmentContainerWritingMode,
                                           WritingMode alignmentSubjectWritingMode) noexcept;
+
     KRYS_NODISCARD static LayoutUnit SynthesizedBaseline(const RenderBox &box, FontBaseline baselineType,
                                                          WritingMode writingModeForSynthesis,
                                                          LineDirection lineDirection,

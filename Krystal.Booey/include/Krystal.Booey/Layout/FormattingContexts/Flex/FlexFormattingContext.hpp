@@ -58,6 +58,7 @@ namespace krys::boo::layout
     FlexFormattingContext(const ElementBox &flexBox, LayoutState &globalLayoutState) noexcept;
 
     void Layout(const ConstraintsForFlexContent &constraints) noexcept;
+
     KRYS_NODISCARD IntrinsicWidthConstraints ComputedIntrinsicWidthConstraints() noexcept;
 
     KRYS_NODISCARD const ElementBox &Root() const noexcept
@@ -71,6 +72,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const BoxGeometry &GeometryForFlexItem(const Box &flexItem) const noexcept;
+
     KRYS_NODISCARD BoxGeometry &GeometryForFlexItem(const Box &flexItem) noexcept;
 
     KRYS_NODISCARD const IntegrationUtils &GetIntegrationUtils() const noexcept
@@ -81,9 +83,11 @@ namespace krys::boo::layout
   private:
     KRYS_NODISCARD FlexLayout::LogicalFlexItems
       ConvertFlexItemsToLogicalSpace(const ConstraintsForFlexContent &constraints) noexcept;
+
     void SetFlexItemsGeometry(const FlexLayout::LogicalFlexItems &logicalFlexItemList,
                               const FlexLayout::LogicalFlexItemRects &logicalRects,
                               const ConstraintsForFlexContent &constraints) noexcept;
+
     void PositionOutOfFlowChildren() noexcept;
   };
 }

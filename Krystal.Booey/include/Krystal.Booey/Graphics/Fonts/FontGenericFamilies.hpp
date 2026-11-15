@@ -57,13 +57,20 @@ namespace krys::boo
     KRYS_NODISCARD bool IsEmpty() const noexcept;
 
     KRYS_NODISCARD const utf8_string &StandardFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+
     KRYS_NODISCARD const utf8_string &FixedFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+
     KRYS_NODISCARD const utf8_string &SerifFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+
     KRYS_NODISCARD const utf8_string &SansSerifFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+
     KRYS_NODISCARD const utf8_string &CursiveFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+
     KRYS_NODISCARD const utf8_string &FantasyFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+
     KRYS_NODISCARD const utf8_string &
       PictographFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+
     KRYS_NODISCARD const utf8_string &MathFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
 
     /// @brief The family the generic family @p family resolves to for @p script, or null for `system-ui`.
@@ -72,12 +79,19 @@ namespace krys::boo
 
     /// @return Whether the family changed.
     bool SetStandardFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+
     bool SetFixedFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+
     bool SetSerifFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+
     bool SetSansSerifFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+
     bool SetCursiveFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+
     bool SetFantasyFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+
     bool SetPictographFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+
     bool SetMathFontFamily(const utf8_string &family, UScriptCode script) noexcept;
   };
 }

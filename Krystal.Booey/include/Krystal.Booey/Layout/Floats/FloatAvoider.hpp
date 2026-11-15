@@ -50,9 +50,11 @@ namespace krys::boo::layout
     FloatAvoider(LayoutPoint absoluteTopLeft, LayoutUnit borderBoxWidth, const BoxGeometry::Edges &margin,
                  BoxGeometry::HorizontalEdges containingBlockAbsoluteContentBox, bool isFloatingPositioned,
                  bool isStartAligned) noexcept;
+
     virtual ~FloatAvoider() noexcept = default;
 
     void SetInlineStart(LayoutUnit inlineStart) noexcept;
+
     void SetBlockStart(LayoutUnit blockStart) noexcept;
 
     void ResetInlineStart() noexcept

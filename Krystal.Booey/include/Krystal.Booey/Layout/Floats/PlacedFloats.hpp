@@ -70,13 +70,18 @@ namespace krys::boo::layout
     public:
       Item(Position position, const BoxGeometry &absoluteBoxGeometry, LayoutPoint localTopLeft,
            RefPtr<const LayoutShape> &&shape) noexcept;
+
       Item(const Box &layoutBox, Position position, const BoxGeometry &absoluteBoxGeometry,
            LayoutPoint localTopLeft, Maybe<size_t> line) noexcept;
+
       ~Item() noexcept;
 
       Item(const Item &) noexcept = default;
+
       Item(Item &&) noexcept = default;
+
       Item &operator=(const Item &) noexcept = default;
+
       Item &operator=(Item &&) noexcept = default;
 
       KRYS_NODISCARD bool IsStartPositioned() const noexcept
@@ -162,7 +167,9 @@ namespace krys::boo::layout
     }
 
     void Add(Item newFloatItem) noexcept;
+
     bool Remove(const Box &floatBox) noexcept;
+
     void Clear() noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
@@ -181,6 +188,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD Maybe<LayoutUnit> HighestPositionOnBlockAxis() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       LowestPositionOnBlockAxis(boo::Clear type = boo::Clear::Both) const noexcept;
 

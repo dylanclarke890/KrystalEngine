@@ -34,9 +34,13 @@ namespace krys
     using const_reverse_iterator = typename Container::const_reverse_iterator;
 
     FixedVector() = default;
+
     FixedVector(const FixedVector &) = default;
+
     FixedVector(FixedVector &&) noexcept = default;
+
     FixedVector &operator=(const FixedVector &) = default;
+
     FixedVector &operator=(FixedVector &&) noexcept = default;
 
     FixedVector(std::initializer_list<T> values) : _values(values)

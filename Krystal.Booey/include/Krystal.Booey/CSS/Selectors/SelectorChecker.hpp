@@ -54,8 +54,8 @@ namespace krys::boo::style
 
 namespace krys::boo::css
 {
-  class SelectorList;
   class ScopeRule;
+  class SelectorList;
 
   /// @brief Matches selectors against elements.
   class SelectorChecker
@@ -163,6 +163,7 @@ namespace krys::boo::css
                                              CheckingContext &checkingContext) const noexcept;
 
     KRYS_NODISCARD static bool IsCommonPseudoClassSelector(const Selector *selector) noexcept;
+
     KRYS_NODISCARD static bool AttributeSelectorMatches(const dom::Element &element,
                                                         const dom::QualifiedName &attributeName,
                                                         const CSSOMStringAtom &attributeValue,
@@ -172,11 +173,14 @@ namespace krys::boo::css
     KRYS_NODISCARD MatchResult
       MatchRecursively(CheckingContext &checkingContext, LocalContext &context,
                        EnumSet<PseudoElementType> &collectedPseudoElements) const noexcept;
+
     KRYS_NODISCARD bool CheckOne(CheckingContext &checkingContext, LocalContext &context,
                                  MatchType &matchType) const noexcept;
+
     KRYS_NODISCARD bool MatchSelectorList(CheckingContext &checkingContext, const LocalContext &context,
                                           const dom::Element &element,
                                           const SelectorList &selectorList) const noexcept;
+
     KRYS_NODISCARD bool MatchHasPseudoClass(CheckingContext &checkingContext, const dom::Element &element,
                                             const Selector &hasSelector) const noexcept;
   };

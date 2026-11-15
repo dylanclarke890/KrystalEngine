@@ -43,8 +43,10 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<AXSVGObject> Create(AXId id, RenderObject &renderer, AXObjectCache &cache,
                                                   bool isSVGRoot = false) noexcept;
+
     KRYS_NODISCARD static Ref<AXSVGObject> Create(AXId id, dom::Element &element,
                                                   AXObjectCache &cache) noexcept;
+
     ~AXSVGObject() noexcept override;
 
     KRYS_NODISCARD bool IsAccessibilitySVGObject() const noexcept final
@@ -82,7 +84,9 @@ namespace krys::boo
                 bool isSVGRoot) noexcept;
 
     KRYS_NODISCARD AXRole DetermineAriaRoleAttribute() const noexcept final;
+
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override;
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept final;
 
   private:

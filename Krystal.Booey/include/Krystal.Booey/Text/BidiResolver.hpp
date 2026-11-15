@@ -190,6 +190,7 @@ namespace krys::boo
     }
 
     BidiCharacterRun(const BidiCharacterRun &) = delete;
+
     BidiCharacterRun &operator=(const BidiCharacterRun &) = delete;
 
     virtual ~BidiCharacterRun() noexcept
@@ -443,10 +444,13 @@ namespace krys::boo
 
   private:
     void RaiseExplicitEmbeddingLevel(UCharDirection from, UCharDirection to) noexcept;
+
     void LowerExplicitEmbeddingLevel(UCharDirection from) noexcept;
+
     void CheckDirectionInLowerRaiseEmbeddingLevel() noexcept;
 
     void UpdateStatusLastFromCurrentDirection(UCharDirection) noexcept;
+
     void ReorderRunsFromLevels() noexcept;
   };
 
@@ -480,7 +484,9 @@ namespace krys::boo
 
   protected:
     void IncrementInternal() noexcept;
+
     void AppendRunInternal() noexcept;
+
     KRYS_NODISCARD bool NeedsContinuePastEndInternal() const noexcept;
   };
 

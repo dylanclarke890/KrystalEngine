@@ -174,6 +174,7 @@ namespace krys::boo::style
   struct Blending<BackgroundSize>
   {
     KRYS_NODISCARD bool CanBlend(const BackgroundSize &, const BackgroundSize &) noexcept;
+
     KRYS_NODISCARD BackgroundSize Blend(const BackgroundSize &, const BackgroundSize &,
                                         const BlendingContext &) noexcept;
   };

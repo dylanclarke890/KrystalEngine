@@ -54,6 +54,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const BorderImageWidthValue &other) const noexcept;
   };
 }

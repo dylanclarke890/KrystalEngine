@@ -40,11 +40,13 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGResourceLinearGradient(svg::SVGLinearGradientElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGResourceLinearGradient() noexcept override;
 
     KRYS_NODISCARD svg::SVGLinearGradientElement &LinearGradientElement() const noexcept;
 
     KRYS_NODISCARD FloatPoint StartPoint(const svg::LinearGradientAttributes &) const noexcept;
+
     KRYS_NODISCARD FloatPoint EndPoint(const svg::LinearGradientAttributes &) const noexcept;
 
   private:
@@ -64,6 +66,7 @@ namespace krys::boo
     }
 
     bool CollectGradientAttributes() noexcept final;
+
     KRYS_NODISCARD Ref<Gradient> BuildGradient() const noexcept final;
 
     void GradientElement() const = delete;

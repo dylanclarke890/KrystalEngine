@@ -50,9 +50,13 @@ namespace krys::boo::mathml
 
     // FIXME: Pseudo-units are not supported yet (https://bugs.webkit.org/show_bug.cgi?id=85730).
     KRYS_NODISCARD const Length &Width() noexcept;
+
     KRYS_NODISCARD const Length &Height() noexcept;
+
     KRYS_NODISCARD const Length &Depth() noexcept;
+
     KRYS_NODISCARD const Length &Lspace() noexcept;
+
     KRYS_NODISCARD const Length &Voffset() noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;

@@ -91,6 +91,7 @@ namespace krys::boo::css
       ShouldThrowWhenAddingSheet(const CSSStyleSheet &sheet) const noexcept;
 
     void DidAddSheet(CSSStyleSheet &sheet) noexcept;
+
     void WillRemoveSheet(CSSStyleSheet &sheet) noexcept;
   };
 }

@@ -48,7 +48,9 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const EasingFunctionValue &other) const noexcept;
+
     KRYS_NODISCARD IterationStatus
       CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept;
   };

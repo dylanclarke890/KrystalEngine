@@ -43,12 +43,15 @@ namespace krys::boo::style
 
   KRYS_NODISCARD Color ToStyleColor(const css::ContrastColor &unresolved,
                                     ColorResolutionState &state) noexcept;
+
   KRYS_NODISCARD boo::Color ResolveColor(const ContrastColor &contrastColor,
                                          const boo::Color &currentColor) noexcept;
+
   KRYS_NODISCARD bool ContainsCurrentColor(const ContrastColor &contrastColor) noexcept;
 
   void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ContrastColor &value) noexcept;
+
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const ContrastColor &value) noexcept;
 }

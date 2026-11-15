@@ -151,6 +151,7 @@ namespace krys::boo
 
   public:
     constexpr Decimal(int32 i32 = 0) noexcept;
+
     constexpr Decimal(Sign sign, int exponent, uint64 coefficient) noexcept;
 
     /// @brief Only tests should use this.
@@ -159,19 +160,28 @@ namespace krys::boo
     }
 
     Decimal &operator+=(const Decimal &other) noexcept;
+
     Decimal &operator-=(const Decimal &other) noexcept;
+
     Decimal &operator*=(const Decimal &other) noexcept;
+
     Decimal &operator/=(const Decimal &other) noexcept;
 
     KRYS_NODISCARD Decimal operator-() const noexcept;
+
     KRYS_NODISCARD Decimal operator+(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD Decimal operator-(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD Decimal operator*(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD Decimal operator/(const Decimal &rhs) const noexcept;
 
     KRYS_NODISCARD friend bool operator==(const Decimal &a, const Decimal &b) noexcept;
+
     /// @note False when either is NaN, as is `==`.
     KRYS_NODISCARD friend bool operator!=(const Decimal &a, const Decimal &b) noexcept;
+
     KRYS_NODISCARD friend std::partial_ordering operator<=>(const Decimal &a, const Decimal &b) noexcept;
 
     KRYS_NODISCARD int Exponent() const noexcept
@@ -216,9 +226,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Decimal Abs() const noexcept;
+
     KRYS_NODISCARD Decimal Ceil() const noexcept;
+
     KRYS_NODISCARD Decimal Floor() const noexcept;
+
     KRYS_NODISCARD Decimal Remainder(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD Decimal Round() const noexcept;
 
     KRYS_NODISCARD double ToDouble() const noexcept;
@@ -239,8 +253,11 @@ namespace krys::boo
     KRYS_NODISCARD static Decimal FromString(utf8_stringview string) noexcept;
 
     KRYS_NODISCARD static constexpr Decimal Infinity(Sign sign) noexcept;
+
     KRYS_NODISCARD static constexpr Decimal NaN() noexcept;
+
     KRYS_NODISCARD static constexpr Decimal Zero(Sign sign) noexcept;
+
     KRYS_NODISCARD static constexpr Decimal DoubleMax() noexcept;
 
     /// @brief Only tests should use this.
@@ -251,6 +268,7 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD Decimal CompareTo(const Decimal &rhs) const noexcept;
+
     KRYS_NODISCARD static AlignedOperands AlignOperands(const Decimal &lhs, const Decimal &rhs) noexcept;
 
     KRYS_NODISCARD static Sign InvertSign(Sign sign) noexcept

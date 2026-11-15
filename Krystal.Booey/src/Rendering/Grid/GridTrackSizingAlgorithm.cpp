@@ -1888,14 +1888,18 @@ namespace krys::boo
   private:
     void LayoutGridItemForMinSizeComputation(RenderBox &gridItem,
                                              bool overrideSizeHasChanged) const noexcept override;
+
     void MaximizeTracks(GridTrackSizingAlgorithm::Tracks &tracks,
                         Maybe<LayoutUnit> &freeSpace) noexcept override;
+
     KRYS_NODISCARD double FindUsedFlexFraction(List<uint32> &flexibleSizedTracksIndex,
                                                GridTrackSizingDirection direction,
                                                Maybe<LayoutUnit> freeSpace,
                                                GridLayoutState &gridLayoutState) const noexcept override;
+
     bool RecomputeUsedFlexFractionIfNeeded(double &flexFraction,
                                            LayoutUnit &totalGrowth) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit FreeSpaceForStretchAutoTracksStep() const noexcept override;
 
     KRYS_NODISCARD bool IsComputingSizeContainment() const noexcept override
@@ -1917,6 +1921,7 @@ namespace krys::boo
                                 GridTrackSizingDirection outermostDirection,
                                 HashSet<const RenderBox *> &itemsSet,
                                 GridLayoutState &gridLayoutState) const noexcept;
+
     void AccumulateFlexFractionMasonry(double &flexFraction, GridIterator &iterator,
                                        GridTrackSizingDirection direction, uint32 flexTrackIndex,
                                        HashSet<const RenderBox *> &itemsSet,
@@ -2168,17 +2173,23 @@ namespace krys::boo
   private:
     void LayoutGridItemForMinSizeComputation(RenderBox &gridItem,
                                              bool overrideSizeHasChanged) const noexcept override;
+
     void MaximizeTracks(GridTrackSizingAlgorithm::Tracks &tracks,
                         Maybe<LayoutUnit> &freeSpace) noexcept override;
+
     KRYS_NODISCARD double FindUsedFlexFraction(List<uint32> &flexibleSizedTracksIndex,
                                                GridTrackSizingDirection direction,
                                                Maybe<LayoutUnit> freeSpace,
                                                GridLayoutState &gridLayoutState) const noexcept override;
+
     bool RecomputeUsedFlexFractionIfNeeded(double &flexFraction,
                                            LayoutUnit &totalGrowth) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit FreeSpaceForStretchAutoTracksStep() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit MinContentContributionForGridItem(
       RenderBox &gridItem, GridLayoutState &gridLayoutState) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       MinLogicalSizeForGridItem(RenderBox &gridItem, const style::MinimumSize &gridItemMinSize,
                                 Maybe<LayoutUnit> availableSize) const noexcept override;

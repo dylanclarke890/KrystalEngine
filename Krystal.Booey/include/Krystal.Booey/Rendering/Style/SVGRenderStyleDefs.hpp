@@ -66,6 +66,7 @@ namespace krys::boo
 
   private:
     StyleFillData() noexcept;
+
     StyleFillData(const StyleFillData &) noexcept;
   };
 
@@ -88,6 +89,7 @@ namespace krys::boo
 
   private:
     StyleStrokeData() noexcept;
+
     StyleStrokeData(const StyleStrokeData &) noexcept;
   };
 
@@ -108,6 +110,7 @@ namespace krys::boo
 
   private:
     StyleStopData() noexcept;
+
     StyleStopData(const StyleStopData &) noexcept;
   };
 
@@ -132,6 +135,7 @@ namespace krys::boo
 
   private:
     StyleMiscData() noexcept;
+
     StyleMiscData(const StyleMiscData &) noexcept;
   };
 
@@ -154,6 +158,7 @@ namespace krys::boo
 
   private:
     StyleInheritedResourceData() noexcept;
+
     StyleInheritedResourceData(const StyleInheritedResourceData &) noexcept;
   };
 
@@ -181,6 +186,7 @@ namespace krys::boo
 
   private:
     StyleLayoutData() noexcept;
+
     StyleLayoutData(const StyleLayoutData &) noexcept;
   };
 }

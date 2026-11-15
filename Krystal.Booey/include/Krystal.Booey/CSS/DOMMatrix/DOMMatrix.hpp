@@ -46,25 +46,37 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrix>> FromMatrix(DOMMatrixInit &&) noexcept;
+
     KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrix>> FromFloat32Array(Span<const float>) noexcept;
+
     KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrix>> FromFloat64Array(Span<const double>) noexcept;
 
     dom::ExceptionOr<Ref<DOMMatrix>> MultiplySelf(DOMMatrixInit &&other) noexcept;
+
     dom::ExceptionOr<Ref<DOMMatrix>> PreMultiplySelf(DOMMatrixInit &&other) noexcept;
+
     Ref<DOMMatrix> TranslateSelf(double tx = 0, double ty = 0, double tz = 0) noexcept;
+
     Ref<DOMMatrix> ScaleSelf(double scaleX = 1, Maybe<double> scaleY = null, double scaleZ = 1,
                              double originX = 0, double originY = 0, double originZ = 0) noexcept;
+
     Ref<DOMMatrix> Scale3dSelf(double scale = 1, double originX = 0, double originY = 0,
                                double originZ = 0) noexcept;
+
     /// @note Angles are in degrees.
     Ref<DOMMatrix> RotateSelf(double rotX = 0, Maybe<double> rotY = null, Maybe<double> rotZ = null) noexcept;
+
     Ref<DOMMatrix> RotateFromVectorSelf(double x = 0, double y = 0) noexcept;
+
     /// @note The angle is in degrees.
     Ref<DOMMatrix> RotateAxisAngleSelf(double x = 0, double y = 0, double z = 0, double angle = 0) noexcept;
+
     /// @note The angle is in degrees.
     Ref<DOMMatrix> SkewXSelf(double sx = 0) noexcept;
+
     /// @note The angle is in degrees.
     Ref<DOMMatrix> SkewYSelf(double sy = 0) noexcept;
+
     Ref<DOMMatrix> InvertSelf() noexcept;
 
     void SetA(double f) noexcept
@@ -108,6 +120,7 @@ namespace krys::boo::css
     }
 
     void SetM13(double f) noexcept;
+
     void SetM14(double f) noexcept;
 
     void SetM21(double f) noexcept
@@ -121,10 +134,15 @@ namespace krys::boo::css
     }
 
     void SetM23(double f) noexcept;
+
     void SetM24(double f) noexcept;
+
     void SetM31(double f) noexcept;
+
     void SetM32(double f) noexcept;
+
     void SetM33(double f) noexcept;
+
     void SetM34(double f) noexcept;
 
     void SetM41(double f) noexcept
@@ -138,10 +156,12 @@ namespace krys::boo::css
     }
 
     void SetM43(double f) noexcept;
+
     void SetM44(double f) noexcept;
 
   private:
     DOMMatrix() noexcept = default;
+
     DOMMatrix(const TransformationMatrix &, Is2D) noexcept;
   };
 

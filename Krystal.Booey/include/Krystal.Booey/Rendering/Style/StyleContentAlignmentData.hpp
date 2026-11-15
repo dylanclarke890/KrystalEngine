@@ -83,8 +83,10 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsStartward(Maybe<TextDirection> leftRightAxisDirection = null,
                                     bool isFlexReverse = false) const noexcept;
+
     KRYS_NODISCARD bool IsEndward(Maybe<TextDirection> leftRightAxisDirection = null,
                                   bool isFlexReverse = false) const noexcept;
+
     // leftRightAxisDirection is only needed for justify-content (invalid for align-content).
     // Pass null if neither the inline axis nor the physical left-right axis matches the justify-content axis
     // (e.g. in flexbox).

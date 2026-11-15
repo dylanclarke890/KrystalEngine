@@ -67,6 +67,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const FontFaceSrcLocalValue &other) const noexcept;
   };
 
@@ -135,9 +136,12 @@ namespace krys::boo::css
       GetFontLoadRequest(dom::Document &context, bool isInitiatingElementInUserAgentShadowTree) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool CustomTraverseSubresources(
       KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
+
     KRYS_NODISCARD bool CustomMayDependOnBaseUrl() const noexcept;
+
     KRYS_NODISCARD bool Equals(const FontFaceSrcResourceValue &other) const noexcept;
   };
 }

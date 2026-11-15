@@ -38,6 +38,7 @@ namespace krys::boo::style
       Row,
       Column,
     };
+
     enum class Packing : bool
     {
       Dense,

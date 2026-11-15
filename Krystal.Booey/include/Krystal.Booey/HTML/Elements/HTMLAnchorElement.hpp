@@ -173,6 +173,7 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD url::URL FullURL() const noexcept final;
+
     void SetFullURL(const url::URL &url) noexcept final;
   };
 }

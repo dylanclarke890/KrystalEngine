@@ -111,6 +111,7 @@ namespace krys::boo::style
   struct Blending<SVGPathData>
   {
     KRYS_NODISCARD bool CanBlend(const SVGPathData &, const SVGPathData &) noexcept;
+
     KRYS_NODISCARD SVGPathData Blend(const SVGPathData &, const SVGPathData &,
                                      const BlendingContext &) noexcept;
   };

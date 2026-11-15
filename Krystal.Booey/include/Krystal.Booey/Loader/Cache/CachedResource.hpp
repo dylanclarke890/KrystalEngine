@@ -107,12 +107,15 @@ namespace krys::boo
 
   public:
     CachedResource(CachedResourceRequest &&, Type) noexcept;
+
     virtual ~CachedResource() noexcept;
 
     virtual void Load(CachedResourceLoader &) noexcept;
 
     virtual void UpdateBuffer(const SharedBuffer &) noexcept;
+
     virtual void FinishLoading(const SharedBuffer *) noexcept;
+
     virtual void Error(Status) noexcept;
 
     void SetResourceError(const ResourceError &error) noexcept
@@ -151,6 +154,7 @@ namespace krys::boo
     }
 
     void AddClient(CachedResourceClient &) noexcept;
+
     void RemoveClient(CachedResourceClient &) noexcept;
 
     KRYS_NODISCARD bool HasClients() const noexcept
@@ -264,6 +268,7 @@ namespace krys::boo
     }
 
     virtual void ResponseReceived(ResourceResponse &&) noexcept;
+
     void SetResponse(ResourceResponse &&) noexcept;
 
     KRYS_NODISCARD const ResourceResponse &Response() const noexcept
@@ -308,7 +313,9 @@ namespace krys::boo
 
   protected:
     void SetEncodedSize(uint32) noexcept;
+
     void SetDecodedSize(uint32) noexcept;
+
     void DidAccessDecodedData(MonotonicTime::duration timeStamp) noexcept;
 
     ResourceResponse &MutableResponse() noexcept
@@ -317,16 +324,20 @@ namespace krys::boo
     }
 
     void StopDecodedDataDeletionTimer() noexcept;
+
     void RestartDecodedDataDeletionTimer() noexcept;
 
   private:
     virtual void CheckNotify() noexcept;
+
     void FailBeforeStarting() noexcept;
+
     void DecodedDataDeletionTimerFired() noexcept;
 
     /// @brief What upstream's subresource loader does when a load ends: hands the response and data to the
     /// resource, or its error.
     void DidFinishLoad(LoadResult &&) noexcept;
+
     void ApplyLoadResult(LoadResult &&) noexcept;
 
     /// @brief The load is done: it leaves its loader's request count, which may let the document finish

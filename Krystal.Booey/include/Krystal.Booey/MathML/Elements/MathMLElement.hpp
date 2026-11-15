@@ -86,6 +86,7 @@ namespace krys::boo::mathml
 
     /// @brief The number of columns an `<mtd>` spans; 1 for other elements.
     KRYS_NODISCARD uint32 ColSpan() const noexcept;
+
     /// @brief The number of rows an `<mtd>` spans; 1 for other elements.
     KRYS_NODISCARD uint32 RowSpan() const noexcept;
 
@@ -195,6 +196,7 @@ namespace krys::boo::mathml
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;

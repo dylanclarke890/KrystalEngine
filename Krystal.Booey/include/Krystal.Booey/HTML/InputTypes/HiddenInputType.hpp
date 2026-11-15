@@ -49,11 +49,16 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool RendererIsNeeded() noexcept final;
+
     KRYS_NODISCARD bool StoresValueSeparateFromAttribute() noexcept final;
+
     void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
+
     bool AppendFormData(DOMFormData &formData) const noexcept final;
+
     KRYS_NODISCARD bool ShouldRespectHeightAndWidthAttributes() noexcept final;
+
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
   };
 }

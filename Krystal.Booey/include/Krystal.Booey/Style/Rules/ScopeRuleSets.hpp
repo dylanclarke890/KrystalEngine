@@ -110,6 +110,7 @@ namespace krys::boo::style
 
   public:
     explicit ScopeRuleSets(Resolver &styleResolver) noexcept;
+
     ~ScopeRuleSets() noexcept;
 
     KRYS_NODISCARD bool IsAuthorStyleDefined() const noexcept
@@ -125,6 +126,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD RuleSet *UserStyle() const noexcept;
+
     KRYS_NODISCARD RuleSet *StyleForDeclarationOrigin(DeclarationOrigin origin) noexcept;
 
     KRYS_NODISCARD const RuleFeatureSet &Features() const noexcept;
@@ -136,12 +138,16 @@ namespace krys::boo::style
 
     KRYS_NODISCARD const List<InvalidationRuleSet> *
       IdInvalidationRuleSets(const css::CSSOMStringAtom &id) const noexcept;
+
     KRYS_NODISCARD const List<InvalidationRuleSet> *
       ClassInvalidationRuleSets(const css::CSSOMStringAtom &className) const noexcept;
+
     KRYS_NODISCARD const List<InvalidationRuleSet> *
       AttributeInvalidationRuleSets(const css::CSSOMStringAtom &attributeName) const noexcept;
+
     KRYS_NODISCARD const List<InvalidationRuleSet> *
       PseudoClassInvalidationRuleSets(const PseudoClassInvalidationKey &pseudoClassKey) const noexcept;
+
     KRYS_NODISCARD const List<InvalidationRuleSet> *
       HasPseudoClassInvalidationRuleSets(const PseudoClassInvalidationKey &key) const noexcept;
 
@@ -158,13 +164,16 @@ namespace krys::boo::style
     void InitializeUserStyle() noexcept;
 
     void ResetAuthorStyle() noexcept;
+
     void AppendAuthorStyleSheets(Span<const RefPtr<css::CSSStyleSheet>> styleSheets,
                                  const css::mq::MediaQueryEvaluator &mediaQueryEvaluator) noexcept;
 
     void ResetUserAgentMediaQueryStyle() noexcept;
 
     KRYS_NODISCARD bool HasViewportDependentMediaQueries() const noexcept;
+
     KRYS_NODISCARD bool HasContainerQueries() const noexcept;
+
     KRYS_NODISCARD bool HasScopeRules() const noexcept;
 
     KRYS_NODISCARD Maybe<DynamicMediaQueryEvaluationChanges>
@@ -182,6 +191,7 @@ namespace krys::boo::style
 
   private:
     void CollectFeatures() const noexcept;
+
     void UpdateUserAgentMediaQueryStyleIfNeeded() const noexcept;
   };
 

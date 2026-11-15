@@ -70,6 +70,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration>
       Create(dom::Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
+
     KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration> CreateEmpty(dom::Element &) noexcept;
 
     ~CSSComputedStyleDeclaration() noexcept override;
@@ -78,24 +79,38 @@ namespace krys::boo::css
 
   private:
     CSSComputedStyleDeclaration(dom::Element &, IsEmpty) noexcept;
+
     CSSComputedStyleDeclaration(dom::Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
 
     // CSSOM functions. Don't make these public.
     KRYS_NODISCARD CSSRule *ParentRule() const noexcept final;
+
     KRYS_NODISCARD uint32 Length() const noexcept final;
+
     KRYS_NODISCARD CSSOMString Item(uint32 index) const noexcept final;
+
     KRYS_NODISCARD CSSOMString GetPropertyValue(const CSSOMString &propertyName) noexcept final;
+
     KRYS_NODISCARD CSSOMString GetPropertyPriority(const CSSOMString &propertyName) noexcept final;
+
     KRYS_NODISCARD CSSOMString GetPropertyShorthand(const CSSOMString &propertyName) noexcept final;
+
     KRYS_NODISCARD bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept final;
+
     dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
                                        const CSSOMString &priority) noexcept final;
+
     dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
+
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     dom::ExceptionOr<void> SetCssText(const CSSOMString &) noexcept final;
+
     KRYS_NODISCARD CSSOMString GetPropertyValueInternal(PropertyId) noexcept final;
+
     dom::ExceptionOr<void> SetPropertyInternal(PropertyId, const CSSOMString &value,
                                                IsImportant) noexcept final;
+
     KRYS_NODISCARD Ref<MutableStyleProperties> CopyProperties() const noexcept final;
 
     KRYS_NODISCARD Ref<dom::Element> ProtectedElement() const noexcept

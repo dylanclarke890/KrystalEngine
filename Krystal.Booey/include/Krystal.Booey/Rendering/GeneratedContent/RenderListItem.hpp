@@ -50,6 +50,7 @@ namespace krys::boo
 
   public:
     RenderListItem(dom::Element &element, RenderStyle &&style) noexcept;
+
     ~RenderListItem() noexcept override;
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
@@ -72,16 +73,19 @@ namespace krys::boo
     void UpdateValue() noexcept;
 
     KRYS_NODISCARD utf8_string MarkerTextWithoutSuffix() const noexcept;
+
     KRYS_NODISCARD utf8_string MarkerTextWithSuffix() const noexcept;
 
     void UpdateListMarkerNumbers() noexcept;
 
     static void UpdateItemValuesForOrderedList(const html::HTMLOListElement &list) noexcept;
+
     KRYS_NODISCARD static uint32 ItemCountForOrderedList(const html::HTMLOListElement &list) noexcept;
 
     KRYS_NODISCARD RenderStyle ComputeMarkerStyle() const noexcept;
 
     KRYS_NODISCARD RenderListMarker *MarkerRenderer() const noexcept;
+
     void SetMarkerRenderer(RenderListMarker &marker) noexcept;
 
     KRYS_NODISCARD bool IsInReversedOrderedList() const noexcept;
@@ -92,6 +96,7 @@ namespace krys::boo
     void ComputePreferredLogicalWidths() noexcept final;
 
     void UpdateValueNow() const noexcept;
+
     void CounterDirectivesChanged() noexcept;
   };
 

@@ -6,8 +6,8 @@
 
 namespace krys::boo::dom
 {
-  class Element;
   class ContainerNode;
+  class Element;
 }
 
 namespace krys::boo::dom::mixins

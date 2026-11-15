@@ -57,6 +57,7 @@ namespace krys::boo::display_list
     }
 
     KRYS_NODISCARD utf8_string AsText(EnumSet<AsTextFlag>) const noexcept;
+
     void Dump(TextStream &) const noexcept;
 
   private:

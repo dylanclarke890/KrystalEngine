@@ -58,6 +58,7 @@ namespace krys::boo
 
   private:
     StyleMultiColData() noexcept;
+
     StyleMultiColData(const StyleMultiColData &) noexcept;
   };
 }

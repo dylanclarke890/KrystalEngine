@@ -15,6 +15,7 @@ namespace krys::ui
   public:
     KRYS_NODISCARD bool StrokeContains(const boo::Path &path, const boo::FloatPoint &point,
                                        const boo::PathStrokeStyle &style) noexcept override;
+
     KRYS_NODISCARD boo::FloatRect StrokeBoundingRect(const boo::Path &path,
                                                      const boo::PathStrokeStyle &style) noexcept override;
 

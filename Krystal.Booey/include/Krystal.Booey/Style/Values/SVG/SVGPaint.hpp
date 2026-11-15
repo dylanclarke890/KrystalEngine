@@ -244,7 +244,9 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool Equals(const SVGPaint &, const SVGPaint &, const RenderStyle &,
                                const RenderStyle &) noexcept;
+
     KRYS_NODISCARD bool CanBlend(const SVGPaint &, const SVGPaint &) noexcept;
+
     KRYS_NODISCARD SVGPaint Blend(const SVGPaint &, const SVGPaint &, const RenderStyle &,
                                   const RenderStyle &, const BlendingContext &) noexcept;
   };

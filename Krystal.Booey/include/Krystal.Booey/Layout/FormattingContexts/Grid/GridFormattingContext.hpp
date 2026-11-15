@@ -77,6 +77,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD BoxGeometry &GeometryForGridItem(const ElementBox &layoutBox) noexcept;
+
     void SetGridItemGeometries(const GridItemRects &gridItemRects) noexcept;
   };
 }

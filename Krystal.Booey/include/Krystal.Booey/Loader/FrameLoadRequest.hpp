@@ -64,10 +64,15 @@ namespace krys::boo
 
   protected:
     FrameLoadRequestBase() noexcept;
+
     FrameLoadRequestBase(const FrameLoadRequestBase &) noexcept;
+
     FrameLoadRequestBase &operator=(const FrameLoadRequestBase &) noexcept;
+
     FrameLoadRequestBase(FrameLoadRequestBase &&) noexcept;
+
     FrameLoadRequestBase &operator=(FrameLoadRequestBase &&) noexcept;
+
     ~FrameLoadRequestBase() noexcept;
 
     void SetDownloadAttribute(dom::DOMStringAtom downloadAttribute) noexcept
@@ -93,10 +98,15 @@ namespace krys::boo
     /// @param downloadAttribute The `download` attribute of the link followed; null if it has none.
     FrameLoadRequest(Ref<dom::Document> &&requester, ResourceRequest &&resourceRequest,
                      dom::DOMStringAtom frameName, dom::DOMStringAtom downloadAttribute = null) noexcept;
+
     ~FrameLoadRequest() noexcept;
+
     FrameLoadRequest(const FrameLoadRequest &) noexcept;
+
     FrameLoadRequest &operator=(const FrameLoadRequest &) noexcept;
+
     FrameLoadRequest(FrameLoadRequest &&) noexcept;
+
     FrameLoadRequest &operator=(FrameLoadRequest &&) noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept

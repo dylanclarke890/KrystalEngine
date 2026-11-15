@@ -54,13 +54,19 @@ namespace krys::boo::css
 
     /// @return A `SyntaxError` if @p hue isn't an angle.
     dom::ExceptionOr<void> SetH(Ref<CSSNumericValue> hue) noexcept;
+
     KRYS_NODISCARD CSSNumberish W() const noexcept;
+
     /// @return A `SyntaxError` if @p whiteness isn't a percentage.
     dom::ExceptionOr<void> SetW(CSSNumberish whiteness) noexcept;
+
     KRYS_NODISCARD CSSNumberish B() const noexcept;
+
     /// @return A `SyntaxError` if @p blackness isn't a percentage.
     dom::ExceptionOr<void> SetB(CSSNumberish blackness) noexcept;
+
     KRYS_NODISCARD CSSNumberish Alpha() const noexcept;
+
     /// @return A `SyntaxError` if @p alpha isn't a percentage.
     dom::ExceptionOr<void> SetAlpha(CSSNumberish alpha) noexcept;
 

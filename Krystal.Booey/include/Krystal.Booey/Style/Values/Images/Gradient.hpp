@@ -170,6 +170,7 @@ namespace krys::boo
         using SizeType = css::SpaceSeparatedArray<LengthPercentage<css::NonNegative>, 2>;
         Variant<SizeType, Extent> Size;
         Maybe<style::Position> Position;
+
         KRYS_NODISCARD bool operator==(const Ellipse &) const noexcept = default;
       };
 
@@ -178,6 +179,7 @@ namespace krys::boo
         using Length = style::Length<css::NonNegative>;
         Variant<Length, Extent> Size;
         Maybe<style::Position> Position;
+
         KRYS_NODISCARD bool operator==(const Circle &) const noexcept = default;
       };
 

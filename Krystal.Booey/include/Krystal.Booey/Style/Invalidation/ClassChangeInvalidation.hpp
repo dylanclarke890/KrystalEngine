@@ -49,12 +49,15 @@ namespace krys::boo::style
   public:
     ClassChangeInvalidation(dom::Element &element, Span<const dom::DOMStringAtom> oldClasses,
                             Span<const dom::DOMStringAtom> newClasses) noexcept;
+
     ~ClassChangeInvalidation() noexcept;
 
   private:
     void ComputeInvalidation(Span<const dom::DOMStringAtom> oldClasses,
                              Span<const dom::DOMStringAtom> newClasses) noexcept;
+
     void InvalidateBeforeChange() noexcept;
+
     void InvalidateAfterChange() noexcept;
   };
 

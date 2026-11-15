@@ -40,6 +40,7 @@ namespace krys::boo::html
 
   private:
     TokenType _type : BitCount<TokenType>();
+
     bool _isSelfClosing : 1 {false};
     bool _selfClosingTagAcknowledged : 1 {false};
     bool _dataReleased : 1 {false};

@@ -53,43 +53,68 @@ namespace krys::boo::style::calc
 
   static auto ToCSS(const Random::Fixed &, const ToCSSConversionOptions &) noexcept
     -> css::calc::Random::SharingType;
+
   static auto ToCSS(const css::keywords::None &, const ToCSSConversionOptions &) noexcept
     -> css::keywords::None;
+
   static auto ToCSS(const ChildOrNone &, const ToCSSConversionOptions &) noexcept -> css::calc::ChildOrNone;
+
   static auto ToCSS(const Children &, const ToCSSConversionOptions &) noexcept -> css::calc::Children;
+
   static auto ToCSS(const Maybe<Child> &, const ToCSSConversionOptions &) noexcept -> Maybe<css::calc::Child>;
+
   static auto ToCSS(const Child &, const ToCSSConversionOptions &) noexcept -> css::calc::Child;
+
   static auto ToCSS(const Number &, const ToCSSConversionOptions &) noexcept -> css::calc::Child;
+
   static auto ToCSS(const Percentage &, const ToCSSConversionOptions &) noexcept -> css::calc::Child;
+
   static auto ToCSS(const Dimension &, const ToCSSConversionOptions &) noexcept -> css::calc::Child;
+
   static auto ToCSS(const IndirectNode<Blend> &, const ToCSSConversionOptions &) noexcept -> css::calc::Child;
+
   template <typename CalculationOp>
   static auto ToCSS(const IndirectNode<CalculationOp> &, const ToCSSConversionOptions &) noexcept
     -> css::calc::Child;
 
   static auto ToStyle(const css::calc::Random::SharingType &, const ToStyleConversionOptions &) noexcept
     -> Random::Fixed;
+
   static auto ToStyle(const Maybe<css::calc::Child> &, const ToStyleConversionOptions &) noexcept
     -> Maybe<Child>;
+
   static auto ToStyle(const css::keywords::None &, const ToStyleConversionOptions &) noexcept
     -> css::keywords::None;
+
   static auto ToStyle(const css::calc::ChildOrNone &, const ToStyleConversionOptions &) noexcept
     -> ChildOrNone;
+
   static auto ToStyle(const css::calc::Children &, const ToStyleConversionOptions &) noexcept -> Children;
+
   static auto ToStyle(const css::calc::Child &, const ToStyleConversionOptions &) noexcept -> Child;
+
   static auto ToStyle(const css::calc::Number &, const ToStyleConversionOptions &) noexcept -> Child;
+
   static auto ToStyle(const css::calc::Percentage &, const ToStyleConversionOptions &) noexcept -> Child;
+
   static auto ToStyle(const css::calc::CanonicalDimension &, const ToStyleConversionOptions &) noexcept
     -> Child;
+
   static auto ToStyle(const css::calc::NonCanonicalDimension &, const ToStyleConversionOptions &) noexcept
     -> Child;
+
   static auto ToStyle(const css::calc::Symbol &, const ToStyleConversionOptions &) noexcept -> Child;
+
   static auto ToStyle(const css::calc::SiblingCount &, const ToStyleConversionOptions &) noexcept -> Child;
+
   static auto ToStyle(const css::calc::SiblingIndex &, const ToStyleConversionOptions &) noexcept -> Child;
+
   static auto ToStyle(const css::calc::IndirectNode<css::calc::Anchor> &,
                       const ToStyleConversionOptions &) noexcept -> Child;
+
   static auto ToStyle(const css::calc::IndirectNode<css::calc::AnchorSize> &,
                       const ToStyleConversionOptions &) noexcept -> Child;
+
   template <typename Op>
   static auto ToStyle(const css::calc::IndirectNode<Op> &, const ToStyleConversionOptions &) noexcept
     -> Child;

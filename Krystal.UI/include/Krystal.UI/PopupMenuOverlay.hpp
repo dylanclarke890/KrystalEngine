@@ -40,13 +40,17 @@ namespace krys::ui
 
   public:
     PopupMenuOverlay(View &owner, boo::PopupMenuClient &client) noexcept;
+
     ~PopupMenuOverlay() noexcept override;
 
 #pragma region PopupMenu
 
     void Show(const boo::IntRect &rect, boo::LocalFrameView &view, int32 selectedIndex) noexcept override;
+
     void Hide() noexcept final;
+
     void UpdateFromElement() noexcept override;
+
     void DisconnectClient() noexcept override;
 
 #pragma endregion
@@ -82,10 +86,13 @@ namespace krys::ui
 
     /// @brief Highlights the item under @p point (in the popup's coordinates).
     void MouseMoved(const boo::IntPoint &point) noexcept final;
+
     /// @brief Chooses the item under @p point (in the popup's coordinates).
     void MouseReleased(const boo::IntPoint &point) noexcept final;
+
     /// @brief Scrolls the popup's items.
     bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept final;
+
     /// @brief The arrow keys, Home and End move the highlight; Enter and Space choose the highlighted item;
     /// Escape and Tab hide the popup.
     bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers) noexcept final;
@@ -109,9 +116,13 @@ namespace krys::ui
   private:
     /// @brief Fills the popup's page with the client's items, and places it.
     void Build() noexcept;
+
     void Highlight(int32 index) noexcept;
+
     void Choose(int32 index) noexcept;
+
     KRYS_NODISCARD bool IsSelectable(int32 index) const noexcept;
+
     /// @brief The next selectable item from @p index in @p direction, or @p index if there's none.
     KRYS_NODISCARD int32 NextSelectableIndex(int32 index, int32 direction) const noexcept;
   };

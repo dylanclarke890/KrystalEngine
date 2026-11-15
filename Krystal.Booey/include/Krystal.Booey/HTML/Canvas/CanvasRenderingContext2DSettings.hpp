@@ -20,6 +20,7 @@ namespace krys::boo::html
       Unorm8,
       Float16,
     };
+
     // FIXME: Half-float backing stores; the context draws in 8 bits a channel whichever is chosen.
     ColorType ColourType {ColorType::Unorm8};
   };

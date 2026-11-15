@@ -64,6 +64,7 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
+
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override;
   };
 
@@ -87,6 +88,7 @@ namespace krys::boo::html
     explicit ProgressValueElement(dom::Document &) noexcept;
 
     KRYS_NODISCARD static Ref<ProgressValueElement> Create(dom::Document &) noexcept;
+
     void SetInlineSizePercentage(double) noexcept;
   };
 }

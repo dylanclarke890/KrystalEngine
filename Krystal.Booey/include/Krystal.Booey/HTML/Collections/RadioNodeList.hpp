@@ -58,6 +58,7 @@ namespace krys::boo::html
   public:
     RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name,
                   RadioNodeListCandidates candidates = RadioNodeListCandidates::ListedElements) noexcept;
+
     ~RadioNodeList() noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-radionodelist-value

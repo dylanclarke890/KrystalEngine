@@ -83,8 +83,11 @@ namespace krys::boo::css
 
   public:
     void PushParent(const dom::Element *parent) noexcept;
+
     void PushParentInitializingIfNeeded(const dom::Element &parent) noexcept;
+
     void PopParent() noexcept;
+
     void PopParentsUntil(const dom::Element *parent) noexcept;
 
     KRYS_NODISCARD bool ParentStackIsEmpty() const noexcept
@@ -102,8 +105,10 @@ namespace krys::boo::css
     KRYS_NODISCARD bool FastRejectSelector(const Hashes &hashes) const noexcept;
 
     KRYS_NODISCARD static Hashes CollectHashes(const Selector &selector) noexcept;
+
     static void CollectElementIdentifierHashes(const dom::Element &element,
                                                SmallList<uint32, 4> &identifierHashes) noexcept;
+
     static void CollectSimpleSelectorHash(CollectedSelectorHashes &collectedHashes,
                                           const Selector &selector) noexcept;
 
@@ -113,6 +118,7 @@ namespace krys::boo::css
     static void CollectSelectorHashes(CollectedSelectorHashes &collectedHashes,
                                       const Selector &rightmostSelector,
                                       IncludeRightmost includeRightmost) noexcept;
+
     KRYS_NODISCARD static Hashes
       ChooseSelectorHashesForFilter(const CollectedSelectorHashes &collectedSelectorHashes) noexcept;
   };

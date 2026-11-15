@@ -38,12 +38,12 @@ namespace krys::boo
   class GraphicsContext;
   class LayoutRect;
   class LegacyRenderSVGRoot;
+  struct PaintInfo;
   class RenderElement;
   class RenderGeometryMap;
   class RenderLayerModelObject;
   class RenderStyle;
   class TransformState;
-  struct PaintInfo;
 
   // SVGRendererSupport is a helper class sharing code between all SVG renderers.
   class SVGRenderSupport
@@ -85,6 +85,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static FloatRect
       ComputeContainerStrokeBoundingBox(const RenderElement &container) noexcept;
+
     KRYS_NODISCARD static bool PaintInfoIntersectsRepaintRect(const FloatRect &localRepaintRect,
                                                               const AffineTransform &localTransform,
                                                               const PaintInfo &) noexcept;
@@ -94,16 +95,21 @@ namespace krys::boo
     KRYS_NODISCARD static LayoutRect ClippedOverflowRectForRepaint(const RenderElement &,
                                                                    const RenderLayerModelObject *container,
                                                                    VisibleRectContext) noexcept;
+
     KRYS_NODISCARD static Maybe<FloatRect>
       ComputeFloatVisibleRectInContainer(const RenderElement &, const FloatRect &,
                                          const RenderLayerModelObject *container,
                                          VisibleRectContext) noexcept;
+
     static const RenderElement &LocalToParentTransform(const RenderElement &, AffineTransform &) noexcept;
+
     static void MapLocalToContainer(const RenderElement &, const RenderLayerModelObject *ancestorContainer,
                                     TransformState &, bool *wasFixed) noexcept;
+
     static const RenderElement *PushMappingToContainer(const RenderElement &,
                                                        const RenderLayerModelObject *ancestorToStopAt,
                                                        RenderGeometryMap &) noexcept;
+
     KRYS_NODISCARD static LayoutRepainter::CheckForRepaint
       CheckForSVGRepaintDuringLayout(const RenderElement &) noexcept;
 
@@ -121,9 +127,11 @@ namespace krys::boo
     static void StyleChanged(RenderElement &, const RenderStyle *) noexcept;
 
     KRYS_NODISCARD static bool IsolatesBlending(const RenderStyle &) noexcept;
+
     static void UpdateMaskedAncestorShouldIsolateBlending(const RenderElement &) noexcept;
 
     KRYS_NODISCARD static LegacyRenderSVGRoot *FindTreeRootObject(RenderElement &) noexcept;
+
     KRYS_NODISCARD static const LegacyRenderSVGRoot *FindTreeRootObject(const RenderElement &) noexcept;
   };
 }

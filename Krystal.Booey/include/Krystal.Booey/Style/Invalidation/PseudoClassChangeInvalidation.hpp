@@ -67,9 +67,11 @@ namespace krys::boo::style
     /// @param value The state after the change.
     PseudoClassChangeInvalidation(dom::Element &element, css::SelectorPseudoClass pseudoClass, bool value,
                                   InvalidationScope invalidationScope = InvalidationScope::All) noexcept;
+
     /// @brief For a change whose state after the change isn't known: invalidates both ways.
     PseudoClassChangeInvalidation(dom::Element &element, css::SelectorPseudoClass pseudoClass,
                                   AnyValueTag) noexcept;
+
     PseudoClassChangeInvalidation(
       dom::Element &element,
       std::initializer_list<Pair<css::SelectorPseudoClass, bool>> pseudoClasses) noexcept;
@@ -79,9 +81,12 @@ namespace krys::boo::style
   private:
     void ComputeInvalidation(css::SelectorPseudoClass pseudoClass, Value value,
                              InvalidationScope invalidationScope) noexcept;
+
     void CollectRuleSets(const PseudoClassInvalidationKey &key, Value value,
                          InvalidationScope invalidationScope) noexcept;
+
     void InvalidateBeforeChange() noexcept;
+
     void InvalidateAfterChange() noexcept;
   };
 

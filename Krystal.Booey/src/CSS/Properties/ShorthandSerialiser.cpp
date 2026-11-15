@@ -208,42 +208,69 @@ namespace krys::boo::css
       KRYS_NODISCARD bool SubsequentLonghandsHaveInitialValues(size_t index) const noexcept;
 
       KRYS_NODISCARD bool CommonSerialisationChecks(const style::Extractor &properties) noexcept;
+
       KRYS_NODISCARD bool CommonSerialisationChecks(const StyleProperties &properties) noexcept;
 
       KRYS_NODISCARD CSSOMString SerialiseLonghands() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseLonghands(size_t lengthLimit,
                                                     CSSOMStringView separator = u8" ") const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseLonghandsOmittingInitialValues() const noexcept;
+
       KRYS_NODISCARD CSSOMString
         SerialiseLonghandsOmittingTrailingInitialValue(CSSOMStringView separator = u8" ") const noexcept;
 
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseCommonValue() const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseCommonValue(size_t startIndex, size_t count) const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialisePair() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseQuad() const noexcept;
 
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseLayered() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseCoordinatingListPropertyGroup() const noexcept;
 
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseBorder(size_t sectionLength) const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseBorderImage() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseBorderRadius() const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseBreakInside() const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseFont() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseFontSynthesis() const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseFontVariant() const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseGrid() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseGridArea() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseGridRowColumn() const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseGridTemplate() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseOffset() const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialisePageBreak() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialisePositionTry() const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseLineClamp() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseTextBox() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseTextWrap() const noexcept;
+
       KRYS_NODISCARD CSSOMString SerialiseWhiteSpace() const noexcept;
+
       KRYS_NODISCARD Maybe<CSSOMString> SerialiseAnimationRange() const noexcept;
+
       KRYS_NODISCARD CSSOMString
         SerialiseSingleAnimationRange(const Value &value, style::SingleAnimationRangeType type,
                                       ValueId startValueId = ValueId::Invalid) const noexcept;

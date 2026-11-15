@@ -63,6 +63,7 @@ namespace krys::boo::html
     constexpr static uint32 DefaultHeight = 150;
 
     HTMLCanvasElement(dom::Document &document) noexcept;
+
     ~HTMLCanvasElement() noexcept override;
 
     void AddRef() const noexcept final
@@ -146,10 +147,12 @@ namespace krys::boo::html
     void DidDraw(const Maybe<FloatRect> &rect) noexcept final;
 
     KRYS_NODISCARD const css::ParserContext &CssParserContext() const noexcept final;
+
     KRYS_NODISCARD dom::Document *CanvasDocument() const noexcept final;
 
     /// @brief Whether the context has work to do before its pixels are composited.
     KRYS_NODISCARD bool NeedsPreparationForDisplay() const noexcept;
+
     void PrepareForDisplay() noexcept;
 
     /// @brief Paints the context's pixels into @p rect, when they aren't shown as the layer's contents.
@@ -169,24 +172,31 @@ namespace krys::boo::html
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
+
     void OnAdopt(dom::Document &oldDocument) noexcept override;
+
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
+
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
   private:
     KRYS_NODISCARD CanvasRenderingContext2D *
       CreateContext2d(CanvasRenderingContext2DSettings &&settings) noexcept;
+
     KRYS_NODISCARD EngineTextureRenderingContext *CreateContextEngineTexture() noexcept;
 
     void CreateImageBuffer() const noexcept final;
+
     void ClearImageBuffer() const noexcept;
 
     KRYS_NODISCARD Image *CopiedImage() const noexcept final;
+
     void ClearCopiedImage() const noexcept final;
 
     void DidUpdateSizeProperties() noexcept;

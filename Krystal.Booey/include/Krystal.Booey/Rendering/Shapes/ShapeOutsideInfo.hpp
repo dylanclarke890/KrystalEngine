@@ -134,6 +134,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutRect ComputedShapePhysicalBoundingBox() const noexcept;
+
     KRYS_NODISCARD FloatPoint ShapeToRendererPoint(const FloatPoint &point) const noexcept;
 
     KRYS_NODISCARD const LayoutShape &ComputedShape() const noexcept;

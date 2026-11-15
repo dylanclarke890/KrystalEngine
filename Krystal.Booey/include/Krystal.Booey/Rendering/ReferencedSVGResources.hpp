@@ -76,16 +76,19 @@ namespace krys::boo
 
   public:
     explicit ReferencedSVGResources(RenderElement &) noexcept;
+
     ~ReferencedSVGResources() noexcept;
 
     KRYS_NODISCARD static SVGElementIdentifierAndTagPairs
       ReferencedSVGResourceIDs(const RenderStyle &, const dom::Document &) noexcept;
+
     void UpdateReferencedResources(dom::DocumentOrShadowRoot &,
                                    const SVGElementIdentifierAndTagPairs &) noexcept;
 
     // Legacy: Clipping needs a renderer, filters use an element.
     KRYS_NODISCARD static LegacyRenderSVGResourceClipper *
       ReferencedClipperRenderer(dom::DocumentOrShadowRoot &, const style::ReferencePath &) noexcept;
+
     KRYS_NODISCARD static RefPtr<svg::SVGFilterElement>
       ReferencedFilterElement(dom::DocumentOrShadowRoot &, const style::ReferenceFilterOperation &) noexcept;
 
@@ -96,11 +99,13 @@ namespace krys::boo
     KRYS_NODISCARD static RefPtr<svg::SVGElement> ElementForResourceID(dom::DocumentOrShadowRoot &,
                                                                        const dom::DOMStringAtom &resourceID,
                                                                        html::TagName) noexcept;
+
     KRYS_NODISCARD static RefPtr<svg::SVGElement> ElementForResourceIDs(dom::DocumentOrShadowRoot &,
                                                                         const dom::DOMStringAtom &resourceID,
                                                                         const SVGQualifiedNames &) noexcept;
 
     void AddClientForTarget(svg::SVGElement &targetElement, const dom::DOMStringAtom &) noexcept;
+
     void RemoveClientForTarget(dom::DocumentOrShadowRoot &, const dom::DOMStringAtom &) noexcept;
   };
 }

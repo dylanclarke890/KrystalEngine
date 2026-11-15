@@ -34,18 +34,23 @@ namespace krys::pal::win32
 
   public:
     UIAutomation(HWND window, IAccessibilityTree &tree) noexcept;
+
     /// @brief Disconnects the elements, which fail every call from then on.
     ~UIAutomation() noexcept;
 
     /// @brief Answers `WM_GETOBJECT`, if it asks for UI Automation's root element.
     KRYS_NODISCARD Maybe<LRESULT> HandleGetObject(WPARAM wParam, LPARAM lParam) noexcept;
+
     /// @brief Lets UI Automation go of the window's elements, as it's destroyed.
     void WindowDestroyed() noexcept;
 
     /// @brief Whether a UI Automation client is listening for events.
     KRYS_NODISCARD static bool ClientsAreListening() noexcept;
+
     void RaiseEvent(AccessibilityNodeID node, AccessibilityEvent event) noexcept;
+
     void RaiseTextChange(AccessibilityNodeID node) noexcept;
+
     /// @brief Disconnects @p node's element, if it has one.
     void NodeRemoved(AccessibilityNodeID node) noexcept;
 
@@ -63,6 +68,7 @@ namespace krys::pal::win32
 
     /// @brief The window's element.
     KRYS_NODISCARD UIAElement &Root() noexcept;
+
     /// @brief @p node's element (made if it has none); the window's for 0.
     KRYS_NODISCARD UIAElement &Element(AccessibilityNodeID node) noexcept;
 

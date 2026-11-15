@@ -63,6 +63,7 @@ namespace krys::boo
     virtual ~TimingFunction() noexcept = default;
 
     KRYS_NODISCARD virtual Ref<TimingFunction> Clone() const noexcept = 0;
+
     KRYS_NODISCARD virtual Type GetType() const noexcept = 0;
 
     KRYS_NODISCARD bool IsLinearTimingFunction() const noexcept
@@ -94,6 +95,7 @@ namespace krys::boo
 
     KRYS_NODISCARD double TransformProgress(double progress, double duration,
                                             Before = Before::No) const noexcept;
+
     KRYS_NODISCARD utf8_string CssText() const noexcept;
   };
 

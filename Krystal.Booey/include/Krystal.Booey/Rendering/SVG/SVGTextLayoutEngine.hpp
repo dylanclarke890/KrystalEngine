@@ -81,7 +81,9 @@ namespace krys::boo
 
   public:
     explicit SVGTextLayoutEngine(List<SVGTextLayoutAttributes *> &) noexcept;
+
     SVGTextLayoutEngine(SVGTextLayoutEngine &&) noexcept = default;
+
     SVGTextLayoutEngine(const SVGTextLayoutEngine &) = delete;
 
     KRYS_NODISCARD List<SVGTextLayoutAttributes *> &LayoutAttributes() noexcept
@@ -90,29 +92,38 @@ namespace krys::boo
     }
 
     void BeginTextPathLayout(const RenderSVGTextPath &, SVGTextLayoutEngine &lineLayout) noexcept;
+
     void EndTextPathLayout() noexcept;
 
     void LayoutInlineTextBox(inline_iterator::SVGTextBoxIterator) noexcept;
+
     KRYS_NODISCARD SVGTextFragmentMap FinishLayout() noexcept;
 
   private:
     void UpdateCharacterPositionIfNeeded(float &x, float &y) noexcept;
+
     void UpdateCurrentTextPosition(float x, float y, float glyphAdvance) noexcept;
+
     void UpdateRelativePositionAdjustmentsIfNeeded(float dx, float dy) noexcept;
 
     void RecordTextFragment(inline_iterator::SVGTextBoxIterator, const List<SVGTextMetrics> &) noexcept;
+
     KRYS_NODISCARD bool ParentDefinesTextLength(RenderObject *) const noexcept;
 
     void LayoutTextOnLineOrPath(inline_iterator::SVGTextBoxIterator, const RenderSVGInlineText &,
                                 const RenderStyle &) noexcept;
+
     void FinalizeTransformMatrices(List<inline_iterator::SVGTextBoxIterator> &) noexcept;
 
     bool CurrentLogicalCharacterAttributes(SVGTextLayoutAttributes *&) noexcept;
+
     bool CurrentLogicalCharacterMetrics(SVGTextLayoutAttributes *&, SVGTextMetrics &) noexcept;
+
     bool CurrentVisualCharacterMetrics(const inline_iterator::SVGTextBox &, const List<SVGTextMetrics> &,
                                        SVGTextMetrics &) noexcept;
 
     void AdvanceToNextLogicalCharacter(const SVGTextMetrics &) noexcept;
+
     void AdvanceToNextVisualCharacter(const SVGTextMetrics &) noexcept;
   };
 }

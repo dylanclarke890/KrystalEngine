@@ -83,10 +83,13 @@ namespace krys::boo
     public:
       KRYS_NODISCARD static Ref<const CustomProperty>
         CreateForGuaranteedInvalid(const css::CSSOMStringAtom &name) noexcept;
+
       KRYS_NODISCARD static Ref<const CustomProperty>
         CreateForVariableData(const css::CSSOMStringAtom &name, Ref<css::VariableData> &&) noexcept;
+
       KRYS_NODISCARD static Ref<const CustomProperty> CreateForValue(const css::CSSOMStringAtom &name,
                                                                      Value &&) noexcept;
+
       KRYS_NODISCARD static Ref<const CustomProperty> CreateForValueList(const css::CSSOMStringAtom &name,
                                                                          ValueList &&) noexcept;
 
@@ -103,8 +106,11 @@ namespace krys::boo
       KRYS_NODISCARD const List<css::Token> &Tokens() const noexcept;
 
       KRYS_NODISCARD bool IsGuaranteedInvalid() const noexcept;
+
       KRYS_NODISCARD bool IsVariableData() const noexcept;
+
       KRYS_NODISCARD bool IsValue() const noexcept;
+
       KRYS_NODISCARD bool IsValueList() const noexcept;
 
       KRYS_NODISCARD bool IsAnimatable() const noexcept;
@@ -112,8 +118,10 @@ namespace krys::boo
       KRYS_NODISCARD bool operator==(const CustomProperty &) const noexcept;
 
       KRYS_NODISCARD Ref<css::Value> PropertyValue(css::ValuePool &, const RenderStyle &) const noexcept;
+
       KRYS_NODISCARD css::CSSOMString PropertyValueSerialisation(const css::SerialisationContext &,
                                                                  const RenderStyle &) const noexcept;
+
       void PropertyValueSerialisation(StringBuilder &, const css::SerialisationContext &,
                                       const RenderStyle &) const noexcept;
 
@@ -126,6 +134,7 @@ namespace krys::boo
       KRYS_NODISCARD css::CSSOMString
         PropertyValueSerialisationForTokenization(const css::SerialisationContext &,
                                                   const RenderStyle &) const noexcept;
+
       void PropertyValueSerialisationForTokenization(StringBuilder &, const css::SerialisationContext &,
                                                      const RenderStyle &) const noexcept;
     };

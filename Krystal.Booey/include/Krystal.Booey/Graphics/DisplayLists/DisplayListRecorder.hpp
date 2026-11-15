@@ -57,9 +57,13 @@ namespace krys::boo::display_list
       }
 
       void Translate(float x, float y) noexcept;
+
       void Rotate(float angleInRadians) noexcept;
+
       void Scale(const FloatSize &) noexcept;
+
       void ConcatCTM(const AffineTransform &) noexcept;
+
       void SetCTM(const AffineTransform &) noexcept;
     };
 
@@ -88,26 +92,45 @@ namespace krys::boo::display_list
     }
 
     KRYS_NODISCARD const ContextState &CurrentState() const noexcept;
+
     KRYS_NODISCARD ContextState &CurrentState() noexcept;
 
     void UpdateStateForSave(GraphicsContextState::Purpose) noexcept;
+
     KRYS_NODISCARD bool UpdateStateForRestore(GraphicsContextState::Purpose) noexcept;
+
     KRYS_NODISCARD bool UpdateStateForTranslate(float x, float y) noexcept;
+
     KRYS_NODISCARD bool UpdateStateForRotate(float angleInRadians) noexcept;
+
     KRYS_NODISCARD bool UpdateStateForScale(const FloatSize &) noexcept;
+
     KRYS_NODISCARD bool UpdateStateForConcatCTM(const AffineTransform &) noexcept;
+
     void UpdateStateForSetCTM(const AffineTransform &) noexcept;
+
     void UpdateStateForBeginTransparencyLayer(float opacity) noexcept;
+
     void UpdateStateForBeginTransparencyLayer(CompositeOperator, boo::BlendMode) noexcept;
+
     KRYS_NODISCARD bool UpdateStateForEndTransparencyLayer() noexcept;
+
     void UpdateStateForResetClip() noexcept;
+
     void UpdateStateForClip(const FloatRect &) noexcept;
+
     void UpdateStateForClipRoundedRect(const FloatRoundedRect &) noexcept;
+
     void UpdateStateForClipPath(const Path &) noexcept;
+
     void UpdateStateForClipToImageBuffer(const FloatRect &) noexcept;
+
     void UpdateStateForClipOut(const FloatRect &) noexcept;
+
     void UpdateStateForClipOut(const Path &) noexcept;
+
     void UpdateStateForClipOutRoundedRect(const FloatRoundedRect &) noexcept;
+
     void UpdateStateForApplyDeviceScaleFactor(float) noexcept;
 
     KRYS_NODISCARD FloatRect InitialClip() const noexcept;
@@ -119,11 +142,14 @@ namespace krys::boo::display_list
     }
 
     KRYS_NODISCARD const GraphicsContextState &State() const noexcept final;
+
     void DidUpdateState(GraphicsContextState &) noexcept final;
+
     void DidUpdateSingleState(GraphicsContextState &, GraphicsContextState::ChangeIndex) noexcept final;
 
     KRYS_NODISCARD
     AffineTransform GetCTM(IncludeDeviceScale = PossiblyIncludeDeviceScale) const noexcept final;
+
     KRYS_NODISCARD IntRect ClipBounds() const noexcept final;
 
     virtual void AppendStateChangeItemIfNecessary() noexcept = 0;

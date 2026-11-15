@@ -49,18 +49,18 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
-  class AXObject;
-  enum class AXNotification : uint8;
-  enum class AXTextChange : uint8;
   enum class AXDetachmentType : uint8;
-  class GraphicsLayer;
-  class GraphicsLayerFactory;
-  class IntRect;
-  class LocalFrame;
+  enum class AXNotification : uint8;
+  class AXObject;
+  enum class AXTextChange : uint8;
   class Color;
   class ColorChooserClient;
   class DataListSuggestionsClient;
   class DateTimeChooserClient;
+  class GraphicsLayer;
+  class GraphicsLayerFactory;
+  class IntRect;
+  class LocalFrame;
   class PopupMenuClient;
 
   /// @brief What a page asks of its host: the window's side of the page, and its graphics.
@@ -73,6 +73,7 @@ namespace krys::boo
 
   public:
     ChromeClient() noexcept = default;
+
     virtual ~ChromeClient() noexcept = default;
 
     /// @brief The page asks to be brought to the front (`window.focus()`); the host decides whether it is.

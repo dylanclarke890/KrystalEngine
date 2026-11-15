@@ -27,6 +27,7 @@ namespace krys::ui
 
   public:
     explicit ValidationMessageOverlay(View &owner) noexcept;
+
     ~ValidationMessageOverlay() noexcept override;
 
     /// @brief Shows @p message at @p anchor, in place of the message shown.

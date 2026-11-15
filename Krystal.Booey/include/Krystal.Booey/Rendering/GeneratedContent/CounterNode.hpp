@@ -80,6 +80,7 @@ namespace krys::boo
 
   public:
     CounterNode(RenderElement &owner, EnumSet<Type> type, int32 value) noexcept;
+
     ~CounterNode() noexcept;
 
     KRYS_NODISCARD static Ref<CounterNode> Create(RenderElement &owner, EnumSet<Type> type,
@@ -111,7 +112,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderElement &Owner() const noexcept;
+
     void AddRenderer(RenderCounter &renderer) noexcept;
+
     void RemoveRenderer(RenderCounter &renderer) noexcept;
 
     /// @brief Invalidates the text in the renderers of this counter, if any.
@@ -143,21 +146,27 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD CounterNode *LastDescendant() const noexcept;
+
     KRYS_NODISCARD CounterNode *PreviousInPreOrder() const noexcept;
+
     KRYS_NODISCARD CounterNode *NextInPreOrder(const CounterNode *stayWithin = nullptr) const noexcept;
+
     KRYS_NODISCARD CounterNode *
       NextInPreOrderAfterChildren(const CounterNode *stayWithin = nullptr) const noexcept;
 
     void InsertAfter(CounterNode &newChild, CounterNode *beforeChild,
                      const css::CSSOMStringAtom &identifier) noexcept;
+
     /// @note @p oldChild's identifier must match the identifier of this counter.
     void RemoveChild(CounterNode &oldChild) noexcept;
 
   private:
     KRYS_NODISCARD int32 ComputeCountInParent() const noexcept;
+
     // Invalidates the text in the renderer of this counter, if any,
     // and in the renderers of all descendants of this counter, if any.
     void ResetThisAndDescendantsRenderers() noexcept;
+
     void Recount() noexcept;
   };
 }

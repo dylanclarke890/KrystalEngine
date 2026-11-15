@@ -55,6 +55,7 @@ namespace krys::boo::inline_iterator
   /// @brief The first of a text renderer's boxes in logical order, and the cache to walk the rest with.
   KRYS_NODISCARD std::pair<TextBoxIterator, TextLogicalOrderCache>
     FirstTextBoxInLogicalOrderFor(const RenderText &text) noexcept;
+
   KRYS_NODISCARD TextBoxIterator NextTextBoxInLogicalOrder(const TextBoxIterator &textBox,
                                                            TextLogicalOrderCache &cache) noexcept;
 
@@ -70,15 +71,19 @@ namespace krys::boo::inline_iterator
 
   KRYS_NODISCARD LeafBoxIterator FirstLeafOnLineInLogicalOrder(const LineBoxIterator &lineBox,
                                                                LineLogicalOrderCache &cache) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator LastLeafOnLineInLogicalOrder(const LineBoxIterator &lineBox,
                                                               LineLogicalOrderCache &cache) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator NextLeafOnLineInLogicalOrder(const LeafBoxIterator &box,
                                                               LineLogicalOrderCache &cache) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator PreviousLeafOnLineInLogicalOrder(const LeafBoxIterator &box,
                                                                   LineLogicalOrderCache &cache) noexcept;
 
   KRYS_NODISCARD LeafBoxIterator FirstLeafOnLineInLogicalOrderWithNode(const LineBoxIterator &lineBox,
                                                                        LineLogicalOrderCache &cache) noexcept;
+
   KRYS_NODISCARD LeafBoxIterator LastLeafOnLineInLogicalOrderWithNode(const LineBoxIterator &lineBox,
                                                                       LineLogicalOrderCache &cache) noexcept;
 

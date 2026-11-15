@@ -47,15 +47,20 @@ namespace krys::boo::css
 
   public:
     DynamicRangeLimit(keywords::Standard) noexcept;
+
     DynamicRangeLimit(keywords::Constrained) noexcept;
+
     DynamicRangeLimit(keywords::NoLimit) noexcept;
+
     DynamicRangeLimit(DynamicRangeLimitMixFunction &&) noexcept;
 
     DynamicRangeLimit(DynamicRangeLimit &&) noexcept;
+
     DynamicRangeLimit &operator=(DynamicRangeLimit &&) noexcept;
 
     // Delete to avoid unnecessary unnecessary allocations on accidental copy.
     DynamicRangeLimit(const DynamicRangeLimit &) = delete;
+
     DynamicRangeLimit &operator=(const DynamicRangeLimit &) = delete;
 
     ~DynamicRangeLimit() noexcept;

@@ -76,6 +76,7 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD static Color FromString(SVGElement &, dom::DOMStringView) noexcept;
+
     KRYS_NODISCARD static dom::DOMString ToString(const Color &) noexcept;
   };
 

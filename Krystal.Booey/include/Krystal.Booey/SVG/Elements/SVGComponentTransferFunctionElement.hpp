@@ -95,6 +95,7 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD virtual ComponentTransferChannel Channel() const noexcept = 0;
+
     KRYS_NODISCARD ComponentTransferFunction TransferFunction() const noexcept;
 
     KRYS_NODISCARD ComponentTransferType GetType() const noexcept
@@ -174,6 +175,7 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override

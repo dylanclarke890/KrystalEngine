@@ -50,6 +50,7 @@ namespace krys::boo::layout
       Start,
       End,
     };
+
     using TextBoxTrim = EnumSet<TextBoxTrimSide>;
 
     struct MarginState

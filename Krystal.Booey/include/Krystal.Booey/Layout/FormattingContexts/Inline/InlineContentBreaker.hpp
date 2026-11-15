@@ -39,9 +39,9 @@ namespace krys::boo
 
 namespace krys::boo::layout
 {
+  struct CandidateTextRunForBreaking;
   class InlineItem;
   class InlineTextItem;
-  struct CandidateTextRunForBreaking;
 
   /// @brief Decides what happens to content that doesn't fit on a line: whether it stays, breaks (and
   /// where), wraps to the next line or reverts to an earlier wrap opportunity.
@@ -132,11 +132,13 @@ namespace krys::boo::layout
         const RenderStyle &Style;
         InlineLayoutUnit Offset {0};
         InlineLayoutUnit TextSpacingAdjustment {0};
+
         enum class ShapingBoundary : bool
         {
           Start,
           End,
         };
+
         Maybe<ShapingBoundary> Shaping {};
 
       private:
@@ -227,6 +229,7 @@ namespace krys::boo::layout
 
       void Append(const InlineItem &inlineItem, const RenderStyle &style, InlineLayoutUnit logicalWidth,
                   InlineLayoutUnit textSpacingAdjustment = 0.f) noexcept;
+
       void AppendTextContent(const InlineTextItem &inlineTextItem, const RenderStyle &style,
                              InlineLayoutUnit logicalWidth) noexcept;
 
@@ -268,6 +271,7 @@ namespace krys::boo::layout
       void AppendToRunList(const InlineItem &inlineItem, const RenderStyle &style, InlineLayoutUnit offset,
                            InlineLayoutUnit contentWidth,
                            InlineLayoutUnit textSpacingAdjustment = 0.f) noexcept;
+
       void ResetTrailingTrimmableContent() noexcept;
     };
 
@@ -335,26 +339,33 @@ namespace krys::boo::layout
   private:
     KRYS_NODISCARD Result ProcessOverflowingContent(const ContinuousContent &continuousContent,
                                                     const LineStatus &lineStatus) const noexcept;
+
     KRYS_NODISCARD OverflowingTextContent ProcessOverflowingContentWithText(
       const ContinuousContent &continuousContent, const LineStatus &lineStatus) const noexcept;
+
     KRYS_NODISCARD Maybe<Result>
       SimplifiedMinimumInstrinsicWidthBreak(const ContinuousContent &candidateContent,
                                             const LineStatus &lineStatus) const noexcept;
+
     KRYS_NODISCARD Maybe<PartialRun> TryBreakingTextRun(const ContinuousContent::RunList &runs,
                                                         const CandidateTextRunForBreaking &candidateTextRun,
                                                         InlineLayoutUnit availableWidth,
                                                         const LineStatus &lineStatus) const noexcept;
+
     KRYS_NODISCARD Maybe<OverflowingTextContent::BreakingPosition>
       TryBreakingOverflowingRun(const LineStatus &lineStatus, const ContinuousContent::RunList &runs,
                                 size_t overflowingRunIndex,
                                 InlineLayoutUnit nonOverflowingContentWidth) const noexcept;
+
     KRYS_NODISCARD Maybe<OverflowingTextContent::BreakingPosition> TryBreakingPreviousNonOverflowingRuns(
       const LineStatus &lineStatus, const ContinuousContent::RunList &runs, size_t overflowingRunIndex,
       InlineLayoutUnit nonOverflowingContentWidth) const noexcept;
+
     KRYS_NODISCARD Maybe<OverflowingTextContent::BreakingPosition>
       TryBreakingNextOverflowingRuns(const LineStatus &lineStatus, const ContinuousContent::RunList &runs,
                                      size_t overflowingRunIndex,
                                      InlineLayoutUnit nonOverflowingContentWidth) const noexcept;
+
     KRYS_NODISCARD Maybe<OverflowingTextContent::BreakingPosition>
       TryHyphenationAcrossOverflowingInlineTextItems(const LineStatus &lineStatus,
                                                      const ContinuousContent::RunList &runs,

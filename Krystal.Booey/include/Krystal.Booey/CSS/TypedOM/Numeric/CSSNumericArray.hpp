@@ -43,6 +43,7 @@ namespace krys::boo::css
 
   public:
     KRYS_NODISCARD static Ref<CSSNumericArray> Create(List<CSSNumberish> &&numberishes) noexcept;
+
     KRYS_NODISCARD static Ref<CSSNumericArray> Create(List<Ref<CSSNumericValue>> &&values) noexcept;
 
     KRYS_NODISCARD size_t Length() const noexcept

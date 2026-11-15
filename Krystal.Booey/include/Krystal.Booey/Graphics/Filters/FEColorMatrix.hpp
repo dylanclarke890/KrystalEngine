@@ -66,7 +66,9 @@ namespace krys::boo
     bool SetValues(const List<float> &values) noexcept;
 
     static void CalculateSaturateComponents(Span<float, 9> components, float value) noexcept;
+
     static void CalculateHueRotateComponents(Span<float, 9> components, float value) noexcept;
+
     KRYS_NODISCARD static List<float> NormalizedFloats(const List<float> &values) noexcept;
 
   private:

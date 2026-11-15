@@ -70,9 +70,11 @@ namespace krys::boo::dom
     /// @brief Adds the IDs of @p node and its descendants to @p parent's tree scope, if it's in one. Done
     /// before their insertion steps, each of which may look up an ID.
     static void SubtreeInserted(Node &node, ContainerNode &parent) noexcept;
+
     /// @brief Removes the IDs of @p node and its descendants from @p parent's tree scope, if it's in one.
     /// Done before their removing steps, each of which may look up an ID.
     static void SubtreeRemoved(Node &node, ContainerNode &parent) noexcept;
+
     /// @brief Moves the IDs of @p node and its descendants to their new tree scope, if it changed.
     static void SubtreeMoved(Node &node, ContainerNode &oldParent, ContainerNode &newParent) noexcept;
 

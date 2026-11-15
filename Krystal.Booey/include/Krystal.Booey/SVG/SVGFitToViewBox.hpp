@@ -78,6 +78,7 @@ namespace krys::boo::svg
     }
 
     void SetViewBox(const FloatRect &viewBox) noexcept;
+
     void ResetViewBox() noexcept;
 
     void SetPreserveAspectRatio(const SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept
@@ -114,8 +115,11 @@ namespace krys::boo::svg
     KRYS_NODISCARD static bool IsKnownAttribute(const dom::QualifiedName &attributeName) noexcept;
 
     void Reset() noexcept;
+
     bool ParseAttribute(const dom::QualifiedName &name, Maybe<dom::DOMStringView> value) noexcept;
+
     KRYS_NODISCARD Maybe<FloatRect> ParseViewBox(dom::DOMStringView value) noexcept;
+
     KRYS_NODISCARD Maybe<FloatRect> ParseViewBox(dom::DOMStringView &buffer, bool validate) noexcept;
   };
 }

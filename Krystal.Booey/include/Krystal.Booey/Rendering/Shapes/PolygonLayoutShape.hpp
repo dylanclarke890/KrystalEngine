@@ -70,6 +70,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD float XIntercept(float y) const noexcept;
+
     KRYS_NODISCARD FloatShapeInterval ClippedEdgeXRange(float y1, float y2) const noexcept;
   };
 

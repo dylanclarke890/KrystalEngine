@@ -38,9 +38,13 @@ namespace krys::boo::inline_display
   struct Content
   {
     void Clear() noexcept;
+
     void Set(Content &&newContent) noexcept;
+
     void Append(Content &&newContent) noexcept;
+
     void Insert(Content &&newContent, size_t lineIndex, size_t boxIndex) noexcept;
+
     void Remove(size_t firstLineIndex, size_t numberOfLines, size_t firstBoxIndex,
                 size_t numberOfBoxes) noexcept;
 

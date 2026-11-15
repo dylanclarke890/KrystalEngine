@@ -87,6 +87,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual IntSize Size() const noexcept = 0;
+
     KRYS_NODISCARD virtual size_t FrameCount() const noexcept = 0;
 
     KRYS_NODISCARD virtual size_t PrimaryFrameIndex() const noexcept
@@ -95,6 +96,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual RepetitionCount GetRepetitionCount() const noexcept = 0;
+
     KRYS_NODISCARD virtual utf8_string FilenameExtension() const noexcept = 0;
 
     KRYS_NODISCARD virtual utf8_string AccessibilityDescription() const noexcept
@@ -106,6 +108,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual IntSize
       FrameSizeAtIndex(size_t index, SubsamplingLevel = SubsamplingLevel::Default) const noexcept = 0;
+
     KRYS_NODISCARD virtual bool FrameIsCompleteAtIndex(size_t index) const noexcept = 0;
 
     KRYS_NODISCARD virtual ImageOrientation FrameOrientationAtIndex(size_t) const noexcept
@@ -119,6 +122,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual seconds FrameDurationAtIndex(size_t index) const noexcept = 0;
+
     KRYS_NODISCARD virtual bool FrameHasAlphaAtIndex(size_t index) const noexcept = 0;
 
     virtual bool FetchFrameMetaDataAtIndex(size_t index, SubsamplingLevel subsamplingLevel,
@@ -133,7 +137,9 @@ namespace krys::boo
     }
 
     virtual void SetData(const SharedBuffer &data, bool allDataReceived) noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsAllDataReceived() const noexcept = 0;
+
     virtual void ClearFrameBufferCache(size_t index) noexcept = 0;
 
   protected:

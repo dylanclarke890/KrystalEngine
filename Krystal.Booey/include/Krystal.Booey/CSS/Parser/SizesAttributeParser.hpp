@@ -43,8 +43,8 @@ namespace krys::boo::dom
 
 namespace krys::boo::css
 {
-  struct ParserContext;
   enum class LengthUnit : uint8;
+  struct ParserContext;
 
   /// @brief Evaluates a `sizes` attribute: the length of its first entry whose media condition matches, or
   /// `100vw`.
@@ -75,9 +75,13 @@ namespace krys::boo::css
 
   private:
     KRYS_NODISCARD bool Parse(TokenRange range, const ParserContext &context) noexcept;
+
     KRYS_NODISCARD float EffectiveSize() const noexcept;
+
     KRYS_NODISCARD Maybe<float> CalculateLengthInPixels(TokenRange range) const noexcept;
+
     KRYS_NODISCARD bool MediaConditionMatches(const mq::MediaQuery &mediaCondition) const noexcept;
+
     KRYS_NODISCARD float EffectiveSizeDefaultValue() const noexcept;
   };
 }

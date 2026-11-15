@@ -34,8 +34,8 @@
 
 namespace krys::boo::css
 {
-  enum class UnitType : uint8;
   enum class Category : uint8;
+  enum class UnitType : uint8;
 
   template <typename>
   struct UnitTraits;

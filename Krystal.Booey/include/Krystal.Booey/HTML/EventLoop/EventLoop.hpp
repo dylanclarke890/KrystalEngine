@@ -76,6 +76,7 @@ namespace krys::boo::html
 
   public:
     EventLoop() noexcept;
+
     ~EventLoop() noexcept;
 
     /// @brief The event loop of the surrounding agent: the process's, as there are no agents (see

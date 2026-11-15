@@ -42,6 +42,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<SliderTrackPart> Create(StyleAppearance) noexcept;
+
     KRYS_NODISCARD static Ref<SliderTrackPart> Create(StyleAppearance, const IntSize &thumbSize,
                                                       const IntRect &trackBounds, List<double> &&tickRatios,
                                                       double thumbPosition) noexcept;

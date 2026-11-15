@@ -47,6 +47,7 @@ namespace krys::boo
 
   public:
     RenderMathMLRow(Type type, mathml::MathMLRowElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLRow() noexcept override;
 
     KRYS_NODISCARD mathml::MathMLRowElement &GetElement() const noexcept;
@@ -59,12 +60,17 @@ namespace krys::boo
   protected:
     void LayoutBlock(RelayoutChildren relayoutChildren,
                      LayoutUnit pageLogicalHeight = 0_lu) noexcept override;
+
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override;
 
     void StretchVerticalOperatorsAndLayoutChildren() noexcept;
+
     void GetContentBoundingBox(LayoutUnit &width, LayoutUnit &ascent, LayoutUnit &descent) const noexcept;
+
     void LayoutRowItems(LayoutUnit width, LayoutUnit ascent) noexcept;
+
     KRYS_NODISCARD LayoutUnit PreferredLogicalWidthOfRowItems() noexcept;
+
     void ComputePreferredLogicalWidths() noexcept override;
   };
 }

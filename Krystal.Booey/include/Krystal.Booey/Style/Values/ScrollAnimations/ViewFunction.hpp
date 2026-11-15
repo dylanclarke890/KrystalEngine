@@ -56,6 +56,7 @@ namespace krys::boo
     struct CSSValueConversion<ViewFunction>
     {
       KRYS_NODISCARD ViewFunction operator()(BuilderState &, const css::Value &) noexcept;
+
       KRYS_NODISCARD ViewFunction operator()(BuilderState &, const css::ViewValue &) noexcept;
     };
 

@@ -45,10 +45,12 @@ namespace krys::boo::css
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssrotate-cssrotate-x-y-z-angle
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSRotate>>
       Create(CSSNumberish x, CSSNumberish y, CSSNumberish z, Ref<CSSNumericValue> angle) noexcept;
+
     /// @brief A 2D rotation by @p angle.
     /// @return A `TypeError` if @p angle isn't an angle.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssrotate-cssrotate-angle
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSRotate>> Create(Ref<CSSNumericValue> angle) noexcept;
+
     /// @brief Reifies a rotation function.
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSRotate>> Create(const FunctionValue &function,
                                                                   dom::Document &document) noexcept;
@@ -75,14 +77,18 @@ namespace krys::boo::css
 
     /// @return A `TypeError` if @p x isn't a number.
     dom::ExceptionOr<void> SetX(CSSNumberish x) noexcept;
+
     /// @return A `TypeError` if @p y isn't a number.
     dom::ExceptionOr<void> SetY(CSSNumberish y) noexcept;
+
     /// @return A `TypeError` if @p z isn't a number.
     dom::ExceptionOr<void> SetZ(CSSNumberish z) noexcept;
+
     /// @return A `TypeError` if @p angle isn't an angle.
     dom::ExceptionOr<void> SetAngle(Ref<CSSNumericValue> angle) noexcept;
 
     void Serialise(StringBuilder &builder) const noexcept final;
+
     KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final

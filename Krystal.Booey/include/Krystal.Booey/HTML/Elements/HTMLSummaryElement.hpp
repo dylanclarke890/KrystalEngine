@@ -50,7 +50,9 @@ namespace krys::boo::html
 #pragma region Extensibility Hooks
 
     void OnInsert() noexcept final;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
+
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
 
 #pragma endregion

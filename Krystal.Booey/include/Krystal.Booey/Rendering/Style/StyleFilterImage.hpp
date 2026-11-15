@@ -57,7 +57,9 @@ namespace krys::boo
     ~StyleFilterImage() noexcept override;
 
     KRYS_NODISCARD bool Equals(const StyleImage &other) const noexcept final;
+
     KRYS_NODISCARD bool Equals(const StyleFilterImage &) const noexcept;
+
     KRYS_NODISCARD bool EqualInputImages(const StyleFilterImage &) const noexcept;
 
     KRYS_NODISCARD RefPtr<StyleImage> InputImage() const noexcept
@@ -74,8 +76,11 @@ namespace krys::boo
     StyleFilterImage(RefPtr<StyleImage> &&, style::Filter &&) noexcept;
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
+
     KRYS_NODISCARD bool IsPending() const noexcept final;
+
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final;
+
     KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &,
                                           const GraphicsContext &destinationContext,
                                           bool isForFirstLine) const noexcept final;

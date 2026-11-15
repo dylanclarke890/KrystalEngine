@@ -79,23 +79,34 @@ namespace krys::boo
 
       // ImageObserver API
       KRYS_NODISCARD url::URL SourceUrl() const noexcept override;
+
       KRYS_NODISCARD utf8_string MimeType() const noexcept override;
+
       KRYS_NODISCARD uint32 NumberOfClients() const noexcept override;
+
       KRYS_NODISCARD int64 ExpectedContentLength() const noexcept override;
 
       void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept final;
+
       void DecodedSizeChanged(const Image &, int64 delta) noexcept final;
+
       void DidDraw(const Image &) noexcept final;
 
       KRYS_NODISCARD bool CanDestroyDecodedData(const Image &) const noexcept final;
+
       void ImageFrameAvailable(const Image &, ImageAnimatingState, const IntRect *changeRect = nullptr,
                                DecodingStatus = DecodingStatus::Invalid) noexcept final;
+
       void ChangedInRect(const Image &, const IntRect *) noexcept final;
+
       void ImageContentChanged(const Image &) noexcept final;
+
       void ScheduleRenderingUpdate(const Image &) noexcept final;
 
       KRYS_NODISCARD bool AllowsAnimation(const Image &) const noexcept final;
+
       KRYS_NODISCARD Settings *GetSettings() const noexcept final;
+
       KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept final;
     };
 
@@ -120,10 +131,12 @@ namespace krys::boo
 
   public:
     explicit CachedImage(CachedResourceRequest &&) noexcept;
+
     ~CachedImage() noexcept override;
 
     KRYS_NODISCARD Image *
       GetImage() const noexcept; // Returns the nullImage() if the image is not available yet.
+
     KRYS_NODISCARD Image *ImageForRenderer(const RenderObject *) noexcept; // Returns the nullImage() if the
                                                                            // image is not available yet.
 
@@ -133,10 +146,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool CurrentFrameKnownToBeOpaque(const RenderElement *) noexcept;
+
     KRYS_NODISCARD bool CurrentFrameIsComplete(const RenderElement *) noexcept;
 
     // Returns an image and the image's resolution scale factor.
     KRYS_NODISCARD Pair<Image *, float> BrokenImage(float deviceScaleFactor) const noexcept;
+
     KRYS_NODISCARD bool WillPaintBrokenImage() const noexcept;
 
     KRYS_NODISCARD bool CanRender(const RenderElement *renderer, float multiplier) noexcept
@@ -158,6 +173,7 @@ namespace krys::boo
                                       const url::URL &) noexcept;
 
     KRYS_NODISCARD bool IsClientWaitingForAsyncDecoding(const CachedImageClient &) const noexcept;
+
     /// @brief Remembers that @p client drew nothing while the frame decodes, so it's told when it's decoded.
     void AddClientWaitingForAsyncDecoding(CachedImageClient &) noexcept;
 
@@ -177,6 +193,7 @@ namespace krys::boo
     }
 
     void UpdateBuffer(const SharedBuffer &) noexcept override;
+
     void FinishLoading(const SharedBuffer *) noexcept override;
 
     enum SizeType : uint8
@@ -187,13 +204,15 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatSize ImageSizeForRenderer(const RenderElement *renderer,
                                                   SizeType = UsedSize) const noexcept;
+
     // This method takes a zoom multiplier that can be used to increase the natural size of the image by the
-    // zoom.
+    // zoom. It returns the size of the complete image.
     KRYS_NODISCARD LayoutSize ImageSizeForRenderer(const RenderElement *, float multiplier,
-                                                   SizeType = UsedSize) const noexcept; // returns the size of
-                                                                                        // the complete image.
+                                                   SizeType = UsedSize) const noexcept;
+
     KRYS_NODISCARD LayoutSize UnclampedImageSizeForRenderer(const RenderElement *renderer, float multiplier,
                                                             SizeType = UsedSize) const noexcept;
+
     void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
                                     FloatSize &intrinsicRatio) noexcept;
 
@@ -205,6 +224,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool AllowsAnimation(const Image &) const noexcept;
+
     /// @brief Whether a client showing the image is drawn with the dark appearance.
     KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept;
 
@@ -212,28 +232,41 @@ namespace krys::boo
     void Clear() noexcept;
 
     void CreateImage() noexcept;
+
     void ClearImage() noexcept;
+
     // If not null, changeRect is the changed part of the image.
     void NotifyObservers(const IntRect *changeRect = nullptr) noexcept;
 
     void DidAddClient(CachedResourceClient &) noexcept final;
+
     void DidRemoveClient(CachedResourceClient &) noexcept final;
 
     void AllClientsRemoved() noexcept override;
+
     void DestroyDecodedData() noexcept override;
 
     EncodedDataStatus UpdateImageData(bool allDataReceived) noexcept;
+
     void Error(CachedResource::Status) noexcept override;
+
     void ResponseReceived(ResourceResponse &&) noexcept override;
 
     void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept;
+
     void DecodedSizeChanged(const Image &, int64 delta) noexcept;
+
     void DidDraw(const Image &) noexcept;
+
     KRYS_NODISCARD bool CanDestroyDecodedData(const Image &) const noexcept;
+
     void ImageFrameAvailable(const Image &, ImageAnimatingState, const IntRect *changeRect = nullptr,
                              DecodingStatus = DecodingStatus::Invalid) noexcept;
+
     void ChangedInRect(const Image &, const IntRect *) noexcept;
+
     void ImageContentChanged(const Image &) noexcept;
+
     void ScheduleRenderingUpdate(const Image &) noexcept;
 
     void UpdateBufferInternal(const SharedBuffer &) noexcept;

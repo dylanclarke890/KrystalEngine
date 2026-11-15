@@ -56,6 +56,7 @@ namespace krys::boo
 
   private:
     StyleFlexibleBoxData() noexcept;
+
     StyleFlexibleBoxData(const StyleFlexibleBoxData &) noexcept;
   };
 }

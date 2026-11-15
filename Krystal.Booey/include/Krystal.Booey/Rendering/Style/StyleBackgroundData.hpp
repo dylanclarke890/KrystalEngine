@@ -54,6 +54,7 @@ namespace krys::boo
 
   private:
     StyleBackgroundData() noexcept;
+
     StyleBackgroundData(const StyleBackgroundData &) noexcept;
   };
 }

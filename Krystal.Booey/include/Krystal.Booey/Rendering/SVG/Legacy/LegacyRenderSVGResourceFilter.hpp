@@ -75,6 +75,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGResourceFilter(svg::SVGFilterElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGResourceFilter() noexcept override;
 
     KRYS_NODISCARD svg::SVGFilterElement &FilterElement() const noexcept;
@@ -82,10 +83,12 @@ namespace krys::boo
     KRYS_NODISCARD bool IsIdentity() const noexcept;
 
     void RemoveAllClientsFromCache() noexcept override;
+
     void RemoveClientFromCache(RenderElement &) noexcept override;
 
     EnumSet<ApplyResult> ApplyResource(RenderElement &, const RenderStyle &, GraphicsContext *&,
                                        EnumSet<RenderSVGResourceMode>) noexcept override;
+
     void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>, const Path *,
                            const RenderElement *) noexcept override;
 
@@ -93,9 +96,11 @@ namespace krys::boo
                                                  RepaintRectCalculation) noexcept override;
 
     KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType FilterUnits() const noexcept;
+
     KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType PrimitiveUnits() const noexcept;
 
     void MarkFilterForRepaint(FilterEffect &) noexcept;
+
     void MarkFilterForRebuild() noexcept;
 
     KRYS_NODISCARD RenderSVGResourceType ResourceType() const noexcept override

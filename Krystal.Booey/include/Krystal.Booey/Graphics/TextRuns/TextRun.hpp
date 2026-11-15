@@ -69,6 +69,7 @@ namespace krys::boo
     }
 
     TextRun(const TextRun &) noexcept = default;
+
     TextRun &operator=(const TextRun &) noexcept = default;
 
     KRYS_NODISCARD bool operator==(const TextRun &other) const noexcept;

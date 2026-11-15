@@ -55,8 +55,11 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept final;
+
     KRYS_NODISCARD static CSSOMString CssTextInternal(const CSSOMString &declarations) noexcept;
+
     void Reattach(Rule &rule) noexcept final;
   };
 }

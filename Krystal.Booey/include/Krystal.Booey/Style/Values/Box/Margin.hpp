@@ -46,6 +46,7 @@ namespace krys::boo::style
   struct CSSValueConversion<MarginEdge>
   {
     KRYS_NODISCARD MarginEdge operator()(BuilderState &, const css::Value &) noexcept;
+
     KRYS_NODISCARD MarginEdge operator()(BuilderState &, const css::PrimitiveValue &) noexcept;
   };
 

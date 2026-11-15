@@ -47,7 +47,9 @@ namespace krys::boo
 
   public:
     SVGTextChunkBuilder() noexcept = default;
+
     SVGTextChunkBuilder(SVGTextChunkBuilder &&) noexcept = default;
+
     SVGTextChunkBuilder(const SVGTextChunkBuilder &) = delete;
 
     KRYS_NODISCARD const List<SVGTextChunk> &TextChunks() const noexcept
@@ -57,7 +59,9 @@ namespace krys::boo
 
     /// @brief In characters (code points).
     KRYS_NODISCARD uint32 TotalCharacters() const noexcept;
+
     KRYS_NODISCARD float TotalLength() const noexcept;
+
     KRYS_NODISCARD float TotalAnchorShift() const noexcept;
 
     KRYS_NODISCARD
@@ -65,6 +69,7 @@ namespace krys::boo
 
     void BuildTextChunks(const List<inline_iterator::SVGTextBoxIterator> &lineLayoutBoxes,
                          const SVGTextChunkStarts &chunkStarts, SVGTextFragmentMap &) noexcept;
+
     void LayoutTextChunks(const List<inline_iterator::SVGTextBoxIterator> &lineLayoutBoxes,
                           const SVGTextChunkStarts &chunkStarts, SVGTextFragmentMap &) noexcept;
   };

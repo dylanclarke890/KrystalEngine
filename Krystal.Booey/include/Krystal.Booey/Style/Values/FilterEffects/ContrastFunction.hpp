@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::Contrast ToCSSContrast(const BasicComponentTransferFilterOperation &,
                                                const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::Contrast &,
                                                               const BuilderState &) noexcept;
   }

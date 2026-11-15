@@ -36,9 +36,13 @@ namespace krys::boo
   }
 
   SourceImage::SourceImage(const SourceImage &) noexcept = default;
+
   SourceImage::SourceImage(SourceImage &&) noexcept = default;
+
   SourceImage &SourceImage::operator=(const SourceImage &) noexcept = default;
+
   SourceImage &SourceImage::operator=(SourceImage &&) noexcept = default;
+
   SourceImage::~SourceImage() noexcept = default;
 
   bool SourceImage::operator==(const SourceImage &other) const noexcept

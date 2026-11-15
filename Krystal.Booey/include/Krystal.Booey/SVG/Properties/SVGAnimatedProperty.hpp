@@ -125,6 +125,7 @@ namespace krys::boo::svg
     explicit SVGAnimatedProperty(SVGElement *) noexcept;
 
     KRYS_NODISCARD SVGPropertyOwner *Owner() const noexcept override;
+
     void CommitPropertyChange(SVGProperty *) noexcept override;
   };
 }

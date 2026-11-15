@@ -41,6 +41,7 @@ namespace krys::boo::style
     FullSizeKana,
     MathAuto,
   };
+
   constexpr auto maxTextTransformValue = TextTransformValue::MathAuto;
 
   using TextTransformValueEnumSet = css::SpaceSeparatedEnumSet<TextTransformValue>;

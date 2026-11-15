@@ -11,6 +11,7 @@ namespace krys
   {
   public:
     ScopedProfiler(const string &name) noexcept;
+
     ~ScopedProfiler() noexcept;
 
   private:

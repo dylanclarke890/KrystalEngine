@@ -71,10 +71,13 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<PackedColour::RGBA> PackedColor() const noexcept;
 
     KRYS_NODISCARD boo::Gradient *GetGradient() const noexcept;
+
     KRYS_NODISCARD boo::Pattern *GetPattern() const noexcept;
+
     KRYS_NODISCARD const AffineTransform &GradientSpaceTransform() const noexcept;
 
     void SetGradient(Ref<boo::Gradient> &&, const AffineTransform &spaceTransform = {}) noexcept;
+
     void SetPattern(Ref<boo::Pattern> &&) noexcept;
 
     KRYS_NODISCARD bool IsVisible() const noexcept

@@ -32,11 +32,11 @@
 
 namespace krys::boo::css
 {
-  class TokenRange;
-  class Value;
-  struct PropertyParserState;
   struct BorderImageComponents;
   struct BorderRadius;
+  struct PropertyParserState;
+  class TokenRange;
+  class Value;
 
   namespace PropertyParserHelpers
   {

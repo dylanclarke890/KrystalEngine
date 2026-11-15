@@ -36,7 +36,9 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD RefPtr<NativeImage> SurfaceBufferToNativeImage(SurfaceBuffer) noexcept override;
+
     KRYS_NODISCARD bool IsSurfaceBufferTransparentBlack(SurfaceBuffer) const noexcept override;
+
     KRYS_NODISCARD RefPtr<GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() noexcept override;
   };

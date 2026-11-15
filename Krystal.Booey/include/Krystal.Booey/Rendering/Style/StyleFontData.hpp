@@ -50,7 +50,9 @@ namespace krys::boo
 
   private:
     StyleFontData() noexcept;
+
     StyleFontData(const StyleFontData &) noexcept;
+
     void operator=(const StyleFontData &) noexcept = delete;
   };
 }

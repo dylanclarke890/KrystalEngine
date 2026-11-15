@@ -56,12 +56,16 @@ namespace krys::boo
 
     void UpdateBeforeOrAfterPseudoElement(dom::Element &current, const style::ElementUpdate &elementUpdate,
                                           PseudoElementType pseudoElementType) noexcept;
+
     void UpdateRemainingQuotes() noexcept;
+
     void UpdateBackdropRenderer(RenderElement &renderer,
                                 style::DifferenceResult minimalStyleDifference) noexcept;
+
     void UpdateCounters() noexcept;
 
     static void RemoveBeforePseudoElement(dom::Element &element, RenderTreeBuilder &builder) noexcept;
+
     static void RemoveAfterPseudoElement(dom::Element &element, RenderTreeBuilder &builder) noexcept;
 
   private:

@@ -42,6 +42,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGEllipse(svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGEllipse() noexcept override;
 
   private:
@@ -58,13 +59,18 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsRenderingDisabled() const noexcept override;
+
     void FillShape(GraphicsContext &) const noexcept override;
+
     void StrokeShape(GraphicsContext &) const noexcept override;
+
     KRYS_NODISCARD bool
       ShapeDependentStrokeContains(const FloatPoint &,
                                    PointCoordinateSpace = GlobalCoordinateSpace) noexcept override;
+
     KRYS_NODISCARD bool ShapeDependentFillContains(const FloatPoint &,
                                                    const WindRule) const noexcept override;
+
     void CalculateRadiiAndCenter() noexcept;
 
     KRYS_NODISCARD bool CanUseStrokeHitTestFastPath() const noexcept;

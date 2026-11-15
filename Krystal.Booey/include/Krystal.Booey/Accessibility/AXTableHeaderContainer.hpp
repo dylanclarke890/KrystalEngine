@@ -42,6 +42,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<AXTableHeaderContainer> Create(AXId id, AXObjectCache &cache) noexcept;
+
     ~AXTableHeaderContainer() noexcept override;
 
     void AddChildren() noexcept override;

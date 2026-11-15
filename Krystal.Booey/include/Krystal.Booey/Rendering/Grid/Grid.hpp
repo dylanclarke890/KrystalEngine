@@ -81,6 +81,7 @@ namespace krys::boo
     KRYS_NODISCARD uint32 NumTracks(style::GridTrackSizingDirection direction) const noexcept;
 
     void EnsureGridSize(uint32 maximumRowSize, uint32 maximumColumnSize) noexcept;
+
     GridArea Insert(RenderBox &gridItem, const GridArea &area) noexcept;
 
     // Note that each in flow child of a grid container becomes a grid item. This means that
@@ -91,19 +92,23 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD GridArea GridItemArea(const RenderBox &item) const noexcept;
+
     void SetGridItemArea(const RenderBox &item, GridArea area) noexcept;
 
     KRYS_NODISCARD GridSpan GridItemSpan(const RenderBox &gridItem,
                                          style::GridTrackSizingDirection direction) const noexcept;
+
     KRYS_NODISCARD GridSpan GridItemSpanIgnoringCollapsedTracks(
       const RenderBox &gridItem, style::GridTrackSizingDirection direction) const noexcept;
 
     KRYS_NODISCARD const GridCell &Cell(uint32 row, uint32 column) const noexcept;
 
     KRYS_NODISCARD uint32 ExplicitGridStart(style::GridTrackSizingDirection direction) const noexcept;
+
     void SetExplicitGridStart(uint32 rowStart, uint32 columnStart) noexcept;
 
     KRYS_NODISCARD uint32 AutoRepeatTracks(style::GridTrackSizingDirection direction) const noexcept;
+
     void SetAutoRepeatTracks(uint32 autoRepeatRows, uint32 autoRepeatColumns) noexcept;
 
     void SetClampingForSubgrid(uint32 maxRows, uint32 maxColumns) noexcept;
@@ -111,9 +116,11 @@ namespace krys::boo
     void ClampAreaToSubgridIfNeeded(GridArea &area) noexcept;
 
     void SetAutoRepeatEmptyColumns(UniquePtr<OrderedTrackIndexSet> autoRepeatEmptyColumns) noexcept;
+
     void SetAutoRepeatEmptyRows(UniquePtr<OrderedTrackIndexSet> autoRepeatEmptyRows) noexcept;
 
     KRYS_NODISCARD bool HasAutoRepeatEmptyTracks(style::GridTrackSizingDirection direction) const noexcept;
+
     KRYS_NODISCARD bool IsEmptyAutoRepeatTrack(style::GridTrackSizingDirection direction,
                                                uint32 line) const noexcept;
 
@@ -165,13 +172,16 @@ namespace krys::boo
     // GridIterator(m_grid, ForColumns, 1) will walk over the rows of the 2nd column.
     GridIterator(const Grid &grid, style::GridTrackSizingDirection direction, uint32 fixedTrackIndex,
                  uint32 varyingTrackIndex = 0) noexcept;
+
     GridIterator(GridIterator &&) noexcept = default;
 
     KRYS_NODISCARD static GridIterator CreateForSubgrid(const RenderGrid &subgrid, const GridIterator &outer,
                                                         GridSpan subgridSpanInOuter) noexcept;
 
     KRYS_NODISCARD RenderBox *NextGridItem() noexcept;
+
     KRYS_NODISCARD bool IsEmptyAreaEnough(uint32 rowSpan, uint32 columnSpan) const noexcept;
+
     KRYS_NODISCARD Maybe<GridArea> NextEmptyGridArea(uint32 fixedTrackSpan, uint32 varyingTrackSpan) noexcept;
 
     KRYS_NODISCARD style::GridTrackSizingDirection Direction() const noexcept

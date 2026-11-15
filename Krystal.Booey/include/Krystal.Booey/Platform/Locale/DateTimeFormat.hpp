@@ -99,12 +99,15 @@ namespace krys::boo
     {
     public:
       virtual ~TokenHandler() noexcept = default;
+
       virtual void VisitField(FieldType fieldType, int numberOfPatternCharacters) noexcept = 0;
+
       virtual void VisitLiteral(utf8_stringview text) noexcept = 0;
     };
 
     /// @return Whether @p source parsed.
     static bool Parse(utf8_stringview source, TokenHandler &tokenHandler) noexcept;
+
     static void QuoteAndAppendLiteral(utf8_stringview literal, utf8_string &buffer) noexcept;
   };
 }

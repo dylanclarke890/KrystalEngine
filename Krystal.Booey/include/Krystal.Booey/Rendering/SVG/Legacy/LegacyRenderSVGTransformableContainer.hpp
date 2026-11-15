@@ -46,6 +46,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGTransformableContainer(svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGTransformableContainer() noexcept override;
 
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override
@@ -70,6 +71,7 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD svg::SVGGraphicsElement &GraphicsElement() noexcept;
+
     void GetElement() const = delete;
 
     bool CalculateLocalTransform() noexcept override;

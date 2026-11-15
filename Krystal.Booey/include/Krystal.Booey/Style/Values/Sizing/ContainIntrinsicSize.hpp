@@ -152,6 +152,7 @@ namespace krys::boo::style
   struct Blending<ContainIntrinsicSize>
   {
     KRYS_NODISCARD bool CanBlend(const ContainIntrinsicSize &, const ContainIntrinsicSize &) noexcept;
+
     KRYS_NODISCARD ContainIntrinsicSize Blend(const ContainIntrinsicSize &, const ContainIntrinsicSize &,
                                               const BlendingContext &) noexcept;
   };

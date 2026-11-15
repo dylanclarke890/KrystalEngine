@@ -48,11 +48,14 @@ namespace krys::boo::css
     css::Color _color;
 
     explicit ColorValue(css::Color color) noexcept;
+
     explicit ColorValue(boo::Color color) noexcept;
+
     ColorValue(StaticValueTag, boo::Color color) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<ColorValue> Create(css::Color color) noexcept;
+
     KRYS_NODISCARD static Ref<ColorValue> Create(boo::Color color) noexcept;
 
     KRYS_NODISCARD const css::Color &GetColor() const noexcept
@@ -61,7 +64,9 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const ColorValue &other) const noexcept;
+
     KRYS_NODISCARD IterationStatus
       CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(css::Value &)> &func) const noexcept;
 

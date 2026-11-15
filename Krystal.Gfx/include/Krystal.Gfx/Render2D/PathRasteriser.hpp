@@ -68,8 +68,11 @@ namespace krys::gfx
     constexpr static float FlatteningTolerance = 0.02f;
 
     PathRasteriser() noexcept = default;
+
     PathRasteriser(PathRasteriser &&) noexcept = default;
+
     PathRasteriser &operator=(PathRasteriser &&) noexcept = default;
+
     ~PathRasteriser() noexcept = default;
 
     /// @brief Rasterises `path`, mapped into pixels by `transform`, within `clip`. Paths with non-finite
@@ -80,9 +83,13 @@ namespace krys::gfx
   private:
     /// @brief Flattens the transformed path into `_edges`; false if a point isn't finite.
     KRYS_NODISCARD bool BuildEdges(const Path2D &path, const Transform2D &transform) noexcept;
+
     void AddLine(Vec2f from, Vec2f to) noexcept;
+
     void AddQuad(Vec2f from, Vec2f control, Vec2f to) noexcept;
+
     void AddCubic(Vec2f from, Vec2f control1, Vec2f control2, Vec2f to) noexcept;
+
     /// @brief Adds `weight` times the length of [left, right) that falls over each pixel of the row.
     void AccumulateSpan(float left, float right, float weight, int32 rowLeft, int32 rowRight) noexcept;
   };

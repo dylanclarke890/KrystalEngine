@@ -38,11 +38,11 @@
 
 namespace krys::boo::layout
 {
+  struct AncestorStack;
   class BoxGeometry;
+  struct DisplayBoxTree;
   class ElementBox;
   class InlineFormattingContext;
-  struct AncestorStack;
-  struct DisplayBoxTree;
   struct IsFirstLastIndex;
 
   /// @brief Builds the display boxes of a line from its line layout result and line box, in visual order, and
@@ -73,43 +73,59 @@ namespace krys::boo::layout
   private:
     void ProcessNonBidiContent(const LineLayoutResult &lineLayoutResult,
                                inline_display::Boxes &boxes) noexcept;
+
     void ProcessBidiContent(const LineLayoutResult &lineLayoutResult, inline_display::Boxes &boxes) noexcept;
+
     void CollectInkOverflowForInlineBoxes(inline_display::Boxes &boxes) noexcept;
+
     void CollectInkOverflowForTextDecorations(inline_display::Boxes &boxes) noexcept;
+
     void AppendTextDisplayBox(const Line::Run &lineRun, const InlineRect &textRunRect,
                               inline_display::Boxes &boxes) noexcept;
+
     void AppendSoftLineBreakDisplayBox(const Line::Run &lineRun, const InlineRect &softLineBreakRunRect,
                                        inline_display::Boxes &boxes) noexcept;
+
     void AppendHardLineBreakDisplayBox(const Line::Run &lineRun, const InlineRect &lineBreakBoxRect,
                                        inline_display::Boxes &boxes) noexcept;
+
     void AppendAtomicInlineLevelDisplayBox(const Line::Run &lineRun, const InlineRect &borderBoxRect,
                                            inline_display::Boxes &boxes) noexcept;
+
     void AppendBlockLevelDisplayBox(const Line::Run &lineRun, const InlineRect &borderBoxRect,
                                     inline_display::Boxes &boxes) noexcept;
+
     void AppendRootInlineBoxDisplayBox(const InlineRect &rootInlineBoxVisualRect, bool lineHasContent,
                                        inline_display::Boxes &boxes) noexcept;
+
     void AppendInlineBoxDisplayBox(const Line::Run &lineRun, const InlineLevelBox &inlineBox,
                                    const InlineRect &inlineBoxBorderBox,
                                    inline_display::Boxes &boxes) noexcept;
+
     void AppendInlineDisplayBoxAtBidiBoundary(const Box &layoutBox, inline_display::Boxes &boxes) noexcept;
+
     void InsertRubyAnnotationBox(const Box &annotationBox, size_t insertionPosition,
                                  const InlineRect &borderBoxRect, inline_display::Boxes &boxes) noexcept;
 
     KRYS_NODISCARD size_t ProcessRubyBase(size_t rubyBaseStart, inline_display::Boxes &displayBoxes,
                                           List<IndexRange> &interlinearRubyColumnRangeList,
                                           List<size_t> &rubyBaseStartIndexListWithAnnotation) noexcept;
+
     void ProcessRubyContent(inline_display::Boxes &displayBoxes,
                             const LineLayoutResult &lineLayoutResult) noexcept;
 
     KRYS_NODISCARD static InlineRect MapInlineRectLogicalToVisual(const InlineRect &logicalRect,
                                                                   const InlineRect &containerLogicalRect,
                                                                   WritingMode writingMode) noexcept;
+
     void SetInlineBoxGeometry(const Box &inlineBox, BoxGeometry &boxGeometry, const InlineRect &logicalRect,
                               bool isFirstInlineBoxFragment) noexcept;
+
     void AdjustVisualGeometryForDisplayBox(
       size_t displayBoxNodeIndex, InlineLayoutUnit &contentLineRightEdge, InlineLayoutUnit lineBoxLogicalTop,
       const DisplayBoxTree &displayBoxTree, inline_display::Boxes &boxes,
       const HashMap<const Box *, IsFirstLastIndex> &isFirstLastIndexesMap) noexcept;
+
     KRYS_NODISCARD size_t EnsureDisplayBoxForContainer(const ElementBox &elementBox,
                                                        DisplayBoxTree &displayBoxTree,
                                                        AncestorStack &ancestorStack,
@@ -117,6 +133,7 @@ namespace krys::boo::layout
 
     void SetLogicalLeft(inline_display::Box &box, InlineLayoutUnit logicalLeft,
                         WritingMode writingMode) const noexcept;
+
     void SetGeometryForBlockLevelOutOfFlowBoxes(const List<size_t> &indexList, const Line::RunList &lineRuns,
                                                 const List<int32> &visualOrderList = {}) noexcept;
 
@@ -146,6 +163,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const ElementBox &Root() const noexcept;
+
     KRYS_NODISCARD InlineRect LogicalRectForInlineBoxOnBlockLine(
       const Box &inlineBox, const LineLayoutResult &lineLayoutResult) const noexcept;
 

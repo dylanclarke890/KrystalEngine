@@ -44,7 +44,9 @@ namespace krys::boo::dom
     List<Ref<DOMRect>> _items;
 
     DOMRectList() noexcept = default;
+
     explicit DOMRectList(const List<FloatQuad> &quads) noexcept;
+
     explicit DOMRectList(const List<FloatRect> &rects) noexcept;
 
   public:

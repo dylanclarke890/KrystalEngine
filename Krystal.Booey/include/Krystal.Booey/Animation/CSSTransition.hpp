@@ -96,9 +96,11 @@ namespace krys::boo
 
   private:
     void SetTimingProperties(Seconds delay, Seconds duration) noexcept;
+
     KRYS_NODISCARD Ref<StyleOriginatedAnimationEvent>
       CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                   const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
+
     void AnimationDidFinish() noexcept final;
 
     KRYS_NODISCARD bool IsCSSTransition() const noexcept final
@@ -107,6 +109,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD AnimationPlayState BackingAnimationPlayState() const noexcept final;
+
     KRYS_NODISCARD boo::TimingFunction *BackingAnimationTimingFunction() const noexcept final;
   };
 }

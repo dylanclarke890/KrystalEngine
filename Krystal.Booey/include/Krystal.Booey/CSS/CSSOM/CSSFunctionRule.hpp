@@ -56,7 +56,9 @@ namespace krys::boo::css
                                                       CSSStyleSheet *parent) noexcept;
 
     KRYS_NODISCARD CSSOMString Name() const noexcept;
+
     KRYS_NODISCARD List<FunctionParameter> GetParameters() const noexcept;
+
     KRYS_NODISCARD CSSOMString ReturnType() const noexcept;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;

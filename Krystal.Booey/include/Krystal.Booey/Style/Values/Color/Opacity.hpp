@@ -66,6 +66,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD constexpr bool operator==(const Opacity &) const noexcept = default;
+
     KRYS_NODISCARD constexpr auto operator<=>(const Opacity &) const noexcept = default;
   };
 

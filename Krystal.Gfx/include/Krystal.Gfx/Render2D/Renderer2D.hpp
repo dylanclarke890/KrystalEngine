@@ -662,10 +662,12 @@ namespace krys::gfx
 
     /// @brief Use `Create`.
     Renderer2D(Device &device, const Renderer2DDesc &desc) noexcept;
+
     ~Renderer2D() noexcept;
 
     /// @brief Starts drawing into a target. Draws are recorded into `commands` on `End`.
     void Begin(CommandBuffer &commands, const Render2DTarget &target) noexcept;
+
     /// @brief Records the frame: a render pass per layer, children first, then the target's, each with its
     /// draws in the order they were made.
     void End() noexcept;
@@ -685,33 +687,44 @@ namespace krys::gfx
 
     /// @brief Pushes a copy of the drawing state.
     void Save() noexcept;
+
     /// @brief Pops the drawing state pushed by the matching `Save`.
     void Restore() noexcept;
 
     /// @brief Applies `transform` before the current transform: later draws are in its coordinates.
     void ConcatTransform(const Transform2D &transform) noexcept;
+
     void Translate(float x, float y) noexcept;
+
     void Scale(float x, float y) noexcept;
+
     /// @brief Rotates by `radians`, clockwise on screen.
     void Rotate(float radians) noexcept;
+
     /// @brief Replaces the current transform, relative to the target's pixels.
     void SetTransform(const Transform2D &transform) noexcept;
+
     KRYS_NODISCARD const Transform2D &GetTransform() const noexcept;
 
     /// @brief Intersects the clip with a rect in the current coordinates. A rect whose edges land on whole
     /// target pixels, under a transform that keeps rects axis-aligned, is the scissor alone.
     void ClipRect(const Rect2D &rect) noexcept;
+
     /// @brief Intersects the clip with a rounded rect in the current coordinates, its radii constrained as
     /// `FillRoundedRect`'s are.
     void ClipRoundedRect(const RoundedRect2D &rect) noexcept;
+
     /// @brief Clips out a rect in the current coordinates: later draws skip it.
     void ClipOutRect(const Rect2D &rect) noexcept;
+
     /// @brief Clips out a rounded rect in the current coordinates.
     void ClipOutRoundedRect(const RoundedRect2D &rect) noexcept;
+
     /// @brief Intersects the clip with a path in the current coordinates, through its coverage mask.
     /// @note One path clip at a time uses its cached mask; nesting a second multiplies their coverage on the
     /// CPU into a mask over the clip's bounds, made again every frame.
     void ClipPath(const Path2D &path, FillRule rule) noexcept;
+
     /// @brief Clips out a path in the current coordinates.
     void ClipOutPath(const Path2D &path, FillRule rule) noexcept;
 
@@ -724,14 +737,17 @@ namespace krys::gfx
 
     /// @brief The clip in effect, which `SetClip` can bring back later in the same frame.
     KRYS_NODISCARD ClipState GetClip() const noexcept;
+
     /// @brief Replaces the clip with one `GetClip` returned earlier in the frame, widening it as well as
     /// narrowing it; `Restore` brings back the clip saved before.
     void SetClip(const ClipState &clip) noexcept;
 
     void FillRect(const Rect2D &rect, const Paint2D &paint) noexcept;
+
     /// @brief Fills a rounded rect. Negative radii are treated as zero, and radii that don't fit are scaled
     /// down together until they do, as CSS does for `border-radius`.
     void FillRoundedRect(const RoundedRect2D &rect, const Paint2D &paint) noexcept;
+
     /// @brief Fills a rect except for a rounded rect inside it: a border's usual shape. Its radii are
     /// constrained as `FillRoundedRect`'s are.
     /// @note Holes have circular corners. For elliptical ones, fill a path with the rect and the hole under
@@ -742,6 +758,7 @@ namespace krys::gfx
     /// @brief Draws the `source` texels of a texture into `destination`, scaling to fit.
     void DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
                    const ImageOptions &options = {}) noexcept;
+
     /// @brief Fills a path under the fill rule. The path is rasterised on the CPU into a coverage mask, which
     /// is cached, so drawing the same path again (or moved by whole pixels) costs only the draw.
     void FillPath(const Path2D &path, FillRule rule, const Paint2D &paint) noexcept;
@@ -749,6 +766,7 @@ namespace krys::gfx
     /// @brief Strokes a path. The stroke's outline is filled through a cached coverage mask, as `FillPath`
     /// fills; the outline is worked out on every call.
     void StrokePath(const Path2D &path, const StrokeStyle &style, const Paint2D &paint) noexcept;
+
     /// @brief Strokes a straight line, with its caps and dashes, without a mask: each dash is a rect (a
     /// rounded one under round caps, so dots are circles) under the line's transform. The style's join
     /// and miter limit don't apply. A gradient is in the current coordinates, not the line's.
@@ -772,16 +790,21 @@ namespace krys::gfx
     /// blur casts nothing.
     /// @note A gradient's shadow is its shape's, as if the gradient were opaque.
     void SetDropShadow(const DropShadow2D &shadow) noexcept;
+
     void ClearDropShadow() noexcept;
+
     KRYS_NODISCARD const Maybe<DropShadow2D> &GetDropShadow() const noexcept;
+
     /// @brief Whether shadows' offsets and blurs are in target pixels (as canvas has them) rather than the
     /// current coordinates.
     void SetShadowsIgnoreTransforms(bool ignore) noexcept;
+
     KRYS_NODISCARD bool GetShadowsIgnoreTransforms() const noexcept;
 
     /// @brief Sets the blend mode later draws mix with what's beneath them by.
     /// @note `BlendMode::PlusDarker` isn't supported: it asserts and draws normally.
     void SetBlendMode(BlendMode mode) noexcept;
+
     KRYS_NODISCARD BlendMode GetBlendMode() const noexcept;
 
     /// @brief Sets the operator later draws, and layers begun after, combine with what's beneath by. On a
@@ -790,18 +813,22 @@ namespace krys::gfx
     /// transparent (`Copy`, `SourceIn`, `SourceOut`, `DestinationIn`, `DestinationAtop`, `Clear`) clears all
     /// of the clip the layer doesn't draw. With a blend mode other than `Normal`, draws blend over.
     void SetCompositeOperator(CompositeOperator2D op) noexcept;
+
     KRYS_NODISCARD CompositeOperator2D GetCompositeOperator() const noexcept;
 
     /// @brief Saves the drawing state and starts drawing into a layer, composited by `EndLayer` at
     /// `opacity` (from 0 to 1) with the current blend mode and operator. Inside the layer, the blend mode is
     /// `Normal` and the operator `SourceOver`.
     void BeginLayer(float opacity) noexcept;
+
     /// @brief Starts a layer as `BeginLayer(opacity)` does, composited with `blend`.
     void BeginLayer(float opacity, BlendMode blend) noexcept;
+
     /// @brief Starts a layer as `BeginLayer(opacity, blend)` does, whose contents go through `filter` as it's
     /// composited. A blur or a shadow reaches past what's drawn by three standard deviations (and the
     /// shadow's offset), within the clip the layer began with.
     void BeginLayer(float opacity, BlendMode blend, const LayerFilter2D &filter) noexcept;
+
     /// @brief Composites the current layer into what's beneath it and restores the drawing state saved by
     /// `BeginLayer`.
     void EndLayer() noexcept;
@@ -813,21 +840,28 @@ namespace krys::gfx
 
   private:
     KRYS_NODISCARD Expected<void> Initialise() noexcept;
+
     KRYS_NODISCARD Expected<PipelineHandle> GetPipeline(TextureFormat format,
                                                         CompositeOperator2D op) noexcept;
+
     /// @brief The operator a batch's pipeline blends with: its blend mode's when that isn't `Normal`.
     KRYS_NODISCARD static CompositeOperator2D PipelineOperator(const Batch &batch) noexcept;
+
     /// @brief Whether @p op changes what's beneath where the source is transparent.
     KRYS_NODISCARD static bool ClearsUncovered(CompositeOperator2D op) noexcept;
+
     KRYS_NODISCARD Expected<PipelineHandle> GetBlurPipeline(TextureFormat format) noexcept;
+
     /// @brief Records one pass of a blur by `sigma` texels along `direction` (1, 0 or 0, 1), over `region` of
     /// `source` into the same texels of `destination`; nothing outside `region` is read.
     void RecordBlur(CommandBuffer &commands, const FrameResources &resources, TextureHandle source,
                     TextureHandle destination, const PixelRect2D &region, Array<float, 2> direction,
                     float sigma, EdgeMode2D edgeMode) noexcept;
+
     /// @brief Adds a rounded rect in `transform`'s coordinates, its radii constrained.
     void AddRoundedRect(const RoundedRect2D &rect, const ResolvedPaint &paint,
                         const Transform2D &transform) noexcept;
+
     /// @brief Fills in the instance's transform and adds it to the batch it can join, or a new one; skips it
     /// when nothing would show.
     void AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
@@ -836,38 +870,47 @@ namespace krys::gfx
 
     /// @brief Adds a pattern paint to the frame under the current transform; nothing when it shows nothing.
     KRYS_NODISCARD Maybe<ResolvedPaint> ResolvePattern(const ImagePattern2D &pattern) noexcept;
+
     /// @brief The paint's colour, or its gradient added to the frame under the current transform; nothing
     /// when it shows nothing. A gradient that comes down to one colour is that colour.
     KRYS_NODISCARD Maybe<ResolvedPaint> ResolvePaint(const Paint2D &paint) noexcept;
+
     /// @brief Where the shadow of a shape drawn under `transform` with `paint` goes; nothing when there's no
     /// shadow to show.
     KRYS_NODISCARD Maybe<ShadowPlacement> PlaceShadow(const Transform2D &transform,
                                                       const ResolvedPaint &paint) const noexcept;
+
     /// @brief Adds a mask's instance, drawn on whole target pixels, unless it's empty or outside the clip.
     void AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient,
                  uint32 pattern = NoPattern) noexcept;
+
     /// @brief Adds a glyph's instance from the atlas, its pen's pixel at (`x`, `y`) in target pixels. A
     /// shadow takes the glyph's coverage (a colour glyph's alpha) in the paint's colour.
     void AddGlyph(const GlyphLocation &glyph, int32 x, int32 y, const ResolvedPaint &paint,
                   bool shadow = false) noexcept;
+
     /// @brief Fills a path through its mask under `geometry` (which may differ from the current transform,
     /// as a glyph's outline is placed at its pen), with its shadow, the paint resolved in the current
     /// coordinates.
     void FillPathMask(const Path2D &path, const Transform2D &geometry, FillRule rule,
                       const ResolvedPaint &paint) noexcept;
+
     /// @brief Whether a paint certainly shows nothing, before the work of resolving it.
     KRYS_NODISCARD static bool IsInvisible(const Paint2D &paint) noexcept;
 
     /// @brief Works out a finished layer's bounds and texture, and fills in its composite.
     void FinishLayer(uint32 index) noexcept;
+
     /// @brief A layer texture at least `width` by `height` that no earlier pass of this frame uses.
     KRYS_NODISCARD TextureHandle AcquireLayerTexture(uint32 width, uint32 height) noexcept;
+
     /// @brief Records one pass: its layer's batches into its attachment, split before each batch that
     /// copies what's beneath it.
     void RecordPass(CommandBuffer &commands, const Pass &pass, const FrameResources &resources) noexcept;
 
     /// @brief Adds a shape clip to the current chain, in a new chain.
     void AddClip(RoundedRect2D shape, bool out) noexcept;
+
     /// @brief Adds a path clip to the current chain, in a new chain.
     void AddPathClip(const Path2D &path, FillRule rule, bool out) noexcept;
 
@@ -875,12 +918,15 @@ namespace krys::gfx
     /// antialiased edge), within the clip.
     KRYS_NODISCARD PixelRect2D Reach(const RectInstance &instance,
                                      const Transform2D &transform) const noexcept;
+
     /// @brief Whether a blend mode reads what's beneath the draw, so it's copied first.
     KRYS_NODISCARD static bool CopiesBackdrop(BlendMode mode) noexcept;
 
     /// @brief The target pixels whose centres are inside the rect from (left, top) to (right, bottom).
     KRYS_NODISCARD static PixelRect2D ToPixelRect(float left, float top, float right, float bottom) noexcept;
+
     KRYS_NODISCARD static PixelRect2D Intersect(const PixelRect2D &a, const PixelRect2D &b) noexcept;
+
     /// @brief The smallest rect holding both; an empty one adds nothing.
     KRYS_NODISCARD static PixelRect2D Union(const PixelRect2D &a, const PixelRect2D &b) noexcept;
   };

@@ -99,12 +99,17 @@ namespace krys::boo
     }
 
     void EffectTimingWasUpdatedUsingBindings(const OptionalEffectTiming &timing) noexcept;
+
     void EffectKeyframesWereSetUsingBindings() noexcept;
+
     void EffectCompositeOperationWasSetUsingBindings() noexcept;
+
     /// @brief Recomputes the keyframes, since the `@keyframes` rule they're from changed.
     void KeyframesRuleDidChange() noexcept;
+
     void UpdateKeyframesIfNeeded(const RenderStyle *oldStyle, const RenderStyle &newStyle,
                                  const style::ResolutionContext &resolutionContext) noexcept;
+
     void SyncStyleOriginatedTimeline() noexcept;
 
     KRYS_NODISCARD const style::Animation &BackingStyleAnimation() const noexcept
@@ -116,20 +121,31 @@ namespace krys::boo
 
   private:
     void SyncPropertiesWithBackingAnimation() noexcept final;
+
     KRYS_NODISCARD AnimationPlayState BackingAnimationPlayState() const noexcept final;
+
     KRYS_NODISCARD boo::TimingFunction *BackingAnimationTimingFunction() const noexcept final;
+
     KRYS_NODISCARD Ref<StyleOriginatedAnimationEvent>
       CreateEvent(dom::DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
                   const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
 
     KRYS_NODISCARD AnimationTimeline *BindingsTimeline() const noexcept final;
+
     void SetBindingsTimeline(RefPtr<AnimationTimeline> &&timeline) noexcept final;
+
     void SetBindingsRangeStart(TimelineRangeValue &&range) noexcept final;
+
     void SetBindingsRangeEnd(TimelineRangeValue &&range) noexcept final;
+
     dom::ExceptionOr<void> BindingsPlay() noexcept final;
+
     dom::ExceptionOr<void> BindingsPause() noexcept final;
+
     void SetBindingsEffect(RefPtr<AnimationEffect> &&newEffect) noexcept final;
+
     dom::ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept final;
+
     dom::ExceptionOr<void> BindingsReverse() noexcept final;
   };
 }

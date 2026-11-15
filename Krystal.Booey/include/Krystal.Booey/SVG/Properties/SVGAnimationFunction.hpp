@@ -47,8 +47,10 @@ namespace krys::boo::svg
 
     virtual void SetFromAndToValues(SVGElement &targetElement, dom::DOMStringView,
                                     dom::DOMStringView) noexcept = 0;
+
     virtual void SetFromAndByValues(SVGElement &targetElement, dom::DOMStringView,
                                     dom::DOMStringView) noexcept = 0;
+
     virtual void SetToAtEndOfDurationValue(SVGElement &targetElement, dom::DOMStringView) noexcept = 0;
 
     KRYS_NODISCARD virtual Maybe<float> CalculateDistance(SVGElement &, dom::DOMStringView,

@@ -166,8 +166,10 @@ namespace krys::boo::style
   struct Blending<MaskBorderSliceValue>
   {
     KRYS_NODISCARD bool CanBlend(const MaskBorderSliceValue &, const MaskBorderSliceValue &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderSliceValue &,
                                                                       const MaskBorderSliceValue &) noexcept;
+
     KRYS_NODISCARD MaskBorderSliceValue Blend(const MaskBorderSliceValue &, const MaskBorderSliceValue &,
                                               const BlendingContext &) noexcept;
   };
@@ -176,8 +178,10 @@ namespace krys::boo::style
   struct Blending<MaskBorderSlice>
   {
     KRYS_NODISCARD bool CanBlend(const MaskBorderSlice &, const MaskBorderSlice &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderSlice &,
                                                                       const MaskBorderSlice &) noexcept;
+
     KRYS_NODISCARD MaskBorderSlice Blend(const MaskBorderSlice &, const MaskBorderSlice &,
                                          const BlendingContext &) noexcept;
   };

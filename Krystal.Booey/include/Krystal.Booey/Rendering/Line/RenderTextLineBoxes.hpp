@@ -44,6 +44,7 @@ namespace krys::boo
 
   public:
     RenderTextLineBoxes() noexcept = default;
+
     ~RenderTextLineBoxes() noexcept;
 
     KRYS_NODISCARD LegacyInlineTextBox *First() const noexcept
@@ -61,6 +62,7 @@ namespace krys::boo
     void Remove(LegacyInlineTextBox &) noexcept;
 
     void RemoveAllFromParent(RenderSVGInlineText &) noexcept;
+
     void DeleteAll() noexcept;
 
     void DirtyForTextChange(RenderSVGInlineText &) noexcept;

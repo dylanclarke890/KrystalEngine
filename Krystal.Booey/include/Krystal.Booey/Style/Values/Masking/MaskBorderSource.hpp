@@ -96,6 +96,7 @@ namespace krys::boo::style
   struct Blending<MaskBorderSource>
   {
     KRYS_NODISCARD bool CanBlend(const MaskBorderSource &, const MaskBorderSource &) noexcept;
+
     KRYS_NODISCARD MaskBorderSource Blend(const MaskBorderSource &, const MaskBorderSource &,
                                           const BlendingContext &) noexcept;
   };

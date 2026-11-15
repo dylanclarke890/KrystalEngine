@@ -48,8 +48,10 @@ namespace krys::boo
 
   public:
     explicit TextBoxTrimmer(const RenderBlockFlow &blockContainer) noexcept;
+
     TextBoxTrimmer(const RenderBlockFlow &blockContainer,
                    const RenderBlockFlow &lastFormattedLineRoot) noexcept;
+
     ~TextBoxTrimmer() noexcept;
 
     KRYS_NODISCARD static RenderBlockFlow *
@@ -57,7 +59,9 @@ namespace krys::boo
 
   private:
     void AdjustTextBoxTrimStatusBeforeLayout(const RenderBlockFlow *lastFormattedLineRoot) noexcept;
+
     void AdjustTextBoxTrimStatusAfterLayout() noexcept;
+
     void HandleTextBoxTrimNoneBeforeLayout() noexcept;
   };
 
@@ -73,6 +77,7 @@ namespace krys::boo
 
   public:
     explicit TextBoxTrimStartDisabler(const RenderBox &renderBox) noexcept;
+
     ~TextBoxTrimStartDisabler() noexcept;
   };
 }

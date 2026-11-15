@@ -45,8 +45,11 @@ namespace krys::gfx
 
   public:
     PathStroker() noexcept = default;
+
     PathStroker(PathStroker &&) noexcept = default;
+
     PathStroker &operator=(PathStroker &&) noexcept = default;
+
     ~PathStroker() noexcept = default;
 
     /// @brief The outline of `path` stroked with `style`, to fill under `FillRule::NonZero` with
@@ -57,19 +60,28 @@ namespace krys::gfx
   private:
     /// @brief Adds a point to the contour, merging it with the last if they're the same.
     void AddPoint(Vec2f point, bool corner) noexcept;
+
     /// @brief Strokes the contour in `_points`, dashed or not, then clears it.
     void FinishContour(bool closed, bool drewSegment) noexcept;
+
     void Dash(bool closed) noexcept;
+
     /// @brief Strokes an open polyline with caps; a single point is a dot along `direction`.
     void StrokeOpen(Span<const Vec2f> points, Span<const uint8> corners, Vec2f direction) noexcept;
+
     /// @brief Strokes a closed polyline, with joins all the way round.
     void StrokeClosed(Span<const Vec2f> points, Span<const uint8> corners) noexcept;
 
     void AddSegment(Vec2f from, Vec2f to) noexcept;
+
     void AddJoin(Vec2f point, Vec2f incoming, Vec2f outgoing, bool corner) noexcept;
+
     void AddCap(Vec2f point, Vec2f direction) noexcept;
+
     void AddDot(Vec2f point, Vec2f direction) noexcept;
+
     void AddCircle(Vec2f centre) noexcept;
+
     /// @brief Adds `_polygon` to the outline, reversed if it winds the wrong way.
     void AddPolygon() noexcept;
   };

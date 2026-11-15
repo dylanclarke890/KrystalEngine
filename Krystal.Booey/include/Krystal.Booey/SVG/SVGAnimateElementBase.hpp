@@ -61,17 +61,25 @@ namespace krys::boo::svg
     }
 
     void SetTargetElement(SVGElement *) noexcept override;
+
     void SetAttributeName(const dom::QualifiedName &) noexcept override;
+
     void ResetAnimation() noexcept override;
 
     bool SetFromAndToValues(dom::DOMStringView fromString, dom::DOMStringView toString) noexcept override;
+
     bool SetFromAndByValues(dom::DOMStringView fromString, dom::DOMStringView byString) noexcept override;
+
     bool SetToAtEndOfDurationValue(dom::DOMStringView toAtEndOfDurationString) noexcept override;
 
     void StartAnimation() noexcept override;
+
     void CalculateAnimatedValue(float progress, uint32 repeatCount) noexcept override;
+
     void ApplyResultsToTarget() noexcept override;
+
     void StopAnimation(SVGElement *targetElement) noexcept override;
+
     KRYS_NODISCARD Maybe<float> CalculateDistance(dom::DOMStringView fromString,
                                                   dom::DOMStringView toString) noexcept override;
 

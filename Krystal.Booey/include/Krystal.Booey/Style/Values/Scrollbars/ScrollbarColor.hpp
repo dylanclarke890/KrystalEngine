@@ -100,7 +100,9 @@ namespace krys::boo::style
   {
     bool Equals(const ScrollbarColor &, const ScrollbarColor &, const RenderStyle &,
                 const RenderStyle &) noexcept;
+
     KRYS_NODISCARD bool CanBlend(const ScrollbarColor &, const ScrollbarColor &) noexcept;
+
     ScrollbarColor Blend(const ScrollbarColor &, const ScrollbarColor &, const RenderStyle &,
                          const RenderStyle &, const BlendingContext &) noexcept;
   };

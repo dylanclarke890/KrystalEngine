@@ -48,6 +48,7 @@ namespace krys::boo
 
   private:
     StyleBackdropFilterData() noexcept;
+
     StyleBackdropFilterData(const StyleBackdropFilterData &) noexcept;
   };
 }

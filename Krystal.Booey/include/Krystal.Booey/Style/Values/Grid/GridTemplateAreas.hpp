@@ -45,6 +45,7 @@ namespace krys::boo::style
     }
 
     GridTemplateAreas(GridNamedAreaMap &&map) noexcept;
+
     GridTemplateAreas(const GridNamedAreaMap &map) noexcept;
 
     KRYS_NODISCARD bool IsNone() const noexcept

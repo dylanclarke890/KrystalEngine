@@ -38,6 +38,7 @@ namespace krys::boo
 
   public:
     RenderSVGInline(Type, svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
+
     ~RenderSVGInline() noexcept override;
 
     KRYS_NODISCARD svg::SVGGraphicsElement &GraphicsElement() const noexcept;
@@ -65,13 +66,17 @@ namespace krys::boo
     // It is also necessary to take the stroke and repaint rect of
     // this element, since we need it for filters.
     KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept final;
+
     KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
+
     KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
+
     KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
 
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                   VisibleRectContext) const noexcept final;
+
     KRYS_NODISCARD RepaintRects RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
                                                               RepaintOutlineBounds) const noexcept final;
 
@@ -81,13 +86,16 @@ namespace krys::boo
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &,
                              EnumSet<MapCoordinatesMode>, bool *wasFixed) const noexcept final;
+
     const RenderElement *PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
                                                 RenderGeometryMap &) const noexcept final;
+
     void AbsoluteQuads(List<FloatQuad> &, bool *wasFixed) const noexcept final;
 
     KRYS_NODISCARD UniquePtr<LegacyInlineFlowBox> CreateInlineFlowBox() noexcept final;
 
     void WillBeDestroyed() noexcept final;
+
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept final;
   };
 }

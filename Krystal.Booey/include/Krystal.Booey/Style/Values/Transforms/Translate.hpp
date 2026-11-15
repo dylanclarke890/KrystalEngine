@@ -79,6 +79,7 @@ namespace krys::boo::style
 
     template <typename>
     KRYS_NODISCARD bool HoldsAlternative() const noexcept;
+
     template <typename... F>
     decltype(auto) SwitchOn(F &&...) const;
 

@@ -48,6 +48,7 @@ namespace krys::boo
 
   public:
     explicit LineClampUpdater(const RenderBlockFlow &blockContainer) noexcept;
+
     ~LineClampUpdater() noexcept;
   };
 }

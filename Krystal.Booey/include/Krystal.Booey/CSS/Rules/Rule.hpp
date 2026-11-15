@@ -204,7 +204,9 @@ namespace krys::boo::css
 
     /// @brief Creates the CSSOM wrapper exposing this rule to scripts.
     KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleSheet &parentSheet) const noexcept;
+
     KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSGroupingRule &parentRule) const noexcept;
+
     KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleRule &parentRule) const noexcept;
 
     // This is only needed to support getMatchedCSSRules.
@@ -249,6 +251,7 @@ namespace krys::boo::css
   protected:
     StyleRule(Ref<StyleProperties> &&properties, bool hasDocumentSecurityOrigin,
               SelectorList &&selectors) noexcept;
+
     StyleRule(const StyleRule &other) noexcept;
 
   public:
@@ -329,6 +332,7 @@ namespace krys::boo::css
 
     StyleRuleWithNesting(Ref<StyleProperties> &&properties, bool hasDocumentSecurityOrigin,
                          SelectorList &&selectors, List<Ref<Rule>> &&nestedRules) noexcept;
+
     explicit StyleRuleWithNesting(StyleRule &&rule) noexcept;
 
   protected:
@@ -341,6 +345,7 @@ namespace krys::boo::css
                                                            bool hasDocumentSecurityOrigin,
                                                            SelectorList &&selectors,
                                                            List<Ref<Rule>> &&nestedRules) noexcept;
+
     KRYS_NODISCARD static Ref<StyleRuleWithNesting> Create(StyleRule &&rule) noexcept;
 
     KRYS_NODISCARD Ref<StyleRuleWithNesting> Copy() const noexcept;
@@ -369,6 +374,7 @@ namespace krys::boo::css
   {
   private:
     explicit NestedDeclarationsRule(Ref<StyleProperties> &&properties) noexcept;
+
     NestedDeclarationsRule(const NestedDeclarationsRule &other) noexcept;
 
   public:
@@ -384,6 +390,7 @@ namespace krys::boo::css
     Ref<StyleProperties> _properties;
 
     explicit FontFaceRule(Ref<StyleProperties> &&properties) noexcept;
+
     FontFaceRule(const FontFaceRule &other) noexcept;
 
   public:
@@ -412,6 +419,7 @@ namespace krys::boo::css
     FontPaletteValuesRule(const CSSOMStringAtom &name, List<CSSOMStringAtom> &&fontFamilies,
                           Maybe<FontPaletteIndex> basePalette,
                           List<boo::FontPaletteValues::OverriddenColor> &&overrideColors) noexcept;
+
     FontPaletteValuesRule(const FontPaletteValuesRule &other) noexcept = default;
 
   public:
@@ -457,6 +465,7 @@ namespace krys::boo::css
 
     FontFeatureValuesBlockRule(boo::FontFeatureValuesType type,
                                const List<FontFeatureValuesTag> &tags) noexcept;
+
     FontFeatureValuesBlockRule(const FontFeatureValuesBlockRule &other) noexcept = default;
 
   public:
@@ -485,6 +494,7 @@ namespace krys::boo::css
 
     FontFeatureValuesRule(const List<CSSOMStringAtom> &fontFamilies,
                           Ref<boo::FontFeatureValues> &&value) noexcept;
+
     FontFeatureValuesRule(const FontFeatureValuesRule &other) noexcept = default;
 
   public:
@@ -515,6 +525,7 @@ namespace krys::boo::css
 
   protected:
     GroupRule(RuleType type, List<Ref<Rule>> &&childRules) noexcept;
+
     GroupRule(const GroupRule &other) noexcept;
 
   public:
@@ -524,6 +535,7 @@ namespace krys::boo::css
     }
 
     void WrapperInsertRule(uint32 index, Ref<Rule> &&rule) noexcept;
+
     void WrapperRemoveRule(uint32 index) noexcept;
   };
 
@@ -534,6 +546,7 @@ namespace krys::boo::css
     mq::MediaQueryList _mediaQueries;
 
     MediaRule(mq::MediaQueryList &&mediaQueries, List<Ref<Rule>> &&childRules) noexcept;
+
     MediaRule(const MediaRule &other) noexcept;
 
   public:
@@ -562,6 +575,7 @@ namespace krys::boo::css
 
     SupportsRule(const CSSOMString &conditionText, bool conditionIsSupported,
                  List<Ref<Rule>> &&rules) noexcept;
+
     SupportsRule(const SupportsRule &other) noexcept = default;
 
   public:
@@ -588,11 +602,14 @@ namespace krys::boo::css
     Variant<CascadeLayerName, List<CascadeLayerName>> _nameVariant;
 
     explicit LayerRule(List<CascadeLayerName> &&nameList) noexcept;
+
     LayerRule(CascadeLayerName &&name, List<Ref<Rule>> &&rules) noexcept;
+
     LayerRule(const LayerRule &other) noexcept = default;
 
   public:
     KRYS_NODISCARD static Ref<LayerRule> CreateStatement(List<CascadeLayerName> &&nameList) noexcept;
+
     KRYS_NODISCARD static Ref<LayerRule> CreateBlock(CascadeLayerName &&name,
                                                      List<Ref<Rule>> &&rules) noexcept;
 
@@ -621,6 +638,7 @@ namespace krys::boo::css
     cq::ContainerQueryList _containerQueries;
 
     ContainerRule(cq::ContainerQueryList &&queries, List<Ref<Rule>> &&rules) noexcept;
+
     ContainerRule(const ContainerRule &other) noexcept = default;
 
   public:
@@ -652,6 +670,7 @@ namespace krys::boo::css
     PropertyRule::Descriptor _descriptor;
 
     explicit PropertyRule(PropertyRule::Descriptor &&descriptor) noexcept;
+
     PropertyRule(const PropertyRule &other) noexcept = default;
 
   public:
@@ -679,6 +698,7 @@ namespace krys::boo::css
     WeakPtr<const StyleSheetContents> _styleSheetOwner;
 
     ScopeRule(SelectorList &&scopeStart, SelectorList &&scopeEnd, List<Ref<Rule>> &&rules) noexcept;
+
     ScopeRule(const ScopeRule &other) noexcept;
 
   public:
@@ -729,6 +749,7 @@ namespace krys::boo::css
   {
   private:
     explicit StartingStyleRule(List<Ref<Rule>> &&rules) noexcept;
+
     StartingStyleRule(const StartingStyleRule &other) noexcept = default;
 
   public:
@@ -743,6 +764,7 @@ namespace krys::boo::css
   {
   private:
     CharsetRule() noexcept;
+
     CharsetRule(const CharsetRule &other) noexcept = default;
 
   public:
@@ -759,6 +781,7 @@ namespace krys::boo::css
     CSSOMStringAtom _uri;
 
     NamespaceRule(const CSSOMStringAtom &prefix, const CSSOMStringAtom &uri) noexcept;
+
     NamespaceRule(const NamespaceRule &other) noexcept = default;
 
   public:

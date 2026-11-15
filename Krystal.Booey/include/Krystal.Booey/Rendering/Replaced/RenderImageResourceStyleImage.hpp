@@ -42,6 +42,7 @@ namespace krys::boo
 
   private:
     void Initialize(RenderElement &renderer) noexcept override;
+
     void Shutdown() noexcept override;
 
     KRYS_NODISCARD RefPtr<Image> GetImage(const IntSize &size = {}) const noexcept override;

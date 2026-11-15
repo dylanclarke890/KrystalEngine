@@ -101,8 +101,11 @@ namespace krys::boo
       // Return true if any of the operation types are 3D operation types (even if the
       // values describe affine transforms)
       KRYS_NODISCARD bool Has3DOperation() const noexcept;
+
       KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept;
+
       KRYS_NODISCARD bool AffectedByTransformOrigin() const noexcept;
+
       KRYS_NODISCARD bool ContainsNonInvertibleMatrix(const LayoutSize &) const noexcept;
 
       KRYS_NODISCARD TransformFunctionSizeDependencies ComputeSizeDependencies() const noexcept;
@@ -126,8 +129,10 @@ namespace krys::boo
     struct Blending<TransformList>
     {
       KRYS_NODISCARD bool CanBlend(const TransformList &, const TransformList &, CompositeOperation) noexcept;
+
       KRYS_NODISCARD TransformList Blend(const TransformList &, const TransformList &,
                                          const BlendingContext &) noexcept;
+
       /// @brief Blends against the border box of the animated renderer, and uses the animation's shared
       /// prefix of `transform` functions.
       KRYS_NODISCARD TransformList Blend(const TransformList &, const TransformList &,

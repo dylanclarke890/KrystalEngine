@@ -213,7 +213,9 @@ namespace krys::boo
     KRYS_NODISCARD int32 LegacyFontSizeFromCSSValue(dom::Document &document, css::PrimitiveValue *value,
                                                     bool shouldUseFixedFontDefaultSize,
                                                     LegacyFontSizeMode mode) noexcept;
+
     KRYS_NODISCARD bool HasTransparentBackgroundColor(css::StyleProperties *style) noexcept;
+
     KRYS_NODISCARD RefPtr<css::Value> BackgroundColorInEffect(dom::Node *node) noexcept;
 
     KRYS_NODISCARD bool IsValueID(const css::Value &value, ValueId valueID) noexcept

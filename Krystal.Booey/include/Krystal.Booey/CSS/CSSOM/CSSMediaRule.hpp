@@ -58,10 +58,13 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept final;
+
     KRYS_NODISCARD CSSOMString ConditionText() const noexcept final;
 
     KRYS_NODISCARD const mq::MediaQueryList &MediaQueries() const noexcept;
+
     void SetMediaQueries(mq::MediaQueryList &&queries) noexcept;
   };
 }

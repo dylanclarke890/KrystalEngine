@@ -72,9 +72,11 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static bool HasExtension(dom::DOMStringView extension) noexcept;
+
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGTests>;
 
     KRYS_NODISCARD SVGConditionalProcessingAttributes &ConditionalProcessingAttributes() noexcept;
+
     KRYS_NODISCARD SVGConditionalProcessingAttributes *
       ConditionalProcessingAttributesIfExists() const noexcept;
 
@@ -95,6 +97,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool IsValid() const noexcept;
 
     void ParseAttribute(const dom::QualifiedName &name, Maybe<dom::DOMStringView> value) noexcept;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept;
 
   private:

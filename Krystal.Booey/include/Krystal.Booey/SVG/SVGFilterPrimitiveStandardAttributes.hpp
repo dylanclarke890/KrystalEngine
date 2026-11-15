@@ -129,7 +129,9 @@ namespace krys::boo::svg
                                                         const GraphicsContext &destinationContext) noexcept;
 
     void PrimitiveAttributeChanged(const dom::QualifiedName &attribute) noexcept;
+
     void MarkFilterEffectForRepaint() noexcept;
+
     void MarkFilterEffectForRebuild() noexcept;
 
     static void InvalidateFilterPrimitiveParent(SVGElement *element) noexcept;
@@ -141,7 +143,9 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
+
     void OnChildrenChanged() noexcept override;
 
     void PrimitiveAttributeOnChildChanged(const dom::Element &child,
@@ -169,6 +173,7 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
+
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override;
 
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept override

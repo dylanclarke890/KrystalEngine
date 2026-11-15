@@ -67,6 +67,7 @@ namespace krys::boo
     void SetTextFragments(List<SVGTextFragment> &&) noexcept;
 
     void DirtyOwnLineBoxes() noexcept override;
+
     void DirtyLineBoxes() noexcept override;
 
     KRYS_NODISCARD SVGInlineTextBox *NextTextBox() const noexcept;

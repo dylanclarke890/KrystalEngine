@@ -70,9 +70,11 @@ namespace krys::boo
     LayoutPoint ScrollSnapshot;
 
     AnchorScrollSnapshot(const RenderBox &scroller, LayoutPoint snapshot) noexcept;
+
     explicit AnchorScrollSnapshot(LayoutPoint snapshot) noexcept;
 
     KRYS_NODISCARD LayoutSize AdjustmentForCurrentScrollPosition() const noexcept;
+
     KRYS_NODISCARD bool operator==(const AnchorScrollSnapshot &) const noexcept;
   };
 
@@ -104,11 +106,15 @@ namespace krys::boo
 
   public:
     AnchorScrollAdjuster(RenderBox &anchored, const RenderBoxModelObject &defaultAnchor) noexcept;
+
     AnchorScrollAdjuster(const AnchorScrollAdjuster &) noexcept;
+
     AnchorScrollAdjuster(AnchorScrollAdjuster &&) noexcept;
+
     ~AnchorScrollAdjuster() noexcept;
 
     AnchorScrollAdjuster &operator=(const AnchorScrollAdjuster &) noexcept;
+
     AnchorScrollAdjuster &operator=(AnchorScrollAdjuster &&) noexcept;
 
     KRYS_NODISCARD RenderBox *Anchored() const noexcept;
@@ -141,6 +147,7 @@ namespace krys::boo
     }
 
     void AddSnapshot(const RenderBox &scroller) noexcept;
+
     void AddViewportSnapshot(const RenderView &) noexcept;
 
     KRYS_NODISCARD bool HasViewportSnapshot() const noexcept
@@ -175,8 +182,8 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
-  class BuilderState;
   struct BuilderPositionTryFallback;
+  class BuilderState;
 
   enum class AnchorPositionResolutionStage : uint8
   {
@@ -265,7 +272,9 @@ namespace krys::boo::style
 
     static void UpdateAnchorPositioningStatesAfterInterleavedLayout(dom::Document &,
                                                                     AnchorPositionedStates &) noexcept;
+
     static void UpdateScrollAdjustments(RenderView &) noexcept;
+
     static void
       UpdateAnchorPositionedStateForDefaultAnchorAndPositionVisibility(dom::Element &, const RenderStyle &,
                                                                        AnchorPositionedStates &) noexcept;
@@ -274,6 +283,7 @@ namespace krys::boo::style
       ComputeAnchorRectRelativeToContainingBlock(const RenderBoxModelObject &anchorBox,
                                                  const RenderElement &containingBlock,
                                                  const RenderBox &anchoredBox) noexcept;
+
     static void CaptureScrollSnapshots(RenderBox &anchored,
                                        bool invalidateStyleForScrollPositionChanges = true) noexcept;
 
@@ -281,12 +291,15 @@ namespace krys::boo::style
       MakeAnchorPositionedForAnchorMap(AnchorPositionedToAnchorMap &) noexcept;
 
     KRYS_NODISCARD static bool IsAnchorPositioned(const RenderStyle &) noexcept;
+
     KRYS_NODISCARD static bool IsStyleTimeAnchorPositioned(const RenderStyle &) noexcept;
+
     KRYS_NODISCARD static bool IsLayoutTimeAnchorPositioned(const RenderStyle &) noexcept;
 
     KRYS_NODISCARD static css::PropertyId
       ResolvePositionTryFallbackProperty(css::PropertyId, WritingMode,
                                          const BuilderPositionTryFallback &) noexcept;
+
     /// @brief Swaps a self-alignment position (`align-self`/`justify-self`) according to a position-try
     /// fallback's tactics.
     KRYS_NODISCARD static css::ValueId
@@ -294,11 +307,14 @@ namespace krys::boo::style
                                                      const BuilderPositionTryFallback &) noexcept;
 
     KRYS_NODISCARD static bool OverflowsInsetModifiedContainingBlock(const RenderBox &anchoredBox) noexcept;
+
     KRYS_NODISCARD static bool
       IsDefaultAnchorInvisibleOrClippedByInterveningBoxes(const RenderBox &anchoredBox) noexcept;
 
     KRYS_NODISCARD static ScopedName DefaultAnchorName(const RenderStyle &) noexcept;
+
     KRYS_NODISCARD static bool IsAnchor(const RenderStyle &) noexcept;
+
     KRYS_NODISCARD static bool IsImplicitAnchor(const RenderStyle &) noexcept;
 
     KRYS_NODISCARD static RenderBoxModelObject *DefaultAnchorForBox(const RenderBox &) noexcept;
@@ -310,13 +326,17 @@ namespace krys::boo::style
   private:
     KRYS_NODISCARD static RenderBoxModelObject *
       FindAnchorForAnchorFunctionAndAttemptResolution(BuilderState &, Maybe<ScopedName> elementName) noexcept;
+
     KRYS_NODISCARD static AnchorElements
       FindAnchorsForAnchorPositionedElement(const dom::Element &,
                                             const HashSet<ResolvedScopedName> &anchorNames,
                                             const AnchorsForAnchorName &) noexcept;
+
     KRYS_NODISCARD static RefPtr<const dom::Element>
       AnchorPositionedElementOrPseudoElement(BuilderState &) noexcept;
+
     KRYS_NODISCARD static AnchorPositionedKey KeyForElementOrPseudoElement(const dom::Element &) noexcept;
+
     static void AddAnchorFunctionScrollCompensatedAxis(RenderStyle &, const RenderBox &anchored,
                                                        const RenderBoxModelObject &anchor, BoxAxis) noexcept;
   };

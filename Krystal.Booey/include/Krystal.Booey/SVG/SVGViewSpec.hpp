@@ -46,6 +46,7 @@ namespace krys::boo::svg
     }
 
     bool ParseViewSpec(dom::DOMStringView) noexcept;
+
     void Reset() noexcept;
 
     void ResetContextElement() noexcept

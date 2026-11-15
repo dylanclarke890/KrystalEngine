@@ -55,6 +55,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
     KRYS_NODISCARD bool Equals(const GridTemplateAreasValue &other) const noexcept;
 
     KRYS_NODISCARD CSSOMString StringForRow(size_t row) const noexcept;

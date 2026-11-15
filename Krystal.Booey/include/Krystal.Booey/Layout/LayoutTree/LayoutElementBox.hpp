@@ -82,10 +82,13 @@ namespace krys::boo::layout
     ElementBox(ElementAttributes &&attributes, RenderStyle &&style,
                UniquePtr<RenderStyle> &&firstLineStyle = nullptr,
                EnumSet<BaseTypeFlag> baseTypeFlags = {ElementBoxFlag}) noexcept;
+
     ElementBox(ElementAttributes &&attributes, EnumSet<ListMarkerAttribute> listMarkerAttributes,
                RenderStyle &&style, UniquePtr<RenderStyle> &&firstLineStyle = nullptr) noexcept;
+
     ElementBox(ElementAttributes &&attributes, ReplacedAttributes &&replacedAttributes, RenderStyle &&style,
                UniquePtr<RenderStyle> &&firstLineStyle = nullptr) noexcept;
+
     ~ElementBox() noexcept override;
 
     KRYS_NODISCARD const Box *FirstChild() const noexcept
@@ -94,7 +97,9 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const Box *FirstInFlowChild() const noexcept;
+
     KRYS_NODISCARD const Box *FirstInFlowOrFloatingChild() const noexcept;
+
     KRYS_NODISCARD const Box *FirstOutOfFlowChild() const noexcept;
 
     KRYS_NODISCARD const Box *LastChild() const noexcept
@@ -103,7 +108,9 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const Box *LastInFlowChild() const noexcept;
+
     KRYS_NODISCARD const Box *LastInFlowOrFloatingChild() const noexcept;
+
     KRYS_NODISCARD const Box *LastOutOfFlowChild() const noexcept;
 
     // FIXME: This is currently needed for style updates.
@@ -130,7 +137,9 @@ namespace krys::boo::layout
     KRYS_NODISCARD bool HasOutOfFlowChild() const noexcept;
 
     void AppendChild(UniquePtr<Box> childRef) noexcept;
+
     void InsertChild(UniquePtr<Box> childRef, Box *beforeChild = nullptr) noexcept;
+
     void DestroyChildren() noexcept;
 
     void SetBaselineForIntegration(LayoutUnit baseline) noexcept
@@ -144,11 +153,17 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD bool HasIntrinsicWidth() const noexcept;
+
     KRYS_NODISCARD bool HasIntrinsicHeight() const noexcept;
+
     KRYS_NODISCARD bool HasIntrinsicRatio() const noexcept;
+
     KRYS_NODISCARD LayoutUnit IntrinsicWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit IntrinsicHeight() const noexcept;
+
     KRYS_NODISCARD LayoutUnit IntrinsicRatio() const noexcept;
+
     KRYS_NODISCARD bool HasAspectRatio() const noexcept;
 
     void SetListMarkerAttributes(EnumSet<ListMarkerAttribute> listMarkerAttributes) noexcept

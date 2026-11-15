@@ -51,6 +51,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD constexpr bool operator==(const StrokeMiterlimit &) const noexcept = default;
+
     KRYS_NODISCARD constexpr auto operator<=>(const StrokeMiterlimit &) const noexcept = default;
   };
   DEFINE_TYPE_WRAPPER_GET(StrokeMiterlimit, Value)

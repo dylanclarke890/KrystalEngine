@@ -88,10 +88,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static bool FamilyNamesAreEqual(const StringAtom &, const StringAtom &) noexcept;
+
     KRYS_NODISCARD static size_t FamilyNameHash(const StringAtom &) noexcept;
+
     KRYS_NODISCARD static utf8_string FoldedFamilyName(utf8_stringview) noexcept;
 
     KRYS_NODISCARD uint32 EffectiveFamilyCount() const noexcept;
+
     KRYS_NODISCARD FontFamilySpecification EffectiveFamilyAt(uint32) const noexcept;
 
     KRYS_NODISCARD float SpecifiedSize() const noexcept
@@ -115,6 +118,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static FontSelectionValue LighterWeight(FontSelectionValue) noexcept;
+
     KRYS_NODISCARD static FontSelectionValue BolderWeight(FontSelectionValue) noexcept;
 
     /// @brief Only use fixed default size when there is only one font family, and that family is "monospace".

@@ -9,6 +9,7 @@ namespace krys::tests
   {
   public:
     TestRefCounted() = default;
+
     virtual ~TestRefCounted() = default;
   };
 

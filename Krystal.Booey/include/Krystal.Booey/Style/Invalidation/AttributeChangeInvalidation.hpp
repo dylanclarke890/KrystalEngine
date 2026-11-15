@@ -51,11 +51,13 @@ namespace krys::boo::style
     AttributeChangeInvalidation(dom::Element &element, const dom::QualifiedName &attributeName,
                                 Maybe<dom::DOMStringView> oldValue,
                                 Maybe<dom::DOMStringView> newValue) noexcept;
+
     ~AttributeChangeInvalidation() noexcept;
 
   private:
     void InvalidateStyle(const dom::QualifiedName &attributeName, Maybe<dom::DOMStringView> oldValue,
                          Maybe<dom::DOMStringView> newValue) noexcept;
+
     void InvalidateStyleWithRuleSets() noexcept;
   };
 

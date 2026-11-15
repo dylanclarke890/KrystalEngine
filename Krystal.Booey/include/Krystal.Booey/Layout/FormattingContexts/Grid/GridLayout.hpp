@@ -106,6 +106,7 @@ namespace krys::boo::layout
     }
 
     void InsertUnplacedGridItem(const UnplacedGridItem &unplacedGridItem) noexcept;
+
     void InsertDefiniteRowItem(const UnplacedGridItem &unplacedGridItem, GridAutoFlowOptions autoFlowOptions,
                                HashMap<size_t, size_t> &rowCursors) noexcept;
 
@@ -115,8 +116,10 @@ namespace krys::boo::layout
     KRYS_NODISCARD Maybe<size_t> FindFirstAvailableColumnPosition(size_t rowStart, size_t rowEnd,
                                                                   size_t columnSpan,
                                                                   size_t startSearchColumn) const noexcept;
+
     KRYS_NODISCARD bool IsCellRangeEmpty(size_t columnStart, size_t columnEnd, size_t rowStart,
                                          size_t rowEnd) const noexcept;
+
     void InsertItemInArea(const UnplacedGridItem &unplacedGridItem, size_t columnStart, size_t columnEnd,
                           size_t rowStart, size_t rowEnd) noexcept;
   };
@@ -134,14 +137,18 @@ namespace krys::boo::layout
   namespace GridLayoutUtils
   {
     KRYS_NODISCARD LayoutUnit ComputeGapValue(const style::GapGutter &gap) noexcept;
+
     KRYS_NODISCARD LayoutUnit UsedInlineSizeForGridItem(const PlacedGridItem &placedGridItem,
                                                         LayoutUnit borderAndPadding,
                                                         const TrackSizes &usedColumnSizes,
                                                         LayoutUnit columnsGap) noexcept;
+
     KRYS_NODISCARD LayoutUnit UsedBlockSizeForGridItem(const PlacedGridItem &placedGridItem) noexcept;
+
     /// @brief The position of the start of the track after grid line @p gridLineIndex.
     KRYS_NODISCARD LayoutUnit ComputeGridLinePosition(size_t gridLineIndex, const TrackSizes &trackSizes,
                                                       LayoutUnit gap) noexcept;
+
     /// @brief The position of the end of the track before grid line @p gridLineIndex.
     KRYS_NODISCARD LayoutUnit ComputeGridLineEndPosition(size_t gridLineIndex, const TrackSizes &trackSizes,
                                                          LayoutUnit gap) noexcept;
@@ -178,27 +185,35 @@ namespace krys::boo::layout
       UnplacedGridItems &unplacedGridItems, const List<style::GridTrackSize> &gridTemplateColumnsTrackSizes,
       const List<style::GridTrackSize> &gridTemplateRowsTrackSizes,
       GridAutoFlowOptions autoFlowOptions) noexcept;
+
     KRYS_NODISCARD static GridDimensions CalculateGridDimensions(const UnplacedGridItems &unplacedGridItems,
                                                                  size_t explicitColumnsCount,
                                                                  size_t explicitRowsCount) noexcept;
+
     KRYS_NODISCARD static TrackSizingFunctionsList
       ComputeTrackSizingFunctions(size_t implicitGridTracksCount,
                                   const List<style::GridTrackSize> &gridTemplateTrackSizes) noexcept;
+
     KRYS_NODISCARD static UsedTrackSizes
       PerformGridSizingAlgorithm(const PlacedGridItems &placedGridItems,
                                  const TrackSizingFunctionsList &columnTrackSizingFunctionsList,
                                  const TrackSizingFunctionsList &rowTrackSizingFunctionsList) noexcept;
+
     KRYS_NODISCARD Pair<UsedInlineSizes, UsedBlockSizes>
       LayoutGridItems(const PlacedGridItems &placedGridItems,
                       const UsedTrackSizes &usedTrackSizes) const noexcept;
+
     KRYS_NODISCARD static List<UsedMargins>
       ComputeInlineMargins(const PlacedGridItems &placedGridItems,
                            const style::ZoomFactor &zoomFactor) noexcept;
+
     KRYS_NODISCARD static List<UsedMargins> ComputeBlockMargins(const PlacedGridItems &placedGridItems,
                                                                 const style::ZoomFactor &zoomFactor) noexcept;
+
     KRYS_NODISCARD static BorderBoxPositions
       PerformInlineAxisSelfAlignment(const PlacedGridItems &placedGridItems,
                                      const List<UsedMargins> &inlineMargins) noexcept;
+
     KRYS_NODISCARD static BorderBoxPositions
       PerformBlockAxisSelfAlignment(const PlacedGridItems &placedGridItems,
                                     const List<UsedMargins> &blockMargins) noexcept;
@@ -209,6 +224,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD const ElementBox &GridContainer() const noexcept;
+
     KRYS_NODISCARD const RenderStyle &GridContainerStyle() const noexcept;
   };
 }

@@ -74,7 +74,9 @@ namespace krys::boo::layout
     }
 
     LayoutIterator &TraverseNext() noexcept;
+
     LayoutIterator &TraverseNextSkippingChildren() noexcept;
+
     LayoutIterator &TraverseNextSibling() noexcept;
   };
 

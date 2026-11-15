@@ -68,6 +68,7 @@ namespace krys::boo
                        const RenderFragmentContainer *fragment = nullptr) noexcept final;
 
     KRYS_NODISCARD bool IsSelected() const noexcept;
+
     // This is in local coordinates, but it's a physical rect (so the top left corner is physical top left).
     KRYS_NODISCARD LayoutRect LocalSelectionRect(bool checkWhetherSelected = true) const noexcept;
 
@@ -93,6 +94,7 @@ namespace krys::boo
     bool SetNeedsLayoutIfNeededAfterIntrinsicSizeChange() noexcept;
 
     KRYS_NODISCARD LayoutSize IntrinsicSize() const noexcept final;
+
     KRYS_NODISCARD FloatSize IntrinsicRatio() const noexcept;
 
     KRYS_NODISCARD bool ShouldInvalidatePreferredWidths() const noexcept override;
@@ -106,13 +108,16 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit
       ComputeReplacedLogicalHeightUsing(const style::PreferredSize &logicalHeight) const noexcept;
+
     KRYS_NODISCARD LayoutUnit
       ComputeReplacedLogicalHeightUsing(const style::MinimumSize &logicalHeight) const noexcept;
+
     KRYS_NODISCARD LayoutUnit
       ComputeReplacedLogicalHeightUsing(const style::MaximumSize &logicalHeight) const noexcept;
 
     KRYS_NODISCARD virtual LayoutUnit ComputeReplacedLogicalWidth(
       ShouldComputePreferred shouldComputePreferred = ShouldComputePreferred::ComputeActual) const noexcept;
+
     KRYS_NODISCARD virtual LayoutUnit
       ComputeReplacedLogicalHeight(Maybe<LayoutUnit> estimatedUsedWidth = null) const noexcept;
 
@@ -120,8 +125,10 @@ namespace krys::boo
 
     void ComputeReplacedOutOfFlowPositionedLogicalWidth(
       LogicalExtentComputedValues &computedValues) const noexcept;
+
     void ComputeReplacedOutOfFlowPositionedLogicalHeight(
       LogicalExtentComputedValues &computedValues) const noexcept;
+
     KRYS_NODISCARD bool ReplacedMaxLogicalHeightComputesAsNone() const noexcept;
 
   protected:
@@ -130,8 +137,10 @@ namespace krys::boo
 
     KRYS_NODISCARD RepaintRects
       LocalRectsForRepaint(RepaintOutlineBounds repaintOutlineBounds) const noexcept override;
+
     RenderReplaced(Type type, dom::Element &element, RenderStyle &&style, const LayoutSize &intrinsicSize,
                    EnumSet<ReplacedFlag> flags = {}) noexcept;
+
     RenderReplaced(Type type, dom::Document &document, RenderStyle &&style, const LayoutSize &intrinsicSize,
                    EnumSet<ReplacedFlag> flags = {}) noexcept;
 
@@ -156,6 +165,7 @@ namespace krys::boo
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
 
     KRYS_NODISCARD virtual FloatSize ComputeIntrinsicSize() const noexcept;
+
     KRYS_NODISCARD virtual FloatSize PreferredAspectRatio() const noexcept;
 
     void SetIntrinsicSize(const LayoutSize &intrinsicSize) noexcept
@@ -181,11 +191,14 @@ namespace krys::boo
 
     template <typename SizeType>
     KRYS_NODISCARD LayoutUnit ComputeReplacedLogicalWidthUsing(const SizeType &logicalWidth) const noexcept;
+
     template <typename SizeType>
     KRYS_NODISCARD LayoutUnit
       ComputeReplacedLogicalHeightUsingGeneric(const SizeType &logicalHeight) const noexcept;
+
     KRYS_NODISCARD LayoutUnit
       ComputeReplacedLogicalHeightRespectingMinMaxHeight(LayoutUnit logicalHeight) const noexcept;
+
     KRYS_NODISCARD bool
       ReplacedMinMaxLogicalHeightComputesAsNone(const auto &logicalHeight,
                                                 const auto &initialLogicalHeight) const noexcept;
@@ -202,6 +215,7 @@ namespace krys::boo
 
     void ComputeAspectRatioInformationForRenderBox(RenderBox *contentRenderer, FloatSize &constrainedSize,
                                                    FloatSize &preferredAspectRatio) const noexcept;
+
     void ComputeIntrinsicSizesConstrainedByTransferredMinMaxSizes(RenderBox *contentRenderer,
                                                                   FloatSize &intrinsicSize,
                                                                   FloatSize &intrinsicRatio) const noexcept;

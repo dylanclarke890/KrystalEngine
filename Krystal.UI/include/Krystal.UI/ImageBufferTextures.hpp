@@ -59,11 +59,13 @@ namespace krys::ui
 
   public:
     ImageBufferTextures(gfx::Device &device, FontFaceCache &fonts) noexcept;
+
     ~ImageBufferTextures() noexcept;
 
     /// @brief A texture holding what @p buffer recorded, at its backend size, rendered on first use in this
     /// replay into @p commands; invalid if it can't be.
     KRYS_NODISCARD gfx::TextureHandle Render(boo::ImageBuffer &buffer, gfx::CommandBuffer &commands) noexcept;
+
     /// @brief The texture an accelerated buffer keeps, with what's been flushed rendered into it in
     /// @p commands; invalid if it can't be.
     KRYS_NODISCARD gfx::TextureHandle Render(ImageBufferRender2DBackend &backend,
@@ -90,6 +92,7 @@ namespace krys::ui
 
   private:
     KRYS_NODISCARD gfx::TextureHandle Acquire(uint32 width, uint32 height) noexcept;
+
     /// @brief A renderer for the current level of nesting, made on first use.
     KRYS_NODISCARD gfx::Renderer2D *RendererForDepth() noexcept;
   };

@@ -109,33 +109,50 @@ namespace krys::boo
 
     static void DeleteSelection(dom::Document &document, EnumSet<Option> options = {},
                                 TextCompositionType compositionType = TextCompositionType::None) noexcept;
+
     static void
       DeleteKeyPressed(dom::Document &document, EnumSet<Option> options = {},
                        TextGranularity granularity = TextGranularity::CharacterGranularity) noexcept;
+
     static void
       ForwardDeleteKeyPressed(dom::Document &document, EnumSet<Option> options = {},
                               TextGranularity granularity = TextGranularity::CharacterGranularity) noexcept;
+
     static void InsertText(dom::Document &document, utf8_stringview text, dom::Event *triggeringEvent,
                            EnumSet<Option> options,
                            TextCompositionType compositionType = TextCompositionType::None) noexcept;
+
     static void InsertText(dom::Document &document, utf8_stringview text, dom::Event *triggeringEvent,
                            const VisibleSelection &selectionForInsertion, EnumSet<Option> options,
                            TextCompositionType compositionType = TextCompositionType::None) noexcept;
+
     static void InsertLineBreak(dom::Document &document, EnumSet<Option> options) noexcept;
+
     static void InsertParagraphSeparator(dom::Document &document, EnumSet<Option> options) noexcept;
+
     static void CloseTyping(dom::Document &document) noexcept;
 
     void InsertText(utf8_stringview text, bool selectInsertedText) noexcept;
+
     void InsertTextRunWithoutNewlines(utf8_stringview text, bool selectInsertedText) noexcept;
+
     void InsertLineBreak() noexcept;
+
     void InsertParagraphSeparator() noexcept;
+
     void DeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept;
+
     void ForwardDeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept;
+
     void DeleteSelection(bool smartDelete) noexcept;
+
     // Typing that tells accessibility what it inserted (and what it replaced).
     void InsertTextAndNotifyAccessibility(utf8_stringview text, bool selectInsertedText) noexcept;
+
     void InsertLineBreakAndNotifyAccessibility() noexcept;
+
     void InsertParagraphSeparatorAndNotifyAccessibility() noexcept;
+
     /// @brief Tells accessibility @p selection's text is being deleted.
     void PostTextStateChangeNotificationForDeletion(const VisibleSelection &selection) noexcept;
 
@@ -166,6 +183,7 @@ namespace krys::boo
       Create(dom::Document &document, Type command, utf8_stringview text = {}, EnumSet<Option> options = {},
              TextGranularity granularity = TextGranularity::CharacterGranularity,
              TextCompositionType compositionType = TextCompositionType::None) noexcept;
+
     KRYS_NODISCARD static Ref<TypingCommand> Create(dom::Document &document, Type command,
                                                     utf8_stringview text, EnumSet<Option> options,
                                                     TextCompositionType compositionType) noexcept;
@@ -217,21 +235,29 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD dom::DOMString InputEventTypeName() const noexcept final;
+
     KRYS_NODISCARD bool IsInputMethodComposing() const noexcept final;
+
     KRYS_NODISCARD dom::DOMString InputEventData() const noexcept final;
+
     KRYS_NODISCARD bool IsBeforeInputEventCancelable() const noexcept final;
 
     static void UpdateSelectionIfDifferentFromCurrentSelection(TypingCommand *typingCommand,
                                                                dom::Document &document) noexcept;
 
     void UpdatePreservesTypingStyle(Type commandType) noexcept;
+
     bool WillAddTypingToOpenCommand(Type commandType, TextGranularity granularity, utf8_stringview text = {},
                                     const Maybe<dom::SimpleRange> &range = null) noexcept;
+
     void TypingAddedToOpenCommand(Type commandTypeForAddedTyping) noexcept;
+
     bool MakeEditableRootEmpty() noexcept;
 
     bool WillApplyCommand() noexcept final;
+
     void DidApplyCommand() noexcept final;
+
     KRYS_NODISCARD bool ShouldDeferWillApplyCommandUntilAddingTypingCommand() const noexcept;
   };
 }

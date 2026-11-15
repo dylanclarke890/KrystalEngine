@@ -84,6 +84,7 @@ namespace krys::boo
 
   public:
     RenderListBox(html::HTMLSelectElement &element, RenderStyle &&style) noexcept;
+
     ~RenderListBox() noexcept override;
 
     KRYS_NODISCARD html::HTMLSelectElement &SelectElement() const noexcept;
@@ -96,10 +97,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD int32 ListIndexAtOffset(const LayoutSize &offset) const noexcept;
+
     KRYS_NODISCARD LayoutRect ItemBoundingBoxRect(const LayoutPoint &additionalOffset,
                                                   int32 index) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutRect>
       LocalBoundsOfOption(const html::HTMLOptionElement &option) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutRect>
       LocalBoundsOfOptGroup(const html::HTMLOptGroupElement &optGroup) const noexcept;
 
@@ -108,6 +112,7 @@ namespace krys::boo
     /// @return Whether it scrolled.
     bool ScrollToRevealElementAtListIndex(int32 index,
                                           ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
+
     /// @brief Whether the item at @p index is fully in view, in the content box or the padding around it.
     KRYS_NODISCARD bool ListIndexIsVisible(int32 index) const noexcept;
 
@@ -124,6 +129,7 @@ namespace krys::boo
     void ScrollDidEnd() noexcept final;
 
     KRYS_NODISCARD Scrollbar *VerticalScrollbar() const noexcept final;
+
     KRYS_NODISCARD Scrollbar *HorizontalScrollbar() const noexcept final;
 
     KRYS_NODISCARD ScrollPosition GetScrollPosition() const noexcept final;
@@ -149,17 +155,23 @@ namespace krys::boo
     }
 
     void PaintObject(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept override;
+
     KRYS_NODISCARD LayoutRect ControlClipRect(const LayoutPoint &additionalOffset) const noexcept override;
+
     bool IsPointInOverflowControl(HitTestResult &result, const LayoutPoint &locationInContainer,
                                   const LayoutPoint &accumulatedOffset) noexcept override;
+
     bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
                        dom::Element **stopElement = nullptr,
                        ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept override;
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
+
     void ComputePreferredLogicalWidths() noexcept override;
+
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
 
@@ -171,24 +183,35 @@ namespace krys::boo
     }
 
     void Autoscroll(const IntPoint &positionInWindow) noexcept override;
+
     void PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept override;
+
     void StopAutoscroll() noexcept override;
 
     KRYS_NODISCARD int32 VerticalScrollbarWidth() const noexcept override;
+
     KRYS_NODISCARD int32 HorizontalScrollbarHeight() const noexcept override;
+
     KRYS_NODISCARD int32 ScrollLeft() const noexcept override;
+
     KRYS_NODISCARD int32 ScrollTop() const noexcept override;
+
     KRYS_NODISCARD int32 ScrollWidth() const noexcept override;
+
     KRYS_NODISCARD int32 ScrollHeight() const noexcept override;
+
     void SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options =
                                         ScrollPositionChangeOptions::CreateProgrammatic()) noexcept override;
+
     void SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &options =
                                       ScrollPositionChangeOptions::CreateProgrammatic()) noexcept override;
+
     void SetScrollPosition(const ScrollPosition &position,
                            const ScrollPositionChangeOptions &options =
                              ScrollPositionChangeOptions::CreateProgrammatic()) noexcept override;
 
     KRYS_NODISCARD int32 LogicalScrollTop() const noexcept;
+
     void SetLogicalScrollTop(int32 newLogicalScrollTop, const ScrollPositionChangeOptions &options) noexcept;
 
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
@@ -198,9 +221,13 @@ namespace krys::boo
 #pragma region ScrollableArea
 
     void SetScrollOffset(const ScrollOffset &offset) noexcept final;
+
     KRYS_NODISCARD ScrollPosition MinimumScrollPosition() const noexcept final;
+
     KRYS_NODISCARD ScrollPosition MaximumScrollPosition() const noexcept final;
+
     void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept final;
+
     void RegisterForAnimatedScroll() noexcept final;
 
     // We don't support resize on list boxes yet. If we did these would have to change.
@@ -216,6 +243,7 @@ namespace krys::boo
 
     KRYS_NODISCARD IntPoint ConvertFromContainingViewToScrollbar(
       const Scrollbar &scrollbar, const IntPoint &parentPoint) const noexcept final;
+
     KRYS_NODISCARD IntSize ContentsSize() const noexcept final;
 
     KRYS_NODISCARD IntSize VisibleSize() const noexcept final
@@ -224,6 +252,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD ScrollableArea *EnclosingScrollableArea() const noexcept final;
+
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept final;
 
     KRYS_NODISCARD bool ShouldPlaceVerticalScrollbarOnLeft() const noexcept final
@@ -249,43 +278,62 @@ namespace krys::boo
 
     // NOTE: This should only be called by the overridden SetScrollOffset from ScrollableArea.
     void ScrollTo(const ScrollPosition &position) noexcept;
+
     /// @brief Scrolls to @p offset pixels from the list's start, clamped, smoothly if @p options say so.
     void ScrollToLogicalOffset(int32 offset, const ScrollPositionChangeOptions &options =
                                                ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
 
     using PaintFunction = Func<void(PaintInfo &, const LayoutPoint &, int32 listItemIndex)>;
+
     void PaintItem(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
                    const PaintFunction &paintFunction) noexcept;
 
     void SetHasScrollbar(ScrollbarOrientation orientation) noexcept;
+
     KRYS_NODISCARD Ref<Scrollbar> CreateScrollbar(ScrollbarOrientation orientation) noexcept;
+
     void DestroyScrollbar() noexcept;
 
     KRYS_NODISCARD LayoutUnit ItemLogicalHeight() const noexcept;
 
     /// @brief How many items fit fully in the content box, at least one.
     KRYS_NODISCARD int32 NumVisibleItems() const noexcept;
+
     KRYS_NODISCARD int32 NumItems() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ListLogicalHeight() const noexcept;
+
     KRYS_NODISCARD Maybe<int32> OptionRowIndex(const html::HTMLOptionElement &option) const noexcept;
 
     KRYS_NODISCARD LayoutRect RectForScrollbar(const Scrollbar &scrollbar) const noexcept;
+
     void PaintScrollbar(PaintInfo &paintInfo, const LayoutPoint &paintOffset, Scrollbar &scrollbar) noexcept;
+
     void PaintItemForeground(PaintInfo &paintInfo, const LayoutPoint &paintOffset, int32 listIndex) noexcept;
+
     void PaintItemBackground(PaintInfo &paintInfo, const LayoutPoint &paintOffset, int32 listIndex) noexcept;
+
     void ScrollToRevealSelection() noexcept;
+
     KRYS_NODISCARD ScrollbarOrientation ScrollbarOrientationForWritingMode() const noexcept;
+
     /// @brief How far the list is scrolled from its start, in pixels.
     KRYS_NODISCARD int32 LogicalScrollOffset() const noexcept;
+
     /// @brief Where the list is scrolling to: the smooth scroll's destination while there is one.
     KRYS_NODISCARD int32 TargetLogicalScrollOffset() const noexcept;
+
     KRYS_NODISCARD int32 MaximumLogicalScrollOffset() const noexcept;
+
     /// @brief The index of the first item fully in the content box when scrolled to @p offset.
     KRYS_NODISCARD int32 FirstFullyVisibleIndex(int32 offset) const noexcept;
+
     /// @brief The index after the last item fully in the content box when scrolled to @p offset.
     KRYS_NODISCARD int32 EndOfFullyVisibleIndexes(int32 offset) const noexcept;
+
     /// @brief The index of the item, or the gap after it, at @p offset from the list's start.
     KRYS_NODISCARD int32 ItemIndexAtLogicalOffset(LayoutUnit offset) const noexcept;
+
     KRYS_NODISCARD bool ListIndexIsVisible(int32 index, int32 offset) const noexcept;
   };
 }

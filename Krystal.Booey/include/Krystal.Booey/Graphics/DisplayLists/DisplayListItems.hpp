@@ -92,6 +92,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -113,6 +114,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -134,6 +136,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -155,6 +158,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -176,6 +180,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -207,6 +212,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -249,6 +255,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -273,6 +280,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -294,6 +302,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -322,6 +331,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -343,6 +353,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -364,6 +375,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -385,6 +397,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -406,6 +419,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -427,6 +441,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -448,6 +463,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -469,6 +485,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -496,6 +513,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -558,6 +576,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -574,10 +593,15 @@ namespace krys::boo::display_list
 
     DrawControlPart(ControlPart &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
                     const ControlStyle &) noexcept;
+
     DrawControlPart(const DrawControlPart &) noexcept;
+
     DrawControlPart(DrawControlPart &&) noexcept;
+
     DrawControlPart &operator=(const DrawControlPart &) noexcept;
+
     DrawControlPart &operator=(DrawControlPart &&) noexcept;
+
     ~DrawControlPart() noexcept;
 
     KRYS_NODISCARD ControlPart &Part() const noexcept;
@@ -600,6 +624,7 @@ namespace krys::boo::display_list
     KRYS_NODISCARD StyleAppearance GetType() const noexcept;
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -612,15 +637,21 @@ namespace krys::boo::display_list
     constexpr static std::string_view Name = "draw-display-list";
 
     explicit DrawDisplayList(Ref<const boo::display_list::DisplayList> &&) noexcept;
+
     DrawDisplayList(const DrawDisplayList &) noexcept;
+
     DrawDisplayList(DrawDisplayList &&) noexcept;
+
     DrawDisplayList &operator=(const DrawDisplayList &) noexcept;
+
     DrawDisplayList &operator=(DrawDisplayList &&) noexcept;
+
     ~DrawDisplayList() noexcept;
 
     KRYS_NODISCARD Ref<const boo::display_list::DisplayList> GetDisplayList() const noexcept;
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -634,10 +665,15 @@ namespace krys::boo::display_list
     constexpr static std::string_view Name = "clip-to-image-buffer";
 
     ClipToImageBuffer(ImageBuffer &, const FloatRect &destinationRect) noexcept;
+
     ClipToImageBuffer(const ClipToImageBuffer &) noexcept;
+
     ClipToImageBuffer(ClipToImageBuffer &&) noexcept;
+
     ClipToImageBuffer &operator=(const ClipToImageBuffer &) noexcept;
+
     ClipToImageBuffer &operator=(ClipToImageBuffer &&) noexcept;
+
     ~ClipToImageBuffer() noexcept;
 
     KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
@@ -648,6 +684,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -663,10 +700,15 @@ namespace krys::boo::display_list
 
     DrawFilteredImageBuffer(RefPtr<ImageBuffer> &&sourceImage, const FloatRect &sourceImageRect,
                             Filter &filter) noexcept;
+
     DrawFilteredImageBuffer(const DrawFilteredImageBuffer &) noexcept;
+
     DrawFilteredImageBuffer(DrawFilteredImageBuffer &&) noexcept;
+
     DrawFilteredImageBuffer &operator=(const DrawFilteredImageBuffer &) noexcept;
+
     DrawFilteredImageBuffer &operator=(DrawFilteredImageBuffer &&) noexcept;
+
     ~DrawFilteredImageBuffer() noexcept;
 
     KRYS_NODISCARD ImageBuffer *SourceImage() const noexcept;
@@ -679,6 +721,7 @@ namespace krys::boo::display_list
     KRYS_NODISCARD Filter &GetFilter() const noexcept;
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -695,10 +738,15 @@ namespace krys::boo::display_list
 
     DrawImageBuffer(ImageBuffer &, const FloatRect &destRect, const FloatRect &srcRect,
                     ImagePaintingOptions) noexcept;
+
     DrawImageBuffer(const DrawImageBuffer &) noexcept;
+
     DrawImageBuffer(DrawImageBuffer &&) noexcept;
+
     DrawImageBuffer &operator=(const DrawImageBuffer &) noexcept;
+
     DrawImageBuffer &operator=(DrawImageBuffer &&) noexcept;
+
     ~DrawImageBuffer() noexcept;
 
     KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
@@ -719,6 +767,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -735,10 +784,15 @@ namespace krys::boo::display_list
 
     DrawNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &srcRect,
                     ImagePaintingOptions) noexcept;
+
     DrawNativeImage(const DrawNativeImage &) noexcept;
+
     DrawNativeImage(DrawNativeImage &&) noexcept;
+
     DrawNativeImage &operator=(const DrawNativeImage &) noexcept;
+
     DrawNativeImage &operator=(DrawNativeImage &&) noexcept;
+
     ~DrawNativeImage() noexcept;
 
     KRYS_NODISCARD NativeImage &GetNativeImage() const noexcept;
@@ -759,6 +813,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -779,10 +834,15 @@ namespace krys::boo::display_list
     DrawPatternNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &tileRect,
                            const AffineTransform &patternTransform, const FloatPoint &phase,
                            const FloatSize &spacing, ImagePaintingOptions) noexcept;
+
     DrawPatternNativeImage(const DrawPatternNativeImage &) noexcept;
+
     DrawPatternNativeImage(DrawPatternNativeImage &&) noexcept;
+
     DrawPatternNativeImage &operator=(const DrawPatternNativeImage &) noexcept;
+
     DrawPatternNativeImage &operator=(DrawPatternNativeImage &&) noexcept;
+
     ~DrawPatternNativeImage() noexcept;
 
     KRYS_NODISCARD NativeImage &GetNativeImage() const noexcept;
@@ -818,6 +878,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -838,10 +899,15 @@ namespace krys::boo::display_list
     DrawPatternImageBuffer(ImageBuffer &, const FloatRect &destRect, const FloatRect &tileRect,
                            const AffineTransform &patternTransform, const FloatPoint &phase,
                            const FloatSize &spacing, ImagePaintingOptions) noexcept;
+
     DrawPatternImageBuffer(const DrawPatternImageBuffer &) noexcept;
+
     DrawPatternImageBuffer(DrawPatternImageBuffer &&) noexcept;
+
     DrawPatternImageBuffer &operator=(const DrawPatternImageBuffer &) noexcept;
+
     DrawPatternImageBuffer &operator=(DrawPatternImageBuffer &&) noexcept;
+
     ~DrawPatternImageBuffer() noexcept;
 
     KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
@@ -877,6 +943,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -891,6 +958,7 @@ namespace krys::boo::display_list
     explicit DrawPlaceholder(Func<void(GraphicsContext &)> &&) noexcept;
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -912,6 +980,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -934,6 +1003,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -973,6 +1043,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1000,6 +1071,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1050,6 +1122,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1078,6 +1151,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1099,6 +1173,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1120,6 +1195,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1154,6 +1230,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1195,6 +1272,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1223,6 +1301,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1250,6 +1329,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1263,6 +1343,7 @@ namespace krys::boo::display_list
     constexpr static std::string_view Name = "fill-rect-with-gradient";
 
     FillRectWithGradient(const FloatRect &, boo::Gradient &) noexcept;
+
     FillRectWithGradient(FloatRect &&, Ref<boo::Gradient> &&) noexcept;
 
     KRYS_NODISCARD const FloatRect &Rect() const noexcept
@@ -1276,6 +1357,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1292,6 +1374,7 @@ namespace krys::boo::display_list
 
     FillRectWithGradientAndSpaceTransform(const FloatRect &, boo::Gradient &, const AffineTransform &,
                                           GraphicsContext::RequiresClipToRect) noexcept;
+
     FillRectWithGradientAndSpaceTransform(FloatRect &&, Ref<boo::Gradient> &&, AffineTransform &&,
                                           GraphicsContext::RequiresClipToRect) noexcept;
 
@@ -1316,6 +1399,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1357,6 +1441,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1391,6 +1476,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1426,6 +1512,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1447,6 +1534,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1468,6 +1556,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1495,6 +1584,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1516,6 +1606,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1537,6 +1628,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1558,6 +1650,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1579,6 +1672,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1600,6 +1694,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
@@ -1639,6 +1734,7 @@ namespace krys::boo::display_list
     }
 
     void Apply(GraphicsContext &) const noexcept;
+
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 }

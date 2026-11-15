@@ -2,10 +2,10 @@
 
 namespace krys::boo::dom
 {
-  class Node;
   class CharacterData;
   class ContainerNode;
   class Document;
+  class Node;
   class Range;
   class Text;
 
@@ -25,6 +25,7 @@ namespace krys::boo::dom
                                       size_t newDataSize) noexcept;
 
     static void NodeNormalized(Node &node, Text &removedText, size_t length) noexcept;
+
     static void MovedBeforeNode(Node &movedBefore) noexcept;
 
     static void InsertedBeforeNode(Node &insertedBefore, size_t nodesInserted) noexcept;

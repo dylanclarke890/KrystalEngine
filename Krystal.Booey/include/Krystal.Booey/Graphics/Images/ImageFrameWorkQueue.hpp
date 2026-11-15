@@ -77,6 +77,7 @@ namespace krys::boo
 
   public:
     explicit ImageFrameWorkQueue(BitmapImageSource &source) noexcept;
+
     ~ImageFrameWorkQueue() noexcept;
 
     KRYS_NODISCARD static Ref<ImageFrameWorkQueue> Create(BitmapImageSource &source) noexcept

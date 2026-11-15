@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     RenderMathMLSpace(mathml::MathMLSpaceElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMathMLSpace() noexcept override;
 
     KRYS_NODISCARD mathml::MathMLSpaceElement &GetElement() const noexcept;
@@ -61,10 +62,13 @@ namespace krys::boo
     }
 
     void ComputePreferredLogicalWidths() noexcept final;
+
     void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept final;
+
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;
 
     KRYS_NODISCARD LayoutUnit SpaceWidth() const noexcept;
+
     void GetSpaceHeightAndDepth(LayoutUnit &height, LayoutUnit &depth) const noexcept;
   };
 }

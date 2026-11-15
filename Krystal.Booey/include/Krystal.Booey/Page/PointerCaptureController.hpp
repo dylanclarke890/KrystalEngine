@@ -114,12 +114,16 @@ namespace krys::boo
     /// @brief The element capturing @p pointerId, if it's in @p document.
     KRYS_NODISCARD dom::Element *PointerCaptureElement(dom::Document *document,
                                                        PointerID pointerId) const noexcept;
+
     /// @see https://w3c.github.io/pointerevents/#setting-pointer-capture
     dom::ExceptionOr<void> SetPointerCapture(dom::Element *capturingTarget, PointerID pointerId) noexcept;
+
     /// @see https://w3c.github.io/pointerevents/#releasing-pointer-capture
     dom::ExceptionOr<void> ReleasePointerCapture(dom::Element *capturingTarget, PointerID pointerId) noexcept;
+
     /// @see https://w3c.github.io/pointerevents/#dom-element-haspointercapture
     KRYS_NODISCARD bool HasPointerCapture(dom::Element *capturingTarget, PointerID pointerId) const noexcept;
+
     /// @brief Forgets every pointer but the mouse, as when the page's main document changes.
     void Reset() noexcept;
 
@@ -162,42 +166,57 @@ namespace krys::boo
                                       const DoublePoint &touchDelta) noexcept;
 
     void TouchWithIdentifierWasRemoved(PointerID pointerId) noexcept;
+
     KRYS_NODISCARD bool HasCancelledPointerEventForIdentifier(PointerID pointerId) const noexcept;
+
     KRYS_NODISCARD bool PreventsCompatibilityMouseEventsForIdentifier(PointerID pointerId) const noexcept;
+
     /// @brief Dispatches @p event at @p target, keeping the pointer's state.
     void DispatchEvent(dom::PointerEvent &event, dom::EventTarget *target) noexcept;
+
     /// @brief Fires `pointercancel`, `pointerout` and `pointerleave` for @p pointerId, at its capturing
     /// element or else the element at @p documentPoint, and releases its capture.
     /// @see https://w3c.github.io/pointerevents/#the-pointercancel-event
     void CancelPointer(PointerID pointerId, const IntPoint &documentPoint,
                        dom::PointerEvent *existingCancelEvent = nullptr) noexcept;
+
     /// @see https://w3c.github.io/pointerevents/#process-pending-pointer-capture
     void ProcessPendingPointerCapture(PointerID pointerId) noexcept;
+
     // Used for mouse presses that trigger contextmenu, causing
     // the matching release to be suppressed.
     void ClearUnmatchedMouseDown(PointerID pointerId) noexcept;
 
   private:
     KRYS_NODISCARD RefPtr<CapturingData> CapturingDataFor(PointerID pointerId) const noexcept;
+
     Ref<CapturingData> EnsureCapturingData(PointerID pointerId, const dom::DOMString &pointerType) noexcept;
+
     Ref<CapturingData> EnsureCapturingDataForPointerEvent(const dom::PointerEvent &event) noexcept;
+
     KRYS_NODISCARD bool HasActiveTouch() const noexcept;
+
     KRYS_NODISCARD MouseButton ButtonForMouseEvent(const dom::MouseEvent &mouseEvent,
                                                    PointerID pointerId) const noexcept;
+
     /// @brief What dispatching a `pointermove` at an element of @p document would do to the pointer's state.
     void PointerMoveWasSkipped(CapturingData &capturingData, dom::Document &document,
                                bool isPrimary) noexcept;
+
     void PointerEventWillBeDispatched(const dom::PointerEvent &event, dom::EventTarget *target) noexcept;
+
     void PointerEventWasDispatched(const dom::PointerEvent &event) noexcept;
 
     void DispatchOverOrOutEvent(dom::DOMStringAtom type, dom::EventTarget *target,
                                 const PlatformTouchEvent &event, uint32 index, bool isPrimary,
                                 LocalFrameView *view, const DoublePoint &touchDelta) noexcept;
+
     void DispatchEnterOrLeaveEvent(dom::DOMStringAtom type, dom::Element &targetElement,
                                    const PlatformTouchEvent &event, uint32 index, bool isPrimary,
                                    LocalFrameView *view, const DoublePoint &touchDelta) noexcept;
 
     void UpdateHaveAnyCapturingElement() noexcept;
+
     void ElementWasRemovedSlow(dom::Element &element) noexcept;
   };
 }

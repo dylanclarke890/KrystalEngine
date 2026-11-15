@@ -70,7 +70,9 @@ namespace krys::boo::style
                               GridPositionSide side, bool nameIsAreaName) noexcept;
 
       KRYS_NODISCARD bool HasNamedLines() const noexcept;
+
       KRYS_NODISCARD bool HasExplicitNamedLines() const noexcept;
+
       KRYS_NODISCARD bool Contains(uint32 line) const noexcept;
 
     protected:

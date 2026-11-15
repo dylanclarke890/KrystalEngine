@@ -165,7 +165,9 @@ namespace krys::boo
 
     /// @brief Tells @p observer before each popup the page opens, until it unregisters.
     void RegisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept;
+
     void UnregisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept;
+
     /// @brief Tells the popup opening observers a popup is about to open; whoever opens one calls it first.
     void NotifyPopupOpeningObservers() const noexcept;
 
@@ -231,6 +233,7 @@ namespace krys::boo
     }
 
     void SuspendScriptedAnimations() noexcept;
+
     void ResumeScriptedAnimations() noexcept;
 
     /// @brief Resumes the paused animated images visible in the main frame's view.
@@ -292,12 +295,15 @@ namespace krys::boo
     /// @brief Asks for a rendering update at the next rendering opportunity, which runs (at least) the
     /// @p requestedSteps.
     void ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps = {}) noexcept;
+
     /// @brief Restyles every document after something their styles depend on outside the style sheets
     /// changed, and evaluates their media queries at the next rendering update.
     void UpdateStyleAfterChangeInEnvironment() noexcept;
+
     /// @brief Restyles the page's documents after what the chrome client says of the screen (its colours,
     /// depth and the like) changed, so their media queries are evaluated again.
     void ScreenPropertiesDidChange() noexcept;
+
     /// @brief How the page's filters are applied when drawn into @p context: through the graphics context
     /// (there's no software or accelerated filter rendering).
     KRYS_NODISCARD EnumSet<FilterRenderingMode>
@@ -332,6 +338,7 @@ namespace krys::boo
 
     /// @brief The rate the page is shown at when nothing tells it otherwise.
     constexpr static uint32 FullSpeedFramesPerSecond {60};
+
     /// @brief Sets the rate the host runs the page's rendering updates at (its display's refresh rate, or the
     /// rate it caps its frames to), which animations align their updates to.
     void SetDisplayNominalFramesPerSecond(uint32 framesPerSecond) noexcept;
@@ -363,14 +370,18 @@ namespace krys::boo
     /// @brief Restyles every page's documents (UpdateStyleAfterChangeInEnvironment), after a change in the
     /// environment they all share, such as the theme's colours.
     static void UpdateStyleForAllPagesAfterGlobalChangeInEnvironment() noexcept;
+
     /// @brief Calls @p functor for each document that's rendered: not render-blocked ones.
     void ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept;
 
   private:
     void RunProcessingStep(RenderingUpdateStep step,
                            const Func<void(dom::Document &)> &perDocumentFunction) noexcept;
+
     void DoAfterUpdateRendering() noexcept;
+
     void FinalizeRenderingUpdate() noexcept;
+
     void RenderingUpdateCompleted() noexcept;
   };
 }

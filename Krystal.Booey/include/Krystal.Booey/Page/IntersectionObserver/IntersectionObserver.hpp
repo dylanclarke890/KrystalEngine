@@ -158,6 +158,7 @@ namespace krys::boo
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-rootmargin
     KRYS_NODISCARD dom::DOMString RootMargin() const noexcept;
+
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-scrollmargin
     KRYS_NODISCARD dom::DOMString ScrollMargin() const noexcept;
 
@@ -191,8 +192,10 @@ namespace krys::boo
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-observe
     void Observe(dom::Element &target) noexcept;
+
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-unobserve
     void Unobserve(dom::Element &target) noexcept;
+
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-disconnect
     void Disconnect() noexcept;
 
@@ -201,6 +204,7 @@ namespace krys::boo
 
     /// @brief An observed element is being destroyed.
     void TargetDestroyed(dom::Element &target) noexcept;
+
     /// @brief The root is being destroyed.
     void RootDestroyed() noexcept;
 
@@ -212,12 +216,14 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<double> NowTimestamp() const noexcept;
 
     void AppendQueuedEntry(Ref<IntersectionObserverEntry> &&entry) noexcept;
+
     /// @brief Calls the callback with the queued entries.
     /// @see https://w3c.github.io/IntersectionObserver/#notify-intersection-observers-algo
     void Notify() noexcept;
 
   private:
     bool RemoveTargetRegistration(dom::Element &target) noexcept;
+
     void RemoveAllTargets() noexcept;
 
     KRYS_NODISCARD IntersectionObservationState ComputeIntersectionState(

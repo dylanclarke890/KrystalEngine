@@ -99,9 +99,13 @@ namespace krys::boo::html
 
   public:
     CustomElementReactionQueueItem() noexcept = default;
+
     CustomElementReactionQueueItem(CustomElementReactionQueueItem &&) noexcept;
+
     CustomElementReactionQueueItem &operator=(CustomElementReactionQueueItem &&) noexcept;
+
     CustomElementReactionQueueItem(Type type, Payload &&payload = null) noexcept;
+
     ~CustomElementReactionQueueItem() noexcept;
 
     KRYS_NODISCARD Type GetType() const noexcept
@@ -123,6 +127,7 @@ namespace krys::boo::html
 
   public:
     CustomElementQueue() noexcept = default;
+
     ~CustomElementQueue() noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
@@ -158,6 +163,7 @@ namespace krys::boo::html
 
   public:
     explicit CustomElementReactionQueue(CustomElementInterface &elementInterface) noexcept;
+
     ~CustomElementReactionQueue() noexcept;
 
     /// @see https://html.spec.whatwg.org/#enqueue-a-custom-element-upgrade-reaction
@@ -168,16 +174,23 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#enqueue-a-custom-element-callback-reaction
     static void EnqueueConnectedCallbackIfNeeded(dom::Element &element) noexcept;
+
     static void EnqueueDisconnectedCallbackIfNeeded(dom::Element &element) noexcept;
+
     static void EnqueueConnectedMoveCallbackIfNeeded(dom::Element &element) noexcept;
+
     static void EnqueueAdoptedCallbackIfNeeded(dom::Element &element, dom::Document &oldDocument,
                                                dom::Document &newDocument) noexcept;
+
     static void EnqueueAttributeChangedCallbackIfNeeded(dom::Element &element,
                                                         const dom::QualifiedName &attributeName,
                                                         dom::DOMStringAtom oldValue,
                                                         dom::DOMStringAtom newValue) noexcept;
+
     static void EnqueueFormAssociatedCallbackIfNeeded(dom::Element &element, HTMLFormElement *form) noexcept;
+
     static void EnqueueFormDisabledCallbackIfNeeded(dom::Element &element, bool isDisabled) noexcept;
+
     static void EnqueueFormResetCallbackIfNeeded(dom::Element &element) noexcept;
 
     /// @brief Enqueues the callbacks an upgrade implies: an attribute change for each observed attribute the
@@ -186,11 +199,15 @@ namespace krys::boo::html
     static void EnqueuePostUpgradeReactions(dom::Element &element) noexcept;
 
     KRYS_NODISCARD bool ObservesStyleAttribute() const noexcept;
+
     KRYS_NODISCARD bool IsElementInternalsDisabled() const noexcept;
+
     /// @brief The element's attached internals, null until `attachInternals()` is called.
     /// @see https://html.spec.whatwg.org/#attached-internals
     KRYS_NODISCARD ElementInternals *AttachedInternals() const noexcept;
+
     void SetAttachedInternals(Ref<ElementInternals> internals) noexcept;
+
     KRYS_NODISCARD bool IsFormAssociated() const noexcept;
 
     /// @brief The definition the element is defined by or is to be upgraded to.
@@ -200,6 +217,7 @@ namespace krys::boo::html
     }
 
     void InvokeAll(dom::Element &element) noexcept;
+
     void Clear() noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept

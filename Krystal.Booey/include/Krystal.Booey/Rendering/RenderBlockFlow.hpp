@@ -182,8 +182,10 @@ namespace krys::boo
   public:
     RenderBlockFlow(Type type, dom::Element &element, RenderStyle &&style,
                     EnumSet<BlockFlowFlag> flags = {}) noexcept;
+
     RenderBlockFlow(Type type, dom::Document &document, RenderStyle &&style,
                     EnumSet<BlockFlowFlag> flags = {}) noexcept;
+
     ~RenderBlockFlow() noexcept override;
 
     void LayoutBlock(RelayoutChildren relayoutChildren,
@@ -193,17 +195,24 @@ namespace krys::boo
 
     /// @brief The multi-column flow holding the block's content, if the block is a multi-column container.
     KRYS_NODISCARD RenderMultiColumnFlow *MultiColumnFlow() const noexcept;
+
     void SetMultiColumnFlow(RenderMultiColumnFlow &fragmentedFlow) noexcept;
+
     void ClearMultiColumnFlow() noexcept;
+
     /// @brief Whether the block's style makes it a multi-column container, so it needs a multi-column flow.
     KRYS_NODISCARD bool WillCreateColumns() const noexcept;
+
     /// @brief Gives the multi-column flow and column sets the block's style, which they're anonymous boxes
     /// of.
     void UpdateStylesForColumnChildren(const RenderStyle *oldStyle) noexcept;
+
     /// @brief The width of the block's columns, or of its content box when it has none.
     KRYS_NODISCARD LayoutUnit ComputedColumnWidth() const noexcept;
+
     /// @brief How many columns the block's content is split into, 1 when it has no columns.
     KRYS_NODISCARD uint32 ComputedColumnCount() const noexcept;
+
     /// @brief The used column-gap.
     KRYS_NODISCARD LayoutUnit ColumnGap() const noexcept;
 
@@ -214,13 +223,17 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit NextPageLogicalTop(
       LayoutUnit logicalOffset,
       PageBoundaryRule pageBoundaryRule = PageBoundaryRule::ExcludePageBoundary) const noexcept;
+
     KRYS_NODISCARD LayoutUnit PageLogicalTopForOffset(LayoutUnit offset) const noexcept;
+
     /// @brief The height of the column at @p offset, 0 when it isn't known or the block isn't paginated.
     KRYS_NODISCARD LayoutUnit PageLogicalHeightForOffset(LayoutUnit offset) const noexcept;
+
     /// @brief How much of the column at @p offset is left below it.
     KRYS_NODISCARD LayoutUnit PageRemainingLogicalHeightForOffset(
       LayoutUnit offset,
       PageBoundaryRule pageBoundaryRule = PageBoundaryRule::IncludePageBoundary) const noexcept;
+
     /// @brief Whether there's a column after the one at @p logicalOffset to move content to.
     KRYS_NODISCARD bool
       HasNextPage(LayoutUnit logicalOffset,
@@ -229,9 +242,11 @@ namespace krys::boo
     /// @brief Reports a column break at @p offset, where @p spaceShortage more height would have fit the
     /// content, to the column balancer.
     void SetPageBreak(LayoutUnit offset, LayoutUnit spaceShortage) noexcept;
+
     /// @brief Reports content at @p offset that needs columns at least @p minHeight tall to stay whole, to
     /// the column balancer.
     void UpdateMinimumPageHeight(LayoutUnit offset, LayoutUnit minHeight) noexcept;
+
     /// @brief Reports how much more height a size-contained @p child at @p offset needs, to the column
     /// balancer.
     void AdjustSizeContainmentChildForPagination(RenderBox &child, LayoutUnit offset) noexcept;
@@ -251,7 +266,9 @@ namespace krys::boo
     }
 
     void SetBreakAtLineToAvoidWidow(int32 lineToBreak) noexcept;
+
     void ClearDidBreakAtLineToAvoidWidow() noexcept;
+
     void SetDidBreakAtLineToAvoidWidow() noexcept;
 
     KRYS_NODISCARD bool DidBreakAtLineToAvoidWidow() const noexcept
@@ -273,10 +290,13 @@ namespace krys::boo
                                          LayoutUnit deltaOffset, LayoutUnit floatMinimumBottom = {}) noexcept;
 
     KRYS_NODISCARD bool HasContentfulInlineOrBlockLine() const noexcept;
+
     KRYS_NODISCARD bool HasContentfulInlineLine() const noexcept;
+
     KRYS_NODISCARD bool HasBlocksInInlineLayout() const noexcept;
 
     void InvalidateLineLayout(InvalidationReason invalidationReason) noexcept;
+
     void ComputeAndSetLineLayoutPath() noexcept;
 
     KRYS_NODISCARD LineLayoutPath GetLineLayoutPath() const noexcept
@@ -373,11 +393,13 @@ namespace krys::boo
       explicit MarginInfo(const RenderBlockFlow &block,
                           IgnoreScrollbarForAfterMargin ignoreScrollbarForAfterMargin =
                             IgnoreScrollbarForAfterMargin::Yes) noexcept;
+
       MarginInfo(bool canCollapseWithChildren, bool canCollapseMarginBeforeWithChildren,
                  bool canCollapseMarginAfterWithChildren, bool quirkContainer, bool atBeforeSideOfBlock,
                  bool atAfterSideOfBlock, bool hasMarginBeforeQuirk, bool hasMarginAfterQuirk,
                  bool determinedMarginBeforeQuirk, LayoutUnit positiveMargin,
                  LayoutUnit negativeMargin) noexcept;
+
       MarginInfo() noexcept = default;
 
       void SetAtBeforeSideOfBlock(bool atBeforeSideOfBlock) noexcept
@@ -538,20 +560,26 @@ namespace krys::boo
     void TrimBlockEndChildrenMargins() noexcept;
 
     void SetStaticInlinePositionForChild(RenderBox &child, LayoutUnit inlinePosition) noexcept;
+
     void UpdateStaticInlinePositionForChild(RenderBox &child, LayoutUnit logicalTop) noexcept;
 
     KRYS_NODISCARD LayoutUnit StaticInlinePositionForOriginalDisplayInline(LayoutUnit logicalTop) noexcept;
 
     LayoutUnit CollapseMargins(RenderBox &child, MarginInfo &marginInfo) noexcept;
+
     LayoutUnit CollapseMarginsWithChildInfo(RenderBox *child, MarginInfo &marginInfo) noexcept;
 
     LayoutUnit ClearFloatsIfNeeded(RenderBox &child, MarginInfo &marginInfo, LayoutUnit oldTopPosMargin,
                                    LayoutUnit oldTopNegMargin, LayoutUnit yPos) noexcept;
+
     KRYS_NODISCARD LayoutUnit EstimateLogicalTopPosition(RenderBox &child, const MarginInfo &marginInfo,
                                                          LayoutUnit &estimateWithoutPagination) noexcept;
+
     void MarginBeforeEstimateForChild(RenderBox &child, LayoutUnit &positiveMarginBefore,
                                       LayoutUnit &negativeMarginBefore) const noexcept;
+
     LayoutUnit HandleAfterSideOfBlock(MarginInfo &marginInfo, LayoutUnit contentBoxLogicalHeight) noexcept;
+
     void SetCollapsedBottomMargin(const MarginInfo &marginInfo) noexcept;
 
     KRYS_NODISCARD bool ChildrenPreventSelfCollapsing() const noexcept final;
@@ -564,15 +592,19 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool ContainsFloat(const RenderBox &renderer) const noexcept;
+
     KRYS_NODISCARD bool SubtreeContainsFloats() const noexcept;
+
     KRYS_NODISCARD bool SubtreeContainsFloat(const RenderBox &renderer) const noexcept;
 
     KRYS_NODISCARD LayoutUnit LowestFloatLogicalBottom(
       FloatingObject::Type floatType = FloatingObject::FloatLeftRight) const noexcept;
 
     void RemoveFloatingObjects() noexcept;
+
     void MarkAllDescendantsWithFloatsForLayout(RenderBox *floatToRemove = nullptr,
                                                bool inLayout = true) noexcept;
+
     void MarkSiblingsWithFloatsForLayout(RenderBox *floatToRemove = nullptr) noexcept;
 
     KRYS_NODISCARD const FloatingObjectSet *GetFloatingObjectSet() const noexcept
@@ -699,17 +731,22 @@ namespace krys::boo
     }
 
     RenderBlockFlowRareData &EnsureRareBlockFlowData() noexcept;
+
     void MaterializeRareBlockFlowData() noexcept;
 
   protected:
     void WillBeDestroyed() noexcept override;
 
     void PaintFloats(PaintInfo &, const LayoutPoint &, bool preservePhase = false) noexcept override;
+
     void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void PaintColumnRules(PaintInfo &, const LayoutPoint &) noexcept override;
+
     bool HitTestFloats(const HitTestRequest &request, HitTestResult &result,
                        const HitTestLocation &locationInContainer,
                        const LayoutPoint &accumulatedOffset) noexcept override;
+
     bool HitTestInlineChildren(const HitTestRequest &request, HitTestResult &result,
                                const HitTestLocation &locationInContainer,
                                const LayoutPoint &accumulatedOffset,
@@ -735,6 +772,7 @@ namespace krys::boo
     void ClipOutFloatingBoxes(RenderBlock &rootBlock, const PaintInfo *paintInfo,
                               const LayoutPoint &rootBlockPhysicalPosition,
                               const LayoutSize &offsetFromRootBlock) noexcept override;
+
     GapRects InlineSelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
                                  const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
                                  LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
@@ -758,11 +796,14 @@ namespace krys::boo
     void LayoutInFlowChildren(RelayoutChildren relayoutChildren, LayoutUnit previousHeight,
                               LayoutUnit &repaintLogicalTop, LayoutUnit &repaintLogicalBottom,
                               LayoutUnit &maxFloatLogicalBottom) noexcept;
+
     void LayoutBlockChildren(RelayoutChildren relayoutChildren, LayoutUnit &maxFloatLogicalBottom) noexcept;
+
     void LayoutInlineChildren(RelayoutChildren relayoutChildren, LayoutUnit previousHeight,
                               LayoutUnit &repaintLogicalTop, LayoutUnit &repaintLogicalBottom) noexcept;
 
     void SimplifiedNormalFlowLayout() noexcept override;
+
     LayoutUnit ShiftForAlignContent(LayoutUnit intrinsicLogicalHeight, LayoutUnit &repaintLogicalTop,
                                     LayoutUnit &repaintLogicalBottom) noexcept;
 
@@ -794,17 +835,21 @@ namespace krys::boo
     /// @p minimumLogicalHeight tall, and whether there is one.
     bool PushToNextPageWithMinimumLogicalHeight(LayoutUnit &adjustment, LayoutUnit logicalOffset,
                                                 LayoutUnit minimumLogicalHeight) const noexcept;
+
     /// @brief The top of the next column when @p child is unsplittable and doesn't fit in the rest of the
     /// column at @p logicalOffset, otherwise @p logicalOffset.
     LayoutUnit AdjustForUnsplittableChild(RenderBox &child, LayoutUnit logicalOffset,
                                           LayoutUnit beforeMargin = 0_lu,
                                           LayoutUnit afterMargin = 0_lu) noexcept;
+
     LayoutUnit AdjustBlockChildForPagination(LayoutUnit logicalTopAfterClear,
                                              LayoutUnit estimateWithoutPagination, RenderBox &child,
                                              bool atBeforeSideOfBlock) noexcept;
+
     /// @brief The top of the next column when @p child has a column break before it, otherwise
     /// @p logicalOffset.
     LayoutUnit ApplyBeforeBreak(RenderBox &child, LayoutUnit logicalOffset) noexcept;
+
     /// @brief The top of the next column when @p child has a column break after it, otherwise
     /// @p logicalOffset.
     LayoutUnit ApplyAfterBreak(RenderBox &child, LayoutUnit logicalOffset, MarginInfo &marginInfo) noexcept;
@@ -849,9 +894,11 @@ namespace krys::boo
     }
 
     void SetMaxMarginBeforeValues(LayoutUnit pos, LayoutUnit neg) noexcept;
+
     void SetMaxMarginAfterValues(LayoutUnit pos, LayoutUnit neg) noexcept;
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
+
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
 
     void ComputeOverflow(LayoutUnit oldClientAfterEdge,
@@ -861,23 +908,30 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit LogicalRightFloatOffsetForLine(
       LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const noexcept override;
+
     KRYS_NODISCARD LayoutUnit LogicalLeftFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset,
                                                             LayoutUnit logicalHeight) const noexcept override;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override;
+
     KRYS_NODISCARD Maybe<LayoutUnit> LastLineBaseline() const noexcept override;
 
     KRYS_NODISCARD LayoutOptionalOutsets AllowedLayoutOverflow() const noexcept override;
 
   private:
     bool RecomputeLogicalWidthAndColumnWidth() noexcept;
+
     void AdjustIntrinsicLogicalWidthsForColumns(LayoutUnit &minLogicalWidth,
                                                 LayoutUnit &maxLogicalWidth) const noexcept;
+
     void ComputeColumnCountAndWidth() noexcept;
+
     void SetComputedColumnCountAndWidth(uint32 count, LayoutUnit width) noexcept;
+
     void CheckForPaginationLogicalHeightChange(RelayoutChildren &relayoutChildren,
                                                LayoutUnit &pageLogicalHeight,
                                                bool &pageLogicalHeightChanged) noexcept;
+
     /// @brief Balances the columns, laying the block out again until their heights settle, and whether it
     /// did.
     bool RelayoutForPagination() noexcept;
@@ -890,47 +944,63 @@ namespace krys::boo
 
     void LayoutInlineContent(RelayoutChildren relayoutChildren, LayoutUnit previousHeight,
                              LayoutUnit &repaintLogicalTop, LayoutUnit &repaintLogicalBottom) noexcept;
+
     InlineContentStatus MarkInlineContentDirtyForLayout(RelayoutChildren relayoutChildren) noexcept;
+
     bool LayoutSimpleBlockContentInInline(MarginInfo &marginInfo) noexcept;
+
     void UpdateRepaintTopAndBottomAfterLayout(RelayoutChildren relayoutChildren,
                                               Maybe<LayoutRect> partialRepaintRect,
                                               Pair<float, float> oldContentTopAndBottomIncludingInkOverflow,
                                               LayoutUnit &repaintLogicalTop,
                                               LayoutUnit &repaintLogicalBottom) noexcept;
+
     bool TryComputePreferredWidthsUsingInlinePath(LayoutUnit &minLogicalWidth,
                                                   LayoutUnit &maxLogicalWidth) noexcept;
+
     void ComputeInlinePreferredLogicalWidths(LayoutUnit &minLogicalWidth,
                                              LayoutUnit &maxLogicalWidth) const noexcept;
+
     void SetStaticPositionsForSimpleOutOfFlowContent() noexcept;
+
     KRYS_NODISCARD Pair<float, float> InlineContentTopAndBottomIncludingInkOverflow() const noexcept;
 
     KRYS_NODISCARD RenderBlockFlow *
       PreviousSiblingWithOverhangingFloats(bool &parentHasFloats) const noexcept;
 
     void InsertFloatingBoxAndMarkForLayout(RenderBox &floatBox) noexcept;
+
     void RemoveFloatingBox(RenderBox &floatBox) noexcept;
+
     void ComputeLogicalLocationForFloat(FloatingObject &floatingObject,
                                         LayoutUnit &logicalTopOffset) noexcept;
+
     void AdjustInitialLetterPosition(RenderBox &childBox, LayoutUnit &logicalTopOffset,
                                      LayoutUnit &marginBeforeOffset) noexcept;
 
     // Called from lineWidth, to position the floats added in the last line.
     // Returns true if and only if it has positioned any floats.
     bool PositionNewFloats() noexcept;
+
     void ClearFloats(UsedClear usedClear) noexcept;
 
     KRYS_NODISCARD LayoutUnit LogicalRightOffsetForPositioningFloat(
       LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit *heightRemaining) const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalLeftOffsetForPositioningFloat(
       LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit *heightRemaining) const noexcept;
 
     KRYS_NODISCARD LayoutUnit NextFloatLogicalBottomBelow(LayoutUnit logicalHeight) const noexcept;
+
     KRYS_NODISCARD LayoutUnit NextFloatLogicalBottomBelowForBlock(LayoutUnit logicalHeight) const noexcept;
 
     LayoutUnit AddOverhangingFloats(RenderBlockFlow &child, bool makeChildPaintOtherFloats) noexcept;
+
     KRYS_NODISCARD bool HasOverhangingFloat(RenderBox &renderer) const noexcept;
+
     void AddIntrudingFloats(RenderBlockFlow *previousBlock, RenderBlockFlow *container,
                             LayoutUnit logicalLeftOffset, LayoutUnit logicalTopOffset) noexcept;
+
     void RepaintOverhangingFloats(bool paintAllDescendants) noexcept final;
 
     KRYS_NODISCARD bool HasOverhangingFloats() const noexcept

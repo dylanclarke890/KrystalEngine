@@ -79,6 +79,7 @@ namespace krys::boo
 
   private:
     StyleBoxData() noexcept;
+
     StyleBoxData(const StyleBoxData &) noexcept;
   };
 }

@@ -58,6 +58,7 @@ namespace krys::boo::html
   private:
     KRYS_NODISCARD Maybe<DateComponents>
       ParseToDateComponents(dom::DOMStringView source) const noexcept final;
+
     KRYS_NODISCARD Maybe<DateComponents> SetMillisecondToDateComponents(double value) const noexcept final;
 
     // DateTimeEditElementEditControlOwner functions:
@@ -67,6 +68,7 @@ namespace krys::boo::html
     // BaseDateAndTimeInputType functions:
     void SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,
                                const DateComponents &date) const noexcept final;
+
     KRYS_NODISCARD bool IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept final;
   };
 }

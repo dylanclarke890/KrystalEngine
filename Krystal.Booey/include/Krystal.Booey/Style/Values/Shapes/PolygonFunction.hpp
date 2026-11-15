@@ -78,6 +78,7 @@ namespace krys::boo::style
   struct Blending<Polygon>
   {
     KRYS_NODISCARD bool CanBlend(const Polygon &, const Polygon &) noexcept;
+
     KRYS_NODISCARD Polygon Blend(const Polygon &, const Polygon &, const BlendingContext &) noexcept;
   };
 }

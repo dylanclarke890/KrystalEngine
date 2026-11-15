@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     SelectionData() noexcept = default;
+
     SelectionData(utf8_stringview text, utf8_stringview markup, const url::URL &url, utf8_stringview uriList,
                   RefPtr<SharedBuffer> &&customData, bool canSmartReplace) noexcept;
 
@@ -187,6 +188,7 @@ namespace krys::boo
     }
 
     void ClearAll() noexcept;
+
     void ClearAllExceptFilenames() noexcept;
   };
 }

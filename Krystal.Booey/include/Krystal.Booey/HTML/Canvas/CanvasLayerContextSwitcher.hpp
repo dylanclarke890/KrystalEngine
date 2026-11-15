@@ -58,6 +58,7 @@ namespace krys::boo::html
     /// draw.
     KRYS_NODISCARD static RefPtr<CanvasLayerContextSwitcher>
       Create(CanvasRenderingContext2DBase &, const FloatRect &bounds, RefPtr<Filter> &&) noexcept;
+
     ~CanvasLayerContextSwitcher() noexcept;
 
     /// @brief Where the context draws while the switcher is in place.

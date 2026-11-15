@@ -116,7 +116,9 @@ namespace krys::boo
     }
 
     bool PrepareToDecode() noexcept;
+
     bool OutputRow() noexcept;
+
     bool DoLZW(Span<const uint8> block) noexcept;
 
     KRYS_NODISCARD bool HasRemainingRows() const noexcept
@@ -293,6 +295,7 @@ namespace krys::boo
 
   private:
     bool Parse(size_t dataPosition, size_t len, bool parseSizeOnly) noexcept;
+
     void SetRemainingBytes(size_t remainingBytes) noexcept;
 
     KRYS_NODISCARD Span<const uint8> Data(size_t offset, size_t length) const noexcept

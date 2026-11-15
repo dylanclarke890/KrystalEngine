@@ -49,7 +49,9 @@ namespace krys::boo::css
   }
 
   DynamicRangeLimit::DynamicRangeLimit(DynamicRangeLimit &&) noexcept = default;
+
   DynamicRangeLimit &DynamicRangeLimit::operator=(DynamicRangeLimit &&) noexcept = default;
+
   DynamicRangeLimit::~DynamicRangeLimit() noexcept = default;
 
   bool DynamicRangeLimit::operator==(const DynamicRangeLimit &) const noexcept = default;

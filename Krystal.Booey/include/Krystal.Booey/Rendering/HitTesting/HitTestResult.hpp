@@ -92,10 +92,15 @@ namespace krys::boo
     }
 
     HitTestResult() noexcept;
+
     explicit HitTestResult(const LayoutPoint &point) noexcept;
+
     explicit HitTestResult(const LayoutRect &rect) noexcept;
+
     explicit HitTestResult(const HitTestLocation &location) noexcept;
+
     HitTestResult(const HitTestResult &other) noexcept;
+
     ~HitTestResult() noexcept;
 
     HitTestResult &operator=(const HitTestResult &other) noexcept;
@@ -190,18 +195,25 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LocalFrame *Frame() const noexcept;
+
     KRYS_NODISCARD bool IsOverLink() const noexcept;
 
     /// @brief Whether the hit-tested point is in its frame's selection.
     KRYS_NODISCARD bool IsSelected() const noexcept;
+
     /// @brief The `alt` text of the image or image input hit.
     KRYS_NODISCARD utf8_string AltDisplayString() const noexcept;
+
     /// @brief The image hit, if it has loaded.
     KRYS_NODISCARD Image *GetImage() const noexcept;
+
     /// @brief The box of the image hit, in absolute coordinates.
     KRYS_NODISCARD IntRect ImageRect() const noexcept;
+
     KRYS_NODISCARD url::URL AbsoluteImageURL() const noexcept;
+
     KRYS_NODISCARD url::URL AbsoluteLinkURL() const noexcept;
+
     /// @brief The text of the link hit.
     KRYS_NODISCARD utf8_string TextContent() const noexcept;
 
@@ -211,9 +223,11 @@ namespace krys::boo
     HitTestProgress AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
                                                  const HitTestLocation &locationInContainer,
                                                  const LayoutRect &rect = LayoutRect()) noexcept;
+
     HitTestProgress AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
                                                  const HitTestLocation &locationInContainer,
                                                  const FloatRect &rect) noexcept;
+
     /// @brief Takes @p other's inner node if there's none yet, and adds its list of nodes.
     void Append(const HitTestResult &other, const HitTestRequest &request) noexcept;
 

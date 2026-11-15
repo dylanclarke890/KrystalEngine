@@ -55,6 +55,7 @@ namespace krys::boo::html
     KRYS_NODISCARD ValidityState Validity() noexcept;
 
     KRYS_NODISCARD virtual bool IsValidatedFormListedElement() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool IsEnumeratable() const noexcept = 0;
 
     /// @brief The `name` attribute's value, or the empty string if there isn't one (the `name` IDL attribute
@@ -70,7 +71,9 @@ namespace krys::boo::html
     }
 
     void FormWillBeDestroyed() noexcept override;
+
     void ResetFormOwner() noexcept final;
+
     void FormOwnerRemovedFromTree(const dom::Node &formRoot) noexcept;
 
     // The ValidityState attributes. The implementations of patternMismatch, rangeOverflow, rangeUnderflow,
@@ -81,14 +84,23 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD virtual bool CustomError() const noexcept;
+
     KRYS_NODISCARD virtual bool HasBadInput() const noexcept;
+
     KRYS_NODISCARD virtual bool PatternMismatch() const noexcept;
+
     KRYS_NODISCARD virtual bool RangeOverflow() const noexcept;
+
     KRYS_NODISCARD virtual bool RangeUnderflow() const noexcept;
+
     KRYS_NODISCARD virtual bool StepMismatch() const noexcept;
+
     KRYS_NODISCARD virtual bool TooShort() const noexcept;
+
     KRYS_NODISCARD virtual bool TooLong() const noexcept;
+
     KRYS_NODISCARD virtual bool TypeMismatch() const noexcept;
+
     KRYS_NODISCARD virtual bool ValueMissing() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-cva-validationmessage
@@ -102,6 +114,7 @@ namespace krys::boo::html
     void FormAttributeTargetChanged() noexcept;
 
     KRYS_NODISCARD virtual FormListedElement *AsFormListedElement() noexcept = 0;
+
     KRYS_NODISCARD virtual ValidatedFormListedElement *AsValidatedFormListedElement() noexcept = 0;
 
     /// @brief Whether the element is a candidate for constraint validation.
@@ -120,13 +133,18 @@ namespace krys::boo::html
     }
 
     void DidMoveToNewDocument() noexcept;
+
     void ElementInsertedIntoAncestor(dom::Element &element, bool connectedToDocument) noexcept override;
+
     void ElementRemovedFromAncestor(dom::Element &element, bool disconnectedFromDocument) noexcept override;
+
     void ParseAttribute(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> value) noexcept;
+
     void ParseFormAttribute(Maybe<dom::DOMStringView> value) noexcept;
 
     // A class that overrides WillChangeForm() or DidChangeForm() must clear its form in its destructor.
     virtual void WillChangeForm() noexcept;
+
     virtual void DidChangeForm() noexcept;
 
     KRYS_NODISCARD dom::DOMString CustomValidationMessage() const noexcept;

@@ -40,11 +40,13 @@ namespace krys::boo::svg
 
     static bool ParseAndReplaceTransform(SVGTransformValue::SVGTransformType, dom::DOMStringView &buffer,
                                          SVGTransform &) noexcept;
+
     KRYS_NODISCARD static RefPtr<SVGTransform> ParseTransform(SVGTransformValue::SVGTransformType,
                                                               dom::DOMStringView &buffer) noexcept;
 
     KRYS_NODISCARD static Maybe<SVGTransformValue::SVGTransformType>
       ParseTransformTypeFromString(dom::DOMStringView) noexcept;
+
     KRYS_NODISCARD static Maybe<SVGTransformValue::SVGTransformType>
       ParseTransformType(dom::DOMStringView &buffer) noexcept;
 

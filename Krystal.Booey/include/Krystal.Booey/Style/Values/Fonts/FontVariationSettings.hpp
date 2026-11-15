@@ -96,6 +96,7 @@ namespace krys::boo::style
   struct Blending<FontVariationSettings>
   {
     KRYS_NODISCARD bool CanBlend(const FontVariationSettings &, const FontVariationSettings &) noexcept;
+
     KRYS_NODISCARD FontVariationSettings Blend(const FontVariationSettings &, const FontVariationSettings &,
                                                const BlendingContext &) noexcept;
   };

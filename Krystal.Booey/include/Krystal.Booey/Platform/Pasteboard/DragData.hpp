@@ -129,16 +129,25 @@ namespace krys::boo
 
     KRYS_NODISCARD bool
       ContainsURL(FilenameConversionPolicy filenamePolicy = ConvertFilenames) const noexcept;
+
     KRYS_NODISCARD bool ContainsPlainText() const noexcept;
+
     KRYS_NODISCARD bool
       ContainsCompatibleContent(DraggingPurpose purpose = DraggingPurpose::ForEditing) const noexcept;
+
     KRYS_NODISCARD utf8_string AsURL(FilenameConversionPolicy filenamePolicy = ConvertFilenames,
                                      utf8_string *title = nullptr) const noexcept;
+
     KRYS_NODISCARD utf8_string AsPlainText() const noexcept;
+
     KRYS_NODISCARD List<utf8_string> AsFilenames() const noexcept;
+
     KRYS_NODISCARD bool CanSmartReplace() const noexcept;
+
     KRYS_NODISCARD bool ContainsColor() const noexcept;
+
     KRYS_NODISCARD bool ContainsFiles() const noexcept;
+
     KRYS_NODISCARD uint32 NumberOfFiles() const noexcept;
 
     KRYS_NODISCARD EnumSet<DragDestinationAction> DragDestinationActionMask() const noexcept

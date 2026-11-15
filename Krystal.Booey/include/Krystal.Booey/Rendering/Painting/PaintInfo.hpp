@@ -34,8 +34,8 @@
 
 namespace krys::boo
 {
-  class RenderLayer;
   class RenderInline;
+  class RenderLayer;
   class RenderLayerModelObject;
   class RenderObject;
 

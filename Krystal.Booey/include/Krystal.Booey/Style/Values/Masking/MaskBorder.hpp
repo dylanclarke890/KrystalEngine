@@ -46,6 +46,7 @@ namespace krys::boo::style
     MaskBorderRepeat Repeat;
 
     MaskBorder() noexcept;
+
     MaskBorder(MaskBorderSource &&, MaskBorderSlice &&, MaskBorderWidth &&, MaskBorderOutset &&,
                MaskBorderRepeat &&) noexcept;
 

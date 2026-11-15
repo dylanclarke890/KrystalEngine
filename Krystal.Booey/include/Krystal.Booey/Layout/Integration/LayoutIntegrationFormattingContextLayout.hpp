@@ -52,6 +52,7 @@ namespace krys::boo::layout_integration
     MaxContent,
     MinContent,
   };
+
   KRYS_NODISCARD LayoutUnit FormattingContextRootLogicalWidthForType(
     const layout::ElementBox &box, LogicalWidthType logicalWidthType) noexcept;
 
@@ -59,6 +60,7 @@ namespace krys::boo::layout_integration
   {
     MinContent,
   };
+
   KRYS_NODISCARD LayoutUnit FormattingContextRootLogicalHeightForType(
     const layout::ElementBox &box, LogicalHeightType logicalHeightType) noexcept;
 

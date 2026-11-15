@@ -68,7 +68,9 @@ namespace krys::boo
     };
 
     KRYS_NODISCARD static GridSpan UntranslatedDefiniteGridSpan(int startLine, int endLine) noexcept;
+
     KRYS_NODISCARD static GridSpan TranslatedDefiniteGridSpan(unsigned startLine, unsigned endLine) noexcept;
+
     KRYS_NODISCARD static GridSpan IndefiniteGridSpan() noexcept;
 
     KRYS_NODISCARD static GridSpan MasonryAxisTranslatedDefiniteGridSpan() noexcept;
@@ -78,15 +80,19 @@ namespace krys::boo
     KRYS_NODISCARD unsigned IntegerSpan() const noexcept;
 
     KRYS_NODISCARD int UntranslatedStartLine() const noexcept;
+
     KRYS_NODISCARD int UntranslatedEndLine() const noexcept;
 
     KRYS_NODISCARD unsigned StartLine() const noexcept;
+
     KRYS_NODISCARD unsigned EndLine() const noexcept;
 
     KRYS_NODISCARD GridSpanIterator begin() const noexcept;
+
     KRYS_NODISCARD GridSpanIterator end() const noexcept;
 
     KRYS_NODISCARD bool IsTranslatedDefinite() const noexcept;
+
     KRYS_NODISCARD bool IsIndefinite() const noexcept;
 
     void Translate(unsigned offset) noexcept;

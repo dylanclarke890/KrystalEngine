@@ -78,13 +78,17 @@ namespace krys::boo::style
 
   public:
     explicit CustomPropertyRegistry(Scope &) noexcept;
+
     ~CustomPropertyRegistry() noexcept;
 
     KRYS_NODISCARD const css::RegisteredCustomProperty *Get(const css::CSSOMStringAtom &) const noexcept;
+
     KRYS_NODISCARD bool IsInherited(const css::CSSOMStringAtom &) const noexcept;
 
     bool RegisterFromAPI(css::RegisteredCustomProperty &&) noexcept;
+
     void RegisterFromStylesheet(const css::PropertyRule::Descriptor &) noexcept;
+
     void ClearRegisteredFromStylesheets() noexcept;
 
     KRYS_NODISCARD const RenderStyle &InitialValuePrototypeStyle() const noexcept;
@@ -98,6 +102,7 @@ namespace krys::boo::style
 
   private:
     void Invalidate(const css::CSSOMStringAtom &) noexcept;
+
     void NotifyAnimationsOfCustomPropertyRegistration(const css::CSSOMStringAtom &) noexcept;
   };
 }

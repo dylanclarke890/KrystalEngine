@@ -59,7 +59,9 @@ namespace krys::boo::html
     void SetPositionFromValue() noexcept;
 
     void DragFrom(const LayoutPoint &) noexcept;
+
     KRYS_NODISCARD HTMLInputElement *HostInput() const noexcept;
+
     void SetPositionFromPoint(const LayoutPoint &) noexcept;
 
     void HostDisabledStateChanged() noexcept;
@@ -70,15 +72,19 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final;
+
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept final;
+
     void DefaultEventHandler(dom::Event &) noexcept final;
 
   private:
     void WillDetachRenderers() noexcept final;
+
     KRYS_NODISCARD Maybe<style::UnadjustedStyle> ResolveCustomStyle(const style::ResolutionContext &,
                                                                     const RenderStyle *) noexcept final;
 
     void StartDragging() noexcept;
+
     void StopDragging() noexcept;
   };
 
@@ -114,11 +120,13 @@ namespace krys::boo::html
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
+
     void OnAdopt(dom::Document &oldDocument) noexcept final;
 
     /// @brief Moves the thumb to a single touch as it starts, and with the touch's moves along the slider,
     /// as Chrome does; a touch that first moves across the slider is left to pan.
     void HandleTouchEvent(dom::TouchEvent &) noexcept;
+
     /// @brief Whether the touch's moves so far are along the slider.
     KRYS_NODISCARD bool CanSlide() const noexcept;
   };

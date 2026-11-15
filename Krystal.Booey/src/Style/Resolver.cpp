@@ -109,6 +109,7 @@ namespace krys::boo::style
     }
 
     State(State &&) noexcept = default;
+
     State &operator=(State &&) noexcept = default;
 
     KRYS_NODISCARD const dom::Element *Element() const noexcept

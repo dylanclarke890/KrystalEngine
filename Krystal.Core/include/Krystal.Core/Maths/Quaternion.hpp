@@ -104,7 +104,9 @@ namespace krys
 
   public:
     constexpr Quaternion(const Quaternion<T> &other) noexcept = default;
+
     constexpr Quaternion<T> &operator=(const Quaternion<T> &other) noexcept = default;
+
     constexpr ~Quaternion() noexcept = default;
 
     constexpr auto operator<=>(const Quaternion<T> &other) const noexcept = default;

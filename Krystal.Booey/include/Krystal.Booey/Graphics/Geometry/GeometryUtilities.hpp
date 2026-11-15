@@ -40,6 +40,7 @@ namespace krys::boo
   class FloatQuad;
 
   KRYS_NODISCARD float EuclidianDistance(const FloatSize &delta) noexcept;
+
   KRYS_NODISCARD float EuclidianDistance(const FloatPoint &p1, const FloatPoint &p2) noexcept;
 
   // Find point where lines through the two pairs of points intersect. Returns false if the lines don't
@@ -48,8 +49,11 @@ namespace krys::boo
                                        const FloatPoint &d2, FloatPoint &intersection) noexcept;
 
   KRYS_NODISCARD IntRect UnionRect(Span<const IntRect> rects) noexcept;
+
   KRYS_NODISCARD IntRect UnionRectIgnoringZeroRects(Span<const IntRect> rects) noexcept;
+
   KRYS_NODISCARD FloatRect UnionRect(Span<const FloatRect> rects) noexcept;
+
   KRYS_NODISCARD FloatRect UnionRectIgnoringZeroRects(Span<const FloatRect> rects) noexcept;
 
   // Map point from srcRect to an equivalent point in destRect.
@@ -62,6 +66,7 @@ namespace krys::boo
 
   KRYS_NODISCARD FloatRect LargestRectWithAspectRatioInsideRect(float aspectRatio,
                                                                 const FloatRect &srcRect) noexcept;
+
   KRYS_NODISCARD FloatRect SmallestRectWithAspectRatioAroundRect(float aspectRatio,
                                                                  const FloatRect &srcRect) noexcept;
 
@@ -108,8 +113,11 @@ namespace krys::boo
                                                                 const FloatPoint &position) noexcept;
 
   KRYS_NODISCARD float DistanceToClosestSide(FloatPoint p, FloatSize size) noexcept;
+
   KRYS_NODISCARD float DistanceToFarthestSide(FloatPoint p, FloatSize size) noexcept;
+
   KRYS_NODISCARD float DistanceToClosestCorner(FloatPoint p, FloatSize size) noexcept;
+
   KRYS_NODISCARD float DistanceToFarthestCorner(FloatPoint p, FloatSize size) noexcept;
 
   // Given a box and an offset from the top left corner, construct a coordinate system with this offset as the
@@ -118,7 +126,9 @@ namespace krys::boo
                                                      const FloatPoint position) noexcept;
 
   KRYS_NODISCARD float ToPositiveAngle(float angle) noexcept;
+
   KRYS_NODISCARD float ToRelatedAcuteAngle(float angle) noexcept;
+
   KRYS_NODISCARD float NormaliseAngleInRadians(float radians) noexcept;
 
   KRYS_NODISCARD FloatRect ScaledRectAtOrigin(const FloatRect &rect, float scale,

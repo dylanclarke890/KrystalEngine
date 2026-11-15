@@ -51,6 +51,7 @@ namespace krys::boo
 
   public:
     RenderLineBoxList() noexcept = default;
+
     ~RenderLineBoxList() noexcept;
 
     KRYS_NODISCARD LegacyInlineFlowBox *FirstLegacyLineBox() const noexcept
@@ -66,12 +67,15 @@ namespace krys::boo
     void AppendLineBox(UniquePtr<LegacyInlineFlowBox>) noexcept;
 
     void DeleteLineBoxTree() noexcept;
+
     void DeleteLineBoxes() noexcept;
 
     void RemoveLineBox(LegacyInlineFlowBox *) noexcept;
 
     void DirtyLineBoxes() noexcept;
+
     void DirtyLineFromChangedChild(RenderBoxModelObject &parent) noexcept;
+
     void ShiftLinesBy(LayoutUnit shiftX, LayoutUnit shiftY) noexcept;
   };
 }

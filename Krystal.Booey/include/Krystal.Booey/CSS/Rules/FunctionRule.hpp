@@ -49,6 +49,7 @@ namespace krys::boo::css
 
     FunctionRule(const CSSOMStringAtom &name, List<Parameter> &&parameters, CustomPropertySyntax &&returnType,
                  List<Ref<Rule>> &&rules) noexcept;
+
     FunctionRule(const FunctionRule &other) noexcept;
 
   public:
@@ -81,6 +82,7 @@ namespace krys::boo::css
     Ref<StyleProperties> _properties;
 
     explicit FunctionDeclarationsRule(Ref<StyleProperties> &&properties) noexcept;
+
     FunctionDeclarationsRule(const FunctionDeclarationsRule &other) noexcept;
 
   public:

@@ -46,8 +46,8 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   enum class ParserMode : uint8;
-  class TokenRange;
   class PrimitiveValue;
+  class TokenRange;
   class Value;
   class ValueList;
 

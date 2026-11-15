@@ -41,12 +41,12 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  struct BorderValue;
+  enum class CollapsedBorderSide : uint8;
   class RenderTable;
   class RenderTableCol;
   class RenderTableRow;
   class RenderTableSection;
-  enum class CollapsedBorderSide : uint8;
-  struct BorderValue;
 
   enum class IncludeBorderColor : bool
   {
@@ -84,7 +84,9 @@ namespace krys::boo
 
   public:
     RenderTableCell(dom::Element &element, RenderStyle &&style) noexcept;
+
     RenderTableCell(dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderTableCell() noexcept override;
 
     KRYS_NODISCARD uint32 ColSpan() const noexcept
@@ -124,10 +126,13 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderTableCell *NextCell() const noexcept;
+
     KRYS_NODISCARD RenderTableCell *PreviousCell() const noexcept;
 
     KRYS_NODISCARD RenderTableRow *Row() const noexcept;
+
     KRYS_NODISCARD RenderTableSection *Section() const noexcept;
+
     KRYS_NODISCARD RenderTable *Table() const noexcept;
 
     KRYS_NODISCARD uint32 RowIndex() const noexcept;
@@ -137,18 +142,27 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit LogicalHeightForRowSizing() const noexcept;
 
     KRYS_NODISCARD LayoutUnit MinLogicalWidthForColumnSizing() noexcept;
+
     KRYS_NODISCARD LayoutUnit MaxLogicalWidthForColumnSizing() noexcept;
 
     void SetCellLogicalWidth(LayoutUnit logicalWidthInTableDirection) noexcept;
 
     KRYS_NODISCARD RectEdges<LayoutUnit> BorderWidths() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderLeft() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderRight() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderTop() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderBottom() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderStart() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderEnd() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderBefore() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit BorderAfter() const noexcept override;
 
     KRYS_NODISCARD LayoutSize
@@ -158,6 +172,7 @@ namespace krys::boo
     void Layout() noexcept override;
 
     KRYS_NODISCARD LayoutUnit CellBaselinePosition() const noexcept;
+
     KRYS_NODISCARD bool IsBaselineAligned() const noexcept;
 
     bool ComputeIntrinsicPadding(LayoutUnit heightConstraint) noexcept;
@@ -178,15 +193,20 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RectEdges<LayoutUnit> Padding() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingTop() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingBottom() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingLeft() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingRight() const noexcept override;
 
     // FIXME: For now we just assume the cell has the same block flow direction as the table. It's likely
     // we'll create an extra anonymous RenderBlock to handle mixing directionality anyway, in which case we
     // can lock the block flow directionality of the cells to the table's directionality.
     KRYS_NODISCARD LayoutUnit PaddingBefore() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit PaddingAfter() const noexcept override;
 
     void SetOverridingLogicalHeightFromRowHeight(LayoutUnit rowHeight) noexcept;
@@ -207,8 +227,11 @@ namespace krys::boo
     KRYS_NODISCARD WritingMode TableWritingMode() const noexcept;
 
     KRYS_NODISCARD const BorderValue &BorderAdjoiningTableStart() const noexcept;
+
     KRYS_NODISCARD const BorderValue &BorderAdjoiningTableEnd() const noexcept;
+
     KRYS_NODISCARD const BorderValue &BorderAdjoiningCellBefore(const RenderTableCell &cell) const noexcept;
+
     KRYS_NODISCARD const BorderValue &BorderAdjoiningCellAfter(const RenderTableCell &cell) const noexcept;
 
 #if KRYS_DEBUG
@@ -234,10 +257,13 @@ namespace krys::boo
 
     KRYS_NODISCARD CollapsedBorderValue
       CollapsedStartBorder(IncludeBorderColor includeColor = IncludeBorderColor::Yes) const noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue
       CollapsedEndBorder(IncludeBorderColor includeColor = IncludeBorderColor::Yes) const noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue
       CollapsedBeforeBorder(IncludeBorderColor includeColor = IncludeBorderColor::Yes) const noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue
       CollapsedAfterBorder(IncludeBorderColor includeColor = IncludeBorderColor::Yes) const noexcept;
 
@@ -247,16 +273,20 @@ namespace krys::boo
     }
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
     /// @brief Paints the cell's sides whose collapsed border is the table's current one.
     void PaintCollapsedBorders(PaintInfo &, const LayoutPoint &) noexcept;
+
     /// @brief Paints @p backgroundObject's background (the cell's, or its row's, row group's, column's or
     /// column group's) behind the cell.
     void PaintBackgroundsBehindCell(PaintInfo &, LayoutPoint paintOffset, RenderBox *backgroundObject,
                                     LayoutPoint backgroundPaintOffset) noexcept;
+
     void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept override;
 
     /// @brief Adds the cell's collapsed borders not yet in @p borderValues.
     void CollectBorderValues(List<CollapsedBorderValue> &borderValues) const noexcept;
+
     /// @brief Sorts @p borderValues from the lowest precedence to the highest.
     static void SortBorderValues(List<CollapsedBorderValue> &borderValues) noexcept;
 
@@ -267,23 +297,33 @@ namespace krys::boo
   protected:
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
+
     KRYS_NODISCARD RepaintRects
       LocalRectsForRepaint(RepaintOutlineBounds repaintOutlineBounds) const noexcept override;
 
   private:
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
     void ComputePreferredLogicalWidths() noexcept override;
+
     void WillBeRemovedFromTree() noexcept override;
+
     void UpdateLogicalWidth() noexcept override;
 
     KRYS_NODISCARD LayoutUnit BorderHalfLeft(bool outer) const noexcept;
+
     KRYS_NODISCARD LayoutUnit BorderHalfRight(bool outer) const noexcept;
+
     KRYS_NODISCARD LayoutUnit BorderHalfTop(bool outer) const noexcept;
+
     KRYS_NODISCARD LayoutUnit BorderHalfBottom(bool outer) const noexcept;
 
     KRYS_NODISCARD LayoutUnit BorderHalfStart(bool outer) const noexcept;
+
     KRYS_NODISCARD LayoutUnit BorderHalfEnd(bool outer) const noexcept;
+
     KRYS_NODISCARD LayoutUnit BorderHalfBefore(bool outer) const noexcept;
+
     KRYS_NODISCARD LayoutUnit BorderHalfAfter(bool outer) const noexcept;
 
     void SetIntrinsicPaddingBefore(LayoutUnit p) noexcept
@@ -303,14 +343,18 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool HasStartBorderAdjoiningTable() const noexcept;
+
     KRYS_NODISCARD bool HasEndBorderAdjoiningTable() const noexcept;
 
     KRYS_NODISCARD CollapsedBorderValue
       ComputeCollapsedStartBorder(IncludeBorderColor includeColor) const noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue
       ComputeCollapsedEndBorder(IncludeBorderColor includeColor) const noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue
       ComputeCollapsedBeforeBorder(IncludeBorderColor includeColor) const noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue
       ComputeCollapsedAfterBorder(IncludeBorderColor includeColor) const noexcept;
 
@@ -321,13 +365,19 @@ namespace krys::boo
     KRYS_NODISCARD CollapsedBorderValue EmptyBorder() const noexcept;
 
     KRYS_NODISCARD CollapsedBorderValue CachedCollapsedLeftBorder(WritingMode writingMode) const noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue CachedCollapsedRightBorder(WritingMode writingMode) const noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue CachedCollapsedTopBorder(WritingMode writingMode) const noexcept;
+
     KRYS_NODISCARD CollapsedBorderValue CachedCollapsedBottomBorder(WritingMode writingMode) const noexcept;
 
     KRYS_NODISCARD const html::HTMLTableCellElement *TableCellElement() const noexcept;
+
     void UpdateColAndRowSpanFlags() noexcept;
+
     KRYS_NODISCARD uint32 ParseRowSpanFromDOM() const noexcept;
+
     KRYS_NODISCARD uint32 ParseColSpanFromDOM() const noexcept;
 
     KRYS_NODISCARD bool HasLineIfEmpty() const noexcept final;

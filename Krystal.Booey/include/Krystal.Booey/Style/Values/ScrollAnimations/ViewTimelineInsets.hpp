@@ -87,6 +87,7 @@ namespace krys::boo
     struct ViewTimelineInsetDefaulter
     {
       KRYS_NODISCARD const ViewTimelineInsetItem &operator()() const noexcept;
+
       KRYS_NODISCARD bool operator==(const ViewTimelineInsetDefaulter &) const noexcept = default;
     };
 
@@ -109,7 +110,9 @@ namespace krys::boo
     struct CSSValueConversion<ViewTimelineInsetItem>
     {
       KRYS_NODISCARD ViewTimelineInsetItem operator()(BuilderState &, const css::Value &) noexcept;
+
       KRYS_NODISCARD ViewTimelineInsetItem operator()(BuilderState &, const css::PrimitiveValue &) noexcept;
+
       KRYS_NODISCARD ViewTimelineInsetItem operator()(BuilderState &, const css::ValuePair &) noexcept;
     };
 

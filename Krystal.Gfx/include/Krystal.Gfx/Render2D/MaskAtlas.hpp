@@ -114,6 +114,7 @@ namespace krys::gfx
 
   public:
     MaskAtlas(Device &device, const MaskAtlasDesc &desc) noexcept;
+
     ~MaskAtlas() noexcept;
 
     /// @brief The mask of `path`, mapped into target pixels by `transform` and blurred by a Gaussian with
@@ -121,6 +122,7 @@ namespace krys::gfx
     /// masks too large to cache.
     KRYS_NODISCARD MaskLocation GetMask(const Path2D &path, const Transform2D &transform, FillRule rule,
                                         const PixelRect2D &clip, float blur = 0.f) noexcept;
+
     /// @brief Uploads a mask made elsewhere into a texture of its own, kept for this frame only.
     KRYS_NODISCARD MaskLocation UploadTransient(const CoverageMask &mask) noexcept;
 
@@ -142,10 +144,13 @@ namespace krys::gfx
   private:
     /// @brief Once per frame: destroys the textures no frame still needs.
     void Collect() noexcept;
+
     /// @brief Finds page space, forgetting the masks of any page cleared to make room.
     KRYS_NODISCARD Maybe<AtlasSlot> Allocate(uint32 width, uint32 height) noexcept;
+
     KRYS_NODISCARD TextureHandle CreateMaskTexture(uint32 width, uint32 height,
                                                    utf8_stringview name) noexcept;
+
     void Upload(TextureHandle texture, const PixelRect2D &texels, const CoverageMask &mask) noexcept;
   };
 }

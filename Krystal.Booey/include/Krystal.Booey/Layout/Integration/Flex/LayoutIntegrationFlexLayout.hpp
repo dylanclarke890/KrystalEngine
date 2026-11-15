@@ -60,18 +60,22 @@ namespace krys::boo::layout_integration
 
   public:
     explicit FlexLayout(RenderFlexibleBox &flexBoxRenderer) noexcept;
+
     ~FlexLayout() noexcept;
 
     /// @brief Whether the flex formatting context supports the flex container's content.
     KRYS_NODISCARD static bool CanUseFor(const RenderFlexibleBox &flexBox) noexcept;
 
     void UpdateFormattingContextGeometries() noexcept;
+
     void UpdateStyle(const RenderBlock &renderer, const RenderStyle &oldStyle) noexcept;
+
     KRYS_NODISCARD Pair<LayoutUnit, LayoutUnit> ComputeIntrinsicWidthConstraints() noexcept;
 
     void Layout() noexcept;
 
     void CollectOverflow() noexcept;
+
     KRYS_NODISCARD LayoutUnit ContentBoxLogicalHeight() const noexcept;
 
   private:
@@ -88,6 +92,7 @@ namespace krys::boo::layout_integration
     }
 
     KRYS_NODISCARD const RenderFlexibleBox &FlexBoxRenderer() const noexcept;
+
     KRYS_NODISCARD RenderFlexibleBox &FlexBoxRenderer() noexcept;
 
     KRYS_NODISCARD layout::LayoutState &GetLayoutState() noexcept

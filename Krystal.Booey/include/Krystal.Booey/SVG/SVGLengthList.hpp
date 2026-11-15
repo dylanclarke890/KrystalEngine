@@ -63,6 +63,7 @@ namespace krys::boo::svg
     }
 
     bool Parse(dom::DOMStringView) noexcept;
+
     KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept override;
 
   private:

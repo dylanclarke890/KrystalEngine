@@ -231,6 +231,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool NextOnLineExists() const noexcept;
+
     KRYS_NODISCARD bool PreviousOnLineExists() const noexcept;
 
     KRYS_NODISCARD virtual bool IsLeaf() const noexcept
@@ -239,6 +240,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LegacyInlineBox *NextLeafOnLine() const noexcept;
+
     KRYS_NODISCARD LegacyInlineBox *PreviousLeafOnLine() const noexcept;
 
     // FIXME: Hide this once all callers are using tighter types.
@@ -258,6 +260,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD const LegacyRootInlineBox &Root() const noexcept;
+
     KRYS_NODISCARD LegacyRootInlineBox &Root() noexcept;
 
     /// @brief The left side of the box in the containing block's coordinate system.
@@ -396,6 +399,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual int32 CaretMinOffset() const noexcept;
+
     KRYS_NODISCARD virtual int32 CaretMaxOffset() const noexcept;
 
     KRYS_NODISCARD uint8 BidiLevel() const noexcept
@@ -450,9 +454,13 @@ namespace krys::boo
     KRYS_NODISCARD RenderBoxModelObject *BoxModelObject() const noexcept;
 
     KRYS_NODISCARD FloatPoint LocationIncludingFlipping() const noexcept;
+
     void FlipForWritingMode(FloatRect &) const noexcept;
+
     KRYS_NODISCARD FloatPoint FlipForWritingMode(const FloatPoint &) const noexcept;
+
     void FlipForWritingMode(LayoutRect &) const noexcept;
+
     KRYS_NODISCARD LayoutPoint FlipForWritingMode(const LayoutPoint &) const noexcept;
 
     KRYS_NODISCARD bool KnownToHaveNoOverflow() const noexcept

@@ -54,6 +54,7 @@ namespace krys::boo
 
   public:
     TimerBase() noexcept = default;
+
     virtual ~TimerBase() noexcept;
 
     /// @brief Fires after @p nextFireInterval, then every @p repeatInterval if it isn't zero.

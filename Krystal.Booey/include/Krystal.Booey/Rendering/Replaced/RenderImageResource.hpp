@@ -52,6 +52,7 @@ namespace krys::boo
 
   public:
     RenderImageResource() noexcept;
+
     virtual ~RenderImageResource() noexcept;
 
     virtual void Initialize(RenderElement &renderer) noexcept
@@ -71,6 +72,7 @@ namespace krys::boo
     void ResetAnimation() noexcept;
 
     KRYS_NODISCARD virtual RefPtr<Image> GetImage(const IntSize &size = {}) const noexcept;
+
     KRYS_NODISCARD virtual bool CurrentFrameIsComplete() const noexcept;
 
     KRYS_NODISCARD virtual bool ErrorOccurred() const noexcept

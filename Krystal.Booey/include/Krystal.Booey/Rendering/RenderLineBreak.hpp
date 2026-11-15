@@ -46,6 +46,7 @@ namespace krys::boo
     }
 
     RenderLineBreak(html::HTMLElement &element, RenderStyle &&style) noexcept;
+
     ~RenderLineBreak() noexcept override;
 
     // FIXME: The lies here keep render tree dump based test results unchanged.
@@ -86,6 +87,7 @@ namespace krys::boo
                        const RenderFragmentContainer *fragment = nullptr) noexcept final;
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
 
     KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept final;

@@ -31,8 +31,8 @@
 namespace krys::boo
 {
   class FontMetrics;
-  class RenderStyle;
   struct FontSizeAdjust;
+  class RenderStyle;
   struct SettingsValues;
 }
 
@@ -59,13 +59,16 @@ namespace krys::boo::style
   KRYS_NODISCARD float ComputedFontSizeFromSpecifiedSize(float specifiedSize, bool isAbsoluteSize,
                                                          float zoomFactor, MinimumFontSizeRule,
                                                          const SettingsValues &) noexcept;
+
   KRYS_NODISCARD ComputedFontSize ComputedFontSizeFromSpecifiedSize(float specifiedSize, bool isAbsoluteSize,
                                                                     bool useSVGZoomRules, const RenderStyle *,
                                                                     const dom::Document &) noexcept;
+
   KRYS_NODISCARD float ComputedFontSizeFromSpecifiedSizeForSVGInlineText(float specifiedSize,
                                                                          bool isAbsoluteSize,
                                                                          float zoomFactor,
                                                                          const dom::Document &) noexcept;
+
   KRYS_NODISCARD float AdjustedFontSize(float size, const boo::FontSizeAdjust &,
                                         const FontMetrics &) noexcept;
 
@@ -73,6 +76,7 @@ namespace krys::boo::style
   // the correct font size scaled relative to the user's default (medium).
   KRYS_NODISCARD float FontSizeForKeyword(uint32 keywordID, bool shouldUseFixedDefaultSize,
                                           const SettingsValues &, bool inQuirksMode = false) noexcept;
+
   KRYS_NODISCARD float FontSizeForKeyword(uint32 keywordID, bool shouldUseFixedDefaultSize,
                                           const dom::Document &) noexcept;
 

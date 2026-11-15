@@ -63,9 +63,9 @@ namespace krys::boo::css
   class KeyframeRule;
   class KeyframesRule;
   class MutableStyleProperties;
+  struct ParserContext;
   class PositionTryRule;
   class StyleSheetContents;
-  struct ParserContext;
 
   /// @brief Parses style sheets, rules and declaration lists into the internal rule model.
   /// @see https://drafts.csswg.org/css-syntax/#parsing
@@ -137,25 +137,32 @@ namespace krys::boo::css
   public:
     Parser(const ParserContext &context, CSSOMStringView string, StyleSheetContents *styleSheet = nullptr,
            NestedContext nestedContext = {}) noexcept;
+
     ~Parser() noexcept;
 
     KRYS_NODISCARD static ParseResult ParseValue(MutableStyleProperties &declaration, PropertyId property,
                                                  CSSOMStringView string, IsImportant important,
                                                  const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static ParseResult ParseCustomPropertyValue(MutableStyleProperties &declaration,
                                                                const CSSOMStringAtom &propertyName,
                                                                CSSOMStringView string, IsImportant important,
                                                                const ParserContext &context) noexcept;
+
     /// @brief Parses the value of an element's `style` attribute.
     KRYS_NODISCARD static Ref<ImmutableStyleProperties>
       ParseInlineStyleDeclaration(CSSOMStringView string, const dom::Element &element) noexcept;
+
     static bool ParseDeclarationList(MutableStyleProperties &declaration, CSSOMStringView string,
                                      const ParserContext &context) noexcept;
+
     KRYS_NODISCARD static RefPtr<Rule> ParseRule(CSSOMStringView string, const ParserContext &context,
                                                  StyleSheetContents *styleSheet, AllowedRules allowedRules,
                                                  NestedContext nestedContext = {}) noexcept;
+
     KRYS_NODISCARD static RefPtr<KeyframeRule> ParseKeyframeRule(CSSOMStringView string,
                                                                  const ParserContext &context) noexcept;
+
     static void ParseStyleSheet(CSSOMStringView string, const ParserContext &context,
                                 StyleSheetContents &styleSheet) noexcept;
 
@@ -195,47 +202,73 @@ namespace krys::boo::css
     KRYS_NODISCARD List<Ref<Rule>> ConsumeNestedGroupRules(TokenRange block) noexcept;
 
     KRYS_NODISCARD static RefPtr<CharsetRule> ConsumeCharsetRule(TokenRange prelude) noexcept;
+
     KRYS_NODISCARD RefPtr<ImportRule> ConsumeImportRule(TokenRange prelude) noexcept;
+
     KRYS_NODISCARD RefPtr<NamespaceRule> ConsumeNamespaceRule(TokenRange prelude) noexcept;
+
     KRYS_NODISCARD RefPtr<MediaRule> ConsumeMediaRule(TokenRange prelude, TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<SupportsRule> ConsumeSupportsRule(TokenRange prelude, TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<FontFaceRule> ConsumeFontFaceRule(TokenRange prelude, TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<FontFeatureValuesBlockRule>
       ConsumeFontFeatureValuesRuleBlock(AtRuleId id, TokenRange prelude, TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<FontFeatureValuesRule> ConsumeFontFeatureValuesRule(TokenRange prelude,
                                                                               TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<FontPaletteValuesRule> ConsumeFontPaletteValuesRule(TokenRange prelude,
                                                                               TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<KeyframesRule> ConsumeKeyframesRule(TokenRange prelude, TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<CounterStyleRule> ConsumeCounterStyleRule(TokenRange prelude,
                                                                     TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<LayerRule> ConsumeLayerRule(TokenRange prelude, Maybe<TokenRange> block) noexcept;
+
     KRYS_NODISCARD RefPtr<ContainerRule> ConsumeContainerRule(TokenRange prelude, TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<PropertyRule> ConsumePropertyRule(TokenRange prelude, TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<ScopeRule> ConsumeScopeRule(TokenRange prelude, TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<StartingStyleRule> ConsumeStartingStyleRule(TokenRange prelude,
                                                                       TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<PositionTryRule> ConsumePositionTryRule(TokenRange prelude,
                                                                   TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<FunctionRule> ConsumeFunctionRule(TokenRange prelude, TokenRange block) noexcept;
 
     KRYS_NODISCARD RefPtr<KeyframeRule> ConsumeKeyframeStyleRule(TokenRange prelude,
                                                                  TokenRange block) noexcept;
+
     KRYS_NODISCARD RefPtr<Rule> ConsumeStyleRule(TokenRange prelude, TokenRange block) noexcept;
+
     KRYS_NODISCARD ParsedPropertyList ConsumeDeclarationListInNewNestingContext(TokenRange tokens,
                                                                                 RuleType ruleType) noexcept;
+
     KRYS_NODISCARD List<Ref<Rule>> ConsumeDeclarationRuleListInNewNestingContext(TokenRange tokens,
                                                                                  RuleType ruleType) noexcept;
 
     // FIXME: We should return value for all those functions instead of using class member attributes.
     void ConsumeBlockContent(TokenRange tokens, RuleType ruleType,
                              EnumSet<BlockAllowedRule> blockAllowedRules) noexcept;
+
     void ConsumeDeclarationList(TokenRange tokens, RuleType ruleType) noexcept;
+
     void ConsumeDeclarationRuleList(TokenRange tokens, RuleType ruleType) noexcept;
+
     void ConsumeStyleBlock(TokenRange tokens, RuleType ruleType) noexcept;
+
     bool ConsumeDeclaration(TokenRange tokens, RuleType ruleType) noexcept;
+
     void ConsumeDeclarationValue(TokenRange tokens, PropertyId property, IsImportant important,
                                  RuleType ruleType) noexcept;
+
     void ConsumeCustomPropertyValue(TokenRange tokens, const CSSOMStringAtom &propertyName,
                                     IsImportant important) noexcept;
 

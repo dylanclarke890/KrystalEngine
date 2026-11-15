@@ -76,7 +76,9 @@ namespace krys::boo
 
   public:
     void SetSizeForGridItem(const RenderBox &gridItem, LayoutUnit size) noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> SizeForItem(const RenderBox &gridItem) const noexcept;
+
     void InvalidateSizeForItem(const RenderBox &gridItem) noexcept;
   };
 
@@ -110,7 +112,9 @@ namespace krys::boo
 
     public:
       explicit GridWrapper(RenderGrid &renderGrid) noexcept;
+
       void ResetCurrentGrid() const noexcept;
+
       mutable std::reference_wrapper<Grid> CurrentGrid {std::ref(_layoutGrid)};
     };
 
@@ -137,11 +141,13 @@ namespace krys::boo
 
   public:
     RenderGrid(dom::Element &element, RenderStyle &&style) noexcept;
+
     ~RenderGrid() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
     void LayoutBlock(RelayoutChildren relayoutChildren,
                      LayoutUnit pageLogicalHeight = 0_lu) noexcept override;
 
@@ -156,10 +162,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool HasDefiniteLogicalHeight() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> AvailableLogicalHeightForContentBox() const noexcept;
 
     void SetNeedsItemPlacement(
       SubgridDidChange descendantSubgridsNeedItemPlacement = SubgridDidChange::No) noexcept;
+
     KRYS_NODISCARD List<LayoutUnit>
       TrackSizesForComputedStyle(style::GridTrackSizingDirection direction) const noexcept;
 
@@ -193,13 +201,17 @@ namespace krys::boo
     // Required by GridTrackSizingAlgorithm. Keep them under control.
     KRYS_NODISCARD LayoutUnit GuttersSize(style::GridTrackSizingDirection direction, uint32 startLine,
                                           uint32 span, Maybe<LayoutUnit> availableSize) const noexcept;
+
     KRYS_NODISCARD LayoutUnit GridItemOffset(style::GridTrackSizingDirection direction) const noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit>
       ExplicitIntrinsicInnerLogicalSize(style::GridTrackSizingDirection direction) const noexcept;
+
     void UpdateGridAreaLogicalSize(RenderBox &gridItem, Maybe<LayoutUnit> width,
                                    Maybe<LayoutUnit> height) const noexcept;
+
     KRYS_NODISCARD bool IsBaselineAlignmentForGridItem(const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD bool
       IsBaselineAlignmentForGridItem(const RenderBox &gridItem,
                                      style::GridTrackSizingDirection alignmentContext) const noexcept;
@@ -216,6 +228,7 @@ namespace krys::boo
     // keeping the logic in the same function was leading to a messy amount of if statements being added to
     // handle specific masonry cases.
     void LayoutGrid(RelayoutChildren relayoutChildren) noexcept;
+
     void LayoutMasonry(RelayoutChildren relayoutChildren) noexcept;
 
     // Computes the span relative to this RenderGrid, even if the RenderBox is a grid item
@@ -224,6 +237,7 @@ namespace krys::boo
                                                 style::GridTrackSizingDirection direction) const noexcept;
 
     KRYS_NODISCARD bool IsSubgrid() const noexcept;
+
     KRYS_NODISCARD bool IsSubgrid(style::GridTrackSizingDirection direction) const noexcept;
 
     KRYS_NODISCARD bool IsSubgridRows() const noexcept
@@ -246,6 +260,7 @@ namespace krys::boo
                                     const RenderGrid &ancestor) const noexcept;
 
     KRYS_NODISCARD bool IsMasonry() const noexcept;
+
     KRYS_NODISCARD bool IsMasonry(style::GridTrackSizingDirection direction) const noexcept;
 
     KRYS_NODISCARD bool AreMasonryRows() const noexcept
@@ -259,6 +274,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD const Grid &CurrentGrid() const noexcept;
+
     KRYS_NODISCARD Grid &CurrentGrid() noexcept;
 
     KRYS_NODISCARD uint32 NumTracks(style::GridTrackSizingDirection direction) const noexcept;
@@ -267,13 +283,16 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<LayoutUnit>
       AvailableSpaceForGutters(style::GridTrackSizingDirection direction) const noexcept;
+
     KRYS_NODISCARD LayoutUnit GridGap(style::GridTrackSizingDirection direction) const noexcept;
+
     KRYS_NODISCARD LayoutUnit GridGap(style::GridTrackSizingDirection direction,
                                       Maybe<LayoutUnit> availableSize) const noexcept;
 
     KRYS_NODISCARD LayoutUnit MasonryContentSize() const noexcept;
 
     void UpdateIntrinsicLogicalHeightsForRowSizingFirstPassCacheAvailability() noexcept;
+
     KRYS_NODISCARD Maybe<GridItemSizeCache> &IntrinsicLogicalHeightsForRowSizingFirstPass() const noexcept;
 
     KRYS_NODISCARD bool
@@ -295,10 +314,12 @@ namespace krys::boo
     bool HitTestChildren(const HitTestRequest &request, HitTestResult &result,
                          const HitTestLocation &locationInContainer, const LayoutPoint &adjustedLocation,
                          HitTestAction hitTestAction) noexcept override;
+
     void PaintChildren(PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild) noexcept override;
 
   private:
     void ComputeLayoutRequirementsForItemsBeforeLayout(GridLayoutState &gridLayoutState) const noexcept;
+
     KRYS_NODISCARD bool CanSetColumnAxisStretchRequirementForItem(const RenderBox &gridItem) const noexcept;
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
@@ -308,14 +329,18 @@ namespace krys::boo
                                                       const RenderStyle &oldStyle,
                                                       const RenderStyle &newStyle,
                                                       const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD bool SelfAlignmentChangedFromStretch(style::GridTrackSizingDirection alignmentContext,
                                                         const RenderStyle &oldStyle,
                                                         const RenderStyle &newStyle,
                                                         const RenderBox &gridItem) const noexcept;
 
     KRYS_NODISCARD SubgridDidChange GetSubgridDidChange(const RenderStyle &oldStyle) const noexcept;
+
     KRYS_NODISCARD bool ExplicitGridDidResize(const RenderStyle &oldStyle) const noexcept;
+
     KRYS_NODISCARD bool NamedGridLinesDefinitionDidChange(const RenderStyle &oldStyle) const noexcept;
+
     KRYS_NODISCARD bool ImplicitGridLinesDefinitionDidChange(const RenderStyle &oldStyle) const noexcept;
 
     KRYS_NODISCARD uint32 ComputeAutoRepeatTracksCount(style::GridTrackSizingDirection direction,
@@ -326,6 +351,7 @@ namespace krys::boo
 
     KRYS_NODISCARD layout::IndexRange
       AutoRepeatTracksRange(style::GridTrackSizingDirection direction) const noexcept;
+
     KRYS_NODISCARD UniquePtr<OrderedTrackIndexSet>
       ComputeEmptyTracksForAutoRepeat(style::GridTrackSizingDirection direction) const noexcept;
 
@@ -334,29 +360,41 @@ namespace krys::boo
       ShouldUpdateGridAreaLogicalSize shouldUpdateGridAreaLogicalSize) const noexcept;
 
     void PlaceItemsOnGrid(Maybe<LayoutUnit> availableLogicalWidth) noexcept;
+
     void PopulateExplicitGridAndOrderIterator() noexcept;
+
     KRYS_NODISCARD GridArea CreateEmptyGridAreaAtSpecifiedPositionsOutsideGrid(
       const RenderBox &gridItem, style::GridTrackSizingDirection specifiedDirection,
       const GridSpan &specifiedPositions) const noexcept;
+
     KRYS_NODISCARD bool
       IsPlacedWithinExtrinsicallySizedExplicitTracks(const RenderBox &gridItem) const noexcept;
+
     void PlaceSpecifiedMajorAxisItemsOnGrid(const List<RenderBox *> &autoGridItems) noexcept;
+
     void PlaceAutoMajorAxisItemsOnGrid(const List<RenderBox *> &autoGridItems) noexcept;
+
     void PlaceAutoMajorAxisItemOnGrid(RenderBox &gridItem, AutoPlacementCursor &autoPlacementCursor) noexcept;
+
     KRYS_NODISCARD style::GridTrackSizingDirection AutoPlacementMajorAxisDirection() const noexcept;
+
     KRYS_NODISCARD style::GridTrackSizingDirection AutoPlacementMinorAxisDirection() const noexcept;
 
     KRYS_NODISCARD bool CanPerformSimplifiedLayout() const noexcept final;
+
     void PrepareGridItemForPositionedLayout(RenderBox &gridItem) noexcept;
+
     KRYS_NODISCARD bool
       HasStaticPositionForGridItem(const RenderBox &gridItem,
                                    style::GridTrackSizingDirection direction) const noexcept;
+
     void LayoutOutOfFlowBox(RenderBox &gridItem, RelayoutChildren relayoutChildren,
                             bool fixedPositionObjectsOnly) noexcept override;
 
     void ComputeTrackSizesForDefiniteSize(style::GridTrackSizingDirection direction,
                                           LayoutUnit availableSpace,
                                           GridLayoutState &gridLayoutState) noexcept;
+
     void ComputeTrackSizesForIndefiniteSize(GridTrackSizingAlgorithm &algorithm,
                                             style::GridTrackSizingDirection direction,
                                             GridLayoutState &gridLayoutState,
@@ -370,6 +408,7 @@ namespace krys::boo
                                            GridLayoutState &gridLayoutState) noexcept;
 
     void LayoutGridItems(GridLayoutState &gridLayoutState) noexcept;
+
     void LayoutMasonryItems(GridLayoutState &gridLayoutState) noexcept;
 
     void PopulateGridPositionsForDirection(const GridTrackSizingAlgorithm &algorithm,
@@ -377,18 +416,25 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRange GridAreaRangeForOutOfFlow(
       const RenderBox &gridItem, style::GridTrackSizingDirection direction) const noexcept;
+
     KRYS_NODISCARD Pair<LayoutUnit, LayoutUnit>
       GridAreaPositionForInFlowGridItem(const RenderBox &gridItem,
                                         style::GridTrackSizingDirection direction) const noexcept;
 
     KRYS_NODISCARD GridAxisPosition ColumnAxisPositionForGridItem(const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD GridAxisPosition RowAxisPositionForGridItem(const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ColumnAxisOffsetForGridItem(const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD LayoutUnit RowAxisOffsetForGridItem(const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD ContentAlignmentData ComputeContentPositionAndDistributionOffset(
       style::GridTrackSizingDirection direction, const LayoutUnit &availableFreeSpace,
       uint32 numberOfGridTracks) const noexcept;
+
     void SetLogicalPositionForGridItem(RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalOffsetForGridItem(
       const RenderBox &gridItem, style::GridTrackSizingDirection direction) const noexcept;
 
@@ -396,26 +442,34 @@ namespace krys::boo
       const RenderBox &gridItem, style::GridTrackSizingDirection direction) const noexcept;
 
     KRYS_NODISCARD LayoutOptionalOutsets AllowedLayoutOverflow() const noexcept override;
+
     void ComputeOverflow(LayoutUnit oldClientAfterEdge,
                          EnumSet<ComputeOverflowOptions> options = {}) noexcept override;
 
     KRYS_NODISCARD StyleSelfAlignmentData
       JustifySelfForGridItem(const RenderBox &gridItem, StretchingMode stretchingMode = StretchingMode::Any,
                              const RenderStyle *gridStyle = nullptr) const noexcept;
+
     KRYS_NODISCARD StyleSelfAlignmentData
       AlignSelfForGridItem(const RenderBox &gridItem, StretchingMode stretchingMode = StretchingMode::Any,
                            const RenderStyle *gridStyle = nullptr) const noexcept;
+
     void ApplyStretchAlignmentToGridItemIfNeeded(RenderBox &gridItem,
                                                  GridLayoutState &gridLayoutState) noexcept;
+
     void ApplySubgridStretchAlignmentToGridItemIfNeeded(RenderBox &gridItem) noexcept;
+
     KRYS_NODISCARD bool IsChildEligibleForMarginTrim(style::MarginTrimSide marginTrimSide,
                                                      const RenderBox &gridItem) const noexcept final;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept final;
+
     KRYS_NODISCARD Maybe<LayoutUnit> LastLineBaseline() const noexcept final;
+
     KRYS_NODISCARD const RenderBox *BaselineGridItem(ItemPosition alignment) const noexcept;
 
     KRYS_NODISCARD LayoutUnit ColumnAxisBaselineOffsetForGridItem(const RenderBox &gridItem) const noexcept;
+
     KRYS_NODISCARD LayoutUnit RowAxisBaselineOffsetForGridItem(const RenderBox &gridItem) const noexcept;
 
     KRYS_NODISCARD uint32 NonCollapsedTracks(style::GridTrackSizingDirection direction) const noexcept;

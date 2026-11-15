@@ -89,6 +89,7 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     bool SetFilterEffectAttribute(FilterEffect &effect,
@@ -100,8 +101,10 @@ namespace krys::boo::svg
     }
 
     KRYS_NODISCARD bool IsIdentity() const noexcept final;
+
     KRYS_NODISCARD IntOutsets Outsets(const FloatRect &targetBoundingBox,
                                       SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept final;
+
     KRYS_NODISCARD RefPtr<FilterEffect>
       CreateFilterEffect(const FilterEffectVector &inputs,
                          const GraphicsContext &destinationContext) const noexcept final;

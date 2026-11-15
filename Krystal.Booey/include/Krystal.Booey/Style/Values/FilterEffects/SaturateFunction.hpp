@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::Saturate ToCSSSaturate(const BasicColorMatrixFilterOperation &,
                                                const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::Saturate &,
                                                               const BuilderState &) noexcept;
   }

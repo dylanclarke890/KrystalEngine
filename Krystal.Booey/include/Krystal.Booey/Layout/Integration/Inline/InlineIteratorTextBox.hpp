@@ -131,8 +131,11 @@ namespace krys::boo::inline_iterator
 
   private:
     BoxIterator &TraverseLineRightwardOnLine() = delete;
+
     BoxIterator &TraverseLineLeftwardOnLine() = delete;
+
     BoxIterator &TraverseLineRightwardOnLineIgnoringLineBreak() = delete;
+
     BoxIterator &TraverseLineLeftwardOnLineIgnoringLineBreak() = delete;
 
     KRYS_NODISCARD const TextBox &Get() const noexcept
@@ -142,11 +145,15 @@ namespace krys::boo::inline_iterator
   };
 
   KRYS_NODISCARD TextBoxIterator LineLeftmostTextBoxFor(const RenderText &text) noexcept;
+
   KRYS_NODISCARD TextBoxIterator TextBoxFor(const LegacyInlineTextBox *legacyInlineTextBox) noexcept;
+
   KRYS_NODISCARD TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content,
                                             const inline_display::Box &box) noexcept;
+
   KRYS_NODISCARD TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content,
                                             size_t boxIndex) noexcept;
+
   KRYS_NODISCARD BoxRange<TextBoxIterator> TextBoxesFor(const RenderText &text) noexcept;
 }
 

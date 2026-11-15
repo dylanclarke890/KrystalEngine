@@ -46,13 +46,16 @@ namespace krys::boo::layout
     explicit FlexFormattingUtils(const FlexFormattingContext &flexFormattingContext) noexcept;
 
     KRYS_NODISCARD static bool IsMainAxisParallelWithInlineAxis(const ElementBox &flexContainer) noexcept;
+
     KRYS_NODISCARD static bool IsMainReversedToContentDirection(const ElementBox &flexContainer) noexcept;
+
     KRYS_NODISCARD static bool AreFlexLinesReversedInCrossAxis(const ElementBox &flexContainer) noexcept;
 
     // FIXME: These values should probably be computed by FlexFormattingContext and get passed in to
     // FlexLayout.
     KRYS_NODISCARD static LayoutUnit MainAxisGapValue(const ElementBox &flexContainer,
                                                       LayoutUnit flexContainerContentBoxWidth) noexcept;
+
     KRYS_NODISCARD static LayoutUnit CrossAxisGapValue(const ElementBox &flexContainer,
                                                        LayoutUnit flexContainerContentBoxHeight) noexcept;
 
@@ -61,9 +64,12 @@ namespace krys::boo::layout
                                     ContentPosition justifyContentPosition) noexcept;
 
     KRYS_NODISCARD LayoutUnit UsedMinimumSizeInMainAxis(const LogicalFlexItem &flexItem) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       UsedMaximumSizeInMainAxis(const LogicalFlexItem &flexItem) const noexcept;
+
     KRYS_NODISCARD LayoutUnit UsedMaxContentSizeInMainAxis(const LogicalFlexItem &flexItem) const noexcept;
+
     KRYS_NODISCARD LayoutUnit UsedSizeInCrossAxis(const LogicalFlexItem &flexItem,
                                                   LayoutUnit maxAxisConstraint) const noexcept;
 

@@ -39,11 +39,11 @@
 
 namespace krys::boo
 {
+  enum class ExternalResourceDownloadPolicy : bool;
   class Font;
   class FontDescription;
   class FontFeatureValues;
   class FontPaletteValues;
-  enum class ExternalResourceDownloadPolicy : bool;
 
   namespace dom
   {
@@ -135,12 +135,19 @@ namespace krys::boo::css
                                                   bool isLocalFallback = false) noexcept;
 
     void SetFamily(Value &family) noexcept;
+
     void SetStyle(Value &style) noexcept;
+
     void SetWeight(Value &weight) noexcept;
+
     void SetWidth(Value &width) noexcept;
+
     void SetSizeAdjust(Value &sizeAdjust) noexcept;
+
     void SetUnicodeRange(ValueList &list) noexcept;
+
     void SetFeatureSettings(Value &featureSettings) noexcept;
+
     void SetDisplay(Value &loadingBehaviorValue) noexcept;
 
     KRYS_NODISCARD Span<const UnicodeRange> Ranges() const noexcept KRYS_LIFETIME_BOUND
@@ -175,6 +182,7 @@ namespace krys::boo::css
     KRYS_NODISCARD FontFaceRule *CssConnection() const noexcept;
 
     void AddClient(CSSFontFaceClient &client) noexcept;
+
     void RemoveClient(CSSFontFaceClient &client) noexcept;
 
     KRYS_NODISCARD bool ComputeFailureState() const noexcept;
@@ -227,12 +235,15 @@ namespace krys::boo::css
 
   private:
     size_t Pump(ExternalResourceDownloadPolicy policy) noexcept;
+
     void SetStatus(Status newStatus) noexcept;
 
     void FontLoadEventOccurred() noexcept;
+
     void TimeoutFired() noexcept;
 
     KRYS_NODISCARD const StyleProperties &Properties() const noexcept;
+
     KRYS_NODISCARD MutableStyleProperties &MutableProperties() noexcept;
 
     template <typename TFunc>

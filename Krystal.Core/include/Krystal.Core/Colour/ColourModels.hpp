@@ -490,6 +490,7 @@ namespace krys
              RGBModel<typename ColourType::ComponentType, RGBBoundedness::Bounded>>
     || SameType<typename ColourType::Model,
                 RGBModel<typename ColourType::ComponentType, RGBBoundedness::Extended>>;
+
 #pragma endregion
 
 #pragma region XYZModel

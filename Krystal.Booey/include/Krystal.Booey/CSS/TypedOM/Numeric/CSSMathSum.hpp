@@ -38,6 +38,7 @@ namespace krys::boo::css
   public:
     /// @return A `SyntaxError` if there are no values, or a `TypeError` if their types can't be combined.
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathSum>> Create(List<CSSNumberish> &&numberishes) noexcept;
+
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathSum>>
       Create(List<Ref<CSSNumericValue>> &&values) noexcept;
 
@@ -60,6 +61,7 @@ namespace krys::boo::css
     }
 
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept final;
+
     KRYS_NODISCARD Maybe<SumValue> ToSumValue() const noexcept final;
 
     KRYS_NODISCARD bool Equals(const CSSNumericValue &other) const noexcept final

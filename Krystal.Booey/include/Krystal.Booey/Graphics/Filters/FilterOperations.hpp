@@ -49,6 +49,7 @@ namespace krys::boo
 
   public:
     FilterOperations() noexcept = default;
+
     explicit FilterOperations(List<Ref<FilterOperation>> &&) noexcept;
 
     KRYS_NODISCARD bool operator==(const FilterOperations &) const noexcept;
@@ -115,7 +116,9 @@ namespace krys::boo
     KRYS_NODISCARD IntOutsets Outsets() const noexcept;
 
     KRYS_NODISCARD bool HasFilterThatAffectsOpacity() const noexcept;
+
     KRYS_NODISCARD bool HasFilterThatMovesPixels() const noexcept;
+
     KRYS_NODISCARD bool HasFilterThatShouldBeRestrictedBySecurityOrigin() const noexcept;
 
     template <FilterOperation::Type Type>
@@ -127,6 +130,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasReferenceFilter() const noexcept;
 
     KRYS_NODISCARD bool CanInterpolate(const FilterOperations &, CompositeOperation) const noexcept;
+
     KRYS_NODISCARD FilterOperations Blend(const FilterOperations &, const BlendingContext &) const noexcept;
   };
 }

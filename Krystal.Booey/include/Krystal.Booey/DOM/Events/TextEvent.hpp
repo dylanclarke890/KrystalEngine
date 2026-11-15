@@ -65,22 +65,28 @@ namespace krys::boo::dom
 
   public:
     TextEvent() noexcept;
+
     TextEvent(DOMStringView data, TextEventInputType inputType) noexcept;
+
     TextEvent(DOMStringView data, RefPtr<DocumentFragment> &&pastingFragment, TextEventInputType inputType,
               bool shouldSmartReplace, bool shouldMatchStyle) noexcept;
+
     ~TextEvent() noexcept override;
 
     /// @brief A trusted `textInput` event, which bubbles, can be cancelled and crosses shadow boundaries.
     KRYS_NODISCARD static Ref<TextEvent>
       Create(LocalDOMWindow *view, DOMStringView data,
              TextEventInputType inputType = TextEventInputType::Keyboard) noexcept;
+
     KRYS_NODISCARD static Ref<TextEvent> CreateForPlainTextPaste(LocalDOMWindow *view, DOMStringView data,
                                                                  bool shouldSmartReplace) noexcept;
+
     KRYS_NODISCARD static Ref<TextEvent> CreateForFragmentPaste(LocalDOMWindow *view,
                                                                 RefPtr<DocumentFragment> &&data,
                                                                 TextEventInputType inputType,
                                                                 bool shouldSmartReplace,
                                                                 bool shouldMatchStyle) noexcept;
+
     KRYS_NODISCARD static Ref<TextEvent> CreateForDrop(LocalDOMWindow *view, DOMStringView data) noexcept;
 
     /// @see https://w3c.github.io/uievents/#dom-textevent-inittextevent

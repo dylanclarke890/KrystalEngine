@@ -48,6 +48,7 @@ namespace krys::tests
       }
 
       MoveOnly(const MoveOnly &) = delete;
+
       MoveOnly &operator=(const MoveOnly &) = delete;
 
       MoveOnly(MoveOnly &&other) noexcept : Value(std::exchange(other.Value, 0))

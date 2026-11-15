@@ -185,11 +185,18 @@ namespace krys::boo
 namespace krys::boo
 {
   TextStream &operator<<(TextStream &ts, CompositeOperator op) noexcept;
+
   TextStream &operator<<(TextStream &ts, CompositeMode compositeMode) noexcept;
+
   TextStream &operator<<(TextStream &ts, InterpolationQuality interpolationQuality) noexcept;
+
   TextStream &operator<<(TextStream &ts, WindRule rule) noexcept;
+
   TextStream &operator<<(TextStream &ts, LineCap capStyle) noexcept;
+
   TextStream &operator<<(TextStream &ts, LineJoin joinStyle) noexcept;
+
   TextStream &operator<<(TextStream &ts, StrokeStyle strokeStyle) noexcept;
+
   TextStream &operator<<(TextStream &ts, TextDrawingMode textDrawingMode) noexcept;
 }

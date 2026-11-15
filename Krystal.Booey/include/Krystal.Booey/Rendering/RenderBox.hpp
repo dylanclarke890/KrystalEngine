@@ -44,8 +44,8 @@ namespace krys::boo
 {
   class FloatingObject;
   class PositionedLayoutConstraints;
-  class ShapeOutsideInfo;
   class RenderBlock;
+  class ShapeOutsideInfo;
 
   enum class AvailableLogicalHeightType : bool
   {
@@ -141,17 +141,27 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit LogicalLeft() const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalRight() const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalTop() const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalBottom() const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalHeight() const noexcept;
 
     void SetLogicalLeft(LayoutUnit left) noexcept;
+
     void SetLogicalTop(LayoutUnit top) noexcept;
+
     void SetLogicalLocation(LayoutPoint location) noexcept;
+
     void SetLogicalWidth(LayoutUnit size) noexcept;
+
     void SetLogicalHeight(LayoutUnit size) noexcept;
+
     void SetLogicalSize(LayoutSize size) noexcept;
 
     KRYS_NODISCARD LayoutPoint Location() const noexcept
@@ -216,6 +226,7 @@ namespace krys::boo
     // The content area of the box (excludes padding - and intrinsic padding for table cells, etc... - and
     // border).
     KRYS_NODISCARD LayoutRect ContentBoxRect() const noexcept;
+
     KRYS_NODISCARD LayoutPoint ContentBoxLocation() const noexcept;
 
     // This returns the content area of the box (excluding padding and border). The only difference with
@@ -226,6 +237,7 @@ namespace krys::boo
     // These represent your location relative to your container as a physical offset.
     // In layout related methods you almost always want the logical location (e.g. x() and y()).
     KRYS_NODISCARD LayoutPoint TopLeftLocation() const noexcept;
+
     KRYS_NODISCARD LayoutSize TopLeftLocationOffset() const noexcept;
 
 #pragma endregion
@@ -234,13 +246,21 @@ namespace krys::boo
 
     // Note these functions are not equivalent of childrenOfType<RenderBox>
     KRYS_NODISCARD RenderBox *ParentBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *FirstChildBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *FirstInFlowChildBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *LastChildBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *LastInFlowChildBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *PreviousSiblingBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *PreviousInFlowSiblingBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *NextSiblingBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *NextInFlowSiblingBox() const noexcept;
 
     KRYS_NODISCARD bool IsGridItem() const noexcept
@@ -272,6 +292,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit LogicalLeftLayoutOverflow() const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalRightLayoutOverflow() const noexcept;
 
     KRYS_NODISCARD LayoutRect VisualOverflowRect() const noexcept
@@ -280,16 +301,22 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit LogicalLeftVisualOverflow() const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalRightVisualOverflow() const noexcept;
 
     // RenderBox's basic implementation accounts for the writing mode (only).
     KRYS_NODISCARD virtual LayoutOptionalOutsets AllowedLayoutOverflow() const noexcept;
+
     void AddLayoutOverflow(const LayoutRect &rect) noexcept;
+
     void AddVisualOverflow(const LayoutRect &rect) noexcept;
+
     void ClearOverflow() noexcept;
+
     RenderOverflow &EnsureOverflow() noexcept;
 
     void AddVisualEffectOverflow() noexcept;
+
     KRYS_NODISCARD LayoutRect ApplyVisualEffectOverflow(const LayoutRect &borderBox) const noexcept;
 
 #pragma region Repaint
@@ -307,21 +334,29 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect
       OutlineBoundsForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept final;
+
     KRYS_NODISCARD Maybe<RepaintRects>
       ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
                                      VisibleRectContext context) const noexcept override;
+
     /// @brief Repaints the box at its old and new positions if layout moved it from @p oldRect.
     void RepaintDuringLayoutIfMoved(const LayoutRect &oldRect) noexcept;
+
     /// @brief Repaints the floats overhanging the box that it paints (or, with @p paintAllDescendants, that
     /// are its descendants).
     virtual void RepaintOverhangingFloats(bool paintAllDescendants) noexcept;
+
     void FlipForWritingMode(RepaintRects &rects) const noexcept;
+
     /// @brief Whether the box scrolls its overflow on layers.
     KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
+
     bool ApplyCachedClipAndScrollPosition(RepaintRects &rects, const RenderLayerModelObject *container,
                                           VisibleRectContext context) const noexcept final;
+
     /// @brief The size the overflow clip clips to: the layer's, which stays as it was until layout finishes.
     KRYS_NODISCARD LayoutSize CachedSizeForOverflowClip() const noexcept;
+
     /// @brief The border box with its visual effects (outline, shadows, border image outsets).
     KRYS_NODISCARD LayoutRect LocalOutlineBoundsRepaintRect() const noexcept;
 
@@ -339,15 +374,20 @@ namespace krys::boo
     {
       RecomputeFloats,
     };
+
     virtual void AddOverflowFromInFlowChildren(EnumSet<ComputeOverflowOptions> options = {}) noexcept;
+
     void AddOverflowFromContainedBox(const RenderBox &child,
                                      EnumSet<ComputeOverflowOptions> options = {}) noexcept;
 
     KRYS_NODISCARD LayoutRect
       LogicalVisualOverflowRectForPropagation(WritingMode parentWritingMode) const noexcept;
+
     KRYS_NODISCARD LayoutRect VisualOverflowRectForPropagation(WritingMode parentWritingMode) const noexcept;
+
     KRYS_NODISCARD LayoutRect
       LogicalLayoutOverflowRectForPropagation(WritingMode parentWritingMode) const noexcept;
+
     KRYS_NODISCARD LayoutRect LayoutOverflowRectForPropagation(WritingMode parentWritingMode) const noexcept;
 
     KRYS_NODISCARD bool HasRenderOverflow() const noexcept
@@ -361,6 +401,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool HasHorizontalLayoutOverflow() const noexcept;
+
     KRYS_NODISCARD bool HasVerticalLayoutOverflow() const noexcept;
 
 #pragma endregion
@@ -368,17 +409,27 @@ namespace krys::boo
 #pragma region Content, padding and client boxes
 
     KRYS_NODISCARD LayoutSize ContentBoxSize() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ContentBoxWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ContentBoxHeight() const noexcept;
+
     KRYS_NODISCARD LayoutSize ContentBoxLogicalSize() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ContentBoxLogicalWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ContentBoxLogicalHeight() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ContentBoxLogicalWidth(LayoutUnit overridingBorderBoxWidth) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ContentBoxLogicalHeight(LayoutUnit overridingBorderBoxHeight) const noexcept;
 
     KRYS_NODISCARD LayoutUnit PaddingBoxWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit PaddingBoxHeight() const noexcept;
+
     KRYS_NODISCARD LayoutRect PaddingBoxRect() const noexcept;
+
     KRYS_NODISCARD LayoutRect PaddingBoxRectIncludingScrollbar() const noexcept;
 
     // IE extensions. Used to calculate offsetWidth/Height.  Overridden by inlines (RenderFlow)
@@ -394,22 +445,31 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit OffsetLeft() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit OffsetTop() const noexcept override;
 
     // More IE extensions.  clientWidth and clientHeight represent the interior of an object
     // excluding border and scrollbar.  clientLeft/Top are just the borderLeftWidth and borderTopWidth.
     KRYS_NODISCARD LayoutUnit ClientLeft() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ClientTop() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ClientWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ClientHeight() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ClientLogicalWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ClientLogicalHeight() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ClientLogicalBottom() const noexcept;
+
     KRYS_NODISCARD LayoutRect ClientBoxRect() const noexcept;
 
     // scrollWidth/scrollHeight will be the same as clientWidth/clientHeight unless the
     // object has overflow:hidden/scroll/auto specified and also has overflow.
     KRYS_NODISCARD virtual int32 ScrollWidth() const noexcept;
+
     KRYS_NODISCARD virtual int32 ScrollHeight() const noexcept;
 
 #pragma endregion
@@ -472,6 +532,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit MarginLogicalLeft() const noexcept;
+
     KRYS_NODISCARD LayoutUnit MarginLogicalRight() const noexcept;
 
     using RenderBoxModelObject::MarginAfter;
@@ -522,8 +583,11 @@ namespace krys::boo
     }
 
     void SetMarginBefore(LayoutUnit value) noexcept;
+
     void SetMarginAfter(LayoutUnit value) noexcept;
+
     void SetMarginStart(LayoutUnit value) noexcept;
+
     void SetMarginEnd(LayoutUnit value) noexcept;
 
     KRYS_NODISCARD virtual bool IsSelfCollapsingBlock() const noexcept
@@ -546,7 +610,9 @@ namespace krys::boo
                                                  style::MarginTrimSide marginSide) const noexcept;
 
     void MarkMarginAsTrimmed(style::MarginTrimSide newTrimmedMargin) noexcept;
+
     void ClearTrimmedMarginsMarkings() noexcept;
+
     KRYS_NODISCARD bool HasTrimmedMargin(Maybe<style::MarginTrimSide> marginTrimType) const noexcept;
 
     struct ComputedMarginValues
@@ -574,6 +640,7 @@ namespace krys::boo
     // Used to resolve margins in the containing block's block-flow direction.
     void ComputeBlockDirectionMargins(const RenderBlock &containingBlock, LayoutUnit &marginBefore,
                                       LayoutUnit &marginAfter) const noexcept;
+
     void ComputeAndSetBlockDirectionMargins(const RenderBlock &containingBlock) noexcept;
 
 #pragma endregion
@@ -583,28 +650,44 @@ namespace krys::boo
     void Layout() noexcept override;
 
     KRYS_NODISCARD virtual LayoutUnit MinPreferredLogicalWidth() const noexcept;
+
     KRYS_NODISCARD virtual LayoutUnit MaxPreferredLogicalWidth() const noexcept;
+
     virtual void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                                LayoutUnit &maxLogicalWidth) const noexcept = 0;
 
     KRYS_NODISCARD Maybe<LayoutUnit> OverridingBorderBoxLogicalWidth() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> OverridingBorderBoxLogicalHeight() const noexcept;
+
     void SetOverridingBorderBoxLogicalHeight(LayoutUnit height) noexcept;
+
     void SetOverridingBorderBoxLogicalWidth(LayoutUnit width) noexcept;
+
     void ClearOverridingBorderBoxLogicalHeight() noexcept;
+
     void ClearOverridingBorderBoxLogicalWidth() noexcept;
+
     void ClearOverridingSize() noexcept;
 
     // Grid item's containing block is not the grid container, but the grid area, for which we don't have a
     // renderer.
     using GridAreaSize = Maybe<LayoutUnit>;
+
     KRYS_NODISCARD Maybe<GridAreaSize> GridAreaContentWidth(WritingMode writingMode) const noexcept;
+
     KRYS_NODISCARD Maybe<GridAreaSize> GridAreaContentHeight(WritingMode writingMode) const noexcept;
+
     KRYS_NODISCARD Maybe<GridAreaSize> GridAreaContentLogicalWidth() const noexcept;
+
     KRYS_NODISCARD Maybe<GridAreaSize> GridAreaContentLogicalHeight() const noexcept;
+
     void SetGridAreaContentLogicalWidth(GridAreaSize logicalWidth) noexcept;
+
     void SetGridAreaContentLogicalHeight(GridAreaSize logicalHeight) noexcept;
+
     void ClearGridAreaContentSize() noexcept;
+
     void ClearGridAreaContentLogicalHeight() noexcept;
 
     // These are currently only used by Flexbox code. In some cases we must layout flex items with a different
@@ -612,27 +695,38 @@ namespace krys::boo
     // value of flex basis, i.e., the initial main size of the flex item before the free space is distributed.
     KRYS_NODISCARD Maybe<style::PreferredSize>
       OverridingLogicalHeightForFlexBasisComputation() const noexcept;
+
     KRYS_NODISCARD Maybe<style::PreferredSize> OverridingLogicalWidthForFlexBasisComputation() const noexcept;
+
     void SetOverridingBorderBoxLogicalHeightForFlexBasisComputation(
       const style::PreferredSize &logicalHeight) noexcept;
+
     void SetOverridingBorderBoxLogicalWidthForFlexBasisComputation(
       const style::PreferredSize &logicalWidth) noexcept;
+
     void ClearOverridingLogicalHeightForFlexBasisComputation() noexcept;
+
     void ClearOverridingLogicalWidthForFlexBasisComputation() noexcept;
 
     KRYS_NODISCARD LayoutUnit AdjustBorderBoxLogicalWidthForBoxSizing(
       const style::Length<css::NonNegativeUnzoomed> &logicalWidth) const noexcept;
+
     KRYS_NODISCARD LayoutUnit
       AdjustBorderBoxLogicalWidthForBoxSizing(LayoutUnit computedLogicalWidth) const noexcept;
+
     KRYS_NODISCARD LayoutUnit AdjustContentBoxLogicalWidthForBoxSizing(
       const style::Length<css::NonNegativeUnzoomed> &logicalWidth) const noexcept;
+
     KRYS_NODISCARD LayoutUnit
       AdjustContentBoxLogicalWidthForBoxSizing(LayoutUnit computedLogicalWidth) const noexcept;
+
     // Overridden by fieldsets to subtract out the intrinsic border.
     KRYS_NODISCARD virtual LayoutUnit
       AdjustBorderBoxLogicalHeightForBoxSizing(LayoutUnit height) const noexcept;
+
     KRYS_NODISCARD virtual LayoutUnit
       AdjustContentBoxLogicalHeightForBoxSizing(Maybe<LayoutUnit> height) const noexcept;
+
     KRYS_NODISCARD virtual LayoutUnit
       AdjustIntrinsicLogicalHeightForBoxSizing(LayoutUnit height) const noexcept;
 
@@ -641,25 +735,35 @@ namespace krys::boo
       No,
       Yes,
     };
+
     KRYS_NODISCARD LayoutUnit ConstrainLogicalWidthByMinMax(
       LayoutUnit logicalWidth, LayoutUnit availableWidth, const RenderBlock &containingBlock,
       AllowIntrinsic allowIntrinsic = AllowIntrinsic::Yes) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ConstrainLogicalHeightByMinMax(
       LayoutUnit logicalHeight, Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ConstrainContentBoxLogicalHeightByMinMax(
       LayoutUnit logicalHeight, Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
 
     KRYS_NODISCARD LayoutUnit ContainingBlockLogicalWidthForContent() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit
       ContainingBlockLogicalHeightForContent(AvailableLogicalHeightType heightType) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ContainingBlockAvailableLineWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit PerpendicularContainingBlockLogicalHeight() const noexcept;
 
     virtual void UpdateLogicalWidth() noexcept;
+
     void UpdateLogicalHeight() noexcept;
+
     void CacheIntrinsicContentLogicalHeightForFlexItem(LayoutUnit height) const noexcept;
+
     KRYS_NODISCARD virtual LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept;
+
     void ComputeLogicalWidth(LogicalExtentComputedValues &computedValues) const noexcept;
 
     void OverrideLogicalHeightForSizeContainment() noexcept;
@@ -680,6 +784,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit IntrinsicLogicalWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit IntrinsicLogicalHeight() const noexcept;
 
     // Whether or not the element shrinks to its intrinsic width (rather than filling the width
@@ -688,9 +793,12 @@ namespace krys::boo
     KRYS_NODISCARD bool SizesPreferredLogicalWidthToFitContent() const noexcept;
 
     KRYS_NODISCARD bool HasStretchedLogicalHeight() const noexcept;
+
     KRYS_NODISCARD bool
       HasStretchedLogicalWidth(StretchingMode stretchingMode = StretchingMode::Any) const noexcept;
+
     KRYS_NODISCARD bool IsStretchingColumnFlexItem() const noexcept;
+
     KRYS_NODISCARD bool ColumnFlexItemHasStretchAlignment() const noexcept;
 
     KRYS_NODISCARD LayoutUnit
@@ -700,12 +808,15 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit ComputeLogicalWidthUsing(const style::PreferredSize &logicalWidth,
                                                        LayoutUnit availableLogicalWidth,
                                                        const RenderBlock &containingBlock) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeLogicalWidthUsing(const style::MinimumSize &logicalWidth,
                                                        LayoutUnit availableLogicalWidth,
                                                        const RenderBlock &containingBlock) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeLogicalWidthUsing(const style::MaximumSize &logicalWidth,
                                                        LayoutUnit availableLogicalWidth,
                                                        const RenderBlock &containingBlock) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeLogicalWidthUsing(const style::FlexBasis &logicalWidth,
                                                        LayoutUnit availableLogicalWidth,
                                                        const RenderBlock &containingBlock) const noexcept;
@@ -713,9 +824,11 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeLogicalHeightUsing(const style::PreferredSize &logicalHeight,
                                 Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeLogicalHeightUsing(const style::MinimumSize &logicalHeight,
                                 Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeLogicalHeightUsing(const style::MaximumSize &logicalHeight,
                                 Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
@@ -723,12 +836,15 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeContentLogicalHeight(const style::PreferredSize &logicalHeight,
                                   Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeContentLogicalHeight(const style::MinimumSize &logicalHeight,
                                   Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeContentLogicalHeight(const style::MaximumSize &logicalHeight,
                                   Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeContentLogicalHeight(const style::FlexBasis &logicalHeight,
                                   Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
@@ -738,34 +854,41 @@ namespace krys::boo
       No,
       Yes,
     };
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputePercentageLogicalHeight(const style::PreferredSize &logicalHeight,
                                      UpdatePercentageHeightDescendants updateDescendants =
                                        UpdatePercentageHeightDescendants::Yes) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputePercentageLogicalHeight(const style::MinimumSize &logicalHeight,
                                      UpdatePercentageHeightDescendants updateDescendants =
                                        UpdatePercentageHeightDescendants::Yes) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputePercentageLogicalHeight(const style::MaximumSize &logicalHeight,
                                      UpdatePercentageHeightDescendants updateDescendants =
                                        UpdatePercentageHeightDescendants::Yes) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputePercentageLogicalHeight(const style::FlexBasis &logicalHeight,
                                      UpdatePercentageHeightDescendants updateDescendants =
                                        UpdatePercentageHeightDescendants::Yes) const noexcept;
+
     KRYS_NODISCARD bool HasAutoHeightOrContainingBlockWithAutoHeight(
       UpdatePercentageHeightDescendants updatePercentageDescendants =
         UpdatePercentageHeightDescendants::Yes) const noexcept;
 
     KRYS_NODISCARD virtual LayoutUnit
       AvailableLogicalHeight(AvailableLogicalHeightType heightType) const noexcept;
+
     KRYS_NODISCARD LayoutUnit AvailableLogicalHeightUsing(
       const style::PreferredSize &logicalHeight, AvailableLogicalHeightType heightType) const noexcept;
 
     KRYS_NODISCARD bool PercentageLogicalHeightIsResolvable() const noexcept;
 
     KRYS_NODISCARD bool ShrinkToAvoidFloats() const noexcept;
+
     KRYS_NODISCARD bool AvoidsFloats() const noexcept;
 
     KRYS_NODISCARD virtual Maybe<LayoutUnit> FirstLineBaseline() const noexcept
@@ -783,18 +906,24 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool ShouldInvalidatePreferredWidths() const noexcept;
 
     KRYS_NODISCARD virtual bool HasRelativeDimensions() const noexcept;
+
     KRYS_NODISCARD virtual bool HasRelativeLogicalHeight() const noexcept;
+
     KRYS_NODISCARD virtual bool HasRelativeLogicalWidth() const noexcept;
 
     KRYS_NODISCARD bool ShouldComputeLogicalHeightFromAspectRatio() const noexcept;
 
     KRYS_NODISCARD bool ShouldIgnoreLogicalMinMaxWidthSizes() const noexcept;
+
     KRYS_NODISCARD bool ShouldIgnoreLogicalMinMaxHeightSizes() const noexcept;
 
     // The explicit intrinsic inner size of contain-intrinsic-size
     KRYS_NODISCARD Maybe<LayoutUnit> ExplicitIntrinsicInnerWidth() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> ExplicitIntrinsicInnerHeight() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> ExplicitIntrinsicInnerLogicalWidth() const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit> ExplicitIntrinsicInnerLogicalHeight() const noexcept;
 
     KRYS_NODISCARD bool ComputeHasTransformRelatedProperty(const RenderStyle &styleToUse) const noexcept;
@@ -802,22 +931,31 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit ComputeIntrinsicLogicalWidthUsing(const style::PreferredSize &logicalWidth,
                                                                 LayoutUnit availableLogicalWidth,
                                                                 LayoutUnit borderAndPadding) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeIntrinsicLogicalWidthUsing(const style::MinimumSize &logicalWidth,
                                                                 LayoutUnit availableLogicalWidth,
                                                                 LayoutUnit borderAndPadding) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeIntrinsicLogicalWidthUsing(const style::MaximumSize &logicalWidth,
                                                                 LayoutUnit availableLogicalWidth,
                                                                 LayoutUnit borderAndPadding) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeIntrinsicLogicalWidthUsing(const style::FlexBasis &logicalWidth,
                                                                 LayoutUnit availableLogicalWidth,
                                                                 LayoutUnit borderAndPadding) const noexcept;
 
     KRYS_NODISCARD bool IncludeVerticalScrollbarSize() const noexcept;
+
     KRYS_NODISCARD bool IncludeHorizontalScrollbarSize() const noexcept;
+
     KRYS_NODISCARD bool CanUseOverlayScrollbars() const noexcept;
+
     KRYS_NODISCARD bool HasAutoScrollbar(ScrollbarOrientation orientation) const noexcept;
+
     KRYS_NODISCARD bool HasAlwaysPresentScrollbar(ScrollbarOrientation orientation) const noexcept;
+
     KRYS_NODISCARD virtual bool CanBeProgramaticallyScrolled() const noexcept;
+
     KRYS_NODISCARD bool CanBeScrolledAndHasScrollableArea() const noexcept;
 
     /// @brief Whether the box clips its content to `ControlClipRect` (a form control's insides).
@@ -834,10 +972,13 @@ namespace krys::boo
     /// @brief Scrolls the box to bring @p positionInWindow into view, while a mouse drag selects past its
     /// edge.
     virtual void Autoscroll(const IntPoint &positionInWindow) noexcept;
+
     KRYS_NODISCARD bool CanAutoscroll() const noexcept;
+
     /// @brief How far @p windowPoint is within the band along the box's edges that autoscrolls, as an offset
     /// out of the box.
     KRYS_NODISCARD IntSize CalculateAutoscrollDirection(const IntPoint &windowPoint) const noexcept;
+
     /// @brief @p renderer or its nearest ancestor that can autoscroll.
     KRYS_NODISCARD static RenderBox *FindAutoscrollable(RenderObject *renderer) noexcept;
 
@@ -848,6 +989,7 @@ namespace krys::boo
     /// @brief Scrolls the box towards @p mousePosition, the further from @p source the faster (both in the
     /// window).
     virtual void PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept;
+
     /// @brief Scrolls the box, or else its nearest containing block that scrolls, by @p stepCount steps of
     /// @p granularity in @p direction; the render view's isn't one.
     /// @param stopElement If given and set, the scroll goes no further than that element; it's set to the
@@ -856,20 +998,29 @@ namespace krys::boo
     virtual bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
                         dom::Element **stopElement = nullptr,
                         ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
+
     /// @brief As `Scroll`, in a direction relative to the box's writing mode.
     virtual bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
                                uint32 stepCount = 1, dom::Element **stopElement = nullptr,
                                ScrollIsAnimated animated = ScrollIsAnimated::No) noexcept;
+
     KRYS_NODISCARD bool RequiresLayerWithScrollableArea() const noexcept;
+
     KRYS_NODISCARD virtual int32 ScrollLeft() const noexcept;
+
     KRYS_NODISCARD virtual int32 ScrollTop() const noexcept;
+
     KRYS_NODISCARD ScrollPosition GetScrollPosition() const noexcept;
+
     /// @brief The scroll position, constrained to the scrollable area's range (without any overscroll).
     KRYS_NODISCARD ScrollPosition ConstrainedScrollPosition() const noexcept;
+
     virtual void SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options =
                                                 ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+
     virtual void SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &options =
                                               ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+
     virtual void SetScrollPosition(const ScrollPosition &position,
                                    const ScrollPositionChangeOptions &options =
                                      ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
@@ -878,15 +1029,21 @@ namespace krys::boo
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &transformState,
                              EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept override;
+
     void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
                                  TransformState &transformState) const noexcept override;
+
     const RenderElement *PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
                                                 RenderGeometryMap &geometryMap) const noexcept override;
+
     KRYS_NODISCARD LayoutSize
       OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
                           bool *offsetDependsOnPoint = nullptr) const noexcept override;
+
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+
     /// @brief The content box in absolute coordinates.
     KRYS_NODISCARD FloatQuad AbsoluteContentQuad() const noexcept;
 
@@ -896,19 +1053,31 @@ namespace krys::boo
 
 #pragma endregion
     KRYS_NODISCARD virtual int32 VerticalScrollbarWidth() const noexcept;
+
     KRYS_NODISCARD virtual int32 HorizontalScrollbarHeight() const noexcept;
+
     KRYS_NODISCARD int32 IntrinsicScrollbarLogicalWidthIncludingGutter() const noexcept;
+
     KRYS_NODISCARD int32 ScrollbarLogicalWidth() const noexcept;
+
     KRYS_NODISCARD int32 ScrollbarLogicalHeight() const noexcept;
 
     KRYS_NODISCARD bool ScrollsOverflow() const noexcept;
+
     KRYS_NODISCARD bool ScrollsOverflowX() const noexcept;
+
     KRYS_NODISCARD bool ScrollsOverflowY() const noexcept;
+
     KRYS_NODISCARD bool HasHorizontalOverflow() const noexcept;
+
     KRYS_NODISCARD bool HasVerticalOverflow() const noexcept;
+
     KRYS_NODISCARD bool HasScrollableOverflowX() const noexcept;
+
     KRYS_NODISCARD bool HasScrollableOverflowY() const noexcept;
+
     KRYS_NODISCARD bool IsScrollContainerX() const noexcept;
+
     KRYS_NODISCARD bool IsScrollContainerY() const noexcept;
 
     KRYS_NODISCARD virtual bool HasIntrinsicAspectRatio() const noexcept;
@@ -919,12 +1088,18 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutPoint FlipForWritingModeForChild(const RenderBox &child,
                                                           const LayoutPoint &point) const noexcept;
+
     // The offset is in the block direction (y for horizontal writing modes, x for vertical writing modes).
     KRYS_NODISCARD LayoutUnit FlipForWritingMode(LayoutUnit position) const noexcept;
+
     KRYS_NODISCARD LayoutPoint FlipForWritingMode(const LayoutPoint &position) const noexcept;
+
     KRYS_NODISCARD FloatPoint FlipForWritingMode(const FloatPoint &position) const noexcept;
+
     KRYS_NODISCARD LayoutSize FlipForWritingMode(const LayoutSize &offset) const noexcept;
+
     void FlipForWritingMode(LayoutRect &rect) const noexcept;
+
     void FlipForWritingMode(FloatRect &rect) const noexcept;
 
 #pragma endregion
@@ -955,11 +1130,14 @@ namespace krys::boo
   protected:
     RenderBox(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
               TypeSpecificFlags typeSpecificFlags = {}) noexcept;
+
     RenderBox(Type type, dom::Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
               TypeSpecificFlags typeSpecificFlags = {}) noexcept;
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
+
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
     void UpdateFromStyle() noexcept override;
 
   public:
@@ -968,6 +1146,7 @@ namespace krys::boo
     void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
                         const FloatRect &boundingBox,
                         EnumSet<style::TransformResolverOption> options) const noexcept override;
+
     using RenderLayerModelObject::ApplyTransform;
 
     KRYS_NODISCARD FloatRect ReferenceBoxRect(CSSBoxType boxType) const noexcept override;
@@ -993,8 +1172,10 @@ namespace krys::boo
     /// fragment.
     KRYS_NODISCARD RenderFragmentContainer *
       ClampToStartAndEndFragments(RenderFragmentContainer *fragment) const noexcept;
+
     /// @brief The box's logical top in its fragmented flow (or the paginated layout), 0 outside one.
     KRYS_NODISCARD virtual LayoutUnit OffsetFromLogicalTopOfFirstPage() const noexcept;
+
     /// @brief What the box has in @p fragment, if it has been laid out there.
     KRYS_NODISCARD RenderBoxFragmentInfo *
       GetRenderBoxFragmentInfo(RenderFragmentContainer *fragment) const noexcept;
@@ -1008,6 +1189,7 @@ namespace krys::boo
     /// @brief Whether the box mustn't be split across columns (replaced boxes, form controls, scrollers,
     /// writing mode roots and size-contained boxes).
     KRYS_NODISCARD bool IsUnsplittableForPagination() const noexcept;
+
     /// @brief Whether the box scrolls its overflow in the block direction and has a specified height, so
     /// splitting it would split its scrollbar.
     KRYS_NODISCARD bool HasUnsplittableScrollingOverflow() const noexcept;
@@ -1034,10 +1216,13 @@ namespace krys::boo
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction action) noexcept override;
+
     KRYS_NODISCARD bool HitTestVisualOverflow(const HitTestLocation &hitTestLocation,
                                               const LayoutPoint &accumulatedOffset) const noexcept;
+
     KRYS_NODISCARD bool HitTestClipPath(const HitTestLocation &hitTestLocation,
                                         const LayoutPoint &accumulatedOffset) const noexcept;
+
     KRYS_NODISCARD bool HitTestBorderRadius(const HitTestLocation &hitTestLocation,
                                             const LayoutPoint &accumulatedOffset) const noexcept;
 
@@ -1052,22 +1237,30 @@ namespace krys::boo
     }
 
     virtual void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept;
+
     virtual void PaintMask(PaintInfo &, const LayoutPoint &) noexcept;
+
     /// @brief Paints the mask images and the mask border into @p paintRect: into a transparency layer that
     /// masks what's beneath (`destination-in`), unless the mask is composited.
     void PaintMaskImages(const PaintInfo &, const LayoutRect &paintRect) noexcept;
+
     /// @brief What the mask paints into: the mask border's area with its outsets, or the union of the mask
     /// images' destination rects.
     KRYS_NODISCARD LayoutRect MaskClipRect(const LayoutPoint &paintOffset) noexcept;
+
     virtual void PaintClippingMask(PaintInfo &, const LayoutPoint &) noexcept;
 
     KRYS_NODISCARD BleedAvoidance DetermineBleedAvoidance(GraphicsContext &) const noexcept;
 
     /// @brief The control part the theme draws the box with, made for its used appearance.
     ControlPart *EnsureControlPart() noexcept;
+
     ControlPart *EnsureControlPartForRenderer() noexcept;
+
     ControlPart *EnsureControlPartForBorderOnly() noexcept;
+
     ControlPart *EnsureControlPartForDecorations() noexcept;
+
     KRYS_NODISCARD bool BackgroundHasOpaqueTopLayer() const noexcept;
 
     /// @brief Whether the box's background is hidden by what's painted over it, so needn't be painted.
@@ -1081,11 +1274,13 @@ namespace krys::boo
     /// @brief Clips to the box's overflow clip for painting its contents, painting the background phase first
     /// if it's to be painted under the clip; false if the box doesn't clip.
     bool PushContentsClip(PaintInfo &, const LayoutPoint &accumulatedOffset) noexcept;
+
     void PopContentsClip(PaintInfo &, PaintPhase originalPhase,
                          const LayoutPoint &accumulatedOffset) noexcept;
 
     void ClipToPaddingBoxShape(GraphicsContext &, const LayoutPoint &,
                                float deviceScaleFactor) const noexcept;
+
     void ClipToContentBoxShape(GraphicsContext &, const LayoutPoint &,
                                float deviceScaleFactor) const noexcept;
 
@@ -1098,6 +1293,7 @@ namespace krys::boo
 
   public:
     void RemoveFloatingOrOutOfFlowChildFromBlockLists() noexcept;
+
     void RemoveFloatingAndInvalidateForLayout() noexcept;
 
     void MarkShapeOutsideDependentsForLayout() noexcept
@@ -1114,6 +1310,7 @@ namespace krys::boo
     void AddOverflowFromFloatBox(const FloatingObject &floatBox) noexcept;
 
     void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+
     /// @brief Repaints the rects @p layers paint @p image in; background layers of the root paint the view's.
     /// @return Whether that repainted the whole box.
     template <typename TLayers>
@@ -1125,8 +1322,11 @@ namespace krys::boo
 
     void UpdateShapeOutsideInfoAfterStyleChange(const RenderStyle &style,
                                                 const RenderStyle *oldStyle) noexcept;
+
     void UpdateGridPositionAfterStyleChange(const RenderStyle &style, const RenderStyle *oldStyle) noexcept;
+
     ShapeOutsideInfo &EnsureShapeOutsideInfo() noexcept;
+
     void RemoveShapeOutsideInfo() noexcept;
 
     KRYS_NODISCARD bool ShouldTrimChildMargin(style::MarginTrimSide type,
@@ -1139,20 +1339,24 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual bool ShouldResetLogicalHeightBeforeLayout() const noexcept;
+
     void ResetLogicalHeightBeforeLayoutIfNeeded() noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeIntrinsicLogicalContentHeightUsing(const style::PreferredSize &logicalHeight,
                                                 Maybe<LayoutUnit> intrinsicContentHeight,
                                                 LayoutUnit borderAndPadding) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeIntrinsicLogicalContentHeightUsing(const style::MinimumSize &logicalHeight,
                                                 Maybe<LayoutUnit> intrinsicContentHeight,
                                                 LayoutUnit borderAndPadding) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeIntrinsicLogicalContentHeightUsing(const style::MaximumSize &logicalHeight,
                                                 Maybe<LayoutUnit> intrinsicContentHeight,
                                                 LayoutUnit borderAndPadding) const noexcept;
+
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeIntrinsicLogicalContentHeightUsing(const style::FlexBasis &logicalHeight,
                                                 Maybe<LayoutUnit> intrinsicContentHeight,
@@ -1163,23 +1367,33 @@ namespace krys::boo
                                                      bool isPerpendicularWritingMode) const noexcept;
 
     KRYS_NODISCARD Maybe<double> ResolveAspectRatio() const noexcept;
+
     KRYS_NODISCARD bool ShouldIgnoreAspectRatio() const noexcept;
+
     KRYS_NODISCARD bool IsRenderReplacedWithIntrinsicRatio() const noexcept;
+
     KRYS_NODISCARD bool ShouldComputeLogicalWidthFromAspectRatio() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeLogicalWidthFromAspectRatioInternal() const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeLogicalWidthFromAspectRatio() const noexcept;
+
     KRYS_NODISCARD Pair<LayoutUnit, LayoutUnit> ComputeMinMaxLogicalWidthFromAspectRatio() const noexcept;
+
     KRYS_NODISCARD Pair<LayoutUnit, LayoutUnit> ComputeMinMaxLogicalHeightFromAspectRatio() const noexcept;
+
     enum class ConstrainDimension : uint8
     {
       Width,
       Height,
     };
+
     enum class MinimumSizeIsAutomaticContentBased : bool
     {
       No,
       Yes,
     };
+
     void ConstrainLogicalMinMaxSizesByAspectRatio(LayoutUnit &computedMinSize, LayoutUnit &computedMaxSize,
                                                   LayoutUnit computedSize,
                                                   MinimumSizeIsAutomaticContentBased minimumSizeType,
@@ -1205,6 +1419,7 @@ namespace krys::boo
     // These values are used in shrink-to-fit layout systems.
     // These include tables, positioned objects, floats and flexible boxes.
     virtual void ComputePreferredLogicalWidths() noexcept;
+
     KRYS_NODISCARD bool ShouldComputePreferredLogicalWidthsFromStyle() const noexcept;
 
     KRYS_NODISCARD virtual ItemPosition
@@ -1236,19 +1451,24 @@ namespace krys::boo
                                                         const Function &computeInlineMargin) const noexcept;
 
     KRYS_NODISCARD LayoutUnit FillAvailableMeasure(LayoutUnit availableLogicalWidth) const noexcept;
+
     KRYS_NODISCARD LayoutUnit FillAvailableMeasure(LayoutUnit availableLogicalWidth, LayoutUnit &marginStart,
                                                    LayoutUnit &marginEnd) const noexcept;
 
     void ComputeOutOfFlowPositionedLogicalHeight(LogicalExtentComputedValues &computedValues) const noexcept;
+
     template <typename SizeType>
     KRYS_NODISCARD LayoutUnit ComputeOutOfFlowPositionedLogicalWidthUsing(
       const SizeType &logicalWidth, const PositionedLayoutConstraints &inlineConstraints) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeOutOfFlowPositionedLogicalHeightUsing(
       const style::PreferredSize &logicalHeight, LayoutUnit computedHeight,
       const PositionedLayoutConstraints &blockConstraints) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeOutOfFlowPositionedLogicalHeightUsing(
       const style::MinimumSize &logicalHeight, LayoutUnit computedHeight,
       const PositionedLayoutConstraints &blockConstraints) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeOutOfFlowPositionedLogicalHeightUsing(
       const style::MaximumSize &logicalHeight, LayoutUnit computedHeight,
       const PositionedLayoutConstraints &blockConstraints) const noexcept;
@@ -1261,9 +1481,11 @@ namespace krys::boo
       MinContent,
       FitContent,
     };
+
     void ComputeIntrinsicKeywordLogicalWidths(IntrinsicKeyword keyword, LayoutUnit borderAndPadding,
                                               LayoutUnit &minLogicalWidth,
                                               LayoutUnit &maxLogicalWidth) const noexcept;
+
     KRYS_NODISCARD LayoutUnit ComputeIntrinsicLogicalWidthUsing(IntrinsicKeyword keyword,
                                                                 LayoutUnit availableLogicalWidth,
                                                                 LayoutUnit borderAndPadding) const noexcept;
@@ -1272,6 +1494,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit
       ComputeLogicalWidthUsingGeneric(const SizeType &logicalWidth, LayoutUnit availableLogicalWidth,
                                       const RenderBlock &containingBlock) const noexcept;
+
     template <typename SizeType>
     KRYS_NODISCARD LayoutUnit
       ComputeIntrinsicLogicalWidthUsingGeneric(const SizeType &logicalWidth, LayoutUnit availableLogicalWidth,
@@ -1281,20 +1504,24 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeLogicalHeightUsingGeneric(const SizeType &logicalHeight,
                                        Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
+
     template <typename SizeType>
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeIntrinsicLogicalContentHeightUsingGeneric(const SizeType &logicalHeight,
                                                        Maybe<LayoutUnit> intrinsicContentHeight,
                                                        LayoutUnit borderAndPadding) const noexcept;
+
     template <typename SizeType>
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputePercentageLogicalHeightGeneric(const SizeType &logicalHeight,
                                             UpdatePercentageHeightDescendants updateDescendants =
                                               UpdatePercentageHeightDescendants::Yes) const noexcept;
+
     template <typename SizeType>
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeContentLogicalHeightGeneric(const SizeType &logicalHeight,
                                          Maybe<LayoutUnit> intrinsicContentHeight) const noexcept;
+
     template <typename SizeType>
     KRYS_NODISCARD Maybe<LayoutUnit>
       ComputeContentAndScrollbarLogicalHeightUsing(const SizeType &logicalHeight,

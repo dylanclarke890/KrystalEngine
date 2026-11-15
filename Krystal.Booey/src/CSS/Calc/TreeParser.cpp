@@ -107,12 +107,19 @@ namespace krys::boo::css::calc
 
   KRYS_NODISCARD static Maybe<TypedChild> ParseCalcFunction(TokenRange &, ValueId functionId, int depth,
                                                             ParserState &) noexcept;
+
   KRYS_NODISCARD static Maybe<TypedChild> ParseCalcSum(TokenRange &, int depth, ParserState &) noexcept;
+
   KRYS_NODISCARD static Maybe<TypedChild> ParseCalcProduct(TokenRange &, int depth, ParserState &) noexcept;
+
   KRYS_NODISCARD static Maybe<TypedChild> ParseCalcValue(TokenRange &, int depth, ParserState &) noexcept;
+
   KRYS_NODISCARD static Maybe<TypedChild> ParseCalcKeyword(const Token &, ParserState &) noexcept;
+
   KRYS_NODISCARD static Maybe<TypedChild> ParseCalcNumber(const Token &, ParserState &) noexcept;
+
   KRYS_NODISCARD static Maybe<TypedChild> ParseCalcPercentage(const Token &, ParserState &) noexcept;
+
   KRYS_NODISCARD static Maybe<TypedChild> ParseCalcDimension(const Token &, ParserState &) noexcept;
 
   Maybe<Tree> ParseAndSimplify(TokenRange &range, css::PropertyParserState &propertyParserState,

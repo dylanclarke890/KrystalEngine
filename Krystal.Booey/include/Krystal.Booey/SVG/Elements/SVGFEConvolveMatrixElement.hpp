@@ -98,6 +98,7 @@ namespace krys::boo::svg
     explicit SVGFEConvolveMatrixElement(dom::Document &document) noexcept;
 
     void SetOrder(float orderX, float orderY) noexcept;
+
     void SetKernelUnitLength(float kernelUnitLengthX, float kernelUnitLengthY) noexcept;
 
     KRYS_NODISCARD dom::DOMString In1() const noexcept
@@ -226,9 +227,11 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD bool IsValidTargetXOffset() const noexcept;
+
     KRYS_NODISCARD bool IsValidTargetYOffset() const noexcept;
 
     bool SetFilterEffectAttribute(FilterEffect &effect,

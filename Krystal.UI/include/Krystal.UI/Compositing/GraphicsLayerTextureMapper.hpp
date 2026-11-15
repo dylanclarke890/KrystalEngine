@@ -81,50 +81,84 @@ namespace krys::ui
 
   public:
     explicit GraphicsLayerTextureMapper(Type layerType, boo::GraphicsLayerClient &client) noexcept;
+
     ~GraphicsLayerTextureMapper() noexcept override;
 
     // GraphicsLayer
     bool SetChildren(List<Ref<GraphicsLayer>> &&children) noexcept override;
+
     void AddChild(Ref<GraphicsLayer> &&layer) noexcept override;
+
     void AddChildAtIndex(Ref<GraphicsLayer> &&layer, int32 index) noexcept override;
+
     void AddChildAbove(Ref<GraphicsLayer> &&layer, GraphicsLayer *sibling) noexcept override;
+
     void AddChildBelow(Ref<GraphicsLayer> &&layer, GraphicsLayer *sibling) noexcept override;
+
     bool ReplaceChild(GraphicsLayer *oldChild, Ref<GraphicsLayer> &&newChild) noexcept override;
 
     void SetMaskLayer(RefPtr<GraphicsLayer> &&value) noexcept override;
+
     void SetReplicatedByLayer(RefPtr<GraphicsLayer> &&value) noexcept override;
+
     void SetPosition(const boo::FloatPoint &value) noexcept override;
+
     void SetBoundsOrigin(const boo::FloatPoint &value) noexcept override;
+
     void SetAnchorPoint(const boo::FloatPoint3D &value) noexcept override;
+
     void SetSize(const boo::FloatSize &value) noexcept override;
+
     void SetTransform(const boo::TransformationMatrix &value) noexcept override;
+
     void SetChildrenTransform(const boo::TransformationMatrix &value) noexcept override;
+
     void SetPreserves3D(bool value) noexcept override;
+
     void SetMasksToBounds(bool value) noexcept override;
+
     void SetDrawsContent(bool value) noexcept override;
+
     void SetContentsVisible(bool value) noexcept override;
+
     void SetContentsMinificationFilter(ScalingFilter filter) noexcept override;
+
     void SetContentsMagnificationFilter(ScalingFilter filter) noexcept override;
+
     void SetContentsOpaque(bool value) noexcept override;
+
     void SetBackfaceVisibility(bool value) noexcept override;
+
     void SetBackgroundColor(const boo::Color &value) noexcept override;
+
     void SetOpacity(float value) noexcept override;
+
     bool SetFilters(const boo::FilterOperations &filters) noexcept override;
+
     bool SetBackdropFilters(const boo::FilterOperations &filters) noexcept override;
+
     void SetBackdropFiltersRect(const boo::FloatRoundedRect &backdropFiltersRect) noexcept override;
 
     void SetNeedsDisplay() noexcept override;
+
     void SetNeedsDisplayInRect(const boo::FloatRect &rect,
                                ShouldClipToLayer = ShouldClipToLayer::Clip) noexcept override;
+
     void SetContentsNeedsDisplay() noexcept override;
+
     void SetContentsRect(const boo::FloatRect &value) noexcept override;
+
     void SetContentsClippingRect(const boo::FloatRoundedRect &rect) noexcept override;
+
     void SetContentsRectClipsDescendants(bool contentsRectClipsDescendants) noexcept override;
 
     void SetContentsToImage(boo::Image *image) noexcept override;
+
     void SetContentsToSolidColor(const boo::Color &color) noexcept override;
+
     void SetContentsToPlatformLayer(TextureMapperPlatformLayer *platformLayer,
                                     ContentsLayerPurpose purpose) noexcept;
+
     void SetContentsDisplayDelegate(RefPtr<boo::GraphicsLayerContentsDisplayDelegate> &&delegate,
                                     ContentsLayerPurpose purpose) noexcept override;
 
@@ -136,16 +170,23 @@ namespace krys::ui
     bool AddAnimation(const boo::GraphicsLayerKeyframeValueList &valueList,
                       const boo::GraphicsLayerAnimation *animation, const utf8_string &keyframesName,
                       double timeOffset) noexcept override;
+
     void PauseAnimation(const utf8_string &animationName, double timeOffset) noexcept override;
+
     void SuspendAnimations(MonotonicTime::duration time) noexcept override;
+
     void ResumeAnimations() noexcept override;
+
     void RemoveAnimation(const utf8_string &animationName, Maybe<boo::AnimatedProperty>) noexcept override;
 
     void SetShowDebugBorder(bool show) noexcept override;
+
     void SetDebugBorder(const boo::Color &color, float width) noexcept override;
+
     void SetShowRepaintCounter(bool show) noexcept override;
 
     void FlushCompositingState(const boo::FloatRect &visibleRect) noexcept override;
+
     void FlushCompositingStateForThisLayerOnly() noexcept override;
 
     void UpdateBackingStoreIncludingSubLayers(TextureMapper &textureMapper) noexcept;
@@ -194,11 +235,17 @@ namespace krys::ui
     }
 
     void CommitLayerChanges() noexcept;
+
     void UpdateDebugBorderAndRepaintCount() noexcept;
+
     void UpdateBackingStoreIfNeeded(TextureMapper &textureMapper) noexcept;
+
     void PrepareBackingStoreIfNeeded() noexcept;
+
     KRYS_NODISCARD bool ShouldHaveBackingStore() const noexcept;
+
     KRYS_NODISCARD bool FiltersCanBeComposited(const boo::FilterOperations &filters) const noexcept;
+
     void UpdateVisibleRects(const boo::FloatRect &visibleRect) noexcept;
 
     void NotifyChange(ChangeMask changeMask) noexcept;

@@ -55,6 +55,7 @@ namespace krys::boo
 
   public:
     explicit AutoTableLayout(RenderTable *table) noexcept;
+
     ~AutoTableLayout() noexcept override;
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minWidth, LayoutUnit &maxWidth,
@@ -66,13 +67,16 @@ namespace krys::boo
     }
 
     void ApplyPreferredLogicalWidthQuirks(LayoutUnit &minWidth, LayoutUnit &maxWidth) const noexcept override;
+
     void Layout() noexcept override;
 
   private:
     void FullRecalc() noexcept;
+
     void RecalcColumn(uint32 effCol) noexcept;
 
     KRYS_NODISCARD float CalcEffectiveLogicalWidth() noexcept;
+
     template <typename T>
     KRYS_NODISCARD float ShrinkCellWidthForType(float available) noexcept;
 

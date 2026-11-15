@@ -76,40 +76,56 @@ namespace krys::boo
 
   public:
     StyleOriginatedTimelinesController() noexcept;
+
     ~StyleOriginatedTimelinesController() noexcept;
 
     void RegisterNamedScrollTimeline(const css::CSSOMStringAtom &name, const style::Styleable &source,
                                      ScrollAxis axis) noexcept;
+
     void RegisterNamedViewTimeline(const css::CSSOMStringAtom &name, const style::Styleable &subject,
                                    ScrollAxis axis, const style::ViewTimelineInsetItem &insets) noexcept;
+
     void UnregisterNamedTimeline(const css::CSSOMStringAtom &name,
                                  const style::Styleable &styleable) noexcept;
+
     void AttachAnimation(CSSAnimation &animation) noexcept;
+
     void UpdateNamedTimelineMapForTimelineScope(const style::NameScope &scope,
                                                 const style::Styleable &styleable) noexcept;
+
     void UpdateTimelineForTimelineScope(const Ref<ScrollTimeline> &timeline,
                                         const css::CSSOMStringAtom &name) noexcept;
+
     void UnregisterNamedTimelinesAssociatedWithElement(const style::Styleable &styleable) noexcept;
+
     void RemovePendingOperationsForCSSAnimation(const CSSAnimation &animation) noexcept;
+
     KRYS_NODISCARD bool IsPendingTimelineAttachment(const WebAnimation &animation) const noexcept;
+
     void DocumentDidResolveStyle() noexcept;
+
     void StyleableWasRemoved(const style::Styleable &styleable) noexcept;
 
   private:
     KRYS_NODISCARD List<Ref<ScrollTimeline>> &TimelinesForName(const css::CSSOMStringAtom &name) noexcept;
+
     KRYS_NODISCARD List<style::WeakStyleable>
       RelatedTimelineScopeElements(const css::CustomIdentifier &name) noexcept;
+
     void UpdateCSSAnimationsAssociatedWithNamedTimeline(const css::CSSOMStringAtom &name) noexcept;
 
     void AttachAnimation(CSSAnimation &animation, AllowsDeferral allowsDeferral) noexcept;
+
     KRYS_NODISCARD ScrollTimeline *
       DetermineTimelineForElement(const List<Ref<ScrollTimeline>> &timelines,
                                   const style::Styleable &styleable,
                                   const List<style::WeakStyleable> &timelineScopeElements) noexcept;
+
     KRYS_NODISCARD ScrollTimeline *
       DetermineTreeOrder(const List<Ref<ScrollTimeline>> &ancestorTimelines,
                          const style::Styleable &styleable,
                          const List<style::WeakStyleable> &timelineScopeElements) noexcept;
+
     KRYS_NODISCARD ScrollTimeline &InactiveNamedTimeline(const css::CSSOMStringAtom &name) noexcept;
   };
 }

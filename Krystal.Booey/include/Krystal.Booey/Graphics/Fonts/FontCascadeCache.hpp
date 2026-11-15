@@ -71,6 +71,7 @@ namespace krys::boo
 
   public:
     FontFamilyName() noexcept;
+
     FontFamilyName(const StringAtom &name) noexcept;
 
     KRYS_NODISCARD const StringAtom &String() const noexcept
@@ -79,6 +80,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool operator==(const FontFamilyName &other) const noexcept;
+
     KRYS_NODISCARD size_t Hash() const noexcept;
   };
 
@@ -115,8 +117,11 @@ namespace krys::boo
     KRYS_NODISCARD static FontCascadeCache &Singleton() noexcept;
 
     void Invalidate() noexcept;
+
     void ClearWidthCaches() noexcept;
+
     void PruneUnreferencedEntries() noexcept;
+
     void PruneSystemFallbackFonts() noexcept;
 
     KRYS_NODISCARD Ref<FontCascadeFonts> RetrieveOrAddCachedFonts(const FontCascadeDescription &description,

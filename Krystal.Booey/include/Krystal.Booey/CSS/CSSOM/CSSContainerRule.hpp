@@ -52,13 +52,17 @@ namespace krys::boo::css
                                                        CSSStyleSheet *parent) noexcept;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     KRYS_NODISCARD CSSOMString ConditionText() const noexcept final;
+
     /// @brief The name of the rule's only condition, or empty if it has several.
     /// @see https://drafts.csswg.org/css-conditional-5/#dom-csscontainerrule-containername
     KRYS_NODISCARD CSSOMString ContainerName() const noexcept;
+
     /// @brief The query of the rule's only condition, or empty if it has several.
     /// @see https://drafts.csswg.org/css-conditional-5/#dom-csscontainerrule-containerquery
     KRYS_NODISCARD CSSOMString ContainerQuery() const noexcept;
+
     /// @see https://drafts.csswg.org/css-conditional-5/#dom-csscontainerrule-conditions
     KRYS_NODISCARD List<CSSContainerCondition> Conditions() const noexcept;
 

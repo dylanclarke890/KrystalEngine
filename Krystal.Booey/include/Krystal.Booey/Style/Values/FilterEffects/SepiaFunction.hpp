@@ -44,6 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD css::Sepia ToCSSSepia(const BasicColorMatrixFilterOperation &,
                                          const RenderStyle &) noexcept;
+
     KRYS_NODISCARD Ref<FilterOperation> CreateFilterOperation(const css::Sepia &,
                                                               const BuilderState &) noexcept;
   }

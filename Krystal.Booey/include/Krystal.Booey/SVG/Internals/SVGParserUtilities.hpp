@@ -52,12 +52,14 @@ namespace krys::boo::svg
 
   /// @brief The number `string` is, after any leading whitespace; 0 if it isn't one.
   KRYS_NODISCARD float ToFloatOrZero(dom::DOMStringView string) noexcept;
+
   /// @brief The number @p string spells, after any leading whitespace; null if anything else follows it.
   KRYS_NODISCARD Maybe<double> ToDouble(dom::DOMStringView string) noexcept;
 
   KRYS_NODISCARD Maybe<bool> ParseArcFlag(dom::DOMStringView &buffer) noexcept;
 
   KRYS_NODISCARD Maybe<FloatPoint> ParsePoint(dom::DOMStringView string) noexcept;
+
   KRYS_NODISCARD Maybe<FloatRect> ParseRect(dom::DOMStringView string) noexcept;
 
   KRYS_NODISCARD Maybe<FloatPoint> ParseFloatPoint(dom::DOMStringView &buffer) noexcept;

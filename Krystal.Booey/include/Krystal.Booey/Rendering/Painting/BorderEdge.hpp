@@ -52,6 +52,7 @@ namespace krys::boo
 
   public:
     BorderEdge() noexcept = default;
+
     BorderEdge(float edgeWidth, boo::Color edgeColor, BorderStyle edgeStyle, bool edgeIsTransparent,
                bool edgeIsPresent, float devicePixelRatio) noexcept;
 
@@ -101,7 +102,9 @@ namespace krys::boo
     }
 
     void GetDoubleBorderStripeWidths(LayoutUnit &outerWidth, LayoutUnit &innerWidth) const noexcept;
+
     KRYS_NODISCARD bool ObscuresBackgroundEdge(float scale) const noexcept;
+
     KRYS_NODISCARD bool ObscuresBackground() const noexcept;
 
   private:
@@ -118,6 +121,7 @@ namespace krys::boo
                                             RectEdges<bool> closedEdges = RectEdges<bool> {true},
                                             LayoutSize inflation = {},
                                             bool setColorsToBlack = false) noexcept;
+
   KRYS_NODISCARD BorderEdges GetBorderEdgesForOutline(const RenderStyle &, BorderStyle,
                                                       float deviceScaleFactor) noexcept;
 

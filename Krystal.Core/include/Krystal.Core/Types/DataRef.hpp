@@ -31,6 +31,7 @@ namespace krys
     }
 
     DataRef(DataRef &&) noexcept = default;
+
     DataRef &operator=(DataRef &&) noexcept = default;
 
     KRYS_NODISCARD operator const T &() const noexcept KRYS_LIFETIME_BOUND

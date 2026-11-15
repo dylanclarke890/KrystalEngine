@@ -59,8 +59,11 @@ namespace krys::boo
 
   public:
     RenderedPosition() noexcept;
+
     explicit RenderedPosition(const VisiblePosition &position) noexcept;
+
     explicit RenderedPosition(const dom::Position &position, Affinity affinity) noexcept;
+
     KRYS_NODISCARD bool IsEquivalent(const RenderedPosition &other) const noexcept;
 
     KRYS_NODISCARD bool IsNull() const noexcept
@@ -84,8 +87,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD uint8 BidiLevelOnLeft() const noexcept;
+
     KRYS_NODISCARD uint8 BidiLevelOnRight() const noexcept;
+
     KRYS_NODISCARD RenderedPosition LeftBoundaryOfBidiRun(uint8 bidiLevelOfRun) const noexcept;
+
     KRYS_NODISCARD RenderedPosition RightBoundaryOfBidiRun(uint8 bidiLevelOfRun) const noexcept;
 
     enum class ShouldMatchBidiLevel : bool
@@ -117,6 +123,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD dom::Position PositionAtLeftBoundaryOfBiDiRun() const noexcept;
+
     KRYS_NODISCARD dom::Position PositionAtRightBoundaryOfBiDiRun() const noexcept;
 
     KRYS_NODISCARD bool AtLeftmostOffsetInBox() const noexcept
@@ -138,9 +145,12 @@ namespace krys::boo
                               uint32 offset) noexcept;
 
     KRYS_NODISCARD inline_iterator::LeafBoxIterator PreviousLeafOnLine() const noexcept;
+
     KRYS_NODISCARD inline_iterator::LeafBoxIterator NextLeafOnLine() const noexcept;
+
     KRYS_NODISCARD bool AtLeftBoundaryOfBidiRun(ShouldMatchBidiLevel shouldMatchBidiLevel,
                                                 uint8 bidiLevelOfRun) const noexcept;
+
     KRYS_NODISCARD bool AtRightBoundaryOfBidiRun(ShouldMatchBidiLevel shouldMatchBidiLevel,
                                                  uint8 bidiLevelOfRun) const noexcept;
   };

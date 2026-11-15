@@ -51,6 +51,7 @@ namespace krys::boo
 
   protected:
     StyleGeneratedImage(StyleImage::Type, bool fixedSize) noexcept;
+
     ~StyleGeneratedImage() noexcept override;
 
     KRYS_NODISCARD WrappedImagePtr Data() const noexcept final
@@ -81,7 +82,9 @@ namespace krys::boo
     KRYS_NODISCARD FloatSize ImageSize(const RenderElement *, float multiplier) const noexcept final;
 
     void AddClient(RenderElement &) noexcept final;
+
     void RemoveClient(RenderElement &) noexcept final;
+
     KRYS_NODISCARD bool HasClient(RenderElement &) const noexcept final;
 
     KRYS_NODISCARD const HashMap<RenderElement *, uint32> &Clients() const noexcept
@@ -108,6 +111,7 @@ namespace krys::boo
 
     /// @brief The image made for @p size, if it's still kept; it's then kept for longer.
     KRYS_NODISCARD GeneratedImage *CachedImageForSize(FloatSize size) noexcept;
+
     /// @brief Keeps @p image, made for @p size, until it hasn't been asked for in a few seconds.
     void SaveCachedImageForSize(FloatSize size, GeneratedImage &image) noexcept;
 

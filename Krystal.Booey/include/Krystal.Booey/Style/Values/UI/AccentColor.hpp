@@ -62,6 +62,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool Equals(const AccentColor &, const AccentColor &, const RenderStyle &,
                                const RenderStyle &) noexcept;
+
     KRYS_NODISCARD bool CanBlend(const AccentColor &, const AccentColor &) noexcept;
 
     KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const AccentColor &,

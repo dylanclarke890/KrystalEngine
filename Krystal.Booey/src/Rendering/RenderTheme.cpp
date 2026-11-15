@@ -79,6 +79,7 @@ namespace krys::boo
   using css::ValueId;
 
   RenderTheme::RenderTheme() noexcept = default;
+
   RenderTheme::~RenderTheme() noexcept = default;
 
   StyleAppearance RenderTheme::AdjustAppearanceForElement(RenderStyle &style, const RenderStyle &parentStyle,

@@ -218,11 +218,15 @@ namespace krys::boo
 
   private:
     GraphicsLayerAnimation() noexcept;
+
     GraphicsLayerAnimation(const GraphicsLayerAnimation &) noexcept;
   };
 
   TextStream &operator<<(TextStream &ts, const GraphicsLayerAnimation &animation) noexcept;
+
   TextStream &operator<<(TextStream &ts, GraphicsLayerAnimation::Direction direction) noexcept;
+
   TextStream &operator<<(TextStream &ts, GraphicsLayerAnimation::FillMode fillMode) noexcept;
+
   TextStream &operator<<(TextStream &ts, GraphicsLayerAnimation::PlayState playState) noexcept;
 }

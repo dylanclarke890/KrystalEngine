@@ -73,6 +73,7 @@ namespace krys::boo::svg
     ~SVGImage() noexcept override;
 
     KRYS_NODISCARD RenderBox *EmbeddedContentBox() const noexcept;
+
     KRYS_NODISCARD LocalFrameView *FrameView() const noexcept;
 
     KRYS_NODISCARD bool IsSVGImage() const noexcept final
@@ -89,14 +90,19 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool RenderingTaintsOrigin() const noexcept final;
 
     KRYS_NODISCARD bool HasRelativeWidth() const noexcept final;
+
     KRYS_NODISCARD bool HasRelativeHeight() const noexcept final;
 
     // Start the animation from the beginning.
     void StartAnimation() noexcept final;
+
     // Resume the animation from where it was last stopped.
     void ResumeAnimation() noexcept;
+
     void StopAnimation() noexcept final;
+
     void ResetAnimation() noexcept final;
+
     KRYS_NODISCARD bool IsAnimating() const noexcept final;
 
     void ScheduleStartAnimation() noexcept;
@@ -116,6 +122,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD utf8_string FilenameExtension() const noexcept final;
 
     void SetContainerSize(const FloatSize &) noexcept final;
+
     KRYS_NODISCARD IntSize ContainerSize() const noexcept;
 
     KRYS_NODISCARD bool UsesContainerSize() const noexcept final
@@ -141,9 +148,11 @@ namespace krys::boo::svg
 
     ImageDrawResult Draw(GraphicsContext &, const FloatRect &destination, const FloatRect &source,
                          ImagePaintingOptions = {}) noexcept final;
+
     ImageDrawResult DrawForContainer(GraphicsContext &, FloatSize containerSize, float containerZoom,
                                      const url::URL &initialFragmentURL, const FloatRect &dstRect,
                                      const FloatRect &srcRect, ImagePaintingOptions = {}) noexcept;
+
     void DrawPatternForContainer(GraphicsContext &, const FloatSize &containerSize, float containerZoom,
                                  const url::URL &initialFragmentURL, const FloatRect &srcRect,
                                  const AffineTransform &, const FloatPoint &phase, const FloatSize &spacing,

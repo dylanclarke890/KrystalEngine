@@ -55,6 +55,7 @@ namespace krys::boo
 
   private:
     void DoApply() noexcept override;
+
     void DoUnapply() noexcept override;
   };
 }

@@ -29,8 +29,8 @@
 
 namespace krys::boo::css
 {
-  class TokenRange;
   struct PropertyParserState;
+  class TokenRange;
   class Value;
 
   namespace PropertyParserHelpers

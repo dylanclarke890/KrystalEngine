@@ -231,11 +231,16 @@ namespace krys::boo::css
     KRYS_NODISCARD static bool AcceptsQuirkyLength(PropertyId id) noexcept;
 
     KRYS_NODISCARD static bool AcceptsQuirkyAngle(PropertyId id) noexcept;
+
     KRYS_NODISCARD static bool AnimationUsesNonAdditiveOrCumulativeInterpolation(PropertyId id) noexcept;
+
     KRYS_NODISCARD static bool AnimationUsesNonNormalizedDiscreteInterpolation(PropertyId id) noexcept;
+
     KRYS_NODISCARD static bool AnimationIsAccelerated(PropertyId id, const Settings &settings) noexcept;
+
     /// @brief The colour properties, whose visited link values depend on the link state.
     KRYS_NODISCARD static Span<const PropertyId> ColorProperties() noexcept;
+
     /// @brief The physical properties logical properties resolve to, which depend on the writing mode.
     KRYS_NODISCARD static Span<const PropertyId> PhysicalProperties() noexcept;
 

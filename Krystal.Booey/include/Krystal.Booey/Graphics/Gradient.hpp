@@ -86,6 +86,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<Gradient> Create(Data &&, ColourInterpolationMethod,
                                                GradientSpreadMethod = GradientSpreadMethod::Pad,
                                                GradientColorStops && = {}, bool isTransient = true) noexcept;
+
     ~Gradient() noexcept;
 
     KRYS_NODISCARD const Data &GetData() const noexcept

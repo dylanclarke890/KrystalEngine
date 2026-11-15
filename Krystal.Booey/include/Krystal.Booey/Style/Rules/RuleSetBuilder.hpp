@@ -83,7 +83,9 @@ namespace krys::boo::style
       css::mq::MediaQueryDynamicDependency AllDynamicDependencies {};
 
       KRYS_NODISCARD bool PushAndEvaluate(const css::mq::MediaQueryList &mediaQueries) noexcept;
+
       void Pop(const css::mq::MediaQueryList &mediaQueries) noexcept;
+
       void AddRuleIfNeeded(const RuleData &ruleData) noexcept;
     };
 
@@ -114,6 +116,7 @@ namespace krys::boo::style
   public:
     RuleSetBuilder(RuleSet &ruleSet, const css::mq::MediaQueryEvaluator &evaluator,
                    Resolver *resolver = nullptr, ShrinkToFit shrinkToFit = ShrinkToFit::Enable) noexcept;
+
     ~RuleSetBuilder() noexcept;
 
     void AddRulesFromSheet(const css::StyleSheetContents &sheet,
@@ -123,21 +126,30 @@ namespace krys::boo::style
 
   private:
     void AddStyleRule(css::StyleRuleWithNesting &rule) noexcept;
+
     void AddStyleRule(css::NestedDeclarationsRule &rule) noexcept;
+
     void AddRulesFromSheetContents(const css::StyleSheetContents &sheet) noexcept;
+
     void AddChildRules(const List<Ref<css::Rule>> &rules) noexcept;
+
     void AddChildRule(Ref<css::Rule> rule) noexcept;
+
     void DisallowDynamicMediaQueryEvaluationIfNeeded() noexcept;
 
     void AddStyleRuleWithSelectorList(const css::SelectorList &selectorList,
                                       const css::StyleRule &rule) noexcept;
 
     void RegisterLayers(const List<css::CascadeLayerName> &names) noexcept;
+
     void PushCascadeLayer(const css::CascadeLayerName &name) noexcept;
+
     void PopCascadeLayer(const css::CascadeLayerName &name) noexcept;
+
     void UpdateCascadeLayerPriorities() noexcept;
 
     void AddMutatingRulesToResolver() noexcept;
+
     void UpdateDynamicMediaQueries() noexcept;
 
     void ResolveSelectorListWithNesting(css::StyleRuleWithNesting &rule) noexcept;

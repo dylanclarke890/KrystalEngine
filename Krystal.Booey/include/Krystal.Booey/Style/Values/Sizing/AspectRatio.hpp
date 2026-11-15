@@ -139,6 +139,7 @@ namespace krys::boo::style
   struct Blending<AspectRatio>
   {
     KRYS_NODISCARD bool CanBlend(const AspectRatio &, const AspectRatio &) noexcept;
+
     AspectRatio Blend(const AspectRatio &, const AspectRatio &, const RenderStyle &, const RenderStyle &,
                       const BlendingContext &) noexcept;
   };

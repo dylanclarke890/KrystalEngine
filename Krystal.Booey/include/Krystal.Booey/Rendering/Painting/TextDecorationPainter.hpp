@@ -98,6 +98,7 @@ namespace krys::boo
                                     const BackgroundDecorationGeometry &decorationGeometry,
                                     style::TextDecorationLine decorationType,
                                     const Styles &decorationStyle) noexcept;
+
     /// @brief Paints the line-through, over the text.
     void PaintForegroundDecorations(const ForegroundDecorationGeometry &foregroundDecorationGeometry,
                                     const Styles &decorationStyle) noexcept;
@@ -105,6 +106,7 @@ namespace krys::boo
     /// @brief The colour decorations are painted in with @p style.
     KRYS_NODISCARD static Color DecorationColor(const RenderStyle &style,
                                                 EnumSet<PaintBehavior> paintBehavior = {}) noexcept;
+
     /// @brief The colour and style of each of @p requestedDecorations as they apply to @p renderer: from it
     /// and the ancestors they propagate from.
     /// @param firstLineStyle Whether the renderer is on the first line, so ancestors' first line styles
@@ -115,6 +117,7 @@ namespace krys::boo
                                                    style::TextDecorationLine requestedDecorations,
                                                    bool firstLineStyle = false,
                                                    EnumSet<PaintBehavior> paintBehavior = {}) noexcept;
+
     /// @brief The decorations @p style has a colour for.
     KRYS_NODISCARD static style::TextDecorationLine
       TextDecorationsInEffectForStyle(const TextDecorationPainter::Styles &style) noexcept;

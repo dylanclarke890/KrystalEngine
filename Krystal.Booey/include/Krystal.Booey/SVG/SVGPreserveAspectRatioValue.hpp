@@ -69,7 +69,9 @@ namespace krys::boo::svg
 
   public:
     SVGPreserveAspectRatioValue() noexcept = default;
+
     explicit SVGPreserveAspectRatioValue(dom::DOMStringView) noexcept;
+
     SVGPreserveAspectRatioValue(SVGPreserveAspectRatioType, SVGMeetOrSliceType) noexcept;
 
     KRYS_NODISCARD bool operator==(const SVGPreserveAspectRatioValue &) const noexcept = default;
@@ -95,6 +97,7 @@ namespace krys::boo::svg
                                           float physicalHeight) const noexcept;
 
     bool Parse(dom::DOMStringView) noexcept;
+
     bool Parse(dom::DOMStringView &buffer, bool validate) noexcept;
 
     KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept;

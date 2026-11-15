@@ -55,15 +55,21 @@ namespace krys::boo::css
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-create-a-type
     KRYS_NODISCARD static Maybe<CSSNumericType> Create(UnitType unit, int32 exponent = 1) noexcept;
+
     KRYS_NODISCARD friend bool operator==(const CSSNumericType &, const CSSNumericType &) noexcept = default;
+
     KRYS_NODISCARD static Maybe<CSSNumericType> AddTypes(const List<Ref<CSSNumericValue>> &values) noexcept;
+
     /// @see https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-add-two-types
     KRYS_NODISCARD static Maybe<CSSNumericType> AddTypes(CSSNumericType a, CSSNumericType b) noexcept;
+
     KRYS_NODISCARD static Maybe<CSSNumericType>
       MultiplyTypes(const List<Ref<CSSNumericValue>> &values) noexcept;
+
     /// @see https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-multiply-two-types
     KRYS_NODISCARD static Maybe<CSSNumericType> MultiplyTypes(const CSSNumericType &a,
                                                               const CSSNumericType &b) noexcept;
+
     KRYS_NODISCARD BaseTypeStorage &ValueForType(CSSNumericBaseType type) noexcept;
 
     KRYS_NODISCARD const BaseTypeStorage &ValueForType(CSSNumericBaseType type) const noexcept
@@ -73,6 +79,7 @@ namespace krys::boo::css
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#apply-the-percent-hint
     void ApplyPercentHint(CSSNumericBaseType hint) noexcept;
+
     KRYS_NODISCARD size_t NonZeroEntryCount() const noexcept;
 
     template <CSSNumericBaseType Type>

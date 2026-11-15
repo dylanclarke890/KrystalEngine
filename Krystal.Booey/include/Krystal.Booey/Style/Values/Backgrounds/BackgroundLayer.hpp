@@ -84,12 +84,16 @@ namespace krys::boo::style
     uint8 _origin : FillBoxBitWidth;
     uint8 _blendMode : 5;
     mutable uint8 _clipMax : FillBoxBitWidth; // maximum _clip value from this to bottom layer
+
     KRYS_FOR_EACH_BACKGROUND_LAYER_PROPERTY(KRYS_DECLARE_COORDINATED_VALUE_LIST_IS_SET_AND_IS_FILLED_MEMBERS)
 
   public:
     BackgroundLayer() noexcept;
+
     BackgroundLayer(css::keywords::None) noexcept;
+
     BackgroundLayer(ImageOrNone &&) noexcept;
+
     BackgroundLayer(RefPtr<StyleImage> &&) noexcept;
 
     KRYS_NODISCARD const ImageOrNone &GetImage() const noexcept

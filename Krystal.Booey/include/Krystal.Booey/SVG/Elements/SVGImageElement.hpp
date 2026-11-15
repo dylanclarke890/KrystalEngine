@@ -50,9 +50,11 @@ namespace krys::boo::svg
 
   public:
     explicit SVGImageElement(dom::Document &document) noexcept;
+
     ~SVGImageElement() noexcept override;
 
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
+
     KRYS_NODISCARD Maybe<dom::DOMString> ImageSourceURL() const noexcept final;
 
     KRYS_NODISCARD const SVGLengthValue &X() const noexcept
@@ -82,6 +84,7 @@ namespace krys::boo::svg
 
     /// @see https://svgwg.org/svg2-draft/embedded.html#__svg__SVGImageElement__crossOrigin
     KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;
+
     /// @see https://svgwg.org/svg2-draft/embedded.html#__svg__SVGImageElement__crossOrigin
     void CrossOrigin(Maybe<dom::DOMString> value) noexcept;
 
@@ -115,10 +118,13 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     void DidAttachRenderers() noexcept final;
+
     void OnInsert() noexcept final;
+
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
     KRYS_NODISCARD bool HaveLoadedRequiredResources() noexcept final;

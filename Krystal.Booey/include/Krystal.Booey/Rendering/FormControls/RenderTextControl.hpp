@@ -60,12 +60,15 @@ namespace krys::boo
     KRYS_NODISCARD float ScaleEmToUnits(int32 x) const noexcept;
 
     KRYS_NODISCARD virtual float GetAverageCharWidth() noexcept;
+
     KRYS_NODISCARD virtual LayoutUnit PreferredContentLogicalWidth(float charWidth) const noexcept = 0;
+
     KRYS_NODISCARD virtual LayoutUnit
       ComputeControlLogicalHeight(LayoutUnit lineHeight, LayoutUnit nonContentHeight) const noexcept = 0;
 
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
+
     void LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept override;
 
   private:
@@ -76,6 +79,7 @@ namespace krys::boo
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
+
     void ComputePreferredLogicalWidths() noexcept override;
 
     KRYS_NODISCARD bool CanHaveGeneratedChildren() const noexcept override
@@ -97,6 +101,7 @@ namespace krys::boo
 
   public:
     RenderTextControlInnerContainer(dom::Element &element, RenderStyle &&style) noexcept;
+
     ~RenderTextControlInnerContainer() noexcept override;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override

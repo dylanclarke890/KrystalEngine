@@ -33,18 +33,23 @@ namespace krys::boo::dom
     LiveHTMLCollection(ContainerNode &root, LiveHTMLCollectionFilterFunc &&filter,
                        LiveCollectionInvalidation invalidation = LiveCollectionInvalidation::TreeOnly,
                        LiveCollectionTraversal traversal = LiveCollectionTraversal::Descendants) noexcept;
+
     ~LiveHTMLCollection() noexcept override;
 
     KRYS_NODISCARD RefPtr<Element> Item(size_t index) noexcept override;
+
     KRYS_NODISCARD RefPtr<const Element> Item(size_t index) const noexcept override;
 
     KRYS_NODISCARD RefPtr<Element> operator[](size_t index) noexcept override;
+
     KRYS_NODISCARD RefPtr<const Element> operator[](size_t index) const noexcept override;
 
     KRYS_NODISCARD RefPtr<Element> NamedItem(DOMStringView name) noexcept override;
+
     KRYS_NODISCARD RefPtr<const Element> NamedItem(DOMStringView name) const noexcept override;
 
     KRYS_NODISCARD RefPtr<Element> operator[](DOMStringView name) noexcept override;
+
     KRYS_NODISCARD RefPtr<const Element> operator[](DOMStringView name) const noexcept override;
 
     KRYS_NODISCARD size_t Length() const noexcept override;
@@ -52,6 +57,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD List<DOMString> SupportedPropertyNames() const noexcept override;
 
     void InvalidateCache() noexcept override;
+
     void InvalidateCacheForAttribute(DOMStringAtom localName) noexcept override;
 
   protected:

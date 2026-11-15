@@ -44,9 +44,9 @@ namespace krys::boo::css
 {
   class MutableStyleProperties;
   class PrimitiveValue;
+  struct SerialisationContext;
   class Value;
   class ValuePool;
-  struct SerialisationContext;
 }
 
 namespace krys::boo::dom
@@ -66,8 +66,11 @@ namespace krys::boo::style
 
   public:
     explicit Extractor(dom::Node *) noexcept;
+
     Extractor(dom::Node *, const Maybe<style::PseudoElementIdentifier> &) noexcept;
+
     explicit Extractor(dom::Element *) noexcept;
+
     Extractor(dom::Element *, const Maybe<style::PseudoElementIdentifier> &) noexcept;
 
     enum class UpdateLayout : bool
@@ -116,9 +119,13 @@ namespace krys::boo::style
     // Helper methods for HTML editing.
     KRYS_NODISCARD Ref<css::MutableStyleProperties>
       CopyProperties(Span<const css::PropertyId>) const noexcept;
+
     KRYS_NODISCARD Ref<css::MutableStyleProperties> CopyProperties() const noexcept;
+
     KRYS_NODISCARD RefPtr<css::PrimitiveValue> GetFontSizeCSSValuePreferringKeyword() const noexcept;
+
     KRYS_NODISCARD bool UseFixedFontDefaultSize() const noexcept;
+
     KRYS_NODISCARD bool PropertyMatches(css::PropertyId, const css::Value *) const noexcept;
 
     static bool UpdateStyleIfNeededForProperty(dom::Element &, css::PropertyId) noexcept;

@@ -103,7 +103,9 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD bool IsZeroWidthSpaceSeparator() const noexcept;
+
     KRYS_NODISCARD bool IsQuirkNonBreakingSpace() const noexcept;
+
     KRYS_NODISCARD bool IsFullyTrimmable() const noexcept;
 
     KRYS_NODISCARD bool HasTrailingSoftHyphen() const noexcept
@@ -132,6 +134,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD InlineTextItem Left(uint32 length) const noexcept;
+
     KRYS_NODISCARD InlineTextItem Right(uint32 length, Maybe<InlineLayoutUnit> width) const noexcept;
 
     KRYS_NODISCARD static bool ShouldPreserveSpacesAndTabs(const InlineTextItem &inlineTextItem) noexcept;
@@ -140,6 +143,7 @@ namespace krys::boo::layout
     InlineTextItem(const InlineTextBox &inlineTextBox, uint32 start, uint32 length, UBiDiLevel bidiLevel,
                    bool hasTrailingSoftHyphen, bool isWordSeparator, Maybe<InlineLayoutUnit> width,
                    TextItemType textItemType) noexcept;
+
     explicit InlineTextItem(const InlineTextBox &inlineTextBox) noexcept;
 
     KRYS_NODISCARD InlineTextItem Split(size_t leftSideLength) noexcept;

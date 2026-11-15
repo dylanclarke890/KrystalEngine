@@ -151,6 +151,7 @@ namespace krys::boo::svg
     };
 
     explicit SVGTextPathElement(dom::Document &) noexcept;
+
     ~SVGTextPathElement() noexcept override;
 
     KRYS_NODISCARD const SVGLengthValue &StartOffset() const noexcept
@@ -191,13 +192,17 @@ namespace krys::boo::svg
 
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept override;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
+
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept final;
+
     KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final;
 
     void ClearResourceReferences() noexcept;
+
     void BuildPendingResource() noexcept override;
 
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;

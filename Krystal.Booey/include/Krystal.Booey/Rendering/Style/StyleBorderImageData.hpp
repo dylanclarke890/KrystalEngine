@@ -47,6 +47,7 @@ namespace krys::boo
 
   private:
     StyleBorderImageData() noexcept;
+
     StyleBorderImageData(const StyleBorderImageData &) noexcept;
   };
 }

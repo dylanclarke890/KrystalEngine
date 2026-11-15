@@ -45,6 +45,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGForeignObject(svg::SVGForeignObjectElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGForeignObject() noexcept override;
 
     KRYS_NODISCARD svg::SVGForeignObjectElement &ForeignObjectElement() const noexcept;
@@ -103,6 +104,7 @@ namespace krys::boo
     }
 
     void UpdateLogicalWidth() noexcept override;
+
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
 

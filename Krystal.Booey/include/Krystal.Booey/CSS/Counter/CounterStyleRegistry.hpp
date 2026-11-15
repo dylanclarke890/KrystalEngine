@@ -56,13 +56,16 @@ namespace krys::boo::css
 
     /// @brief The counter style named @p name, with its references resolved.
     KRYS_NODISCARD Ref<CounterStyle> ResolvedCounterStyle(const CSSOMStringAtom &name) noexcept;
+
     /// @brief The counter style @p style names, with its references resolved.
     KRYS_NODISCARD Ref<CounterStyle> ResolvedCounterStyle(const style::CounterStyle &style) noexcept;
+
     void ResolveReferencesIfNeeded() noexcept;
 
     void AddCounterStyle(const CounterStyleDescriptors &descriptors) noexcept;
 
     static void AddUserAgentCounterStyle(const CounterStyleDescriptors &descriptors) noexcept;
+
     static void ResolveUserAgentReferences() noexcept;
 
     KRYS_NODISCARD bool HasAuthorCounterStyles() const noexcept
@@ -79,7 +82,9 @@ namespace krys::boo::css
 
     // If no map is passed on, user-agent counter styles map will be used
     static void ResolveFallbackReference(CounterStyle &counter, CounterStyleMap *map = nullptr) noexcept;
+
     static void ResolveExtendsReference(CounterStyle &counter, CounterStyleMap *map = nullptr) noexcept;
+
     static void ResolveExtendsReference(CounterStyle &counter, HashSet<CounterStyle *> &countersInChain,
                                         CounterStyleMap *map = nullptr) noexcept;
 

@@ -46,6 +46,7 @@ namespace krys::boo::html
 
   public:
     HTMLFieldSetElement(dom::Document &document) noexcept;
+
     ~HTMLFieldSetElement() noexcept override;
 
 #pragma region HTMLFieldSetElement - https://html.spec.whatwg.org/#htmlfieldsetelement
@@ -79,11 +80,13 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLLegendElement *Legend() const noexcept;
 
     void AddInvalidDescendant(const HTMLElement &invalidFormControlElement) noexcept;
+
     void RemoveInvalidDescendant(const HTMLElement &formControlElement) noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
 
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final;
+
     KRYS_NODISCARD bool IsActuallyDisabled() const noexcept final;
 
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final
@@ -97,6 +100,7 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD bool MatchesValidPseudoClass() const noexcept final;
+
     KRYS_NODISCARD bool MatchesInvalidPseudoClass() const noexcept final;
 
   protected:
@@ -106,6 +110,7 @@ namespace krys::boo::html
     }
 
     void DisabledStateChanged() noexcept final;
+
     void OnChildrenChanged() noexcept final;
   };
 }

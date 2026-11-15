@@ -84,6 +84,7 @@ namespace krys::boo
     void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
 
     RenderListMarker(RenderListItem &listItem, RenderStyle &&style) noexcept;
+
     ~RenderListMarker() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
@@ -114,6 +115,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsInside() const noexcept;
+
     KRYS_NODISCARD bool IsDisclosureMarker() const noexcept;
 
     /// @brief Updates the marker's text from its list item's value and its style.
@@ -153,15 +155,21 @@ namespace krys::boo
     }
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept final;
+
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept final;
+
     void Layout() noexcept final;
+
     KRYS_NODISCARD Pair<float, float> LayoutBoundForTextContent(utf8_stringview text) const noexcept;
 
     void UpdateInlineMargins() noexcept;
+
     void UpdateContent() noexcept;
+
     KRYS_NODISCARD RenderBox *ParentBox(RenderBox &box) noexcept;
 
     KRYS_NODISCARD RefPtr<css::CounterStyle> GetCounterStyle() const noexcept;
+
     KRYS_NODISCARD bool WidthUsesMetricsOfPrimaryFont() const noexcept;
   };
 }

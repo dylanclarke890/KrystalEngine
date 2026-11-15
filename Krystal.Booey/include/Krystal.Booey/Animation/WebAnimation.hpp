@@ -91,21 +91,25 @@ namespace krys::boo
       No,
       Yes,
     };
+
     enum class SynchronouslyNotify : bool
     {
       No,
       Yes,
     };
+
     enum class RespectHoldTime : bool
     {
       No,
       Yes,
     };
+
     enum class AutoRewind : bool
     {
       No,
       Yes,
     };
+
     enum class TimeToRunPendingTask : uint8
     {
       NotScheduled,
@@ -151,6 +155,7 @@ namespace krys::boo
 
     /// @brief An animation of @p effect on @p document's default timeline.
     KRYS_NODISCARD static Ref<WebAnimation> Create(dom::Document &document, AnimationEffect *effect) noexcept;
+
     KRYS_NODISCARD static Ref<WebAnimation> Create(dom::Document &document, AnimationEffect *effect,
                                                    AnimationTimeline *timeline) noexcept;
 
@@ -201,6 +206,7 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/web-animations-1/#setting-the-associated-effect
     void SetEffect(RefPtr<AnimationEffect> &&newEffect) noexcept;
+
     KRYS_NODISCARD KeyframeEffect *GetKeyframeEffect() const noexcept;
 
     KRYS_NODISCARD virtual AnimationTimeline *BindingsTimeline() const noexcept
@@ -222,6 +228,7 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/web-animations-1/#the-current-time-of-an-animation
     KRYS_NODISCARD Maybe<WebAnimationTime>
       CurrentTime(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-2/#setting-the-current-time-of-an-animation
     dom::ExceptionOr<void> SetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept;
 
@@ -272,20 +279,28 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/web-animations-1/#cancel-an-animation
     virtual void Cancel(Silently silently = Silently::No) noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-1/#finish-an-animation
     dom::ExceptionOr<void> Finish() noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-2/#play-an-animation
     dom::ExceptionOr<void> Play() noexcept;
+
     /// @see https://drafts.csswg.org/web-animations/#seamlessly-update-the-playback-rate
     void UpdatePlaybackRate(double newPlaybackRate) noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-2/#pause-an-animation
     dom::ExceptionOr<void> Pause() noexcept;
+
     /// @brief Reverses the animation, as `reverse()` does.
     virtual dom::ExceptionOr<void> BindingsReverse() noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-1/#reverse-an-animation
     dom::ExceptionOr<void> Reverse() noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-persist
     void Persist() noexcept;
+
     /// @brief Writes the animation's current values into its target's `style` attribute.
     /// @return A `NoModificationAllowedError` if the target can't have a style attribute (a pseudo-element),
     /// or an `InvalidStateError` if it isn't rendered.
@@ -376,9 +391,13 @@ namespace krys::boo
     }
 
     virtual void SetBindingsRangeStart(TimelineRangeValue &&rangeStartValue) noexcept;
+
     virtual void SetBindingsRangeEnd(TimelineRangeValue &&rangeEndValue) noexcept;
+
     void SetRangeStart(style::SingleAnimationRangeStart &&rangeStart) noexcept;
+
     void SetRangeEnd(style::SingleAnimationRangeEnd &&rangeEnd) noexcept;
+
     /// @brief The animation's attachment range, with the edges set from C++ computed for its target.
     /// @see https://drafts.csswg.org/web-animations-2/#animation-attachment-range
     KRYS_NODISCARD const style::SingleAnimationRange &Range() noexcept;
@@ -391,7 +410,9 @@ namespace krys::boo
     void SetPendingStartTime(WebAnimationTime pendingStartTime) noexcept;
 
     KRYS_NODISCARD bool NeedsTick() const noexcept;
+
     virtual void Tick() noexcept;
+
     /// @brief How long until the animation next needs updating.
     KRYS_NODISCARD Seconds TimeToNextTick() const noexcept;
 
@@ -403,6 +424,7 @@ namespace krys::boo
 
     void EffectTargetDidChange(const Maybe<style::Styleable> &previousTarget,
                                const Maybe<style::Styleable> &newTarget) noexcept;
+
     void WillChangeRenderer() noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#relevant-animations-section
@@ -417,13 +439,16 @@ namespace krys::boo
     }
 
     void UpdateRelevance() noexcept;
+
     void EffectTimingDidChange() noexcept;
+
     /// @brief The scroll metrics of the source of the animation's progress-based timeline changed.
     void ProgressBasedTimelineSourceDidChangeMetrics() noexcept;
 
     /// @brief Stops changes to the animation from invalidating its effect's target's style, while it's being
     /// created during style resolution.
     void SuspendEffectInvalidation() noexcept;
+
     void UnsuspendEffectInvalidation() noexcept;
 
     KRYS_NODISCARD bool IsEffectInvalidationSuspended() const noexcept
@@ -432,6 +457,7 @@ namespace krys::boo
     }
 
     void SetSuspended(bool isSuspended) noexcept;
+
     /// @brief Tells the timeline the effect's accelerated actions changed, to apply them at the rendering
     /// update.
     void AcceleratedStateDidChange() noexcept;
@@ -473,21 +499,29 @@ namespace krys::boo
   protected:
     /// @brief Resolves the first ready promise.
     void Initialize() noexcept;
+
     void EnqueueAnimationEvent(Ref<AnimationEventBase> &&event) noexcept;
+
     virtual void AnimationDidFinish() noexcept;
+
     KRYS_NODISCARD WebAnimationTime ZeroTime() const noexcept;
 
   private:
     void TimingDidChange(DidSeek didSeek, SynchronouslyNotify synchronouslyNotify,
                          Silently silently = Silently::No) noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-1/#updating-the-finished-state
     void UpdateFinishedState(DidSeek didSeek, SynchronouslyNotify synchronouslyNotify) noexcept;
+
     KRYS_NODISCARD WebAnimationTime EffectEndTime() const noexcept;
+
     KRYS_NODISCARD Maybe<WebAnimationTime>
       CurrentTime(RespectHoldTime respectHoldTime,
                   UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-2/#silently-set-the-current-time
     dom::ExceptionOr<void> SilentlySetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-1/#finish-notification-steps
     void FinishNotificationSteps() noexcept;
 
@@ -502,23 +536,35 @@ namespace krys::boo
     }
 
     dom::ExceptionOr<void> Play(AutoRewind autoRewind) noexcept;
+
     void RunPendingPauseTask() noexcept;
+
     void RunPendingPlayTask() noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-1/#reset-an-animations-pending-tasks
     void ResetPendingTasks() noexcept;
+
     void SetEffectInternal(RefPtr<AnimationEffect> &&newEffect,
                            bool doNotRemoveFromTimeline = false) noexcept;
+
     void SetTimelineInternal(RefPtr<AnimationTimeline> &&timeline) noexcept;
+
     KRYS_NODISCARD bool ComputeRelevance() noexcept;
+
     void InvalidateEffect() noexcept;
+
     /// @see https://drafts.csswg.org/web-animations/#effective-playback-rate
     KRYS_NODISCARD double EffectivePlaybackRate() const noexcept;
+
     /// @see https://drafts.csswg.org/web-animations/#apply-any-pending-playback-rate
     void ApplyPendingPlaybackRate() noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-2/#ready
     void MaybeMarkAsReady() noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-2/#auto-aligning-start-time
     void AutoAlignStartTime() noexcept;
+
     /// @see https://drafts.csswg.org/web-animations-2/#validating-a-css-numberish-time
     KRYS_NODISCARD bool IsTimeValid(const Maybe<WebAnimationTime> &time) const noexcept;
   };

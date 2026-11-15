@@ -50,8 +50,11 @@ namespace krys::boo::style::interpolation
     virtual ~Client() noexcept = default;
 
     KRYS_NODISCARD virtual dom::Document *Document() const noexcept = 0;
+
     KRYS_NODISCARD virtual RenderElement *Renderer() const noexcept = 0;
+
     KRYS_NODISCARD virtual const RenderStyle &CurrentStyle() const noexcept = 0;
+
     KRYS_NODISCARD virtual Maybe<uint32> TransformFunctionListPrefix() const noexcept = 0;
   };
 }

@@ -38,28 +38,50 @@
 namespace krys::boo::css::calc
 {
   static auto Evaluate(const keywords::None &, const EvaluationOptions &) noexcept -> Maybe<keywords::None>;
+
   static auto Evaluate(const ChildOrNone &, const EvaluationOptions &) noexcept
     -> Maybe<Variant<double, keywords::None>>;
+
   static auto Evaluate(const Maybe<Child> &, const EvaluationOptions &) noexcept -> Maybe<Maybe<double>>;
+
   static auto Evaluate(const Child &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const Number &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const Percentage &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const CanonicalDimension &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const NonCanonicalDimension &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const Symbol &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const SiblingCount &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const SiblingIndex &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Sum> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Product> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Min> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Max> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Hypot> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Random> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Anchor> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<AnchorSize> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Sin> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Cos> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   static auto Evaluate(const IndirectNode<Tan> &, const EvaluationOptions &) noexcept -> Maybe<double>;
+
   template <typename Op>
   static auto Evaluate(const IndirectNode<Op> &, const EvaluationOptions &) noexcept -> Maybe<double>;
 

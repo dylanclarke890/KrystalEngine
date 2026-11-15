@@ -107,13 +107,16 @@ namespace krys::boo::html
     /// @brief Requests to close the watcher; its cancel action can always refuse.
     /// @see https://html.spec.whatwg.org/#dom-closewatcher-requestclose
     void RequestClose() noexcept;
+
     /// @brief Requests to close the watcher; its cancel action can refuse unless
     /// @p requireHistoryActionActivation and the window has no history-action activation or group to spare.
     /// @return Whether the watcher closed (or couldn't be asked): false if the cancel action refused.
     /// @see https://html.spec.whatwg.org/#close-watcher-request-close
     bool RequestToClose(bool requireHistoryActionActivation) noexcept;
+
     /// @see https://html.spec.whatwg.org/#close-watcher-close
     void Close() noexcept;
+
     /// @see https://html.spec.whatwg.org/#close-watcher-destroy
     void Destroy() noexcept;
 

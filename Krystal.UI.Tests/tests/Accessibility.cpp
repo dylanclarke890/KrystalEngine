@@ -565,7 +565,9 @@ namespace krys::ui::tests
       T *Pointer {nullptr};
 
       ComRef() noexcept = default;
+
       ComRef(const ComRef &) = delete;
+
       ComRef &operator=(const ComRef &) = delete;
 
       ~ComRef() noexcept

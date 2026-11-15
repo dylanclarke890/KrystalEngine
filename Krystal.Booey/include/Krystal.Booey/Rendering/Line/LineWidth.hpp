@@ -57,7 +57,9 @@ namespace krys::boo
     explicit LineWidth(RenderBlockFlow &) noexcept;
 
     KRYS_NODISCARD bool FitsOnLine(bool ignoringTrailingSpace = false) const noexcept;
+
     KRYS_NODISCARD bool FitsOnLineIncludingExtraWidth(float extra) const noexcept;
+
     KRYS_NODISCARD bool FitsOnLineExcludingTrailingWhitespace(float extra) const noexcept;
 
     KRYS_NODISCARD float CurrentWidth() const noexcept
@@ -110,11 +112,14 @@ namespace krys::boo
     }
 
     void Commit() noexcept;
+
     void SetTrailingWhitespaceWidth(float collapsedWhitespace, float borderPaddingMargin = 0) noexcept;
 
   private:
     void ComputeAvailableWidthFromLeftAndRight() noexcept;
+
     KRYS_NODISCARD bool FitsOnLineExcludingTrailingCollapsedWhitespace() const noexcept;
+
     void UpdateLineDimension(LayoutUnit newLineTop, LayoutUnit newLineWidth, float newLineLeft,
                              float newLineRight) noexcept;
   };

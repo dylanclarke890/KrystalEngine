@@ -51,15 +51,22 @@ namespace krys::boo::css
                                                                CSSColorPercent alpha = 1.0) noexcept;
 
     KRYS_NODISCARD CSSColorRGBComp R() const noexcept;
+
     /// @return A `SyntaxError` if @p red isn't a number or percentage or `none`.
     dom::ExceptionOr<void> SetR(CSSColorRGBComp red) noexcept;
+
     KRYS_NODISCARD CSSColorRGBComp G() const noexcept;
+
     /// @return A `SyntaxError` if @p green isn't a number or percentage or `none`.
     dom::ExceptionOr<void> SetG(CSSColorRGBComp green) noexcept;
+
     KRYS_NODISCARD CSSColorRGBComp B() const noexcept;
+
     /// @return A `SyntaxError` if @p blue isn't a number or percentage or `none`.
     dom::ExceptionOr<void> SetB(CSSColorRGBComp blue) noexcept;
+
     KRYS_NODISCARD CSSColorPercent Alpha() const noexcept;
+
     /// @return A `SyntaxError` if @p alpha isn't a percentage or `none`.
     dom::ExceptionOr<void> SetAlpha(CSSColorPercent alpha) noexcept;
 

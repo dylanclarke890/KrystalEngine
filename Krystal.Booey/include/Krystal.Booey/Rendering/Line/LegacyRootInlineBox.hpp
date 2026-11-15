@@ -46,6 +46,7 @@ namespace krys::boo
 
   public:
     explicit LegacyRootInlineBox(RenderBlockFlow &) noexcept;
+
     ~LegacyRootInlineBox() noexcept override = default;
 
     KRYS_NODISCARD RenderBlockFlow &BlockFlow() const noexcept;
@@ -90,6 +91,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LayoutUnit SelectionTop() const noexcept;
+
     KRYS_NODISCARD LayoutUnit SelectionBottom() const noexcept;
 
     KRYS_NODISCARD LayoutUnit SelectionHeight() const noexcept
@@ -114,7 +116,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderObject::HighlightState SelectionState() const noexcept final;
+
     KRYS_NODISCARD const LegacyInlineBox *FirstSelectedBox() const noexcept;
+
     KRYS_NODISCARD const LegacyInlineBox *LastSelectedBox() const noexcept;
 
     void RemoveLineBoxFromRenderObject() noexcept final;

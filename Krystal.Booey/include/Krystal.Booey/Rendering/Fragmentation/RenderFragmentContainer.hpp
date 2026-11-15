@@ -83,6 +83,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutPoint FragmentedFlowPortionLocation() const noexcept;
 
     virtual void AttachFragment() noexcept;
+
     virtual void DetachFragment() noexcept;
 
     KRYS_NODISCARD RenderFragmentedFlow *FragmentedFlow() const noexcept;
@@ -100,26 +101,33 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderBoxFragmentInfo *GetRenderBoxFragmentInfo(const RenderBox &box) const noexcept;
+
     RenderBoxFragmentInfo *SetRenderBoxFragmentInfo(const RenderBox &box, LayoutUnit logicalLeftInset,
                                                     LayoutUnit logicalRightInset,
                                                     bool containingBlockChainIsInset) noexcept;
+
     KRYS_NODISCARD UniquePtr<RenderBoxFragmentInfo> TakeRenderBoxFragmentInfo(const RenderBox &box) noexcept;
+
     void RemoveRenderBoxFragmentInfo(const RenderBox &box) noexcept;
 
     void DeleteAllRenderBoxFragmentInfo() noexcept;
 
     KRYS_NODISCARD bool IsFirstFragment() const noexcept;
+
     KRYS_NODISCARD bool IsLastFragment() const noexcept;
+
     KRYS_NODISCARD virtual bool ShouldClipFragmentedFlowContent() const noexcept;
 
     /// @brief The logical width of a "page": the content width of a fragment, or of one of the columns or
     /// pages of a set.
     KRYS_NODISCARD virtual LayoutUnit PageLogicalWidth() const noexcept;
+
     /// @brief The logical height of a "page": the content height of a fragment, or of one of the columns or
     /// pages of a set.
     KRYS_NODISCARD virtual LayoutUnit PageLogicalHeight() const noexcept;
 
     KRYS_NODISCARD LayoutUnit LogicalTopOfFragmentedFlowContentRect(const LayoutRect &rect) const noexcept;
+
     KRYS_NODISCARD LayoutUnit LogicalBottomOfFragmentedFlowContentRect(const LayoutRect &rect) const noexcept;
 
     KRYS_NODISCARD LayoutUnit LogicalTopForFragmentedFlowContent() const noexcept
@@ -154,9 +162,13 @@ namespace krys::boo
     }
 
     void AddLayoutOverflowForBox(const RenderBox &box, const LayoutRect &rect) noexcept;
+
     void AddVisualOverflowForBox(const RenderBox &box, const LayoutRect &rect) noexcept;
+
     KRYS_NODISCARD LayoutRect VisualOverflowRectForBox(const RenderBox &box) const noexcept;
+
     KRYS_NODISCARD LayoutRect LayoutOverflowRectForBoxForPropagation(const RenderBox &box) noexcept;
+
     KRYS_NODISCARD LayoutRect VisualOverflowRectForBoxForPropagation(const RenderBox &box) noexcept;
 
     /// @brief The part of @p rect (in @p box's coordinates) inside the fragment.
@@ -189,18 +201,22 @@ namespace krys::boo
   protected:
     RenderFragmentContainer(Type type, dom::Element &element, RenderStyle &&style,
                             RenderFragmentedFlow *fragmentedFlow) noexcept;
+
     RenderFragmentContainer(Type type, dom::Document &document, RenderStyle &&style,
                             RenderFragmentedFlow *fragmentedFlow) noexcept;
+
     ~RenderFragmentContainer() noexcept override;
 
     KRYS_NODISCARD RenderOverflow *OverflowForBox(const RenderBox &box) const noexcept;
 
     void ComputePreferredLogicalWidths() noexcept override;
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
 
     KRYS_NODISCARD LayoutRect OverflowRectForFragmentedFlowPortion(
       const LayoutRect &fragmentedFlowPortionRect, bool isFirstPortion, bool isLastPortion) const noexcept;
+
     void RepaintFragmentedFlowContentRectangle(
       const LayoutRect &repaintRect, const LayoutRect &fragmentedFlowPortionRect,
       const LayoutPoint &fragmentLocation,
@@ -218,6 +234,7 @@ namespace krys::boo
     }
 
     void InsertedIntoTree() noexcept override;
+
     void WillBeRemovedFromTree() noexcept override;
 
     /// @brief Connects the fragment to its flow, which a set did when it was made.
@@ -225,7 +242,9 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutPoint
       MapFragmentPointIntoFragmentedFlowCoordinates(const LayoutPoint &point) noexcept;
+
     KRYS_NODISCARD LayoutRect ComputedVisualOverflowRectForBox(const RenderBox &box) const noexcept;
+
     KRYS_NODISCARD LayoutRect ComputedLayoutOverflowRectForBox(const RenderBox &box) const noexcept;
   };
 
@@ -239,6 +258,7 @@ namespace krys::boo
 
   public:
     explicit CurrentRenderFragmentContainerMaintainer(RenderFragmentContainer &fragment) noexcept;
+
     ~CurrentRenderFragmentContainerMaintainer() noexcept;
 
     KRYS_NODISCARD RenderFragmentContainer &Fragment() const noexcept

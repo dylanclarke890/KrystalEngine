@@ -43,6 +43,7 @@ namespace krys::boo
 
   public:
     LegacyRenderSVGRect(svg::SVGRectElement &, RenderStyle &&) noexcept;
+
     ~LegacyRenderSVGRect() noexcept override;
 
     KRYS_NODISCARD svg::SVGRectElement &RectElement() const noexcept;
@@ -61,15 +62,20 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsRenderingDisabled() const noexcept override;
+
     void FillShape(GraphicsContext &) const noexcept override;
+
     void StrokeShape(GraphicsContext &) const noexcept override;
+
     KRYS_NODISCARD bool
       ShapeDependentStrokeContains(const FloatPoint &,
                                    PointCoordinateSpace = GlobalCoordinateSpace) noexcept override;
+
     KRYS_NODISCARD bool ShapeDependentFillContains(const FloatPoint &,
                                                    const WindRule) const noexcept override;
 
     KRYS_NODISCARD bool DefinitelyHasSimpleStroke() const noexcept;
+
     KRYS_NODISCARD bool CanUseStrokeHitTestFastPath() const noexcept;
   };
 }

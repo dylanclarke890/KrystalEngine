@@ -45,16 +45,21 @@ namespace krys::boo
 
   public:
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction hitTestAction) noexcept override;
+
     void UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept override;
+
     KRYS_NODISCARD dom::PositionWithAffinity
       PositionForPoint(const LayoutPoint &point, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept final;
 
     RenderInline(Type type, dom::Element &element, RenderStyle &&style) noexcept;
+
     RenderInline(Type type, dom::Document &document, RenderStyle &&style) noexcept;
+
     ~RenderInline() noexcept override;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept final
@@ -72,13 +77,21 @@ namespace krys::boo
     void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
 
     KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit MarginRight() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit MarginTop() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit MarginBottom() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit MarginBefore(WritingMode writingMode) const noexcept final;
+
     KRYS_NODISCARD LayoutUnit MarginAfter(WritingMode writingMode) const noexcept final;
+
     KRYS_NODISCARD LayoutUnit MarginStart(WritingMode writingMode) const noexcept final;
+
     KRYS_NODISCARD LayoutUnit MarginEnd(WritingMode writingMode) const noexcept final;
+
     using RenderBoxModelObject::MarginAfter;
     using RenderBoxModelObject::MarginBefore;
     using RenderBoxModelObject::MarginEnd;
@@ -100,9 +113,12 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+
     /// @brief The top left of the inline's first inline box.
     KRYS_NODISCARD LayoutPoint FirstInlineBoxTopLeft() const noexcept;
+
     KRYS_NODISCARD LayoutUnit OffsetLeft() const noexcept final;
+
     KRYS_NODISCARD LayoutUnit OffsetTop() const noexcept final;
 
     KRYS_NODISCARD LayoutRect FrameRectForStickyPositioning() const noexcept final
@@ -112,6 +128,7 @@ namespace krys::boo
 
     /// @brief The bounding box of the inline's line boxes with their ink overflow.
     KRYS_NODISCARD LayoutRect LinesVisualOverflowBoundingBox() const noexcept;
+
     /// @brief Adds the rects of the inline's line boxes, moved by @p additionalOffset, skipping empty ones.
     void CollectLineBoxRects(List<LayoutRect> &rects, const LayoutPoint &additionalOffset) const noexcept;
 
@@ -120,12 +137,16 @@ namespace krys::boo
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &transformState,
                              EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept override;
+
     const RenderElement *PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
                                                 RenderGeometryMap &geometryMap) const noexcept override;
+
     KRYS_NODISCARD LayoutSize
       OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
                           bool *offsetDependsOnPoint = nullptr) const noexcept override;
+
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
 
     KRYS_NODISCARD bool RequiresLayer() const noexcept override;
@@ -134,10 +155,13 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                   VisibleRectContext context) const noexcept override;
+
     KRYS_NODISCARD RepaintRects RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
                                                               RepaintOutlineBounds) const noexcept override;
+
     KRYS_NODISCARD LayoutRect RectWithOutlineForRepaint(const RenderLayerModelObject *repaintContainer,
                                                         LayoutUnit outlineWidth) const noexcept final;
+
     KRYS_NODISCARD Maybe<RepaintRects>
       ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
                                      VisibleRectContext context) const noexcept final;
@@ -149,6 +173,7 @@ namespace krys::boo
 #pragma endregion
 
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxWidth() const noexcept;
+
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxHeight() const noexcept;
 
     LegacyInlineFlowBox *CreateAndAppendInlineFlowBox() noexcept;
@@ -177,7 +202,9 @@ namespace krys::boo
 
   protected:
     void WillBeDestroyed() noexcept override;
+
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
+
     void UpdateFromStyle() noexcept override;
 
     /// @brief Subclassed by RenderSVGInline.

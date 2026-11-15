@@ -75,7 +75,9 @@ namespace krys::boo::css
     ToLengthConversionData(const ToLengthConversionData &) noexcept;
 
     ToLengthConversionData(ToLengthConversionData &&) noexcept;
+
     ToLengthConversionData &operator=(const ToLengthConversionData &) noexcept;
+
     ToLengthConversionData &operator=(ToLengthConversionData &&) noexcept;
 
     /// @brief This is used during style building. The 'zoom' property is taken into account.

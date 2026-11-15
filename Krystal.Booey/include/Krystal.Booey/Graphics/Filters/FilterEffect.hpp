@@ -132,6 +132,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RefPtr<FilterImage> Apply(const Filter &filter, FilterImage &input,
                                              FilterResults &results) noexcept override;
+
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context, const Filter &filter,
                                                         const FilterStyle &input) const noexcept override;
   };

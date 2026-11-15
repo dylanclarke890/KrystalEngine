@@ -49,10 +49,14 @@ namespace krys::boo::css::calc
 {
   static auto CopyAndSimplify(const Random::SharingType &, const SimplificationOptions &) noexcept
     -> Random::SharingType;
+
   static auto CopyAndSimplify(const keywords::None &, const SimplificationOptions &) noexcept
     -> keywords::None;
+
   static auto CopyAndSimplify(const Children &, const SimplificationOptions &) noexcept -> Children;
+
   static auto CopyAndSimplify(const ChildOrNone &, const SimplificationOptions &) noexcept -> ChildOrNone;
+
   template <typename T>
   static auto CopyAndSimplify(const Maybe<T> &, const SimplificationOptions &) noexcept -> Maybe<T>;
 

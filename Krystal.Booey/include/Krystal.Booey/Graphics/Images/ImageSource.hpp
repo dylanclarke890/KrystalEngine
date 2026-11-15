@@ -155,6 +155,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual Expected<Ref<NativeImage>, DecodingStatus>
       PrimaryNativeImageForDrawing(SubsamplingLevel, const DecodingOptions &) noexcept;
+
     KRYS_NODISCARD virtual Expected<Ref<NativeImage>, DecodingStatus>
       CurrentNativeImageForDrawing(SubsamplingLevel, const DecodingOptions &) noexcept;
 

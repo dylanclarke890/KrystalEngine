@@ -80,13 +80,17 @@ namespace krys::boo::css
 
   public:
     CSSFontFaceSource(CSSFontFace &owner, StringAtom fontFaceName) noexcept;
+
     CSSFontFaceSource(CSSFontFace &owner, CSSFontSelector &fontSelector,
                       Ref<FontLoadRequest> &&request) noexcept;
+
     ~CSSFontFaceSource() noexcept override;
 
     // FontLoadRequestClient.
     void AddRef() const noexcept final;
+
     void SubRef() const noexcept final;
+
     KRYS_NODISCARD uint32 GetRefCount() const noexcept final;
 
     KRYS_NODISCARD Status GetStatus() const noexcept
@@ -97,6 +101,7 @@ namespace krys::boo::css
     void OpportunisticallyStartFontDataURLLoading() noexcept;
 
     void Load(dom::Document *document = nullptr) noexcept;
+
     KRYS_NODISCARD RefPtr<Font> GetFont(const FontDescription &fontDescription, bool syntheticBold,
                                         bool syntheticItalic,
                                         const FontCreationContext &fontCreationContext) noexcept;

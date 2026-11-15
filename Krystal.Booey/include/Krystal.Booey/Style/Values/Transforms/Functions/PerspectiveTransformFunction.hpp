@@ -41,6 +41,7 @@ namespace krys::boo::style
     KRYS_NODISCARD static Ref<const PerspectiveTransformFunction> Create(Perspective) noexcept;
 
     KRYS_NODISCARD Ref<const TransformFunctionBase> Clone() const noexcept override;
+
     KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const FloatSize &) const noexcept override;
 
     KRYS_NODISCARD Perspective GetPerspective() const noexcept

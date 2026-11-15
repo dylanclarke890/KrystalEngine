@@ -145,6 +145,7 @@ namespace krys::boo::dom
   }
 
   template Node *CommonInclusiveAncestor<TreeType::Tree>(const SimpleRange &) noexcept;
+
   template Node *CommonInclusiveAncestor<TreeType::ComposedTree>(const SimpleRange &) noexcept;
 
   template <TreeType treeType>
@@ -155,7 +156,9 @@ namespace krys::boo::dom
   }
 
   template bool Contains<TreeType::Tree>(const SimpleRange &, const BoundaryPoint &) noexcept;
+
   template bool Contains<TreeType::ShadowIncludingTree>(const SimpleRange &, const BoundaryPoint &) noexcept;
+
   template bool Contains<TreeType::ComposedTree>(const SimpleRange &, const BoundaryPoint &) noexcept;
 
   template <TreeType treeType>
@@ -188,10 +191,13 @@ namespace krys::boo::dom
 
   template std::partial_ordering TreeOrder<TreeType::Tree>(const SimpleRange &,
                                                            const BoundaryPoint &) noexcept;
+
   template std::partial_ordering TreeOrder<TreeType::Tree>(const BoundaryPoint &,
                                                            const SimpleRange &) noexcept;
+
   template std::partial_ordering TreeOrder<TreeType::ComposedTree>(const SimpleRange &,
                                                                    const BoundaryPoint &) noexcept;
+
   template std::partial_ordering TreeOrder<TreeType::ComposedTree>(const BoundaryPoint &,
                                                                    const SimpleRange &) noexcept;
 
@@ -203,7 +209,9 @@ namespace krys::boo::dom
   }
 
   template bool Contains<TreeType::Tree>(const SimpleRange &, const SimpleRange &) noexcept;
+
   template bool Contains<TreeType::ShadowIncludingTree>(const SimpleRange &, const SimpleRange &) noexcept;
+
   template bool Contains<TreeType::ComposedTree>(const SimpleRange &, const SimpleRange &) noexcept;
 
   template <TreeType treeType>
@@ -214,7 +222,9 @@ namespace krys::boo::dom
   }
 
   template bool Intersects<TreeType::Tree>(const SimpleRange &, const SimpleRange &) noexcept;
+
   template bool Intersects<TreeType::ShadowIncludingTree>(const SimpleRange &, const SimpleRange &) noexcept;
+
   template bool Intersects<TreeType::ComposedTree>(const SimpleRange &, const SimpleRange &) noexcept;
 
   namespace
@@ -252,7 +262,9 @@ namespace krys::boo::dom
   }
 
   template bool Contains<TreeType::Tree>(const SimpleRange &, const Node &) noexcept;
+
   template bool Contains<TreeType::ShadowIncludingTree>(const SimpleRange &, const Node &) noexcept;
+
   template bool Contains<TreeType::ComposedTree>(const SimpleRange &, const Node &) noexcept;
 
   namespace
@@ -287,6 +299,8 @@ namespace krys::boo::dom
   }
 
   template bool Intersects<TreeType::Tree>(const SimpleRange &, const Node &) noexcept;
+
   template bool Intersects<TreeType::ShadowIncludingTree>(const SimpleRange &, const Node &) noexcept;
+
   template bool Intersects<TreeType::ComposedTree>(const SimpleRange &, const Node &) noexcept;
 }

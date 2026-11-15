@@ -106,6 +106,7 @@ namespace krys::boo
     /// @param client The host's side of the loader; without one, the loader has an empty client, which
     /// ignores every navigation.
     FrameLoader(LocalFrame &frame, UniquePtr<LocalFrameLoaderClient> &&client) noexcept;
+
     ~FrameLoader() noexcept;
 
     KRYS_NODISCARD LocalFrameLoaderClient &Client() const noexcept

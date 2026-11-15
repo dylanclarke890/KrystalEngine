@@ -27,6 +27,7 @@ namespace krys::boo::dom
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-dragevent-dragevent
     DragEvent(DOMStringAtom type, const DragEventInit &eventInitDict = {}) noexcept;
+
     ~DragEvent() noexcept;
 
     /// @brief A trusted drag event from its parts.

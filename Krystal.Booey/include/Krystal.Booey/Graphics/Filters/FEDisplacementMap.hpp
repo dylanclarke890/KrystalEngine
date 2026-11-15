@@ -96,6 +96,7 @@ namespace krys::boo
 
     KRYS_NODISCARD const DestinationColorSpace &
       ResultColorSpace(Span<const Ref<FilterImage>> inputs) const noexcept override;
+
     void TransformInputsColorSpace(Span<const Ref<FilterImage>> inputs) const noexcept override;
 
     TextStream &ExternalRepresentation(TextStream &ts,

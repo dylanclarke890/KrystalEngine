@@ -89,6 +89,7 @@ namespace krys::boo
 
     /// @brief Attaches the loader to the frame it loads into.
     void AttachToFrame(LocalFrame &frame) noexcept;
+
     void DetachFromFrame() noexcept;
 
     KRYS_NODISCARD LocalFrame *Frame() const noexcept
@@ -164,10 +165,12 @@ namespace krys::boo
 
     /// @brief Collects the main frame's document's icons and, if they changed, asks the client which to load.
     void StartIconLoading() noexcept;
+
     /// @brief The client's decision on loading the icon of @p loadIdentifier: if it's to load, its bytes are
     /// handed to @p completionHandler once it's loaded, or null if it can't be.
     void DidGetLoadDecisionForIcon(bool decision, uint64 loadIdentifier,
                                    Func<void(const SharedBuffer *)> completionHandler) noexcept;
+
     /// @brief @p loader finished, with @p data or none.
     void FinishedLoadingIcon(IconLoader &loader, const SharedBuffer *data) noexcept;
 

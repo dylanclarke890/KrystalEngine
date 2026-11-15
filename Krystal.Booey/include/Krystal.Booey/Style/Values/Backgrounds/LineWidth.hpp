@@ -68,6 +68,7 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD constexpr bool operator==(const LineWidth &) const noexcept = default;
+
       KRYS_NODISCARD constexpr auto operator<=>(const LineWidth &) const noexcept = default;
     };
 

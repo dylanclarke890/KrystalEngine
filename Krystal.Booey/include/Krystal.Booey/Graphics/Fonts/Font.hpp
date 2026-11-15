@@ -182,6 +182,7 @@ namespace krys::boo
 
     Font(const FontPlatformData &platformData, Origin origin, FontIsInterstitial interstitial,
          Visibility visibility, IsOrientationFallback orientationFallback) noexcept;
+
     explicit Font(IsSystemFallbackFontPlaceholder) noexcept;
 
   public:
@@ -212,9 +213,13 @@ namespace krys::boo
     KRYS_NODISCARD const OpenTypeMathData *MathData() const noexcept;
 
     KRYS_NODISCARD const Font *SmallCapsFont(const FontDescription &fontDescription) const noexcept;
+
     KRYS_NODISCARD const Font &NoSynthesizableFeaturesFont() const noexcept;
+
     KRYS_NODISCARD const Font *EmphasisMarkFont(const FontDescription &fontDescription) const noexcept;
+
     KRYS_NODISCARD const Font &BrokenIdeographFont() const noexcept;
+
     KRYS_NODISCARD RefPtr<Font> HalfWidthFont() const noexcept;
 
     KRYS_NODISCARD bool IsProbablyOnlyUsedToRenderIcons() const noexcept;
@@ -237,7 +242,9 @@ namespace krys::boo
     KRYS_NODISCARD bool VariantCapsSupportedForSynthesis(FontVariantCaps fontVariantCaps) const noexcept;
 
     KRYS_NODISCARD const Font &VerticalRightOrientationFont() const noexcept;
+
     KRYS_NODISCARD const Font &UprightOrientationFont() const noexcept;
+
     KRYS_NODISCARD const Font &InvisibleFont() const noexcept;
 
     KRYS_NODISCARD bool HasVerticalGlyphs() const noexcept
@@ -281,8 +288,10 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatRect BoundsForGlyph(Glyph glyph) const noexcept;
+
     /// @brief @p glyph's outline at the font's size, with its origin on the baseline and y pointing down.
     KRYS_NODISCARD Path PathForGlyph(Glyph glyph) const noexcept;
+
     KRYS_NODISCARD SmallList<FloatRect, InlineGlyphRunCapacity>
       BoundsForGlyphs(Span<const Glyph> glyphs) const noexcept;
 
@@ -330,8 +339,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD GlyphData GlyphDataForCharacter(char32 character) const noexcept;
+
     KRYS_NODISCARD Glyph GlyphForCharacter(char32 character) const noexcept;
+
     KRYS_NODISCARD bool SupportsCodePoint(char32 character) const noexcept;
+
     KRYS_NODISCARD bool PlatformSupportsCodePoint(char32 character,
                                                   Maybe<char32> variation = null) const noexcept;
 
@@ -400,22 +412,29 @@ namespace krys::boo
 
   private:
     void PlatformInit() noexcept;
+
     void PlatformGlyphInit() noexcept;
+
     void PlatformCharWidthInit() noexcept;
 
     void InitCharWidths() noexcept;
 
     KRYS_NODISCARD RefPtr<Font> CreateScaledFont(const FontDescription &fontDescription,
                                                  float scaleFactor) const noexcept;
+
     KRYS_NODISCARD RefPtr<Font> PlatformCreateScaledFont(const FontDescription &fontDescription,
                                                          float scaleFactor) const noexcept;
+
     KRYS_NODISCARD RefPtr<Font> CreateHalfWidthFont() const noexcept;
+
     KRYS_NODISCARD RefPtr<Font> PlatformCreateHalfWidthFont() const noexcept;
 
     KRYS_NODISCARD DerivedFonts &EnsureDerivedFontData() const noexcept;
 
     KRYS_NODISCARD FloatRect PlatformBoundsForGlyph(Glyph glyph) const noexcept;
+
     KRYS_NODISCARD Path PlatformPathForGlyph(Glyph glyph) const noexcept;
+
     KRYS_NODISCARD float PlatformWidthForGlyph(Glyph glyph) const noexcept;
   };
 }

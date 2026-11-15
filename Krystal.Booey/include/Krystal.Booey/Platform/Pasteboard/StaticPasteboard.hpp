@@ -53,6 +53,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool HasData() noexcept final;
+
     KRYS_NODISCARD List<utf8_string> TypesSafeForBindings(utf8_stringview origin) noexcept final;
 
     KRYS_NODISCARD utf8_string ReadOrigin() noexcept final
@@ -61,12 +62,17 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string ReadString(utf8_stringview type) noexcept final;
+
     KRYS_NODISCARD Maybe<utf8_string> ReadStringInCustomData(utf8_stringview type) noexcept final;
 
     void WriteString(utf8_stringview type, utf8_stringview data) noexcept final;
+
     void WriteData(utf8_stringview type, Ref<SharedBuffer> &&data) noexcept;
+
     void WriteStringInCustomData(utf8_stringview type, utf8_stringview data) noexcept;
+
     void Clear() noexcept final;
+
     void Clear(utf8_stringview type) noexcept final;
 
     void Read(PasteboardPlainText &,
@@ -82,9 +88,13 @@ namespace krys::boo
     using Pasteboard::Read;
 
     void Write(const PasteboardURL &url) noexcept final;
+
     void Write(const PasteboardImage &image) noexcept final;
+
     void Write(const PasteboardWebContent &content) noexcept final;
+
     void WriteMarkup(utf8_stringview markup) noexcept final;
+
     void WritePlainText(utf8_stringview text, SmartReplaceOption smartReplaceOption) noexcept final;
 
     void SetDragImage(DragImage, const IntPoint &) noexcept final

@@ -94,12 +94,17 @@ namespace krys::boo
 
   private:
     void CloseSubpath() noexcept;
+
     void MoveTo(const FloatPoint &) noexcept;
+
     void LineTo(const FloatPoint &) noexcept;
+
     void QuadraticBezierTo(const FloatPoint &, const FloatPoint &) noexcept;
+
     void CubicBezierTo(const FloatPoint &, const FloatPoint &, const FloatPoint &) noexcept;
 
     KRYS_NODISCARD bool FinalizeAppendPathElement() noexcept;
+
     KRYS_NODISCARD bool AppendPathElement(PathElement::Type, std::span<const FloatPoint>) noexcept;
 
   private:

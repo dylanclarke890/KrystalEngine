@@ -65,13 +65,17 @@ namespace krys::boo::layout
                        const inline_display::Content &displayContent) noexcept;
 
     bool RootStyleWillChange(const ElementBox &formattingContextRoot, const RenderStyle &newStyle) noexcept;
+
     bool StyleWillChange(const Box &layoutBox, const RenderStyle &newStyle, style::Difference diff) noexcept;
 
     bool TextInserted(const InlineTextBox &newOrDamagedInlineTextBox, Maybe<size_t> offset = {}) noexcept;
+
     bool TextWillBeRemoved(const InlineTextBox &damagedInlineTextBox, Maybe<size_t> offset = {}) noexcept;
 
     bool InlineLevelBoxInserted(const Box &layoutBox) noexcept;
+
     bool InlineLevelBoxWillBeRemoved(const Box &layoutBox) noexcept;
+
     bool InlineLevelBoxContentWillChange(const Box &layoutBox) noexcept;
 
     bool RestartForPagination(size_t lineIndex, LayoutUnit pageTopAdjustment) noexcept;
@@ -87,6 +91,7 @@ namespace krys::boo::layout
     bool UpdateInlineDamage(const InvalidatedLine &invalidatedLine, InlineDamage::Reason reason,
                             ShouldApplyRangeLayout shouldApplyRangeLayout = ShouldApplyRangeLayout::No,
                             LayoutUnit restartPaginationAdjustment = 0_lu) noexcept;
+
     bool SetFullLayoutIfNeeded(const Box &layoutBox) noexcept;
 
     KRYS_NODISCARD const inline_display::Boxes &DisplayBoxes() const noexcept

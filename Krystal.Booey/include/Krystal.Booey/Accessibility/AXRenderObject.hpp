@@ -48,8 +48,10 @@ namespace krys::boo
     /// @brief An object for @p renderer, and its node if it has one.
     KRYS_NODISCARD static Ref<AXRenderObject> Create(AXId id, RenderObject &renderer,
                                                      AXObjectCache &cache) noexcept;
+
     /// @brief An object for @p node with no renderer yet (`display: contents` and so on).
     KRYS_NODISCARD static Ref<AXRenderObject> Create(AXId id, dom::Node &node, AXObjectCache &cache) noexcept;
+
     ~AXRenderObject() noexcept override;
 
     KRYS_NODISCARD bool IsDetached() const noexcept override
@@ -69,50 +71,71 @@ namespace krys::boo
 
     /// @brief Sets the renderer, for a node whose renderer was created or destroyed; whether it changed.
     bool SetRendererIfNeeded(RenderObject *renderer) noexcept;
+
     KRYS_NODISCARD dom::Document *GetDocument() const noexcept override;
 
     KRYS_NODISCARD AXObject *ParentObject() const noexcept override;
+
     void AddChildren() noexcept override;
 
     KRYS_NODISCARD dom::DOMString StringValue() const noexcept override;
+
     KRYS_NODISCARD LayoutRect ElementRect() const noexcept override;
+
     KRYS_NODISCARD bool IsOffScreen() const noexcept override;
+
     KRYS_NODISCARD AXObject *AccessibilityHitTest(const IntPoint &point) const noexcept override;
+
     KRYS_NODISCARD AXObject *ElementAccessibilityHitTest(const IntPoint &point) const noexcept override;
+
     /// @brief The object of the root of the SVG document this image shows, in that document's cache (made if
     /// @p create and it doesn't exist yet); null if it isn't showing an SVG image.
     KRYS_NODISCARD AXSVGObject *RemoteSVGRoot(bool create = true) const noexcept;
+
     using AXNodeObject::SetValue;
+
     bool SetValue(dom::DOMStringView value) noexcept override;
+
     KRYS_NODISCARD bool IsIgnoredElementWithinMathTree() const noexcept override;
 
   protected:
     AXRenderObject(AXId id, RenderObject *renderer, dom::Node *node, AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override;
+
     KRYS_NODISCARD bool ComputeIsIgnored() const noexcept override;
+
     void DetachRemoteParts(AXDetachmentType detachmentType) noexcept override;
 
   private:
     /// @brief The control of the label the object is in (not the control itself), if any.
     KRYS_NODISCARD AXObject *ControlForLabelElement() const noexcept;
+
     /// @brief The tree the object is in, if any.
     KRYS_NODISCARD AXObject *ContainingTree() const noexcept;
+
     /// @brief Whether the object can be in the tree it's in: tree items, their descendants and static text.
     KRYS_NODISCARD bool IsAllowedChildOfTree() const noexcept;
+
     /// @brief Whether an exposed row is above the object, with no cell or table between: what's between a
     /// row and its cells is ignored.
     KRYS_NODISCARD bool IgnoredByRowAncestor() const noexcept;
+
     /// @brief An image's map's areas that are links.
     void AddImageMapChildren() noexcept;
+
     /// @brief A number input's spin button.
     void AddTextFieldChildren() noexcept;
+
     /// @brief The root of the SVG document an image shows.
     void AddRemoteSVGChildren() noexcept;
+
     /// @brief Moves @p rect, in an SVG image's document's coordinates, to where the image showing it is.
     void OffsetForRemoteSVGElement(LayoutRect &rect) const noexcept;
+
     /// @brief Updates the roles that depend on the children (a menu with no items, a list).
     void UpdateRoleAfterChildrenCreation() noexcept;
+
     /// @brief The list item's marker renderer, if this is an unignored list item with one.
     KRYS_NODISCARD RenderObject *MarkerRenderer() const noexcept;
   };

@@ -47,7 +47,9 @@ namespace krys::boo::css
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-colorspace
     KRYS_NODISCARD Ref<CSSKeywordValue> ColorSpace() const noexcept;
+
     void SetColorSpace(CSSKeywordish colorSpace) noexcept;
+
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csscolor-channels
     KRYS_NODISCARD List<CSSColorPercent> Channels() const noexcept;
 

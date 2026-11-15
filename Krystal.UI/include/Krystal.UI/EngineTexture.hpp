@@ -57,6 +57,7 @@ namespace krys::ui
 
     KRYS_NODISCARD RefPtr<boo::GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() noexcept override;
+
     KRYS_NODISCARD RefPtr<boo::NativeImage> GetNativeImage() noexcept override;
 
   private:

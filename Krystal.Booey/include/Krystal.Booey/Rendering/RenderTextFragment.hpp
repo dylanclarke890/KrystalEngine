@@ -52,9 +52,12 @@ namespace krys::boo
 
   public:
     RenderTextFragment(dom::Text &textNode, utf8_stringview text, size_t startOffset, size_t length) noexcept;
+
     RenderTextFragment(dom::Document &document, utf8_stringview text, size_t startOffset,
                        size_t length) noexcept;
+
     RenderTextFragment(dom::Document &document, utf8_string text) noexcept;
+
     ~RenderTextFragment() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
@@ -75,6 +78,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderBoxModelObject *FirstLetter() const noexcept;
+
     void SetFirstLetter(RenderBoxModelObject &firstLetter) noexcept;
 
     KRYS_NODISCARD RenderBlock *BlockForAccompanyingFirstLetter() noexcept;

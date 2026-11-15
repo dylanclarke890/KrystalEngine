@@ -37,6 +37,7 @@ namespace krys::boo
 
     void Draw(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
               const ControlStyle &) noexcept override;
+
     static void DrawButton(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
                            const ControlStyle &) noexcept;
   };

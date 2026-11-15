@@ -57,6 +57,7 @@ namespace krys::boo::svg
     }
 
     void SetValue(float) noexcept;
+
     KRYS_NODISCARD float Value() const noexcept;
 
     void SetValueInSpecifiedUnits(float valueInSpecifiedUnits) noexcept
@@ -70,9 +71,11 @@ namespace krys::boo::svg
     }
 
     dom::ExceptionOr<void> SetValueAsString(dom::DOMStringView) noexcept;
+
     KRYS_NODISCARD dom::DOMString ValueAsString() const noexcept;
 
     dom::ExceptionOr<void> NewValueSpecifiedUnits(uint16 unitType, float valueInSpecifiedUnits) noexcept;
+
     dom::ExceptionOr<void> ConvertToSpecifiedUnits(uint16 unitType) noexcept;
   };
 }

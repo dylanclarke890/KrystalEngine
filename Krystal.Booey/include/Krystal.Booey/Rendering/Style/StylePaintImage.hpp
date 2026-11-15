@@ -59,7 +59,9 @@ namespace krys::boo
     StylePaintImage(css::CSSOMString &&, Ref<css::VariableData> &&) noexcept;
 
     KRYS_NODISCARD bool Equals(const StyleImage &) const noexcept final;
+
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
+
     KRYS_NODISCARD bool IsPending() const noexcept final;
 
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final

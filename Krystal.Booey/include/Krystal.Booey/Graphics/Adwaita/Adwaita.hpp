@@ -33,8 +33,8 @@
 
 namespace krys::boo
 {
-  class GraphicsContext;
   class FloatRect;
+  class GraphicsContext;
   class Path;
 }
 
@@ -120,7 +120,9 @@ namespace krys::boo::adwaita
 
   void PaintFocus(GraphicsContext &, const FloatRect &, int32 offset, const Color &,
                   PaintRounded = PaintRounded::No) noexcept;
+
   void PaintFocus(GraphicsContext &, const Path &, const Color &) noexcept;
+
   void PaintFocus(GraphicsContext &, Span<const FloatRect>, const Color &,
                   PaintRounded = PaintRounded::No) noexcept;
 
@@ -138,5 +140,6 @@ namespace krys::boo::adwaita
   }
 
   KRYS_NODISCARD Color SystemAccentColor() noexcept;
+
   KRYS_NODISCARD Color SystemFocusRingColor() noexcept;
 }

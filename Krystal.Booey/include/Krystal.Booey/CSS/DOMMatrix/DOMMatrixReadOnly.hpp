@@ -74,13 +74,16 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrixReadOnly>> FromMatrix(DOMMatrixInit &&) noexcept;
+
     KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
       FromFloat32Array(Span<const float>) noexcept;
+
     KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
       FromFloat64Array(Span<const double>) noexcept;
 
     /// @see https://drafts.fxtf.org/geometry/#matrix-validate-and-fixup
     KRYS_NODISCARD static dom::ExceptionOr<void> ValidateAndFixup(DOMMatrix2DInit &) noexcept;
+
     KRYS_NODISCARD static dom::ExceptionOr<void> ValidateAndFixup(DOMMatrixInit &) noexcept;
 
     KRYS_NODISCARD double A() const noexcept
@@ -204,32 +207,45 @@ namespace krys::boo::css
     dom::ExceptionOr<void> SetMatrixValue(const CSSOMString &) noexcept;
 
     KRYS_NODISCARD Ref<DOMMatrix> Translate(double tx = 0, double ty = 0, double tz = 0) const noexcept;
+
     KRYS_NODISCARD dom::ExceptionOr<Ref<DOMMatrix>> Multiply(DOMMatrixInit &&other) const noexcept;
+
     KRYS_NODISCARD Ref<DOMMatrix> FlipX() const noexcept;
+
     KRYS_NODISCARD Ref<DOMMatrix> FlipY() const noexcept;
+
     KRYS_NODISCARD Ref<DOMMatrix> Scale(double scaleX = 1, Maybe<double> scaleY = null, double scaleZ = 1,
                                         double originX = 0, double originY = 0,
                                         double originZ = 0) const noexcept;
+
     KRYS_NODISCARD Ref<DOMMatrix> Scale3d(double scale = 1, double originX = 0, double originY = 0,
                                           double originZ = 0) const noexcept;
+
     KRYS_NODISCARD Ref<DOMMatrix> ScaleNonUniform(double scaleX = 1, double scaleY = 1) const noexcept;
+
     /// @note Angles are in degrees.
     KRYS_NODISCARD Ref<DOMMatrix> Rotate(double rotX = 0, Maybe<double> rotY = null,
                                          Maybe<double> rotZ = null) const noexcept;
+
     KRYS_NODISCARD Ref<DOMMatrix> RotateFromVector(double x = 0, double y = 0) const noexcept;
+
     /// @note The angle is in degrees.
     KRYS_NODISCARD Ref<DOMMatrix> RotateAxisAngle(double x = 0, double y = 0, double z = 0,
                                                   double angle = 0) const noexcept;
+
     /// @note The angle is in degrees.
     KRYS_NODISCARD Ref<DOMMatrix> SkewX(double sx = 0) const noexcept;
+
     /// @note The angle is in degrees.
     KRYS_NODISCARD Ref<DOMMatrix> SkewY(double sy = 0) const noexcept;
+
     KRYS_NODISCARD Ref<DOMMatrix> Inverse() const noexcept;
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-transformpoint
     KRYS_NODISCARD Ref<dom::DOMPoint> TransformPoint(dom::DOMPointInit &&) const noexcept;
 
     KRYS_NODISCARD Array<float, 16> ToFloat32Array() const noexcept;
+
     KRYS_NODISCARD Array<double, 16> ToFloat64Array() const noexcept;
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-stringifier
@@ -244,6 +260,7 @@ namespace krys::boo::css
 
   protected:
     DOMMatrixReadOnly() noexcept = default;
+
     DOMMatrixReadOnly(const TransformationMatrix &, Is2D) noexcept;
 
     struct AbstractMatrix

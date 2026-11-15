@@ -58,10 +58,10 @@ namespace krys::boo::dom
 
 namespace krys::boo::style
 {
-  class ScopeRuleSets;
-  struct MatchRequest;
-  struct SelectorMatchingState;
   enum class DeclarationOrigin : uint8;
+  struct MatchRequest;
+  class ScopeRuleSets;
+  struct SelectorMatchingState;
 
   struct MatchedRule
   {
@@ -110,9 +110,11 @@ namespace krys::boo::style
       const dom::Element &element, const ScopeRuleSets &ruleSets,
       SelectorMatchingState *selectorMatchingState,
       css::SelectorChecker::Mode mode = css::SelectorChecker::Mode::ResolvingStyle) noexcept;
+
     ElementRuleCollector(
       const dom::Element &element, const RuleSet &authorStyle, SelectorMatchingState *selectorMatchingState,
       css::SelectorChecker::Mode mode = css::SelectorChecker::Mode::ResolvingStyle) noexcept;
+
     ~ElementRuleCollector() noexcept;
 
     void SetIncludeEmptyRules(bool value) noexcept
@@ -121,8 +123,11 @@ namespace krys::boo::style
     }
 
     void MatchAllRules(bool matchAuthorAndUserStyles, bool includeSMILProperties) noexcept;
+
     void MatchUARules() noexcept;
+
     void MatchAuthorRules() noexcept;
+
     void MatchUserRules() noexcept;
 
     KRYS_NODISCARD bool MatchesAnyAuthorRules() noexcept;
@@ -135,6 +140,7 @@ namespace krys::boo::style
     void SetMedium(const css::mq::MediaQueryEvaluator &medium) noexcept;
 
     KRYS_NODISCARD const MatchResult &GetMatchResult() const noexcept;
+
     KRYS_NODISCARD Ref<MatchResult> ReleaseMatchResult() noexcept;
 
     KRYS_NODISCARD const List<RefPtr<const css::StyleRule>> &MatchedRuleList() const noexcept;
@@ -163,35 +169,48 @@ namespace krys::boo::style
     void AddElementInlineStyleProperties(bool includeSMILProperties) noexcept;
 
     void MatchUserAgentPartRules(DeclarationOrigin origin) noexcept;
+
     void MatchHostPseudoClassRules(DeclarationOrigin origin) noexcept;
+
     void MatchSlottedPseudoElementRules(DeclarationOrigin origin) noexcept;
+
     void MatchPartPseudoElementRules(DeclarationOrigin origin) noexcept;
+
     void MatchPartPseudoElementRulesForScope(const dom::Element &partMatchingElement,
                                              DeclarationOrigin origin) noexcept;
 
     void CollectMatchingRules(DeclarationOrigin origin) noexcept;
+
     void CollectMatchingRules(const MatchRequest &matchRequest) noexcept;
+
     void CollectMatchingUserAgentPartRules(const MatchRequest &matchRequest) noexcept;
+
     void CollectMatchingRulesForList(const RuleSet::RuleDataVector *rules,
                                      const MatchRequest &matchRequest) noexcept;
+
     KRYS_NODISCARD bool IsFirstMatchModeAndHasMatchedAnyRules() const noexcept;
 
     KRYS_NODISCARD bool RuleMatches(const RuleData &ruleData, uint32 &specificity,
                                     ScopeOrdinal styleScopeOrdinal,
                                     const Maybe<ScopingRootWithDistance> &scopingRoot = {}) noexcept;
+
     KRYS_NODISCARD bool ContainerQueriesMatch(const RuleData &ruleData,
                                               const MatchRequest &matchRequest) const noexcept;
+
     KRYS_NODISCARD std::pair<bool, Maybe<List<ScopingRootWithDistance>>>
       ScopeRulesMatch(const RuleData &ruleData, const MatchRequest &matchRequest) const noexcept;
 
     void SortMatchedRules() noexcept;
 
     KRYS_NODISCARD List<MatchedProperties> &DeclarationsForOrigin(DeclarationOrigin origin) noexcept;
+
     void SortAndTransferMatchedRules(DeclarationOrigin origin) noexcept;
+
     void TransferMatchedRules(DeclarationOrigin origin, Maybe<ScopeOrdinal> fromScope = {}) noexcept;
 
     void AddMatchedRule(const RuleData &ruleData, uint32 specificity, uint32 scopingRootDistance,
                         const MatchRequest &matchRequest) noexcept;
+
     void AddMatchedProperties(MatchedProperties &&matchedProperties, DeclarationOrigin origin) noexcept;
 
     KRYS_NODISCARD const dom::Element &Element() const noexcept

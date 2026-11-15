@@ -68,9 +68,11 @@ namespace krys::boo
 
   public:
     SVGTextLayoutAttributesBuilder() noexcept;
+
     ~SVGTextLayoutAttributesBuilder() noexcept;
 
     bool BuildLayoutAttributesForForSubtree(RenderSVGText &) noexcept;
+
     void BuildLayoutAttributesForTextRenderer(RenderSVGInlineText &) noexcept;
 
     void RebuildMetricsForSubtree(RenderSVGText &) noexcept;
@@ -88,7 +90,9 @@ namespace krys::boo
 
   private:
     void BuildCharacterDataMap(RenderSVGText &) noexcept;
+
     void CollectTextPositioningElements(RenderBoxModelObject &, bool &lastCharacterWasSpace) noexcept;
+
     void FillCharacterDataMap(const TextPosition &) noexcept;
   };
 }

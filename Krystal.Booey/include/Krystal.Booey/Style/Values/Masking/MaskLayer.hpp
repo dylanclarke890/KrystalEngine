@@ -84,12 +84,16 @@ namespace krys::boo::style
     uint8 _composite : 4;
     uint8 _maskMode : 2;
     mutable uint8 _clipMax : FillBoxBitWidth; // maximum _clip value from this to bottom layer
+
     KRYS_FOR_EACH_MASK_LAYER_PROPERTY(KRYS_DECLARE_COORDINATED_VALUE_LIST_IS_SET_AND_IS_FILLED_MEMBERS)
 
   public:
     MaskLayer() noexcept;
+
     MaskLayer(css::keywords::None) noexcept;
+
     MaskLayer(ImageOrNone &&) noexcept;
+
     MaskLayer(RefPtr<StyleImage> &&) noexcept;
 
     KRYS_NODISCARD const ImageOrNone &GetImage() const noexcept

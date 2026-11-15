@@ -47,6 +47,7 @@ namespace krys::boo
 
   public:
     GraphicsClient() noexcept = default;
+
     virtual ~GraphicsClient() noexcept = default;
 
   private:

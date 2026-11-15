@@ -40,6 +40,7 @@ namespace krys::boo
 
   public:
     BidiRun(uint32 start, uint32 stop, RenderObject &, BidiContext *, UCharDirection) noexcept;
+
     ~BidiRun() noexcept override;
 
     KRYS_NODISCARD BidiRun *Next() const noexcept

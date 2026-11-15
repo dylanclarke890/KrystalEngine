@@ -53,20 +53,30 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD size_t Size() const noexcept final;
+
     KRYS_NODISCARD List<Entry> Entries() const noexcept final;
+
     void Clear() noexcept final;
 
   private:
     explicit InlineStylePropertyMap(dom::StyledElement &element) noexcept;
 
     KRYS_NODISCARD dom::Document *Document() const noexcept final;
+
     KRYS_NODISCARD RefPtr<Value> PropertyValue(PropertyId property) const noexcept final;
+
     KRYS_NODISCARD CSSOMString ShorthandPropertySerialisation(PropertyId property) const noexcept final;
+
     KRYS_NODISCARD RefPtr<Value> CustomPropertyValue(const CSSOMStringAtom &property) const noexcept final;
+
     void RemoveProperty(PropertyId property) noexcept final;
+
     void RemoveCustomProperty(const CSSOMStringAtom &property) noexcept final;
+
     bool SetShorthandProperty(PropertyId property, const CSSOMString &value) noexcept final;
+
     bool SetProperty(PropertyId property, Ref<Value> value) noexcept final;
+
     bool SetCustomProperty(const CSSOMStringAtom &property, Ref<VariableReferenceValue> value) noexcept final;
   };
 }

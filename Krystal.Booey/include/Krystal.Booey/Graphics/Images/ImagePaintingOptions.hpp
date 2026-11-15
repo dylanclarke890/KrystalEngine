@@ -89,6 +89,7 @@ namespace krys::boo
     }
 
     ImagePaintingOptions(const ImagePaintingOptions &) noexcept = default;
+
     ImagePaintingOptions &operator=(const ImagePaintingOptions &) noexcept = default;
 
     KRYS_NODISCARD CompositeOperator GetCompositeOperator() const noexcept

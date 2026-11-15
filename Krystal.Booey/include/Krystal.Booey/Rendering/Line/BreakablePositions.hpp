@@ -44,6 +44,7 @@ namespace krys::boo
       Normal,
       Break,
     };
+
     enum class WordBreakBehavior : uint8
     {
       Normal,
@@ -51,6 +52,7 @@ namespace krys::boo
       KeepAll,
       AutoPhrase,
     };
+
     enum class LineBreakRules : uint8
     {
       Normal,  // Fast path available when using default line-breaking rules within ASCII.
@@ -91,6 +93,7 @@ namespace krys::boo
 
     // Helper functions.
     enum BreakClass : uint16;
+
     template <LineBreakRules TRules, NoBreakSpaceBehavior TSpaces>
     KRYS_NODISCARD static inline BreakClass Classify(char32 character) noexcept;
 

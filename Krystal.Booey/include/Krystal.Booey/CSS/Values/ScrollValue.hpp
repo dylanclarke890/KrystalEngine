@@ -45,6 +45,7 @@ namespace krys::boo::css
 
   public:
     KRYS_NODISCARD static Ref<ScrollValue> Create() noexcept;
+
     KRYS_NODISCARD static Ref<ScrollValue> Create(RefPtr<Value> &&scroller, RefPtr<Value> &&axis) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;

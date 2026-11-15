@@ -150,7 +150,9 @@ namespace krys::boo::style
   struct Blending<Clip>
   {
     KRYS_NODISCARD bool CanBlend(const Clip &, const Clip &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const Clip &, const Clip &) noexcept;
+
     KRYS_NODISCARD Clip Blend(const Clip &, const Clip &, const BlendingContext &) noexcept;
   };
 }

@@ -168,6 +168,7 @@ namespace krys::boo::style
                     const HashSet<AnimatableCSSProperty> *animatedProperties = nullptr,
                     const css::StyleProperties *positionTryFallbackProperties = nullptr,
                     const HashSet<AnimatableCSSProperty> *transitioningProperties = nullptr) noexcept;
+
     PropertyCascade(const PropertyCascade &parent, Origin maximumOrigin,
                     Maybe<ScopeOrdinal> rollbackScope = {},
                     Maybe<style::CascadeLayerPriority> maximumCascadeLayerPriorityForRollback = {}) noexcept;
@@ -180,14 +181,18 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD bool HasNormalProperty(css::PropertyId id) const noexcept;
+
     KRYS_NODISCARD const Property &NormalProperty(css::PropertyId id) const noexcept;
 
     KRYS_NODISCARD bool HasLogicalGroupProperty(css::PropertyId id) const noexcept;
+
     KRYS_NODISCARD const Property &LogicalGroupProperty(css::PropertyId id) const noexcept;
+
     KRYS_NODISCARD const Property *
       LastPropertyResolvingLogicalPropertyPair(css::PropertyId id, WritingMode writingMode) const noexcept;
 
     KRYS_NODISCARD bool HasCustomProperty(const css::CSSOMStringAtom &name) const noexcept;
+
     KRYS_NODISCARD const Property &GetCustomProperty(const css::CSSOMStringAtom &name) const noexcept;
 
     KRYS_NODISCARD Span<const css::PropertyId> LogicalGroupPropertyIds() const noexcept;
@@ -216,27 +221,37 @@ namespace krys::boo::style
 
   private:
     void BuildCascade() noexcept;
+
     KRYS_NODISCARD bool AddNormalMatches(Origin origin) noexcept;
+
     void AddImportantMatches(Origin origin) noexcept;
+
     bool AddMatch(const MatchedProperties &matchedProperties, Origin origin,
                   css::IsImportant important) noexcept;
+
     KRYS_NODISCARD bool
       ShouldApplyAfterAnimation(const css::StyleProperties::PropertyReference &property) noexcept;
+
     void AddPositionTryFallbackProperties() noexcept;
 
     void Set(css::PropertyId id, const css::Value &cssValue, const MatchedProperties &matchedProperties,
              Origin origin) noexcept;
+
     void SetLogicalGroupProperty(css::PropertyId id, const css::Value &cssValue,
                                  const MatchedProperties &matchedProperties, Origin origin) noexcept;
+
     static void SetPropertyInternal(Property &property, css::PropertyId id, const css::Value &cssValue,
                                     const MatchedProperties &matchedProperties, Origin origin) noexcept;
 
     KRYS_NODISCARD bool HasProperty(css::PropertyId propertyId, const css::Value &value) const noexcept;
+
     KRYS_NODISCARD bool MayOverrideExistingProperty(css::PropertyId propertyId,
                                                     const css::Value &value) const noexcept;
 
     KRYS_NODISCARD uint32 LogicalGroupPropertyIndex(css::PropertyId id) const noexcept;
+
     void SetLogicalGroupPropertyIndex(css::PropertyId id, uint32 index) noexcept;
+
     void SortLogicalGroupPropertyIds() noexcept;
   };
 

@@ -131,6 +131,7 @@ namespace krys::boo
 
   public:
     explicit RenderLayerBacking(RenderLayer &layer) noexcept;
+
     ~RenderLayerBacking() noexcept override;
 
     // Do cleanup while layer->backing() is still valid.
@@ -155,6 +156,7 @@ namespace krys::boo
     }
 
     void RemoveBackingSharingLayer(RenderLayer &layer, EnumSet<UpdateBackingSharingFlags> flags) noexcept;
+
     void ClearBackingSharingLayers(EnumSet<UpdateBackingSharingFlags> flags) noexcept;
 
     void UpdateConfigurationAfterStyleChange() noexcept;
@@ -268,6 +270,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD GraphicsLayer *ParentForSublayers() const noexcept;
+
     KRYS_NODISCARD GraphicsLayer *ChildForSuperlayers() const noexcept;
 
     // RenderLayers with backing normally short-circuit paintLayer() because their content is rendered via
@@ -288,6 +291,7 @@ namespace krys::boo
 
     void SetContentsNeedDisplay(
       GraphicsLayerShouldClipToLayer shouldClip = GraphicsLayerShouldClipToLayer::Clip) noexcept;
+
     // r is in the coordinate space of the layer's render object
     void SetContentsNeedDisplayInRect(const LayoutRect &r, GraphicsLayerShouldClipToLayer shouldClip =
                                                              GraphicsLayerShouldClipToLayer::Clip) noexcept;
@@ -296,8 +300,10 @@ namespace krys::boo
     void ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect) noexcept;
 
     KRYS_NODISCARD LayoutRect CompositedBounds() const noexcept;
+
     // Returns true if changed.
     bool SetCompositedBounds(const LayoutRect &bounds) noexcept;
+
     // Returns true if changed.
     bool UpdateCompositedBounds() noexcept;
 
@@ -316,44 +322,59 @@ namespace krys::boo
 
     bool StartAnimation(double timeOffset, const GraphicsLayerAnimation &animation,
                         const BlendingKeyframes &keyframes) noexcept;
+
     void AnimationPaused(double timeOffset, const utf8_string &animationName) noexcept;
+
     void AnimationFinished(const utf8_string &animationName) noexcept;
+
     void TransformRelatedPropertyDidChange() noexcept;
+
     void SuspendAnimations(MonotonicTime::duration time = {}) noexcept;
+
     void ResumeAnimations() noexcept;
 
     // GraphicsLayerClient interface
     void TiledBackingUsageChanged(const GraphicsLayer *, bool usingTiledBacking) noexcept override;
+
     void NotifyAnimationStarted(const GraphicsLayer *, const utf8_string &,
                                 MonotonicTime::duration) noexcept override;
+
     void NotifyFlushRequired(const GraphicsLayer *layer) noexcept override;
+
     void NotifySubsequentFlushRequired(const GraphicsLayer *layer) noexcept override;
 
     void PaintContents(const GraphicsLayer &graphicsLayer, GraphicsContext &context, const FloatRect &clip,
                        EnumSet<GraphicsLayerPaintBehavior> layerPaintBehavior) noexcept override;
 
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept override;
+
     KRYS_NODISCARD float
       ContentsScaleMultiplierForNewTiles(const GraphicsLayer *layer) const noexcept override;
 
     KRYS_NODISCARD bool PaintsOpaquelyAtNonIntegralScales(const GraphicsLayer *) const noexcept override;
 
     KRYS_NODISCARD float PageScaleFactor() const noexcept override;
+
     KRYS_NODISCARD float ZoomedOutPageScaleFactor() const noexcept override;
 
     KRYS_NODISCARD FloatSize EnclosingFrameViewVisibleSize() const noexcept override;
 
     void DidChangePlatformLayerForLayer(const GraphicsLayer *layer) noexcept override;
+
     bool GetCurrentTransform(const GraphicsLayer *graphicsLayer,
                              TransformationMatrix &transform) const noexcept override;
+
     KRYS_NODISCARD TransformationMatrix
       TransformMatrixForProperty(AnimatedProperty property) const noexcept override;
 
     KRYS_NODISCARD bool IsFlushingLayers() const noexcept override;
+
     KRYS_NODISCARD bool IsTrackingRepaints() const noexcept override;
+
     KRYS_NODISCARD bool
       ShouldSkipLayerInDump(const GraphicsLayer *layer,
                             EnumSet<LayerTreeAsTextOptions> options) const noexcept override;
+
     KRYS_NODISCARD bool
       ShouldDumpPropertyForLayer(const GraphicsLayer *layer, utf8_stringview propertyName,
                                  EnumSet<LayerTreeAsTextOptions> options) const noexcept override;
@@ -414,6 +435,7 @@ namespace krys::boo
     KRYS_NODISCARD FloatRect BackgroundBoxForSimpleContainerPainting() const noexcept;
 
     void CreatePrimaryGraphicsLayer() noexcept;
+
     void DestroyGraphicsLayers() noexcept;
 
     void WillDestroyLayer(const GraphicsLayer *layer) noexcept;
@@ -440,34 +462,50 @@ namespace krys::boo
     }
 
     void UpdateInternalHierarchy() noexcept;
+
     bool UpdateViewportConstrainedSublayers(ViewportConstrainedSublayers sublayers) noexcept;
+
     bool UpdateAncestorClipping(bool needsAncestorClip, const RenderLayer *compositingAncestor) noexcept;
+
     bool UpdateDescendantClippingLayer(bool needsDescendantClip) noexcept;
+
     bool UpdateOverflowControlsLayers(bool needsHorizontalScrollbarLayer, bool needsVerticalScrollbarLayer,
                                       bool needsScrollCornerLayer) noexcept;
+
     bool UpdateForegroundLayer(bool needsForegroundLayer) noexcept;
+
     bool UpdateBackgroundLayer(bool needsBackgroundLayer) noexcept;
+
     bool UpdateMaskingLayer(bool hasMask, bool hasClipPath) noexcept;
+
     bool UpdateTransformFlatteningLayer(const RenderLayer *compositingAncestor) noexcept;
 
     KRYS_NODISCARD bool RequiresLayerForScrollbar(Scrollbar *scrollbar) const noexcept;
+
     KRYS_NODISCARD bool RequiresHorizontalScrollbarLayer() const noexcept;
+
     KRYS_NODISCARD bool RequiresVerticalScrollbarLayer() const noexcept;
+
     KRYS_NODISCARD bool RequiresScrollCornerLayer() const noexcept;
+
     bool UpdateScrollingLayers(bool needsScrollingLayers) noexcept;
 
     void UpdateScrollOffset(ScrollOffset scrollOffset) noexcept;
 
     void UpdateMaskingLayerGeometry() noexcept;
+
     void UpdateRootLayerConfiguration() noexcept;
+
     void UpdatePaintingPhases() noexcept;
 
     void SetBackgroundLayerPaintsFixedRootBackground(bool backgroundLayerPaintsFixedRootBackground) noexcept;
 
     KRYS_NODISCARD LayoutSize ContentOffsetInCompositingLayer() const noexcept;
+
     KRYS_NODISCARD LayoutSize OffsetRelativeToRendererOriginForDescendantLayers() const noexcept;
 
     void EnsureClippingStackLayers(LayerAncestorClippingStack &clippingStack) noexcept;
+
     void RemoveClippingStackLayers(LayerAncestorClippingStack &clippingStack) noexcept;
 
     void UpdateClippingStackLayerGeometry(LayerAncestorClippingStack &clippingStack,
@@ -477,49 +515,69 @@ namespace krys::boo
     void ConnectClippingStackLayers(LayerAncestorClippingStack &clippingStack) noexcept;
 
     void UpdateOpacity(const RenderStyle &style) noexcept;
+
     void UpdateTransform(const RenderStyle &style) noexcept;
+
     void UpdateChildrenTransformAndAnchorPoint(const LayoutRect &primaryGraphicsLayerRect,
                                                LayoutSize offsetFromParentGraphicsLayer) noexcept;
+
     void UpdateFilters(const RenderStyle &style) noexcept;
+
     void UpdateBackdropFilters(const RenderStyle &style) noexcept;
+
     void UpdateBackdropFiltersGeometry() noexcept;
+
     bool UpdateBackdropRoot() noexcept;
+
     void UpdateBlendMode(const RenderStyle &style) noexcept;
+
     void UpdateContentsScalingFilters(const RenderStyle &style) noexcept;
+
     /// @brief Whether the layer's contents are a canvas context's display delegate.
     KRYS_NODISCARD bool ShouldSetContentsDisplayDelegate() const noexcept;
 
     // Return the opacity value that this layer should use for compositing.
     KRYS_NODISCARD float CompositingOpacity(float rendererOpacity) const noexcept;
+
     KRYS_NODISCARD Color RendererBackgroundColor() const noexcept;
 
     KRYS_NODISCARD bool PaintsBoxDecorations() const noexcept;
+
     void DeterminePaintsContent(RenderLayer::PaintedContentRequest &request) const noexcept;
 
     void UpdateDrawsContent(PaintedContentsInfo &contentsInfo) noexcept;
 
     // Returns true if this compositing layer has no visible content.
     KRYS_NODISCARD bool IsSimpleContainerCompositingLayer(PaintedContentsInfo &contentsInfo) const noexcept;
+
     // Returns true if this layer has content that needs to be rendered by painting into the backing store.
     KRYS_NODISCARD bool ContainsPaintedContent(PaintedContentsInfo &contentsInfo) const noexcept;
+
     // Returns true if the RenderLayer just contains an image that we can composite directly.
     KRYS_NODISCARD bool IsDirectlyCompositedImage() const noexcept;
+
     void UpdateImageContents(PaintedContentsInfo &contentsInfo) noexcept;
+
     KRYS_NODISCARD bool IsUnscaledBitmapOnly() const noexcept;
+
     KRYS_NODISCARD bool IsBitmapOnly() const noexcept;
 
     void UpdateDirectlyCompositedBoxDecorations(PaintedContentsInfo &contentsInfo,
                                                 bool &didUpdateContentsRect) noexcept;
+
     void UpdateDirectlyCompositedBackgroundColor(PaintedContentsInfo &contentsInfo,
                                                  bool &didUpdateContentsRect) noexcept;
+
     void UpdateDirectlyCompositedBackgroundImage(PaintedContentsInfo &contentsInfo,
                                                  bool &didUpdateContentsRect) noexcept;
 
     void ResetContentsRect() noexcept;
+
     void UpdateContentsRects() noexcept;
 
     void DetermineNonCompositedLayerDescendantsPaintedContent(
       RenderLayer::PaintedContentRequest &request) const noexcept;
+
     KRYS_NODISCARD bool HasVisibleNonCompositedDescendants() const noexcept;
 
     KRYS_NODISCARD bool ShouldClipCompositedBounds() const noexcept;
@@ -536,6 +594,7 @@ namespace krys::boo
 
     void PaintIntoLayer(const GraphicsLayer *graphicsLayer, GraphicsContext &context,
                         const IntRect &paintDirtyRect, EnumSet<PaintBehavior> paintBehavior) noexcept;
+
     KRYS_NODISCARD EnumSet<RenderLayer::PaintLayerFlag>
       PaintFlagsForLayer(const GraphicsLayer &graphicsLayer) const noexcept;
 
@@ -546,6 +605,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect
       ComputeParentGraphicsLayerRect(const RenderLayer *compositedAncestor) const noexcept;
+
     KRYS_NODISCARD LayoutRect ComputePrimaryGraphicsLayerRect(
       const RenderLayer *compositedAncestor, const LayoutRect &parentGraphicsLayerRect) const noexcept;
   };
@@ -560,6 +620,7 @@ namespace krys::boo
     /// Shown as its compositing layer's contents, drawn by its context.
     CanvasAsLayerContents,
   };
+
   /// @brief How @p renderer, a canvas's, is composited.
   KRYS_NODISCARD CanvasCompositingStrategy
     GetCanvasCompositingStrategy(const RenderObject &renderer) noexcept;

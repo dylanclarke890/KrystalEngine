@@ -63,6 +63,7 @@ namespace krys::boo
 
   private:
     StyleSurroundData() noexcept;
+
     StyleSurroundData(const StyleSurroundData &) noexcept;
   };
 }

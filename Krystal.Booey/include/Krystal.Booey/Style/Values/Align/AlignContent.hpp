@@ -37,15 +37,25 @@ namespace krys::boo::style
   struct AlignContent
   {
     constexpr AlignContent(css::keywords::Normal) noexcept;
+
     constexpr AlignContent(css::keywords::Baseline, Maybe<BaselineAlignmentPreference> = null) noexcept;
+
     constexpr AlignContent(css::keywords::SpaceBetween) noexcept;
+
     constexpr AlignContent(css::keywords::SpaceAround) noexcept;
+
     constexpr AlignContent(css::keywords::SpaceEvenly) noexcept;
+
     constexpr AlignContent(css::keywords::Stretch) noexcept;
+
     constexpr AlignContent(css::keywords::Center, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr AlignContent(css::keywords::Start, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr AlignContent(css::keywords::End, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr AlignContent(css::keywords::FlexStart, Maybe<OverflowPosition> = null) noexcept;
+
     constexpr AlignContent(css::keywords::FlexEnd, Maybe<OverflowPosition> = null) noexcept;
 
     KRYS_NODISCARD constexpr bool IsNormal() const noexcept
@@ -139,14 +149,19 @@ namespace krys::boo::style
     };
 
     KRYS_NODISCARD constexpr static bool CanHaveBaselinePosition(PrimaryKind) noexcept;
+
     KRYS_NODISCARD constexpr static bool IsContentPosition(PrimaryKind) noexcept;
 
     constexpr AlignContent(PrimaryKind) noexcept;
+
     constexpr AlignContent(PrimaryKind, Maybe<BaselineAlignmentPreference>) noexcept;
+
     constexpr AlignContent(PrimaryKind, Maybe<OverflowPosition>) noexcept;
 
     KRYS_NODISCARD constexpr PrimaryKind Primary() const noexcept;
+
     KRYS_NODISCARD constexpr BaselineAlignmentPreferenceKind GetBaselineAlignmentPreference() const noexcept;
+
     KRYS_NODISCARD constexpr OverflowPositionKind GetOverflowPosition() const noexcept;
 
     uint8 _primary : 4 {static_cast<uint8>(PrimaryKind::Normal)};

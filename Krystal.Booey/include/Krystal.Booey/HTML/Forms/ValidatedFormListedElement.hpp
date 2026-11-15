@@ -73,6 +73,7 @@ namespace krys::boo::html
     /// @brief Asks the host to show the control's validation message at @p validationAnchor, or to hide it if
     /// it's shown (as typing does) or there's none.
     void UpdateVisibleValidationMessage(HTMLElement &validationAnchor) noexcept;
+
     void HideVisibleValidationMessage() noexcept;
 
     /// @see https://html.spec.whatwg.org/#check-validity-steps
@@ -84,9 +85,13 @@ namespace krys::boo::html
     bool ReportValidity() noexcept;
 
     KRYS_NODISCARD HTMLElement *FocusableValidationAnchorElement() noexcept;
+
     void ReportNonFocusableControlError() noexcept;
+
     void FocusAndShowValidationMessage(HTMLElement &validationAnchor) noexcept;
+
     KRYS_NODISCARD bool IsShowingValidationMessage() const noexcept;
+
     KRYS_NODISCARD bool IsFocusingWithValidationMessage() const noexcept;
 
     /// @brief Must be called when a validation constraint or the control's value changes.
@@ -140,8 +145,11 @@ namespace krys::boo::html
     void SetInteractedWithSinceLastFormSubmitEvent(bool interactedWith) noexcept;
 
     KRYS_NODISCARD bool MatchesValidPseudoClass() const noexcept;
+
     KRYS_NODISCARD bool MatchesInvalidPseudoClass() const noexcept;
+
     KRYS_NODISCARD bool MatchesUserInvalidPseudoClass() const noexcept;
+
     KRYS_NODISCARD bool MatchesUserValidPseudoClass() const noexcept;
 
     KRYS_NODISCARD virtual bool ShouldAutocomplete() const noexcept;
@@ -173,18 +181,26 @@ namespace krys::boo::html
     }
 
     void InsertedIntoAncestor(bool connectedToDocument, dom::ContainerNode &parentOfInsertedTree) noexcept;
+
     void DidFinishInsertingNode() noexcept;
+
     void RemovedFromAncestor(bool disconnectedFromDocument,
                              dom::ContainerNode &oldParentOfRemovedTree) noexcept;
+
     void ParseAttribute(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> value) noexcept;
+
     void ParseDisabledAttribute(Maybe<dom::DOMStringView> value) noexcept;
+
     void ParseReadOnlyAttribute(Maybe<dom::DOMStringView> value) noexcept;
 
     virtual void DisabledStateChanged() noexcept;
+
     virtual void ReadOnlyStateChanged() noexcept;
 
     void WillChangeForm() noexcept override;
+
     void DidChangeForm() noexcept override;
+
     void FormWillBeDestroyed() noexcept final;
 
     KRYS_NODISCARD bool BelongsToFormThatIsBeingDestroyed() const noexcept
@@ -193,10 +209,12 @@ namespace krys::boo::html
     }
 
     void SetDataListAncestorState(TriState isInsideDataList) noexcept;
+
     void SyncWithFieldsetAncestors(dom::ContainerNode *insertionNode) noexcept;
 
   private:
     KRYS_NODISCARD bool ComputeIsDisabledByFieldsetAncestor() const noexcept;
+
     void SetDisabledInternal(bool disabled, bool disabledByAncestorFieldset) noexcept;
 
     KRYS_NODISCARD virtual HTMLElement *ValidationAnchorElement() noexcept = 0;

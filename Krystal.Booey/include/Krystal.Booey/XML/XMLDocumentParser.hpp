@@ -58,8 +58,11 @@ namespace krys::boo::xml
   public:
     KRYS_NODISCARD static RefPtr<XMLParserContext> CreateMemoryParser(_xmlSAXHandler *, void *userData,
                                                                       const utf8_string &chunk) noexcept;
+
     KRYS_NODISCARD static Ref<XMLParserContext> CreateStringParser(_xmlSAXHandler *, void *userData) noexcept;
+
     XMLParserContext() = delete;
+
     ~XMLParserContext() noexcept;
 
     KRYS_NODISCARD _xmlParserCtxt *Context() const noexcept
@@ -111,6 +114,7 @@ namespace krys::boo::xml
     }
 
     XMLDocumentParser() = delete;
+
     ~XMLDocumentParser() noexcept override;
 
     // Exposed for callbacks:
@@ -138,14 +142,18 @@ namespace krys::boo::xml
     KRYS_NODISCARD static bool SupportsXMLVersion(dom::DOMStringView) noexcept;
 
     void Append(dom::DOMString source) noexcept final;
+
     void Finish() noexcept final;
+
     void StopParsing() noexcept final;
+
     void Detach() noexcept final;
 
     KRYS_NODISCARD SourceLocation TextPosition() const noexcept;
 
   private:
     explicit XMLDocumentParser(dom::Document &) noexcept;
+
     XMLDocumentParser(dom::DocumentFragment &, HashMap<dom::DOMStringAtom, dom::DOMStringAtom> &&,
                       dom::DOMStringAtom) noexcept;
 
@@ -158,31 +166,44 @@ namespace krys::boo::xml
     // the parser implementation, but outside this class.
 
     void Error(XMLErrors::Type, const char *message, va_list args) noexcept;
+
     void StartElementNs(const xmlChar *xmlLocalName, const xmlChar *xmlPrefix, const xmlChar *xmlURI,
                         int numNamespaces, const xmlChar **namespaces, int numAttributes, int numDefaulted,
                         const xmlChar **libxmlAttributes) noexcept;
+
     void EndElementNs() noexcept;
+
     void Characters(Span<const xmlChar>) noexcept;
+
     void ProcessingInstruction(const xmlChar *target, const xmlChar *data) noexcept;
+
     void CdataBlock(Span<const xmlChar>) noexcept;
+
     void Comment(const xmlChar *) noexcept;
+
     void StartDocument(const xmlChar *version, const xmlChar *encoding, int standalone) noexcept;
+
     void InternalSubset(const xmlChar *name, const xmlChar *externalID, const xmlChar *systemID) noexcept;
+
     void EndDocument() noexcept;
 
   private:
     void InitializeParserContext(const utf8_string &chunk = {}) noexcept;
 
     void PushCurrentNode(dom::ContainerNode *) noexcept;
+
     void PopCurrentNode() noexcept;
+
     void ClearCurrentNodeStack() noexcept;
 
     void InsertErrorMessageBlock() noexcept;
 
     void CreateLeafTextNode() noexcept;
+
     bool UpdateLeafTextNode() noexcept;
 
     void DoWrite(const dom::DOMString &) noexcept;
+
     void DoEnd() noexcept;
 
     KRYS_NODISCARD _xmlParserCtxt *Context() const noexcept
@@ -192,5 +213,6 @@ namespace krys::boo::xml
   };
 
   _xmlParserInput *ExternalEntityLoader(const char *url, const char *id, _xmlParserCtxt *) noexcept;
+
   void InitializeXMLParser() noexcept;
 }

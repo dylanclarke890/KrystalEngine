@@ -207,7 +207,9 @@ namespace krys::boo::style
     }
 
     void RemoveEmptyValues() noexcept;
+
     void FillUnsetProperties() noexcept;
+
     void ComputeUsedLength() noexcept;
   };
 

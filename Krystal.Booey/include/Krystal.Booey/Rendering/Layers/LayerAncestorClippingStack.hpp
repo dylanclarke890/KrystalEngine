@@ -88,17 +88,21 @@ namespace krys::boo
 
   public:
     explicit LayerAncestorClippingStack(List<CompositedClipData> &&clipDataStack) noexcept;
+
     ~LayerAncestorClippingStack() noexcept = default;
 
     KRYS_NODISCARD bool HasAnyScrollingLayers() const noexcept;
 
     KRYS_NODISCARD bool EqualToClipData(const List<CompositedClipData> &clipDataStack) const noexcept;
+
     bool UpdateWithClipData(List<CompositedClipData> &&clipDataStack) noexcept;
 
     KRYS_NODISCARD List<CompositedClipData> GetCompositedClipData() const noexcept;
+
     void Clear() noexcept;
 
     KRYS_NODISCARD GraphicsLayer *FirstLayer() const noexcept;
+
     KRYS_NODISCARD GraphicsLayer *LastLayer() const noexcept;
 
     KRYS_NODISCARD List<ClippingStackEntry> &Stack() noexcept

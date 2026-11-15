@@ -33,11 +33,11 @@
 
 namespace krys::boo
 {
+  struct PaintInfo;
   class RenderBlock;
   class RenderBlockFlow;
   class RenderBox;
   class RenderInline;
-  struct PaintInfo;
 
   namespace inline_display
   {
@@ -80,8 +80,11 @@ namespace krys::boo::layout_integration
 
   private:
     void PaintDisplayBox(const inline_display::Box &box) noexcept;
+
     void PaintEllipsis(size_t lineIndex) noexcept;
+
     KRYS_NODISCARD LayoutPoint FlippedContentOffsetIfNeeded(const RenderBox &childRenderer) const noexcept;
+
     KRYS_NODISCARD const RenderBlock &Root() const noexcept;
   };
 

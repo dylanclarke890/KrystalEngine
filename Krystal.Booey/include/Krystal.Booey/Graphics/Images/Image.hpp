@@ -115,6 +115,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual bool CurrentFrameKnownToBeOpaque() const noexcept = 0;
+
     KRYS_NODISCARD virtual bool CurrentFrameIsComplete() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsAnimated() const noexcept
@@ -162,6 +163,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual FloatSize
       Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept = 0;
+
     KRYS_NODISCARD virtual FloatSize
       SourceSize(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
 
@@ -253,15 +255,21 @@ namespace krys::boo
 
     // Typically the CachedImage that owns us.
     KRYS_NODISCARD RefPtr<ImageObserver> GetImageObserver() const noexcept;
+
     void SetImageObserver(RefPtr<ImageObserver> &&) noexcept;
 
     KRYS_NODISCARD url::URL SourceURL() const noexcept;
+
     KRYS_NODISCARD utf8_string MimeType() const noexcept;
+
     KRYS_NODISCARD int64 ExpectedContentLength() const noexcept;
 
     KRYS_NODISCARD virtual RefPtr<NativeImage> GetNativeImage() noexcept;
+
     KRYS_NODISCARD virtual RefPtr<NativeImage> NativeImageAtIndex(uint32) noexcept;
+
     KRYS_NODISCARD virtual RefPtr<NativeImage> CurrentNativeImage() noexcept;
+
     KRYS_NODISCARD virtual RefPtr<NativeImage>
       CurrentPreTransformedNativeImage(ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
 
@@ -279,9 +287,11 @@ namespace krys::boo
 
     virtual ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
                                  ImagePaintingOptions = {}) noexcept = 0;
+
     ImageDrawResult DrawTiled(GraphicsContext &, const FloatRect &dstRect, const FloatPoint &srcPoint,
                               const FloatSize &tileSize, const FloatSize &spacing,
                               ImagePaintingOptions = {}) noexcept;
+
     ImageDrawResult DrawTiled(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
                               const FloatSize &tileScaleFactor, TileRule hRule, TileRule vRule,
                               ImagePaintingOptions = {}) noexcept;

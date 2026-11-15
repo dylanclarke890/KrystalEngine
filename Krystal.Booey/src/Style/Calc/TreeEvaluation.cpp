@@ -32,30 +32,44 @@ namespace krys::boo::style::calc
 {
   static auto Evaluate(const css::keywords::None &, double percentResolutionLength,
                        const ZoomFactor &) noexcept -> css::keywords::None;
+
   static auto Evaluate(const ChildOrNone &, double percentResolutionLength, const ZoomFactor &) noexcept
     -> Variant<double, css::keywords::None>;
+
   static auto Evaluate(const Maybe<Child> &, double percentResolutionLength, const ZoomFactor &) noexcept
     -> Maybe<double>;
+
   static auto Evaluate(const Child &, double percentResolutionLength, const ZoomFactor &) noexcept -> double;
+
   static auto Evaluate(const Number &, double percentResolutionLength, const ZoomFactor &) noexcept -> double;
+
   static auto Evaluate(const Percentage &, double percentResolutionLength, const ZoomFactor &) noexcept
     -> double;
+
   static auto Evaluate(const Dimension &, double percentResolutionLength, const ZoomFactor &) noexcept
     -> double;
+
   static auto Evaluate(const IndirectNode<Sum> &, double percentResolutionLength, const ZoomFactor &) noexcept
     -> double;
+
   static auto Evaluate(const IndirectNode<Product> &, double percentResolutionLength,
                        const ZoomFactor &) noexcept -> double;
+
   static auto Evaluate(const IndirectNode<Min> &, double percentResolutionLength, const ZoomFactor &) noexcept
     -> double;
+
   static auto Evaluate(const IndirectNode<Max> &, double percentResolutionLength, const ZoomFactor &) noexcept
     -> double;
+
   static auto Evaluate(const IndirectNode<Hypot> &, double percentResolutionLength,
                        const ZoomFactor &) noexcept -> double;
+
   static auto Evaluate(const IndirectNode<Random> &, double percentResolutionLength,
                        const ZoomFactor &) noexcept -> double;
+
   static auto Evaluate(const IndirectNode<Blend> &, double percentResolutionLength,
                        const ZoomFactor &) noexcept -> double;
+
   template <typename Op>
   static auto Evaluate(const IndirectNode<Op> &, double percentResolutionLength, const ZoomFactor &) noexcept
     -> double;

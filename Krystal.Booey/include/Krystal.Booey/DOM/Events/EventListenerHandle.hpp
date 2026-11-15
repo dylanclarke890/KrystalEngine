@@ -42,11 +42,17 @@ namespace krys::boo::dom
   public:
     /// @brief A handle that owns no listener.
     EventListenerHandle() noexcept = default;
+
     EventListenerHandle(EventTarget &target, EventListener &listener) noexcept;
+
     EventListenerHandle(EventListenerHandle &&other) noexcept;
+
     EventListenerHandle &operator=(EventListenerHandle &&other) noexcept;
+
     EventListenerHandle(const EventListenerHandle &) = delete;
+
     EventListenerHandle &operator=(const EventListenerHandle &) = delete;
+
     ~EventListenerHandle() noexcept;
 
     /// @brief Removes the listener now, if it's still registered; the handle then owns none.

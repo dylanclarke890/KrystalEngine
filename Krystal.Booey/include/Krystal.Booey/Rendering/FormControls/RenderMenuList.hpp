@@ -62,6 +62,7 @@ namespace krys::boo
 
   public:
     RenderMenuList(html::HTMLSelectElement &element, RenderStyle &&style) noexcept;
+
     ~RenderMenuList() noexcept override;
 
     KRYS_NODISCARD html::HTMLSelectElement &SelectElement() const noexcept;
@@ -72,6 +73,7 @@ namespace krys::boo
     }
 
     void ShowPopup() noexcept;
+
     void HidePopup() noexcept;
 
     void SetOptionsChanged(bool changed) noexcept
@@ -121,6 +123,7 @@ namespace krys::boo
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
+
     void ComputePreferredLogicalWidths() noexcept override;
 
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
@@ -138,22 +141,39 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string ItemText(uint32 listIndex) const noexcept override;
+
     KRYS_NODISCARD utf8_string ItemLabel(uint32 listIndex) const noexcept override;
+
     KRYS_NODISCARD utf8_string ItemIcon(uint32 listIndex) const noexcept override;
+
     KRYS_NODISCARD utf8_string ItemToolTip(uint32 listIndex) const noexcept override;
+
     KRYS_NODISCARD utf8_string ItemAccessibilityText(uint32 listIndex) const noexcept override;
+
     KRYS_NODISCARD bool ItemIsEnabled(uint32 listIndex) const noexcept override;
+
     KRYS_NODISCARD PopupMenuStyle ItemStyle(uint32 listIndex) const noexcept override;
+
     KRYS_NODISCARD PopupMenuStyle MenuStyle() const noexcept override;
+
     KRYS_NODISCARD int32 ClientInsetLeft() const noexcept override;
+
     KRYS_NODISCARD int32 ClientInsetRight() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit ClientPaddingLeft() const noexcept override;
+
     KRYS_NODISCARD LayoutUnit ClientPaddingRight() const noexcept override;
+
     KRYS_NODISCARD int32 ListSize() const noexcept override;
+
     KRYS_NODISCARD int32 SelectedIndex() const noexcept override;
+
     void PopupDidHide() noexcept override;
+
     KRYS_NODISCARD bool ItemIsSeparator(uint32 listIndex) const noexcept override;
+
     KRYS_NODISCARD bool ItemIsLabel(uint32 listIndex) const noexcept override;
+
     KRYS_NODISCARD bool ItemIsSelected(uint32 listIndex) const noexcept override;
 
     KRYS_NODISCARD bool ShouldPopOver() const noexcept override
@@ -162,8 +182,10 @@ namespace krys::boo
     }
 
     void SetTextFromItem(uint32 listIndex) noexcept override;
+
     void ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
                            bool fireOnChangeNow = true) noexcept override;
+
     KRYS_NODISCARD bool Multiple() const noexcept override;
 
 #pragma endregion
@@ -182,8 +204,11 @@ namespace krys::boo
                                 bool &itemHasCustomBackgroundColor) const noexcept;
 
     void AdjustInnerStyle() noexcept;
+
     void SetText(const utf8_string &text) noexcept;
+
     void SetTextFromOption(int32 optionIndex) noexcept;
+
     void UpdateOptionsWidth() noexcept;
 
     void DidUpdateActiveOption(int32 optionIndex) noexcept;

@@ -62,11 +62,13 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#establish-a-close-watcher
     void Add(Ref<CloseWatcher> watcher) noexcept;
+
     /// @see https://html.spec.whatwg.org/#close-watcher-destroy
     void Remove(CloseWatcher &watcher) noexcept;
 
     /// @see https://html.spec.whatwg.org/#notify-the-close-watcher-manager-about-user-activation
     void NotifyAboutUserActivation() noexcept;
+
     /// @brief Whether a close request can be canceled: there's a group to spare.
     KRYS_NODISCARD bool CanPreventClose() const noexcept;
 
@@ -74,6 +76,7 @@ namespace krys::boo::html
     /// untrusted.
     /// @return Whether an enabled watcher was asked.
     bool EscapeKeyHandler(dom::KeyboardEvent &event) noexcept;
+
     /// @brief A close request (Escape, or another user action the host treats as one): asks the last group's
     /// watchers to close, newest first, until one cancels.
     /// @return Whether an enabled watcher was asked.

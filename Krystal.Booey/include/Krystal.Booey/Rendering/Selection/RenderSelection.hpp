@@ -64,7 +64,9 @@ namespace krys::boo
     explicit RenderSelection(RenderView &view) noexcept;
 
     void Set(const RenderRange &selection, RepaintMode blockRepaintMode = RepaintMode::NewXOROld) noexcept;
+
     void Clear() noexcept;
+
     void Repaint() const noexcept;
 
     KRYS_NODISCARD IntRect Bounds() const noexcept
@@ -79,6 +81,7 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD IntRect CollectBounds(ClipToVisibleContent clipToVisibleContent) const noexcept;
+
     void Apply(const RenderRange &newSelection, RepaintMode blockRepaintMode) noexcept;
   };
 }

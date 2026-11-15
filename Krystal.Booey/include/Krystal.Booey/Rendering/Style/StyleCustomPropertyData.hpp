@@ -65,6 +65,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const CustomPropertyData &) const noexcept;
 
     KRYS_NODISCARD const CustomProperty *Get(const css::CSSOMStringAtom &) const noexcept;
+
     void Set(const css::CSSOMStringAtom &, Ref<const CustomProperty> &&) noexcept;
 
     KRYS_NODISCARD uint32 Size() const noexcept
@@ -78,10 +79,12 @@ namespace krys::boo::style
     }
 
     void ForEach(const Func<IterationStatus(const Entry &)> &) const noexcept;
+
     KRYS_NODISCARD css::CSSOMStringAtom FindKeyAtIndex(uint32) const noexcept;
 
   private:
     CustomPropertyData() noexcept = default;
+
     CustomPropertyData(const CustomPropertyData &) noexcept;
 
     template <typename TCallback>

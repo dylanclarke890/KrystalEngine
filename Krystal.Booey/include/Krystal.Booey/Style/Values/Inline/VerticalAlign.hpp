@@ -177,8 +177,10 @@ namespace krys::boo::style
   struct Blending<VerticalAlign>
   {
     KRYS_NODISCARD bool CanBlend(const VerticalAlign &, const VerticalAlign &) noexcept;
+
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const VerticalAlign &,
                                                                       const VerticalAlign &) noexcept;
+
     KRYS_NODISCARD VerticalAlign Blend(const VerticalAlign &, const VerticalAlign &,
                                        const BlendingContext &) noexcept;
   };

@@ -46,16 +46,24 @@ namespace krys::boo::html
 
   public:
     RadioButtonGroups() noexcept;
+
     ~RadioButtonGroups() noexcept;
 
     void Clear() noexcept;
+
     void AddButton(HTMLInputElement &element) noexcept;
+
     void UpdateCheckedState(HTMLInputElement &element) noexcept;
+
     void RequiredStateChanged(HTMLInputElement &element) noexcept;
+
     void RemoveButton(HTMLInputElement &element) noexcept;
+
     KRYS_NODISCARD RefPtr<HTMLInputElement>
       CheckedButtonForGroup(dom::DOMStringView groupName) const noexcept;
+
     KRYS_NODISCARD bool HasCheckedButton(const HTMLInputElement &element) const noexcept;
+
     KRYS_NODISCARD bool IsInRequiredGroup(HTMLInputElement &element) const noexcept;
 
     /// @brief The buttons in @p element's group, in tree order.

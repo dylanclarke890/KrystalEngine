@@ -77,6 +77,7 @@ namespace krys::boo::style
       NamedLines,
       AutoRepeatNamedLines,
     };
+
     void AppendLines(List<css::CSSOMString> &, uint32 index, NamedLinesType) const noexcept;
   };
 

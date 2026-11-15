@@ -67,10 +67,13 @@ namespace krys::boo
   public:
     /// @brief An empty blob.
     KRYS_NODISCARD static Ref<Blob> Create() noexcept;
+
     /// @see https://w3c.github.io/FileAPI/#constructorBlob
     KRYS_NODISCARD static Ref<Blob> Create(List<BlobPartVariant> &&blobPartVariants,
                                            const BlobPropertyBag &propertyBag) noexcept;
+
     KRYS_NODISCARD static Ref<Blob> Create(List<uint8> &&data, utf8_stringview contentType) noexcept;
+
     KRYS_NODISCARD static Ref<Blob> Create(Ref<SharedBuffer> &&buffer, utf8_stringview contentType) noexcept;
 
     virtual ~Blob() noexcept = default;
@@ -97,6 +100,7 @@ namespace krys::boo
 
     // The checks described in the File API spec.
     KRYS_NODISCARD static bool IsValidContentType(utf8_stringview contentType) noexcept;
+
     // The normalization procedure described in the File API spec.
     KRYS_NODISCARD static utf8_string NormalizedContentType(utf8_stringview contentType) noexcept;
 
@@ -108,6 +112,7 @@ namespace krys::boo
     /// can't be read.
     /// @see https://w3c.github.io/FileAPI/#dom-blob-bytes
     KRYS_NODISCARD dom::ExceptionOr<List<uint8>> Bytes() const noexcept;
+
     /// @brief Reads the blob's bytes, decoded as UTF-8.
     /// @see https://w3c.github.io/FileAPI/#dom-blob-text
     KRYS_NODISCARD dom::ExceptionOr<utf8_string> Text() const noexcept;
@@ -124,7 +129,9 @@ namespace krys::boo
     };
 
     Blob(Ref<BlobData> &&data, utf8_stringview type, Maybe<uint64> size, size_t memoryCost) noexcept;
+
     Blob(List<BlobPartVariant> &&blobPartVariants, const BlobPropertyBag &propertyBag) noexcept;
+
     /// @brief A blob with @p blob's bytes and type.
     Blob(ReferencingExistingBlobConstructor, const Blob &blob) noexcept;
   };

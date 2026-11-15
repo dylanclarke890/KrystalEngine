@@ -59,6 +59,7 @@ namespace krys::boo::layout
     InlineTextBox(utf8_string content, bool isCombined,
                   EnumSet<ContentCharacteristic> contentCharacteristicSet, RenderStyle &&style,
                   UniquePtr<RenderStyle> &&firstLineStyle = nullptr) noexcept;
+
     ~InlineTextBox() noexcept override = default;
 
     KRYS_NODISCARD const utf8_string &Content() const noexcept

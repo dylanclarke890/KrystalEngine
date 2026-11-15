@@ -58,18 +58,23 @@ namespace krys::boo::layout
       No,
       Yes,
     };
+
     KRYS_NODISCARD static InlineLevelBox
       CreateInlineBox(const Box &layoutBox, const RenderStyle &style, InlineLayoutUnit logicalLeft,
                       InlineLayoutUnit logicalWidth,
                       LineSpanningInlineBox isLineSpanning = LineSpanningInlineBox::No) noexcept;
+
     KRYS_NODISCARD static InlineLevelBox CreateRootInlineBox(const Box &layoutBox, const RenderStyle &style,
                                                              InlineLayoutUnit logicalLeft,
                                                              InlineLayoutUnit logicalWidth) noexcept;
+
     KRYS_NODISCARD static InlineLevelBox CreateAtomicInlineBox(const Box &layoutBox, const RenderStyle &style,
                                                                InlineLayoutUnit logicalLeft,
                                                                InlineLayoutUnit logicalWidth) noexcept;
+
     KRYS_NODISCARD static InlineLevelBox CreateLineBreakBox(const Box &layoutBox, const RenderStyle &style,
                                                             InlineLayoutUnit logicalLeft) noexcept;
+
     KRYS_NODISCARD static InlineLevelBox CreateGenericInlineLevelBox(const Box &layoutBox,
                                                                      const RenderStyle &style,
                                                                      InlineLayoutUnit logicalLeft) noexcept;

@@ -367,6 +367,7 @@ namespace krys::boo::style
   {
     template <typename N, css::PrimitiveKeyword... Ks>
     std::true_type IsLengthWrapperBase(const LengthWrapperBase<N, Ks...> *);
+
     std::false_type IsLengthWrapperBase(const void *);
   }
 

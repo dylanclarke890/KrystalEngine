@@ -68,16 +68,20 @@ namespace krys::boo::layout
 namespace krys::boo
 {
   class AffineTransform;
+  enum class Affinity : bool;
   class ControlPart;
   class FloatPoint;
+  class FloatQuad;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
-  class FloatQuad;
+  enum class HitTestSource : bool;
   class IntRect;
   class LayoutPoint;
   class LayoutRect;
   class LayoutSize;
+  class LocalFrameViewLayoutContext;
+  class ReferencedSVGResources;
   class RenderBlock;
   class RenderBlockFlow;
   class RenderBox;
@@ -85,19 +89,15 @@ namespace krys::boo
   class RenderElement;
   class RenderFragmentContainer;
   class RenderFragmentedFlow;
+  class RenderGeometryMap;
   class RenderLayer;
   class RenderLayerModelObject;
   class RenderTreeBuilder;
   class RenderView;
-  class LocalFrameViewLayoutContext;
   class ScrollAnchoringController;
-  class ReferencedSVGResources;
-  class RenderGeometryMap;
-  class TransformState;
   class TransformationMatrix;
+  class TransformState;
   class VisiblePosition;
-  enum class Affinity : bool;
-  enum class HitTestSource : bool;
 
   enum class RenderObjectStateFlag : uint8
   {
@@ -489,6 +489,7 @@ namespace krys::boo
     /// @brief Schedules the page's rendering update for @p image's own, as an SVG image's page is updated
     /// with the page that shows it.
     virtual void ScheduleRenderingUpdateForImage(CachedImage &image) noexcept;
+
     /// @brief The client the renderer is to the cached images it uses.
     KRYS_NODISCARD CachedImageClient &GetCachedImageClient() const noexcept;
 
@@ -507,6 +508,7 @@ namespace krys::boo
     /// @brief The renderer whose coordinates the renderer's repaints are in: null for the render view.
     // FIXME: Compositing layers and filter layers, once there are any.
     KRYS_NODISCARD RepaintContainerStatus ContainerForRepaint() const noexcept;
+
     /// @brief Repaints @p rect, in @p repaintContainer's coordinates (the render view's if null).
     void RepaintUsingContainer(const RenderLayerModelObject *repaintContainer, const LayoutRect &rect,
                                bool shouldClipToLayer = true) const noexcept;
@@ -516,6 +518,7 @@ namespace krys::boo
       No,
       Yes,
     };
+
     /// @brief Repaints the renderer: its clipped overflow rect.
     void Repaint(ForceRepaint forceRepaint = ForceRepaint::No) const noexcept;
 
@@ -524,10 +527,13 @@ namespace krys::boo
       No,
       Yes,
     };
+
     /// @brief Repaints @p repaintRect, in the renderer's coordinates.
     void RepaintRectangle(const LayoutRect &repaintRect, bool shouldClipToLayer = true) const noexcept;
+
     /// @brief Repaints a renderer with a fixed background, which moves against the contents when they scroll.
     void RepaintSlowRepaintObject() const noexcept;
+
     void RepaintRectangle(const LayoutRect &repaintRect, ClipRepaintToLayer shouldClipToLayer,
                           ForceRepaint forceRepaint,
                           Maybe<LayoutBoxExtent> additionalRepaintOutsets = null) const noexcept;
@@ -605,25 +611,32 @@ namespace krys::boo
       }
 
       void Transform(const TransformationMatrix &matrix) noexcept;
+
       void Transform(const TransformationMatrix &matrix, float deviceScaleFactor) noexcept;
     };
 
     /// @brief The rect to repaint whenever the renderer changes, in the view's coordinates: its overflow and
     /// outlines.
     KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForRepaint() const noexcept;
+
     /// @brief The renderer's clipped overflow rect in the view's coordinates, clipped as composited, as
     /// spatial navigation tests whether it's on screen.
     KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForSpatialNavigation() const noexcept;
+
     KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForRenderTreeAsText() const noexcept;
+
     KRYS_NODISCARD IntRect PixelSnappedAbsoluteClippedOverflowRect() const noexcept;
 
     KRYS_NODISCARD virtual LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                           VisibleRectContext context) const noexcept;
+
     KRYS_NODISCARD LayoutRect
       ClippedOverflowRectForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept;
+
     KRYS_NODISCARD virtual LayoutRect
       RectWithOutlineForRepaint(const RenderLayerModelObject *repaintContainer,
                                 LayoutUnit outlineWidth) const noexcept;
+
     KRYS_NODISCARD virtual LayoutRect
       OutlineBoundsForRepaint(const RenderLayerModelObject * /*repaintContainer*/) const noexcept;
 
@@ -631,8 +644,10 @@ namespace krys::boo
     KRYS_NODISCARD RepaintRects ComputeRects(const RepaintRects &rects,
                                              const RenderLayerModelObject *repaintContainer,
                                              VisibleRectContext context) const noexcept;
+
     KRYS_NODISCARD LayoutRect ComputeRectForRepaint(
       const LayoutRect &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
+
     KRYS_NODISCARD FloatRect ComputeFloatRectForRepaint(
       const FloatRect &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
 
@@ -646,23 +661,28 @@ namespace krys::boo
     KRYS_NODISCARD virtual Maybe<RepaintRects>
       ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
                                      VisibleRectContext context) const noexcept;
+
     /// @brief `ComputeVisibleRectsInContainer` for SVG renderers, which map float rects.
     KRYS_NODISCARD virtual Maybe<FloatRect>
       ComputeFloatVisibleRectInContainer(const FloatRect &rect, const RenderLayerModelObject *container,
                                          VisibleRectContext context) const noexcept;
 
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForRepaint() noexcept;
+
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForSpatialNavigation() noexcept;
+
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForRenderTreeAsText() noexcept;
 
     /// @brief Whether the renderer has a layer that paints itself.
     KRYS_NODISCARD bool HasSelfPaintingLayer() const noexcept;
 
     KRYS_NODISCARD bool HasOutlineAutoAncestor() const noexcept;
+
     void SetHasOutlineAutoAncestor(bool hasOutlineAutoAncestor = true) noexcept;
 
     /// @brief Marks the enclosing layer as needing a full repaint after layout.
     void SetLayerNeedsFullRepaint() noexcept;
+
     void SetLayerNeedsFullRepaintForOutOfFlowMovementLayout() noexcept;
 
   protected:
@@ -702,15 +722,23 @@ namespace krys::boo
 
       // CachedImageClient.
       void ImageChanged(CachedImage *, const IntRect * = nullptr) noexcept final;
+
       KRYS_NODISCARD bool AllowsAnimation() const noexcept final;
+
       KRYS_NODISCARD bool CanDestroyDecodedData() const noexcept final;
+
       VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                  const IntRect *) noexcept final;
+
       KRYS_NODISCARD VisibleInViewportState
         ImageVisibleInViewport(const dom::Document &) const noexcept final;
+
       void DidRemoveCachedImageClient(CachedImage &) noexcept final;
+
       void ImageContentChanged(CachedImage &) noexcept final;
+
       void ScheduleRenderingUpdateForImage(CachedImage &) noexcept final;
+
       KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept final;
     };
 
@@ -744,6 +772,7 @@ namespace krys::boo
     /// marked as anonymous in the constructor.
     RenderObject(Type type, dom::Node &node, EnumSet<TypeFlag> typeFlags,
                  TypeSpecificFlags typeSpecificFlags) noexcept;
+
     virtual ~RenderObject() noexcept;
 
     KRYS_NODISCARD Type GetType() const noexcept
@@ -771,6 +800,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderObject *PreviousInFlowSibling() const noexcept;
+
     KRYS_NODISCARD RenderObject *NextInFlowSibling() const noexcept;
 
     // Use RenderElement versions instead.
@@ -785,14 +815,21 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RenderObject *NextInPreOrder() const noexcept;
+
     KRYS_NODISCARD RenderObject *NextInPreOrder(const RenderObject *stayWithin) const noexcept;
+
     KRYS_NODISCARD RenderObject *NextInPreOrderAfterChildren() const noexcept;
+
     KRYS_NODISCARD RenderObject *NextInPreOrderAfterChildren(const RenderObject *stayWithin) const noexcept;
+
     KRYS_NODISCARD RenderObject *PreviousInPreOrder() const noexcept;
+
     KRYS_NODISCARD RenderObject *PreviousInPreOrder(const RenderObject *stayWithin) const noexcept;
+
     KRYS_NODISCARD RenderObject *ChildAt(uint32 index) const noexcept;
 
     KRYS_NODISCARD RenderObject *FirstLeafChild() const noexcept;
+
     KRYS_NODISCARD RenderObject *LastLeafChild() const noexcept;
 
     KRYS_NODISCARD virtual bool CanHaveChildren() const noexcept = 0;
@@ -806,11 +843,15 @@ namespace krys::boo
 
     /// @brief The render tree's root.
     KRYS_NODISCARD RenderView &View() const noexcept;
+
     KRYS_NODISCARD LocalFrameViewLayoutContext &LayoutContext() const noexcept;
 
     KRYS_NODISCARD layout::Box *LayoutBox() noexcept;
+
     KRYS_NODISCARD const layout::Box *LayoutBox() const noexcept;
+
     void SetLayoutBox(layout::Box &box) noexcept;
+
     void ClearLayoutBox() noexcept;
 
     KRYS_NODISCARD RenderElement *FirstNonAnonymousAncestor() const noexcept;
@@ -829,6 +870,7 @@ namespace krys::boo
     void Destroy() noexcept;
 
     virtual void InsertedIntoTree() noexcept;
+
     virtual void WillBeRemovedFromTree() noexcept;
 
 #pragma region Fragmentation
@@ -853,6 +895,7 @@ namespace krys::boo
       No,
       Yes,
     };
+
     void SetFragmentedFlowStateIncludingDescendants(
       FragmentedFlowState state,
       SkipDescendentFragmentedFlow skipDescendentFragmentedFlow = SkipDescendentFragmentedFlow::Yes) noexcept;
@@ -869,6 +912,7 @@ namespace krys::boo
 
     /// @brief Sets the state of an object just inserted from its new container's.
     void InitializeFragmentedFlowStateOnInsertion() noexcept;
+
     /// @brief Takes an object being removed out of its fragmented flow.
     void ResetFragmentedFlowStateOnRemoval() noexcept;
 
@@ -1372,7 +1416,9 @@ namespace krys::boo
     // Unfortunately we don't have such a class yet, because it's not possible for all renderers
     // to inherit from RenderSVGObject -> RenderObject (some need RenderBlock inheritance for instance)
     void InvalidateCachedBoundaries() noexcept;
+
     KRYS_NODISCARD bool UsesBoundaryCaching() const noexcept;
+
     virtual void SetNeedsBoundariesUpdate() noexcept;
 
     virtual void SetNeedsTransformUpdate() noexcept
@@ -1386,6 +1432,7 @@ namespace krys::boo
     // objectBoundingBox is returned local coordinates.
     // The name objectBoundingBox is taken from the SVG 1.1 spec.
     KRYS_NODISCARD virtual FloatRect ObjectBoundingBox() const noexcept;
+
     KRYS_NODISCARD virtual FloatRect StrokeBoundingBox() const noexcept;
 
     // The objectBoundingBox of a SVG container is affected by the transformations applied on its children --
@@ -1494,10 +1541,12 @@ namespace krys::boo
 
     /// @brief Whether the renderer is drawn in the dark appearance (its style's colour scheme).
     KRYS_NODISCARD bool UseDarkAppearance() const noexcept;
+
     /// @brief The options its system colours are resolved with.
     KRYS_NODISCARD style::ColorOptions StyleColorOptions() const noexcept;
 
     KRYS_NODISCARD bool IsAtomicInlineLevelBox() const noexcept;
+
     KRYS_NODISCARD bool IsNonReplacedAtomicInlineLevelBox() const noexcept;
 
     KRYS_NODISCARD bool IsExcludedFromNormalLayout() const noexcept
@@ -1551,12 +1600,15 @@ namespace krys::boo
     KRYS_NODISCARD bool IsTransformed() const noexcept;
 
     KRYS_NODISCARD RenderLayer *EnclosingLayer() const noexcept;
+
     /// @brief The scroll anchoring of the closest scroller around @p renderer (or @p renderer itself) that
     /// has an anchor, or else the frame view's.
     KRYS_NODISCARD static ScrollAnchoringController *
       SearchParentChainForScrollAnchoringController(const RenderObject &renderer) noexcept;
+
     /// @brief The nearest box that is this renderer or one of its ancestors.
     KRYS_NODISCARD RenderBox &EnclosingBox() const noexcept;
+
     KRYS_NODISCARD RenderBox *EnclosingScrollableContainer() const noexcept;
 
     KRYS_NODISCARD bool IsSkippedContent() const noexcept;
@@ -1566,18 +1618,22 @@ namespace krys::boo
     bool HitTest(const HitTestRequest &request, HitTestResult &result,
                  const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                  HitTestFilter hitTestFilter = HitTestAll) noexcept;
+
     /// @brief Whether @p locationInContainer hits the renderer (or its descendants) in @p hitTestAction,
     /// setting
     /// @p result's inner node when it does.
     virtual bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                              const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                              HitTestAction hitTestAction) noexcept;
+
     /// @brief Sets @p result's inner node to this renderer's node (if it has none yet), @p point being the
     /// hit point in the renderer's coordinates.
     virtual void UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept;
+
     /// @brief The node hit testing reports for the renderer: its node, or for anonymous renderers in
     /// generated content, the pseudo-element's.
     KRYS_NODISCARD virtual dom::Node *NodeForHitTest() const noexcept;
+
     KRYS_NODISCARD bool HasTransformOrPerspective() const noexcept;
 
     KRYS_NODISCARD bool PaintContainmentApplies() const noexcept
@@ -1586,7 +1642,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsDocumentElementRenderer() const noexcept;
+
     KRYS_NODISCARD bool IsFieldset() const noexcept;
+
     KRYS_NODISCARD bool IsLegend() const noexcept;
 
     KRYS_NODISCARD bool IsExcludedAndPlacedInBorder() const noexcept
@@ -1604,12 +1662,16 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept;
+
     KRYS_NODISCARD virtual const RenderStyle &OutlineStyleForRepaint() const noexcept;
+
     KRYS_NODISCARD bool IsBody() const noexcept;
+
     KRYS_NODISCARD bool IsPseudoElement() const noexcept;
 
     // Returns the object containing this one. Can be different from parent for positioned elements.
     KRYS_NODISCARD RenderElement *Container() const noexcept;
+
     /// @brief The object containing this one, and whether @p repaintContainer was skipped to reach it.
     KRYS_NODISCARD RenderElement *Container(const RenderLayerModelObject *repaintContainer,
                                             bool &repaintContainerSkipped) const noexcept;
@@ -1620,10 +1682,13 @@ namespace krys::boo
     KRYS_NODISCARD FloatPoint LocalToAbsolute(const FloatPoint &localPoint,
                                               EnumSet<MapCoordinatesMode> mode = {},
                                               bool *wasFixed = nullptr) const noexcept;
+
     KRYS_NODISCARD FloatPoint LocalToAbsolute() const noexcept;
+
     /// @brief Converts an absolute point to this renderer's coordinates.
     KRYS_NODISCARD FloatPoint AbsoluteToLocal(const FloatPoint &containerPoint,
                                               EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
+
     KRYS_NODISCARD FloatQuad AbsoluteToLocalQuad(const FloatQuad &quad,
                                                  EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
 
@@ -1631,11 +1696,13 @@ namespace krys::boo
     KRYS_NODISCARD FloatQuad LocalToAbsoluteQuad(
       const FloatQuad &quad, EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
       bool *wasFixed = nullptr) const noexcept;
+
     /// @brief Converts a quad in this renderer's coordinates to @p container's (absolute if null).
     KRYS_NODISCARD FloatQuad
       LocalToContainerQuad(const FloatQuad &localQuad, const RenderLayerModelObject *container,
                            EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
                            bool *wasFixed = nullptr) const noexcept;
+
     KRYS_NODISCARD FloatPoint
       LocalToContainerPoint(const FloatPoint &localPoint, const RenderLayerModelObject *container,
                             EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
@@ -1646,6 +1713,7 @@ namespace krys::boo
     virtual void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer,
                                      TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
                                      bool *wasFixed) const noexcept;
+
     /// @brief Maps the coordinates in @p transformState from absolute coordinates to this renderer's.
     virtual void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
                                          TransformState &transformState) const noexcept;
@@ -1654,6 +1722,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual LayoutSize
       OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
                           bool *offsetDependsOnPoint = nullptr) const noexcept;
+
     /// @brief The offset from an ancestor @p container, without transforms, to this renderer.
     KRYS_NODISCARD LayoutSize OffsetFromAncestorContainer(const RenderElement &container) const noexcept;
 
@@ -1670,11 +1739,13 @@ namespace krys::boo
     /// @brief The quads, in absolute coordinates, of the text and line breaks @p range covers.
     KRYS_NODISCARD static List<FloatQuad>
       AbsoluteTextQuads(const dom::SimpleRange &range, EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
+
     /// @brief The border boxes of the elements @p range wholly selects (outermost only) and the rects of the
     /// text it covers, in absolute coordinates.
     KRYS_NODISCARD static List<FloatRect>
       AbsoluteBorderAndTextRects(const dom::SimpleRange &range,
                                  EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
+
     /// @brief `AbsoluteBorderAndTextRects` in client coordinates, as `Range`'s `getClientRects()` returns
     /// them.
     KRYS_NODISCARD static List<FloatRect> ClientBorderAndTextRects(const dom::SimpleRange &range) noexcept;
@@ -1682,6 +1753,7 @@ namespace krys::boo
     /// @brief The bounding box of the renderer in absolute coordinates.
     KRYS_NODISCARD IntRect AbsoluteBoundingBoxRect(bool useTransforms = true,
                                                    bool *wasFixed = nullptr) const noexcept;
+
     KRYS_NODISCARD IntRect AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept;
 
     /// @brief The absolute rect painting the renderer's subtree covers: its bounding box with its
@@ -1689,20 +1761,25 @@ namespace krys::boo
     /// @param topLevelRect Set to the renderer's own bounding box.
     // FIXME: change this to use the subtreePaint terminology
     KRYS_NODISCARD LayoutRect PaintingRootRect(LayoutRect &topLevelRect) noexcept;
+
     void AddAbsoluteRectForLayer(LayoutRect &result) noexcept;
 
     KRYS_NODISCARD bool ShouldUseTransformFromContainer(const RenderElement *containerObject) const noexcept;
+
     void GetTransformFromContainer(const LayoutSize &offsetInContainer,
                                    TransformationMatrix &transform) const noexcept;
+
     void PushOntoTransformState(TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
                                 const RenderLayerModelObject *repaintContainer,
                                 const RenderElement *container, const LayoutSize &offsetInContainer,
                                 bool containerSkipped) const noexcept;
+
     KRYS_NODISCARD bool ParticipatesInPreserve3D() const noexcept;
 
 #pragma endregion
 
     KRYS_NODISCARD RenderBlock *ContainingBlock() const noexcept;
+
     KRYS_NODISCARD static RenderBlock *ContainingBlockForPositionType(PositionType positionType,
                                                                       const RenderObject &renderer) noexcept;
 
@@ -1724,13 +1801,16 @@ namespace krys::boo
 
     /// @brief The node rendered, or null for an anonymous object or a pseudo-element.
     KRYS_NODISCARD dom::Node *NonPseudoNode() const noexcept;
+
     KRYS_NODISCARD dom::Element *NonPseudoElement() const noexcept;
 
     KRYS_NODISCARD dom::Document &GetDocument() const noexcept;
+
     KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
     /// @brief The style the object is rendered with: an element's own, or a text's parent's.
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
+
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
 
 #pragma region Editing
@@ -1739,23 +1819,29 @@ namespace krys::boo
     KRYS_NODISCARD virtual dom::PositionWithAffinity
       PositionForPoint(const LayoutPoint &point, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept;
+
     KRYS_NODISCARD VisiblePosition
       VisiblePositionForPoint(const LayoutPoint &point, HitTestSource source,
                               const RenderFragmentContainer *fragment = nullptr) noexcept;
+
     /// @brief The position at @p offset in this renderer's node, or near it if the renderer is anonymous; a
     /// visually equivalent editable position is preferred.
     KRYS_NODISCARD dom::PositionWithAffinity CreatePositionWithAffinity(int32 offset,
                                                                         Affinity affinity) const noexcept;
+
     KRYS_NODISCARD dom::PositionWithAffinity
       CreatePositionWithAffinity(const dom::Position &position) const noexcept;
 
     KRYS_NODISCARD bool IsHR() const noexcept;
 
     KRYS_NODISCARD virtual int32 CaretMinOffset() const noexcept;
+
     KRYS_NODISCARD virtual int32 CaretMaxOffset() const noexcept;
 
     KRYS_NODISCARD virtual int32 PreviousOffset(int32 current) const noexcept;
+
     KRYS_NODISCARD virtual int32 PreviousOffsetForBackwardDeletion(int32 current) const noexcept;
+
     KRYS_NODISCARD virtual int32 NextOffset(int32 current) const noexcept;
 
 #pragma endregion
@@ -1817,6 +1903,7 @@ namespace krys::boo
 #pragma region Layout bits
 
     using MarkingBehavior = RenderObjectMarkingBehavior;
+
     enum class HadSkippedLayout : bool
     {
       No,
@@ -1898,8 +1985,11 @@ namespace krys::boo
     /// @p layoutRoot or the first layout boundary.
     /// @return The renderer to lay out from, or null if the chain was already marked or isn't rooted.
     RenderElement *MarkContainingBlocksForLayout(RenderElement *layoutRoot = nullptr) noexcept;
+
     void SetNeedsLayout(MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
+
     void ClearNeedsLayout(HadSkippedLayout hadSkippedLayout = HadSkippedLayout::No) noexcept;
+
     void SetNeedsPreferredWidthsUpdate(
       MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
 
@@ -1926,6 +2016,7 @@ namespace krys::boo
     public:
       explicit SetLayoutNeededForbiddenScope(const RenderObject &renderObject,
                                              bool isForbidden = true) noexcept;
+
       ~SetLayoutNeededForbiddenScope() noexcept;
     };
 
@@ -1941,6 +2032,7 @@ namespace krys::boo
 
     /// @brief Finds the fragmented flow the object is laid out in, through its containing blocks.
     KRYS_NODISCARD virtual RenderFragmentedFlow *LocateEnclosingFragmentedFlow() const noexcept;
+
     /// @brief The state @p renderer should have in its current place in the tree.
     KRYS_NODISCARD static FragmentedFlowState
       ComputedFragmentedFlowState(const RenderObject &renderer) noexcept;
@@ -2014,12 +2106,15 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD const RareData &GetRareData() const noexcept;
+
     KRYS_NODISCARD RareData &EnsureRareData() noexcept;
+
     void RemoveRareData() noexcept;
 
   private:
     // Entries are removed when their renderer is destroyed.
     using RareDataMap = HashMap<const RenderObject *, UniquePtr<RareData>>;
+
     KRYS_NODISCARD static RareDataMap &GetRareDataMap() noexcept;
 
   protected:

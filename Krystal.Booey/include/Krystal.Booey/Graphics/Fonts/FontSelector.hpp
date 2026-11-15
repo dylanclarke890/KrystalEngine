@@ -58,8 +58,10 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual FontRanges FontRangesForFamily(const FontDescription &description,
                                                           const StringAtom &family) noexcept = 0;
+
     KRYS_NODISCARD virtual RefPtr<Font> FallbackFontAt(const FontDescription &description,
                                                        size_t index) noexcept = 0;
+
     KRYS_NODISCARD virtual size_t FallbackFontCount() noexcept = 0;
 
     virtual void OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
@@ -70,9 +72,11 @@ namespace krys::boo
     }
 
     virtual void RegisterForInvalidationCallbacks(FontSelectorClient &client) noexcept = 0;
+
     virtual void UnregisterForInvalidationCallbacks(FontSelectorClient &client) noexcept = 0;
 
     KRYS_NODISCARD virtual uint32 UniqueId() const noexcept = 0;
+
     KRYS_NODISCARD virtual uint32 Version() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsSimpleFontSelectorForDescription() const noexcept = 0;

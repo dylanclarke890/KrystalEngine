@@ -33,9 +33,9 @@
 
 namespace krys::boo::css
 {
+  struct PropertyParserState;
   class TokenRange;
   class Value;
-  struct PropertyParserState;
   using GridNamedAreaMapRow = SmallList<CSSOMString, 8uz>;
   class GridLineNamesValue;
 

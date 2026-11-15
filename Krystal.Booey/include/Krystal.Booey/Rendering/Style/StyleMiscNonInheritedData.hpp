@@ -66,6 +66,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Ref<StyleMiscNonInheritedData> Copy() const noexcept;
+
     ~StyleMiscNonInheritedData() noexcept;
 
     bool operator==(const StyleMiscNonInheritedData &) const noexcept;
@@ -112,6 +113,7 @@ namespace krys::boo
 
   private:
     StyleMiscNonInheritedData() noexcept;
+
     StyleMiscNonInheritedData(const StyleMiscNonInheritedData &) noexcept;
   };
 }

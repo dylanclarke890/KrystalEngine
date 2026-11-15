@@ -73,20 +73,25 @@ namespace krys::boo
     /// brought up to date first.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animationeffect-gettiming
     KRYS_NODISCARD EffectTiming GetBindingsTiming() const noexcept;
+
     KRYS_NODISCARD BasicEffectTiming GetBasicTiming() noexcept;
+
     /// @brief The timing at the current time, as `getComputedTiming()` returns it: the style of a
     /// style-originated animation is brought up to date first.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animationeffect-getcomputedtiming
     KRYS_NODISCARD ComputedEffectTiming GetBindingsComputedTiming() noexcept;
+
     KRYS_NODISCARD ComputedEffectTiming
       GetComputedTiming(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes,
                         EndpointInclusiveActiveInterval endpointInclusiveActiveInterval =
                           EndpointInclusiveActiveInterval::No) noexcept;
+
     /// @brief Updates the timing properties present in @p timing, as `updateTiming()` does: those of a CSS
     /// animation then no longer follow its style.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animationeffect-updatetiming
     dom::ExceptionOr<void> BindingsUpdateTiming(dom::Document &document,
                                                 const Maybe<OptionalEffectTiming> &timing) noexcept;
+
     /// @brief Updates the timing properties present in @p timing.
     /// @return A `TypeError` if a value is invalid, leaving every property unchanged.
     /// @see https://drafts.csswg.org/web-animations-1/#updating-animationeffect-timing
@@ -120,8 +125,10 @@ namespace krys::boo
     }
 
     virtual void AnimationPlaybackRateDidChange() noexcept;
+
     virtual void AnimationProgressBasedTimelineSourceDidChangeMetrics(
       const style::SingleAnimationRange &animationAttachmentRange) noexcept;
+
     void AnimationRangeDidChange() noexcept;
 
     KRYS_NODISCARD const AnimationEffectTiming &Timing() const noexcept
@@ -178,6 +185,7 @@ namespace krys::boo
     dom::ExceptionOr<void> SetIterations(double iterations) noexcept;
 
     KRYS_NODISCARD WebAnimationTime IterationDuration() noexcept;
+
     /// @attention The computed timing properties must be up to date.
     KRYS_NODISCARD WebAnimationTime IterationDuration() const noexcept;
 
@@ -203,6 +211,7 @@ namespace krys::boo
     void SetTimingFunction(const RefPtr<boo::TimingFunction> &timingFunction) noexcept;
 
     KRYS_NODISCARD WebAnimationTime ActiveDuration() noexcept;
+
     KRYS_NODISCARD WebAnimationTime EndTime() noexcept;
 
     /// @brief How long until the effect next needs updating, given its timing.
@@ -226,6 +235,7 @@ namespace krys::boo
       GetResolutionData(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes,
                         EndpointInclusiveActiveInterval endpointInclusiveActiveInterval =
                           EndpointInclusiveActiveInterval::No) const noexcept;
+
     void UpdateComputedTimingPropertiesIfNeeded() noexcept;
   };
 }

@@ -49,15 +49,18 @@ namespace krys::boo::css
     mutable UniquePtr<CSSRuleList> _ruleListCSSOMWrapper;
 
     CSSStyleRule(StyleRule &rule, CSSStyleSheet *parent) noexcept;
+
     CSSStyleRule(StyleRuleWithNesting &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSStyleRule() noexcept;
 
     KRYS_NODISCARD static Ref<CSSStyleRule> Create(StyleRule &rule, CSSStyleSheet *sheet) noexcept;
+
     KRYS_NODISCARD static Ref<CSSStyleRule> Create(StyleRuleWithNesting &rule, CSSStyleSheet *sheet) noexcept;
 
     KRYS_NODISCARD CSSOMString SelectorText() const noexcept;
+
     void SetSelectorText(const CSSOMString &selectorText) noexcept;
 
     KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
@@ -73,9 +76,13 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSRuleList &CssRules() const noexcept;
+
     dom::ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
+
     dom::ExceptionOr<void> DeleteRule(uint32 index) noexcept;
+
     KRYS_NODISCARD uint32 Length() const noexcept;
+
     KRYS_NODISCARD CSSRule *Item(uint32 index) const noexcept;
 
   private:
@@ -85,15 +92,22 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
     KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept final;
+
     KRYS_NODISCARD CSSOMString CssTextInternal(const CSSOMString &declarations,
                                                const StringBuilder &rules) const noexcept;
+
     void Reattach(Rule &rule) noexcept final;
+
     void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept final;
 
     KRYS_NODISCARD CSSOMString GenerateSelectorText() const noexcept;
+
     KRYS_NODISCARD const List<Ref<Rule>> &NestedRules() const noexcept;
+
     void CssTextForRules(StringBuilder &rules) const noexcept;
+
     void CssTextForRulesWithReplacementURLs(StringBuilder &rules,
                                             const SerialisationContext &context) const noexcept;
   };

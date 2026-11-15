@@ -229,7 +229,9 @@ namespace krys
 
   public:
     virtual void AddRef() const noexcept = 0;
+
     virtual void SubRef() const noexcept = 0;
+
     virtual uint32 GetRefCount() const noexcept = 0;
   };
 
@@ -238,6 +240,7 @@ namespace krys
   {
   protected:
     RefCounted() noexcept = default;
+
     ~RefCounted() noexcept = default;
 
   public:
@@ -266,6 +269,7 @@ namespace krys
 
   protected:
     constexpr ThreadSafeRefCounted() noexcept = default;
+
     constexpr ~ThreadSafeRefCounted() noexcept = default;
   };
 

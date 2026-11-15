@@ -64,7 +64,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual LayoutRect LocalCaretRect() const noexcept = 0;
+
     KRYS_NODISCARD virtual dom::Document *GetDocument() noexcept = 0;
+
     KRYS_NODISCARD virtual dom::Node *CaretNode() noexcept = 0;
   };
 
@@ -101,6 +103,7 @@ namespace krys::boo
     virtual ~CaretAnimator() noexcept = default;
 
     virtual void Start() noexcept = 0;
+
     virtual void Stop(CaretAnimatorStopReason reason = CaretAnimatorStopReason::Default) noexcept;
 
     KRYS_NODISCARD bool IsActive() const noexcept
@@ -126,6 +129,7 @@ namespace krys::boo
 
     virtual void Paint(GraphicsContext &context, const FloatRect &caret, const Color &color,
                        const LayoutPoint &paintOffset) const noexcept;
+
     KRYS_NODISCARD virtual LayoutRect CaretRepaintRectForLocalRect(LayoutRect rect) const noexcept;
 
   protected:
@@ -134,6 +138,7 @@ namespace krys::boo
     virtual void UpdateAnimationProperties() noexcept = 0;
 
     void DidStart(MonotonicTime::duration currentTime, Maybe<MonotonicTime::duration> interval) noexcept;
+
     void DidEnd() noexcept;
 
     // FIXME: This is layering violation. Platform code should not rely on the rest of the engine.

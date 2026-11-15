@@ -41,6 +41,7 @@ namespace krys::boo::svg
     explicit SVGPathElement(dom::Document &document) noexcept;
 
     KRYS_NODISCARD float GetTotalLength() const noexcept final;
+
     KRYS_NODISCARD dom::ExceptionOr<Ref<SVGPoint>> GetPointAtLength(float distance) const noexcept final;
 
     KRYS_NODISCARD FloatRect GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept final;
@@ -48,6 +49,7 @@ namespace krys::boo::svg
     /// @brief The path data the element is drawn with: the `d` property's once it has a renderer, otherwise
     /// the `d` attribute's.
     KRYS_NODISCARD const SVGPathByteStream &PathByteStream() const noexcept;
+
     KRYS_NODISCARD Path GetPath() const noexcept;
 
     void PathDidChange() noexcept;
@@ -57,6 +59,7 @@ namespace krys::boo::svg
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
+
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD bool IsValid() const noexcept final
@@ -74,12 +77,15 @@ namespace krys::boo::svg
     void InvalidateMPathDependencies() noexcept;
 
     void OnInsert() noexcept final;
+
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
 
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept final;
+
     void CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept override;
+
     void CollectDPresentationalHint(css::MutableStyleProperties &style) noexcept;
   };
 }

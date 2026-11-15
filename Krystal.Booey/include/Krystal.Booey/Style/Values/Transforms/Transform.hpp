@@ -42,6 +42,7 @@ namespace krys::boo
 
       // Convenience constructors for creating a `transform` directly from transform functions.
       Transform(std::initializer_list<TransformFunction>) noexcept;
+
       Transform(TransformFunction &&) noexcept;
 
       template <TransformFunctionType operationType>
@@ -52,8 +53,11 @@ namespace krys::boo
       // Return true if any of the operation types are 3D operation types (even if the
       // values describe affine transforms)
       KRYS_NODISCARD bool Has3DOperation() const noexcept;
+
       KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept;
+
       KRYS_NODISCARD bool AffectedByTransformOrigin() const noexcept;
+
       KRYS_NODISCARD bool ContainsNonInvertibleMatrix(const LayoutSize &) const noexcept;
 
       KRYS_NODISCARD TransformFunctionSizeDependencies ComputeSizeDependencies() const noexcept;
@@ -135,6 +139,7 @@ namespace krys::boo
       }
 
       KRYS_NODISCARD Transform Blend(const Transform &, const Transform &, const BlendingContext &) noexcept;
+
       KRYS_NODISCARD Transform Blend(const Transform &, const Transform &,
                                      const interpolation::Context &) noexcept;
     };

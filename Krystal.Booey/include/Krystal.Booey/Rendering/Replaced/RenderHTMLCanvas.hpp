@@ -42,6 +42,7 @@ namespace krys::boo
 
   public:
     RenderHTMLCanvas(html::HTMLCanvasElement &element, RenderStyle &&style) noexcept;
+
     ~RenderHTMLCanvas() noexcept override;
 
     KRYS_NODISCARD html::HTMLCanvasElement &CanvasElement() const noexcept;

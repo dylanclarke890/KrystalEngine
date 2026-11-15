@@ -37,6 +37,7 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<AXSpinButtonPart> Create(AXId id, AXObjectCache &cache) noexcept;
+
     ~AXSpinButtonPart() noexcept override;
 
     KRYS_NODISCARD bool IsIncrementor() const noexcept

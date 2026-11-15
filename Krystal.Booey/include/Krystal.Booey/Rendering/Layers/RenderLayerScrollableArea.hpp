@@ -97,6 +97,7 @@ namespace krys::boo
 
   public:
     explicit RenderLayerScrollableArea(RenderLayer &layer) noexcept;
+
     ~RenderLayerScrollableArea() noexcept override;
 
     KRYS_NODISCARD RenderLayer &Layer() noexcept
@@ -109,6 +110,7 @@ namespace krys::boo
     void RestoreScrollPosition() noexcept;
 
     void SetPostLayoutScrollPosition(Maybe<ScrollPosition> position) noexcept;
+
     void ApplyPostLayoutScrollPositionIfNeeded() noexcept;
 
     KRYS_NODISCARD bool HasPostLayoutScrollPosition() const noexcept
@@ -117,6 +119,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD int32 ScrollWidth() const noexcept;
+
     KRYS_NODISCARD int32 ScrollHeight() const noexcept;
 
     // Attempt to scroll the given ScrollOffset, returning the real target offset after it has
@@ -136,20 +139,26 @@ namespace krys::boo
     /// @return The rect in absolute coordinates after scrolling.
     LayoutRect ScrollRectToVisible(const LayoutRect &absoluteRect,
                                    const ScrollRectToVisibleOptions &options) noexcept;
+
     Maybe<LayoutRect> UpdateScrollPositionForScrollIntoView(const ScrollPositionChangeOptions &options,
                                                             const LayoutRect &revealRect,
                                                             const LayoutRect &localExposeRect) noexcept;
 
     void ScrollToXPosition(int32 x, const ScrollPositionChangeOptions &options) noexcept;
+
     void ScrollToYPosition(int32 y, const ScrollPositionChangeOptions &options) noexcept;
+
     void SetScrollPosition(const ScrollPosition &position,
                            const ScrollPositionChangeOptions &options) noexcept;
 
     KRYS_NODISCARD bool ScrollsOverflow() const noexcept;
+
     KRYS_NODISCARD bool HasScrollableHorizontalOverflow() const noexcept;
+
     /// @brief Adds the area to the frame view's scrollable areas while it can scroll (@p hasOverflow), has
     /// scrollbars or scrolls smoothly, and removes it otherwise.
     void UpdateScrollableAreaSet(bool hasOverflow) noexcept;
+
     KRYS_NODISCARD bool HasScrollableVerticalOverflow() const noexcept;
 
     KRYS_NODISCARD bool HasScrollbars() const noexcept
@@ -168,10 +177,13 @@ namespace krys::boo
     }
 
     void SetHasHorizontalScrollbar(bool hasScrollbar) noexcept;
+
     void SetHasVerticalScrollbar(bool hasScrollbar) noexcept;
 
     KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept final;
+
     KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept final;
+
     /// @brief Whether the scrollbars are dark: their box's `color-scheme`.
     KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept final;
 
@@ -188,6 +200,7 @@ namespace krys::boo
     // Returns true when the layer could do touch scrolling, but doesn't look at whether there is actually
     // scrollable overflow.
     KRYS_NODISCARD bool CanUseCompositedScrolling() const noexcept;
+
     KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
 
     // Returns true when there is actually scrollable overflow (requires layout to be up-to-date).
@@ -199,6 +212,7 @@ namespace krys::boo
     KRYS_NODISCARD int32 VerticalScrollbarWidth(
       OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
       bool isHorizontalWritingMode = true) const noexcept;
+
     KRYS_NODISCARD int32 HorizontalScrollbarHeight(
       OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
       bool isHorizontalWritingMode = true) const noexcept;
@@ -206,6 +220,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasOverflowControls() const noexcept;
 
     void UpdateScrollInfoAfterLayout() noexcept;
+
     void UpdateScrollbarSteps() noexcept;
 
     void AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept final;
@@ -242,14 +257,19 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsScrollCornerVisible() const noexcept final;
+
     KRYS_NODISCARD IntRect ScrollCornerRect() const noexcept final;
+
     void SetScrollOffset(const ScrollOffset &offset) noexcept final;
 
     KRYS_NODISCARD IntSize VisibleSize() const noexcept final;
+
     KRYS_NODISCARD IntSize ContentsSize() const noexcept final;
+
     KRYS_NODISCARD IntSize ReachableTotalContentsSize() const noexcept final;
 
     void UpdateScrollbarsAfterStyleChange(const RenderStyle *oldStyle) noexcept;
+
     void UpdateScrollbarsAfterLayout() noexcept;
 
     bool PositionOverflowControls(const IntSize &offsetFromRoot) noexcept;
@@ -264,23 +284,32 @@ namespace krys::boo
 
     // NOTE: This should only be called by the overridden setScrollOffset from ScrollableArea.
     void ScrollTo(const ScrollPosition &position) noexcept;
+
     void RegisterForAnimatedScroll() noexcept override;
+
     /// @brief Finds the snap positions of the boxes that snap in this one.
     void UpdateSnapOffsets() noexcept;
 
     /// @brief Fires `scrollend` at the element after a scroll it fired `scroll` for.
     void ScrollDidEnd() noexcept override;
+
     void UpdateAnchorPositionedAfterScroll() noexcept final;
+
     /// @brief Updates the compositing layers a scroll moved, from the enclosing compositing layer of the
     /// stacking context.
     void UpdateCompositingLayersAfterScroll() noexcept;
 
     /// @brief The backing's layers the scrollbars and scroll corner paint into, if they have their own.
     KRYS_NODISCARD GraphicsLayer *LayerForHorizontalScrollbar() const noexcept;
+
     KRYS_NODISCARD GraphicsLayer *LayerForVerticalScrollbar() const noexcept;
+
     KRYS_NODISCARD GraphicsLayer *LayerForScrollCorner() const noexcept;
+
     void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept override;
+
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override;
+
     KRYS_NODISCARD bool ScrollAnimatorEnabled() const noexcept override;
 
     /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset. Overlay scrollbars paint over
@@ -289,6 +318,7 @@ namespace krys::boo
     void PaintOverflowControls(GraphicsContext &context, EnumSet<PaintBehavior> paintBehavior,
                                const IntPoint &paintOffset, const IntRect &damageRect,
                                bool paintingOverlayControls = false) noexcept;
+
     /// @brief The second pass: paints the overlay scrollbars the first pass found, if there were any.
     void PaintOverlayScrollbars(GraphicsContext &context, const LayoutRect &damageRect,
                                 EnumSet<PaintBehavior> paintBehavior,
@@ -306,27 +336,33 @@ namespace krys::boo
 
     void PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
                            const IntRect &damageRect) noexcept;
+
     /// @brief Paints the grip of a box the user can resize, in its bottom corner.
     void PaintResizer(GraphicsContext &context, const LayoutPoint &paintOffset,
                       const LayoutRect &damageRect) noexcept;
+
     /// @brief Whether @p hitTestLocation is over the resizer in one of @p layerFragments; sets
     /// @p pointInFragment to where.
     KRYS_NODISCARD bool HitTestResizerInFragments(const LayerFragments &layerFragments,
                                                   const HitTestLocation &hitTestLocation,
                                                   LayoutPoint &pointInFragment) const noexcept;
+
     /// @brief Whether @p localPoint (in the box's coordinates) is over a scrollbar, which @p result then
     /// names.
     bool HitTestOverflowControls(HitTestResult &result, const IntPoint &localPoint) noexcept;
 
     KRYS_NODISCARD IntPoint ConvertFromContainingViewToScrollbar(
       const Scrollbar &scrollbar, const IntPoint &parentPoint) const noexcept override;
+
     KRYS_NODISCARD OverscrollBehavior HorizontalOverscrollBehavior() const noexcept override;
+
     KRYS_NODISCARD OverscrollBehavior VerticalOverscrollBehavior() const noexcept override;
 
     KRYS_NODISCARD IntSize ScrollbarOffset(const Scrollbar &scrollbar) const noexcept;
 
   private:
     KRYS_NODISCARD bool HasHorizontalOverflow() const noexcept;
+
     KRYS_NODISCARD bool HasVerticalOverflow() const noexcept;
 
     KRYS_NODISCARD bool ShowsOverflowControls() const noexcept;
@@ -334,9 +370,11 @@ namespace krys::boo
     KRYS_NODISCARD ScrollOffset ClampScrollOffset(const ScrollOffset &offset) const noexcept;
 
     void ComputeScrollDimensions() noexcept;
+
     void ComputeScrollOrigin() noexcept;
 
     KRYS_NODISCARD Ref<Scrollbar> CreateScrollbar(ScrollbarOrientation orientation) noexcept;
+
     void DestroyScrollbar(ScrollbarOrientation orientation) noexcept;
 
     void UpdateScrollbarPresenceAndState(Maybe<bool> hasHorizontalOverflow = null,

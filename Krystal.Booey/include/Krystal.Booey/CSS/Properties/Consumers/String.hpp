@@ -30,8 +30,8 @@
 
 namespace krys::boo::css
 {
-  class TokenRange;
   class PrimitiveValue;
+  class TokenRange;
 
   // MARK: <string>
   // https://drafts.csswg.org/css-values/#strings
