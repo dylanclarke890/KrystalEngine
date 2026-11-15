@@ -30,7 +30,6 @@
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include <compare>
 
 namespace krys::boo::dom
@@ -59,9 +58,10 @@ namespace krys::boo::dom
   {
     friend class LiveRangeUpdater;
 
-    struct DeleteClonedContent : public StronglyTypedBool<DeleteClonedContent>
+    enum class DeleteClonedContent : bool
     {
-      using Base::Base;
+      No,
+      Yes,
     };
 
   public:

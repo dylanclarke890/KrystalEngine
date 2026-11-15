@@ -516,7 +516,7 @@ namespace krys::boo
 
   void TypingCommand::InsertTextAndNotifyAccessibility(utf8_stringview text, bool selectInsertedText) noexcept
   {
-    ax::AccessibilityReplacedText replacedText(GetDocument().Selection().Selection());
+    AXReplacedText replacedText(GetDocument().Selection().Selection());
     InsertText(text, selectInsertedText);
     replacedText.PostTextStateChangeNotification(GetDocument().ExistingAXObjectCache(), text,
                                                  GetDocument().Selection().Selection());
@@ -528,7 +528,7 @@ namespace krys::boo
 
   void TypingCommand::InsertLineBreakAndNotifyAccessibility() noexcept
   {
-    ax::AccessibilityReplacedText replacedText(GetDocument().Selection().Selection());
+    AXReplacedText replacedText(GetDocument().Selection().Selection());
     InsertLineBreak();
     replacedText.PostTextStateChangeNotification(GetDocument().ExistingAXObjectCache(), u8"\n",
                                                  GetDocument().Selection().Selection());
@@ -540,7 +540,7 @@ namespace krys::boo
 
   void TypingCommand::InsertParagraphSeparatorAndNotifyAccessibility() noexcept
   {
-    ax::AccessibilityReplacedText replacedText(GetDocument().Selection().Selection());
+    AXReplacedText replacedText(GetDocument().Selection().Selection());
     InsertParagraphSeparator();
     replacedText.PostTextStateChangeNotification(GetDocument().ExistingAXObjectCache(), u8"\n",
                                                  GetDocument().Selection().Selection());
@@ -552,14 +552,14 @@ namespace krys::boo
 
   void TypingCommand::PostTextStateChangeNotificationForDeletion(const VisibleSelection &selection) noexcept
   {
-    if (!ax::AXObjectCache::AccessibilityEnabled())
+    if (!AXObjectCache::AccessibilityEnabled())
     {
       return;
     }
-    PostTextStateChangeNotification(ax::AXTextChange::Deleted,
-                                    ax::AccessibilityObject::StringForVisiblePositionRange(
-                                      {selection.VisibleStart(), selection.VisibleEnd()}),
-                                    selection.VisibleStart());
+    PostTextStateChangeNotification(
+      AXTextChange::Deleted,
+      AXObject::StringForVisiblePositionRange({selection.VisibleStart(), selection.VisibleEnd()}),
+      selection.VisibleStart());
     VisiblePositionIndexRange range;
     range.StartIndex.Value = IndexForVisiblePosition(selection.VisibleStart(), range.StartIndex.Scope);
     range.EndIndex.Value = IndexForVisiblePosition(selection.VisibleEnd(), range.EndIndex.Scope);

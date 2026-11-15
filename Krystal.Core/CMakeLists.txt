@@ -267,7 +267,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/Stack.hpp
       include/Krystal.Core/Types/String.hpp
       include/Krystal.Core/Types/StringAtom.hpp
-      include/Krystal.Core/Types/StronglyTypedValue.hpp
       include/Krystal.Core/Types/TaggedPtr.hpp
       include/Krystal.Core/Types/TinyLRUCache.hpp
       include/Krystal.Core/Types/ThreadSafeWeakPtr.hpp

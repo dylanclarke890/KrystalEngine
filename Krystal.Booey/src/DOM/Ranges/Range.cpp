@@ -430,7 +430,7 @@ namespace krys::boo::dom
         // 4e. Return fragment.
         auto cloneResult =
           CloneCharacterDataContents(*fragment, *originalStartNode, originalStartOffset,
-                                     originalEndOffset - originalStartOffset, DeleteClonedContent(true));
+                                     originalEndOffset - originalStartOffset, DeleteClonedContent::Yes);
 
         if (cloneResult.HasException())
         {
@@ -509,7 +509,7 @@ namespace krys::boo::dom
       //           to fragment, and replace that data of originalStartNode with the empty string.
       auto length = TreeQueries::Length(*originalStartNode) - originalStartOffset;
       auto cloneResult = CloneCharacterDataContents(*fragment, *originalStartNode, originalStartOffset,
-                                                    length, DeleteClonedContent(true));
+                                                    length, DeleteClonedContent::Yes);
       if (cloneResult.HasException())
       {
         return cloneResult.ReleaseException();
@@ -568,7 +568,7 @@ namespace krys::boo::dom
       // 19a.-19d. Clone originalEndNode with its data up to originalEndOffset, append the clone to fragment,
       //           and replace that data of originalEndNode with the empty string.
       auto cloneResult = CloneCharacterDataContents(*fragment, *originalEndNode, 0uz, originalEndOffset,
-                                                    DeleteClonedContent(true));
+                                                    DeleteClonedContent::Yes);
       if (cloneResult.HasException())
       {
         return cloneResult.ReleaseException();
@@ -644,7 +644,7 @@ namespace krys::boo::dom
         // 4d. Return fragment.
         auto clone =
           CloneCharacterDataContents(*fragment, *originalStartNode, originalStartOffset,
-                                     originalEndOffset - originalStartOffset, DeleteClonedContent(false));
+                                     originalEndOffset - originalStartOffset, DeleteClonedContent::No);
 
         if (clone.HasException())
         {
@@ -682,7 +682,7 @@ namespace krys::boo::dom
     {
       auto length = TreeQueries::Length(*originalStartNode) - originalStartOffset;
       auto clone = CloneCharacterDataContents(*fragment, *originalStartNode, originalStartOffset, length,
-                                              DeleteClonedContent(false));
+                                              DeleteClonedContent::No);
       if (clone.HasException())
       {
         return clone.ReleaseException();
@@ -743,7 +743,7 @@ namespace krys::boo::dom
     if (Is<CharacterData>(lastPartiallyContainedChild))
     {
       auto clone = CloneCharacterDataContents(*fragment, *originalEndNode, 0uz, originalEndOffset,
-                                              DeleteClonedContent(false));
+                                              DeleteClonedContent::No);
       if (clone.HasException())
       {
         return clone.ReleaseException();
@@ -1362,7 +1362,7 @@ namespace krys::boo::dom
       return appendResult.ReleaseException();
     }
 
-    if (deleteClonedContent)
+    if (deleteClonedContent == DeleteClonedContent::Yes)
     {
       if (auto deleteDataResult = characterData.DeleteData(offset, length); deleteDataResult.HasException())
       {

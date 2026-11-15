@@ -242,7 +242,7 @@ namespace krys::boo::css
         [&](TokenRange &tokens)
         {
           return MetaConsumer<AnglePercentage<>>::Consume(tokens, state,
-                                                          {.UnitlessZeroAngle = AllowUnitlessZero(true)});
+                                                          {.UnitlessZeroAngle = AllowUnitlessZero::Yes});
         });
     }
 
@@ -398,7 +398,7 @@ namespace krys::boo::css
       // https://drafts.csswg.org/css-images-4/#typedef-linear-gradient-syntax
 
       if (auto angle =
-            MetaConsumer<Angle<>>::Consume(tokens, state, {.UnitlessZeroAngle = AllowUnitlessZero(true)}))
+            MetaConsumer<Angle<>>::Consume(tokens, state, {.UnitlessZeroAngle = AllowUnitlessZero::Yes}))
       {
         gradientLine = GradientLine {krys::move(*angle)};
       }
@@ -740,7 +740,7 @@ namespace krys::boo::css
       Maybe<Angle<>> angle;
       if (ConsumeIdentRaw<ValueId::From>(tokens))
       {
-        angle = MetaConsumer<Angle<>>::Consume(tokens, state, {.UnitlessZeroAngle = AllowUnitlessZero(true)});
+        angle = MetaConsumer<Angle<>>::Consume(tokens, state, {.UnitlessZeroAngle = AllowUnitlessZero::Yes});
         if (!angle)
         {
           return nullptr;

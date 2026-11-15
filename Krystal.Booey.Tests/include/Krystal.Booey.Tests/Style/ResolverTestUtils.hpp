@@ -51,7 +51,7 @@ namespace krys::boo::style::tests
       html::EventLoop::Current().RunUntilIdle();
       auto document = CreateRef<dom::HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(markup), IsEOF(true));
+      parser->InputStream().Append(krys::move(markup), IsEOF::Yes);
       (void)parser->PumpTokenizer();
       return document;
     }

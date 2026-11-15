@@ -25,11 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Accessibility/AccessibilityRole.hpp"
+#include "Krystal.Booey/Accessibility/AXRole.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 
 namespace krys::boo
 {
+  class AXObjectCache;
   class RenderObject;
 
   namespace dom
@@ -45,17 +46,12 @@ namespace krys::boo
   }
 }
 
-namespace krys::boo::ax
-{
-  class AXObjectCache;
-}
-
 /// @brief What the table, row and cell objects share: which elements are tables, rows and cells, and the
 /// heuristic that tells a data table from a layout table.
-namespace krys::boo::ax::table_helpers
+namespace krys::boo::ax
 {
   /// @brief The role a cell takes when its table is a layout table, not a data table.
-  constexpr AccessibilityRole LayoutTableCellRole = AccessibilityRole::TextGroup;
+  constexpr AXRole LayoutTableCellRole = AXRole::TextGroup;
 
   /// @brief Whether @p element's `role` (or its custom element's default role) lists @p role.
   KRYS_NODISCARD bool HasRole(const dom::Element &element, dom::DOMStringView role) noexcept;
@@ -69,7 +65,7 @@ namespace krys::boo::ax::table_helpers
   /// @brief Whether @p element is a `thead`, `tbody` or `tfoot`, or has the `rowgroup` role.
   KRYS_NODISCARD bool IsRowGroup(const dom::Element &element) noexcept;
 
-  KRYS_NODISCARD bool IsTableRole(AccessibilityRole role) noexcept;
+  KRYS_NODISCARD bool IsTableRole(AXRole role) noexcept;
   /// @brief Whether @p element is a row: `role=row`, or a `tr` (or `display: table-row` element) with no
   /// role.
   KRYS_NODISCARD bool IsTableRowElement(const dom::Element &element) noexcept;

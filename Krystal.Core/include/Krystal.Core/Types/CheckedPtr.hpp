@@ -67,10 +67,10 @@ namespace krys
   };
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using CheckedRef = IntrusivePtr<T, PtrTraits, CheckedRefPolicy<T>, IsNullable(false)>;
+  using CheckedRef = IntrusivePtr<T, PtrTraits, CheckedRefPolicy<T>, IsNullable::No>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using CheckedPtr = IntrusivePtr<T, PtrTraits, CheckedRefPolicy<T>, IsNullable(true)>;
+  using CheckedPtr = IntrusivePtr<T, PtrTraits, CheckedRefPolicy<T>, IsNullable::Yes>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
   KRYS_NODISCARD constexpr CheckedRef<T, PtrTraits>

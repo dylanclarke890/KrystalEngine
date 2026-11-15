@@ -993,7 +993,7 @@ namespace krys::boo::css::calc
   {
     // <anchor()> = anchor( <anchor-element>? && <anchor-side>, <length-percentage>? )
 
-    if (!state.ParserOptions.PropertyOptions.AnchorPolicy)
+    if (state.ParserOptions.PropertyOptions.AnchorPolicy == AllowAnchor::No)
     {
       return null;
     }
@@ -1108,7 +1108,7 @@ namespace krys::boo::css::calc
     // <anchor-element> = <dashed-ident>
     // <anchor-size> = width | height | block | inline | self-block | self-inline
 
-    if (!state.ParserOptions.PropertyOptions.AnchorSizePolicy)
+    if (state.ParserOptions.PropertyOptions.AnchorSizePolicy == AllowAnchorSize::No)
     {
       return null;
     }

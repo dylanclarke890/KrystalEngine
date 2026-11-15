@@ -27,7 +27,7 @@ namespace krys::boo::css::tests
         }
 
         text += ToNarrow(ToString(property.Id())) + ": " + CssText(property.Value());
-        if (property.Important())
+        if (property.Important() == IsImportant::Yes)
         {
           text += " !important";
         }
@@ -40,7 +40,7 @@ namespace krys::boo::css::tests
     /// @return "<fail>" if parsing failed, otherwise the parsed properties (see `PropertiesToText`).
     KRYS_NODISCARD std::string ParseToText(utf8_stringview css, PropertyId property,
                                            const ParserContext &context, RuleType ruleType = RuleType::Style,
-                                           IsImportant important = IsImportant(false))
+                                           IsImportant important = IsImportant::No)
     {
       Tokens tokens {css};
       ParsedPropertyList properties;
@@ -56,7 +56,7 @@ namespace krys::boo::css::tests
 
     KRYS_NODISCARD std::string ParseToText(utf8_stringview css, PropertyId property,
                                            RuleType ruleType = RuleType::Style,
-                                           IsImportant important = IsImportant(false))
+                                           IsImportant important = IsImportant::No)
     {
       ParserContext context {ParserMode::HTMLStandard};
       return ParseToText(css, property, context, ruleType, important);
@@ -76,7 +76,7 @@ namespace krys::boo::css::tests
     {
       CHECK(ParseToText(u8"red", PropertyId::Color) == "color: red");
       CHECK(ParseToText(u8"  10px  ", PropertyId::Width) == "width: 10px");
-      CHECK(ParseToText(u8"red", PropertyId::Color, RuleType::Style, IsImportant(true))
+      CHECK(ParseToText(u8"red", PropertyId::Color, RuleType::Style, IsImportant::Yes)
             == "color: red !important");
       CHECK(ParseToText(u8"10px", PropertyId::Color) == "<fail>");
       CHECK(ParseToText(u8"red blue", PropertyId::Color) == "<fail>");
@@ -112,9 +112,8 @@ namespace krys::boo::css::tests
       properties.push_back(Property(PropertyId::Color, PrimitiveValue::Create(ValueId::Red)));
 
       ParserContext context {ParserMode::HTMLStandard};
-      CHECK_FALSE(PropertyParser::ParseValue(PropertyId::Margin, IsImportant(false),
-                                             tokens.Tokenizer.Tokens(), context, properties,
-                                             RuleType::Style));
+      CHECK_FALSE(PropertyParser::ParseValue(PropertyId::Margin, IsImportant::No, tokens.Tokenizer.Tokens(),
+                                             context, properties, RuleType::Style));
       REQUIRE(properties.size() == 1uz);
       CHECK(properties[0].Id() == PropertyId::Color);
     }
@@ -151,7 +150,7 @@ namespace krys::boo::css::tests
       CHECK(ParseToText(u8"1px", PropertyId::MarginLeft, context, RuleType::PositionTry)
             == "margin-left: 1px");
       CHECK(ParseToText(u8"red", PropertyId::Color, context, RuleType::PositionTry) == "<fail>");
-      CHECK(ParseToText(u8"1px", PropertyId::Top, context, RuleType::PositionTry, IsImportant(true))
+      CHECK(ParseToText(u8"1px", PropertyId::Top, context, RuleType::PositionTry, IsImportant::Yes)
             == "<fail>");
     }
 

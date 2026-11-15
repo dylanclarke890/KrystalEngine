@@ -198,7 +198,7 @@ namespace krys::boo::css
   {
     auto property =
       LookupCSSPropertyFromIDLAttribute<PropertyLookupMode::ConvertUsingNoDashPrefix>(attribute);
-    return SetPropertyInternal(property, value, IsImportant(false));
+    return SetPropertyInternal(property, value, IsImportant::No);
   }
 
   CSSOMString
@@ -213,7 +213,7 @@ namespace krys::boo::css
                                                               const CSSOMString &value) noexcept
   {
     auto property = LookupCSSPropertyFromIDLAttribute<PropertyLookupMode::NoConversion>(attribute);
-    return SetPropertyInternal(property, value, IsImportant(false));
+    return SetPropertyInternal(property, value, IsImportant::No);
   }
 
   CSSOMString CSSStyleProperties::CssFloat() noexcept
@@ -223,7 +223,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> CSSStyleProperties::SetCssFloat(const CSSOMString &value) noexcept
   {
-    return SetPropertyInternal(PropertyId::Float, value, IsImportant(false));
+    return SetPropertyInternal(PropertyId::Float, value, IsImportant::No);
   }
 
 #pragma endregion

@@ -32,7 +32,7 @@ namespace krys::boo::css::tests
         auto property = FindProperty(name);
         INFO(ToNarrow(name));
         REQUIRE(property != PropertyId::Invalid);
-        REQUIRE(PropertyParser::ParseValue(property, IsImportant(false), tokens.Tokenizer.Tokens(), context,
+        REQUIRE(PropertyParser::ParseValue(property, IsImportant::No, tokens.Tokenizer.Tokens(), context,
                                            parsed, ruleType));
         properties->AddParsedProperties(parsed);
       }

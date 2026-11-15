@@ -76,8 +76,7 @@ namespace krys::boo::css
       return _selector.get();
     }
 
-    void SetValue(const CSSOMStringAtom &value,
-                  MatchLowercase matchLowercase = MatchLowercase(false)) noexcept
+    void SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase = MatchLowercase::No) noexcept
     {
       _selector->SetValue(value, matchLowercase);
     }

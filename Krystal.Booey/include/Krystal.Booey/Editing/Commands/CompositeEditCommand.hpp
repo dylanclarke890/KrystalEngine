@@ -87,8 +87,8 @@ namespace krys::boo
     void CaptureTextForUnapply() noexcept;
     void CaptureTextForReapply() noexcept;
 
-    void PostTextStateChangeNotificationForUnapply(ax::AXObjectCache *cache) noexcept;
-    void PostTextStateChangeNotificationForReapply(ax::AXObjectCache *cache) noexcept;
+    void PostTextStateChangeNotificationForUnapply(AXObjectCache *cache) noexcept;
+    void PostTextStateChangeNotificationForReapply(AXObjectCache *cache) noexcept;
 
   private:
     KRYS_NODISCARD dom::DOMString TextDeletedByUnapply() const noexcept;

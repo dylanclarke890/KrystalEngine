@@ -454,7 +454,7 @@ namespace krys::boo
 
   void RenderMenuList::DidUpdateActiveOption(int32 optionIndex) noexcept
   {
-    if (!ax::AXObjectCache::AccessibilityEnabled())
+    if (!AXObjectCache::AccessibilityEnabled())
     {
       return;
     }

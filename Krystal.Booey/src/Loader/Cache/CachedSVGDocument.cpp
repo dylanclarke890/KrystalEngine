@@ -36,7 +36,7 @@ namespace krys::boo
     constexpr text::DecodePolicy DocumentDecodePolicy {
       .OnInvalidSequence = text::EncodingErrorAction::Replace,
       .OnIncompleteSequence = text::EncodingErrorAction::Replace,
-      .CheckByteOrderMark = text::CheckForBOM(true)};
+      .CheckByteOrderMark = text::CheckForBOM::Yes};
 
     /// @brief Decodes a document's bytes as UTF-8, dropping a byte order mark and replacing invalid
     /// sequences.

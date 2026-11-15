@@ -67,7 +67,7 @@ namespace krys::boo::css::tests
     // Unitless values: zero (unless disallowed), SVG attributes, and quirky properties in quirks mode.
     CHECK(ConsumeAll<Length<>>(u8"0"));
     CHECK_FALSE(ConsumeAll<Length<>>(u8"0", ParserMode::HTMLStandard, PropertyId::Invalid,
-                                     {.UnitlessZeroLength = AllowUnitlessZero {false}}));
+                                     {.UnitlessZeroLength = AllowUnitlessZero::No}));
     CHECK_FALSE(ConsumeAll<Length<>>(u8"5"));
     CHECK(ConsumeAll<Length<>>(u8"5", ParserMode::SVGAttribute)->GetRaw()->Unit == LengthUnit::Px);
     CHECK(ConsumeAll<Length<>>(u8"5", ParserMode::HTMLQuirks, PropertyId::FontSize));
@@ -104,7 +104,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(ConsumeAll<AnglePercentage<>>(u8"5px"));
 
     CHECK(ConsumeAll<AnglePercentage<>>(u8"0", ParserMode::HTMLStandard, PropertyId::Invalid,
-                                        {.UnitlessZeroAngle = AllowUnitlessZero {true}})
+                                        {.UnitlessZeroAngle = AllowUnitlessZero::Yes})
             ->GetRaw()
             ->Unit
           == AnglePercentageUnit::Deg);

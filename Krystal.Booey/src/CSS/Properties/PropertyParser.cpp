@@ -321,7 +321,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::Style,
       .CurrentProperty = property,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     if (auto value = ParserFastPaths::MaybeParseValue(property, string, state))
@@ -366,7 +366,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::Style,
       .CurrentProperty = property,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     auto value = PropertyParsing::ParseStylePropertyLonghand(range, property, state);
@@ -393,7 +393,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::CounterStyle,
       .CurrentProperty = property,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     auto result = PropertyParsing::ParseCounterStyleDescriptor(range, property, state);
@@ -422,7 +422,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::Style,
       .CurrentProperty = PropertyId::Custom,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     auto value = ConsumeTypedCustomPropertyValue(range, state, name, syntax, builderState);
@@ -446,7 +446,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::Style,
       .CurrentProperty = PropertyId::Custom,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     auto value = ConsumeTypedCustomPropertyValue(range, state, name, syntax, builderState);
@@ -475,7 +475,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::Style,
       .CurrentProperty = PropertyId::Custom,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     auto [value, syntaxType] = ConsumeCustomPropertyValueWithSyntax(range, state, syntax);
@@ -502,7 +502,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::Style,
       .CurrentProperty = PropertyId::Custom,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     return !!ConsumeCustomPropertyValueWithSyntax(range, state, syntax).first;
@@ -831,7 +831,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::FontFace,
       .CurrentProperty = property,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     RefPtr parsedValue = PropertyParsing::ParseFontFaceDescriptor(range, property, state);
@@ -840,7 +840,7 @@ namespace krys::boo::css
       return false;
     }
 
-    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant::No);
     return true;
   }
 
@@ -851,7 +851,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::FontPaletteValues,
       .CurrentProperty = property,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     RefPtr parsedValue = PropertyParsing::ParseFontPaletteValuesDescriptor(range, property, state);
@@ -860,7 +860,7 @@ namespace krys::boo::css
       return false;
     }
 
-    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant::No);
     return true;
   }
 
@@ -871,7 +871,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::CounterStyle,
       .CurrentProperty = property,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     RefPtr parsedValue = PropertyParsing::ParseCounterStyleDescriptor(range, property, state);
@@ -880,7 +880,7 @@ namespace krys::boo::css
       return false;
     }
 
-    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant::No);
     return true;
   }
 
@@ -912,7 +912,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::Property,
       .CurrentProperty = property,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     RefPtr parsedValue = PropertyParsing::ParsePropertyDescriptor(range, property, state);
@@ -921,7 +921,7 @@ namespace krys::boo::css
       return false;
     }
 
-    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant::No);
     return true;
   }
 
@@ -938,7 +938,7 @@ namespace krys::boo::css
                                     IsImportant important, PropertyParserResult &result) noexcept
   {
     // Per spec, !important is not allowed and makes the whole declaration invalid.
-    if (important)
+    if (important == IsImportant::Yes)
     {
       return false;
     }
@@ -958,7 +958,7 @@ namespace krys::boo::css
       .Context = context,
       .CurrentRule = RuleType::Function,
       .CurrentProperty = property,
-      .Important = IsImportant(false),
+      .Important = IsImportant::No,
     };
 
     RefPtr parsedValue = PropertyParsing::ParseFunctionDescriptor(range, property, state);
@@ -967,7 +967,7 @@ namespace krys::boo::css
       return false;
     }
 
-    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant::No);
     return true;
   }
 

@@ -108,18 +108,18 @@ namespace krys::boo
 
   EditCommand::~EditCommand() noexcept = default;
 
-  void EditCommand::PostTextStateChangeNotification(ax::AXTextChange change, utf8_stringview text) noexcept
+  void EditCommand::PostTextStateChangeNotification(AXTextChange change, utf8_stringview text) noexcept
   {
-    if (ax::AXObjectCache::AccessibilityEnabled())
+    if (AXObjectCache::AccessibilityEnabled())
     {
       PostTextStateChangeNotification(change, text, _document->Selection().Selection().VisibleStart());
     }
   }
 
-  void EditCommand::PostTextStateChangeNotification(ax::AXTextChange change, utf8_stringview text,
+  void EditCommand::PostTextStateChangeNotification(AXTextChange change, utf8_stringview text,
                                                     const VisiblePosition &position) noexcept
   {
-    if (!ax::AXObjectCache::AccessibilityEnabled() || text.empty())
+    if (!AXObjectCache::AccessibilityEnabled() || text.empty())
     {
       return;
     }

@@ -209,56 +209,56 @@ add_custom_command(
 
 # Every header and source is listed here; a file that isn't listed isn't built.
 set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
-  include/Krystal.Booey/Accessibility/ARIAMixin.hpp
+  include/Krystal.Booey/DOM/Mixins/ARIAMixin.hpp
   include/Krystal.Booey/Accessibility/AXLogger.hpp
   include/Krystal.Booey/Accessibility/AXNotifications.hpp
   include/Krystal.Booey/Accessibility/AXObjectCache.hpp
   include/Krystal.Booey/Accessibility/AXObjectRareData.hpp
   include/Krystal.Booey/Accessibility/AXTableHelpers.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityListBoxOption.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityMathMLElement.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityMenuList.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityMenuListOption.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityMenuListPopup.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityMockObject.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityNodeObject.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityObject.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityProgressIndicator.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityRenderObject.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityRole.hpp
-  include/Krystal.Booey/Accessibility/AccessibilitySVGObject.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityScrollView.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityScrollbar.hpp
-  include/Krystal.Booey/Accessibility/AccessibilitySlider.hpp
-  include/Krystal.Booey/Accessibility/AccessibilitySpinButton.hpp
-  include/Krystal.Booey/Accessibility/AccessibilitySpinButtonPart.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityTableColumn.hpp
-  include/Krystal.Booey/Accessibility/AccessibilityTableHeaderContainer.hpp
+  include/Krystal.Booey/Accessibility/AXListBoxOption.hpp
+  include/Krystal.Booey/Accessibility/AXMathMLElement.hpp
+  include/Krystal.Booey/Accessibility/AXMenuList.hpp
+  include/Krystal.Booey/Accessibility/AXMenuListOption.hpp
+  include/Krystal.Booey/Accessibility/AXMenuListPopup.hpp
+  include/Krystal.Booey/Accessibility/AXMockObject.hpp
+  include/Krystal.Booey/Accessibility/AXNodeObject.hpp
+  include/Krystal.Booey/Accessibility/AXObject.hpp
+  include/Krystal.Booey/Accessibility/AXProgressIndicator.hpp
+  include/Krystal.Booey/Accessibility/AXRenderObject.hpp
+  include/Krystal.Booey/Accessibility/AXRole.hpp
+  include/Krystal.Booey/Accessibility/AXSVGObject.hpp
+  include/Krystal.Booey/Accessibility/AXScrollView.hpp
+  include/Krystal.Booey/Accessibility/AXScrollbar.hpp
+  include/Krystal.Booey/Accessibility/AXSlider.hpp
+  include/Krystal.Booey/Accessibility/AXSpinButton.hpp
+  include/Krystal.Booey/Accessibility/AXSpinButtonPart.hpp
+  include/Krystal.Booey/Accessibility/AXTableColumn.hpp
+  include/Krystal.Booey/Accessibility/AXTableHeaderContainer.hpp
 )
 
 set(KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES
-  src/Accessibility/ARIAMixin.cpp
+  src/DOM/Mixins/ARIAMixin.cpp
   src/Accessibility/AXLogger.cpp
   src/Accessibility/AXObjectCache.cpp
   src/Accessibility/AXTableHelpers.cpp
-  src/Accessibility/AccessibilityListBoxOption.cpp
-  src/Accessibility/AccessibilityMathMLElement.cpp
-  src/Accessibility/AccessibilityMenuList.cpp
-  src/Accessibility/AccessibilityMenuListOption.cpp
-  src/Accessibility/AccessibilityMenuListPopup.cpp
-  src/Accessibility/AccessibilityMockObject.cpp
-  src/Accessibility/AccessibilityNodeObject.cpp
-  src/Accessibility/AccessibilityObject.cpp
-  src/Accessibility/AccessibilityProgressIndicator.cpp
-  src/Accessibility/AccessibilityRenderObject.cpp
-  src/Accessibility/AccessibilitySVGObject.cpp
-  src/Accessibility/AccessibilityScrollView.cpp
-  src/Accessibility/AccessibilityScrollbar.cpp
-  src/Accessibility/AccessibilitySlider.cpp
-  src/Accessibility/AccessibilitySpinButton.cpp
-  src/Accessibility/AccessibilitySpinButtonPart.cpp
-  src/Accessibility/AccessibilityTableColumn.cpp
-  src/Accessibility/AccessibilityTableHeaderContainer.cpp
+  src/Accessibility/AXListBoxOption.cpp
+  src/Accessibility/AXMathMLElement.cpp
+  src/Accessibility/AXMenuList.cpp
+  src/Accessibility/AXMenuListOption.cpp
+  src/Accessibility/AXMenuListPopup.cpp
+  src/Accessibility/AXMockObject.cpp
+  src/Accessibility/AXNodeObject.cpp
+  src/Accessibility/AXObject.cpp
+  src/Accessibility/AXProgressIndicator.cpp
+  src/Accessibility/AXRenderObject.cpp
+  src/Accessibility/AXSVGObject.cpp
+  src/Accessibility/AXScrollView.cpp
+  src/Accessibility/AXScrollbar.cpp
+  src/Accessibility/AXSlider.cpp
+  src/Accessibility/AXSpinButton.cpp
+  src/Accessibility/AXSpinButtonPart.cpp
+  src/Accessibility/AXTableColumn.cpp
+  src/Accessibility/AXTableHeaderContainer.cpp
 )
 
 set(KRYSTAL_BOOEY_ANIMATION_HEADERS

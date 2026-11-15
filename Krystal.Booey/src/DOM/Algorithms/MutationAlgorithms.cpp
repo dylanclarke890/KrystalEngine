@@ -326,7 +326,7 @@ namespace krys::boo::dom
       // 4a. Remove its children with suppressObservers set to true.
       while (auto *fragmentChild = documentFragment->FirstChild())
       {
-        auto result = Remove(*fragmentChild, SuppressObservers(true));
+        auto result = Remove(*fragmentChild, SuppressObservers::Yes);
         if (result.HasException())
         {
           return result.ReleaseException();
@@ -489,7 +489,7 @@ namespace krys::boo::dom
 
     // 8. If suppressObservers is false, then queue a tree mutation record for parent with nodes, « »,
     //    previousSibling, and child.
-    if (!suppressObservers)
+    if (suppressObservers == SuppressObservers::No)
     {
       SmallNodeList nodesCopy = nodes;
       MutationObserverAlgorithms::QueueTreeMutationRecord(ShareRef(parent), krys::move(nodesCopy), {},
@@ -825,7 +825,7 @@ namespace krys::boo::dom
       removedNodes.push_back(ShareRef(child));
 
       // 7b. Remove child with suppressObservers set to true.
-      if (auto result = Remove(child, SuppressObservers(true)); result.HasException())
+      if (auto result = Remove(child, SuppressObservers::Yes); result.HasException())
       {
         return result.ReleaseException();
       }
@@ -843,7 +843,7 @@ namespace krys::boo::dom
     }
 
     // 9. Insert node into parent before referenceChild with suppressObservers set to true.
-    if (auto result = Insert(node, parent, referenceChild, SuppressObservers(true)); result.HasException())
+    if (auto result = Insert(node, parent, referenceChild, SuppressObservers::Yes); result.HasException())
     {
       return result.ReleaseException();
     }
@@ -880,7 +880,7 @@ namespace krys::boo::dom
     // 5. Remove all parent's children, in tree order, with suppressObservers set to true.
     while (auto *firstChild = parent.FirstChild())
     {
-      if (auto result = Remove(*firstChild, SuppressObservers(true)); result.HasException())
+      if (auto result = Remove(*firstChild, SuppressObservers::Yes); result.HasException())
       {
         return result.ReleaseException();
       }
@@ -889,7 +889,7 @@ namespace krys::boo::dom
     // 6. If node is non-null, then insert node into parent before null with suppressObservers set to true.
     if (node != nullptr)
     {
-      if (auto result = Insert(*node, parent, nullptr, SuppressObservers(true)); result.HasException())
+      if (auto result = Insert(*node, parent, nullptr, SuppressObservers::Yes); result.HasException())
       {
         return result.ReleaseException();
       }
@@ -1051,7 +1051,7 @@ namespace krys::boo::dom
 
     // 16. If suppressObservers is false, then queue a tree mutation record for parent with « », « node »,
     //     oldPreviousSibling, and oldNextSibling.
-    if (!suppressObservers)
+    if (suppressObservers == SuppressObservers::No)
     {
       MutationObserverAlgorithms::QueueTreeMutationRecord(ShareRef(parent), {}, {krys::move(protectedNode)},
                                                           ShareRefPtr(oldPreviousSibling),

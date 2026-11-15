@@ -124,7 +124,7 @@ namespace krys::boo::css
                                                                 CSSOMStringView cssText) noexcept
     {
       auto declaration = MutableStyleProperties::Create();
-      if (Parser::ParseValue(*declaration, property, cssText, IsImportant(true), ParserContext(document))
+      if (Parser::ParseValue(*declaration, property, cssText, IsImportant::Yes, ParserContext(document))
           == Parser::ParseResult::Error)
       {
         return dom::Exception {dom::ExceptionCode::TypeError};
@@ -136,7 +136,7 @@ namespace krys::boo::css
       ExtractShorthandValues(dom::Document &document, PropertyId property, CSSOMStringView cssText) noexcept
     {
       auto declaration = MutableStyleProperties::Create();
-      if (Parser::ParseValue(*declaration, property, cssText, IsImportant(true), ParserContext(document))
+      if (Parser::ParseValue(*declaration, property, cssText, IsImportant::Yes, ParserContext(document))
           == Parser::ParseResult::Error)
       {
         return dom::Exception {dom::ExceptionCode::TypeError};

@@ -2061,7 +2061,7 @@ namespace krys::boo
     {
       _mutableStyle = css::MutableStyleProperties::Create();
     }
-    (void)_mutableStyle->SetProperty(PropertyId::Display, ValueId::Inline, css::IsImportant(true));
+    (void)_mutableStyle->SetProperty(PropertyId::Display, ValueId::Inline, css::IsImportant::Yes);
   }
 
   void EditingStyle::AddDisplayContents() noexcept

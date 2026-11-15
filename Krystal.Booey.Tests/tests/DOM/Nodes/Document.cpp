@@ -50,7 +50,7 @@ namespace krys::boo::dom::tests
       auto document = CreateRef<HTMLDocument>();
       document->SetURL(url::URL(url));
       auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF(true));
+      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       (void)parser->PumpTokenizer();
       return document;
     }

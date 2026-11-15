@@ -3920,27 +3920,27 @@ namespace krys::boo
 
     if (auto *cache = frame->Document() ? frame->Document()->ExistingAXObjectCache() : nullptr)
     {
-      auto notification = [&]() -> Maybe<ax::AXNotification>
+      auto notification = [&]() -> Maybe<AXNotification>
       {
         if (eventType == u8"dragstart")
         {
-          return ax::AXNotification::DraggingStarted;
+          return AXNotification::DraggingStarted;
         }
         if (eventType == u8"dragend")
         {
-          return ax::AXNotification::DraggingEnded;
+          return AXNotification::DraggingEnded;
         }
         if (eventType == u8"dragenter")
         {
-          return ax::AXNotification::DraggingEnteredDropZone;
+          return AXNotification::DraggingEnteredDropZone;
         }
         if (eventType == u8"dragleave")
         {
-          return ax::AXNotification::DraggingExitedDropZone;
+          return AXNotification::DraggingExitedDropZone;
         }
         if (eventType == u8"drop")
         {
-          return ax::AXNotification::DraggingDropped;
+          return AXNotification::DraggingDropped;
         }
         return null;
       }();

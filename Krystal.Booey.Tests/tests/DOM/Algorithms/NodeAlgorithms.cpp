@@ -150,10 +150,10 @@ namespace krys::boo::dom::tests
       auto mode = GENERATE(ShadowRootMode::Open, ShadowRootMode::Closed);
       auto shadow = host
                       ->AttachShadow({.Mode = mode,
-                                      .DelegatesFocus = DelegatesFocus(true),
+                                      .DelegatesFocus = DelegatesFocus::Yes,
                                       .SlotAssignment = SlotAssignmentMode::Manual,
-                                      .Clonable = Clonable(true),
-                                      .Serialisable = Serialisable(true),
+                                      .Clonable = Clonable::Yes,
+                                      .Serialisable = Serialisable::Yes,
                                       .ReferenceTarget = DOMString(u8"inner")})
                       .ReleaseValue();
       auto inner = CreateElement(*document, u8"p");

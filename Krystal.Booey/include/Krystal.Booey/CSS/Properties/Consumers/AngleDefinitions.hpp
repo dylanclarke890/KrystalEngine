@@ -53,7 +53,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static bool ShouldAcceptUnitlessValue(double value, PropertyParserState &state,
                                                          PropertyParserOptions options) noexcept
     {
-      if (!value && options.UnitlessZeroAngle)
+      if (!value && options.UnitlessZeroAngle == AllowUnitlessZero::Yes)
       {
         return true;
       }

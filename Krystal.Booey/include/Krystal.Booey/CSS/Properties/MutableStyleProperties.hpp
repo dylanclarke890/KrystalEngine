@@ -121,17 +121,17 @@ namespace krys::boo::css
 
     // These expand shorthand properties into multiple properties.
     bool SetProperty(PropertyId property, const CSSOMString &value, ParserContext context,
-                     IsImportant important = IsImportant(false), bool *didFailParsing = nullptr) noexcept;
+                     IsImportant important = IsImportant::No, bool *didFailParsing = nullptr) noexcept;
 
-    bool SetProperty(PropertyId property, const CSSOMString &value,
-                     IsImportant important = IsImportant(false), bool *didFailParsing = nullptr) noexcept;
+    bool SetProperty(PropertyId property, const CSSOMString &value, IsImportant important = IsImportant::No,
+                     bool *didFailParsing = nullptr) noexcept;
 
     void SetProperty(PropertyId property, Ref<css::Value> &&value,
-                     IsImportant important = IsImportant(false)) noexcept;
+                     IsImportant important = IsImportant::No) noexcept;
 
     // These do not. FIXME: This is too messy, we can do better.
     bool SetProperty(PropertyId property, ValueId identifier,
-                     IsImportant important = IsImportant(false)) noexcept;
+                     IsImportant important = IsImportant::No) noexcept;
 
     bool SetProperty(const Property &property, Property *slot = nullptr) noexcept;
 
@@ -151,7 +151,7 @@ namespace krys::boo::css
 
     // Methods for querying and altering CSS custom properties.
     bool SetCustomProperty(const CSSOMString &propertyName, const CSSOMString &value, ParserContext context,
-                           IsImportant important = IsImportant(false)) noexcept;
+                           IsImportant important = IsImportant::No) noexcept;
 
     bool RemoveCustomProperty(CSSOMStringView propertyName, CSSOMString *returnText = nullptr) noexcept;
 

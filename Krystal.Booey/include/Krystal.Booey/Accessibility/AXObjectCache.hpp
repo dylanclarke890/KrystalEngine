@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
 #include "Krystal.Booey/Accessibility/AXNotifications.hpp"
+#include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -56,12 +56,8 @@ namespace krys::boo
     class HTMLAreaElement;
     class HTMLInputElement;
   }
-}
-
-namespace krys::boo::ax
-{
-  class AccessibilityNodeObject;
-  class AccessibilityRenderObject;
+  class AXNodeObject;
+  class AXRenderObject;
 
   /// @brief A document's accessibility tree: creates the accessibility object for each node or renderer
   /// that needs one, keeps them up to date as the DOM and render tree change, and posts notifications of
@@ -83,19 +79,19 @@ namespace krys::boo::ax
 
   private:
     dom::Document &_document;
-    HashMap<AXID, Ref<AccessibilityObject>> _objects;
-    HashMap<const dom::Node *, AXID> _nodeIdMapping;
+    HashMap<AXId, Ref<AXObject>> _objects;
+    HashMap<const dom::Node *, AXId> _nodeIdMapping;
     // Renderers with no node (anonymous ones, such as list markers) are looked up by renderer.
-    HashMap<const RenderObject *, AXID> _renderObjectIdMapping;
+    HashMap<const RenderObject *, AXId> _renderObjectIdMapping;
     uint64 _nextID {1};
     // The document's view's object.
-    Maybe<AXID> _scrollViewID;
+    Maybe<AXId> _scrollViewID;
 
-    List<Pair<Ref<AccessibilityObject>, AXNotification>> _notificationsToPost;
+    List<Pair<Ref<AXObject>, AXNotification>> _notificationsToPost;
     // Text inserted or deleted, posted with the notifications.
     struct TextChange
     {
-      Ref<AccessibilityObject> Object;
+      Ref<AXObject> Object;
       AXTextChange Change;
       uint64 Offset;
       dom::DOMString Text;
@@ -104,16 +100,16 @@ namespace krys::boo::ax
     Timer _notificationPostTimer;
 
     // Each object's relations to others (both ways round), worked out for the whole document when needed.
-    using AXRelations = HashMap<AXRelation, ListHashSet<AXID>>;
-    HashMap<AXID, AXRelations> _relations;
+    using AXRelations = HashMap<AXRelation, ListHashSet<AXId>>;
+    HashMap<AXId, AXRelations> _relations;
     // The objects some other object is related to.
-    HashSet<AXID> _relationTargets;
+    HashSet<AXId> _relationTargets;
     // While the relations are worked out again, each owned object's owner before (so an unchanged aria-owns
     // doesn't change any children).
-    HashMap<AXID, AXID> _previousOwners;
+    HashMap<AXId, AXId> _previousOwners;
     // While a tree is being built, each object's ignored state, so it isn't worked out again for each
     // descendant (WebKit's AXComputedObjectAttributeCache); null when not caching.
-    Maybe<HashMap<AXID, bool>> _computedIgnoredStates;
+    Maybe<HashMap<AXId, bool>> _computedIgnoredStates;
     bool _relationsNeedUpdate {true};
 
     // An attribute change waiting for its element's renderer to be up to date.
@@ -125,11 +121,11 @@ namespace krys::boo::ax
       dom::DOMString NewValue;
     };
 
-    ListHashSet<AXID> _deferredChildrenChangedList;
+    ListHashSet<AXId> _deferredChildrenChangedList;
     // Elements added to or removed from the tree, which may be live regions or menus that opened.
     ListHashSet<dom::Element *> _deferredElementAddedOrRemovedList;
     // Live regions whose contents changed, each told once when the notifications are next posted.
-    ListHashSet<AXID> _changedLiveRegions;
+    ListHashSet<AXId> _changedLiveRegions;
     List<DeferredAttributeChange> _deferredAttributeChanges;
     // Nodes whose text changed, and elements whose ignored state needs working out again.
     ListHashSet<dom::Node *> _deferredTextChangedList;
@@ -139,10 +135,10 @@ namespace krys::boo::ax
     Maybe<Pair<RefPtr<dom::Element>, RefPtr<dom::Element>>> _deferredFocusedNodeChange;
     // Notifications for objects that may not exist yet, posted once the tree is up to date.
     List<Pair<Ref<dom::Node>, AXNotification>> _deferredNotifications;
-    ListHashSet<AXID> _deferredRendererChangedList;
+    ListHashSet<AXId> _deferredRendererChangedList;
     // Tables whose exposed state and whose cell slots need working out again.
-    ListHashSet<AXID> _deferredRecomputeTableIsExposedList;
-    ListHashSet<AXID> _deferredRecomputeTableCellSlotsList;
+    ListHashSet<AXId> _deferredRecomputeTableIsExposedList;
+    ListHashSet<AXId> _deferredRecomputeTableCellSlotsList;
     Timer _performCacheUpdateTimer;
     bool _performingDeferredCacheUpdate {false};
 
@@ -172,7 +168,7 @@ namespace krys::boo::ax
 
     /// @brief The root of the tree: the document's view (above its web area), or its web area if it has no
     /// view.
-    KRYS_NODISCARD AccessibilityObject *RootObject() noexcept;
+    KRYS_NODISCARD AXObject *RootObject() noexcept;
     /// @brief The modal dialog the user is in, outside which everything is ignored; null if there isn't one.
     /// It's the active modal `dialog`; otherwise the deepest `aria-modal` dialog with the focus in it, if
     /// it's visible and has something to expose.
@@ -198,58 +194,56 @@ namespace krys::boo::ax
       _computedIgnoredStates.reset();
     }
     /// @brief The cached ignored state of the object with @p id, if it's cached.
-    KRYS_NODISCARD Maybe<bool> CachedIgnoredState(AXID id) const noexcept;
+    KRYS_NODISCARD Maybe<bool> CachedIgnoredState(AXId id) const noexcept;
     /// @brief Caches the ignored state of the object with @p id, if caching.
-    void CacheIgnoredState(AXID id, bool ignored) noexcept;
+    void CacheIgnoredState(AXId id, bool ignored) noexcept;
     /// @brief The object for the focused element (or its active descendant), or the nearest unignored
     /// ancestor if that object is ignored; the web area if nothing is focused.
-    KRYS_NODISCARD AccessibilityObject *FocusedObject() noexcept;
+    KRYS_NODISCARD AXObject *FocusedObject() noexcept;
 
     // Lookup and creation.
 
-    KRYS_NODISCARD AccessibilityObject *Get(const dom::Node &node) const noexcept;
-    KRYS_NODISCARD AccessibilityObject *Get(const RenderObject &renderer) const noexcept;
-    KRYS_NODISCARD AccessibilityObject *ObjectForID(AXID id) const noexcept;
+    KRYS_NODISCARD AXObject *Get(const dom::Node &node) const noexcept;
+    KRYS_NODISCARD AXObject *Get(const RenderObject &renderer) const noexcept;
+    KRYS_NODISCARD AXObject *ObjectForID(AXId id) const noexcept;
 
     /// @brief The object for @p node, created if it needs one: if it's rendered, or if it isn't but
     /// accessibility needs it anyway (`display: contents`, canvas fallback content, a focused node,
     /// @p isPartOfRelation).
-    AccessibilityObject *GetOrCreate(dom::Node &node,
-                                     IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept;
-    AccessibilityObject *GetOrCreate(dom::Node *node,
-                                     IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept
+    AXObject *GetOrCreate(dom::Node &node, IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept;
+    AXObject *GetOrCreate(dom::Node *node, IsPartOfRelation isPartOfRelation = IsPartOfRelation::No) noexcept
     {
       return node ? GetOrCreate(*node, isPartOfRelation) : nullptr;
     }
     /// @brief The object for @p renderer (its node's, if it has one), created if needed.
-    AccessibilityObject *GetOrCreate(RenderObject &renderer) noexcept;
-    AccessibilityObject *GetOrCreate(RenderObject *renderer) noexcept
+    AXObject *GetOrCreate(RenderObject &renderer) noexcept;
+    AXObject *GetOrCreate(RenderObject *renderer) noexcept
     {
       return renderer ? GetOrCreate(*renderer) : nullptr;
     }
     /// @brief The object for the document's view (its scroll view), made if needed.
-    AccessibilityObject *GetOrCreate(LocalFrameView &view) noexcept;
+    AXObject *GetOrCreate(LocalFrameView &view) noexcept;
     /// @brief A new object for one of the view's scroll bars; its maker sets its parent.
-    AccessibilityObject *Create(Scrollbar &scrollbar) noexcept;
+    AXObject *Create(Scrollbar &scrollbar) noexcept;
     /// @brief A new object with no node or renderer of its own, for one of the roles that has one (a slider's
     /// thumb, a menu list's pop-up); null for the others. Its maker sets its parent.
-    AccessibilityObject *Create(AccessibilityRole role) noexcept;
+    AXObject *Create(AXRole role) noexcept;
 
     /// @brief Removes and detaches @p node's object.
     void Remove(dom::Node &node) noexcept;
     /// @brief Removes and detaches @p renderer's object if it has no node; otherwise the node's object
     /// just loses its renderer.
     void Remove(RenderObject &renderer) noexcept;
-    void Remove(AXID id) noexcept;
+    void Remove(AXId id) noexcept;
 
     // Changes.
 
     /// @brief @p node's children changed; for a rendered node, the renderer's children-changed covers it.
     void ChildrenChanged(dom::Node &node) noexcept;
     void ChildrenChanged(RenderObject &renderer, RenderObject *newChild = nullptr) noexcept;
-    void ChildrenChanged(AccessibilityObject *object) noexcept;
+    void ChildrenChanged(AXObject *object) noexcept;
     /// @brief Tells the platform @p object's role changed from @p previousRole.
-    void HandleRoleChanged(AccessibilityObject &object, AccessibilityRole previousRole) noexcept;
+    void HandleRoleChanged(AXObject &object, AXRole previousRole) noexcept;
     void RecomputeIsIgnored(dom::Node &node) noexcept;
     void RecomputeIsIgnored(dom::Node *node) noexcept
     {
@@ -270,7 +264,7 @@ namespace krys::boo::ax
                                       Maybe<dom::DOMStringView> oldValue,
                                       Maybe<dom::DOMStringView> newValue) noexcept;
     /// @brief The text of @p object (or under it) changed: its name and its ancestors' may have too.
-    void HandleTextChanged(AccessibilityObject *object) noexcept;
+    void HandleTextChanged(AXObject *object) noexcept;
     /// @brief As above for @p node's object, now if its renderer is up to date.
     void DeferTextChangedIfNeeded(dom::Node *node) noexcept;
 
@@ -338,7 +332,7 @@ namespace krys::boo::ax
 
     /// @brief The objects @p object is related to by @p relation (null if none), with the relations brought
     /// up to date first.
-    KRYS_NODISCARD Maybe<ListHashSet<AXID>> RelatedObjectIDsFor(const AccessibilityObject &object,
+    KRYS_NODISCARD Maybe<ListHashSet<AXId>> RelatedObjectIDsFor(const AXObject &object,
                                                                 AXRelation relation) noexcept;
     /// @brief @p origin's @p attribute (a relation attribute) changed its targets: the relation is set up
     /// again.
@@ -370,37 +364,37 @@ namespace krys::boo::ax
     // Notifications.
 
     /// @brief Queues @p notification for @p object, to post to the platform once the current task ends.
-    void PostNotification(AccessibilityObject *object, AXNotification notification) noexcept;
+    void PostNotification(AXObject *object, AXNotification notification) noexcept;
     void PostNotification(dom::Node *node, AXNotification notification) noexcept;
     void PostNotification(RenderObject *renderer, AXNotification notification) noexcept;
 
   private:
-    KRYS_NODISCARD AXID GenerateID() noexcept
+    KRYS_NODISCARD AXId GenerateID() noexcept
     {
-      return static_cast<AXID>(_nextID++);
+      return static_cast<AXId>(_nextID++);
     }
-    KRYS_NODISCARD Ref<AccessibilityRenderObject> CreateObjectFromRenderer(RenderObject &renderer) noexcept;
-    KRYS_NODISCARD Ref<AccessibilityNodeObject> CreateFromNode(dom::Node &node) noexcept;
-    void CacheAndInitializeWrapper(AccessibilityObject &object, const dom::Node *node,
+    KRYS_NODISCARD Ref<AXRenderObject> CreateObjectFromRenderer(RenderObject &renderer) noexcept;
+    KRYS_NODISCARD Ref<AXNodeObject> CreateFromNode(dom::Node &node) noexcept;
+    void CacheAndInitializeWrapper(AXObject &object, const dom::Node *node,
                                    const RenderObject *renderer) noexcept;
-    AccessibilityObject *GetOrCreateSlow(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept;
-    KRYS_NODISCARD AccessibilityObject *FocusedObjectForNode(dom::Node &node) noexcept;
+    AXObject *GetOrCreateSlow(dom::Node &node, IsPartOfRelation isPartOfRelation) noexcept;
+    KRYS_NODISCARD AXObject *FocusedObjectForNode(dom::Node &node) noexcept;
     /// @brief A focused area's object: its image's child for it.
-    KRYS_NODISCARD AccessibilityObject *FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept;
+    KRYS_NODISCARD AXObject *FocusedImageMapUIElement(html::HTMLAreaElement &area) noexcept;
 
     KRYS_NODISCARD static AXRelation AttributeToRelationType(dom::DOMStringView attribute) noexcept;
     KRYS_NODISCARD static AXRelation SymmetricRelation(AXRelation relation) noexcept;
     KRYS_NODISCARD static bool IsRelationAttribute(dom::DOMStringView attribute) noexcept;
     bool AddRelation(dom::Element &origin, dom::Element &target, AXRelation relation) noexcept;
-    bool AddRelation(AccessibilityObject *origin, AccessibilityObject *target, AXRelation relation,
+    bool AddRelation(AXObject *origin, AXObject *target, AXRelation relation,
                      bool addSymmetricRelation = true) noexcept;
     /// @brief Sets up the relation @p origin's @p attribute gives it to the elements it refers to.
     bool AddRelation(dom::Element &origin, dom::DOMStringView attribute) noexcept;
     /// @brief A label's relation to its control.
     bool AddLabelForRelation(dom::Element &origin) noexcept;
     bool RemoveRelation(dom::Element &origin, AXRelation relation) noexcept;
-    void RemoveAllRelations(AXID id) noexcept;
-    void RemoveRelationByID(AXID originID, AXID targetID, AXRelation relation) noexcept;
+    void RemoveAllRelations(AXId id) noexcept;
+    void RemoveRelationByID(AXId originID, AXId targetID, AXRelation relation) noexcept;
     void UpdateRelationsIfNeeded() noexcept;
     void UpdateRelationsForTree(dom::ContainerNode &root) noexcept;
     /// @brief Whether an ancestor of @p node is related to something (so @p node may be named by it, and
@@ -420,7 +414,7 @@ namespace krys::boo::ax
     void HandleRoleChanged(dom::Element &element, dom::DOMStringView oldValue,
                            dom::DOMStringView newValue) noexcept;
     void HandleAriaExpandedChange(dom::Element &element) noexcept;
-    void HandleRowCountChanged(AccessibilityObject *object) noexcept;
+    void HandleRowCountChanged(AXObject *object) noexcept;
     void HandleMenuItemSelected(dom::Element *element) noexcept;
     /// @brief Whether a focus change works out the modal dialog again (not when more changes that may change
     /// it are to follow).
@@ -441,20 +435,20 @@ namespace krys::boo::ax
     /// `aria-hidden` (unless it's focused).
     KRYS_NODISCARD static bool IsNodeVisible(const dom::Node *node) noexcept;
     void DeferModalChange(dom::Element &element) noexcept;
-    void HandleChildrenChanged(AccessibilityObject &object) noexcept;
+    void HandleChildrenChanged(AXObject &object) noexcept;
     /// @brief The object that tells the host about @p node's changes; the web area's if none does.
-    KRYS_NODISCARD AccessibilityObject *ObservableObjectForNode(dom::Node *node) noexcept;
+    KRYS_NODISCARD AXObject *ObservableObjectForNode(dom::Node *node) noexcept;
     void DeferElementAddedOrRemoved(dom::Element *element) noexcept;
     void HandleMenuOpened(dom::Element &element) noexcept;
     void HandleLiveRegionCreated(dom::Element &element) noexcept;
     /// @brief A label (or something labelling an object) changed: the objects it labels are told.
-    void HandleLabelChanged(AccessibilityObject *object) noexcept;
-    void PostLiveRegionChangeNotification(AccessibilityObject &object) noexcept;
+    void HandleLabelChanged(AXObject *object) noexcept;
+    void PostLiveRegionChangeNotification(AXObject &object) noexcept;
     void HandleAllDeferredChildrenChanged() noexcept;
     /// @brief Works out again (later) whether @p element's table is exposed: adding or removing rows can make
     /// a layout table a data table or the other way round.
     void DeferRecomputeTableIsExposed(dom::Element *element) noexcept;
-    void DeferRecomputeTableCellSlots(AccessibilityNodeObject &table) noexcept;
+    void DeferRecomputeTableCellSlots(AXNodeObject &table) noexcept;
     void StartPerformCacheUpdateTimer() noexcept;
     void NotificationPostTimerFired() noexcept;
     void PerformCacheUpdateTimerFired() noexcept
@@ -463,10 +457,10 @@ namespace krys::boo::ax
     }
 
     // The platform's side: the host's accessibility bridge.
-    void DetachWrapper(AccessibilityObject &object, AccessibilityDetachmentType detachmentType) noexcept;
-    void PostPlatformNotification(AccessibilityObject &object, AXNotification notification) noexcept;
+    void DetachWrapper(AXObject &object, AXDetachmentType detachmentType) noexcept;
+    void PostPlatformNotification(AXObject &object, AXNotification notification) noexcept;
 
-    friend class AccessibilityObject;
+    friend class AXObject;
   };
 
   /// @brief The text an edit replaces (the selection it started with), so inserting the edit's text can be
@@ -504,15 +498,15 @@ namespace krys::boo::ax
     }
   };
 
-  class AccessibilityReplacedText
+  class AXReplacedText
   {
   private:
     dom::DOMString _replacedText;
     VisiblePositionIndexRange _replacedRange;
 
   public:
-    AccessibilityReplacedText() noexcept = default;
-    explicit AccessibilityReplacedText(const VisibleSelection &selection) noexcept;
+    AXReplacedText() noexcept = default;
+    explicit AXReplacedText(const VisibleSelection &selection) noexcept;
 
     /// @brief @p insertedText replaced the text (if there was any), leaving @p selection.
     void PostTextStateChangeNotification(AXObjectCache *cache, dom::DOMStringView insertedText,

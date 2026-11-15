@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
+#include "Krystal.Booey/Accessibility/AXObject.hpp"
 
-namespace krys::boo::ax
+namespace krys::boo
 {
   /// @brief What only some node objects need: a table's rows, columns and cell slots, and a row's or cell's
   /// place in its table.
@@ -37,11 +37,11 @@ namespace krys::boo::ax
     KRYS_NON_COPY_MOVABLE(AXObjectRareData);
 
     // Tables.
-    AccessibilityObject::AccessibilityChildrenVector _tableRows;
-    AccessibilityObject::AccessibilityChildrenVector _tableColumns;
+    AXObject::AXChildrenVector _tableRows;
+    AXObject::AXChildrenVector _tableColumns;
     // The cell covering each slot (https://html.spec.whatwg.org/#concept-slots), by row then column.
-    List<List<Maybe<AXID>>> _cellSlots;
-    RefPtr<AccessibilityObject> _tableHeaderContainer;
+    List<List<Maybe<AXId>>> _cellSlots;
+    RefPtr<AXObject> _tableHeaderContainer;
     bool _isExposableTable {false};
 
     // Rows and cells.
@@ -53,11 +53,11 @@ namespace krys::boo::ax
   public:
     AXObjectRareData() noexcept = default;
 
-    KRYS_NODISCARD const AccessibilityObject::AccessibilityChildrenVector &TableRows() const noexcept
+    KRYS_NODISCARD const AXObject::AXChildrenVector &TableRows() const noexcept
     {
       return _tableRows;
     }
-    KRYS_NODISCARD const AccessibilityObject::AccessibilityChildrenVector &TableColumns() const noexcept
+    KRYS_NODISCARD const AXObject::AXChildrenVector &TableColumns() const noexcept
     {
       return _tableColumns;
     }
@@ -69,11 +69,11 @@ namespace krys::boo::ax
     {
       return static_cast<uint32>(_tableColumns.size());
     }
-    void AppendColumn(AccessibilityObject &column) noexcept
+    void AppendColumn(AXObject &column) noexcept
     {
       _tableColumns.emplace_back(ShareRef(column));
     }
-    void AppendRow(AccessibilityObject &row) noexcept
+    void AppendRow(AXObject &row) noexcept
     {
       _tableRows.emplace_back(ShareRef(row));
     }
@@ -85,19 +85,19 @@ namespace krys::boo::ax
     {
       _isExposableTable = value;
     }
-    KRYS_NODISCARD AccessibilityObject *TableHeaderContainer() const noexcept
+    KRYS_NODISCARD AXObject *TableHeaderContainer() const noexcept
     {
       return _tableHeaderContainer.get();
     }
-    void SetTableHeaderContainer(AccessibilityObject &object) noexcept
+    void SetTableHeaderContainer(AXObject &object) noexcept
     {
       _tableHeaderContainer = ShareRefPtr(&object);
     }
-    KRYS_NODISCARD const List<List<Maybe<AXID>>> &CellSlots() const noexcept
+    KRYS_NODISCARD const List<List<Maybe<AXId>>> &CellSlots() const noexcept
     {
       return _cellSlots;
     }
-    KRYS_NODISCARD List<List<Maybe<AXID>>> &MutableCellSlots() noexcept
+    KRYS_NODISCARD List<List<Maybe<AXId>>> &MutableCellSlots() noexcept
     {
       return _cellSlots;
     }

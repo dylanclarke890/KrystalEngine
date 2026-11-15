@@ -39,18 +39,19 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 
 namespace krys::boo::css
 {
-  struct DisallowPseudoElements : public StronglyTypedBool<DisallowPseudoElements>
+  enum class DisallowPseudoElements : bool
   {
-    using Base::Base;
+    No,
+    Yes,
   };
 
-  struct IsForgivingSelectorList : public StronglyTypedBool<IsForgivingSelectorList>
+  enum class IsForgivingSelectorList : bool
   {
-    using Base::Base;
+    No,
+    Yes,
   };
 
   /// @brief Parses selectors into MutableSelectors.
@@ -78,7 +79,7 @@ namespace krys::boo::css
   public:
     SelectorParser(const SelectorParserContext &context, StyleSheetContents *styleSheet,
                    NestedContext nestedContext = {},
-                   DisallowPseudoElements disallowPseudoElements = DisallowPseudoElements(false)) noexcept;
+                   DisallowPseudoElements disallowPseudoElements = DisallowPseudoElements::No) noexcept;
 
     KRYS_NODISCARD MutableSelectorList ConsumeComplexSelectorList(TokenRange &tokens) noexcept;
     KRYS_NODISCARD MutableSelectorList ConsumeNestedSelectorList(TokenRange &tokens) noexcept;

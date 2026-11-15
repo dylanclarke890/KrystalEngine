@@ -200,7 +200,7 @@ namespace krys::boo::css::tests
       auto properties = MutableStyleProperties::Create();
       CHECK(properties->SetProperty(PropertyId::Display, ValueId::Block));
       CHECK_FALSE(properties->SetProperty(PropertyId::Display, ValueId::Block));
-      CHECK(properties->SetProperty(PropertyId::Display, ValueId::Flex, IsImportant(true)));
+      CHECK(properties->SetProperty(PropertyId::Display, ValueId::Flex, IsImportant::Yes));
       CHECK(AsText(properties) == "display: flex !important;");
     }
 

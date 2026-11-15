@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
+#include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
@@ -36,10 +36,9 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXActions: pressing", "[Accessibility][AXActions]")
   {
-    AccessibilityFixture page(
-      u8"<button id=button>Go</button><input id=box type=checkbox>"
-      u8"<div id=group role=button><span>Inside</span><button id=inner>Real</button></div>"
-      u8"<p id=text>Text</p>");
+    AXFixture page(u8"<button id=button>Go</button><input id=box type=checkbox>"
+                   u8"<div id=group role=button><span>Inside</span><button id=inner>Real</button></div>"
+                   u8"<p id=text>Text</p>");
     int clicks = 0;
     ListenWith(page.ById(u8"button"), u8"click", [&](dom::Event &) { ++clicks; });
     CHECK(page.Object(u8"button").Press());
@@ -56,7 +55,7 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXActions: focusing", "[Accessibility][AXActions]")
   {
-    AccessibilityFixture page(u8"<input id=input><p id=text>Text</p>");
+    AXFixture page(u8"<input id=input><p id=text>Text</p>");
     auto &input = page.Object(u8"input");
     CHECK(input.CanSetFocusAttribute());
     input.SetFocused(true);
@@ -67,10 +66,10 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXActions: values", "[Accessibility][AXActions]")
   {
-    AccessibilityFixture page(u8"<input id=input value=old><input id=readonly readonly>"
-                              u8"<input id=range type=range min=0 max=100 value=50 step=10>"
-                              u8"<div id=aria role=slider aria-valuenow=5 aria-valuemin=0 aria-valuemax=10 "
-                              u8"tabindex=0>5</div>");
+    AXFixture page(u8"<input id=input value=old><input id=readonly readonly>"
+                   u8"<input id=range type=range min=0 max=100 value=50 step=10>"
+                   u8"<div id=aria role=slider aria-valuenow=5 aria-valuemin=0 aria-valuemax=10 "
+                   u8"tabindex=0>5</div>");
     auto &input = page.Object(u8"input");
     CHECK(input.CanSetValueAttribute());
     CHECK_FALSE(page.Object(u8"readonly").CanSetValueAttribute());
@@ -102,9 +101,8 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXActions: selecting and expanding", "[Accessibility][AXActions]")
   {
-    AccessibilityFixture page(
-      u8"<select id=list size=3><option>One</option><option id=two>Two</option></select>"
-      u8"<details id=details><summary>More</summary>Hidden</details>");
+    AXFixture page(u8"<select id=list size=3><option>One</option><option id=two>Two</option></select>"
+                   u8"<details id=details><summary>More</summary>Hidden</details>");
     auto &list = page.Object(u8"list");
     REQUIRE(list.Children().size() == 2);
     list.Children()[1]->SetSelected(true);
@@ -117,9 +115,9 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXActions: hit testing", "[Accessibility][AXActions]")
   {
-    AccessibilityFixture page(u8"<style>body { margin: 0 }</style>"
-                              u8"<button id=button style='width: 100px; height: 40px'>Go</button>"
-                              u8"<p id=far style='margin-top: 5000px'>Far</p>");
+    AXFixture page(u8"<style>body { margin: 0 }</style>"
+                   u8"<button id=button style='width: 100px; height: 40px'>Go</button>"
+                   u8"<p id=far style='margin-top: 5000px'>Far</p>");
     auto *root = page.Cache().RootObject();
     REQUIRE(root);
     CHECK(root->AccessibilityHitTest({10, 10}) == &page.Object(u8"button"));

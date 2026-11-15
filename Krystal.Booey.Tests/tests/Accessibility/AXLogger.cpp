@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/Accessibility/AXLogger.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
+#include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
 
 namespace krys::boo::ax::tests
 {
   TEST_CASE("AXLogger: the tree as text", "[Accessibility][AXLogger]")
   {
-    AccessibilityFixture page(u8"<main><h1>Title</h1><p>Some <a href='#'>link</a>.</p>"
-                              u8"<label>Name <input id=name value=Ada></label><button>Save</button></main>");
+    AXFixture page(u8"<main><h1>Title</h1><p>Some <a href='#'>link</a>.</p>"
+                   u8"<label>Name <input id=name value=Ada></label><button>Save</button></main>");
 
     SECTION("roles and names")
     {

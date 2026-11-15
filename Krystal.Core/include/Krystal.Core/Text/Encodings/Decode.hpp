@@ -54,12 +54,12 @@ namespace krys::text
     /// @brief The action to take when an incomplete sequence is encountered (e.g., the input ends before a
     /// complete code unit sequence is read). Decoding will always stop when this error is encountered (the
     /// input has ended), but with slightly differing behavior:
-    /// - `Stop` - reports the error and leaves DecodeResult::CodeUnitsConsumed at the start of the invalid
+    /// - `Stop` - reports the error and leaves DecodeResult::uint8 at the start of the invalid
     /// sequence.
-    /// - `Skip` - ignores the error, and updates DecodeResult::CodeUnitsConsumed to include the consumed
+    /// - `Skip` - ignores the error, and updates DecodeResult::uint8 to include the consumed
     /// incomplete sequence before returning,
     /// - `Replace` - replaces the incomplete sequence with the replacement character before returning and
-    /// updates DecodeResult::CodeUnitsConsumed to include the consumed incomplete sequence.
+    /// updates DecodeResult::uint8 to include the consumed incomplete sequence.
     EncodingErrorAction OnIncompleteSequence = EncodingErrorAction::Stop;
 
     /// @brief Whether to check for a byte order mark (BOM) at the start of the input when decoding, if the
@@ -67,14 +67,14 @@ namespace krys::text
     /// and UTF-32. If the input does not start with a BOM, decoding will continue as normal.
     /// `DecodeResult::SawByteOrderMark` will be set to true if a BOM was detected and consumed from the
     /// input.
-    CheckForBOM CheckByteOrderMark = CheckForBOM(false);
+    CheckForBOM CheckByteOrderMark = CheckForBOM::No;
   };
 
   /// @brief The default decoding policy, which handles all errors by replacing the invalid code unit
   /// sequences with the appropriate replacement code point.
   constexpr DecodePolicy DefaultDecodePolicy {.OnInvalidSequence = EncodingErrorAction::Replace,
                                               .OnIncompleteSequence = EncodingErrorAction::Replace,
-                                              .CheckByteOrderMark = CheckForBOM(false)};
+                                              .CheckByteOrderMark = CheckForBOM::No};
 
   /// @brief Decodes the input code units into code points using the specified encoding and policy.
   template <Encoding TEncoding, DecodePolicy Policy = DefaultDecodePolicy, typename TOutput = utf32_string,
@@ -92,7 +92,7 @@ namespace krys::text
     auto current = std::ranges::cbegin(input);
     auto last = std::ranges::cend(input);
 
-    if constexpr (Policy.CheckByteOrderMark && HasByteOrderMark<TEncoding>)
+    if constexpr (Policy.CheckByteOrderMark == CheckForBOM::Yes && HasByteOrderMark<TEncoding>)
     {
       if (std::ranges::starts_with(std::ranges::subrange(current, last), TEncoding::BOM))
       {

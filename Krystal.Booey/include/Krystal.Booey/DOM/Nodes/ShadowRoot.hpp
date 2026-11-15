@@ -75,29 +75,32 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::SlotAssignmentMode, 2u);
 
 namespace krys::boo::dom
 {
-  struct DelegatesFocus : public StronglyTypedBool<DelegatesFocus>
+  enum class DelegatesFocus : bool
   {
-    using Base::Base;
+    No,
+    Yes,
   };
 
-  struct Clonable : public StronglyTypedBool<Clonable>
+  enum class Clonable : bool
   {
-    using Base::Base;
+    No,
+    Yes,
   };
 
-  struct Serialisable : public StronglyTypedBool<Serialisable>
+  enum class Serialisable : bool
   {
-    using Base::Base;
+    No,
+    Yes,
   };
 
   /// @see https://dom.spec.whatwg.org/#dictdef-shadowrootinit
   struct ShadowRootInit
   {
     ShadowRootMode Mode {ShadowRootMode::Open};
-    DelegatesFocus DelegatesFocus {false};
+    DelegatesFocus DelegatesFocus {};
     SlotAssignmentMode SlotAssignment {SlotAssignmentMode::Named};
-    Clonable Clonable {false};
-    Serialisable Serialisable {false};
+    Clonable Clonable {};
+    Serialisable Serialisable {};
     /// @see https://dom.spec.whatwg.org/#dom-shadowrootinit-referencetarget
     Maybe<DOMString> ReferenceTarget;
     html::CustomElementRegistry *CustomElementRegistry {nullptr};

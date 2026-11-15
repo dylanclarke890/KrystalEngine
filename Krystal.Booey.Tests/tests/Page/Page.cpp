@@ -59,7 +59,7 @@ namespace krys::boo::tests
         Document = CreateRef<dom::HTMLDocument>();
         frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
-        parser->InputStream().Append(krys::move(markup), IsEOF(true));
+        parser->InputStream().Append(krys::move(markup), IsEOF::Yes);
         parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();
         TestPage->UpdateRendering();
@@ -255,7 +255,7 @@ namespace krys::boo::tests
       PageFixture fixture {u8"<!DOCTYPE html><body>"};
       auto &document = *fixture.Document;
       auto host = document.CreateElement(u8"div").ReleaseValue();
-      auto shadow = host->AttachShadow({.DelegatesFocus = dom::DelegatesFocus(true)}).ReleaseValue();
+      auto shadow = host->AttachShadow({.DelegatesFocus = dom::DelegatesFocus::Yes}).ReleaseValue();
       auto inner = document.CreateElement(u8"input").ReleaseValue();
       REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
       REQUIRE_FALSE(host->SetAttribute(u8"autofocus", u8"").HasException());
@@ -274,7 +274,7 @@ namespace krys::boo::tests
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(
         u8"<!DOCTYPE html><div id=auto autofocus tabindex=0></div><div id=other tabindex=0></div>",
-        IsEOF(true));
+        IsEOF::Yes);
       parser->PumpTokenizer();
       CHECK(document->AutofocusCandidates().size() == 1);
       CHECK(page->IsRenderingUpdateScheduled());
@@ -293,7 +293,7 @@ namespace krys::boo::tests
       page->MainFrame().SetDocument(ShareRefPtr<dom::Document>(document.get()));
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(
-        u8"<!DOCTYPE html><div id=auto autofocus tabindex=0></div><div id=target></div>", IsEOF(true));
+        u8"<!DOCTYPE html><div id=auto autofocus tabindex=0></div><div id=target></div>", IsEOF::Yes);
       parser->PumpTokenizer();
       REQUIRE(document->AutofocusCandidates().size() == 1);
 
@@ -309,7 +309,7 @@ namespace krys::boo::tests
     {
       auto document = CreateRef<dom::HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(u8"<!DOCTYPE html><div autofocus tabindex=0></div>", IsEOF(true));
+      parser->InputStream().Append(u8"<!DOCTYPE html><div autofocus tabindex=0></div>", IsEOF::Yes);
       parser->PumpTokenizer();
       CHECK(document->AutofocusCandidates().empty());
     }

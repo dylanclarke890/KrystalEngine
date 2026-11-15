@@ -32,7 +32,6 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::css
@@ -139,14 +138,16 @@ namespace krys::boo::css
     Sensitive
   };
 
-  struct IsCaseSensitive : public StronglyTypedBool<IsCaseSensitive>
+  enum class IsCaseSensitive : bool
   {
-    using Base::Base;
+    No,
+    Yes,
   };
 
-  struct MatchLowercase : public StronglyTypedBool<MatchLowercase>
+  enum class MatchLowercase : bool
   {
-    using Base::Base;
+    No,
+    Yes,
   };
 }
 
@@ -471,8 +472,7 @@ namespace krys::boo::css
       _flags = value ? (_flags | flag) : (_flags & ~flag);
     }
 
-    void SetValue(const CSSOMStringAtom &value,
-                  MatchLowercase matchLowercase = MatchLowercase(false)) noexcept;
+    void SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase = MatchLowercase::No) noexcept;
 
     void SetAttribute(const dom::QualifiedName &name, AttributeCaseFlag caseFlag) noexcept;
     void SetNth(int32 a, int32 b) noexcept;
@@ -589,7 +589,8 @@ namespace krys::boo::css
   inline void Selector::SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase) noexcept
   {
     krys_debug_assert(Match() != SelectorMatch::Type);
-    auto matchingValue = matchLowercase ? CSSOMStringAtom(text::ToASCIILower(value.View())) : value;
+    auto matchingValue =
+      matchLowercase == MatchLowercase::Yes ? CSSOMStringAtom(text::ToASCIILower(value.View())) : value;
     if (!HasRareData() && matchingValue != value)
     {
       CreateRareData();

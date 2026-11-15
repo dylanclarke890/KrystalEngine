@@ -269,7 +269,7 @@ namespace krys::boo::css
 
       auto end = PropertyParsing::ParseStylePropertyLonghand(tokens, longhands[1], state);
       auto endImplicit = IsImplicit(!end);
-      if (endImplicit)
+      if (endImplicit == IsImplicit::Yes)
       {
         end = start;
       }
@@ -310,17 +310,17 @@ namespace krys::boo::css
       auto bottomImplicit = IsImplicit(!bottom);
       auto leftImplicit = IsImplicit(!left);
 
-      if (rightImplicit)
+      if (rightImplicit == IsImplicit::Yes)
       {
         right = top;
       }
 
-      if (bottomImplicit)
+      if (bottomImplicit == IsImplicit::Yes)
       {
         bottom = top;
       }
 
-      if (leftImplicit)
+      if (leftImplicit == IsImplicit::Yes)
       {
         left = right;
       }
@@ -1726,7 +1726,7 @@ namespace krys::boo::css
         // Instead, we store sentinel values, later replaced by environment-sensitive values
         // inside Style::BuilderCustom and Style::BuilderConverter.
         result.AddPropertyForAllLonghandsOfCurrentShorthand(state, PrimitiveValue::Create(systemFont),
-                                                            IsImplicit(true));
+                                                            IsImplicit::Yes);
 
         return true;
       }
@@ -1816,12 +1816,12 @@ namespace krys::boo::css
       auto shorthandProperties = shorthand.Properties();
       for (auto [value, longhand] : zippedRange(values, shorthandProperties.first(values.size())))
       {
-        result.AddPropertyForCurrentShorthand(state, longhand, krys::move(value), IsImplicit(true));
+        result.AddPropertyForCurrentShorthand(state, longhand, krys::move(value), IsImplicit::Yes);
       }
 
       for (auto longhand : shorthandProperties.subspan(values.size()))
       {
-        result.AddPropertyForCurrentShorthand(state, longhand, nullptr, IsImplicit(true));
+        result.AddPropertyForCurrentShorthand(state, longhand, nullptr, IsImplicit::Yes);
       }
 
       return true;
@@ -1853,8 +1853,8 @@ namespace krys::boo::css
       FontVariantLigaturesParser ligaturesParser;
       FontVariantNumericParser numericParser;
 
-      auto implicitLigatures = IsImplicit(true);
-      auto implicitNumeric = IsImplicit(true);
+      auto implicitLigatures = IsImplicit::Yes;
+      auto implicitNumeric = IsImplicit::Yes;
       do
       {
         if (tokens.Peek().ValueId() == ValueId::Normal)
@@ -1888,12 +1888,12 @@ namespace krys::boo::css
 
         if (ligaturesParseResult == FontVariantLigaturesParser::ParseResult::ConsumedValue)
         {
-          implicitLigatures = IsImplicit(false);
+          implicitLigatures = IsImplicit::No;
           continue;
         }
         if (numericParseResult == FontVariantNumericParser::ParseResult::ConsumedValue)
         {
-          implicitNumeric = IsImplicit(false);
+          implicitNumeric = IsImplicit::No;
           continue;
         }
 

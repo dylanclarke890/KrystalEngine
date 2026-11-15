@@ -41,7 +41,7 @@ namespace krys::boo
     constexpr text::DecodePolicy SheetDecodePolicy {.OnInvalidSequence = text::EncodingErrorAction::Replace,
                                                     .OnIncompleteSequence =
                                                       text::EncodingErrorAction::Replace,
-                                                    .CheckByteOrderMark = text::CheckForBOM(true)};
+                                                    .CheckByteOrderMark = text::CheckForBOM::Yes};
 
     /// @brief Decodes a sheet's bytes as UTF-8, dropping a byte order mark and replacing invalid sequences.
     KRYS_NODISCARD utf8_string DecodeSheet(Span<const uint8> bytes) noexcept

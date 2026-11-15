@@ -1,8 +1,8 @@
 ﻿#include "Krystal.UI/ViewAccessibility.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityObject.hpp"
-#include "Krystal.Booey/Accessibility/AccessibilityScrollView.hpp"
 #include "Krystal.Booey/Accessibility/AXNotifications.hpp"
+#include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
+#include "Krystal.Booey/Accessibility/AXScrollView.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
@@ -24,9 +24,9 @@ namespace krys::ui
 {
   namespace
   {
-    using boo::ax::AccessibilityObject;
-    using boo::ax::AccessibilityRole;
-    using boo::ax::AXNotification;
+    using boo::AXNotification;
+    using boo::AXObject;
+    using boo::AXRole;
 
     // Each page's cache numbers its objects from the same counter, so the nodes of other pages than the
     // view's (an overlay's, an SVG image's) have the top bit set and their cache's tag above their objects'
@@ -35,122 +35,121 @@ namespace krys::ui
     constexpr uint32 ForeignTagShift = 40;
     constexpr pal::AccessibilityNodeID ForeignObjectIDMask = (1ull << ForeignTagShift) - 1;
 
-    KRYS_NODISCARD pal::AccessibilityRole ToPalRole(const AccessibilityObject &object) noexcept
+    KRYS_NODISCARD pal::AccessibilityRole ToPalRole(const AXObject &object) noexcept
     {
       using Role = pal::AccessibilityRole;
       switch (object.Role())
       {
-        case AccessibilityRole::WebArea:
-        case AccessibilityRole::Document:
-        case AccessibilityRole::DocumentArticle:
-        case AccessibilityRole::GraphicsDocument:       return Role::Document;
-        case AccessibilityRole::ScrollArea:             return Role::Pane;
-        case AccessibilityRole::ApplicationDialog:
-        case AccessibilityRole::ApplicationAlertDialog: return Role::Dialog;
-        case AccessibilityRole::ApplicationAlert:       return Role::Alert;
-        case AccessibilityRole::Button:
-        case AccessibilityRole::PopUpButton:            return Role::Button;
-        case AccessibilityRole::ToggleButton:
-        case AccessibilityRole::Switch:                 return Role::ToggleButton;
-        case AccessibilityRole::Checkbox:
-        case AccessibilityRole::MenuItemCheckbox:
-          return object.Role() == AccessibilityRole::Checkbox ? Role::CheckBox : Role::MenuItem;
-        case AccessibilityRole::RadioButton:           return Role::RadioButton;
-        case AccessibilityRole::ComboBox:              return Role::ComboBox;
-        case AccessibilityRole::TextField:
-        case AccessibilityRole::TextArea:
-        case AccessibilityRole::SearchField:           return Role::Edit;
-        case AccessibilityRole::Link:                  return Role::Link;
-        case AccessibilityRole::Image:
-        case AccessibilityRole::ImageMap:
-        case AccessibilityRole::Canvas:
-        case AccessibilityRole::GraphicsObject:
-        case AccessibilityRole::GraphicsSymbol:
-        case AccessibilityRole::SVGRoot:               return Role::Image;
-        case AccessibilityRole::Heading:               return Role::Heading;
-        case AccessibilityRole::Paragraph:             return Role::Paragraph;
-        case AccessibilityRole::StaticText:
-        case AccessibilityRole::Label:
-        case AccessibilityRole::ListMarker:            return Role::Text;
-        case AccessibilityRole::List:
-        case AccessibilityRole::ListBox:
-        case AccessibilityRole::DescriptionList:
-        case AccessibilityRole::Directory:
-        case AccessibilityRole::Feed:                  return Role::List;
-        case AccessibilityRole::ListItem:
-        case AccessibilityRole::ListBoxOption:
-        case AccessibilityRole::MenuListOption:
-        case AccessibilityRole::DescriptionListTerm:
-        case AccessibilityRole::DescriptionListDetail: return Role::ListItem;
-        case AccessibilityRole::Menu:
-        case AccessibilityRole::MenuListPopup:         return Role::Menu;
-        case AccessibilityRole::MenuBar:               return Role::MenuBar;
-        case AccessibilityRole::MenuItem:
-        case AccessibilityRole::MenuItemRadio:         return Role::MenuItem;
-        case AccessibilityRole::ProgressIndicator:
-        case AccessibilityRole::Meter:                 return Role::ProgressBar;
-        case AccessibilityRole::Slider:                return Role::Slider;
-        case AccessibilityRole::SpinButton:            return Role::SpinButton;
-        case AccessibilityRole::SpinButtonPart:        return Role::Button;
-        case AccessibilityRole::ScrollBar:             return Role::ScrollBar;
-        case AccessibilityRole::TabList:               return Role::TabList;
-        case AccessibilityRole::Tab:                   return Role::Tab;
-        case AccessibilityRole::TabPanel:              return Role::TabPanel;
-        case AccessibilityRole::Table:
-        case AccessibilityRole::Grid:
-        case AccessibilityRole::TreeGrid:              return Role::Table;
-        case AccessibilityRole::Row:                   return Role::Row;
-        case AccessibilityRole::Cell:
-        case AccessibilityRole::GridCell:              return Role::Cell;
-        case AccessibilityRole::ColumnHeader:          return Role::ColumnHeader;
-        case AccessibilityRole::RowHeader:             return Role::RowHeader;
-        case AccessibilityRole::Tree:                  return Role::Tree;
-        case AccessibilityRole::TreeItem:              return Role::TreeItem;
-        case AccessibilityRole::HorizontalRule:
-        case AccessibilityRole::Splitter:              return Role::Separator;
-        case AccessibilityRole::Toolbar:               return Role::ToolBar;
-        case AccessibilityRole::UserInterfaceTooltip:  return Role::ToolTip;
-        case AccessibilityRole::ApplicationStatus:     return Role::StatusBar;
-        case AccessibilityRole::LandmarkBanner:
-        case AccessibilityRole::LandmarkComplementary:
-        case AccessibilityRole::LandmarkContentInfo:
-        case AccessibilityRole::LandmarkDocRegion:
-        case AccessibilityRole::LandmarkMain:
-        case AccessibilityRole::LandmarkNavigation:
-        case AccessibilityRole::LandmarkRegion:
-        case AccessibilityRole::LandmarkSearch:
-        case AccessibilityRole::Form:                  return Role::Landmark;
-        case AccessibilityRole::Figure:                return Role::Figure;
-        case AccessibilityRole::DocumentMath:          return Role::Math;
-        case AccessibilityRole::Unknown:               return Role::Unknown;
-        default:                                       return Role::Group;
+        case AXRole::WebArea:
+        case AXRole::Document:
+        case AXRole::DocumentArticle:
+        case AXRole::GraphicsDocument:       return Role::Document;
+        case AXRole::ScrollArea:             return Role::Pane;
+        case AXRole::ApplicationDialog:
+        case AXRole::ApplicationAlertDialog: return Role::Dialog;
+        case AXRole::ApplicationAlert:       return Role::Alert;
+        case AXRole::Button:
+        case AXRole::PopUpButton:            return Role::Button;
+        case AXRole::ToggleButton:
+        case AXRole::Switch:                 return Role::ToggleButton;
+        case AXRole::Checkbox:
+        case AXRole::MenuItemCheckbox:
+          return object.Role() == AXRole::Checkbox ? Role::CheckBox : Role::MenuItem;
+        case AXRole::RadioButton:           return Role::RadioButton;
+        case AXRole::ComboBox:              return Role::ComboBox;
+        case AXRole::TextField:
+        case AXRole::TextArea:
+        case AXRole::SearchField:           return Role::Edit;
+        case AXRole::Link:                  return Role::Link;
+        case AXRole::Image:
+        case AXRole::ImageMap:
+        case AXRole::Canvas:
+        case AXRole::GraphicsObject:
+        case AXRole::GraphicsSymbol:
+        case AXRole::SVGRoot:               return Role::Image;
+        case AXRole::Heading:               return Role::Heading;
+        case AXRole::Paragraph:             return Role::Paragraph;
+        case AXRole::StaticText:
+        case AXRole::Label:
+        case AXRole::ListMarker:            return Role::Text;
+        case AXRole::List:
+        case AXRole::ListBox:
+        case AXRole::DescriptionList:
+        case AXRole::Directory:
+        case AXRole::Feed:                  return Role::List;
+        case AXRole::ListItem:
+        case AXRole::ListBoxOption:
+        case AXRole::MenuListOption:
+        case AXRole::DescriptionListTerm:
+        case AXRole::DescriptionListDetail: return Role::ListItem;
+        case AXRole::Menu:
+        case AXRole::MenuListPopup:         return Role::Menu;
+        case AXRole::MenuBar:               return Role::MenuBar;
+        case AXRole::MenuItem:
+        case AXRole::MenuItemRadio:         return Role::MenuItem;
+        case AXRole::ProgressIndicator:
+        case AXRole::Meter:                 return Role::ProgressBar;
+        case AXRole::Slider:                return Role::Slider;
+        case AXRole::SpinButton:            return Role::SpinButton;
+        case AXRole::SpinButtonPart:        return Role::Button;
+        case AXRole::ScrollBar:             return Role::ScrollBar;
+        case AXRole::TabList:               return Role::TabList;
+        case AXRole::Tab:                   return Role::Tab;
+        case AXRole::TabPanel:              return Role::TabPanel;
+        case AXRole::Table:
+        case AXRole::Grid:
+        case AXRole::TreeGrid:              return Role::Table;
+        case AXRole::Row:                   return Role::Row;
+        case AXRole::Cell:
+        case AXRole::GridCell:              return Role::Cell;
+        case AXRole::ColumnHeader:          return Role::ColumnHeader;
+        case AXRole::RowHeader:             return Role::RowHeader;
+        case AXRole::Tree:                  return Role::Tree;
+        case AXRole::TreeItem:              return Role::TreeItem;
+        case AXRole::HorizontalRule:
+        case AXRole::Splitter:              return Role::Separator;
+        case AXRole::Toolbar:               return Role::ToolBar;
+        case AXRole::UserInterfaceTooltip:  return Role::ToolTip;
+        case AXRole::ApplicationStatus:     return Role::StatusBar;
+        case AXRole::LandmarkBanner:
+        case AXRole::LandmarkComplementary:
+        case AXRole::LandmarkContentInfo:
+        case AXRole::LandmarkDocRegion:
+        case AXRole::LandmarkMain:
+        case AXRole::LandmarkNavigation:
+        case AXRole::LandmarkRegion:
+        case AXRole::LandmarkSearch:
+        case AXRole::Form:                  return Role::Landmark;
+        case AXRole::Figure:                return Role::Figure;
+        case AXRole::DocumentMath:          return Role::Math;
+        case AXRole::Unknown:               return Role::Unknown;
+        default:                            return Role::Group;
       }
     }
 
-    KRYS_NODISCARD uint32 UnsignedAttribute(const AccessibilityObject &object,
-                                            boo::dom::DOMStringView name) noexcept
+    KRYS_NODISCARD uint32 UnsignedAttribute(const AXObject &object, boo::dom::DOMStringView name) noexcept
     {
       auto value = object.GetAttributeTrimmed(name);
       auto parsed = boo::html::Numbers::ParseNonNegativeInteger(value);
       return !value.empty() && parsed.Success() ? static_cast<uint32>(parsed.Value) : 0;
     }
 
-    KRYS_NODISCARD bool IsPassword(const AccessibilityObject &object) noexcept
+    KRYS_NODISCARD bool IsPassword(const AXObject &object) noexcept
     {
       auto *input = DynamicDowncast<boo::html::HTMLInputElement>(object.GetNode());
       return input && input->IsPasswordField();
     }
 
-    KRYS_NODISCARD bool IsRangeControl(const AccessibilityObject &object) noexcept
+    KRYS_NODISCARD bool IsRangeControl(const AXObject &object) noexcept
     {
       switch (object.Role())
       {
-        case AccessibilityRole::Slider:
-        case AccessibilityRole::ProgressIndicator:
-        case AccessibilityRole::Meter:
-        case AccessibilityRole::ScrollBar:
-        case AccessibilityRole::SpinButton:        return true;
-        default:                                   return false;
+        case AXRole::Slider:
+        case AXRole::ProgressIndicator:
+        case AXRole::Meter:
+        case AXRole::ScrollBar:
+        case AXRole::SpinButton:        return true;
+        default:                        return false;
       }
     }
 
@@ -195,7 +194,7 @@ namespace krys::ui
     }
 
     /// @brief The event Krystal.PAL has for @p notification, if it has one.
-    KRYS_NODISCARD Maybe<pal::AccessibilityEvent> ToPalEvent(const AccessibilityObject &object,
+    KRYS_NODISCARD Maybe<pal::AccessibilityEvent> ToPalEvent(const AXObject &object,
                                                              AXNotification notification) noexcept
     {
       using Event = pal::AccessibilityEvent;
@@ -231,8 +230,7 @@ namespace krys::ui
         case AXNotification::LiveRegionChanged:          return Event::LiveRegionChanged;
         case AXNotification::LiveRegionCreated:
           // An alert appearing is announced as one; another live region announces its changes.
-          if (object.Role() == AccessibilityRole::ApplicationAlert
-              || object.Role() == AccessibilityRole::ApplicationAlertDialog)
+          if (object.Role() == AXRole::ApplicationAlert || object.Role() == AXRole::ApplicationAlertDialog)
           {
             return Event::Alert;
           }
@@ -280,21 +278,20 @@ namespace krys::ui
     return overlay ? &overlay->ContentView() : nullptr;
   }
 
-  boo::ax::AXObjectCache *ViewAccessibility::OverlayCache() const noexcept
+  boo::AXObjectCache *ViewAccessibility::OverlayCache() const noexcept
   {
     auto *view = OverlayView();
-    return view && boo::ax::AXObjectCache::AccessibilityEnabled() ? view->Document().AxObjectCache()
-                                                                  : nullptr;
+    return view && boo::AXObjectCache::AccessibilityEnabled() ? view->Document().AxObjectCache() : nullptr;
   }
 
-  boo::ax::AXObjectCache *ViewAccessibility::ForeignCache::Get() const noexcept
+  boo::AXObjectCache *ViewAccessibility::ForeignCache::Get() const noexcept
   {
     auto *document = Document.get();
     auto *cache = document ? document->ExistingAXObjectCache() : nullptr;
     return cache && cache == Cache ? cache : nullptr;
   }
 
-  void ViewAccessibility::ForgetForeignCache(const boo::ax::AXObjectCache &cache) noexcept
+  void ViewAccessibility::ForgetForeignCache(const boo::AXObjectCache &cache) noexcept
   {
     for (auto &slot : _foreignCaches)
     {
@@ -305,7 +302,7 @@ namespace krys::ui
     }
   }
 
-  pal::AccessibilityNodeID ViewAccessibility::ID(const AccessibilityObject *object) const noexcept
+  pal::AccessibilityNodeID ViewAccessibility::ID(const AXObject *object) const noexcept
   {
     if (!object)
     {
@@ -331,8 +328,7 @@ namespace krys::ui
     return ForeignNodeBit | (static_cast<pal::AccessibilityNodeID>(index + 1) << ForeignTagShift) | id;
   }
 
-  Pair<View *, boo::IntPoint>
-    ViewAccessibility::ViewAndOrigin(const AccessibilityObject &object) const noexcept
+  Pair<View *, boo::IntPoint> ViewAccessibility::ViewAndOrigin(const AXObject &object) const noexcept
   {
     // An object is in the overlay if its page, or the page of the image it's in, is the overlay's.
     auto *overlayCache = OverlayCache();
@@ -412,47 +408,47 @@ namespace krys::ui
     }
   }
 
-  boo::ax::AXObjectCache *ViewAccessibility::Cache() noexcept
+  boo::AXObjectCache *ViewAccessibility::Cache() noexcept
   {
     // Assistive technology asking for the tree is what turns accessibility on.
-    if (!boo::ax::AXObjectCache::AccessibilityEnabled())
+    if (!boo::AXObjectCache::AccessibilityEnabled())
     {
-      boo::ax::AXObjectCache::EnableAccessibility();
+      boo::AXObjectCache::EnableAccessibility();
     }
     return _view.Document().AxObjectCache();
   }
 
-  AccessibilityObject *ViewAccessibility::Object(pal::AccessibilityNodeID node) noexcept
+  AXObject *ViewAccessibility::Object(pal::AccessibilityNodeID node) noexcept
   {
     auto *cache = Cache();
     if (!cache || !node)
     {
       return nullptr;
     }
-    AccessibilityObject *object = nullptr;
+    AXObject *object = nullptr;
     if (node & ForeignNodeBit)
     {
       auto tag = static_cast<size_t>((node & ~ForeignNodeBit) >> ForeignTagShift);
       auto *foreignCache = tag && tag <= _foreignCaches.size() ? _foreignCaches[tag - 1].Get() : nullptr;
       if (foreignCache)
       {
-        object = foreignCache->ObjectForID(static_cast<boo::ax::AXID>(node & ForeignObjectIDMask));
+        object = foreignCache->ObjectForID(static_cast<boo::AXId>(node & ForeignObjectIDMask));
       }
     }
     else
     {
-      object = cache->ObjectForID(static_cast<boo::ax::AXID>(node));
+      object = cache->ObjectForID(static_cast<boo::AXId>(node));
     }
     return object && !object->IsDetached() ? object : nullptr;
   }
 
-  pal::AccessibilityRect ViewAccessibility::ToWindow(const AccessibilityObject &object, float x, float y,
-                                                     float width, float height) const noexcept
+  pal::AccessibilityRect ViewAccessibility::ToWindow(const AXObject &object, float x, float y, float width,
+                                                     float height) const noexcept
   {
     // The view and its scroll bars are in the view's coordinates; everything else is in the document's,
     // which the view is scrolled into.
     auto [view, origin] = ViewAndOrigin(object);
-    if (!object.IsScrollView() && object.Role() != AccessibilityRole::ScrollBar)
+    if (!object.IsScrollView() && object.Role() != AXRole::ScrollBar)
     {
       auto scroll = view->ScrollPosition();
       x -= static_cast<float>(scroll.X());
@@ -464,8 +460,7 @@ namespace krys::ui
             width * scale, height * scale};
   }
 
-  void ViewAccessibility::NotificationPosted(AccessibilityObject &object,
-                                             AXNotification notification) noexcept
+  void ViewAccessibility::NotificationPosted(AXObject &object, AXNotification notification) noexcept
   {
     if (!_window || !_window->IsAccessibilityActive())
     {
@@ -483,20 +478,20 @@ namespace krys::ui
     }
   }
 
-  void ViewAccessibility::TextChanged(AccessibilityObject &object, boo::ax::AXTextChange change,
-                                      uint64 offset, utf8_stringview text) noexcept
+  void ViewAccessibility::TextChanged(AXObject &object, boo::AXTextChange change, uint64 offset,
+                                      utf8_stringview text) noexcept
   {
     if (_window && _window->IsAccessibilityActive())
     {
       _window->RaiseAccessibilityTextChange(ID(&object),
-                                            change == boo::ax::AXTextChange::Inserted
+                                            change == boo::AXTextChange::Inserted
                                               ? pal::AccessibilityTextChange::Inserted
                                               : pal::AccessibilityTextChange::Deleted,
                                             offset, text);
     }
   }
 
-  void ViewAccessibility::ObjectDetached(AccessibilityObject &object) noexcept
+  void ViewAccessibility::ObjectDetached(AXObject &object) noexcept
   {
     if (_window && _window->IsAccessibilityActive())
     {
@@ -569,7 +564,7 @@ namespace krys::ui
     setState(State::Offscreen, object->IsOffScreen());
     setState(State::Busy, object->IsBusy());
     setState(State::Protected, isPassword);
-    setState(State::Multiline, object->Role() == AccessibilityRole::TextArea);
+    setState(State::Multiline, object->Role() == AXRole::TextArea);
     setState(State::Visited, object->IsVisited());
     auto *cache = object->AxObjectCache();
     setState(State::Modal, cache && object->GetNode() && cache->ModalNode() == object->GetNode());
@@ -577,8 +572,7 @@ namespace krys::ui
 
     using Action = pal::AccessibilityAction;
     auto &actions = result.Actions;
-    if (object->ActionElement() || object->IsMenuList()
-        || object->Role() == AccessibilityRole::SpinButtonPart)
+    if (object->ActionElement() || object->IsMenuList() || object->Role() == AXRole::SpinButtonPart)
     {
       actions.Add(Action::Press);
     }
@@ -586,7 +580,7 @@ namespace krys::ui
     {
       actions.Add(Action::Focus);
     }
-    if (object->Role() == AccessibilityRole::Slider || object->Role() == AccessibilityRole::SpinButton)
+    if (object->Role() == AXRole::Slider || object->Role() == AXRole::SpinButton)
     {
       actions.Add(Action::Increment);
       actions.Add(Action::Decrement);
@@ -719,8 +713,8 @@ namespace krys::ui
     return ID(HitTestIn(*cache, _view, viewPoint));
   }
 
-  AccessibilityObject *ViewAccessibility::HitTestIn(boo::ax::AXObjectCache &cache, View &view,
-                                                    const boo::IntPoint &viewPoint) noexcept
+  AXObject *ViewAccessibility::HitTestIn(boo::AXObjectCache &cache, View &view,
+                                         const boo::IntPoint &viewPoint) noexcept
   {
     auto *root = cache.RootObject();
     if (!root)
@@ -730,14 +724,12 @@ namespace krys::ui
     // The view's scroll bars are in its coordinates; the page is in the document's.
     for (const auto &child : root->Children())
     {
-      if (child->Role() == AccessibilityRole::ScrollBar
-          && child->ElementRect().Contains(boo::LayoutPoint(viewPoint)))
+      if (child->Role() == AXRole::ScrollBar && child->ElementRect().Contains(boo::LayoutPoint(viewPoint)))
       {
         return child.get();
       }
     }
-    auto *webArea =
-      root->IsScrollView() ? DynamicDowncast<boo::ax::AccessibilityScrollView>(*root)->WebAreaObject() : root;
+    auto *webArea = root->IsScrollView() ? DynamicDowncast<boo::AXScrollView>(*root)->WebAreaObject() : root;
     if (!webArea)
     {
       return nullptr;
@@ -764,7 +756,7 @@ namespace krys::ui
   bool ViewAccessibility::PerformAction(pal::AccessibilityNodeID node,
                                         pal::AccessibilityAction action) noexcept
   {
-    RefPtr<AccessibilityObject> object = ShareRefPtr(Object(node));
+    RefPtr<AXObject> object = ShareRefPtr(Object(node));
     if (!object)
     {
       return false;
@@ -814,13 +806,13 @@ namespace krys::ui
 
   bool ViewAccessibility::SetValue(pal::AccessibilityNodeID node, utf8_stringview value) noexcept
   {
-    RefPtr<AccessibilityObject> object = ShareRefPtr(Object(node));
+    RefPtr<AXObject> object = ShareRefPtr(Object(node));
     return object && object->CanSetValueAttribute() && object->SetValue(boo::dom::DOMStringView(value));
   }
 
   bool ViewAccessibility::SetRangeValue(pal::AccessibilityNodeID node, double value) noexcept
   {
-    RefPtr<AccessibilityObject> object = ShareRefPtr(Object(node));
+    RefPtr<AXObject> object = ShareRefPtr(Object(node));
     return object && object->CanSetValueAttribute() && object->SetValue(static_cast<float>(value));
   }
 
@@ -834,7 +826,7 @@ namespace krys::ui
     auto text = object->Text();
     if (text.empty() && !object->IsTextControl())
     {
-      text = AccessibilityObject::StringForVisiblePositionRange(object->GetVisiblePositionRange());
+      text = AXObject::StringForVisiblePositionRange(object->GetVisiblePositionRange());
     }
     return text;
   }
@@ -859,7 +851,7 @@ namespace krys::ui
   bool ViewAccessibility::SetTextSelection(pal::AccessibilityNodeID node,
                                            pal::AccessibilityTextRange range) noexcept
   {
-    RefPtr<AccessibilityObject> object = ShareRefPtr(Object(node));
+    RefPtr<AXObject> object = ShareRefPtr(Object(node));
     if (!object)
     {
       return false;

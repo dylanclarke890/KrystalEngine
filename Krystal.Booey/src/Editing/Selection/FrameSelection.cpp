@@ -637,8 +637,7 @@ namespace krys::boo
 
   void FrameSelection::NotifyAccessibilityForSelectionChange() noexcept
   {
-    if (!ax::AXObjectCache::AccessibilityEnabled() || _selection.Start().IsNull()
-        || _selection.End().IsNull())
+    if (!AXObjectCache::AccessibilityEnabled() || _selection.Start().IsNull() || _selection.End().IsNull())
     {
       return;
     }

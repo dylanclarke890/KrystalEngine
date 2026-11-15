@@ -286,7 +286,7 @@ namespace krys::boo::html::tests
     auto document = CreateRef<dom::HTMLDocument>();
     auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(u8"<!DOCTYPE html><body><img id=img usemap=#m><map id=first name=m></map>",
-                                 IsEOF(true));
+                                 IsEOF::Yes);
     (void)parser->PumpTokenizer();
     auto &body = *document->Body();
     auto &image = Downcast<HTMLImageElement>(*document->GetElementById(u8"img"));

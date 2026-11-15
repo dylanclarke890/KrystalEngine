@@ -339,7 +339,7 @@ Status: reviewed (2026-11-01)
 ##### [4.13.7.4 Accessibility semantics](https://html.spec.whatwg.org/#accessibility-semantics)
 
 Status: reviewed (2026-11-11)
-> `ElementInternals` includes `aria::mixins::ARIAMixin`; its strings go to the internal content attribute map, which the internals hold for their element (`InternalContentAttribute`), and its element references to the internals' own explicitly set attr-elements.
+> `ElementInternals` includes `dom::mixins::ARIAMixin`; its strings go to the internal content attribute map, which the internals hold for their element (`InternalContentAttribute`), and its element references to the internals' own explicitly set attr-elements.
 <!-- definitions: internal-content-attribute-map -->
 
 ##### [4.13.7.5 Custom state pseudo-class](https://html.spec.whatwg.org/#custom-state-pseudo-class)

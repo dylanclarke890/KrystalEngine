@@ -253,7 +253,7 @@ namespace krys::boo::html::tests
     static Ref<DocumentParser> CreateParser(dom::HTMLDocument &document, utf8_string &&input) noexcept
     {
       auto parser = CreateRef<DocumentParser>(document);
-      parser->InputStream().Append(krys::move(input), IsEOF(true));
+      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       return parser;
     }
 

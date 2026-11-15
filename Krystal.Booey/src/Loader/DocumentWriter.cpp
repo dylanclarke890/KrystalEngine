@@ -290,7 +290,7 @@ namespace krys::boo
       }
 
       _hasReceivedSomeData = true;
-      parser->InputStream().Append(text::ReplaceInvalidUTF8(krys::move(_pendingBytes)), IsEOF(true));
+      parser->InputStream().Append(text::ReplaceInvalidUTF8(krys::move(_pendingBytes)), IsEOF::Yes);
       _pendingBytes.clear();
       parser->PumpTokenizer();
     }

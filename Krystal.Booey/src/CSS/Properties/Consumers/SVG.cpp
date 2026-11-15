@@ -132,7 +132,7 @@ namespace krys::boo::css::PropertyParserHelpers
       auto dash = PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(
         range, state,
         {
-          .UnitlessZeroLength = AllowUnitlessZero(false),
+          .UnitlessZeroLength = AllowUnitlessZero::No,
           .OverrideParserMode = ParserMode::HTMLStandard,
         });
 

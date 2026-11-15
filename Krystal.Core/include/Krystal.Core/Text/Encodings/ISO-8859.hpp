@@ -217,7 +217,7 @@ namespace krys::text
                                                                           TIterator end) noexcept
     {
       krys_debug_assert(current != end);
-      return DecodeOneWithExtendedASCIILookupMap<ISO_8859_3, MightBeInvalidEntry(true)>(
+      return DecodeOneWithExtendedASCIILookupMap<ISO_8859_3, MightBeInvalidEntry::Yes>(
         CodeUnitValue(*current));
     }
 
@@ -347,10 +347,11 @@ namespace krys::text
        UnmappedByte, UnmappedByte}};
 
     template <CodeUnitInputIterator<ISO_8859_6> TIterator>
-    KRYS_NODISCARD constexpr static DecodeOneResult<ISO_8859_6> DecodeOne(TIterator current, KRYS_MAYBE_UNUSED TIterator end) noexcept
+    KRYS_NODISCARD constexpr static DecodeOneResult<ISO_8859_6>
+      DecodeOne(TIterator current, KRYS_MAYBE_UNUSED TIterator end) noexcept
     {
       krys_debug_assert(current != end);
-      return DecodeOneWithExtendedASCIILookupMap<ISO_8859_6, MightBeInvalidEntry(true)>(
+      return DecodeOneWithExtendedASCIILookupMap<ISO_8859_6, MightBeInvalidEntry::Yes>(
         CodeUnitValue(*current));
     }
 
@@ -392,10 +393,11 @@ namespace krys::text
        0x03C8, 0x03C9, 0x03CA,       0x03CB, 0x03CC, 0x03CD, 0x03CE,       UnmappedByte}};
 
     template <CodeUnitInputIterator<ISO_8859_7> TIterator>
-    KRYS_NODISCARD constexpr static DecodeOneResult<ISO_8859_7> DecodeOne(TIterator current, KRYS_MAYBE_UNUSED TIterator end) noexcept
+    KRYS_NODISCARD constexpr static DecodeOneResult<ISO_8859_7>
+      DecodeOne(TIterator current, KRYS_MAYBE_UNUSED TIterator end) noexcept
     {
       krys_debug_assert(current != end);
-      return DecodeOneWithExtendedASCIILookupMap<ISO_8859_7, MightBeInvalidEntry(true)>(
+      return DecodeOneWithExtendedASCIILookupMap<ISO_8859_7, MightBeInvalidEntry::Yes>(
         CodeUnitValue(*current));
     }
 
@@ -447,7 +449,7 @@ namespace krys::text
                                                                           TIterator end) noexcept
     {
       krys_debug_assert(current != end);
-      return DecodeOneWithExtendedASCIILookupMap<ISO_8859_8, MightBeInvalidEntry(true)>(
+      return DecodeOneWithExtendedASCIILookupMap<ISO_8859_8, MightBeInvalidEntry::Yes>(
         CodeUnitValue(*current));
     }
 

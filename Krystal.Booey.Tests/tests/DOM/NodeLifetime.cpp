@@ -97,7 +97,7 @@ namespace krys::boo::dom::tests
     {
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(u8"<!DOCTYPE html><title>T</title><p id=a>One<p>Two <b>three</b>",
-                                   IsEOF(true));
+                                   IsEOF::Yes);
       (void)parser->PumpTokenizer();
     }
     auto weak = CreateWeakPtr<Document>(&*document);
@@ -119,7 +119,7 @@ namespace krys::boo::dom::tests
     RefPtr<HTMLDocument> document = CreateRef<HTMLDocument>();
     {
       auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(utf8_string(markup.begin(), markup.end()), IsEOF(true));
+      parser->InputStream().Append(utf8_string(markup.begin(), markup.end()), IsEOF::Yes);
       (void)parser->PumpTokenizer();
     }
     // The signal slots hold slots whose assignment changed until the microtask checkpoint.

@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Accessibility/AccessibilityTestUtils.hpp"
+#include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
@@ -9,10 +9,10 @@ namespace krys::boo::ax::tests
 {
   TEST_CASE("AXModal: an aria-modal dialog", "[Accessibility][AXModal]")
   {
-    AccessibilityFixture page(u8"<button id=outside>Outside</button>"
-                              u8"<div id=dialog role=dialog aria-modal=true><button id=inside "
-                              u8"aria-controls=popup>Inside</button></div>"
-                              u8"<div id=popup role=listbox>Popup</div>");
+    AXFixture page(u8"<button id=outside>Outside</button>"
+                   u8"<div id=dialog role=dialog aria-modal=true><button id=inside "
+                   u8"aria-controls=popup>Inside</button></div>"
+                   u8"<div id=popup role=listbox>Popup</div>");
     auto &outside = page.Object(u8"outside");
     auto &inside = page.Object(u8"inside");
 
@@ -52,8 +52,8 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXModal: an empty dialog doesn't trap the user", "[Accessibility][AXModal]")
   {
-    AccessibilityFixture page(u8"<button id=outside>Outside</button>"
-                              u8"<div id=dialog role=dialog aria-modal=true tabindex=0></div>");
+    AXFixture page(u8"<button id=outside>Outside</button>"
+                   u8"<div id=dialog role=dialog aria-modal=true tabindex=0></div>");
     (void)page.Object(u8"outside");
     Downcast<html::HTMLElement>(page.ById(u8"dialog")).Focus();
     (void)page.TakeNotifications();
@@ -63,8 +63,8 @@ namespace krys::boo::ax::tests
 
   TEST_CASE("AXModal: a modal dialog element", "[Accessibility][AXModal]")
   {
-    AccessibilityFixture page(u8"<p id=text>Text</p>"
-                              u8"<dialog id=dialog><button id=inside>Inside</button></dialog>");
+    AXFixture page(u8"<p id=text>Text</p>"
+                   u8"<dialog id=dialog><button id=inside>Inside</button></dialog>");
     auto &text = page.Object(u8"text");
     CHECK(page.Cache().ModalNode() == nullptr);
 

@@ -464,10 +464,10 @@ namespace krys::boo::dom::tests
       auto host = make(u8"p");
       auto shadow = host
                       ->AttachShadow({.Mode = ShadowRootMode::Closed,
-                                      .DelegatesFocus = DelegatesFocus(true),
+                                      .DelegatesFocus = DelegatesFocus::Yes,
                                       .SlotAssignment = SlotAssignmentMode::Manual,
-                                      .Clonable = Clonable(true),
-                                      .Serialisable = Serialisable(true),
+                                      .Clonable = Clonable::Yes,
+                                      .Serialisable = Serialisable::Yes,
                                       .ReferenceTarget = DOMString(u8"in\"ner")})
                       .ReleaseValue();
       // The reference target is escaped as an attribute value.
@@ -612,7 +612,7 @@ namespace krys::boo::dom::tests
 
     SECTION("getHTML serialises serialisable shadow roots when asked to")
     {
-      auto shadow = p->AttachShadow({.Serialisable = Serialisable(true)}).ReleaseValue();
+      auto shadow = p->AttachShadow({.Serialisable = Serialisable::Yes}).ReleaseValue();
       REQUIRE_FALSE(shadow->InnerHTML(u8"<b></b>").HasException());
       CHECK(MarkupText(div.InnerHTML().ReleaseValue()) == "<p></p>");
       CHECK(MarkupText(div.GetHTML()) == "<p></p>");

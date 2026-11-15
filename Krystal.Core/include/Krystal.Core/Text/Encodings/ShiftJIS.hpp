@@ -1574,29 +1574,28 @@ namespace krys::text
       char32 first = CodeUnitValue(*current);
       if (first <= 0x80)
       {
-        return DecodeOneSuccess<ShiftJISx0208>(first, CodeUnitsConsumed(1u));
+        return DecodeOneSuccess<ShiftJISx0208>(first, 1u);
       }
 
       if (first <= 0xDF && first >= 0xA1)
       {
-        return DecodeOneSuccess<ShiftJISx0208>(static_cast<char32>((0xFF61 - 0xA1) + first),
-                                               CodeUnitsConsumed(1u));
+        return DecodeOneSuccess<ShiftJISx0208>(static_cast<char32>((0xFF61 - 0xA1) + first), 1u);
       }
 
       if (!((first <= 0x9F && first >= 0x81) || (first <= 0xFC && first >= 0xE0)))
       {
-        return DecodeOneInvalidSequenceError<ShiftJISx0208>(CodeUnitsConsumed(1u));
+        return DecodeOneInvalidSequenceError<ShiftJISx0208>(1u);
       }
 
       if (++current == end)
       {
-        return DecodeOneIncompleteSequenceError<ShiftJISx0208>(CodeUnitsConsumed(1u));
+        return DecodeOneIncompleteSequenceError<ShiftJISx0208>(1u);
       }
 
       char32 second = CodeUnitValue(*current);
       if (!((second <= 0x7E && second >= 0x40) || (second <= 0xFC && second >= 0x80)))
       {
-        return DecodeOneInvalidSequenceError<ShiftJISx0208>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<ShiftJISx0208>(2u);
       }
 
       uint8 lookupOffset = second < 0x7F ? 0x40 : 0x41;
@@ -1606,8 +1605,7 @@ namespace krys::text
 
       if (lookupIndex >= 8'836uz && lookupIndex <= 10'715uz)
       {
-        return DecodeOneSuccess<ShiftJISx0208>(static_cast<char32>(0xE000 - 8'836uz + lookupIndex),
-                                               CodeUnitsConsumed(2u));
+        return DecodeOneSuccess<ShiftJISx0208>(static_cast<char32>(0xE000 - 8'836uz + lookupIndex), 2u);
       }
 
       auto it =
@@ -1615,10 +1613,10 @@ namespace krys::text
                                  { return entry.Index < index; });
       if (it != LookupMap.end() && it->Index == lookupIndex)
       {
-        return DecodeOneSuccess<ShiftJISx0208>(static_cast<char32>(it->CodePoint), CodeUnitsConsumed(2u));
+        return DecodeOneSuccess<ShiftJISx0208>(static_cast<char32>(it->CodePoint), 2u);
       }
 
-      return DecodeOneInvalidSequenceError<ShiftJISx0208>(CodeUnitsConsumed(2u));
+      return DecodeOneInvalidSequenceError<ShiftJISx0208>(2u);
     }
 
     KRYS_NODISCARD constexpr static EncodeOneResult<ShiftJISx0208> EncodeOne(char32 codePoint) noexcept

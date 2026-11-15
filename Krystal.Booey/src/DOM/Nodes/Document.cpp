@@ -836,7 +836,7 @@ namespace krys::boo::dom
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->SanitizerConfiguration(krys::move(configuration));
       // 3. Place html into the input stream for parser.
-      parser->InputStream().Append(DOMString(html), IsEOF(true));
+      parser->InputStream().Append(DOMString(html), IsEOF::Yes);
       // 4. Start parser and let it run until it has consumed all the characters just inserted into the input
       //    stream.
       parser->PumpTokenizer();
@@ -3745,7 +3745,7 @@ namespace krys::boo::dom
       svgExtensions->StartAnimations();
     }
 
-    if (Frame() && HasLivingRenderTree() && ax::AXObjectCache::AccessibilityEnabled())
+    if (Frame() && HasLivingRenderTree() && AXObjectCache::AccessibilityEnabled())
     {
       if (auto *cache = AxObjectCache())
       {
@@ -4010,9 +4010,9 @@ namespace krys::boo::dom
     ResolveStyle(ResolveStyleType::Rebuild);
   }
 
-  ax::AXObjectCache *Document::AxObjectCache() noexcept
+  AXObjectCache *Document::AxObjectCache() noexcept
   {
-    if (!ax::AXObjectCache::AccessibilityEnabled())
+    if (!AXObjectCache::AccessibilityEnabled())
     {
       return nullptr;
     }
@@ -4022,7 +4022,7 @@ namespace krys::boo::dom
       {
         return nullptr;
       }
-      _axObjectCache = CreateUnique<ax::AXObjectCache>(*this);
+      _axObjectCache = CreateUnique<AXObjectCache>(*this);
     }
     return _axObjectCache.get();
   }

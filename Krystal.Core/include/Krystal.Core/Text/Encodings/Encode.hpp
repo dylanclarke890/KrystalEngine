@@ -48,13 +48,13 @@ namespace krys::text
 
     /// @brief Whether to append a byte order mark (BOM) to the output when encoding, if the encoding supports
     /// it. This is only applicable to encodings that have a BOM, such as UTF-8, UTF-16, and UTF-32.
-    AppendBOM AppendByteOrderMark = AppendBOM(false);
+    AppendBOM AppendByteOrderMark = AppendBOM::No;
   };
 
   /// @brief The default encoding policy, which handles all errors by replacing the invalid code point with
   /// the appropriate replacement code unit.
   constexpr EncodePolicy DefaultEncodePolicy {.OnUnmappableCodePoint = EncodingErrorAction::Replace,
-                                              .AppendByteOrderMark = AppendBOM(false)};
+                                              .AppendByteOrderMark = AppendBOM::No};
 
   /// @brief Encodes the input code points into code units using the specified encoding and policy.
   template <Encoding TEncoding, EncodePolicy Policy = DefaultEncodePolicy,
@@ -69,7 +69,7 @@ namespace krys::text
       return result;
     }
 
-    if constexpr (Policy.AppendByteOrderMark && HasByteOrderMark<TEncoding>)
+    if constexpr (Policy.AppendByteOrderMark == AppendBOM::Yes && HasByteOrderMark<TEncoding>)
     {
       WriteToOutput(result.Output, TEncoding::BOM);
       result.CodeUnitsProduced += TEncoding::BOM.size();

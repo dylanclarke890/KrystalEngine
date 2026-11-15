@@ -85,10 +85,10 @@ namespace krys::boo::dom::tests
       auto mode = GENERATE(ShadowRootMode::Open, ShadowRootMode::Closed);
       auto shadow = host
                       ->AttachShadow({.Mode = mode,
-                                      .DelegatesFocus = DelegatesFocus(true),
+                                      .DelegatesFocus = DelegatesFocus::Yes,
                                       .SlotAssignment = SlotAssignmentMode::Manual,
-                                      .Clonable = Clonable(true),
-                                      .Serialisable = Serialisable(true)})
+                                      .Clonable = Clonable::Yes,
+                                      .Serialisable = Serialisable::Yes})
                       .ReleaseValue();
       CHECK(shadow->Mode() == mode);
       CHECK(shadow->DelegatesFocus());

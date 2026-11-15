@@ -3437,23 +3437,23 @@ namespace krys::text
       char32 first = CodeUnitValue(*current);
       if (first <= MaxASCIIChar)
       {
-        return DecodeOneSuccess<EUC_KR_UHC>(first, CodeUnitsConsumed(1u));
+        return DecodeOneSuccess<EUC_KR_UHC>(first, 1u);
       }
 
       if (first > 0xFE || first < 0x81)
       {
-        return DecodeOneInvalidSequenceError<EUC_KR_UHC>(CodeUnitsConsumed(1u));
+        return DecodeOneInvalidSequenceError<EUC_KR_UHC>(1u);
       }
 
       if (++current == end)
       {
-        return DecodeOneIncompleteSequenceError<EUC_KR_UHC>(CodeUnitsConsumed(1u));
+        return DecodeOneIncompleteSequenceError<EUC_KR_UHC>(1u);
       }
 
       char32 second = CodeUnitValue(*current);
       if (second > 0xFE || second < 0x41)
       {
-        return DecodeOneInvalidSequenceError<EUC_KR_UHC>(CodeUnitsConsumed(2u));
+        return DecodeOneInvalidSequenceError<EUC_KR_UHC>(2u);
       }
 
       size_t lookupIndex = ((first - 0x81uz) * 190uz) + (second - 0x41uz);
@@ -3463,10 +3463,10 @@ namespace krys::text
 
       if (it != LookupMap.end() && it->Index == lookupIndex)
       {
-        return DecodeOneSuccess<EUC_KR_UHC>(it->CodePoint, CodeUnitsConsumed(2u));
+        return DecodeOneSuccess<EUC_KR_UHC>(it->CodePoint, 2u);
       }
 
-      return DecodeOneInvalidSequenceError<EUC_KR_UHC>(CodeUnitsConsumed(2u));
+      return DecodeOneInvalidSequenceError<EUC_KR_UHC>(2u);
     }
 
     KRYS_NODISCARD constexpr static EncodeOneResult<EUC_KR_UHC> EncodeOne(char32 codePoint) noexcept

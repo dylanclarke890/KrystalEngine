@@ -328,7 +328,7 @@ namespace krys::boo
   LegacyRootInlineBox *LegacyLineLayout::CreateAndAppendRootInlineBox() noexcept
   {
     _legacyRootInlineBox = CreateRootInlineBox();
-    if (ax::AXObjectCache::AccessibilityEnabled()) KRYS_UNLIKELY
+    if (AXObjectCache::AccessibilityEnabled()) KRYS_UNLIKELY
     {
       if (auto *cache = _flow.GetDocument().ExistingAXObjectCache())
       {

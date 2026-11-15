@@ -201,7 +201,7 @@ namespace krys::boo::tests
     auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(
       u8"<!DOCTYPE html><div style='height: 10px; background: url(file:///images/update.png)'></div>",
-      IsEOF(true));
+      IsEOF::Yes);
     parser->PumpTokenizer();
     document->StyleScope().FlushPendingUpdate();
     page->UpdateRendering();
