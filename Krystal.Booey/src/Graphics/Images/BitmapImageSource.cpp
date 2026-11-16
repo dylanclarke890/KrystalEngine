@@ -163,6 +163,11 @@ namespace krys::boo
     return _allDataReceived && _bitmapImage && _bitmapImage->Data() && ImageFrameWorkQueue::HostWorkQueue();
   }
 
+  BitmapImage *BitmapImageSource::Image() const noexcept
+  {
+    return _bitmapImage.get();
+  }
+
   RefPtr<ImageDecoder> BitmapImageSource::CreateWorkQueueDecoder() const noexcept
   {
     auto *data = _bitmapImage ? _bitmapImage->Data() : nullptr;

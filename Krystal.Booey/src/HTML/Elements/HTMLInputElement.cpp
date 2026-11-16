@@ -86,6 +86,39 @@ namespace krys::boo::html
     }
   }
 
+  /// @brief Tells its input when the element its `list` attribute names changes, in a task, as the change
+  /// may be in the middle of a tree mutation.
+  class ListAttributeTargetObserver final : private dom::IdTargetObserver
+  {
+  private:
+    WeakPtr<HTMLInputElement> _element;
+
+  public:
+    ListAttributeTargetObserver(dom::DOMStringAtom id, HTMLInputElement &element) noexcept
+        : IdTargetObserver(element.TreeScope().IdTargetObserverRegistry(), id),
+          _element(CreateWeakPtr(&element))
+    {
+    }
+
+  private:
+    void IdTargetChanged(dom::Element &) noexcept override
+    {
+      auto *element = _element.get();
+      if (!element)
+      {
+        return;
+      }
+      EventLoop::Current().QueueTask(TaskSource::DOMManipulation, element->NodeDocument(),
+                                     [weakElement = _element]
+                                     {
+                                       if (RefPtr<HTMLInputElement> element = ShareRefPtr(weakElement.get()))
+                                       {
+                                         element->DataListMayHaveChanged();
+                                       }
+                                     });
+    }
+  };
+
   HTMLInputElement::HTMLInputElement(dom::Document &document) noexcept
       : HTMLTextFormControlElement(document, HTMLElementInterface::Input),
         _inputType(CreateRef<TextInputType>(*this))
@@ -2006,39 +2039,6 @@ namespace krys::boo::html
     }
     ResetListAttributeTargetObserver();
   }
-
-  /// @brief Tells its input when the element its `list` attribute names changes, in a task, as the change
-  /// may be in the middle of a tree mutation.
-  class ListAttributeTargetObserver final : private dom::IdTargetObserver
-  {
-  private:
-    WeakPtr<HTMLInputElement> _element;
-
-  public:
-    ListAttributeTargetObserver(dom::DOMStringAtom id, HTMLInputElement &element) noexcept
-        : IdTargetObserver(element.TreeScope().IdTargetObserverRegistry(), id),
-          _element(CreateWeakPtr(&element))
-    {
-    }
-
-  private:
-    void IdTargetChanged(dom::Element &) noexcept override
-    {
-      auto *element = _element.get();
-      if (!element)
-      {
-        return;
-      }
-      EventLoop::Current().QueueTask(TaskSource::DOMManipulation, element->NodeDocument(),
-                                     [weakElement = _element]
-                                     {
-                                       if (RefPtr<HTMLInputElement> element = ShareRefPtr(weakElement.get()))
-                                       {
-                                         element->DataListMayHaveChanged();
-                                       }
-                                     });
-    }
-  };
 
   RefPtr<HTMLDataListElement> HTMLInputElement::List() const noexcept
   {

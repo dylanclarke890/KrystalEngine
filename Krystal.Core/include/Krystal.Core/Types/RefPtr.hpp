@@ -8,10 +8,8 @@ namespace krys
   struct StrongRefPolicy
   {
     template <typename T>
-    KRYS_ALWAYS_INLINE constexpr static T *AddRef(T *ptr) noexcept
+    KRYS_ALWAYS_INLINE static T *AddRef(T *ptr) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       if (ptr) KRYS_LIKELY
       {
         ptr->AddRef();
@@ -20,19 +18,15 @@ namespace krys
     }
 
     template <typename T>
-    KRYS_ALWAYS_INLINE constexpr static T &AddRef(T &ptr) noexcept
+    KRYS_ALWAYS_INLINE static T &AddRef(T &ptr) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       ptr.AddRef();
       return ptr;
     }
 
     template <typename T>
-    KRYS_ALWAYS_INLINE constexpr static void SubRef(T *ptr) noexcept
+    KRYS_ALWAYS_INLINE static void SubRef(T *ptr) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       if (ptr) KRYS_LIKELY
       {
         ptr->SubRef();
@@ -40,18 +34,14 @@ namespace krys
     }
 
     template <typename T>
-    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static T *ValidateGetAccess(T *ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE static T *ValidateGetAccess(T *ptr) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       return ptr;
     }
 
     template <typename T>
-    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static bool IsValid(T *ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE static bool IsValid(T *ptr) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       return ptr != nullptr;
     }
   };

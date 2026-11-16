@@ -141,6 +141,9 @@ namespace krys::boo::svg
                                          UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                          SVGElementInterface interface) noexcept;
 
+    // Out of line: destroying _effect needs FilterEffect, which this header only forward-declares.
+    ~SVGFilterPrimitiveStandardAttributes() noexcept override;
+
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;
 

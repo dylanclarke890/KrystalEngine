@@ -549,13 +549,13 @@ namespace krys::ui::tests
     };
 
     load(path);
-    CHECK_FALSE(result);
+    CHECK_FALSE(result.has_value());
     CHECK(queue.PendingCount() == 1);
     CHECK(queue.RunAll() == 1);
     // Read, the file waits in the event loop's inbox.
-    CHECK_FALSE(result);
+    CHECK_FALSE(result.has_value());
     boo::html::EventLoop::Current().RunUntilIdle();
-    REQUIRE(result);
+    REQUIRE(result.has_value());
     REQUIRE(result->has_value());
     CHECK((*result)->Response.MimeType() == u8"text/plain");
     auto data = (*result)->Data->GetSpan();
@@ -566,7 +566,7 @@ namespace krys::ui::tests
     load(path);
     CHECK(queue.RunAll() == 1);
     boo::html::EventLoop::Current().RunUntilIdle();
-    REQUIRE(result);
+    REQUIRE(result.has_value());
     CHECK_FALSE(result->has_value());
   }
 

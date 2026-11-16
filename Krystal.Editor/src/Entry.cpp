@@ -64,7 +64,7 @@ int main(int argc, char **argv)
   if (!result.has_value())
   {
 #if KRYS_OS(WINDOWS)
-    ::MessageBoxA(nullptr, result.error().c_str(), NULL, MB_OK | MB_ICONERROR | MB_DEFAULT_DESKTOP_ONLY);
+    ::MessageBoxA(nullptr, result.error().c_str(), nullptr, MB_OK | MB_ICONERROR | MB_DEFAULT_DESKTOP_ONLY);
 #endif
     return -1;
   }

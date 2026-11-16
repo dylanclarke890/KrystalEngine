@@ -51,6 +51,12 @@ namespace krys::boo::tests
       KRYS_NODISCARD Ref<GraphicsLayer> CreateGraphicsLayer(GraphicsLayerType type,
                                                             GraphicsLayerClient &client) noexcept final
       {
+        return CreateTestLayer(type, client);
+      }
+
+      KRYS_NODISCARD Ref<TestGraphicsLayer> CreateTestLayer(GraphicsLayerType type,
+                                                            GraphicsLayerClient &client) noexcept
+      {
         return AdoptRef(*new TestGraphicsLayer(type, client));
       }
     };
@@ -71,10 +77,11 @@ namespace krys::boo::tests
       CreateLayer(GraphicsLayerClient &client, utf8_stringview name = u8"",
                   GraphicsLayerType type = GraphicsLayerType::Normal) noexcept
     {
+      // GraphicsLayer::Create only asks the factory; asking it directly keeps the concrete type.
       static TestFactory factory;
-      Ref<GraphicsLayer> layer = GraphicsLayer::Create(&factory, client, type);
+      Ref<TestGraphicsLayer> layer = factory.CreateTestLayer(type, client);
       layer->SetName(utf8_string(name));
-      return Downcast<TestGraphicsLayer>(krys::move(layer));
+      return layer;
     }
 
     KRYS_NODISCARD utf8_string Names(const GraphicsLayer &layer) noexcept

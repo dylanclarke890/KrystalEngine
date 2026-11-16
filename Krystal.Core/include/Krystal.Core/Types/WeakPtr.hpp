@@ -151,22 +151,16 @@ namespace krys::detail
       return _impl && *_impl;
     }
 
-    KRYS_ALWAYS_INLINE constexpr T &operator*() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_ALWAYS_INLINE T &operator*() const noexcept KRYS_LIFETIME_BOUND
     {
-      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
-                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-
       krys_assert(this->get());
 
       T *result = this->get();
       return *result;
     }
 
-    KRYS_ALWAYS_INLINE constexpr T *operator->() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_ALWAYS_INLINE T *operator->() const noexcept KRYS_LIFETIME_BOUND
     {
-      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
-                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-
       T *result = this->get();
       krys_assert(result);
       return result;
@@ -174,29 +168,20 @@ namespace krys::detail
 
     template <typename X = T, typename TMember>
     requires(SameType<X, T>)
-    constexpr TMember &operator->*(TMember X::*memptr) const noexcept
+    TMember &operator->*(TMember X::*memptr) const noexcept
     {
-      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
-                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-
       T *result = this->get();
       krys_assert(result);
       return result->*memptr;
     }
 
-    KRYS_NODISCARD constexpr T *get() const noexcept
+    KRYS_NODISCARD T *get() const noexcept
     {
-      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
-                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-
       return _impl ? static_cast<T *>(_impl->template get<T>()) : nullptr;
     }
 
     KRYS_NODISCARD constexpr T *release() noexcept
     {
-      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
-                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-
       return _impl.release();
     }
 
@@ -205,23 +190,26 @@ namespace krys::detail
       _impl = nullptr;
     }
 
-    KRYS_NODISCARD constexpr RefPtr<T> lock() const noexcept
+    KRYS_NODISCARD RefPtr<T> lock() const noexcept
     {
-      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
-                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
       return _impl ? ShareRefPtr(static_cast<T *>(_impl->template get<T>())) : nullptr;
     }
 
   private:
-    explicit constexpr IntrusiveWeakPtr(const T *object) noexcept
+    explicit IntrusiveWeakPtr(const T *object) noexcept
         : _impl(ShareRefPtr<Impl>(object ? &object->WeakImpl() : nullptr))
     {
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
+                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
+
       krys_assert(!object || object == _impl->template get<T>());
     }
 
-    explicit constexpr IntrusiveWeakPtr(const T &object) noexcept
-        : _impl(ShareRefPtr<Impl>(&object.WeakImpl()))
+    explicit IntrusiveWeakPtr(const T &object) noexcept : _impl(ShareRefPtr<Impl>(&object.WeakImpl()))
     {
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
+                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
+
       krys_assert(&object == _impl->template get<T>());
     }
   };

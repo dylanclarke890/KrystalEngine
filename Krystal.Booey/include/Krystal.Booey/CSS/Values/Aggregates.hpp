@@ -137,7 +137,7 @@ namespace krys::boo::css
     using Wrapped::Wrapped;                                                                                  \
                                                                                                              \
     template <size_t I>                                                                                      \
-    friend KRYS_NODISCARD const auto &get(const wrapper &self) noexcept                                      \
+    KRYS_NODISCARD friend const auto &get(const wrapper &self) noexcept                                      \
     {                                                                                                        \
       return get<I>(static_cast<const wrapped &>(self));                                                     \
     }                                                                                                        \
@@ -183,7 +183,7 @@ namespace krys::boo::css
     }                                                                                                        \
                                                                                                              \
     template <size_t>                                                                                        \
-    friend KRYS_NODISCARD const auto &get(const wrapper &self) noexcept                                      \
+    KRYS_NODISCARD friend const auto &get(const wrapper &self) noexcept                                      \
     {                                                                                                        \
       return self.Value;                                                                                     \
     }                                                                                                        \

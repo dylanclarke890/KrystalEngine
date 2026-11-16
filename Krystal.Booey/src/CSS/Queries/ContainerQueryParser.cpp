@@ -26,6 +26,7 @@
 #include "Krystal.Booey/CSS/Parser/VariableParser.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Queries/ContainerQueryFeatures.hpp"
+#include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::cq

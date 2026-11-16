@@ -14,10 +14,8 @@ namespace krys
   template <typename T>
   struct CheckedRefPolicy
   {
-    KRYS_ALWAYS_INLINE constexpr static T *AddRef(T *ptr) noexcept
+    KRYS_ALWAYS_INLINE static T *AddRef(T *ptr) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       if (ptr) KRYS_LIKELY
       {
         ptr->AddRefChecked();
@@ -25,28 +23,22 @@ namespace krys
       return ptr;
     }
 
-    KRYS_ALWAYS_INLINE constexpr static T &AddRef(T &ref) noexcept
+    KRYS_ALWAYS_INLINE static T &AddRef(T &ref) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       ref.AddRefChecked();
       return ref;
     }
 
-    KRYS_ALWAYS_INLINE constexpr static void SubRef(T *ptr) noexcept
+    KRYS_ALWAYS_INLINE static void SubRef(T *ptr) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       if (ptr) KRYS_LIKELY
       {
         ptr->SubRefChecked();
       }
     }
 
-    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static T *ValidateGetAccess(T *ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE static T *ValidateGetAccess(T *ptr) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       if (ptr && !ptr->GetRefCountChecked())
       {
         krys_assert_msg(false, "Attempting to access an object through a CheckedPtr that has been deleted");
@@ -56,10 +48,8 @@ namespace krys
       return ptr;
     }
 
-    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static bool IsValid(T *ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE static bool IsValid(T *ptr) noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
-
       // Note that we only check for nullptr here and not ptr->GetRefCountChecked() == 0 because we want to
       // allow nullptr.
       return ptr != nullptr;

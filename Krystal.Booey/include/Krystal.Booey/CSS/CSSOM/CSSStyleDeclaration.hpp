@@ -58,7 +58,7 @@ namespace krys::boo::css
     CSSStyleDeclaration() noexcept = default;
 
   public:
-    virtual ~CSSStyleDeclaration() noexcept;
+    ~CSSStyleDeclaration() noexcept override;
 
     KRYS_NODISCARD virtual StyleDeclarationType GetStyleDeclarationType() const noexcept = 0;
 
