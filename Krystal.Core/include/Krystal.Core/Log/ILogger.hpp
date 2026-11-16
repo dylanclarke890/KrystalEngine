@@ -64,7 +64,7 @@ namespace krys::log
   template <typename... Args>                                                                                \
   void level(stringview fmt, Args &&...args)                                                                 \
   {                                                                                                          \
-    Log(Level::##level, fmt, std::forward<Args>(args)...);                                                   \
+    Log(Level::level, fmt, std::forward<Args>(args)...);                                                     \
   }
 
     LOG_METHOD(Trace)

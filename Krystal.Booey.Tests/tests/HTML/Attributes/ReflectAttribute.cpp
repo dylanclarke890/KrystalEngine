@@ -3,6 +3,7 @@
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -28,7 +29,7 @@ namespace krys::boo::html::tests
       {
         if (initialValue != null)
         {
-          Element->SetAttribute(TestAttribute, std::move(initialValue.value()));
+          Element->SetAttribute(TestAttribute, krys::move(initialValue.value()));
         }
       }
     };

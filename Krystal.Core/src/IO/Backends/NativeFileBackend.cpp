@@ -2,6 +2,7 @@
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/IO/Streams/NativeFileStream.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <filesystem>
 #include <fstream>
 
@@ -11,7 +12,7 @@ namespace krys::io
   {
   }
 
-  NativeFileBackend::NativeFileBackend(Path &&root) : _root(std::move(root))
+  NativeFileBackend::NativeFileBackend(Path &&root) : _root(krys::move(root))
   {
   }
 

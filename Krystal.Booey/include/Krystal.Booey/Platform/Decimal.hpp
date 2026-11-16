@@ -177,12 +177,12 @@ namespace krys::boo
 
     KRYS_NODISCARD Decimal operator/(const Decimal &rhs) const noexcept;
 
-    KRYS_NODISCARD friend bool operator==(const Decimal &a, const Decimal &b) noexcept;
+    friend bool operator==(const Decimal &a, const Decimal &b) noexcept;
 
     /// @note False when either is NaN, as is `==`.
-    KRYS_NODISCARD friend bool operator!=(const Decimal &a, const Decimal &b) noexcept;
+    friend bool operator!=(const Decimal &a, const Decimal &b) noexcept;
 
-    KRYS_NODISCARD friend std::partial_ordering operator<=>(const Decimal &a, const Decimal &b) noexcept;
+    friend std::partial_ordering operator<=>(const Decimal &a, const Decimal &b) noexcept;
 
     KRYS_NODISCARD int Exponent() const noexcept
     {

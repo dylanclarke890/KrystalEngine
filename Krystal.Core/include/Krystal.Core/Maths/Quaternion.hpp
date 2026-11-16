@@ -111,12 +111,11 @@ namespace krys
 
     constexpr auto operator<=>(const Quaternion<T> &other) const noexcept = default;
 
-    constexpr Quaternion(const Quaternion<T> &&other) noexcept
-        : w(other.w), x(other.x), y(other.y), z(other.z)
+    constexpr Quaternion(Quaternion<T> &&other) noexcept : w(other.w), x(other.x), y(other.y), z(other.z)
     {
     }
 
-    constexpr Quaternion<T> &operator=(const Quaternion<T> &&other) noexcept
+    constexpr Quaternion<T> &operator=(Quaternion<T> &&other) noexcept
     {
       w = other.w;
       x = other.x;

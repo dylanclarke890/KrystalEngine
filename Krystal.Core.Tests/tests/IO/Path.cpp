@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Core/IO/Path.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::io::tests
 {
@@ -32,7 +33,7 @@ namespace krys::io::tests
   TEST_CASE("Path Constructor - Move", "[IO]")
   {
     krys::io::Path p1("dir/file");
-    krys::io::Path p2(std::move(p1));
+    krys::io::Path p2(krys::move(p1));
     REQUIRE(p2.ToString() == "dir/file");
   }
 

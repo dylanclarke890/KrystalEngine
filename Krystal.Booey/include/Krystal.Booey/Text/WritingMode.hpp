@@ -59,12 +59,12 @@ namespace krys::boo
   enum class StyleWritingMode : uint8
   {
     HorizontalTb = 0,
-    SidewaysLr = WritingModeFlags::IsVerticalText,
-    HorizontalBt = WritingModeFlags::IsFlippedBlock, // Non-standard.
-    SidewaysRl = WritingModeFlags::IsVerticalText | WritingModeFlags::IsFlippedBlock,
-    VerticalLr = WritingModeFlags::IsVerticalText | WritingModeFlags::IsVerticalType,
-    VerticalRl =
-      WritingModeFlags::IsVerticalText | WritingModeFlags::IsVerticalType | WritingModeFlags::IsFlippedBlock,
+    SidewaysLr = static_cast<uint8>(WritingModeFlags::IsVerticalText),
+    HorizontalBt = static_cast<uint8>(WritingModeFlags::IsFlippedBlock), // Non-standard.
+    SidewaysRl = static_cast<uint8>(WritingModeFlags::IsVerticalText | WritingModeFlags::IsFlippedBlock),
+    VerticalLr = static_cast<uint8>(WritingModeFlags::IsVerticalText | WritingModeFlags::IsVerticalType),
+    VerticalRl = static_cast<uint8>(WritingModeFlags::IsVerticalText | WritingModeFlags::IsVerticalType
+                                    | WritingModeFlags::IsFlippedBlock),
   };
 
   enum class TextDirection : bool
@@ -83,9 +83,9 @@ namespace krys::boo
   enum class FlowDirection : uint8
   {
     TopToBottom = 0,
-    LeftToRight = WritingModeFlags::IsVerticalText,
-    BottomToTop = WritingModeFlags::IsFlippedBlock,
-    RightToLeft = WritingModeFlags::IsVerticalText | WritingModeFlags::IsFlippedBlock,
+    LeftToRight = static_cast<uint8>(WritingModeFlags::IsVerticalText),
+    BottomToTop = static_cast<uint8>(WritingModeFlags::IsFlippedBlock),
+    RightToLeft = static_cast<uint8>(WritingModeFlags::IsVerticalText | WritingModeFlags::IsFlippedBlock),
   };
 
   enum class BoxAxis : uint8;

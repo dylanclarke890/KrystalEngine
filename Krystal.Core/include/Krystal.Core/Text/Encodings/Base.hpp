@@ -269,16 +269,6 @@ namespace krys::text
     }
   }
 
-  template <typename TEncoding>
-  KRYS_NODISCARD constexpr DecodeOneResult<TEncoding> DecodeOneSuccess(char32 first, char32 second,
-                                                                       uint8 codeUnitsConsumed = 1u) noexcept
-  {
-    return {.Output = {{first, second}},
-            .CodeUnitsConsumed = codeUnitsConsumed,
-            .CodePointsProduced = 2u,
-            .Error = DecodeOneError::None};
-  }
-
   template <Encoding TEncoding>
   KRYS_NODISCARD constexpr DecodeOneResult<TEncoding> DecodeOneWithLookupMap(char32 codeUnit) noexcept
   {

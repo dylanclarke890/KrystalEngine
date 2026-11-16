@@ -403,7 +403,7 @@ namespace krys::boo::css
 
     template <typename... Ts>
     requires(sizeof...(Ts) == N && krys::AllTrue<ConvertibleTo<Ts, T>...>)
-    constexpr SpaceSeparatedArray(Ts... values) noexcept : Value(std::forward<Ts>(values)...)
+    constexpr SpaceSeparatedArray(Ts... values) noexcept : Value {static_cast<T>(std::forward<Ts>(values))...}
     {
     }
 
@@ -505,7 +505,7 @@ namespace krys::boo::css
 
     template <typename... Ts>
     requires(sizeof...(Ts) == N && krys::AllTrue<ConvertibleTo<Ts, T>...>)
-    constexpr CommaSeparatedArray(Ts... values) noexcept : Value(std::forward<Ts>(values)...)
+    constexpr CommaSeparatedArray(Ts... values) noexcept : Value {static_cast<T>(std::forward<Ts>(values))...}
     {
     }
 

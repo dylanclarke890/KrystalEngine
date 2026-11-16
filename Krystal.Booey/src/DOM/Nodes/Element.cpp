@@ -126,6 +126,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -2191,7 +2192,7 @@ namespace krys::boo::dom
 
     // 3. Set an attribute value for this using localName, verifiedValue, prefix, and namespace.
     const auto &qName = validateAndExtractResult.Value();
-    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName(), std::move(value), qName.NamespacePrefix(),
+    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName(), krys::move(value), qName.NamespacePrefix(),
                                          qName.NamespaceURI());
 
     return {};

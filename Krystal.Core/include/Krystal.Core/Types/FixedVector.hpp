@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -50,7 +51,7 @@ namespace krys
     {
     }
 
-    FixedVector(T &&value) : _values {std::move(value)}
+    FixedVector(T &&value) : _values {krys::move(value)}
     {
     }
 

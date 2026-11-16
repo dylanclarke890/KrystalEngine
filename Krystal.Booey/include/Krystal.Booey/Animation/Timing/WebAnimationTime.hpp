@@ -108,8 +108,7 @@ namespace krys::boo
     KRYS_NODISCARD friend bool operator==(const WebAnimationTime &,
                                           const WebAnimationTime &) noexcept = default;
 
-    KRYS_NODISCARD friend std::partial_ordering operator<=>(const WebAnimationTime &a,
-                                                            const WebAnimationTime &b) noexcept;
+    friend std::partial_ordering operator<=>(const WebAnimationTime &a, const WebAnimationTime &b) noexcept;
 
     friend std::partial_ordering operator<=>(const WebAnimationTime &a, Seconds b) noexcept;
 

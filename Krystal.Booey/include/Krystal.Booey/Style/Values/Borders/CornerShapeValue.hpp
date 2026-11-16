@@ -26,9 +26,13 @@
 
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 
+namespace krys::boo::css
+{
+  class Value;
+}
+
 namespace krys::boo
 {
-  class css::Value;
   class RenderStyle;
 
   namespace style

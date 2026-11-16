@@ -437,7 +437,8 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD html::HTMLBodyElement &Body() noexcept
     {
-      return *Document->Body();
+      auto *body = Document->Body().get(); // The document keeps it alive.
+      return *body;
     }
 
     /// @brief The markup of @p element's children.

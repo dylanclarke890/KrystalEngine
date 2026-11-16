@@ -1029,7 +1029,17 @@ namespace krys::boo::css
       default:             return null;
     }
   }
+}
 
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::PrimitiveValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
+  {
+    return value.IsPrimitiveValue();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+
+namespace krys::boo::css
+{
 #pragma region ValueId helpers
 
   KRYS_NODISCARD inline ValueId GetValueId(const PrimitiveValue &value) noexcept
@@ -1100,17 +1110,7 @@ namespace krys::boo::css
   }
 
 #pragma endregion
-}
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::PrimitiveValue)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
-  {
-    return value.IsPrimitiveValue();
-  }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
-
-namespace krys::boo::css
-{
 #pragma region Value inline definitions
 
   inline bool Value::IsValueId() const noexcept

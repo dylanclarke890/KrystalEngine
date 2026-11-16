@@ -32,31 +32,30 @@
 
 #define VECTOR_BINARY_OPERATOR(OP)                                                                           \
   template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const Vector<T, N> &lhs,                           \
-                                                          const Vector<T, N> &rhs) noexcept                  \
+  KRYS_NODISCARD constexpr auto operator OP(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept       \
   {                                                                                                          \
     return Zip(lhs, rhs, [](auto l, auto r) { return l OP r; });                                             \
   }                                                                                                          \
   template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const Vector<T, N> &lhs, T scalar) noexcept        \
+  KRYS_NODISCARD constexpr auto operator OP(const Vector<T, N> &lhs, T scalar) noexcept                      \
   {                                                                                                          \
     return MapEach(lhs, [&](auto v) { return v OP scalar; });                                                \
   }
 
 #define VECTOR_UNARY_OPERATOR(OP)                                                                            \
   template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const Vector<T, N> &rhs) noexcept                  \
+  KRYS_NODISCARD constexpr auto operator OP(const Vector<T, N> &rhs) noexcept                                \
   {                                                                                                          \
     return MapEach(rhs, [](auto v) { return OP v; });                                                        \
   }
 
 #define VECTOR_OPERATOR_ASSIGNMENT(OP)                                                                       \
-  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(const Vector &other) noexcept                    \
+  constexpr auto &operator KRYS_CONCAT(OP, =)(const Vector &other) noexcept                                  \
   {                                                                                                          \
     *this = *this OP other;                                                                                  \
     return *this;                                                                                            \
   }                                                                                                          \
-  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(T scalar) noexcept                               \
+  constexpr auto &operator KRYS_CONCAT(OP, =)(T scalar) noexcept                                             \
   {                                                                                                          \
     *this = *this OP scalar;                                                                                 \
     return *this;                                                                                            \

@@ -1308,7 +1308,7 @@ namespace krys::pal
 
     void Win32Window::SetCallbacks(WindowCallbacks &&callbacks) noexcept
     {
-      _callbacks = std::move(callbacks);
+      _callbacks = krys::move(callbacks);
       UpdateDropTarget();
       UpdateTouchpadPan();
     }

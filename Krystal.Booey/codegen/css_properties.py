@@ -7778,9 +7778,9 @@ class GeneratePropertyId:
                   return nullptr;
                 }
                 
-                KRYS_NODISCARD constexpr static uint16_t size() noexcept
+                KRYS_NODISCARD constexpr static uint16 size() noexcept
                 {
-                  return Last - First + 1;
+                  return static_cast<uint16>(static_cast<uint16>(Last) - static_cast<uint16>(First) + 1);
                 }
             };
 

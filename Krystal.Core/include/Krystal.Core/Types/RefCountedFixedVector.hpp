@@ -3,6 +3,7 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys
 {
@@ -22,7 +23,7 @@ namespace krys
   public:
     KRYS_NODISCARD static Ref<RefCountedFixedVector> create(T &&value)
     {
-      return AdoptRef(*new RefCountedFixedVector(Container {std::move(value)}));
+      return AdoptRef(*new RefCountedFixedVector(Container {krys::move(value)}));
     }
 
     KRYS_NODISCARD static Ref<RefCountedFixedVector> create(std::initializer_list<T> values)
@@ -96,7 +97,7 @@ namespace krys
     }
 
   private:
-    explicit RefCountedFixedVector(Container &&values) noexcept : _values {std::move(values)}
+    explicit RefCountedFixedVector(Container &&values) noexcept : _values {krys::move(values)}
     {
     }
   };

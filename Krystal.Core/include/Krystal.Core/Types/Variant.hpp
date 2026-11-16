@@ -249,12 +249,6 @@ namespace krys
   }                                                                                                          \
                                                                                                              \
   template <typename T>                                                                                      \
-  KRYS_NODISCARD friend const T &&get(const Self &&self) noexcept                                            \
-  {                                                                                                          \
-    return std::get<T>(krys::move(self.name));                                                               \
-  }                                                                                                          \
-                                                                                                             \
-  template <typename T>                                                                                      \
   KRYS_NODISCARD friend add_ptr_t<T> get_if(Self *self) noexcept                                             \
   {                                                                                                          \
     return std::get_if<T>(&self->name);                                                                      \

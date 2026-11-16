@@ -87,7 +87,8 @@ namespace krys::boo::html::tests
 
     CustomElementRegistry &Registry() noexcept
     {
-      return *Document->CustomElementRegistry();
+      auto *registry = Document->CustomElementRegistry().get(); // The document keeps it alive.
+      return *registry;
     }
 
     void Define(dom::DOMStringAtom name, List<dom::DOMStringAtom> observed = {}) noexcept
@@ -112,7 +113,8 @@ namespace krys::boo::html::tests
       {
         Parse(u8"");
       }
-      return *Document->Body();
+      auto *body = Document->Body().get(); // The document keeps it alive.
+      return *body;
     }
 
     dom::Element &ById(dom::DOMStringView id) noexcept

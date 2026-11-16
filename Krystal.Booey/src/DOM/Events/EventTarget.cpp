@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -67,7 +68,7 @@ namespace krys::boo::dom
               && listener->Capture() == options.Capture);
     };
 
-    const auto &existing = std::ranges::find_if(_eventListenerList, std::move(AlreadyExists));
+    const auto &existing = std::ranges::find_if(_eventListenerList, krys::move(AlreadyExists));
     if (existing != _eventListenerList.end())
     {
       EventTargetAlgorithms::RemoveEventListener(*this, *existing->get());

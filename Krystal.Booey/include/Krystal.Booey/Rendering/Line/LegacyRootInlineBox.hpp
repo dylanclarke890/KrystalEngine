@@ -51,15 +51,9 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderBlockFlow &BlockFlow() const noexcept;
 
-    KRYS_NODISCARD LegacyRootInlineBox *NextRootBox() const noexcept
-    {
-      return Downcast<LegacyRootInlineBox>(_nextLineBox);
-    }
+    KRYS_NODISCARD LegacyRootInlineBox *NextRootBox() const noexcept;
 
-    KRYS_NODISCARD LegacyRootInlineBox *PrevRootBox() const noexcept
-    {
-      return Downcast<LegacyRootInlineBox>(_prevLineBox);
-    }
+    KRYS_NODISCARD LegacyRootInlineBox *PrevRootBox() const noexcept;
 
     void AdjustPosition(float dx, float dy) noexcept final;
 
@@ -152,3 +146,17 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LegacyRootInlineBox)
     return box.IsRootInlineBox();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+
+namespace krys::boo
+{
+  // After the cast traits, which they need.
+  inline LegacyRootInlineBox *LegacyRootInlineBox::NextRootBox() const noexcept
+  {
+    return Downcast<LegacyRootInlineBox>(_nextLineBox);
+  }
+
+  inline LegacyRootInlineBox *LegacyRootInlineBox::PrevRootBox() const noexcept
+  {
+    return Downcast<LegacyRootInlineBox>(_prevLineBox);
+  }
+}

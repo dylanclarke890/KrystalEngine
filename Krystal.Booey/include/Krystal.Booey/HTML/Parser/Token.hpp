@@ -36,6 +36,7 @@
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::html
 {
@@ -220,7 +221,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD UniquePtr<DoctypeData> ReleaseDOCTYPEData() noexcept
     {
-      return std::move(_doctypeData);
+      return krys::move(_doctypeData);
     }
 
 #pragma endregion

@@ -357,7 +357,7 @@ namespace krys::boo::html::tests
     {
       auto element = document.CreateElementNS(infra::Namespaces::SVG, tagName);
       REQUIRE(element.HasValue());
-      return *element;
+      return Downcast<svg::SVGElement>(*element);
     }
 
     Ref<dom::DocumentType> CreateDocumentType(dom::Document &document, const dom::DOMString &name,

@@ -813,7 +813,7 @@ namespace krys::boo::html
 
         if (token.Name() == u8"head")
         {
-          _head = InsertHTMLElement(krys::move(token));
+          _head = Downcast<HTMLHeadElement>(InsertHTMLElement(krys::move(token)));
           _insertionMode = InsertionMode::InHead;
           return;
         }
@@ -833,8 +833,9 @@ namespace krys::boo::html
       }
     }
 
-    _head = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"head", TagName::head, Namespace::HTML));
+    _head = Downcast<HTMLHeadElement>(
+      dom::ElementFactory::Create(_document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"head",
+                                                                TagName::head, Namespace::HTML)));
     InsertElementAtAdjustedInsertionLocation(*_head);
     _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
 
@@ -1472,7 +1473,7 @@ namespace krys::boo::html
             auto element = InsertHTMLElement(krys::move(token));
             if (!containsTemplateElement)
             {
-              _form = krys::move(element);
+              _form = Downcast<HTMLFormElement>(krys::move(element));
             }
 
             return;
@@ -2503,7 +2504,7 @@ namespace krys::boo::html
             auto element = InsertHTMLElement(krys::move(token));
             if (!containsTemplateElement)
             {
-              _form = krys::move(element);
+              _form = Downcast<HTMLFormElement>(krys::move(element));
             }
 
             // Pop that form element off the stack of open elements.

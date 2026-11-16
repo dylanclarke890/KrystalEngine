@@ -209,7 +209,7 @@ namespace krys::detail
     {
       static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-      return _impl ? ShareRefPtr(_impl->template get<T>()) : nullptr;
+      return _impl ? ShareRefPtr(static_cast<T *>(_impl->template get<T>())) : nullptr;
     }
 
   private:

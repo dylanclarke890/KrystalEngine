@@ -42,24 +42,23 @@ private:                                                                        
 
 #define MATRIX_BINARY_OPERATOR(OP)                                                                           \
   template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const MATRIX_TYPE &lhs,                            \
-                                                          const MATRIX_TYPE &rhs) noexcept                   \
+  KRYS_NODISCARD constexpr auto operator OP(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs) noexcept         \
   {                                                                                                          \
     return Zip(lhs, rhs, [](auto l, auto r) { return l OP r; });                                             \
   }                                                                                                          \
   template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const MATRIX_TYPE &lhs, T scalar) noexcept         \
+  KRYS_NODISCARD constexpr auto operator OP(const MATRIX_TYPE &lhs, T scalar) noexcept                       \
   {                                                                                                          \
     return MapEach(lhs, [&](auto v) { return v OP scalar; });                                                \
   }
 
 #define MATRIX_OPERATOR_ASSIGNMENT(OP)                                                                       \
-  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(const Matrix &other) noexcept                    \
+  constexpr auto &operator KRYS_CONCAT(OP, =)(const Matrix &other) noexcept                                  \
   {                                                                                                          \
     *this = *this OP other;                                                                                  \
     return *this;                                                                                            \
   }                                                                                                          \
-  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(T scalar) noexcept                               \
+  constexpr auto &operator KRYS_CONCAT(OP, =)(T scalar) noexcept                                             \
   {                                                                                                          \
     *this = *this OP scalar;                                                                                 \
     return *this;                                                                                            \
@@ -67,7 +66,7 @@ private:                                                                        
 
 #define MATRIX_UNARY_OPERATOR(OP)                                                                            \
   template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const MATRIX_TYPE &rhs) noexcept                   \
+  KRYS_NODISCARD constexpr auto operator OP(const MATRIX_TYPE &rhs) noexcept                                 \
   {                                                                                                          \
     return MapEach(rhs, [](auto v) { return OP v; });                                                        \
   }

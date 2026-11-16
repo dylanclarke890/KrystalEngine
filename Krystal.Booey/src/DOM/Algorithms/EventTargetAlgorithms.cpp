@@ -13,6 +13,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -139,7 +140,8 @@ namespace krys::boo::dom
               && l->Capture() == listener.Capture());
     };
 
-    if (const auto &existing = std::ranges::find_if(eventTarget._eventListenerList, std::move(AlreadyExists));
+    if (const auto &existing =
+          std::ranges::find_if(eventTarget._eventListenerList, krys::move(AlreadyExists));
         existing != eventTarget._eventListenerList.end())
     {
       return false;

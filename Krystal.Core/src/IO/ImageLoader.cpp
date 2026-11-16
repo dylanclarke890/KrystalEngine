@@ -2,6 +2,7 @@
 #include "Krystal.Core/IO/Streams/Stream.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "stb/stb_image.h"
 
 namespace
@@ -88,6 +89,6 @@ namespace krys::io
       stbi_image_free(data);
     }
 
-    return std::move(image);
+    return krys::move(image);
   }
 }

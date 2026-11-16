@@ -261,7 +261,7 @@ namespace krys
     }
 
     template <size_t I = 0uz>
-    requires(Iuz == sizeof...(Types) - 1uz)
+    requires(I == sizeof...(Types) - 1uz)
     KRYS_NODISCARD constexpr static size_t Hash(const std::tuple<Types...> &t) noexcept
     {
       using IthElementType = std::tuple_element<I, std::tuple<Types...>>::type;
@@ -290,7 +290,7 @@ namespace krys
   template <HashableWithMemberFunction T>
   struct MemberBasedHash
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = IsSafeToCompareToEmptyOrDeleted<T>();
+    constexpr static bool IsSafeToCompareToEmptyOrDeleted = ::krys::IsSafeToCompareToEmptyOrDeleted<T>();
 
     KRYS_NODISCARD constexpr static size_t Hash(const T &key) noexcept
     {
@@ -306,7 +306,7 @@ namespace krys
   template <typename T>
   struct StdHashAdapter
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = IsSafeToCompareToEmptyOrDeleted<T>();
+    constexpr static bool IsSafeToCompareToEmptyOrDeleted = ::krys::IsSafeToCompareToEmptyOrDeleted<T>();
 
     KRYS_NODISCARD constexpr static size_t Hash(const T &key) noexcept
     {
