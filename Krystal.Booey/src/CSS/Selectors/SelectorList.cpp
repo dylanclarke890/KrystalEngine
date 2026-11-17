@@ -46,7 +46,7 @@ namespace krys::boo::css
     }
   }
 
-  SelectorList::SelectorList(MutableSelectorList &&selectors) noexcept
+  SelectorList::SelectorList(MutableSelectorList selectors) noexcept
   {
     krys_debug_assert(!selectors.empty());
 

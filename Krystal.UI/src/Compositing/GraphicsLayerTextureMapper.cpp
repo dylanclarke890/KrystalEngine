@@ -80,7 +80,7 @@ namespace krys::ui
     AddRepaintRect(rect);
   }
 
-  bool GraphicsLayerTextureMapper::SetChildren(List<Ref<GraphicsLayer>> &&children) noexcept
+  bool GraphicsLayerTextureMapper::SetChildren(List<Ref<GraphicsLayer>> children) noexcept
   {
     if (GraphicsLayer::SetChildren(krys::move(children)))
     {

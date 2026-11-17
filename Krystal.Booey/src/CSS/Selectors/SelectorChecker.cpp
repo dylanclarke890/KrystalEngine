@@ -920,16 +920,9 @@ namespace krys::boo::css
     {
       return false;
     }
-    bool caseSensitive = true;
-    if (selector.IsAttributeValueMatchingCaseInsensitive())
-    {
-      caseSensitive = false;
-    }
-    else if (isHTML && !selector.IsAttributeValueMatchingCaseSensitive()
-             && !dom::HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute()))
-    {
-      caseSensitive = false;
-    }
+    bool caseSensitive = !selector.IsAttributeValueMatchingCaseInsensitive()
+                         && !(isHTML && !selector.IsAttributeValueMatchingCaseSensitive()
+                              && !dom::HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute()));
     return AttributeValueMatches(attributeValue.View(), selector.Match(), selector.Value().View(),
                                  caseSensitive);
   }
@@ -983,17 +976,10 @@ namespace krys::boo::css
       }
 
       auto &attr = selector.Attribute();
-      bool caseSensitive = true;
-      if (selector.IsAttributeValueMatchingCaseInsensitive())
-      {
-        caseSensitive = false;
-      }
-      else if (_documentIsHTML && Is<html::HTMLElement>(element)
-               && !selector.IsAttributeValueMatchingCaseSensitive()
-               && !dom::HTMLDocument::IsCaseSensitiveAttribute(attr))
-      {
-        caseSensitive = false;
-      }
+      bool caseSensitive = !selector.IsAttributeValueMatchingCaseInsensitive()
+                           && !(_documentIsHTML && Is<html::HTMLElement>(element)
+                                && !selector.IsAttributeValueMatchingCaseSensitive()
+                                && !dom::HTMLDocument::IsCaseSensitiveAttribute(attr));
 
       return AnyAttributeMatches(element, selector, attr, caseSensitive);
     }
@@ -1417,6 +1403,7 @@ namespace krys::boo::css
         case SelectorPseudoClass::Lang:
           krys_debug_assert(selector.LangList() && selector.LangList()->size());
           return MatchesLangPseudoClass(element, *selector.LangList());
+        // NOLINTBEGIN(bugprone-branch-clone): each group has its own FIXME.
         case SelectorPseudoClass::Fullscreen:
         case SelectorPseudoClass::PictureInPicture:
           // FIXME: Fullscreen and picture-in-picture.
@@ -1434,6 +1421,7 @@ namespace krys::boo::css
         case SelectorPseudoClass::VolumeLocked:
           // FIXME: Media element playback state.
           return false;
+          // NOLINTEND(bugprone-branch-clone)
 
         case SelectorPseudoClass::Scope:
         {

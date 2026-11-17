@@ -179,7 +179,7 @@ namespace krys
     template <typename U>
     KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static T *exchange(storage_type &ptr, U &&newValue) noexcept
     {
-      return std::exchange(ptr, newValue);
+      return std::exchange(ptr, std::forward<U>(newValue));
     }
 
     KRYS_ALWAYS_INLINE constexpr static void swap(storage_type &a, storage_type &b) noexcept

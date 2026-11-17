@@ -106,7 +106,7 @@ namespace krys::boo
     List<Func<void()>> _loadedCallbacks;
 
   public:
-    CachedResource(CachedResourceRequest &&, Type) noexcept;
+    CachedResource(CachedResourceRequest, Type) noexcept;
 
     virtual ~CachedResource() noexcept;
 
@@ -336,9 +336,9 @@ namespace krys::boo
 
     /// @brief What upstream's subresource loader does when a load ends: hands the response and data to the
     /// resource, or its error.
-    void DidFinishLoad(LoadResult &&) noexcept;
+    void DidFinishLoad(LoadResult) noexcept;
 
-    void ApplyLoadResult(LoadResult &&) noexcept;
+    void ApplyLoadResult(LoadResult) noexcept;
 
     /// @brief The load is done: it leaves its loader's request count, which may let the document finish
     /// loading.

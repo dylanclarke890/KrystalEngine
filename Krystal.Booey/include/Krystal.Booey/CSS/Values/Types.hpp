@@ -701,15 +701,15 @@ namespace krys::boo::css
 
   KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(ValueId keyword) noexcept;
 
-  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const CustomIdentifier &identifer) noexcept;
+  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const CustomIdentifier &identifier) noexcept;
 
-  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const PropertyIdentifier &identifer) noexcept;
+  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const PropertyIdentifier &identifier) noexcept;
 
-  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const CSSOMStringAtom &str) noexcept;
+  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const CSSOMStringAtom &string) noexcept;
 
-  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const CSSOMString &str) noexcept;
+  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const CSSOMString &string) noexcept;
 
-  KRYS_NODISCARD Ref<Value> CreateFunctionValue(ValueId name, Ref<Value> &&args) noexcept;
+  KRYS_NODISCARD Ref<Value> CreateFunctionValue(ValueId name, Ref<Value> &&arguments) noexcept;
 
   template <SerialisationSeparatorType>
   KRYS_NODISCARD Ref<Value> CreateCoalescingPairValue(Ref<Value> &&, Ref<Value> &&) noexcept;

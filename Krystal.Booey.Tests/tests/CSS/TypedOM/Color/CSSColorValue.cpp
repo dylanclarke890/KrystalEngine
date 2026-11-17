@@ -21,7 +21,7 @@ namespace krys::boo::css::tests
     using Factory = CSSNumericFactory;
 
     template <typename T>
-    KRYS_NODISCARD Ref<T> Value(dom::ExceptionOr<Ref<T>> &&result)
+    KRYS_NODISCARD Ref<T> Value(dom::ExceptionOr<Ref<T>> result)
     {
       REQUIRE(result.HasValue());
       return result.ReleaseValue();

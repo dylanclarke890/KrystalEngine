@@ -135,7 +135,7 @@ namespace krys::boo
 
     /// @brief Shows @p newDocument in the frame, in place of its current document. @p newDocument must not be
     /// in a frame already.
-    void SetDocument(RefPtr<dom::Document> &&newDocument) noexcept;
+    void SetDocument(const RefPtr<dom::Document> &newDocument) noexcept;
 
     /// @brief The caret position nearest @p framePoint (in the frame's contents).
     KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const IntPoint &framePoint) const noexcept;

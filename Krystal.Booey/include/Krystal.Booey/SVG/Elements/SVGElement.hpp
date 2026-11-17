@@ -451,8 +451,8 @@ namespace krys::boo::svg
     /// one.
     /// @see https://svgwg.org/svg2-draft/styling.html#PresentationAttributes
     KRYS_NODISCARD static css::PropertyId
-      CssPropertyIdForSVGAttributeName(dom::DOMStringAtom localName,
-                                       dom::DOMStringAtom namespaceURI) noexcept;
+      CssPropertyIdForSVGAttributeName(const dom::DOMStringAtom &localName,
+                                       const dom::DOMStringAtom &namespaceURI) noexcept;
 
   protected:
     void FinishParsingChildren() noexcept override;

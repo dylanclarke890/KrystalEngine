@@ -202,7 +202,7 @@ namespace krys::boo::style
 
   private:
     template <typename T>
-    KRYS_NODISCARD static ColorKind CreateIndirectColor(T &&color) noexcept;
+    KRYS_NODISCARD static ColorKind CreateIndirectColor(T color) noexcept;
 
     KRYS_NODISCARD static ColorKind Copy(const ColorKind &other) noexcept;
   };

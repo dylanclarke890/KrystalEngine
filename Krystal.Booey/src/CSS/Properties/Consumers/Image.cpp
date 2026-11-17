@@ -173,7 +173,7 @@ namespace krys::boo::css
     template <SupportsColorHints TSupportsColorHints, typename TStop, typename TConsumer>
     KRYS_NODISCARD static Maybe<GradientColorStopList<TStop>>
       ConsumeColorStopList(TokenRange &tokens, PropertyParserState &state,
-                           TConsumer &&consumeStopPosition) noexcept
+                           TConsumer consumeStopPosition) noexcept
     {
       typename GradientColorStopList<TStop>::Container stops;
 
@@ -600,7 +600,7 @@ namespace krys::boo::css
                     .Position = krys::move(position),
                   };
                 },
-                [&](Length<NonNegative> &&) -> Maybe<GradientBox>
+                [&](const Length<NonNegative> &) -> Maybe<GradientBox>
                 {
                   // Ellipses must have two length-percentages specified.
                   return null;
@@ -631,7 +631,7 @@ namespace krys::boo::css
                     .Position = krys::move(position),
                   };
                 },
-                [&](EllipseSize &&) -> Maybe<GradientBox>
+                [&](const EllipseSize &) -> Maybe<GradientBox>
                 {
                   // Circles must have a maximum of only one length specified.
                   return null;

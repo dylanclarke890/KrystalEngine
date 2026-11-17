@@ -247,6 +247,7 @@ namespace krys::boo::html
   void HTMLElement::Hidden(double value) noexcept
   {
     CEReactionsScope ceReactions;
+    // NOLINTBEGIN(bugprone-branch-clone): the spec's steps, in order.
     // 5. Otherwise, if the given value is 0, then remove the hidden attribute.
     if (value == 0)
     {
@@ -262,6 +263,7 @@ namespace krys::boo::html
     {
       dom::ElementAlgorithms::SetAttributeValue(*this, u8"hidden", u8"");
     }
+    // NOLINTEND(bugprone-branch-clone)
   }
 
   bool HTMLElement::Inert() const noexcept
@@ -957,7 +959,7 @@ namespace krys::boo::html
   namespace
   {
     /// @brief What a popover algorithm returns once @p validity says the popover can't be shown or hidden.
-    KRYS_NODISCARD dom::ExceptionOr<void> InvalidPopoverResult(dom::ExceptionOr<bool> &&validity,
+    KRYS_NODISCARD dom::ExceptionOr<void> InvalidPopoverResult(dom::ExceptionOr<bool> validity,
                                                                bool throwExceptions) noexcept
     {
       if (throwExceptions && validity.HasException())
@@ -1928,6 +1930,7 @@ namespace krys::boo::html
     auto floatValue = css::ValueId::Invalid;
     auto verticalAlignValue = css::ValueId::Invalid;
 
+    // NOLINTBEGIN(bugprone-branch-clone): one branch per keyword.
     if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"absmiddle")
         || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"abscenter"))
     {
@@ -1967,6 +1970,7 @@ namespace krys::boo::html
     {
       verticalAlignValue = css::ValueId::TextTop;
     }
+    // NOLINTEND(bugprone-branch-clone)
 
     if (floatValue != css::ValueId::Invalid)
     {

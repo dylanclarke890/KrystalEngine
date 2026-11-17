@@ -1882,7 +1882,7 @@ namespace krys::boo::css
     List _value;
 
   public:
-    ListOrNone(List &&list) : _value {krys::move(list)}
+    ListOrNone(List list) : _value {krys::move(list)}
     {
       krys_assert(!_value.isEmpty());
     }
@@ -2248,7 +2248,7 @@ namespace krys::boo::css
     using Keyword = K;
     using value_type = typename EnumSet::value_type;
 
-    constexpr EnumSetOrKeywordBase(EnumSet &&list) noexcept : _value {krys::move(list)}
+    constexpr EnumSetOrKeywordBase(EnumSet list) noexcept : _value {krys::move(list)}
     {
       krys_assert(!_value.IsEmpty());
     }

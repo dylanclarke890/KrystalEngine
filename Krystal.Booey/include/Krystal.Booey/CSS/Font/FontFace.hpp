@@ -247,7 +247,7 @@ namespace krys::boo::css
     KRYS_NODISCARD MutableStyleProperties &MutableProperties() noexcept;
 
     template <typename TFunc>
-    void IterateClients(TFunc &&callback) noexcept;
+    void IterateClients(TFunc callback) noexcept;
   };
 
   /// @brief Something told when a font face loads, changes state or has its descriptors changed.

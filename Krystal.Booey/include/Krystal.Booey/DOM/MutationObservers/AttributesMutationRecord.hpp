@@ -20,12 +20,12 @@ namespace krys::boo::dom
       return type;
     }
 
-    KRYS_NODISCARD const DOMStringAtom &AttributeName() const noexcept final
+    KRYS_NODISCARD const DOMStringAtom &AttributeName() const noexcept KRYS_LIFETIME_BOUND final
     {
       return _attributeName;
     }
 
-    KRYS_NODISCARD const DOMStringAtom &AttributeNamespace() const noexcept final
+    KRYS_NODISCARD const DOMStringAtom &AttributeNamespace() const noexcept KRYS_LIFETIME_BOUND final
     {
       return _attributeNamespace;
     }

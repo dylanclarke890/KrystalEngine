@@ -75,7 +75,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#event-listener-type
-    KRYS_NODISCARD const DOMStringAtom &Type() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &Type() const noexcept KRYS_LIFETIME_BOUND
     {
       return _type;
     }

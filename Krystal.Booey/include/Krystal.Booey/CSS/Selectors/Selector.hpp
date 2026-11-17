@@ -297,7 +297,7 @@ namespace krys::boo::css
     KRYS_NODISCARD Array<uint8, 3> ComputeSpecificityTuple() const noexcept;
 
     bool VisitSimpleSelectors(
-      VisitFunc &&func,
+      const VisitFunc &func,
       VisitFunctionalPseudoClasses visitFunctionalPseudoClasses = VisitFunctionalPseudoClasses::No,
       VisitOnlySubject visitOnlySubject = VisitOnlySubject::No) const noexcept;
 
@@ -359,7 +359,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD const dom::QualifiedName &Attribute() const noexcept;
 
-    KRYS_NODISCARD const CSSOMStringAtom &Argument() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &Argument() const noexcept KRYS_LIFETIME_BOUND
     {
       return HasRareData() ? _data.Rare->Argument : CSSOMStringAtom::Null();
     }

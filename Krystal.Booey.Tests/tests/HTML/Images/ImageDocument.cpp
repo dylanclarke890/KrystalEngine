@@ -134,14 +134,14 @@ namespace krys::boo::tests
 
     // It's larger than the 200x100 view, so it's shrunk as it loads, and a click will zoom it in.
     CHECK(isShrunk());
-    CHECK(fixture.Style().find("cursor: zoom-in") != std::string::npos);
+    CHECK(fixture.Style().contains("cursor: zoom-in"));
 
     SECTION("Growing the view to fit it restores it")
     {
       fixture.ResizeView(400, 300);
       CHECK(image.Width() == 300);
       CHECK(image.Height() == 150);
-      CHECK(fixture.Style().find("cursor") == std::string::npos);
+      CHECK_FALSE(fixture.Style().contains("cursor"));
 
       // And shrinking the view again shrinks it.
       fixture.ResizeView(200, 100);
@@ -153,11 +153,11 @@ namespace krys::boo::tests
       image.Click();
       CHECK(image.Width() == 300);
       CHECK(image.Height() == 150);
-      CHECK(fixture.Style().find("cursor: zoom-out") != std::string::npos);
+      CHECK(fixture.Style().contains("cursor: zoom-out"));
 
       image.Click();
       CHECK(isShrunk());
-      CHECK(fixture.Style().find("cursor: zoom-in") != std::string::npos);
+      CHECK(fixture.Style().contains("cursor: zoom-in"));
     }
   }
 
@@ -167,12 +167,12 @@ namespace krys::boo::tests
     ImageDocumentFixture fixture(images::PNG, u8"image/png", u8"https://example.com/image.png");
     CHECK(fixture.Image().Width() == 3);
     CHECK(fixture.Image().Height() == 2);
-    CHECK(fixture.Style().find("cursor") == std::string::npos);
+    CHECK_FALSE(fixture.Style().contains("cursor"));
 
     // A click does nothing.
     fixture.Image().Click();
     CHECK(fixture.Image().Width() == 3);
-    CHECK(fixture.Style().find("cursor") == std::string::npos);
+    CHECK_FALSE(fixture.Style().contains("cursor"));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "ImageDocument: other types aren't image documents",

@@ -91,6 +91,7 @@ namespace krys::boo::style
       auto &document = element.NodeDocument();
       auto documentElement = document.DocumentElement();
       if (!documentElement || documentElement.get() == &element)
+      // NOLINTNEXTLINE(bugprone-branch-clone): the fallbacks, in order.
       {
         _rootElementStyle = document.InitialContainingBlockStyle();
       }
@@ -360,7 +361,7 @@ namespace krys::boo::style
 
   UnadjustedStyle Resolver::UnadjustedStyleForCachedMatchResult(dom::Element &element,
                                                                 const ResolutionContext &context,
-                                                                CachedMatchResult &&cachedResult) noexcept
+                                                                CachedMatchResult cachedResult) noexcept
   {
     auto &unadjustedStyle = cachedResult.UnadjustedStyle;
 

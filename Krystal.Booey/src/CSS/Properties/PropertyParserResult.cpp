@@ -34,7 +34,7 @@ namespace krys::boo::css
   }
 
   void PropertyParserResult::AddProperty(KRYS_MAYBE_UNUSED PropertyParserState &state, PropertyId property,
-                                         PropertyId currentShorthand, RefPtr<Value> &&value,
+                                         PropertyId currentShorthand, RefPtr<Value> value,
                                          IsImportant important, IsImplicit implicit) noexcept
   {
     uint8 shorthandIndex = 0u;
@@ -72,15 +72,14 @@ namespace krys::boo::css
 #pragma region Utils
 
   void PropertyParserResult::AddPropertyForCurrentShorthand(PropertyParserState &state, PropertyId longhand,
-                                                            RefPtr<Value> &&value,
-                                                            IsImplicit implicit) noexcept
+                                                            RefPtr<Value> value, IsImplicit implicit) noexcept
   {
     AddProperty(state, longhand, state.CurrentProperty, krys::move(value), state.Important, implicit);
   }
 
   void PropertyParserResult::AddPropertyForAllLonghandsOfShorthand(PropertyParserState &state,
                                                                    PropertyId shorthand,
-                                                                   RefPtr<Value> &&value,
+                                                                   const RefPtr<Value> &value,
                                                                    IsImportant important,
                                                                    IsImplicit implicit) noexcept
   {
@@ -91,7 +90,7 @@ namespace krys::boo::css
   }
 
   void PropertyParserResult::AddPropertyForAllLonghandsOfCurrentShorthand(PropertyParserState &state,
-                                                                          RefPtr<Value> &&value,
+                                                                          RefPtr<Value> value,
                                                                           IsImplicit implicit) noexcept
   {
     AddPropertyForAllLonghandsOfShorthand(state, state.CurrentProperty, krys::move(value), state.Important,

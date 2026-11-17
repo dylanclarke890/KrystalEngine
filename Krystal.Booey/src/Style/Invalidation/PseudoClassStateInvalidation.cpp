@@ -75,8 +75,8 @@ namespace krys::boo::style
     /// shadow trees if @p crossShadowBoundaries: the subtrees of descendants for which @p stop is true are
     /// skipped.
     template <typename TStop, typename TFunction>
-    void ForEachInheritingDescendant(dom::Element &element, bool crossShadowBoundaries, TStop &&stop,
-                                     TFunction &&function) noexcept
+    void ForEachInheritingDescendant(dom::Element &element, bool crossShadowBoundaries, TStop stop,
+                                     TFunction function) noexcept
     {
       auto visitChildren = [&](this auto &self, dom::ContainerNode &container) -> void
       {

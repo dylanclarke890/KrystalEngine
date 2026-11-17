@@ -112,7 +112,7 @@ namespace krys::boo
   public:
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-viewtimeline
     KRYS_NODISCARD static dom::ExceptionOr<Ref<ViewTimeline>>
-      Create(dom::Document &document, ViewTimelineOptions &&options = {}) noexcept;
+      Create(dom::Document &document, const ViewTimelineOptions &options = {}) noexcept;
 
     KRYS_NODISCARD static Ref<ViewTimeline> Create(const css::CSSOMStringAtom &name, ScrollAxis axis,
                                                    const style::ViewTimelineInsetItem &insets) noexcept;
@@ -187,7 +187,7 @@ namespace krys::boo
     template <typename F>
     KRYS_NODISCARD double MapOffsetToTimelineRange(const ScrollTimeline::Data &data,
                                                    style::SingleAnimationRangeName name,
-                                                   F &&valueWithinSubjectRange) const noexcept;
+                                                   F valueWithinSubjectRange) const noexcept;
 
     KRYS_NODISCARD bool IsViewTimeline() const noexcept final
     {

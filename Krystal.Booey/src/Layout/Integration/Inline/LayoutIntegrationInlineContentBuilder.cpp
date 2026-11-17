@@ -138,8 +138,7 @@ namespace krys::boo::layout_integration
   {
   }
 
-  FloatRect InlineContentBuilder::Build(layout::InlineLayoutResult &&layoutResult,
-                                        InlineContent &inlineContent,
+  FloatRect InlineContentBuilder::Build(layout::InlineLayoutResult layoutResult, InlineContent &inlineContent,
                                         const layout::InlineDamage *lineDamage) const noexcept
   {
     inlineContent.ReleaseCaches();
@@ -394,7 +393,7 @@ namespace krys::boo::layout_integration
   }
 
   FloatRect InlineContentBuilder::HandlePartialDisplayContentUpdate(
-    layout::InlineLayoutResult &&layoutResult, InlineContent &inlineContent,
+    layout::InlineLayoutResult layoutResult, InlineContent &inlineContent,
     const layout::InlineDamage *lineDamage) const noexcept
   {
     auto firstDamagedLineIndex = [&]() -> Maybe<size_t>

@@ -68,7 +68,7 @@ namespace krys::boo
     /// time.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-documenttimeline-documenttimeline
     KRYS_NODISCARD static Ref<DocumentTimeline> Create(dom::Document &document,
-                                                       DocumentTimelineOptions &&options) noexcept;
+                                                       DocumentTimelineOptions options) noexcept;
 
     KRYS_NODISCARD dom::Document *Document() const noexcept
     {

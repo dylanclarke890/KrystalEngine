@@ -147,8 +147,8 @@ namespace krys::boo::dom
     {
       auto &scope = parent.TreeScope();
       ForEachTreeScopeKeyInSubtree(
-        node, [&](Element &element, DOMStringAtom id) { scope.AddElementById(id, element); },
-        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.AddImageMap(name, map); });
+        node, [&](Element &element, DOMStringAtom id) { scope.AddElementById(krys::move(id), element); },
+        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.AddImageMap(krys::move(name), map); });
     }
   }
 
@@ -160,8 +160,8 @@ namespace krys::boo::dom
     {
       auto &scope = parent.TreeScope();
       ForEachTreeScopeKeyInSubtree(
-        node, [&](Element &element, DOMStringAtom id) { scope.RemoveElementById(id, element); },
-        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.RemoveImageMap(name, map); });
+        node, [&](Element &element, DOMStringAtom id) { scope.RemoveElementById(krys::move(id), element); },
+        [&](html::HTMLMapElement &map, DOMStringAtom name) { scope.RemoveImageMap(krys::move(name), map); });
     }
   }
 
@@ -178,8 +178,9 @@ namespace krys::boo::dom
       if (oldScope)
       {
         ForEachTreeScopeKeyInSubtree(
-          node, [&](Element &, DOMStringAtom id) { oldScope->ElementsWithIdChangedOrder(id); },
-          [&](html::HTMLMapElement &, DOMStringAtom name) { oldScope->ImageMapsChangedOrder(name); });
+          node, [&](Element &, DOMStringAtom id) { oldScope->ElementsWithIdChangedOrder(krys::move(id)); },
+          [&](html::HTMLMapElement &, DOMStringAtom name)
+          { oldScope->ImageMapsChangedOrder(krys::move(name)); });
       }
       return;
     }
@@ -413,9 +414,9 @@ namespace krys::boo::dom
     node.OnAdopt(oldDocument);
   }
 
-  void ExtensibilityHooks::ElementAttributeChanged(Element &element, DOMStringAtom localName,
+  void ExtensibilityHooks::ElementAttributeChanged(Element &element, const DOMStringAtom &localName,
                                                    Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
-                                                   DOMStringAtom namespaceURI) noexcept
+                                                   const DOMStringAtom &namespaceURI) noexcept
   {
     element.OnAttributeChanged(localName, oldValue, value, namespaceURI);
     // Only attributes in no namespace mean anything to accessibility.

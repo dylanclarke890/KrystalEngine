@@ -39,9 +39,9 @@ namespace krys::boo::style
 
     switch (primitiveValue->ValueId())
     {
-      case css::ValueId::Alpha:       return MaskMode::Alpha;
-      case css::ValueId::Luminance:   return MaskMode::Luminance;
-      case css::ValueId::MatchSource: return MaskMode::MatchSource;
+      case css::ValueId::Alpha:     return MaskMode::Alpha;
+      case css::ValueId::Luminance: return MaskMode::Luminance;
+      case css::ValueId::MatchSource:
       case css::ValueId::Auto: // -webkit-mask-source-type
         return MaskMode::MatchSource;
       default: state.SetCurrentPropertyInvalidAtComputedValueTime(); return MaskMode::MatchSource;

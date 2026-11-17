@@ -119,7 +119,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
   void FormAssociatedCustomElement::SetFormValue(CustomElementFormValue &&submissionValue,
-                                                 Maybe<CustomElementFormValue> &&state) noexcept
+                                                 Maybe<CustomElementFormValue> state) noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
 

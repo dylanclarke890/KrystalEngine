@@ -80,6 +80,7 @@ namespace krys::boo
               }
               break;
             case 2:
+              // NOLINTBEGIN(bugprone-branch-clone): at the start, at the end, and in between.
               if (i == 0)
               {
                 // at start of string
@@ -97,6 +98,7 @@ namespace krys::boo
                 s += convertedSpaceString;
                 s += u8' ';
               }
+              // NOLINTEND(bugprone-branch-clone)
               break;
           }
           count -= add;

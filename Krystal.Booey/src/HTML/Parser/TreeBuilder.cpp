@@ -64,7 +64,7 @@ namespace krys::boo::html
   {
   }
 
-  void TreeBuilder::ProcessToken(TokenAtom &&token) noexcept
+  void TreeBuilder::ProcessToken(TokenAtom token) noexcept
   {
     if (_ignoreNextNewline)
     {
@@ -145,7 +145,7 @@ namespace krys::boo::html
     return false;
   }
 
-  void TreeBuilder::ProcessAccordingToRulesForHTMLContent(TokenAtom &&token) noexcept
+  void TreeBuilder::ProcessAccordingToRulesForHTMLContent(TokenAtom token) noexcept
   {
     switch (_insertionMode)
     {
@@ -173,7 +173,7 @@ namespace krys::boo::html
     }
   }
 
-  void TreeBuilder::ProcessAccordingToRulesForForeignContent(TokenAtom &&token) noexcept
+  void TreeBuilder::ProcessAccordingToRulesForForeignContent(TokenAtom token) noexcept
   {
     auto InvalidTag = [&]()
     {
@@ -368,7 +368,7 @@ namespace krys::boo::html
         }
 
         AdjustForeignAttributes(token);
-        InsertForeignElement(krys::move(token), adjustedCurrentNode.NamespaceURI(), false);
+        InsertForeignElement(token, adjustedCurrentNode.NamespaceURI(), false);
 
         if (token.IsSelfClosing())
         {
@@ -623,7 +623,7 @@ namespace krys::boo::html
     return _templateInsertionModes.back();
   }
 
-  void TreeBuilder::InitialMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InitialMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -710,7 +710,7 @@ namespace krys::boo::html
     BeforeHTMLMode(krys::move(token));
   }
 
-  void TreeBuilder::BeforeHTMLMode(TokenAtom &&token) noexcept
+  void TreeBuilder::BeforeHTMLMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -774,7 +774,7 @@ namespace krys::boo::html
     BeforeHeadMode(krys::move(token));
   }
 
-  void TreeBuilder::BeforeHeadMode(TokenAtom &&token) noexcept
+  void TreeBuilder::BeforeHeadMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -813,7 +813,7 @@ namespace krys::boo::html
 
         if (token.Name() == u8"head")
         {
-          _head = Downcast<HTMLHeadElement>(InsertHTMLElement(krys::move(token)));
+          _head = Downcast<HTMLHeadElement>(InsertHTMLElement(token));
           _insertionMode = InsertionMode::InHead;
           return;
         }
@@ -843,7 +843,7 @@ namespace krys::boo::html
     InHeadMode(krys::move(token));
   }
 
-  void TreeBuilder::InHeadMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InHeadMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -881,19 +881,20 @@ namespace krys::boo::html
             InBodyMode(krys::move(token));
             return;
           }
+          // NOLINTBEGIN(bugprone-branch-clone): meta has its own (skipped) steps.
           case TagName::base:
           case TagName::basefont:
           case TagName::bgsound:
           case TagName::link:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             return;
           }
           case TagName::meta:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
@@ -910,6 +911,7 @@ namespace krys::boo::html
 
             return;
           }
+          // NOLINTEND(bugprone-branch-clone)
           case TagName::title:
           {
             ParseGenericRCDATATextElement(krys::move(token));
@@ -919,7 +921,7 @@ namespace krys::boo::html
           {
             if (_scriptingMode == ParserScriptingMode::Disabled)
             {
-              InsertHTMLElement(krys::move(token));
+              InsertHTMLElement(token);
               _insertionMode = InsertionMode::InHeadNoscript;
             }
             else
@@ -966,7 +968,7 @@ namespace krys::boo::html
           }
           case TagName::template_:
           {
-            InsertTemplateElement(krys::move(token));
+            InsertTemplateElement(token);
             return;
           }
           case TagName::head:
@@ -1066,7 +1068,7 @@ namespace krys::boo::html
     AfterHeadMode(krys::move(token));
   }
 
-  void TreeBuilder::InHeadNoscriptMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InHeadNoscriptMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -1145,7 +1147,7 @@ namespace krys::boo::html
     InHeadMode(krys::move(token));
   }
 
-  void TreeBuilder::AfterHeadMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterHeadMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -1185,7 +1187,7 @@ namespace krys::boo::html
           }
           case TagName::body:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _framesetOk = false;
 
             _insertionMode = InsertionMode::InBody;
@@ -1193,7 +1195,7 @@ namespace krys::boo::html
           }
           case TagName::frameset:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InFrameset;
             return;
@@ -1261,7 +1263,7 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void TreeBuilder::InBodyMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InBodyMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -1372,7 +1374,7 @@ namespace krys::boo::html
             auto &bodyElement = Downcast<HTMLBodyElement>(_openElementStack[1].Element());
             (void)dom::MutationAlgorithms::Remove(bodyElement);
             _openElementStack.PopUntil(_openElementStack.Top().Element());
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InFrameset;
             return;
@@ -1408,7 +1410,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::h1:
@@ -1439,7 +1441,7 @@ namespace krys::boo::html
               }
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::pre:
@@ -1450,7 +1452,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _ignoreNextNewline = true;
             _framesetOk = false;
@@ -1470,7 +1472,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            auto element = InsertHTMLElement(krys::move(token));
+            auto element = InsertHTMLElement(token);
             if (!containsTemplateElement)
             {
               _form = Downcast<HTMLFormElement>(krys::move(element));
@@ -1511,7 +1513,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::dd:
@@ -1561,7 +1563,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::plaintext:
@@ -1571,7 +1573,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _tokenizer.State(TokenizerState::PLAINTEXT);
             return;
@@ -1586,7 +1588,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _framesetOk = false;
 
@@ -1611,7 +1613,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             auto &a = _openElementStack.Bottom();
             _activeFormattingElements.PushElement(
@@ -1633,7 +1635,7 @@ namespace krys::boo::html
           case TagName::u:
           {
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             auto &fmtOpenItem = _openElementStack.Bottom();
             ParsedAttributeList fmtAttrsCopy = fmtOpenItem.Attributes();
@@ -1653,7 +1655,7 @@ namespace krys::boo::html
               ReconstructActiveFormattingElements();
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             auto &nobrOpenItem = _openElementStack.Bottom();
             ParsedAttributeList nobrAttrsCopy = nobrOpenItem.Attributes();
@@ -1668,7 +1670,7 @@ namespace krys::boo::html
           case TagName::object:
           {
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _activeFormattingElements.PushMarker();
             _framesetOk = false;
 
@@ -1682,7 +1684,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _framesetOk = false;
 
             _insertionMode = InsertionMode::InTable;
@@ -1696,7 +1698,7 @@ namespace krys::boo::html
           case TagName::wbr:
           {
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             _framesetOk = false;
@@ -1731,7 +1733,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
@@ -1746,7 +1748,7 @@ namespace krys::boo::html
           case TagName::source:
           case TagName::track:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
@@ -1769,7 +1771,7 @@ namespace krys::boo::html
               }
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             _framesetOk = false;
@@ -1786,7 +1788,7 @@ namespace krys::boo::html
           }
           case TagName::textarea:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _ignoreNextNewline = true;
             _tokenizer.State(TokenizerState::RCDATA);
@@ -1831,7 +1833,7 @@ namespace krys::boo::html
 
             // Scripting is disabled: treat as 'any other start tag'.
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::select:
@@ -1852,7 +1854,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _framesetOk = false;
 
             return;
@@ -1876,7 +1878,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             return;
           }
@@ -1900,7 +1902,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             return;
           }
@@ -1916,7 +1918,7 @@ namespace krys::boo::html
               }
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::rp:
@@ -1933,7 +1935,7 @@ namespace krys::boo::html
               }
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::math:
@@ -1941,7 +1943,7 @@ namespace krys::boo::html
             ReconstructActiveFormattingElements();
             AdjustMathMLAttributes(token);
             AdjustForeignAttributes(token);
-            InsertForeignElement(krys::move(token), infra::Namespaces::MathML, false);
+            InsertForeignElement(token, infra::Namespaces::MathML, false);
 
             if (token.IsSelfClosing())
             {
@@ -1956,7 +1958,7 @@ namespace krys::boo::html
             ReconstructActiveFormattingElements();
             AdjustSVGAttributes(token);
             AdjustForeignAttributes(token);
-            InsertForeignElement(krys::move(token), infra::Namespaces::SVG, false);
+            InsertForeignElement(token, infra::Namespaces::SVG, false);
 
             if (token.IsSelfClosing())
             {
@@ -1984,7 +1986,7 @@ namespace krys::boo::html
           default:
           {
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             return;
           }
@@ -2241,7 +2243,7 @@ namespace krys::boo::html
             // Act as if this were a "br" start tag with no attributes.
             token._attributes.clear();
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
 
             _framesetOk = false;
@@ -2296,7 +2298,7 @@ namespace krys::boo::html
     }
   }
 
-  void TreeBuilder::TextMode(TokenAtom &&token) noexcept
+  void TreeBuilder::TextMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2335,7 +2337,7 @@ namespace krys::boo::html
     }
   }
 
-  void TreeBuilder::InTableMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InTableMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2386,7 +2388,7 @@ namespace krys::boo::html
           {
             _openElementStack.PopUntilTableContext();
             _activeFormattingElements.PushMarker();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InCaption;
             return;
@@ -2394,7 +2396,7 @@ namespace krys::boo::html
           case TagName::colgroup:
           {
             _openElementStack.PopUntilTableContext();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InColumnGroup;
             return;
@@ -2419,7 +2421,7 @@ namespace krys::boo::html
           case TagName::thead:
           {
             _openElementStack.PopUntilTableContext();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InTableBody;
             return;
@@ -2480,7 +2482,7 @@ namespace krys::boo::html
 
             ParseError(token);
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
@@ -2501,7 +2503,7 @@ namespace krys::boo::html
 
             // Otherwise: Insert an HTML element for the token, and, if the parser is not parsing template
             // contents, set the form element pointer to point to the element created.
-            auto element = InsertHTMLElement(krys::move(token));
+            auto element = InsertHTMLElement(token);
             if (!containsTemplateElement)
             {
               _form = Downcast<HTMLFormElement>(krys::move(element));
@@ -2570,7 +2572,7 @@ namespace krys::boo::html
     _fosterParenting = false;
   }
 
-  void TreeBuilder::InTableTextMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InTableTextMode(TokenAtom token) noexcept
   {
     if (token.Type() == TokenType::Character)
     {
@@ -2624,7 +2626,7 @@ namespace krys::boo::html
     ProcessToken(krys::move(token));
   }
 
-  void TreeBuilder::InCaptionMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InCaptionMode(TokenAtom token) noexcept
   {
     auto CloseCaption = [&]() -> bool
     {
@@ -2715,7 +2717,7 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void TreeBuilder::InColumnGroupMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InColumnGroupMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2755,7 +2757,7 @@ namespace krys::boo::html
           }
           case TagName::col:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             return;
@@ -2818,7 +2820,7 @@ namespace krys::boo::html
     InTableMode(krys::move(token));
   }
 
-  void TreeBuilder::InTableBodyMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InTableBodyMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2830,7 +2832,7 @@ namespace krys::boo::html
           case TagName::tr:
           {
             _openElementStack.PopUntilTableBodyContext();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InRow;
             return;
@@ -2938,7 +2940,7 @@ namespace krys::boo::html
     InTableMode(krys::move(token));
   }
 
-  void TreeBuilder::InRowMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InRowMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2952,7 +2954,7 @@ namespace krys::boo::html
           {
             _openElementStack.PopUntilTableRowContext();
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _insertionMode = InsertionMode::InCell;
 
             _activeFormattingElements.PushMarker();
@@ -3061,7 +3063,7 @@ namespace krys::boo::html
     InTableMode(krys::move(token));
   }
 
-  void TreeBuilder::InCellMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InCellMode(TokenAtom token) noexcept
   {
     auto CloseTheCell = [&]()
     {
@@ -3172,7 +3174,7 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void TreeBuilder::InTemplateMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InTemplateMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3293,7 +3295,7 @@ namespace krys::boo::html
     }
   }
 
-  void TreeBuilder::AfterBodyMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterBodyMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3360,7 +3362,7 @@ namespace krys::boo::html
     ProcessToken(krys::move(token));
   }
 
-  void TreeBuilder::InFramesetMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InFramesetMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3403,12 +3405,12 @@ namespace krys::boo::html
           }
           case TagName::frameset:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::frame:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             return;
@@ -3459,7 +3461,7 @@ namespace krys::boo::html
     ParseError(token);
   }
 
-  void TreeBuilder::AfterFramesetMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterFramesetMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3528,7 +3530,7 @@ namespace krys::boo::html
     ParseError(token);
   }
 
-  void TreeBuilder::AfterAfterBodyMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterAfterBodyMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3581,7 +3583,7 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void TreeBuilder::AfterAfterFramesetMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterAfterFramesetMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -4102,7 +4104,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#parsing-main-inhead (a start tag whose tag name is "template")
-  void TreeBuilder::InsertTemplateElement(TokenAtom &&token) noexcept
+  void TreeBuilder::InsertTemplateElement(TokenAtom &token) noexcept
   {
     // 1. Let templateStartTag be the start tag.
     auto &templateStartTag = token;
@@ -4318,7 +4320,7 @@ namespace krys::boo::html
     }
   }
 
-  Ref<dom::Element> TreeBuilder::InsertForeignElement(TokenAtom &&token,
+  Ref<dom::Element> TreeBuilder::InsertForeignElement(TokenAtom &token,
                                                       const dom::DOMStringAtom &namespaceURI,
                                                       bool onlyAddToElementStack) noexcept
   {
@@ -4352,9 +4354,9 @@ namespace krys::boo::html
     return element;
   }
 
-  Ref<dom::Element> TreeBuilder::InsertHTMLElement(TokenAtom &&token) noexcept
+  Ref<dom::Element> TreeBuilder::InsertHTMLElement(TokenAtom &token) noexcept
   {
-    return InsertForeignElement(krys::move(token), infra::Namespaces::HTML, false);
+    return InsertForeignElement(token, infra::Namespaces::HTML, false);
   }
 
   void TreeBuilder::InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position) noexcept
@@ -4413,10 +4415,10 @@ namespace krys::boo::html
     InsertComment(data, InsertionLocation {&_document, nullptr});
   }
 
-  void TreeBuilder::ParseGenericRawTextElement(TokenAtom &&token) noexcept
+  void TreeBuilder::ParseGenericRawTextElement(TokenAtom token) noexcept
   {
     // 1. Insert an HTML element for the token.
-    InsertHTMLElement(krys::move(token));
+    InsertHTMLElement(token);
 
     // 2. If the algorithm that was invoked is the generic raw text element parsing algorithm, switch the
     //    tokenizer to the RAWTEXT state; otherwise the algorithm invoked was the generic RCDATA element
@@ -4430,10 +4432,10 @@ namespace krys::boo::html
     _insertionMode = InsertionMode::Text;
   }
 
-  void TreeBuilder::ParseGenericRCDATATextElement(TokenAtom &&token) noexcept
+  void TreeBuilder::ParseGenericRCDATATextElement(TokenAtom token) noexcept
   {
     // 1. Insert an HTML element for the token.
-    InsertHTMLElement(krys::move(token));
+    InsertHTMLElement(token);
 
     // 2. If the algorithm that was invoked is the generic raw text element parsing algorithm, switch the
     //    tokenizer to the RAWTEXT state; otherwise the algorithm invoked was the generic RCDATA element

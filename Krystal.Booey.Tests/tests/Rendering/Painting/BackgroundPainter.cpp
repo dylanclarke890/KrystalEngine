@@ -394,11 +394,10 @@ namespace krys::boo::tests
     // A solid border's area is a path to clip to.
     auto solid = Painted(u8"<style>body{margin:0}div{width:40px;height:20px;border:4px solid "
                          u8"transparent;background:green border-area}</style><div></div>");
-    CHECK(solid.find(u8R"((clip-path
+    CHECK(solid.contains(u8R"((clip-path
   (path add rect at (0,0) size 48x28, add rect at (4,4) size 40x20)
-  (wind-rule EVEN-ODD)))")
-          != utf8_string::npos);
-    CHECK(solid.find(u8"(begin-transparency-layer") == utf8_string::npos);
+  (wind-rule EVEN-ODD)))"));
+    CHECK_FALSE(solid.contains(u8"(begin-transparency-layer"));
 
     // Other borders are painted into a mask.
     auto dotted = Painted(u8"<style>body{margin:0}div{width:40px;height:20px;border:4px dotted "

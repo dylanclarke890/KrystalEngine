@@ -111,8 +111,8 @@ namespace krys::boo
     /// @brief Writes @p srcRect of @p source at @p destPoint, replacing what's there, ignoring the context's
     /// state (its transform, clip, alpha, shadow and compositing).
     /// @note It's drawn into the context as an image, in order with what's drawn before and after.
-    virtual void PutPixelBuffer(const PixelBufferSourceView &source, const IntRect &srcRect,
-                                const IntPoint &destPoint, AlphaPremultiplication destFormat) noexcept;
+    virtual void PutPixelBuffer(const PixelBufferSourceView &source, const IntRect &sourceRect,
+                                const IntPoint &destinationPoint, AlphaPremultiplication destFormat) noexcept;
 
     KRYS_NODISCARD virtual uint32 BytesPerRow() const noexcept;
 
@@ -162,12 +162,12 @@ namespace krys::boo
     explicit ImageBufferBackend(const Parameters &) noexcept;
 
     /// @brief Reads @p srcRect of @p sourceData, the backend's pixels, into @p destination.
-    void GetPixelBuffer(const IntRect &srcRect, Span<const uint8> sourceData,
+    void GetPixelBuffer(const IntRect &sourceRect, Span<const uint8> sourceData,
                         PixelBuffer &destination) noexcept;
 
     /// @brief Writes @p srcRect of @p source at @p destPoint into @p destinationData, the backend's pixels.
-    void PutPixelBuffer(const PixelBufferSourceView &source, const IntRect &srcRect,
-                        const IntPoint &destPoint, AlphaPremultiplication destFormat,
+    void PutPixelBuffer(const PixelBufferSourceView &source, const IntRect &sourceRect,
+                        const IntPoint &destinationPoint, AlphaPremultiplication destinationAlphaFormat,
                         Span<uint8> destinationData) noexcept;
   };
 }

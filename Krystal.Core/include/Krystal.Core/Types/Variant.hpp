@@ -124,7 +124,7 @@ namespace krys
   ///   using V = Variant<int, float>;
   ///   TypeForIndex<V>(1, []<typename T>() { /* T is float */ });
   template <typename V, typename F>
-  constexpr decltype(auto) TypeForIndex(size_t index, F &&f)
+  constexpr decltype(auto) TypeForIndex(size_t index, F f)
   {
     return detail_variant::TypeForIndexImpl<remove_cvref_t<V>, 0>(index, f);
   }

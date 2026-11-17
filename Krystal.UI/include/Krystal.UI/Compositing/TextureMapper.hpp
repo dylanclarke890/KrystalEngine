@@ -170,6 +170,6 @@ namespace krys::ui
                     const boo::TransformationMatrix &modelViewMatrix) const noexcept;
 
     template <typename TPaint>
-    void PaintIntoTexture(BitmapTexture &texture, const boo::IntRect &targetRect, TPaint &&paint) noexcept;
+    void PaintIntoTexture(BitmapTexture &texture, const boo::IntRect &targetRect, TPaint paint) noexcept;
   };
 }

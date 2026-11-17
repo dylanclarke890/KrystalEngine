@@ -263,7 +263,7 @@ namespace krys::boo
   }
 
   void ImageLoader::DidUpdateCachedImage(RelevantMutation relevantMutation,
-                                         CachedResourceHandle<CachedImage> &&newImage) noexcept
+                                         const CachedResourceHandle<CachedImage> &newImage) noexcept
   {
     CachedResourceHandle oldImage = _image;
     if (newImage != oldImage || relevantMutation == RelevantMutation::Yes)

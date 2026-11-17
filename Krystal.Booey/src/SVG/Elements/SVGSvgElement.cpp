@@ -354,13 +354,13 @@ namespace krys::boo::svg
     return CollectIntersectionOrEnclosureList(rect, referenceElement, CheckEnclosureWithoutUpdatingLayout);
   }
 
-  bool SVGSvgElement::CheckIntersection(Ref<SVGElement> &&element, SVGRect &rect) noexcept
+  bool SVGSvgElement::CheckIntersection(const Ref<SVGElement> &element, SVGRect &rect) noexcept
   {
     (void)element->NodeDocument().UpdateLayoutIgnorePendingStylesheets(SvgQueryLayoutOptions, element.get());
     return CheckIntersectionWithoutUpdatingLayout(*element, rect);
   }
 
-  bool SVGSvgElement::CheckEnclosure(Ref<SVGElement> &&element, SVGRect &rect) noexcept
+  bool SVGSvgElement::CheckEnclosure(const Ref<SVGElement> &element, SVGRect &rect) noexcept
   {
     (void)element->NodeDocument().UpdateLayoutIgnorePendingStylesheets(SvgQueryLayoutOptions, element.get());
     return CheckEnclosureWithoutUpdatingLayout(*element, rect);
@@ -427,7 +427,7 @@ namespace krys::boo::svg
     return SVGTransform::Create(SVGTransformValue::SVG_TRANSFORM_MATRIX);
   }
 
-  Ref<SVGTransform> SVGSvgElement::CreateSVGTransformFromMatrix(css::DOMMatrix2DInit &&matrixInit) noexcept
+  Ref<SVGTransform> SVGSvgElement::CreateSVGTransformFromMatrix(css::DOMMatrix2DInit matrixInit) noexcept
   {
     AffineTransform transform;
     if (matrixInit.A)

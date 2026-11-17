@@ -178,7 +178,7 @@ namespace krys::boo
       return false;
     }
 
-    void Append(UniquePtr<OverlapMapContainer> &&otherContainer) noexcept
+    void Append(UniquePtr<OverlapMapContainer> otherContainer) noexcept
     {
       MergeClippingScopesRecursive(otherContainer->_rootScope, _rootScope);
     }

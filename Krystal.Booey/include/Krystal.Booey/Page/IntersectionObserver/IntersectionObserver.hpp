@@ -94,7 +94,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(IntersectionObserver);
 
   public:
-    // At namespace scope so that `Init &&init = {}` below sees its member initialisers.
+    // At namespace scope so that `Init init = {}` below sees its member initialisers.
     using Init = IntersectionObserverInit;
 
     enum class NeedNotify : bool
@@ -144,7 +144,7 @@ namespace krys::boo
   public:
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserver-intersectionobserver
     KRYS_NODISCARD static dom::ExceptionOr<Ref<IntersectionObserver>>
-      Create(dom::Document &document, IntersectionObserverCallback &&callback, Init &&init = {},
+      Create(dom::Document &document, IntersectionObserverCallback &&callback, Init init = {},
              IncludeObscuredInsets includeObscuredInsets = IncludeObscuredInsets::No) noexcept;
 
     ~IntersectionObserver() noexcept;

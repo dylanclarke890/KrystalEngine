@@ -41,8 +41,8 @@ namespace krys::boo
     return ConstrainedBetween(rect.MinXMinYCorner(), rect.MaxXMaxYCorner());
   }
 
-  TextStream &operator<<(TextStream &ts, const IntPoint &p) noexcept
+  TextStream &operator<<(TextStream &ts, const IntPoint &value) noexcept
   {
-    return ts << '(' << p.X() << ',' << p.Y() << ')';
+    return ts << '(' << value.X() << ',' << value.Y() << ')';
   }
 }

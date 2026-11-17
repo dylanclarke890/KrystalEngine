@@ -57,7 +57,7 @@ namespace krys::boo::dom
       switch (state)
       {
         case PlatformTouchPoint::TouchPressed:    return event_names::PointerDown;
-        case PlatformTouchPoint::TouchMoved:      return event_names::PointerMove;
+        case PlatformTouchPoint::TouchMoved:
         case PlatformTouchPoint::TouchStationary: return event_names::PointerMove;
         case PlatformTouchPoint::TouchReleased:   return event_names::PointerUp;
         case PlatformTouchPoint::TouchCancelled:  return event_names::PointerCancel;

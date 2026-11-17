@@ -382,7 +382,7 @@ namespace krys::ui
     /// `Update` until `IsLoading` is false (or the load handler hears it committed).
     /// @param cachePolicy How its style sheets, images and other resources use the memory cache: `Reload`
     /// loads them again, as reloading a page does.
-    void LoadHTML(utf8_string &&markup, boo::url::URL &&url = {},
+    void LoadHTML(utf8_string markup, boo::url::URL &&url = {},
                   boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
 
     /// @brief Starts loading the UTF-8 file at @p path, at the file's URL, through the loader strategy; as
@@ -764,7 +764,7 @@ namespace krys::ui
 
     /// @brief Replaces the document with one parsed from @p markup at once, without a load: the overlays'
     /// content.
-    void ReplaceDocument(utf8_string &&markup) noexcept;
+    void ReplaceDocument(utf8_string markup) noexcept;
 
     void ShowOverlay(Overlay &overlay) noexcept;
 
@@ -792,7 +792,7 @@ namespace krys::ui
     KRYS_NODISCARD boo::MouseButton HeldButton() const noexcept;
 
     /// @brief The drag @p item describes, of @p dataTransfer's data, started in the page.
-    void DragStarted(boo::DragItem &&item, boo::dom::DataTransfer &dataTransfer) noexcept;
+    void DragStarted(boo::DragItem item, boo::dom::DataTransfer &dataTransfer) noexcept;
 
     /// @brief The drag moved to @p point (in viewport coordinates), with @p modifiers held: over the page,
     /// it's entered or updated, and off it, it's left.

@@ -56,7 +56,7 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD RefPtr<NodeList> RemovedNodes() const noexcept final;
 
-    KRYS_NODISCARD const DOMStringAtom &OldValue() const noexcept final
+    KRYS_NODISCARD const DOMStringAtom &OldValue() const noexcept KRYS_LIFETIME_BOUND final
     {
       return _oldValue;
     }

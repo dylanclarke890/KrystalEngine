@@ -46,9 +46,8 @@ namespace krys::boo::tests
     ts << brush;
     auto dump = ts.Release();
     CAPTURE(css::tests::ToNarrow(dump));
-    CHECK(dump.find(u8"(tile-size width=20 height=40)") != utf8_string::npos);
-    CHECK(dump.find(u8"(pattern-space-transform {m=((3.00,0.00)(0.00,3.00)) t=(0.00,0.00)})")
-          != utf8_string::npos);
+    CHECK(dump.contains(u8"(tile-size width=20 height=40)"));
+    CHECK(dump.contains(u8"(pattern-space-transform {m=((3.00,0.00)(0.00,3.00)) t=(0.00,0.00)})"));
 
     // The graphics context's fill and stroke patterns are its brushes'.
     auto &context = tile->Context();

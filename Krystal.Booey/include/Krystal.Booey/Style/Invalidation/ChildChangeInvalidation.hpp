@@ -82,13 +82,13 @@ namespace krys::boo::style
     void InvalidateForChangeOutsideHasScope() noexcept;
 
     template <typename TFunction>
-    void TraverseRemovedElements(TFunction &&function) noexcept;
+    void TraverseRemovedElements(TFunction function) noexcept;
 
     template <typename TFunction>
-    void TraverseAddedElements(TFunction &&function) noexcept;
+    void TraverseAddedElements(TFunction function) noexcept;
 
     template <typename TFunction>
-    void TraverseRemainingExistingSiblings(TFunction &&function) noexcept;
+    void TraverseRemainingExistingSiblings(TFunction function) noexcept;
 
     KRYS_NODISCARD dom::Element &ParentElement() noexcept
     {

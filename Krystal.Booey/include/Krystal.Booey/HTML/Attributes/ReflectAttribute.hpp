@@ -655,7 +655,7 @@ namespace krys::boo::html
   template <ReflectType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
-    Reflect(Target &target, dom::DOMStringAtom name, TValue &&value) noexcept
+    Reflect(Target &target, dom::DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [Reflect] setter");
 
@@ -835,7 +835,7 @@ namespace krys::boo::html
   template <ReflectType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
-    ReflectSetter(Target &target, dom::DOMStringAtom name, TValue &&value) noexcept
+    ReflectSetter(Target &target, dom::DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectSetter] setter");
 
@@ -860,7 +860,7 @@ namespace krys::boo::html
   template <ReflectURLType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
-    ReflectURL(Target &target, dom::DOMStringAtom name, TValue &&value) noexcept
+    ReflectURL(Target &target, dom::DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectURL] setter");
 

@@ -891,28 +891,28 @@ namespace krys::boo::svg
     return true;
   }
 
-  void SVGElement::SVGAttributeChanged(const dom::QualifiedName &attrName) noexcept
+  void SVGElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
   {
-    auto propId = CssPropertyIdForSVGAttributeName(attrName.LocalName(), attrName.NamespaceURI());
+    auto propId = CssPropertyIdForSVGAttributeName(attributeName.LocalName(), attributeName.NamespaceURI());
     if (propId != css::PropertyId::Invalid)
     {
       InvalidateInstances();
       return;
     }
 
-    if (attrName == SVGNames::ClassAttr())
+    if (attributeName == SVGNames::ClassAttr())
     {
       // NOTE: the element's classes are read from its class attribute, so a change to className through the
       // DOM is written to the attribute now, whose change steps invalidate the style.
-      if (auto value = _propertyRegistry->Synchronize(attrName))
+      if (auto value = _propertyRegistry->Synchronize(attributeName))
       {
-        (void)SetAttribute(attrName.LocalName(), krys::move(*value));
+        (void)SetAttribute(attributeName.LocalName(), krys::move(*value));
       }
       InvalidateInstances();
       return;
     }
 
-    if (attrName == SVGNames::IdAttr())
+    if (attributeName == SVGNames::IdAttr())
     {
       // Notify resources about id changes, this is important as we cache resources by id in
       // SVGDocumentExtensions
@@ -1163,8 +1163,9 @@ namespace krys::boo::svg
 
 #pragma region Presentational hints
 
-  css::PropertyId SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom localName,
-                                                               dom::DOMStringAtom namespaceURI) noexcept
+  css::PropertyId
+    SVGElement::CssPropertyIdForSVGAttributeName(const dom::DOMStringAtom &localName,
+                                                 const dom::DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI != null)
     {

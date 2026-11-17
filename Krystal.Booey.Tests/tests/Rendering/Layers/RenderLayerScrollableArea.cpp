@@ -210,8 +210,8 @@ namespace krys::boo::tests
     {
       PaintFixture fixture(scroller(u8"auto"));
       auto painted = fixture.Painted();
-      CHECK(painted.find(Thumb) == utf8_string::npos);
-      CHECK(painted.find(Track) == utf8_string::npos);
+      CHECK_FALSE(painted.contains(Thumb));
+      CHECK_FALSE(painted.contains(Track));
       CHECK_FALSE(ScrollableAreaOf(fixture, u8"box")->ScrollbarColorStyle());
     }
 
@@ -225,16 +225,16 @@ namespace krys::boo::tests
       CHECK(colours->TrackColor == Color(SRGBA<uint8> {0, 0, 255}));
 
       // The vertical track, the horizontal track and the corner between them.
-      CHECK(painted.find(u8"(rect at (79,0) size 21x59)") != utf8_string::npos);
-      CHECK(painted.find(u8"(rect at (0,59) size 79x21)") != utf8_string::npos);
-      CHECK(painted.find(u8"(rect at (79,59) size 21x21)") != utf8_string::npos);
+      CHECK(painted.contains(u8"(rect at (79,0) size 21x59)"));
+      CHECK(painted.contains(u8"(rect at (0,59) size 79x21)"));
+      CHECK(painted.contains(u8"(rect at (79,59) size 21x21)"));
       size_t tracks = 0;
       for (auto at = painted.find(Track); at != utf8_string::npos; at = painted.find(Track, at + 1))
       {
         ++tracks;
       }
       CHECK(tracks == 3u);
-      CHECK(painted.find(Thumb) != utf8_string::npos);
+      CHECK(painted.contains(Thumb));
     }
 
     SECTION("the root's colours are the viewport's")
@@ -362,13 +362,13 @@ namespace krys::boo::tests
     auto &loop = html::EventLoop::Current();
 
     auto painted = fixture.Painted();
-    REQUIRE(painted.find(Child) != utf8_string::npos);
-    REQUIRE(painted.find(Thumb) != utf8_string::npos);
+    REQUIRE(painted.contains(Child));
+    REQUIRE(painted.contains(Thumb));
     CHECK(painted.find(Thumb) > painted.find(Child));
 
     // Faded out, it isn't drawn.
     loop.Run(loop.Now() + 3'100ms);
-    CHECK(fixture.Painted().find(Thumb) == utf8_string::npos);
+    CHECK_FALSE(fixture.Painted().contains(Thumb));
 
     // The mouse coming over the scroller shows it.
     auto move = PlatformMouseEvent(DoublePoint(50, 50), DoublePoint(50, 50), MouseButton::None,
@@ -376,7 +376,7 @@ namespace krys::boo::tests
     (void)fixture.Frame->GetEventHandler().MouseMoved(move);
     loop.Run(loop.Now() + 1s);
     CHECK(ScrollableAreaOf(fixture, u8"box")->VerticalScrollbar()->Opacity() == 1);
-    CHECK(fixture.Painted().find(Thumb) != utf8_string::npos);
+    CHECK(fixture.Painted().contains(Thumb));
   }
 
   TEST_CASE_METHOD(

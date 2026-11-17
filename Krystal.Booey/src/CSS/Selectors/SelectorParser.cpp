@@ -168,7 +168,7 @@ namespace krys::boo::css
 
   template <typename TConsumeSelector>
   MutableSelectorList SelectorParser::ConsumeSelectorList(TokenRange &tokens,
-                                                          TConsumeSelector &&consumeSelector) noexcept
+                                                          TConsumeSelector consumeSelector) noexcept
   {
     MutableSelectorList selectorList;
     auto selector = consumeSelector(tokens);
@@ -215,9 +215,8 @@ namespace krys::boo::css
   }
 
   template <typename TConsumeSelector>
-  MutableSelectorList
-    SelectorParser::ConsumeForgivingSelectorList(TokenRange &tokens,
-                                                 TConsumeSelector &&consumeSelector) noexcept
+  MutableSelectorList SelectorParser::ConsumeForgivingSelectorList(TokenRange &tokens,
+                                                                   TConsumeSelector consumeSelector) noexcept
   {
     if (_failedParsing)
     {

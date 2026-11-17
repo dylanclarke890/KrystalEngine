@@ -118,7 +118,7 @@ namespace krys::boo::css::parse_property
   }
 
   template <typename Predicate, typename... Args>
-  KRYS_NODISCARD Maybe<ValueId> ConsumeIdentRaw(TokenRange &tokens, Predicate &&predicate,
+  KRYS_NODISCARD Maybe<ValueId> ConsumeIdentRaw(TokenRange &tokens, Predicate predicate,
                                                 Args &&...args) noexcept
   {
     if (auto keyword = tokens.Peek().ValueId(); predicate(keyword, std::forward<Args>(args)...))
@@ -133,7 +133,7 @@ namespace krys::boo::css::parse_property
   }
 
   template <typename Predicate, typename... Args>
-  KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeIdent(TokenRange &tokens, Predicate &&predicate,
+  KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeIdent(TokenRange &tokens, Predicate predicate,
                                                      Args &&...args) noexcept
   {
     if (auto keyword = tokens.Peek().ValueId(); predicate(keyword, std::forward<Args>(args)...))
@@ -150,7 +150,7 @@ namespace krys::boo::css::parse_property
   /// @brief Maps the next token's identifier with `mapping`, without consuming it.
   /// @param mapping Takes a `ValueId` and returns a `Maybe` of the mapped value (`null` if unmapped).
   template <Callable<ValueId> TMapping>
-  KRYS_NODISCARD auto PeekIdentUsingMapping(TokenRange &tokens, TMapping &&mapping) noexcept
+  KRYS_NODISCARD auto PeekIdentUsingMapping(TokenRange &tokens, TMapping mapping) noexcept
   {
     return mapping(tokens.Peek().ValueId());
   }
@@ -158,7 +158,7 @@ namespace krys::boo::css::parse_property
   /// @brief Consumes the next token if `mapping` maps its identifier to a value.
   /// @param mapping Takes a `ValueId` and returns a `Maybe` of the mapped value (`null` if unmapped).
   template <Callable<ValueId> TMapping>
-  KRYS_NODISCARD auto ConsumeIdentUsingMapping(TokenRange &tokens, TMapping &&mapping) noexcept
+  KRYS_NODISCARD auto ConsumeIdentUsingMapping(TokenRange &tokens, TMapping mapping) noexcept
   {
     auto value = mapping(tokens.Peek().ValueId());
     if (value)

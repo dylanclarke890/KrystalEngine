@@ -547,7 +547,7 @@ namespace krys::boo
 
       KRYS_NODISCARD FontCascade &MutableFontCascadeWithoutUpdate() noexcept;
 
-      void SetFontCascade(FontCascade &&) noexcept;
+      void SetFontCascade(FontCascade) noexcept;
 
       KRYS_NODISCARD const FontCascadeDescription &GetFontDescription() const noexcept;
 
@@ -567,9 +567,9 @@ namespace krys::boo
 
       KRYS_NODISCARD const LineHeight &SpecifiedLineHeight() const noexcept;
 
-      void SetLetterSpacingFromAnimation(LetterSpacing &&) noexcept;
+      void SetLetterSpacingFromAnimation(LetterSpacing) noexcept;
 
-      void SetWordSpacingFromAnimation(WordSpacing &&) noexcept;
+      void SetWordSpacingFromAnimation(WordSpacing) noexcept;
 
       void SynchronizeLetterSpacingWithFontCascade() noexcept;
 

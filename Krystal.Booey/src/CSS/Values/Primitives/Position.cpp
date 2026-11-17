@@ -60,7 +60,7 @@ namespace krys::boo::css
     }
   }
 
-  Pair<PositionX, PositionY> Split(Position &&position) noexcept
+  Pair<PositionX, PositionY> Split(Position position) noexcept
   {
     // PositionX and PositionY don't utilize the three component variants, so the non-length containing item
     // must be converted to its two component variant.

@@ -784,11 +784,11 @@ namespace krys::boo::tests
         // Three discs centred on the mouse: an outline, a white fill, and a dot.
         auto painted = paintView();
         INFO(reinterpret_cast<const char *>(painted.c_str()));
-        CHECK(painted.find(u8"fill-ellipse") != utf8_string::npos);
-        CHECK(painted.find(u8"(92,12) size 16x16") != utf8_string::npos);
+        CHECK(painted.contains(u8"fill-ellipse"));
+        CHECK(painted.contains(u8"(92,12) size 16x16"));
         CHECK(fixture.Press(100, 20));
         CHECK_FALSE(fixture.Handler().PanScrollInProgress());
-        CHECK(paintView().find(u8"fill-ellipse") == utf8_string::npos);
+        CHECK_FALSE(paintView().contains(u8"fill-ellipse"));
       }
 
       SECTION("doesn't scroll over the icon, and goes on after the release")
@@ -860,9 +860,9 @@ namespace krys::boo::tests
           view->Paint(recorder, IntRect(0, 0, 200, 100));
           return recorder.TakeDisplayList()->AsText({});
         };
-        CHECK(painted().find(u8"ellipse") != utf8_string::npos);
+        CHECK(painted().contains(u8"ellipse"));
         (void)fixture.Press(100, 20);
-        CHECK(painted().find(u8"ellipse") == utf8_string::npos);
+        CHECK_FALSE(painted().contains(u8"ellipse"));
       }
     }
 

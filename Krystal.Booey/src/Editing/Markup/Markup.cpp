@@ -1312,7 +1312,7 @@ namespace krys::boo
         return;
       }
 
-      krys_debug_assert(string.find(u8'\n') == utf8_stringview::npos);
+      krys_debug_assert(!string.contains(u8'\n'));
 
       List<utf8_stringview> tabList;
       for (auto part : std::views::split(string, u8'\t'))
@@ -1612,7 +1612,7 @@ namespace krys::boo
     }
   }
 
-  utf8_string SanitizedMarkupForFragmentInDocument(Ref<dom::DocumentFragment> &&fragment,
+  utf8_string SanitizedMarkupForFragmentInDocument(const Ref<dom::DocumentFragment> &fragment,
                                                    dom::Document &document, MSOListQuirks msoListQuirks,
                                                    utf8_stringview originalMarkup) noexcept
   {
@@ -1862,7 +1862,7 @@ namespace krys::boo
   // FIXME: Setting a lone text child's data instead of replacing it when script can't observe the difference
   // (canUseSetDataOptimization), with mutation observers' child list scope.
   dom::ExceptionOr<void> ReplaceChildrenWithFragment(dom::ContainerNode &container,
-                                                     Ref<dom::DocumentFragment> &&fragment) noexcept
+                                                     const Ref<dom::DocumentFragment> &fragment) noexcept
   {
     Ref<dom::ContainerNode> containerNode = ShareRef(container);
 

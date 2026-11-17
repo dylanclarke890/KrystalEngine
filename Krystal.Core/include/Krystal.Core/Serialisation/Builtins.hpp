@@ -33,6 +33,7 @@ namespace krys::serialisation
     KRYS_NON_COPYABLE(NamedField);
 
   public:
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): T may be an lvalue reference.
     constexpr NamedField(stringview name, T &&value) noexcept : Name(name), Value(std::forward<T>(value))
     {
     }
@@ -79,6 +80,7 @@ namespace krys::serialisation
     // Stores a reference if passed an lvalue reference, otherwise makes a copy of the data.
     using SizeType = conditional_t<LValueRef<T>, T, decay_t<T>>;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): T may be an lvalue reference.
     ContainerSize(T &&value) noexcept : Size(std::forward<T>(value))
     {
     }
@@ -113,6 +115,7 @@ namespace krys::serialisation
     using KeyType = conditional_t<LValueRef<TKey>, TKey, decay_t<TKey>>;
     using ValueType = conditional_t<LValueRef<TValue>, TValue, decay_t<TValue>>;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): may be lvalue references.
     KeyValuePair(TKey &&key, TValue &&value) noexcept
         : Key(std::forward<TKey>(key)), Value(std::forward<TValue>(value))
     {

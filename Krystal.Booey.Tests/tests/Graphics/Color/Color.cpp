@@ -45,6 +45,7 @@ namespace krys::boo::tests
     }
 
     template <typename T>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): a self-move needs the reference.
     void SelfMove(T &a, T &&b)
     {
       a = krys::move(b);

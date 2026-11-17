@@ -538,7 +538,7 @@ namespace krys::boo::tests
     SECTION("the canvas paints its buffer")
     {
       auto painted = fixture.Painted();
-      CHECK(painted.find(u8"draw-image-buffer") != utf8_string::npos);
+      CHECK(painted.contains(u8"draw-image-buffer"));
     }
   }
 

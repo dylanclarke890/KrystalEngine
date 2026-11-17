@@ -197,7 +197,7 @@ namespace krys::boo
     return AddFontFileData(text::FontFileData::Create(krys::move(bytes)));
   }
 
-  uint32 FontDatabase::AddFontFileData(Ref<text::FontFileData> &&data) noexcept
+  uint32 FontDatabase::AddFontFileData(const Ref<text::FontFileData> &data) noexcept
   {
     auto faceCount = text::FreeTypeFace::FaceCount(*data);
     uint32 count = 0;

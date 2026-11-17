@@ -161,7 +161,7 @@ namespace krys::boo::layout_integration
     KRYS_NODISCARD bool IsInlineBoxWrapperForBlockLevelBox(const inline_display::Box &box) const noexcept;
 
     template <typename TFunction>
-    void TraverseNonRootInlineBoxes(const layout::Box &layoutBox, TFunction &&function) const noexcept
+    void TraverseNonRootInlineBoxes(const layout::Box &layoutBox, TFunction function) const noexcept
     {
       for (auto index : NonRootInlineBoxIndexesForLayoutBox(layoutBox))
       {

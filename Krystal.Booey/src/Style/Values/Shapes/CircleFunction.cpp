@@ -61,10 +61,10 @@ namespace krys::boo::style
 
   // MARK: - Path Generation
 
-  KRYS_NODISCARD FloatPoint ResolvePosition(const Circle &value, FloatSize boundingBox) noexcept
+  KRYS_NODISCARD FloatPoint ResolvePosition(const Circle &value, FloatSize boxSize) noexcept
   {
-    return value.Position ? Evaluate<FloatPoint>(*value.Position, boundingBox, style::ZoomNeeded {})
-                          : FloatPoint {boundingBox.Width() / 2, boundingBox.Height() / 2};
+    return value.Position ? Evaluate<FloatPoint>(*value.Position, boxSize, style::ZoomNeeded {})
+                          : FloatPoint {boxSize.Width() / 2, boxSize.Height() / 2};
   }
 
   KRYS_NODISCARD float ResolveRadius(const Circle &value, FloatSize boxSize, FloatPoint center) noexcept

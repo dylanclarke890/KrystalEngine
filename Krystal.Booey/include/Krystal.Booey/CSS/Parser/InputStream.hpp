@@ -20,7 +20,7 @@ namespace krys::boo::css
     SourceLocation _currentLocation;
 
   public:
-    InputStream(CSSOMString &&input) noexcept : _data(FilterCodePoints(krys::move(input)))
+    InputStream(CSSOMString input) noexcept : _data(FilterCodePoints(krys::move(input)))
     {
       krys_debug_assert(_data.empty() || _data.back() != EOFMarker);
     }
@@ -115,7 +115,7 @@ namespace krys::boo::css
 
   private:
     /// @see https://drafts.csswg.org/css-syntax/#css-filter-code-points
-    static utf32_string FilterCodePoints(CSSOMString &&input) noexcept
+    static utf32_string FilterCodePoints(CSSOMString input) noexcept
     {
       utf8_string output;
       output.reserve(input.size());

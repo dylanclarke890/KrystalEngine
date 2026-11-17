@@ -35,7 +35,7 @@
 
 namespace krys::boo::css
 {
-  Ref<CSSKeywordValue> CSSKeywordValue::RectifyKeywordish(CSSKeywordish &&keywordish) noexcept
+  Ref<CSSKeywordValue> CSSKeywordValue::RectifyKeywordish(CSSKeywordish keywordish) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-keywordish-value
     return krys::SwitchOn(

@@ -114,11 +114,7 @@ namespace krys::boo::style
     {
     }
 
-    LengthWrapperBase(Calc &&calc) noexcept : _value(IndexForCalc, calc.ProtectedCalculation())
-    {
-    }
-
-    LengthWrapperBase(Specified &&specified) noexcept : _value(ToData(specified))
+    LengthWrapperBase(const Calc &calc) noexcept : _value(IndexForCalc, calc.ProtectedCalculation())
     {
     }
 

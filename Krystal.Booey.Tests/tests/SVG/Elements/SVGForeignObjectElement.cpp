@@ -77,9 +77,9 @@ layer at (0,0) size 200x100
     // Opacity clips to the foreign object's repaint rect, which starts at its location, where its content is
     // painted.
     auto painted = fixture.Painted();
-    CHECK(painted.find(u8"(clip\n  (rect at (0,0) size 40x30))") != utf8_string::npos);
-    CHECK(painted.find(u8"(begin-transparency-layer") != utf8_string::npos);
-    CHECK(painted.find(u8"(rect at (0,0) size 20x10)\n  (color #00FF00)") != utf8_string::npos);
+    CHECK(painted.contains(u8"(clip\n  (rect at (0,0) size 40x30))"));
+    CHECK(painted.contains(u8"(begin-transparency-layer"));
+    CHECK(painted.contains(u8"(rect at (0,0) size 20x10)\n  (color #00FF00)"));
   }
 
   TEST_CASE("SVGForeignObjectElement: positioned content", "[SVG][SVGForeignObjectElement]")

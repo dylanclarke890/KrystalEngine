@@ -377,7 +377,7 @@ namespace krys::boo
     /// host around it.
     void ApplyStyle(const css::StyleProperties *style, EditAction editingAction) noexcept;
 
-    void ApplyStyle(RefPtr<EditingStyle> &&style, EditAction editingAction) noexcept;
+    void ApplyStyle(const RefPtr<EditingStyle> &style, EditAction editingAction) noexcept;
 
     /// @brief Applies @p style to the paragraphs the selection touches.
     void ApplyParagraphStyle(const css::StyleProperties *style, EditAction editingAction) noexcept;
@@ -435,7 +435,7 @@ namespace krys::boo
     /// @brief Fires `beforeinput` for a command about to be applied.
     /// @return Whether to go on and apply it.
     bool WillApplyEditing(CompositeEditCommand &command,
-                          List<RefPtr<dom::StaticRange>> &&targetRanges) noexcept;
+                          const List<RefPtr<dom::StaticRange>> &targetRanges) noexcept;
 
     /// @brief Selects the command's result, fires `input`, and registers the command to be undone.
     void AppliedEditing(CompositeEditCommand &command) noexcept;
@@ -578,10 +578,10 @@ namespace krys::boo
 
     KRYS_NODISCARD utf8_string SelectedText(TextIteratorBehaviors behaviors) const noexcept;
 
-    bool DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind) noexcept;
+    bool DispatchClipboardEvent(RefPtr<dom::Element> target, ClipboardEventKind kind) noexcept;
 
-    bool DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind,
-                                Ref<dom::DataTransfer> &&dataTransfer) noexcept;
+    bool DispatchClipboardEvent(const RefPtr<dom::Element> &target, ClipboardEventKind kind,
+                                const Ref<dom::DataTransfer> &dataTransfer) noexcept;
 
     KRYS_NODISCARD RefPtr<dom::Element> FindEventTargetFromSelection() const noexcept;
 

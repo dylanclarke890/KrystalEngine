@@ -84,6 +84,7 @@ namespace krys::ui::tests
       {
       }
 
+      // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): the interface's signature.
       void SetCallbacks(pal::WindowCallbacks &&) noexcept override
       {
       }

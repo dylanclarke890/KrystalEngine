@@ -70,7 +70,7 @@ namespace krys::boo
                             style::Evaluate<float>(style.OutlineWidth(), style::ZoomNeeded {}), color);
     }
 
-    void AppendIfNotEmpty(List<LayoutRect> &rects, LayoutRect &&rect) noexcept
+    void AppendIfNotEmpty(List<LayoutRect> &rects, LayoutRect rect) noexcept
     {
       if (rect.IsEmpty())
       {
@@ -728,7 +728,7 @@ namespace krys::boo
     auto [graph, polys] = FloatPointGraph::PolygonsForRect(rects);
 
     // Fall back to corner painting with no radius for empty and disjoint rectangles.
-    if (!polys.size() || polys.size() > 1)
+    if (polys.empty() || polys.size() > 1)
     {
       return Path();
     }

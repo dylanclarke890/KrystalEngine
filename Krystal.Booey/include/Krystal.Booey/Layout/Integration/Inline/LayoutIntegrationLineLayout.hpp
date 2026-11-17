@@ -237,7 +237,7 @@ namespace krys::boo::layout_integration
     /// @note This is temporary, required by partial bailout check.
     KRYS_NODISCARD bool ContentNeedsVisualReordering() const noexcept;
 
-    KRYS_NODISCARD FloatRect ApplySVGTextFragments(SVGTextFragmentMap &&fragmentMap) noexcept;
+    KRYS_NODISCARD FloatRect ApplySVGTextFragments(SVGTextFragmentMap fragmentMap) noexcept;
 
     KRYS_NODISCARD bool HasBlocks() const noexcept;
 

@@ -46,11 +46,7 @@ namespace krys::boo::html::tests
           auto localName = element.LocalName().ToString();
           auto namespaceName = [&] -> dom::DOMString
           {
-            if (element.NamespaceURI() == infra::Namespaces::HTML)
-            {
-              return u8"";
-            }
-            else if (element.NamespaceURI() == infra::Namespaces::SVG)
+            if (element.NamespaceURI() == infra::Namespaces::SVG)
             {
               return u8"svg ";
             }
@@ -73,11 +69,7 @@ namespace krys::boo::html::tests
             auto attrLocalName = attr->LocalName().ToString();
             auto attrNamespaceName = [&] -> dom::DOMString
             {
-              if (attr->NamespaceURI() == infra::Namespaces::HTML)
-              {
-                return u8"";
-              }
-              else if (attr->NamespaceURI() == infra::Namespaces::XML)
+              if (attr->NamespaceURI() == infra::Namespaces::XML)
               {
                 return u8"xml ";
               }

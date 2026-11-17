@@ -75,7 +75,7 @@ namespace krys::boo::layout
         return _inlineItemList;
       }
 
-      void Set(InlineItemList &&inlineItemList, ContentAttributes contentAttributes,
+      void Set(InlineItemList inlineItemList, ContentAttributes contentAttributes,
                IsPopulatedFromCache isPopulatedFromCache) noexcept
       {
         _inlineItemList = krys::move(inlineItemList);
@@ -83,7 +83,7 @@ namespace krys::boo::layout
         _isPopulatedFromCache = isPopulatedFromCache == IsPopulatedFromCache::Yes;
       }
 
-      void Replace(size_t insertionPosition, InlineItemList &&inlineItemList,
+      void Replace(size_t insertionPosition, InlineItemList inlineItemList,
                    ContentAttributes contentAttributes, IsPopulatedFromCache isPopulatedFromCache) noexcept
       {
         _inlineItemList.erase(_inlineItemList.begin() + static_cast<ptrdiff_t>(insertionPosition),

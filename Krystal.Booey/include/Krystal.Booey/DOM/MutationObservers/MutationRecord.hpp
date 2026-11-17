@@ -59,19 +59,19 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributename
-    KRYS_NODISCARD virtual const DOMStringAtom &AttributeName() const noexcept
+    KRYS_NODISCARD virtual const DOMStringAtom &AttributeName() const noexcept KRYS_LIFETIME_BOUND
     {
       return DOMStringAtom::Null();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributenamespace
-    KRYS_NODISCARD virtual const DOMStringAtom &AttributeNamespace() const noexcept
+    KRYS_NODISCARD virtual const DOMStringAtom &AttributeNamespace() const noexcept KRYS_LIFETIME_BOUND
     {
       return DOMStringAtom::Null();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-oldvalue
-    KRYS_NODISCARD virtual const DOMStringAtom &OldValue() const noexcept
+    KRYS_NODISCARD virtual const DOMStringAtom &OldValue() const noexcept KRYS_LIFETIME_BOUND
     {
       return DOMStringAtom::Null();
     }

@@ -85,7 +85,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-addeventlistener
     /// @note The target holds its listeners' callbacks: a callback that holds a reference to the target (or
     /// to a node of its document) keeps both alive, as there's no garbage collector to find the cycle.
-    void AddEventListener(const DOMStringAtom &type, Ref<EventListenerCallback> &&callback,
+    void AddEventListener(const DOMStringAtom &type, Ref<EventListenerCallback> callback,
                           const AddEventListenerOptionsOrBool &options) noexcept;
 
     /// @brief Adds a listener that calls @p callback, owned by the returned handle: destroying the handle
@@ -116,7 +116,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-removeeventlistener
-    void RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
+    void RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> callback,
                              const EventListenerOptionsOrBool &options) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-dispatchevent

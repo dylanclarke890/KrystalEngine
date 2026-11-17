@@ -135,7 +135,7 @@ namespace krys::boo::dom
 
     template <typename TPredicate>
     KRYS_NODISCARD DOMString ReadURLsFromPasteboardAsString(Pasteboard &pasteboard,
-                                                            TPredicate &&shouldIncludeURL) noexcept
+                                                            TPredicate shouldIncludeURL) noexcept
     {
       DOMString urlList;
       for (auto &urlString : pasteboard.ReadAllStrings(u8"text/uri-list"))
@@ -240,6 +240,7 @@ namespace krys::boo::dom
         Types.emplace(text::ToASCIILower(File::ContentTypeForFile(filename)));
       }
 
+      // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): the interface's signature.
       void ReadBuffer(utf8_stringview, utf8_stringview type, Ref<SharedBuffer> &&) noexcept final
       {
         Types.emplace(text::ToASCIILower(type));
@@ -767,7 +768,7 @@ namespace krys::boo::dom
     _dropEffect = DOMString(IEOpFromDragOp(operationMask));
   }
 
-  void DataTransfer::MoveDragState(Ref<DataTransfer> &&other) noexcept
+  void DataTransfer::MoveDragState(const Ref<DataTransfer> &other) noexcept
   {
     krys_assert(Is<StaticPasteboard>(other->GetPasteboard()));
     other->CommitToPasteboard(*_pasteboard);

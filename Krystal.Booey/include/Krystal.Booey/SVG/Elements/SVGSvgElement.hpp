@@ -98,10 +98,10 @@ namespace krys::boo::svg
     KRYS_NODISCARD Ref<dom::NodeList> GetEnclosureList(SVGRect &, SVGElement *referenceElement) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__checkIntersection
-    KRYS_NODISCARD static bool CheckIntersection(Ref<SVGElement> &&, SVGRect &) noexcept;
+    KRYS_NODISCARD static bool CheckIntersection(const Ref<SVGElement> &, SVGRect &) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__checkEnclosure
-    KRYS_NODISCARD static bool CheckEnclosure(Ref<SVGElement> &&, SVGRect &) noexcept;
+    KRYS_NODISCARD static bool CheckEnclosure(const Ref<SVGElement> &, SVGRect &) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__deselectAll
     void DeselectAll() noexcept;
@@ -121,7 +121,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD static Ref<SVGTransform> CreateSVGTransform() noexcept;
 
     KRYS_NODISCARD static Ref<SVGTransform>
-      CreateSVGTransformFromMatrix(css::DOMMatrix2DInit &&matrixInit) noexcept;
+      CreateSVGTransformFromMatrix(css::DOMMatrix2DInit matrixInit) noexcept;
 
     /// @brief The first element in the subtree of the `<svg>` element whose id is @p id.
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__getElementById

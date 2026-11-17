@@ -98,6 +98,7 @@ namespace krys::boo::css
   {
   }
 
+  // NOLINTNEXTLINE(bugprone-copy-constructor-init): a copy starts with its own reference and weak counts.
   StyleSheetContents::StyleSheetContents(const StyleSheetContents &other) noexcept
       : _originalURL(other._originalURL), _encodingFromCharsetRule(other._encodingFromCharsetRule),
         _namespaces(other._namespaces), _defaultNamespace(other._defaultNamespace),

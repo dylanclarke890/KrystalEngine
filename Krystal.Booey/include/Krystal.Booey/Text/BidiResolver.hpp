@@ -1137,6 +1137,7 @@ namespace krys::boo
           }
           break;
           // neutrals
+        // NOLINTNEXTLINE(bugprone-branch-clone): each has its own FIXME.
         case U_BLOCK_SEPARATOR:
           // FIXME: What do we do with newline and paragraph separators that come to here?
           break;

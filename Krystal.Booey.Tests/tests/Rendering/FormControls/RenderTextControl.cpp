@@ -125,10 +125,8 @@ layer at (447,18) size 51x10
     CHECK_FALSE(layer->InResizeMode());
 
     // It's wider, and no shorter than its minimum height.
-    CHECK(boo::tests::Narrow(box.GetAttribute(u8"style").value_or(u8"")).find("width: 130px")
-          != std::string::npos);
-    CHECK(boo::tests::Narrow(box.GetAttribute(u8"style").value_or(u8"")).find("height: 40px")
-          != std::string::npos);
+    CHECK(boo::tests::Narrow(box.GetAttribute(u8"style").value_or(u8"")).contains("width: 130px"));
+    CHECK(boo::tests::Narrow(box.GetAttribute(u8"style").value_or(u8"")).contains("height: 40px"));
     CHECK(Downcast<RenderBox>(box.Renderer())->Width() == 130);
   }
 

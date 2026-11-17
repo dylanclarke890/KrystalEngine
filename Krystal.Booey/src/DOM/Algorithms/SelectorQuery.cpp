@@ -64,7 +64,7 @@ namespace krys::boo::dom
 
     /// @brief Calls @p func with each element descendant of @p rootNode in tree order, until it returns true.
     template <typename TFunc>
-    void ForEachDescendantElement(const ContainerNode &rootNode, TFunc &&func) noexcept
+    void ForEachDescendantElement(const ContainerNode &rootNode, TFunc func) noexcept
     {
       for (auto *node = TreeQueries::Next(rootNode, &rootNode); node;
            node = TreeQueries::Next(*node, &rootNode))

@@ -15,7 +15,7 @@
 
 namespace krys::boo::dom
 {
-  void EventTarget::AddEventListener(const DOMStringAtom &type, Ref<EventListenerCallback> &&callback,
+  void EventTarget::AddEventListener(const DOMStringAtom &type, Ref<EventListenerCallback> callback,
                                      const AddEventListenerOptionsOrBool &optionsOrBool) noexcept
   {
     // 1. Let capture, passive, once, and signal be the result of flattening more options.
@@ -54,7 +54,7 @@ namespace krys::boo::dom
       { return !listener->Removed() && listener->Capture() && listener->Type() == type; });
   }
 
-  void EventTarget::RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
+  void EventTarget::RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> callback,
                                         const EventListenerOptionsOrBool &optionsOrBool) noexcept
   {
     // 1. Let capture be the result of flattening options.

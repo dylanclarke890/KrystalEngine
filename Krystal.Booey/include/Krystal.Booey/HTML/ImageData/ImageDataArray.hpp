@@ -50,7 +50,7 @@ namespace krys::boo::html
     {
     }
 
-    ImageDataArray(ImageDataArray &&original, Maybe<ImageDataPixelFormat> overridingPixelFormat) noexcept
+    ImageDataArray(ImageDataArray original, Maybe<ImageDataPixelFormat> overridingPixelFormat) noexcept
         : _data(krys::move(original._data)),
           _pixelFormat(overridingPixelFormat.value_or(original._pixelFormat))
     {

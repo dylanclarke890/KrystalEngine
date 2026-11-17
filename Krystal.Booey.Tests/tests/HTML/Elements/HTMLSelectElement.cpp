@@ -827,7 +827,7 @@ namespace krys::boo::tests
       option.RemoveAttribute(u8"label");
       (void)option.TextContent(dom::DOMString(u8"Replaced"));
       (void)fixture.Document->UpdateLayout();
-      CHECK(layout::tests::DumpWithIds(fixture).find(u8"\"Contents\"") == utf8_string::npos);
+      CHECK_FALSE(layout::tests::DumpWithIds(fixture).contains(u8"\"Contents\""));
       CHECK(Dumps(fixture, u8"\"Replaced\""));
     }
 

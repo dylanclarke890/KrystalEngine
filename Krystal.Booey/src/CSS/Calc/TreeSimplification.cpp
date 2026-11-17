@@ -328,7 +328,7 @@ namespace krys::boo::css::calc
   template <typename Op, typename Completion>
   static Maybe<Child> SimplifyForOperationWithCompletion(Child &a, Child &b,
                                                          const SimplificationOptions &options,
-                                                         Completion &&completion) noexcept
+                                                         Completion completion) noexcept
   {
     return SwitchTogether(
       a, b,

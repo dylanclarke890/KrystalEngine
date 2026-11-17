@@ -28,6 +28,7 @@
 
 namespace krys::boo
 {
+  // NOLINTNEXTLINE(bugprone-unhandled-self-assignment): safe, see _accumulatedTransform below.
   TransformState &TransformState::operator=(const TransformState &other) noexcept
   {
     _accumulatedOffset = other._accumulatedOffset;

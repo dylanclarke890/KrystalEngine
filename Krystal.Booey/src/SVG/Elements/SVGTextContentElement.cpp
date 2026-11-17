@@ -127,7 +127,7 @@ namespace krys::boo::svg
     return SVGTextQuery(Renderer()).RotationOfCharacter(charnum);
   }
 
-  int32 SVGTextContentElement::GetCharNumAtPosition(dom::DOMPointInit &&pointInit) noexcept
+  int32 SVGTextContentElement::GetCharNumAtPosition(dom::DOMPointInit pointInit) noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
       {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,

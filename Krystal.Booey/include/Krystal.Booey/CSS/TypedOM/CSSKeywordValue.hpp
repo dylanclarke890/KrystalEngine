@@ -62,7 +62,7 @@ namespace krys::boo::css
     }
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-keywordish-value
-    KRYS_NODISCARD static Ref<CSSKeywordValue> RectifyKeywordish(CSSKeywordish &&keywordish) noexcept;
+    KRYS_NODISCARD static Ref<CSSKeywordValue> RectifyKeywordish(CSSKeywordish keywordish) noexcept;
 
     KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 

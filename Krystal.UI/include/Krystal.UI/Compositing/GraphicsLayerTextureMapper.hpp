@@ -85,7 +85,7 @@ namespace krys::ui
     ~GraphicsLayerTextureMapper() noexcept override;
 
     // GraphicsLayer
-    bool SetChildren(List<Ref<GraphicsLayer>> &&children) noexcept override;
+    bool SetChildren(List<Ref<GraphicsLayer>> children) noexcept override;
 
     void AddChild(Ref<GraphicsLayer> &&layer) noexcept override;
 

@@ -53,7 +53,7 @@ namespace krys::boo
   }
 
   Ref<DocumentTimeline> DocumentTimeline::Create(dom::Document &document,
-                                                 DocumentTimelineOptions &&options) noexcept
+                                                 DocumentTimelineOptions options) noexcept
   {
     return AdoptRef(*new DocumentTimeline(document, Seconds {options.OriginTime / 1'000}));
   }

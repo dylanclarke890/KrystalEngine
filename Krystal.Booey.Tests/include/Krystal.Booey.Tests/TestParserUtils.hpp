@@ -95,7 +95,7 @@ namespace krys::boo::tests
 
   template <typename ParseSectionFunc>
   KRYS_NODISCARD inline void ParseTestData(std::istream &stream, stringview newSectionDelimeter,
-                                           ParseSectionFunc &&parseSectionFunc) noexcept
+                                           ParseSectionFunc parseSectionFunc) noexcept
   {
     utf8_string sectionName;
     utf8_string data;
@@ -133,7 +133,7 @@ namespace krys::boo::tests
   }
 
   template <typename T, typename ExecuteTestFunc>
-  inline void ExecuteTests(const List<T> &tests, ExecuteTestFunc &&func) noexcept
+  inline void ExecuteTests(const List<T> &tests, ExecuteTestFunc func) noexcept
   {
     for (size_t i = 0uz; i < tests.size(); ++i)
     {

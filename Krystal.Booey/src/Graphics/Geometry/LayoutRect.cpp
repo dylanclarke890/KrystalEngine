@@ -234,13 +234,13 @@ namespace krys::boo
     return FloatRect(location, maxPoint - location);
   }
 
-  TextStream &operator<<(TextStream &ts, const LayoutRect &r) noexcept
+  TextStream &operator<<(TextStream &ts, const LayoutRect &value) noexcept
   {
     if (ts.HasFormattingFlag(TextStream::Formatting::LayoutUnitsAsIntegers))
     {
-      return ts << SnappedIntRect(r);
+      return ts << SnappedIntRect(value);
     }
 
-    return ts << FloatRect(r);
+    return ts << FloatRect(value);
   }
 }

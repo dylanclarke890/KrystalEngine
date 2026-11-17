@@ -11,7 +11,7 @@ namespace krys::boo::svg::tests
   /// paused at 0 for tests to seek.
   struct AnimationFixture : boo::tests::LoadFixture
   {
-    explicit AnimationFixture(utf8_string &&markup) noexcept
+    explicit AnimationFixture(utf8_string markup) noexcept
     {
       LoadMarkup(u8"<!DOCTYPE html>" + markup, u8"https://example.com/");
       html::EventLoop::Current().RunUntilIdle();

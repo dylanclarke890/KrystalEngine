@@ -50,7 +50,7 @@ namespace krys::boo
 
     KRYS_NODISCARD UniquePtr<BidiRun> TakeNext() noexcept;
 
-    void SetNext(UniquePtr<BidiRun> &&next) noexcept
+    void SetNext(UniquePtr<BidiRun> next) noexcept
     {
       BidiCharacterRun::SetNext(UniquePtr<BidiCharacterRun>(next.release()));
     }

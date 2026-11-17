@@ -52,7 +52,7 @@ namespace krys::boo::html
 
     /// @brief Removes the table's caption, and inserts @p caption as its first child if it isn't null.
     /// @see https://html.spec.whatwg.org/#dom-table-caption
-    dom::ExceptionOr<void> Caption(RefPtr<HTMLTableCaptionElement> &&caption) noexcept;
+    dom::ExceptionOr<void> Caption(const RefPtr<HTMLTableCaptionElement> &caption) noexcept;
 
     /// @brief The table's caption, made its first child if it had none.
     /// @see https://html.spec.whatwg.org/#dom-table-createcaption
@@ -67,7 +67,7 @@ namespace krys::boo::html
     /// @brief Removes the table's `thead`, and inserts @p head after the caption and column groups if it
     /// isn't null: a `HierarchyRequestError` if it isn't a `thead`.
     /// @see https://html.spec.whatwg.org/#dom-table-thead
-    dom::ExceptionOr<void> THead(RefPtr<HTMLTableSectionElement> &&head) noexcept;
+    dom::ExceptionOr<void> THead(const RefPtr<HTMLTableSectionElement> &head) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-createthead
     Ref<HTMLTableSectionElement> CreateTHead() noexcept;
@@ -81,7 +81,7 @@ namespace krys::boo::html
     /// @brief Removes the table's `tfoot`, and appends @p foot if it isn't null: a `HierarchyRequestError` if
     /// it isn't a `tfoot`.
     /// @see https://html.spec.whatwg.org/#dom-table-tfoot
-    dom::ExceptionOr<void> TFoot(RefPtr<HTMLTableSectionElement> &&foot) noexcept;
+    dom::ExceptionOr<void> TFoot(const RefPtr<HTMLTableSectionElement> &foot) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-createtfoot
     Ref<HTMLTableSectionElement> CreateTFoot() noexcept;

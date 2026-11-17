@@ -136,7 +136,7 @@ namespace krys::boo::css
     template <TokenType, typename ResultType, typename F>
     KRYS_NODISCARD static std::nullopt_t Consume(TokenRange &tokens, PropertyParserState &state,
                                                  const AllowedSymbols &allowedSymbols,
-                                                 PropertyParserOptions options, F &&func) noexcept
+                                                 PropertyParserOptions options, F func) noexcept
     {
       (void)tokens;
       (void)state;
@@ -173,7 +173,7 @@ namespace krys::boo::css
     template <TokenType TokenType, typename ResultType, typename F>
     KRYS_NODISCARD static Maybe<ResultType> Consume(TokenRange &tokens, PropertyParserState &state,
                                                     const AllowedSymbols &symbolsAllowed,
-                                                    PropertyParserOptions options, F &&func) noexcept
+                                                    PropertyParserOptions options, F func) noexcept
     {
       using Consumer = MetaConsumerDispatcher<TokenType, ConsumerDefinition<T>>;
       if constexpr (Consumer::Supported)

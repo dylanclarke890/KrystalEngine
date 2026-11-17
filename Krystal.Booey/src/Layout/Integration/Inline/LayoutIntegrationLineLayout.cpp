@@ -1273,7 +1273,7 @@ namespace krys::boo::layout_integration
     }
   }
 
-  FloatRect LineLayout::ApplySVGTextFragments(SVGTextFragmentMap &&fragmentMap) noexcept
+  FloatRect LineLayout::ApplySVGTextFragments(SVGTextFragmentMap fragmentMap) noexcept
   {
     auto &boxes = _inlineContent->DisplayContent().BoxList;
     auto &lines = _inlineContent->DisplayContent().LineList;

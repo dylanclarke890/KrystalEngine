@@ -35,7 +35,7 @@ namespace krys::boo
   {
   }
 
-  LayerAncestorClippingStack::LayerAncestorClippingStack(List<CompositedClipData> &&clipDataStack) noexcept
+  LayerAncestorClippingStack::LayerAncestorClippingStack(List<CompositedClipData> clipDataStack) noexcept
   {
     _stack.reserve(clipDataStack.size());
     for (auto &clipDataEntry : clipDataStack)
@@ -95,7 +95,7 @@ namespace krys::boo
     return _stack.back().ParentForSublayers();
   }
 
-  bool LayerAncestorClippingStack::UpdateWithClipData(List<CompositedClipData> &&clipDataStack) noexcept
+  bool LayerAncestorClippingStack::UpdateWithClipData(List<CompositedClipData> clipDataStack) noexcept
   {
     bool stackChanged = false;
 

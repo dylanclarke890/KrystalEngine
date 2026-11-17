@@ -53,7 +53,7 @@ namespace krys::boo::css
   }
 
   template <typename TFunc>
-  void CSSFontFace::IterateClients(TFunc &&callback) noexcept
+  void CSSFontFace::IterateClients(TFunc callback) noexcept
   {
     auto clients = _clients;
     for (auto &client : clients)
@@ -460,8 +460,6 @@ namespace krys::boo::css
       case Status::Loading:  krys_debug_assert(_status == Status::Pending); break;
       case Status::TimedOut: krys_debug_assert(_status == Status::Loading); break;
       case Status::Success:
-        krys_debug_assert(_status == Status::Loading || _status == Status::TimedOut);
-        break;
       case Status::Failure:
         krys_debug_assert(_status == Status::Loading || _status == Status::TimedOut);
         break;

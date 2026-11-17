@@ -36,5 +36,5 @@ namespace krys::boo::css
     RefPtr<Value> Repeat;
   };
 
-  KRYS_NODISCARD Ref<ValueList> CreateBorderImageValue(BorderImageComponents &&components) noexcept;
+  KRYS_NODISCARD Ref<ValueList> CreateBorderImageValue(BorderImageComponents components) noexcept;
 }

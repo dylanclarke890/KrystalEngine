@@ -83,7 +83,7 @@ namespace krys::boo::css::tests
   {
     auto document = CreateRef<dom::HTMLDocument>();
     auto &registry = document->StyleScope().GetCustomPropertyRegistry();
-    auto exceptionCode = [&](PropertyDefinition &&definition)
+    auto exceptionCode = [&](const PropertyDefinition &definition)
     {
       auto result = DOMCSSNamespace::RegisterProperty(*document, definition);
       REQUIRE(result.HasException());

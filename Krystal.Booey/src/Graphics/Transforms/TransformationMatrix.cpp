@@ -1236,15 +1236,15 @@ namespace krys::boo
     return *this;
   }
 
-  TransformationMatrix &TransformationMatrix::Skew(double sx, double sy) noexcept
+  TransformationMatrix &TransformationMatrix::Skew(double angleX, double angleY) noexcept
   {
     // angles are in degrees. Switch to radians
-    sx = deg2rad(sx);
-    sy = deg2rad(sy);
+    angleX = deg2rad(angleX);
+    angleY = deg2rad(angleY);
 
     TransformationMatrix mat;
-    mat._matrix[0][1] = std::tan(sy); // note that the y shear goes in the first row
-    mat._matrix[1][0] = std::tan(sx); // and the x shear in the second row
+    mat._matrix[0][1] = std::tan(angleY); // note that the y shear goes in the first row
+    mat._matrix[1][0] = std::tan(angleX); // and the x shear in the second row
 
     Multiply(mat);
     return *this;

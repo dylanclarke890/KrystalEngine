@@ -245,19 +245,19 @@ namespace krys::boo::dom
 #pragma region Element - https://dom.spec.whatwg.org/#element
 
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
-    KRYS_NODISCARD const DOMStringAtom &NamespaceURI() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &NamespaceURI() const noexcept KRYS_LIFETIME_BOUND
     {
       return _qualifiedName.NamespaceURI();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-prefix
-    KRYS_NODISCARD const DOMStringAtom &Prefix() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &Prefix() const noexcept KRYS_LIFETIME_BOUND
     {
       return _qualifiedName.NamespacePrefix();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-localname
-    KRYS_NODISCARD const DOMStringAtom &LocalName() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &LocalName() const noexcept KRYS_LIFETIME_BOUND
     {
       return _qualifiedName.LocalName();
     }
@@ -426,70 +426,72 @@ namespace krys::boo::dom
     /// context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtml
-    ExceptionOr<void> SetHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtml
-    ExceptionOr<void> AppendHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtml
-    ExceptionOr<void> PrependHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the element's children (a template's contents) with @p html, parsed as HTML in its
     /// context; sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtmlunsafe
-    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
+                                    const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtmlunsafe
     ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
-                                       html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
-                                        html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                        const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
-    ExceptionOr<void> BeforeHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
-    ExceptionOr<void> AfterHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
-    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context; sanitized only if
     /// @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
     ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
-                                       html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
-    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
+                                      const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
     ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
-                                            html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-element-gethtml
-    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions &&options = {}) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions options = {}) const noexcept;
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
@@ -785,7 +787,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-element-is-value
-    KRYS_NODISCARD const DOMStringAtom &IsValue() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &IsValue() const noexcept KRYS_LIFETIME_BOUND
     {
       return _is;
     }
@@ -1353,7 +1355,7 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animatable-animate
     KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>>
       Animate(boo::KeyframesInput &&keyframes,
-              Maybe<Variant<double, KeyframeAnimationOptions>> &&options = null) noexcept;
+              Maybe<Variant<double, KeyframeAnimationOptions>> options = null) noexcept;
 
     /// @brief The relevant animations whose effects target the element (or, with `subtree`, its descendants
     /// too), in composite order.

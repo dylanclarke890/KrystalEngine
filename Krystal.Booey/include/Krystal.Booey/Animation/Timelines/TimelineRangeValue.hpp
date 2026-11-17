@@ -50,7 +50,7 @@ namespace krys::boo
 
   /// @brief Parses @p value as an edge of an attachment range for @p element's document, or null if it isn't
   /// one.
-  KRYS_NODISCARD RefPtr<css::Value> ConvertToCSSValue(TimelineRangeValue &&value,
+  KRYS_NODISCARD RefPtr<css::Value> ConvertToCSSValue(TimelineRangeValue value,
                                                       const RefPtr<dom::Element> &element,
                                                       style::SingleAnimationRangeType type) noexcept;
 }

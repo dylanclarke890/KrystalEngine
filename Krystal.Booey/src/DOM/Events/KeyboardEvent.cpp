@@ -51,10 +51,9 @@ namespace krys::boo::dom
         case PlatformEvent::Type::KeyUp:      return event_names::KeyUp;
         case PlatformEvent::Type::RawKeyDown: return event_names::KeyDown;
         case PlatformEvent::Type::Char:       return event_names::KeyPress;
+        // The caller should disambiguate the combined KeyDown event into RawKeyDown or Char events.
         case PlatformEvent::Type::KeyDown:
-          // The caller should disambiguate the combined event into RawKeyDown or Char events.
-          break;
-        default: break;
+        default:                              break;
       }
       krys_debug_assert(false);
       return event_names::KeyDown;

@@ -384,7 +384,7 @@ namespace krys::boo
     Client().DragEnded();
   }
 
-  void DragController::DragExited(LocalFrame &frame, DragData &&dragData) noexcept
+  void DragController::DragExited(LocalFrame &frame, DragData dragData) noexcept
   {
     DisallowFileAccessIfNeeded(dragData);
     if (frame.View())
@@ -400,7 +400,7 @@ namespace krys::boo
     }
   }
 
-  bool DragController::PerformDragOperation(DragData &&dragData) noexcept
+  bool DragController::PerformDragOperation(DragData dragData) noexcept
   {
     SetForScope isPerformingDrop(_isPerformingDrop, true);
     Ref<LocalFrame> mainFrame = ShareRef(_page.MainFrame());
@@ -463,7 +463,7 @@ namespace krys::boo
     _documentUnderMouse = krys::move(newDocument);
   }
 
-  Maybe<DragOperation> DragController::DragEnteredOrUpdated(LocalFrame &frame, DragData &&dragData) noexcept
+  Maybe<DragOperation> DragController::DragEnteredOrUpdated(LocalFrame &frame, DragData dragData) noexcept
   {
     auto point = frame.View()->WindowToContents(dragData.ClientPosition());
     auto hitTestResult = HitTestResult(LayoutPoint(point));
@@ -587,21 +587,13 @@ namespace krys::boo
       uint32 numberOfFiles = dragData.NumberOfFiles();
       if (RefPtr<html::HTMLInputElement> fileInput = _fileInputElementUnderMouse)
       {
-        if (fileInput->IsDisabledFormControl())
-        {
-          _numberOfItemsToBeAccepted = 0;
-        }
-        else if (fileInput->Multiple())
-        {
-          _numberOfItemsToBeAccepted = numberOfFiles;
-        }
-        else if (numberOfFiles > 1)
+        if (fileInput->IsDisabledFormControl() || (!fileInput->Multiple() && numberOfFiles > 1))
         {
           _numberOfItemsToBeAccepted = 0;
         }
         else
         {
-          _numberOfItemsToBeAccepted = 1;
+          _numberOfItemsToBeAccepted = fileInput->Multiple() ? numberOfFiles : 1;
         }
 
         if (!_numberOfItemsToBeAccepted)

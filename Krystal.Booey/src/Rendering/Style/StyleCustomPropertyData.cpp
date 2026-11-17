@@ -155,7 +155,7 @@ namespace krys::boo::style
   }
 
   template <typename TCallback>
-  void CustomPropertyData::ForEachInternal(TCallback &&callback) const noexcept
+  void CustomPropertyData::ForEachInternal(TCallback callback) const noexcept
   {
     SmallList<const CustomPropertyData *, MaximumAncestorCount> descendants;
 

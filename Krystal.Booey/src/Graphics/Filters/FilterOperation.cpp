@@ -245,9 +245,9 @@ namespace krys::boo
   {
     switch (_type)
     {
-      case Type::Opacity:    return 1;
       case Type::Invert:     return 0;
-      case Type::Contrast:   return 1;
+      case Type::Opacity:
+      case Type::Contrast:
       case Type::Brightness: return 1;
       default:               krys_debug_assert_msg(false, "Unreachable"); return 0;
     }

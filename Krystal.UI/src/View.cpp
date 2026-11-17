@@ -292,12 +292,12 @@ namespace krys::ui
       return point - boo::ToIntSize(_view->ToPage(_view->_screenOrigin));
     }
 
-    void RequestPointerLock(Func<void(boo::PointerLockRequestResult)> &&completionHandler) noexcept override
+    void RequestPointerLock(Func<void(boo::PointerLockRequestResult)> completionHandler) noexcept override
     {
       completionHandler(_view ? _view->LockPointer() : boo::PointerLockRequestResult::Unsupported);
     }
 
-    void RequestPointerUnlock(Func<void(bool)> &&completionHandler) noexcept override
+    void RequestPointerUnlock(Func<void(bool)> completionHandler) noexcept override
     {
       completionHandler(_view && _view->UnlockPointer());
     }
@@ -657,7 +657,7 @@ namespace krys::ui
     return Downcast<boo::dom::HTMLDocument>(*_frame->Document());
   }
 
-  void View::LoadHTML(utf8_string &&markup, boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
+  void View::LoadHTML(utf8_string markup, boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
     auto requestURL = url.IsNull() ? boo::url::URL(u8"about:blank") : url;
@@ -746,7 +746,7 @@ namespace krys::ui
     }
   }
 
-  void View::ReplaceDocument(utf8_string &&markup) noexcept
+  void View::ReplaceDocument(utf8_string markup) noexcept
   {
     // The document is parsed in the frame, as a navigation's is, so it's fully active as its elements are
     // inserted; it replaces the current one at once, without a load.
@@ -2609,7 +2609,7 @@ namespace krys::ui
     }
   }
 
-  void View::DragStarted(boo::DragItem &&item, boo::dom::DataTransfer &dataTransfer) noexcept
+  void View::DragStarted(boo::DragItem item, boo::dom::DataTransfer &dataTransfer) noexcept
   {
     ActiveDrag drag;
     drag.Data = dataTransfer.GetPasteboard().GetSelectionData();

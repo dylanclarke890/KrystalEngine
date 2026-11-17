@@ -264,7 +264,7 @@ namespace krys::boo
     }
   }
 
-  void RenderLayerBacking::SetBackingSharingLayers(ListHashSet<RenderLayer *> &&sharingLayers) noexcept
+  void RenderLayerBacking::SetBackingSharingLayers(const ListHashSet<RenderLayer *> &sharingLayers) noexcept
   {
     auto liveSharingLayers =
       std::ranges::count_if(_backingSharingLayers, [](const auto &layer) { return !!layer; });

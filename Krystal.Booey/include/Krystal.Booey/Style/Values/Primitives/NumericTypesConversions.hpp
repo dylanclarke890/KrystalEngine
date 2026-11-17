@@ -614,6 +614,7 @@ namespace krys::boo::style
     using To = typename ToStyleMapping<typename RawToCSSMapping<RawType>::type>::type;
 
     template <typename... Rest>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): context, passed to two calls.
     KRYS_NODISCARD To operator()(const From &value, Rest &&...rest) noexcept
     {
       return {Canonicalize(RawType {To::Unit, value.Evaluate(From::Category, rest...)}, rest...)};

@@ -337,7 +337,7 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  Color::ColorKind Color::CreateIndirectColor(T &&color) noexcept
+  Color::ColorKind Color::CreateIndirectColor(T color) noexcept
   {
     return {CreateUnique<decay_t<T>>(krys::move(color))};
   }

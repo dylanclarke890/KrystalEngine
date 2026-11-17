@@ -79,7 +79,7 @@ namespace krys::text
   /// @brief Decodes the input code units into code points using the specified encoding and policy.
   template <Encoding TEncoding, DecodePolicy Policy = DefaultDecodePolicy, typename TOutput = utf32_string,
             CodeUnitInputRange<TEncoding> TInput>
-  KRYS_NODISCARD constexpr DecodeResult<TOutput> Decode(TInput &&input) noexcept
+  KRYS_NODISCARD constexpr DecodeResult<TOutput> Decode(const TInput &input) noexcept
   {
     DecodeResult<TOutput> result {};
 

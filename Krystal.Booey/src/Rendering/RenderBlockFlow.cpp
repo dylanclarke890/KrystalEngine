@@ -1524,6 +1524,7 @@ namespace krys::boo
     bool markDescendantsWithFloats = false;
     if (logicalTopEstimate != oldLogicalTop && !child.AvoidsFloats() && childBlockFlow
         && childBlockFlow->ContainsFloats())
+    // NOLINTNEXTLINE(bugprone-branch-clone): each reason is explained separately.
     {
       markDescendantsWithFloats = true;
     }

@@ -24,7 +24,7 @@ namespace krys::boo::tests
     Ref<Page> TestPage {Page::Create()};
     RefPtr<dom::HTMLDocument> Document;
 
-    explicit AnimationPageFixture(utf8_string &&markup) noexcept
+    explicit AnimationPageFixture(utf8_string markup) noexcept
     {
       auto &frame = TestPage->MainFrame();
       frame.CreateView({200, 100});

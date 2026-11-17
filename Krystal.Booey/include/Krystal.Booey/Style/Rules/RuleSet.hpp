@@ -351,7 +351,7 @@ namespace krys::boo::style
       PositionTryRuleForName(const css::CSSOMStringAtom &name) const noexcept;
 
   private:
-    void AddRule(RuleData &&ruleData, CascadeLayerIdentifier cascadeLayerIdentifier,
+    void AddRule(RuleData ruleData, CascadeLayerIdentifier cascadeLayerIdentifier,
                  ContainerQueryIdentifier containerQueryIdentifier, ScopeRuleIdentifier scopeRuleIdentifier,
                  RuleFeatureSet::CollectionContext *featureCollectionContext) noexcept;
 
@@ -359,10 +359,10 @@ namespace krys::boo::style
       const css::mq::MediaQueryEvaluator &evaluator, size_t startIndex) noexcept;
 
     template <typename TFunction>
-    void TraverseRuleDatas(TFunction &&function) noexcept;
+    void TraverseRuleDatas(TFunction function) noexcept;
 
     template <typename TFunction>
-    void TraverseRuleDatas(TFunction &&function) const noexcept;
+    void TraverseRuleDatas(TFunction function) const noexcept;
 
     KRYS_NODISCARD CascadeLayer &CascadeLayerForIdentifier(CascadeLayerIdentifier identifier) noexcept
     {

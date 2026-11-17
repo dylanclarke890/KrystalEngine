@@ -113,7 +113,7 @@ namespace krys::gfx
 
     /// @brief Calls `func(handle, value)` for every live value.
     template <typename TFunc>
-    void ForEach(TFunc &&func) noexcept
+    void ForEach(TFunc func) noexcept
     {
       for (uint32 index = 0u; index < _slots.size(); ++index)
       {

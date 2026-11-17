@@ -415,6 +415,7 @@ namespace krys::boo::layout
             isEnteringBidi ? EnterExitType::EnteringInlineBox : EnterExitType::ExitingInlineBox,
             bidiContextStack);
         }
+        // NOLINTBEGIN(bugprone-branch-clone): one branch per kind of item.
         else if (inlineItem.IsHardLineBreak())
         {
           HandleBidiParagraphStart(paragraphContentBuilder, inlineItemOffsetList, bidiContextStack);
@@ -451,6 +452,7 @@ namespace krys::boo::layout
         {
           krys_debug_assert(false);
         }
+        // NOLINTEND(bugprone-branch-clone)
       }
     }
 

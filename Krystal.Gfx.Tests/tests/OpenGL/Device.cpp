@@ -205,7 +205,7 @@ void main()
       }
 
       template <typename TFunc>
-      void Frame(TFunc &&record)
+      void Frame(TFunc record)
       {
         _device->BeginFrame();
         auto &commands = _device->GetCommandBuffer();

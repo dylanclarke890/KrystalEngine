@@ -350,7 +350,8 @@ namespace krys::boo::url
 
   KRYS_NODISCARD bool ProtocolHostAndPortAreEqual(const URL &a, const URL &b) noexcept;
 
-  KRYS_NODISCARD List<KeyValuePair> DifferingQueryParameters(const URL &a, const URL &b) noexcept;
+  KRYS_NODISCARD List<KeyValuePair> DifferingQueryParameters(const URL &firstURL,
+                                                             const URL &secondURL) noexcept;
 
   KRYS_NODISCARD List<KeyValuePair> QueryParameters(const URL &url) noexcept;
 

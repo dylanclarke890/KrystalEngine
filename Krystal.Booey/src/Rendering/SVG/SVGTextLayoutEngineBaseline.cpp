@@ -69,7 +69,6 @@ namespace krys::boo
         // predominant script of the character data content.
         return AlignmentBaseline::Alphabetic;
       case DominantBaseline::NoChange:
-        return DominantBaselineToAlignmentBaseline(isVerticalText, *textRenderer.Parent());
       case DominantBaseline::ResetSize:
         return DominantBaselineToAlignmentBaseline(isVerticalText, *textRenderer.Parent());
       case DominantBaseline::Ideographic:    return AlignmentBaseline::Ideographic;

@@ -46,13 +46,13 @@ namespace krys::boo::tests
         return Mouse;
       }
 
-      void RequestPointerLock(Func<void(PointerLockRequestResult)> &&completionHandler) noexcept final
+      void RequestPointerLock(Func<void(PointerLockRequestResult)> completionHandler) noexcept final
       {
         ++Locks;
         completionHandler(Result);
       }
 
-      void RequestPointerUnlock(Func<void(bool)> &&completionHandler) noexcept final
+      void RequestPointerUnlock(Func<void(bool)> completionHandler) noexcept final
       {
         ++Unlocks;
         completionHandler(UnlockResult);
@@ -154,7 +154,7 @@ namespace krys::boo::tests
         std::string settled = "pending";
         element.RequestPointerLock(
           options,
-          [&](dom::ExceptionOr<void> &&result)
+          [&](const dom::ExceptionOr<void> &result)
           {
             settled =
               !result.HasException()                                                   ? "ok"

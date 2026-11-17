@@ -281,7 +281,7 @@ namespace krys::boo::tests
       return type == PasteboardCustomData::BooeyType() ? CustomData : nullptr;
     }
 
-    void WriteToClipboard(utf8_stringview pasteboardName, SelectionData &&selectionData) noexcept final
+    void WriteToClipboard(utf8_stringview pasteboardName, SelectionData selectionData) noexcept final
     {
       ClearClipboard(pasteboardName);
       ++Writes;

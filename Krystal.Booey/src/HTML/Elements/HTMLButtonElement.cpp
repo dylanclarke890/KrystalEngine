@@ -284,6 +284,7 @@ namespace krys::boo::html
   void HTMLButtonElement::ComputeType(dom::DOMStringView typeAttributeValue) noexcept
   {
     auto oldType = _type;
+    // NOLINTBEGIN(bugprone-branch-clone): the keywords' states, then the missing and invalid value defaults.
     if (text::IsASCIICaselessEqual(typeAttributeValue, u8"reset"))
     {
       _type = ButtonType::Reset;
@@ -304,6 +305,7 @@ namespace krys::boo::html
     {
       _type = ButtonType::Submit;
     }
+    // NOLINTEND(bugprone-branch-clone)
 
     if (oldType != _type)
     {

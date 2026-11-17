@@ -87,7 +87,7 @@ namespace krys::boo
     List<ClippingStackEntry> _stack;
 
   public:
-    explicit LayerAncestorClippingStack(List<CompositedClipData> &&clipDataStack) noexcept;
+    explicit LayerAncestorClippingStack(List<CompositedClipData> clipDataStack) noexcept;
 
     ~LayerAncestorClippingStack() noexcept = default;
 
@@ -95,7 +95,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool EqualToClipData(const List<CompositedClipData> &clipDataStack) const noexcept;
 
-    bool UpdateWithClipData(List<CompositedClipData> &&clipDataStack) noexcept;
+    bool UpdateWithClipData(List<CompositedClipData> clipDataStack) noexcept;
 
     KRYS_NODISCARD List<CompositedClipData> GetCompositedClipData() const noexcept;
 

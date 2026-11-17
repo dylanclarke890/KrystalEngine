@@ -30,9 +30,9 @@
 
 namespace krys::boo
 {
-  TextStream &operator<<(TextStream &ts, const FloatSize &size) noexcept
+  TextStream &operator<<(TextStream &ts, const FloatSize &value) noexcept
   {
-    return ts << "width=" << TextStream::FormatNumberRespectingIntegers(size.Width())
-              << " height=" << TextStream::FormatNumberRespectingIntegers(size.Height());
+    return ts << "width=" << TextStream::FormatNumberRespectingIntegers(value.Width())
+              << " height=" << TextStream::FormatNumberRespectingIntegers(value.Height());
   }
 }

@@ -53,7 +53,7 @@ namespace krys::boo::css
       const Feature &feature, float, const ToLengthConversionData &conversionData) noexcept;
 
     KRYS_NODISCARD EvaluationResult EvaluateIdentifierFeature(
-      const Feature &feature, ValueId identifier, const ToLengthConversionData &conversionData) noexcept;
+      const Feature &feature, ValueId currentValue, const ToLengthConversionData &conversionData) noexcept;
 
     template <typename ConcreteEvaluator>
     class GenericMediaQueryEvaluator

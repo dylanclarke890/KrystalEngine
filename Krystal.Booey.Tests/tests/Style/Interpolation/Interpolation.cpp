@@ -46,7 +46,7 @@ namespace krys::boo::style::tests
       UniquePtr<RenderStyle> From;
       UniquePtr<RenderStyle> To;
 
-      explicit InterpolationFixture(utf8_string &&styles) noexcept
+      explicit InterpolationFixture(const utf8_string &styles) noexcept
           : ResolverFixture(u8"<!DOCTYPE html><style>" + styles
                             + u8"</style><div id=a></div><div id=b></div>"),
             From(Resolve(ById(u8"a")).Style), To(Resolve(ById(u8"b")).Style)

@@ -435,7 +435,7 @@ namespace krys::boo::style
     return false;
   }
 
-  void Styleable::UpdateCSSAnimations(const RenderStyle *currentStyle, const RenderStyle &newStyle,
+  void Styleable::UpdateCSSAnimations(const RenderStyle *currentStyle, const RenderStyle &afterChangeStyle,
                                       const ResolutionContext &resolutionContext,
                                       WeakStyleOriginatedAnimations &newStyleOriginatedAnimations,
                                       IsInDisplayNoneTree isInDisplayNoneTree) const noexcept
@@ -445,7 +445,7 @@ namespace krys::boo::style
     // In case this element is newly getting a "display: none" we need to cancel all of its animations and
     // disregard new ones.
     if ((!currentStyle || currentStyle->Display() != DisplayType::None)
-        && newStyle.Display() == DisplayType::None)
+        && afterChangeStyle.Display() == DisplayType::None)
     {
       List<Ref<CSSAnimation>> animationsToCancel(AnimationsCreatedByMarkup().begin(),
                                                  AnimationsCreatedByMarkup().end());
@@ -458,12 +458,12 @@ namespace krys::boo::style
       return;
     }
 
-    const auto &currentAnimationList = newStyle.GetAnimations();
+    const auto &currentAnimationList = afterChangeStyle.GetAnimations();
     const auto &previousAnimationList = keyframeEffectStack.CSSAnimationList();
     if (!Element.HasPendingKeyframesUpdate(PseudoElementIdentifier) && previousAnimationList
-        && !previousAnimationList->IsInitial() && newStyle.HasAnimations()
-        && *previousAnimationList == newStyle.GetAnimations()
-        && !AnimationListContainsNewlyValidAnimation(newStyle.GetAnimations()))
+        && !previousAnimationList->IsInitial() && afterChangeStyle.HasAnimations()
+        && *previousAnimationList == afterChangeStyle.GetAnimations()
+        && !AnimationListContainsNewlyValidAnimation(afterChangeStyle.GetAnimations()))
     {
       return;
     }
@@ -513,7 +513,7 @@ namespace krys::boo::style
             matchingAnimation->SetBackingStyleAnimation(currentAnimation);
             // Keyframes may have been cleared if the @keyframes rules was changed since the last style
             // update, so we must ensure keyframes are picked up.
-            matchingAnimation->UpdateKeyframesIfNeeded(currentStyle, newStyle, resolutionContext);
+            matchingAnimation->UpdateKeyframesIfNeeded(currentStyle, afterChangeStyle, resolutionContext);
             newStyleOriginatedAnimations.push_back(
               CreateWeakPtr<StyleOriginatedAnimation>(matchingAnimation.get()));
             (void)newAnimations.add(matchingAnimation);
@@ -527,7 +527,7 @@ namespace krys::boo::style
         if (!foundMatchingAnimation && isInDisplayNoneTree == IsInDisplayNoneTree::No)
         {
           auto cssAnimation = CSSAnimation::Create(*this, Animation {currentAnimation}, currentStyle,
-                                                   newStyle, resolutionContext);
+                                                   afterChangeStyle, resolutionContext);
           newStyleOriginatedAnimations.push_back(CreateWeakPtr<StyleOriginatedAnimation>(cssAnimation.get()));
           (void)newAnimations.add(krys::move(cssAnimation));
         }
@@ -924,6 +924,7 @@ namespace krys::boo::style
         if (interpolation::Equals(property, previouslyRunningTransitionCurrentStyle, afterChangeStyle,
                                   document)
             || !propertyCanBeInterpolated(property, currentStyle, afterChangeStyle))
+        // NOLINTNEXTLINE(bugprone-branch-clone): the spec's steps, in order.
         {
           // 1. If the current value of the property in the running transition is equal to the value of the
           //    property in the after-change style, or if these two values cannot be interpolated, then

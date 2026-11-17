@@ -176,7 +176,7 @@ namespace krys::boo::style
     AddRule(krys::move(ruleData), 0, 0, 0, nullptr);
   }
 
-  void RuleSet::AddRule(RuleData &&ruleData, CascadeLayerIdentifier cascadeLayerIdentifier,
+  void RuleSet::AddRule(RuleData ruleData, CascadeLayerIdentifier cascadeLayerIdentifier,
                         ContainerQueryIdentifier containerQueryIdentifier,
                         ScopeRuleIdentifier scopeRuleIdentifier,
                         RuleFeatureSet::CollectionContext *featureCollectionContext) noexcept
@@ -415,7 +415,7 @@ namespace krys::boo::style
   }
 
   template <typename TFunction>
-  void RuleSet::TraverseRuleDatas(TFunction &&function) noexcept
+  void RuleSet::TraverseRuleDatas(TFunction function) noexcept
   {
     auto traverseVector = [&](auto &vector)
     {
@@ -452,7 +452,7 @@ namespace krys::boo::style
   }
 
   template <typename TFunction>
-  void RuleSet::TraverseRuleDatas(TFunction &&function) const noexcept
+  void RuleSet::TraverseRuleDatas(TFunction function) const noexcept
   {
     const_cast<RuleSet &>(*this).TraverseRuleDatas([&](const RuleData &ruleData) { function(ruleData); });
   }

@@ -91,7 +91,7 @@ namespace krys::boo::inline_iterator
   /// @p reverseFunction (given each run of boxes to reverse).
   template <typename TReverseFunction>
   KRYS_NODISCARD List<LeafBoxIterator> LeafBoxesInLogicalOrder(const LineBoxIterator &lineBox,
-                                                               TReverseFunction &&reverseFunction) noexcept
+                                                               TReverseFunction reverseFunction) noexcept
   {
     List<LeafBoxIterator> boxes;
 

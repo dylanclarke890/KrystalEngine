@@ -45,7 +45,7 @@ namespace krys::boo::svg
 
   public:
     template <typename... TArgs>
-    SVGValuePropertyListAnimator(const dom::QualifiedName &attributeName, Ref<SVGProperty> &&property,
+    SVGValuePropertyListAnimator(const dom::QualifiedName &attributeName, const Ref<SVGProperty> &property,
                                  TArgs &&...arguments) noexcept
         : Base(attributeName, std::forward<TArgs>(arguments)...),
           _list(ShareRef(static_cast<TList &>(*property)))

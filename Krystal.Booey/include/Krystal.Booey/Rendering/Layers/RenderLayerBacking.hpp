@@ -148,7 +148,7 @@ namespace krys::boo
       return _backingSharingLayers;
     }
 
-    void SetBackingSharingLayers(ListHashSet<RenderLayer *> &&sharingLayers) noexcept;
+    void SetBackingSharingLayers(const ListHashSet<RenderLayer *> &sharingLayers) noexcept;
 
     KRYS_NODISCARD bool HasBackingSharingLayers() const noexcept
     {

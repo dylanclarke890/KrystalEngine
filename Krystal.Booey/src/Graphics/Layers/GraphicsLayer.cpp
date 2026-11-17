@@ -200,7 +200,7 @@ namespace krys::boo
     return false;
   }
 
-  bool GraphicsLayer::SetChildren(List<Ref<GraphicsLayer>> &&newChildren) noexcept
+  bool GraphicsLayer::SetChildren(List<Ref<GraphicsLayer>> newChildren) noexcept
   {
     // If the contents of the arrays are the same, nothing to do.
     auto sameChildren = [&]

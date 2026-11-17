@@ -100,14 +100,14 @@ namespace krys::boo
 
     /// @brief A drag entered or moved over @p frame.
     /// @return The operation a drop there would do, if any.
-    Maybe<DragOperation> DragEnteredOrUpdated(LocalFrame &frame, DragData &&dragData) noexcept;
+    Maybe<DragOperation> DragEnteredOrUpdated(LocalFrame &frame, DragData dragData) noexcept;
 
     /// @brief A drag left @p frame.
-    void DragExited(LocalFrame &frame, DragData &&dragData) noexcept;
+    void DragExited(LocalFrame &frame, DragData dragData) noexcept;
 
     /// @brief Drops the drag where it is.
     /// @return Whether the drop was handled.
-    bool PerformDragOperation(DragData &&dragData) noexcept;
+    bool PerformDragOperation(DragData dragData) noexcept;
 
     KRYS_NODISCARD bool MouseIsOverFileInput() const noexcept;
 

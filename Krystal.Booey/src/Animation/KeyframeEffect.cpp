@@ -523,7 +523,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD dom::ExceptionOr<void>
-      ProcessIterableKeyframes(dom::Document &document, List<KeyframeEffect::InputKeyframe> &&keyframesInput,
+      ProcessIterableKeyframes(dom::Document &document, List<KeyframeEffect::InputKeyframe> keyframesInput,
                                List<KeyframeEffect::ParsedKeyframe> &parsedKeyframes) noexcept
     {
       css::ParserContext parserContext(document);
@@ -587,7 +587,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD dom::ExceptionOr<void> ProcessPropertyIndexedKeyframes(
-      dom::Document &document, KeyframeEffect::InputPropertyIndexedKeyframes &&keyframesInput,
+      dom::Document &document, KeyframeEffect::InputPropertyIndexedKeyframes keyframesInput,
       List<KeyframeEffect::ParsedKeyframe> &parsedKeyframes, List<dom::DOMString> &unusedEasings) noexcept
     {
       // 1. Let property-indexed keyframe be the result of running the procedure to process a keyframe-like
@@ -930,7 +930,7 @@ namespace krys::boo
 
   dom::ExceptionOr<Ref<KeyframeEffect>>
     KeyframeEffect::Create(dom::Document &document, dom::Element *target, KeyframesInput &&keyframes,
-                           Maybe<Variant<double, KeyframeEffectOptions>> &&options) noexcept
+                           Maybe<Variant<double, KeyframeEffectOptions>> options) noexcept
   {
     Ref keyframeEffect = AdoptRef(*new KeyframeEffect(target, {}));
     keyframeEffect->_document = CreateWeakPtr(&document);
@@ -989,7 +989,7 @@ namespace krys::boo
     return keyframeEffect;
   }
 
-  Ref<KeyframeEffect> KeyframeEffect::Create(Ref<KeyframeEffect> &&source) noexcept
+  Ref<KeyframeEffect> KeyframeEffect::Create(Ref<KeyframeEffect> source) noexcept
   {
     Ref keyframeEffect = AdoptRef(*new KeyframeEffect(nullptr, {}));
     keyframeEffect->CopyPropertiesFromSource(krys::move(source));
@@ -1013,7 +1013,7 @@ namespace krys::boo
     }
   }
 
-  void KeyframeEffect::CopyPropertiesFromSource(Ref<KeyframeEffect> &&source) noexcept
+  void KeyframeEffect::CopyPropertiesFromSource(const Ref<KeyframeEffect> &source) noexcept
   {
     _target = source->_target;
     _pseudoElementIdentifier = source->_pseudoElementIdentifier;
@@ -1355,7 +1355,7 @@ namespace krys::boo
   }
 
   dom::ExceptionOr<void> KeyframeEffect::SetBindingsKeyframes(dom::Document &document,
-                                                              KeyframesInput &&keyframesInput) noexcept
+                                                              KeyframesInput keyframesInput) noexcept
   {
     auto retVal = SetKeyframes(document, krys::move(keyframesInput));
     if (!retVal.HasException())
@@ -1369,7 +1369,7 @@ namespace krys::boo
   }
 
   dom::ExceptionOr<void> KeyframeEffect::SetKeyframes(dom::Document &document,
-                                                      KeyframesInput &&keyframesInput) noexcept
+                                                      KeyframesInput keyframesInput) noexcept
   {
     auto processKeyframesResult = ProcessKeyframes(document, krys::move(keyframesInput));
     if (!processKeyframesResult.HasException() && Animation())
@@ -1387,7 +1387,7 @@ namespace krys::boo
   }
 
   dom::ExceptionOr<void> KeyframeEffect::ProcessKeyframes(dom::Document &document,
-                                                          KeyframesInput &&keyframesInput) noexcept
+                                                          KeyframesInput keyframesInput) noexcept
   {
     Ref protectedDocument = ShareRef(document);
 

@@ -830,11 +830,6 @@ namespace krys::boo
     switch (position.GetAnchorType())
     {
       case dom::Position::AnchorType::PositionIsBeforeChildren:
-        if (isShadowIncludingInclusiveAncestorOf(position.GetContainerNode()))
-        {
-          position = dom::PositionInParentBeforeNode(&node);
-        }
-        break;
       case dom::Position::AnchorType::PositionIsAfterChildren:
         if (isShadowIncludingInclusiveAncestorOf(position.GetContainerNode()))
         {

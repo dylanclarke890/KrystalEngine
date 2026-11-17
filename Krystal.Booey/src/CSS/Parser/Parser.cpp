@@ -1871,15 +1871,15 @@ namespace krys::boo::css
     return didParseNewProperties();
   }
 
-  void Parser::ConsumeCustomPropertyValue(TokenRange tokens, const CSSOMStringAtom &variableName,
+  void Parser::ConsumeCustomPropertyValue(TokenRange tokens, const CSSOMStringAtom &propertyName,
                                           IsImportant important) noexcept
   {
     if (tokens.IsAtEnd())
     {
       TopContext().ParsedProperties.push_back(
-        Property(PropertyId::Custom, CustomPropertyValue::CreateEmpty(variableName), important));
+        Property(PropertyId::Custom, CustomPropertyValue::CreateEmpty(propertyName), important));
     }
-    else if (auto value = VariableParser::ParseDeclarationValue(variableName, tokens, _context))
+    else if (auto value = VariableParser::ParseDeclarationValue(propertyName, tokens, _context))
     {
       TopContext().ParsedProperties.push_back(Property(PropertyId::Custom, ShareRef(*value), important));
     }

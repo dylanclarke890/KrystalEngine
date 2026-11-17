@@ -61,7 +61,7 @@ namespace krys::boo::svg
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGTransform>> Create(dom::ExceptionOr<T> &&value) noexcept
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGTransform>> Create(dom::ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {
@@ -100,7 +100,7 @@ namespace krys::boo::svg
       return ShareRef(Matrix());
     }
 
-    dom::ExceptionOr<void> SetMatrix(css::DOMMatrix2DInit &&matrixInit) noexcept
+    dom::ExceptionOr<void> SetMatrix(css::DOMMatrix2DInit matrixInit) noexcept
     {
       if (IsReadOnly())
       {

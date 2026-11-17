@@ -286,8 +286,8 @@ namespace krys::boo
   // Returns whether caller should continue with "the default processing", which is the same as
   // the event handler NOT setting the return value to false
   // https://w3c.github.io/clipboard-apis/#fire-a-clipboard-event
-  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind,
-                                      Ref<dom::DataTransfer> &&dataTransfer) noexcept
+  bool Editor::DispatchClipboardEvent(const RefPtr<dom::Element> &target, ClipboardEventKind kind,
+                                      const Ref<dom::DataTransfer> &dataTransfer) noexcept
   {
     // FIXME: Move the target selection code here.
     if (!target)
@@ -311,7 +311,7 @@ namespace krys::boo
     return !noDefaultProcessing;
   }
 
-  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind) noexcept
+  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> target, ClipboardEventKind kind) noexcept
   {
     if (!target)
     {
@@ -763,7 +763,7 @@ namespace krys::boo
 
   // There are no Writing Tools to suppress editing; see DIFFERENCES.md.
   bool Editor::WillApplyEditing(CompositeEditCommand &command,
-                                List<RefPtr<dom::StaticRange>> &&targetRanges) noexcept
+                                const List<RefPtr<dom::StaticRange>> &targetRanges) noexcept
   {
     if (!command.ShouldDispatchInputEvents())
     {
@@ -1043,7 +1043,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::ApplyStyle(RefPtr<EditingStyle> &&style, EditAction editingAction) noexcept
+  void Editor::ApplyStyle(const RefPtr<EditingStyle> &style, EditAction editingAction) noexcept
   {
     if (!style)
     {

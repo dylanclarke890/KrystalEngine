@@ -42,14 +42,14 @@ namespace krys::boo::style
   // MARK: - Serialisation
 
   void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &,
-                                       const ResolvedColor &absoluteColor) noexcept
+                                       const ResolvedColor &value) noexcept
   {
-    builder.Append(boo::SerialisationForCSS(absoluteColor.Value));
+    builder.Append(boo::SerialisationForCSS(value.Value));
   }
 
   css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &,
-                                                   const ResolvedColor &absoluteColor) noexcept
+                                                   const ResolvedColor &value) noexcept
   {
-    return boo::SerialisationForCSS(absoluteColor.Value);
+    return boo::SerialisationForCSS(value.Value);
   }
 }

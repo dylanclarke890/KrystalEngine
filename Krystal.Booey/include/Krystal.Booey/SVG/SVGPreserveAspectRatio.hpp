@@ -48,7 +48,7 @@ namespace krys::boo::svg
 
     template <typename T>
     KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGPreserveAspectRatio>>
-      Create(dom::ExceptionOr<T> &&value) noexcept
+      Create(dom::ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {

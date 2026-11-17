@@ -209,12 +209,12 @@ namespace krys::boo
 
   // MARK: - Fonts
 
-  inline void RenderStyleBase::SetLetterSpacingFromAnimation(style::LetterSpacing &&value) noexcept
+  inline void RenderStyleBase::SetLetterSpacingFromAnimation(style::LetterSpacing value) noexcept
   {
     _computedStyle.SetLetterSpacingFromAnimation(krys::move(value));
   }
 
-  inline void RenderStyleBase::SetWordSpacingFromAnimation(style::WordSpacing &&value) noexcept
+  inline void RenderStyleBase::SetWordSpacingFromAnimation(style::WordSpacing value) noexcept
   {
     _computedStyle.SetWordSpacingFromAnimation(krys::move(value));
   }

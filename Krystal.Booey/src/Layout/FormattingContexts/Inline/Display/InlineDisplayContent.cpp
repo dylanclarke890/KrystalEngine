@@ -30,7 +30,7 @@ namespace krys::boo::inline_display
   namespace
   {
     template <typename T>
-    void InsertList(List<T> &list, size_t index, List<T> &&other) noexcept
+    void InsertList(List<T> &list, size_t index, List<T> other) noexcept
     {
       list.insert(list.begin() + static_cast<ptrdiff_t>(index), std::make_move_iterator(other.begin()),
                   std::make_move_iterator(other.end()));
@@ -50,19 +50,19 @@ namespace krys::boo::inline_display
     BoxList.clear();
   }
 
-  void Content::Set(Content &&newContent) noexcept
+  void Content::Set(Content newContent) noexcept
   {
     LineList = krys::move(newContent.LineList);
     BoxList = krys::move(newContent.BoxList);
   }
 
-  void Content::Append(Content &&newContent) noexcept
+  void Content::Append(Content newContent) noexcept
   {
     InsertList(LineList, LineList.size(), krys::move(newContent.LineList));
     InsertList(BoxList, BoxList.size(), krys::move(newContent.BoxList));
   }
 
-  void Content::Insert(Content &&newContent, size_t lineIndex, size_t boxIndex) noexcept
+  void Content::Insert(Content newContent, size_t lineIndex, size_t boxIndex) noexcept
   {
     InsertList(LineList, lineIndex, krys::move(newContent.LineList));
     InsertList(BoxList, boxIndex, krys::move(newContent.BoxList));

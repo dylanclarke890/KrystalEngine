@@ -256,7 +256,7 @@ namespace krys::boo::style
                      ResolutionType resolutionType) noexcept;
 
     KRYS_NODISCARD ElementUpdate CreateAnimatedElementUpdate(
-      ResolvedStyle &&resolvedStyle, const Styleable &styleable, EnumSet<Change> parentChanges,
+      ResolvedStyle resolvedStyle, const Styleable &styleable, EnumSet<Change> parentChanges,
       const ResolutionContext &resolutionContext,
       style::IsInDisplayNoneTree isInDisplayNoneTree = style::IsInDisplayNoneTree::No) noexcept;
 

@@ -91,7 +91,7 @@ namespace krys::boo::css
   /// @brief Shared validator for types dimensional types that need to canonicalize to support range
   /// constraints other than 0 and +/-∞.
   template <typename Raw, typename F>
-  KRYS_NODISCARD bool IsValidDimensionValue(Raw raw, F &&functor) noexcept
+  KRYS_NODISCARD bool IsValidDimensionValue(Raw raw, F functor) noexcept
   {
     if (std::isinf(raw.Value))
     {

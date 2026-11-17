@@ -36,7 +36,7 @@
 namespace krys::boo::html
 {
   CustomElementInterface::CustomElementInterface(dom::DOMStringAtom localName, CustomElementFactory &&factory,
-                                                 CustomElementOptions &&options) noexcept
+                                                 const CustomElementOptions &options) noexcept
       : _name(infra::Namespaces::HTML, null, krys::move(localName)), _factory(krys::move(factory)),
         _isElementInternalsDisabled(options.DisableInternals), _isShadowDisabled(options.DisableShadow),
         _isFormAssociated(options.FormAssociated)
@@ -193,7 +193,7 @@ namespace krys::boo::html
   }
 
   template <typename TFunction>
-  void CustomElementInterface::InvokeCallback(dom::Element &element, TFunction &&function) noexcept
+  void CustomElementInterface::InvokeCallback(dom::Element &element, TFunction function) noexcept
   {
     auto *customElement = element.GetCustomElement();
     if (customElement == nullptr)

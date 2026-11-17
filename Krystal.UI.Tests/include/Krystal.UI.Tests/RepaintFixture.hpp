@@ -103,7 +103,7 @@ namespace krys::ui::tests
 
   private:
     template <typename TDraw>
-    KRYS_NODISCARD GoldenImage Draw(TDraw &&draw, const Func<void(gfx::CommandBuffer &)> &before = {})
+    KRYS_NODISCARD GoldenImage Draw(TDraw draw, const Func<void(gfx::CommandBuffer &)> &before = {})
     {
       _device->BeginFrame();
       auto &commands = _device->GetCommandBuffer();

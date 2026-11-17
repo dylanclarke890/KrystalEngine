@@ -60,9 +60,9 @@ namespace krys::boo
     return ShareRefPtr(_imageObserver.get());
   }
 
-  void Image::SetImageObserver(RefPtr<ImageObserver> &&observer) noexcept
+  void Image::SetImageObserver(RefPtr<ImageObserver> observer) noexcept
   {
-    _imageObserver = observer;
+    _imageObserver = krys::move(observer);
   }
 
   RefPtr<Image> Image::Create(ImageObserver &observer) noexcept
@@ -270,13 +270,13 @@ namespace krys::boo
     }
   }
 
-  ImageDrawResult Image::DrawTiled(GraphicsContext &ctxt, const FloatRect &destRect,
+  ImageDrawResult Image::DrawTiled(GraphicsContext &ctxt, const FloatRect &destinationRect,
                                    const FloatPoint &srcPoint, const FloatSize &scaledTileSize,
                                    const FloatSize &spacing, ImagePaintingOptions options) noexcept
   {
     if (auto color = SinglePixelSolidColor())
     {
-      FillWithSolidColor(ctxt, destRect, *color, options.GetCompositeOperator());
+      FillWithSolidColor(ctxt, destinationRect, *color, options.GetCompositeOperator());
       return ImageDrawResult::DidDraw;
     }
 
@@ -294,24 +294,24 @@ namespace krys::boo
 
     FloatRect oneTileRect;
     FloatSize actualTileSize = scaledTileSize + spacing;
-    oneTileRect.SetX(destRect.X()
+    oneTileRect.SetX(destinationRect.X()
                      + std::fmodf(std::fmodf(-srcPoint.X(), actualTileSize.Width()) - actualTileSize.Width(),
                                   actualTileSize.Width()));
     oneTileRect.SetY(
-      destRect.Y()
+      destinationRect.Y()
       + std::fmodf(std::fmodf(-srcPoint.Y(), actualTileSize.Height()) - actualTileSize.Height(),
                    actualTileSize.Height()));
     oneTileRect.SetSize(scaledTileSize);
 
     // Check and see if a single draw of the image can cover the entire area we are supposed to tile.
-    if (oneTileRect.Contains(destRect) && !ctxt.DrawLuminanceMask())
+    if (oneTileRect.Contains(destinationRect) && !ctxt.DrawLuminanceMask())
     {
       FloatRect visibleSrcRect;
-      visibleSrcRect.SetX((destRect.X() - oneTileRect.X()) / scale.Width());
-      visibleSrcRect.SetY((destRect.Y() - oneTileRect.Y()) / scale.Height());
-      visibleSrcRect.SetWidth(destRect.Width() / scale.Width());
-      visibleSrcRect.SetHeight(destRect.Height() / scale.Height());
-      return Draw(ctxt, destRect, visibleSrcRect, options);
+      visibleSrcRect.SetX((destinationRect.X() - oneTileRect.X()) / scale.Width());
+      visibleSrcRect.SetY((destinationRect.Y() - oneTileRect.Y()) / scale.Height());
+      visibleSrcRect.SetWidth(destinationRect.Width() / scale.Width());
+      visibleSrcRect.SetHeight(destinationRect.Height() / scale.Height());
+      return Draw(ctxt, destinationRect, visibleSrcRect, options);
     }
 
     // Patterned images and gradients can use lots of memory for caching when the
@@ -325,16 +325,16 @@ namespace krys::boo
     if (transformedTileSizePixels > maxPatternTilePixels)
     {
       GraphicsContextStateSaver stateSaver(ctxt);
-      ctxt.Clip(destRect);
+      ctxt.Clip(destinationRect);
 
-      currentTileRect.ShiftYEdgeTo(destRect.Y());
+      currentTileRect.ShiftYEdgeTo(destinationRect.Y());
       float toY = currentTileRect.Y();
       ImageDrawResult result = ImageDrawResult::DidNothing;
-      while (toY < destRect.MaxY())
+      while (toY < destinationRect.MaxY())
       {
-        currentTileRect.ShiftXEdgeTo(destRect.X());
+        currentTileRect.ShiftXEdgeTo(destinationRect.X());
         float toX = currentTileRect.X();
-        while (toX < destRect.MaxX())
+        while (toX < destinationRect.MaxX())
         {
           FloatRect toRect(toX, toY, currentTileRect.Width(), currentTileRect.Height());
           FloatRect fromRect(ToFloatPoint(currentTileRect.Location() - oneTileRect.Location()),
@@ -357,7 +357,7 @@ namespace krys::boo
 
     AffineTransform patternTransform = AffineTransform().ScaleNonUniform(scale.Width(), scale.Height());
     FloatRect tileRect(FloatPoint(), intrinsicTileSize);
-    DrawPattern(ctxt, destRect, tileRect, patternTransform, oneTileRect.Location(), spacing, options);
+    DrawPattern(ctxt, destinationRect, tileRect, patternTransform, oneTileRect.Location(), spacing, options);
     return ImageDrawResult::DidDraw;
   }
 

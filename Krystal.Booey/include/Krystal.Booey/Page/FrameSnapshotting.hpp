@@ -84,17 +84,17 @@ namespace krys::boo
   /// @note Shareable and accelerated snapshots are the same as others: every image buffer records a display
   /// list.
   KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotFrameRect(LocalFrame &, const IntRect &,
-                                                       SnapshotOptions &&) noexcept;
+                                                       SnapshotOptions) noexcept;
 
   /// @brief A snapshot of @p imageRect, clipped to @p clipRects if there are any.
   KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotFrameRectWithClip(LocalFrame &, const IntRect &,
                                                                const List<FloatRect> &clipRects,
-                                                               SnapshotOptions &&) noexcept;
+                                                               SnapshotOptions) noexcept;
 
   /// @brief A snapshot of @p node and its descendants alone, on a transparent background; null if it isn't
   /// rendered.
-  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotNode(LocalFrame &, dom::Node &, SnapshotOptions &&) noexcept;
+  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotNode(LocalFrame &, dom::Node &, SnapshotOptions) noexcept;
 
   /// @brief A snapshot of the frame's selection alone; null if it isn't a range or its bounds are empty.
-  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotSelection(LocalFrame &, SnapshotOptions &&) noexcept;
+  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotSelection(LocalFrame &, SnapshotOptions) noexcept;
 }

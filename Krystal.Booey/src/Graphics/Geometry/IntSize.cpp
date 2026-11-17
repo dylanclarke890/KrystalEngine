@@ -35,8 +35,8 @@ namespace krys::boo
   {
   }
 
-  TextStream &operator<<(TextStream &ts, const IntSize &size) noexcept
+  TextStream &operator<<(TextStream &ts, const IntSize &value) noexcept
   {
-    return ts << "width=" << size.Width() << " height=" << size.Height();
+    return ts << "width=" << value.Width() << " height=" << value.Height();
   }
 }

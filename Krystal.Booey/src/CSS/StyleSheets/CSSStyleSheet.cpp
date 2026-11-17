@@ -116,7 +116,7 @@ namespace krys::boo::css
     return AdoptRef(*new CSSStyleSheet(krys::move(contents), owner, true));
   }
 
-  dom::ExceptionOr<Ref<CSSStyleSheet>> CSSStyleSheet::Create(dom::Document &document, Init &&init) noexcept
+  dom::ExceptionOr<Ref<CSSStyleSheet>> CSSStyleSheet::Create(dom::Document &document, Init init) noexcept
   {
     url::URL baseURL;
     if (!init.BaseURL)
@@ -159,7 +159,7 @@ namespace krys::boo::css
 
   // https://w3c.github.io/csswg-drafts/cssom-1/#dom-cssstylesheet-cssstylesheet
   CSSStyleSheet::CSSStyleSheet(Ref<StyleSheetContents> &&contents, dom::Document &document,
-                               Init &&options) noexcept
+                               Init options) noexcept
       : _contents(krys::move(contents)), _isDisabled(options.Disabled), _wasConstructedByJS(true),
         _isOriginClean(true), _constructorDocument(CreateWeakPtr(&document))
   {
@@ -168,14 +168,14 @@ namespace krys::boo::css
 
     SwitchOn(
       krys::move(options.Media),
-      [this](RefPtr<MediaList> &&mediaList)
+      [this](const RefPtr<MediaList> &mediaList)
       {
         if (auto queries = mediaList->MediaQueries(); !queries.empty())
         {
           SetMediaQueries(krys::move(queries));
         }
       },
-      [this](CSSOMString &&mediaString)
+      [this](const CSSOMString &mediaString)
       { SetMediaQueries(mq::MediaQueryParser::Parse(mediaString, StrictParserContext())); });
   }
 
@@ -649,7 +649,7 @@ namespace krys::boo::css
   }
 
   // https://w3c.github.io/csswg-drafts/cssom-1/#dom-cssstylesheet-replacesync
-  dom::ExceptionOr<void> CSSStyleSheet::ReplaceSync(CSSOMString &&text) noexcept
+  dom::ExceptionOr<void> CSSStyleSheet::ReplaceSync(const CSSOMString &text) noexcept
   {
     if (!_wasConstructedByJS)
     {

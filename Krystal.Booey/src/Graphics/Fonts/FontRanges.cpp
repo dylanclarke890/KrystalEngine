@@ -34,7 +34,7 @@ namespace krys::boo
     return _fontAccessor->GetFont(policy);
   }
 
-  FontRanges::FontRanges(FontRanges &&other, boo::IsGenericFontFamily isGenericFontFamily) noexcept
+  FontRanges::FontRanges(FontRanges other, boo::IsGenericFontFamily isGenericFontFamily) noexcept
       : _ranges {krys::move(other._ranges)}, _isGenericFontFamily {isGenericFontFamily}
   {
   }

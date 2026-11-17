@@ -79,8 +79,8 @@ namespace krys::boo::dom
     static void SubtreeMoved(Node &node, ContainerNode &oldParent, ContainerNode &newParent) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change-ext
-    static void ElementAttributeChanged(Element &element, DOMStringAtom localName,
+    static void ElementAttributeChanged(Element &element, const DOMStringAtom &localName,
                                         Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
-                                        DOMStringAtom namespaceURI) noexcept;
+                                        const DOMStringAtom &namespaceURI) noexcept;
   };
 }

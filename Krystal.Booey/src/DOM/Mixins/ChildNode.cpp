@@ -16,7 +16,7 @@ namespace krys::boo::dom::mixins
     /// @brief Return the first node in the given range that isn't contained in the given list of nodes, or
     /// null if there are no such nodes.
     template <std::ranges::forward_range TRange>
-    KRYS_NODISCARD Node *FirstViableSibling(TRange &&range, const List<NodeOrString> &nodes) noexcept
+    KRYS_NODISCARD Node *FirstViableSibling(const TRange &range, const List<NodeOrString> &nodes) noexcept
     {
       for (auto &item : range)
       {

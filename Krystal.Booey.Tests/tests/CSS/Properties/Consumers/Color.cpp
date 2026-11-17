@@ -489,7 +489,7 @@ namespace krys::boo::css::tests
   {
     /// @brief Tokenizes `css` and consumes it with `consume`; null unless every token was consumed.
     template <typename TConsume>
-    RefPtr<Value> ConsumeValue(utf8_stringview css, const ParserContext &context, TConsume &&consume)
+    RefPtr<Value> ConsumeValue(utf8_stringview css, const ParserContext &context, TConsume consume)
     {
       InputStream input {CSSOMString(css)};
       Tokenizer tokenizer {input};

@@ -2410,7 +2410,7 @@ namespace krys::boo
 
     // This is a simplified version of containing block walking that only handles absolute and fixed position.
     template <typename TFunction>
-    AncestorTraversal TraverseAncestorLayers(const RenderLayer &layer, TFunction &&function) noexcept
+    AncestorTraversal TraverseAncestorLayers(const RenderLayer &layer, TFunction function) noexcept
     {
       auto positioningBehavior = layer.Renderer().Style().GetPosition();
       RenderLayer *nextPaintOrderParent = layer.PaintOrderParent();

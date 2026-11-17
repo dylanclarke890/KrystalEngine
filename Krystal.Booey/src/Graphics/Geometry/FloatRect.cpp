@@ -220,17 +220,17 @@ namespace krys::boo
     return IntRect(RoundedIntPoint(rect.Location()), RoundedIntSize(rect.Size()));
   }
 
-  TextStream &operator<<(TextStream &ts, const FloatRect &r) noexcept
+  TextStream &operator<<(TextStream &ts, const FloatRect &value) noexcept
   {
     if (ts.HasFormattingFlag(TextStream::Formatting::SVGStyleRect))
     {
       // FIXME: callers should use the NumberRespectingIntegers flag.
-      return ts << "at (" << TextStream::FormatNumberRespectingIntegers(r.X()) << ','
-                << TextStream::FormatNumberRespectingIntegers(r.Y()) << ") size "
-                << TextStream::FormatNumberRespectingIntegers(r.Width()) << "x"
-                << TextStream::FormatNumberRespectingIntegers(r.Height());
+      return ts << "at (" << TextStream::FormatNumberRespectingIntegers(value.X()) << ','
+                << TextStream::FormatNumberRespectingIntegers(value.Y()) << ") size "
+                << TextStream::FormatNumberRespectingIntegers(value.Width()) << "x"
+                << TextStream::FormatNumberRespectingIntegers(value.Height());
     }
 
-    return ts << r.Location() << ' ' << r.Size();
+    return ts << value.Location() << ' ' << value.Size();
   }
 }

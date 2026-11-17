@@ -69,7 +69,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<Blob> Create() noexcept;
 
     /// @see https://w3c.github.io/FileAPI/#constructorBlob
-    KRYS_NODISCARD static Ref<Blob> Create(List<BlobPartVariant> &&blobPartVariants,
+    KRYS_NODISCARD static Ref<Blob> Create(List<BlobPartVariant> blobPartVariants,
                                            const BlobPropertyBag &propertyBag) noexcept;
 
     KRYS_NODISCARD static Ref<Blob> Create(List<uint8> &&data, utf8_stringview contentType) noexcept;
@@ -130,7 +130,7 @@ namespace krys::boo
 
     Blob(Ref<BlobData> &&data, utf8_stringview type, Maybe<uint64> size, size_t memoryCost) noexcept;
 
-    Blob(List<BlobPartVariant> &&blobPartVariants, const BlobPropertyBag &propertyBag) noexcept;
+    Blob(List<BlobPartVariant> blobPartVariants, const BlobPropertyBag &propertyBag) noexcept;
 
     /// @brief A blob with @p blob's bytes and type.
     Blob(ReferencingExistingBlobConstructor, const Blob &blob) noexcept;

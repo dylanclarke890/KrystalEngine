@@ -83,13 +83,13 @@ namespace krys::boo::html
 
   public:
     CustomElementInterface(dom::DOMStringAtom localName, CustomElementFactory &&factory,
-                           CustomElementOptions &&options) noexcept;
+                           const CustomElementOptions &options) noexcept;
 
     ~CustomElementInterface() noexcept;
 
     KRYS_NODISCARD static Ref<CustomElementInterface> Create(dom::DOMStringAtom localName,
                                                              CustomElementFactory &&factory,
-                                                             CustomElementOptions &&options) noexcept
+                                                             CustomElementOptions options) noexcept
     {
       return CreateRef<CustomElementInterface>(localName, krys::move(factory), krys::move(options));
     }
@@ -160,6 +160,6 @@ namespace krys::boo::html
                                                                     const dom::QualifiedName &name) noexcept;
 
     template <typename TFunction>
-    void InvokeCallback(dom::Element &element, TFunction &&function) noexcept;
+    void InvokeCallback(dom::Element &element, TFunction function) noexcept;
   };
 }

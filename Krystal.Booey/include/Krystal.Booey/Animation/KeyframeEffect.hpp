@@ -209,11 +209,11 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-keyframeeffect
     KRYS_NODISCARD static dom::ExceptionOr<Ref<KeyframeEffect>>
       Create(dom::Document &document, dom::Element *target, KeyframesInput &&keyframes,
-             Maybe<Variant<double, KeyframeEffectOptions>> &&options = null) noexcept;
+             Maybe<Variant<double, KeyframeEffectOptions>> options = null) noexcept;
 
     /// @brief The `KeyframeEffect(source)` constructor: a copy of @p source.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-keyframeeffect-source
-    KRYS_NODISCARD static Ref<KeyframeEffect> Create(Ref<KeyframeEffect> &&source) noexcept;
+    KRYS_NODISCARD static Ref<KeyframeEffect> Create(Ref<KeyframeEffect> source) noexcept;
 
     KRYS_NODISCARD static Ref<KeyframeEffect>
       Create(const dom::Element &target,
@@ -248,9 +248,9 @@ namespace krys::boo
     /// `@keyframes` rule.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-setkeyframes
     dom::ExceptionOr<void> SetBindingsKeyframes(dom::Document &document,
-                                                KeyframesInput &&keyframesInput) noexcept;
+                                                KeyframesInput keyframesInput) noexcept;
 
-    dom::ExceptionOr<void> SetKeyframes(dom::Document &document, KeyframesInput &&keyframesInput) noexcept;
+    dom::ExceptionOr<void> SetKeyframes(dom::Document &document, KeyframesInput keyframesInput) noexcept;
 
     KRYS_NODISCARD boo::IterationCompositeOperation IterationComposite() const noexcept
     {
@@ -409,11 +409,10 @@ namespace krys::boo
     KRYS_NODISCARD static dom::DOMString PropertyIdToIDLAttributeName(css::PropertyId property) noexcept;
 
   private:
-    void CopyPropertiesFromSource(Ref<KeyframeEffect> &&source) noexcept;
+    void CopyPropertiesFromSource(const Ref<KeyframeEffect> &source) noexcept;
 
     /// @see https://drafts.csswg.org/web-animations-1/#processing-a-keyframes-argument
-    dom::ExceptionOr<void> ProcessKeyframes(dom::Document &document,
-                                            KeyframesInput &&keyframesInput) noexcept;
+    dom::ExceptionOr<void> ProcessKeyframes(dom::Document &document, KeyframesInput keyframesInput) noexcept;
 
     void UpdateBlendingKeyframes(RenderStyle &elementStyle,
                                  const style::ResolutionContext &resolutionContext) noexcept;

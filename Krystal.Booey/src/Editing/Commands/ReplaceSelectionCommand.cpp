@@ -481,12 +481,9 @@ namespace krys::boo
       {
         text.append(textNode->Data());
       }
-      else if (HasTagName(node, html::TagName::br))
-      {
-        text.push_back(u8'\n');
-      }
-      else if (node->ParentNode() == &fragment && Is<dom::Element>(*node) && !text.empty()
-               && text.back() != u8'\n')
+      else if (HasTagName(node, html::TagName::br)
+               || (node->ParentNode() == &fragment && Is<dom::Element>(*node) && !text.empty()
+                   && text.back() != u8'\n'))
       {
         text.push_back(u8'\n');
       }

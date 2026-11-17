@@ -65,7 +65,7 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLTemplateElement: a template for no marker is an ordinary template",
             "[HTML][HTMLTemplateElement][html:prepare-content-patching]")
   {
-    auto check = [](utf8_string &&markup)
+    auto check = [](const utf8_string &markup)
     {
       auto document =
         ParseTemplateDocument(u8"<!DOCTYPE html><div id=t><?marker name=\"x\"?></div>" + markup);

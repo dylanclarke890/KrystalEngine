@@ -255,11 +255,11 @@ namespace krys::boo::style
 
     inline void SetFontDescriptionFontSize(float) noexcept;
 
-    inline void SetFontDescriptionFamilies(FontFamilies &&) noexcept;
+    inline void SetFontDescriptionFamilies(FontFamilies) noexcept;
 
-    inline void SetFontDescriptionFeatureSettings(FontFeatureSettings &&) noexcept;
+    inline void SetFontDescriptionFeatureSettings(FontFeatureSettings) noexcept;
 
-    inline void SetFontDescriptionFontPalette(FontPalette &&) noexcept;
+    inline void SetFontDescriptionFontPalette(const FontPalette &) noexcept;
 
     inline void SetFontDescriptionFontSizeAdjust(FontSizeAdjust) noexcept;
 
@@ -275,7 +275,7 @@ namespace krys::boo::style
 
     inline void SetFontDescriptionOpticalSizing(FontOpticalSizing) noexcept;
 
-    inline void SetFontDescriptionSpecifiedLocale(WebkitLocale &&) noexcept;
+    inline void SetFontDescriptionSpecifiedLocale(WebkitLocale) noexcept;
 
     inline void SetFontDescriptionTextAutospace(TextAutospace) noexcept;
 
@@ -289,13 +289,13 @@ namespace krys::boo::style
 
     inline void SetFontDescriptionVariantPosition(FontVariantPosition) noexcept;
 
-    inline void SetFontDescriptionVariationSettings(FontVariationSettings &&) noexcept;
+    inline void SetFontDescriptionVariationSettings(FontVariationSettings) noexcept;
 
     inline void SetFontDescriptionWeight(FontWeight) noexcept;
 
     inline void SetFontDescriptionWidth(FontWidth) noexcept;
 
-    inline void SetFontDescriptionVariantAlternates(FontVariantAlternates &&) noexcept;
+    inline void SetFontDescriptionVariantAlternates(FontVariantAlternates) noexcept;
 
     inline void SetFontDescriptionVariantEastAsian(FontVariantEastAsian) noexcept;
 

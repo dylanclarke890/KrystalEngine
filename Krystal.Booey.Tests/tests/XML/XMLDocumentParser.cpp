@@ -131,7 +131,7 @@ namespace krys::boo::tests
     REQUIRE(Is<dom::Element>(error));
     CHECK(Downcast<dom::Element>(*error).LocalName() == u8"parsererror");
     CHECK(Downcast<dom::Element>(*error).NamespaceURI() == infra::Namespaces::HTML);
-    CHECK(error->TextContent().value_or(u8"").find(u8"error on line 1") != utf8_string::npos);
+    CHECK(error->TextContent().value_or(u8"").contains(u8"error on line 1"));
   }
 
   TEST_CASE("A malformed SVG document is shown inside an HTML document", "[XML][XMLDocumentParser]")

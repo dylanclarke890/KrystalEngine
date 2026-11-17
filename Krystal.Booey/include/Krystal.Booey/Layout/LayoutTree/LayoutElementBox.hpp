@@ -86,7 +86,7 @@ namespace krys::boo::layout
     ElementBox(ElementAttributes &&attributes, EnumSet<ListMarkerAttribute> listMarkerAttributes,
                RenderStyle &&style, UniquePtr<RenderStyle> &&firstLineStyle = nullptr) noexcept;
 
-    ElementBox(ElementAttributes &&attributes, ReplacedAttributes &&replacedAttributes, RenderStyle &&style,
+    ElementBox(ElementAttributes &&attributes, ReplacedAttributes replacedAttributes, RenderStyle &&style,
                UniquePtr<RenderStyle> &&firstLineStyle = nullptr) noexcept;
 
     ~ElementBox() noexcept override;

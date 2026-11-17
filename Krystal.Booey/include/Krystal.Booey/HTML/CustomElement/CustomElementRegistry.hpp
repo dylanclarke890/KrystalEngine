@@ -128,6 +128,6 @@ namespace krys::boo::html
     KRYS_NODISCARD CustomElementInterface *FindInterface(const dom::QualifiedName &name) const noexcept;
 
   private:
-    void AddElementDefinition(Ref<CustomElementInterface> &&elementInterface) noexcept;
+    void AddElementDefinition(const Ref<CustomElementInterface> &elementInterface) noexcept;
   };
 }

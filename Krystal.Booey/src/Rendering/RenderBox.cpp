@@ -2895,14 +2895,10 @@ namespace krys::boo
     switch (containingBlockWritingMode.BlockDirection())
     {
       case FlowDirection::TopToBottom:
-        shouldFlip = (childBlockFlowDirection == FlowDirection::RightToLeft);
-        break;
       case FlowDirection::BottomToTop:
         shouldFlip = (childBlockFlowDirection == FlowDirection::RightToLeft);
         break;
       case FlowDirection::RightToLeft:
-        shouldFlip = (childBlockFlowDirection == FlowDirection::BottomToTop);
-        break;
       case FlowDirection::LeftToRight:
         shouldFlip = (childBlockFlowDirection == FlowDirection::BottomToTop);
         break;

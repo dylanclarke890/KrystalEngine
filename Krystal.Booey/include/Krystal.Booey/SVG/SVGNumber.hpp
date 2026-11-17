@@ -51,7 +51,7 @@ namespace krys::boo::svg
     }
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGNumber>> Create(dom::ExceptionOr<T> &&value) noexcept
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGNumber>> Create(dom::ExceptionOr<T> value) noexcept
     {
       if (value.HasException())
       {

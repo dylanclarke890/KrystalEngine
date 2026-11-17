@@ -64,8 +64,10 @@ namespace krys::boo::css
     constexpr auto OneOrMore = ListBounds::MinimumOf(1);
 
     template <char Separator, ListBounds Bounds, typename SubConsumer, typename... Args>
-    KRYS_NODISCARD auto ConsumeListSeparatedByIntoBuilder(TokenRange &tokens, SubConsumer &&subConsumer,
-                                                          Args &&...args) noexcept -> Maybe<ValueListBuilder>
+    KRYS_NODISCARD auto ConsumeListSeparatedByIntoBuilder(
+      TokenRange &tokens, SubConsumer subConsumer,
+      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): context, passed to each item.
+      Args &&...args) noexcept -> Maybe<ValueListBuilder>
     {
       auto consumeSeparator = [](auto &tokens)
       {
@@ -89,11 +91,7 @@ namespace krys::boo::css
         auto value = std::invoke(subConsumer, tokens, args...);
         if (!value)
         {
-          if constexpr (Separator == ',')
-          {
-            return {};
-          }
-          else if constexpr (Separator == '/')
+          if constexpr (Separator == ',' || Separator == '/')
           {
             return {};
           }
@@ -126,7 +124,7 @@ namespace krys::boo::css
 
     template <char Separator, ListBounds Bounds, ListOptimization Optimization = ListOptimization::None,
               typename ListType = ValueList, typename SubConsumer, typename... Args>
-    KRYS_NODISCARD auto ConsumeListSeparatedBy(TokenRange &tokens, SubConsumer &&subConsumer,
+    KRYS_NODISCARD auto ConsumeListSeparatedBy(TokenRange &tokens, SubConsumer subConsumer,
                                                Args &&...args) noexcept
       -> std::conditional_t<Optimization == ListOptimization::None, RefPtr<ListType>, RefPtr<Value>>
     {

@@ -9367,9 +9367,12 @@ class GenerateStyleBuilderGenerated:
                 ],
             )
 
+            # One case per property, so neighbouring cases often share a body.
+            writer.write("// NOLINTBEGIN(bugprone-branch-clone)")
             with writer.namespace(namespace="krys::boo::style"):
                 self._generate_style_builder_generated_cpp_builder_functions_class(to=writer)
                 self._generate_style_builder_generated_cpp_builder_generated_apply(to=writer)
+            writer.write("// NOLINTEND(bugprone-branch-clone)")
 
 
 # Generates `Style/Extractor/ExtractorGenerated.cpp`.
@@ -9636,10 +9639,13 @@ class GenerateStyleExtractorGenerated:
                 ],
             )
 
+            # One case per property, so neighbouring cases often share a body.
+            writer.write("// NOLINTBEGIN(bugprone-branch-clone)")
             with writer.namespace(namespace="krys::boo::style"):
                 self._generate_style_extractor_generated_cpp_extractor_functions_class(to=writer)
                 self._generate_style_extractor_generated_cpp_extractor_generated_extract_value(to=writer)
                 self._generate_style_extractor_generated_cpp_extractor_generated_extract_serialisation(to=writer)
+            writer.write("// NOLINTEND(bugprone-branch-clone)")
 
 
 # Generates `StyleInterpolationWrapperMap.h` and `StyleInterpolationWrapperMap.cpp`.

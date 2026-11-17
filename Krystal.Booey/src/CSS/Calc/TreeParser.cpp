@@ -165,7 +165,7 @@ namespace krys::boo::css::calc
   }
 
   template <typename Op>
-  KRYS_NODISCARD static Maybe<TypedChild> SimplifyOrCreateChild(Op &&op, Type outputType,
+  KRYS_NODISCARD static Maybe<TypedChild> SimplifyOrCreateChild(Op op, Type outputType,
                                                                 ParserState &state) noexcept
   {
     if (auto *simplificationOptions = state.SimplificationOptions)
@@ -984,7 +984,7 @@ namespace krys::boo::css::calc
     return typedValue;
   }
 
-  KRYS_NODISCARD static CSSOMStringAtom ToAtom(Maybe<CSSOMString> &&string) noexcept
+  KRYS_NODISCARD static CSSOMStringAtom ToAtom(Maybe<CSSOMString> string) noexcept
   {
     if (!string)
     {

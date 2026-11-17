@@ -181,7 +181,7 @@ namespace krys::boo::style
   struct InsetEdgeSharedAdaptor
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, const InsetEdge &value, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, const InsetEdge &value, F functor) const noexcept
     {
       // If the element is not displayed; return the "computed value".
       const auto *box = DynamicDowncast<RenderBox>(state.Renderer);
@@ -353,7 +353,7 @@ namespace krys::boo::style
   struct MarginEdgeSharedAdaptor
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, const MarginEdge &value, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, const MarginEdge &value, F functor) const noexcept
     {
       auto rendererCanHaveTrimmedMargin = [](const RenderBox &renderer)
       {
@@ -505,7 +505,7 @@ namespace krys::boo::style
   struct PaddingEdgeSharedAdaptor
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, const PaddingEdge &value, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, const PaddingEdge &value, F functor) const noexcept
     {
       const auto *renderBox = DynamicDowncast<RenderBox>(state.Renderer);
       if (!renderBox || value.IsFixed())
@@ -536,8 +536,7 @@ namespace krys::boo::style
   struct PreferredSizeSharedAdaptor
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, const PreferredSize &value,
-                                 F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, const PreferredSize &value, F functor) const noexcept
     {
       auto sizingBox = [](auto &renderer) -> LayoutRect
       {
@@ -579,7 +578,7 @@ namespace krys::boo::style
   struct MaximumSizeSharedAdaptor
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &, const MaximumSize &value, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &, const MaximumSize &value, F functor) const noexcept
     {
       if (value.IsNone())
       {
@@ -593,7 +592,7 @@ namespace krys::boo::style
   struct MinimumSizeSharedAdaptor
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, const MinimumSize &value, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, const MinimumSize &value, F functor) const noexcept
     {
       auto isFlexOrGridItem = [](auto renderer)
       {
@@ -617,7 +616,7 @@ namespace krys::boo::style
   /// @return False if @p value has no legacy keyword.
   // https://drafts.csswg.org/css-break-3/#page-break-properties
   template <typename F>
-  KRYS_NODISCARD bool VisitPageBreakKeyword(BreakBetween value, F &&functor) noexcept
+  KRYS_NODISCARD bool VisitPageBreakKeyword(BreakBetween value, F functor) noexcept
   {
     switch (value)
     {
@@ -634,7 +633,7 @@ namespace krys::boo::style
   /// @return False if @p value has no legacy keyword.
   // https://drafts.csswg.org/css-break-3/#page-break-properties
   template <typename F>
-  KRYS_NODISCARD bool VisitPageBreakKeyword(BreakInside value, F &&functor) noexcept
+  KRYS_NODISCARD bool VisitPageBreakKeyword(BreakInside value, F functor) noexcept
   {
     switch (value)
     {
@@ -657,7 +656,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::Direction>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       if (state.Element.get() == state.Element->NodeDocument().DocumentElement()
           && !state.Style.HasExplicitlySetDirection())
@@ -672,7 +671,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::WritingMode>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       if (state.Element.get() == state.Element->NodeDocument().DocumentElement()
           && !state.Style.HasExplicitlySetWritingMode())
@@ -687,7 +686,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::Float>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       if (state.Style.HasOutOfFlowPosition())
       {
@@ -701,7 +700,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::Content>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       if (state.Style.HasUsedContentNone())
       {
@@ -715,7 +714,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::LetterSpacing>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       // "For legacy reasons, a computed letter-spacing of zero yields a
       //  resolved value (getComputedStyle() return value) of `normal`."
@@ -734,7 +733,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::WordSpacing>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       return functor(state.Style.ComputedWordSpacing());
     }
@@ -744,7 +743,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::LineHeight>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       return krys::SwitchOn(
         state.Style.GetLineHeight(), [&](const css::keywords::Normal &keyword) { return functor(keyword); },
@@ -779,7 +778,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::FontFamily>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       auto fontFamily = state.Style.FontFamily();
       if (fontFamily.size() == 1)
@@ -794,7 +793,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::FontSize>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       return functor(Length<css::NonNegative> {state.Style.GetFontDescription().ComputedSize()});
     }
@@ -805,7 +804,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::property>                                                 \
   {                                                                                                          \
     template <typename F>                                                                                    \
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept                          \
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept                            \
     {                                                                                                        \
       return adaptor<css::PropertyId::property> {}.ComputedValue(state, state.Style.getter(),                \
                                                                  std::forward<F>(functor));                  \
@@ -837,7 +836,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::GridAutoFlow>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       // FIXME: Adjust this once CSSWG clarifies exactly how the initial value should compute.
       // For now, this gives the most backwards-compatible behavior.
@@ -885,7 +884,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::Rotate>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       if (Is<RenderInline>(state.Renderer))
       {
@@ -899,7 +898,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::Scale>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       if (Is<RenderInline>(state.Renderer))
       {
@@ -913,7 +912,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::Translate>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       if (Is<RenderInline>(state.Renderer))
       {
@@ -928,7 +927,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::Widows>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       return functor(state.Style.GetWidows().TryValue().value_or(2));
     }
@@ -938,7 +937,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::Orphans>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       return functor(state.Style.GetOrphans().TryValue().value_or(2));
     }
@@ -948,7 +947,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::BlockStep>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       auto blockStepSize = state.Style.GetBlockStepSize();
       bool hasBlockStepSize = blockStepSize != ComputedStyle::InitialBlockStepSize();
@@ -992,7 +991,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::FontSynthesis>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       auto &description = state.Style.GetFontDescription();
 
@@ -1026,7 +1025,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::LineClamp>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       auto maxLines = state.Style.MaxLines().TryValue();
       if (!maxLines)
@@ -1041,7 +1040,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::MaskBorder>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       return functor(state.Style.GetMaskBorder());
     }
@@ -1051,7 +1050,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::PerspectiveOrigin>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       if (state.Renderer)
       {
@@ -1074,7 +1073,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::TextBox>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       auto textBoxTrim = state.Style.GetTextBoxTrim();
       auto textBoxEdge = state.Style.GetTextBoxEdge();
@@ -1103,7 +1102,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::TextDecoration>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       auto textDecorationLine = state.Style.GetTextDecorationLine();
       bool hasTextDecorationLine = textDecorationLine != ComputedStyle::InitialTextDecorationLine();
@@ -1150,7 +1149,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::TextWrap>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       auto textWrapMode = state.Style.GetTextWrapMode();
       auto textWrapStyle = state.Style.GetTextWrapStyle();
@@ -1173,7 +1172,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::TransformOrigin>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       if (state.Renderer)
       {
@@ -1205,7 +1204,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::WhiteSpace>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       auto whiteSpaceCollapse = state.Style.GetWhiteSpaceCollapse();
       auto textWrapMode = state.Style.GetTextWrapMode();
@@ -1246,7 +1245,7 @@ namespace krys::boo::style
   struct PropertyExtractorAdaptor<css::PropertyId::Color>
   {
     template <typename F>
-    decltype(auto) ComputedValue(ExtractorState &state, F &&functor) const noexcept
+    decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       return functor(style::Color {state.Style.GetColor()});
     }
@@ -1273,7 +1272,7 @@ namespace krys::boo::style
 
   template <css::PropertyId propertyID, typename TList, typename TMapper>
   KRYS_NODISCARD Ref<css::Value> ExtractCoordinatedValueListValue(ExtractorState &state, const TList &list,
-                                                                  TMapper &&mapper) noexcept
+                                                                  TMapper mapper) noexcept
   {
     using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyID>;
 
@@ -1310,7 +1309,7 @@ namespace krys::boo::style
   template <css::PropertyId propertyID, typename TList, typename TMapper>
   void ExtractCoordinatedValueListSerialisation(ExtractorState &state, StringBuilder &builder,
                                                 const css::SerialisationContext &context, const TList &list,
-                                                TMapper &&mapper) noexcept
+                                                TMapper mapper) noexcept
   {
     using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyID>;
 
@@ -1593,7 +1592,7 @@ namespace krys::boo::style
 
   /// @brief Appends each item to `builder`, separated by `separator`.
   template <typename TRange, typename TFunc>
-  void AppendInterleaved(StringBuilder &builder, const TRange &range, TFunc &&func,
+  void AppendInterleaved(StringBuilder &builder, const TRange &range, TFunc func,
                          css::CSSOMStringView separator) noexcept
   {
     bool first = true;

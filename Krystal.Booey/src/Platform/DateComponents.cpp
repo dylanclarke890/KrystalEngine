@@ -408,7 +408,7 @@ namespace krys::boo
 
     template <typename TFunction>
     KRYS_NODISCARD Maybe<DateComponents> CreateFromString(utf8_stringview source,
-                                                          TFunction &&parseFunction) noexcept
+                                                          TFunction parseFunction) noexcept
     {
       if (source.empty())
       {
@@ -431,8 +431,7 @@ namespace krys::boo
     }
 
     template <typename TFunction>
-    KRYS_NODISCARD Maybe<DateComponents> CreateFromTimeOffset(double timeOffset,
-                                                              TFunction &&function) noexcept
+    KRYS_NODISCARD Maybe<DateComponents> CreateFromTimeOffset(double timeOffset, TFunction function) noexcept
     {
       DateComponents result;
       if (!function(result, timeOffset))

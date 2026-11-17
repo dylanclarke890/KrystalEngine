@@ -73,8 +73,8 @@ namespace krys::boo::tests
     auto markup = Narrow(SerializePreservingVisualAppearance(fixture.Selection().Selection()));
 
     // The text keeps its bold weight and font, however it's pasted.
-    CHECK(markup.find("uick") != std::string::npos);
-    CHECK(markup.find("<b") != std::string::npos);
-    CHECK(markup.find("The") == std::string::npos);
+    CHECK(markup.contains("uick"));
+    CHECK(markup.contains("<b"));
+    CHECK_FALSE(markup.contains("The"));
   }
 }

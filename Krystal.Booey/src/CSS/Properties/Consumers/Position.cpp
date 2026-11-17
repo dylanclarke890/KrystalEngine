@@ -179,6 +179,8 @@ namespace krys::boo::css::parse_property
     return {};
   }
 
+  // The visitors' components are rvalues; by value would be ambiguous with each catch-all `auto &&`.
+  // NOLINTBEGIN(cppcoreguidelines-missing-std-forward,cppcoreguidelines-rvalue-reference-param-not-moved)
   KRYS_NODISCARD static Maybe<Position>
     PositionUnresolvedFromOneComponent(PositionUnresolvedComponent &&component) noexcept
   {
@@ -197,8 +199,8 @@ namespace krys::boo::css::parse_property
   }
 
   KRYS_NODISCARD static Maybe<Position>
-    PositionUnresolvedFromTwoComponents(PositionUnresolvedComponent &&component1,
-                                        PositionUnresolvedComponent &&component2) noexcept
+    PositionUnresolvedFromTwoComponents(PositionUnresolvedComponent component1,
+                                        PositionUnresolvedComponent component2) noexcept
   {
     // <position-two> = [
     //   [ left | center | right | x-start | x-end ] &&
@@ -276,9 +278,9 @@ namespace krys::boo::css::parse_property
   }
 
   KRYS_NODISCARD static Maybe<Position>
-    PositionUnresolvedFromThreeComponents(PositionUnresolvedComponent &&component1,
-                                          PositionUnresolvedComponent &&component2,
-                                          PositionUnresolvedComponent &&component3) noexcept
+    PositionUnresolvedFromThreeComponents(PositionUnresolvedComponent component1,
+                                          PositionUnresolvedComponent component2,
+                                          PositionUnresolvedComponent component3) noexcept
   {
     // Special case only for <bg-position> productions.
 
@@ -407,8 +409,8 @@ namespace krys::boo::css::parse_property
   }
 
   KRYS_NODISCARD static Maybe<Position> PositionUnresolvedFromFourComponents(
-    PositionUnresolvedComponent &&component1, PositionUnresolvedComponent &&component2,
-    PositionUnresolvedComponent &&component3, PositionUnresolvedComponent &&component4) noexcept
+    PositionUnresolvedComponent component1, PositionUnresolvedComponent component2,
+    PositionUnresolvedComponent component3, PositionUnresolvedComponent component4) noexcept
   {
     // <position-four> = [
     //   [ [ left | right | x-start | x-end ] <length-percentage> ] &&
@@ -463,6 +465,8 @@ namespace krys::boo::css::parse_property
         return {};
       });
   }
+
+  // NOLINTEND(cppcoreguidelines-missing-std-forward,cppcoreguidelines-rvalue-reference-param-not-moved)
 
   Maybe<Position> ConsumePositionUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
   {

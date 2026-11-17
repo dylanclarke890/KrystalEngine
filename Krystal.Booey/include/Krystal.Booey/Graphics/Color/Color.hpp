@@ -314,7 +314,7 @@ namespace krys::boo
     KRYS_NODISCARD bool AnyComponentIsNone() const noexcept;
 
     template <typename Functor>
-    KRYS_NODISCARD decltype(auto) CallOnUnderlyingType(Functor &&functor) const noexcept
+    KRYS_NODISCARD decltype(auto) CallOnUnderlyingType(Functor functor) const noexcept
     {
       if (IsOutOfLine())
       {

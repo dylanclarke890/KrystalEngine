@@ -526,7 +526,7 @@ namespace krys::boo::css::parse_property
     // MARK: - color()
 
     template <typename Functor>
-    KRYS_NODISCARD auto CallWithColorFunction(ValueId id, Functor &&functor) noexcept
+    KRYS_NODISCARD auto CallWithColorFunction(ValueId id, Functor functor) noexcept
       -> decltype(functor.template operator()<ColorRGBFunction<ExtendedSRGBA<float>>>())
     {
       switch (id)
@@ -576,7 +576,7 @@ namespace krys::boo::css::parse_property
     }
 
     template <typename Functor>
-    KRYS_NODISCARD auto ConsumeColorSpace(TokenRange &args, Functor &&functor) noexcept
+    KRYS_NODISCARD auto ConsumeColorSpace(TokenRange &args, Functor functor) noexcept
       -> decltype(functor.template operator()<ColorRGBFunction<ExtendedSRGBA<float>>>())
     {
       return CallWithColorFunction(args.Peek().ValueId(),

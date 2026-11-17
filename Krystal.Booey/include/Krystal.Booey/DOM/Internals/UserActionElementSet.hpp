@@ -144,7 +144,7 @@ namespace krys::boo::dom
 
     /// @brief Calls @p function for each element that is focused or has focus within.
     template <typename TFunction>
-    void ForEachFocusedOrFocusWithinElement(TFunction &&function) const noexcept
+    void ForEachFocusedOrFocusWithinElement(TFunction function) const noexcept
     {
       for (auto &[element, flags] : _elements)
       {

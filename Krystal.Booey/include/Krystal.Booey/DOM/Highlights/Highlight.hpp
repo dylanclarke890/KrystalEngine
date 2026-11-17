@@ -99,11 +99,11 @@ namespace krys::boo::dom
     Type _type {Type::Highlight};
     int32 _priority {0};
 
-    explicit Highlight(List<Ref<AbstractRange>> &&initialRanges) noexcept;
+    explicit Highlight(List<Ref<AbstractRange>> initialRanges) noexcept;
 
   public:
     /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-highlight-highlight
-    KRYS_NODISCARD static Ref<Highlight> Create(List<Ref<AbstractRange>> &&initialRanges = {}) noexcept;
+    KRYS_NODISCARD static Ref<Highlight> Create(List<Ref<AbstractRange>> initialRanges = {}) noexcept;
 
     /// @brief Repaints the renderers of the nodes @p range intersects.
     static void RepaintRange(const AbstractRange &range) noexcept;

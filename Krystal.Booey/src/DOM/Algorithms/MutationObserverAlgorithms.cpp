@@ -255,9 +255,10 @@ namespace krys::boo::dom
   }
 
   void MutationObserverAlgorithms::QueueMutationRecord(
-    MutationRecordType type, Ref<Node> &&target, const DOMStringAtom &name, const DOMStringAtom &namespaceURI,
-    const DOMStringAtom &oldValue, SmallNodeList &&addedNodes, SmallNodeList &&removedNodes,
-    RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept
+    MutationRecordType type, const Ref<Node> &target, const DOMStringAtom &name,
+    const DOMStringAtom &namespaceURI, const DOMStringAtom &oldValue, const SmallNodeList &addedNodes,
+    const SmallNodeList &removedNodes, const RefPtr<Node> &previousSibling,
+    const RefPtr<Node> &nextSibling) noexcept
   {
     // 1. Let interestedObservers be an empty map.
     List<InterestedObserver> interestedObservers;
@@ -299,6 +300,7 @@ namespace krys::boo::dom
             continue;
           }
         }
+        // NOLINTBEGIN(bugprone-branch-clone): the spec's conditions, one per type.
         else if (type == MutationRecordType::CharacterData && !options.CharacterData.value_or(false))
         {
           continue;
@@ -307,6 +309,7 @@ namespace krys::boo::dom
         {
           continue;
         }
+        // NOLINTEND(bugprone-branch-clone)
 
         // 3b.i. Let mo be registered's observer.
         Ref<MutationObserver> observer = registered->Observer();
@@ -383,10 +386,10 @@ namespace krys::boo::dom
     QueueMutationObserverMicrotask();
   }
 
-  void MutationObserverAlgorithms::QueueTreeMutationRecord(Ref<Node> &&target, SmallNodeList &&addedNodes,
-                                                           SmallNodeList &&removedNodes,
-                                                           RefPtr<Node> &&previousSibling,
-                                                           RefPtr<Node> &&nextSibling) noexcept
+  void MutationObserverAlgorithms::QueueTreeMutationRecord(Ref<Node> target, SmallNodeList addedNodes,
+                                                           SmallNodeList removedNodes,
+                                                           RefPtr<Node> previousSibling,
+                                                           RefPtr<Node> nextSibling) noexcept
   {
     // 1. Assert: either addedNodes or removedNodes is not empty.
     krys_debug_assert(!addedNodes.empty() || !removedNodes.empty());

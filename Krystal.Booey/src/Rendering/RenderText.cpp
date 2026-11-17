@@ -869,7 +869,7 @@ namespace krys::boo
       MeasureTextConsideringPossibleTrailingSpace(bool currentCharacterIsSpace, size_t startIndex,
                                                   size_t wordLength, WordTrailingSpace &wordTrailingSpace,
                                                   HashSet<RefPtr<const Font>> &fallbackFonts,
-                                                  TMeasureTextCallback &&callback) noexcept
+                                                  TMeasureTextCallback callback) noexcept
     {
       Maybe<float> wordTrailingSpaceWidth;
       if (currentCharacterIsSpace)

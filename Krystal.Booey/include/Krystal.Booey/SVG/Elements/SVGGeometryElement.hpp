@@ -46,10 +46,10 @@ namespace krys::boo::svg
     KRYS_NODISCARD virtual dom::ExceptionOr<Ref<SVGPoint>> GetPointAtLength(float distance) const noexcept;
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__isPointInFill
-    KRYS_NODISCARD bool IsPointInFill(dom::DOMPointInit &&) noexcept;
+    KRYS_NODISCARD bool IsPointInFill(dom::DOMPointInit) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__isPointInStroke
-    KRYS_NODISCARD bool IsPointInStroke(dom::DOMPointInit &&) noexcept;
+    KRYS_NODISCARD bool IsPointInStroke(dom::DOMPointInit) noexcept;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGGeometryElement, SVGGraphicsElement>;
 

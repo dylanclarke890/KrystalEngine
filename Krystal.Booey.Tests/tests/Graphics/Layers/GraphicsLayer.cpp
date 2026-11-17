@@ -252,8 +252,7 @@ namespace krys::boo::tests
 )");
 
     CHECK(root->LayerTreeAsText({LayerTreeAsTextOptions::IncludePaintingPhases})
-            .find(u8"(paintingPhases [background, foreground])")
-          != utf8_string::npos);
+            .contains(u8"(paintingPhases [background, foreground])"));
   }
 
   TEST_CASE("GraphicsLayer: coverage grows in the direction it moves", "[Graphics][GraphicsLayer]")

@@ -261,7 +261,7 @@ namespace krys::boo
     }
 
     // Returns true if the child list changed.
-    virtual bool SetChildren(List<Ref<GraphicsLayer>> &&newChildren) noexcept;
+    virtual bool SetChildren(List<Ref<GraphicsLayer>> newChildren) noexcept;
 
     // Add child layers. If the child is already parented, it will be removed from its old parent.
     virtual void AddChild(Ref<GraphicsLayer> &&childLayer) noexcept;
@@ -724,6 +724,7 @@ namespace krys::boo
     }
 
     /// @brief Shows what @p delegate displays as the layer's contents, or removes them if it's null.
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): overrides take it.
     virtual void SetContentsDisplayDelegate(RefPtr<GraphicsLayerContentsDisplayDelegate> &&,
                                             ContentsLayerPurpose) noexcept
     {

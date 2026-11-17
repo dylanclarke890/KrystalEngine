@@ -36,8 +36,8 @@
 
 namespace krys::boo::layout
 {
-  Box::Box(ElementAttributes &&elementAttributes, RenderStyle &&style,
-           UniquePtr<RenderStyle> &&firstLineStyle, EnumSet<BaseTypeFlag> baseTypeFlags) noexcept
+  Box::Box(ElementAttributes elementAttributes, RenderStyle &&style, UniquePtr<RenderStyle> &&firstLineStyle,
+           EnumSet<BaseTypeFlag> baseTypeFlags) noexcept
       : _nodeType(elementAttributes.NodeType), _isAnonymous(static_cast<bool>(elementAttributes.IsAnonymous)),
         _baseTypeFlags(static_cast<uint8>(baseTypeFlags.ToRaw())), _style(krys::move(style))
   {

@@ -82,8 +82,8 @@ namespace krys::boo::svg
 
   namespace
   {
-    KRYS_NODISCARD bool IsXOrYAttribute(dom::DOMStringAtom localName,
-                                        dom::DOMStringAtom namespaceURI) noexcept
+    KRYS_NODISCARD bool IsXOrYAttribute(const dom::DOMStringAtom &localName,
+                                        const dom::DOMStringAtom &namespaceURI) noexcept
     {
       return namespaceURI == null && (localName == u8"x" || localName == u8"y");
     }

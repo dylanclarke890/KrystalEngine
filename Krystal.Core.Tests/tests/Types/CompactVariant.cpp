@@ -131,11 +131,6 @@ namespace krys
       return static_cast<uint64>(std::bit_cast<uint32>(static_cast<float>(value.Value)));
     }
 
-    constexpr static uint64 Encode(tests::TooBigStruct &&value) noexcept
-    {
-      return static_cast<uint64>(std::bit_cast<uint32>(static_cast<float>(value.Value)));
-    }
-
     constexpr static tests::TooBigStruct Decode(uint64 value) noexcept
     {
       return {std::bit_cast<float>(static_cast<uint32>(value))};

@@ -28,7 +28,7 @@
 
 namespace krys::boo::css
 {
-  dom::ExceptionOr<Ref<CSSMathMin>> CSSMathMin::Create(List<CSSNumberish> &&numberishes) noexcept
+  dom::ExceptionOr<Ref<CSSMathMin>> CSSMathMin::Create(List<CSSNumberish> numberishes) noexcept
   {
     List<Ref<CSSNumericValue>> values;
     values.reserve(numberishes.size());

@@ -67,7 +67,8 @@ namespace krys::boo::dom
 
 #pragma region Range
 
-  Range::Range(BoundaryPoint start, BoundaryPoint end) noexcept : AbstractRange(start, end)
+  Range::Range(BoundaryPoint start, BoundaryPoint end) noexcept
+      : AbstractRange(krys::move(start), krys::move(end))
   {
     LiveRangeUpdater::Created(*this);
   }
@@ -1333,11 +1334,11 @@ namespace krys::boo::dom
     return containedChildren;
   }
 
-  ExceptionOr<void> Range::CloneCharacterDataContents(DocumentFragment &fragment, Node &node, size_t offset,
-                                                      size_t length,
+  ExceptionOr<void> Range::CloneCharacterDataContents(DocumentFragment &fragment, Node &container,
+                                                      size_t offset, size_t length,
                                                       DeleteClonedContent deleteClonedContent) const noexcept
   {
-    CharacterData &characterData = Downcast<CharacterData>(node);
+    CharacterData &characterData = Downcast<CharacterData>(container);
 
     auto cloneResult = NodeAlgorithms::CloneNode(characterData);
     if (cloneResult.HasException())

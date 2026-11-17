@@ -1354,7 +1354,7 @@ namespace krys::boo::url
     return ProtocolIsAbout() && Path() == u8"srcdoc" && !HasQuery();
   }
 
-  bool URL::IsIPv6Address(utf8_stringview string) noexcept
+  bool URL::IsIPv6Address(utf8_stringview address) noexcept
   {
     enum SkipState
     {
@@ -1371,9 +1371,9 @@ namespace krys::boo::url
     size_t start = 0;
     while (true)
     {
-      size_t end = string.find(u8':', start);
+      size_t end = address.find(u8':', start);
       utf8_stringview hextet =
-        string.substr(start, end == utf8_stringview::npos ? utf8_stringview::npos : end - start);
+        address.substr(start, end == utf8_stringview::npos ? utf8_stringview::npos : end - start);
       bool isLast = end == utf8_stringview::npos;
       start = end + 1;
 

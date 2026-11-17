@@ -139,7 +139,7 @@ namespace krys::boo::css
     CSSStyleSheet(Ref<StyleSheetContents> &&contents, dom::Node &ownerNode,
                   Maybe<bool> isOriginClean) noexcept;
 
-    CSSStyleSheet(Ref<StyleSheetContents> &&contents, dom::Document &document, Init &&options) noexcept;
+    CSSStyleSheet(Ref<StyleSheetContents> &&contents, dom::Document &document, Init options) noexcept;
 
   public:
     ~CSSStyleSheet() noexcept override;
@@ -158,7 +158,7 @@ namespace krys::boo::css
     /// @brief The `CSSStyleSheet` constructor: an empty sheet, constructed by script, for @p document.
     /// @see https://drafts.csswg.org/cssom/#dom-cssstylesheet-cssstylesheet
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSStyleSheet>> Create(dom::Document &document,
-                                                                      Init &&options) noexcept;
+                                                                      Init init) noexcept;
 
     KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept final;
 
@@ -196,7 +196,7 @@ namespace krys::boo::css
 
     dom::ExceptionOr<void> RemoveRule(uint32 index) noexcept;
 
-    dom::ExceptionOr<void> ReplaceSync(CSSOMString &&text) noexcept;
+    dom::ExceptionOr<void> ReplaceSync(const CSSOMString &text) noexcept;
 
     KRYS_NODISCARD bool WasMutated() const noexcept
     {

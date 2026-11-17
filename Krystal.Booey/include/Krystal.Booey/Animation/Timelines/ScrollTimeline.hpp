@@ -84,7 +84,7 @@ namespace krys::boo
   public:
     /// @see https://drafts.csswg.org/scroll-animations-1/#dom-scrolltimeline-scrolltimeline
     KRYS_NODISCARD static Ref<ScrollTimeline> Create(dom::Document &document,
-                                                     ScrollTimelineOptions &&options = {}) noexcept;
+                                                     const ScrollTimelineOptions &options = {}) noexcept;
 
     KRYS_NODISCARD static Ref<ScrollTimeline> Create(const css::CSSOMStringAtom &name,
                                                      ScrollAxis axis) noexcept;

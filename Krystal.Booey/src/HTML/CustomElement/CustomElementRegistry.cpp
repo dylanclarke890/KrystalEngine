@@ -144,7 +144,8 @@ namespace krys::boo::html
     return {};
   }
 
-  void CustomElementRegistry::AddElementDefinition(Ref<CustomElementInterface> &&elementInterface) noexcept
+  void
+    CustomElementRegistry::AddElementDefinition(const Ref<CustomElementInterface> &elementInterface) noexcept
   {
     // 16. Append definition to this's custom element definition set.
     auto localName = elementInterface->Name().LocalName();

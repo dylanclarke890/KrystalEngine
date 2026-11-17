@@ -238,6 +238,7 @@ namespace krys::boo::css
     switch (shorthandId)
     {
       // We are not yet using the font shorthand here because our editing code is currently incompatible.
+      // NOLINTNEXTLINE(bugprone-branch-clone): the cases are grouped by reason.
       case PropertyId::Font:               return false;
 
       // Avoid legacy shorthands according to https://www.w3.org/TR/css-cascade-5/#legacy-shorthand

@@ -203,6 +203,7 @@ namespace krys::boo
     return _backend ? _backend->SinkIntoNativeImage() : nullptr;
   }
 
+  // NOLINTNEXTLINE(performance-unnecessary-value-param): the sink uses the buffer up.
   RefPtr<NativeImage> ImageBuffer::SinkIntoNativeImage(RefPtr<ImageBuffer> source) noexcept
   {
     if (!source)
@@ -222,14 +223,14 @@ namespace krys::boo
     return ToData(ShareRef(const_cast<ImageBuffer &>(*this)), mimeType, quality);
   }
 
-  utf8_string ImageBuffer::ToDataURL(Ref<ImageBuffer> source, utf8_stringview mimeType,
+  utf8_string ImageBuffer::ToDataURL(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
                                      Maybe<double> quality) noexcept
   {
-    auto encodedData = ToData(krys::move(source), mimeType, quality);
+    auto encodedData = ToData(source, mimeType, quality);
     return DataURL(encodedData, mimeType);
   }
 
-  List<uint8> ImageBuffer::ToData(Ref<ImageBuffer> source, utf8_stringview mimeType,
+  List<uint8> ImageBuffer::ToData(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
                                   Maybe<double> quality) noexcept
   {
     // The pixels are read back to be encoded. A JPEG has no alpha, so its pixels are premultiplied: what's

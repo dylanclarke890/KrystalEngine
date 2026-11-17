@@ -103,6 +103,7 @@ namespace krys::boo::css
       {
         SerialiseCharacterAsCodePoint(c, appendTo);
       }
+      // NOLINTBEGIN(bugprone-branch-clone): the spec's steps, in order.
       else if (c == U'-' && isFirst && isLast)
       {
         SerialiseCharacter(c, appendTo);
@@ -116,6 +117,7 @@ namespace krys::boo::css
       {
         SerialiseCharacter(c, appendTo);
       }
+      // NOLINTEND(bugprone-branch-clone)
 
       if (isFirst)
       {

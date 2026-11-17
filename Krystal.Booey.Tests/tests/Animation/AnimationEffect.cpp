@@ -87,7 +87,7 @@ namespace krys::boo::tests
 
     SECTION("invalid values throw a TypeError and change nothing")
     {
-      auto expectTypeError = [&](OptionalEffectTiming &&timing)
+      auto expectTypeError = [&](OptionalEffectTiming timing)
       {
         auto result = effect.UpdateTiming(*fixture.Document, timing);
         REQUIRE(result.HasException());

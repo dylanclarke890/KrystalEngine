@@ -259,7 +259,7 @@ namespace krys::boo::tests
     SECTION("Arabic digits")
     {
       auto &date = fixture.Input(u8"date", u8"ar-EG", {{u8"value", u8"2026-03-07"}});
-      CHECK(Shown(date).find(u8"\u0662\u0660\u0662\u0666") != utf8_string::npos);
+      CHECK(Shown(date).contains(u8"\u0662\u0660\u0662\u0666"));
     }
 
     SECTION("the visible value is localised")

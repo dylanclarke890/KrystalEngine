@@ -458,7 +458,7 @@ namespace krys::boo::html
 
     void SetTransform(double m11, double m12, double m21, double m22, double dx, double dy) noexcept;
 
-    dom::ExceptionOr<void> SetTransform(css::DOMMatrix2DInit && = {}) noexcept;
+    dom::ExceptionOr<void> SetTransform(css::DOMMatrix2DInit = {}) noexcept;
 
     void ResetTransform() noexcept;
 
@@ -530,17 +530,17 @@ namespace krys::boo::html
 
     /// @brief A pattern of @p image repeated as @p repetition says; null if the image isn't ready yet.
     KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>>
-      CreatePattern(CanvasImageSource &&image, dom::DOMStringView repetition) noexcept;
+      CreatePattern(CanvasImageSource image, dom::DOMStringView repetition) noexcept;
 
 #pragma endregion
 
 #pragma region CanvasDrawImage
 
-    dom::ExceptionOr<void> DrawImage(CanvasImageSource &&, float dx, float dy) noexcept;
+    dom::ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(CanvasImageSource &&, float dx, float dy, float dw, float dh) noexcept;
+    dom::ExceptionOr<void> DrawImage(CanvasImageSource, float dx, float dy, float dw, float dh) noexcept;
 
-    dom::ExceptionOr<void> DrawImage(CanvasImageSource &&, float sx, float sy, float sw, float sh, float dx,
+    dom::ExceptionOr<void> DrawImage(CanvasImageSource, float sx, float sy, float sw, float sh, float dx,
                                      float dy, float dw, float dh) noexcept;
 
 #pragma endregion

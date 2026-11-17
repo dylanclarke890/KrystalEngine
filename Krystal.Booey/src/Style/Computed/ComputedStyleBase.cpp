@@ -208,14 +208,14 @@ namespace krys::boo::style
     return _inheritedData.Access().FontData.Access().FontCascade;
   }
 
-  void ComputedStyleBase::SetFontCascade(FontCascade &&fontCascade) noexcept
+  void ComputedStyleBase::SetFontCascade(FontCascade fontCascade) noexcept
   {
     if (fontCascade == this->GetFontCascade())
     {
       return;
     }
 
-    _inheritedData.Access().FontData.Access().FontCascade = fontCascade;
+    _inheritedData.Access().FontData.Access().FontCascade = krys::move(fontCascade);
   }
 
   // MARK: - FontCascadeDescription support.
@@ -291,21 +291,21 @@ namespace krys::boo::style
     return _inheritedData->LineHeight;
   }
 
-  void ComputedStyleBase::SetLetterSpacingFromAnimation(LetterSpacing &&value) noexcept
+  void ComputedStyleBase::SetLetterSpacingFromAnimation(LetterSpacing value) noexcept
   {
     if (value != _inheritedData->FontData->LetterSpacing)
     {
-      _inheritedData.Access().FontData.Access().LetterSpacing = value;
+      _inheritedData.Access().FontData.Access().LetterSpacing = krys::move(value);
 
       SynchronizeLetterSpacingWithFontCascade();
     }
   }
 
-  void ComputedStyleBase::SetWordSpacingFromAnimation(WordSpacing &&value) noexcept
+  void ComputedStyleBase::SetWordSpacingFromAnimation(WordSpacing value) noexcept
   {
     if (value != _inheritedData->FontData->WordSpacing)
     {
-      _inheritedData.Access().FontData.Access().WordSpacing = value;
+      _inheritedData.Access().FontData.Access().WordSpacing = krys::move(value);
 
       SynchronizeWordSpacingWithFontCascade();
     }

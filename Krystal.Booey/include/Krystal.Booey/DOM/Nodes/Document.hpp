@@ -646,14 +646,14 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#dom-parsehtmlunsafe
     KRYS_NODISCARD static ExceptionOr<Ref<Document>>
       ParseHTMLUnsafe(Document &context, DOMStringView markup,
-                      html::ParseHTMLUnsafeOptions &&options = {}) noexcept;
+                      html::ParseHTMLUnsafeOptions options = {}) noexcept;
 
     /// @brief A new HTML document parsed from @p html, with declarative shadow roots and the settings of
     /// @p context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
     /// @see https://html.spec.whatwg.org/#dom-parsehtml
-    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTML(Document &context, DOMStringView html,
-                                                               html::SetHTMLOptions &&options = {}) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>>
+      ParseHTML(Document &context, DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Sets whether parsing into the document attaches declarative shadow roots.
     /// @see https://dom.spec.whatwg.org/#document-allow-declarative-shadow-roots

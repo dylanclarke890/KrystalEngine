@@ -52,7 +52,7 @@ namespace krys::boo::css
 
     SelectorList(SelectorList &&selectors) noexcept = default;
 
-    explicit SelectorList(MutableSelectorList &&selectors) noexcept;
+    explicit SelectorList(MutableSelectorList selectors) noexcept;
 
     explicit SelectorList(UniqueArray<Selector> &&array) noexcept : _selectors(krys::move(array))
     {

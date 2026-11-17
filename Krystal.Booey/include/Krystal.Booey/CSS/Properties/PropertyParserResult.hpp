@@ -44,19 +44,19 @@ namespace krys::boo::css
 
     // Bottleneck where the Value is added to the CSSProperty vector.
     void AddProperty(PropertyParserState &state, PropertyId property, PropertyId currentShorthand,
-                     RefPtr<Value> &&value, IsImportant important,
+                     RefPtr<Value> value, IsImportant important,
                      IsImplicit implicit = IsImplicit::No) noexcept;
 
 #pragma region Utils
 
-    void AddPropertyForCurrentShorthand(PropertyParserState &state, PropertyId longhand,
-                                        RefPtr<Value> &&value, IsImplicit implicit = IsImplicit::No) noexcept;
+    void AddPropertyForCurrentShorthand(PropertyParserState &state, PropertyId longhand, RefPtr<Value> value,
+                                        IsImplicit implicit = IsImplicit::No) noexcept;
 
     void AddPropertyForAllLonghandsOfShorthand(PropertyParserState &state, PropertyId shorthand,
-                                               RefPtr<Value> &&value, IsImportant important,
+                                               const RefPtr<Value> &value, IsImportant important,
                                                IsImplicit implicit = IsImplicit::No) noexcept;
 
-    void AddPropertyForAllLonghandsOfCurrentShorthand(PropertyParserState &, RefPtr<Value> &&value,
+    void AddPropertyForAllLonghandsOfCurrentShorthand(PropertyParserState &, RefPtr<Value> value,
                                                       IsImplicit implicit = IsImplicit::No) noexcept;
 
 #pragma endregion

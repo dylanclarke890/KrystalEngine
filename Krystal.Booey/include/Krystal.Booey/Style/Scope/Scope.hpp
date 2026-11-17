@@ -453,7 +453,7 @@ namespace krys::boo::style
     KRYS_NODISCARD ResolverScopes CollectResolverScopes() noexcept;
 
     template <typename TFunction>
-    void EvaluateMediaQueries(TFunction &&testFunction) noexcept;
+    void EvaluateMediaQueries(TFunction testFunction) noexcept;
 
     KRYS_NODISCARD static MediaQueryViewportState
       MediaQueryViewportStateForDocument(const dom::Document &document) noexcept;

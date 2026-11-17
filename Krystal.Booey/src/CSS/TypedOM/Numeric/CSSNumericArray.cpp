@@ -27,7 +27,7 @@
 
 namespace krys::boo::css
 {
-  Ref<CSSNumericArray> CSSNumericArray::Create(List<CSSNumberish> &&numberishes) noexcept
+  Ref<CSSNumericArray> CSSNumericArray::Create(List<CSSNumberish> numberishes) noexcept
   {
     List<Ref<CSSNumericValue>> values;
     values.reserve(numberishes.size());

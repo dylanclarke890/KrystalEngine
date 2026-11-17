@@ -171,7 +171,7 @@ namespace krys::boo
     void UpdatedHasPendingEvent() noexcept;
 
     void DidUpdateCachedImage(RelevantMutation relevantMutation,
-                              CachedResourceHandle<CachedImage> &&newImage) noexcept;
+                              const CachedResourceHandle<CachedImage> &newImage) noexcept;
 
     void DispatchPendingLoadEvent() noexcept;
 

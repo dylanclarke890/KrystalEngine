@@ -57,7 +57,7 @@ namespace krys::boo
     }
   }
 
-  CachedCSSStyleSheet::CachedCSSStyleSheet(CachedResourceRequest &&request) noexcept
+  CachedCSSStyleSheet::CachedCSSStyleSheet(const CachedResourceRequest &request) noexcept
       : CachedResource(CachedResourceRequest(request), Type::CSSStyleSheet), _charset(request.Charset())
   {
   }
@@ -258,7 +258,7 @@ namespace krys::boo
     return _parsedStyleSheetCache;
   }
 
-  void CachedCSSStyleSheet::SaveParsedStyleSheet(Ref<css::StyleSheetContents> &&sheet) noexcept
+  void CachedCSSStyleSheet::SaveParsedStyleSheet(const Ref<css::StyleSheetContents> &sheet) noexcept
   {
     krys_debug_assert(sheet->IsCacheable());
 

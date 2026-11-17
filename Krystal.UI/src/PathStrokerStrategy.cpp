@@ -11,7 +11,7 @@ namespace krys::ui
     // Calls @p function with each line of @p outline's contours, closing each one; curves are split into
     // lines.
     template <typename TFunction>
-    void ForEachEdge(const gfx::Path2D &outline, TFunction &&function) noexcept
+    void ForEachEdge(const gfx::Path2D &outline, TFunction function) noexcept
     {
       constexpr int32 curveSteps = 16;
       auto points = outline.Points();

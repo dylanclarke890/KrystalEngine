@@ -28,13 +28,13 @@
 
 namespace krys::boo
 {
-  TextStream &operator<<(TextStream &ts, const LayoutPoint &p) noexcept
+  TextStream &operator<<(TextStream &ts, const LayoutPoint &value) noexcept
   {
     if (ts.HasFormattingFlag(TextStream::Formatting::LayoutUnitsAsIntegers))
     {
-      return ts << '(' << p.X().ToInt() << ',' << p.Y().ToInt() << ')';
+      return ts << '(' << value.X().ToInt() << ',' << value.Y().ToInt() << ')';
     }
 
-    return ts << '(' << p.X().ToFloat() << ',' << p.Y().ToFloat() << ')';
+    return ts << '(' << value.X().ToFloat() << ',' << value.Y().ToFloat() << ')';
   }
 }

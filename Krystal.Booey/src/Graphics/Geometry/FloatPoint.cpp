@@ -51,10 +51,10 @@ namespace krys::boo
     return NarrowPrecision(newX, newY);
   }
 
-  TextStream &operator<<(TextStream &ts, const FloatPoint &p) noexcept
+  TextStream &operator<<(TextStream &ts, const FloatPoint &value) noexcept
   {
     // FIXME: callers should use the NumberRespectingIntegers flag.
-    return ts << '(' << TextStream::FormatNumberRespectingIntegers(p.X()) << ','
-              << TextStream::FormatNumberRespectingIntegers(p.Y()) << ')';
+    return ts << '(' << TextStream::FormatNumberRespectingIntegers(value.X()) << ','
+              << TextStream::FormatNumberRespectingIntegers(value.Y()) << ')';
   }
 }

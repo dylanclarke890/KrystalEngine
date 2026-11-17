@@ -108,6 +108,7 @@ namespace krys::boo
       krys_assert_msg(false, "Not reached");
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): overrides take it.
     virtual void Decode(Func<void(DecodingStatus)> &&) noexcept
     {
       krys_assert_msg(false, "Not reached");

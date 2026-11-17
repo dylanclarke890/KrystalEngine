@@ -98,11 +98,7 @@ namespace krys::boo
         child->ClearKnownToHaveNoOverflow();
       }
     }
-    else if (child->BoxModelObject()->HasSelfPaintingLayer())
-    {
-      child->ClearKnownToHaveNoOverflow();
-    }
-    else if (childStyle.HasOutlineInVisualOverflow())
+    else if (child->BoxModelObject()->HasSelfPaintingLayer() || childStyle.HasOutlineInVisualOverflow())
     {
       child->ClearKnownToHaveNoOverflow();
     }

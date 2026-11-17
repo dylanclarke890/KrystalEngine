@@ -585,6 +585,9 @@ namespace krys::boo
 
       case StyleAppearance::InnerSpinButton:              return InnerSpinButtonPart::Create();
 
+      // NOLINTNEXTLINE(bugprone-branch-clone): kept with their own appearances.
+      // NOLINTNEXTLINE(bugprone-branch-clone): kept with their own appearances.
+      // NOLINTNEXTLINE(bugprone-branch-clone): kept with their own appearances.
       case StyleAppearance::ListButton:                   break;
 
       case StyleAppearance::SearchFieldDecoration:        break;
@@ -1637,6 +1640,9 @@ namespace krys::boo
   {
     auto useDarkAppearance = HasFlag(options, style::ColorOptions::UseDarkAppearance);
 
+    // NOLINTBEGIN(bugprone-branch-clone): one documented case per system colour.
+    // NOLINTBEGIN(bugprone-branch-clone): one documented case per system colour.
+    // NOLINTBEGIN(bugprone-branch-clone): one documented case per system colour.
     switch (cssValueId)
     {
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-canvas
@@ -1834,6 +1840,9 @@ namespace krys::boo
 
       default:                           return {};
     }
+    // NOLINTEND(bugprone-branch-clone)
+    // NOLINTEND(bugprone-branch-clone)
+    // NOLINTEND(bugprone-branch-clone)
   }
 
   Color RenderTheme::TextSearchHighlightColor(style::ColorOptions options) const noexcept

@@ -235,7 +235,7 @@ namespace krys::boo::css
 
   template <typename T>
   KRYS_NODISCARD static RefPtr<CSSNumericValue>
-    OperationOnValuesOfSameUnit(T &&operation, const List<Ref<CSSNumericValue>> &values) noexcept
+    OperationOnValuesOfSameUnit(T operation, const List<Ref<CSSNumericValue>> &values) noexcept
   {
     bool allValuesHaveSameUnit =
       !values.empty()
@@ -260,8 +260,7 @@ namespace krys::boo::css
     return nullptr;
   }
 
-  KRYS_NODISCARD static List<Ref<CSSNumericValue>>
-    RectifyNumberishes(List<CSSNumberish> &&numberishes) noexcept
+  KRYS_NODISCARD static List<Ref<CSSNumericValue>> RectifyNumberishes(List<CSSNumberish> numberishes) noexcept
   {
     List<Ref<CSSNumericValue>> values;
     values.reserve(numberishes.size());
@@ -274,7 +273,7 @@ namespace krys::boo::css
 
   template <typename T>
   List<Ref<CSSNumericValue>>
-    CSSNumericValue::PrependItemsOfTypeOrThis(List<Ref<CSSNumericValue>> &&numericValues) noexcept
+    CSSNumericValue::PrependItemsOfTypeOrThis(List<Ref<CSSNumericValue>> numericValues) noexcept
   {
     List<Ref<CSSNumericValue>> values;
     if (T *t = DynamicDowncast<T>(*this))
@@ -292,7 +291,7 @@ namespace krys::boo::css
   }
 
   dom::ExceptionOr<Ref<CSSNumericValue>>
-    CSSNumericValue::AddInternal(List<Ref<CSSNumericValue>> &&numericValues) noexcept
+    CSSNumericValue::AddInternal(List<Ref<CSSNumericValue>> numericValues) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-add
     auto values = PrependItemsOfTypeOrThis<CSSMathSum>(krys::move(numericValues));
@@ -305,12 +304,12 @@ namespace krys::boo::css
     return ConvertToExceptionOrNumericValue(CSSMathSum::Create(krys::move(values)));
   }
 
-  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Add(List<CSSNumberish> &&values) noexcept
+  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Add(List<CSSNumberish> values) noexcept
   {
     return AddInternal(RectifyNumberishes(krys::move(values)));
   }
 
-  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Sub(List<CSSNumberish> &&values) noexcept
+  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Sub(List<CSSNumberish> values) noexcept
   {
     List<Ref<CSSNumericValue>> negatedValues;
     negatedValues.reserve(values.size());
@@ -322,7 +321,7 @@ namespace krys::boo::css
   }
 
   dom::ExceptionOr<Ref<CSSNumericValue>>
-    CSSNumericValue::MultiplyInternal(List<Ref<CSSNumericValue>> &&numericValues) noexcept
+    CSSNumericValue::MultiplyInternal(List<Ref<CSSNumericValue>> numericValues) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-mul
     auto values = PrependItemsOfTypeOrThis<CSSMathProduct>(krys::move(numericValues));
@@ -363,12 +362,12 @@ namespace krys::boo::css
     return ConvertToExceptionOrNumericValue(CSSMathProduct::Create(krys::move(values)));
   }
 
-  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Mul(List<CSSNumberish> &&values) noexcept
+  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Mul(List<CSSNumberish> values) noexcept
   {
     return MultiplyInternal(RectifyNumberishes(krys::move(values)));
   }
 
-  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Div(List<CSSNumberish> &&values) noexcept
+  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Div(List<CSSNumberish> values) noexcept
   {
     List<Ref<CSSNumericValue>> invertedValues;
     invertedValues.reserve(values.size());
@@ -380,7 +379,7 @@ namespace krys::boo::css
     return MultiplyInternal(krys::move(invertedValues));
   }
 
-  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Min(List<CSSNumberish> &&numberishes) noexcept
+  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Min(List<CSSNumberish> numberishes) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-min
     auto values = PrependItemsOfTypeOrThis<CSSMathMin>(RectifyNumberishes(krys::move(numberishes)));
@@ -393,7 +392,7 @@ namespace krys::boo::css
     return ConvertToExceptionOrNumericValue(CSSMathMin::Create(krys::move(values)));
   }
 
-  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Max(List<CSSNumberish> &&numberishes) noexcept
+  dom::ExceptionOr<Ref<CSSNumericValue>> CSSNumericValue::Max(List<CSSNumberish> numberishes) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-max
     auto values = PrependItemsOfTypeOrThis<CSSMathMax>(RectifyNumberishes(krys::move(numberishes)));
@@ -406,7 +405,7 @@ namespace krys::boo::css
     return ConvertToExceptionOrNumericValue(CSSMathMax::Create(krys::move(values)));
   }
 
-  Ref<CSSNumericValue> CSSNumericValue::RectifyNumberish(CSSNumberish &&numberish) noexcept
+  Ref<CSSNumericValue> CSSNumericValue::RectifyNumberish(CSSNumberish numberish) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#rectify-a-numberish-value
     return krys::SwitchOn(
@@ -419,7 +418,7 @@ namespace krys::boo::css
       [](double value) -> Ref<CSSNumericValue> { return CSSNumericFactory::Number(value); });
   }
 
-  bool CSSNumericValue::Equals(List<CSSNumberish> &&values) noexcept
+  bool CSSNumericValue::Equals(List<CSSNumberish> values) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-equals
     auto numericValues = RectifyNumberishes(krys::move(values));
@@ -481,7 +480,7 @@ namespace krys::boo::css
     return Ref<CSSUnitValue> {krys::move(converted)};
   }
 
-  dom::ExceptionOr<Ref<CSSMathSum>> CSSNumericValue::ToSum(List<CSSOMString> &&units) noexcept
+  dom::ExceptionOr<Ref<CSSMathSum>> CSSNumericValue::ToSum(const List<CSSOMString> &units) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-tosum
     List<UnitType> parsedUnits;

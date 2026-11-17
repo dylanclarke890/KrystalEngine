@@ -85,7 +85,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::Caption(RefPtr<HTMLTableCaptionElement> &&caption) noexcept
+  dom::ExceptionOr<void> HTMLTableElement::Caption(const RefPtr<HTMLTableCaptionElement> &caption) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -136,7 +136,7 @@ namespace krys::boo::html
     return FirstTableSection(*this, TagName::thead);
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::THead(RefPtr<HTMLTableSectionElement> &&head) noexcept
+  dom::ExceptionOr<void> HTMLTableElement::THead(const RefPtr<HTMLTableSectionElement> &head) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -208,7 +208,7 @@ namespace krys::boo::html
     return FirstTableSection(*this, TagName::tfoot);
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::TFoot(RefPtr<HTMLTableSectionElement> &&foot) noexcept
+  dom::ExceptionOr<void> HTMLTableElement::TFoot(const RefPtr<HTMLTableSectionElement> &foot) noexcept
   {
     CEReactionsScope ceReactions;
 

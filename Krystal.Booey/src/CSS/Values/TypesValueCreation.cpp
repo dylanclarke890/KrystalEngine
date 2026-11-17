@@ -32,34 +32,34 @@
 
 namespace krys::boo::css
 {
-  Ref<Value> CreatePrimitiveValue(ValueId value) noexcept
+  Ref<Value> CreatePrimitiveValue(ValueId keyword) noexcept
   {
-    return PrimitiveValue::Create(value);
+    return PrimitiveValue::Create(keyword);
   }
 
-  Ref<Value> CreatePrimitiveValue(const CustomIdentifier &value) noexcept
+  Ref<Value> CreatePrimitiveValue(const CustomIdentifier &identifier) noexcept
   {
-    return PrimitiveValue::CreateCustomIdent(value.Value);
+    return PrimitiveValue::CreateCustomIdent(identifier.Value);
   }
 
-  Ref<Value> CreatePrimitiveValue(const PropertyIdentifier &value) noexcept
+  Ref<Value> CreatePrimitiveValue(const PropertyIdentifier &identifier) noexcept
   {
-    return PrimitiveValue::Create(value.Value);
+    return PrimitiveValue::Create(identifier.Value);
   }
 
-  Ref<Value> CreatePrimitiveValue(const CSSOMStringAtom &value) noexcept
+  Ref<Value> CreatePrimitiveValue(const CSSOMStringAtom &string) noexcept
   {
-    return PrimitiveValue::Create(value);
+    return PrimitiveValue::Create(string);
   }
 
-  Ref<Value> CreatePrimitiveValue(const CSSOMString &value) noexcept
+  Ref<Value> CreatePrimitiveValue(const CSSOMString &string) noexcept
   {
-    return PrimitiveValue::Create(value);
+    return PrimitiveValue::Create(string);
   }
 
-  Ref<Value> CreateFunctionValue(ValueId name, Ref<Value> &&value) noexcept
+  Ref<Value> CreateFunctionValue(ValueId name, Ref<Value> &&arguments) noexcept
   {
-    return FunctionValue::Create(name, krys::move(value));
+    return FunctionValue::Create(name, krys::move(arguments));
   }
 
   template <>

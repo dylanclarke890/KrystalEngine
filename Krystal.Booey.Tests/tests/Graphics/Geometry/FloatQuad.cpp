@@ -62,7 +62,7 @@ namespace krys::boo::tests
         {FloatPoint(10, -20), FloatPoint(30, -20.1f), FloatPoint(30, -10.1f), FloatPoint(10, -10)}, 0.01f));
   }
 
-  static void CheckIsEmpty(bool expectation, FloatQuad &&quad)
+  static void CheckIsEmpty(bool expectation, FloatQuad quad)
   {
     CHECK(expectation == quad.IsEmpty());
   }

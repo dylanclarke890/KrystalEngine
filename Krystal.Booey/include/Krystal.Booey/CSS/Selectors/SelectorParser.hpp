@@ -112,11 +112,11 @@ namespace krys::boo::css
   private:
     template <typename TConsumeSelector>
     KRYS_NODISCARD MutableSelectorList ConsumeSelectorList(TokenRange &tokens,
-                                                           TConsumeSelector &&consumeSelector) noexcept;
+                                                           TConsumeSelector consumeSelector) noexcept;
 
     template <typename TConsumeSelector>
     KRYS_NODISCARD MutableSelectorList
-      ConsumeForgivingSelectorList(TokenRange &tokens, TConsumeSelector &&consumeSelector) noexcept;
+      ConsumeForgivingSelectorList(TokenRange &tokens, TConsumeSelector consumeSelector) noexcept;
 
     KRYS_NODISCARD MutableSelectorList ConsumeCompoundSelectorList(TokenRange &tokens) noexcept;
 

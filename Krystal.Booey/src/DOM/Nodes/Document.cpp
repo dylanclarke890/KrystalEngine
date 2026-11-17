@@ -846,7 +846,7 @@ namespace krys::boo::dom
 
   // https://html.spec.whatwg.org/#dom-parsehtmlunsafe
   ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup,
-                                                       html::ParseHTMLUnsafeOptions &&options) noexcept
+                                                       html::ParseHTMLUnsafeOptions options) noexcept
   {
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
     //    algorithm with the current global object, html, options, and "Document parseHTMLUnsafe".
@@ -871,7 +871,7 @@ namespace krys::boo::dom
 
   // https://html.spec.whatwg.org/#dom-parsehtml
   ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html,
-                                                 html::SetHTMLOptions &&options) noexcept
+                                                 const html::SetHTMLOptions &options) noexcept
   {
     // 1. Let document be a new Document, whose content type is "text/html" and origin is this's relevant
     //    global object's associated Document's origin.

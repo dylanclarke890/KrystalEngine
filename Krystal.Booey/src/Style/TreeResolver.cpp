@@ -937,7 +937,7 @@ namespace krys::boo::style
   }
 
   ElementUpdate TreeResolver::CreateAnimatedElementUpdate(
-    ResolvedStyle &&resolvedStyle, const Styleable &styleable, EnumSet<Change> parentChanges,
+    ResolvedStyle resolvedStyle, const Styleable &styleable, EnumSet<Change> parentChanges,
     const ResolutionContext &resolutionContext, style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept
   {
     auto &element = styleable.Element;

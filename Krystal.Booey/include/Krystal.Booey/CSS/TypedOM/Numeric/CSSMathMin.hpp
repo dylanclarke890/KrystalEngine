@@ -37,7 +37,7 @@ namespace krys::boo::css
 
   public:
     /// @return A `SyntaxError` if there are no values, or a `TypeError` if their types can't be combined.
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathMin>> Create(List<CSSNumberish> &&numberishes) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathMin>> Create(List<CSSNumberish> numberishes) noexcept;
 
     KRYS_NODISCARD static dom::ExceptionOr<Ref<CSSMathMin>>
       Create(List<Ref<CSSNumericValue>> &&values) noexcept;

@@ -907,8 +907,7 @@ namespace krys::boo::html
     Transform(m11, m12, m21, m22, dx, dy);
   }
 
-  dom::ExceptionOr<void>
-    CanvasRenderingContext2DBase::SetTransform(css::DOMMatrix2DInit &&matrixInit) noexcept
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::SetTransform(css::DOMMatrix2DInit matrixInit) noexcept
   {
     // https://html.spec.whatwg.org/#dom-context-2d-settransform-matrix
     // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
@@ -1721,7 +1720,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-context-2d-createpattern
   dom::ExceptionOr<RefPtr<CanvasPattern>>
-    CanvasRenderingContext2DBase::CreatePattern(CanvasImageSource &&image,
+    CanvasRenderingContext2DBase::CreatePattern(CanvasImageSource image,
                                                 dom::DOMStringView repetition) noexcept
   {
     // 4. If repetition is the empty string, then set it to "repeat".
@@ -1905,7 +1904,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-context-2d-drawimage
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource &&image, float dx,
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float dx,
                                                                  float dy) noexcept
   {
     // (The source and destination rectangles default to the image's size; see below.)
@@ -1935,8 +1934,8 @@ namespace krys::boo::html
       });
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource &&image, float dx,
-                                                                 float dy, float dw, float dh) noexcept
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float dx, float dy,
+                                                                 float dw, float dh) noexcept
   {
     return SwitchOn(image,
                     [&](auto &element) -> dom::ExceptionOr<void>
@@ -1948,9 +1947,9 @@ namespace krys::boo::html
                     });
   }
 
-  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource &&image, float sx,
-                                                                 float sy, float sw, float sh, float dx,
-                                                                 float dy, float dw, float dh) noexcept
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float sx, float sy,
+                                                                 float sw, float sh, float dx, float dy,
+                                                                 float dw, float dh) noexcept
   {
     return SwitchOn(
       image, [&](auto &element) -> dom::ExceptionOr<void>

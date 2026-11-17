@@ -184,13 +184,14 @@ namespace krys::boo
     return clippedRect;
   }
 
-  TextStream &operator<<(TextStream &ts, const IntRect &r) noexcept
+  TextStream &operator<<(TextStream &ts, const IntRect &value) noexcept
   {
     if (ts.HasFormattingFlag(TextStream::Formatting::SVGStyleRect))
     {
-      return ts << "at (" << r.X() << ',' << r.Y() << ") size " << r.Width() << 'x' << r.Height();
+      return ts << "at (" << value.X() << ',' << value.Y() << ") size " << value.Width() << 'x'
+                << value.Height();
     }
 
-    return ts << r.Location() << ' ' << r.Size();
+    return ts << value.Location() << ' ' << value.Size();
   }
 }

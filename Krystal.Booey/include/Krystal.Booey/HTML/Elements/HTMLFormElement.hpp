@@ -247,7 +247,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#constructing-the-form-data-set
     /// @return The entry list, or null if the form is already constructing one.
     KRYS_NODISCARD RefPtr<DOMFormData>
-      ConstructEntryList(RefPtr<HTMLFormControlElement> &&submitter, Ref<DOMFormData> &&domFormData,
+      ConstructEntryList(const RefPtr<HTMLFormControlElement> &submitter, const Ref<DOMFormData> &domFormData,
                          List<Pair<dom::DOMString, dom::DOMString>> *formValues) noexcept;
 
     KRYS_NODISCARD const FormSubmission::Attributes &Attributes() const noexcept
@@ -287,7 +287,7 @@ namespace krys::boo::html
     void Submit(dom::Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
                 HTMLFormControlElement *submitter = nullptr) noexcept;
 
-    void SubmitDialog(Ref<FormSubmission> &&formSubmission) noexcept;
+    void SubmitDialog(const Ref<FormSubmission> &formSubmission) noexcept;
 
     KRYS_NODISCARD uint32 FormElementIndexWithFormAttribute(dom::Element &element, uint32 rangeStart,
                                                             uint32 rangeEnd) noexcept;

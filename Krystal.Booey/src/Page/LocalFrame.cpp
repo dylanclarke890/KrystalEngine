@@ -137,7 +137,7 @@ namespace krys::boo
     return result.InnerNode() ? &result.InnerNode()->NodeDocument() : nullptr;
   }
 
-  void LocalFrame::SetDocument(RefPtr<dom::Document> &&newDocument) noexcept
+  void LocalFrame::SetDocument(const RefPtr<dom::Document> &newDocument) noexcept
   {
     krys_assert_msg(!newDocument || !newDocument->Frame(), "a document is in one frame at most");
 

@@ -15,7 +15,7 @@ namespace krys::boo::css::calc::tests
     }
 
     template <typename Op>
-    Child Node(Op &&op, Type type = Type::CreateLength())
+    Child Node(Op op, Type type = Type::CreateLength())
     {
       return CreateChild(krys::move(op), type);
     }
@@ -38,7 +38,7 @@ namespace krys::boo::css::calc::tests
                                     .AllowZeroValueLengthRemovalFromSum = removeZeros};
     }
 
-    Child Simplified(Child &&root, const SimplificationOptions &options = Options())
+    Child Simplified(Child root, const SimplificationOptions &options = Options())
     {
       return CopyAndSimplify(root, options);
     }

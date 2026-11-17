@@ -45,7 +45,7 @@ namespace krys::boo::svg::tests
     {
       auto &rect = *document->GetElementById(u8"r");
       REQUIRE_FALSE(rect.SetAttribute(u8"fill", u8"blue").HasException());
-      CHECK(Hints(rect).find("fill: blue;") != std::string::npos);
+      CHECK(Hints(rect).contains("fill: blue;"));
     }
 
     SECTION("Resolution")
