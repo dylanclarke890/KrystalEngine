@@ -168,14 +168,14 @@ namespace krys::detail
 
     template <typename X = T, typename TMember>
     requires(SameType<X, T>)
-    TMember &operator->*(TMember X::*memptr) const noexcept
+    TMember &operator->*(TMember X::*memptr) const noexcept KRYS_LIFETIME_BOUND
     {
       T *result = this->get();
       krys_assert(result);
       return result->*memptr;
     }
 
-    KRYS_NODISCARD T *get() const noexcept
+    KRYS_NODISCARD T *get() const noexcept KRYS_LIFETIME_BOUND
     {
       return _impl ? static_cast<T *>(_impl->template get<T>()) : nullptr;
     }

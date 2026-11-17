@@ -229,7 +229,7 @@ namespace krys
     // can never be anything other than T. Either way it compiles as expected but we need the indirection to
     // avoid intellisense errors.
     template <typename X = T, typename TMember>
-    constexpr TMember &operator->*(TMember X::*memptr) const noexcept
+    constexpr TMember &operator->*(TMember X::*memptr) const noexcept KRYS_LIFETIME_BOUND
     {
       static_assert(SameType<T, X>, "T must be the same as X");
       krys_assert(PtrTraits::unwrap(_ptr) != nullptr);
