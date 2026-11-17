@@ -25,6 +25,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -34,9 +35,8 @@ namespace krys::boo
     return AdoptRef(*new FEFlood(floodColor, floodOpacity, colorSpace));
   }
 
-  FEFlood::FEFlood(const Color &floodColor, float floodOpacity,
-                   const DestinationColorSpace &colorSpace) noexcept
-      : FilterEffect(FilterEffect::Type::FEFlood, colorSpace), _floodColor(floodColor),
+  FEFlood::FEFlood(Color floodColor, float floodOpacity, const DestinationColorSpace &colorSpace) noexcept
+      : FilterEffect(FilterEffect::Type::FEFlood, colorSpace), _floodColor(krys::move(floodColor)),
         _floodOpacity(floodOpacity)
   {
   }

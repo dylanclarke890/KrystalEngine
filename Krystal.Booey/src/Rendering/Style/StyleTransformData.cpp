@@ -35,8 +35,7 @@ namespace krys::boo
   }
 
   inline StyleTransformData::StyleTransformData(const StyleTransformData &other) noexcept
-      : RefCounted<StyleTransformData>(), Transform(other.Transform), Origin(other.Origin),
-        TransformBox(other.TransformBox)
+      : Transform(other.Transform), Origin(other.Origin), TransformBox(other.TransformBox)
   {
   }
 

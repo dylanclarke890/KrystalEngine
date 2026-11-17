@@ -75,7 +75,7 @@ namespace krys::boo
 
     struct ContainerBoundingBoxes
     {
-      Markable<FloatRect> ObjectBoundingBox {};
+      Markable<FloatRect> ObjectBoundingBox;
       FloatRect RepaintBoundingBox {};
     };
 

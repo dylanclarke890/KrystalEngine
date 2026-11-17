@@ -631,7 +631,7 @@ namespace krys::boo
     EnumSet<LayerPositionUpdates> _layerPositionDirtyBits;
 
     const bool _isRenderViewLayer : 1;
-    const bool _forcedStackingContext : 1;
+    const bool _forcedStackingContext : 1 {false};
 
     bool _isNormalFlowOnly : 1 {false};
     bool _inResizeMode : 1 {false};
@@ -922,7 +922,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasNegativeZOrderLayers() const noexcept
     {
-      return _negZOrderList && _negZOrderList->size();
+      return _negZOrderList && !_negZOrderList->empty();
     }
 
     KRYS_NODISCARD LayerList NegativeZOrderLayers() const noexcept

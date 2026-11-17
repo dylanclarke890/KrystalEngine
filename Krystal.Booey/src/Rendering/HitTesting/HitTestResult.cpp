@@ -65,8 +65,8 @@ namespace krys::boo
   {
   }
 
-  HitTestResult::HitTestResult(const HitTestLocation &other) noexcept
-      : _hitTestLocation(other), _doublePointInInnerNodeFrame(_hitTestLocation.Point())
+  HitTestResult::HitTestResult(const HitTestLocation &location) noexcept
+      : _hitTestLocation(location), _doublePointInInnerNodeFrame(_hitTestLocation.Point())
   {
   }
 

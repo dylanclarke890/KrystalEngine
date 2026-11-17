@@ -103,13 +103,13 @@ namespace krys::boo
 
     KRYS_NODISCARD svg::SVGUnitTypes::SVGUnitType ClipPathUnits() const noexcept;
 
+    void GetElement() const = delete;
+
   private:
     KRYS_NODISCARD bool SelfNeedsClientInvalidation() const noexcept override
     {
       return (EverHadLayout() || !_clipperMap.empty()) && SelfNeedsLayout();
     }
-
-    void GetElement() const = delete;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {

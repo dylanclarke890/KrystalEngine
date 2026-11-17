@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -49,14 +50,15 @@ namespace krys::boo
     return result;
   }
 
-  CSSTransition::CSSTransition(const style::Styleable &styleable, const AnimatableCSSProperty &property,
-                               Seconds generationTime, const style::Transition &backingStyleTransition,
+  CSSTransition::CSSTransition(const style::Styleable &styleable, AnimatableCSSProperty property,
+                               Seconds generationTime, style::Transition backingStyleTransition,
                                const RenderStyle &targetStyle, const RenderStyle &reversingAdjustedStartStyle,
                                double reversingShorteningFactor) noexcept
-      : StyleOriginatedAnimation(styleable), _property(property), _generationTime(generationTime),
+      : StyleOriginatedAnimation(styleable), _property(krys::move(property)), _generationTime(generationTime),
         _targetStyle(RenderStyle::ClonePtr(targetStyle)),
         _reversingAdjustedStartStyle(RenderStyle::ClonePtr(reversingAdjustedStartStyle)),
-        _reversingShorteningFactor(reversingShorteningFactor), _backingStyleTransition(backingStyleTransition)
+        _reversingShorteningFactor(reversingShorteningFactor),
+        _backingStyleTransition(krys::move(backingStyleTransition))
   {
   }
 

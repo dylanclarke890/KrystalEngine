@@ -93,7 +93,7 @@ namespace krys::boo::style
 
     bool _shouldIncludeEmptyRules {false};
     bool _isPrintStyle {false};
-    Maybe<PseudoElementRequest> _pseudoElementRequest {};
+    Maybe<PseudoElementRequest> _pseudoElementRequest;
     const css::SelectorChecker::Mode _mode {css::SelectorChecker::Mode::ResolvingStyle};
 
     SmallList<MatchedRule, 64> _matchedRules;

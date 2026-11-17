@@ -65,13 +65,13 @@ namespace krys::boo::html
     auto *self = watcher.get();
     watcher->_cancelAction = [self](bool canPreventClose)
     {
-      auto cancelEvent = dom::Event::Create(EventNames::Cancel, false, canPreventClose);
+      auto cancelEvent = dom::Event::Create(event_names::Cancel, false, canPreventClose);
       (void)dom::EventDispatcher::DispatchToTarget(*cancelEvent, self);
       return !cancelEvent->DefaultPrevented();
     };
     watcher->_closeAction = [self]
     {
-      auto closeEvent = dom::Event::Create(EventNames::Close, false, false);
+      auto closeEvent = dom::Event::Create(event_names::Close, false, false);
       (void)dom::EventDispatcher::DispatchToTarget(*closeEvent, self);
     };
 

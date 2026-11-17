@@ -19,7 +19,7 @@ namespace krys::gfx
   {
     ShaderStage Stage {ShaderStage::Vertex};
     /// @brief The source; it must start with a `#version` line.
-    utf8_stringview Source {};
-    utf8_stringview DebugName {};
+    utf8_stringview Source;
+    utf8_stringview DebugName;
   };
 }

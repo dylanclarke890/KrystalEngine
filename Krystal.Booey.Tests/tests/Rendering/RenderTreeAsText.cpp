@@ -106,13 +106,13 @@ layer at (0,0) size 800x80 layerType: foreground only
       WriteDebugInfo(ts, *renderer.Parent(), {RenderAsTextFlag::ShowLayoutState});
       CHECK(ts.Release() == u8" (needs layout: child)");
       WriteDebugInfo(ts, renderer, {});
-      CHECK(ts.Release() == u8"");
+      CHECK(ts.Release().empty());
     }
 
     SECTION("An element's layers")
     {
       // Only boxes with a layer dump.
-      CHECK(ExternalRepresentation(&fixture.ById(u8"a")) == u8"");
+      CHECK(ExternalRepresentation(&fixture.ById(u8"a")).empty());
       CHECK(ExternalRepresentation(&fixture.ById(u8"rel")) == u8R"(layer at (0,0) size 784x0
   RenderBlock (relative positioned) zI: 2 {DIV} at (0,22) size 784x0
 )");

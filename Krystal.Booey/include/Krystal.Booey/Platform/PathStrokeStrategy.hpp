@@ -18,7 +18,7 @@ namespace krys::boo
     LineJoin Join {LineJoin::Miter};
     float MiterLimit {10};
     /// @brief Empty for a solid stroke.
-    DashArray Dashes {};
+    DashArray Dashes;
     float DashOffset {0};
   };
 

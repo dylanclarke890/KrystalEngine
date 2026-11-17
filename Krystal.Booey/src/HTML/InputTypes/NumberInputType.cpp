@@ -121,7 +121,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool HasDecimalSeparator(dom::DOMStringView string) noexcept
     {
-      return string.find(u8'.') != dom::DOMStringView::npos;
+      return string.contains(u8'.');
     }
 
     KRYS_NODISCARD bool HasE(dom::DOMStringView string) noexcept
@@ -149,7 +149,7 @@ namespace krys::boo::html
       result.reserve(input.size());
       for (char8 character : input)
       {
-        if (allowedChars.find(character) != dom::DOMStringView::npos)
+        if (allowedChars.contains(character))
         {
           result.push_back(character);
         }
@@ -336,10 +336,8 @@ namespace krys::boo::html
         // after the 'e'.
         // - Reject if the editing value contains '+' or '-' and the caret is
         // placed before it unless it's after an e
-        if (HasDecimalSeparator(leftHalf) || HasDecimalSeparator(rightHalf)
-            || leftHalf.find(separator) != dom::DOMStringView::npos
-            || rightHalf.find(separator) != dom::DOMStringView::npos || HasE(leftHalf)
-            || HasSignNotAfterE(rightHalf))
+        if (HasDecimalSeparator(leftHalf) || HasDecimalSeparator(rightHalf) || leftHalf.contains(separator)
+            || rightHalf.contains(separator) || HasE(leftHalf) || HasSignNotAfterE(rightHalf))
         {
           continue;
         }

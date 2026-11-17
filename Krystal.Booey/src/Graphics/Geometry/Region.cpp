@@ -67,6 +67,7 @@ namespace krys::boo
 
   Region::~Region() noexcept = default;
 
+  // NOLINTNEXTLINE(bugprone-unhandled-self-assignment): the shape is copied first.
   Region &Region::operator=(const Region &other) noexcept
   {
     _bounds = other._bounds;

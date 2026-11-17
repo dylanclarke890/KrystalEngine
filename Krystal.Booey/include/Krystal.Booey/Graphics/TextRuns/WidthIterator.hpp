@@ -55,7 +55,7 @@ namespace krys::boo
                   bool forTextEmphasis = false) noexcept;
 
     /// @brief Lays out the run up to byte offset @p to.
-    void Advance(uint32 to, GlyphBuffer &glyphBuffer) noexcept;
+    void Advance(uint32 offset, GlyphBuffer &glyphBuffer) noexcept;
 
     KRYS_NODISCARD bool AdvanceOneCharacter(float &width, GlyphBuffer &glyphBuffer) noexcept;
 

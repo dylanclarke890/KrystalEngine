@@ -62,9 +62,9 @@ namespace krys::ui::tests
     view.UpdateRendering();
 
     auto log = CreateRef<EventLog>();
-    for (auto type : {boo::EventNames::CompositionStart, boo::EventNames::CompositionUpdate,
-                      boo::EventNames::CompositionEnd, boo::EventNames::Input, boo::EventNames::KeyDown,
-                      boo::EventNames::KeyPress})
+    for (auto type : {boo::event_names::CompositionStart, boo::event_names::CompositionUpdate,
+                      boo::event_names::CompositionEnd, boo::event_names::Input, boo::event_names::KeyDown,
+                      boo::event_names::KeyPress})
     {
       view.Document().AddEventListener(boo::dom::DOMStringAtom(type), log, true);
     }

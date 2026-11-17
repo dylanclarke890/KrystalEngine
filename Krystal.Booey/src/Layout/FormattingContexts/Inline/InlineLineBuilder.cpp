@@ -47,8 +47,8 @@ namespace krys::boo::layout
   {
     InlineItemRange Range;
     size_t PartialTrailingContentLength {0};
-    Maybe<InlineLayoutUnit> OverflowLogicalWidth {};
-    HashMap<const Box *, InlineLayoutUnit> RubyBaseAlignmentOffsetList {};
+    Maybe<InlineLayoutUnit> OverflowLogicalWidth;
+    HashMap<const Box *, InlineLayoutUnit> RubyBaseAlignmentOffsetList;
     InlineLayoutUnit RubyAnnotationOffset {0.f};
 
     enum class LineBreakReason : uint8
@@ -153,9 +153,9 @@ namespace krys::boo::layout
       const InlineItem *_trailingWordBreakOpportunity {nullptr};
       bool _hasTrailingClonedDecoration {false};
       bool _hasTrailingSoftWrapOpportunity {false};
-      Maybe<size_t> _firstTextRunIndex {};
-      Maybe<size_t> _lastTextRunIndex {};
-      Maybe<size_t> _lastInlineBoxIndex {};
+      Maybe<size_t> _firstTextRunIndex;
+      Maybe<size_t> _lastTextRunIndex;
+      Maybe<size_t> _lastInlineBoxIndex;
       bool _hasTextContentSpanningBoxes {false};
     };
 
@@ -1187,7 +1187,7 @@ namespace krys::boo::layout
     {
       if (leadingContentRunIndex && trailingContentRunIndex && hasBoundaryBetween)
       {
-        ranges.push_back({*leadingContentRunIndex, *trailingContentRunIndex});
+        ranges.emplace_back(*leadingContentRunIndex, *trailingContentRunIndex);
       }
       resetCandidateRange();
     };

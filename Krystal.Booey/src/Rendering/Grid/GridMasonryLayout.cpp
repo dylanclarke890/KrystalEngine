@@ -190,7 +190,7 @@ namespace krys::boo
     LayoutUnit marginBoxSize;
     if (_masonryAxisDirection == GridTrackSizingDirection::Rows)
     {
-      if (GridLayoutFunctions::IsOrthogonalGridItem(_renderGrid, gridItem))
+      if (grid_layout_functions::IsOrthogonalGridItem(_renderGrid, gridItem))
       {
         marginBoxSize = gridItem.IsHorizontalWritingMode()
                           ? gridItem.Width() + gridItem.HorizontalMarginExtent()
@@ -203,7 +203,7 @@ namespace krys::boo
     }
     else
     {
-      if (GridLayoutFunctions::IsOrthogonalGridItem(_renderGrid, gridItem))
+      if (grid_layout_functions::IsOrthogonalGridItem(_renderGrid, gridItem))
       {
         marginBoxSize = gridItem.IsHorizontalWritingMode()
                           ? gridItem.Height() + gridItem.VerticalMarginExtent()

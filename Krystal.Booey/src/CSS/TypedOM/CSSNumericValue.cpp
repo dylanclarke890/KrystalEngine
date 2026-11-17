@@ -297,7 +297,7 @@ namespace krys::boo::css
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-add
     auto values = PrependItemsOfTypeOrThis<CSSMathSum>(krys::move(numericValues));
 
-    if (auto result = OperationOnValuesOfSameUnit(std::plus<double>(), values))
+    if (auto result = OperationOnValuesOfSameUnit(std::plus<>(), values))
     {
       return Ref<CSSNumericValue> {krys::move(result)};
     }
@@ -510,7 +510,7 @@ namespace krys::boo::css
       {
         return dom::Exception {dom::ExceptionCode::TypeError, u8"Could not create CSSUnitValue"};
       }
-      values.push_back(krys::move(cssUnitValue));
+      values.emplace_back(krys::move(cssUnitValue));
     }
 
     if (parsedUnits.empty())
@@ -541,7 +541,7 @@ namespace krys::boo::css
           ++i;
         }
       }
-      result.push_back(krys::move(temp));
+      result.emplace_back(krys::move(temp));
     }
 
     if (!values.empty())

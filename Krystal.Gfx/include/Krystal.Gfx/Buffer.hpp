@@ -34,8 +34,8 @@ namespace krys::gfx
     BufferUsage Usage {BufferUsage::Vertex};
     MemoryUsage Memory {MemoryUsage::GpuOnly};
     /// @brief Copied into the start of the buffer; may be shorter than `Size`.
-    Span<const byte> InitialData {};
-    utf8_stringview DebugName {};
+    Span<const byte> InitialData;
+    utf8_stringview DebugName;
   };
 }
 

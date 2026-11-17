@@ -60,7 +60,7 @@ namespace krys::boo
     if (alignmentContextType == GridTrackSizingDirection::Rows && !hasOrthogonalAncestorSubgrids())
     {
       extraMarginsFromAncestorSubgrids =
-        GridLayoutFunctions::ExtraMarginForSubgridAncestors(GridTrackSizingDirection::Rows, gridItem);
+        grid_layout_functions::ExtraMarginForSubgridAncestors(GridTrackSizingDirection::Rows, gridItem);
     }
 
     LayoutUnit ascent = AscentForGridItem(gridItem, alignmentContextType, position)

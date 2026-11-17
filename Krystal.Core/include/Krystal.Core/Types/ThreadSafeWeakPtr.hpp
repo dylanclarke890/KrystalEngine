@@ -196,12 +196,12 @@ namespace krys
       }
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static type *ValidateGetAccess(type *ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static type *ValidateGetAccess(type *ptr) noexcept
     {
       return ptr;
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static bool IsValid(type *ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static bool IsValid(type *ptr) noexcept
     {
       return ptr != nullptr;
     }
@@ -442,12 +442,7 @@ namespace krys
       return *this;
     }
 
-    ThreadSafeWeakPtr &operator=(const ThreadSafeWeakPtr &other) noexcept
-    {
-      _controlBlock = other._controlBlock;
-      _objectOfCorrectType = other._objectOfCorrectType;
-      return *this;
-    }
+    ThreadSafeWeakPtr &operator=(const ThreadSafeWeakPtr &other) noexcept = default;
 
     template <typename U>
     requires(!IsPointer<U>)

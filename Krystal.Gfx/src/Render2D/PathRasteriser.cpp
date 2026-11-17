@@ -110,6 +110,7 @@ namespace krys::gfx
       auto *coverage = mask.Coverage.data() + static_cast<size_t>(y - top) * mask.Bounds.Width;
       for (uint32 x = 0u; x < mask.Bounds.Width; ++x)
       {
+        // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
         coverage[x] = static_cast<uint8>(std::clamp(_row[x], 0.f, 1.f) * 255.f + 0.5f);
         _row[x] = 0.f;
       }

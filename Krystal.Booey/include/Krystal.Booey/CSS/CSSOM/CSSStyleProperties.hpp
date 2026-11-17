@@ -177,7 +177,7 @@ namespace krys::boo::css
     StyleRuleCSSStyleProperties(MutableStyleProperties &propertySet, CSSRule &parentRule) noexcept;
 
   public:
-    ~StyleRuleCSSStyleProperties() noexcept;
+    ~StyleRuleCSSStyleProperties() noexcept override;
 
     void AddRef() const noexcept final
     {

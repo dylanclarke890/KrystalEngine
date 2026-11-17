@@ -58,11 +58,11 @@ namespace krys::boo::style
       case css::ValueId::Lighter:
         return FontCascadeDescription::LighterWeight(state.ParentStyle().GetFontDescription().Weight());
       default:
-        if (css::PropertyParserHelpers::IsSystemFontShorthand(valueID))
+        if (css::parse_property::IsSystemFontShorthand(valueID))
         {
           return state.GetDocument()
             .GetSettings()
-            .Values.SystemFonts[css::PropertyParserHelpers::LowerFontShorthand(valueID)]
+            .Values.SystemFonts[css::parse_property::LowerFontShorthand(valueID)]
             .Weight;
         }
 

@@ -34,7 +34,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     enum class PathParsingOption : uint8
     {
@@ -58,4 +58,4 @@ namespace krys::boo::css
   }
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::PathParsingOption, 3uz)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::parse_property::PathParsingOption, 3uz)

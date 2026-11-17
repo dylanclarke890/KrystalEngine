@@ -200,7 +200,7 @@ namespace krys::boo::tests
     // No-break spaces separate words, and are kept.
     CHECK(Capitalize(u8"a b") == u8"A B");
     CHECK(Capitalize(u8"b", u8" ") == u8"B");
-    CHECK(Capitalize(u8"") == u8"");
+    CHECK(Capitalize(u8"").empty());
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderLineBreak: <br> and <wbr>",

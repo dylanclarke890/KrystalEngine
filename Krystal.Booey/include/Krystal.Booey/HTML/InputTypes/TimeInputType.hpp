@@ -45,7 +45,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::Time;
+      return input_type_names::Time;
     }
 
     KRYS_NODISCARD DateComponentsType DateType() const noexcept final

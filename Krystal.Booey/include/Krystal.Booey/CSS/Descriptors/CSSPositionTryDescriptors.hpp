@@ -40,7 +40,7 @@ namespace krys::boo::css
     CSSPositionTryDescriptors(MutableStyleProperties &propertySet, CSSPositionTryRule &parentRule) noexcept;
 
   public:
-    ~CSSPositionTryDescriptors() noexcept;
+    ~CSSPositionTryDescriptors() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSPositionTryDescriptors> Create(MutableStyleProperties &propertySet,
                                                                 CSSPositionTryRule &parentRule) noexcept;

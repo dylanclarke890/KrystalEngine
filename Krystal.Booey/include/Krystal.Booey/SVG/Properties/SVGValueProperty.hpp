@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::svg
 {
@@ -81,8 +82,8 @@ namespace krys::boo::svg
     }
 
     // Create an initialized and attached property.
-    SVGValueProperty(SVGPropertyOwner *owner, SVGPropertyAccess access, const TProperty &value) noexcept
-        : SVGProperty(owner, access), _value(value)
+    SVGValueProperty(SVGPropertyOwner *owner, SVGPropertyAccess access, TProperty value) noexcept
+        : SVGProperty(owner, access), _value(krys::move(value))
     {
     }
   };

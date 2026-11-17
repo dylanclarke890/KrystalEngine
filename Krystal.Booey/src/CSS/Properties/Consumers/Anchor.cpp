@@ -31,7 +31,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   // <position-area> syntax, rewritten for expository purpose:
   //
@@ -339,15 +339,15 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  RefPtr<Value> ValueForPositionArea(ValueId dim1, ValueId dim2, ValueType context) noexcept
+  RefPtr<Value> ValueForPositionArea(ValueId dimension1, ValueId dimension2, ValueType context) noexcept
   {
-    auto maybeDim1Type = GetKeywordType(dim1);
+    auto maybeDim1Type = GetKeywordType(dimension1);
     if (!maybeDim1Type)
     {
       return nullptr;
     }
 
-    auto maybeDim2Type = GetKeywordType(dim2);
+    auto maybeDim2Type = GetKeywordType(dimension2);
     if (!maybeDim2Type)
     {
       return nullptr;
@@ -360,20 +360,20 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    if (dim1 == ValueId::SpanAll && IsTypeAxisExplicit(dim2Type))
+    if (dimension1 == ValueId::SpanAll && IsTypeAxisExplicit(dim2Type))
     {
-      return PrimitiveValue::Create(dim2);
+      return PrimitiveValue::Create(dimension2);
     }
 
-    if (IsTypeAxisExplicit(dim1Type) && dim2 == ValueId::SpanAll)
+    if (IsTypeAxisExplicit(dim1Type) && dimension2 == ValueId::SpanAll)
     {
-      return PrimitiveValue::Create(dim1);
+      return PrimitiveValue::Create(dimension1);
     }
 
     // Ensure the X/block axis keyword goes first in the pair.
     if (IsTypeInlineOrYAxis(dim1Type) || IsTypeBlockOrXAxis(dim2Type))
     {
-      std::swap(dim1, dim2);
+      std::swap(dimension1, dimension2);
       std::swap(dim1Type, dim2Type);
     }
 
@@ -390,12 +390,12 @@ namespace krys::boo::css::PropertyParserHelpers
           || (dim1Type == KeywordType::Axisless
               && (dim2Type == KeywordType::LogicalInline || dim2Type == KeywordType::SelfLogicalInline)))
       {
-        dim1 = MakeAmbiguous(dim1);
-        dim2 = MakeAmbiguous(dim2);
+        dimension1 = MakeAmbiguous(dimension1);
+        dimension2 = MakeAmbiguous(dimension2);
       }
     }
 
-    return ValuePair::Create(PrimitiveValue::Create(dim1), PrimitiveValue::Create(dim2));
+    return ValuePair::Create(PrimitiveValue::Create(dimension1), PrimitiveValue::Create(dimension2));
   }
 
   RefPtr<Value> ConsumePositionArea(TokenRange &tokens, PropertyParserState &) noexcept

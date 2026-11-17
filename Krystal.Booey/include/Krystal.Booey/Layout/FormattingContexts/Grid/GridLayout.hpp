@@ -134,7 +134,7 @@ namespace krys::boo::layout
                  const TrackSizingFunctionsList &trackSizingFunctions) noexcept;
   };
 
-  namespace GridLayoutUtils
+  namespace grid_layout_utils
   {
     KRYS_NODISCARD LayoutUnit ComputeGapValue(const style::GapGutter &gap) noexcept;
 

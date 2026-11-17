@@ -554,7 +554,7 @@ namespace krys::boo::css
     if (tokens.Peek().Type() == TokenType::OpenCurly)
     {
       auto rangeCopyForDashedIdent = initialRange;
-      auto customProperty = PropertyParserHelpers::ConsumeDashedIdent(rangeCopyForDashedIdent);
+      auto customProperty = parse_property::ConsumeDashedIdent(rangeCopyForDashedIdent);
       // This rule is ambigous with a custom property because it looks like "--ident: ...."
       if (customProperty && rangeCopyForDashedIdent.Peek().Type() == TokenType::Colon)
       {
@@ -652,7 +652,7 @@ namespace krys::boo::css
           return null;
         }
 
-        name.push_back(CSSOMStringAtom(nameToken.IdentCodePoints()));
+        name.emplace_back(nameToken.IdentCodePoints());
 
         if (tokens.Peek().Type() != TokenType::Delim || tokens.Peek().Delimiter() != U'.')
         {
@@ -693,7 +693,7 @@ namespace krys::boo::css
           && text::IsASCIICaselessEqual(token.IdentCodePoints(), u8"layer"))
       {
         auto savedPreludeForFailure = prelude;
-        auto contents = PropertyParserHelpers::ConsumeFunction(prelude);
+        auto contents = parse_property::ConsumeFunction(prelude);
         auto layerName = ConsumeCascadeLayerName(contents, AllowAnonymous::No);
         if (!layerName || !contents.IsAtEnd())
         {
@@ -716,7 +716,7 @@ namespace krys::boo::css
       if (token.Type() == TokenType::Function
           && text::IsASCIICaselessEqual(token.IdentCodePoints(), u8"supports"))
       {
-        auto arguments = PropertyParserHelpers::ConsumeFunction(prelude);
+        auto arguments = parse_property::ConsumeFunction(prelude);
         auto supported = SupportsParser::SupportsCondition(arguments, *this,
                                                            SupportsParser::ParsingMode::AllowBareDeclaration);
         if (supported == SupportsParser::Invalid)
@@ -958,8 +958,7 @@ namespace krys::boo::css
   {
     // @font-feature-values <family-name># { <declaration-list> }
 
-    auto fontFamilies =
-      PropertyParserHelpers::ConsumeFontFeatureValuesPreludeFamilyNameList(prelude, _context);
+    auto fontFamilies = parse_property::ConsumeFontFeatureValuesPreludeFamilyNameList(prelude, _context);
     if (fontFamilies.empty() || !prelude.IsAtEnd())
     {
       return nullptr;
@@ -987,7 +986,7 @@ namespace krys::boo::css
   RefPtr<FontPaletteValuesRule> Parser::ConsumeFontPaletteValuesRule(TokenRange prelude,
                                                                      TokenRange block) noexcept
   {
-    auto name = PropertyParserHelpers::ConsumeDashedIdent(prelude);
+    auto name = parse_property::ConsumeDashedIdent(prelude);
     if (!name || !prelude.IsAtEnd())
     {
       return nullptr; // Parse error; expected custom ident in @font-palette-values header
@@ -1003,7 +1002,7 @@ namespace krys::boo::css
       {
         if (value.IsFontFamily())
         {
-          fontFamilies.push_back(CSSOMStringAtom(value.StringValue()));
+          fontFamilies.emplace_back(value.StringValue());
         }
       };
       auto cssFontFamily = properties->GetPropertyCSSValue(PropertyId::FontFamily);
@@ -1058,7 +1057,7 @@ namespace krys::boo::css
           continue;
         }
 
-        overrideColors.push_back({key, krys::move(color)});
+        overrideColors.emplace_back(key, krys::move(color));
       }
     }
 
@@ -1102,7 +1101,7 @@ namespace krys::boo::css
   RefPtr<CounterStyleRule> Parser::ConsumeCounterStyleRule(TokenRange prelude, TokenRange block) noexcept
   {
     auto rangeCopy = prelude;
-    auto name = PropertyParserHelpers::ConsumeCounterStyleNameInPrelude(rangeCopy, _context.Mode);
+    auto name = parse_property::ConsumeCounterStyleNameInPrelude(rangeCopy, _context.Mode);
     if (name == null)
     {
       return nullptr;
@@ -1121,7 +1120,7 @@ namespace krys::boo::css
   RefPtr<PositionTryRule> Parser::ConsumePositionTryRule(TokenRange prelude, TokenRange block) noexcept
   {
     // Prelude should ONLY be a <dashed-ident>.
-    auto ruleName = PropertyParserHelpers::ConsumeDashedIdentRaw(prelude);
+    auto ruleName = parse_property::ConsumeDashedIdentRaw(prelude);
     if (!ruleName)
     {
       return nullptr;
@@ -1147,7 +1146,7 @@ namespace krys::boo::css
     }
 
     auto name = CSSOMStringAtom(prelude.Peek().IdentCodePoints());
-    auto parametersRange = PropertyParserHelpers::ConsumeFunction(prelude);
+    auto parametersRange = parse_property::ConsumeFunction(prelude);
 
     // <function-parameter>#?
     List<FunctionRule::Parameter> parameters;
@@ -1530,7 +1529,7 @@ namespace krys::boo::css
   RefPtr<KeyframeRule> Parser::ConsumeKeyframeStyleRule(TokenRange prelude, TokenRange block) noexcept
   {
     auto state = PropertyParserState {.Context = _context};
-    auto keyList = PropertyParserHelpers::ConsumeKeyframeKeyList(prelude, state);
+    auto keyList = parse_property::ConsumeKeyframeKeyList(prelude, state);
     if (keyList.empty())
     {
       return nullptr;
@@ -1630,12 +1629,12 @@ namespace krys::boo::css
       if (ruleType == RuleType::Function)
       {
         auto rule = FunctionDeclarationsRule::Create(CreateStyleProperties(properties, _context.Mode));
-        TopContext().ParsedRules.push_back(krys::move(rule));
+        TopContext().ParsedRules.emplace_back(krys::move(rule));
         return;
       }
 
       auto rule = NestedDeclarationsRule::Create(CreateStyleProperties(properties, _context.Mode));
-      TopContext().ParsedRules.push_back(krys::move(rule));
+      TopContext().ParsedRules.emplace_back(krys::move(rule));
     };
 
     while (!tokens.IsAtEnd())

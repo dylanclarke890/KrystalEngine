@@ -162,9 +162,9 @@ namespace krys::boo::dom::tests
 
     List<std::string> order;
     auto older = CreateRef<MutationObserver>([&](const List<Ref<MutationRecord>> &, MutationObserver &)
-                                             { order.push_back("older"); });
+                                             { order.emplace_back("older"); });
     auto newer = CreateRef<MutationObserver>([&](const List<Ref<MutationRecord>> &, MutationObserver &)
-                                             { order.push_back("newer"); });
+                                             { order.emplace_back("newer"); });
     REQUIRE_FALSE(older->Observe(*first, {.ChildList = true}).HasException());
     REQUIRE_FALSE(newer->Observe(*second, {.ChildList = true}).HasException());
 

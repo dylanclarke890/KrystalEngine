@@ -321,7 +321,7 @@ namespace krys::boo::tests
     source.FillRect({0, 0, 10, 10});
     source.Translate(5, 5);
     source.FillRoundedRect(FloatRoundedRect({0, 0, 20, 20}, {5, 5}, {5, 5}, {5, 5}, {5, 5}), Color::green);
-    source.FillRectWithRoundedHole({0, 0, 30, 30}, FloatRoundedRect({5, 5, 20, 20}), Color::blue);
+    source.FillRectWithRoundedHole({0, 0, 30, 30}, FloatRoundedRect(FloatRect {5, 5, 20, 20}), Color::blue);
     auto displayList = source.TakeDisplayList();
 
     SECTION("Drawing a display list into a recorder records it as one item")

@@ -82,9 +82,8 @@ namespace krys::boo
     }
 
     HitTestingTransformState(const HitTestingTransformState &other) noexcept
-        : RefCounted<HitTestingTransformState>(), LastPlanarPoint(other.LastPlanarPoint),
-          LastPlanarQuad(other.LastPlanarQuad), LastPlanarArea(other.LastPlanarArea),
-          AccumulatedTransform(other.AccumulatedTransform)
+        : LastPlanarPoint(other.LastPlanarPoint), LastPlanarQuad(other.LastPlanarQuad),
+          LastPlanarArea(other.LastPlanarArea), AccumulatedTransform(other.AccumulatedTransform)
     {
     }
   };

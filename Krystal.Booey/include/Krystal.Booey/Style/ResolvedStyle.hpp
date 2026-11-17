@@ -31,15 +31,15 @@ namespace krys::boo::style
   struct UnadjustedStyle
   {
     UniquePtr<RenderStyle> Style;
-    UniquePtr<style::Relations> Relations {};
-    RefPtr<const style::MatchResult> MatchResult {};
+    UniquePtr<style::Relations> Relations;
+    RefPtr<const style::MatchResult> MatchResult;
   };
 
   /// @brief An element's resolved style, with the relations and matched declarations it came from.
   struct ResolvedStyle
   {
     UniquePtr<RenderStyle> Style;
-    UniquePtr<style::Relations> Relations {};
-    RefPtr<const style::MatchResult> MatchResult {};
+    UniquePtr<style::Relations> Relations;
+    RefPtr<const style::MatchResult> MatchResult;
   };
 }

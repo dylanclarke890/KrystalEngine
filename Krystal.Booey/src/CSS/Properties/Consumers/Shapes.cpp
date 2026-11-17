@@ -44,7 +44,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   using namespace css::Literals;
 

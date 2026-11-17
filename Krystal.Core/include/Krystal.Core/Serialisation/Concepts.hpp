@@ -7,7 +7,7 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
 #pragma region Archive Type Concepts
 
@@ -19,15 +19,15 @@ namespace krys::Serialisation
   /// @brief A special type that provides a name for the next field to be serialised along with its
   /// value.
   template <typename T>
-  concept ArchiveNamedField = DerivedFrom<remove_cvref_t<T>, Impl::NamedField>;
+  concept ArchiveNamedField = DerivedFrom<remove_cvref_t<T>, detail::NamedField>;
 
   /// @brief A special type that indicates a container is about to be serialised, and provides its size.
   template <typename T>
-  concept ArchiveContainerSize = DerivedFrom<remove_cvref_t<T>, Impl::ContainerSize>;
+  concept ArchiveContainerSize = DerivedFrom<remove_cvref_t<T>, detail::ContainerSize>;
 
   /// @brief A special type that indicates a key-value pair is being serialised.
   template <typename T>
-  concept ArchiveKeyValuePair = DerivedFrom<remove_cvref_t<T>, Impl::KeyValuePair>;
+  concept ArchiveKeyValuePair = DerivedFrom<remove_cvref_t<T>, detail::KeyValuePair>;
 
   /// @brief A type that requires custom serialisation methods.
   template <typename T>

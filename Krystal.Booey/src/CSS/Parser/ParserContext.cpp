@@ -28,6 +28,7 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::css
 {
@@ -46,8 +47,8 @@ namespace krys::boo::css
     return strictContext;
   }
 
-  ParserContext::ParserContext(ParserMode mode, const url::URL &baseURL) noexcept
-      : BaseURL(baseURL), Mode(mode)
+  ParserContext::ParserContext(ParserMode mode, url::URL baseURL) noexcept
+      : BaseURL(krys::move(baseURL)), Mode(mode)
   {
     if (IsUASheetBehavior(mode))
     {

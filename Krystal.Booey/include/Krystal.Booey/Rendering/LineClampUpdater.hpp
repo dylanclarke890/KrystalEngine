@@ -42,7 +42,7 @@ namespace krys::boo
 
   private:
     const RenderBlockFlow &_blockContainer;
-    Maybe<RenderLayoutState::LineClamp> _previousLineClamp {};
+    Maybe<RenderLayoutState::LineClamp> _previousLineClamp;
     // Whether the block container establishes an independent formatting context, whose lines aren't counted.
     bool _skipsLineCounting {false};
 

@@ -230,7 +230,7 @@ namespace krys::ui::tests
     auto solid = fixture.CreateLayer(u8"solid", {280, 150}, {60, 50});
     solid->SetContentsToSolidColor(Rgb(0x8338EC));
     solid->SetContentsRect({0, 0, 60, 50});
-    solid->SetContentsClippingRect(boo::FloatRoundedRect({0, 0, 60, 50}));
+    solid->SetContentsClippingRect(boo::FloatRoundedRect(boo::FloatRect {0, 0, 60, 50}));
 
     for (auto *layer : {drawn.get(), group.get(), turned.get(), blurred.get(), clipping.get(), solid.get()})
     {

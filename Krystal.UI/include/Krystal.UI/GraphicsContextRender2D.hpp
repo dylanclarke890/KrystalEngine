@@ -137,7 +137,7 @@ namespace krys::ui
                     const boo::FloatPoint &, boo::FontSmoothingMode) noexcept override;
 
     void DrawLinesForText(const boo::FloatPoint &origin, float thickness,
-                          Span<const boo::FloatSegment> lineSegments, bool isPrinting, bool doubleLines,
+                          Span<const boo::FloatSegment> lineSegments, bool isPrinting, bool doubleUnderlines,
                           boo::StrokeStyle) noexcept override;
 
     void DrawDotsForDocumentMarker(const boo::FloatRect &, boo::DocumentMarkerLineStyle) noexcept override;

@@ -420,7 +420,7 @@ namespace krys::boo::tests
         {
           auto end = painted.find(u8"(fill-rect", at + 1);
           auto fill = painted.substr(at, end == utf8_string::npos ? utf8_string::npos : end - at);
-          if (fill.find(u8" size 1x") != utf8_string::npos && fill.find(colourText) != utf8_string::npos)
+          if (fill.contains(u8" size 1x") && fill.contains(colourText))
           {
             return true;
           }

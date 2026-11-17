@@ -63,6 +63,7 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
+#include <cmath>
 
 namespace krys::boo
 {
@@ -1225,7 +1226,7 @@ namespace krys::boo
       float dx = scale * (layoutRect.X() - mouseDownPoint.X());
       auto originY = static_cast<float>(layoutRect.Y());
       float dy = scale * (originY - mouseDownPoint.Y());
-      scaledOrigin = IntPoint(static_cast<int32>(dx + 0.5), static_cast<int32>(dy + 0.5));
+      scaledOrigin = IntPoint(static_cast<int32>(std::lround(dx)), static_cast<int32>(std::lround(dy)));
     }
     else
     {

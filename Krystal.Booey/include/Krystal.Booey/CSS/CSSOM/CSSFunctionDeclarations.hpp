@@ -46,7 +46,7 @@ namespace krys::boo::css
     CSSFunctionDeclarations(FunctionDeclarationsRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSFunctionDeclarations() noexcept;
+    ~CSSFunctionDeclarations() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSFunctionDeclarations> Create(FunctionDeclarationsRule &rule,
                                                               CSSStyleSheet *sheet) noexcept;

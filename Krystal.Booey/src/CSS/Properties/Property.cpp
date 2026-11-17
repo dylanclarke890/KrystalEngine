@@ -31,7 +31,7 @@ namespace krys::boo::css
     }
 
     auto shorthands = MatchingShorthandsForLonghand(Id);
-    krys_debug_assert(shorthands.size() && ShorthandIndex < shorthands.size());
+    krys_debug_assert(!shorthands.empty() && ShorthandIndex < shorthands.size());
 
     return shorthands[ShorthandIndex].Id();
   }

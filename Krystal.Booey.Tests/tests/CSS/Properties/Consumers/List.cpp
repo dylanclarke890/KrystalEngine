@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::CssText;
   using css::tests::ValueFixture;
@@ -44,8 +44,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     }
   }
 
-  TEST_CASE_METHOD(ValueFixture, "PropertyParserHelpers(ConsumeListSeparatedBy)",
-                   "[CSS][Properties][Consumers]")
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumeListSeparatedBy)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeList<',', OneOrMore>(u8"a, b ,c") == "a, b, c");
     CHECK(ConsumeList<'/', OneOrMore>(u8"a / b") == "a / b");
@@ -56,10 +55,10 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeList<'/', OneOrMore>(u8"a / 5") == "<null>");
     CHECK(ConsumeList<' ', OneOrMore>(u8"a b 5", false) == "a b");
     CHECK(ConsumeList<' ', OneOrMore>(u8"5", false) == "<null>");
-    CHECK(ConsumeList<' ', ZeroOrMore>(u8"5", false) == "");
+    CHECK(ConsumeList<' ', ZeroOrMore>(u8"5", false).empty());
   }
 
-  TEST_CASE_METHOD(ValueFixture, "PropertyParserHelpers(ConsumeListSeparatedBy bounds)",
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumeListSeparatedBy bounds)",
                    "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeList<',', ListBounds::Exactly(2)>(u8"a, b") == "a, b");
@@ -69,7 +68,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeList<' ', ListBounds {1, 2}>(u8"a b c") == "<null>");
   }
 
-  TEST_CASE_METHOD(ValueFixture, "PropertyParserHelpers(ConsumeListSeparatedBy single value)",
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumeListSeparatedBy single value)",
                    "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"a"};

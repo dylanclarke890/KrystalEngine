@@ -103,7 +103,7 @@ namespace krys::boo::tests
     CHECK_FALSE(stack.HasAnyScrollingLayers());
     CHECK_FALSE(stack.UpdateWithClipData(List<CompositedClipData>(clips)));
 
-    clips.push_back({&a, LayoutRoundedRect(LayoutRect(10, 10, 20, 20)), true});
+    clips.emplace_back(&a, LayoutRoundedRect(LayoutRect(10, 10, 20, 20)), true);
     CHECK(stack.UpdateWithClipData(List<CompositedClipData>(clips)));
     CHECK(stack.HasAnyScrollingLayers());
     CHECK(stack.Stack().size() == 2u);

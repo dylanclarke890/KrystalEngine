@@ -60,7 +60,7 @@ namespace krys::boo::layout
       size_t LineIndex {0};
       InlineLayoutUnit LastLineWidth {0};
       InlineItemPosition LineEnd {};
-      Maybe<PreviousLine> PreviousLineInfo {};
+      Maybe<PreviousLine> PreviousLineInfo;
     };
 
     InlineFormattingContext &_inlineFormattingContext;

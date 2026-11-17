@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::style
 {
@@ -64,9 +65,9 @@ namespace krys::boo::style
     }
 
     DropShadowFilterOperationWithStyleColor(const IntPoint &location, int stdDeviation,
-                                            const style::Color &color) noexcept
+                                            style::Color color) noexcept
         : DropShadowFilterOperationBase(Type::DropShadowWithStyleColor, location, stdDeviation),
-          _styleColor(color)
+          _styleColor(krys::move(color))
     {
     }
 

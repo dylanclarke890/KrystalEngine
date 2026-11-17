@@ -115,6 +115,9 @@ namespace krys::boo::html
     friend class CanvasFilterContextSwitcher;
     friend class CanvasLayerContextSwitcher;
 
+  private:
+    constexpr static html::ImageSmoothingQuality DefaultSmoothingQuality = html::ImageSmoothingQuality::Low;
+
   public:
     using Direction = CanvasDirection;
 
@@ -198,25 +201,25 @@ namespace krys::boo::html
       dom::DOMString UnparsedFillColor;
       CanvasStyle StrokeStyle;
       CanvasStyle FillStyle;
-      double LineWidth;
-      boo::LineCap LineCap;
-      boo::LineJoin LineJoin;
-      double MiterLimit;
+      double LineWidth {1};
+      boo::LineCap LineCap {boo::LineCap::Butt};
+      boo::LineJoin LineJoin {boo::LineJoin::Miter};
+      double MiterLimit {10};
       FloatSize ShadowOffset;
-      float ShadowBlur;
+      float ShadowBlur {0};
       Color ShadowColor;
-      double GlobalAlpha;
-      CompositeOperator GlobalComposite;
-      BlendMode GlobalBlend;
+      double GlobalAlpha {1};
+      CompositeOperator GlobalComposite {CompositeOperator::SourceOver};
+      BlendMode GlobalBlend {BlendMode::Normal};
       AffineTransform Transform;
       Maybe<AffineTransform> TransformInverse;
       List<double> LineDash;
-      double LineDashOffset;
-      bool ImageSmoothingEnabled;
-      html::ImageSmoothingQuality ImageSmoothingQuality;
-      boo::TextAlign TextAlign;
-      boo::TextBaseline TextBaseline;
-      CanvasRenderingContext2DBase::Direction Direction;
+      double LineDashOffset {0};
+      bool ImageSmoothingEnabled {true};
+      html::ImageSmoothingQuality ImageSmoothingQuality {DefaultSmoothingQuality};
+      boo::TextAlign TextAlign {StartTextAlign};
+      boo::TextBaseline TextBaseline {AlphabeticTextBaseline};
+      CanvasRenderingContext2DBase::Direction Direction {Direction::Inherit};
 
       dom::DOMString FilterString;
       style::Filter Filter;
@@ -227,10 +230,10 @@ namespace krys::boo::html
       dom::DOMString UnparsedFont;
       FontProxy Font;
 
-      CanvasFontKerning FontKerning;
-      CanvasFontStretch FontStretch;
-      CanvasFontVariantCaps FontVariantCaps;
-      CanvasTextRendering TextRendering;
+      CanvasFontKerning FontKerning {CanvasFontKerning::Auto};
+      CanvasFontStretch FontStretch {CanvasFontStretch::Normal};
+      CanvasFontVariantCaps FontVariantCaps {CanvasFontVariantCaps::Normal};
+      CanvasTextRendering TextRendering {CanvasTextRendering::Auto};
       dom::DOMString Lang;
 
       RefPtr<CanvasLayerContextSwitcher> TargetSwitcher;

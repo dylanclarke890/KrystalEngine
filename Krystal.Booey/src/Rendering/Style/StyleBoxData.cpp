@@ -43,8 +43,8 @@ namespace krys::boo
   }
 
   inline StyleBoxData::StyleBoxData(const StyleBoxData &o) noexcept
-      : RefCounted<StyleBoxData>(), Width(o.Width), Height(o.Height), MinWidth(o.MinWidth),
-        MinHeight(o.MinHeight), MaxWidth(o.MaxWidth), MaxHeight(o.MaxHeight), VerticalAlign(o.VerticalAlign),
+      : Width(o.Width), Height(o.Height), MinWidth(o.MinWidth), MinHeight(o.MinHeight), MaxWidth(o.MaxWidth),
+        MaxHeight(o.MaxHeight), VerticalAlign(o.VerticalAlign),
         HasAutoSpecifiedZIndex(o.HasAutoSpecifiedZIndex), HasAutoUsedZIndex(o.HasAutoUsedZIndex),
         BoxSizing(o.BoxSizing), BoxDecorationBreak(o.BoxDecorationBreak),
         SpecifiedZIndexValue(o.SpecifiedZIndexValue), UsedZIndexValue(o.UsedZIndexValue)

@@ -9,17 +9,17 @@ namespace krys
 {
   class Endian
   {
+  public:
     Endian() = delete;
 
     ~Endian() = delete;
 
-  public:
     /// @brief Represents the endianness of a system or value.
     enum Type : uint8
     {
-      Little = std::endian::little,
-      Big = std::endian::big,
-      System = std::endian::native,
+      Little = static_cast<uint8>(std::endian::little),
+      Big = static_cast<uint8>(std::endian::big),
+      System = static_cast<uint8>(std::endian::native),
     };
 
     /// @brief Checks if the system is big endian.

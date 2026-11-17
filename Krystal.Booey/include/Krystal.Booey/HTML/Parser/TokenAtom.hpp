@@ -31,6 +31,7 @@
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::html
 {
@@ -150,7 +151,7 @@ namespace krys::boo::html
       krys_debug_assert(!_dataReleased);
 
       _dataReleased = true;
-      return std::move(_data);
+      return krys::move(_data);
     }
 
     KRYS_NODISCARD dom::DOMStringAtom ProcessingInstructionTarget() const noexcept
@@ -179,7 +180,7 @@ namespace krys::boo::html
       krys_debug_assert(!_dataReleased);
 
       _dataReleased = true;
-      return std::move(_data);
+      return krys::move(_data);
     }
 
     KRYS_NODISCARD bool IsForceQuirks() const noexcept

@@ -38,6 +38,7 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -96,18 +97,18 @@ namespace krys::boo
     _method = ParseMethodType(type);
   }
 
-  FormSubmission::FormSubmission(Maybe<dom::DOMString> returnValue, const url::URL &action,
+  FormSubmission::FormSubmission(Maybe<dom::DOMString> returnValue, url::URL action,
                                  dom::DOMStringView target, dom::DOMStringView encodingType,
                                  dom::Event *event) noexcept
-      : _method(Method::Dialog), _action(action), _target(target), _encodingType(encodingType),
+      : _method(Method::Dialog), _action(krys::move(action)), _target(target), _encodingType(encodingType),
         _event(ShareRefPtr(event)), _returnValue(krys::move(returnValue))
   {
   }
 
-  FormSubmission::FormSubmission(Method method, const url::URL &action, dom::DOMStringView target,
+  FormSubmission::FormSubmission(Method method, url::URL action, dom::DOMStringView target,
                                  dom::DOMStringView encodingType, Ref<html::DOMFormData> &&entryList,
                                  dom::Event *event) noexcept
-      : _method(method), _action(action), _target(target), _encodingType(encodingType),
+      : _method(method), _action(krys::move(action)), _target(target), _encodingType(encodingType),
         _entryList(krys::move(entryList)), _event(ShareRefPtr(event))
   {
   }

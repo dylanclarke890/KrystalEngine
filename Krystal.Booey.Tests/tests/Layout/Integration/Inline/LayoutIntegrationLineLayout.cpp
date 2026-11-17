@@ -220,6 +220,7 @@ layer at (0,0) size 800x60
     } guard;
 
     const utf8_stringview pages[] = {
+      // NOLINTNEXTLINE(bugprone-suspicious-missing-comma): one page split over two lines.
       u8"<text id=t x='10 20 30' y='20 25' dx=3 rotate='0 10'>Hello <tspan fill=red "
       u8"dy=5>world</tspan></text>",
       u8"<text id=t x=100 y=40 text-anchor=middle font-size=20>centred <tspan "
@@ -252,7 +253,7 @@ layer at (0,0) size 800x60
       std::string result = "length " + std::to_string(text.GetComputedTextLength()) + ", box "
                            + std::to_string(box.X()) + " " + std::to_string(box.Y()) + " "
                            + std::to_string(box.Width()) + " " + std::to_string(box.Height());
-      for (uint32 index = 0; index < static_cast<uint32>(text.GetNumberOfChars()); ++index)
+      for (uint32 index = 0; index < text.GetNumberOfChars(); ++index)
       {
         auto start = text.GetStartPositionOfChar(index);
         if (!start.HasException())

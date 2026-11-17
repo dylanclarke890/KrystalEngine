@@ -702,7 +702,7 @@ namespace krys::boo
         if (auto *dropShadow =
               DynamicDowncast<style::DropShadowFilterOperationWithStyleColor>(operation.get()))
         {
-          operations.push_back(dropShadow->CreateEquivalentWithResolvedColor(style));
+          operations.emplace_back(dropShadow->CreateEquivalentWithResolvedColor(style));
         }
         else
         {

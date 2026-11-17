@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::CssText;
   using css::tests::ToNarrow;
@@ -25,7 +25,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     };
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeStringRaw)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeStringRaw)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"\"foo\"  'bar' baz"};
     auto range = tokens.Tokenizer.Tokens();
@@ -35,7 +35,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(range.Peek().Type() == TokenType::Ident);
   }
 
-  TEST_CASE_METHOD(ValueFixture, "PropertyParserHelpers(ConsumeString)", "[CSS][Properties][Consumers]")
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumeString)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"\"a b\" 5"};
     auto range = tokens.Tokenizer.Tokens();

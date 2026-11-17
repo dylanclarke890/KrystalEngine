@@ -168,7 +168,13 @@ namespace krys::boo
       return {_x * scaleX, _y * scaleY};
     }
 
-    void Rotate(double angleInRadians, const FloatPoint &aboutPoint = {}) noexcept;
+    void Rotate(double angleInRadians, const FloatPoint &aboutPoint) noexcept;
+
+    // An overload, not a default argument: a default argument can't use the member initialisers in here.
+    void Rotate(double angleInRadians) noexcept
+    {
+      Rotate(angleInRadians, FloatPoint());
+    }
 
     void Normalise() noexcept
     {

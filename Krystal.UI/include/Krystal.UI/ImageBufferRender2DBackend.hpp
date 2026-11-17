@@ -200,7 +200,7 @@ namespace krys::ui
 
     using ImageBufferBackend::GetPixelBuffer;
 
-    void GetPixelBuffer(const boo::IntRect &srcRect, boo::PixelBuffer &destination) noexcept override;
+    void GetPixelBuffer(const boo::IntRect &sourceRect, boo::PixelBuffer &destination) noexcept override;
 
     /// @brief Renders what's been flushed into the texture with @p renderer, recording into @p commands,
     /// and returns the texture; invalid if it can't be made.

@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   CSSOMStringView ConsumeStringRaw(TokenRange &tokens) noexcept
   {

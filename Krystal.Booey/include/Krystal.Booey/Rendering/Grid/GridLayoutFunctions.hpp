@@ -86,7 +86,7 @@ namespace krys::boo
   };
 
   /// @brief Helpers shared by grid layout, track sizing and baseline alignment.
-  namespace GridLayoutFunctions
+  namespace grid_layout_functions
   {
     KRYS_NODISCARD LayoutUnit ComputeMarginLogicalSizeForGridItem(const RenderGrid &grid,
                                                                   style::GridTrackSizingDirection direction,

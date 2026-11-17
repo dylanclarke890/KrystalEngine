@@ -83,8 +83,8 @@ namespace krys::boo::css::tests
     SECTION("Common colours are shared by every pool")
     {
       ValuePool other;
-      for (auto color : {boo::Color {boo::Color::transparentBlack}, boo::Color {boo::Color::white},
-                         boo::Color {boo::Color::black}})
+      for (const auto &color : {boo::Color {boo::Color::transparentBlack}, boo::Color {boo::Color::white},
+                                boo::Color {boo::Color::black}})
       {
         auto first = pool.CreateColorValue(color);
         auto second = other.CreateColorValue(color);

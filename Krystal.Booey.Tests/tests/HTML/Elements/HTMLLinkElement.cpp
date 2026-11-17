@@ -28,7 +28,7 @@ namespace krys::boo::html::tests
     auto document = CreateRef<dom::HTMLDocument>();
     auto element = document->CreateElement(u8"link").ReleaseValue();
     auto &link = Downcast<HTMLLinkElement>(Downcast<HTMLElement>(*element));
-    CHECK(link.As() == u8"");
+    CHECK(link.As().empty());
 
     for (auto [value, expected] :
          {Pair {u8"FETCH", u8"fetch"}, Pair {u8"Style", u8"style"}, Pair {u8"json", u8"json"},

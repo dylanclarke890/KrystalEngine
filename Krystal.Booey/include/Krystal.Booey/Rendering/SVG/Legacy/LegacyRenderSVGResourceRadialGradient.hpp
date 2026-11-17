@@ -53,6 +53,8 @@ namespace krys::boo
 
     KRYS_NODISCARD float FocalRadius(const svg::RadialGradientAttributes &) const noexcept;
 
+    void GradientElement() const = delete;
+
   private:
     KRYS_NODISCARD RenderSVGResourceType ResourceType() const noexcept final
     {
@@ -70,8 +72,6 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Ref<Gradient> BuildGradient() const noexcept final;
-
-    void GradientElement() const = delete;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
     {

@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
 namespace krys::boo::dom
@@ -336,7 +337,7 @@ namespace krys::boo::dom
         auto temporaryResult = FindFlattenedSlottables(Downcast<html::HTMLSlotElement>(*node));
 
         // 5a.ii. Append each slottable in temporaryResult, in order, to result.
-        result.append_range(std::move(temporaryResult));
+        result.append_range(krys::move(temporaryResult));
       }
       // 5b. Otherwise, append node to result.
       else

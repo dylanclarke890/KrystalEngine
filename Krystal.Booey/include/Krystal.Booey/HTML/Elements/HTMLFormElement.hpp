@@ -304,7 +304,7 @@ namespace krys::boo::html
 
     void AddToPastNamesMap(FormAssociatedElement &element, dom::DOMStringView pastName) noexcept;
 
-    void RemoveFromPastNamesMap(FormAssociatedElement &element) noexcept;
+    void RemoveFromPastNamesMap(FormAssociatedElement &item) noexcept;
 
     void ResetListedFormControlElements() noexcept;
   };

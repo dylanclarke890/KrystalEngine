@@ -4,7 +4,6 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 #include <tuple>
-#include <type_traits>
 #include <utility>
 #include <variant>
 
@@ -151,7 +150,7 @@ namespace krys
 
     template <typename D, typename S>
     using CheckForNarrowing =
-      typename conditional_t<std::is_arithmetic_v<D>, NarrowingCheck, NoNarrowingCheck>::template Apply<D, S>;
+      typename conditional_t<Number<D>, NarrowingCheck, NoNarrowingCheck>::template Apply<D, S>;
 
     template <typename T, size_t I>
     struct Overload
@@ -183,7 +182,7 @@ namespace krys
       typename MakeOverloadsImpl<std::make_index_sequence<sizeof...(Ts)>>::template Apply<Ts...>;
 
     template <typename T, typename... Ts>
-    using BestMatchImpl = std::invoke_result_t<MakeOverloads<Ts...>, T, T>;
+    using BestMatchImpl = invoke_result_t<MakeOverloads<Ts...>, T, T>;
   }
 
   template <typename V, typename Arg>
@@ -247,12 +246,6 @@ namespace krys
   KRYS_NODISCARD friend const T &get(const Self &self) noexcept                                              \
   {                                                                                                          \
     return std::get<T>(self.name);                                                                           \
-  }                                                                                                          \
-                                                                                                             \
-  template <typename T>                                                                                      \
-  KRYS_NODISCARD friend const T &&get(const Self &&self) noexcept                                            \
-  {                                                                                                          \
-    return std::get<T>(krys::move(self.name));                                                               \
   }                                                                                                          \
                                                                                                              \
   template <typename T>                                                                                      \

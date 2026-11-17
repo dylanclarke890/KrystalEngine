@@ -173,13 +173,13 @@ namespace krys::boo::html
   {
     if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
     {
-      if (keyboardEvent->Type() == EventNames::KeyDown && keyboardEvent->KeyIdentifier() == u8"U+0020")
+      if (keyboardEvent->Type() == event_names::KeyDown && keyboardEvent->KeyIdentifier() == u8"U+0020")
       {
         SetActive(true);
         // No SetDefaultHandled(): a keypress follows.
         return;
       }
-      if (keyboardEvent->Type() == EventNames::KeyPress)
+      if (keyboardEvent->Type() == event_names::KeyPress)
       {
         switch (keyboardEvent->CharCode())
         {
@@ -194,7 +194,7 @@ namespace krys::boo::html
           default: break;
         }
       }
-      if (keyboardEvent->Type() == EventNames::KeyUp && keyboardEvent->KeyIdentifier() == u8"U+0020")
+      if (keyboardEvent->Type() == event_names::KeyUp && keyboardEvent->KeyIdentifier() == u8"U+0020")
       {
         if (Active())
         {
@@ -393,7 +393,7 @@ namespace krys::boo::html
     init.Source = ShareRefPtr<dom::Element>(this);
     init.Command = commandRaw.value_or(dom::DOMString());
 
-    auto event = dom::CommandEvent::Create(EventNames::Command, init, true);
+    auto event = dom::CommandEvent::Create(event_names::Command, init, true);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *invokee, this);
 
     // 5e. If continue is false, then return.

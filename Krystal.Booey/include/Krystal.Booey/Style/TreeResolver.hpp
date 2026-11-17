@@ -156,7 +156,7 @@ namespace krys::boo::style
     struct PositionOptions
     {
       // Array of option styles. By convention, the original style is at index 0.
-      List<PositionOption> OptionStyles {};
+      List<PositionOption> OptionStyles;
       ResolvedStyle OriginalResolvedStyle;
       size_t Index {0};
       bool Sorted {false};

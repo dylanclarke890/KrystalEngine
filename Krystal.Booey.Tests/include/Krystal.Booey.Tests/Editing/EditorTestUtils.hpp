@@ -58,7 +58,7 @@ namespace krys::boo::tests
     bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final
     {
       ++KeyEvents;
-      if (event.Type() != EventNames::KeyDown || event.KeyCode() != vk::Right || !event.ShiftKey())
+      if (event.Type() != event_names::KeyDown || event.KeyCode() != vk::Right || !event.ShiftKey())
       {
         return false;
       }
@@ -437,7 +437,8 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD html::HTMLBodyElement &Body() noexcept
     {
-      return *Document->Body();
+      auto *body = Document->Body().get(); // The document keeps it alive.
+      return *body;
     }
 
     /// @brief The markup of @p element's children.

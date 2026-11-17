@@ -10,7 +10,7 @@
 
 namespace krys::tests
 {
-  using namespace krys::Serialisation;
+  using namespace krys::serialisation;
 
 #pragma region Setup
 

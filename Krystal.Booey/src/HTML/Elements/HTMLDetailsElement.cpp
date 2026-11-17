@@ -97,7 +97,7 @@ namespace krys::boo::html
     _summarySlot = CreateWeakPtr(summarySlot.get());
 
     auto defaultSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
-    defaultSlot->SetUserAgentPart(css::UserAgentParts::DetailsContent());
+    defaultSlot->SetUserAgentPart(css::user_agent_parts::DetailsContent());
     krys_debug_assert(!HasAttribute(u8"open"));
     (void)defaultSlot->SetInlineStyleProperty(css::PropertyId::ContentVisibility, css::ValueId::Hidden);
     (void)defaultSlot->SetInlineStyleProperty(css::PropertyId::Display, css::ValueId::Block);
@@ -230,7 +230,7 @@ namespace krys::boo::html
           {
             for (auto &otherDetailsElement : OtherElementsInNameGroup())
             {
-              (void)otherDetailsElement->RemoveAttribute(u8"open");
+              otherDetailsElement->RemoveAttribute(u8"open");
             }
           }
         }

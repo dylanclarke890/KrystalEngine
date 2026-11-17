@@ -33,7 +33,7 @@ namespace krys::boo::css
   struct PropertyParserState;
   class TokenRange;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <'line-fit-edge'> consuming
     // https://drafts.csswg.org/css-inline-3/#propdef-line-fit-edge

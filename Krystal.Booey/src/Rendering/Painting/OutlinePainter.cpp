@@ -208,7 +208,7 @@ namespace krys::boo
         containingBlock.FlipForWritingMode(enclosingVisualRect);
       }
 
-      rects.push_back(LayoutRect {enclosingVisualRect});
+      rects.emplace_back(enclosingVisualRect);
     }
     PaintOutlineWithLineRects(renderer, paintOffset, rects);
   }
@@ -436,7 +436,7 @@ namespace krys::boo
     int32 selectedItem = selectElement.ActiveSelectionEndListIndex();
     if (selectedItem >= 0)
     {
-      rects.push_back(SnappedIntRect(renderer.ItemBoundingBoxRect(additionalOffset, selectedItem)));
+      rects.emplace_back(SnappedIntRect(renderer.ItemBoundingBoxRect(additionalOffset, selectedItem)));
       return true;
     }
 
@@ -468,7 +468,7 @@ namespace krys::boo
     // above and below us (thus getting merged with them to form a single irregular shape).
     if (renderer.Width() && renderer.Height())
     {
-      rects.push_back(LayoutRect(additionalOffset, renderer.Size()));
+      rects.emplace_back(additionalOffset, renderer.Size());
     }
 
     if (!renderer.HasNonVisibleOverflow() && !renderer.HasControlClip())

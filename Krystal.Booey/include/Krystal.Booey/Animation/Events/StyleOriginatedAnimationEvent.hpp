@@ -45,7 +45,7 @@ namespace krys::boo
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
     StyleOriginatedAnimationEvent(dom::DOMStringAtom type, const dom::EventInit &eventInitDict,
-                                  double elapsedTime, const css::CSSOMString &pseudoElement) noexcept;
+                                  double elapsedTime, css::CSSOMString pseudoElement) noexcept;
 
   public:
     ~StyleOriginatedAnimationEvent() noexcept override;

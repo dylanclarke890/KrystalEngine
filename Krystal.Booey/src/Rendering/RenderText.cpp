@@ -226,7 +226,7 @@ namespace krys::boo
           {
             if (auto narrow = SingleDecomposition(normalizer, wide))
             {
-              forms.push_back({*narrow, wide});
+              forms.emplace_back(*narrow, wide);
             }
           }
         };
@@ -1107,7 +1107,7 @@ namespace krys::boo
   {
     auto firstRun = inline_iterator::LineLeftmostTextBoxFor(*this);
 
-    if (!firstRun || !Text().length())
+    if (!firstRun || Text().empty())
     {
       return CreatePositionWithAffinity(0, Affinity::Downstream);
     }

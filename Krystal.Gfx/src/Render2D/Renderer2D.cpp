@@ -1291,6 +1291,7 @@ void main()
       combined.Coverage.resize(pixelCount);
       for (size_t i = 0u; i < pixelCount; ++i)
       {
+        // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
         combined.Coverage[i] = static_cast<uint8>(std::clamp(_combinedClip[i], 0.f, 1.f) * 255.f + 0.5f);
       }
       chain.Mask = _masks.UploadTransient(combined);
@@ -1539,6 +1540,7 @@ void main()
       return;
     }
 
+    // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
     const auto alpha = static_cast<uint8>(std::clamp(options.Opacity, 0.f, 1.f) * 255.f + 0.5f);
     if (alpha == 0u)
     {
@@ -1926,6 +1928,7 @@ void main()
 
   Maybe<Renderer2D::ResolvedPaint> Renderer2D::ResolvePattern(const ImagePattern2D &pattern) noexcept
   {
+    // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
     const auto alpha = static_cast<uint8>(std::clamp(pattern.Opacity, 0.f, 1.f) * 255.f + 0.5f);
     const auto desc = _device->GetTextureDesc(pattern.Texture);
     krys_debug_assert_msg(desc.has_value(), "Painting with a stale or invalid texture.");
@@ -1989,6 +1992,7 @@ void main()
     // A premultiplied colour, as an instance's straight colour.
     auto solid = [](const Array<float, 4> &colour) -> Maybe<ResolvedPaint>
     {
+      // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
       const auto alpha = static_cast<uint8>(std::clamp(colour[3], 0.f, 1.f) * 255.f + 0.5f);
       if (alpha == 0u)
       {
@@ -1996,6 +2000,7 @@ void main()
       }
       auto channel = [&](float value)
       {
+        // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
         return static_cast<uint8>(std::clamp(value / colour[3], 0.f, 1.f) * 255.f + 0.5f);
       };
       return ResolvedPaint {.Colour = {channel(colour[0]), channel(colour[1]), channel(colour[2]), alpha},
@@ -2478,6 +2483,7 @@ void main()
                      static_cast<float>(bounds.Width), static_cast<float>(bounds.Height)};
     instance.UV = {0.f, 0.f, static_cast<float>(bounds.Width) / width,
                    static_cast<float>(bounds.Height) / height};
+    // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
     instance.Colour = {255u, 255u, 255u, static_cast<uint8>(layer.Opacity * 255.f + 0.5f)};
     instance.Flags = Textured | static_cast<uint32>(layer.Blend) << BlendModeShift;
     auto &batch = _batches[layer.CompositeBatch];
@@ -2527,6 +2533,7 @@ void main()
         cast.UV = instance.UV;
         const auto colour = shadow.Colour.Resolved();
         cast.Colour = {colour.Red, colour.Green, colour.Blue,
+                       // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
                        static_cast<uint8>(static_cast<float>(colour.Alpha) * layer.Opacity + 0.5f)};
         cast.Flags = Textured | AlphaMask | static_cast<uint32>(layer.Blend) << BlendModeShift;
         auto &shadowBatch = _batches[layer.ShadowBatch];

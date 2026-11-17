@@ -78,7 +78,7 @@ namespace krys::boo::display_list
     {
     }
 
-    virtual ~Recorder() noexcept;
+    ~Recorder() noexcept override;
 
     void AppendDisplayList(const DisplayList &) noexcept;
 
@@ -159,13 +159,13 @@ namespace krys::boo::display_list
 
   inline const Recorder::ContextState &Recorder::CurrentState() const noexcept
   {
-    krys_debug_assert(_stateStack.size());
+    krys_debug_assert(!_stateStack.empty());
     return _stateStack.back();
   }
 
   inline Recorder::ContextState &Recorder::CurrentState() noexcept
   {
-    krys_debug_assert(_stateStack.size());
+    krys_debug_assert(!_stateStack.empty());
     return _stateStack.back();
   }
 }

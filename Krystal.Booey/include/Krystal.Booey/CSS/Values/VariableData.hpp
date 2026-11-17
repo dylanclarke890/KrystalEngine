@@ -46,7 +46,7 @@ namespace krys::boo::css
     List<Token> _tokens;
     const ParserContext _context;
 
-    VariableData(const css::TokenRange &range, const ParserContext &context) noexcept;
+    VariableData(const css::TokenRange &range, ParserContext context) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<VariableData>

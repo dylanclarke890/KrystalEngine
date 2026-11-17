@@ -142,13 +142,13 @@ namespace krys
       _value = Traits::EmptyValue();
     }
 
-    KRYS_NODISCARD constexpr const T &value() const & noexcept
+    KRYS_NODISCARD constexpr const T &value() const & noexcept KRYS_LIFETIME_BOUND
     {
       krys_debug_assert(bool(*this));
       return _value;
     }
 
-    KRYS_NODISCARD constexpr T &value() & noexcept
+    KRYS_NODISCARD constexpr T &value() & noexcept KRYS_LIFETIME_BOUND
     {
       krys_debug_assert(bool(*this));
       return _value;
@@ -160,25 +160,25 @@ namespace krys
       return krys::move(_value);
     }
 
-    KRYS_NODISCARD constexpr const T *operator->() const noexcept
+    KRYS_NODISCARD constexpr const T *operator->() const noexcept KRYS_LIFETIME_BOUND
     {
       krys_debug_assert(bool(*this));
       return std::addressof(_value);
     }
 
-    KRYS_NODISCARD constexpr T *operator->() noexcept
+    KRYS_NODISCARD constexpr T *operator->() noexcept KRYS_LIFETIME_BOUND
     {
       krys_debug_assert(bool(*this));
       return std::addressof(_value);
     }
 
-    KRYS_NODISCARD constexpr const T &operator*() const & noexcept
+    KRYS_NODISCARD constexpr const T &operator*() const & noexcept KRYS_LIFETIME_BOUND
     {
       krys_debug_assert(bool(*this));
       return _value;
     }
 
-    KRYS_NODISCARD constexpr T &operator*() & noexcept
+    KRYS_NODISCARD constexpr T &operator*() & noexcept KRYS_LIFETIME_BOUND
     {
       krys_debug_assert(bool(*this));
       return _value;

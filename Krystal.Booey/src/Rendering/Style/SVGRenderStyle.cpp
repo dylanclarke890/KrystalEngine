@@ -63,8 +63,8 @@ namespace krys::boo
   }
 
   inline SVGRenderStyle::SVGRenderStyle(const SVGRenderStyle &other) noexcept
-      : RefCounted<SVGRenderStyle>(), InheritedFlags(other.InheritedFlags),
-        NonInheritedFlags(other.NonInheritedFlags), FillData(other.FillData), StrokeData(other.StrokeData),
+      : InheritedFlags(other.InheritedFlags), NonInheritedFlags(other.NonInheritedFlags),
+        FillData(other.FillData), StrokeData(other.StrokeData),
         InheritedResourceData(other.InheritedResourceData), StopData(other.StopData),
         MiscData(other.MiscData), LayoutData(other.LayoutData)
   {

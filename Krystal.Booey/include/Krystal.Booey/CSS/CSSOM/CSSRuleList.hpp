@@ -42,7 +42,7 @@ namespace krys::boo::css
     CSSRuleList() noexcept;
 
   public:
-    virtual ~CSSRuleList() noexcept;
+    ~CSSRuleList() noexcept override;
 
     KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;
 
@@ -65,7 +65,7 @@ namespace krys::boo::css
     StaticCSSRuleList() noexcept;
 
   public:
-    ~StaticCSSRuleList() noexcept;
+    ~StaticCSSRuleList() noexcept override;
 
     void AddRef() const noexcept final
     {

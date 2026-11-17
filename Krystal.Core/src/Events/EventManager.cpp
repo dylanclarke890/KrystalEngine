@@ -1,11 +1,12 @@
 ﻿#include "Krystal.Core/Events/EventManager.hpp"
 #include "Krystal.Core/Events/Event.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys
 {
   void EventManager::Enqueue(UniquePtr<Event> event) noexcept
   {
-    _pendingEvents.emplace(std::move(event));
+    _pendingEvents.emplace(krys::move(event));
   }
 
   void EventManager::DispatchAll() noexcept
@@ -13,7 +14,7 @@ namespace krys
     std::swap(_dispatchEvents, _pendingEvents);
     while (!_dispatchEvents.empty())
     {
-      UniquePtr<Event> event = std::move(_dispatchEvents.front());
+      UniquePtr<Event> event = krys::move(_dispatchEvents.front());
       DispatchSingle(*event);
       _dispatchEvents.pop();
     }

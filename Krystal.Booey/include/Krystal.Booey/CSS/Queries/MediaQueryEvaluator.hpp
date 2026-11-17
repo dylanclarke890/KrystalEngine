@@ -50,10 +50,10 @@ namespace krys::boo::css::mq
     EvaluationResult _staticMediaConditionResult {EvaluationResult::Unknown};
 
   public:
-    MediaQueryEvaluator(const CSSOMStringAtom &mediaType, const dom::Document &document,
+    MediaQueryEvaluator(CSSOMStringAtom mediaType, const dom::Document &document,
                         const RenderStyle *rootElementStyle) noexcept;
 
-    explicit MediaQueryEvaluator(const CSSOMStringAtom &mediaType = null,
+    explicit MediaQueryEvaluator(CSSOMStringAtom mediaType = null,
                                  EvaluationResult mediaConditionResult = EvaluationResult::False) noexcept;
 
     KRYS_NODISCARD bool Evaluate(const MediaQueryList &list) const noexcept;

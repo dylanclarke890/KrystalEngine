@@ -90,8 +90,8 @@ layer at (0,0) size 800x66
       u8"value=50>");
     auto &input = Downcast<html::HTMLInputElement>(fixture.ById(u8"range"));
     auto &handler = fixture.Frame->GetEventHandler();
-    auto inputs = fixture.Listen(EventNames::Input);
-    auto changes = fixture.Listen(EventNames::Change);
+    auto inputs = fixture.Listen(event_names::Input);
+    auto changes = fixture.Listen(event_names::Change);
 
     // Pressing on the thumb and dragging it moves it with the mouse, firing input; releasing fires change.
     (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {64, 10}));

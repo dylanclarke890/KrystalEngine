@@ -39,7 +39,7 @@ namespace krys::gfx
     uint32 MipLevels {1u};
     uint32 Samples {1u};
     TextureUsage Usage {TextureUsage::Sampled};
-    utf8_stringview DebugName {};
+    utf8_stringview DebugName;
   };
 
   /// @brief A box of texels in one mip level of a texture.

@@ -30,7 +30,7 @@
 namespace krys::boo
 {
   StyleRareInheritedData::StyleRareInheritedData() noexcept
-      : UsedZoom(style::Evaluate<float>(style::ComputedStyle::InitialZoom())), DeviceScaleFactor(1.0f),
+      : UsedZoom(style::Evaluate<float>(style::ComputedStyle::InitialZoom())),
         TextEmphasisColor(style::ComputedStyle::InitialTextEmphasisColor()),
         CaretColor(style::Color::GetCurrentColor()), AccentColor(style::ComputedStyle::InitialAccentColor()),
         ScrollbarColor(style::ComputedStyle::InitialScrollbarColor()),
@@ -46,7 +46,7 @@ namespace krys::boo
         DynamicRangeLimit(style::ComputedStyle::InitialDynamicRangeLimit()),
         TextShadow(style::ComputedStyle::InitialTextShadow()),
         HyphenateCharacter(style::ComputedStyle::InitialHyphenateCharacter()),
-        CustomProperties(style::CustomPropertyData::Create()), EventListenerRegionTypes {},
+        CustomProperties(style::CustomPropertyData::Create()),
         StrokeWidth(style::ComputedStyle::InitialStrokeWidth()),
         TextUnderlineOffset(style::ComputedStyle::InitialTextUnderlineOffset()),
         TabSize(style::ComputedStyle::InitialTabSize()),
@@ -95,12 +95,12 @@ namespace krys::boo
   }
 
   inline StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData &o) noexcept
-      : RefCounted<StyleRareInheritedData>(), UsedZoom(o.UsedZoom), DeviceScaleFactor(o.DeviceScaleFactor),
-        TextEmphasisColor(o.TextEmphasisColor), CaretColor(o.CaretColor), AccentColor(o.AccentColor),
-        ScrollbarColor(o.ScrollbarColor), TextEmphasisStyle(o.TextEmphasisStyle), Quotes(o.Quotes),
-        StrokeColor(o.StrokeColor), ColorScheme(o.ColorScheme), CursorImages(o.CursorImages),
-        ListStyleType(o.ListStyleType), BlockEllipsis(o.BlockEllipsis), TextIndent(o.TextIndent),
-        ListStyleImage(o.ListStyleImage), DynamicRangeLimit(o.DynamicRangeLimit), TextShadow(o.TextShadow),
+      : UsedZoom(o.UsedZoom), DeviceScaleFactor(o.DeviceScaleFactor), TextEmphasisColor(o.TextEmphasisColor),
+        CaretColor(o.CaretColor), AccentColor(o.AccentColor), ScrollbarColor(o.ScrollbarColor),
+        TextEmphasisStyle(o.TextEmphasisStyle), Quotes(o.Quotes), StrokeColor(o.StrokeColor),
+        ColorScheme(o.ColorScheme), CursorImages(o.CursorImages), ListStyleType(o.ListStyleType),
+        BlockEllipsis(o.BlockEllipsis), TextIndent(o.TextIndent), ListStyleImage(o.ListStyleImage),
+        DynamicRangeLimit(o.DynamicRangeLimit), TextShadow(o.TextShadow),
         HyphenateCharacter(o.HyphenateCharacter), CustomProperties(o.CustomProperties),
         EventListenerRegionTypes(o.EventListenerRegionTypes), StrokeWidth(o.StrokeWidth),
         TextUnderlineOffset(o.TextUnderlineOffset), TabSize(o.TabSize), StrokeMiterLimit(o.StrokeMiterLimit),

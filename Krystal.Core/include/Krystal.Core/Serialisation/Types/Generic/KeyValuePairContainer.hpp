@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Serialisation/Builtins.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   /// @brief Saving for std-like pair associative containers.
   template <typename Archive, template <typename...> typename TMap, typename... Args,
@@ -34,7 +35,7 @@ namespace krys::Serialisation
       typename TMap<Args...>::mapped_type value;
 
       archive(KRYS_KEY_VALUE_PAIR(key, value));
-      hint = map.emplace_hint(hint, std::move(key), std::move(value));
+      hint = map.emplace_hint(hint, krys::move(key), krys::move(value));
     }
   }
 }

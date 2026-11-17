@@ -7,9 +7,6 @@
 
 namespace krys::boo::tests
 {
-  using Catch::Matchers::WithinAbs;
-  using Catch::Matchers::WithinULP;
-
   static void TestGetAndSet(IntRect rect)
   {
     rect.SetX(1);

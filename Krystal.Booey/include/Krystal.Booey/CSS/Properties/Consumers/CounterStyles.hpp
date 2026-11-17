@@ -35,7 +35,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // https://drafts.csswg.org/css-counter-styles-3/
 
@@ -44,7 +44,7 @@ namespace krys::boo::css
 
     // MARK: @counter-style consumer
     KRYS_NODISCARD CSSOMStringAtom ConsumeCounterStyleNameInPrelude(
-      TokenRange &tokens, ParserMode mode = ParserMode::HTMLStandard) noexcept;
+      TokenRange &prelude, ParserMode mode = ParserMode::HTMLStandard) noexcept;
 
     // MARK: @counter-style descriptor consumers
     KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleName(TokenRange &tokens,

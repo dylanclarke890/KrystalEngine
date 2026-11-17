@@ -23,6 +23,7 @@
 #include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -34,8 +35,8 @@ namespace krys::boo
     HitTestResult _hitTestResult;
 
   public:
-    MouseEventWithHitTestResults(const PlatformMouseEvent &event, const HitTestResult &hitTestResult) noexcept
-        : _event(event), _hitTestResult(hitTestResult)
+    MouseEventWithHitTestResults(PlatformMouseEvent event, const HitTestResult &hitTestResult) noexcept
+        : _event(krys::move(event)), _hitTestResult(hitTestResult)
     {
     }
 

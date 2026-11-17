@@ -47,7 +47,7 @@ namespace krys::boo::css
     CSSCounterStyleRule(CounterStyleRule &counterStyleRule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSCounterStyleRule() noexcept;
+    ~CSSCounterStyleRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSCounterStyleRule> Create(CounterStyleRule &rule,
                                                           CSSStyleSheet *sheet) noexcept;

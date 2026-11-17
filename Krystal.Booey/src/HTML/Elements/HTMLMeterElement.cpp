@@ -230,15 +230,15 @@ namespace krys::boo::html
       {
         case HTMLMeterElement::GaugeRegion::Optimum:
           (void)element.SetAttribute(u8"class", u8"optimum");
-          element.SetUserAgentPart(css::UserAgentParts::WebkitMeterOptimumValue());
+          element.SetUserAgentPart(css::user_agent_parts::WebkitMeterOptimumValue());
           return;
         case HTMLMeterElement::GaugeRegion::Suboptimal:
           (void)element.SetAttribute(u8"class", u8"suboptimum");
-          element.SetUserAgentPart(css::UserAgentParts::WebkitMeterSuboptimumValue());
+          element.SetUserAgentPart(css::user_agent_parts::WebkitMeterSuboptimumValue());
           return;
         case HTMLMeterElement::GaugeRegion::EvenLessGood:
           (void)element.SetAttribute(u8"class", u8"even-less-good");
-          element.SetUserAgentPart(css::UserAgentParts::WebkitMeterEvenLessGoodValue());
+          element.SetUserAgentPart(css::user_agent_parts::WebkitMeterEvenLessGoodValue());
           return;
       }
     }
@@ -276,12 +276,12 @@ namespace krys::boo::html
     // Pseudos are set to allow author styling.
     auto inner = CreateRef<HTMLDivElement>(document);
     inner->Id(u8"inner");
-    inner->SetUserAgentPart(css::UserAgentParts::WebkitMeterInnerElement());
+    inner->SetUserAgentPart(css::user_agent_parts::WebkitMeterInnerElement());
     (void)root.AppendChild(*inner);
 
     auto bar = CreateRef<HTMLDivElement>(document);
     bar->Id(u8"bar");
-    bar->SetUserAgentPart(css::UserAgentParts::WebkitMeterBar());
+    bar->SetUserAgentPart(css::user_agent_parts::WebkitMeterBar());
     (void)inner->AppendChild(*bar);
 
     auto valueElement = CreateRef<HTMLDivElement>(document);

@@ -35,7 +35,7 @@ namespace krys::boo::dom::tests
     CHECK(&data.Node->NodeDocument() == data.Document.get());
     CHECK(data.Node->ParentNode() == nullptr);
     CHECK_FALSE(TreeQueries::IsExclusiveTextNode(*data.Node));
-    CHECK(CreateRef<CDATASection>(*data.Document)->Data() == u8"");
+    CHECK(CreateRef<CDATASection>(*data.Document)->Data().empty());
 
     // It's still a Text node to the methods it inherits.
     CHECK(data.Node->WholeText() == u8"Hello, world!");

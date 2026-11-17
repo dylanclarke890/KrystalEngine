@@ -87,10 +87,10 @@ namespace krys::boo
       return !_objectBoundingBox.IsEmpty();
     }
 
+    void GetElement() const = delete;
+
   private:
     void WillBeDestroyed() noexcept override;
-
-    void GetElement() const = delete;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {

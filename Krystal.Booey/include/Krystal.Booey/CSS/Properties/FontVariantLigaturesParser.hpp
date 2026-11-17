@@ -107,7 +107,7 @@ namespace krys::boo::css
         }
       }
 
-      _result.push_back(PropertyParserHelpers::ConsumeIdent(range));
+      _result.push_back(parse_property::ConsumeIdent(range));
       return ParseResult::ConsumedValue;
     }
 

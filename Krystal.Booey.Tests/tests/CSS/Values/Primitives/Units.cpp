@@ -168,7 +168,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("PrimitiveUnits(unit strings)", "[CSS][Primitives][Units]")
   {
-    CHECK(UnitString(IntegerUnit::Integer) == u8"");
+    CHECK(UnitString(IntegerUnit::Integer).empty());
     CHECK(UnitString(PercentageUnit::Percentage) == u8"%");
     CHECK(UnitString(LengthUnit::Px) == u8"px");
     CHECK(UnitString(LengthUnit::Q) == u8"Q");

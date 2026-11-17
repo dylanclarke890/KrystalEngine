@@ -48,7 +48,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD RefPtr<html::HTMLDetailsElement> ClosedDetailsElementAncestor(const Node &node) noexcept
     {
       auto *slot = SlotAlgorithms::GetAssignedSlot(node);
-      if (slot && slot->UserAgentPart() == css::UserAgentParts::DetailsContent())
+      if (slot && slot->UserAgentPart() == css::user_agent_parts::DetailsContent())
       {
         if (auto *details = DynamicDowncast<html::HTMLDetailsElement>(TreeQueries::ShadowHost(*slot)))
         {
@@ -132,7 +132,7 @@ namespace krys::boo::dom
           // 4.2.2. Fire an event named beforematch at ancestorToReveal with the bubbles attribute initialized
           //        to true.
           {
-            auto event = Event::Create(EventNames::BeforeMatch, true, false);
+            auto event = Event::Create(event_names::BeforeMatch, true, false);
             (void)element->DispatchEvent(*event);
           }
           // 4.2.3. If ancestorToReveal is not connected, then return.

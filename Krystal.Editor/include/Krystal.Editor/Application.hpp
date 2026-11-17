@@ -44,7 +44,7 @@ namespace krys
 
   struct ApplicationSettings
   {
-    string Name {};
+    string Name;
 
     log::LoggerSettings GlobalLoggerSettings {};
 
@@ -61,16 +61,16 @@ namespace krys
 
   struct ApplicationContext
   {
-    List<string> CommandLineArgs {};
+    List<string> CommandLineArgs;
     ApplicationSettings Settings {};
-    UniquePtr<log::ILogger> Logger {};
-    UniquePtr<EventManager> Events {};
+    UniquePtr<log::ILogger> Logger;
+    UniquePtr<EventManager> Events;
     /// @brief The worker threads that run the application's jobs, including those that block on files.
-    UniquePtr<JobSystem> Jobs {};
-    UniquePtr<pal::IWindow> Window {};
-    UniquePtr<pal::Input> Input {};
-    UniquePtr<io::VirtualFileSystem> VFS {};
-    UniquePtr<gfx::Device> Device {};
+    UniquePtr<JobSystem> Jobs;
+    UniquePtr<pal::IWindow> Window;
+    UniquePtr<pal::Input> Input;
+    UniquePtr<io::VirtualFileSystem> VFS;
+    UniquePtr<gfx::Device> Device;
     gfx::SwapchainHandle Swapchain {};
   };
 
@@ -80,8 +80,8 @@ namespace krys
     KRYS_NON_COPY_MOVABLE(Application);
 
   protected:
-    bool _running;
-    bool _isWindowMinimised;
+    bool _running {false};
+    bool _isWindowMinimised {false};
     UniquePtr<ApplicationContext> _context;
 
   public:

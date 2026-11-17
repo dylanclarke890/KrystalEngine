@@ -39,6 +39,7 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
 #include "Krystal.UI/DataListSuggestionsOverlay.hpp"
@@ -1560,9 +1561,9 @@ namespace krys::ui
       }
       else
       {
-        points.push_back(boo::PlatformTouchPoint(
-          touch.Id, boo::PlatformTouchPoint::TouchStationary, touch.Point.ScreenPos(), touch.Point.Pos(),
-          touch.Point.Radius(), touch.Point.RotationAngle(), touch.Point.Force()));
+        points.emplace_back(touch.Id, boo::PlatformTouchPoint::TouchStationary, touch.Point.ScreenPos(),
+                            touch.Point.Pos(), touch.Point.Radius(), touch.Point.RotationAngle(),
+                            touch.Point.Force());
       }
     }
 

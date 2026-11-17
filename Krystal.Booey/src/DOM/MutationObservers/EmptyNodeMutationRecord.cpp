@@ -31,11 +31,13 @@
 
 #include "Krystal.Booey/DOM/MutationObservers/EmptyNodeMutationRecord.hpp"
 #include "Krystal.Booey/DOM/Collections/StaticNodeList.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::dom
 {
   EmptyNodeMutationRecord::EmptyNodeMutationRecord(Ref<Node> &&target, DOMStringAtom oldValue) noexcept
-      : _target(krys::move(target)), _addedNodes(nullptr), _removedNodes(nullptr), _oldValue(oldValue)
+      : _target(krys::move(target)), _addedNodes(nullptr), _removedNodes(nullptr),
+        _oldValue(krys::move(oldValue))
   {
   }
 

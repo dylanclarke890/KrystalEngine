@@ -34,7 +34,7 @@ namespace krys::boo::style::tests
 
       css::ParserContext context {css::ParserMode::HTMLStandard};
       css::PropertyParserState state {.Context = context};
-      auto result = css::PropertyParserHelpers::ConsumeUnresolvedDynamicRangeLimit(tokens, state);
+      auto result = css::parse_property::ConsumeUnresolvedDynamicRangeLimit(tokens, state);
       REQUIRE(result);
       REQUIRE(tokens.IsAtEnd());
       return ConvertToStyle(*result, css::ToLengthConversionData {});

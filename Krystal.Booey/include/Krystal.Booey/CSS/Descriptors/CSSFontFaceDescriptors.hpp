@@ -40,7 +40,7 @@ namespace krys::boo::css
     CSSFontFaceDescriptors(MutableStyleProperties &propertySet, CSSFontFaceRule &parentRule) noexcept;
 
   public:
-    ~CSSFontFaceDescriptors() noexcept;
+    ~CSSFontFaceDescriptors() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSFontFaceDescriptors> Create(MutableStyleProperties &propertySet,
                                                              CSSFontFaceRule &parentRule) noexcept;

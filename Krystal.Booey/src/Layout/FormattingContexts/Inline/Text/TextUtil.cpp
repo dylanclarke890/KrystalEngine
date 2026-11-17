@@ -866,7 +866,7 @@ namespace krys::boo::layout
 
   bool TextUtil::HasPositionDependentContentWidth(utf8_stringview textContent) noexcept
   {
-    return textContent.find(u8'\t') != utf8_stringview::npos;
+    return textContent.contains(u8'\t');
   }
 
   char32 TextUtil::LastBaseCharacterFromText(utf8_stringview string) noexcept

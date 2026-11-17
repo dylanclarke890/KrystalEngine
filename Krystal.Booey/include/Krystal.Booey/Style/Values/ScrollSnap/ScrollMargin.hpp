@@ -53,17 +53,17 @@ namespace krys::boo
       {
       }
 
-      KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsZero() const noexcept
+      KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsZero() const noexcept
       {
         return _value.IsZero();
       }
 
-      KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsPositive() const noexcept
+      KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsPositive() const noexcept
       {
         return _value.IsPositive();
       }
 
-      KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsNegative() const noexcept
+      KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsNegative() const noexcept
       {
         return _value.IsNegative();
       }

@@ -31,6 +31,7 @@
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::display_list
 {
@@ -490,7 +491,7 @@ namespace krys::boo::display_list
     }
   }
 
-  SetState::SetState(const GraphicsContextState &state) noexcept : _state(state)
+  SetState::SetState(GraphicsContextState state) noexcept : _state(krys::move(state))
   {
   }
 
@@ -526,8 +527,9 @@ namespace krys::boo::display_list
   }
 
   DrawControlPart::DrawControlPart(ControlPart &part, const FloatRoundedRect &borderRect,
-                                   float deviceScaleFactor, const ControlStyle &style) noexcept
-      : _part(ShareRef(part)), _borderRect(borderRect), _deviceScaleFactor(deviceScaleFactor), _style(style)
+                                   float deviceScaleFactor, ControlStyle style) noexcept
+      : _part(ShareRef(part)), _borderRect(borderRect), _deviceScaleFactor(deviceScaleFactor),
+        _style(krys::move(style))
   {
   }
 

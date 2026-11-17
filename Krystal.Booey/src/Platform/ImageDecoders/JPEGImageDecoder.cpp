@@ -284,7 +284,7 @@ namespace krys::boo
       _bufferLength = static_cast<unsigned>(data.Size());
 
       // We need to do the setjmp here. Otherwise bad things will happen
-      if (setjmp(_err.SetjmpBuffer))
+      if (setjmp(_err.SetjmpBuffer)) // NOLINT(modernize-avoid-setjmp-longjmp): libjpeg
       {
         return _decoder->SetFailed();
       }
@@ -502,7 +502,7 @@ namespace krys::boo
     {
       // Return control to the setjmp point.
       auto *err = reinterpret_cast<DecoderErrorManager *>(cinfo->err);
-      longjmp(err->SetjmpBuffer, -1);
+      longjmp(err->SetjmpBuffer, -1); // NOLINT(modernize-avoid-setjmp-longjmp): libjpeg
     }
 
     void InitSource(j_decompress_ptr)

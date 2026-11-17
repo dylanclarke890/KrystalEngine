@@ -159,7 +159,6 @@ namespace krys::boo::css
 
         // finally, we can just append the text character to the output
         output.push_back(ch);
-        continue;
       }
 
       // An empty input stream is valid; it only produces an EOF token.

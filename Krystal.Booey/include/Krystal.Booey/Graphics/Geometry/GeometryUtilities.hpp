@@ -146,21 +146,21 @@ namespace krys::boo
 
   KRYS_NODISCARD constexpr float Min3(float a, float b, float c) noexcept
   {
-    return std::min(std::min(a, b), c);
+    return std::min({a, b, c});
   }
 
   KRYS_NODISCARD constexpr float Max3(float a, float b, float c) noexcept
   {
-    return std::max(std::max(a, b), c);
+    return std::max({a, b, c});
   }
 
   KRYS_NODISCARD constexpr float Min4(float a, float b, float c, float d) noexcept
   {
-    return std::min(std::min(a, b), std::min(c, d));
+    return std::min({a, b, c, d});
   }
 
   KRYS_NODISCARD constexpr float Max4(float a, float b, float c, float d) noexcept
   {
-    return std::max(std::max(a, b), std::max(c, d));
+    return std::max({a, b, c, d});
   }
 }

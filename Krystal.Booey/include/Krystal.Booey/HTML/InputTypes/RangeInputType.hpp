@@ -58,7 +58,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::Range;
+      return input_type_names::Range;
     }
 
     KRYS_NODISCARD double ValueAsDouble() const noexcept final;

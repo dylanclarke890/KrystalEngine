@@ -189,7 +189,7 @@ namespace krys::boo::html
   Ref<TextControlPlaceholderElement> TextControlPlaceholderElement::Create(dom::Document &document) noexcept
   {
     auto element = CreateRef<TextControlPlaceholderElement>(document);
-    element->SetUserAgentPart(css::UserAgentParts::Placeholder());
+    element->SetUserAgentPart(css::user_agent_parts::Placeholder());
     return element;
   }
 
@@ -283,7 +283,7 @@ namespace krys::boo::html
           ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this))))
     {
       auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
-      if (event.Type() == EventNames::MouseDown && mouseEvent && mouseEvent->Button() == 0)
+      if (event.Type() == event_names::MouseDown && mouseEvent && mouseEvent->Button() == 0)
       {
         input->Focus();
         input->Select();
@@ -309,7 +309,7 @@ namespace krys::boo::html
   Ref<SearchFieldCancelButtonElement> SearchFieldCancelButtonElement::Create(dom::Document &document) noexcept
   {
     auto element = CreateRef<SearchFieldCancelButtonElement>(document);
-    element->SetUserAgentPart(css::UserAgentParts::WebkitSearchCancelButton());
+    element->SetUserAgentPart(css::user_agent_parts::WebkitSearchCancelButton());
     (void)element->SetAttribute(u8"aria-label", AXSearchFieldCancelButtonText());
     (void)element->SetAttribute(u8"role", u8"button");
     return element;
@@ -348,7 +348,7 @@ namespace krys::boo::html
     }
 
     if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
-        event.Type() == EventNames::MouseDown && mouseEvent && mouseEvent->Button() == 0)
+        event.Type() == event_names::MouseDown && mouseEvent && mouseEvent->Button() == 0)
     {
       input->Focus();
       input->Select();

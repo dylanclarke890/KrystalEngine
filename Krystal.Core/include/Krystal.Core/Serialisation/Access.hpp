@@ -2,9 +2,9 @@
 
 #include "Krystal.Core/Serialisation/Builtins.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
-#define KRYS_ACCESS_FRIEND() friend class ::krys::Serialisation::Access
+#define KRYS_ACCESS_FRIEND() friend class ::krys::serialisation::Access
 
   /// @brief Allows archives to use private Transfer/Save/Load methods of types by being a friend.
   class Access

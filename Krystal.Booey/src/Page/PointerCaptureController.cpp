@@ -212,7 +212,7 @@ namespace krys::boo
         // FIXME: Spec doesn't specify which task source to use.
         element.NodeDocument().QueueTaskToDispatchEvent(
           html::TaskSource::UserInteraction,
-          dom::PointerEvent::Create(EventNames::LostPointerCapture, element.NodeDocument().Window(), id,
+          dom::PointerEvent::Create(event_names::LostPointerCapture, element.NodeDocument().Window(), id,
                                     pointerType));
         return;
       }
@@ -283,20 +283,22 @@ namespace krys::boo
     // simplify cross-device input authoring, Pointer Events do not fire overlapping pointerdown and pointerup
     // events for chorded button presses (depressing an additional button while another button on the pointer
     // device is already depressed).
-    if (type == EventNames::MouseDown || type == EventNames::MouseUp)
+    if (type == event_names::MouseDown || type == event_names::MouseUp)
     {
       // We're already active and getting another mousedown, this means that we should dispatch
       // a pointermove event and let the button state show the newly depressed button.
-      if (type == EventNames::MouseDown && pointerIsPressed)
+      if (type == event_names::MouseDown && pointerIsPressed)
       {
-        return dom::PointerEvent::Create(EventNames::PointerMove, button, mouseEvent, pointerId, pointerType);
+        return dom::PointerEvent::Create(event_names::PointerMove, button, mouseEvent, pointerId,
+                                         pointerType);
       }
 
       // We're active and the mouseup still has some pressed button, this means we should dispatch
       // a pointermove event.
-      if (type == EventNames::MouseUp && pointerIsPressed && mouseEvent.Buttons() > 0)
+      if (type == event_names::MouseUp && pointerIsPressed && mouseEvent.Buttons() > 0)
       {
-        return dom::PointerEvent::Create(EventNames::PointerMove, button, mouseEvent, pointerId, pointerType);
+        return dom::PointerEvent::Create(event_names::PointerMove, button, mouseEvent, pointerId,
+                                         pointerType);
       }
     }
 
@@ -358,7 +360,7 @@ namespace krys::boo
       return;
     }
 
-    DispatchEvent(*dom::PointerEvent::Create(EventNames::PointerRawUpdate,
+    DispatchEvent(*dom::PointerEvent::Create(event_names::PointerRawUpdate,
                                              ButtonForMouseEvent(mouseEvent, pointerId), mouseEvent,
                                              pointerId, pointerType),
                   &target);
@@ -369,7 +371,7 @@ namespace krys::boo
                                                               const dom::DOMString &pointerType,
                                                               dom::Element &target) noexcept
   {
-    if (mouseEvent.Type() != EventNames::MouseMove || target.NodeDocument().HasPointerMoveListener()
+    if (mouseEvent.Type() != event_names::MouseMove || target.NodeDocument().HasPointerMoveListener()
         || HasActiveTouch())
     {
       return false;
@@ -422,7 +424,7 @@ namespace krys::boo
     EventHandler::RemoveBoundaryTargetsWithoutListeners(targetChain,
                                                         Span<const dom::DOMStringAtom>(&type, 1));
 
-    if (type == EventNames::PointerEnter)
+    if (type == event_names::PointerEnter)
     {
       for (auto it = targetChain.rbegin(); it != targetChain.rend(); ++it)
       {
@@ -494,7 +496,7 @@ namespace krys::boo
 
     // A pointer cancelled because its touch now pans or zooms the page fires nothing more.
     // https://w3c.github.io/pointerevents/#the-pointercancel-event
-    if (type != EventNames::PointerDown && HasCancelledPointerEventForIdentifier(pointerId))
+    if (type != event_names::PointerDown && HasCancelledPointerEventForIdentifier(pointerId))
     {
       return;
     }
@@ -507,7 +509,7 @@ namespace krys::boo
 
     capturingData->PreviousTarget = currentTarget;
 
-    if (type == EventNames::PointerMove && previousTarget != currentTarget)
+    if (type == event_names::PointerMove && previousTarget != currentTarget)
     {
       List<Ref<dom::Element>> leftElementsChain;
       for (dom::Element *element = previousTarget.get(); element;
@@ -541,8 +543,8 @@ namespace krys::boo
       }
 
       // Enter and leave events don't bubble, so they go only to the elements a listener would see them on.
-      const dom::DOMStringAtom leaveType(EventNames::PointerLeave);
-      const dom::DOMStringAtom enterType(EventNames::PointerEnter);
+      const dom::DOMStringAtom leaveType(event_names::PointerLeave);
+      const dom::DOMStringAtom enterType(event_names::PointerEnter);
       EventHandler::RemoveBoundaryTargetsWithoutListeners(leftElementsChain,
                                                           Span<const dom::DOMStringAtom>(&leaveType, 1));
       EventHandler::RemoveBoundaryTargetsWithoutListeners(enteredElementsChain,
@@ -550,44 +552,44 @@ namespace krys::boo
 
       if (previousTarget)
       {
-        DispatchOverOrOutEvent(EventNames::PointerOut, previousTarget.get(), platformTouchEvent, index,
+        DispatchOverOrOutEvent(event_names::PointerOut, previousTarget.get(), platformTouchEvent, index,
                                isPrimary, view, touchDelta);
       }
 
       for (auto &chain : leftElementsChain)
       {
-        DispatchEvent(*dom::PointerEvent::Create(EventNames::PointerLeave, platformTouchEvent, {}, {}, index,
+        DispatchEvent(*dom::PointerEvent::Create(event_names::PointerLeave, platformTouchEvent, {}, {}, index,
                                                  isPrimary, view, touchDelta),
                       chain.get());
       }
 
       if (currentTarget)
       {
-        DispatchOverOrOutEvent(EventNames::PointerOver, currentTarget.get(), platformTouchEvent, index,
+        DispatchOverOrOutEvent(event_names::PointerOver, currentTarget.get(), platformTouchEvent, index,
                                isPrimary, view, touchDelta);
       }
 
       for (auto it = enteredElementsChain.rbegin(); it != enteredElementsChain.rend(); ++it)
       {
-        DispatchEvent(*dom::PointerEvent::Create(EventNames::PointerEnter, platformTouchEvent, {}, {}, index,
+        DispatchEvent(*dom::PointerEvent::Create(event_names::PointerEnter, platformTouchEvent, {}, {}, index,
                                                  isPrimary, view, touchDelta),
                       it->get());
       }
     }
 
-    if (type == EventNames::PointerDown)
+    if (type == event_names::PointerDown)
     {
       // https://w3c.github.io/pointerevents/#the-pointerdown-event
       // For input devices that do not support hover, a user agent MUST also fire a pointer event named
       // pointerover followed by a pointer event named pointerenter prior to dispatching the pointerdown
       // event.
-      DispatchOverOrOutEvent(EventNames::PointerOver, currentTarget.get(), platformTouchEvent, index,
+      DispatchOverOrOutEvent(event_names::PointerOver, currentTarget.get(), platformTouchEvent, index,
                              isPrimary, view, touchDelta);
-      DispatchEnterOrLeaveEvent(EventNames::PointerEnter, *currentTarget, platformTouchEvent, index,
+      DispatchEnterOrLeaveEvent(event_names::PointerEnter, *currentTarget, platformTouchEvent, index,
                                 isPrimary, view, touchDelta);
     }
 
-    if (type == EventNames::PointerCancel)
+    if (type == event_names::PointerCancel)
     {
       auto location = touchPoint.Pos();
       IntPoint documentPoint =
@@ -603,7 +605,7 @@ namespace krys::boo
     // (A stationary touch has a pointermove, but nothing about it changed.)
     if (touchPoint.GetState() == PlatformTouchPoint::TouchMoved && document.HasPointerRawUpdateListener())
     {
-      const dom::DOMStringAtom rawUpdateType(EventNames::PointerRawUpdate);
+      const dom::DOMStringAtom rawUpdateType(event_names::PointerRawUpdate);
       DispatchEvent(
         *dom::PointerEvent::Create(rawUpdateType, platformTouchEvent,
                                    mapToPointerEvents(platformTouchEvent.CoalescedEvents(), &rawUpdateType),
@@ -611,7 +613,7 @@ namespace krys::boo
         &target);
     }
 
-    if (type == EventNames::PointerMove && !document.HasPointerMoveListener())
+    if (type == event_names::PointerMove && !document.HasPointerMoveListener())
     {
       // As for an event that's dispatched: see DispatchEvent.
       ProcessPendingPointerCapture(pointerId);
@@ -621,7 +623,7 @@ namespace krys::boo
 
     DispatchEvent(*createPointerEvent(), &target);
 
-    if (type != EventNames::PointerUp)
+    if (type != event_names::PointerUp)
     {
       return;
     }
@@ -629,9 +631,9 @@ namespace krys::boo
     // https://w3c.github.io/pointerevents/#the-pointerup-event
     // For input devices that do not support hover, a user agent MUST also fire a pointer event named
     // pointerout followed by a pointer event named pointerleave after dispatching the pointerup event.
-    DispatchOverOrOutEvent(EventNames::PointerOut, currentTarget.get(), platformTouchEvent, index, isPrimary,
+    DispatchOverOrOutEvent(event_names::PointerOut, currentTarget.get(), platformTouchEvent, index, isPrimary,
                            view, touchDelta);
-    DispatchEnterOrLeaveEvent(EventNames::PointerLeave, *currentTarget, platformTouchEvent, index, isPrimary,
+    DispatchEnterOrLeaveEvent(event_names::PointerLeave, *currentTarget, platformTouchEvent, index, isPrimary,
                               view, touchDelta);
 
     capturingData->CurrentState = CapturingData::State::Finished;
@@ -669,9 +671,9 @@ namespace krys::boo
       return;
     }
 
-    bool isPointerdown = event.Type() == EventNames::PointerDown;
-    bool isPointerup = event.Type() == EventNames::PointerUp;
-    bool isPointermove = event.Type() == EventNames::PointerMove;
+    bool isPointerdown = event.Type() == event_names::PointerDown;
+    bool isPointerup = event.Type() == event_names::PointerUp;
+    bool isPointermove = event.Type() == event_names::PointerMove;
 
     if (!isPointerdown && !isPointerup && !isPointermove)
     {
@@ -744,7 +746,7 @@ namespace krys::boo
     // pointer capture target override for the pointerId of the pointerup or pointercancel event that was just
     // dispatched, and then run Process Pending Pointer Capture steps to fire lostpointercapture if necessary.
     // https://w3c.github.io/pointerevents/#implicit-release-of-pointer-capture
-    if (event.Type() == EventNames::PointerUp)
+    if (event.Type() == event_names::PointerUp)
     {
       capturingData->PendingTargetOverride = nullptr;
       ProcessPendingPointerCapture(event.PointerId());
@@ -753,7 +755,7 @@ namespace krys::boo
     // If a mouse pointer has moved while it isn't pressed, make sure we reset the
     // preventsCompatibilityMouseEvents flag since we could otherwise prevent compatibility mouse events while
     // those are only supposed to be prevented while the pointer is pressed.
-    if (event.Type() == EventNames::PointerMove && capturingData->PointerType == dom::MousePointerEventType()
+    if (event.Type() == event_names::PointerMove && capturingData->PointerType == dom::MousePointerEventType()
         && !capturingData->PointerIsPressed)
     {
       capturingData->PreventsCompatibilityMouseEvents = false;
@@ -762,7 +764,7 @@ namespace krys::boo
     // If the pointer event dispatched was pointerdown and the event was canceled, then set the PREVENT MOUSE
     // EVENT flag for this pointerType.
     // https://www.w3.org/TR/pointerevents/#mapping-for-devices-that-support-hover
-    if (event.Type() == EventNames::PointerDown)
+    if (event.Type() == event_names::PointerDown)
     {
       capturingData->PreventsCompatibilityMouseEvents = event.DefaultPrevented();
     }
@@ -845,17 +847,18 @@ namespace krys::boo
     }
     else
     {
-      auto cancelEvent = dom::PointerEvent::Create(EventNames::PointerCancel, target->NodeDocument().Window(),
-                                                   pointerId, capturingData->PointerType, isPrimary);
+      auto cancelEvent =
+        dom::PointerEvent::Create(event_names::PointerCancel, target->NodeDocument().Window(), pointerId,
+                                  capturingData->PointerType, isPrimary);
       (void)dom::EventDispatcher::DispatchToTarget(*cancelEvent, target.get());
     }
 
     (void)dom::EventDispatcher::DispatchToTarget(
-      *dom::PointerEvent::Create(EventNames::PointerOut, target->NodeDocument().Window(), pointerId,
+      *dom::PointerEvent::Create(event_names::PointerOut, target->NodeDocument().Window(), pointerId,
                                  capturingData->PointerType, isPrimary),
       target.get());
     (void)dom::EventDispatcher::DispatchToTarget(
-      *dom::PointerEvent::Create(EventNames::PointerLeave, target->NodeDocument().Window(), pointerId,
+      *dom::PointerEvent::Create(event_names::PointerLeave, target->NodeDocument().Window(), pointerId,
                                  capturingData->PointerType, isPrimary),
       target.get());
     ProcessPendingPointerCapture(pointerId);
@@ -890,7 +893,7 @@ namespace krys::boo
       if (targetOverride->IsConnected())
       {
         (void)dom::EventDispatcher::DispatchToTarget(
-          *dom::PointerEvent::CreateForPointerCapture(EventNames::LostPointerCapture,
+          *dom::PointerEvent::CreateForPointerCapture(event_names::LostPointerCapture,
                                                       targetOverride->NodeDocument().Window(), pointerId,
                                                       capturingData->IsPrimary, capturingData->PointerType),
           targetOverride.get());
@@ -917,7 +920,7 @@ namespace krys::boo
         }
       }
       (void)dom::EventDispatcher::DispatchToTarget(
-        *dom::PointerEvent::CreateForPointerCapture(EventNames::GotPointerCapture,
+        *dom::PointerEvent::CreateForPointerCapture(event_names::GotPointerCapture,
                                                     pendingTargetOverride->NodeDocument().Window(), pointerId,
                                                     capturingData->IsPrimary, capturingData->PointerType),
         pendingTargetOverride.get());

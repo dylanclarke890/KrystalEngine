@@ -50,7 +50,7 @@ namespace krys::boo::css
     CSSKeyframeRule(KeyframeRule &keyframe, CSSKeyframesRule *parent) noexcept;
 
   public:
-    ~CSSKeyframeRule() noexcept;
+    ~CSSKeyframeRule() noexcept override;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 

@@ -14,11 +14,11 @@ namespace krys
 {
   class ByteUtils
   {
+  public:
     ByteUtils() = delete;
 
     ~ByteUtils() = delete;
 
-  public:
     /// @brief Enumerates chunks of bytes from the given byte span, invoking the provided callable for each
     /// chunk.
     template <size_t N, typename TFunc>

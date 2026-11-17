@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "Krystal.Core/Maths/Maths.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 using namespace krys;
 
@@ -12,7 +13,8 @@ namespace krys::tests
 #define TEST_COPY_AND_MOVE()                                                                                 \
   constexpr Vec copy(v);                                                                                     \
   REQUIRE(copy == v);                                                                                        \
-  constexpr Vec move(std::move(Vec(v)));                                                                     \
+  Vec moveSource(v);                                                                                         \
+  const Vec move(krys::move(moveSource));                                                                    \
   REQUIRE(move == v);
 
 #define TEST_COMMON_OPERATORS()                                                                              \

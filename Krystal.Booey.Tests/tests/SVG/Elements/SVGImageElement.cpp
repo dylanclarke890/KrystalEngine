@@ -25,7 +25,7 @@ namespace krys::boo::svg::tests
 
     KRYS_NODISCARD bool Contains(const utf8_string &text, utf8_stringview part) noexcept
     {
-      return text.find(part) != utf8_string::npos;
+      return text.contains(part);
     }
   }
 

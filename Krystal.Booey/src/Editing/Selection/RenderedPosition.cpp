@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -74,7 +75,7 @@ namespace krys::boo
 
   RenderedPosition::RenderedPosition(const RenderObject *renderer, inline_iterator::LeafBoxIterator box,
                                      uint32 offset) noexcept
-      : _renderer(CreateWeakPtr(renderer)), _box(box), _offset(offset)
+      : _renderer(CreateWeakPtr(renderer)), _box(krys::move(box)), _offset(offset)
   {
   }
 

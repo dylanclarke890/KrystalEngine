@@ -320,7 +320,7 @@ namespace krys::boo::url
 
     KRYS_NODISCARD bool HasFetchScheme() const noexcept;
 
-    KRYS_NODISCARD friend bool ProtocolHostAndPortAreEqual(const URL &a, const URL &b) noexcept;
+    friend bool ProtocolHostAndPortAreEqual(const URL &a, const URL &b) noexcept;
 
   private:
     void Invalidate() noexcept;

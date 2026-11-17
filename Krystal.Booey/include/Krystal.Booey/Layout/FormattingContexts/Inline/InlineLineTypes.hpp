@@ -176,7 +176,7 @@ namespace krys::boo::layout
   {
     size_t LineIndex {0};
     // Content width measured during line breaking (avoid double-measuring).
-    Maybe<InlineLayoutUnit> TrailingOverflowingContentWidth {};
+    Maybe<InlineLayoutUnit> TrailingOverflowingContentWidth;
     bool EndsWithLineBreak {false};
     TextDirection InlineBaseDirection {TextDirection::LTR};
     List<const Box *> SuspendedFloats;

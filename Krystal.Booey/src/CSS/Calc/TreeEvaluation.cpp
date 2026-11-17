@@ -369,7 +369,7 @@ namespace krys::boo::css::calc
     {
       return null;
     }
-    if (GetType(root->A).MatchesAny<Type::Match::Angle>())
+    if (GetType(root->A).template MatchesAny<Type::Match::Angle>())
     {
       argument = deg2rad(*argument);
     }

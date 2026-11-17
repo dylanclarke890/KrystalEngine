@@ -38,6 +38,7 @@
 #include "Krystal.Booey/Style/Rules/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <ranges>
 
@@ -162,8 +163,8 @@ namespace krys::boo::style
     _ruleInformation = CollectRuleInformation();
   }
 
-  Invalidator::Invalidator(const InvalidationRuleSetVector &ruleSets) noexcept
-      : _ruleSets(ruleSets), _ruleInformation(CollectRuleInformation())
+  Invalidator::Invalidator(InvalidationRuleSetVector ruleSets) noexcept
+      : _ruleSets(krys::move(ruleSets)), _ruleInformation(CollectRuleInformation())
   {
     krys_debug_assert(!_ruleSets.empty());
   }

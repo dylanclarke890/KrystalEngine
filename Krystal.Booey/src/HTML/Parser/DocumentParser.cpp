@@ -253,7 +253,5 @@ namespace krys::boo::html
       TokenAtom tokenAtom(*token);
       _treeBuilder.ProcessToken(krys::move(tokenAtom));
     }
-
-    return;
   }
 }

@@ -74,7 +74,7 @@ namespace krys::boo::style
           return {DefaultMetric, ConvertCSSValueToStyle<FontSizeAdjust::Number>(state, *primitiveValue)};
 
         default:
-          if (css::PropertyParserHelpers::IsSystemFontShorthand(valueID))
+          if (css::parse_property::IsSystemFontShorthand(valueID))
           {
             return css::keywords::None {};
           }

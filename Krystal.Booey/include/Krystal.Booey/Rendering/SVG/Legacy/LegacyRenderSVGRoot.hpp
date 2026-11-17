@@ -44,11 +44,11 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGRoot);
 
   private:
-    IntSize _containerSize {};
+    IntSize _containerSize;
     FloatRect _repaintBoundingBox {};
-    Markable<FloatRect> _objectBoundingBox {};
-    mutable Markable<FloatRect> _strokeBoundingBox {};
-    mutable Markable<FloatRect> _accurateRepaintBoundingBox {};
+    Markable<FloatRect> _objectBoundingBox;
+    mutable Markable<FloatRect> _strokeBoundingBox;
+    mutable Markable<FloatRect> _accurateRepaintBoundingBox;
     mutable AffineTransform _localToParentTransform {};
     AffineTransform _localToBorderBoxTransform {};
     List<WeakPtr<LegacyRenderSVGResourceContainer>> _resourcesNeedingToInvalidateClients;
@@ -113,9 +113,9 @@ namespace krys::boo
 
     static void AddResourceForClientInvalidation(LegacyRenderSVGResourceContainer *) noexcept;
 
-  private:
     void GetElement() const = delete;
 
+  private:
     // Intentially left 'RenderSVGRoot' instead of 'LegacyRenderSVGRoot', to avoid breaking layout tests.
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {

@@ -743,23 +743,21 @@ namespace krys::boo::css::calc
     builder.Append(ToString(root.Id));
   }
 
-  void SerialiseCalculationTree(StringBuilder &builder, const SiblingCount &root,
-                                SerialisationState &) noexcept
+  void SerialiseCalculationTree(StringBuilder &builder, const SiblingCount &, SerialisationState &) noexcept
   {
     // 2. If root is a numeric value, or a non-math function, serialize root per the normal rules for it and
     // return the result.
 
-    builder.Append(ToString(root.Id));
+    builder.Append(ToString(SiblingCount::Id));
     builder.Append(u8"()");
   }
 
-  void SerialiseCalculationTree(StringBuilder &builder, const SiblingIndex &root,
-                                SerialisationState &) noexcept
+  void SerialiseCalculationTree(StringBuilder &builder, const SiblingIndex &, SerialisationState &) noexcept
   {
     // 2. If root is a numeric value, or a non-math function, serialize root per the normal rules for it and
     // return the result.
 
-    builder.Append(ToString(root.Id));
+    builder.Append(ToString(SiblingIndex::Id));
     builder.Append(u8"()");
   }
 

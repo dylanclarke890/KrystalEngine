@@ -92,7 +92,7 @@ namespace krys::boo::html
   void HTMLOptionElement::DefaultEventHandler(dom::Event &event) noexcept
   {
     auto *select = OwnerSelectElement();
-    if (select && select->ContentsUseBaseAppearance() && event.Type() == EventNames::MouseUp)
+    if (select && select->ContentsUseBaseAppearance() && event.Type() == event_names::MouseUp)
     {
       // https://html.spec.whatwg.org/#concept-select-pick
       // 3. If event is a MouseEvent and event's button attribute is not 0, then return.

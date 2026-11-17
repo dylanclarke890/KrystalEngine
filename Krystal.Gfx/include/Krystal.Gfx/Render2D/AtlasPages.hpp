@@ -52,7 +52,7 @@ namespace krys::gfx
     struct Page
     {
       TextureHandle Texture {};
-      List<Shelf> Shelves {};
+      List<Shelf> Shelves;
       uint32 NextShelfY {0u};
       uint64 LastUsedFrame {0u};
     };
@@ -60,7 +60,7 @@ namespace krys::gfx
   private:
     Device *_device;
     AtlasPagesDesc _desc;
-    List<Page> _pages {};
+    List<Page> _pages;
     uint32 _evictions {0u};
 
   public:

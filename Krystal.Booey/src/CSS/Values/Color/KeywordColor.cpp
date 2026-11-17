@@ -92,7 +92,7 @@ namespace krys::boo::css
 
     if (auto namedColor = FindColor(ToString(keyword)))
     {
-      return AsSRGBA(PackedColour::ARGB {namedColor->ARGBValue});
+      return AsSRGBA(packed_colour::ARGB {namedColor->ARGBValue});
     }
     krys_debug_assert_msg(false, "Every absolute colour keyword is a named colour.");
     return {};

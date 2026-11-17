@@ -33,6 +33,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <utility>
 
 namespace krys::boo
@@ -63,9 +64,10 @@ namespace krys::boo
     }
   }
 
-  VisibleSelection::VisibleSelection(const dom::Position &anchor, const dom::Position &focus,
-                                     Affinity affinity, boo::Directionality directionality) noexcept
-      : _anchor(anchor), _focus(focus), _affinity(affinity), _directionality(directionality)
+  VisibleSelection::VisibleSelection(dom::Position anchor, dom::Position focus, Affinity affinity,
+                                     boo::Directionality directionality) noexcept
+      : _anchor(krys::move(anchor)), _focus(krys::move(focus)), _affinity(affinity),
+        _directionality(directionality)
   {
     Validate();
   }

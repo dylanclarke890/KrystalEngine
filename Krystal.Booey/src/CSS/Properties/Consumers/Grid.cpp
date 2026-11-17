@@ -46,7 +46,7 @@
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   KRYS_NODISCARD bool IsGridBreadthIdent(ValueId id) noexcept
   {

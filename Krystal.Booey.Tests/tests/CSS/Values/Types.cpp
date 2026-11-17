@@ -48,10 +48,10 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(SpaceSeparatedList<CustomIdentifier> {Ident(u8"a"), Ident(u8"b"), Ident(u8"c")})
           == u8"a b c");
     CHECK(SerialiseForTest(CommaSeparatedList<CustomIdentifier> {Ident(u8"a"), Ident(u8"b")}) == u8"a, b");
-    CHECK(SerialiseForTest(SpaceSeparatedList<CustomIdentifier> {}) == u8"");
+    CHECK(SerialiseForTest(SpaceSeparatedList<CustomIdentifier> {}).empty());
 
     // Optional-like: empty serialises to nothing, and empty tuple elements are skipped.
-    CHECK(SerialiseForTest(Maybe<CustomIdentifier> {}) == u8"");
+    CHECK(SerialiseForTest(Maybe<CustomIdentifier> {}).empty());
     CHECK(SerialiseForTest(Maybe<CustomIdentifier> {Ident(u8"a")}) == u8"a");
     CHECK(SerialiseForTest(SpaceSeparatedTuple<Maybe<CustomIdentifier>, CustomIdentifier> {
             Maybe<CustomIdentifier> {}, Ident(u8"b")})

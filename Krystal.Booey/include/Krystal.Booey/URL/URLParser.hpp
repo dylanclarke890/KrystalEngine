@@ -161,9 +161,9 @@ namespace krys::boo::url
 
     KRYS_NODISCARD bool IsLocalhost(utf8_stringview view) noexcept;
 
-    void ConsumeSingleDotPathSegment(CodePointIterator &iterator) noexcept;
+    void ConsumeSingleDotPathSegment(CodePointIterator &c) noexcept;
 
-    void ConsumeDoubleDotPathSegment(CodePointIterator &iterator) noexcept;
+    void ConsumeDoubleDotPathSegment(CodePointIterator &c) noexcept;
 
     void AppendWindowsDriveLetter(CodePointIterator &iterator) noexcept;
 

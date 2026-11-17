@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   // MARK: - color-mix()
 
@@ -71,7 +71,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return method;
   }
 
-  Maybe<ColourInterpolationMethod> ConsumeColorInterpolationMethod(TokenRange &args,
+  Maybe<ColourInterpolationMethod> ConsumeColorInterpolationMethod(TokenRange &tokens,
                                                                    PropertyParserState &) noexcept
   {
     // <rectangular-color-space> = srgb | srgb-linear | display-p3 | a98-rgb | prophoto-rgb | rec2020 | lab |
@@ -81,27 +81,27 @@ namespace krys::boo::css::PropertyParserHelpers
     // <color-interpolation-method> = in [ <rectangular-color-space> | <polar-color-space>
     // <hue-interpolation-method>? ]
 
-    krys_debug_assert(args.Peek().ValueId() == ValueId::In);
-    args.Discard();
-    args.DiscardWhitespace();
+    krys_debug_assert(tokens.Peek().ValueId() == ValueId::In);
+    tokens.Discard();
+    tokens.DiscardWhitespace();
 
-    auto consumePolarColorSpace = [](TokenRange &args,
+    auto consumePolarColorSpace = [](TokenRange &tokens,
                                      auto colorInterpolationMethod) -> Maybe<ColourInterpolationMethod>
     {
       // Consume the color space identifier.
-      args.Discard();
-      args.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
 
       // <hue-interpolation-method> is optional, so if it is not provided, we just use the default value
       // specified in the passed in 'colorInterpolationMethod' parameter.
-      auto hueInterpolationMethod = ConsumeHueInterpolationMethod(args);
+      auto hueInterpolationMethod = ConsumeHueInterpolationMethod(tokens);
       if (!hueInterpolationMethod)
       {
         return ColourInterpolationMethod {colorInterpolationMethod, AlphaPremultiplication::Premultiplied};
       }
 
       // If the hue-interpolation-method was provided it must be followed immediately by the 'hue' identifier.
-      if (!ConsumeIdentRaw<ValueId::Hue>(args))
+      if (!ConsumeIdentRaw<ValueId::Hue>(tokens))
       {
         return null;
       }
@@ -111,78 +111,78 @@ namespace krys::boo::css::PropertyParserHelpers
       return ColourInterpolationMethod {colorInterpolationMethod, AlphaPremultiplication::Premultiplied};
     };
 
-    auto consumeRectangularColorSpace = [](TokenRange &args,
+    auto consumeRectangularColorSpace = [](TokenRange &tokens,
                                            auto colorInterpolationMethod) -> Maybe<ColourInterpolationMethod>
     {
       // Consume the color space identifier.
-      args.Discard();
-      args.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
 
       return ColourInterpolationMethod {colorInterpolationMethod, AlphaPremultiplication::Premultiplied};
     };
 
-    switch (args.Peek().ValueId())
+    switch (tokens.Peek().ValueId())
     {
       case ValueId::Hsl:
       {
-        return consumePolarColorSpace(args, ColourInterpolationMethod::HSL {});
+        return consumePolarColorSpace(tokens, ColourInterpolationMethod::HSL {});
       }
       case ValueId::Hwb:
       {
-        return consumePolarColorSpace(args, ColourInterpolationMethod::HWB {});
+        return consumePolarColorSpace(tokens, ColourInterpolationMethod::HWB {});
       }
       case ValueId::Lch:
       {
-        return consumePolarColorSpace(args, ColourInterpolationMethod::LCH {});
+        return consumePolarColorSpace(tokens, ColourInterpolationMethod::LCH {});
       }
       case ValueId::Lab:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::Lab {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::Lab {});
       }
       case ValueId::Oklch:
       {
-        return consumePolarColorSpace(args, ColourInterpolationMethod::OKLCH {});
+        return consumePolarColorSpace(tokens, ColourInterpolationMethod::OKLCH {});
       }
       case ValueId::Oklab:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::OKLab {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::OKLab {});
       }
       case ValueId::SRGB:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::SRGB {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::SRGB {});
       }
       case ValueId::SrgbLinear:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::SRGBLinear {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::SRGBLinear {});
       }
       case ValueId::DisplayP3:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::DisplayP3 {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::DisplayP3 {});
       }
       case ValueId::DisplayP3Linear:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::DisplayP3Linear {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::DisplayP3Linear {});
       }
       case ValueId::A98Rgb:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::A98RGB {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::A98RGB {});
       }
       case ValueId::ProphotoRgb:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::ProPhotoRGB {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::ProPhotoRGB {});
       }
       case ValueId::Rec2020:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::Rec2020 {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::Rec2020 {});
       }
       case ValueId::XyzD50:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::XYZD50 {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::XYZD50 {});
       }
       case ValueId::Xyz:
       case ValueId::XyzD65:
       {
-        return consumeRectangularColorSpace(args, ColourInterpolationMethod::XYZD65 {});
+        return consumeRectangularColorSpace(tokens, ColourInterpolationMethod::XYZD65 {});
       }
       default:
       {

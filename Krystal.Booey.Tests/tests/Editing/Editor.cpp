@@ -156,8 +156,8 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<div id=e contenteditable>The quick brown fox</div><p id=p>Not editable</p>");
     auto &editor = fixture.GetEditor();
     auto &root = fixture.ById(u8"e");
-    auto beforeCut = fixture.Listen(EventNames::BeforeCut);
-    auto cut = fixture.Listen(EventNames::Cut);
+    auto beforeCut = fixture.Listen(event_names::BeforeCut);
+    auto cut = fixture.Listen(event_names::Cut);
 
     SECTION("Cutting copies the selected text, then deletes it")
     {
@@ -203,8 +203,8 @@ namespace krys::boo::tests
     EditorFixture fixture(u8"<div id=e contenteditable>abc</div><p id=p>Not editable</p>");
     auto &editor = fixture.GetEditor();
     auto &root = fixture.ById(u8"e");
-    auto paste = fixture.Listen(EventNames::Paste);
-    auto textInput = fixture.Listen(EventNames::TextInput);
+    auto paste = fixture.Listen(event_names::Paste);
+    auto textInput = fixture.Listen(event_names::TextInput);
     fixture.SetCaret(fixture.TextIn(u8"e"), 1);
 
     SECTION("Pasting inserts the clipboard's text at the selection")
@@ -331,7 +331,7 @@ namespace krys::boo::tests
     SECTION("A cancelled copy puts what its listeners wrote on the clipboard")
     {
       RefPtr<dom::DataTransfer> clipboardData;
-      ListenWith(fixture, EventNames::Copy,
+      ListenWith(fixture, event_names::Copy,
                  [&](dom::Event &event)
                  {
                    clipboardData = ShareRefPtr(Downcast<dom::ClipboardEvent>(event).ClipboardData());
@@ -361,7 +361,7 @@ namespace krys::boo::tests
     SECTION("An uncancelled copy copies the selection, whatever its listeners wrote")
     {
       ListenWith(
-        fixture, EventNames::Copy, [&](dom::Event &event)
+        fixture, event_names::Copy, [&](dom::Event &event)
         { Downcast<dom::ClipboardEvent>(event).ClipboardData()->SetData(document, u8"text", u8"ignored"); });
       fixture.Select(fixture.TextIn(u8"p"), 4, 9);
       editor.Copy();
@@ -371,7 +371,7 @@ namespace krys::boo::tests
     SECTION("Listeners of the events before copying can't read or write")
     {
       int32 events = 0;
-      ListenWith(fixture, EventNames::BeforeCopy,
+      ListenWith(fixture, event_names::BeforeCopy,
                  [&](dom::Event &event)
                  {
                    ++events;
@@ -393,7 +393,7 @@ namespace krys::boo::tests
       List<dom::DOMString> types;
       dom::DOMString text;
       dom::DOMString markup;
-      ListenWith(fixture, EventNames::Paste,
+      ListenWith(fixture, event_names::Paste,
                  [&](dom::Event &event)
                  {
                    auto *clipboardData = Downcast<dom::ClipboardEvent>(event).ClipboardData();
@@ -425,7 +425,7 @@ namespace krys::boo::tests
 
     SECTION("A page reads back the custom types it copied, and other pages don't")
     {
-      ListenWith(fixture, EventNames::Copy,
+      ListenWith(fixture, event_names::Copy,
                  [&](dom::Event &event)
                  {
                    auto *clipboardData = Downcast<dom::ClipboardEvent>(event).ClipboardData();
@@ -434,7 +434,7 @@ namespace krys::boo::tests
                  });
       dom::DOMString custom;
       List<dom::DOMString> types;
-      ListenWith(fixture, EventNames::Paste,
+      ListenWith(fixture, event_names::Paste,
                  [&](dom::Event &event)
                  {
                    auto *clipboardData = Downcast<dom::ClipboardEvent>(event).ClipboardData();
@@ -460,7 +460,7 @@ namespace krys::boo::tests
     {
       RefPtr<dom::DataTransfer> dataTransfer;
       int32 events = 0;
-      ListenWith(fixture, EventNames::BeforeInput,
+      ListenWith(fixture, event_names::BeforeInput,
                  [&](dom::Event &event)
                  {
                    ++events;
@@ -480,7 +480,7 @@ namespace krys::boo::tests
     {
       fixture.Pasteboard.FilePaths = {u8"C:\\files\\notes.txt"};
       utf8_string name;
-      ListenWith(fixture, EventNames::Paste,
+      ListenWith(fixture, event_names::Paste,
                  [&](dom::Event &event)
                  {
                    auto &files = Downcast<dom::ClipboardEvent>(event).ClipboardData()->Files(document);
@@ -501,7 +501,7 @@ namespace krys::boo::tests
     auto &field = Downcast<html::HTMLInputElement>(fixture.ById(u8"field"));
     bool hadDataTransfer = true;
     int32 events = 0;
-    ListenWith(fixture, EventNames::BeforeInput,
+    ListenWith(fixture, event_names::BeforeInput,
                [&](dom::Event &event)
                {
                  ++events;

@@ -164,7 +164,7 @@ namespace krys::boo::dom::tests
     CHECK(toggle(u8"a", null));
     CHECK(data.Node->Data() == u8"a=\"\"");
     CHECK_FALSE(toggle(u8"a", null));
-    CHECK(data.Node->Data() == u8"");
+    CHECK(data.Node->Data().empty());
 
     CHECK(toggle(u8"a", true));
     CHECK(toggle(u8"a", true));

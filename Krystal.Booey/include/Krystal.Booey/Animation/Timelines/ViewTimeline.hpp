@@ -175,7 +175,7 @@ namespace krys::boo
     explicit ViewTimeline(ScrollAxis axis) noexcept;
 
     ViewTimeline(const css::CSSOMStringAtom &name, ScrollAxis axis,
-                 const style::ViewTimelineInsetItem &insets) noexcept;
+                 style::ViewTimelineInsetItem insets) noexcept;
 
     KRYS_NODISCARD ScrollTimeline::Data ComputeTimelineData(
       UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept final;

@@ -386,7 +386,7 @@ namespace krys::boo
     KRYS_NODISCARD Color SemanticColor() const noexcept;
 
     /// @brief Returns the underlying color if its type is inline.
-    KRYS_NODISCARD Maybe<PackedColour::RGBA> TryGetAsPackedInline() const noexcept
+    KRYS_NODISCARD Maybe<packed_colour::RGBA> TryGetAsPackedInline() const noexcept
     {
       if (IsInline())
       {
@@ -464,7 +464,7 @@ namespace krys::boo
       return AsSRGBA(AsPackedInline());
     }
 
-    KRYS_NODISCARD PackedColour::RGBA AsPackedInline() const noexcept
+    KRYS_NODISCARD packed_colour::RGBA AsPackedInline() const noexcept
     {
       krys_assert(IsInline());
       return DecodedPackedInlineColor(_colorAndFlags);
@@ -493,10 +493,10 @@ namespace krys::boo
 
     KRYS_NODISCARD static uint64 EncodedInlineColor(SRGBA<uint8> color) noexcept
     {
-      return EncodedPackedInlineColor(PackedColour::RGBA {color});
+      return EncodedPackedInlineColor(packed_colour::RGBA {color});
     }
 
-    KRYS_NODISCARD static uint64 EncodedPackedInlineColor(PackedColour::RGBA color) noexcept
+    KRYS_NODISCARD static uint64 EncodedPackedInlineColor(packed_colour::RGBA color) noexcept
     {
       return color.Value;
     }
@@ -522,9 +522,9 @@ namespace krys::boo
       return AsSRGBA(DecodedPackedInlineColor(value));
     }
 
-    KRYS_NODISCARD static PackedColour::RGBA DecodedPackedInlineColor(uint64 value) noexcept
+    KRYS_NODISCARD static packed_colour::RGBA DecodedPackedInlineColor(uint64 value) noexcept
     {
-      return PackedColour::RGBA {static_cast<uint32>(value & colorValueMask)};
+      return packed_colour::RGBA {static_cast<uint32>(value & colorValueMask)};
     }
 
     KRYS_NODISCARD static OutOfLineComponents &DecodedOutOfLineComponents(uint64 value) noexcept

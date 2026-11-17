@@ -31,6 +31,7 @@
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -55,7 +56,7 @@ namespace krys::boo
                                      dom::DOMStringAtom frameName,
                                      dom::DOMStringAtom downloadAttribute) noexcept
       : _requester(krys::move(requester)), _resourceRequest(krys::move(resourceRequest)),
-        _frameName(frameName)
+        _frameName(krys::move(frameName))
   {
     SetDownloadAttribute(downloadAttribute);
   }

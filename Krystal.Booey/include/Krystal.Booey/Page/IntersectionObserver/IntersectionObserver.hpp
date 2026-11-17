@@ -75,6 +75,15 @@ namespace krys::boo
     Yes,
   };
 
+  /// @see https://w3c.github.io/IntersectionObserver/#dictdef-intersectionobserverinit
+  struct IntersectionObserverInit
+  {
+    Maybe<Variant<RefPtr<dom::Element>, RefPtr<dom::Document>>> Root;
+    dom::DOMString RootMargin {u8"0px"};
+    dom::DOMString ScrollMargin {u8"0px"};
+    Variant<double, List<double>> Threshold {0.0};
+  };
+
   /// @brief Reports changes in how much of the elements it observes intersect its root (an element, a
   /// document, or the main frame's viewport), in the rendering update. Whoever made it keeps it: it stops
   /// observing when it's destroyed.
@@ -85,14 +94,8 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(IntersectionObserver);
 
   public:
-    /// @see https://w3c.github.io/IntersectionObserver/#dictdef-intersectionobserverinit
-    struct Init
-    {
-      Maybe<Variant<RefPtr<dom::Element>, RefPtr<dom::Document>>> Root;
-      dom::DOMString RootMargin {u8"0px"};
-      dom::DOMString ScrollMargin {u8"0px"};
-      Variant<double, List<double>> Threshold {0.0};
-    };
+    // At namespace scope so that `Init &&init = {}` below sees its member initialisers.
+    using Init = IntersectionObserverInit;
 
     enum class NeedNotify : bool
     {

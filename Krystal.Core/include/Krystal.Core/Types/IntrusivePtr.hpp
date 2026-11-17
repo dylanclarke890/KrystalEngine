@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
@@ -105,6 +106,7 @@ namespace krys
     }
 
     template <typename X, typename Y, typename Z, IsNullable ONullable>
+    requires ConvertibleTo<X *, T *>
     KRYS_ALWAYS_INLINE constexpr IntrusivePtr(const IntrusivePtr<X, Y, Z, ONullable> &o) noexcept
         : _ptr(RefPolicy::AddRef(static_cast<T *>(o.get())))
     {
@@ -123,6 +125,7 @@ namespace krys
     }
 
     template <typename X, typename Y, typename Z, IsNullable ONullable>
+    requires ConvertibleTo<X *, T *>
     KRYS_ALWAYS_INLINE constexpr IntrusivePtr(IntrusivePtr<X, Y, Z, ONullable> &&o) noexcept
         : _ptr(static_cast<T *>(o.release()))
     {
@@ -151,6 +154,7 @@ namespace krys
     }
 
     template <typename X, typename Y, typename Z, IsNullable ONullable>
+    requires ConvertibleTo<X *, T *>
     constexpr IntrusivePtr &operator=(const IntrusivePtr<X, Y, Z, ONullable> &o) noexcept
     {
       IntrusivePtr ref = o;
@@ -178,6 +182,7 @@ namespace krys
     }
 
     template <typename X, typename Y, typename Z, IsNullable ONullable>
+    requires ConvertibleTo<X *, T *>
     constexpr IntrusivePtr &operator=(IntrusivePtr<X, Y, Z, ONullable> &&o) noexcept
     {
       IntrusivePtr ref = krys::move(o);
@@ -224,7 +229,7 @@ namespace krys
     // can never be anything other than T. Either way it compiles as expected but we need the indirection to
     // avoid intellisense errors.
     template <typename X = T, typename TMember>
-    constexpr TMember &operator->*(TMember X::*memptr) const noexcept
+    constexpr TMember &operator->*(TMember X::*memptr) const noexcept KRYS_LIFETIME_BOUND
     {
       static_assert(SameType<T, X>, "T must be the same as X");
       krys_assert(PtrTraits::unwrap(_ptr) != nullptr);

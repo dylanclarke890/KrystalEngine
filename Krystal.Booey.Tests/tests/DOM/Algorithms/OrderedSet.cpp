@@ -6,8 +6,8 @@ namespace krys::boo::dom::tests
   TEST_CASE("Ordered set parser: splits on ASCII whitespace, keeping the first of each token",
             "[HTML][OrderedSet][dom:concept-ordered-set-parser]")
   {
-    REQUIRE(OrderedSet::Parser(u8"") == List<dom::DOMString> {});
-    REQUIRE(OrderedSet::Parser(u8"   ") == List<dom::DOMString> {});
+    REQUIRE(OrderedSet::Parser(u8"").empty());
+    REQUIRE(OrderedSet::Parser(u8"   ").empty());
     REQUIRE(OrderedSet::Parser(u8"foo") == List<dom::DOMString> {u8"foo"});
     REQUIRE(OrderedSet::Parser(u8"foo bar") == List<dom::DOMString> {u8"foo", u8"bar"});
     REQUIRE(OrderedSet::Parser(u8"foo bar foo") == List<dom::DOMString> {u8"foo", u8"bar"});
@@ -39,7 +39,7 @@ namespace krys::boo::dom::tests
   {
     {
       auto input = List<dom::DOMString> {};
-      REQUIRE(OrderedSet::Serialiser(input) == u8"");
+      REQUIRE(OrderedSet::Serialiser(input).empty());
     }
     {
       auto input = List<dom::DOMString> {u8"foo"};

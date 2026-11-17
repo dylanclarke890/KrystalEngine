@@ -42,7 +42,7 @@ namespace krys::boo
   using style::GridTrackSizingDirection;
 
   GridTrackSizingAlgorithm::GridTrackSizingAlgorithm(const RenderGrid *renderGrid, Grid &grid) noexcept
-      : _grid(grid), _renderGrid(renderGrid), _sizingState(SizingState::ColumnSizingFirstIteration)
+      : _grid(grid), _renderGrid(renderGrid)
   {
   }
 
@@ -147,7 +147,7 @@ namespace krys::boo
       ShouldClearOverridingContainingBlockContentSizeForGridItem(const RenderBox &gridItem,
                                                                  GridTrackSizingDirection direction) noexcept
     {
-      return GridLayoutFunctions::HasRelativeOrIntrinsicSizeForGridItem(gridItem, direction)
+      return grid_layout_functions::HasRelativeOrIntrinsicSizeForGridItem(gridItem, direction)
              || HasRelativeMarginOrPaddingForGridItem(gridItem, direction);
     }
 
@@ -160,7 +160,7 @@ namespace krys::boo
       // writing mode of the CB and the grid for which we're doing sizing don't match, swap
       // the directions.
       direction =
-        GridLayoutFunctions::FlowAwareDirectionForGridItem(grid, *gridItem.ContainingBlock(), direction);
+        grid_layout_functions::FlowAwareDirectionForGridItem(grid, *gridItem.ContainingBlock(), direction);
       if (direction == GridTrackSizingDirection::Columns)
       {
         gridItem.SetGridAreaContentLogicalWidth(size);
@@ -1087,7 +1087,7 @@ namespace krys::boo
                                         : RawGridTrackSize(direction, trackPosition);
       auto &maxTrackSize = trackSize.MaxTrackBreadth();
       if (maxTrackSize.IsContentSized() || maxTrackSize.IsFlex()
-          || GridLayoutFunctions::IsRelativeGridTrackBreadthAsAuto(maxTrackSize, AvailableSpace(direction)))
+          || grid_layout_functions::IsRelativeGridTrackBreadthAsAuto(maxTrackSize, AvailableSpace(direction)))
       {
         gridAreaIsIndefinite = true;
       }
@@ -1099,7 +1099,7 @@ namespace krys::boo
 
     gridAreaSize += _renderGrid->GuttersSize(direction, span.StartLine(), span.IntegerSpan(), availableSize);
 
-    auto gridItemInlineDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+    auto gridItemInlineDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
       *_renderGrid, gridItem, GridTrackSizingDirection::Columns);
     if (gridAreaIsIndefinite)
     {
@@ -1122,7 +1122,7 @@ namespace krys::boo
     }
 
     if (_renderGrid->AreMasonryRows() && direction == GridTrackSizingDirection::Rows
-        && !GridLayoutFunctions::IsOrthogonalGridItem(*_renderGrid, gridItem))
+        && !grid_layout_functions::IsOrthogonalGridItem(*_renderGrid, gridItem))
     {
       return _renderGrid->ContentBoxLogicalHeight();
     }
@@ -1207,8 +1207,8 @@ namespace krys::boo
     auto &trackSize = RawGridTrackSize(direction, translatedIndex);
     if (trackSize.IsFitContent())
     {
-      if (GridLayoutFunctions::IsRelativeGridTrackBreadthAsAuto(trackSize.FitContentTrackLength(),
-                                                                AvailableSpace(direction)))
+      if (grid_layout_functions::IsRelativeGridTrackBreadthAsAuto(trackSize.FitContentTrackLength(),
+                                                                  AvailableSpace(direction)))
       {
         return style::GridTrackSize::MinMax {{style::GridTrackBreadth {css::keywords::Auto {}},
                                               style::GridTrackBreadth {css::keywords::MaxContent {}}}};
@@ -1220,13 +1220,13 @@ namespace krys::boo
     auto maxTrackBreadth = trackSize.MaxTrackBreadth();
     // If the logical width/height of the grid container is indefinite, percentage
     // values are treated as <auto>.
-    if (GridLayoutFunctions::IsRelativeGridTrackBreadthAsAuto(trackSize.MinTrackBreadth(),
-                                                              AvailableSpace(direction)))
+    if (grid_layout_functions::IsRelativeGridTrackBreadthAsAuto(trackSize.MinTrackBreadth(),
+                                                                AvailableSpace(direction)))
     {
       minTrackBreadth = css::keywords::Auto {};
     }
-    if (GridLayoutFunctions::IsRelativeGridTrackBreadthAsAuto(trackSize.MaxTrackBreadth(),
-                                                              AvailableSpace(direction)))
+    if (grid_layout_functions::IsRelativeGridTrackBreadthAsAuto(trackSize.MaxTrackBreadth(),
+                                                                AvailableSpace(direction)))
     {
       maxTrackBreadth = css::keywords::Auto {};
     }
@@ -1387,7 +1387,7 @@ namespace krys::boo
   LayoutUnit GridTrackSizingAlgorithmStrategy::LogicalHeightForGridItem(
     RenderBox &gridItem, GridLayoutState &gridLayoutState) const noexcept
   {
-    auto gridItemBlockDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+    auto gridItemBlockDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
       *GetRenderGrid(), gridItem, GridTrackSizingDirection::Rows);
 
     auto &intrinsicLogicalHeightsForRowSizingFirstPass =
@@ -1406,7 +1406,7 @@ namespace krys::boo
     // possible resolution).
     auto hasOverridingContainingBlockContentSizeForGridItem = [&]
     {
-      auto overridingSize = GridLayoutFunctions::OverridingContainingBlockContentSizeForGridItem(
+      auto overridingSize = grid_layout_functions::OverridingContainingBlockContentSizeForGridItem(
         gridItem, GridTrackSizingDirection::Rows);
       return overridingSize && *overridingSize;
     };
@@ -1433,10 +1433,10 @@ namespace krys::boo
 
     gridItem.LayoutIfNeeded();
 
-    auto gridItemLogicalHeight =
-      gridItem.LogicalHeight()
-      + GridLayoutFunctions::MarginLogicalSizeForGridItem(*GetRenderGrid(), gridItemBlockDirection, gridItem)
-      + _algorithm.BaselineOffsetForGridItem(gridItem, Direction());
+    auto gridItemLogicalHeight = gridItem.LogicalHeight()
+                                 + grid_layout_functions::MarginLogicalSizeForGridItem(
+                                   *GetRenderGrid(), gridItemBlockDirection, gridItem)
+                                 + _algorithm.BaselineOffsetForGridItem(gridItem, Direction());
     if (intrinsicLogicalHeightsForRowSizingFirstPass
         && GetSizingState() == GridTrackSizingAlgorithm::SizingState::RowSizingFirstIteration)
     {
@@ -1449,7 +1449,7 @@ namespace krys::boo
   LayoutUnit GridTrackSizingAlgorithmStrategy::MinContentContributionForGridItem(
     RenderBox &gridItem, GridLayoutState &gridLayoutState) const noexcept
   {
-    auto gridItemInlineDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+    auto gridItemInlineDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
       *GetRenderGrid(), gridItem, GridTrackSizingDirection::Columns);
     if (Direction() == gridItemInlineDirection)
     {
@@ -1475,20 +1475,20 @@ namespace krys::boo
       {
         auto rowSize = GetRenderGrid()->GridAreaBreadthForGridItemIncludingAlignmentOffsets(
           gridItem, GridTrackSizingDirection::Rows);
-        auto stretchedSize = !GridLayoutFunctions::IsOrthogonalGridItem(*GetRenderGrid(), gridItem)
+        auto stretchedSize = !grid_layout_functions::IsOrthogonalGridItem(*GetRenderGrid(), gridItem)
                                ? gridItem.ConstrainLogicalHeightByMinMax(rowSize, null)
                                : gridItem.ConstrainLogicalWidthByMinMax(
                                    rowSize, GetRenderGrid()->ContentBoxWidth(), *GetRenderGrid());
-        GridLayoutFunctions::SetOverridingContentSizeForGridItem(*GetRenderGrid(), gridItem, stretchedSize,
-                                                                 GridTrackSizingDirection::Rows);
+        grid_layout_functions::SetOverridingContentSizeForGridItem(*GetRenderGrid(), gridItem, stretchedSize,
+                                                                   GridTrackSizingDirection::Rows);
       }
 
       auto minContentLogicalWidth = gridItem.MinPreferredLogicalWidth();
 
       if (needsGridItemMinContentContributionForSecondColumnPass)
       {
-        GridLayoutFunctions::ClearOverridingContentSizeForGridItem(*GetRenderGrid(), gridItem,
-                                                                   GridTrackSizingDirection::Rows);
+        grid_layout_functions::ClearOverridingContentSizeForGridItem(*GetRenderGrid(), gridItem,
+                                                                     GridTrackSizingDirection::Rows);
       }
 
       auto minLogicalWidth = [&]
@@ -1509,8 +1509,8 @@ namespace krys::boo
       }();
 
       return std::max(minContentLogicalWidth, minLogicalWidth)
-             + GridLayoutFunctions::MarginLogicalSizeForGridItem(*GetRenderGrid(), gridItemInlineDirection,
-                                                                 gridItem)
+             + grid_layout_functions::MarginLogicalSizeForGridItem(*GetRenderGrid(), gridItemInlineDirection,
+                                                                   gridItem)
              + _algorithm.BaselineOffsetForGridItem(gridItem, Direction());
     }
 
@@ -1543,7 +1543,7 @@ namespace krys::boo
   LayoutUnit GridTrackSizingAlgorithmStrategy::MaxContentContributionForGridItem(
     RenderBox &gridItem, GridLayoutState &gridLayoutState) const noexcept
   {
-    auto gridItemInlineDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+    auto gridItemInlineDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
       *GetRenderGrid(), gridItem, GridTrackSizingDirection::Columns);
     if (Direction() == gridItemInlineDirection)
     {
@@ -1558,8 +1558,8 @@ namespace krys::boo
         gridItem.SetNeedsPreferredWidthsUpdate();
       }
       return gridItem.MaxPreferredLogicalWidth()
-             + GridLayoutFunctions::MarginLogicalSizeForGridItem(*GetRenderGrid(), gridItemInlineDirection,
-                                                                 gridItem)
+             + grid_layout_functions::MarginLogicalSizeForGridItem(*GetRenderGrid(), gridItemInlineDirection,
+                                                                   gridItem)
              + _algorithm.BaselineOffsetForGridItem(gridItem, Direction());
     }
 
@@ -1578,7 +1578,7 @@ namespace krys::boo
   LayoutUnit GridTrackSizingAlgorithmStrategy::MinContributionForGridItem(
     RenderBox &gridItem, GridLayoutState &gridLayoutState) const noexcept
   {
-    auto gridItemInlineDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+    auto gridItemInlineDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
       *GetRenderGrid(), gridItem, GridTrackSizingDirection::Columns);
     bool isRowAxis = Direction() == gridItemInlineDirection;
     if (isRowAxis && IsComputingInlineSizeContainment())
@@ -1640,7 +1640,7 @@ namespace krys::boo
       if (minSize > maxBreadth)
       {
         auto marginAndBorderAndPadding =
-          GridLayoutFunctions::MarginLogicalSizeForGridItem(*GetRenderGrid(), Direction(), gridItem);
+          grid_layout_functions::MarginLogicalSizeForGridItem(*GetRenderGrid(), Direction(), gridItem);
         marginAndBorderAndPadding +=
           isRowAxis ? gridItem.BorderAndPaddingLogicalWidth() : gridItem.BorderAndPaddingLogicalHeight();
         minSize = std::max(maxBreadth, marginAndBorderAndPadding + baselineShim);
@@ -1664,8 +1664,8 @@ namespace krys::boo
     // and replaced elements.
     bool isGridItemBlockDirectionParallelToAlignmentAxis =
       alignmentContextType == GridTrackSizingDirection::Rows
-        ? !GridLayoutFunctions::IsOrthogonalGridItem(*_renderGrid, gridItem)
-        : GridLayoutFunctions::IsOrthogonalGridItem(*_renderGrid, gridItem);
+        ? !grid_layout_functions::IsOrthogonalGridItem(*_renderGrid, gridItem)
+        : grid_layout_functions::IsOrthogonalGridItem(*_renderGrid, gridItem);
     if (isGridItemBlockDirectionParallelToAlignmentAxis && gridItem.FirstLineBaseline())
     {
       return true;
@@ -1708,7 +1708,7 @@ namespace krys::boo
 
     auto align = _renderGrid->SelfAlignmentForGridItem(alignmentContextType, gridItem).Position();
     const auto &span = _renderGrid->GridSpanForGridItem(gridItem, alignmentContextType);
-    auto alignmentContext = GridLayoutFunctions::AlignmentContextForBaselineAlignment(span, align);
+    auto alignmentContext = grid_layout_functions::AlignmentContextForBaselineAlignment(span, align);
     _baselineAlignment.UpdateBaselineAlignmentContext(align, alignmentContext, gridItem,
                                                       alignmentContextType);
   }
@@ -1732,7 +1732,7 @@ namespace krys::boo
                       || !_renderGrid->IsSubgridRows());
     auto align = _renderGrid->SelfAlignmentForGridItem(alignmentContextType, gridItem).Position();
     const auto &span = _renderGrid->GridSpanForGridItem(gridItem, alignmentContextType);
-    auto alignmentContext = GridLayoutFunctions::AlignmentContextForBaselineAlignment(span, align);
+    auto alignmentContext = grid_layout_functions::AlignmentContextForBaselineAlignment(span, align);
     return _baselineAlignment.BaselineOffsetForGridItem(align, alignmentContext, gridItem,
                                                         alignmentContextType);
   }
@@ -1751,7 +1751,7 @@ namespace krys::boo
     krys_debug_assert(
       Downcast<RenderGrid>(item.Parent())->IsBaselineAlignmentForGridItem(item, alignmentContextType));
 
-    if (GridLayoutFunctions::IsOrthogonalParent(*_renderGrid, *item.Parent()))
+    if (grid_layout_functions::IsOrthogonalParent(*_renderGrid, *item.Parent()))
     {
       alignmentContextType = alignmentContextType == GridTrackSizingDirection::Rows
                                ? GridTrackSizingDirection::Columns
@@ -1770,7 +1770,7 @@ namespace krys::boo
     if (const auto *gridItemParent = DynamicDowncast<RenderGrid>(item.Parent()))
     {
       auto gridItemParentIsSubgridRowsOfRootGrid =
-        GridLayoutFunctions::IsOrthogonalGridItem(*_renderGrid, *gridItemParent)
+        grid_layout_functions::IsOrthogonalGridItem(*_renderGrid, *gridItemParent)
           ? gridItemParent->IsSubgridColumns()
           : gridItemParent->IsSubgridRows();
       if (cachingRowSubgridsForRootGrid && gridItemParentIsSubgridRowsOfRootGrid)
@@ -1808,12 +1808,12 @@ namespace krys::boo
       // (either by being a child of the grid, or via being subgridded in this dimension.
       auto *grid = Downcast<RenderGrid>(gridItem.Parent());
       auto subgridDirection =
-        GridLayoutFunctions::FlowAwareDirectionForGridItem(*GetRenderGrid(), *grid, direction);
+        grid_layout_functions::FlowAwareDirectionForGridItem(*GetRenderGrid(), *grid, direction);
       while (grid->Parent() != GetRenderGrid() && !grid->IsSubgridOf(subgridDirection, *GetRenderGrid()))
       {
         grid = Downcast<RenderGrid>(grid->Parent());
         subgridDirection =
-          GridLayoutFunctions::FlowAwareDirectionForGridItem(*GetRenderGrid(), *grid, direction);
+          grid_layout_functions::FlowAwareDirectionForGridItem(*GetRenderGrid(), *grid, direction);
       }
 
       if (grid == gridItem.Parent() && grid->IsSubgrid(subgridDirection))
@@ -1821,8 +1821,8 @@ namespace krys::boo
         // If the item is subgridded in this direction (and thus the tracks it covers are tracks
         // owned by this sizing algorithm), then we want to take the breadth of the tracks we occupy,
         // and subtract any space occupied by the subgrid itself (and any ancestor subgrids).
-        *overrideSize -=
-          GridLayoutFunctions::ExtraMarginForSubgridAncestors(subgridDirection, gridItem).ExtraTotalMargin();
+        *overrideSize -= grid_layout_functions::ExtraMarginForSubgridAncestors(subgridDirection, gridItem)
+                           .ExtraTotalMargin();
       }
       else
       {
@@ -1839,7 +1839,7 @@ namespace krys::boo
     }
 
     if (auto overridingContainingBlockContentSizeForGridItem =
-          GridLayoutFunctions::OverridingContainingBlockContentSizeForGridItem(gridItem, direction);
+          grid_layout_functions::OverridingContainingBlockContentSizeForGridItem(gridItem, direction);
         overridingContainingBlockContentSizeForGridItem
         && *overridingContainingBlockContentSizeForGridItem == overrideSize)
     {
@@ -1854,7 +1854,7 @@ namespace krys::boo
     RenderBox &gridItem, const style::MinimumSize &gridItemMinSize,
     Maybe<LayoutUnit> availableSize) const noexcept
   {
-    auto gridItemInlineDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+    auto gridItemInlineDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
       *GetRenderGrid(), gridItem, GridTrackSizingDirection::Columns);
     bool isRowAxis = Direction() == gridItemInlineDirection;
     if (isRowAxis)
@@ -1863,17 +1863,17 @@ namespace krys::boo
                ? 0_lu
                : gridItem.ComputeLogicalWidthUsing(gridItemMinSize, availableSize.value_or(0_lu),
                                                    *GetRenderGrid())
-                   + GridLayoutFunctions::MarginLogicalSizeForGridItem(*GetRenderGrid(),
-                                                                       gridItemInlineDirection, gridItem);
+                   + grid_layout_functions::MarginLogicalSizeForGridItem(*GetRenderGrid(),
+                                                                         gridItemInlineDirection, gridItem);
     }
     bool overrideSizeHasChanged =
       UpdateOverridingContainingBlockContentSizeForGridItem(gridItem, gridItemInlineDirection, availableSize);
     LayoutGridItemForMinSizeComputation(gridItem, overrideSizeHasChanged);
-    auto gridItemBlockDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+    auto gridItemBlockDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
       *GetRenderGrid(), gridItem, GridTrackSizingDirection::Rows);
     return gridItem.ComputeLogicalHeightUsing(gridItemMinSize, null).value_or(0_lu)
-           + GridLayoutFunctions::MarginLogicalSizeForGridItem(*GetRenderGrid(), gridItemBlockDirection,
-                                                               gridItem);
+           + grid_layout_functions::MarginLogicalSizeForGridItem(*GetRenderGrid(), gridItemBlockDirection,
+                                                                 gridItem);
   }
 
   /// @brief Track sizing for an indefinite size: the intrinsic size computation.
@@ -2214,13 +2214,13 @@ namespace krys::boo
                                                              const style::MinimumSize &gridItemMinSize,
                                                              Maybe<LayoutUnit> availableSize) const noexcept
   {
-    auto gridItemInlineDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+    auto gridItemInlineDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
       *GetRenderGrid(), gridItem, GridTrackSizingDirection::Columns);
     auto flowAwareDirection =
-      GridLayoutFunctions::FlowAwareDirectionForGridItem(*GetRenderGrid(), gridItem, Direction());
+      grid_layout_functions::FlowAwareDirectionForGridItem(*GetRenderGrid(), gridItem, Direction());
     if (HasRelativeMarginOrPaddingForGridItem(gridItem, flowAwareDirection)
         || (Direction() != gridItemInlineDirection
-            && GridLayoutFunctions::HasRelativeOrIntrinsicSizeForGridItem(gridItem, flowAwareDirection)))
+            && grid_layout_functions::HasRelativeOrIntrinsicSizeForGridItem(gridItem, flowAwareDirection)))
     {
       auto indefiniteSize = Direction() == gridItemInlineDirection ? Maybe<LayoutUnit>(0_lu) : null;
       SetOverridingContainingBlockContentSizeForGridItem(*GetRenderGrid(), gridItem, Direction(),
@@ -2279,14 +2279,14 @@ namespace krys::boo
     DefiniteSizeStrategy::MinContentContributionForGridItem(RenderBox &gridItem,
                                                             GridLayoutState &gridLayoutState) const noexcept
   {
-    auto gridItemInlineDirection = GridLayoutFunctions::FlowAwareDirectionForGridItem(
+    auto gridItemInlineDirection = grid_layout_functions::FlowAwareDirectionForGridItem(
       *GetRenderGrid(), gridItem, GridTrackSizingDirection::Columns);
 
     auto shouldClearOverridingContainingBlockContentSize = [&]
     {
       auto direction = Direction();
 
-      if (!GridLayoutFunctions::IsOrthogonalGridItem(*GetRenderGrid(), gridItem)
+      if (!grid_layout_functions::IsOrthogonalGridItem(*GetRenderGrid(), gridItem)
           && direction == GridTrackSizingDirection::Columns
           && _algorithm.IsIntrinsicSizedGridArea(gridItem, GridTrackSizingDirection::Columns)
           && (gridItem.Style().LogicalWidth().IsPercentOrCalculated()
@@ -2400,9 +2400,9 @@ namespace krys::boo
       // Convert the direction into the coordinate space of subgrid (which may not be a direct child
       // of the outermost grid for which we're running the track sizing algorithm).
       auto direction =
-        GridLayoutFunctions::FlowAwareDirectionForGridItem(*outermost, *subgrid, outermostDirection);
+        grid_layout_functions::FlowAwareDirectionForGridItem(*outermost, *subgrid, outermostDirection);
       bool reversed =
-        GridLayoutFunctions::IsSubgridReversedDirection(*outermost, outermostDirection, *subgrid);
+        grid_layout_functions::IsSubgridReversedDirection(*outermost, outermostDirection, *subgrid);
 
       LayoutUnit subgridMbp;
       if (trackIndex == span.StartLine() && track.CachedTrackSize().HasIntrinsicMinTrackBreadth())
@@ -2454,7 +2454,7 @@ namespace krys::boo
             (currentAncestorSubgrid.GridGap(direction) - currentAncestorSubgridParent->GridGap(direction))
             / 2;
         }
-        direction = GridLayoutFunctions::FlowAwareDirectionForParent(
+        direction = grid_layout_functions::FlowAwareDirectionForParent(
           currentAncestorSubgrid, *currentAncestorSubgridParent, direction);
       }
       return gutterTotal;
@@ -2965,7 +2965,7 @@ namespace krys::boo
   {
     auto *outer = Downcast<RenderGrid>(_renderGrid->Parent());
     auto &parentAlgo = outer->_trackSizingAlgorithm;
-    auto direction = GridLayoutFunctions::FlowAwareDirectionForParent(*_renderGrid, *outer, _direction);
+    auto direction = grid_layout_functions::FlowAwareDirectionForParent(*_renderGrid, *outer, _direction);
     auto &parentTracks = parentAlgo.GetTracks(direction);
 
     if (parentTracks.empty())
@@ -2983,7 +2983,7 @@ namespace krys::boo
       *allTracks[i] = *parentTracks[i + span.StartLine()];
     }
 
-    if (GridLayoutFunctions::IsSubgridReversedDirection(*outer, direction, *_renderGrid))
+    if (grid_layout_functions::IsSubgridReversedDirection(*outer, direction, *_renderGrid))
     {
       std::ranges::reverse(allTracks);
     }

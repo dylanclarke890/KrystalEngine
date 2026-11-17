@@ -466,7 +466,7 @@ namespace krys::boo
         return nullptr;
       }
 
-      stack.push_back(result);
+      stack.emplace_back(result);
     }
 
     krys_debug_assert(stack.size() == 1);

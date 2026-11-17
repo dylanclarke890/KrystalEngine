@@ -134,7 +134,7 @@ namespace krys::boo
                                                               const TextRun &textRun) noexcept;
 
     /// @brief Advance and emit glyphs up to the specified byte offset.
-    void Advance(uint32 to, GlyphBuffer *glyphBuffer = nullptr,
+    void Advance(uint32 offset, GlyphBuffer *glyphBuffer = nullptr,
                  GlyphIterationStyle iterationStyle = GlyphIterationStyle::IncludePartialGlyphs,
                  HashSet<RefPtr<const Font>> *fallbackFonts = nullptr) noexcept;
 
@@ -362,6 +362,6 @@ namespace krys::boo
     }
 
     void AdvanceByCombiningCharacterSequence(const CachedTextBreakIterator &graphemeClusterIterator,
-                                             uint32 &location, char32 &baseCharacter) noexcept;
+                                             uint32 &currentIndex, char32 &baseCharacter) noexcept;
   };
 }

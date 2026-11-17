@@ -86,6 +86,7 @@ namespace krys::tests
         Log() += std::string("move-construct(") + Name + ") ";
       }
 
+      // NOLINTNEXTLINE(bugprone-unhandled-self-assignment)
       LifecycleLogger &operator=(const LifecycleLogger &other) noexcept
       {
         Name = other.Name;
@@ -238,7 +239,7 @@ namespace krys::tests
 
     variant = TooBigStruct {5.0};
     CompactVariant<int *, float *, TooBigStruct> movedToVariant = krys::move(variant);
-    CHECK(variant.IsValuelessByMove());
+    CHECK(variant.IsValuelessByMove()); // NOLINT(clang-analyzer-cplusplus.Move)
     CHECK(HoldsAlternative<TooBigStruct>(movedToVariant));
     SwitchOn(
       movedToVariant, [&](int *const &) { FAIL(); }, [&](float *const &) { FAIL(); },
@@ -282,14 +283,14 @@ namespace krys::tests
 
     CompactVariant<int *, float *> other = krys::move(variant);
     CHECK_FALSE(other.IsValuelessByMove());
-    CHECK(variant.IsValuelessByMove());
+    CHECK(variant.IsValuelessByMove()); // NOLINT(clang-analyzer-cplusplus.Move)
 
     CompactVariant<int *, float *> copy = variant;
     CHECK(variant.IsValuelessByMove());
     CHECK(copy.IsValuelessByMove());
 
     CompactVariant<int *, float *> moved = krys::move(variant);
-    CHECK(variant.IsValuelessByMove());
+    CHECK(variant.IsValuelessByMove()); // NOLINT(clang-analyzer-cplusplus.Move)
     CHECK(moved.IsValuelessByMove());
   }
 

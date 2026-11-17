@@ -38,9 +38,9 @@ namespace krys::boo::tests
 
     SECTION("one-shot timers run as tasks after their delay, in order")
     {
-      auto late = document.StartTimer(20ms, [&] { order.push_back("late"); });
-      auto early = document.StartTimer(10ms, [&] { order.push_back("early"); });
-      auto now = document.StartTimer(-5ms, [&] { order.push_back("now"); });
+      auto late = document.StartTimer(20ms, [&] { order.emplace_back("late"); });
+      auto early = document.StartTimer(10ms, [&] { order.emplace_back("early"); });
+      auto now = document.StartTimer(-5ms, [&] { order.emplace_back("now"); });
       CHECK(late.IsActive());
       CHECK(order.empty());
 
@@ -56,7 +56,7 @@ namespace krys::boo::tests
 
     SECTION("a stopped timer doesn't run")
     {
-      auto timer = document.StartTimer(5ms, [&] { order.push_back("stopped"); });
+      auto timer = document.StartTimer(5ms, [&] { order.emplace_back("stopped"); });
       timer.Stop();
       CHECK_FALSE(timer.IsActive());
       timer.Stop();
@@ -67,8 +67,8 @@ namespace krys::boo::tests
     SECTION("destroying the handle stops the timer, unless it was released")
     {
       {
-        auto dropped = document.StartTimer(5ms, [&] { order.push_back("dropped"); });
-        auto released = document.StartTimer(5ms, [&] { order.push_back("released"); });
+        auto dropped = document.StartTimer(5ms, [&] { order.emplace_back("dropped"); });
+        auto released = document.StartTimer(5ms, [&] { order.emplace_back("released"); });
         released.Release();
         CHECK_FALSE(released.IsActive());
       }
@@ -78,11 +78,11 @@ namespace krys::boo::tests
 
     SECTION("moving the handle moves the timer, and assigning stops the old one")
     {
-      auto first = document.StartTimer(5ms, [&] { order.push_back("first"); });
+      auto first = document.StartTimer(5ms, [&] { order.emplace_back("first"); });
       auto moved = krys::move(first);
-      CHECK_FALSE(first.IsActive());
+      CHECK_FALSE(first.IsActive()); // NOLINT(clang-analyzer-cplusplus.Move)
       CHECK(moved.IsActive());
-      moved = document.StartTimer(5ms, [&] { order.push_back("second"); });
+      moved = document.StartTimer(5ms, [&] { order.emplace_back("second"); });
       AdvanceTimers(10ms);
       CHECK(order == List<std::string> {"second"});
     }
@@ -127,8 +127,8 @@ namespace krys::boo::tests
 
     SECTION("a document leaving its frame stops its timers")
     {
-      auto timeout = document.StartTimer(5ms, [&] { order.push_back("timeout"); });
-      auto interval = document.StartRepeatingTimer(5ms, [&] { order.push_back("interval"); });
+      auto timeout = document.StartTimer(5ms, [&] { order.emplace_back("timeout"); });
+      auto interval = document.StartRepeatingTimer(5ms, [&] { order.emplace_back("interval"); });
       fixture.TestPage->MainFrame().SetDocument(nullptr);
       CHECK_FALSE(timeout.IsActive());
       CHECK_FALSE(interval.IsActive());

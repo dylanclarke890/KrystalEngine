@@ -77,8 +77,8 @@ namespace krys::boo
     ApplyStyleCommand(dom::Document &document, const EditingStyle *style, EditAction action,
                       ApplyStylePropertyLevel level) noexcept;
 
-    ApplyStyleCommand(dom::Document &document, const EditingStyle *style, const dom::Position &start,
-                      const dom::Position &end, EditAction action, ApplyStylePropertyLevel level) noexcept;
+    ApplyStyleCommand(dom::Document &document, const EditingStyle *style, dom::Position start,
+                      dom::Position end, EditAction action, ApplyStylePropertyLevel level) noexcept;
 
     ApplyStyleCommand(dom::Element &element, bool removeOnly, EditAction action) noexcept;
 
@@ -172,7 +172,7 @@ namespace krys::boo
     dom::Position PositionToComputeInlineStyleChange(dom::Node &startNode,
                                                      RefPtr<dom::Node> &dummyElement) noexcept;
 
-    void ApplyInlineStyleChange(dom::Node &startNode, dom::Node &endNode, StyleChange &styleChange,
+    void ApplyInlineStyleChange(dom::Node &passedStart, dom::Node &passedEnd, StyleChange &styleChange,
                                 AddStyledElement addStyledElement) noexcept;
 
     void SplitTextAtStart(const dom::Position &start, const dom::Position &end) noexcept;

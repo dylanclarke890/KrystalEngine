@@ -481,7 +481,7 @@ namespace krys::boo
     {
       // The marked texts for the gaps between document markers and selection are implicitly created by
       // subdividing the entire line.
-      markedTexts.push_back({startPosition, endPosition, MarkedText::Type::Unmarked});
+      markedTexts.emplace_back(startPosition, endPosition, MarkedText::Type::Unmarked);
 
       if (!_isPrinting)
       {

@@ -339,6 +339,8 @@ class GenerationContext:
 
             to.write("namespace krys::boo::css")
             to.write("{")
+            # gperf's own code isn't ours to lint; NOLINTEND follows the keywords.
+            to.write("// NOLINTBEGIN")
 
     def _generate_gperf_definition(self, *, to: Writer):
         to.newline()
@@ -362,6 +364,7 @@ class GenerationContext:
         for value in self.values:
             to.write(f"{value.name_lowercase}, static_cast<uint16>({value.id})")
         to.write("%%")
+        to.write("// NOLINTEND")
 
     def _generate_name_string_tables(self, *, to: Writer):
         to.write(f"constexpr CSSOMStringView KeywordNamesList[TotalValueKeywords] = {{")

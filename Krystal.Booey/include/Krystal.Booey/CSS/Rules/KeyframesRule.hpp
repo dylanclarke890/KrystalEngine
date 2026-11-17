@@ -37,7 +37,7 @@ namespace krys::boo::css
     mutable List<Ref<KeyframeRule>> _keyframes;
     CSSOMStringAtom _name;
 
-    explicit KeyframesRule(const CSSOMStringAtom &name) noexcept;
+    explicit KeyframesRule(CSSOMStringAtom name) noexcept;
 
     KeyframesRule(const KeyframesRule &other) noexcept;
 

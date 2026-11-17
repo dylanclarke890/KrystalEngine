@@ -77,7 +77,7 @@ namespace krys::boo::tests
     auto &number = Downcast<html::HTMLInputElement>(fixture.ById(u8"number"));
     auto &handler = fixture.Frame->GetEventHandler();
     auto moves = CreateRef<CountingListener>();
-    fixture.ById(u8"other").AddEventListener(EventNames::MouseMove, moves, false);
+    fixture.ById(u8"other").AddEventListener(event_names::MouseMove, moves, false);
 
     auto &spinButton = Downcast<html::SpinButtonElement>(*number.InnerSpinButtonElement());
     auto bounds = spinButton.GetRenderBox()->AbsoluteBoundingBoxRect();
@@ -105,7 +105,7 @@ namespace krys::boo::tests
     auto &number = Downcast<html::HTMLInputElement>(fixture.ById(u8"number"));
     auto &handler = fixture.Frame->GetEventHandler();
     auto moves = CreateRef<CountingListener>();
-    fixture.ById(u8"other").AddEventListener(EventNames::MouseMove, moves, false);
+    fixture.ById(u8"other").AddEventListener(event_names::MouseMove, moves, false);
 
     auto &spinButton = Downcast<html::SpinButtonElement>(*number.InnerSpinButtonElement());
     auto bounds = spinButton.GetRenderBox()->AbsoluteBoundingBoxRect();

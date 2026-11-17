@@ -186,7 +186,7 @@ namespace krys::boo::html
     Ref<dom::Document> originalDocument = ShareRef(element.NodeDocument());
     // 1a. Fire an event named invalid at element, with the cancelable attribute initialized to true (though
     //     canceling has no effect).
-    auto type = dom::DOMStringAtom(EventNames::Invalid);
+    auto type = dom::DOMStringAtom(event_names::Invalid);
     bool notCanceled =
       dom::EventDispatcher::FireEvent<dom::Event>(type, element, dom::EventInit {.Cancelable = true});
 
@@ -280,10 +280,10 @@ namespace krys::boo::html
     return _isFocusingWithValidationMessage;
   }
 
-  void ValidatedFormListedElement::SetDisabledByAncestorFieldset(bool newDisabledByAncestorFieldset) noexcept
+  void ValidatedFormListedElement::SetDisabledByAncestorFieldset(bool isDisabled) noexcept
   {
-    krys_debug_assert(ComputeIsDisabledByFieldsetAncestor() == newDisabledByAncestorFieldset);
-    SetDisabledInternal(_disabled, newDisabledByAncestorFieldset);
+    krys_debug_assert(ComputeIsDisabledByFieldsetAncestor() == isDisabled);
+    SetDisabledInternal(_disabled, isDisabled);
   }
 
   void ValidatedFormListedElement::SetDisabledInternal(bool disabled,

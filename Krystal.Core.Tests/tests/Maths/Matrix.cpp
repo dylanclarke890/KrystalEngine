@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Core/Maths/Matrix.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::tests
 {
@@ -8,7 +9,8 @@ namespace krys::tests
 #define TEST_COPY_AND_MOVE()                                                                                 \
   constexpr Mat copy(m);                                                                                     \
   REQUIRE(copy == m);                                                                                        \
-  constexpr Mat move(std::move(Mat(m)));                                                                     \
+  Mat moveSource(m);                                                                                         \
+  const Mat move(krys::move(moveSource));                                                                    \
   REQUIRE(move == m);
 
 #define TEST_COMMON_OPERATORS()                                                                              \

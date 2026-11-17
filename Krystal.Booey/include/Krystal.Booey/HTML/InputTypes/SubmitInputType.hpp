@@ -45,7 +45,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::Submit;
+      return input_type_names::Submit;
     }
 
     bool AppendFormData(DOMFormData &formData) const noexcept final;

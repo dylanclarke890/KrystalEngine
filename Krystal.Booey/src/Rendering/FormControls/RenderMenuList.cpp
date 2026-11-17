@@ -179,6 +179,7 @@ namespace krys::boo
 
   void RenderMenuList::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
   {
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     RenderBlock::StyleDidChange(diff, oldStyle);
 
     // RenderBlock handled updating the anonymous block's style.
@@ -267,9 +268,9 @@ namespace krys::boo
     DidUpdateActiveOption(optionIndex);
   }
 
-  void RenderMenuList::SetText(const utf8_string &s) noexcept
+  void RenderMenuList::SetText(const utf8_string &text) noexcept
   {
-    utf8_string textToUse = s.empty() ? utf8_string(u8"\n") : s;
+    utf8_string textToUse = text.empty() ? utf8_string(u8"\n") : text;
 
     if (_buttonText)
     {

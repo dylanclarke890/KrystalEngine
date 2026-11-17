@@ -165,7 +165,7 @@ namespace krys::boo
     bool UpdateConfiguration(const RenderLayer *compositingAncestor) noexcept;
 
     // Update graphics layer position and bounds.
-    void UpdateGeometry(const RenderLayer *compositingAncestor) noexcept;
+    void UpdateGeometry(const RenderLayer *compositedAncestor) noexcept;
 
     // Update state the requires that descendant layers have been updated.
     void UpdateAfterDescendants() noexcept;

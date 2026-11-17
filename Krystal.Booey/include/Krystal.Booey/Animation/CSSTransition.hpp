@@ -43,10 +43,9 @@ namespace krys::boo
     double _reversingShorteningFactor;
     style::Transition _backingStyleTransition;
 
-    CSSTransition(const style::Styleable &styleable, const AnimatableCSSProperty &property,
-                  Seconds generationTime, const style::Transition &backingStyleTransition,
-                  const RenderStyle &targetStyle, const RenderStyle &reversingAdjustedStartStyle,
-                  double reversingShorteningFactor) noexcept;
+    CSSTransition(const style::Styleable &styleable, AnimatableCSSProperty property, Seconds generationTime,
+                  style::Transition backingStyleTransition, const RenderStyle &targetStyle,
+                  const RenderStyle &reversingAdjustedStartStyle, double reversingShorteningFactor) noexcept;
 
   public:
     ~CSSTransition() noexcept override;

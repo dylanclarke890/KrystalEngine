@@ -9,7 +9,7 @@
 
 namespace krys::tests
 {
-  using namespace krys::Serialisation;
+  using namespace krys::serialisation;
 
   struct VersionedType1
   {
@@ -37,7 +37,7 @@ namespace krys::tests
   {
     int A {0};
     float B {0};
-    string C {};
+    string C;
   };
 }
 

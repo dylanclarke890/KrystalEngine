@@ -52,7 +52,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::Radio;
+      return input_type_names::Radio;
     }
 
     KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;

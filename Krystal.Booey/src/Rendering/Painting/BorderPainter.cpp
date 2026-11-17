@@ -37,6 +37,7 @@
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImage.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include <algorithm>
 #include <cmath>
 #include <numeric>
 
@@ -744,7 +745,7 @@ namespace krys::boo
   }
 
   void BorderPainter::PaintBorderSides(const BorderShape &borderShape, const Sides &sides,
-                                       EnumSet<BoxSide> edgeSet, bool antialias,
+                                       EnumSet<BoxSide> edgesToDraw, bool antialias,
                                        const Color *overrideColor) const noexcept
   {
     Path roundedPath;
@@ -764,7 +765,7 @@ namespace krys::boo
     auto paintOneSide = [&](BoxSide side, BoxSide adjacentSide1, BoxSide adjacentSide2)
     {
       const auto &edge = sides.Edges.At(side);
-      if (!edge.ShouldRender() || !edgeSet.Contains(side))
+      if (!edge.ShouldRender() || !edgesToDraw.Contains(side))
       {
         return;
       }
@@ -841,8 +842,8 @@ namespace krys::boo
 
       ClipBorderSidePolygon(borderShape, side, adjacentSide1StylesMatch, adjacentSide2StylesMatch);
 
-      float thickness = std::max(std::max(edgeToRender.WidthForPainting(), adjacentEdge1.WidthForPainting()),
-                                 adjacentEdge2.WidthForPainting());
+      float thickness = std::max({edgeToRender.WidthForPainting(), adjacentEdge1.WidthForPainting(),
+                                  adjacentEdge2.WidthForPainting()});
       DrawBoxSideFromPath(borderShape, *path, sides.Edges, edgeToRender.WidthForPainting(), thickness, side,
                           colorToPaint, edgeToRender.Style(), sides.BleedAvoidance);
     }

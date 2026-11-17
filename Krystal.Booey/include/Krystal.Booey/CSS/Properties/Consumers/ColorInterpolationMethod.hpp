@@ -37,7 +37,7 @@ namespace krys::boo::css
   struct PropertyParserState;
   class TokenRange;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <color-interpolation-method> consuming (raw)
     KRYS_NODISCARD Maybe<ColourInterpolationMethod>

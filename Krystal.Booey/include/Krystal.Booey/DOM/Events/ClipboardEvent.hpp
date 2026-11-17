@@ -28,7 +28,7 @@ namespace krys::boo::dom
     /// @see https://w3c.github.io/clipboard-apis/#dom-clipboardevent-clipboardevent
     ClipboardEvent(DOMStringAtom type, const ClipboardEventInit &eventInitDict = {}) noexcept;
 
-    ~ClipboardEvent() noexcept;
+    ~ClipboardEvent() noexcept override;
 
     /// @brief A trusted clipboard event carrying @p dataTransfer, which bubbles, can be cancelled and crosses
     /// shadow boundaries.

@@ -114,7 +114,7 @@ namespace krys::boo
         continue;
       }
       renderer->AddClientRenderLayer(*layer);
-      _internalSVGReferences.push_back(Ref<dom::Element>(filterElement));
+      _internalSVGReferences.emplace_back(filterElement);
     }
   }
 

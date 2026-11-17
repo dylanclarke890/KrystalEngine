@@ -15,8 +15,8 @@ namespace krys::gfx
   /// @brief A gradient along the line from `Point0` (offset 0) to `Point1` (offset 1).
   struct LinearGradient2D
   {
-    Vec2f Point0 {};
-    Vec2f Point1 {};
+    Vec2f Point0;
+    Vec2f Point1;
   };
 
   /// @brief A gradient between two circles: offset 0 is the circle at `Point0` with `StartRadius`, offset 1
@@ -24,8 +24,8 @@ namespace krys::gfx
   /// overlap, the one with the largest offset shows; where none reaches, nothing does.
   struct RadialGradient2D
   {
-    Vec2f Point0 {};
-    Vec2f Point1 {};
+    Vec2f Point0;
+    Vec2f Point1;
     float StartRadius {0.f};
     float EndRadius {0.f};
     /// @brief For an elliptical gradient, its width over its height: the circles are squashed vertically
@@ -36,7 +36,7 @@ namespace krys::gfx
   /// @brief A gradient around `Point0`, clockwise from `AngleRadians` (0 points up) all the way round.
   struct ConicGradient2D
   {
-    Vec2f Point0 {};
+    Vec2f Point0;
     float AngleRadians {0.f};
   };
 
@@ -56,7 +56,7 @@ namespace krys::gfx
   struct Gradient2D
   {
     Variant<LinearGradient2D, RadialGradient2D, ConicGradient2D> Shape {LinearGradient2D {}};
-    List<GradientStop2D> Stops {};
+    List<GradientStop2D> Stops;
     GradientSpreadMethod Spread {GradientSpreadMethod::Pad};
     ColourInterpolationMethod Interpolation {.ColourSpace = ColourInterpolationMethod::SRGB {},
                                              .AlphaPremultiplication = AlphaPremultiplication::Premultiplied};

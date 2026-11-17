@@ -73,7 +73,7 @@ namespace krys::boo::css
 
     /// @brief Creates a context for @p mode, with every setting at its default.
     /// @note Initialises the static value pool.
-    explicit ParserContext(ParserMode mode, const url::URL &baseURL = {}) noexcept;
+    explicit ParserContext(ParserMode mode, url::URL baseURL = {}) noexcept;
 
     /// @brief The document's context (`Document::CssParserContext()`).
     explicit ParserContext(const dom::Document &document) noexcept;

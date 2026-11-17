@@ -52,7 +52,7 @@ namespace krys::boo::layout
 
     bool _contentRequiresVisualReordering {false};
     bool _hasTextAutospace;
-    Maybe<bool> _textContentPopulatedFromCache {};
+    Maybe<bool> _textContentPopulatedFromCache;
 
   public:
     InlineItemsBuilder(InlineContentCache &inlineContentCache, const ElementBox &root) noexcept;

@@ -35,7 +35,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   // MARK: <position>
   // https://drafts.csswg.org/css-values/#position

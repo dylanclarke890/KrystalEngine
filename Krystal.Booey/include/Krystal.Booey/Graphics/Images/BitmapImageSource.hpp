@@ -215,10 +215,7 @@ namespace krys::boo
     /// @brief A decoder of the work queue's own, over all the image's data; null if there's none to decode.
     KRYS_NODISCARD RefPtr<ImageDecoder> CreateWorkQueueDecoder() const noexcept;
 
-    KRYS_NODISCARD BitmapImage *Image() const noexcept
-    {
-      return _bitmapImage.get();
-    }
+    KRYS_NODISCARD BitmapImage *Image() const noexcept;
 
     DecodingStatus RequestNativeImageAtIndex(uint32 index, SubsamplingLevel, ImageAnimatingState,
                                              const DecodingOptions &) noexcept;

@@ -24,7 +24,6 @@
 #include "Krystal.Booey/SVG/Elements/SVGAElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGTSpanElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
 namespace krys::boo::svg
@@ -56,6 +55,7 @@ namespace krys::boo::svg
       if (Is<SVGAElement>(*parent) || Is<SVGTextElement>(*parent) || Is<SVGTextPathElement>(*parent)
           || Is<SVGTSpanElement>(*parent))
       {
+        // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
         return dom::StyledElement::RendererIsNeeded(style);
       }
     }

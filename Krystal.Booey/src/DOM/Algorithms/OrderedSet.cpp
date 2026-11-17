@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -18,7 +19,7 @@ namespace krys::boo::dom
       // Appending to a set does nothing if it already contains the item.
       if (std::ranges::find(tokens, token) == tokens.end())
       {
-        tokens.emplace_back(std::move(token));
+        tokens.emplace_back(krys::move(token));
       }
     }
 

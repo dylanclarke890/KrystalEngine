@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
@@ -14,7 +14,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     }
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeBasicShape)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeBasicShape)", "[CSS][Properties][Consumers]")
   {
     SECTION("circle() and ellipse()")
     {
@@ -78,7 +78,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     }
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeShapeOutside)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeShapeOutside)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/dir/")};
 

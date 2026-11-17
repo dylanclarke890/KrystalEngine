@@ -71,15 +71,15 @@ namespace krys::boo::style
       struct DynamicContext
       {
         const css::mq::MediaQueryList &Queries;
-        List<size_t> AffectedRulePositions {};
-        HashSet<const css::StyleRule *> AffectedRules {};
-        List<Ref<const css::StyleRule>> AffectedRulesInOrder {};
+        List<size_t> AffectedRulePositions;
+        HashSet<const css::StyleRule *> AffectedRules;
+        List<Ref<const css::StyleRule>> AffectedRulesInOrder;
       };
 
       const css::mq::MediaQueryEvaluator &Evaluator;
       bool CollectDynamic {false};
-      List<DynamicContext> DynamicContextStack {};
-      List<RuleSet::DynamicMediaQueryRules> DynamicMediaQueryRules {};
+      List<DynamicContext> DynamicContextStack;
+      List<RuleSet::DynamicMediaQueryRules> DynamicMediaQueryRules;
       css::mq::MediaQueryDynamicDependency AllDynamicDependencies {};
 
       KRYS_NODISCARD bool PushAndEvaluate(const css::mq::MediaQueryList &mediaQueries) noexcept;
@@ -104,7 +104,7 @@ namespace krys::boo::style
     RuleSet::ContainerQueryIdentifier _currentContainerQueryIdentifier {0};
     RuleSet::ScopeRuleIdentifier _currentScopeIdentifier {0};
 
-    EnumSet<UsedRuleType> _usedRuleTypes {};
+    EnumSet<UsedRuleType> _usedRuleTypes;
 
     List<RuleSet::ResolverMutatingRule> _collectedResolverMutatingRules;
     bool _requiresStaticMediaQueryEvaluation {false};

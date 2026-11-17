@@ -53,7 +53,7 @@ namespace krys::tests
       Ref<TestRefCounted> ref = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
-      RefPtr<TestRefCounted> ptr = std::move(ref);
+      RefPtr<TestRefCounted> ptr = krys::move(ref);
       REQUIRE(obj->GetRefCount() == 1);
     }
   }
@@ -87,7 +87,7 @@ namespace krys::tests
       RefPtr<TestRefCounted> p1(ref);
       REQUIRE(obj->GetRefCount() == 2);
 
-      RefPtr<TestRefCounted> p2 = std::move(p1);
+      RefPtr<TestRefCounted> p2 = krys::move(p1);
       REQUIRE(obj->GetRefCount() == 2);
     }
   }
@@ -130,7 +130,7 @@ namespace krys::tests
       Ref<TestRefCounted> ref = AdoptRef(*obj);
       RefPtr<TestRefCounted> p(ref);
 
-      p = std::move(p);
+      p = krys::move(p);
       REQUIRE(obj->GetRefCount() == 2);
     }
   }
@@ -143,7 +143,7 @@ namespace krys::tests
     RefPtr<TestRefCounted> p2 = p;
     REQUIRE(!p2);
 
-    RefPtr<TestRefCounted> p3 = std::move(p2);
+    RefPtr<TestRefCounted> p3 = krys::move(p2);
     REQUIRE(!p3);
   }
 }

@@ -660,8 +660,8 @@ namespace krys::boo::style
     auto blockOrXAxisKeyword = KeywordForPositionAreaSpan(value.BlockOrXAxis());
     auto inlineOrYAxisKeyword = KeywordForPositionAreaSpan(value.InlineOrYAxis());
 
-    return Ref<css::Value> {css::PropertyParserHelpers::ValueForPositionArea(
-      blockOrXAxisKeyword, inlineOrYAxisKeyword, css::PropertyParserHelpers::ValueType::Computed)};
+    return Ref<css::Value> {css::parse_property::ValueForPositionArea(
+      blockOrXAxisKeyword, inlineOrYAxisKeyword, css::parse_property::ValueType::Computed)};
   }
 
   // MARK: - Serialization
@@ -674,9 +674,8 @@ namespace krys::boo::style
     auto inlineOrYAxisKeyword = KeywordForPositionAreaSpan(value.InlineOrYAxis());
 
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-    builder.Append(
-      css::PropertyParserHelpers::ValueForPositionArea(blockOrXAxisKeyword, inlineOrYAxisKeyword,
-                                                       css::PropertyParserHelpers::ValueType::Computed)
-        ->CssText(context));
+    builder.Append(css::parse_property::ValueForPositionArea(blockOrXAxisKeyword, inlineOrYAxisKeyword,
+                                                             css::parse_property::ValueType::Computed)
+                     ->CssText(context));
   }
 }

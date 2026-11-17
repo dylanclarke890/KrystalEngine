@@ -58,7 +58,7 @@ namespace krys::boo::css
     PropertySetCSSDescriptors(MutableStyleProperties &propertySet, CSSRule &parentRule) noexcept;
 
   public:
-    virtual ~PropertySetCSSDescriptors() noexcept;
+    ~PropertySetCSSDescriptors() noexcept override;
 
     void AddRef() const noexcept final
     {

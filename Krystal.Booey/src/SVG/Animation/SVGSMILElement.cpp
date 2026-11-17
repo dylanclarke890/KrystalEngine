@@ -236,6 +236,7 @@ namespace krys::boo::svg
     {
       return false;
     }
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
@@ -1457,9 +1458,9 @@ namespace krys::boo::svg
     _activeState = DetermineActiveState(elapsed);
     bool animationIsContributing = IsContributing(elapsed);
 
-    auto beginEvent = dom::DOMStringAtom(EventNames::BeginEvent);
-    auto endEvent = dom::DOMStringAtom(EventNames::EndEvent);
-    auto repeatEvent = dom::DOMStringAtom(EventNames::RepeatEvent);
+    auto beginEvent = dom::DOMStringAtom(event_names::BeginEvent);
+    auto endEvent = dom::DOMStringAtom(event_names::EndEvent);
+    auto repeatEvent = dom::DOMStringAtom(event_names::RepeatEvent);
 
     if (animationIsContributing)
     {

@@ -253,7 +253,7 @@ namespace krys::boo::css
                       && tokens.Peek().FunctionId() == ValueId::FontFormat);
 
     auto state = PropertyParserState {.Context = _parser.Context()};
-    auto format = PropertyParserHelpers::ConsumeFontFormat(tokens, state, true);
+    auto format = parse_property::ConsumeFontFormat(tokens, state, true);
     if (!format)
     {
       return Unsupported;
@@ -268,7 +268,7 @@ namespace krys::boo::css
                       && tokens.Peek().FunctionId() == ValueId::FontTech);
 
     auto state = PropertyParserState {.Context = _parser.Context()};
-    auto technologies = PropertyParserHelpers::ConsumeFontTech(tokens, state, true);
+    auto technologies = parse_property::ConsumeFontTech(tokens, state, true);
     if (technologies.empty())
     {
       return Unsupported;

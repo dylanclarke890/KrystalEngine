@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
-#include <concepts>
+#include <concepts> // NOLINT(portability-restrict-system-includes): the engine wrapper itself
 #include <xutility>
 
 namespace krys::detail_concepts

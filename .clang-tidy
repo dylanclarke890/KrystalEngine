@@ -1,49 +1,139 @@
 ---
+# Krystal's conventions (see CLAUDE.md). Kept deliberately small: add checks as the code is brought in line.
 Checks: >
   -*,
-  clang-analyzer-*,
-  cppcoreguidelines-*,
-  -cppcoreguidelines-macro-usage,
-  -cppcoreguidelines-avoid-do-while,
-  modernize-*,
-  -modernize-use-trailing-return-type,
-  performance-*,
-  readability-*,
-  -readability-convert-member-functions-to-static,
-  -readability-uppercase-literal-suffix,
-  -readability-identifier-length,
-  bugprone-*,
-  -bugprone-branch-clone,
-  -bugprone-casting-through-void,
-  -bugprone-macros-parentheses,
-  -bugprone-easily-swappable-parameters,
-  hicpp-*,
-  -hicpp-member-init,
-  -hicpp-uppercase-literal-suffix,
-  -hicpp-signed-bitwise,
-  portability-*,
-  misc-*,
-  -misc-include-cleaner,
-  -misc-non-private-member-variables-in-classes,
-  -misc-no-recursion,
-  documentation-*
+  bugprone-assert-side-effect,
+  bugprone-branch-clone,
+  bugprone-copy-constructor-init,
+  bugprone-dangling-handle,
+  bugprone-forwarding-reference-overload,
+  bugprone-incorrect-roundings,
+  bugprone-infinite-loop,
+  bugprone-integer-division,
+  bugprone-move-forwarding-reference,
+  bugprone-parent-virtual-call,
+  bugprone-redundant-branch-condition,
+  bugprone-suspicious-missing-comma,
+  bugprone-suspicious-semicolon,
+  bugprone-suspicious-string-compare,
+  bugprone-swapped-arguments,
+  bugprone-undelegated-constructor,
+  bugprone-unhandled-self-assignment,
+  bugprone-unused-raii,
+  bugprone-unused-return-value,
+  bugprone-use-after-move,
+  bugprone-virtual-near-miss,
+  clang-analyzer-cplusplus.Move,
+  cppcoreguidelines-missing-std-forward,
+  cppcoreguidelines-noexcept-move-operations,
+  cppcoreguidelines-rvalue-reference-param-not-moved,
+  cppcoreguidelines-slicing,
+  cppcoreguidelines-virtual-class-destructor,
+  misc-definitions-in-headers,
+  misc-misplaced-const,
+  misc-redundant-expression,
+  misc-throw-by-value-catch-by-reference,
+  misc-unused-alias-decls,
+  misc-unused-using-decls,
+  modernize-avoid-bind,
+  modernize-avoid-setjmp-longjmp,
+  modernize-avoid-variadic-functions,
+  modernize-concat-nested-namespaces,
+  modernize-deprecated-headers,
+  modernize-deprecated-ios-base-aliases,
+  modernize-min-max-use-initializer-list,
+  modernize-pass-by-value,
+  modernize-redundant-void-arg,
+  modernize-replace-auto-ptr,
+  modernize-replace-random-shuffle,
+  modernize-shrink-to-fit,
+  modernize-unary-static-assert,
+  modernize-use-bool-literals,
+  modernize-use-constraints,
+  modernize-use-default-member-init,
+  modernize-use-emplace,
+  modernize-use-equals-default,
+  modernize-use-equals-delete,
+  modernize-use-noexcept,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-scoped-lock,
+  modernize-use-starts-ends-with,
+  modernize-use-std-numbers,
+  modernize-use-transparent-functors,
+  modernize-use-uncaught-exceptions,
+  modernize-use-using,
+  performance-faster-string-find,
+  performance-for-range-copy,
+  performance-inefficient-vector-operation,
+  performance-move-const-arg,
+  performance-noexcept-move-constructor,
+  performance-unnecessary-value-param,
+  portability-restrict-system-includes,
+  portability-std-allocator-const,
+  readability-container-contains,
+  readability-container-size-empty,
+  readability-duplicate-include,
+  readability-identifier-naming,
+  readability-inconsistent-declaration-parameter-name,
+  readability-make-member-function-const,
+  readability-misleading-indentation,
+  readability-redundant-casting,
+  readability-redundant-control-flow,
+  readability-redundant-declaration,
+  readability-redundant-member-init,
+  readability-redundant-smartptr-get,
+  readability-static-accessed-through-instance
 
-WarningsAsErrors: >
-  clang-analyzer-*,
-  cppcoreguidelines-*,
-  modernize-*,
-  bugprone-* # Treat these warnings as errors.
+# Still to address (noisy on the WebKit port); add to Checks above once the code is ready:
+#   modernize-avoid-c-arrays,
+#   modernize-avoid-c-style-cast,
+#   modernize-loop-convert,
+#   modernize-make-shared,              (configure MakeSmartPtrFunction first)
+#   modernize-make-unique,              (configure MakeSmartPtrFunction for CreateUnique first)
+#   modernize-raw-string-literal,
+#   modernize-return-braced-init-list,
+#   modernize-use-designated-initializers,
+#   modernize-use-integer-sign-comparison,
+#   modernize-use-ranges,
+#   modernize-use-std-format,
+#   modernize-use-std-print,
 
-HeaderFilterRegex: '.*' # Analyze all headers in the project.
-FormatStyle: file # Use the .clang-format file in the project for formatting.
+# Not wanted: it treats Ref/RefPtr copies that keep an object alive (and copies tests make on purpose) as waste.
+#   performance-unnecessary-copy-initialization,
+
+# Useful, but a large first pass; same as above:
+#   bugprone-easily-swappable-parameters,
+#   bugprone-narrowing-conversions,
+#   bugprone-unchecked-optional-access,
+#   misc-const-correctness,
+#   misc-include-cleaner,               (tune for the PCH and unity build: IgnoreHeaders)
+#   misc-unused-parameters,
+#   readability-convert-member-functions-to-static,
+#   readability-else-after-return,
+#   readability-implicit-bool-conversion,
+#   readability-simplify-boolean-expr,
+
+WarningsAsErrors: ''
+
+# Only the engine's own modules (and their tests and generated code), not vcpkg or third-party/.
+HeaderFilterRegex: '.*[/\\]Krystal\.[A-Za-z.]+[/\\].*'
+
+# Vendored code inside the modules (magic_enum, Khronos's OpenGL headers).
+ExcludeHeaderFilterRegex: '.*[/\\](MagicEnum\.hpp|OpenGL[/\\]Official[/\\].*)'
+
+# Auto-fixes are formatted with .clang-format.
+FormatStyle: file
+
 CheckOptions:
-  - key: cppcoreguidelines-pro-type-member-init.MemberInit
-    value: 'false' # Allow missing member initializations (adjust based on project needs).
-  - key: readability-identifier-naming.NamespaceCase
-    value: CamelCase # Enforce consistent naming for namespaces.
-  - key: documentation-unknown-command
-    value: 'false' # Suppress warnings about unknown commands in comments.
-  - key: modernize-use-nullptr.NullMacros
-    value: 'NULL' # Ensure `nullptr` is used instead of `NULL`.
-  - key: performance-unnecessary-value-param.AllowedType
-    value: 'std::string' # Allow std::string by value for performance checks.
+  # Engine wrappers instead of std's: Krystal.Core/TypeTraits.hpp and Concepts.hpp.
+  portability-restrict-system-includes.Includes: '*,-type_traits,-concepts'
+
+  # Namespaces: krys, krys::detail.
+  readability-identifier-naming.NamespaceCase: lower_case
+
+  # krys::move instead of std::move. bugprone-use-after-move and performance-move-const-arg only
+  # recognise std::move and can't be configured, so clang-analyzer-cplusplus.Move (which follows the
+  # move itself, not the function's name) catches uses after krys::move.
+  cppcoreguidelines-rvalue-reference-param-not-moved.MoveFunction: '::krys::move'
+  clang-analyzer-cplusplus.Move:WarnOn: All

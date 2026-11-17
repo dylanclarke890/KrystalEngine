@@ -252,7 +252,7 @@ namespace krys::boo
       // FIXME: Determine the how calc() and relative units should be resolved and switch to the
       // non-deprecated parsing function.
       auto timingFunctionResult =
-        css::PropertyParserHelpers::ParseEasingFunctionDeprecated(*timing->Easing, parsingContext);
+        css::parse_property::ParseEasingFunctionDeprecated(*timing->Easing, parsingContext);
       if (!timingFunctionResult)
       {
         return dom::Exception {dom::ExceptionCode::TypeError};

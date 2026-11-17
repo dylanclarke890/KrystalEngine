@@ -178,7 +178,7 @@ namespace krys::boo::style::interpolation
         interpolatedSyntaxValues.reserve(interpolatedTransformList.size());
         for (const auto &transformFunction : interpolatedTransformList)
         {
-          interpolatedSyntaxValues.push_back(transformFunction);
+          interpolatedSyntaxValues.emplace_back(transformFunction);
         }
 
         return CustomProperty::ValueList {krys::move(interpolatedSyntaxValues), from.Separator};

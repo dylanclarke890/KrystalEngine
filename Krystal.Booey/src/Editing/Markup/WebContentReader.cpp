@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -48,9 +49,9 @@ namespace krys::boo
     return ContentOrigin().empty() ? MSOListQuirks::CheckIfNeeded : MSOListQuirks::Disabled;
   }
 
-  WebContentReader::WebContentReader(LocalFrame &frame, const dom::SimpleRange &context,
+  WebContentReader::WebContentReader(LocalFrame &frame, dom::SimpleRange context,
                                      bool allowPlainText) noexcept
-      : FrameWebContentReader(frame), _context(context), _allowPlainText(allowPlainText)
+      : FrameWebContentReader(frame), _context(krys::move(context)), _allowPlainText(allowPlainText)
   {
   }
 
@@ -104,7 +105,7 @@ namespace krys::boo
 
   // FIXME: Preferring images' MIME types to their markup (preferMIMETypeForImages), with images on the
   // pasteboard.
-  bool WebContentReader::ReadHTML(utf8_stringview string) noexcept
+  bool WebContentReader::ReadHTML(utf8_stringview markup) noexcept
   {
     auto *document = Frame().Document();
     if (!document)
@@ -112,7 +113,7 @@ namespace krys::boo
       return false;
     }
 
-    AddFragment(CreateFragmentFromMarkup(*document, string, {}));
+    AddFragment(CreateFragmentFromMarkup(*document, markup, {}));
     return true;
   }
 
@@ -136,7 +137,7 @@ namespace krys::boo
 
   // FIXME: Removing the attributes of subresource URLs that aren't HTTP or data URLs
   // (removeSubresourceURLAttributes), with URL attributes.
-  bool WebContentMarkupReader::ReadHTML(utf8_stringview string) noexcept
+  bool WebContentMarkupReader::ReadHTML(utf8_stringview markup) noexcept
   {
     auto *document = Frame().Document();
     if (!document)
@@ -146,11 +147,11 @@ namespace krys::boo
 
     if (ShouldSanitize())
     {
-      _markup = SanitizeMarkup(string, document, MSOListQuirks::Disabled).value_or(utf8_string());
+      _markup = SanitizeMarkup(markup, document, MSOListQuirks::Disabled).value_or(utf8_string());
     }
     else
     {
-      _markup = utf8_string(string);
+      _markup = utf8_string(markup);
     }
 
     return !_markup.empty();

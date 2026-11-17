@@ -46,6 +46,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <utility>
 
@@ -226,10 +227,10 @@ namespace krys::boo
   }
 
   ApplyStyleCommand::ApplyStyleCommand(dom::Document &document, const EditingStyle *style,
-                                       const dom::Position &start, const dom::Position &end,
-                                       EditAction action, ApplyStylePropertyLevel level) noexcept
-      : CompositeEditCommand(document, action), _style(style->Copy()), _propertyLevel(level), _start(start),
-        _end(end), _useEndingSelection(false), _removeOnly(false)
+                                       dom::Position start, dom::Position end, EditAction action,
+                                       ApplyStylePropertyLevel level) noexcept
+      : CompositeEditCommand(document, action), _style(style->Copy()), _propertyLevel(level),
+        _start(krys::move(start)), _end(krys::move(end)), _useEndingSelection(false), _removeOnly(false)
   {
   }
 
@@ -1243,7 +1244,7 @@ namespace krys::boo
           currentElement && IsStyledInlineElementToRemove(currentElement))
       {
         styledElement = ShareRefPtr(currentElement);
-        elementsToPushDown.push_back(ShareRef(*currentElement));
+        elementsToPushDown.emplace_back(ShareRef(*currentElement));
       }
 
       auto styleToPushDown = EditingStyle::Create();

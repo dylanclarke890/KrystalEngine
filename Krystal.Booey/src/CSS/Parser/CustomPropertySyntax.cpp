@@ -225,7 +225,7 @@ namespace krys::boo::css
         return {};
       }
 
-      auto typeRange = PropertyParserHelpers::ConsumeFunction(tokens);
+      auto typeRange = parse_property::ConsumeFunction(tokens);
       auto type = Parse(typeRange.Serialise(TokenSerialisationMode::Normal));
       if (!type || type->ContainsUnknownType())
       {

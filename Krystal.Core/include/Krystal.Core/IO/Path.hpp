@@ -15,7 +15,7 @@ namespace krys::io
   public:
     Path() = default;
 
-    explicit Path(const std::filesystem::path &path);
+    explicit Path(std::filesystem::path path);
 
     ~Path() noexcept = default;
 

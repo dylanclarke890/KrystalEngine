@@ -14,16 +14,16 @@
 #include <format>
 #include <sstream>
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   class XmlArchiveWriter : public BaseArchiveWriter<XmlArchiveWriter>
   {
     struct NodeMetadata
     {
       rapidxml::xml_node<> *Node;
-      size_t NameCounter;
+      size_t NameCounter {0u};
 
-      NodeMetadata(rapidxml::xml_node<> *node) noexcept : Node(node), NameCounter(0u)
+      NodeMetadata(rapidxml::xml_node<> *node) noexcept : Node(node)
       {
       }
 
@@ -36,8 +36,8 @@ namespace krys::Serialisation
   private:
     io::IStreamWriter &_stream;
     rapidxml::xml_document<> _document;
-    Stack<NodeMetadata> _nodes {};
-    stringview _nextFieldName {};
+    Stack<NodeMetadata> _nodes;
+    stringview _nextFieldName;
 
   public:
     XmlArchiveWriter(io::IStreamWriter &stream) noexcept : _stream(stream)
@@ -199,10 +199,10 @@ namespace krys::Serialisation
 
     struct NodeMetadata
     {
-      NodeType *Node;     /// @brief A pointer to this node
-      NodeType *Child;    /// @brief A pointer to its current child
-      size_t Size {0u};   /// @brief The remaining number of children for this node
-      stringview Name {}; /// @brief The NVP name for next child node
+      NodeType *Node;   /// @brief A pointer to this node
+      NodeType *Child;  /// @brief A pointer to its current child
+      size_t Size {0u}; /// @brief The remaining number of children for this node
+      stringview Name;  /// @brief The NVP name for next child node
 
       NodeMetadata(NodeType *node) noexcept
           : Node(node), Child(node->first_node()), Size(GetNumberOfChildren(node))
@@ -254,13 +254,13 @@ namespace krys::Serialisation
     io::IStreamReader &_stream;
     List<byte> _data;
     rapidxml::xml_document<> _document;
-    Stack<NodeMetadata> _nodes {};
+    Stack<NodeMetadata> _nodes;
 
   public:
     XmlArchiveReader(io::IStreamReader &stream) : _stream(stream)
     {
       // Read the entire stream into memory
-      const auto size = static_cast<size_t>(_stream.Size());
+      const auto size = _stream.Size();
       _data.resize(size + 1); // +1 for null terminator
 
       _stream.Read(Span(_data.data(), _data.size() - 1));

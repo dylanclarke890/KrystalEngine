@@ -61,7 +61,7 @@ namespace krys::boo::layout
 
       CommittedContentCount CommittedCount {};
       size_t PartialTrailingContentLength {0};
-      Maybe<InlineLayoutUnit> OverflowLogicalWidth {};
+      Maybe<InlineLayoutUnit> OverflowLogicalWidth;
     };
 
     enum MayOverConstrainLine : uint8
@@ -74,7 +74,7 @@ namespace krys::boo::layout
     struct RectAndFloatConstraints
     {
       InlineRect LogicalRect;
-      EnumSet<UsedFloat> ConstrainedSideSet {};
+      EnumSet<UsedFloat> ConstrainedSideSet;
     };
 
     struct InitialLetterOffsets
@@ -93,7 +93,7 @@ namespace krys::boo::layout
     LineLayoutResult::SuspendedFloatList _suspendedFloats;
     Maybe<InlineLayoutUnit> _overflowingLogicalWidth;
     SmallList<InlineItem, 1> _lineSpanningInlineBoxes;
-    EnumSet<UsedFloat> _lineIsConstrainedByFloat {};
+    EnumSet<UsedFloat> _lineIsConstrainedByFloat;
     Maybe<InlineLayoutUnit> _initialLetterClearGap;
     TextSpacingContext _textSpacingContext {};
 

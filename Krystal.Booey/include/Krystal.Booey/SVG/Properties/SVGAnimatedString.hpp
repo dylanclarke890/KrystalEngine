@@ -29,6 +29,10 @@
 
 namespace krys::boo::svg
 {
+  // Instantiated once in SVGAnimatedPropertyImpl.cpp (see SVGAnimatedPropertyImpl.hpp).
+  extern template class SVGSharedPrimitiveProperty<dom::DOMString>;
+  extern template class SVGAnimatedPrimitiveProperty<dom::DOMString>;
+
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGAnimatedString
   class SVGAnimatedString : public SVGAnimatedPrimitiveProperty<dom::DOMString>
   {

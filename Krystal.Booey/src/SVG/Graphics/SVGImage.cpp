@@ -231,8 +231,8 @@ namespace krys::boo::svg
     context.DrawPattern(*buffer, dstRect, scaledSrcRect, unscaledPatternTransform, phase, spacing, options);
   }
 
-  ImageDrawResult SVGImage::Draw(GraphicsContext &context, const FloatRect &dstRect, const FloatRect &srcRect,
-                                 ImagePaintingOptions options) noexcept
+  ImageDrawResult SVGImage::Draw(GraphicsContext &context, const FloatRect &destination,
+                                 const FloatRect &source, ImagePaintingOptions options) noexcept
   {
     if (!_page)
     {
@@ -244,7 +244,7 @@ namespace krys::boo::svg
 
     GraphicsContextStateSaver stateSaver(context);
     context.SetCompositeOperation(options.GetCompositeOperator(), options.GetBlendMode());
-    context.Clip(FloatRect(EnclosingIntRect(dstRect)));
+    context.Clip(FloatRect(EnclosingIntRect(destination)));
 
     float alpha = context.Alpha();
     bool compositingRequiresTransparencyLayer =
@@ -263,12 +263,12 @@ namespace krys::boo::svg
       orientation = ImageOrientation::Orientation::None;
     }
 
-    FloatSize scale(dstRect.Width() / srcRect.Width(), dstRect.Height() / srcRect.Height());
+    FloatSize scale(destination.Width() / source.Width(), destination.Height() / source.Height());
 
     // We can only draw the entire frame, clipped to the rect we want. So compute where the top left
     // of the image would be if we were drawing without clipping, and translate accordingly.
-    FloatSize topLeftOffset(srcRect.Location().X() * scale.Width(), srcRect.Location().Y() * scale.Height());
-    FloatPoint destOffset = dstRect.Location() - topLeftOffset;
+    FloatSize topLeftOffset(source.Location().X() * scale.Width(), source.Location().Y() * scale.Height());
+    FloatPoint destOffset = destination.Location() - topLeftOffset;
 
     context.Translate(destOffset);
     context.Scale(scale);
@@ -289,7 +289,7 @@ namespace krys::boo::svg
       view->LayoutContext().Layout();
     }
 
-    view->Paint(context, Intersection(context.ClipBounds(), EnclosingIntRect(srcRect)));
+    view->Paint(context, Intersection(context.ClipBounds(), EnclosingIntRect(source)));
 
     if (compositingRequiresTransparencyLayer)
     {

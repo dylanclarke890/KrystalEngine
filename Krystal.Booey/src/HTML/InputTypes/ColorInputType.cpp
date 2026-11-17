@@ -61,7 +61,7 @@ namespace krys::boo::html
     KRYS_NODISCARD Maybe<Color> ParseColorValue(dom::DOMStringView string,
                                                 const HTMLInputElement &input) noexcept
     {
-      using namespace css::PropertyParserHelpers;
+      using namespace css::parse_property;
       auto context = input.NodeDocument().CssParserContext();
       context.Mode = css::ParserMode::HTMLStandard;
       auto color = ParseColorRawSimple(string, context);
@@ -184,8 +184,8 @@ namespace krys::boo::html
     (void)shadowRoot.AppendChild(*wrapperElement);
 
     (void)wrapperElement->AppendChild(*colorSwatch);
-    wrapperElement->SetUserAgentPart(css::UserAgentParts::WebkitColorSwatchWrapper());
-    colorSwatch->SetUserAgentPart(css::UserAgentParts::WebkitColorSwatch());
+    wrapperElement->SetUserAgentPart(css::user_agent_parts::WebkitColorSwatchWrapper());
+    colorSwatch->SetUserAgentPart(css::user_agent_parts::WebkitColorSwatch());
 
     RenderTheme::Singleton().CreateColorWellSwatchSubtree(*colorSwatch);
 

@@ -107,7 +107,7 @@ namespace krys::boo
     GraphicsContext(IsDeferred = IsDeferred::No, const GraphicsContextState::ChangeFlags & = {},
                     InterpolationQuality = InterpolationQuality::Default) noexcept;
 
-    GraphicsContext(IsDeferred, const GraphicsContextState &) noexcept;
+    GraphicsContext(IsDeferred, GraphicsContextState) noexcept;
 
     virtual ~GraphicsContext() noexcept;
 
@@ -654,7 +654,7 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatRect ComputeUnderlineBoundsForText(const FloatRect &, bool printing) noexcept;
 
-    void DrawLineForText(const FloatRect &, bool isPrinting, bool doubleLines = false,
+    void DrawLineForText(const FloatRect &, bool isPrinting, bool doubleUnderlines = false,
                          boo::StrokeStyle = boo::StrokeStyle::SolidStroke) noexcept;
 
     // The `origin` defines the line origin point.

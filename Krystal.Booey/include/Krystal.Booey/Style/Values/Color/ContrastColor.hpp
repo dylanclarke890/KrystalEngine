@@ -50,8 +50,9 @@ namespace krys::boo::style
   KRYS_NODISCARD bool ContainsCurrentColor(const ContrastColor &contrastColor) noexcept;
 
   void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
-                                       const ContrastColor &value) noexcept;
+                                       const ContrastColor &contrastColor) noexcept;
 
-  KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
-                                                                  const ContrastColor &value) noexcept;
+  KRYS_NODISCARD css::CSSOMString
+    SerialisationForCSSTokenization(const css::SerialisationContext &context,
+                                    const ContrastColor &contrastColor) noexcept;
 }

@@ -204,7 +204,7 @@ namespace krys::boo::tests
       fixture.On(a, u8"pointerrawupdate",
                  [&](dom::Event &event)
                  {
-                   fixture.Records.push_back("raw:a");
+                   fixture.Records.emplace_back("raw:a");
                    rawUpdates.push_back(ShareRef(Downcast<dom::PointerEvent>(event)));
                    event.PreventDefault();
                  });
@@ -223,7 +223,7 @@ namespace krys::boo::tests
       CHECK(rawUpdate.ClientX() == 10);
       auto coalesced = rawUpdate.GetCoalescedEvents();
       REQUIRE(coalesced.size() == 1uz);
-      CHECK(coalesced[0]->Type() == EventNames::PointerRawUpdate);
+      CHECK(coalesced[0]->Type() == event_names::PointerRawUpdate);
       CHECK(rawUpdate.GetPredictedEvents().empty());
 
       // Pressing and releasing the only button have none; a chorded button is a move, and has one.

@@ -30,7 +30,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   // FIXME: Users of this function are likely getting incorrect results when used with calc() producing a
   // percent, as it is not getting divided by 100.

@@ -14,7 +14,7 @@ namespace krys::gfx::tests
   {
     uint32 Width {0u};
     uint32 Height {0u};
-    List<Array<uint8, 4>> Pixels {};
+    List<Array<uint8, 4>> Pixels;
   };
 
   /// @brief How far an image is from its golden.

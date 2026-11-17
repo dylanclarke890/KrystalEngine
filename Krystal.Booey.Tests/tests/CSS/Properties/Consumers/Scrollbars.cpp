@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeScrollbarColor)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeScrollbarColor)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"auto", ConsumeScrollbarColor) == "auto");
     CHECK(ConsumeToText(u8"red blue", ConsumeScrollbarColor) == "red blue");

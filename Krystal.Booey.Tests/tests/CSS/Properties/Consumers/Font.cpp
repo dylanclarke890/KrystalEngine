@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
   using css::tests::Tokens;
@@ -61,7 +61,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     };
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFontStyle)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFontStyle)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"normal", ConsumeFontStyle) == "normal");
     CHECK(ConsumeToText(u8"italic", ConsumeFontStyle) == "italic");
@@ -76,7 +76,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"10deg", ConsumeFontStyle) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(GenericFontFamily)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(GenericFontFamily)", "[CSS][Properties][Consumers]")
   {
     CHECK(GenericFontFamily(ValueId::Serif) == GenericFontFamilyNames::SerifFamily());
     CHECK(GenericFontFamily(ValueId::SansSerif).View() == u8"-internal-sans-serif");
@@ -91,7 +91,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
           == u8"-internal-standard");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFamilyName)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFamilyName)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"Arial", ConsumeFamilyName) == "Arial");
     CHECK(ConsumeToText(u8"\"Times New Roman\"", ConsumeFamilyName) == "\"Times New Roman\"");
@@ -108,7 +108,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"10px", ConsumeFamilyName) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFontFamily)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFontFamily)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"serif", ConsumeFontFamily) == "serif");
     CHECK(ConsumeToText(u8"Arial, \"Times New Roman\", sans-serif", ConsumeFontFamily)
@@ -123,7 +123,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"initial", ConsumeFontFamily) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFontSizeAdjust)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFontSizeAdjust)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeFontSizeAdjust) == "none");
     CHECK(ConsumeToText(u8"from-font", ConsumeFontSizeAdjust) == "from-font");
@@ -137,7 +137,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"0.5 cap-height", ConsumeFontSizeAdjust) == "<partial>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeUnresolvedFont)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeUnresolvedFont)", "[CSS][Properties][Consumers]")
   {
     SECTION("Size and family only")
     {
@@ -209,7 +209,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     }
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFontFormat)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFontFormat)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeFormat(u8"format(woff2)") == CSSOMString {u8"woff2"});
     CHECK(ConsumeFormat(u8"format(embedded-opentype)") == CSSOMString {u8"embedded-opentype"});
@@ -223,7 +223,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK_FALSE(ConsumeFormat(u8"format()"));
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFontTech)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFontTech)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeTech(u8"tech(variations)") == List<FontTechnology> {FontTechnology::Variations});
     CHECK(ConsumeTech(u8"tech(color-COLRv1, features-opentype, palettes)")
@@ -236,7 +236,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeTech(u8"tech(variations,)").empty());
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFontFaceSrc)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFontFaceSrc)", "[CSS][Properties][Consumers]")
   {
     auto context = Context();
 
@@ -255,7 +255,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"local(a, b)", FontFaceSrc, context) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFontFaceFontStyle)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFontFaceFontStyle)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"normal", ConsumeFontFaceFontStyle) == "normal");
     CHECK(ConsumeToText(u8"italic", ConsumeFontFaceFontStyle) == "italic");
@@ -269,7 +269,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"auto", ConsumeFontFaceFontStyle) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFeatureTagValue)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFeatureTagValue)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"\"liga\"", ConsumeFeatureTagValue) == "\"liga\"");
     CHECK(ConsumeToText(u8"\"liga\" on", ConsumeFeatureTagValue) == "\"liga\"");
@@ -286,7 +286,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"\"liga\" 1.5", ConsumeFeatureTagValue) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeVariationTagValue)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeVariationTagValue)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"\"wght\" 400", ConsumeVariationTagValue) == "\"wght\" 400");
     CHECK(ConsumeToText(u8"\"wdth\" -1.5", ConsumeVariationTagValue) == "\"wdth\" -1.5");
@@ -295,8 +295,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"\"wght\" on", ConsumeVariationTagValue) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeFontFeatureValuesPreludeFamilyNameList)",
-            "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeFontFeatureValuesPreludeFamilyNameList)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumePreludeNames(u8"Foo, \"Bar Baz\", Qux  Quux")
           == List<CSSOMStringAtom> {CSSOMStringAtom {u8"Foo"}, u8"Bar Baz", u8"Qux Quux"});
@@ -306,7 +305,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumePreludeNames(u8"Foo,").empty());
   }
 
-  TEST_CASE("PropertyParserHelpers(IsSystemFontShorthand)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(IsSystemFontShorthand)", "[CSS][Properties][Consumers]")
   {
     CHECK(IsSystemFontShorthand(ValueId::Caption));
     CHECK(IsSystemFontShorthand(ValueId::StatusBar));

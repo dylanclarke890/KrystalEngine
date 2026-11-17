@@ -10,7 +10,7 @@
 #include <bit>
 #include <memory>
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   class BinaryArchiveWriter : public BaseArchiveWriter<BinaryArchiveWriter>
   {

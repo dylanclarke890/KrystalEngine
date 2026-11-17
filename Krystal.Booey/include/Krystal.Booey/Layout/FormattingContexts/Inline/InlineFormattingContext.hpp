@@ -88,7 +88,7 @@ namespace krys::boo::layout
     InlineLayoutState _inlineLayoutState;
 
   public:
-    InlineFormattingContext(const ElementBox &formattingContextRoot, LayoutState &globalLayoutState,
+    InlineFormattingContext(const ElementBox &rootBlockContainer, LayoutState &globalLayoutState,
                             BlockLayoutState &parentBlockLayoutState) noexcept;
 
     KRYS_NODISCARD InlineLayoutResult Layout(const ConstraintsForInlineContent &constraints,

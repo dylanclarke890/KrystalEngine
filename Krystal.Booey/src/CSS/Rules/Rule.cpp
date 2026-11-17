@@ -50,6 +50,7 @@
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <functional>
 #include <memory>
 
@@ -601,9 +602,9 @@ namespace krys::boo::css
 #pragma region FontPaletteValuesRule
 
   FontPaletteValuesRule::FontPaletteValuesRule(
-    const CSSOMStringAtom &name, List<CSSOMStringAtom> &&fontFamilies, Maybe<FontPaletteIndex> basePalette,
+    CSSOMStringAtom name, List<CSSOMStringAtom> &&fontFamilies, Maybe<FontPaletteIndex> basePalette,
     List<boo::FontPaletteValues::OverriddenColor> &&overrideColors) noexcept
-      : Rule(RuleType::FontPaletteValues), _name(name), _fontFamilies(krys::move(fontFamilies)),
+      : Rule(RuleType::FontPaletteValues), _name(krys::move(name)), _fontFamilies(krys::move(fontFamilies)),
         _fontPaletteValues(basePalette, krys::move(overrideColors))
   {
   }
@@ -702,9 +703,7 @@ namespace krys::boo::css
   {
   }
 
-  MediaRule::MediaRule(const MediaRule &other) noexcept : GroupRule(other), _mediaQueries(other._mediaQueries)
-  {
-  }
+  MediaRule::MediaRule(const MediaRule &other) noexcept = default;
 
   Ref<MediaRule> MediaRule::Create(mq::MediaQueryList &&mediaQueries, List<Ref<Rule>> &&childRules) noexcept
   {
@@ -720,9 +719,9 @@ namespace krys::boo::css
 
 #pragma region SupportsRule
 
-  SupportsRule::SupportsRule(const CSSOMString &conditionText, bool conditionIsSupported,
+  SupportsRule::SupportsRule(CSSOMString conditionText, bool conditionIsSupported,
                              List<Ref<Rule>> &&rules) noexcept
-      : GroupRule(RuleType::Supports, krys::move(rules)), _conditionText(conditionText),
+      : GroupRule(RuleType::Supports, krys::move(rules)), _conditionText(krys::move(conditionText)),
         _conditionIsSupported(conditionIsSupported)
   {
   }
@@ -882,8 +881,8 @@ namespace krys::boo::css
 
 #pragma region NamespaceRule
 
-  NamespaceRule::NamespaceRule(const CSSOMStringAtom &prefix, const CSSOMStringAtom &uri) noexcept
-      : Rule(RuleType::Namespace), _prefix(prefix), _uri(uri)
+  NamespaceRule::NamespaceRule(CSSOMStringAtom prefix, CSSOMStringAtom uri) noexcept
+      : Rule(RuleType::Namespace), _prefix(krys::move(prefix)), _uri(krys::move(uri))
   {
   }
 

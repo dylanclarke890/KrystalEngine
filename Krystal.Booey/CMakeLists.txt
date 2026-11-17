@@ -4178,6 +4178,7 @@ set(KRYSTAL_BOOEY_SVG_SOURCES
   src/SVG/Internals/SVGPathTraversalStateBuilder.cpp
   src/SVG/Internals/SVGPathUtilities.cpp
   src/SVG/Properties/SVGAnimatedProperty.cpp
+  src/SVG/Properties/SVGAnimatedPropertyImpl.cpp
   src/SVG/Properties/SVGAnimationAdditiveValueFunctionImpl.cpp
   src/SVG/Properties/SVGAttributeAnimator.cpp
   src/SVG/Properties/SVGPropertyTraits.cpp

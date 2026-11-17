@@ -46,7 +46,7 @@ namespace krys::boo::html
                                     DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeDayFieldElement>(document, fieldOwner);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditDayField(), AXDateFieldDayText());
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditDayField(), AXDateFieldDayText());
     return element;
   }
 
@@ -84,7 +84,7 @@ namespace krys::boo::html
                                                                  int minimum, int maximum) noexcept
   {
     auto element = CreateRef<DateTimeHourFieldElement>(document, fieldOwner, minimum, maximum);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditHourField(), AXTimeFieldHourText());
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditHourField(), AXTimeFieldHourText());
     return element;
   }
 
@@ -152,7 +152,7 @@ namespace krys::boo::html
                                          const List<utf8_string> &labels) noexcept
   {
     auto element = CreateRef<DateTimeMeridiemFieldElement>(document, fieldOwner, labels);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditMeridiemField());
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditMeridiemField());
     return element;
   }
 
@@ -189,7 +189,7 @@ namespace krys::boo::html
                                             DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeMillisecondFieldElement>(document, fieldOwner);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditMillisecondField(),
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditMillisecondField(),
                AXTimeFieldMillisecondText());
     return element;
   }
@@ -227,7 +227,7 @@ namespace krys::boo::html
                                        DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeMinuteFieldElement>(document, fieldOwner);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditMinuteField(), AXTimeFieldMinuteText());
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditMinuteField(), AXTimeFieldMinuteText());
     return element;
   }
 
@@ -265,7 +265,7 @@ namespace krys::boo::html
                                       DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeMonthFieldElement>(document, fieldOwner);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditMonthField(), AXDateFieldMonthText());
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditMonthField(), AXDateFieldMonthText());
     return element;
   }
 
@@ -303,7 +303,7 @@ namespace krys::boo::html
                                        DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeSecondFieldElement>(document, fieldOwner);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditSecondField(), AXTimeFieldSecondText());
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditSecondField(), AXTimeFieldSecondText());
     return element;
   }
 
@@ -342,7 +342,7 @@ namespace krys::boo::html
                                               const List<utf8_string> &labels) noexcept
   {
     auto element = CreateRef<DateTimeSymbolicMonthFieldElement>(document, fieldOwner, labels);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditMonthField(), AXDateFieldMonthText());
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditMonthField(), AXDateFieldMonthText());
     return element;
   }
 
@@ -390,7 +390,7 @@ namespace krys::boo::html
                                      DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeWeekFieldElement>(document, fieldOwner);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditWeekField(), AXDateFieldWeekText());
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditWeekField(), AXDateFieldWeekText());
     return element;
   }
 
@@ -438,7 +438,7 @@ namespace krys::boo::html
                                      DateTimeFieldElementFieldOwner &fieldOwner) noexcept
   {
     auto element = CreateRef<DateTimeYearFieldElement>(document, fieldOwner);
-    Initialize(*element, css::UserAgentParts::WebkitDatetimeEditYearField(), AXDateFieldYearText());
+    Initialize(*element, css::user_agent_parts::WebkitDatetimeEditYearField(), AXDateFieldYearText());
     return element;
   }
 

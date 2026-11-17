@@ -75,11 +75,10 @@
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <cmath>
+#include <numbers>
 
 namespace krys::boo::html
 {
-  constexpr static ImageSmoothingQuality DefaultSmoothingQuality = ImageSmoothingQuality::Low;
-
   constexpr static std::u8string_view DefaultFont = u8"10px sans-serif";
 
   KRYS_NODISCARD static CanvasLineCap ToCanvasLineCap(LineCap lineCap) noexcept
@@ -313,16 +312,10 @@ namespace krys::boo::html
   }
 
   CanvasRenderingContext2DBase::State::State() noexcept
-      : StrokeStyle(Color::black), FillStyle(Color::black), LineWidth(1), LineCap(boo::LineCap::Butt),
-        LineJoin(boo::LineJoin::Miter), MiterLimit(10), ShadowBlur(0), ShadowColor(Color::transparentBlack),
-        GlobalAlpha(1), GlobalComposite(CompositeOperator::SourceOver), GlobalBlend(BlendMode::Normal),
-        TransformInverse(AffineTransform {}), LineDashOffset(0), ImageSmoothingEnabled(true),
-        ImageSmoothingQuality(DefaultSmoothingQuality), TextAlign(StartTextAlign),
-        TextBaseline(AlphabeticTextBaseline), Direction(Direction::Inherit), FilterString(u8"none"),
-        Filter(css::keywords::None {}), LetterSpacing(u8"0px"), WordSpacing(u8"0px"),
-        UnparsedFont(DefaultFont), FontKerning(CanvasFontKerning::Auto),
-        FontStretch(CanvasFontStretch::Normal), FontVariantCaps(CanvasFontVariantCaps::Normal),
-        TextRendering(CanvasTextRendering::Auto), Lang(u8"inherit")
+      : StrokeStyle(Color::black), FillStyle(Color::black), ShadowColor(Color::transparentBlack),
+
+        TransformInverse(AffineTransform {}), FilterString(u8"none"), Filter(css::keywords::None {}),
+        LetterSpacing(u8"0px"), WordSpacing(u8"0px"), UnparsedFont(DefaultFont), Lang(u8"inherit")
   {
   }
 
@@ -370,7 +363,7 @@ namespace krys::boo::html
   void CanvasRenderingContext2DBase::RealizeSavesLoop() noexcept
   {
     krys_debug_assert(_unrealizedSaveCount);
-    krys_debug_assert(_stateStack.size() >= 1);
+    krys_debug_assert(!_stateStack.empty());
     GraphicsContext *context = DrawingContext();
     do
     {
@@ -396,7 +389,7 @@ namespace krys::boo::html
       --_unrealizedSaveCount;
       return;
     }
-    krys_debug_assert(_stateStack.size() >= 1);
+    krys_debug_assert(!_stateStack.empty());
     if (_stateStack.size() <= 1)
     {
       return;
@@ -2903,7 +2896,7 @@ namespace krys::boo::html
     // Fast approximation of the stroke's bounding rect.
     // This yields a slightly oversized rect but is very fast
     // compared to Path::strokeBoundingRect().
-    static const float root2 = std::sqrt(2.f);
+    static const float root2 = std::numbers::sqrt2_v<float>;
     auto delta = static_cast<float>(GetState().LineWidth / 2);
     if (GetState().LineJoin == boo::LineJoin::Miter)
     {
@@ -3702,6 +3695,7 @@ namespace krys::boo::html
       case BottomTextBaseline:
       case IdeographicTextBaseline: offset.SetY(static_cast<float>(-fontMetrics.IntDescent())); break;
       case MiddleTextBaseline:
+        // NOLINTNEXTLINE(bugprone-integer-division): whole pixels, as WebKit.
         offset.SetY(static_cast<float>(fontMetrics.IntHeight() / 2 - fontMetrics.IntDescent()));
         break;
       case AlphabeticTextBaseline:

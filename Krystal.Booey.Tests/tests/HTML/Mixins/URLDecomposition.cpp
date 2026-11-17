@@ -159,16 +159,16 @@ namespace krys::boo::html::tests
 
     // An invalid URL is a null one, with empty parts.
     CHECK(Str(bad.Protocol()) == ":");
-    CHECK(Str(bad.Username()) == "");
-    CHECK(Str(bad.Host()) == "");
-    CHECK(Str(bad.Hostname()) == "");
-    CHECK(Str(bad.Port()) == "");
-    CHECK(Str(bad.Pathname()) == "");
-    CHECK(Str(bad.Search()) == "");
-    CHECK(Str(bad.Hash()) == "");
-    CHECK(Str(none.Pathname()) == "");
+    CHECK(Str(bad.Username()).empty());
+    CHECK(Str(bad.Host()).empty());
+    CHECK(Str(bad.Hostname()).empty());
+    CHECK(Str(bad.Port()).empty());
+    CHECK(Str(bad.Pathname()).empty());
+    CHECK(Str(bad.Search()).empty());
+    CHECK(Str(bad.Hash()).empty());
+    CHECK(Str(none.Pathname()).empty());
     CHECK(Str(mail.Pathname()) == "me@x.test");
-    CHECK(Str(mail.Host()) == "");
+    CHECK(Str(mail.Host()).empty());
 
     // Setting a part of a null URL does nothing, without an href or with one that doesn't parse.
     none.Hash(u8"x");
@@ -199,8 +199,8 @@ namespace krys::boo::html::tests
     CHECK(attr(u8"foo") == "foo:///p");
     // An empty query or fragment reads as nothing, and setting one keeps it.
     auto &empty = fixture.Get<HTMLAnchorElement>(u8"empty");
-    CHECK(Str(empty.Search()) == "");
-    CHECK(Str(empty.Hash()) == "");
+    CHECK(Str(empty.Search()).empty());
+    CHECK(Str(empty.Hash()).empty());
     empty.Search(u8"?");
     CHECK(attr(u8"empty") == "https://example.com/p?#");
     empty.Hash(u8"#");

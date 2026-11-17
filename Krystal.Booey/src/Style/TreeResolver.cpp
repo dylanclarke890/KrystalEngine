@@ -1817,7 +1817,7 @@ namespace krys::boo::style
       _update = CreateUnique<Update>(*_document);
     }
     _scopeStack.push_back(CreateRef<Scope>(*_document, *_update));
-    _parentStack.push_back(Parent(*_document));
+    _parentStack.emplace_back(*_document);
 
     ResolveComposedTree();
 

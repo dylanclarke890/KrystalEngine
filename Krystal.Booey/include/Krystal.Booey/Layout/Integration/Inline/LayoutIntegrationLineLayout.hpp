@@ -162,7 +162,7 @@ namespace krys::boo::layout_integration
                  HitTestAction hitTestAction, const RenderInline *layerRenderer = nullptr) noexcept;
 
     Maybe<LayoutRect> Layout(RenderBlockFlow::MarginInfo &marginInfo,
-                             ForceFullLayout forceFullLayout = ForceFullLayout::No) noexcept;
+                             ForceFullLayout forcedFullLayout = ForceFullLayout::No) noexcept;
 
     void ShiftLinesBy(LayoutUnit blockShift) noexcept;
 

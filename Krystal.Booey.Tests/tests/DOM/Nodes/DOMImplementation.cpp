@@ -61,7 +61,7 @@ namespace krys::boo::dom::tests
 
     SECTION("3. no document element for the empty or null qualified name")
     {
-      for (auto name : {DOMStringAtom::Empty(), DOMStringAtom()})
+      for (const auto &name : {DOMStringAtom::Empty(), DOMStringAtom()})
       {
         auto document = implementation.CreateDocument(u8"urn:x", name).ReleaseValue();
         CHECK_FALSE(document->HasChildNodes());
@@ -117,8 +117,8 @@ namespace krys::boo::dom::tests
       CHECK(document->ContentType() == u8"text/html");
       CHECK(childNames(*document) == u8"html HTML");
       CHECK(document->DocType()->Name() == u8"html");
-      CHECK(document->DocType()->PublicId() == u8"");
-      CHECK(document->DocType()->SystemId() == u8"");
+      CHECK(document->DocType()->PublicId().empty());
+      CHECK(document->DocType()->SystemId().empty());
       auto html = document->DocumentElement();
       CHECK(html->NamespaceURI() == infra::Namespaces::HTML);
       CHECK(childNames(*html) == u8"HEAD BODY");

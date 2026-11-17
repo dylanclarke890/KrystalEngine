@@ -43,23 +43,27 @@ namespace krys::boo
   }
 
   PositionedLayoutConstraints::PositionedLayoutConstraints(const RenderBox &renderer,
-                                                           const RenderStyle &style,
+                                                           const RenderStyle &selfStyleOverride,
                                                            LogicalBoxAxis selfAxis) noexcept
       : _renderer(renderer),
         // Using containingBlock() would be wrong for relpositioned inlines.
         _container(&Downcast<RenderBoxModelObject>(*renderer.Container())),
-        _containingWritingMode(_container->Style().GetWritingMode()), _writingMode(style.GetWritingMode()),
-        _selfAxis(selfAxis),
+        _containingWritingMode(_container->Style().GetWritingMode()),
+        _writingMode(selfStyleOverride.GetWritingMode()), _selfAxis(selfAxis),
         _containingAxis(!_containingWritingMode.IsOrthogonal(_writingMode) ? selfAxis
                                                                            : OppositeAxis(selfAxis)),
         _physicalAxis(selfAxis == LogicalBoxAxis::Inline ? _writingMode.InlineAxis()
                                                          : _writingMode.BlockAxis()),
-        _style(style), _alignment(_containingAxis == LogicalBoxAxis::Inline ? style.GetJustifySelf().Resolve()
-                                                                            : style.GetAlignSelf().Resolve()),
-        _defaultAnchorBox(NeedsAnchor() ? style::AnchorPositionEvaluator::DefaultAnchorForBox(renderer)
-                                        : nullptr),
-        _marginBefore(style::MarginEdge::Fixed {0}), _marginAfter(style::MarginEdge::Fixed {0}),
-        _insetBefore(style::InsetEdge::Fixed {0}), _insetAfter(style::InsetEdge::Fixed {0})
+        _style(selfStyleOverride),
+        _alignment(_containingAxis == LogicalBoxAxis::Inline ? selfStyleOverride.GetJustifySelf().Resolve()
+                                                             : selfStyleOverride.GetAlignSelf().Resolve()),
+        _defaultAnchorBox(NeedsAnchor()
+                            ? style::AnchorPositionEvaluator::DefaultAnchorForBox(renderer)
+                            : nullptr),
+        _marginBefore(style::MarginEdge::Fixed {0}),
+        _marginAfter(style::MarginEdge::Fixed {0}),
+        _insetBefore(style::InsetEdge::Fixed {0}),
+        _insetAfter(style::InsetEdge::Fixed {0})
   {
     krys_debug_assert(_container);
 

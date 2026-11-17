@@ -49,7 +49,7 @@ namespace krys::boo::css
     CSSLayerStatementRule(LayerRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSLayerStatementRule() noexcept;
+    ~CSSLayerStatementRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSLayerStatementRule> Create(LayerRule &rule, CSSStyleSheet *parent) noexcept;
 

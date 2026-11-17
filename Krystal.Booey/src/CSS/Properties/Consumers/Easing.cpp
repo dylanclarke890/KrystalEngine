@@ -38,7 +38,7 @@
 #include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
 #include "Krystal.Booey/Style/Values/Easing/EasingFunction.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   // MARK: - <steps()>
 

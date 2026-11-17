@@ -38,12 +38,12 @@ namespace krys::boo::style
   {
     using Base::Base;
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsNormal() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsNormal() const noexcept
     {
       return HoldsAlternative<css::keywords::Normal>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsInfinite() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsInfinite() const noexcept
     {
       return HoldsAlternative<css::keywords::Infinite>();
     }

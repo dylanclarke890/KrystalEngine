@@ -60,7 +60,7 @@ namespace krys::boo::dom
 
   void AbortSignal::DidAddEventListener(const EventListener &listener) noexcept
   {
-    if (listener.Type() == EventNames::Abort)
+    if (listener.Type() == event_names::Abort)
     {
       ++_abortEventListenerCount;
       UpdateHeldBySources();
@@ -69,7 +69,7 @@ namespace krys::boo::dom
 
   void AbortSignal::DidRemoveEventListener(const EventListener &listener) noexcept
   {
-    if (listener.Type() == EventNames::Abort && _abortEventListenerCount > 0)
+    if (listener.Type() == event_names::Abort && _abortEventListenerCount > 0)
     {
       --_abortEventListenerCount;
       UpdateHeldBySources();

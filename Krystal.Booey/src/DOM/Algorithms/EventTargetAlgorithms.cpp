@@ -13,6 +13,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -71,8 +72,8 @@ namespace krys::boo::dom
     //   node document's document element is eventTarget, or is a node whose node document's body element is
     //   eventTarget.
     // 2. Return false.
-    if (type != EventNames::TouchStart && type != EventNames::TouchMove && type != EventNames::Wheel
-        && type != EventNames::MouseWheel)
+    if (type != event_names::TouchStart && type != event_names::TouchMove && type != event_names::Wheel
+        && type != event_names::MouseWheel)
     {
       return false;
     }
@@ -139,7 +140,8 @@ namespace krys::boo::dom
               && l->Capture() == listener.Capture());
     };
 
-    if (const auto &existing = std::ranges::find_if(eventTarget._eventListenerList, std::move(AlreadyExists));
+    if (const auto &existing =
+          std::ranges::find_if(eventTarget._eventListenerList, krys::move(AlreadyExists));
         existing != eventTarget._eventListenerList.end())
     {
       return false;
@@ -192,7 +194,7 @@ namespace krys::boo::dom
   {
     while (!eventTarget._eventListenerList.empty())
     {
-      RemoveEventListener(eventTarget, *eventTarget._eventListenerList.front().get());
+      RemoveEventListener(eventTarget, *eventTarget._eventListenerList.front());
     }
   }
 

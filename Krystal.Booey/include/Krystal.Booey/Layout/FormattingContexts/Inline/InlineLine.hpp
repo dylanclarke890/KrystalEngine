@@ -305,8 +305,8 @@ namespace krys::boo::layout
       InlineLayoutUnit _logicalWidth {0};
       inline_display::Box::Expansion _expansion;
       UBiDiLevel _bidiLevel {UBIDI_DEFAULT_LTR};
-      Maybe<TrailingWhitespace> _trailingWhitespace {};
-      Maybe<size_t> _lastNonWhitespaceContentStart {};
+      Maybe<TrailingWhitespace> _trailingWhitespace;
+      Maybe<size_t> _lastNonWhitespaceContentStart;
       Maybe<Text> _textContent;
       Maybe<Line::ShapingBoundary> _shapingBoundary;
       InlineLayoutUnit _textSpacingAdjustment {0};
@@ -559,7 +559,7 @@ namespace krys::boo::layout
         InlineLayoutUnit Width {0.f};
       };
 
-      Maybe<TrailingContent> _trailingContent {};
+      Maybe<TrailingContent> _trailingContent;
     };
 
     const InlineFormattingContext &_inlineFormattingContext;
@@ -568,7 +568,7 @@ namespace krys::boo::layout
     HangingContent _hangingContent;
     InlineLayoutUnit _contentLogicalWidth {0};
     size_t _nonSpanningInlineLevelBoxCount {0};
-    Maybe<InlineLayoutUnit> _trailingSoftHyphenWidth {};
+    Maybe<InlineLayoutUnit> _trailingSoftHyphenWidth;
     InlineBoxListWithClonedDecorationEnd _inlineBoxListWithClonedDecorationEnd;
     bool _hasNonDefaultBidiLevelRun {false};
     bool _isFirstFormattedLine {false};

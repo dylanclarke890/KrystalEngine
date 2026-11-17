@@ -94,7 +94,7 @@ namespace krys::boo::layout
     }
   }
 
-  namespace LayoutBoxTraversal
+  namespace layout_box_traversal
   {
     template <typename U>
     requires DerivedFrom<remove_const_t<U>, ElementBox>
@@ -170,12 +170,12 @@ namespace krys::boo::layout
   }
 
   // Traversal helpers
-  namespace Traversal
+  namespace traversal
   {
     template <typename T, typename U>
     KRYS_NODISCARD inline const T *FirstChild(U &current) noexcept
     {
-      auto *object = LayoutBoxTraversal::FirstChild(current);
+      auto *object = layout_box_traversal::FirstChild(current);
       while (object && !IsLayoutBoxOfType<T>(*object))
       {
         object = object->NextSibling();
@@ -197,10 +197,10 @@ namespace krys::boo::layout
     template <typename T, typename U>
     KRYS_NODISCARD inline const T *FirstWithin(const U &stayWithin) noexcept
     {
-      auto *descendant = LayoutBoxTraversal::FirstChild(stayWithin);
+      auto *descendant = layout_box_traversal::FirstChild(stayWithin);
       while (descendant && !IsLayoutBoxOfType<T>(*descendant))
       {
-        descendant = LayoutBoxTraversal::Next(*descendant, stayWithin);
+        descendant = layout_box_traversal::Next(*descendant, stayWithin);
       }
       return static_cast<const T *>(descendant);
     }
@@ -208,10 +208,10 @@ namespace krys::boo::layout
     template <typename T, typename U>
     KRYS_NODISCARD inline const T *Next(const U &current, const ElementBox &stayWithin) noexcept
     {
-      auto *descendant = LayoutBoxTraversal::Next(current, stayWithin);
+      auto *descendant = layout_box_traversal::Next(current, stayWithin);
       while (descendant && !IsLayoutBoxOfType<T>(*descendant))
       {
-        descendant = LayoutBoxTraversal::Next(*descendant, stayWithin);
+        descendant = layout_box_traversal::Next(*descendant, stayWithin);
       }
       return static_cast<const T *>(descendant);
     }
@@ -220,10 +220,10 @@ namespace krys::boo::layout
     KRYS_NODISCARD inline const T *NextSkippingChildren(const U &current,
                                                         const ElementBox &stayWithin) noexcept
     {
-      auto *descendant = LayoutBoxTraversal::NextSkippingChildren(current, stayWithin);
+      auto *descendant = layout_box_traversal::NextSkippingChildren(current, stayWithin);
       while (descendant && !IsLayoutBoxOfType<T>(*descendant))
       {
-        descendant = LayoutBoxTraversal::NextSkippingChildren(*descendant, stayWithin);
+        descendant = layout_box_traversal::NextSkippingChildren(*descendant, stayWithin);
       }
       return static_cast<const T *>(descendant);
     }
@@ -233,7 +233,7 @@ namespace krys::boo::layout
   inline LayoutIterator<T> &LayoutIterator<T>::TraverseNextSibling() noexcept
   {
     krys_debug_assert(_current);
-    _current = Traversal::NextSibling<T>(*_current);
+    _current = traversal::NextSibling<T>(*_current);
     return *this;
   }
 
@@ -241,7 +241,7 @@ namespace krys::boo::layout
   inline LayoutIterator<T> &LayoutIterator<T>::TraverseNext() noexcept
   {
     krys_debug_assert(_current);
-    _current = Traversal::Next<T>(*_current, *_root);
+    _current = traversal::Next<T>(*_current, *_root);
     return *this;
   }
 
@@ -249,7 +249,7 @@ namespace krys::boo::layout
   inline LayoutIterator<T> &LayoutIterator<T>::TraverseNextSkippingChildren() noexcept
   {
     krys_debug_assert(_current);
-    _current = Traversal::NextSkippingChildren<T>(*_current, *_root);
+    _current = traversal::NextSkippingChildren<T>(*_current, *_root);
     return *this;
   }
 }

@@ -552,7 +552,7 @@ namespace krys::boo
     };
 
     /// @brief Lays out a block in inline content, called from the inline formatting context.
-    BlockPositionAndMargin LayoutBlockChildFromInlineLayout(RenderBox &child, LayoutUnit blockLogicalTop,
+    BlockPositionAndMargin LayoutBlockChildFromInlineLayout(RenderBox &child, LayoutUnit contentHeight,
                                                             MarginInfo marginInfo) noexcept;
 
     void AdjustOutOfFlowBlock(RenderBox &child, const MarginInfo &marginInfo) noexcept;
@@ -939,7 +939,7 @@ namespace krys::boo
     struct InlineContentStatus
     {
       bool HasSimpleOutOfFlowContentOnly {false};
-      Maybe<bool> OnlyBlockContentNeedsLayout {};
+      Maybe<bool> OnlyBlockContentNeedsLayout;
     };
 
     void LayoutInlineContent(RelayoutChildren relayoutChildren, LayoutUnit previousHeight,

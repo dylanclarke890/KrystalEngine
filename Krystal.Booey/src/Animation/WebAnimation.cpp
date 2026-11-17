@@ -948,7 +948,7 @@ namespace krys::boo
         }
         return null;
       }();
-      EnqueueAnimationPlaybackEvent(EventNames::Cancel, null, scheduledTime);
+      EnqueueAnimationPlaybackEvent(event_names::Cancel, null, scheduledTime);
     }
 
     // 2. Make animation's hold time unresolved.
@@ -1337,7 +1337,7 @@ namespace krys::boo
       }
       return null;
     }();
-    EnqueueAnimationPlaybackEvent(EventNames::Finish, CurrentTime(), scheduledTime);
+    EnqueueAnimationPlaybackEvent(event_names::Finish, CurrentTime(), scheduledTime);
   }
 
   dom::ExceptionOr<void> WebAnimation::Play() noexcept
@@ -2148,7 +2148,7 @@ namespace krys::boo
       {
         if (animation->GetPlayState() != WebAnimation::PlayState::Idle)
         {
-          sortedAnimations.push_back(animation);
+          sortedAnimations.emplace_back(animation);
         }
       }
     }

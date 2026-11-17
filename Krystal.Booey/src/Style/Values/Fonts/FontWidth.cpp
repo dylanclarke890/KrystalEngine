@@ -57,7 +57,7 @@ namespace krys::boo::style
       case css::ValueId::ExtraExpanded:  return css::keywords::ExtraExpanded {};
       case css::ValueId::UltraExpanded:  return css::keywords::UltraExpanded {};
       default:
-        if (css::PropertyParserHelpers::IsSystemFontShorthand(valueID))
+        if (css::parse_property::IsSystemFontShorthand(valueID))
         {
           return css::keywords::Normal {};
         }

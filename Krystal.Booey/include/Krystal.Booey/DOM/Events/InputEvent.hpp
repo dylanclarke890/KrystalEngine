@@ -70,7 +70,7 @@ namespace krys::boo::dom
     /// @see https://w3c.github.io/uievents/#dom-inputevent-inputevent
     InputEvent(DOMStringAtom type, const InputEventInit &eventInitDict = {}) noexcept;
 
-    ~InputEvent() noexcept;
+    ~InputEvent() noexcept override;
 
     /// @brief A trusted input event, which bubbles and crosses shadow boundaries.
     KRYS_NODISCARD static Ref<InputEvent> Create(DOMStringAtom type, LocalDOMWindow *view,

@@ -65,8 +65,8 @@ namespace krys::boo::style
   KRYS_NODISCARD bool ContainsCurrentColor(const ColorMix &colorMix) noexcept;
 
   void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
-                                       const ColorMix &value) noexcept;
+                                       const ColorMix &colorMix) noexcept;
 
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
-                                                                  const ColorMix &value) noexcept;
+                                                                  const ColorMix &colorMix) noexcept;
 }

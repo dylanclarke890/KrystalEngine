@@ -27,6 +27,7 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Rendering/Style/BorderValue.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -47,10 +48,10 @@ namespace krys::boo
     {
     }
 
-    CollapsedBorderValue(const BorderValue &border, const Color &color, BorderPrecedence precedence,
+    CollapsedBorderValue(const BorderValue &border, Color color, BorderPrecedence precedence,
                          const style::ZoomFactor) noexcept
         : _width(border.NonZero() ? style::Evaluate<LayoutUnit>(border.Width, style::ZoomNeeded {}) : 0_lu),
-          _color(color), _style(border.Style), _precedence(static_cast<uint8>(precedence)),
+          _color(krys::move(color)), _style(border.Style), _precedence(static_cast<uint8>(precedence)),
           _transparent(border.IsTransparent())
     {
     }

@@ -26,10 +26,12 @@
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Animations.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::css
 {
-  KeyframesRule::KeyframesRule(const CSSOMStringAtom &name) noexcept : Rule(RuleType::Keyframes), _name(name)
+  KeyframesRule::KeyframesRule(CSSOMStringAtom name) noexcept
+      : Rule(RuleType::Keyframes), _name(krys::move(name))
   {
   }
 
@@ -56,7 +58,7 @@ namespace krys::boo::css
     {
       return;
     }
-    _keyframes.push_back(krys::move(keyframe));
+    _keyframes.emplace_back(krys::move(keyframe));
   }
 
   void KeyframesRule::WrapperAppendKeyframe(Ref<KeyframeRule> &&keyframe) noexcept
@@ -71,7 +73,7 @@ namespace krys::boo::css
 
   Maybe<size_t> KeyframesRule::FindKeyframeIndex(const CSSOMString &key) const noexcept
   {
-    auto keys = PropertyParserHelpers::ParseKeyframeKeyList(key, StrictParserContext());
+    auto keys = parse_property::ParseKeyframeKeyList(key, StrictParserContext());
     if (keys.empty())
     {
       return {};

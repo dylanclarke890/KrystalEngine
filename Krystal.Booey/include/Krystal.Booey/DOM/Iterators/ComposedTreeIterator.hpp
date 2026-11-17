@@ -104,7 +104,7 @@ namespace krys::boo::dom
         return;
       }
 
-      _contextStack.push_back(Context(root, ElementAndTextDescendantIterator::FirstChild));
+      _contextStack.emplace_back(root, ElementAndTextDescendantIterator::FirstChild);
     }
 
     ComposedTreeIterator(ContainerNode &root, Node &current) noexcept
@@ -120,7 +120,7 @@ namespace krys::boo::dom
       }
       else
       {
-        _contextStack.push_back(Context(root, current));
+        _contextStack.emplace_back(root, current);
       }
     }
 
@@ -246,7 +246,7 @@ namespace krys::boo::dom
         }
         if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*parent))
         {
-          _contextStack.push_back(Context(*shadowRoot, *contextCurrent));
+          _contextStack.emplace_back(*shadowRoot, *contextCurrent);
           _contextStack.back().SlotNodeIndex = currentSlotNodeIndex;
 
           node = shadowRoot->Host();
@@ -256,7 +256,7 @@ namespace krys::boo::dom
         }
         if (ShadowRootOf(*parent))
         {
-          _contextStack.push_back(Context(*parent, *contextCurrent, Context::Slotted));
+          _contextStack.emplace_back(*parent, *contextCurrent, Context::Slotted);
           _contextStack.back().SlotNodeIndex = currentSlotNodeIndex;
 
           auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(*node);
@@ -274,7 +274,7 @@ namespace krys::boo::dom
         }
         node = parent;
       }
-      _contextStack.push_back(Context(root, *contextCurrent));
+      _contextStack.emplace_back(root, *contextCurrent);
       _contextStack.back().SlotNodeIndex = currentSlotNodeIndex;
 
       std::reverse(_contextStack.begin(), _contextStack.end());
@@ -304,7 +304,7 @@ namespace krys::boo::dom
           GetContext().SlotNodeIndex = 0;
           auto &assignedNode = *assignedNodes->front();
           krys_debug_assert(Is<Element>(assignedNode.ParentNode()));
-          _contextStack.push_back(Context(*assignedNode.ParentNode(), assignedNode, Context::Slotted));
+          _contextStack.emplace_back(*assignedNode.ParentNode(), assignedNode, Context::Slotted);
           return;
         }
       }
@@ -348,7 +348,7 @@ namespace krys::boo::dom
 
       auto &slotNode = *assignedNodes[GetContext().SlotNodeIndex];
       krys_debug_assert(Is<Element>(slotNode.ParentNode()));
-      _contextStack.push_back(Context(*slotNode.ParentNode(), slotNode, Context::Slotted));
+      _contextStack.emplace_back(*slotNode.ParentNode(), slotNode, Context::Slotted);
       return true;
     }
 

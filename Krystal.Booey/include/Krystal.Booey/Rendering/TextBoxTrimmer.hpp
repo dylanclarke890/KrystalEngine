@@ -43,7 +43,7 @@ namespace krys::boo
 
   private:
     const RenderBlockFlow *_blockContainer;
-    Maybe<LocalFrameViewLayoutContext::TextBoxTrim> _previousTextBoxTrimStatus {};
+    Maybe<LocalFrameViewLayoutContext::TextBoxTrim> _previousTextBoxTrimStatus;
     bool _shouldRestoreTextBoxTrimStatus {false};
 
   public:
@@ -73,7 +73,7 @@ namespace krys::boo
 
   private:
     const RenderBox *_renderBox;
-    Maybe<LocalFrameViewLayoutContext::TextBoxTrim> _previousTextBoxTrimStatus {};
+    Maybe<LocalFrameViewLayoutContext::TextBoxTrim> _previousTextBoxTrimStatus;
 
   public:
     explicit TextBoxTrimStartDisabler(const RenderBox &renderBox) noexcept;

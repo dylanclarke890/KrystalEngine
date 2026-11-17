@@ -3,6 +3,8 @@
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include <numbers>
 
 namespace krys::boo::html::tests
 {
@@ -28,7 +30,7 @@ namespace krys::boo::html::tests
       {
         if (initialValue != null)
         {
-          Element->SetAttribute(TestAttribute, std::move(initialValue.value()));
+          Element->SetAttribute(TestAttribute, krys::move(initialValue.value()));
         }
       }
     };
@@ -65,7 +67,7 @@ namespace krys::boo::html::tests
       SECTION("USVString")
       {
         TestData data;
-        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"");
+        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute).empty());
 
         // Not treated as a URL: the value is returned as it is, not completed.
         data.Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
@@ -75,7 +77,7 @@ namespace krys::boo::html::tests
 
         Reflect<dom::USVString>(*data.Element, TestAttribute, u8"");
         REQUIRE(data.Element->HasAttribute(TestAttribute));
-        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"");
+        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute).empty());
       }
 
       SECTION("bool")
@@ -136,13 +138,13 @@ namespace krys::boo::html::tests
         TestData data;
         REQUIRE(Reflect<double>(*data.Element, TestAttribute) == 0.0);
 
-        Reflect<double>(*data.Element, TestAttribute, 3.14159265359);
+        Reflect<double>(*data.Element, TestAttribute, static_cast<double>(std::numbers::pi));
         REQUIRE_THAT(Reflect<double>(*data.Element, TestAttribute),
-                     Catch::Matchers::WithinRel(3.14159265359));
+                     Catch::Matchers::WithinRel(std::numbers::pi));
 
-        Reflect<double>(*data.Element, TestAttribute, -3.14159265359);
+        Reflect<double>(*data.Element, TestAttribute, -static_cast<double>(std::numbers::pi));
         REQUIRE_THAT(Reflect<double>(*data.Element, TestAttribute),
-                     Catch::Matchers::WithinRel(-3.14159265359));
+                     Catch::Matchers::WithinRel(-std::numbers::pi));
       }
     }
 
@@ -313,7 +315,7 @@ namespace krys::boo::html::tests
 
     SECTION("An absent attribute is the empty string")
     {
-      REQUIRE(ReflectURL<dom::USVString>(*data.Element, TestAttribute) == u8"");
+      REQUIRE(ReflectURL<dom::USVString>(*data.Element, TestAttribute).empty());
     }
 
     SECTION("The value is completed against the document's base URL, and set as it is")

@@ -43,7 +43,6 @@ namespace krys::boo::layout
 
     ~InitialContainingBlock() noexcept override = default;
 
-  private:
     const ElementBox &Parent() const = delete;
 
     const Box *NextSibling() const = delete;

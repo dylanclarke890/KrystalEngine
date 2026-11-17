@@ -46,7 +46,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::Telephone;
+      return input_type_names::Telephone;
     }
   };
 }

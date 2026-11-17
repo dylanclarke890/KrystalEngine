@@ -52,12 +52,12 @@ namespace krys::boo::style
     {
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD const RayFunction &Ray() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE const RayFunction &Ray() const noexcept
     {
       return _operation->Ray();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD CSSBoxType ReferenceBox() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE CSSBoxType ReferenceBox() const noexcept
     {
       return _operation->ReferenceBox();
     }
@@ -100,17 +100,17 @@ namespace krys::boo::style
     {
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD const URL &Url() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE const URL &Url() const noexcept
     {
       return _operation->Url();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD const css::CSSOMStringAtom &Fragment() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE const css::CSSOMStringAtom &Fragment() const noexcept
     {
       return _operation->Fragment();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD CSSBoxType ReferenceBox() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE CSSBoxType ReferenceBox() const noexcept
     {
       return _operation->ReferenceBox();
     }
@@ -152,12 +152,12 @@ namespace krys::boo::style
     {
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD const BasicShape &GetShape() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE const BasicShape &GetShape() const noexcept
     {
       return _operation->GetShape();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD CSSBoxType ReferenceBox() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE CSSBoxType ReferenceBox() const noexcept
     {
       return _operation->ReferenceBox();
     }
@@ -199,7 +199,7 @@ namespace krys::boo::style
     {
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD CSSBoxType ReferenceBox() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE CSSBoxType ReferenceBox() const noexcept
     {
       return _operation->ReferenceBox();
     }

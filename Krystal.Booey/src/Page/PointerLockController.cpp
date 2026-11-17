@@ -84,7 +84,7 @@ namespace krys::boo
   {
     if (!target || !target->IsConnected() || _documentOfRemovedElementWhileWaitingForUnlock)
     {
-      EnqueueEvent(EventNames::PointerLockError, target);
+      EnqueueEvent(event_names::PointerLockError, target);
       Settle(krys::move(promise), dom::Exception {dom::ExceptionCode::WrongDocumentError,
                                                   u8"Pointer lock target must be in an active document."});
       return;
@@ -93,7 +93,7 @@ namespace krys::boo
     if (_documentAllowedToRelockWithoutUserGesture.get() != &target->NodeDocument()
         && !HasTransientActivation(target->NodeDocument()))
     {
-      EnqueueEvent(EventNames::PointerLockError, target);
+      EnqueueEvent(event_names::PointerLockError, target);
       // If the request was not started from an engagement gesture and the Document has not previously
       // released a successful Pointer Lock with exitPointerLock():
       Settle(krys::move(promise),
@@ -104,7 +104,7 @@ namespace krys::boo
     if (options && options->UnadjustedMovement && !SupportsUnadjustedMovement())
     {
       // If options["unadjustedMovement"] is true and the platform does not support unadjustedMovement:
-      EnqueueEvent(EventNames::PointerLockError, target);
+      EnqueueEvent(event_names::PointerLockError, target);
       Settle(krys::move(promise),
              dom::Exception {dom::ExceptionCode::NotSupportedError, u8"Unadjusted movement is unavailable."});
       return;
@@ -114,7 +114,7 @@ namespace krys::boo
     {
       if (&_element->NodeDocument() != &target->NodeDocument())
       {
-        EnqueueEvent(EventNames::PointerLockError, target);
+        EnqueueEvent(event_names::PointerLockError, target);
         // If the user agent's pointer-lock target is an element whose shadow-including root is not equal to
         // this's shadow-including root, then:
         Settle(krys::move(promise),
@@ -139,7 +139,7 @@ namespace krys::boo
       {
         // !_lockPending means the pointer lock is currently held on the page, and page is just re-targeting
         // it or changing the options.
-        EnqueueEvent(EventNames::PointerLockChange, target);
+        EnqueueEvent(event_names::PointerLockChange, target);
         Settle(krys::move(promise), {});
         if (auto *page = _page.get())
         {
@@ -175,7 +175,7 @@ namespace krys::boo
           case PointerLockRequestResult::Success: controller.DidAcquirePointerLock(); break;
           case PointerLockRequestResult::Failure: controller.DidNotAcquirePointerLock(); break;
           case PointerLockRequestResult::Unsupported:
-            controller.EnqueueEvent(EventNames::PointerLockError, target.get());
+            controller.EnqueueEvent(event_names::PointerLockError, target.get());
             controller.RejectPromises(dom::ExceptionCode::NotSupportedError,
                                       u8"Pointer lock is unavailable.");
             controller.ClearElement();
@@ -276,7 +276,7 @@ namespace krys::boo
 
     krys_debug_assert(_element);
     RefPtr element = _element;
-    EnqueueEvent(EventNames::PointerLockChange, element.get());
+    EnqueueEvent(event_names::PointerLockChange, element.get());
     ResolvePromises();
     _lockPending = false;
     _documentAllowedToRelockWithoutUserGesture = CreateWeakPtr(&element->NodeDocument());
@@ -298,7 +298,7 @@ namespace krys::boo
     // 1. Fire an event named pointerlockerror at this's node document.
     // 2. Reject promise with a "WrongDocumentError" DOMException.
     RefPtr element = _element;
-    EnqueueEvent(EventNames::PointerLockError, element.get());
+    EnqueueEvent(event_names::PointerLockError, element.get());
     RejectPromises(dom::ExceptionCode::WrongDocumentError,
                    u8"Pointer lock requires the window to have focus.");
     ClearElement();
@@ -316,7 +316,7 @@ namespace krys::boo
     RefPtr<dom::Document> document = _element
                                        ? ShareRefPtr(&_element->NodeDocument())
                                        : ShareRefPtr(_documentOfRemovedElementWhileWaitingForUnlock.get());
-    EnqueueEvent(EventNames::PointerLockChange, document.get());
+    EnqueueEvent(event_names::PointerLockChange, document.get());
     ClearElement();
     _unlockPending = false;
     _documentOfRemovedElementWhileWaitingForUnlock = nullptr;
@@ -342,9 +342,9 @@ namespace krys::boo
     }
 
     // Create click events
-    if (eventType == EventNames::MouseUp)
+    if (eventType == event_names::MouseUp)
     {
-      (void)protectedElement->DispatchMouseEvent(event, EventNames::Click, event.ClickCount());
+      (void)protectedElement->DispatchMouseEvent(event, event_names::Click, event.ClickCount());
     }
   }
 

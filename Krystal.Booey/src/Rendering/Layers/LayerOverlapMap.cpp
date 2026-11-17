@@ -112,7 +112,7 @@ namespace krys::boo
       ClippingScope *
         AddChildWithLayerAndBounds(const LayerOverlapMap::LayerAndBounds &layerAndBounds) noexcept
       {
-        Children.push_back(ClippingScope {layerAndBounds});
+        Children.emplace_back(layerAndBounds);
         return &Children.back();
       }
 

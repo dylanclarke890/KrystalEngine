@@ -65,6 +65,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Text/UnicodeHelpers.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <ranges>
 
@@ -201,16 +202,15 @@ namespace krys::boo
       bool _hasAppendedAnyText {false};
 
     public:
-      StyledMarkupAccumulator(const dom::Position &start, const dom::Position &end,
-                              List<Ref<dom::Node>> *nodes, ResolveURLs resolveURLs,
-                              SerializeComposedTree serializeComposedTree,
+      StyledMarkupAccumulator(const dom::Position &start, dom::Position end, List<Ref<dom::Node>> *nodes,
+                              ResolveURLs resolveURLs, SerializeComposedTree serializeComposedTree,
                               IgnoreUserSelectNone ignoreUserSelectNone, AnnotateForInterchange annotate,
                               StandardFontFamilySerializationMode standardFontFamilySerializationMode,
                               MSOListMode msoListMode, bool needsPositionStyleConversion,
                               PreserveDirectionForInlineText preserveDirectionForInlineText,
                               dom::Node *highestNodeToBeSerialized = nullptr) noexcept
           : MarkupAccumulator(nodes, resolveURLs, GetSerializationSyntax(*start.GetDocument())),
-            _start(start), _end(end), _annotate(annotate),
+            _start(start), _end(krys::move(end)), _annotate(annotate),
             _highestNodeToBeSerialized(ShareRefPtr(highestNodeToBeSerialized)),
             _useComposedTree(serializeComposedTree == SerializeComposedTree::Yes),
             _ignoresUserSelectNone(ignoreUserSelectNone == IgnoreUserSelectNone::Yes),
@@ -262,7 +262,7 @@ namespace krys::boo
           return;
         }
 
-        _reversedPrecedingMarkup.push_back(u8"</head>");
+        _reversedPrecedingMarkup.emplace_back(u8"</head>");
         if (baseElement)
         {
           utf8_string markupForBase;
@@ -271,9 +271,9 @@ namespace krys::boo
         }
         if (shouldAppendMetaCharset)
         {
-          _reversedPrecedingMarkup.push_back(u8"<meta charset=\"UTF-8\">");
+          _reversedPrecedingMarkup.emplace_back(u8"<meta charset=\"UTF-8\">");
         }
-        _reversedPrecedingMarkup.push_back(u8"<head>");
+        _reversedPrecedingMarkup.emplace_back(u8"<head>");
       }
 
       void WrapInBodyTagWithDirectionAttributeIfNecessary(const VisiblePosition &start,
@@ -617,8 +617,8 @@ namespace krys::boo
       {
         auto style = element.GetAttribute(u8"style").value_or(dom::DOMString());
         utf8_stringview view(style);
-        return view.starts_with(u8"mso-list:") || view.find(u8";mso-list:") != utf8_stringview::npos
-               || view.find(u8"\nmso-list:") != utf8_stringview::npos;
+        return view.starts_with(u8"mso-list:") || view.contains(u8";mso-list:")
+               || view.contains(u8"\nmso-list:");
       }
       return false;
     }
@@ -1262,7 +1262,7 @@ namespace krys::boo
           }
           if (nodes)
           {
-            nodes->push_back(Ref<dom::Node>(ancestor));
+            nodes->emplace_back(ancestor);
           }
 
           if (ancestor == specialCommonAncestor)
@@ -1747,7 +1747,7 @@ namespace krys::boo
     }
 
     // A string with no newlines gets added inline, rather than being put into a paragraph.
-    if (string.find(u8'\n') == utf8_string::npos)
+    if (!string.contains(u8'\n'))
     {
       FillContainerFromString(*fragment, string);
       return fragment;

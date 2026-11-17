@@ -174,7 +174,7 @@ namespace krys::ui
       for (const auto pixel : pixels)
       {
         premultiplied.push_back(
-          PackedColour::ARGB {PremultipliedFlooring(AsSRGBA(PackedColour::ARGB {pixel}))}.Value);
+          packed_colour::ARGB {PremultipliedFlooring(AsSRGBA(packed_colour::ARGB {pixel}))}.Value);
       }
       pixels = premultiplied;
     }

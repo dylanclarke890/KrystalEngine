@@ -363,7 +363,7 @@ namespace krys::boo
     // the captured element).
     if (element)
     {
-      UpdateMouseEventTargetNode(EventNames::GotPointerCapture, element, _lastPlatformMouseEvent,
+      UpdateMouseEventTargetNode(event_names::GotPointerCapture, element, _lastPlatformMouseEvent,
                                  FireMouseOverOut::Yes);
     }
   }
@@ -493,7 +493,7 @@ namespace krys::boo
     {
       if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
       {
-        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, EventNames::MouseDown);
+        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, event_names::MouseDown);
         return true;
       }
     }
@@ -565,7 +565,7 @@ namespace krys::boo
       _resizeLayer = CreateWeakPtr(layer);
       _offsetFromResizeCorner = LayoutSize(layer->OffsetFromResizeCorner(localPoint));
       RefPtr<dom::Node> resizedNode = ShareRefPtr(mouseEvent.TargetNode());
-      (void)DispatchMouseEvent(EventNames::MouseDown, resizedNode.get(), _clickCount, platformMouseEvent,
+      (void)DispatchMouseEvent(event_names::MouseDown, resizedNode.get(), _clickCount, platformMouseEvent,
                                FireMouseOverOut::Yes);
       return true;
     }
@@ -573,7 +573,7 @@ namespace krys::boo
     _frame.Document()->Selection().SetCaretBlinkingSuspended(true);
 
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
-    bool swallowEvent = !DispatchMouseEvent(EventNames::MouseDown, targetNode.get(), _clickCount,
+    bool swallowEvent = !DispatchMouseEvent(event_names::MouseDown, targetNode.get(), _clickCount,
                                             platformMouseEvent, FireMouseOverOut::Yes);
     if (!swallowEvent || mouseEvent.GetScrollbar())
     {
@@ -647,7 +647,7 @@ namespace krys::boo
     {
       if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
       {
-        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, EventNames::MouseMove);
+        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, event_names::MouseMove);
         return true;
       }
     }
@@ -712,7 +712,7 @@ namespace krys::boo
     }
 
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
-    bool swallowEvent = !DispatchMouseEvent(EventNames::MouseMove, targetNode.get(), 0, platformMouseEvent,
+    bool swallowEvent = !DispatchMouseEvent(event_names::MouseMove, targetNode.get(), 0, platformMouseEvent,
                                             FireMouseOverOut::Yes);
 
     if (!swallowEvent
@@ -792,7 +792,7 @@ namespace krys::boo
     //
     // The click event should only be fired for the primary pointer button.
     bool isPrimaryPointerButton = platformMouseEvent.Button() == MouseButton::Left;
-    dom::DOMStringAtom eventName(isPrimaryPointerButton ? EventNames::Click : EventNames::AuxClick);
+    dom::DOMStringAtom eventName(isPrimaryPointerButton ? event_names::Click : event_names::AuxClick);
 
     bool swallowed = false;
     RefPtr<dom::Element> clickCaptureElement = std::exchange(_clickCaptureElement, nullptr);
@@ -838,7 +838,7 @@ namespace krys::boo
     {
       if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
       {
-        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, EventNames::MouseUp);
+        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, event_names::MouseUp);
         return true;
       }
     }
@@ -857,7 +857,7 @@ namespace krys::boo
       InvalidateClick();
       (void)lastScrollbarUnderMouse->MouseUp(platformMouseEvent);
       RefPtr<dom::Element> lastElementUnderMouse = _lastElementUnderMouse;
-      return !DispatchMouseEvent(EventNames::MouseUp, lastElementUnderMouse.get(), _clickCount,
+      return !DispatchMouseEvent(event_names::MouseUp, lastElementUnderMouse.get(), _clickCount,
                                  platformMouseEvent, FireMouseOverOut::No);
     }
 
@@ -869,7 +869,7 @@ namespace krys::boo
     // FIXME: Mouse capture.
 
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
-    bool swallowMouseUpEvent = !DispatchMouseEvent(EventNames::MouseUp, targetNode.get(), _clickCount,
+    bool swallowMouseUpEvent = !DispatchMouseEvent(event_names::MouseUp, targetNode.get(), _clickCount,
                                                    platformMouseEvent, FireMouseOverOut::Yes);
 
     bool swallowClickEvent =
@@ -998,7 +998,7 @@ namespace krys::boo
       {
         area->MouseEnteredContentArea();
       }
-      else if (eventType == EventNames::MouseMove)
+      else if (eventType == event_names::MouseMove)
       {
         area->MouseMovedInContentArea();
       }
@@ -1073,26 +1073,28 @@ namespace krys::boo
 
         // Enter and leave events (and the pointer events dispatched with them) go only to the elements a
         // listener would see them on, as they don't bubble.
-        const std::array<dom::DOMStringAtom, 2> leaveTypes {EventNames::MouseLeave, EventNames::PointerLeave};
-        const std::array<dom::DOMStringAtom, 2> enterTypes {EventNames::MouseEnter, EventNames::PointerEnter};
+        const std::array<dom::DOMStringAtom, 2> leaveTypes {event_names::MouseLeave,
+                                                            event_names::PointerLeave};
+        const std::array<dom::DOMStringAtom, 2> enterTypes {event_names::MouseEnter,
+                                                            event_names::PointerEnter};
         RemoveBoundaryTargetsWithoutListeners(leftElementsChain, leaveTypes);
         RemoveBoundaryTargetsWithoutListeners(enteredElementsChain, enterTypes);
 
         if (RefPtr<dom::Element> lastElementUnderMouse = _lastElementUnderMouse)
         {
-          (void)lastElementUnderMouse->DispatchMouseEvent(platformMouseEvent, EventNames::MouseOut, 0,
+          (void)lastElementUnderMouse->DispatchMouseEvent(platformMouseEvent, event_names::MouseOut, 0,
                                                           _elementUnderMouse.get());
         }
 
         for (auto &chain : leftElementsChain)
         {
-          (void)chain->DispatchMouseEvent(platformMouseEvent, EventNames::MouseLeave, 0,
+          (void)chain->DispatchMouseEvent(platformMouseEvent, event_names::MouseLeave, 0,
                                           _elementUnderMouse.get());
         }
 
         if (RefPtr<dom::Element> elementUnderMouse = _elementUnderMouse)
         {
-          (void)elementUnderMouse->DispatchMouseEvent(platformMouseEvent, EventNames::MouseOver, 0,
+          (void)elementUnderMouse->DispatchMouseEvent(platformMouseEvent, event_names::MouseOver, 0,
                                                       _lastElementUnderMouse.get());
         }
 
@@ -1106,7 +1108,7 @@ namespace krys::boo
 
           if (!IsElementAnAncestorOfLastElementUnderMouse(chain.get()))
           {
-            (void)chain->DispatchMouseEvent(platformMouseEvent, EventNames::MouseEnter, 0,
+            (void)chain->DispatchMouseEvent(platformMouseEvent, event_names::MouseEnter, 0,
                                             _lastElementUnderMouse.get());
           }
         }
@@ -1153,10 +1155,10 @@ namespace krys::boo
     // FIXME: The window's last user click event (updateLastUserClickEvent).
     UpdateMouseEventTargetNode(eventType, targetNode, platformMouseEvent, fireMouseOverOut);
 
-    bool isMouseDownEvent = eventType == EventNames::MouseDown;
+    bool isMouseDownEvent = eventType == event_names::MouseDown;
 
     RefPtr<dom::Element> elementUnderMouse = _elementUnderMouse;
-    if (eventType == EventNames::MouseMove && _mouseMoveTargetOverride)
+    if (eventType == event_names::MouseMove && _mouseMoveTargetOverride)
     {
       // If _mouseMoveTargetOverride is set, targetNode must have been disconnected during the execution of
       // this method. One situation this may occur is an event listener for a boundary event immediately
@@ -1178,7 +1180,7 @@ namespace krys::boo
         {
           _capturesDragging = CapturesDragging::InabilityReason::MousePressIsCancelled;
         }
-        else if (eventType == EventNames::MouseMove)
+        else if (eventType == event_names::MouseMove)
         {
           _capturesDragging = CapturesDragging::InabilityReason::MouseMoveIsCancelled;
         }
@@ -1437,7 +1439,7 @@ namespace krys::boo
     // Platforms should differentiate real commands like selectAll from text input in disguise (like
     // insertNewline), and avoid dispatching text input events from keydown default handlers.
     krys_debug_assert(!underlyingEvent || !underlyingEvent->IsKeyboardEvent()
-                      || underlyingEvent->Type() == EventNames::KeyPress);
+                      || underlyingEvent->Type() == event_names::KeyPress);
 
     RefPtr<dom::EventTarget> target;
     if (underlyingEvent)
@@ -1470,7 +1472,7 @@ namespace krys::boo
 
   bool EventHandler::DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept
   {
-    if (event.Type() == EventNames::KeyDown)
+    if (event.Type() == event_names::KeyDown)
     {
       if (_frame.Document()->GetEditor().HandleKeyboardEvent(event))
       {
@@ -1506,7 +1508,7 @@ namespace krys::boo
       }
       return false;
     }
-    if (event.Type() == EventNames::KeyPress)
+    if (event.Type() == event_names::KeyPress)
     {
       if (_frame.Document()->GetEditor().HandleKeyboardEvent(event))
       {
@@ -1528,7 +1530,7 @@ namespace krys::boo
 
   bool EventHandler::DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept
   {
-    krys_debug_assert(event.Type() == EventNames::KeyDown);
+    krys_debug_assert(event.Type() == event_names::KeyDown);
 
     if (event.CtrlKey() || event.MetaKey() || event.AltKey() || event.ShiftKey())
     {
@@ -1543,7 +1545,7 @@ namespace krys::boo
 
   bool EventHandler::DefaultHomeEndEventHandler(dom::KeyboardEvent &event) noexcept
   {
-    krys_debug_assert(event.Type() == EventNames::KeyDown);
+    krys_debug_assert(event.Type() == event_names::KeyDown);
 
     if (event.CtrlKey() || event.MetaKey() || event.AltKey() || event.ShiftKey())
     {
@@ -1558,7 +1560,7 @@ namespace krys::boo
 
   bool EventHandler::DefaultSpaceEventHandler(dom::KeyboardEvent &event) noexcept
   {
-    krys_debug_assert(event.Type() == EventNames::KeyPress);
+    krys_debug_assert(event.Type() == event_names::KeyPress);
 
     if (event.CtrlKey() || event.MetaKey() || event.AltKey())
     {
@@ -1584,7 +1586,7 @@ namespace krys::boo
   bool EventHandler::DefaultArrowEventHandler(dom::FocusDirection focusDirection,
                                               dom::KeyboardEvent &event) noexcept
   {
-    krys_debug_assert(event.Type() == EventNames::KeyDown);
+    krys_debug_assert(event.Type() == event_names::KeyDown);
 
     if (!_frame.Document()->GetSettings().SpatialNavigationEnabled)
     {
@@ -1721,7 +1723,7 @@ namespace krys::boo
 
   bool EventHandler::DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept
   {
-    krys_debug_assert(event.Type() == EventNames::KeyDown);
+    krys_debug_assert(event.Type() == event_names::KeyDown);
 
     // We should only advance focus on tabs if no special modifier keys are held down.
     if (event.CtrlKey() || event.MetaKey())
@@ -2568,7 +2570,7 @@ namespace krys::boo
         return true;
       }
 
-      auto type = dom::DOMStringAtom(EventNames::SelectStart);
+      auto type = dom::DOMStringAtom(event_names::SelectStart);
       return dom::EventDispatcher::FireEvent<dom::Event>(
         type, *node, dom::EventInit {.Bubbles = true, .Cancelable = true});
     }
@@ -2843,7 +2845,7 @@ namespace krys::boo
         mouseEvent.GetHitTestResult(), AppendTrailingWhitespaceForEvent(_frame, mouseEvent));
     }
 
-    return !DispatchMouseEvent(EventNames::ContextMenu, mouseEvent.TargetNode(), 0, event,
+    return !DispatchMouseEvent(event_names::ContextMenu, mouseEvent.TargetNode(), 0, event,
                                FireMouseOverOut::No);
   }
 
@@ -2853,10 +2855,10 @@ namespace krys::boo
     {
       switch (state)
       {
-        case PlatformTouchPoint::TouchReleased:  return EventNames::TouchEnd;
-        case PlatformTouchPoint::TouchCancelled: return EventNames::TouchCancel;
-        case PlatformTouchPoint::TouchPressed:   return EventNames::TouchStart;
-        case PlatformTouchPoint::TouchMoved:     return EventNames::TouchMove;
+        case PlatformTouchPoint::TouchReleased:  return event_names::TouchEnd;
+        case PlatformTouchPoint::TouchCancelled: return event_names::TouchCancel;
+        case PlatformTouchPoint::TouchPressed:   return event_names::TouchStart;
+        case PlatformTouchPoint::TouchMoved:     return event_names::TouchMove;
         // TouchStationary state is not converted to touch events, so fall through to assert.
         default:                                 krys_debug_assert_msg(false, "Not reached."); return null;
       }
@@ -4006,8 +4008,8 @@ namespace krys::boo
       {
         // As per the HTML spec, we must always fire a drag event before firing a dragenter, dragleave, or
         // dragover event.
-        DispatchEventToDragSourceElement(EventNames::Drag, event);
-        response = DispatchDragEnterOrDragOverEvent(EventNames::DragEnter, *newTarget, event,
+        DispatchEventToDragSourceElement(event_names::Drag, event);
+        response = DispatchDragEnterOrDragOverEvent(event_names::DragEnter, *newTarget, event,
                                                     makePasteboard(), sourceOperationMask, draggingFiles);
       }
 
@@ -4015,7 +4017,7 @@ namespace krys::boo
       {
         auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
           dragTarget->NodeDocument(), makePasteboard(), sourceOperationMask, draggingFiles);
-        (void)DispatchDragEvent(EventNames::DragLeave, *dragTarget, event, *dataTransfer);
+        (void)DispatchDragEvent(event_names::DragLeave, *dragTarget, event, *dataTransfer);
         dataTransfer->MakeInvalidForSecurity();
       }
 
@@ -4033,9 +4035,9 @@ namespace krys::boo
       // have been fired earlier.
       if (!_shouldOnlyFireDragOverEvent)
       {
-        DispatchEventToDragSourceElement(EventNames::Drag, event);
+        DispatchEventToDragSourceElement(event_names::Drag, event);
       }
-      response = DispatchDragEnterOrDragOverEvent(EventNames::DragOver, *newTarget, event, makePasteboard(),
+      response = DispatchDragEnterOrDragOverEvent(event_names::DragOver, *newTarget, event, makePasteboard(),
                                                   sourceOperationMask, draggingFiles);
       _shouldOnlyFireDragOverEvent = false;
     }
@@ -4051,11 +4053,11 @@ namespace krys::boo
 
     if (RefPtr<dom::Element> dragTarget = _dragTarget)
     {
-      DispatchEventToDragSourceElement(EventNames::Drag, event);
+      DispatchEventToDragSourceElement(event_names::Drag, event);
 
       auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
         dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
-      (void)DispatchDragEvent(EventNames::DragLeave, *dragTarget, event, *dataTransfer);
+      (void)DispatchDragEvent(event_names::DragLeave, *dragTarget, event, *dataTransfer);
       dataTransfer->MakeInvalidForSecurity();
     }
     ClearDragState();
@@ -4072,7 +4074,7 @@ namespace krys::boo
     {
       Ref<dom::DataTransfer> dataTransfer = dom::DataTransfer::CreateForDrop(
         dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
-      preventedDefault = DispatchDragEvent(EventNames::Drop, *dragTarget, event, *dataTransfer);
+      preventedDefault = DispatchDragEvent(event_names::Drop, *dragTarget, event, *dataTransfer);
       dataTransfer->MakeInvalidForSecurity();
     }
     ClearDragState();
@@ -4156,7 +4158,7 @@ namespace krys::boo
     if (ShouldDispatchEventsToDragSourceElement())
     {
       GetDragState().DataTransfer->SetDestinationOperationMask(dragOperationMask);
-      DispatchEventToDragSourceElement(EventNames::DragEnd, event);
+      DispatchEventToDragSourceElement(event_names::DragEnd, event);
     }
     InvalidateDataTransfer();
 
@@ -4200,7 +4202,7 @@ namespace krys::boo
                                                     dataTransfer,
                                                     RoundedIntPoint(_mouseDownContentsPosition));
     }
-    return !DispatchDragEvent(EventNames::DragStart, *draggedElement, _mouseDownEvent, dataTransfer)
+    return !DispatchDragEvent(event_names::DragStart, *draggedElement, _mouseDownEvent, dataTransfer)
            && !_frame.Document()->Selection().Selection().IsInPasswordField();
   }
 
@@ -4349,7 +4351,7 @@ namespace krys::boo
         }
         else
         {
-          DispatchEventToDragSourceElement(EventNames::DragEnd, event.Event());
+          DispatchEventToDragSourceElement(event_names::DragEnd, event.Event());
           _mouseDownMayStartDrag = false;
           InvalidateDataTransfer();
           SetDragStateSource(nullptr);
@@ -4387,7 +4389,7 @@ namespace krys::boo
       if (ShouldDispatchEventsToDragSourceElement())
       {
         // Drag was canned at the last minute. We owe dragSource a dragend event.
-        DispatchEventToDragSourceElement(EventNames::DragEnd, event.Event());
+        DispatchEventToDragSourceElement(event_names::DragEnd, event.Event());
         _mouseDownMayStartDrag = false;
       }
     }

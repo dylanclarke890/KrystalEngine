@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // rect() = rect( [ <length> | auto ]#{4} | [ <length> | auto ]{4} )
     // https://drafts.fxtf.org/css-masking/#funcdef-clip-rect

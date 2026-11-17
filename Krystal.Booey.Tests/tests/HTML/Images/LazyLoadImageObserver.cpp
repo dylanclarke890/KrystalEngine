@@ -31,7 +31,7 @@ namespace krys::boo::tests
         frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(u8"<!DOCTYPE html>" + krys::move(markup), IsEOF::Yes);
-        (void)parser->PumpTokenizer();
+        parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();
       }
 
@@ -64,7 +64,7 @@ namespace krys::boo::tests
         display_list::RecorderImpl recorder(
           FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
         Frame().View()->PaintContents(recorder, IntRect(IntPoint(), ViewSize));
-        return recorder.TakeDisplayList()->AsText({}).find(u8"draw-native-image") != utf8_string::npos;
+        return recorder.TakeDisplayList()->AsText({}).contains(u8"draw-native-image");
       }
     };
   }

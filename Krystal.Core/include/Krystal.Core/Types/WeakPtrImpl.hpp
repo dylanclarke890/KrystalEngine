@@ -50,9 +50,8 @@ namespace krys::detail
     }
 
     template <typename T>
-    KRYS_NODISCARD constexpr typename T::weak_value *get() noexcept
+    KRYS_NODISCARD typename T::weak_value *get() noexcept
     {
-      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
       return static_cast<typename T::weak_value *>(_ptr);
     }
 

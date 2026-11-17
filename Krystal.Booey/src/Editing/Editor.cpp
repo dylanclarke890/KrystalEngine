@@ -92,14 +92,14 @@ namespace krys::boo
       switch (kind)
       {
         case ClipboardEventKind::Copy:
-        case ClipboardEventKind::CopyFont:         return EventNames::Copy;
-        case ClipboardEventKind::Cut:              return EventNames::Cut;
+        case ClipboardEventKind::CopyFont:         return event_names::Copy;
+        case ClipboardEventKind::Cut:              return event_names::Cut;
         case ClipboardEventKind::Paste:
         case ClipboardEventKind::PasteAsPlainText:
-        case ClipboardEventKind::PasteFont:        return EventNames::Paste;
-        case ClipboardEventKind::BeforeCopy:       return EventNames::BeforeCopy;
-        case ClipboardEventKind::BeforeCut:        return EventNames::BeforeCut;
-        case ClipboardEventKind::BeforePaste:      return EventNames::BeforePaste;
+        case ClipboardEventKind::PasteFont:        return event_names::Paste;
+        case ClipboardEventKind::BeforeCopy:       return event_names::BeforeCopy;
+        case ClipboardEventKind::BeforeCut:        return event_names::BeforeCut;
+        case ClipboardEventKind::BeforePaste:      return event_names::BeforePaste;
       }
       krys_debug_assert(false);
       return {};
@@ -130,7 +130,7 @@ namespace krys::boo
                                   const List<RefPtr<dom::StaticRange>> &targetRanges = {},
                                   bool cancelable = true) noexcept
     {
-      auto event = dom::InputEvent::Create(EventNames::BeforeInput, element.NodeDocument().Window(),
+      auto event = dom::InputEvent::Create(event_names::BeforeInput, element.NodeDocument().Window(),
                                            inputType, cancelable, krys::move(data), krys::move(dataTransfer),
                                            targetRanges, 0, isInputMethodComposing);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &element);
@@ -145,7 +145,7 @@ namespace krys::boo
                             RefPtr<dom::DataTransfer> &&dataTransfer = nullptr,
                             const List<RefPtr<dom::StaticRange>> &targetRanges = {}) noexcept
     {
-      auto event = dom::InputEvent::Create(EventNames::Input, element.NodeDocument().Window(), inputType,
+      auto event = dom::InputEvent::Create(event_names::Input, element.NodeDocument().Window(), inputType,
                                            false, krys::move(data), krys::move(dataTransfer), targetRanges, 0,
                                            isInputMethodComposing);
       dom::ScopedEventQueue::DispatchOrQueue(krys::move(event), ShareRef(element));
@@ -731,11 +731,11 @@ namespace krys::boo
     }
   }
 
-  bool Editor::DoTextFieldCommandFromEvent(dom::Element &e, dom::KeyboardEvent *ke) noexcept
+  bool Editor::DoTextFieldCommandFromEvent(dom::Element &e, dom::KeyboardEvent *event) noexcept
   {
     if (auto *client = Client())
     {
-      return client->DoTextFieldCommandFromEvent(e, ke);
+      return client->DoTextFieldCommandFromEvent(e, event);
     }
 
     return false;
@@ -1806,7 +1806,7 @@ namespace krys::boo
     if (RefPtr<dom::Element> target = ShareRefPtr(document->FocusedElement()))
     {
       auto event =
-        dom::CompositionEvent::Create(EventNames::CompositionEnd, target->NodeDocument().Window(), text);
+        dom::CompositionEvent::Create(event_names::CompositionEnd, target->NodeDocument().Window(), text);
       (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     }
 
@@ -1888,17 +1888,17 @@ namespace krys::boo
         // function doesn't create a composition node when the text is empty.
         if (!text.empty())
         {
-          auto start = dom::CompositionEvent::Create(EventNames::CompositionStart,
+          auto start = dom::CompositionEvent::Create(event_names::CompositionStart,
                                                      target->NodeDocument().Window(), originalText);
           (void)dom::EventDispatcher::DispatchToTarget(*start, target.get());
-          event = dom::CompositionEvent::Create(EventNames::CompositionUpdate,
+          event = dom::CompositionEvent::Create(event_names::CompositionUpdate,
                                                 target->NodeDocument().Window(), text);
         }
       }
       else if (!text.empty())
       {
-        event =
-          dom::CompositionEvent::Create(EventNames::CompositionUpdate, target->NodeDocument().Window(), text);
+        event = dom::CompositionEvent::Create(event_names::CompositionUpdate, target->NodeDocument().Window(),
+                                              text);
       }
 
       if (event)
@@ -1916,7 +1916,7 @@ namespace krys::boo
       if (target)
       {
         auto end =
-          dom::CompositionEvent::Create(EventNames::CompositionEnd, target->NodeDocument().Window(), text);
+          dom::CompositionEvent::Create(event_names::CompositionEnd, target->NodeDocument().Window(), text);
         (void)dom::EventDispatcher::DispatchToTarget(*end, target.get());
       }
     }

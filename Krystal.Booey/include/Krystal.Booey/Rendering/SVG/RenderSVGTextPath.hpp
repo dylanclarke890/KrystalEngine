@@ -50,9 +50,9 @@ namespace krys::boo
 
     KRYS_NODISCARD const svg::SVGLengthValue &StartOffset() const noexcept;
 
-  private:
     void GraphicsElement() const = delete;
 
+  private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGTextPath";

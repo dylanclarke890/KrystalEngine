@@ -3,6 +3,7 @@
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -22,7 +23,7 @@ namespace krys::io
   }
 
   NativeFileReader::NativeFileReader(Path &&path, ReadFlags flags)
-      : _path(std::move(path)), _size(0uz), _flags(flags)
+      : _path(krys::move(path)), _size(0uz), _flags(flags)
   {
     NativeFileReader::Open();
   }
@@ -214,7 +215,7 @@ namespace krys::io
   }
 
   NativeFileWriter::NativeFileWriter(Path &&path, WriteFlags flags)
-      : _path(std::move(path)), _size(0uz), _flags(flags)
+      : _path(krys::move(path)), _size(0uz), _flags(flags)
   {
     NativeFileWriter::Open();
   }

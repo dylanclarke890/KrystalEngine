@@ -20,13 +20,14 @@
 #include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
 #include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::svg
 {
   SVGImageForContainer::SVGImageForContainer(SVGImage *image, const FloatSize &containerSize,
-                                             float containerZoom, const url::URL &initialFragmentURL) noexcept
+                                             float containerZoom, url::URL initialFragmentURL) noexcept
       : _image(CreateWeakPtr(image)), _containerSize(containerSize), _containerZoom(containerZoom),
-        _initialFragmentURL(initialFragmentURL)
+        _initialFragmentURL(krys::move(initialFragmentURL))
   {
   }
 

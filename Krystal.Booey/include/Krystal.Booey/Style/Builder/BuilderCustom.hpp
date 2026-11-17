@@ -1562,13 +1562,13 @@ namespace krys::boo::style
         (parentIsAbsoluteSize
          && (ident == css::ValueId::Larger || ident == css::ValueId::Smaller
              || ident == css::ValueId::InternalRubyText || ident == css::ValueId::Math))
-        || css::PropertyParserHelpers::IsSystemFontShorthand(ident));
+        || css::parse_property::IsSystemFontShorthand(ident));
 
-      if (css::PropertyParserHelpers::IsSystemFontShorthand(ident))
+      if (css::parse_property::IsSystemFontShorthand(ident))
       {
         size = builderState.GetDocument()
                  .GetSettings()
-                 .Values.SystemFonts[css::PropertyParserHelpers::LowerFontShorthand(ident)]
+                 .Values.SystemFonts[css::parse_property::LowerFontShorthand(ident)]
                  .Size;
       }
 

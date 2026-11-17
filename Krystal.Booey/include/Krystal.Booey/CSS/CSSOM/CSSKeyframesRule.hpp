@@ -50,7 +50,7 @@ namespace krys::boo::css
     CSSKeyframesRule(KeyframesRule &keyframesRule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSKeyframesRule() noexcept;
+    ~CSSKeyframesRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSKeyframesRule> Create(KeyframesRule &rule, CSSStyleSheet *sheet) noexcept;
 

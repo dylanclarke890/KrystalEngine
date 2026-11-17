@@ -42,7 +42,7 @@
   #include <cstdint>
   #include <functional>
   #include <limits>
-  #include <type_traits>
+  #include <type_traits> // NOLINT(portability-restrict-system-includes): third-party
   #include <utility>
 #endif
 

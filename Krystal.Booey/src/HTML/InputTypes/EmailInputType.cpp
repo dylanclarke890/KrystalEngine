@@ -36,8 +36,7 @@ namespace krys::boo::html
     /// @brief Whether @p c is one of the ABNF's `atext` characters, which make up the part before the `@`.
     KRYS_NODISCARD constexpr bool IsEmailLocalPartCharacter(char8_t c) noexcept
     {
-      return text::IsASCIIAlphanumeric(c)
-             || dom::DOMStringView(u8".!#$%&'*+/=?^_`{|}~-").find(c) != dom::DOMStringView::npos;
+      return text::IsASCIIAlphanumeric(c) || dom::DOMStringView(u8".!#$%&'*+/=?^_`{|}~-").contains(c);
     }
 
     /// @brief Whether @p label is a domain label: 1 to 63 ASCII alphanumerics and hyphens, starting and
@@ -104,7 +103,7 @@ namespace krys::boo::html
     {
       return !IsValidEmailAddress(value);
     }
-    for (auto address : infra::StringAlgorithms::StrictlySplit(value, u8','))
+    for (const auto &address : infra::StringAlgorithms::StrictlySplit(value, u8','))
     {
       if (!IsValidEmailAddress(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(address)))
       {
@@ -161,7 +160,7 @@ namespace krys::boo::html
 
     dom::DOMString strippedValue;
     bool first = true;
-    for (auto address : infra::StringAlgorithms::StrictlySplit(noLineBreakValue, u8','))
+    for (const auto &address : infra::StringAlgorithms::StrictlySplit(noLineBreakValue, u8','))
     {
       if (!first)
       {

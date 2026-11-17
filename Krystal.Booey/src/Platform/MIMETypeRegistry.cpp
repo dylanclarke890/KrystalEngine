@@ -39,13 +39,9 @@ namespace krys::boo
       {
         return false;
       }
-      return std::ranges::all_of(value,
-                                 [](char8 c)
-                                 {
-                                   return text::IsASCIIAlphanumeric(c)
-                                          || utf8_stringview(u8"!#$%&'*+-.^_`|~").find(c)
-                                               != utf8_stringview::npos;
-                                 });
+      return std::ranges::all_of(
+        value, [](char8 c)
+        { return text::IsASCIIAlphanumeric(c) || utf8_stringview(u8"!#$%&'*+-.^_`|~").contains(c); });
     }
 
     KRYS_NODISCARD bool IsValidMIMETypeWithSuffix(utf8_stringview mimeType, utf8_stringview suffix) noexcept

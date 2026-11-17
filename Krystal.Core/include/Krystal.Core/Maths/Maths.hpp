@@ -6,6 +6,7 @@
 #include "Krystal.Core/Maths/Vector.hpp"
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 namespace krys
 {
@@ -43,7 +44,7 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr T Pi() noexcept
   {
-    return T(3.14159265358979323846264338327950288);
+    return T(std::numbers::pi);
   }
 
   /// @returns pi * 2.
@@ -85,7 +86,7 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr T OneOverPi() noexcept
   {
-    return T(0.318309886183790671537767526745028724);
+    return T(std::numbers::inv_pi);
   }
 
   /// @returns 1 / (2 * pi).
@@ -148,14 +149,14 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr T e() noexcept
   {
-    return T(2.71828182845904523536);
+    return T(std::numbers::e);
   }
 
   /// @returns log10(e), the base-10 logarithm of e.
   template <Number T>
   KRYS_NODISCARD constexpr T Log10E() noexcept
   {
-    return T(0.434294481903251827651128918916605082);
+    return T(std::numbers::log10e);
   }
 
   /// @returns sqrt(e), the square root of e.
@@ -169,21 +170,21 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr T Euler() noexcept
   {
-    return T(0.577215664901532860606);
+    return T(std::numbers::egamma);
   }
 
   /// @returns sqrt(2).
   template <Number T>
   KRYS_NODISCARD constexpr T RootTwo() noexcept
   {
-    return T(1.41421356237309504880168872420969808);
+    return T(std::numbers::sqrt2);
   }
 
   /// @returns sqrt(3).
   template <Number T>
   KRYS_NODISCARD constexpr T RootThree() noexcept
   {
-    return T(1.73205080756887729352744634150587236);
+    return T(std::numbers::sqrt3);
   }
 
   /// @returns sqrt(5).
@@ -197,14 +198,14 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr T LnTwo() noexcept
   {
-    return T(0.693147180559945309417232121458176568);
+    return T(std::numbers::ln2);
   }
 
   /// @returns ln(10).
   template <Number T>
   KRYS_NODISCARD constexpr T LnTen() noexcept
   {
-    return T(2.30258509299404568401799145468436421);
+    return T(std::numbers::ln10);
   }
 
   /// @returns ln(ln(2)).
@@ -232,7 +233,7 @@ namespace krys
   template <Number T>
   KRYS_NODISCARD constexpr T GoldenRatio() noexcept
   {
-    return T(1.61803398874989484820458683436563811);
+    return T(std::numbers::phi);
   }
 
   /// @returns cos(1 / 2).

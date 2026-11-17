@@ -18,7 +18,7 @@ namespace krys::boo::dom::tests
   {
     KRYS_NODISCARD Ref<Event> CancelableEvent() noexcept
     {
-      return CreateRef<Event>(EventNames::Click, EventInit {.Cancelable = true});
+      return CreateRef<Event>(event_names::Click, EventInit {.Cancelable = true});
     }
 
     KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringAtom localName)
@@ -44,8 +44,8 @@ namespace krys::boo::dom::tests
             "[HTML][Event][dom:concept-event-constructor][dom:inner-event-creation-steps]")
   {
     auto event =
-      CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true, .Cancelable = true, .Composed = true});
-    REQUIRE(event->Type() == EventNames::Click);
+      CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true, .Cancelable = true, .Composed = true});
+    REQUIRE(event->Type() == event_names::Click);
     REQUIRE(event->Bubbles());
     REQUIRE(event->Cancelable());
     REQUIRE(event->Composed());
@@ -62,14 +62,14 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Event.type: the type it was initialized to", "[HTML][Event][dom:dom-event-type]")
   {
-    auto event = CreateRef<Event>(EventNames::Click);
-    REQUIRE(event->Type() == EventNames::Click);
+    auto event = CreateRef<Event>(event_names::Click);
+    REQUIRE(event->Type() == event_names::Click);
   }
 
   TEST_CASE("Event.target and srcElement: the event's target", "[HTML][Event][dom:dom-event-target]"
                                                                "[dom:dom-event-srcelement]")
   {
-    auto event = CreateRef<Event>(EventNames::Click);
+    auto event = CreateRef<Event>(event_names::Click);
     REQUIRE(event->Target() == nullptr);
     REQUIRE(event->SrcElement() == nullptr);
 
@@ -88,14 +88,14 @@ namespace krys::boo::dom::tests
     auto child = NewElement(*document, u8"span");
     REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
-    auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true});
+    auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true});
     REQUIRE(event->CurrentTarget() == nullptr);
 
     List<EventTarget *> seen;
     auto onChild =
-      child->AddEventListener(EventNames::Click, [&](Event &e) { seen.push_back(e.CurrentTarget().get()); });
-    auto onParent =
-      parent->AddEventListener(EventNames::Click, [&](Event &e) { seen.push_back(e.CurrentTarget().get()); });
+      child->AddEventListener(event_names::Click, [&](Event &e) { seen.push_back(e.CurrentTarget().get()); });
+    auto onParent = parent->AddEventListener(event_names::Click,
+                                             [&](Event &e) { seen.push_back(e.CurrentTarget().get()); });
     REQUIRE_FALSE(child->DispatchEvent(*event).HasException());
 
     REQUIRE(seen == List<EventTarget *> {child.get(), parent.get()});
@@ -111,7 +111,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Empty outside dispatch")
     {
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto event = CreateRef<Event>(event_names::Click);
       REQUIRE(event->ComposedPath().empty());
       REQUIRE_FALSE(host->DispatchEvent(*event).HasException());
       REQUIRE(event->ComposedPath().empty());
@@ -125,10 +125,10 @@ namespace krys::boo::dom::tests
 
       List<EventTarget *> fromInner, fromHost;
       auto onInner =
-        inner->AddEventListener(EventNames::Click, [&](Event &e) { fromInner = ComposedPathOf(e); });
+        inner->AddEventListener(event_names::Click, [&](Event &e) { fromInner = ComposedPathOf(e); });
       auto onHost =
-        host->AddEventListener(EventNames::Click, [&](Event &e) { fromHost = ComposedPathOf(e); });
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true, .Composed = true});
+        host->AddEventListener(event_names::Click, [&](Event &e) { fromHost = ComposedPathOf(e); });
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true, .Composed = true});
       REQUIRE_FALSE(inner->DispatchEvent(*event).HasException());
 
       auto full = List<EventTarget *> {inner.get(), shadow.get(), host.get(), document.get()};
@@ -144,10 +144,10 @@ namespace krys::boo::dom::tests
 
       List<EventTarget *> fromInner, fromHost;
       auto onInner =
-        inner->AddEventListener(EventNames::Click, [&](Event &e) { fromInner = ComposedPathOf(e); });
+        inner->AddEventListener(event_names::Click, [&](Event &e) { fromInner = ComposedPathOf(e); });
       auto onHost =
-        host->AddEventListener(EventNames::Click, [&](Event &e) { fromHost = ComposedPathOf(e); });
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true, .Composed = true});
+        host->AddEventListener(event_names::Click, [&](Event &e) { fromHost = ComposedPathOf(e); });
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true, .Composed = true});
       REQUIRE_FALSE(inner->DispatchEvent(*event).HasException());
 
       REQUIRE(fromInner == List<EventTarget *> {inner.get(), shadow.get(), host.get(), document.get()});
@@ -164,10 +164,10 @@ namespace krys::boo::dom::tests
 
       List<EventTarget *> fromSlotted, fromSlot;
       auto onSlotted =
-        slotted->AddEventListener(EventNames::Click, [&](Event &e) { fromSlotted = ComposedPathOf(e); });
+        slotted->AddEventListener(event_names::Click, [&](Event &e) { fromSlotted = ComposedPathOf(e); });
       auto onSlot =
-        slot->AddEventListener(EventNames::Click, [&](Event &e) { fromSlot = ComposedPathOf(e); });
-      auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true});
+        slot->AddEventListener(event_names::Click, [&](Event &e) { fromSlot = ComposedPathOf(e); });
+      auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true});
       REQUIRE_FALSE(slotted->DispatchEvent(*event).HasException());
 
       REQUIRE(fromSlotted == List<EventTarget *> {slotted.get(), host.get(), document.get()});
@@ -184,7 +184,7 @@ namespace krys::boo::dom::tests
     auto child = NewElement(*document, u8"span");
     REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
-    auto event = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true});
+    auto event = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true});
     REQUIRE(event->EventPhase() == EventPhaseType::NONE);
 
     List<EventPhaseType> phases;
@@ -192,9 +192,9 @@ namespace krys::boo::dom::tests
     {
       phases.push_back(e.EventPhase());
     };
-    auto capture = parent->AddEventListener(EventNames::Click, record, true);
-    auto atTarget = child->AddEventListener(EventNames::Click, record);
-    auto bubble = parent->AddEventListener(EventNames::Click, record);
+    auto capture = parent->AddEventListener(event_names::Click, record, true);
+    auto atTarget = child->AddEventListener(event_names::Click, record);
+    auto bubble = parent->AddEventListener(event_names::Click, record);
     REQUIRE_FALSE(child->DispatchEvent(*event).HasException());
 
     REQUIRE(phases
@@ -206,7 +206,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Event.stopPropagation() and cancelBubble: the stop propagation flag",
             "[HTML][Event][dom:dom-event-stoppropagation][dom:dom-event-cancelbubble]")
   {
-    auto event = CreateRef<Event>(EventNames::Click);
+    auto event = CreateRef<Event>(event_names::Click);
     REQUIRE_FALSE(event->CancelBubble());
 
     SECTION("stopPropagation() sets it")
@@ -235,15 +235,15 @@ namespace krys::boo::dom::tests
     auto element = NewElement(*document, u8"div");
     int calls = 0;
     bool cancelBubble = false;
-    auto first = element->AddEventListener(EventNames::Click,
+    auto first = element->AddEventListener(event_names::Click,
                                            [&](Event &e)
                                            {
                                              ++calls;
                                              e.StopImmediatePropagation();
                                              cancelBubble = e.CancelBubble();
                                            });
-    auto second = element->AddEventListener(EventNames::Click, [&](Event &) { ++calls; });
-    auto event = CreateRef<Event>(EventNames::Click);
+    auto second = element->AddEventListener(event_names::Click, [&](Event &) { ++calls; });
+    auto event = CreateRef<Event>(event_names::Click);
     REQUIRE_FALSE(element->DispatchEvent(*event).HasException());
 
     REQUIRE(calls == 1);
@@ -253,11 +253,11 @@ namespace krys::boo::dom::tests
   TEST_CASE("Event.bubbles and cancelable: the values they were initialized to",
             "[HTML][Event][dom:dom-event-bubbles][dom:dom-event-cancelable]")
   {
-    auto plain = CreateRef<Event>(EventNames::Click);
+    auto plain = CreateRef<Event>(event_names::Click);
     REQUIRE_FALSE(plain->Bubbles());
     REQUIRE_FALSE(plain->Cancelable());
 
-    auto both = CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true, .Cancelable = true});
+    auto both = CreateRef<Event>(event_names::Click, EventInit {.Bubbles = true, .Cancelable = true});
     REQUIRE(both->Bubbles());
     REQUIRE(both->Cancelable());
   }
@@ -276,7 +276,7 @@ namespace krys::boo::dom::tests
 
     SECTION("An event that isn't cancelable isn't")
     {
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto event = CreateRef<Event>(event_names::Click);
       event->PreventDefault();
       REQUIRE_FALSE(event->DefaultPrevented());
     }
@@ -288,7 +288,7 @@ namespace krys::boo::dom::tests
       AddEventListenerOptions passive;
       passive.Passive = true;
       auto listener =
-        element->AddEventListener(EventNames::Click, [](Event &e) { e.PreventDefault(); }, passive);
+        element->AddEventListener(event_names::Click, [](Event &e) { e.PreventDefault(); }, passive);
       auto event = CancelableEvent();
       auto result = element->DispatchEvent(*event);
       REQUIRE_FALSE(result.HasException());
@@ -322,7 +322,7 @@ namespace krys::boo::dom::tests
 
     SECTION("An event that isn't cancelable stays true")
     {
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto event = CreateRef<Event>(event_names::Click);
       event->ReturnValue(false);
       REQUIRE(event->ReturnValue());
     }
@@ -330,15 +330,15 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Event.composed: the composed flag", "[HTML][Event][dom:dom-event-composed]")
   {
-    REQUIRE_FALSE(CreateRef<Event>(EventNames::Click)->Composed());
-    REQUIRE(CreateRef<Event>(EventNames::Click, EventInit {.Composed = true})->Composed());
+    REQUIRE_FALSE(CreateRef<Event>(event_names::Click)->Composed());
+    REQUIRE(CreateRef<Event>(event_names::Click, EventInit {.Composed = true})->Composed());
   }
 
   TEST_CASE("Event.isTrusted: false for constructed events, true for the user agent's",
             "[HTML][Event][dom:dom-event-istrusted]")
   {
-    REQUIRE_FALSE(CreateRef<Event>(EventNames::Click)->IsTrusted());
-    REQUIRE(Event::Create(EventNames::Click, false, false)->IsTrusted());
+    REQUIRE_FALSE(CreateRef<Event>(event_names::Click)->IsTrusted());
+    REQUIRE(Event::Create(event_names::Click, false, false)->IsTrusted());
   }
 
   TEST_CASE("Event::TimeStamp is the host's time at creation",
@@ -346,7 +346,7 @@ namespace krys::boo::dom::tests
   {
     auto &loop = html::EventLoop::Current();
     loop.Run(loop.Now() + 7ms);
-    auto event = CreateRef<Event>(EventNames::Click);
+    auto event = CreateRef<Event>(event_names::Click);
     CHECK(event->TimeStamp() == loop.Now());
   }
 
@@ -361,13 +361,13 @@ namespace krys::boo::dom::tests
       auto *window = fixture.Document->Window();
       REQUIRE(window);
       loop.Run(window->TimeOrigin() + 2'500us);
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto event = CreateRef<Event>(event_names::Click);
       CHECK(event->TimeStampForBindings(*fixture.Document) == 2.5);
     }
 
     SECTION("Never before the time origin")
     {
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto event = CreateRef<Event>(event_names::Click);
       loop.Run(loop.Now() + 10ms);
       boo::tests::PaintFixture fixture(u8"<!DOCTYPE html>", {200, 100}, true);
       REQUIRE(fixture.Document->Window());
@@ -378,7 +378,7 @@ namespace krys::boo::dom::tests
     {
       loop.Run(loop.Now() + 10ms);
       auto document = CreateRef<Document>();
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto event = CreateRef<Event>(event_names::Click);
       CHECK(event->TimeStampForBindings(*document) == 0);
     }
   }
@@ -388,9 +388,9 @@ namespace krys::boo::dom::tests
   {
     SECTION("Sets the type, bubbles and cancelable")
     {
-      auto event = CreateRef<Event>(EventNames::Click);
-      event->InitEvent(EventNames::MouseWheel, true, true);
-      REQUIRE(event->Type() == EventNames::MouseWheel);
+      auto event = CreateRef<Event>(event_names::Click);
+      event->InitEvent(event_names::MouseWheel, true, true);
+      REQUIRE(event->Type() == event_names::MouseWheel);
       REQUIRE(event->Bubbles());
       REQUIRE(event->Cancelable());
     }
@@ -399,13 +399,13 @@ namespace krys::boo::dom::tests
     {
       auto document = CreateRef<Document>();
       auto element = NewElement(*document, u8"div");
-      auto event = Event::Create(EventNames::Click, false, true);
+      auto event = Event::Create(event_names::Click, false, true);
       event->StopImmediatePropagation();
       event->PreventDefault();
       REQUIRE_FALSE(element->DispatchEvent(*event).HasException());
       REQUIRE(event->Target().get() == element.get());
 
-      event->InitEvent(EventNames::Click, false, true);
+      event->InitEvent(event_names::Click, false, true);
       REQUIRE_FALSE(event->CancelBubble());
       REQUIRE_FALSE(event->DefaultPrevented());
       REQUIRE_FALSE(event->IsTrusted());
@@ -413,8 +413,8 @@ namespace krys::boo::dom::tests
 
       // The stop immediate propagation flag is clear too: both listeners run.
       int calls = 0;
-      auto first = element->AddEventListener(EventNames::Click, [&](Event &) { ++calls; });
-      auto second = element->AddEventListener(EventNames::Click, [&](Event &) { ++calls; });
+      auto first = element->AddEventListener(event_names::Click, [&](Event &) { ++calls; });
+      auto second = element->AddEventListener(event_names::Click, [&](Event &) { ++calls; });
       REQUIRE_FALSE(element->DispatchEvent(*event).HasException());
       REQUIRE(calls == 2);
     }
@@ -423,11 +423,11 @@ namespace krys::boo::dom::tests
     {
       auto document = CreateRef<Document>();
       auto element = NewElement(*document, u8"div");
-      auto listener = element->AddEventListener(EventNames::Click, [](Event &e)
-                                                { e.InitEvent(EventNames::MouseWheel, true, true); });
-      auto event = CreateRef<Event>(EventNames::Click);
+      auto listener = element->AddEventListener(event_names::Click, [](Event &e)
+                                                { e.InitEvent(event_names::MouseWheel, true, true); });
+      auto event = CreateRef<Event>(event_names::Click);
       REQUIRE_FALSE(element->DispatchEvent(*event).HasException());
-      REQUIRE(event->Type() == EventNames::Click);
+      REQUIRE(event->Type() == event_names::Click);
       REQUIRE_FALSE(event->Bubbles());
       REQUIRE_FALSE(event->Cancelable());
     }

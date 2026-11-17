@@ -118,7 +118,7 @@ namespace krys::boo
       auto *select = DynamicDowncast<html::HTMLSelectElement>(*element);
       if ((select && select->UsesMenuList())
           || (element->IsInUserAgentShadowTree()
-              && element->UserAgentPart() == css::UserAgentParts::InternalSelectPicker()))
+              && element->UserAgentPart() == css::user_agent_parts::InternalSelectPicker()))
       {
         return appearance;
       }
@@ -191,7 +191,7 @@ namespace krys::boo
     // NOTE: This is just a legacy hard-coded list of elements that have some appearance value in html.css
     // FIXME: Remove when devolvable widgets are universally enabled.
     if (element.IsInUserAgentShadowTree()
-        && element.UserAgentPart() == css::UserAgentParts::WebkitListButton())
+        && element.UserAgentPart() == css::user_agent_parts::WebkitListButton())
     {
       return true;
     }
@@ -398,14 +398,14 @@ namespace krys::boo
     {
       const auto &part = element.UserAgentPart();
 
-      if (part == css::UserAgentParts::WebkitListButton())
+      if (part == css::user_agent_parts::WebkitListButton())
       {
         return StyleAppearance::ListButton;
       }
 
       // FIXME: The colour swatch parts, with colour inputs (G14d4).
 
-      if (part == css::UserAgentParts::WebkitSearchCancelButton())
+      if (part == css::user_agent_parts::WebkitSearchCancelButton())
       {
         return StyleAppearance::SearchFieldCancelButton;
       }
@@ -417,28 +417,28 @@ namespace krys::boo
           return StyleAppearance::None;
         }
 
-        if (part == css::UserAgentParts::WebkitSearchDecoration())
+        if (part == css::user_agent_parts::WebkitSearchDecoration())
         {
           return StyleAppearance::SearchFieldDecoration;
         }
 
-        if (part == css::UserAgentParts::WebkitSearchResultsDecoration())
+        if (part == css::user_agent_parts::WebkitSearchResultsDecoration())
         {
           return StyleAppearance::SearchFieldResultsDecoration;
         }
 
-        if (part == css::UserAgentParts::WebkitSearchResultsButton())
+        if (part == css::user_agent_parts::WebkitSearchResultsButton())
         {
           return StyleAppearance::SearchFieldResultsButton;
         }
       }
 
-      if (part == css::UserAgentParts::WebkitSliderThumb())
+      if (part == css::user_agent_parts::WebkitSliderThumb())
       {
         return StyleAppearance::SliderThumbHorizontal;
       }
 
-      if (part == css::UserAgentParts::WebkitInnerSpinButton())
+      if (part == css::user_agent_parts::WebkitInnerSpinButton())
       {
         return StyleAppearance::InnerSpinButton;
       }

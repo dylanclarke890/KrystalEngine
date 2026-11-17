@@ -16,7 +16,7 @@ namespace krys::boo::css::tests
     REQUIRE_FALSE(document->AppendChild(*html).HasException());
 
     // Nothing sets it: the pragma-set default language, which is empty here.
-    CHECK(EffectiveLang(*html) == u8"");
+    CHECK(EffectiveLang(*html).empty());
 
     REQUIRE_FALSE(html->SetAttribute(u8"lang", u8"en").HasException());
     auto div = document->CreateElement(u8"div").ReleaseValue();
@@ -43,7 +43,7 @@ namespace krys::boo::css::tests
     auto empty = document->CreateElement(u8"span").ReleaseValue();
     REQUIRE_FALSE(empty->SetAttribute(u8"lang", u8"").HasException());
     REQUIRE_FALSE(div->AppendChild(*empty).HasException());
-    CHECK(EffectiveLang(*empty) == u8"");
+    CHECK(EffectiveLang(*empty).empty());
 
     // A shadow tree's elements take the host's.
     auto host = document->CreateElement(u8"div").ReleaseValue();

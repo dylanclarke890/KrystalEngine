@@ -14,8 +14,8 @@ namespace krys::boo::html::tests
     {
       auto element = document->CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
       auto &mod = Downcast<HTMLModElement>(Downcast<HTMLElement>(*element));
-      CHECK(mod.Cite() == u8"");
-      CHECK(mod.DateTime() == u8"");
+      CHECK(mod.Cite().empty());
+      CHECK(mod.DateTime().empty());
 
       mod.Cite(u8"changes.html");
       CHECK(element->GetAttribute(u8"cite") == u8"changes.html");

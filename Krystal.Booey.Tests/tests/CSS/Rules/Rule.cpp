@@ -363,7 +363,7 @@ namespace krys::boo::css::tests
     SECTION("FontPaletteValuesRule")
     {
       List<FontPaletteValues::OverriddenColor> colors;
-      colors.push_back({1u, boo::Color::black});
+      colors.emplace_back(1u, boo::Color::black);
       auto rule =
         FontPaletteValuesRule::Create(u8"--p", {CSSOMStringAtom(u8"Bixa")},
                                       FontPaletteIndex(FontPaletteIndex::Type::Dark), krys::move(colors));

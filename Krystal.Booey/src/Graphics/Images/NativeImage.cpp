@@ -75,7 +75,7 @@ namespace krys::boo
       return null;
     }
 
-    auto pixel = AsSRGBA(PackedColour::ARGB {_platformImage->Pixels()[0]});
+    auto pixel = AsSRGBA(packed_colour::ARGB {_platformImage->Pixels()[0]});
     if (_platformImage->PremultipliedAlpha())
     {
       pixel = Unpremultiplied(pixel);

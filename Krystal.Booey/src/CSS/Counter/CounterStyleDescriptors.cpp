@@ -278,7 +278,7 @@ namespace krys::boo::css
       {
         convertedHigh = high.ResolveAsIntegerDeprecated<int32>();
       }
-      result.push_back({convertedLow, convertedHigh});
+      result.emplace_back(convertedLow, convertedHigh);
     }
     return result;
   }

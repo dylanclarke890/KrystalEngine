@@ -55,38 +55,38 @@ namespace krys::boo::style
   {
     using Base::Base;
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsNone() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsNone() const noexcept
     {
       return HoldsAlternative<css::keywords::None>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsMinContent() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsMinContent() const noexcept
     {
       return HoldsAlternative<css::keywords::MinContent>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsMaxContent() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsMaxContent() const noexcept
     {
       return HoldsAlternative<css::keywords::MaxContent>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsFitContent() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsFitContent() const noexcept
     {
       return HoldsAlternative<css::keywords::FitContent>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsFillAvailable() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsFillAvailable() const noexcept
     {
       return HoldsAlternative<css::keywords::Stretch>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsIntrinsic() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsIntrinsic() const noexcept
     {
       return HoldsAlternative<css::keywords::MinContent>() || HoldsAlternative<css::keywords::MaxContent>()
              || HoldsAlternative<css::keywords::Stretch>() || HoldsAlternative<css::keywords::FitContent>();
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsIntrinsicOrAuto() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsIntrinsicOrAuto() const noexcept
     {
       return HoldsAlternative<css::keywords::MinContent>() || HoldsAlternative<css::keywords::MaxContent>()
              || HoldsAlternative<css::keywords::Stretch>() || HoldsAlternative<css::keywords::FitContent>();

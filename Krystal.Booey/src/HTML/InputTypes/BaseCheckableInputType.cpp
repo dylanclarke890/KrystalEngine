@@ -109,7 +109,7 @@ namespace krys::boo::html
 
     Ref<InputType> protectedThis = ShareRef(*this);
     element->SetTextAsOfLastFormControlChangeEvent({});
-    auto event = dom::Event::Create(EventNames::Input, true, false, true);
+    auto event = dom::Event::Create(event_names::Input, true, false, true);
     (void)dom::EventDispatcher::DispatchToTarget(*event, element.get());
     if (auto *currentElement = Element())
     {

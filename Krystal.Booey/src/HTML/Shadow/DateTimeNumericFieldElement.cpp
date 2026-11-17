@@ -177,7 +177,7 @@ namespace krys::boo::html
 
   void DateTimeNumericFieldElement::HandleKeyboardEvent(dom::KeyboardEvent &keyboardEvent) noexcept
   {
-    if (keyboardEvent.Type() != EventNames::KeyPress)
+    if (keyboardEvent.Type() != event_names::KeyPress)
     {
       return;
     }

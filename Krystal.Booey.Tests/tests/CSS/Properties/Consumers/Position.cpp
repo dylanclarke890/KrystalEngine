@@ -3,10 +3,9 @@
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/PositionValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
-  using css::tests::CssText;
   using css::tests::Tokens;
 
   namespace
@@ -33,7 +32,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     };
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumePosition)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumePosition)", "[CSS][Properties][Consumers]")
   {
     // One component: the other axis is center.
     CHECK(ConsumeToText(u8"left", ConsumePosition) == "left center");
@@ -63,7 +62,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"left top 5px 5px", ConsumePosition) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeBackgroundPositionUnresolved)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeBackgroundPositionUnresolved)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"right top", ConsumeBackgroundPosition) == "right top");
 
@@ -82,8 +81,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"left 10px 20px", ConsumeBackgroundPosition) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeOneOrTwoComponentPositionUnresolved)",
-            "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeOneOrTwoComponentPositionUnresolved)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"right", ConsumeOneOrTwoComponentPosition) == "right center");
     CHECK(ConsumeToText(u8"top right", ConsumeOneOrTwoComponentPosition) == "right top");
@@ -92,7 +90,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"left 10px top 20px", ConsumeOneOrTwoComponentPosition) == "<partial>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumePosition axis-relative keywords)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumePosition axis-relative keywords)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
 
@@ -103,7 +101,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"y-start", ConsumePositionY, context) == "y-start");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumePositionX and ConsumePositionY)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumePositionX and ConsumePositionY)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"left", ConsumePositionX) == "left");
     CHECK(ConsumeToText(u8"right 10px", ConsumePositionX) == "right 10px");
@@ -118,7 +116,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"left", ConsumePositionY) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeTwoComponentPosition*Unresolved)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeTwoComponentPosition*Unresolved)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
     PropertyParserState state {.Context = context};

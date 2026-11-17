@@ -41,7 +41,7 @@ namespace krys::boo::css
     CSSNestedDeclarations(NestedDeclarationsRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSNestedDeclarations() noexcept;
+    ~CSSNestedDeclarations() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSNestedDeclarations> Create(NestedDeclarationsRule &rule,
                                                             CSSStyleSheet *sheet) noexcept;

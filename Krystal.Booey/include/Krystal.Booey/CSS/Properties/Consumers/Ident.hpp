@@ -34,7 +34,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <ranges>
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
 #pragma region <ident>
 

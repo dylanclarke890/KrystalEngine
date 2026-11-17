@@ -20,7 +20,7 @@ namespace krys::boo::css::tests
       auto document = CreateRef<dom::HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      (void)parser->PumpTokenizer();
+      parser->PumpTokenizer();
       return document;
     }
 
@@ -269,7 +269,7 @@ namespace krys::boo::css::tests
     REQUIRE(relations(first, u8":first-of-type > *")
             == Relations {{body, R::DescendantsAffectedByForwardPositionalRules, 1}});
     // Only resolving style records relations.
-    REQUIRE(relations(first, u8":first-child", SelectorChecker::Mode::QueryingRules) == Relations {});
+    REQUIRE(relations(first, u8":first-child", SelectorChecker::Mode::QueryingRules).empty());
 
     SECTION(":has() forwards positional relations as affecting :has()")
     {

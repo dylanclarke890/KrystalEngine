@@ -52,6 +52,7 @@
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -286,7 +287,7 @@ namespace krys::boo::xml
                                        dom::DOMStringAtom defaultNamespaceURI) noexcept
       : DocumentParser(fragment.NodeDocument()), _currentNode(ShareRefPtr<dom::ContainerNode>(&fragment)),
         _parsingFragment(true), _prefixToNamespaceMap(krys::move(prefixToNamespaceMap)),
-        _defaultNamespaceURI(defaultNamespaceURI)
+        _defaultNamespaceURI(krys::move(defaultNamespaceURI))
   {
   }
 
@@ -738,6 +739,7 @@ namespace krys::boo::xml
       GetParser(closure)->Comment(comment);
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-variadic-functions): libxml2 callback.
     void WarningHandler(void *closure, const char *message, ...)
     {
       va_list args;
@@ -746,6 +748,7 @@ namespace krys::boo::xml
       va_end(args);
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-variadic-functions): libxml2 callback.
     void FatalErrorHandler(void *closure, const char *message, ...)
     {
       va_list args;
@@ -754,6 +757,7 @@ namespace krys::boo::xml
       va_end(args);
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-variadic-functions): libxml2 callback.
     void NormalErrorHandler(void *closure, const char *message, ...)
     {
       va_list args;

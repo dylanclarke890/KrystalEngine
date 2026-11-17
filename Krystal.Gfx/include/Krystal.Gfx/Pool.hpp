@@ -22,7 +22,7 @@ namespace krys::gfx
 
   private:
     List<Slot> _slots {};
-    List<uint32> _freeSlots {};
+    List<uint32> _freeSlots;
     uint32 _count {0u};
 
   public:

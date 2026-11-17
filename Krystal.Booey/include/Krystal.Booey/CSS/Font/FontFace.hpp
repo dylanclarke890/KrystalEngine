@@ -142,7 +142,7 @@ namespace krys::boo::css
 
     void SetWidth(Value &width) noexcept;
 
-    void SetSizeAdjust(Value &sizeAdjust) noexcept;
+    void SetSizeAdjust(Value &value) noexcept;
 
     void SetUnicodeRange(ValueList &list) noexcept;
 

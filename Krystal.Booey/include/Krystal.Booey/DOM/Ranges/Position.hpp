@@ -33,6 +33,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <compare>
 
 namespace krys::boo
@@ -363,8 +364,8 @@ namespace krys::boo::dom
   public:
     PositionWithAffinity() noexcept = default;
 
-    PositionWithAffinity(const Position &position, Affinity affinity = Affinity::Downstream) noexcept
-        : _position(position), _affinity(affinity)
+    PositionWithAffinity(Position position, Affinity affinity = Affinity::Downstream) noexcept
+        : _position(krys::move(position)), _affinity(affinity)
     {
     }
 

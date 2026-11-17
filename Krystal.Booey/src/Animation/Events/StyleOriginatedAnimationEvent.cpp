@@ -26,6 +26,7 @@
 #include "Krystal.Booey/Animation/Events/StyleOriginatedAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -40,8 +41,9 @@ namespace krys::boo
   StyleOriginatedAnimationEvent::StyleOriginatedAnimationEvent(dom::DOMStringAtom type,
                                                                const dom::EventInit &eventInitDict,
                                                                double elapsedTime,
-                                                               const css::CSSOMString &pseudoElement) noexcept
-      : AnimationEventBase(type, eventInitDict), _elapsedTime(elapsedTime), _pseudoElement(pseudoElement)
+                                                               css::CSSOMString pseudoElement) noexcept
+      : AnimationEventBase(type, eventInitDict), _elapsedTime(elapsedTime),
+        _pseudoElement(krys::move(pseudoElement))
   {
     RefPtr<dom::Node> node = ShareRefPtr(DynamicDowncast<dom::Node>(Target().get()));
     auto [parsed, pseudoElementIdentifier] =

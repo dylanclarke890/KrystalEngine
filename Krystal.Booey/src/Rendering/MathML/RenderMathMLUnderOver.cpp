@@ -211,6 +211,7 @@ namespace krys::boo
 
     if (!IsValid())
     {
+      // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
       RenderMathMLRow::ComputePreferredLogicalWidths();
       return;
     }
@@ -355,6 +356,7 @@ namespace krys::boo
 
     if (!IsValid())
     {
+      // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
       RenderMathMLRow::LayoutBlock(relayoutChildren);
       return;
     }

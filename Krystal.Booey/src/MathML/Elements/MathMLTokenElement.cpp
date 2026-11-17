@@ -62,6 +62,7 @@ namespace krys::boo::mathml
   bool MathMLTokenElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
   {
     // The HTML specification defines <mi>, <mo>, <mn>, <ms> and <mtext> as insertion points.
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     return StyledElement::ChildShouldCreateRenderer(child);
   }
 

@@ -1,19 +1,20 @@
 ﻿#include "Krystal.Core/IO/Path.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <utility>
 
 namespace krys::io
 {
-  Path::Path(const std::filesystem::path &path) : _path(path)
+  Path::Path(std::filesystem::path path) : _path(krys::move(path))
   {
   }
 
-  Path::Path(Path &&other) noexcept : _path(std::move(other._path))
+  Path::Path(Path &&other) noexcept : _path(krys::move(other._path))
   {
   }
 
   Path &Path::operator=(Path &&other) noexcept
   {
-    _path = std::move(other._path);
+    _path = krys::move(other._path);
     return *this;
   }
 

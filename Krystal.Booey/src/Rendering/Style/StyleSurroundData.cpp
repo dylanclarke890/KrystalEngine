@@ -37,8 +37,7 @@ namespace krys::boo
   }
 
   inline StyleSurroundData::StyleSurroundData(const StyleSurroundData &o) noexcept
-      : RefCounted<StyleSurroundData>(),
-        HasExplicitlySetBorderBottomLeftRadius(o.HasExplicitlySetBorderBottomLeftRadius),
+      : HasExplicitlySetBorderBottomLeftRadius(o.HasExplicitlySetBorderBottomLeftRadius),
         HasExplicitlySetBorderBottomRightRadius(o.HasExplicitlySetBorderBottomRightRadius),
         HasExplicitlySetBorderTopLeftRadius(o.HasExplicitlySetBorderTopLeftRadius),
         HasExplicitlySetBorderTopRightRadius(o.HasExplicitlySetBorderTopRightRadius),

@@ -33,8 +33,7 @@ namespace krys::boo
   }
 
   inline StyleInheritedData::StyleInheritedData(const StyleInheritedData &o) noexcept
-      : RefCounted<StyleInheritedData>(), BorderSpacing(o.BorderSpacing), LineHeight(o.LineHeight),
-        FontData(o.FontData), Color(o.Color)
+      : BorderSpacing(o.BorderSpacing), LineHeight(o.LineHeight), FontData(o.FontData), Color(o.Color)
   {
     krys_debug_assert_msg(o == *this, "StyleInheritedData should be properly copied.");
   }

@@ -43,11 +43,10 @@ namespace krys::boo::svg
   public:
     template <typename... TArgs>
     SVGAnimationAdditiveListFunction(AnimationMode animationMode, CalcMode calcMode, bool isAccumulated,
-                                     bool isAdditive, TArgs &&...arguments) noexcept
+                                     bool isAdditive, const TArgs &...arguments) noexcept
         : SVGAnimationAdditiveFunction(animationMode, calcMode, isAccumulated, isAdditive),
-          _from(TList::Create(std::forward<TArgs>(arguments)...)),
-          _to(TList::Create(std::forward<TArgs>(arguments)...)),
-          _toAtEndOfDuration(TList::Create(std::forward<TArgs>(arguments)...))
+          _from(TList::Create(arguments...)), _to(TList::Create(arguments...)),
+          _toAtEndOfDuration(TList::Create(arguments...))
     {
     }
 

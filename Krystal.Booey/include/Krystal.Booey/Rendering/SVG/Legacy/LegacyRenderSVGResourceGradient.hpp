@@ -113,6 +113,8 @@ namespace krys::boo
       return FloatRect();
     }
 
+    void GetElement() const = delete;
+
   protected:
     LegacyRenderSVGResourceGradient(Type, svg::SVGGradientElement &, RenderStyle &&) noexcept;
 
@@ -120,8 +122,6 @@ namespace krys::boo
       PlatformSpreadMethodFromSVGType(svg::SVGSpreadMethodType) noexcept;
 
   private:
-    void GetElement() const = delete;
-
     KRYS_NODISCARD GradientData::Inputs ComputeInputs(RenderElement &,
                                                       EnumSet<RenderSVGResourceMode>) noexcept;
 

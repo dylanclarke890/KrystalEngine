@@ -106,8 +106,8 @@ namespace krys::boo
           }
           if (frontmost)
           {
-            result.push_back({offsetSoFar, offsets[i].Value, offsets[*frontmost].Text->MarkedType,
-                              offsets[*frontmost].Text->HighlightName});
+            result.emplace_back(offsetSoFar, offsets[i].Value, offsets[*frontmost].Text->MarkedType,
+                                offsets[*frontmost].Text->HighlightName);
           }
         }
         else
@@ -118,8 +118,8 @@ namespace krys::boo
           {
             if (!processedMarkedTexts.contains(offsets[j].Text))
             {
-              result.push_back({offsetSoFar, offsets[i].Value, offsets[j].Text->MarkedType,
-                                offsets[j].Text->HighlightName, offsets[j].Text->Priority});
+              result.emplace_back(offsetSoFar, offsets[i].Value, offsets[j].Text->MarkedType,
+                                  offsets[j].Text->HighlightName, offsets[j].Text->Priority);
             }
           }
         }

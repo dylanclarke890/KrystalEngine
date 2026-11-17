@@ -110,7 +110,7 @@ namespace krys::boo::html
 
     if (IsEmailField() && element.Multiple())
     {
-      for (auto address : infra::StringAlgorithms::StrictlySplit(value, u8','))
+      for (const auto &address : infra::StringAlgorithms::StrictlySplit(value, u8','))
       {
         if (valuePatternMismatch(address))
         {

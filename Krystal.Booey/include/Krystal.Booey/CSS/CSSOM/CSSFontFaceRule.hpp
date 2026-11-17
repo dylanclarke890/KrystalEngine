@@ -42,7 +42,7 @@ namespace krys::boo::css
     CSSFontFaceRule(FontFaceRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSFontFaceRule() noexcept;
+    ~CSSFontFaceRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSFontFaceRule> Create(FontFaceRule &rule, CSSStyleSheet *sheet) noexcept;
 

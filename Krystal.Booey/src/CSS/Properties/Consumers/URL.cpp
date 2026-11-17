@@ -34,7 +34,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   // MARK: <url>
   // https://drafts.csswg.org/css-values/#urls

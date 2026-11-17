@@ -78,7 +78,7 @@ namespace krys::boo
         AnchorScope(style::ComputedStyle::InitialAnchorScope()),
         PositionAnchor(style::ComputedStyle::InitialPositionAnchor()),
         PositionArea(style::ComputedStyle::InitialPositionArea()),
-        PositionTryFallbacks(style::ComputedStyle::InitialPositionTryFallbacks()), UsedPositionOptionIndex(),
+        PositionTryFallbacks(style::ComputedStyle::InitialPositionTryFallbacks()),
         BlockStepSize(style::ComputedStyle::InitialBlockStepSize()),
         BlockStepAlign(static_cast<unsigned>(style::ComputedStyle::InitialBlockStepAlign())),
         BlockStepInsert(static_cast<unsigned>(style::ComputedStyle::InitialBlockStepInsert())),
@@ -117,13 +117,12 @@ namespace krys::boo
   }
 
   inline StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInheritedData &o) noexcept
-      : RefCounted<StyleRareNonInheritedData>(), ContainIntrinsicWidth(o.ContainIntrinsicWidth),
-        ContainIntrinsicHeight(o.ContainIntrinsicHeight), Zoom(o.Zoom), MaxLines(o.MaxLines),
-        TouchAction(o.TouchAction), InitialLetter(o.InitialLetter), BackdropFilter(o.BackdropFilter),
-        Grid(o.Grid), GridItem(o.GridItem), MaskBorder(o.MaskBorder), Clip(o.Clip),
-        ScrollMargin(o.ScrollMargin), ScrollPadding(o.ScrollPadding), CounterDirectives(o.CounterDirectives),
-        WillChange(o.WillChange), ShapeOutside(o.ShapeOutside), ShapeMargin(o.ShapeMargin),
-        ShapeImageThreshold(o.ShapeImageThreshold), Perspective(o.Perspective),
+      : ContainIntrinsicWidth(o.ContainIntrinsicWidth), ContainIntrinsicHeight(o.ContainIntrinsicHeight),
+        Zoom(o.Zoom), MaxLines(o.MaxLines), TouchAction(o.TouchAction), InitialLetter(o.InitialLetter),
+        BackdropFilter(o.BackdropFilter), Grid(o.Grid), GridItem(o.GridItem), MaskBorder(o.MaskBorder),
+        Clip(o.Clip), ScrollMargin(o.ScrollMargin), ScrollPadding(o.ScrollPadding),
+        CounterDirectives(o.CounterDirectives), WillChange(o.WillChange), ShapeOutside(o.ShapeOutside),
+        ShapeMargin(o.ShapeMargin), ShapeImageThreshold(o.ShapeImageThreshold), Perspective(o.Perspective),
         PerspectiveOrigin(o.PerspectiveOrigin), ClipPath(o.ClipPath), CustomProperties(o.CustomProperties),
         CustomPaintWatchedProperties(o.CustomPaintWatchedProperties), Rotate(o.Rotate), Scale(o.Scale),
         Translate(o.Translate), ContainerNames(o.ContainerNames), ColumnGap(o.ColumnGap), RowGap(o.RowGap),

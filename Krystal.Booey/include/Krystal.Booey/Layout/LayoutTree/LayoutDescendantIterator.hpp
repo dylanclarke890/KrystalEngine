@@ -63,7 +63,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD LayoutDescendantIterator<T> begin() noexcept
     {
-      return LayoutDescendantIterator<T>(_root, Traversal::FirstWithin<T>(_root));
+      return LayoutDescendantIterator<T>(_root, traversal::FirstWithin<T>(_root));
     }
 
     KRYS_NODISCARD LayoutDescendantIterator<T> end() noexcept

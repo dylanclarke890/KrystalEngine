@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeQuotes)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeQuotes)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeQuotes) == "none");
     CHECK(ConsumeToText(u8"auto", ConsumeQuotes) == "auto");
@@ -17,7 +17,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"\"a\"", ConsumeQuotes) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeContent)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeContent)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/dir/")};
 

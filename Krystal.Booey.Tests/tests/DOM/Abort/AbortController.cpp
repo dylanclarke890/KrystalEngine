@@ -26,7 +26,7 @@ namespace krys::boo::dom::tests
   {
     AbortController controller;
     int aborts = 0;
-    auto listener = controller.Signal()->AddEventListener(EventNames::Abort, [&](Event &) { ++aborts; });
+    auto listener = controller.Signal()->AddEventListener(event_names::Abort, [&](Event &) { ++aborts; });
 
     SECTION("Without a reason, an AbortError")
     {

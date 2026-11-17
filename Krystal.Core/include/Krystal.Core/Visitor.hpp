@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <utility>
 
 namespace krys
@@ -122,13 +123,13 @@ namespace krys
   template <typename... Ts>
   KRYS_ALWAYS_INLINE constexpr Variant<Ts...> &&AsVariant(Variant<Ts...> &&v) noexcept
   {
-    return std::move(v);
+    return krys::move(v);
   }
 
   template <typename... Ts>
   KRYS_ALWAYS_INLINE constexpr const Variant<Ts...> &&AsVariant(const Variant<Ts...> &&v) noexcept
   {
-    return std::move(v);
+    return static_cast<const Variant<Ts...> &&>(v);
   }
 
   template <typename T>

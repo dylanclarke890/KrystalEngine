@@ -66,8 +66,8 @@ namespace krys::boo::tests
       FontVariantSettings settings;
       auto &values = settings.Alternates.ValuesRef();
       values.HistoricalForms = true;
-      values.Styleset.push_back(css::CSSOMString {u8"fancy"});
-      values.Styleset.push_back(css::CSSOMString {u8"missing"});
+      values.Styleset.emplace_back(u8"fancy");
+      values.Styleset.emplace_back(u8"missing");
       values.Swash = css::CSSOMString {u8"flowing"};
       values.Stylistic = css::CSSOMString {u8"alt"};
 

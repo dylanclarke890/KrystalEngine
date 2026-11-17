@@ -31,6 +31,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <cmath>
 #include <limits>
 
@@ -193,7 +194,7 @@ namespace krys::boo
     {
     }
 
-    explicit BlendingKeyframes(const KeyframesIdentifier &identifier) noexcept : _identifier(identifier)
+    explicit BlendingKeyframes(KeyframesIdentifier identifier) noexcept : _identifier(krys::move(identifier))
     {
     }
 

@@ -63,7 +63,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD LayoutChildIterator<T> begin() const noexcept
     {
-      return LayoutChildIterator<T>(_parent, Traversal::FirstChild<T>(_parent));
+      return LayoutChildIterator<T>(_parent, traversal::FirstChild<T>(_parent));
     }
 
     KRYS_NODISCARD LayoutChildIterator<T> end() const noexcept
@@ -73,7 +73,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD const T *First() const noexcept
     {
-      return Traversal::FirstChild<T>(_parent);
+      return traversal::FirstChild<T>(_parent);
     }
   };
 

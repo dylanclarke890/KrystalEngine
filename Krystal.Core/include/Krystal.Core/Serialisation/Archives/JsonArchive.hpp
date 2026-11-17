@@ -16,7 +16,7 @@
 #include <format>
 #include <memory>
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   class JsonArchiveWriter : public BaseArchiveWriter<JsonArchiveWriter>
   {
@@ -40,8 +40,8 @@ namespace krys::Serialisation
 
     Stream _stream;
     Writer _writer;
-    stringview _nextName {}; // The next name, can be specified using a NamedField or generated automatically.
-    Stack<Node> _nodes {};
+    stringview _nextName; // The next name, can be specified using a NamedField or generated automatically.
+    Stack<Node> _nodes;
 
   public:
     JsonArchiveWriter(io::IStreamWriter &stream) noexcept : _stream(stream), _writer(_stream)
@@ -188,13 +188,13 @@ namespace krys::Serialisation
       Iterator() noexcept = default;
 
       Iterator(MemberIterator begin, MemberIterator end) noexcept
-          : _memberIteratorBegin(begin), _memberIteratorEnd(end), _index(0u),
-            _size(std::distance(begin, end)), _type(_size == 0 ? Type::null : Type::Member)
+          : _memberIteratorBegin(begin), _memberIteratorEnd(end), _size(std::distance(begin, end)),
+            _type(_size == 0 ? Type::null : Type::Member)
       {
       }
 
       Iterator(ValueIterator begin, ValueIterator end) noexcept
-          : _valueIteratorBegin(begin), _index(0u), _size(std::distance(begin, end)),
+          : _valueIteratorBegin(begin), _size(std::distance(begin, end)),
             _type(_size == 0 ? Type::null : Type::Value)
       {
       }
@@ -255,9 +255,9 @@ namespace krys::Serialisation
       }
 
     private:
-      MemberIterator _memberIteratorBegin {}, _memberIteratorEnd {}; /// @brief The member iterator (object)
-      ValueIterator _valueIteratorBegin {};                          /// @brief The value iterator (array)
-      size_t _index {0u}, _size {0u}; /// @brief The current index of this iterator
+      MemberIterator _memberIteratorBegin, _memberIteratorEnd; /// @brief The member iterator (object)
+      ValueIterator _valueIteratorBegin {};                    /// @brief The value iterator (array)
+      size_t _index {0u}, _size {0u};                          /// @brief The current index of this iterator
 
       enum class Type
       {
@@ -268,10 +268,10 @@ namespace krys::Serialisation
     };
 
   private:
-    stringview _nextName {};          /// @brief Next name set by NamedField
-    Stream _stream;                   /// @brief Rapidjson read stream
-    List<Iterator> _iteratorStack {}; /// @brief 'Stack' of rapidJSON iterators
-    rapidjson::Document _document;    /// @brief Rapidjson document
+    stringview _nextName;          /// @brief Next name set by NamedField
+    Stream _stream;                /// @brief Rapidjson read stream
+    List<Iterator> _iteratorStack; /// @brief 'Stack' of rapidJSON iterators
+    rapidjson::Document _document; /// @brief Rapidjson document
 
   public:
     JsonArchiveReader(io::IStreamReader &stream) noexcept : _stream(stream)
@@ -289,9 +289,7 @@ namespace krys::Serialisation
       }
     }
 
-    ~JsonArchiveReader() noexcept override
-    {
-    }
+    ~JsonArchiveReader() noexcept override = default;
 
     /// @brief Sets the name for the next node created with StartNode
     void SetNextFieldName(stringview name)

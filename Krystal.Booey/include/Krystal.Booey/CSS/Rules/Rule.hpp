@@ -416,7 +416,7 @@ namespace krys::boo::css
     List<CSSOMStringAtom> _fontFamilies;
     boo::FontPaletteValues _fontPaletteValues;
 
-    FontPaletteValuesRule(const CSSOMStringAtom &name, List<CSSOMStringAtom> &&fontFamilies,
+    FontPaletteValuesRule(CSSOMStringAtom name, List<CSSOMStringAtom> &&fontFamilies,
                           Maybe<FontPaletteIndex> basePalette,
                           List<boo::FontPaletteValues::OverriddenColor> &&overrideColors) noexcept;
 
@@ -573,8 +573,7 @@ namespace krys::boo::css
     CSSOMString _conditionText;
     bool _conditionIsSupported;
 
-    SupportsRule(const CSSOMString &conditionText, bool conditionIsSupported,
-                 List<Ref<Rule>> &&rules) noexcept;
+    SupportsRule(CSSOMString conditionText, bool conditionIsSupported, List<Ref<Rule>> &&rules) noexcept;
 
     SupportsRule(const SupportsRule &other) noexcept = default;
 
@@ -780,7 +779,7 @@ namespace krys::boo::css
     CSSOMStringAtom _prefix;
     CSSOMStringAtom _uri;
 
-    NamespaceRule(const CSSOMStringAtom &prefix, const CSSOMStringAtom &uri) noexcept;
+    NamespaceRule(CSSOMStringAtom prefix, CSSOMStringAtom uri) noexcept;
 
     NamespaceRule(const NamespaceRule &other) noexcept = default;
 

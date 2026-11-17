@@ -32,6 +32,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -64,9 +65,9 @@ namespace krys::boo
     return _url == Downcast<ReferencePathOperation>(other)._url;
   }
 
-  ReferencePathOperation::ReferencePathOperation(const style::URL &url, const css::CSSOMStringAtom &fragment,
+  ReferencePathOperation::ReferencePathOperation(style::URL url, css::CSSOMStringAtom fragment,
                                                  const svg::SVGElement *element) noexcept
-      : PathOperation(Type::Reference), _url(url), _fragment(fragment)
+      : PathOperation(Type::Reference), _url(krys::move(url)), _fragment(krys::move(fragment))
   {
     if (Is<svg::SVGPathElement>(element) || Is<svg::SVGGeometryElement>(element))
     {

@@ -13,11 +13,11 @@ namespace krys
   {
     KRYS_NON_COPY_MOVABLE(Morton);
 
+  public:
     Morton() = delete;
 
     ~Morton() = delete;
 
-  public:
 #pragma region uint8
 
     KRYS_NODISCARD constexpr static uint16 Encode(uint8 x, uint8 y) noexcept

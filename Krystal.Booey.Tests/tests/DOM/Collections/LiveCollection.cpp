@@ -747,7 +747,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(second->SetAttribute(u8"type", u8"radio").HasException());
       REQUIRE_FALSE(first->SetAttribute(u8"value", u8"a").HasException());
       REQUIRE_FALSE(second->SetAttribute(u8"value", u8"b").HasException());
-      CHECK(list->Value() == u8"");
+      CHECK(list->Value().empty());
 
       list->SetValue(u8"b");
       CHECK(Downcast<html::HTMLInputElement>(*second).Checked());

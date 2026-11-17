@@ -30,7 +30,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   RefPtr<Value> ConsumeScrollSnapType(TokenRange &tokens, PropertyParserState &) noexcept
   {

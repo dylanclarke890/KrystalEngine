@@ -40,7 +40,7 @@
 #include "Krystal.Booey/CSS/Values/RayValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   KRYS_NODISCARD static Maybe<RaySize> RaySizeFromValueId(ValueId id) noexcept
   {

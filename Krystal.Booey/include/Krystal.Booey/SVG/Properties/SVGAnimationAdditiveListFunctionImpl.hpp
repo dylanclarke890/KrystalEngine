@@ -96,7 +96,7 @@ namespace krys::boo::svg
       const auto &fromItems = _from->Items();
       const auto &toItems = _to->Items();
 
-      if (!fromItems.size() || fromItems.size() != toItems.size())
+      if (fromItems.empty() || fromItems.size() != toItems.size())
       {
         return;
       }
@@ -157,7 +157,7 @@ namespace krys::boo::svg
       const auto &fromItems = _from->Items();
       auto &toItems = _to->Items();
 
-      if (!fromItems.size() || fromItems.size() != toItems.size())
+      if (fromItems.empty() || fromItems.size() != toItems.size())
       {
         return;
       }
@@ -221,7 +221,7 @@ namespace krys::boo::svg
       const auto &fromItems = _from->Items();
       auto &toItems = _to->Items();
 
-      if (!fromItems.size() || fromItems.size() != toItems.size())
+      if (fromItems.empty() || fromItems.size() != toItems.size())
       {
         return;
       }
@@ -289,7 +289,7 @@ namespace krys::boo::svg
       if (_isAccumulated && repeatCount)
       {
         const SVGTransformValue &toAtEndOfDuration =
-          toAtEndOfDurationItems.size() ? toAtEndOfDurationItems[0]->Value() : zerosTransform;
+          !toAtEndOfDurationItems.empty() ? toAtEndOfDurationItems[0]->Value() : zerosTransform;
         animatedItems.push_back(SVGTransform::Create(
           SVGTransformDistance::AddSVGTransforms(current, toAtEndOfDuration, repeatCount)));
       }
@@ -305,7 +305,7 @@ namespace krys::boo::svg
       const auto &fromItems = _from->Items();
       auto &toItems = _to->Items();
 
-      if (!fromItems.size() || fromItems.size() != toItems.size())
+      if (fromItems.empty() || fromItems.size() != toItems.size())
       {
         return;
       }

@@ -118,7 +118,7 @@ namespace krys::gfx::detail
       {
         // The Gaussian's mass over the pixel, not its value at the centre: exact for even coverage.
         const float x = static_cast<float>(i) - static_cast<float>(extent);
-        const float k = 1.f / (sigma * std::sqrt(2.f));
+        const float k = 1.f / (sigma * std::numbers::sqrt2_v<float>);
         kernel[i] = 0.5f * (std::erf((x + 0.5f) * k) - std::erf((x - 0.5f) * k));
         total += kernel[i];
       }
@@ -172,6 +172,7 @@ namespace krys::gfx::detail
     blurred.Coverage.resize(values.size());
     for (size_t i = 0u; i < values.size(); ++i)
     {
+      // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
       blurred.Coverage[i] = static_cast<uint8>(std::clamp(values[i], 0.f, 1.f) * 255.f + 0.5f);
     }
     return blurred;

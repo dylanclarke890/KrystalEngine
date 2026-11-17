@@ -35,6 +35,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD MouseEventInit ToMouseEventInit(const TouchEventInit &initializer) noexcept
     {
       MouseEventInit init;
+      // NOLINTNEXTLINE(cppcoreguidelines-slicing): copies the shared fields.
       static_cast<EventModifierInit &>(init) = initializer;
       return init;
     }
@@ -44,7 +45,7 @@ namespace krys::boo::dom
       // https://w3c.github.io/touch-events/#list-of-touchevent-types
       UIEventInit init;
       init.Bubbles = true;
-      init.Cancelable = type != EventNames::TouchCancel;
+      init.Cancelable = type != event_names::TouchCancel;
       init.Composed = true;
       return init;
     }

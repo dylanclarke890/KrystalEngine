@@ -22,7 +22,7 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD bool Contains(utf8_stringview text, utf8_stringview part) noexcept
     {
-      return text.find(part) != utf8_stringview::npos;
+      return text.contains(part);
     }
 
     /// @brief A page with a path marked at every vertex by a 4x4 marker with the given attributes.

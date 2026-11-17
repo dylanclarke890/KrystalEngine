@@ -1196,8 +1196,8 @@ namespace krys::boo::layout
     if (overflowingRunIndex == runs.size())
     {
       // We have to have either an overflowing run or a soft hyphen.
-      krys_debug_assert(continuousContent.HasTrailingSoftHyphen() && runs.size());
-      return {runs.size() ? runs.size() - 1 : 0};
+      krys_debug_assert(continuousContent.HasTrailingSoftHyphen() && !runs.empty());
+      return {!runs.empty() ? runs.size() - 1 : 0};
     }
 
     // Check first if we can actually break the overflowing run.

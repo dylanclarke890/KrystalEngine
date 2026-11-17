@@ -344,7 +344,7 @@ namespace krys::boo::style
       auto search = GridSpan::TranslatedDefiniteGridSpan(0, _lastLine);
       auto currentSide = side;
       auto direction = DirectionFromSide(currentSide);
-      bool initialFlipped = GridLayoutFunctions::IsFlippedDirection(initialGrid, direction);
+      bool initialFlipped = grid_layout_functions::IsFlippedDirection(initialGrid, direction);
 
       // If we're a subgrid, we want to inherit the line names from any ancestor grids.
       if (!initialGrid.IsSubgrid(direction))
@@ -376,14 +376,14 @@ namespace krys::boo::style
         direction = DirectionFromSide(currentSide);
 
         auto span = currentAncestorSubgridParent->GridSpanForGridItem(currentAncestorSubgrid, direction);
-        search.TranslateTo(span, GridLayoutFunctions::IsSubgridReversedDirection(
+        search.TranslateTo(span, grid_layout_functions::IsSubgridReversedDirection(
                                    *currentAncestorSubgridParent, direction, currentAncestorSubgrid));
 
         auto convertToInitialSpace = [&](uint32 i)
         {
           krys_debug_assert(i >= search.StartLine());
           i -= search.StartLine();
-          if (GridLayoutFunctions::IsFlippedDirection(*currentAncestorSubgridParent, direction)
+          if (grid_layout_functions::IsFlippedDirection(*currentAncestorSubgridParent, direction)
               != initialFlipped)
           {
             krys_debug_assert(_lastLine >= i);
@@ -799,7 +799,7 @@ namespace krys::boo::style
     {
       auto &parent = *Downcast<RenderGrid>(gridContainer.Parent());
       auto flowAwareDirection =
-        GridLayoutFunctions::FlowAwareDirectionForGridItem(parent, gridContainer, direction);
+        grid_layout_functions::FlowAwareDirectionForGridItem(parent, gridContainer, direction);
       return parent.GridSpanForGridItem(gridContainer, flowAwareDirection).IntegerSpan();
     }
     auto &style = gridContainer.Style();

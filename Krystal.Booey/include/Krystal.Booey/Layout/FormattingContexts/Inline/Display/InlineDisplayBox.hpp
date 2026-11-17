@@ -504,6 +504,6 @@ namespace krys::boo::inline_display
       _isLastForLayoutBox = true;
     }
 
-    KRYS_NODISCARD friend bool operator==(const Box &a, const Box &b) noexcept;
+    friend bool operator==(const Box &a, const Box &b) noexcept;
   };
 }

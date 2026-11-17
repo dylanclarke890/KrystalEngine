@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Types/String.hpp"
 
-namespace krys::boo::EventNames
+namespace krys::boo::event_names
 {
   constexpr const char8 *ReadyStateChange = u8"readystatechange";
   constexpr const char8 *Abort = u8"abort";
@@ -108,7 +108,7 @@ namespace krys::boo::EventNames
   constexpr const char8 *Finish = u8"finish";
   constexpr const char8 *Remove = u8"remove";
 
-  namespace Legacy
+  namespace legacy
   {
     constexpr const char8 *AnimationEnd = u8"webkitAnimationEnd";
     constexpr const char8 *AnimationIteration = u8"webkitAnimationIteration";

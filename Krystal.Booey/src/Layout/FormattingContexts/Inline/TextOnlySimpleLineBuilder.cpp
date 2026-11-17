@@ -38,7 +38,7 @@ namespace krys::boo::layout
     InlineContentBreaker::IsEndOfLine EndOfLine {InlineContentBreaker::IsEndOfLine::Yes};
     size_t CommittedCount {0};
     size_t OverflowingContentLength {0};
-    Maybe<InlineLayoutUnit> OverflowLogicalWidth {};
+    Maybe<InlineLayoutUnit> OverflowLogicalWidth;
     bool IsRevert {false};
   };
 

@@ -92,13 +92,13 @@ namespace krys::boo::html
 
     KRYS_NODISCARD const StringAtom &LoadEventName() noexcept
     {
-      static const StringAtom name {EventNames::Load};
+      static const StringAtom name {event_names::Load};
       return name;
     }
 
     KRYS_NODISCARD const StringAtom &ErrorEventName() noexcept
     {
-      static const StringAtom name {EventNames::Error};
+      static const StringAtom name {event_names::Error};
       return name;
     }
   }

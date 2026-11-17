@@ -58,7 +58,7 @@ namespace krys::boo::style
     struct PendingPoint
     {
       double Output;
-      Maybe<double> Input {};
+      Maybe<double> Input;
     };
 
     List<PendingPoint> points;

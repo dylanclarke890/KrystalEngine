@@ -53,7 +53,8 @@ namespace krys::boo::layout::tests
   ElementBox &BuildBoxTree(RenderBlock &renderer) noexcept
   {
     DetachLineLayout(renderer);
-    return *layout_integration::BoxTreeUpdater(renderer).Build();
+    auto *root = layout_integration::BoxTreeUpdater(renderer).Build().get(); // The renderer keeps it alive.
+    return *root;
   }
 
   const ElementBox &RootBoxOf(style::tests::ResolverFixture &fixture, dom::DOMStringView id) noexcept

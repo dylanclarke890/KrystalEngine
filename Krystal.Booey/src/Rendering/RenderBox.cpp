@@ -982,7 +982,7 @@ namespace krys::boo
 
   void RenderBox::BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept
   {
-    rects.push_back({accumulatedOffset, Size()});
+    rects.emplace_back(accumulatedOffset, Size());
   }
 
   void RenderBox::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
@@ -2766,7 +2766,7 @@ namespace krys::boo
       // This is a temporary solution to prevent regressions.
       auto *renderGrid = Downcast<RenderGrid>(Parent());
       return (renderGrid->AreMasonryColumns()
-              && !GridLayoutFunctions::IsOrthogonalGridItem(*renderGrid, *this))
+              && !grid_layout_functions::IsOrthogonalGridItem(*renderGrid, *this))
              || !HasStretchedLogicalWidth();
     }
 

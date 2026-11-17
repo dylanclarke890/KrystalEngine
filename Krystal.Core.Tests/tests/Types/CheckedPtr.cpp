@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::tests
 {
@@ -64,7 +65,7 @@ namespace krys::tests
       CheckedPtr<TestCheckedRefCounted> p1 = ShareCheckedPtr(obj);
       REQUIRE(obj->GetRefCountChecked() == 1);
 
-      CheckedPtr<TestCheckedRefCounted> p2(std::move(p1));
+      CheckedPtr<TestCheckedRefCounted> p2(krys::move(p1));
       REQUIRE(obj->GetRefCountChecked() == 1);
       REQUIRE(p2.get() == obj);
       REQUIRE(p1.get() == nullptr);

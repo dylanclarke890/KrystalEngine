@@ -300,8 +300,8 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
 
-    bool isFocusEvent = event.Type() == EventNames::Focus;
-    bool isBlurEvent = event.Type() == EventNames::Blur;
+    bool isFocusEvent = event.Type() == event_names::Focus;
+    bool isBlurEvent = event.Type() == event_names::Blur;
     if (event.IsMouseEvent() || isFocusEvent || isBlurEvent)
     {
       Element()->ForwardEvent(event);
@@ -360,7 +360,7 @@ namespace krys::boo::html
   bool TextFieldInputType::ShouldSubmitImplicitly(dom::Event &event) noexcept
   {
     auto *textEvent = DynamicDowncast<dom::TextEvent>(event);
-    return (event.Type() == EventNames::TextInput && textEvent && textEvent->Data() == u8"\n")
+    return (event.Type() == event_names::TextInput && textEvent && textEvent->Data() == u8"\n")
            || InputType::ShouldSubmitImplicitly(event);
   }
 
@@ -757,7 +757,7 @@ namespace krys::boo::html
     auto container = TextControlInnerContainer::Create(document);
     _container = container;
     (void)shadowRoot.AppendChild(*container);
-    container->SetUserAgentPart(css::UserAgentParts::WebkitTextfieldDecorationContainer());
+    container->SetUserAgentPart(css::user_agent_parts::WebkitTextfieldDecorationContainer());
 
     auto innerBlock = TextControlInnerElement::Create(document);
     _innerBlock = innerBlock;

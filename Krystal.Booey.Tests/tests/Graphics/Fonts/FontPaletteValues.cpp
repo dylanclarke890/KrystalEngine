@@ -30,7 +30,7 @@ namespace krys::boo::tests
       CHECK(base.BasePalette() == FontPaletteIndex(1u));
 
       List<FontPaletteValues::OverriddenColor> colors;
-      colors.push_back({0u, Color::black});
+      colors.emplace_back(0u, Color::black);
       FontPaletteValues overridden({}, krys::move(colors));
       CHECK(static_cast<bool>(overridden));
       CHECK_FALSE(overridden.BasePalette());

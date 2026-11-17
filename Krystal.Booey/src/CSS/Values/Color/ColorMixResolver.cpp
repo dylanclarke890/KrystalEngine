@@ -34,7 +34,7 @@ namespace krys::boo::css
     {
       double P1;
       double P2;
-      Maybe<double> AlphaMultiplier {};
+      Maybe<double> AlphaMultiplier;
     };
 
     KRYS_NODISCARD Maybe<ColorMixPercentages> NormalizedMixPercentages(

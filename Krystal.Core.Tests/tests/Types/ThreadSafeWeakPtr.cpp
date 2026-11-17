@@ -32,6 +32,7 @@ namespace krys::tests
     void OnThreads(F work)
     {
       std::vector<std::thread> threads;
+      threads.reserve(ThreadCount);
       for (int i = 0; i < ThreadCount; ++i)
       {
         threads.emplace_back(work);

@@ -17,7 +17,7 @@ namespace krys::boo::css::tests
       return DOMCSSNamespace::Escape(CSSOMString(ident));
     };
 
-    CHECK(escape(u8"") == u8"");
+    CHECK(escape(u8"").empty());
     CHECK(escape(u8"abc-_1") == u8"abc-_1");
     CHECK(escape(u8"a b") == u8"a\\ b");
     CHECK(escape(u8"a.b#c") == u8"a\\.b\\#c");

@@ -103,6 +103,7 @@ namespace krys::boo::html
 
   bool HTMLTextAreaElement::AccessKeyAction(bool sendMouseEvents) noexcept
   {
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     return dom::Element::AccessKeyAction(sendMouseEvents);
   }
 

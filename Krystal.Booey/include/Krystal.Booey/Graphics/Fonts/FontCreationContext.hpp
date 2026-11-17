@@ -31,6 +31,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -44,10 +45,9 @@ namespace krys::boo
     RefPtr<FontFeatureValues> _fontFeatureValues;
     float _sizeAdjust;
 
-    FontCreationContextRareData(const FontFeatureSettings &fontFaceFeatures,
-                                const FontPaletteValues &fontPaletteValues,
+    FontCreationContextRareData(FontFeatureSettings fontFaceFeatures, FontPaletteValues fontPaletteValues,
                                 RefPtr<FontFeatureValues> fontFeatureValues, float sizeAdjust) noexcept
-        : _fontFaceFeatures(fontFaceFeatures), _fontPaletteValues(fontPaletteValues),
+        : _fontFaceFeatures(krys::move(fontFaceFeatures)), _fontPaletteValues(krys::move(fontPaletteValues)),
           _fontFeatureValues(krys::move(fontFeatureValues)), _sizeAdjust(sizeAdjust)
     {
     }

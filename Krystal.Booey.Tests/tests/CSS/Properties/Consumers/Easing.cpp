@@ -3,12 +3,12 @@
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
   using css::tests::Tokens;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeEasingFunction keywords)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeEasingFunction keywords)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"linear", ConsumeEasingFunction) == "linear");
     CHECK(ConsumeToText(u8"ease", ConsumeEasingFunction) == "ease");
@@ -24,7 +24,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"5", ConsumeEasingFunction) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeEasingFunction steps)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeEasingFunction steps)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"steps(3)", ConsumeEasingFunction) == "steps(3)");
     CHECK(ConsumeToText(u8"steps(3, end)", ConsumeEasingFunction) == "steps(3)");
@@ -45,7 +45,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"steps(3, end, end)", ConsumeEasingFunction) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeEasingFunction cubic-bezier)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeEasingFunction cubic-bezier)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"cubic-bezier(0.1, 0.7, 1, 0.1)", ConsumeEasingFunction)
           == "cubic-bezier(0.1, 0.7, 1, 0.1)");
@@ -59,7 +59,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"cubic-bezier(0, 0, 1, 1, 0)", ConsumeEasingFunction) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeEasingFunction linear)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeEasingFunction linear)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"linear(0, 1)", ConsumeEasingFunction) == "linear(0, 1)");
     CHECK(ConsumeToText(u8"linear(0, 0.5 25% 75%, 1)", ConsumeEasingFunction) == "linear(0, 0.5 25% 75%, 1)");
@@ -73,7 +73,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"linear(0, 1,)", ConsumeEasingFunction) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeEasingFunction spring)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeEasingFunction spring)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
     CHECK(ConsumeToText(u8"spring(1 100 10 0)", ConsumeEasingFunction, context) == "<null>");
@@ -89,7 +89,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"spring(1 100 10)", ConsumeEasingFunction, context) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeUnresolvedEasingFunction)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeUnresolvedEasingFunction)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
     PropertyParserState state {.Context = context};

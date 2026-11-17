@@ -36,7 +36,7 @@ namespace krys::boo
     _width = scaledFont.Width(run) / scalingFactor;
     _height = scaledFont.MetricsOfPrimaryFont().Height() / scalingFactor;
 
-    _length = static_cast<uint32>(run.Length());
+    _length = run.Length();
   }
 
   TextRun SVGTextMetrics::ConstructTextRun(const RenderSVGInlineText &text, uint32 position,

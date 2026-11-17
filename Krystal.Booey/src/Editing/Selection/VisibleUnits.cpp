@@ -882,23 +882,23 @@ namespace krys::boo
     return static_cast<uint32>(start);
   }
 
-  VisiblePosition StartOfWord(const VisiblePosition &c, WordSide side) noexcept
+  VisiblePosition StartOfWord(const VisiblePosition &position, WordSide side) noexcept
   {
     // FIXME: This returns a null VP for c at the start of the document
     // and side == LeftWordIfOnBoundary
-    VisiblePosition p = c;
+    VisiblePosition p = position;
     if (side == WordSide::RightWordIfOnBoundary)
     {
       // at paragraph end, the startofWord is the current position
-      if (IsEndOfParagraph(c))
+      if (IsEndOfParagraph(position))
       {
-        return c;
+        return position;
       }
 
-      p = c.Next();
+      p = position.Next();
       if (p.IsNull())
       {
-        return c;
+        return position;
       }
     }
     return PreviousBoundary(p, StartWordBoundary);
@@ -920,25 +920,25 @@ namespace krys::boo
     return static_cast<uint32>(end);
   }
 
-  VisiblePosition EndOfWord(const VisiblePosition &c, WordSide side) noexcept
+  VisiblePosition EndOfWord(const VisiblePosition &position, WordSide side) noexcept
   {
-    VisiblePosition p = c;
+    VisiblePosition p = position;
     if (side == WordSide::LeftWordIfOnBoundary)
     {
-      if (IsStartOfParagraph(c))
+      if (IsStartOfParagraph(position))
       {
-        return c;
+        return position;
       }
 
-      p = c.Previous();
+      p = position.Previous();
       if (p.IsNull())
       {
-        return c;
+        return position;
       }
     }
-    else if (IsEndOfParagraph(c))
+    else if (IsEndOfParagraph(position))
     {
-      return c;
+      return position;
     }
 
     return NextBoundary(p, EndWordBoundary);
@@ -1704,10 +1704,10 @@ namespace krys::boo
     }
   }
 
-  VisiblePosition StartOfParagraph(const VisiblePosition &c,
+  VisiblePosition StartOfParagraph(const VisiblePosition &position,
                                    EditingBoundaryCrossingRule boundaryCrossingRule) noexcept
   {
-    auto p = c.DeepEquivalent();
+    auto p = position.DeepEquivalent();
     auto *startNode = p.DeprecatedNode();
 
     if (!startNode)
@@ -1732,15 +1732,15 @@ namespace krys::boo
     return PositionForParagraphNode(krys::move(node), offset, type);
   }
 
-  VisiblePosition EndOfParagraph(const VisiblePosition &c,
+  VisiblePosition EndOfParagraph(const VisiblePosition &position,
                                  EditingBoundaryCrossingRule boundaryCrossingRule) noexcept
   {
-    if (c.IsNull())
+    if (position.IsNull())
     {
       return VisiblePosition();
     }
 
-    auto p = c.DeepEquivalent();
+    auto p = position.DeepEquivalent();
     auto *startNode = p.DeprecatedNode();
 
     if (IsRenderedAsNonInlineTableImageOrHR(startNode))
@@ -1895,9 +1895,9 @@ namespace krys::boo
     return VisiblePosition(firstCandidate);
   }
 
-  VisiblePosition StartOfDocument(const VisiblePosition &c) noexcept
+  VisiblePosition StartOfDocument(const VisiblePosition &position) noexcept
   {
-    return StartOfDocument(c.DeepEquivalent().DeprecatedNode());
+    return StartOfDocument(position.DeepEquivalent().DeprecatedNode());
   }
 
   VisiblePosition EndOfDocument(const dom::Node *node) noexcept
@@ -1921,9 +1921,9 @@ namespace krys::boo
     return VisiblePosition(lastCandidate);
   }
 
-  VisiblePosition EndOfDocument(const VisiblePosition &c) noexcept
+  VisiblePosition EndOfDocument(const VisiblePosition &position) noexcept
   {
-    return EndOfDocument(c.DeepEquivalent().DeprecatedNode());
+    return EndOfDocument(position.DeepEquivalent().DeprecatedNode());
   }
 
   bool IsStartOfDocument(const VisiblePosition &p) noexcept
@@ -1955,17 +1955,17 @@ namespace krys::boo
     return p.IsNotNull() && p.Next().IsNull();
   }
 
-  VisiblePosition LeftBoundaryOfLine(const VisiblePosition &c, TextDirection direction,
+  VisiblePosition LeftBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
                                      bool *reachedBoundary) noexcept
   {
-    return direction == TextDirection::LTR ? LogicalStartOfLine(c, reachedBoundary)
-                                           : LogicalEndOfLine(c, reachedBoundary);
+    return direction == TextDirection::LTR ? LogicalStartOfLine(position, reachedBoundary)
+                                           : LogicalEndOfLine(position, reachedBoundary);
   }
 
-  VisiblePosition RightBoundaryOfLine(const VisiblePosition &c, TextDirection direction,
+  VisiblePosition RightBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
                                       bool *reachedBoundary) noexcept
   {
-    return direction == TextDirection::LTR ? LogicalEndOfLine(c, reachedBoundary)
-                                           : LogicalStartOfLine(c, reachedBoundary);
+    return direction == TextDirection::LTR ? LogicalEndOfLine(position, reachedBoundary)
+                                           : LogicalStartOfLine(position, reachedBoundary);
   }
 }

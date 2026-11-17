@@ -48,9 +48,9 @@ namespace krys::boo::tests
     KRYS_NODISCARD Ref<EventLog> LogEvents(EditorFixture &fixture) noexcept
     {
       auto log = CreateRef<EventLog>();
-      for (auto type : {EventNames::CompositionStart, EventNames::CompositionUpdate,
-                        EventNames::CompositionEnd, EventNames::BeforeInput, EventNames::Input,
-                        EventNames::TextInput, EventNames::KeyDown, EventNames::KeyPress})
+      for (auto type : {event_names::CompositionStart, event_names::CompositionUpdate,
+                        event_names::CompositionEnd, event_names::BeforeInput, event_names::Input,
+                        event_names::TextInput, event_names::KeyDown, event_names::KeyPress})
       {
         fixture.Document->AddEventListener(dom::DOMStringAtom(type), log, true);
       }

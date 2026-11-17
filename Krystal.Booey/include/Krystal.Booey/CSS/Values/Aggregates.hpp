@@ -137,7 +137,7 @@ namespace krys::boo::css
     using Wrapped::Wrapped;                                                                                  \
                                                                                                              \
     template <size_t I>                                                                                      \
-    friend KRYS_NODISCARD const auto &get(const wrapper &self) noexcept                                      \
+    KRYS_NODISCARD friend const auto &get(const wrapper &self) noexcept                                      \
     {                                                                                                        \
       return get<I>(static_cast<const wrapped &>(self));                                                     \
     }                                                                                                        \
@@ -183,7 +183,7 @@ namespace krys::boo::css
     }                                                                                                        \
                                                                                                              \
     template <size_t>                                                                                        \
-    friend KRYS_NODISCARD const auto &get(const wrapper &self) noexcept                                      \
+    KRYS_NODISCARD friend const auto &get(const wrapper &self) noexcept                                      \
     {                                                                                                        \
       return self.Value;                                                                                     \
     }                                                                                                        \
@@ -403,7 +403,7 @@ namespace krys::boo::css
 
     template <typename... Ts>
     requires(sizeof...(Ts) == N && krys::AllTrue<ConvertibleTo<Ts, T>...>)
-    constexpr SpaceSeparatedArray(Ts... values) noexcept : Value(std::forward<Ts>(values)...)
+    constexpr SpaceSeparatedArray(Ts... values) noexcept : Value {static_cast<T>(std::forward<Ts>(values))...}
     {
     }
 
@@ -505,7 +505,7 @@ namespace krys::boo::css
 
     template <typename... Ts>
     requires(sizeof...(Ts) == N && krys::AllTrue<ConvertibleTo<Ts, T>...>)
-    constexpr CommaSeparatedArray(Ts... values) noexcept : Value(std::forward<Ts>(values)...)
+    constexpr CommaSeparatedArray(Ts... values) noexcept : Value {static_cast<T>(std::forward<Ts>(values))...}
     {
     }
 

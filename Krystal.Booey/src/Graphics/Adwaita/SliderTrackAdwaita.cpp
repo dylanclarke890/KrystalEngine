@@ -52,12 +52,12 @@ namespace krys::boo
     bool isHorizontal = sliderTrackPart.GetType() == StyleAppearance::SliderHorizontal;
     if (isHorizontal)
     {
-      fieldRect.Move(0, rect.Height() / 2 - (SliderTrackSize / 2));
+      fieldRect.Move(0, rect.Height() / 2 - (static_cast<float>(SliderTrackSize) / 2));
       fieldRect.SetHeight(SliderTrackSize);
     }
     else
     {
-      fieldRect.Move(rect.Width() / 2 - (SliderTrackSize / 2), 0);
+      fieldRect.Move(rect.Width() / 2 - (static_cast<float>(SliderTrackSize) / 2), 0);
       fieldRect.SetWidth(SliderTrackSize);
     }
 

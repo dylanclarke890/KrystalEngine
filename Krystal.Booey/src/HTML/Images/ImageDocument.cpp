@@ -171,7 +171,7 @@ namespace krys::boo::html
     if (_shouldShrinkImage)
     {
       _clickListener = imageElement->AddEventListener<dom::MouseEvent>(
-        EventNames::Click,
+        event_names::Click,
         [document = CreateWeakPtr(this)](dom::MouseEvent &event)
         {
           if (document && dom::IsAnyClick(event))
@@ -260,8 +260,8 @@ namespace krys::boo::html
     }
 
     auto imageSize = ImageSize();
-    imageElement->Width(static_cast<uint32>(imageSize.Width().ToUnsigned()));
-    imageElement->Height(static_cast<uint32>(imageSize.Height().ToUnsigned()));
+    imageElement->Width(imageSize.Width().ToUnsigned());
+    imageElement->Height(imageSize.Height().ToUnsigned());
 
     if (ImageFitsInWindow())
     {

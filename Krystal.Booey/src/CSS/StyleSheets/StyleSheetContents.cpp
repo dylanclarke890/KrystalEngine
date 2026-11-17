@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <utility>
 
@@ -88,20 +89,20 @@ namespace krys::boo::css
     return size;
   }
 
-  StyleSheetContents::StyleSheetContents(ImportRule *ownerRule, const CSSOMString &originalURL,
-                                         const ParserContext &context) noexcept
-      : _ownerRule(ownerRule), _originalURL(originalURL), _defaultNamespace(dom::StarAtom()),
+  StyleSheetContents::StyleSheetContents(ImportRule *ownerRule, CSSOMString originalURL,
+                                         ParserContext context) noexcept
+      : _ownerRule(ownerRule), _originalURL(krys::move(originalURL)), _defaultNamespace(dom::StarAtom()),
         _isUserStyleSheet(ownerRule && ownerRule->ParentStyleSheet()
                           && ownerRule->ParentStyleSheet()->IsUserStyleSheet()),
-        _parserContext(context)
+        _parserContext(krys::move(context))
   {
   }
 
   StyleSheetContents::StyleSheetContents(const StyleSheetContents &other) noexcept
-      : RefCounted(), CanMakeWeakPtr(), _originalURL(other._originalURL),
-        _encodingFromCharsetRule(other._encodingFromCharsetRule), _namespaces(other._namespaces),
-        _defaultNamespace(other._defaultNamespace), _isUserStyleSheet(other._isUserStyleSheet),
-        _loadCompleted(true), _hasSyntacticallyValidCSSHeader(other._hasSyntacticallyValidCSSHeader),
+      : _originalURL(other._originalURL), _encodingFromCharsetRule(other._encodingFromCharsetRule),
+        _namespaces(other._namespaces), _defaultNamespace(other._defaultNamespace),
+        _isUserStyleSheet(other._isUserStyleSheet), _loadCompleted(true),
+        _hasSyntacticallyValidCSSHeader(other._hasSyntacticallyValidCSSHeader),
         _hasNestingRulesCache(other._hasNestingRulesCache), _parserContext(other._parserContext)
   {
     krys_debug_assert(other.IsCacheable());
@@ -259,7 +260,7 @@ namespace krys::boo::css
       for (auto &splitRule :
            styleRule->SplitIntoMultipleRulesWithMaximumSelectorComponentCount(MaximumSelectorComponentCount))
       {
-        _childRules.push_back(krys::move(splitRule));
+        _childRules.emplace_back(krys::move(splitRule));
       }
       return;
     }

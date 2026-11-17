@@ -35,7 +35,7 @@ namespace krys::boo::style
   {
     using Base::Base;
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD bool IsAuto() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsAuto() const noexcept
     {
       return HoldsAlternative<css::keywords::Auto>();
     }

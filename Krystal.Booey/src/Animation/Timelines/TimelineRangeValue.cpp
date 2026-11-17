@@ -46,12 +46,12 @@ namespace krys::boo
       value,
       [&](dom::DOMString &rangeString) -> RefPtr<css::Value>
       {
-        return css::PropertyParserHelpers::ParseSingleAnimationRange(rangeString,
-                                                                     document->CssParserContext(), type);
+        return css::parse_property::ParseSingleAnimationRange(rangeString, document->CssParserContext(),
+                                                              type);
       },
       [&](TimelineRangeOffset &rangeOffset) -> RefPtr<css::Value>
       {
-        if (auto consumedRangeName = css::PropertyParserHelpers::ParseSingleAnimationRange(
+        if (auto consumedRangeName = css::parse_property::ParseSingleAnimationRange(
               rangeOffset.RangeName, document->CssParserContext(), type))
         {
           if (RefPtr offset = rangeOffset.Offset)

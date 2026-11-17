@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   enum class ValueId : uint16;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     KRYS_NODISCARD bool IsAnimationRangeKeyword(ValueId id) noexcept;
 

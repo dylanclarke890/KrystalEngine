@@ -100,7 +100,7 @@ namespace krys::boo
     }
 
   protected:
-    FELighting(Type type, const Color &lightingColor, float surfaceScale, float diffuseConstant,
+    FELighting(Type type, Color lightingColor, float surfaceScale, float diffuseConstant,
                float specularConstant, float specularExponent, float kernelUnitLengthX,
                float kernelUnitLengthY, Ref<LightSource> &&lightSource,
                const DestinationColorSpace &colorSpace) noexcept;

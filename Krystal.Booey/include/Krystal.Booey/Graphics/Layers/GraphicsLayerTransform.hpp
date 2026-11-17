@@ -34,9 +34,9 @@ namespace krys::boo
     FloatPoint3D _anchorPoint;
     FloatPoint _position;
     FloatSize _size;
-    bool _flattening;
-    bool _dirty;
-    mutable bool _childrenDirty;
+    bool _flattening {true};
+    bool _dirty {false};
+    mutable bool _childrenDirty {false};
     TransformationMatrix _local;
     TransformationMatrix _children;
     TransformationMatrix _combined;

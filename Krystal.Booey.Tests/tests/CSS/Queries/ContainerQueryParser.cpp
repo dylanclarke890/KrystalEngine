@@ -290,7 +290,7 @@ namespace krys::boo::css::tests
     REQUIRE(query);
     auto *feature = std::get_if<mq::Feature>(&query->Condition.Queries[0]);
     REQUIRE(feature);
-    CHECK(feature->Schema == &cq::Features::Style());
+    CHECK(feature->Schema == &cq::features::Style());
     CHECK(feature->FunctionId == ValueId::Style);
     REQUIRE(feature->RightComparison);
     CHECK(feature->RightComparison->Value->IsCustomPropertyValue());
@@ -330,7 +330,7 @@ namespace krys::boo::css::tests
     REQUIRE(query);
     auto *range = std::get_if<mq::StyleRange>(&query->Condition.Queries[0]);
     REQUIRE(range);
-    CHECK(range->Schema == &cq::Features::Style());
+    CHECK(range->Schema == &cq::features::Style());
     CHECK(range->FunctionId == ValueId::Style);
     REQUIRE(range->Values.size() == 3uz);
     CHECK(range->Values[1].CustomPropertyName == u8"--foo");
@@ -416,12 +416,12 @@ namespace krys::boo::css::tests
 
   TEST_CASE("ContainerQueryFeatures: AllSchemas", "[CSS][Queries][ContainerQueryFeatures]")
   {
-    auto schemas = cq::Features::AllSchemas();
+    auto schemas = cq::features::AllSchemas();
     CHECK(schemas
-          == List<const mq::FeatureSchema *> {&cq::Features::Width(), &cq::Features::Height(),
-                                              &cq::Features::InlineSize(), &cq::Features::BlockSize(),
-                                              &cq::Features::AspectRatio(), &cq::Features::Orientation()});
-    CHECK(ToNarrow(cq::Features::Style().Name.View()) == "style");
-    CHECK(cq::Features::Style().FeatureValueType == mq::FeatureSchema::ValueType::CustomProperty);
+          == List<const mq::FeatureSchema *> {&cq::features::Width(), &cq::features::Height(),
+                                              &cq::features::InlineSize(), &cq::features::BlockSize(),
+                                              &cq::features::AspectRatio(), &cq::features::Orientation()});
+    CHECK(ToNarrow(cq::features::Style().Name.View()) == "style");
+    CHECK(cq::features::Style().FeatureValueType == mq::FeatureSchema::ValueType::CustomProperty);
   }
 }

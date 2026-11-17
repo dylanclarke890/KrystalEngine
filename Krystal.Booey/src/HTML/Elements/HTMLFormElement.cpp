@@ -102,7 +102,7 @@ namespace krys::boo::html
     {
       auto contains = [&](char8 character)
       {
-        return target.find(character) != dom::DOMStringView::npos;
+        return target.contains(character);
       };
       if ((contains(u8'\n') || contains(u8'\r') || contains(u8'\t')) && contains(u8'<'))
       {
@@ -387,7 +387,7 @@ namespace krys::boo::html
     // https://html.spec.whatwg.org/#concept-form-reset
     // 1. Let reset be the result of firing an event named reset at form, with the bubbles and cancelable
     //    attributes initialized to true.
-    auto event = dom::Event::Create(EventNames::Reset, true, true);
+    auto event = dom::Event::Create(event_names::Reset, true, true);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
 
     // 2. If reset is true, then invoke the reset algorithm of each resettable element whose form owner is
@@ -616,7 +616,7 @@ namespace krys::boo::html
       {
         continue;
       }
-      values.push_back({input->Name(), input->Value()});
+      values.emplace_back(input->Name(), input->Value());
     }
     return values;
   }
@@ -1102,14 +1102,15 @@ namespace krys::boo::html
     return entry != _pastNamesMap.end() ? entry->second.get() : nullptr;
   }
 
-  void HTMLFormElement::AddToPastNamesMap(FormAssociatedElement &item, dom::DOMStringView pastName) noexcept
+  void HTMLFormElement::AddToPastNamesMap(FormAssociatedElement &element,
+                                          dom::DOMStringView pastName) noexcept
   {
-    krys_debug_assert(item.Form() == this);
+    krys_debug_assert(element.Form() == this);
     if (pastName.empty())
     {
       return;
     }
-    _pastNamesMap[dom::DOMStringAtom(pastName)] = CreateWeakPtr(&item.AsHTMLElement());
+    _pastNamesMap[dom::DOMStringAtom(pastName)] = CreateWeakPtr(&element.AsHTMLElement());
   }
 
   void HTMLFormElement::RemoveFromPastNamesMap(FormAssociatedElement &item) noexcept
@@ -1154,7 +1155,7 @@ namespace krys::boo::html
     }
     else if (elementFromPast && namedItems.empty())
     {
-      namedItems.push_back(ShareRef(*elementFromPast));
+      namedItems.emplace_back(ShareRef(*elementFromPast));
     }
 
     return namedItems;
@@ -1322,7 +1323,7 @@ namespace krys::boo::html
       {
         if (input->IsTextField())
         {
-          formValues->push_back({input->Name(), input->Value()});
+          formValues->emplace_back(input->Name(), input->Value());
         }
       }
     }
@@ -1331,7 +1332,7 @@ namespace krys::boo::html
     // 7. Fire an event named formdata at form using FormDataEvent, with the formData attribute initialized to
     //    form data and the bubbles attribute initialized to true.
     auto event =
-      dom::FormDataEvent::Create(EventNames::FormData, true, false, false, Ref<DOMFormData>(domFormData));
+      dom::FormDataEvent::Create(event_names::FormData, true, false, false, Ref<DOMFormData>(domFormData));
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
 
     if (submitter)

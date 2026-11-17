@@ -68,7 +68,7 @@ namespace krys::boo::html
     // Without the `results` attribute (which isn't standard), the results button is only a decoration.
     auto resultsButton = SearchFieldResultsButtonElement::Create(document);
     (void)container->InsertBefore(*resultsButton, textWrapper);
-    resultsButton->SetUserAgentPart(css::UserAgentParts::WebkitSearchDecoration());
+    resultsButton->SetUserAgentPart(css::user_agent_parts::WebkitSearchDecoration());
     _resultsButton = krys::move(resultsButton);
 
     auto cancelButton = SearchFieldCancelButtonElement::Create(document);

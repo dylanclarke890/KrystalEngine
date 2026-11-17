@@ -25,7 +25,7 @@ namespace krys::boo::css::tests
     CHECK(list.ComponentCount() == 0);
     CHECK(list.SelectorCount() == 0);
     CHECK(list.begin() == list.end());
-    CHECK(list.SelectorsText() == u8"");
+    CHECK(list.SelectorsText().empty());
     CHECK(!list.HasOnlyNestingSelector());
     CHECK(!list.HasExplicitNestingParent());
     CHECK(list == SelectorList {});

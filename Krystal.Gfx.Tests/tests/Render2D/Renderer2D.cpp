@@ -43,7 +43,7 @@ namespace krys::gfx::tests
       UniquePtr<Device> _device;
       UniquePtr<Renderer2D> _renderer;
       TextureHandle _target {};
-      List<TextureHandle> _images {};
+      List<TextureHandle> _images;
       uint32 _width {4u};
       uint32 _height {4u};
       TextureFormat _format {TextureFormat::RGBA8Unorm};
@@ -1757,9 +1757,11 @@ namespace krys::gfx::tests
       {
         const double mixed = (1.0 - ab) * cs + ab * std::clamp(blendedChannel, 0.0, 1.0);
         const double result = as * mixed + (1.0 - as) * premultipliedBackdrop / 255.0;
+        // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
         return static_cast<uint8>(std::clamp(result, 0.0, 1.0) * 255.0 + 0.5);
       };
       return {channel(s.R, blended.R, backdrop[0]), channel(s.G, blended.G, backdrop[1]),
+              // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
               channel(s.B, blended.B, backdrop[2]), static_cast<uint8>((as + ab * (1.0 - as)) * 255.0 + 0.5)};
     }
 
@@ -1975,6 +1977,7 @@ namespace krys::gfx::tests
 
     KRYS_NODISCARD Pixel Grey(double t)
     {
+      // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
       const auto value = static_cast<uint8>(std::clamp(t, 0.0, 1.0) * 255.0 + 0.5);
       return {value, value, value, 255};
     }
@@ -1989,6 +1992,7 @@ namespace krys::gfx::tests
       for (uint32 i = 0u; i < pixels.size(); ++i)
       {
         const double x = static_cast<double>(i % width) + 0.5;
+        // NOLINTNEXTLINE(bugprone-integer-division): the row.
         const double y = static_cast<double>(i / width) + 0.5;
         const Maybe<double> t = offset(x, y);
         if (t && std::isnan(*t))
@@ -2367,7 +2371,7 @@ namespace krys::gfx::tests
     /// `high`.
     KRYS_NODISCARD double GaussianMass(double low, double high, double p, double sigma)
     {
-      const double k = 1.0 / (sigma * std::sqrt(2.0));
+      const double k = 1.0 / (sigma * std::numbers::sqrt2);
       return 0.5 * (std::erf((high - p) * k) - std::erf((low - p) * k));
     }
 
@@ -2404,12 +2408,14 @@ namespace krys::gfx::tests
       for (uint32 i = 0u; i < pixels.size(); ++i)
       {
         const double x = static_cast<double>(i % width) + 0.5;
+        // NOLINTNEXTLINE(bugprone-integer-division): the row.
         const double y = static_cast<double>(i / width) + 0.5;
         const double value = expected(x, y);
         if (std::isnan(value))
         {
           continue;
         }
+        // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
         const int alpha = static_cast<int>(value * 255.0 + 0.5);
         if (std::abs(int(pixels[i][3]) - alpha) > tolerance)
         {

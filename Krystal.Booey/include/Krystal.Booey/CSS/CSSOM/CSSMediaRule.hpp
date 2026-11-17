@@ -45,7 +45,7 @@ namespace krys::boo::css
     CSSMediaRule(MediaRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSMediaRule() noexcept;
+    ~CSSMediaRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSMediaRule> Create(MediaRule &rule, CSSStyleSheet *sheet) noexcept;
 

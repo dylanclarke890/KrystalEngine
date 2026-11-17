@@ -50,7 +50,7 @@ namespace krys::boo::dom::tests
 
     auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"").ReleaseValue();
     auto attr = data.Document->CreateAttribute(u8"test").ReleaseValue();
-    for (Ref<Node> node : {Ref<Node>(doctype), Ref<Node>(attr)})
+    for (const Ref<Node> &node : {Ref<Node>(doctype), Ref<Node>(attr)})
     {
       for (bool atStart : {true, false})
       {

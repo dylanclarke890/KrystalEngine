@@ -38,7 +38,7 @@ namespace krys::boo
   }
 
   inline StyleFillData::StyleFillData(const StyleFillData &other) noexcept
-      : RefCounted<StyleFillData>(), FillOpacity(other.FillOpacity), Fill(other.Fill)
+      : FillOpacity(other.FillOpacity), Fill(other.Fill)
   {
   }
 
@@ -61,8 +61,8 @@ namespace krys::boo
   }
 
   inline StyleStrokeData::StyleStrokeData(const StyleStrokeData &other) noexcept
-      : RefCounted<StyleStrokeData>(), StrokeOpacity(other.StrokeOpacity), Stroke(other.Stroke),
-        StrokeDashOffset(other.StrokeDashOffset), StrokeDashArray(other.StrokeDashArray)
+      : StrokeOpacity(other.StrokeOpacity), Stroke(other.Stroke), StrokeDashOffset(other.StrokeDashOffset),
+        StrokeDashArray(other.StrokeDashArray)
   {
   }
 
@@ -84,7 +84,7 @@ namespace krys::boo
   }
 
   inline StyleStopData::StyleStopData(const StyleStopData &other) noexcept
-      : RefCounted<StyleStopData>(), StopOpacity(other.StopOpacity), StopColor(other.StopColor)
+      : StopOpacity(other.StopOpacity), StopColor(other.StopColor)
   {
   }
 
@@ -107,8 +107,8 @@ namespace krys::boo
   }
 
   inline StyleMiscData::StyleMiscData(const StyleMiscData &other) noexcept
-      : RefCounted<StyleMiscData>(), FloodOpacity(other.FloodOpacity), FloodColor(other.FloodColor),
-        LightingColor(other.LightingColor), BaselineShift(other.BaselineShift)
+      : FloodOpacity(other.FloodOpacity), FloodColor(other.FloodColor), LightingColor(other.LightingColor),
+        BaselineShift(other.BaselineShift)
   {
   }
 
@@ -132,8 +132,7 @@ namespace krys::boo
 
   inline StyleInheritedResourceData::StyleInheritedResourceData(
     const StyleInheritedResourceData &other) noexcept
-      : RefCounted<StyleInheritedResourceData>(), MarkerStart(other.MarkerStart), MarkerMid(other.MarkerMid),
-        MarkerEnd(other.MarkerEnd)
+      : MarkerStart(other.MarkerStart), MarkerMid(other.MarkerMid), MarkerEnd(other.MarkerEnd)
   {
   }
 
@@ -156,8 +155,7 @@ namespace krys::boo
   }
 
   inline StyleLayoutData::StyleLayoutData(const StyleLayoutData &other) noexcept
-      : RefCounted<StyleLayoutData>(), Cx(other.Cx), Cy(other.Cy), R(other.R), Rx(other.Rx), Ry(other.Ry),
-        X(other.X), Y(other.Y), D(other.D)
+      : Cx(other.Cx), Cy(other.Cy), R(other.R), Rx(other.Rx), Ry(other.Ry), X(other.X), Y(other.Y), D(other.D)
   {
   }
 

@@ -146,9 +146,9 @@ namespace krys::boo::layout
     InlineItems _inlineItems;
     TextSpacingContext _textSpacingContext;
 
-    Maybe<LineLayoutResult> _maximumIntrinsicWidthLineContent {};
-    Maybe<InlineLayoutUnit> _minimumContentSize {};
-    Maybe<InlineLayoutUnit> _maximumContentSize {};
+    Maybe<LineLayoutResult> _maximumIntrinsicWidthLineContent;
+    Maybe<InlineLayoutUnit> _minimumContentSize;
+    Maybe<InlineLayoutUnit> _maximumContentSize;
 
   public:
     InlineContentCache() noexcept = default;

@@ -69,7 +69,9 @@ namespace krys::boo::html
   bool ProgressInnerElement::RendererIsNeeded(const RenderStyle &style) noexcept
   {
     auto *progressRenderer = ProgressElement()->Renderer();
-    return progressRenderer && !progressRenderer->Style().HasUsedAppearance()
+    return progressRenderer
+           && !progressRenderer->Style().HasUsedAppearance()
+           // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
            && HTMLDivElement::RendererIsNeeded(style);
   }
 
@@ -90,21 +92,21 @@ namespace krys::boo::html
   Ref<ProgressInnerElement> ProgressInnerElement::Create(dom::Document &document) noexcept
   {
     auto result = CreateRef<ProgressInnerElement>(document);
-    result->SetUserAgentPart(css::UserAgentParts::WebkitProgressInnerElement());
+    result->SetUserAgentPart(css::user_agent_parts::WebkitProgressInnerElement());
     return result;
   }
 
   Ref<ProgressBarElement> ProgressBarElement::Create(dom::Document &document) noexcept
   {
     auto result = CreateRef<ProgressBarElement>(document);
-    result->SetUserAgentPart(css::UserAgentParts::WebkitProgressBar());
+    result->SetUserAgentPart(css::user_agent_parts::WebkitProgressBar());
     return result;
   }
 
   Ref<ProgressValueElement> ProgressValueElement::Create(dom::Document &document) noexcept
   {
     auto result = CreateRef<ProgressValueElement>(document);
-    result->SetUserAgentPart(css::UserAgentParts::WebkitProgressValue());
+    result->SetUserAgentPart(css::user_agent_parts::WebkitProgressValue());
     return result;
   }
 }

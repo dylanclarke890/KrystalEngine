@@ -73,7 +73,7 @@ namespace krys::boo::html::tests
     // To the filename mode, the value is empty.
     REQUIRE_FALSE(t.SetValue(u8"x").HasException());
     t.Type(u8"file");
-    CHECK(Str(t.Value()) == "");
+    CHECK(Str(t.Value()).empty());
   }
 
   TEST_CASE("HTMLInputElement: clicking a checkbox or radio button, and canceling the click",

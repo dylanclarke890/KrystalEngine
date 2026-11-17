@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 
-namespace krys::boo::css::cq::Features
+namespace krys::boo::css::cq::features
 {
   KRYS_NODISCARD const mq::FeatureSchema &Width() noexcept;
 

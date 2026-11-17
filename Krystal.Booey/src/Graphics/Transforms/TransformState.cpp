@@ -37,12 +37,10 @@ namespace krys::boo
     _inputSecondaryQuad = other._inputSecondaryQuad;
     _direction = other._direction;
 
-    _accumulatedTransform = nullptr;
-
-    if (other._accumulatedTransform)
-    {
-      _accumulatedTransform = CreateUnique<TransformationMatrix>(*other._accumulatedTransform);
-    }
+    // Copied before it's replaced, so self-assignment keeps it.
+    _accumulatedTransform = other._accumulatedTransform
+                              ? CreateUnique<TransformationMatrix>(*other._accumulatedTransform)
+                              : nullptr;
 
     return *this;
   }

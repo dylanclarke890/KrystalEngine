@@ -55,6 +55,8 @@ namespace krys::boo::svg
     }
   }
 
+  SVGFilterPrimitiveStandardAttributes::~SVGFilterPrimitiveStandardAttributes() noexcept = default;
+
   void SVGFilterPrimitiveStandardAttributes::AttributeChanged(const dom::QualifiedName &name,
                                                               Maybe<dom::DOMStringView> oldValue,
                                                               Maybe<dom::DOMStringView> value) noexcept

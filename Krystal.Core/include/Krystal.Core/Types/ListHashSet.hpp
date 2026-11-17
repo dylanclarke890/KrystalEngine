@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Core/Utils/Move.hpp"
 #include <cstddef>
 #include <functional>
 #include <initializer_list>
@@ -140,7 +141,7 @@ namespace krys
         return {const_iterator(found->second), false};
       }
 
-      _values.push_back(std::move(value));
+      _values.push_back(krys::move(value));
       auto position = std::prev(_values.end());
       _index.emplace(*position, position);
       return {const_iterator(position), true};

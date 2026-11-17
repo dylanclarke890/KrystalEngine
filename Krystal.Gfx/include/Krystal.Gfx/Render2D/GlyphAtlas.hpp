@@ -93,7 +93,7 @@ namespace krys::gfx
   private:
     AtlasPages _coverage;
     AtlasPages _colour;
-    HashMap<Key, Entry, KeyHash> _entries {};
+    HashMap<Key, Entry, KeyHash> _entries;
     GlyphAtlasStats _stats {};
 
   public:

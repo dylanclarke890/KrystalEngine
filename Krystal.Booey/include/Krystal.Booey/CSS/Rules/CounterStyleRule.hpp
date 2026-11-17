@@ -37,7 +37,7 @@ namespace krys::boo::css
     CSSOMStringAtom _name;
     CounterStyleDescriptors _descriptors;
 
-    CounterStyleRule(const CSSOMStringAtom &name, CounterStyleDescriptors &&descriptors) noexcept;
+    CounterStyleRule(CSSOMStringAtom name, CounterStyleDescriptors &&descriptors) noexcept;
 
     CounterStyleRule(const CounterStyleRule &other) noexcept = default;
 

@@ -7,7 +7,6 @@
 #include "Krystal.Core/Maths/Traits.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include <type_traits>
 
 #pragma region Helper Macros
 
@@ -43,24 +42,23 @@ private:                                                                        
 
 #define MATRIX_BINARY_OPERATOR(OP)                                                                           \
   template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const MATRIX_TYPE &lhs,                            \
-                                                          const MATRIX_TYPE &rhs) noexcept                   \
+  KRYS_NODISCARD constexpr auto operator OP(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs) noexcept         \
   {                                                                                                          \
     return Zip(lhs, rhs, [](auto l, auto r) { return l OP r; });                                             \
   }                                                                                                          \
   template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const MATRIX_TYPE &lhs, T scalar) noexcept         \
+  KRYS_NODISCARD constexpr auto operator OP(const MATRIX_TYPE &lhs, T scalar) noexcept                       \
   {                                                                                                          \
     return MapEach(lhs, [&](auto v) { return v OP scalar; });                                                \
   }
 
 #define MATRIX_OPERATOR_ASSIGNMENT(OP)                                                                       \
-  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(const Matrix &other) noexcept                    \
+  constexpr auto &operator KRYS_CONCAT(OP, =)(const Matrix &other) noexcept                                  \
   {                                                                                                          \
     *this = *this OP other;                                                                                  \
     return *this;                                                                                            \
   }                                                                                                          \
-  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(T scalar) noexcept                               \
+  constexpr auto &operator KRYS_CONCAT(OP, =)(T scalar) noexcept                                             \
   {                                                                                                          \
     *this = *this OP scalar;                                                                                 \
     return *this;                                                                                            \
@@ -68,7 +66,7 @@ private:                                                                        
 
 #define MATRIX_UNARY_OPERATOR(OP)                                                                            \
   template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const MATRIX_TYPE &rhs) noexcept                   \
+  KRYS_NODISCARD constexpr auto operator OP(const MATRIX_TYPE &rhs) noexcept                                 \
   {                                                                                                          \
     return MapEach(rhs, [](auto v) { return OP v; });                                                        \
   }
@@ -400,7 +398,7 @@ namespace krys
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
-    using U = std::invoke_result_t<F, T>;
+    using U = invoke_result_t<F, T>;
     using Mat = Matrix<U, C, R>;
 
     if constexpr (C == 2)
@@ -466,7 +464,7 @@ namespace krys
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
-    using U = std::invoke_result_t<F, T, T>;
+    using U = invoke_result_t<F, T, T>;
     using Mat = Matrix<U, C, R>;
 
     if constexpr (C == 2)
@@ -503,7 +501,7 @@ namespace krys
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
-    using U = std::invoke_result_t<F, T, T, T>;
+    using U = invoke_result_t<F, T, T, T>;
     using Mat = Matrix<U, C, R>;
 
     if constexpr (C == 2)
@@ -546,7 +544,7 @@ namespace krys
   template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T> F>
   KRYS_NODISCARD constexpr auto Sum(const MATRIX_TYPE &m, const F &func) noexcept
   {
-    using U = std::invoke_result_t<F, T>;
+    using U = invoke_result_t<F, T>;
 
     U sum = U(0);
     ForEach(m, [&sum, &func](auto val) { sum += func(val); });

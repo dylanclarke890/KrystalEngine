@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -99,10 +100,10 @@ namespace krys::boo
   {
   }
 
-  EditCommand::EditCommand(dom::Document &document, const VisibleSelection &startingSelection,
-                           const VisibleSelection &endingSelection) noexcept
-      : _document(ShareRef(document)), _startingSelection(startingSelection),
-        _endingSelection(endingSelection)
+  EditCommand::EditCommand(dom::Document &document, VisibleSelection startingSelection,
+                           VisibleSelection endingSelection) noexcept
+      : _document(ShareRef(document)), _startingSelection(krys::move(startingSelection)),
+        _endingSelection(krys::move(endingSelection))
   {
   }
 

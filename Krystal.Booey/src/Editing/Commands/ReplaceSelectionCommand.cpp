@@ -1979,13 +1979,13 @@ namespace krys::boo
   // we put the list items into the existing list.
   RefPtr<dom::Node> ReplaceSelectionCommand::InsertAsListItems(dom::Element &passedListElement,
                                                                dom::Node *insertionBlock,
-                                                               const dom::Position &insertPos,
+                                                               const dom::Position &position,
                                                                InsertedNodes &insertedNodes) noexcept
   {
     Ref<dom::Element> listElement = DeepestSingleChildList(passedListElement);
 
-    bool isStart = IsStartOfParagraph(insertPos);
-    bool isEnd = IsEndOfParagraph(insertPos);
+    bool isStart = IsStartOfParagraph(position);
+    bool isEnd = IsEndOfParagraph(position);
     bool isMiddle = !isStart && !isEnd;
     RefPtr<dom::Node> lastNode = ShareRefPtr(insertionBlock);
 
@@ -1993,12 +1993,12 @@ namespace krys::boo
     // list items and insert these nodes between them.
     if (isMiddle)
     {
-      int32 textNodeOffset = insertPos.OffsetInContainerNode();
-      if (auto *text = DynamicDowncast<dom::Text>(*insertPos.DeprecatedNode()); text && textNodeOffset > 0)
+      int32 textNodeOffset = position.OffsetInContainerNode();
+      if (auto *text = DynamicDowncast<dom::Text>(*position.DeprecatedNode()); text && textNodeOffset > 0)
       {
         SplitTextNode(*text, static_cast<uint32>(textNodeOffset));
       }
-      (void)SplitTreeToNode(*insertPos.DeprecatedNode(), *lastNode, true);
+      (void)SplitTreeToNode(*position.DeprecatedNode(), *lastNode, true);
     }
 
     while (auto *firstChild = listElement->FirstChild())

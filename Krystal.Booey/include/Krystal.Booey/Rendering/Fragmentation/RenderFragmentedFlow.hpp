@@ -120,7 +120,7 @@ namespace krys::boo
 
     virtual void AddFragmentToThread(RenderFragmentContainer *fragment) noexcept = 0;
 
-    void RemoveFragmentFromThread(RenderFragmentContainer &fragment) noexcept;
+    void RemoveFragmentFromThread(RenderFragmentContainer &renderFragmentContainer) noexcept;
 
     KRYS_NODISCARD Span<RenderFragmentContainer *const> RenderFragmentContainerList() const noexcept
     {

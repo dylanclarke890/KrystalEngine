@@ -32,7 +32,7 @@
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   RefPtr<Value> ConsumeMarginTrim(TokenRange &tokens, PropertyParserState &) noexcept
   {

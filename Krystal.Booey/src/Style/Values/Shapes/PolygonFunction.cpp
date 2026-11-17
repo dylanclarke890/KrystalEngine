@@ -40,7 +40,7 @@ namespace krys::boo::style
   public:
     KRYS_NODISCARD static bool IsKeyNull(const List<FloatPoint> &points) noexcept
     {
-      return !points.size();
+      return points.empty();
     }
 
     KRYS_NODISCARD static boo::Path CreateValueForKey(const List<FloatPoint> &points) noexcept

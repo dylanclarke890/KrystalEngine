@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Core/Maths/Quaternion.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::tests
 {
@@ -11,9 +12,9 @@ namespace krys::tests
     constexpr Quaternion<float> copy(empty);
     REQUIRE(copy == empty);
 
-    constexpr Quaternion<float> move_src(empty);
-    constexpr Quaternion<float> move_dst(std::move(move_src));
-    REQUIRE(move_dst == empty);
+    Quaternion<float> moveSource(empty);
+    const Quaternion<float> moveDestination(krys::move(moveSource));
+    REQUIRE(moveDestination == empty);
   }
 
   TEST_CASE("Quaternion::Equality", "[Quaternion]")

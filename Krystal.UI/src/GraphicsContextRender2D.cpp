@@ -354,7 +354,7 @@ namespace krys::ui
   }
 
   void GraphicsContextRender2D::FillRectWithRoundedHole(const boo::FloatRect &outerRect,
-                                                        const boo::FloatRoundedRect &innerRRect,
+                                                        const boo::FloatRoundedRect &roundedHoleRect,
                                                         const boo::Color &color) noexcept
   {
     if (!color.IsValid())
@@ -364,7 +364,7 @@ namespace krys::ui
 
     auto fill = [&]
     {
-      if (auto circular = ToCircularRoundedRect(innerRRect))
+      if (auto circular = ToCircularRoundedRect(roundedHoleRect))
       {
         _renderer.FillRectWithRoundedHole(ToRect2D(outerRect), *circular, ToColour(color));
         return;
@@ -372,7 +372,7 @@ namespace krys::ui
 
       gfx::Path2D path;
       path.AddRect(ToRect2D(outerRect));
-      AddRoundedRect(path, innerRRect);
+      AddRoundedRect(path, roundedHoleRect);
       _renderer.FillPath(path, gfx::FillRule::EvenOdd, ToColour(color));
     };
 
@@ -646,12 +646,12 @@ namespace krys::ui
     }
   }
 
-  void GraphicsContextRender2D::DrawLinesForText(const boo::FloatPoint &point, float thickness,
+  void GraphicsContextRender2D::DrawLinesForText(const boo::FloatPoint &origin, float thickness,
                                                  Span<const boo::FloatSegment> lineSegments, bool printing,
                                                  bool doubleUnderlines, boo::StrokeStyle strokeStyle) noexcept
   {
     auto [rects, strokeColor] = ComputeRectsAndStrokeColorForLinesForText(
-      point, thickness, lineSegments, printing, doubleUnderlines, strokeStyle);
+      origin, thickness, lineSegments, printing, doubleUnderlines, strokeStyle);
     for (auto &rect : rects)
     {
       FillRect(rect, strokeColor);
@@ -674,7 +674,7 @@ namespace krys::ui
   void GraphicsContextRender2D::BeginTransparencyLayer(float opacity) noexcept
   {
     GraphicsContext::BeginTransparencyLayer(opacity);
-    _layerStack.push_back({});
+    _layerStack.emplace_back();
     _clipBoundsStack.push_back(_clipBounds);
     PrepareDraw(false);
 

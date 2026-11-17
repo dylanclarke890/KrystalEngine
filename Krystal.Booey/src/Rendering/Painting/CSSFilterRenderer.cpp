@@ -410,7 +410,7 @@ namespace krys::boo
 
       if (_functions.empty())
       {
-        _functions.push_back(SourceGraphic::Create());
+        _functions.emplace_back(SourceGraphic::Create());
       }
 
       _functions.push_back(krys::move(function));

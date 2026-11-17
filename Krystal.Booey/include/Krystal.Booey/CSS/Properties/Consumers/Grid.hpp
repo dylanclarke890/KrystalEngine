@@ -39,7 +39,7 @@ namespace krys::boo::css
   using GridNamedAreaMapRow = SmallList<CSSOMString, 8uz>;
   class GridLineNamesValue;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // https://drafts.csswg.org/css-grid/
 

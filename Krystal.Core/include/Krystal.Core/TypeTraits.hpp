@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include <cstddef>
-#include <type_traits>
+#include <type_traits> // NOLINT(portability-restrict-system-includes): the engine wrapper itself
 #include <utility>
 
 namespace krys
@@ -177,7 +177,7 @@ namespace krys
     using storage_type = T *;
 
     template <typename U>
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static T *exchange(storage_type &ptr, U &&newValue) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static T *exchange(storage_type &ptr, U &&newValue) noexcept
     {
       return std::exchange(ptr, newValue);
     }
@@ -187,7 +187,7 @@ namespace krys
       std::swap(a, b);
     }
 
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static T *unwrap(const storage_type &ptr) noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static T *unwrap(const storage_type &ptr) noexcept
     {
       return ptr;
     }

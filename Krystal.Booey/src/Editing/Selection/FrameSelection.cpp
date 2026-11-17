@@ -497,7 +497,7 @@ namespace krys::boo
           if (RefPtr<dom::Document> document = ShareRefPtr(weakDocument.get()))
           {
             document->Selection()._hasScheduledSelectionChangeEventOnDocument = false;
-            (void)dom::EventDispatcher::FireEvent(EventNames::SelectionChange, *document);
+            (void)dom::EventDispatcher::FireEvent(event_names::SelectionChange, *document);
           }
         });
     }
@@ -1885,7 +1885,7 @@ namespace krys::boo
       return true;
     }
 
-    auto type = dom::DOMStringAtom(EventNames::SelectStart);
+    auto type = dom::DOMStringAtom(event_names::SelectStart);
     return dom::EventDispatcher::FireEvent<dom::Event>(type, *selectStartTarget,
                                                        dom::EventInit {.Bubbles = true, .Cancelable = true});
   }
@@ -2034,7 +2034,7 @@ namespace krys::boo
 
     if (selectStartTarget)
     {
-      auto type = dom::DOMStringAtom(EventNames::SelectStart);
+      auto type = dom::DOMStringAtom(event_names::SelectStart);
       bool notCanceled = dom::EventDispatcher::FireEvent<dom::Event>(
         type, *selectStartTarget, dom::EventInit {.Bubbles = true, .Cancelable = true});
       if (!notCanceled)

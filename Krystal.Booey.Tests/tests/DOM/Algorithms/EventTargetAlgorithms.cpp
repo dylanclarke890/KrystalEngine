@@ -73,7 +73,7 @@ namespace krys::boo::dom::tests
     "Default passive value: true for wheel and touch listeners on the window, document, its element and body",
     "[DOM][EventTargetAlgorithms][dom:default-passive-value]")
   {
-    auto wheel = DOMStringAtom(EventNames::Wheel);
+    auto wheel = DOMStringAtom(event_names::Wheel);
 
     SECTION("The window, the document, its document element and its body")
     {
@@ -82,16 +82,16 @@ namespace krys::boo::dom::tests
       REQUIRE(window);
 
       CHECK(EventTargetAlgorithms::DefaultPassiveValue(wheel, *window));
-      CHECK(EventTargetAlgorithms::DefaultPassiveValue(EventNames::TouchStart, *window));
-      CHECK(EventTargetAlgorithms::DefaultPassiveValue(EventNames::TouchMove, *window));
-      CHECK(EventTargetAlgorithms::DefaultPassiveValue(EventNames::MouseWheel, *window));
+      CHECK(EventTargetAlgorithms::DefaultPassiveValue(event_names::TouchStart, *window));
+      CHECK(EventTargetAlgorithms::DefaultPassiveValue(event_names::TouchMove, *window));
+      CHECK(EventTargetAlgorithms::DefaultPassiveValue(event_names::MouseWheel, *window));
       CHECK(EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document));
       CHECK(EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->DocumentElement()));
       CHECK(EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->Body()));
       CHECK_FALSE(
         EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->GetElementById(u8"box")));
-      CHECK_FALSE(EventTargetAlgorithms::DefaultPassiveValue(EventNames::Click, *window));
-      CHECK_FALSE(EventTargetAlgorithms::DefaultPassiveValue(EventNames::TouchEnd, *window));
+      CHECK_FALSE(EventTargetAlgorithms::DefaultPassiveValue(event_names::Click, *window));
+      CHECK_FALSE(EventTargetAlgorithms::DefaultPassiveValue(event_names::TouchEnd, *window));
     }
 
     SECTION("A frameset is the body element")
@@ -109,7 +109,7 @@ namespace krys::boo::dom::tests
   {
     auto document = CreateRef<Document>();
     auto target = document->CreateElement(u8"div").ReleaseValue();
-    auto click = DOMStringAtom(EventNames::Click);
+    auto click = DOMStringAtom(event_names::Click);
     auto callback = Callback();
 
     SECTION("A listener with an aborted signal isn't added")
@@ -166,7 +166,7 @@ namespace krys::boo::dom::tests
   {
     auto document = CreateRef<Document>();
     auto target = document->CreateElement(u8"div").ReleaseValue();
-    auto click = DOMStringAtom(EventNames::Click);
+    auto click = DOMStringAtom(event_names::Click);
 
     int laterCalls = 0;
     auto later = Listener(click, Callback([&](Event &) { ++laterCalls; }));
@@ -186,7 +186,7 @@ namespace krys::boo::dom::tests
   {
     auto document = CreateRef<Document>();
     auto target = document->CreateElement(u8"div").ReleaseValue();
-    auto first = Listener(EventNames::Click, Callback());
+    auto first = Listener(event_names::Click, Callback());
     auto second = Listener(u8"other", Callback());
     REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *first));
     REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *second));

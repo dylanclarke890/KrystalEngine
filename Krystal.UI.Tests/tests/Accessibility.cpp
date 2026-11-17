@@ -154,7 +154,7 @@ namespace krys::ui::tests
       void RaiseAccessibilityEvent(pal::AccessibilityNodeID node,
                                    pal::AccessibilityEvent event) noexcept override
       {
-        Events.push_back({node, event});
+        Events.emplace_back(node, event);
       }
 
       void RaiseAccessibilityTextChange(pal::AccessibilityNodeID, pal::AccessibilityTextChange change, uint64,

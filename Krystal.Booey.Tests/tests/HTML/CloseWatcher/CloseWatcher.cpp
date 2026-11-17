@@ -198,7 +198,7 @@ namespace krys::boo::html::tests
     {
       bool enabled = false;
       auto a = CloseWatcher::Establish(
-        document, [](bool) { return true; }, [&] { log.Events.push_back("a:closed"); },
+        document, [](bool) { return true; }, [&] { log.Events.emplace_back("a:closed"); },
         [&] { return enabled; });
       (void)PressKey(frame, u8"Escape");
       CHECK(log.Events.empty());

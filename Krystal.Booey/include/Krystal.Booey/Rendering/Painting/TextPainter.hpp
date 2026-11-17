@@ -64,9 +64,8 @@ namespace krys::boo
 
   public:
     TextPainter(GraphicsContext &context, const FontCascade &font, const RenderStyle &renderStyle,
-                const TextPaintStyle &textPaintStyle, const style::TextShadows &shadow,
-                const StringAtom &emphasisMark, float emphasisMarkOffset,
-                const RenderCombineText *combinedText = nullptr) noexcept;
+                TextPaintStyle textPaintStyle, const style::TextShadows &shadow, StringAtom emphasisMark,
+                float emphasisMarkOffset, const RenderCombineText *combinedText = nullptr) noexcept;
 
     /// @brief Paints @p textRun from byte offset @p start to @p end.
     /// @param boxRect The rect of the whole text box.
@@ -105,7 +104,7 @@ namespace krys::boo
     bool _onlyDrawsShadow : 1;
     bool _avoidDrawingShadow : 1;
     bool _nothingToDraw : 1;
-    bool _didSaveContext : 1;
+    bool _didSaveContext : 1 {false};
 
   public:
     ShadowApplier(const RenderStyle &renderStyle, GraphicsContext &context, const style::TextShadow *shadow,

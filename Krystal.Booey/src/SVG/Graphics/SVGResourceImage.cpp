@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::svg
 {
@@ -39,8 +40,8 @@ namespace krys::boo::svg
   }
 
   SVGResourceImage::SVGResourceImage(LegacyRenderSVGResourceContainer &renderResource,
-                                     const style::URL &resourceURL) noexcept
-      : _legacyRenderResource(CreateWeakPtr(&renderResource)), _resourceURL(resourceURL)
+                                     style::URL resourceURL) noexcept
+      : _legacyRenderResource(CreateWeakPtr(&renderResource)), _resourceURL(krys::move(resourceURL))
   {
   }
 

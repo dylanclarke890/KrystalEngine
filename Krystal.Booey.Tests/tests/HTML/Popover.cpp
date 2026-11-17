@@ -429,7 +429,7 @@ namespace krys::boo::html::tests
       // Setting the element sets the attribute to the empty string; it's still found when it moves.
       auto &after = fixture.Get<HTMLButtonElement>(u8"after");
       after.PopoverTargetElementForBindings(&popover);
-      CHECK(NarrowOrNull(after.GetAttribute(u8"popovertarget")) == "");
+      CHECK(NarrowOrNull(after.GetAttribute(u8"popovertarget")).empty());
       CHECK(after.PopoverTargetElement().get() == &popover);
       (void)after.SetAttribute(u8"popovertarget", u8"nope");
       CHECK_FALSE(after.PopoverTargetElement());
@@ -513,8 +513,8 @@ namespace krys::boo::html::tests
     REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<div id=p popover>P</div>").HasException());
     List<std::string> heard;
     auto onBefore =
-      host.AddEventListener(u8"beforetoggle", [&](dom::Event &) { heard.push_back("beforetoggle"); });
-    auto onToggle = host.AddEventListener(u8"toggle", [&](dom::Event &) { heard.push_back("toggle"); });
+      host.AddEventListener(u8"beforetoggle", [&](dom::Event &) { heard.emplace_back("beforetoggle"); });
+    auto onToggle = host.AddEventListener(u8"toggle", [&](dom::Event &) { heard.emplace_back("toggle"); });
 
     Downcast<HTMLButtonElement>(fixture.ById(u8"t")).Click();
     html::EventLoop::Current().RunUntilIdle();

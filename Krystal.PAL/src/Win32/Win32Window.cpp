@@ -238,11 +238,11 @@ namespace
     {
       return {};
     }
-    const int size =
-      ::WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()), NULL, 0, NULL, NULL);
+    const int size = ::WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()), nullptr, 0,
+                                           nullptr, nullptr);
     krys::utf8_string result(static_cast<size_t>(size), u8'\0');
     ::WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()),
-                          reinterpret_cast<char *>(result.data()), size, NULL, NULL);
+                          reinterpret_cast<char *>(result.data()), size, nullptr, nullptr);
     return result;
   }
 
@@ -317,7 +317,7 @@ namespace
 
     KRYS_NODISCARD explicit operator bool() const noexcept
     {
-      return _context != NULL;
+      return _context != nullptr;
     }
   };
 
@@ -406,7 +406,7 @@ namespace
       case CursorShape::DragMove:
       case CursorShape::DragCopy:
       case CursorShape::DragLink:
-      case CursorShape::Hidden:     return NULL;
+      case CursorShape::Hidden:     return nullptr;
     }
     return IDC_ARROW;
   }
@@ -423,13 +423,13 @@ namespace
       case CursorShape::DragMove: resource = 2; break;
       case CursorShape::DragCopy: resource = 3; break;
       case CursorShape::DragLink: resource = 4; break;
-      default:                    return NULL;
+      default:                    return nullptr;
     }
 
-    static HMODULE ole32 = ::LoadLibraryExW(L"ole32.dll", NULL, LOAD_LIBRARY_AS_DATAFILE);
+    static HMODULE ole32 = ::LoadLibraryExW(L"ole32.dll", nullptr, LOAD_LIBRARY_AS_DATAFILE);
     if (!ole32)
     {
-      return NULL;
+      return nullptr;
     }
     return ::LoadCursorW(ole32, MAKEINTRESOURCEW(resource));
   }
@@ -463,7 +463,7 @@ namespace
   static std::wstring ToWideString(const krys::string &str)
   {
     const int sizeNeeded =
-      ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), NULL, 0);
+      ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), nullptr, 0);
     std::wstring wideStr(sizeNeeded, 0);
     ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), wideStr.data(), sizeNeeded);
     return wideStr;
@@ -486,12 +486,11 @@ namespace krys::pal
 
   namespace win32
   {
-    Win32Window::Win32Window(const WindowSettings &settings)
-        : _settings(settings), _callbacks(), _handle(nullptr)
+    Win32Window::Win32Window(WindowSettings settings) : _settings(krys::move(settings)), _callbacks()
     {
       ::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
-      const auto instance = ::GetModuleHandleW(NULL);
+      const auto instance = ::GetModuleHandleW(nullptr);
       if (!instance)
       {
         throw std::runtime_error("Failed to get module handle: " + win32::GetLastErrorAsString());
@@ -501,7 +500,7 @@ namespace krys::pal
       CreateWindowHandle(instance);
       RegisterRawInput();
       // Without an input context, the input method doesn't see the keys.
-      ::ImmAssociateContextEx(_handle, NULL, 0);
+      ::ImmAssociateContextEx(_handle, nullptr, 0);
     }
 
     Win32Window::~Win32Window() noexcept
@@ -564,8 +563,9 @@ namespace krys::pal
       int width = dimensions.right - dimensions.left;
       int height = dimensions.bottom - dimensions.top;
 
-      _handle = ::CreateWindowExW(0, _class.lpszClassName, ToWideString(_settings.Title).c_str(), styles,
-                                  CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, instance, this);
+      _handle =
+        ::CreateWindowExW(0, _class.lpszClassName, ToWideString(_settings.Title).c_str(), styles,
+                          CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, instance, this);
       if (!_handle)
       {
         throw std::runtime_error("Failed to create window: " + win32::GetLastErrorAsString());
@@ -737,7 +737,7 @@ namespace krys::pal
       // All the thread's messages: the input method and the text services (the emoji panel among them) have
       // windows of their own on it, which their messages go to.
       MSG message {};
-      while (::PeekMessageW(&message, NULL, 0, 0, PM_REMOVE) != 0)
+      while (::PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE) != 0)
       {
         ::TranslateMessage(&message);
         ::DispatchMessageW(&message);
@@ -1208,7 +1208,7 @@ namespace krys::pal
         case WM_DPICHANGED:
         {
           RECT *rect = reinterpret_cast<RECT *>(lParam);
-          ::SetWindowPos(window, NULL, rect->left, rect->top, rect->right - rect->left,
+          ::SetWindowPos(window, nullptr, rect->left, rect->top, rect->right - rect->left,
                          rect->bottom - rect->top, SWP_NOZORDER);
           if (_callbacks.OnDPIChange)
           {
@@ -1307,7 +1307,7 @@ namespace krys::pal
 
     void Win32Window::SetCallbacks(WindowCallbacks &&callbacks) noexcept
     {
-      _callbacks = std::move(callbacks);
+      _callbacks = krys::move(callbacks);
       UpdateDropTarget();
       UpdateTouchpadPan();
     }
@@ -1785,7 +1785,7 @@ namespace krys::pal
         DestroyCaret();
       }
       _textInputEnabled = enabled;
-      ::ImmAssociateContextEx(_handle, NULL, enabled ? IACE_DEFAULT : 0);
+      ::ImmAssociateContextEx(_handle, nullptr, enabled ? IACE_DEFAULT : 0);
       if (enabled)
       {
         PlaceInputMethodWindows();
@@ -1863,7 +1863,7 @@ namespace krys::pal
       }
 
       // The caret is never shown.
-      if (::GetFocus() == _handle && ::CreateCaret(_handle, NULL, 1, (std::max)(rect.Height, 1)))
+      if (::GetFocus() == _handle && ::CreateCaret(_handle, nullptr, 1, (std::max)(rect.Height, 1)))
       {
         _hasCaret = true;
         ::SetCaretPos(rect.X, rect.Y);
@@ -1883,12 +1883,12 @@ namespace krys::pal
     {
       if (_cursor == CursorShape::Hidden || _pointerLock)
       {
-        ::SetCursor(NULL);
+        ::SetCursor(nullptr);
         return;
       }
       if (_cursorImage)
       {
-        ::SetCursor(_imageCursor ? _imageCursor : ::LoadCursorW(NULL, IDC_ARROW));
+        ::SetCursor(_imageCursor ? _imageCursor : ::LoadCursorW(nullptr, IDC_ARROW));
         return;
       }
       if (auto dragCursor = DragCursor(_cursor))
@@ -1896,7 +1896,7 @@ namespace krys::pal
         ::SetCursor(dragCursor);
         return;
       }
-      ::SetCursor(::LoadCursorW(NULL, CursorShapeToResource(_cursor)));
+      ::SetCursor(::LoadCursorW(nullptr, CursorShapeToResource(_cursor)));
     }
   }
 }

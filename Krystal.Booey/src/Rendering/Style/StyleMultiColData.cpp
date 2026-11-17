@@ -35,8 +35,8 @@ namespace krys::boo
   }
 
   inline StyleMultiColData::StyleMultiColData(const StyleMultiColData &other) noexcept
-      : RefCounted<StyleMultiColData>(), ColumnWidth(other.ColumnWidth), ColumnCount(other.ColumnCount),
-        ColumnRule(other.ColumnRule), ColumnFill(other.ColumnFill), ColumnSpan(other.ColumnSpan)
+      : ColumnWidth(other.ColumnWidth), ColumnCount(other.ColumnCount), ColumnRule(other.ColumnRule),
+        ColumnFill(other.ColumnFill), ColumnSpan(other.ColumnSpan)
   {
   }
 

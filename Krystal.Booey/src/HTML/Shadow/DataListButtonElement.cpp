@@ -44,7 +44,7 @@ namespace krys::boo::html
                                                            DataListButtonOwner &owner) noexcept
   {
     auto element = CreateRef<DataListButtonElement>(document, owner);
-    element->SetUserAgentPart(css::UserAgentParts::WebkitListButton());
+    element->SetUserAgentPart(css::user_agent_parts::WebkitListButton());
     return element;
   }
 

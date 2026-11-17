@@ -531,16 +531,16 @@ namespace krys::boo::style
 
       if (simplifiedCalc->GetCategory() == dimensionCategory)
       {
-        return Canonicalize(TDimensionRaw {To::Dimension::Unit, simplifiedCalc->DoubleValue(rest...)},
-                            std::forward<Rest>(rest)...);
+        const double resolved = simplifiedCalc->DoubleValue(rest...);
+        return Canonicalize(TDimensionRaw {To::Dimension::Unit, resolved}, std::forward<Rest>(rest)...);
       }
 
       if (simplifiedCalc->GetCategory() == css::Category::Percentage)
       {
         if (krys::HoldsAlternative<css::calc::Percentage>(simplifiedCalc->GetTree().Root))
         {
-          return Canonicalize(TPercentageRaw {simplifiedCalc->DoubleValue(rest...)},
-                              std::forward<Rest>(rest)...);
+          const double resolved = simplifiedCalc->DoubleValue(rest...);
+          return Canonicalize(TPercentageRaw {resolved}, std::forward<Rest>(rest)...);
         }
 
         return typename To::Calc {simplifiedCalc->CreateCalculationValue(rest...)};
@@ -548,14 +548,14 @@ namespace krys::boo::style
 
       if (!simplifiedCalc->GetTree().Type.PercentHint)
       {
-        return Canonicalize(TDimensionRaw {To::Dimension::Unit, simplifiedCalc->DoubleValue(rest...)},
-                            std::forward<Rest>(rest)...);
+        const double resolved = simplifiedCalc->DoubleValue(rest...);
+        return Canonicalize(TDimensionRaw {To::Dimension::Unit, resolved}, std::forward<Rest>(rest)...);
       }
 
       if (krys::HoldsAlternative<css::calc::Percentage>(simplifiedCalc->GetTree().Root))
       {
-        return Canonicalize(TPercentageRaw {simplifiedCalc->DoubleValue(rest...)},
-                            std::forward<Rest>(rest)...);
+        const double resolved = simplifiedCalc->DoubleValue(rest...);
+        return Canonicalize(TPercentageRaw {resolved}, std::forward<Rest>(rest)...);
       }
 
       return typename To::Calc {simplifiedCalc->CreateCalculationValue(rest...)};

@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeOffsetPath)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeOffsetPath)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/dir/")};
 

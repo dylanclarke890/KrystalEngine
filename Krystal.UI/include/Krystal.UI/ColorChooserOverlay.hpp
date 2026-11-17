@@ -41,8 +41,7 @@ namespace krys::ui
 
   public:
     /// @brief Makes the picker, and shows it with @p initialColor chosen.
-    ColorChooserOverlay(View &owner, boo::ColorChooserClient &client,
-                        const boo::Color &initialColor) noexcept;
+    ColorChooserOverlay(View &owner, boo::ColorChooserClient &client, boo::Color initialColor) noexcept;
 
     ~ColorChooserOverlay() noexcept override;
 

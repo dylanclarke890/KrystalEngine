@@ -25,7 +25,7 @@ namespace krys::boo::style::tests
       ScopeOrdinal StyleScopeOrdinal {ScopeOrdinal::Element};
       style::CascadeLayerPriority CascadeLayerPriority {RuleSet::CascadeLayerPriorityForUnlayered};
       style::FromStyleAttribute FromStyleAttribute {style::FromStyleAttribute::No};
-      EnumSet<UsedRuleType> UsedRuleTypes {};
+      EnumSet<UsedRuleType> UsedRuleTypes;
       PropertyAllowlist AllowlistType {PropertyAllowlist::None};
       style::IsCacheable IsCacheable {style::IsCacheable::Yes};
     };
@@ -88,7 +88,7 @@ namespace krys::boo::style::tests
       auto document = CreateRef<dom::HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      (void)parser->PumpTokenizer();
+      parser->PumpTokenizer();
       document->StyleScope().FlushPendingUpdate();
       return document;
     }

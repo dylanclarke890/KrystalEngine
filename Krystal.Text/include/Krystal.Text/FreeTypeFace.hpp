@@ -12,7 +12,7 @@
 #include "Krystal.Text/HarfBuzz.hpp"
 
 // FreeType's own declarations of these handles.
-typedef struct FT_FaceRec_ *FT_Face;
+using FT_Face = struct FT_FaceRec_ *;
 
 namespace krys::text
 {

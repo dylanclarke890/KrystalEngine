@@ -28,6 +28,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::svg
 {
@@ -69,7 +70,7 @@ namespace krys::boo::svg
     }
 
   private:
-    SVGSharedPrimitiveProperty(const TProperty &value) noexcept : _value(value)
+    SVGSharedPrimitiveProperty(TProperty value) noexcept : _value(krys::move(value))
     {
     }
   };

@@ -33,10 +33,10 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGContainer);
 
   private:
-    Markable<FloatRect> _objectBoundingBox {};
-    mutable Markable<FloatRect> _strokeBoundingBox {};
+    Markable<FloatRect> _objectBoundingBox;
+    mutable Markable<FloatRect> _strokeBoundingBox;
     FloatRect _repaintBoundingBox {};
-    mutable Markable<FloatRect> _accurateRepaintBoundingBox {};
+    mutable Markable<FloatRect> _accurateRepaintBoundingBox;
 
     bool _needsBoundariesUpdate {true};
     bool _repaintIsSuspendedForChildrenDuringLayout {false};

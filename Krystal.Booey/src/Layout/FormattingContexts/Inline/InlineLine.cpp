@@ -1174,7 +1174,7 @@ namespace krys::boo::layout
     {
       return {};
     }
-    return InlineLayoutUnit {LetterSpacing()};
+    return LetterSpacing();
   }
 
   InlineLayoutUnit Line::Run::RemoveTrailingLetterSpacing() noexcept

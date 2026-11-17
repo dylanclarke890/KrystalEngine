@@ -34,7 +34,7 @@ namespace krys::boo::html::tests
         auto *assigned = slot.AssignedNodes();
         if (!assigned)
         {
-          return nodes.size() == 0;
+          return nodes.empty();
         }
         return std::ranges::equal(*assigned, nodes,
                                   [](const auto &weak, const dom::Node *node) { return weak.get() == node; });

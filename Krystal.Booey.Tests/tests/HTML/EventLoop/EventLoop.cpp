@@ -109,9 +109,9 @@ namespace krys::boo::html::tests
                      [&](int result)
                      {
                        received = result;
-                       order.push_back(u8"completion");
-                       loop.QueueMicrotask([&] { order.push_back(u8"microtask"); });
-                       loop.QueueTask(TaskSource::DOMManipulation, [&] { order.push_back(u8"task"); });
+                       order.emplace_back(u8"completion");
+                       loop.QueueMicrotask([&] { order.emplace_back(u8"microtask"); });
+                       loop.QueueTask(TaskSource::DOMManipulation, [&] { order.emplace_back(u8"task"); });
                      });
 
       REQUIRE(queue.RunAll() == 1);
@@ -130,7 +130,7 @@ namespace krys::boo::html::tests
         JobSystem jobs(2);
         for (int i = 0; i < 3; ++i)
         {
-          jobs.Dispatch([]() {}, loop.Inbox(), [&] { order.push_back(u8"done"); });
+          jobs.Dispatch([]() {}, loop.Inbox(), [&] { order.emplace_back(u8"done"); });
         }
         // The workers finish their jobs as the system goes.
       }

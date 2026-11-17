@@ -23,7 +23,7 @@ namespace krys::boo::dom::tests
     /// @brief Whether @p painted has @p fragment.
     KRYS_NODISCARD bool Has(const utf8_string &painted, utf8_stringview fragment) noexcept
     {
-      return painted.find(fragment) != utf8_string::npos;
+      return painted.contains(fragment);
     }
   }
 

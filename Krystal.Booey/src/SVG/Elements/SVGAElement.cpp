@@ -148,7 +148,7 @@ namespace krys::boo::svg
 
       // A click is followed as the activation behaviour; other buttons' clicks (the middle button opening the
       // link elsewhere) are followed here, and the host decides from the button.
-      if (event.Type() == EventNames::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event))
+      if (event.Type() == event_names::AuxClick && dom::MouseEvent::CanTriggerActivationBehavior(event))
       {
         FollowTheHyperlink(event);
         return;

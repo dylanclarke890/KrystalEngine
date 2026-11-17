@@ -63,7 +63,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   KRYS_NODISCARD static Ref<PrimitiveValue> ResolveToPrimitiveValue(Numeric auto &&primitive) noexcept
   {
@@ -331,7 +331,7 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       if (auto ident = ConsumeGenericFamilyUnresolved(tokens))
       {
-        list.push_back(UnresolvedFontFamilyName {*ident});
+        list.emplace_back(*ident);
       }
       else
       {
@@ -340,7 +340,7 @@ namespace krys::boo::css::PropertyParserHelpers
         {
           return null;
         }
-        list.push_back(UnresolvedFontFamilyName {krys::move(*familyName)});
+        list.emplace_back(krys::move(*familyName));
       }
     } while (ConsumeComma(tokens));
     return list;

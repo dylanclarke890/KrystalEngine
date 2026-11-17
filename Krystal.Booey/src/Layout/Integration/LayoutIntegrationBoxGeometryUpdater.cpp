@@ -925,7 +925,7 @@ namespace krys::boo::layout_integration
     krys_debug_assert(false);
   }
 
-  void BoxGeometryUpdater::SetFormattingContextRootGeometry(LayoutUnit availableWidth) noexcept
+  void BoxGeometryUpdater::SetFormattingContextRootGeometry(LayoutUnit availableLogicalWidth) noexcept
   {
     // FIXME: BFC should be responsible for creating the box geometry for this block box (IFC root) as part of
     // the block layout. This is really only required by float layout as IFC does not consult the root
@@ -933,7 +933,7 @@ namespace krys::boo::layout_integration
     auto &rootRenderer = RootRenderer();
     auto writingMode = GetWritingMode();
 
-    auto padding = LogicalPadding(rootRenderer, availableWidth, writingMode);
+    auto padding = LogicalPadding(rootRenderer, availableLogicalWidth, writingMode);
     auto border = LogicalBorder(rootRenderer, writingMode);
     if (writingMode.IsVertical() && !RootLayoutBox().GetWritingMode().IsBlockFlipped())
     {
@@ -947,8 +947,9 @@ namespace krys::boo::layout_integration
     rootGeometry.SetPadding(padding);
     rootGeometry.SetBorder(border);
     rootGeometry.SetSpaceForScrollbar(ScrollbarLogicalSize(rootRenderer));
-    rootGeometry.SetHorizontalMargin(HorizontalLogicalMargin(rootRenderer, availableWidth, writingMode));
-    rootGeometry.SetVerticalMargin(VerticalLogicalMargin(rootRenderer, availableWidth, writingMode));
+    rootGeometry.SetHorizontalMargin(
+      HorizontalLogicalMargin(rootRenderer, availableLogicalWidth, writingMode));
+    rootGeometry.SetVerticalMargin(VerticalLogicalMargin(rootRenderer, availableLogicalWidth, writingMode));
   }
 
   layout::ConstraintsForInlineContent

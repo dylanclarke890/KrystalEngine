@@ -11,11 +11,11 @@ namespace krys::gfx
   struct SwapchainDesc
   {
     /// @brief The native window (an `HWND` on Windows, for example).
-    NativeHandle Window {};
+    NativeHandle Window;
     uint32 Width {0u};
     uint32 Height {0u};
     TextureFormat Format {TextureFormat::RGBA8Srgb};
     bool VSync {true};
-    utf8_stringview DebugName {};
+    utf8_stringview DebugName;
   };
 }

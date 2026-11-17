@@ -7,7 +7,7 @@
 #include "Krystal.Core/Maths/Vector.hpp"
 #include <cmath>
 
-namespace krys::Impl
+namespace krys::detail
 {
   using namespace krys;
 
@@ -243,7 +243,7 @@ namespace krys
   template <Number T>                                                                                        \
   KRYS_NODISCARD constexpr Vector3<T> ToEuler##Convention(const MatType<T> &m) noexcept                      \
   {                                                                                                          \
-    return Impl::ExtractEuler##Convention<MatType<T>, T>(m);                                                 \
+    return detail::ExtractEuler##Convention<MatType<T>, T>(m);                                               \
   }
 
 #define QUATERNION_TO_EULER_ANGLE_FUNC(Convention)                                                           \

@@ -41,7 +41,7 @@ namespace krys::boo
   {
     RefPtr<StyleImage> Image {StyleInvalidImage::Create()};
     float ScaleFactor {1};
-    Maybe<css::CSSOMString> MimeType {};
+    Maybe<css::CSSOMString> MimeType;
 
     KRYS_NODISCARD bool operator==(const ImageWithScale &other) const noexcept
     {

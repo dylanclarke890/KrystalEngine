@@ -199,7 +199,7 @@ namespace krys::boo::html::tests
     {
       CHECK_FALSE(button.CommandForElement());
       button.CommandForElementForBindings(&popover);
-      CHECK(NarrowOrNull(button.GetAttribute(u8"commandfor")) == "");
+      CHECK(NarrowOrNull(button.GetAttribute(u8"commandfor")).empty());
       CHECK(button.CommandForElement().get() == &popover);
       CHECK(button.CommandForElementForBindings().get() == &popover);
       (void)button.SetAttribute(u8"commandfor", u8"nope");
@@ -215,7 +215,7 @@ namespace krys::boo::html::tests
       CHECK(Narrow(button.FormControlType()) == "submit");
       button.Command(u8"--spin");
       CHECK(Narrow(button.FormControlType()) == "button");
-      (void)button.RemoveAttribute(u8"command");
+      button.RemoveAttribute(u8"command");
       CHECK(Narrow(button.FormControlType()) == "submit");
 
       auto &inForm = fixture.Get<HTMLButtonElement>(u8"f");
@@ -323,7 +323,7 @@ namespace krys::boo::html::tests
     log.Watch(dialog);
     List<std::string> cancels;
     auto cancelListener =
-      dialog.AddEventListener(u8"cancel", [&](dom::Event &) { cancels.push_back("cancel"); });
+      dialog.AddEventListener(u8"cancel", [&](dom::Event &) { cancels.emplace_back("cancel"); });
 
     SECTION("show-modal shows it modally, and close closes it with the button's value")
     {

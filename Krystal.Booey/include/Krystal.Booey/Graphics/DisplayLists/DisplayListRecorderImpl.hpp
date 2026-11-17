@@ -45,7 +45,7 @@ namespace krys::boo::display_list
     {
     }
 
-    virtual ~RecorderImpl() noexcept;
+    ~RecorderImpl() noexcept override;
 
     KRYS_NODISCARD Ref<const DisplayList> TakeDisplayList() noexcept;
 

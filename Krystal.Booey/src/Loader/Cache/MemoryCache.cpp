@@ -32,7 +32,6 @@ namespace krys::boo
 {
   namespace
   {
-    constexpr uint32 DefaultCacheCapacity = 8'192 * 1'024;
     constexpr MonotonicTime::duration MinDelayBeforeLiveDecodedPrune = std::chrono::seconds(1);
     // Percentage of capacity toward which we prune, to avoid immediately pruning again.
     constexpr float TargetPrunePercentage = .95f;
@@ -51,9 +50,7 @@ namespace krys::boo
     return memoryCache;
   }
 
-  MemoryCache::MemoryCache() noexcept
-      : _capacity(DefaultCacheCapacity), _maxDeadCapacity(DefaultCacheCapacity),
-        _pruneTimer(*this, &MemoryCache::Prune)
+  MemoryCache::MemoryCache() noexcept : _pruneTimer(*this, &MemoryCache::Prune)
   {
   }
 

@@ -517,7 +517,7 @@ namespace krys::boo::layout
                                                        inline_display::Line &displayLine,
                                                        inline_display::Boxes &displayBoxes) noexcept
   {
-    if (truncationPolicy == LineEndingTruncationPolicy::NoTruncation || !displayBoxes.size())
+    if (truncationPolicy == LineEndingTruncationPolicy::NoTruncation || displayBoxes.empty())
     {
       return;
     }

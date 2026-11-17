@@ -62,8 +62,8 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual IntRect ThumbRect(Scrollbar &) noexcept;
 
-    virtual void SplitTrack(Scrollbar &, const IntRect &track, IntRect &startTrack, IntRect &thumb,
-                            IntRect &endTrack) noexcept;
+    virtual void SplitTrack(Scrollbar &, const IntRect &unconstrainedTrackRect, IntRect &beforeThumbRect,
+                            IntRect &thumb, IntRect &afterThumbRect) noexcept;
 
     KRYS_NODISCARD virtual int32 MinimumThumbLength(Scrollbar &) noexcept;
 

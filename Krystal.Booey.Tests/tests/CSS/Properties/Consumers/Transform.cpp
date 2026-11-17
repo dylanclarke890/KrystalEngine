@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeTranslate)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeTranslate)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeTranslate) == "none");
     CHECK(ConsumeToText(u8"10px", ConsumeTranslate) == "10px");
@@ -26,7 +26,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"1px 2px 3px 4px", ConsumeTranslate) == "<partial>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeScale)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeScale)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeScale) == "none");
     CHECK(ConsumeToText(u8"2", ConsumeScale) == "2");
@@ -44,7 +44,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"1 none", ConsumeScale) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeRotate)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeRotate)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeRotate) == "none");
     CHECK(ConsumeToText(u8"45deg", ConsumeRotate) == "45deg");
@@ -67,7 +67,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"x 1 0 0 45deg", ConsumeRotate) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeRotate3dFunction)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeRotate3dFunction)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"rotate3d(1, 0, 0, 45deg)", ConsumeRotate3dFunction) == "rotate3d(1, 0, 0, 45deg)");
 
@@ -81,7 +81,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"rotate(45deg)", ConsumeRotate3dFunction) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeTranslateFunction and ConsumeTranslate3dFunction)",
+  TEST_CASE("parse_property(ConsumeTranslateFunction and ConsumeTranslate3dFunction)",
             "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"translate(10px)", ConsumeTranslateFunction) == "translate(10px)");

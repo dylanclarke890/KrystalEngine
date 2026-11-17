@@ -549,13 +549,13 @@ namespace krys::ui::tests
     };
 
     load(path);
-    CHECK_FALSE(result);
+    CHECK_FALSE(result.has_value());
     CHECK(queue.PendingCount() == 1);
     CHECK(queue.RunAll() == 1);
     // Read, the file waits in the event loop's inbox.
-    CHECK_FALSE(result);
+    CHECK_FALSE(result.has_value());
     boo::html::EventLoop::Current().RunUntilIdle();
-    REQUIRE(result);
+    REQUIRE(result.has_value());
     REQUIRE(result->has_value());
     CHECK((*result)->Response.MimeType() == u8"text/plain");
     auto data = (*result)->Data->GetSpan();
@@ -566,7 +566,7 @@ namespace krys::ui::tests
     load(path);
     CHECK(queue.RunAll() == 1);
     boo::html::EventLoop::Current().RunUntilIdle();
-    REQUIRE(result);
+    REQUIRE(result.has_value());
     CHECK_FALSE(result->has_value());
   }
 
@@ -880,7 +880,7 @@ namespace krys::ui::tests
       auto id = element ? element->GetAttribute(u8"id").value_or(boo::dom::DOMString())
                         : boo::dom::DOMString(u8"document");
       std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
-      if (event.Type() == boo::EventNames::MouseMove)
+      if (event.Type() == boo::event_names::MouseMove)
       {
         auto &mouse = static_cast<boo::dom::MouseEvent &>(event);
         text += "/" + std::to_string(static_cast<int>(mouse.MovementX())) + ","
@@ -920,7 +920,7 @@ namespace krys::ui::tests
     view.SetPointerLockHandler(
       [&](bool locked)
       {
-        records.push_back(locked ? "lock" : "unlock");
+        records.emplace_back(locked ? "lock" : "unlock");
         return hostLocks;
       });
 
@@ -2268,7 +2268,7 @@ namespace krys::ui::tests
     view.MousePressed(inside, pal::MouseButton::Left);
     view.MouseReleased(inside, pal::MouseButton::Left);
     REQUIRE(view.ShownOverlay());
-    CHECK(view.Record()->Items().size() > 0uz);
+    CHECK(!view.Record()->Items().empty());
   }
 
   namespace
@@ -2795,10 +2795,10 @@ namespace krys::ui::tests
       {
         switch (event.Type)
         {
-          case LoadEventType::Started:   events.push_back("started"); break;
-          case LoadEventType::Committed: events.push_back("committed"); break;
-          case LoadEventType::Finished:  events.push_back("finished"); break;
-          case LoadEventType::Failed:    events.push_back("failed"); break;
+          case LoadEventType::Started:   events.emplace_back("started"); break;
+          case LoadEventType::Committed: events.emplace_back("committed"); break;
+          case LoadEventType::Finished:  events.emplace_back("finished"); break;
+          case LoadEventType::Failed:    events.emplace_back("failed"); break;
         }
       });
 
@@ -2827,7 +2827,7 @@ namespace krys::ui::tests
       view.SetNavigationHandler(
         [&](const NavigationRequest &request)
         {
-          asked.push_back(std::string(request.URL.begin(), request.URL.end()));
+          asked.emplace_back(request.URL.begin(), request.URL.end());
           view.Load(boo::url::URL(request.URL));
         });
       view.Document().GetElementById(u8"next")->DispatchSimulatedClick(nullptr);
@@ -2848,8 +2848,8 @@ namespace krys::ui::tests
     CHECK_FALSE(view.Document().Hidden());
 
     uint32 changes = 0;
-    auto handle = view.Document().AddEventListener(boo::dom::DOMStringAtom(boo::EventNames::VisibilityChange),
-                                                   [&](boo::dom::Event &) { ++changes; });
+    auto handle = view.Document().AddEventListener(
+      boo::dom::DOMStringAtom(boo::event_names::VisibilityChange), [&](boo::dom::Event &) { ++changes; });
     view.SetVisible(false);
     CHECK_FALSE(view.IsVisible());
     CHECK(view.Document().Hidden());

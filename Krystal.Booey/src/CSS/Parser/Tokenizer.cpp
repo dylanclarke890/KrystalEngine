@@ -408,7 +408,6 @@ namespace krys::boo::css
       }
 
       codePoints.push_back(current);
-      continue;
     }
   }
 
@@ -476,7 +475,6 @@ namespace krys::boo::css
       }
 
       url.push_back(current);
-      continue;
     }
   }
 
@@ -830,7 +828,7 @@ namespace krys::boo::css
         continue;
       }
 
-      continue; // do nothing, just consume the character
+      // do nothing, just consume the character
     }
   }
 

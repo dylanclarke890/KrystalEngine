@@ -165,7 +165,7 @@ namespace krys::boo
     style::GridTrackSizingDirection _direction;
     uint32 _rowIndex;
     uint32 _columnIndex;
-    uint32 _gridItemIndex;
+    uint32 _gridItemIndex {0};
 
   public:
     // |direction| is the direction that is fixed to |fixedTrackIndex| so e.g

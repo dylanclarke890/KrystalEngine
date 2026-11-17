@@ -142,8 +142,8 @@ namespace krys::boo::dom
   }
 
   Position::Position(RefPtr<Node> &&anchorNode, AnchorType anchorType) noexcept
-      : _anchorNode(krys::move(anchorNode)), _offset(0), _anchorType(anchorType),
-        _isLegacyEditingPosition(false)
+      : _anchorNode(krys::move(anchorNode)), _anchorType(anchorType)
+
   {
     krys_debug_assert(!_anchorNode || !Is<ShadowRoot>(*_anchorNode)
                       || _anchorNode.get() == GetContainerNode());
@@ -155,15 +155,15 @@ namespace krys::boo::dom
   }
 
   Position::Position(RefPtr<Node> &&anchorNode, uint32 offset, AnchorType anchorType) noexcept
-      : _anchorNode(krys::move(anchorNode)), _offset(offset), _anchorType(anchorType),
-        _isLegacyEditingPosition(false)
+      : _anchorNode(krys::move(anchorNode)), _offset(offset), _anchorType(anchorType)
+
   {
     krys_debug_assert(anchorType == AnchorType::PositionIsOffsetInAnchor);
   }
 
   Position::Position(RefPtr<Text> &&textNode, uint32 offset) noexcept
-      : _anchorNode(krys::move(textNode)), _offset(offset), _anchorType(AnchorType::PositionIsOffsetInAnchor),
-        _isLegacyEditingPosition(false)
+      : _anchorNode(krys::move(textNode)), _offset(offset)
+
   {
     krys_debug_assert(_anchorNode);
   }

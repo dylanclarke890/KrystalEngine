@@ -14,7 +14,7 @@ namespace krys::boo::html::tests
       document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
       auto parser = CreateRef<DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      (void)parser->PumpTokenizer();
+      parser->PumpTokenizer();
       return document;
     }
 
@@ -53,7 +53,7 @@ namespace krys::boo::html::tests
     CHECK(document->BaseTarget() == u8"_top");
 
     auto *base = AsBase(document->Head()->FirstElementChild());
-    CHECK(base->Target() == u8"");
+    CHECK(base->Target().empty());
     base->Target(u8"frame");
     CHECK(base->Target() == u8"frame");
     CHECK(document->BaseTarget() == u8"frame");

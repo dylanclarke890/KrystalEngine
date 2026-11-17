@@ -116,7 +116,7 @@ namespace krys::boo::dom
 
     if (mouseEventOptions != SimulatedClickMouseEventOptions::SendNoEvents)
     {
-      SimulateMouseEvent(EventNames::MouseDown, element, underlyingEvent, source);
+      SimulateMouseEvent(event_names::MouseDown, element, underlyingEvent, source);
     }
     if (mouseEventOptions != SimulatedClickMouseEventOptions::SendNoEvents
         || visualOptions == SimulatedClickVisualOptions::ShowPressedLook)
@@ -125,11 +125,11 @@ namespace krys::boo::dom
     }
     if (mouseEventOptions != SimulatedClickMouseEventOptions::SendNoEvents)
     {
-      SimulateMouseEvent(EventNames::MouseUp, element, underlyingEvent, source);
+      SimulateMouseEvent(event_names::MouseUp, element, underlyingEvent, source);
     }
     element.SetActive(false);
 
-    SimulatePointerEvent(EventNames::Click, element, underlyingEvent, source);
+    SimulatePointerEvent(event_names::Click, element, underlyingEvent, source);
 
     elementsDispatchingSimulatedClicks.erase(&element);
     return true;

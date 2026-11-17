@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeAlignContent)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeAlignContent)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"center", ConsumeAlignContent) == "center");
     CHECK(ConsumeToText(u8"space-between", ConsumeAlignContent) == "space-between");
@@ -22,7 +22,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"baseline first", ConsumeAlignContent) == "<partial>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeJustifyContent)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeJustifyContent)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"left", ConsumeJustifyContent) == "left");
     CHECK(ConsumeToText(u8"unsafe right", ConsumeJustifyContent) == "unsafe right");
@@ -30,7 +30,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"baseline", ConsumeJustifyContent) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeAlignSelf and ConsumeAlignItems)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeAlignSelf and ConsumeAlignItems)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"auto", ConsumeAlignSelf) == "auto");
     CHECK(ConsumeToText(u8"self-end", ConsumeAlignSelf) == "self-end");
@@ -46,8 +46,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"safe anchor-center", ConsumeAlignItems, context) == "safe anchor-center");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeJustifySelf and ConsumeJustifyItems)",
-            "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeJustifySelf and ConsumeJustifyItems)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"left", ConsumeJustifySelf) == "left");
     CHECK(ConsumeToText(u8"unsafe right", ConsumeJustifySelf) == "unsafe right");

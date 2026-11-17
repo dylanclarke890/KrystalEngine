@@ -52,7 +52,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMStringView FormControlType() const noexcept final
     {
-      return InputTypeNames::Image;
+      return input_type_names::Image;
     }
 
     KRYS_NODISCARD bool IsFormDataAppendable() const noexcept final;

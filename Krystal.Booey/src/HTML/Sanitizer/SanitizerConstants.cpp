@@ -221,6 +221,7 @@ namespace krys::boo::html
     // animation, transition, selection and gamepad ones), then those of other specifications it doesn't have
     // yet.
     constexpr utf8_stringview EventHandlerNames[] = {
+      // NOLINTNEXTLINE(bugprone-suspicious-missing-comma): the macros add the commas.
       KRYS_GLOBAL_EVENT_HANDLERS(KRYS_SANITIZER_EVENT_HANDLER_NAME)
         KRYS_WINDOW_EVENT_HANDLERS(KRYS_SANITIZER_EVENT_HANDLER_NAME)
           KRYS_DOCUMENT_AND_ELEMENT_EVENT_HANDLERS(KRYS_SANITIZER_EVENT_HANDLER_NAME)

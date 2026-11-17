@@ -41,7 +41,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <rotate3d()> consuming (Value)
     KRYS_NODISCARD RefPtr<Value> ConsumeRotate3dFunction(TokenRange &tokens,

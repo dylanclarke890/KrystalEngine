@@ -53,10 +53,10 @@ namespace krys::boo
     return !_nonDefaultDataTypes.empty();
   }
 
-  void StaticPasteboard::WriteString(utf8_stringview type, utf8_stringview value) noexcept
+  void StaticPasteboard::WriteString(utf8_stringview type, utf8_stringview data) noexcept
   {
     _nonDefaultDataTypes.emplace(type);
-    _customData.WriteString(type, value);
+    _customData.WriteString(type, data);
   }
 
   void StaticPasteboard::WriteData(utf8_stringview type, Ref<SharedBuffer> &&data) noexcept
@@ -65,10 +65,10 @@ namespace krys::boo
     _customData.WriteData(type, krys::move(data));
   }
 
-  void StaticPasteboard::WriteStringInCustomData(utf8_stringview type, utf8_stringview value) noexcept
+  void StaticPasteboard::WriteStringInCustomData(utf8_stringview type, utf8_stringview data) noexcept
   {
     _nonDefaultDataTypes.emplace(type);
-    _customData.WriteStringInCustomData(type, value);
+    _customData.WriteStringInCustomData(type, data);
   }
 
   void StaticPasteboard::Clear() noexcept

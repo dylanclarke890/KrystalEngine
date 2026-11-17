@@ -40,7 +40,7 @@ namespace krys::boo::html::tests
 
     target = utf32_stringview(U"&NonExistentReference;");
     entries = SearchNamedCharacterReferences(Span(target.begin(), target.end()));
-    REQUIRE(entries.size() == 0uz);
+    REQUIRE(entries.empty());
   }
 
   TEST_CASE("CharacterReference(NamedCharacterReferences)",

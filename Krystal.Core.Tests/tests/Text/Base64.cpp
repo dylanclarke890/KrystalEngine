@@ -62,7 +62,7 @@ namespace krys::tests
         Base64Encode(Span<const uint8>(reinterpret_cast<const uint8 *>(input.data()), input.size()));
       return std::string(encoded.begin(), encoded.end());
     };
-    CHECK(encode("") == "");
+    CHECK(encode("").empty());
     CHECK(encode("M") == "TQ==");
     CHECK(encode("Ma") == "TWE=");
     CHECK(encode("Man") == "TWFu");

@@ -34,9 +34,8 @@ namespace krys::boo
   }
 
   GraphicsLayerAnimation::GraphicsLayerAnimation(const GraphicsLayerAnimation &o) noexcept
-      : RefCounted<GraphicsLayerAnimation>(), _delay(o._delay), _duration(o._duration),
-        _iterationCount(o._iterationCount), _playbackRate(o._playbackRate),
-        _timingFunction(o._timingFunction),
+      : _delay(o._delay), _duration(o._duration), _iterationCount(o._iterationCount),
+        _playbackRate(o._playbackRate), _timingFunction(o._timingFunction),
         _defaultTimingFunctionForKeyframes(o._defaultTimingFunctionForKeyframes),
         _compositeOperation(o._compositeOperation), _direction(o._direction), _fillMode(o._fillMode),
         _playState(o._playState)

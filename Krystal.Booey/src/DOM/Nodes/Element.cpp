@@ -126,6 +126,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -1061,8 +1062,8 @@ namespace krys::boo::dom
     {
       // https://www.w3.org/TR/pointerevents/#compatibility-mapping-with-mouse-events
       auto type = mouseEvent.Type();
-      return !IsAnyClick(mouseEvent) && type != EventNames::MouseOver && type != EventNames::MouseOut
-             && type != EventNames::MouseEnter && type != EventNames::MouseLeave;
+      return !IsAnyClick(mouseEvent) && type != event_names::MouseOver && type != event_names::MouseOut
+             && type != event_names::MouseEnter && type != event_names::MouseLeave;
     }
 
     enum class ShouldIgnoreMouseEvent : bool
@@ -1086,14 +1087,14 @@ namespace krys::boo::dom
         }
 
         if (platformEvent.GetSyntheticClickType() != SyntheticClickType::NoTap && !IsAnyClick(mouseEvent)
-            && mouseEvent.Type() != EventNames::ContextMenu)
+            && mouseEvent.Type() != event_names::ContextMenu)
         {
           return ShouldIgnoreMouseEvent::No;
         }
 
         // https://w3c.github.io/pointerevents/#the-pointerrawupdate-event
         // The user agent MUST dispatch the pointerrawupdate event before the corresponding pointermove.
-        bool isMove = mouseEvent.Type() == EventNames::MouseMove;
+        bool isMove = mouseEvent.Type() == event_names::MouseMove;
         if (isMove)
         {
           pointerCaptureController.DispatchPointerRawUpdateForMouseEvent(
@@ -1113,7 +1114,7 @@ namespace krys::boo::dom
               mouseEvent, platformEvent.PointerId(), platformEvent.PointerType()))
         {
           // A chorded button's press or release is a pointermove.
-          if (!isMove && pointerEvent->Type() == EventNames::PointerMove)
+          if (!isMove && pointerEvent->Type() == event_names::PointerMove)
           {
             pointerCaptureController.DispatchPointerRawUpdateForMouseEvent(
               mouseEvent, platformEvent.PointerId(), platformEvent.PointerType(), element);
@@ -1130,7 +1131,7 @@ namespace krys::boo::dom
           if (pointerEvent->DefaultPrevented() || pointerEvent->DefaultHandled())
           {
             didNotSwallowEvent = false;
-            if (pointerEvent->Type() == EventNames::PointerDown)
+            if (pointerEvent->Type() == event_names::PointerDown)
             {
               return ShouldIgnoreMouseEvent::Yes;
             }
@@ -1182,7 +1183,7 @@ namespace krys::boo::dom
     }
 
     bool shouldNotDispatchMouseEvent =
-      IsAnyClick(*mouseEvent) || mouseEvent->Type() == EventNames::ContextMenu;
+      IsAnyClick(*mouseEvent) || mouseEvent->Type() == event_names::ContextMenu;
     if (!shouldNotDispatchMouseEvent)
     {
       krys_debug_assert(!mouseEvent->Target() || mouseEvent->Target() != relatedTarget);
@@ -1198,13 +1199,13 @@ namespace krys::boo::dom
     }
 
     // The document should not receive dblclick for non-primary buttons.
-    if (mouseEvent->Type() == EventNames::Click && mouseEvent->Detail() == 2)
+    if (mouseEvent->Type() == event_names::Click && mouseEvent->Detail() == 2)
     {
       // Special case: If it's a double click event, we also send the dblclick event. This is not part
       // of the DOM specs, but is used for compatibility with the ondblclick="" attribute. This is treated
       // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
       Ref<MouseEvent> doubleClickEvent =
-        MouseEvent::Create(EventNames::DblClick, mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
+        MouseEvent::Create(event_names::DblClick, mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
                            html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
                            mouseEvent->ScreenX(), mouseEvent->ScreenY(), mouseEvent->ClientX(),
                            mouseEvent->ClientY(), mouseEvent->ModifierKeys(), mouseEvent->ButtonType(),
@@ -2191,7 +2192,7 @@ namespace krys::boo::dom
 
     // 3. Set an attribute value for this using localName, verifiedValue, prefix, and namespace.
     const auto &qName = validateAndExtractResult.Value();
-    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName(), std::move(value), qName.NamespacePrefix(),
+    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName(), krys::move(value), qName.NamespacePrefix(),
                                          qName.NamespaceURI());
 
     return {};

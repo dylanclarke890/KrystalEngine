@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers::tests
+namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
 
-  TEST_CASE("PropertyParserHelpers(ConsumeSingleTransitionProperty)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeSingleTransitionProperty)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"all", ConsumeSingleTransitionProperty) == "all");
     CHECK(ConsumeToText(u8"opacity", ConsumeSingleTransitionProperty) == "opacity");
@@ -18,7 +18,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"5", ConsumeSingleTransitionProperty) == "<null>");
   }
 
-  TEST_CASE("PropertyParserHelpers(ConsumeSingleTransitionPropertyOrNone)", "[CSS][Properties][Consumers]")
+  TEST_CASE("parse_property(ConsumeSingleTransitionPropertyOrNone)", "[CSS][Properties][Consumers]")
   {
     CHECK(ConsumeToText(u8"none", ConsumeSingleTransitionPropertyOrNone) == "none");
     CHECK(ConsumeToText(u8"width", ConsumeSingleTransitionPropertyOrNone) == "width");

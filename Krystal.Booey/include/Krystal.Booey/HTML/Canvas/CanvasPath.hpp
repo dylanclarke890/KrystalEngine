@@ -34,6 +34,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::html
 {
@@ -91,7 +92,7 @@ namespace krys::boo::html
   protected:
     CanvasPath() noexcept = default;
 
-    explicit CanvasPath(const Path &path) noexcept : _path(path)
+    explicit CanvasPath(Path path) noexcept : _path(krys::move(path))
     {
     }
 

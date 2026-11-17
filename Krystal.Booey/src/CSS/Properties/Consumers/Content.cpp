@@ -37,7 +37,7 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   RefPtr<Value> ConsumeQuotes(TokenRange &tokens, PropertyParserState &) noexcept
   {
@@ -64,7 +64,7 @@ namespace krys::boo::css::PropertyParserHelpers
       values.push_back(krys::move(parsedValue));
     }
 
-    if (values.size() && !(values.size() % 2))
+    if (!values.empty() && !(values.size() % 2))
     {
       return ValueList::CreateSpaceSeparated(krys::move(values));
     }

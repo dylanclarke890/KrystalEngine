@@ -9,6 +9,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
 namespace krys::io
@@ -72,7 +73,7 @@ namespace krys::io
     _insertionOrder = 0; // Reset insertion order for the next build.
 
     auto vfs = UniquePtr<VirtualFileSystem>(new VirtualFileSystem());
-    vfs->_backends = std::move(backends);
+    vfs->_backends = krys::move(backends);
     return vfs;
   }
 
@@ -169,7 +170,7 @@ namespace krys::io
       {
         if (seen.insert(entry.RelativePath.RelativePath(relativeRoot)).second)
         {
-          out.emplace_back(std::move(entry)); // first in precedence order wins
+          out.emplace_back(krys::move(entry)); // first in precedence order wins
         }
       }
     }

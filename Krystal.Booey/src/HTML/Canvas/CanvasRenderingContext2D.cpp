@@ -90,8 +90,8 @@ namespace krys::boo::html
     }
 
     auto parserContext = css::ParserContext(css::StrictToParserMode(!UsesCSSCompatibilityParseMode()));
-    return css::PropertyParserHelpers::ParseFilterValueListOrNoneRaw(
-      css::CSSOMString(filterString), parserContext, document, const_cast<RenderStyle &>(*style));
+    return css::parse_property::ParseFilterValueListOrNoneRaw(css::CSSOMString(filterString), parserContext,
+                                                              document, const_cast<RenderStyle &>(*style));
   }
 
   RefPtr<Filter> CanvasRenderingContext2D::CreateFilter(const FloatRect &bounds) const noexcept
@@ -214,7 +214,7 @@ namespace krys::boo::html
 
     // According to http://lists.w3.org/Archives/Public/public-html/2009Jul/0947.html,
     // the "inherit" and "initial" values must be ignored. ParseUnresolvedFont ignores these.
-    auto unresolvedFont = css::PropertyParserHelpers::ParseUnresolvedFont(
+    auto unresolvedFont = css::parse_property::ParseUnresolvedFont(
       css::CSSOMString(newFont), document, css::StrictToParserMode(!UsesCSSCompatibilityParseMode()));
     if (!unresolvedFont)
     {

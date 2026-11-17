@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Types/Pair.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   template <typename Archive, typename TKey, typename TValue>
   void Save(Archive &archive, const Pair<TKey, TValue> &pair) noexcept

@@ -32,6 +32,7 @@
 
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::style::interpolation
 {
@@ -43,13 +44,13 @@ namespace krys::boo::style::interpolation
     const interpolation::Client &Client;
     AnimatableCSSProperty Property;
 
-    Context(const AnimatableCSSProperty &property, double progress, bool isDiscrete,
+    Context(AnimatableCSSProperty property, double progress, bool isDiscrete,
             boo::CompositeOperation compositeOperation,
             boo::IterationCompositeOperation iterationCompositeOperation, double currentIteration,
             boo::Color fromColor, boo::Color toColor, const interpolation::Client &client) noexcept
         : BlendingContext(progress, isDiscrete, compositeOperation, iterationCompositeOperation,
                           currentIteration, krys::move(fromColor), krys::move(toColor)),
-          Client(client), Property(property)
+          Client(client), Property(krys::move(property))
     {
     }
   };

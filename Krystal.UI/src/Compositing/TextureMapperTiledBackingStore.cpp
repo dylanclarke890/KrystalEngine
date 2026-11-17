@@ -165,7 +165,7 @@ namespace krys::ui
         continue;
       }
 
-      _tiles.push_back(TextureMapperTile(rect));
+      _tiles.emplace_back(rect);
     }
 
     // Remove unnecessary tiles, if they weren't recycled. We use a threshold to make sure we don't

@@ -33,7 +33,7 @@ namespace krys::boo::dom::tests
       auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      (void)parser->PumpTokenizer();
+      parser->PumpTokenizer();
       return document;
     }
 
@@ -217,7 +217,7 @@ namespace krys::boo::dom::tests
       REQUIRE(StyleAttribute(*element) == "width: 1px;");
 
       REQUIRE_FALSE(style.SetCssText(u8"").HasException());
-      REQUIRE(StyleAttribute(*element) == "");
+      REQUIRE(StyleAttribute(*element).empty());
     }
 
     SECTION("The attribute's text is rewritten even when cssText sets the same properties")
@@ -348,7 +348,7 @@ namespace krys::boo::dom::tests
     REQUIRE(StyleAttribute(*element) == "display: none; color: red;");
 
     element->RemoveAllInlineStyleProperties();
-    REQUIRE(StyleAttribute(*element) == "");
+    REQUIRE(StyleAttribute(*element).empty());
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "StyledElement: parser mode", "[DOM][StyledElement]")

@@ -51,8 +51,8 @@ namespace krys::gfx
     SamplerHandle _sampler {};
     /// @brief Bound for inputs a node doesn't have.
     TextureHandle _transparentTexture {};
-    List<PooledTexture> _textures {};
-    List<TurbulenceTable> _turbulenceTables {};
+    List<PooledTexture> _textures;
+    List<TurbulenceTable> _turbulenceTables;
 
   public:
     KRYS_NODISCARD static Expected<UniquePtr<FilterRenderer2D>> Create(Device &device) noexcept;

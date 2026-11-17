@@ -162,6 +162,7 @@ namespace krys::gfx::tests
       auto tile = [&](uint32 index, const LayerFilter2D &filter)
       {
         const float x = static_cast<float>(index % 4u) * 80.f;
+        // NOLINTNEXTLINE(bugprone-integer-division): the row.
         const float y = static_cast<float>(index / 4u) * 80.f;
         renderer.BeginLayer(1.f, BlendMode::Normal, filter);
         content(x, y);
@@ -305,7 +306,7 @@ namespace krys::gfx::tests
       for (const char32_t *character = text; *character != U'\0'; ++character)
       {
         glyphs.push_back(face.GlyphIndex(*character));
-        positions.push_back({x, 0.f});
+        positions.emplace_back(x, 0.f);
         x += face.Advance(glyphs.back(), size);
       }
       renderer.DrawGlyphs(face, size, glyphs, positions, baseline, paint);

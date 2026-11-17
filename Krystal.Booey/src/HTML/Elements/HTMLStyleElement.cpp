@@ -242,7 +242,7 @@ namespace krys::boo::html
     UnblockRendering();
     html::EventLoop::Current().QueueTask(
       TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), loaded = _loadedSheet]
-      { dom::EventDispatcher::FireEvent(loaded ? EventNames::Load : EventNames::Error, *element); });
+      { dom::EventDispatcher::FireEvent(loaded ? event_names::Load : event_names::Error, *element); });
   }
 
   void HTMLStyleElement::PotentiallyBlockRendering(const css::mq::MediaQueryList &mediaQueries) noexcept

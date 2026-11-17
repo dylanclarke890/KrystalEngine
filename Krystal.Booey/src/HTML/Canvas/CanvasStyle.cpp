@@ -58,7 +58,7 @@ namespace krys::boo::html
       }
 
       auto colorString = CanvasElement->InlineStyle()->GetPropertyValue(css::PropertyId::Color);
-      auto color = css::PropertyParserHelpers::ParseColorRaw(colorString, CanvasElement->CssParserContext());
+      auto color = css::parse_property::ParseColorRaw(colorString, CanvasElement->CssParserContext());
       if (color.IsValid())
       {
         return color;
@@ -69,7 +69,7 @@ namespace krys::boo::html
 
   Color ParseColor(dom::DOMStringView colorString, CanvasBase &canvasBase) noexcept
   {
-    using namespace css::PropertyParserHelpers;
+    using namespace css::parse_property;
 
     const auto &cssParserContext = canvasBase.CssParserContext();
     auto color = ParseColorRawSimple(colorString, cssParserContext);
@@ -93,7 +93,7 @@ namespace krys::boo::html
 
   Color ParseColor(dom::DOMStringView colorString) noexcept
   {
-    using namespace css::PropertyParserHelpers;
+    using namespace css::parse_property;
 
     const css::ParserContext cssParserContext(css::ParserMode::HTMLStandard);
     auto color = ParseColorRawSimple(colorString, cssParserContext);

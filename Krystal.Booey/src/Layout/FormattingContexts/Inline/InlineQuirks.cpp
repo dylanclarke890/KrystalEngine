@@ -148,7 +148,7 @@ namespace krys::boo::layout
   {
     // This quirk is needed as we put the marker in seemingly random places in the list item's subtree.
     // (instead of having a well defined place and layout behavior).
-    if (!lineContent.size() || numberOfOutsideListMarkers != 1)
+    if (lineContent.empty() || numberOfOutsideListMarkers != 1)
     {
       return false;
     }

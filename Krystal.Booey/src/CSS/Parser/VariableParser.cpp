@@ -217,7 +217,7 @@ namespace krys::boo::css
         return true;
       }
 
-      if (!PropertyParserHelpers::ConsumeComma(range))
+      if (!parse_property::ConsumeComma(range))
       {
         return false;
       }
@@ -241,7 +241,7 @@ namespace krys::boo::css
         return true;
       }
 
-      if (!PropertyParserHelpers::ConsumeComma(range))
+      if (!parse_property::ConsumeComma(range))
       {
         return false;
       }
@@ -273,7 +273,7 @@ namespace krys::boo::css
       };
 
       size_t index = 0uz;
-      while (auto argumentRange = PropertyParserHelpers::ConsumeArgument(range, index))
+      while (auto argumentRange = parse_property::ConsumeArgument(range, index))
       {
         if (!validateArgument(*argumentRange))
         {
@@ -286,7 +286,7 @@ namespace krys::boo::css
 
     struct VariableType
     {
-      Maybe<GlobalKeyword> Keyword {};
+      Maybe<GlobalKeyword> Keyword;
       css::ClassifyBlockResult ClassifyBlockResult {};
     };
 

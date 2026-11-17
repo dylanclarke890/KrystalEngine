@@ -40,7 +40,7 @@ namespace krys::boo
     struct UnderlineOffsetArguments
     {
       const RenderStyle &LineStyle;
-      Maybe<TextUnderlinePositionUnder> TextUnderlinePositionUnder {};
+      Maybe<TextUnderlinePositionUnder> TextUnderlinePositionUnder;
     };
 
     KRYS_NODISCARD bool IsAncestorAndWithinBlock(const RenderInline &ancestor,

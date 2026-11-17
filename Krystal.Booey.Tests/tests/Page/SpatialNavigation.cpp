@@ -99,7 +99,7 @@ namespace krys::boo::tests
     {
       std::string markup =
         "<style>button{position:absolute;width:40px;height:40px;padding:0;border:0}</style>";
-      for (auto [id, x, y] : buttons)
+      for (const auto &[id, x, y] : buttons)
       {
         markup += std::string("<button id=") + id + " style=left:" + std::to_string(x)
                   + "px;top:" + std::to_string(y) + "px></button>";

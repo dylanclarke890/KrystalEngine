@@ -23,7 +23,7 @@ namespace krys::pal::win32
     WindowSettings _settings;
     WindowCallbacks _callbacks;
     WNDCLASSW _class;
-    HWND _handle;
+    HWND _handle {nullptr};
     CursorShape _cursor {CursorShape::Arrow};
     /// @brief The image shown as the cursor in place of `_cursor`, and the system cursor made from it.
     RefPtr<CursorImage> _cursorImage;
@@ -70,7 +70,7 @@ namespace krys::pal::win32
     UniquePtr<UIAutomation> _uiAutomation;
 
   public:
-    Win32Window(const WindowSettings &settings);
+    Win32Window(WindowSettings settings);
 
     ~Win32Window() noexcept override;
 
@@ -80,7 +80,7 @@ namespace krys::pal::win32
 
     KRYS_NODISCARD const string &GetTitle() const noexcept override;
 
-    KRYS_NODISCARD virtual WindowSize GetSize() const noexcept override;
+    KRYS_NODISCARD WindowSize GetSize() const noexcept override;
 
     KRYS_NODISCARD WindowPosition ClientOriginOnScreen() const noexcept override;
 
@@ -131,7 +131,7 @@ namespace krys::pal::win32
 
     void AccessibilityNodeRemoved(AccessibilityNodeID node) noexcept override;
 
-    LRESULT HandleMessage(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
+    LRESULT HandleMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
 
   private:
     void CreateWindowClass(HMODULE instance);

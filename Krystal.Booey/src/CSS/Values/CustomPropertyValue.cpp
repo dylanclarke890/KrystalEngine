@@ -174,7 +174,7 @@ namespace krys::boo::css
   {
     if (auto *value = std::get_if<Ref<VariableReferenceValue>>(&_value))
     {
-      if (func(*value->get()) == IterationStatus::Done)
+      if (func(**value) == IterationStatus::Done)
       {
         return IterationStatus::Done;
       }

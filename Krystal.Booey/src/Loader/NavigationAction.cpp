@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -82,10 +83,11 @@ namespace krys::boo
 
   NavigationAction::NavigationAction() noexcept = default;
 
-  NavigationAction::NavigationAction(const ResourceRequest &originalRequest, bool isFormSubmission,
+  NavigationAction::NavigationAction(ResourceRequest originalRequest, bool isFormSubmission,
                                      dom::Event *event, dom::DOMStringAtom downloadAttribute,
                                      dom::Element *sourceElement) noexcept
-      : _originalRequest(originalRequest), _keyStateEventData(KeyStateDataForFirstEventWithKeyState(event)),
+      : _originalRequest(krys::move(originalRequest)),
+        _keyStateEventData(KeyStateDataForFirstEventWithKeyState(event)),
         _mouseEventData(MouseEventDataForFirstMouseEvent(event)),
         _type(GetNavigationType(isFormSubmission, event != nullptr))
   {

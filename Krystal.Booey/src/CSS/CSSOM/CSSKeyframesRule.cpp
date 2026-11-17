@@ -87,11 +87,11 @@ namespace krys::boo::css
     _childRuleCSSOMWrappers.resize(Length());
   }
 
-  void CSSKeyframesRule::DeleteRule(const CSSOMString &s) noexcept
+  void CSSKeyframesRule::DeleteRule(const CSSOMString &key) noexcept
   {
     krys_debug_assert(_childRuleCSSOMWrappers.size() == _keyframesRule->Keyframes().size());
 
-    auto i = _keyframesRule->FindKeyframeIndex(s);
+    auto i = _keyframesRule->FindKeyframeIndex(key);
     if (!i)
     {
       return;

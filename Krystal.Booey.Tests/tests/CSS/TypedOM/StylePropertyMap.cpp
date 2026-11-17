@@ -32,7 +32,7 @@ namespace krys::boo::css::tests
       List<CSSStyleValueOrString> list;
       for (auto value : values)
       {
-        list.push_back(CSSOMString(value));
+        list.emplace_back(CSSOMString(value));
       }
       return list;
     }
@@ -40,7 +40,7 @@ namespace krys::boo::css::tests
     KRYS_NODISCARD List<CSSStyleValueOrString> Values(Ref<CSSStyleValue> value)
     {
       List<CSSStyleValueOrString> list;
-      list.push_back(RefPtr<CSSStyleValue>(krys::move(value)));
+      list.emplace_back(RefPtr<CSSStyleValue>(krys::move(value)));
       return list;
     }
   }

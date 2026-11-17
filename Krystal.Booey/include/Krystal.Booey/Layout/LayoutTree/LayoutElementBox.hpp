@@ -59,7 +59,7 @@ namespace krys::boo::layout
     struct ReplacedAttributes
     {
       LayoutSize IntrinsicSize;
-      Maybe<LayoutUnit> IntrinsicRatio {};
+      Maybe<LayoutUnit> IntrinsicRatio;
       // FIXME: The cached image.
     };
 

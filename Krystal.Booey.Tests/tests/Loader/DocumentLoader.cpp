@@ -296,13 +296,13 @@ namespace krys::boo::tests
                                                         switch (document.ReadyState())
                                                         {
                                                           case html::DocumentReadyState::Loading:
-                                                            Events.push_back("loading");
+                                                            Events.emplace_back("loading");
                                                             break;
                                                           case html::DocumentReadyState::Interactive:
-                                                            Events.push_back("interactive");
+                                                            Events.emplace_back("interactive");
                                                             break;
                                                           case html::DocumentReadyState::Complete:
-                                                            Events.push_back("complete");
+                                                            Events.emplace_back("complete");
                                                             break;
                                                         }
                                                       }));
@@ -310,14 +310,14 @@ namespace krys::boo::tests
                                                       [this](dom::Event &event)
                                                       {
                                                         CHECK(event.Bubbles());
-                                                        Events.push_back("DOMContentLoaded");
+                                                        Events.emplace_back("DOMContentLoaded");
                                                       }));
           Handles.push_back(window->AddEventListener(u8"load",
                                                      [this, &document, window](dom::Event &event)
                                                      {
                                                        CHECK(event.Target().get() == &document);
                                                        CHECK(event.CurrentTarget().get() == window);
-                                                       Events.push_back("load");
+                                                       Events.emplace_back("load");
                                                      }));
           Handles.push_back(
             window->AddEventListener<html::PageTransitionEvent>(u8"pageshow",
@@ -326,11 +326,11 @@ namespace krys::boo::tests
                                                                   CHECK_FALSE(event.Persisted());
                                                                   CHECK(event.Bubbles());
                                                                   CHECK(event.Cancelable());
-                                                                  Events.push_back("pageshow");
+                                                                  Events.emplace_back("pageshow");
                                                                 }));
           // load doesn't reach the window from the document's own listeners, and DOMContentLoaded does.
           Handles.push_back(window->AddEventListener(u8"DOMContentLoaded", [this](dom::Event &)
-                                                     { Events.push_back("window heard"); }));
+                                                     { Events.emplace_back("window heard"); }));
         };
       }
     };
@@ -419,14 +419,14 @@ namespace krys::boo::tests
                                                                           CHECK_FALSE(event.Persisted());
                                                                           CHECK(event.Bubbles());
                                                                           CHECK(event.Cancelable());
-                                                                          events.push_back("pagehide");
+                                                                          events.emplace_back("pagehide");
                                                                           tryToNavigate();
                                                                         });
     auto unload = window->AddEventListener(u8"unload",
                                            [&](dom::Event &event)
                                            {
                                              CHECK(event.Target().get() == first.get());
-                                             events.push_back("unload");
+                                             events.emplace_back("unload");
                                              tryToNavigate();
                                            });
 
@@ -439,7 +439,7 @@ namespace krys::boo::tests
                                                     {
                                                       CHECK(event.Bubbles());
                                                       CHECK(first->Hidden());
-                                                      events.push_back("visibilitychange");
+                                                      events.emplace_back("visibilitychange");
                                                     });
     auto onParagraph = paragraph->AddEventListener(u8"click", [](dom::Event &) {});
 

@@ -91,7 +91,7 @@ namespace krys::boo::style
         // Property allow-list for `::cue`:
         if (component->Match() == css::SelectorMatch::PseudoElement
             && component->PseudoElement() == css::SelectorPseudoElement::UserAgentPart
-            && component->Value() == css::UserAgentParts::Cue())
+            && component->Value() == css::user_agent_parts::Cue())
         {
           return PropertyAllowlist::Cue;
         }

@@ -94,7 +94,7 @@ namespace krys::boo::style
     Invalidator(const List<Ref<css::StyleSheetContents>> &sheets,
                 const css::mq::MediaQueryEvaluator &mediaQueryEvaluator) noexcept;
 
-    explicit Invalidator(const InvalidationRuleSetVector &ruleSets) noexcept;
+    explicit Invalidator(InvalidationRuleSetVector ruleSets) noexcept;
 
     ~Invalidator() noexcept;
 

@@ -132,7 +132,7 @@ namespace krys::boo::layout
       style::ZoomFactor ZoomFactor {1.0f, 1.0f};
       style::WebkitLineBoxContain LineBoxContain;
       InlineLayoutUnit PrimaryFontSize {0};
-      VerticalAlignment VerticalAlignmentValue {};
+      VerticalAlignment VerticalAlignmentValue;
     };
 
     struct TextEmphasis

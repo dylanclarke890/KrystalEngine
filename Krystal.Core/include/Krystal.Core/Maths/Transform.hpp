@@ -136,11 +136,11 @@ namespace krys
   }
 
   /// @brief Constructs a look at matrix.
-  template <FloatingPoint T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
+  template <FloatingPoint T, conventions::Handedness Handedness = conventions::DefaultHandedness>
   KRYS_NODISCARD constexpr auto LookAt(const Vector3<T> &eye, const Vector3<T> &center,
                                        const Vector3<T> &up) noexcept -> Matrix4x4<T>
   {
-    if constexpr (Handedness == Conventions::Handedness::Left)
+    if constexpr (Handedness == conventions::Handedness::Left)
     {
       return LookAt_LH(eye, center, up);
     }

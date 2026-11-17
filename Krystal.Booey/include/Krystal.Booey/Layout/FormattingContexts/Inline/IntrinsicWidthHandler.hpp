@@ -52,8 +52,8 @@ namespace krys::boo::layout
     InlineItemRange _inlineItemRange;
     bool _mayUseSimplifiedTextOnlyInlineLayoutInRange {false};
 
-    Maybe<InlineLayoutUnit> _maximumContentWidthBetweenLineBreaks {};
-    Maybe<LineLayoutResult> _maximumIntrinsicWidthResultForSingleLine {};
+    Maybe<InlineLayoutUnit> _maximumContentWidthBetweenLineBreaks;
+    Maybe<LineLayoutResult> _maximumIntrinsicWidthResultForSingleLine;
 
   public:
     IntrinsicWidthHandler(InlineFormattingContext &inlineFormattingContext,

@@ -1,11 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include <concepts>
-#include <type_traits>
 
 namespace krys
 {
@@ -55,15 +54,15 @@ namespace krys
 
   /// @brief @p number in hexadecimal, for appending to a string builder. Negative numbers are written as
   /// their two's complement.
-  template <std::integral TNumber>
+  template <Integral TNumber>
   KRYS_NODISCARD constexpr HexNumber Hex(TNumber number, uint32 minimumDigits = 0,
                                          HexConversionMode mode = HexConversionMode::Uppercase) noexcept
   {
-    return HexNumber {static_cast<uint64>(static_cast<std::make_unsigned_t<TNumber>>(number)), minimumDigits,
+    return HexNumber {static_cast<uint64>(static_cast<make_unsigned_t<TNumber>>(number)), minimumDigits,
                       mode};
   }
 
-  template <std::integral TNumber>
+  template <Integral TNumber>
   KRYS_NODISCARD constexpr HexNumber Hex(TNumber number, HexConversionMode mode) noexcept
   {
     return Hex(number, 0, mode);

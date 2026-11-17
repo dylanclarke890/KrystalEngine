@@ -133,9 +133,9 @@ namespace krys::boo::css
     return {};
   }
 
-  dom::ExceptionOr<void> MediaList::DeleteMedium(const CSSOMString &value) noexcept
+  dom::ExceptionOr<void> MediaList::DeleteMedium(const CSSOMString &oldMedium) noexcept
   {
-    auto valueToRemove = text::ToASCIILower(CSSOMStringView(value));
+    auto valueToRemove = text::ToASCIILower(CSSOMStringView(oldMedium));
     auto queries = MediaQueries();
     for (uint32 i = 0; i < queries.size(); ++i)
     {
@@ -149,14 +149,14 @@ namespace krys::boo::css
     return dom::ExceptionCode::NotFoundError;
   }
 
-  void MediaList::AppendMedium(const CSSOMString &value) noexcept
+  void MediaList::AppendMedium(const CSSOMString &newMedium) noexcept
   {
-    if (value.empty())
+    if (newMedium.empty())
     {
       return;
     }
 
-    auto newQuery = mq::MediaQueryParser::Parse(value, StrictParserContext());
+    auto newQuery = mq::MediaQueryParser::Parse(newMedium, StrictParserContext());
     auto queries = MediaQueries();
     queries.insert(queries.end(), newQuery.begin(), newQuery.end());
     SetMediaQueries(krys::move(queries));

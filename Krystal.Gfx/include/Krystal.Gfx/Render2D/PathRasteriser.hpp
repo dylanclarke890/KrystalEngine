@@ -16,7 +16,7 @@ namespace krys::gfx
     /// @brief The pixels the mask covers; empty when the shape covers none.
     PixelRect2D Bounds {};
     /// @brief One byte per pixel, from 0 (outside) to 255 (inside), rows from the top.
-    List<uint8> Coverage {};
+    List<uint8> Coverage;
 
     KRYS_NODISCARD uint8 At(int32 x, int32 y) const noexcept
     {
@@ -56,11 +56,11 @@ namespace krys::gfx
     };
 
   private:
-    List<Edge> _edges {};
+    List<Edge> _edges;
     /// @brief Indices of the edges that overlap the current row.
-    List<uint32> _active {};
-    List<Crossing> _crossings {};
-    List<float> _row {};
+    List<uint32> _active;
+    List<Crossing> _crossings;
+    List<float> _row;
 
   public:
     constexpr static uint32 SubScanlines = 16u;

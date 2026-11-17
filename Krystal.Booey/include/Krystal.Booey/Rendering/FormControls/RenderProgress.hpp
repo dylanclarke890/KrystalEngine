@@ -38,7 +38,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderProgress);
 
   private:
-    double _position;
+    double _position; // NOLINT(modernize-use-default-member-init): set in the .cpp
     MonotonicTime::duration _animationStartTime {};
     bool _animating {false};
     Timer _animationTimer;

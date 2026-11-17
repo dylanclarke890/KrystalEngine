@@ -59,6 +59,25 @@ namespace krys::boo::svg
   using SVGAnimatedPointList = SVGAnimatedPropertyList<SVGPointList>;
   using SVGAnimatedTransformList = SVGAnimatedPropertyList<SVGTransformList>;
 
+  // Instantiated once in SVGAnimatedPropertyImpl.cpp: their virtual members are then compiled the same way by
+  // every compiler (whether an implicit instantiation includes unused virtuals is unspecified), and once
+  // rather than in every file that uses them.
+  extern template class SVGSharedPrimitiveProperty<bool>;
+  extern template class SVGSharedPrimitiveProperty<int32>;
+  extern template class SVGSharedPrimitiveProperty<float>;
+  extern template class SVGAnimatedPrimitiveProperty<bool>;
+  extern template class SVGAnimatedPrimitiveProperty<int32>;
+  extern template class SVGAnimatedPrimitiveProperty<float>;
+  extern template class SVGAnimatedValueProperty<SVGAngle>;
+  extern template class SVGAnimatedValueProperty<SVGLength>;
+  extern template class SVGAnimatedValueProperty<SVGRect>;
+  extern template class SVGAnimatedValueProperty<SVGPreserveAspectRatio>;
+  extern template class SVGAnimatedPropertyList<SVGLengthList>;
+  extern template class SVGAnimatedPropertyList<SVGNumberList>;
+  extern template class SVGAnimatedPropertyList<SVGPointList>;
+  extern template class SVGAnimatedPropertyList<SVGTransformList>;
+  extern template class SVGAnimatedPropertyList<SVGPathSegList>;
+
   class SVGAnimatedPathSegList : public SVGAnimatedPropertyList<SVGPathSegList>
   {
     using Base = SVGAnimatedPropertyList<SVGPathSegList>;

@@ -169,19 +169,19 @@ namespace krys::boo::dom
     auto isSkippedContent = target.IsRelevantToUser() ? IsSkippedContent::No : IsSkippedContent::Yes;
     target.InvalidateStyle();
     UpdateAnimations(target, wasSkippedContent, isSkippedContent);
-    html::EventLoop::Current().QueueTask(
-      html::TaskSource::DOMManipulation, target.NodeDocument(),
-      [protectedTarget = ShareRef(target), isSkippedContent]
-      {
-        if (protectedTarget->IsConnected())
-        {
-          ContentVisibilityAutoStateChangeEventInit init;
-          init.Skipped = isSkippedContent == IsSkippedContent::Yes;
-          auto event =
-            ContentVisibilityAutoStateChangeEvent::Create(EventNames::ContentVisibilityAutoStateChange, init);
-          (void)EventDispatcher::DispatchToTarget(*event, protectedTarget.get());
-        }
-      });
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, target.NodeDocument(),
+                                         [protectedTarget = ShareRef(target), isSkippedContent]
+                                         {
+                                           if (protectedTarget->IsConnected())
+                                           {
+                                             ContentVisibilityAutoStateChangeEventInit init;
+                                             init.Skipped = isSkippedContent == IsSkippedContent::Yes;
+                                             auto event = ContentVisibilityAutoStateChangeEvent::Create(
+                                               event_names::ContentVisibilityAutoStateChange, init);
+                                             (void)EventDispatcher::DispatchToTarget(*event,
+                                                                                     protectedTarget.get());
+                                           }
+                                         });
     return true;
   }
 

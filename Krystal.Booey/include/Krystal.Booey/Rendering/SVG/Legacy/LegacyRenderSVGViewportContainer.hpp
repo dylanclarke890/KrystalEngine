@@ -76,9 +76,9 @@ namespace krys::boo
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
 
-  private:
     void GetElement() const = delete;
 
+  private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGViewportContainer";

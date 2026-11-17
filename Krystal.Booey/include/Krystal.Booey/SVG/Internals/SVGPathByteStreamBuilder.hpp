@@ -23,8 +23,8 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSegType.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include <type_traits>
 
 namespace krys::boo::svg
 {
@@ -76,13 +76,13 @@ namespace krys::boo::svg
     template <typename TData>
     void WriteType(const TData &data) noexcept
     {
-      static_assert(std::is_trivially_copyable_v<TData>);
+      static_assert(TriviallyCopyable<TData>);
       _byteStream.Append(Span<const uint8>(reinterpret_cast<const uint8 *>(&data), sizeof(TData)));
     }
 
     void WriteSegmentType(SVGPathSegType type) noexcept
     {
-      static_assert(std::is_same_v<std::underlying_type_t<SVGPathSegType>, uint8>);
+      static_assert(SameType<underlying_t<SVGPathSegType>, uint8>);
       _byteStream.Append(static_cast<uint8>(type));
     }
   };

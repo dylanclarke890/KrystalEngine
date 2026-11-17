@@ -35,7 +35,7 @@ namespace krys::gfx::tests
     protected:
       UniquePtr<Device> _device;
       UniquePtr<FilterRenderer2D> _renderer;
-      List<TextureHandle> _images {};
+      List<TextureHandle> _images;
       PixelRect2D _region {};
 
     public:

@@ -41,17 +41,17 @@ namespace krys::boo::tests
 
     void DispatchDidStartProvisionalLoad() noexcept override
     {
-      Events.push_back("start");
+      Events.emplace_back("start");
     }
 
     void DispatchDidFailProvisionalLoad(const ResourceError &error) noexcept override
     {
-      Events.push_back(error.IsCancellation() ? "fail provisional (cancelled)" : "fail provisional");
+      Events.emplace_back(error.IsCancellation() ? "fail provisional (cancelled)" : "fail provisional");
     }
 
     void DispatchDidCommitLoad() noexcept override
     {
-      Events.push_back("commit");
+      Events.emplace_back("commit");
     }
 
     /// @brief Called with each new document, before it's parsed.
@@ -59,7 +59,7 @@ namespace krys::boo::tests
 
     void DispatchDidClearWindowObject() noexcept override
     {
-      Events.push_back("window");
+      Events.emplace_back("window");
       if (OnClearWindowObject)
       {
         OnClearWindowObject();
@@ -68,12 +68,12 @@ namespace krys::boo::tests
 
     void DispatchDidFinishDocumentLoad() noexcept override
     {
-      Events.push_back("document loaded");
+      Events.emplace_back("document loaded");
     }
 
     void DispatchDidFinishLoad() noexcept override
     {
-      Events.push_back("finish");
+      Events.emplace_back("finish");
     }
 
     /// @brief Each time the client is asked about icons, the icons, with their identifiers.

@@ -112,28 +112,28 @@ namespace krys::boo::html
     };
 
     constexpr std::array<InputTypeFactory, 22> InputTypeFactories {{
-      {InputTypeNames::Button, &CreateInputType<ButtonInputType>},
-      {InputTypeNames::Checkbox, &CreateInputType<CheckboxInputType>},
-      {InputTypeNames::Color, &CreateInputType<ColorInputType>},
-      {InputTypeNames::Date, &CreateInputType<DateInputType>},
-      {InputTypeNames::DateTimeLocal, &CreateInputType<DateTimeLocalInputType>},
-      {InputTypeNames::Email, &CreateInputType<EmailInputType>},
-      {InputTypeNames::File, &CreateInputType<FileInputType>},
-      {InputTypeNames::Hidden, &CreateInputType<HiddenInputType>},
-      {InputTypeNames::Image, &CreateInputType<ImageInputType>},
-      {InputTypeNames::Month, &CreateInputType<MonthInputType>},
-      {InputTypeNames::Number, &CreateInputType<NumberInputType>},
-      {InputTypeNames::Password, &CreateInputType<PasswordInputType>},
-      {InputTypeNames::Radio, &CreateInputType<RadioInputType>},
-      {InputTypeNames::Range, &CreateInputType<RangeInputType>},
-      {InputTypeNames::Reset, &CreateInputType<ResetInputType>},
-      {InputTypeNames::Search, &CreateInputType<SearchInputType>},
-      {InputTypeNames::Submit, &CreateInputType<SubmitInputType>},
-      {InputTypeNames::Telephone, &CreateInputType<TelephoneInputType>},
-      {InputTypeNames::Text, &CreateInputType<TextInputType>},
-      {InputTypeNames::Time, &CreateInputType<TimeInputType>},
-      {InputTypeNames::URL, &CreateInputType<URLInputType>},
-      {InputTypeNames::Week, &CreateInputType<WeekInputType>},
+      {input_type_names::Button, &CreateInputType<ButtonInputType>},
+      {input_type_names::Checkbox, &CreateInputType<CheckboxInputType>},
+      {input_type_names::Color, &CreateInputType<ColorInputType>},
+      {input_type_names::Date, &CreateInputType<DateInputType>},
+      {input_type_names::DateTimeLocal, &CreateInputType<DateTimeLocalInputType>},
+      {input_type_names::Email, &CreateInputType<EmailInputType>},
+      {input_type_names::File, &CreateInputType<FileInputType>},
+      {input_type_names::Hidden, &CreateInputType<HiddenInputType>},
+      {input_type_names::Image, &CreateInputType<ImageInputType>},
+      {input_type_names::Month, &CreateInputType<MonthInputType>},
+      {input_type_names::Number, &CreateInputType<NumberInputType>},
+      {input_type_names::Password, &CreateInputType<PasswordInputType>},
+      {input_type_names::Radio, &CreateInputType<RadioInputType>},
+      {input_type_names::Range, &CreateInputType<RangeInputType>},
+      {input_type_names::Reset, &CreateInputType<ResetInputType>},
+      {input_type_names::Search, &CreateInputType<SearchInputType>},
+      {input_type_names::Submit, &CreateInputType<SubmitInputType>},
+      {input_type_names::Telephone, &CreateInputType<TelephoneInputType>},
+      {input_type_names::Text, &CreateInputType<TextInputType>},
+      {input_type_names::Time, &CreateInputType<TimeInputType>},
+      {input_type_names::URL, &CreateInputType<URLInputType>},
+      {input_type_names::Week, &CreateInputType<WeekInputType>},
     }};
 
     KRYS_NODISCARD const InputTypeFactory *FindFactory(dom::DOMStringView typeName) noexcept
@@ -519,7 +519,7 @@ namespace krys::boo::html
   bool InputType::ShouldSubmitImplicitly(dom::Event &event) noexcept
   {
     auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
-    return keyboardEvent && event.Type() == EventNames::KeyPress && keyboardEvent->CharCode() == '\r';
+    return keyboardEvent && event.Type() == event_names::KeyPress && keyboardEvent->CharCode() == '\r';
   }
 
   Decimal InputType::ParseToNumber(dom::DOMStringView, const Decimal &defaultValue) const noexcept

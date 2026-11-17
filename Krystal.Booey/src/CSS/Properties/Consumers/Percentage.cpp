@@ -30,7 +30,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
-namespace krys::boo::css::PropertyParserHelpers
+namespace krys::boo::css::parse_property
 {
   RefPtr<PrimitiveValue> ConsumePercentageDividedBy100OrNumber(TokenRange &tokens,
                                                                PropertyParserState &state) noexcept

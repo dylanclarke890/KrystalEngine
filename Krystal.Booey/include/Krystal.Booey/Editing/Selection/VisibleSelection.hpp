@@ -94,8 +94,7 @@ namespace krys::boo
 
     VisibleSelection() noexcept = default;
 
-    VisibleSelection(const dom::Position &anchor, const dom::Position &focus,
-                     Affinity affinity = DefaultAffinity,
+    VisibleSelection(dom::Position anchor, dom::Position focus, Affinity affinity = DefaultAffinity,
                      boo::Directionality directionality = boo::Directionality::None) noexcept;
 
     // FIXME: A caret selection never has direction so we should remove the Directionality argument from this

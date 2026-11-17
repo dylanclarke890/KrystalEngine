@@ -6,7 +6,7 @@
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
-namespace krys::Serialisation
+namespace krys::serialisation
 {
   class RapidJsonStreamWriterAdapter
   {
@@ -16,7 +16,7 @@ namespace krys::Serialisation
     io::IStreamWriter &_stream;
 
   public:
-    typedef char Ch;
+    using Ch = char;
 
     RapidJsonStreamWriterAdapter(io::IStreamWriter &stream) : _stream(stream)
     {
@@ -52,7 +52,7 @@ namespace krys::Serialisation
     io::IStreamReader &_stream;
 
   public:
-    typedef char Ch;
+    using Ch = char;
 
     RapidJsonStreamReaderAdapter(io::IStreamReader &stream) : _stream(stream)
     {
@@ -79,7 +79,7 @@ namespace krys::Serialisation
 
     size_t Tell() const
     {
-      return (size_t)_stream.Position();
+      return _stream.Position();
     }
 
     void Put(Ch)

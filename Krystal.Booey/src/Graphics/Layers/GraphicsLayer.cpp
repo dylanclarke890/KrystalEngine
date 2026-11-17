@@ -108,14 +108,7 @@ namespace krys::boo
   }
 
   GraphicsLayer::GraphicsLayer(Type type, GraphicsLayerClient &layerClient) noexcept
-      : _client(&layerClient), _type(type), _beingDestroyed(false), _contentsOpaque(false),
-        _preserves3D(type == Type::Structural), _backfaceVisibility(true), _masksToBounds(false),
-        _drawsContent(false), _contentsVisible(true), _contentsRectClipsDescendants(false),
-        _acceleratesDrawing(false), _usesDisplayListDrawing(false), _allowsTiling(true),
-        _appliesPageScale(false), _appliesDeviceScale(true), _showDebugBorder(false),
-        _showRepaintCounter(false), _showFrameProcessBorders(false), _isMaskLayer(false),
-        _isBackdropRoot(false), _isTrackingDisplayListReplay(false), _userInteractionEnabled(true),
-        _canDetachBackingStore(true), _shouldPaintUsingCompositeCopy(false)
+      : _client(&layerClient), _type(type), _preserves3D(type == Type::Structural)
   {
 #if KRYS_DEBUG
     Client().VerifyNotPainting();

@@ -105,15 +105,9 @@ namespace krys::boo
       return static_cast<uint32>(_vertices.size());
     }
 
-    KRYS_NODISCARD const FloatPolygonEdge &EdgeAt(uint32 index) const noexcept
-    {
-      return _edges[index];
-    }
+    KRYS_NODISCARD const FloatPolygonEdge &EdgeAt(uint32 index) const noexcept;
 
-    KRYS_NODISCARD uint32 NumberOfEdges() const noexcept
-    {
-      return static_cast<uint32>(_edges.size());
-    }
+    KRYS_NODISCARD uint32 NumberOfEdges() const noexcept;
 
     KRYS_NODISCARD FloatRect BoundingBox() const noexcept
     {
@@ -188,4 +182,15 @@ namespace krys::boo
       return _edgeIndex;
     }
   };
+
+  // After FloatPolygonEdge, which they need complete.
+  inline const FloatPolygonEdge &FloatPolygon::EdgeAt(uint32 index) const noexcept
+  {
+    return _edges[index];
+  }
+
+  inline uint32 FloatPolygon::NumberOfEdges() const noexcept
+  {
+    return static_cast<uint32>(_edges.size());
+  }
 }

@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     /// @grammar <'quotes'>
     /// @see https://drafts.csswg.org/css-content-3/#propdef-quotes

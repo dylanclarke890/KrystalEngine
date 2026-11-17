@@ -473,7 +473,7 @@ namespace krys::boo::css::tests
     mq::FeatureEvaluationContext context {CreateWeakRef<const dom::Document>(*fixture.Document),
                                           {fixture.RootStyle, &fixture.RootStyle, nullptr, nullptr},
                                           nullptr};
-    for (auto *schema : mq::Features::AllSchemas())
+    for (auto *schema : mq::features::AllSchemas())
     {
       mq::Feature feature {schema->Name};
       feature.Schema = schema;

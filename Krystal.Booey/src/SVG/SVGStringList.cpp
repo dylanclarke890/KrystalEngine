@@ -55,7 +55,7 @@ namespace krys::boo::svg
         break;
       }
 
-      _items.push_back(dom::DOMString {start.substr(0, start.size() - buffer.size())});
+      _items.emplace_back(start.substr(0, start.size() - buffer.size()));
       SkipOptionalSVGSpacesOrDelimiter(buffer, static_cast<char>(delimiter));
     }
 

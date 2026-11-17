@@ -56,5 +56,5 @@ namespace krys::boo::style
                                        const ColorLayers &value) noexcept;
 
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
-                                                                  const ColorLayers &value) noexcept;
+                                                                  const ColorLayers &colorLayers) noexcept;
 }

@@ -498,8 +498,8 @@ namespace krys::boo::tests
     auto &select = SelectById(fixture, u8"s");
     auto input = CreateRef<EventCounter>();
     auto change = CreateRef<EventCounter>();
-    select.AddEventListener(EventNames::Input, ShareRef<dom::EventListenerCallback>(*input), false);
-    select.AddEventListener(EventNames::Change, ShareRef<dom::EventListenerCallback>(*change), false);
+    select.AddEventListener(event_names::Input, ShareRef<dom::EventListenerCallback>(*input), false);
+    select.AddEventListener(event_names::Change, ShareRef<dom::EventListenerCallback>(*change), false);
     select.Focus();
     REQUIRE(fixture.Document->FocusedElement() == &select);
 
@@ -576,7 +576,7 @@ namespace krys::boo::tests
     KRYS_NODISCARD bool Dumps(EditorFixture &fixture, utf8_stringview text) noexcept
     {
       (void)fixture.Document->UpdateLayout();
-      return layout::tests::DumpWithIds(fixture).find(text) != utf8_string::npos;
+      return layout::tests::DumpWithIds(fixture).contains(text);
     }
   }
 
@@ -704,7 +704,7 @@ namespace krys::boo::tests
       SECTION("clicking an option picks it, firing events and closing")
       {
         auto counter = CreateRef<EventCounter>();
-        select.AddEventListener(EventNames::Change, ShareRef<dom::EventListenerCallback>(*counter), false);
+        select.AddEventListener(event_names::Change, ShareRef<dom::EventListenerCallback>(*counter), false);
         ClickElement(fixture, d);
         html::EventLoop::Current().RunUntilIdle();
         CHECK(select.SelectedIndex() == 3);

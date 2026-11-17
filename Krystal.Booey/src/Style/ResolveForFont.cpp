@@ -88,7 +88,7 @@ namespace krys::boo::style
       return *width;
     }
 
-    krys_debug_assert(css::PropertyParserHelpers::IsSystemFontShorthand(primitiveValue.ValueId()));
+    krys_debug_assert(css::parse_property::IsSystemFontShorthand(primitiveValue.ValueId()));
     return NormalWidthValue();
   }
 
@@ -127,9 +127,9 @@ namespace krys::boo::style
     return ItalicValue();
   }
 
-  static FontSelectionValue FontWeightFromUnresolvedFontWeight(
-    const css::PropertyParserHelpers::UnresolvedFontWeight &unresolvedWeight,
-    const FontCascadeDescription &fontDescription) noexcept
+  static FontSelectionValue
+    FontWeightFromUnresolvedFontWeight(const css::parse_property::UnresolvedFontWeight &unresolvedWeight,
+                                       const FontCascadeDescription &fontDescription) noexcept
   {
     return krys::SwitchOn(
       unresolvedWeight,
@@ -146,7 +146,7 @@ namespace krys::boo::style
         krys_debug_assert(false);
         return NormalWeightValue();
       },
-      [&](const css::PropertyParserHelpers::UnresolvedFontWeightNumber &weight)
+      [&](const css::parse_property::UnresolvedFontWeightNumber &weight)
       {
         // FIXME: Figure out correct behavior when conversion data is required.
         if (css::RequiresConversionData(weight))
@@ -158,8 +158,8 @@ namespace krys::boo::style
       });
   }
 
-  static FontSelectionValue FontWidthFromUnresolvedFontWidth(
-    const css::PropertyParserHelpers::UnresolvedFontWidth &unresolvedWidth) noexcept
+  static FontSelectionValue
+    FontWidthFromUnresolvedFontWidth(const css::parse_property::UnresolvedFontWidth &unresolvedWidth) noexcept
   {
     return krys::SwitchOn(
       unresolvedWidth,
@@ -171,7 +171,7 @@ namespace krys::boo::style
         }
         return NormalWidthValue();
       },
-      [&](const css::PropertyParserHelpers::UnresolvedFontWidthPercentage &percentage)
+      [&](const css::parse_property::UnresolvedFontWidthPercentage &percentage)
       {
         // FIXME: Figure out correct behavior when conversion data is required.
         if (css::RequiresConversionData(percentage))
@@ -192,8 +192,8 @@ namespace krys::boo::style
     };
   }
 
-  static ResolvedFontStyle FontStyleFromUnresolvedFontStyle(
-    const css::PropertyParserHelpers::UnresolvedFontStyle &unresolvedStyle) noexcept
+  static ResolvedFontStyle
+    FontStyleFromUnresolvedFontStyle(const css::parse_property::UnresolvedFontStyle &unresolvedStyle) noexcept
   {
     // Font style applied in the same way as BuilderConverter::ConvertFontStyleFromValue
     return krys::SwitchOn(
@@ -211,7 +211,7 @@ namespace krys::boo::style
         krys_debug_assert(false);
         return {.Slope = null, .Axis = FontStyleAxis::slnt};
       },
-      [](const css::PropertyParserHelpers::UnresolvedFontStyleObliqueAngle &angle) -> ResolvedFontStyle
+      [](const css::parse_property::UnresolvedFontStyleObliqueAngle &angle) -> ResolvedFontStyle
       {
         // FIXME: Figure out correct behavior when conversion data is required.
         if (css::RequiresConversionData(angle))
@@ -235,7 +235,7 @@ namespace krys::boo::style
   }
 
   static ResolvedFontSize
-    FontSizeFromUnresolvedFontSize(const css::PropertyParserHelpers::UnresolvedFontSize &unresolvedSize,
+    FontSizeFromUnresolvedFontSize(const css::parse_property::UnresolvedFontSize &unresolvedSize,
                                    float parentSize, const FontCascadeDescription &fontDescription,
                                    dom::Document &document) noexcept
   {
@@ -315,7 +315,7 @@ namespace krys::boo::style
   }
 
   static ResolvedFontFamily FontFamilyFromUnresolvedFontFamily(
-    const css::PropertyParserHelpers::UnresolvedFontFamily &unresolvedFamily) noexcept
+    const css::parse_property::UnresolvedFontFamily &unresolvedFamily) noexcept
   {
     bool isFirstFont = true;
     bool isSpecifiedFont = false;
@@ -332,8 +332,7 @@ namespace krys::boo::style
           {
             return {css::GenericFontFamilyNames::SystemUiFamily(), true};
           }
-          return {css::GenericFontFamilyNames::FamilyName(
-                    css::PropertyParserHelpers::GenericFontFamilyIndex(ident)),
+          return {css::GenericFontFamilyNames::FamilyName(css::parse_property::GenericFontFamilyIndex(ident)),
                   true};
         },
         [&](const css::CSSOMStringAtom &familyString) -> std::pair<StringAtom, bool>
@@ -357,9 +356,9 @@ namespace krys::boo::style
 
   // MARK: - Unresolved Font Shorthand Resolution
 
-  Maybe<FontCascade>
-    ResolveForUnresolvedFont(const css::PropertyParserHelpers::UnresolvedFont &unresolvedFont,
-                             FontCascadeDescription &&fontDescription, dom::Document &document) noexcept
+  Maybe<FontCascade> ResolveForUnresolvedFont(const css::parse_property::UnresolvedFont &unresolvedFont,
+                                              FontCascadeDescription &&fontDescription,
+                                              dom::Document &document) noexcept
   {
     // Map the font property longhands into the style.
     float parentSize = fontDescription.SpecifiedSize();
@@ -410,7 +409,7 @@ namespace krys::boo::style
     }
 
     // As there is no line-height on FontCascade, there's no need to resolve it, even
-    // though there is line-height information on css::PropertyParserHelpers::UnresolvedFont.
+    // though there is line-height information on css::parse_property::UnresolvedFont.
 
     auto fontCascade = FontCascade(krys::move(fontDescription));
     fontCascade.Update(ShareRefPtr(&document.GetFontSelector()));

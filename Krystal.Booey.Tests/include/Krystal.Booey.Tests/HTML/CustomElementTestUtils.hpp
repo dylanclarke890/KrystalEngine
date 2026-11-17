@@ -29,7 +29,7 @@ namespace krys::boo::html::tests
   public:
     LoggingElement(HTMLElement &element, Log &log) noexcept : CustomElement(element), _log(log)
     {
-      _log.push_back(u8"constructed");
+      _log.emplace_back(u8"constructed");
     }
 
     void ConnectedCallback() noexcept override
@@ -87,7 +87,8 @@ namespace krys::boo::html::tests
 
     CustomElementRegistry &Registry() noexcept
     {
-      return *Document->CustomElementRegistry();
+      auto *registry = Document->CustomElementRegistry().get(); // The document keeps it alive.
+      return *registry;
     }
 
     void Define(dom::DOMStringAtom name, List<dom::DOMStringAtom> observed = {}) noexcept
@@ -102,7 +103,7 @@ namespace krys::boo::html::tests
     {
       auto parser = CreateRef<DocumentParser>(*Document);
       parser->InputStream().Append(u8"<!DOCTYPE html><body>" + krys::move(markup), IsEOF::Yes);
-      (void)parser->PumpTokenizer();
+      parser->PumpTokenizer();
     }
 
     /// @brief The body, parsing an empty page first if there's none.
@@ -112,7 +113,8 @@ namespace krys::boo::html::tests
       {
         Parse(u8"");
       }
-      return *Document->Body();
+      auto *body = Document->Body().get(); // The document keeps it alive.
+      return *body;
     }
 
     dom::Element &ById(dom::DOMStringView id) noexcept

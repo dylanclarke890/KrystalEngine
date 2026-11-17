@@ -33,7 +33,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  namespace PropertyParserHelpers
+  namespace parse_property
   {
     // MARK: <'text-shadow'> consuming
     // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow

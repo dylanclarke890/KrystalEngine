@@ -44,6 +44,7 @@ namespace krys::boo::css
   class PrimitiveValue;
   class Quad;
   class Rect;
+  class StaticValuePool;
   class ToLengthConversionData;
 
   struct ComputedStyleDependencies;
@@ -54,6 +55,8 @@ namespace krys::boo::css
 
   class Value
   {
+    friend class StaticValuePool;
+
     KRYS_NON_COPYABLE(Value);
 
   public:

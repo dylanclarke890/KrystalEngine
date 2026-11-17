@@ -962,7 +962,7 @@ namespace krys::boo::dom
   void Node::DefaultEventHandler(Event &event) noexcept
   {
     // A middle button press pans the nearest box that can scroll, unless it's on a link.
-    if (event.Type() != EventNames::MouseDown)
+    if (event.Type() != event_names::MouseDown)
     {
       return;
     }

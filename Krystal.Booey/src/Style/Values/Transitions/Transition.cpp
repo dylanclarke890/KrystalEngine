@@ -44,8 +44,8 @@ namespace krys::boo::style
   }
 
   Transition::TransitionData::TransitionData(const TransitionData &other) noexcept
-      : RefCounted<TransitionData>(), _property {other._property}, _delay {other._delay},
-        _duration {other._duration}, _timingFunction {other._timingFunction}, _behavior {other._behavior},
+      : _property {other._property}, _delay {other._delay}, _duration {other._duration},
+        _timingFunction {other._timingFunction}, _behavior {other._behavior},
         _propertyState {other._propertyState}, _timingFunctionState {other._timingFunctionState},
         _delayState {other._delayState}, _durationState {other._durationState},
         _behaviorState {other._behaviorState}

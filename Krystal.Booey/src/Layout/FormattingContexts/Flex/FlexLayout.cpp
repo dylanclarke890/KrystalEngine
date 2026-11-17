@@ -310,11 +310,11 @@ namespace krys::boo::layout
         flexItemsMainSize += flexItemHypotheticalOuterMainSize;
         continue;
       }
-      lineRanges.push_back({lastWrapIndex, flexItemIndex});
+      lineRanges.emplace_back(lastWrapIndex, flexItemIndex);
       flexItemsMainSize = flexItemHypotheticalOuterMainSize;
       lastWrapIndex = flexItemIndex;
     }
-    lineRanges.push_back({lastWrapIndex, flexBaseAndHypotheticalMainSizeList.size()});
+    lineRanges.emplace_back(lastWrapIndex, flexBaseAndHypotheticalMainSizeList.size());
     return lineRanges;
   }
 

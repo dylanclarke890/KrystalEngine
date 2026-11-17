@@ -42,8 +42,8 @@ namespace krys::boo
   }
 
   StyleNonInheritedData::StyleNonInheritedData(const StyleNonInheritedData &other) noexcept
-      : RefCounted<StyleNonInheritedData>(), BoxData(other.BoxData), BackgroundData(other.BackgroundData),
-        SurroundData(other.SurroundData), MiscData(other.MiscData), RareData(other.RareData)
+      : BoxData(other.BoxData), BackgroundData(other.BackgroundData), SurroundData(other.SurroundData),
+        MiscData(other.MiscData), RareData(other.RareData)
   {
     krys_debug_assert_msg(other == *this, "StyleNonInheritedData should be properly copied.");
   }

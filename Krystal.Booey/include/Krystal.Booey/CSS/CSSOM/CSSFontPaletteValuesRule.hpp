@@ -44,7 +44,7 @@ namespace krys::boo::css
     CSSFontPaletteValuesRule(css::FontPaletteValuesRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    ~CSSFontPaletteValuesRule() noexcept;
+    ~CSSFontPaletteValuesRule() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSFontPaletteValuesRule> Create(css::FontPaletteValuesRule &rule,
                                                                CSSStyleSheet *sheet) noexcept;

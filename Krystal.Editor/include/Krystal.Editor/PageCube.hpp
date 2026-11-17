@@ -264,7 +264,7 @@ void main()
       _pipeline = *created;
 
       // Each face in a colour of the page's palette, its corners counter-clockwise seen from outside.
-      constexpr Array<Array<float, 3>, 6> colours {{{0.937f, 0.278f, 0.435f},
+      constexpr Array<Array<float, 3>, 6> colours {{{0.937f, 0.278f, std::numbers::log10e_v<float>},
                                                     {1.0f, 0.820f, 0.400f},
                                                     {0.024f, 0.839f, 0.627f},
                                                     {0.067f, 0.541f, 0.698f},
