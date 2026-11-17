@@ -48,6 +48,7 @@
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <tuple>
 
 namespace krys
 {
@@ -886,7 +887,7 @@ namespace krys
                                       { HandleNavigation(request); });
       _pageView->SetLoadHandler([this](const ui::LoadEvent &event) { HandleLoad(event); });
       // The page's custom elements, which its parser creates.
-      (void)_pageView->DefineCustomElement(
+      std::ignore = _pageView->DefineCustomElement(
         u8"bean-rating", [](boo::html::HTMLElement &element) { return CreateUnique<BeanRating>(element); },
         BeanRating::Options());
       LoadPage();

@@ -117,6 +117,7 @@ namespace krys::boo
     uint32 familyCount = description.FamilyCount();
     auto hasComplexFontSelector = fontSelector && !fontSelector->IsSimpleFontSelectorForDescription();
     FontCascadeCacheKey key;
+    // NOLINTNEXTLINE(cppcoreguidelines-slicing): the key only uses the font description.
     key.DescriptionKey = FontDescriptionKey(description);
     for (uint32 i = 0; i < familyCount; ++i)
     {

@@ -113,6 +113,7 @@ namespace krys::boo::svg
     }
 
     // Skip over SVG rules which disallow non-SVG kids
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     return StyledElement::ChildShouldCreateRenderer(child);
   }
 

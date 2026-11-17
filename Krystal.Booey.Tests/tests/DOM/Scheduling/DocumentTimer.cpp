@@ -80,7 +80,7 @@ namespace krys::boo::tests
     {
       auto first = document.StartTimer(5ms, [&] { order.emplace_back("first"); });
       auto moved = krys::move(first);
-      CHECK_FALSE(first.IsActive());
+      CHECK_FALSE(first.IsActive()); // NOLINT(clang-analyzer-cplusplus.Move)
       CHECK(moved.IsActive());
       moved = document.StartTimer(5ms, [&] { order.emplace_back("second"); });
       AdvanceTimers(10ms);

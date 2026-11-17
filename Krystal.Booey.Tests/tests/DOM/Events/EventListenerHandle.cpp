@@ -60,7 +60,7 @@ namespace krys::boo::dom::tests
       CHECK(calls == 10);
 
       auto moved = krys::move(first);
-      CHECK_FALSE(first.IsActive());
+      CHECK_FALSE(first.IsActive()); // NOLINT(clang-analyzer-cplusplus.Move)
       CHECK(moved.IsActive());
       Fire(u8"ping");
       CHECK(calls == 20);

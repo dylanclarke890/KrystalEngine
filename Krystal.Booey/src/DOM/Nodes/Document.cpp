@@ -4070,7 +4070,7 @@ namespace krys::boo::dom
 
       _renderView->Destroy();
     }
-    (void)_renderView.release();
+    std::ignore = _renderView.release(); // Destroy() deleted it.
 
     Node::SetRenderer(nullptr);
 

@@ -311,6 +311,7 @@ namespace krys::boo::svg
     {
       return true;
     }
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     return dom::StyledElement::RendererIsNeeded(style);
   }
 

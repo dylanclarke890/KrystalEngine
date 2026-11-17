@@ -254,6 +254,7 @@ namespace krys
     {
     }
 
+    // NOLINTNEXTLINE(bugprone-unhandled-self-assignment): Ref before Deref.
     StringAtom &operator=(const StringAtom &other) noexcept
     {
       Ref(other._impl);

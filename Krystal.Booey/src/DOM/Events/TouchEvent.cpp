@@ -35,6 +35,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD MouseEventInit ToMouseEventInit(const TouchEventInit &initializer) noexcept
     {
       MouseEventInit init;
+      // NOLINTNEXTLINE(cppcoreguidelines-slicing): copies the shared fields.
       static_cast<EventModifierInit &>(init) = initializer;
       return init;
     }

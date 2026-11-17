@@ -236,6 +236,7 @@ namespace krys::boo::svg
     {
       return false;
     }
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 

@@ -179,6 +179,7 @@ namespace krys::boo
 
   void RenderMenuList::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
   {
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     RenderBlock::StyleDidChange(diff, oldStyle);
 
     // RenderBlock handled updating the anonymous block's style.

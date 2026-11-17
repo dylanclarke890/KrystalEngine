@@ -1721,12 +1721,9 @@ namespace krys::boo::url
           } while (!c.AtEnd());
           break;
         case State::FilePathStart:
-          if (*c == '/' || *c != '\\')
+          // WebKit tests `*c == '/' || *c != '\\'`, then reports a backslash that can't reach here.
+          if (*c != '\\')
           {
-            if (_urlIsSpecial && *c == '\\') KRYS_UNLIKELY
-            {
-              SyntaxViolation(c);
-            }
             AppendToASCIIBuffer('/');
             Advance(c);
             _url._pathAfterLastSlash = static_cast<uint32>(CurrentPosition(c));

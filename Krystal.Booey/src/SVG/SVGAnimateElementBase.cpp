@@ -93,6 +93,7 @@ namespace krys::boo::svg
 
   void SVGAnimateElementBase::SetAttributeName(const dom::QualifiedName &attributeName) noexcept
   {
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     SVGSMILElement::SetAttributeName(attributeName);
     ResetAnimation();
   }

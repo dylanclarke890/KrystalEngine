@@ -197,6 +197,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override
     {
+      // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
       return RenderBlock::FirstLineBaseline();
     }
 

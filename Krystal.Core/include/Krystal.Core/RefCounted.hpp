@@ -14,6 +14,8 @@ namespace krys::detail
 
   class RefCounted
   {
+    KRYS_NON_COPYABLE(RefCounted);
+
   private:
     mutable uint32 _refCount {1};
 

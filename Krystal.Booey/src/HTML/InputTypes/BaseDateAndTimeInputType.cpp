@@ -665,6 +665,7 @@ namespace krys::boo::html
         parameters.SuggestionValues.push_back(
           element.SanitizeValue(dom::DOMStringView(value)).value_or(dom::DOMString()));
         parameters.LocalizedSuggestionValues.push_back(LocalizeValue(value));
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move): a new label each iteration.
         parameters.SuggestionLabels.push_back(value == label ? dom::DOMString() : krys::move(label));
       }
     }

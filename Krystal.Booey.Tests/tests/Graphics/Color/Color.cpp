@@ -210,7 +210,7 @@ namespace krys::boo::tests
 
     // We should have moved the out of line color pointer into c2,
     // and set c1 to invalid so that it doesn't cause deletion.
-    CHECK_FALSE(c1.IsValid()); // NOLINT(bugprone-use-after-move)
+    CHECK_FALSE(c1.IsValid()); // NOLINT(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
     CheckDisplayP3Components(c2);
   }
 
@@ -224,7 +224,7 @@ namespace krys::boo::tests
 
     // We should have moved the out of line color pointer into c2,
     // and set c1 to invalid so that it doesn't cause deletion.
-    CHECK_FALSE(c1.IsValid()); // NOLINT(bugprone-use-after-move)
+    CHECK_FALSE(c1.IsValid()); // NOLINT(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
     CheckDisplayP3Components(c2);
 
     // The API contract is that move invalidates. We should mark the source as invalid even if the
@@ -232,7 +232,7 @@ namespace krys::boo::tests
     Color c3 {DisplayP3<float> {1.0f, 0.5f, 0.25f, 1.0f}};
     CHECK(c2 == c3);
     c2 = krys::move(c3);
-    CHECK_FALSE(c3.IsValid()); // NOLINT(bugprone-use-after-move)
+    CHECK_FALSE(c3.IsValid()); // NOLINT(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
     CHECK(c2.IsValid());
     CheckDisplayP3Components(c2);
 

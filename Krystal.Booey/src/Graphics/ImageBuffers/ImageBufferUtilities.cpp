@@ -23,6 +23,7 @@ namespace krys::boo
   {
     if (quality && *quality >= 0.0 && *quality <= 1.0)
     {
+      // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
       return static_cast<int32>(*quality * 100.0 + 0.5);
     }
     return 100;

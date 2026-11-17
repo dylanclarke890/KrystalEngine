@@ -25,6 +25,7 @@ namespace krys
   {
     if constexpr (FloatingPoint<T>)
     {
+      // NOLINTNEXTLINE(misc-redundant-expression): true only for NaN.
       return value != value;
     }
     else

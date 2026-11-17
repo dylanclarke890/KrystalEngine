@@ -61,6 +61,7 @@ namespace krys::boo
     // RenderSVGHiddenContainer overwrites layout(). We need the
     // layouting of LegacyRenderSVGContainer for calculating  local
     // transformations and repaint.
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     LegacyRenderSVGContainer::Layout();
   }
 
@@ -135,6 +136,7 @@ namespace krys::boo
     PaintInfo info(paintInfo);
     GraphicsContextStateSaver stateSaver(info.Context());
     info.ApplyTransform(transform);
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     LegacyRenderSVGContainer::Paint(info, IntPoint());
   }
 

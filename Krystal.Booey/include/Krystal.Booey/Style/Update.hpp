@@ -34,6 +34,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <limits>
+#include <utility>
 
 namespace krys::boo
 {
@@ -100,7 +101,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD ListHashSet<RefPtr<dom::Element>> TakeRebuildRoots() noexcept
     {
-      return krys::move(_rebuildRoots);
+      return std::exchange(_rebuildRoots, {});
     }
 
     KRYS_NODISCARD const ElementUpdate *GetElementUpdate(const dom::Element &element) const noexcept;

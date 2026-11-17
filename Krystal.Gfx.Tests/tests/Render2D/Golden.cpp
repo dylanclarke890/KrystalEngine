@@ -162,6 +162,7 @@ namespace krys::gfx::tests
       auto tile = [&](uint32 index, const LayerFilter2D &filter)
       {
         const float x = static_cast<float>(index % 4u) * 80.f;
+        // NOLINTNEXTLINE(bugprone-integer-division): the row.
         const float y = static_cast<float>(index / 4u) * 80.f;
         renderer.BeginLayer(1.f, BlendMode::Normal, filter);
         content(x, y);

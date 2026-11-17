@@ -172,6 +172,7 @@ namespace krys::gfx::detail
     blurred.Coverage.resize(values.size());
     for (size_t i = 0u; i < values.size(); ++i)
     {
+      // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
       blurred.Coverage[i] = static_cast<uint8>(std::clamp(values[i], 0.f, 1.f) * 255.f + 0.5f);
     }
     return blurred;

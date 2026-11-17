@@ -143,6 +143,7 @@ namespace krys::boo::svg
     {
       if (Is<SVGAElement>(*parent) || Is<SVGTextElement>(*parent))
       {
+        // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
         return dom::StyledElement::RendererIsNeeded(style);
       }
     }

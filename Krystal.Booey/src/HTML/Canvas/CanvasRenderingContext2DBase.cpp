@@ -3695,6 +3695,7 @@ namespace krys::boo::html
       case BottomTextBaseline:
       case IdeographicTextBaseline: offset.SetY(static_cast<float>(-fontMetrics.IntDescent())); break;
       case MiddleTextBaseline:
+        // NOLINTNEXTLINE(bugprone-integer-division): whole pixels, as WebKit.
         offset.SetY(static_cast<float>(fontMetrics.IntHeight() / 2 - fontMetrics.IntDescent()));
         break;
       case AlphabeticTextBaseline:

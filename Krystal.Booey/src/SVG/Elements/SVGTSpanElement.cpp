@@ -55,6 +55,7 @@ namespace krys::boo::svg
       if (Is<SVGAElement>(*parent) || Is<SVGTextElement>(*parent) || Is<SVGTextPathElement>(*parent)
           || Is<SVGTSpanElement>(*parent))
       {
+        // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
         return dom::StyledElement::RendererIsNeeded(style);
       }
     }

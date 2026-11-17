@@ -81,6 +81,7 @@ namespace krys::boo::html
   dom::ExceptionOr<void> DateTimeLocalInputType::SetValueAsDate(double value) const noexcept
   {
     // valueAsDate doesn't work for the datetime-local type according to the standard.
+    // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
     return InputType::SetValueAsDate(value);
   }
 

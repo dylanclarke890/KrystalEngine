@@ -69,7 +69,9 @@ namespace krys::boo::html
   bool ProgressInnerElement::RendererIsNeeded(const RenderStyle &style) noexcept
   {
     auto *progressRenderer = ProgressElement()->Renderer();
-    return progressRenderer && !progressRenderer->Style().HasUsedAppearance()
+    return progressRenderer
+           && !progressRenderer->Style().HasUsedAppearance()
+           // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
            && HTMLDivElement::RendererIsNeeded(style);
   }
 
