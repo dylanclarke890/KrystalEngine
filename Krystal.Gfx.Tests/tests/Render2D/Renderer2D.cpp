@@ -2367,7 +2367,7 @@ namespace krys::gfx::tests
     /// `high`.
     KRYS_NODISCARD double GaussianMass(double low, double high, double p, double sigma)
     {
-      const double k = 1.0 / (sigma * std::sqrt(2.0));
+      const double k = 1.0 / (sigma * std::numbers::sqrt2);
       return 0.5 * (std::erf((high - p) * k) - std::erf((low - p) * k));
     }
 

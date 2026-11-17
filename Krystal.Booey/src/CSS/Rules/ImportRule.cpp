@@ -25,6 +25,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::css
 {
@@ -36,10 +37,10 @@ namespace krys::boo::css
                                     krys::move(supportsCondition)));
   }
 
-  ImportRule::ImportRule(const CSSOMString &href, mq::MediaQueryList &&mediaQueries,
+  ImportRule::ImportRule(CSSOMString href, mq::MediaQueryList &&mediaQueries,
                          Maybe<CascadeLayerName> &&cascadeLayerName,
                          ImportRule::SupportsCondition &&supportsCondition) noexcept
-      : Rule(RuleType::Import), _styleSheetClient(*this), _href(href),
+      : Rule(RuleType::Import), _styleSheetClient(*this), _href(krys::move(href)),
         _mediaQueries(krys::move(mediaQueries)), _cascadeLayerName(krys::move(cascadeLayerName)),
         _supportsCondition(krys::move(supportsCondition))
   {

@@ -37,6 +37,7 @@
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -50,7 +51,7 @@ namespace krys::boo
 
     FontDescriptionKey() noexcept = default;
 
-    explicit FontDescriptionKey(const FontDescription &description) noexcept : Description(description)
+    explicit FontDescriptionKey(FontDescription description) noexcept : Description(krys::move(description))
     {
     }
 
@@ -72,7 +73,7 @@ namespace krys::boo
   public:
     FontFamilyName() noexcept;
 
-    FontFamilyName(const StringAtom &name) noexcept;
+    FontFamilyName(StringAtom name) noexcept;
 
     KRYS_NODISCARD const StringAtom &String() const noexcept
     {

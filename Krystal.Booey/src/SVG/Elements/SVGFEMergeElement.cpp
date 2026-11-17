@@ -46,7 +46,7 @@ namespace krys::boo::svg
     {
       if (auto *mergeNode = DynamicDowncast<SVGFEMergeNodeElement>(*child))
       {
-        inputsNames.push_back(dom::DOMStringAtom(mergeNode->In1()));
+        inputsNames.emplace_back(mergeNode->In1());
       }
     }
     return inputsNames;

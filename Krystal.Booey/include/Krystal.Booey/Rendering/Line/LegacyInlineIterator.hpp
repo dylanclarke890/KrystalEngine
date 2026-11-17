@@ -505,7 +505,7 @@ namespace krys::boo
     // ASSERT here that we didn't create multiple objects for the same inline.
     resolver.SetWhitespaceCollapsingTransitionForIsolatedRun(
       *isolatedRun, resolver.GetWhitespaceCollapsingState().CurrentTransition());
-    resolver.IsolatedRuns().push_back(BidiIsolatedRun(obj, pos, root, *isolatedRun));
+    resolver.IsolatedRuns().emplace_back(obj, pos, root, *isolatedRun);
     resolver.Runs().AppendRun(krys::move(isolatedRun));
   }
 

@@ -19,14 +19,15 @@
 
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::dom
 {
   QualifiedNameStorage::QualifiedNameStorage(DOMStringAtom namespaceURI, DOMStringAtom prefix,
                                              DOMStringAtom localName, html::TagName tagName,
                                              html::Namespace tagNamespace) noexcept
-      : _namespaceURI(namespaceURI), _namespacePrefix(prefix), _localName(localName), _tagName(tagName),
-        _namespace(tagNamespace)
+      : _namespaceURI(krys::move(namespaceURI)), _namespacePrefix(krys::move(prefix)),
+        _localName(krys::move(localName)), _tagName(tagName), _namespace(tagNamespace)
   {
     krys_debug_assert(_localName != null || _namespacePrefix != DOMStringAtom::Empty());
 

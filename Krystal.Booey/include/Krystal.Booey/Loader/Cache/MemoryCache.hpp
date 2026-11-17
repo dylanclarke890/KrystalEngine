@@ -51,11 +51,13 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(MemoryCache);
 
   private:
+    constexpr static uint32 DefaultCacheCapacity = 8'192 * 1'024;
+
     bool _disabled {false};
     bool _inPruneResources {false};
-    uint32 _capacity;
+    uint32 _capacity {DefaultCacheCapacity};
     uint32 _minDeadCapacity {0};
-    uint32 _maxDeadCapacity;
+    uint32 _maxDeadCapacity {DefaultCacheCapacity};
     MonotonicTime::duration _deadDecodedDataDeletionInterval {};
 
     uint32 _liveSize {0}; // The number of bytes currently consumed by "live" resources in the cache.

@@ -28,17 +28,18 @@
 
 #include "Krystal.Booey/Graphics/Filters/FELighting.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
 #include <algorithm>
 
 namespace krys::boo
 {
-  FELighting::FELighting(Type type, const Color &lightingColor, float surfaceScale, float diffuseConstant,
+  FELighting::FELighting(Type type, Color lightingColor, float surfaceScale, float diffuseConstant,
                          float specularConstant, float specularExponent, float kernelUnitLengthX,
                          float kernelUnitLengthY, Ref<LightSource> &&lightSource,
                          const DestinationColorSpace &colorSpace) noexcept
-      : FilterEffect(type, colorSpace), _lightingColor(lightingColor), _surfaceScale(surfaceScale),
-        _diffuseConstant(std::max(diffuseConstant, 0.0f)),
+      : FilterEffect(type, colorSpace), _lightingColor(krys::move(lightingColor)),
+        _surfaceScale(surfaceScale), _diffuseConstant(std::max(diffuseConstant, 0.0f)),
         _specularConstant(std::max(specularConstant, 0.0f)),
         _specularExponent(std::clamp(specularExponent, 1.0f, 128.0f)), _kernelUnitLengthX(kernelUnitLengthX),
         _kernelUnitLengthY(kernelUnitLengthY), _lightSource(krys::move(lightSource))

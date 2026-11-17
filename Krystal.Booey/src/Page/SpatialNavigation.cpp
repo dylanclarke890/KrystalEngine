@@ -361,8 +361,8 @@ namespace krys::boo
   }
 
   FocusCandidate::FocusCandidate(dom::Element *element, dom::FocusDirection direction) noexcept
-      : Distance(MaxDistance()), Alignment(RectsAlignment::None), IsOffscreen(true),
-        IsOffscreenAfterScrolling(true)
+      : Distance(MaxDistance()), IsOffscreen(true)
+
   {
     if (auto *area = DynamicDowncast<html::HTMLAreaElement>(element))
     {

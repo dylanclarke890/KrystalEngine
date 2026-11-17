@@ -38,7 +38,7 @@
 struct _xmlParserCtxt;
 struct _xmlParserInput;
 struct _xmlSAXHandler;
-typedef unsigned char xmlChar;
+using xmlChar = unsigned char;
 
 namespace krys::boo::dom
 {

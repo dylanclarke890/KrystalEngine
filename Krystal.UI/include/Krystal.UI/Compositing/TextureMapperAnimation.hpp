@@ -60,6 +60,7 @@ namespace krys::ui
   public:
     TextureMapperAnimation() noexcept = default;
 
+    // NOLINTNEXTLINE(modernize-pass-by-value): its copy constructor is explicit.
     TextureMapperAnimation(utf8_stringview name, const boo::GraphicsLayerKeyframeValueList &keyframes,
                            const boo::GraphicsLayerAnimation &animation, MonotonicTime::duration startTime,
                            boo::Seconds pauseTime, State state) noexcept;

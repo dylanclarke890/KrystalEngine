@@ -135,28 +135,28 @@ namespace krys::boo
     // affects orientation of layer contents
     CompositingCoordinatesOrientation _contentsOrientation {CompositingCoordinatesOrientation::TopDown};
 
-    bool _beingDestroyed : 1;
-    bool _contentsOpaque : 1;
+    bool _beingDestroyed : 1 {false};
+    bool _contentsOpaque : 1 {false};
     bool _preserves3D : 1;
-    bool _backfaceVisibility : 1;
-    bool _masksToBounds : 1;
-    bool _drawsContent : 1;
-    bool _contentsVisible : 1;
-    bool _contentsRectClipsDescendants : 1;
-    bool _acceleratesDrawing : 1;
-    bool _usesDisplayListDrawing : 1;
-    bool _allowsTiling : 1;
-    bool _appliesPageScale : 1; // Set for the layer which has the page scale applied to it.
-    bool _appliesDeviceScale : 1;
-    bool _showDebugBorder : 1;
-    bool _showRepaintCounter : 1;
-    bool _showFrameProcessBorders : 1;
-    bool _isMaskLayer : 1;
-    bool _isBackdropRoot : 1;
-    bool _isTrackingDisplayListReplay : 1;
-    bool _userInteractionEnabled : 1;
-    bool _canDetachBackingStore : 1;
-    bool _shouldPaintUsingCompositeCopy : 1;
+    bool _backfaceVisibility : 1 {true};
+    bool _masksToBounds : 1 {false};
+    bool _drawsContent : 1 {false};
+    bool _contentsVisible : 1 {true};
+    bool _contentsRectClipsDescendants : 1 {false};
+    bool _acceleratesDrawing : 1 {false};
+    bool _usesDisplayListDrawing : 1 {false};
+    bool _allowsTiling : 1 {true};
+    bool _appliesPageScale : 1 {false}; // Set for the layer which has the page scale applied to it.
+    bool _appliesDeviceScale : 1 {true};
+    bool _showDebugBorder : 1 {false};
+    bool _showRepaintCounter : 1 {false};
+    bool _showFrameProcessBorders : 1 {false};
+    bool _isMaskLayer : 1 {false};
+    bool _isBackdropRoot : 1 {false};
+    bool _isTrackingDisplayListReplay : 1 {false};
+    bool _userInteractionEnabled : 1 {true};
+    bool _canDetachBackingStore : 1 {true};
+    bool _shouldPaintUsingCompositeCopy : 1 {false};
     bool _renderingIsSuppressedIncludingDescendants : 1 {false};
 
     int32 _repaintCount {0};

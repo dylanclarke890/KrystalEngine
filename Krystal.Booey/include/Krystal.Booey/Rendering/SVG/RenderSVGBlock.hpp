@@ -37,6 +37,8 @@ namespace krys::boo
   public:
     KRYS_NODISCARD svg::SVGGraphicsElement &GraphicsElement() const noexcept;
 
+    void GetElement() const = delete;
+
   protected:
     RenderSVGBlock(Type, svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
 
@@ -52,8 +54,6 @@ namespace krys::boo
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept override;
 
   private:
-    void GetElement() const = delete;
-
     void BoundingRects(List<LayoutRect> &, const LayoutPoint &accumulatedOffset) const noexcept override;
 
     void AbsoluteQuads(List<FloatQuad> &, bool *wasFixed) const noexcept override;

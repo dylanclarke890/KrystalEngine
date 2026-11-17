@@ -26,14 +26,15 @@
 #include "Krystal.Booey/Rendering/Painting/BorderEdge.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <cmath>
 
 namespace krys::boo
 {
   BorderEdge::BorderEdge(float edgeWidth, boo::Color edgeColor, BorderStyle edgeStyle, bool edgeIsTransparent,
                          bool edgeIsPresent, float devicePixelRatio) noexcept
-      : _color(edgeColor), _width(edgeWidth), _devicePixelRatio(devicePixelRatio), _style(edgeStyle),
-        _isTransparent(edgeIsTransparent), _isPresent(edgeIsPresent)
+      : _color(krys::move(edgeColor)), _width(edgeWidth), _devicePixelRatio(devicePixelRatio),
+        _style(edgeStyle), _isTransparent(edgeIsTransparent), _isPresent(edgeIsPresent)
   {
     if (edgeStyle == BorderStyle::Double && edgeWidth < BorderWidthInDevicePixel(3))
     {

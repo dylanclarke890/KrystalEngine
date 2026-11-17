@@ -87,14 +87,14 @@ namespace krys::boo
       else
       {
         krys_assert(first != i);
-        _textChunks.push_back(SVGTextChunk(lineLayoutBoxes, first, i, fragmentMap));
+        _textChunks.emplace_back(lineLayoutBoxes, first, i, fragmentMap);
         first = i;
       }
     }
 
     if (first != limit)
     {
-      _textChunks.push_back(SVGTextChunk(lineLayoutBoxes, first, limit, fragmentMap));
+      _textChunks.emplace_back(lineLayoutBoxes, first, limit, fragmentMap);
     }
   }
 

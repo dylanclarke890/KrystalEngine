@@ -71,14 +71,14 @@ namespace krys::boo::css
       {
         if (auto reified = ReifyValue(document, ShareRefPtr(const_cast<Value *>(&item)), property))
         {
-          values.push_back(Ref<CSSStyleValue>(krys::move(reified)));
+          values.emplace_back(krys::move(reified));
         }
       }
       return values;
     }
     if (auto reified = ReifyValue(document, krys::move(value), property))
     {
-      values.push_back(Ref<CSSStyleValue>(krys::move(reified)));
+      values.emplace_back(krys::move(reified));
     }
     return values;
   }
@@ -143,7 +143,7 @@ namespace krys::boo::css
       if (auto value = CSSStyleValueFactory::ConstructStyleValueForShorthandSerialisation(
             *document, ShorthandPropertySerialisation(propertyId)))
       {
-        values.push_back(Ref<CSSStyleValue>(krys::move(value)));
+        values.emplace_back(krys::move(value));
       }
       return values;
     }

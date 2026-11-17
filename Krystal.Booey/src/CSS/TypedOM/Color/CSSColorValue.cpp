@@ -224,7 +224,7 @@ namespace krys::boo::css
       }
       else
       {
-        components.push_back(CSSColorPercent {1.0});
+        components.emplace_back(1.0);
       }
       return components;
     }

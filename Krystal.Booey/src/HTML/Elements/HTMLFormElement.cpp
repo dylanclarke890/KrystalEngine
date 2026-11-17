@@ -616,7 +616,7 @@ namespace krys::boo::html
       {
         continue;
       }
-      values.push_back({input->Name(), input->Value()});
+      values.emplace_back(input->Name(), input->Value());
     }
     return values;
   }
@@ -1154,7 +1154,7 @@ namespace krys::boo::html
     }
     else if (elementFromPast && namedItems.empty())
     {
-      namedItems.push_back(ShareRef(*elementFromPast));
+      namedItems.emplace_back(ShareRef(*elementFromPast));
     }
 
     return namedItems;
@@ -1322,7 +1322,7 @@ namespace krys::boo::html
       {
         if (input->IsTextField())
         {
-          formValues->push_back({input->Name(), input->Value()});
+          formValues->emplace_back(input->Name(), input->Value());
         }
       }
     }

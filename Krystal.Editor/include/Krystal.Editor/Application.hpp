@@ -80,8 +80,8 @@ namespace krys
     KRYS_NON_COPY_MOVABLE(Application);
 
   protected:
-    bool _running;
-    bool _isWindowMinimised;
+    bool _running {false};
+    bool _isWindowMinimised {false};
     UniquePtr<ApplicationContext> _context;
 
   public:

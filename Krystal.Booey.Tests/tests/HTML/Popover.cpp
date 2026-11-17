@@ -513,8 +513,8 @@ namespace krys::boo::html::tests
     REQUIRE_FALSE(shadow->SetHTMLUnsafe(u8"<div id=p popover>P</div>").HasException());
     List<std::string> heard;
     auto onBefore =
-      host.AddEventListener(u8"beforetoggle", [&](dom::Event &) { heard.push_back("beforetoggle"); });
-    auto onToggle = host.AddEventListener(u8"toggle", [&](dom::Event &) { heard.push_back("toggle"); });
+      host.AddEventListener(u8"beforetoggle", [&](dom::Event &) { heard.emplace_back("beforetoggle"); });
+    auto onToggle = host.AddEventListener(u8"toggle", [&](dom::Event &) { heard.emplace_back("toggle"); });
 
     Downcast<HTMLButtonElement>(fixture.ById(u8"t")).Click();
     html::EventLoop::Current().RunUntilIdle();

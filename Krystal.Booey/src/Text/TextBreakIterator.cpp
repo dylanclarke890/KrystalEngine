@@ -22,6 +22,7 @@
 #include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>
 #include <unicode/ubrk.h>
@@ -485,7 +486,7 @@ namespace krys::boo
 
   NonSharedCharacterBreakIterator::NonSharedCharacterBreakIterator(
     NonSharedCharacterBreakIterator &&other) noexcept
-      : _iterator(nullptr)
+
   {
     std::swap(_iterator, other._iterator);
   }
@@ -527,7 +528,7 @@ namespace krys::boo
 
   NonSharedSentenceBreakIterator::NonSharedSentenceBreakIterator(
     NonSharedSentenceBreakIterator &&other) noexcept
-      : _iterator(nullptr)
+
   {
     std::swap(_iterator, other._iterator);
   }

@@ -52,7 +52,7 @@ namespace krys::boo
     WeakPtr<RenderCounter> _nextForSameCounter;
 
   public:
-    RenderCounter(dom::Document &document, const style::Content::Counter &counter) noexcept;
+    RenderCounter(dom::Document &document, style::Content::Counter counter) noexcept;
 
     ~RenderCounter() noexcept override;
 

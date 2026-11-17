@@ -24,12 +24,12 @@
  */
 
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::css
 {
-  CounterStyleRule::CounterStyleRule(const CSSOMStringAtom &name,
-                                     CounterStyleDescriptors &&descriptors) noexcept
-      : Rule(RuleType::CounterStyle), _name(name), _descriptors(krys::move(descriptors))
+  CounterStyleRule::CounterStyleRule(CSSOMStringAtom name, CounterStyleDescriptors &&descriptors) noexcept
+      : Rule(RuleType::CounterStyle), _name(krys::move(name)), _descriptors(krys::move(descriptors))
   {
   }
 

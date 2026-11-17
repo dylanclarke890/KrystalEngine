@@ -429,8 +429,8 @@ namespace krys::boo::dom
     // invocation-target-in-shadow-tree is invocationTargetInShadowTree, shadow-adjusted target is
     // shadowAdjustedTarget, relatedTarget is relatedTarget, touch target list is touchTargets,
     // root-of-closed-tree is rootOfClosedTree, and slot-in-closed-tree is slotInClosedTree.
-    event._path.push_back(EventPathItem {invocationTarget, invocationTargetInShadowTree, shadowAdjustedTarget,
-                                         relatedTarget, touchTargets, rootOfClosedTree, slotInClosedTree});
+    event._path.emplace_back(invocationTarget, invocationTargetInShadowTree, shadowAdjustedTarget,
+                             relatedTarget, touchTargets, rootOfClosedTree, slotInClosedTree);
   }
 
   void EventDispatcher::Invoke(EventPathItem &pathItem, Event &event, EventPhaseType phase,

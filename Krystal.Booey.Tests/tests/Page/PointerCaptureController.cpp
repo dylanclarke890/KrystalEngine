@@ -204,7 +204,7 @@ namespace krys::boo::tests
       fixture.On(a, u8"pointerrawupdate",
                  [&](dom::Event &event)
                  {
-                   fixture.Records.push_back("raw:a");
+                   fixture.Records.emplace_back("raw:a");
                    rawUpdates.push_back(ShareRef(Downcast<dom::PointerEvent>(event)));
                    event.PreventDefault();
                  });

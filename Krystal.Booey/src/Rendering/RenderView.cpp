@@ -538,7 +538,7 @@ namespace krys::boo
   void RenderView::BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept
   {
     // FIXME: It's weird that this gets is size from the layer.
-    rects.push_back(LayoutRect {accumulatedOffset, LayoutSize(Layer()->Size())});
+    rects.emplace_back(accumulatedOffset, LayoutSize(Layer()->Size()));
   }
 
   void RenderView::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
@@ -547,7 +547,7 @@ namespace krys::boo
     {
       *wasFixed = false;
     }
-    quads.push_back(FloatRect(FloatPoint(), FloatSize(Layer()->Size())));
+    quads.emplace_back(FloatRect(FloatPoint(), FloatSize(Layer()->Size())));
   }
 
   dom::Node *RenderView::NodeForHitTest() const noexcept

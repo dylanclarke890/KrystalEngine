@@ -27,8 +27,8 @@ namespace krys::boo::dom
 
   protected:
     /// @see https://dom.spec.whatwg.org/#create-a-doctype
-    DocumentType(Document &document, const DOMString &name, const DOMString &publicId = {},
-                 const DOMString &systemId = {}) noexcept;
+    DocumentType(Document &document, DOMString name, DOMString publicId = {},
+                 DOMString systemId = {}) noexcept;
 
   public:
 #pragma region DocumentType

@@ -1,11 +1,12 @@
 ﻿#include "Krystal.Core/Utils/ScopedProfiler.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <chrono>
 
 namespace krys
 {
-  ScopedProfiler::ScopedProfiler(const string &name) noexcept : _performance(), _name(name)
+  ScopedProfiler::ScopedProfiler(string name) noexcept : _performance(), _name(krys::move(name))
   {
   }
 

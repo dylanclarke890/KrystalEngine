@@ -57,6 +57,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGStyleElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <utility>
 
@@ -393,11 +394,11 @@ namespace krys::boo::style
 
     if (isInHead)
     {
-      _elementsInHeadWithPendingSheets.push_back(CreateWeakPtr(&element));
+      _elementsInHeadWithPendingSheets.emplace_back(CreateWeakPtr(&element));
     }
     else
     {
-      _elementsInBodyWithPendingSheets.push_back(CreateWeakPtr(&element));
+      _elementsInBodyWithPendingSheets.emplace_back(CreateWeakPtr(&element));
     }
   }
 
@@ -418,7 +419,7 @@ namespace krys::boo::style
   {
     krys_debug_assert(!HasPendingSheet(processingInstruction));
 
-    _processingInstructionsWithPendingSheets.push_back(CreateWeakPtr(&processingInstruction));
+    _processingInstructionsWithPendingSheets.emplace_back(CreateWeakPtr(&processingInstruction));
   }
 
   void Scope::RemovePendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept
@@ -663,8 +664,8 @@ namespace krys::boo::style
       {
         continue;
       }
-      styleSheetsForStyleSheetsList.push_back(adoptedStyleSheet);
-      sheets.push_back(adoptedStyleSheet);
+      styleSheetsForStyleSheetsList.emplace_back(adoptedStyleSheet);
+      sheets.emplace_back(adoptedStyleSheet);
     }
 
     return {krys::move(sheets), krys::move(styleSheetsForStyleSheetsList)};

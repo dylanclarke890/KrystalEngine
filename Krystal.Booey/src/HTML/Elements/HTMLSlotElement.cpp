@@ -36,7 +36,7 @@ namespace krys::boo::html
       {
         if (auto node = weakNode.lock())
         {
-          nodes.push_back(krys::move(node));
+          nodes.emplace_back(krys::move(node));
         }
       }
       return nodes;

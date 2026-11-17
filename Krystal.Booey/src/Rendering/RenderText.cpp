@@ -226,7 +226,7 @@ namespace krys::boo
           {
             if (auto narrow = SingleDecomposition(normalizer, wide))
             {
-              forms.push_back({*narrow, wide});
+              forms.emplace_back(*narrow, wide);
             }
           }
         };

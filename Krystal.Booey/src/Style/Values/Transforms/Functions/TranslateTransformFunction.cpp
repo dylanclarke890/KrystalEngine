@@ -29,15 +29,16 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 
 #include "Krystal.Booey/Graphics/Transforms/TranslateTransformOperation.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::style
 {
   using namespace css::Literals;
 
-  TranslateTransformFunction::TranslateTransformFunction(const LengthPercentage &x, const LengthPercentage &y,
+  TranslateTransformFunction::TranslateTransformFunction(LengthPercentage x, LengthPercentage y,
                                                          const Length &z,
                                                          TransformFunctionBase::Type type) noexcept
-      : TransformFunctionBase(type), _x(x), _y(y), _z(z)
+      : TransformFunctionBase(type), _x(krys::move(x)), _y(krys::move(y)), _z(z)
   {
     krys_assert(IsTranslateTransformFunctionType(type));
   }

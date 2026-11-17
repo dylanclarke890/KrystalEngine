@@ -35,6 +35,7 @@
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRunIterator.hpp"
 #include "Krystal.Booey/Text/BidiResolver.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -46,8 +47,8 @@ namespace krys::boo
   {
   }
 
-  GraphicsContext::GraphicsContext(IsDeferred isDeferred, const GraphicsContextState &state) noexcept
-      : _state(state), _isDeferred(isDeferred)
+  GraphicsContext::GraphicsContext(IsDeferred isDeferred, GraphicsContextState state) noexcept
+      : _state(krys::move(state)), _isDeferred(isDeferred)
   {
   }
 

@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -35,8 +36,8 @@ namespace krys::boo
                                          const LayoutPoint &paintOffset, Color selectionForegroundColor,
                                          Color selectionBackgroundColor) noexcept
       : _lineBox(lineBox), _paintInfo(paintInfo), _paintOffset(paintOffset),
-        _selectionForegroundColor(selectionForegroundColor),
-        _selectionBackgroundColor(selectionBackgroundColor)
+        _selectionForegroundColor(krys::move(selectionForegroundColor)),
+        _selectionBackgroundColor(krys::move(selectionBackgroundColor))
   {
   }
 

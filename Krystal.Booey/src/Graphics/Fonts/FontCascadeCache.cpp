@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -48,7 +49,7 @@ namespace krys::boo
   {
   }
 
-  FontFamilyName::FontFamilyName(const StringAtom &name) noexcept : _name {name}
+  FontFamilyName::FontFamilyName(StringAtom name) noexcept : _name {krys::move(name)}
   {
   }
 

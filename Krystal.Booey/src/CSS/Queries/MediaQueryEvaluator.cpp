@@ -26,19 +26,21 @@
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::css::mq
 {
-  MediaQueryEvaluator::MediaQueryEvaluator(const CSSOMStringAtom &mediaType, const dom::Document &document,
+  MediaQueryEvaluator::MediaQueryEvaluator(CSSOMStringAtom mediaType, const dom::Document &document,
                                            const RenderStyle *rootElementStyle) noexcept
-      : GenericMediaQueryEvaluator(), _mediaType(mediaType), _document(CreateWeakPtr(&document)),
+      : GenericMediaQueryEvaluator(), _mediaType(krys::move(mediaType)), _document(CreateWeakPtr(&document)),
         _rootElementStyle(rootElementStyle)
   {
   }
 
-  MediaQueryEvaluator::MediaQueryEvaluator(const CSSOMStringAtom &mediaType,
+  MediaQueryEvaluator::MediaQueryEvaluator(CSSOMStringAtom mediaType,
                                            EvaluationResult mediaConditionResult) noexcept
-      : GenericMediaQueryEvaluator(), _mediaType(mediaType), _staticMediaConditionResult(mediaConditionResult)
+      : GenericMediaQueryEvaluator(), _mediaType(krys::move(mediaType)),
+        _staticMediaConditionResult(mediaConditionResult)
   {
   }
 

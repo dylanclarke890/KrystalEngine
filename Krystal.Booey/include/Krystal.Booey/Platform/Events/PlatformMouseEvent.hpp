@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Platform/Events/PointerID.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -69,10 +70,11 @@ namespace krys::boo
                        const DoublePoint &movementDelta = {}, double force = 0,
                        SyntheticClickType syntheticClickType = SyntheticClickType::NoTap,
                        PointerID pointerId = MousePointerID,
-                       const dom::DOMString &pointerType = dom::MousePointerEventType()) noexcept
+                       dom::DOMString pointerType = dom::MousePointerEventType()) noexcept
         : PlatformEvent(type, modifiers, timestamp), _button(button), _syntheticClickType(syntheticClickType),
           _position(position), _globalPosition(globalPosition), _movementDelta(movementDelta), _force(force),
-          _pointerId(pointerId), _pointerType(pointerType), _clickCount(clickCount), _buttons(buttons)
+          _pointerId(pointerId), _pointerType(krys::move(pointerType)), _clickCount(clickCount),
+          _buttons(buttons)
     {
     }
 

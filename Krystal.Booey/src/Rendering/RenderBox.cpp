@@ -982,7 +982,7 @@ namespace krys::boo
 
   void RenderBox::BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept
   {
-    rects.push_back({accumulatedOffset, Size()});
+    rects.emplace_back(accumulatedOffset, Size());
   }
 
   void RenderBox::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept

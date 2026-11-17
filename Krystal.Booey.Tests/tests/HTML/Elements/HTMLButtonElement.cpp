@@ -323,7 +323,7 @@ namespace krys::boo::html::tests
     log.Watch(dialog);
     List<std::string> cancels;
     auto cancelListener =
-      dialog.AddEventListener(u8"cancel", [&](dom::Event &) { cancels.push_back("cancel"); });
+      dialog.AddEventListener(u8"cancel", [&](dom::Event &) { cancels.emplace_back("cancel"); });
 
     SECTION("show-modal shows it modally, and close closes it with the button's value")
     {

@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -51,9 +52,8 @@ namespace krys::boo
     bool _ignoreForRequestCount {false};
 
   public:
-    explicit CachedResourceRequest(ResourceRequest &&request,
-                                   const ResourceLoaderOptions &options = {}) noexcept
-        : _resourceRequest(krys::move(request)), _options(options)
+    explicit CachedResourceRequest(ResourceRequest &&request, ResourceLoaderOptions options = {}) noexcept
+        : _resourceRequest(krys::move(request)), _options(krys::move(options))
     {
     }
 

@@ -47,7 +47,7 @@ namespace krys::boo::css
     const List<Parameter> _parameters;
     const CustomPropertySyntax _returnType;
 
-    FunctionRule(const CSSOMStringAtom &name, List<Parameter> &&parameters, CustomPropertySyntax &&returnType,
+    FunctionRule(CSSOMStringAtom name, List<Parameter> &&parameters, CustomPropertySyntax &&returnType,
                  List<Ref<Rule>> &&rules) noexcept;
 
     FunctionRule(const FunctionRule &other) noexcept;

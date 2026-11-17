@@ -190,6 +190,7 @@
 #include <chrono>
 #include <format>
 #include <random>
+#include <tuple>
 
 namespace krys::boo::dom
 {
@@ -267,10 +268,9 @@ namespace krys::boo::dom
 
   Document::Document() noexcept
       : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode),
-        DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _flags(DocumentFlags::None),
-        _url(url::AboutBlankURL()), _baseURL(_url), _settings(ShareRef(Settings::Default())),
-        _userActionElements(CreateUnique<UserActionElementSet>()),
-        _styleRecalcTimer([this] { (void)ShareRef(*this)->UpdateStyleIfNeeded(); }),
+        DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _url(url::AboutBlankURL()), _baseURL(_url),
+        _settings(ShareRef(Settings::Default())), _userActionElements(CreateUnique<UserActionElementSet>()),
+        _styleRecalcTimer([this] { std::ignore = ShareRef(*this)->UpdateStyleIfNeeded(); }),
         _intersectionObserversInitialUpdateTimer(
           [this] { ScheduleRenderingUpdate({RenderingUpdateStep::IntersectionObservations}); })
   {

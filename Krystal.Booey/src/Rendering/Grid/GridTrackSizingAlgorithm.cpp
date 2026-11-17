@@ -42,7 +42,7 @@ namespace krys::boo
   using style::GridTrackSizingDirection;
 
   GridTrackSizingAlgorithm::GridTrackSizingAlgorithm(const RenderGrid *renderGrid, Grid &grid) noexcept
-      : _grid(grid), _renderGrid(renderGrid), _sizingState(SizingState::ColumnSizingFirstIteration)
+      : _grid(grid), _renderGrid(renderGrid)
   {
   }
 

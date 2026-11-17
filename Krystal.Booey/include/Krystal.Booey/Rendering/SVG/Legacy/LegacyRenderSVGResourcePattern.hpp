@@ -86,9 +86,9 @@ namespace krys::boo
 
     void CollectPatternAttributes(svg::PatternAttributes &) const noexcept;
 
-  private:
     void GetElement() const = delete;
 
+  private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGResourcePattern";

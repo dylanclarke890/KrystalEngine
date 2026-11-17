@@ -73,7 +73,7 @@ namespace krys::editor
       {
         const auto glyph = font->GlyphForCharacter(static_cast<char32>(character));
         glyphs.push_back(glyph);
-        advances.push_back({font->WidthForGlyph(glyph), 0});
+        advances.emplace_back(font->WidthForGlyph(glyph), 0.f);
       }
       _context.SetFillColor(color);
       _context.DrawGlyphs(*font, glyphs, advances, {x, baseline}, boo::FontSmoothingMode::Antialiased);

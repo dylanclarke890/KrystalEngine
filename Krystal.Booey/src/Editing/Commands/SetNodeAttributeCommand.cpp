@@ -31,6 +31,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -59,8 +60,8 @@ namespace krys::boo
 
   SetNodeAttributeCommand::SetNodeAttributeCommand(dom::Element &element, dom::DOMStringAtom attribute,
                                                    Maybe<dom::DOMString> value) noexcept
-      : SimpleEditCommand(element.NodeDocument()), _element(ShareRef(element)), _attribute(attribute),
-        _value(krys::move(value))
+      : SimpleEditCommand(element.NodeDocument()), _element(ShareRef(element)),
+        _attribute(krys::move(attribute)), _value(krys::move(value))
   {
   }
 

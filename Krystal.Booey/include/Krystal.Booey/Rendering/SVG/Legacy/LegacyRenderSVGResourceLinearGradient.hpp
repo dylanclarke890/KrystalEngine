@@ -49,6 +49,8 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatPoint EndPoint(const svg::LinearGradientAttributes &) const noexcept;
 
+    void GradientElement() const = delete;
+
   private:
     KRYS_NODISCARD RenderSVGResourceType ResourceType() const noexcept final
     {
@@ -68,8 +70,6 @@ namespace krys::boo
     bool CollectGradientAttributes() noexcept final;
 
     KRYS_NODISCARD Ref<Gradient> BuildGradient() const noexcept final;
-
-    void GradientElement() const = delete;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
     {

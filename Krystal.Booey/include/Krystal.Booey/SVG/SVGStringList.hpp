@@ -51,7 +51,7 @@ namespace krys::boo::svg
       // Add empty string, if list is empty.
       if (_items.empty())
       {
-        _items.push_back(dom::DOMString {});
+        _items.emplace_back();
       }
     }
 

@@ -38,7 +38,7 @@ namespace krys::boo
       float overhangAtStart = -scrollbar.CurrentPos();
       float overhangAtEnd = scrollbar.CurrentPos() + static_cast<float>(scrollbar.VisibleSize())
                             - static_cast<float>(scrollbar.TotalSize());
-      float overhang = std::max(0.0f, std::max(overhangAtStart, overhangAtEnd));
+      float overhang = std::max({0.0f, overhangAtStart, overhangAtEnd});
       return static_cast<float>(scrollbar.TotalSize()) + overhang;
     }
   }

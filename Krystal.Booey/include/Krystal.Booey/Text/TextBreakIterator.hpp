@@ -31,6 +31,7 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 struct UBreakIterator;
 
@@ -345,11 +346,11 @@ namespace krys::boo
   public:
     CachedLineBreakIteratorFactory() noexcept = default;
 
-    explicit CachedLineBreakIteratorFactory(utf8_stringview stringView, const StringAtom &locale = null,
+    explicit CachedLineBreakIteratorFactory(utf8_stringview stringView, StringAtom locale = null,
                                             TextBreakLineBehavior mode = TextBreakLineBehavior::Default,
                                             TextBreakIterator::ContentAnalysis contentAnalysis =
                                               TextBreakIterator::ContentAnalysis::Mechanical) noexcept
-        : _stringView(stringView), _locale(locale), _mode(mode), _contentAnalysis(contentAnalysis)
+        : _stringView(stringView), _locale(krys::move(locale)), _mode(mode), _contentAnalysis(contentAnalysis)
     {
     }
 
@@ -394,7 +395,7 @@ namespace krys::boo
     KRYS_NON_COPYABLE(NonSharedCharacterBreakIterator);
 
   private:
-    UBreakIterator *_iterator;
+    UBreakIterator *_iterator {nullptr};
 
   public:
     explicit NonSharedCharacterBreakIterator(utf8_stringview string) noexcept;
@@ -415,7 +416,7 @@ namespace krys::boo
     KRYS_NON_COPYABLE(NonSharedSentenceBreakIterator);
 
   private:
-    UBreakIterator *_iterator;
+    UBreakIterator *_iterator {nullptr};
 
   public:
     explicit NonSharedSentenceBreakIterator(utf8_stringview string) noexcept;

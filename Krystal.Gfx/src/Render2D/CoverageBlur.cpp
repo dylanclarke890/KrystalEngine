@@ -118,7 +118,7 @@ namespace krys::gfx::detail
       {
         // The Gaussian's mass over the pixel, not its value at the centre: exact for even coverage.
         const float x = static_cast<float>(i) - static_cast<float>(extent);
-        const float k = 1.f / (sigma * std::sqrt(2.f));
+        const float k = 1.f / (sigma * std::numbers::sqrt2_v<float>);
         kernel[i] = 0.5f * (std::erf((x + 0.5f) * k) - std::erf((x - 0.5f) * k));
         total += kernel[i];
       }

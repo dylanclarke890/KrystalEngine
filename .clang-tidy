@@ -2,15 +2,59 @@
 # Krystal's conventions (see CLAUDE.md). Kept deliberately small: add checks as the code is brought in line.
 Checks: >
   -*,
+  modernize-avoid-bind,
+  modernize-avoid-setjmp-longjmp,
+  modernize-avoid-variadic-functions,
+  modernize-concat-nested-namespaces,
+  modernize-deprecated-headers,
+  modernize-deprecated-ios-base-aliases,
+  modernize-min-max-use-initializer-list,
+  modernize-pass-by-value,
+  modernize-redundant-void-arg,
+  modernize-replace-auto-ptr,
+  modernize-replace-random-shuffle,
+  modernize-shrink-to-fit,
+  modernize-unary-static-assert,
+  modernize-use-bool-literals,
+  modernize-use-constraints,
+  modernize-use-default-member-init,
+  modernize-use-emplace,
+  modernize-use-equals-default,
+  modernize-use-equals-delete,
+  modernize-use-noexcept,
   modernize-use-nullptr,
   modernize-use-override,
+  modernize-use-scoped-lock,
+  modernize-use-starts-ends-with,
+  modernize-use-std-numbers,
+  modernize-use-transparent-functors,
+  modernize-use-uncaught-exceptions,
+  modernize-use-using,
   portability-restrict-system-includes,
+  portability-std-allocator-const,
   readability-identifier-naming
+
+# Still to address (noisy on the WebKit port); add to Checks above once the code is ready:
+#   modernize-avoid-c-arrays,
+#   modernize-avoid-c-style-cast,
+#   modernize-loop-convert,
+#   modernize-make-shared,              (configure MakeSmartPtrFunction first)
+#   modernize-make-unique,              (configure MakeSmartPtrFunction for CreateUnique first)
+#   modernize-raw-string-literal,
+#   modernize-return-braced-init-list,
+#   modernize-use-designated-initializers,
+#   modernize-use-integer-sign-comparison,
+#   modernize-use-ranges,
+#   modernize-use-std-format,
+#   modernize-use-std-print,
 
 WarningsAsErrors: ''
 
 # Only the engine's own modules (and their tests and generated code), not vcpkg or third-party/.
 HeaderFilterRegex: '.*[/\\]Krystal\.[A-Za-z.]+[/\\].*'
+
+# Vendored code inside the modules (magic_enum, Khronos's OpenGL headers).
+ExcludeHeaderFilterRegex: '.*[/\\](MagicEnum\.hpp|OpenGL[/\\]Official[/\\].*)'
 
 # Auto-fixes are formatted with .clang-format.
 FormatStyle: file

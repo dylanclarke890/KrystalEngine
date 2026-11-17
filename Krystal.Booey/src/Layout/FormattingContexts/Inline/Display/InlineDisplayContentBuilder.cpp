@@ -514,11 +514,11 @@ namespace krys::boo::layout
           ? text::DecodeUTF8(Span<const char8>(content.data() + text->Start, content.size() - text->Start))
               .Length
           : size_t {0};
-      boxes.push_back({LineIndex(), inline_display::Box::Type::Text, inlineTextBox, lineRun.BidiLevel(),
-                       textRunRect, inkOverflow, IsFirstFormattedLine(), lineRun.Expansion(),
-                       inline_display::Box::Text {text->Start, firstCharacterLength,
-                                                  objectReplacementCharacterString, utf8_string {content}},
-                       isContentful, IsLineFullyTruncatedInBlockDirection()});
+      boxes.emplace_back(LineIndex(), inline_display::Box::Type::Text, inlineTextBox, lineRun.BidiLevel(),
+                         textRunRect, inkOverflow, IsFirstFormattedLine(), lineRun.Expansion(),
+                         inline_display::Box::Text {text->Start, firstCharacterLength,
+                                                    objectReplacementCharacterString, utf8_string {content}},
+                         isContentful, IsLineFullyTruncatedInBlockDirection());
       return;
     }
 
@@ -548,14 +548,14 @@ namespace krys::boo::layout
       }
       return inline_display::Box::Text::ShapingBoundary::NotApplicable;
     };
-    boxes.push_back(
-      {LineIndex(),
-       lineRun.IsWordSeparator() ? inline_display::Box::Type::WordSeparator : inline_display::Box::Type::Text,
-       inlineTextBox, lineRun.BidiLevel(), textRunRect, inkOverflow, IsFirstFormattedLine(),
-       lineRun.Expansion(),
-       inline_display::Box::Text {text->Start, text->Length, content, adjustedContentToRender(),
-                                  text->NeedsHyphen, shapingBoundary()},
-       isContentful, IsLineFullyTruncatedInBlockDirection()});
+    boxes.emplace_back(
+      LineIndex(),
+      lineRun.IsWordSeparator() ? inline_display::Box::Type::WordSeparator : inline_display::Box::Type::Text,
+      inlineTextBox, lineRun.BidiLevel(), textRunRect, inkOverflow, IsFirstFormattedLine(),
+      lineRun.Expansion(),
+      inline_display::Box::Text {text->Start, text->Length, content, adjustedContentToRender(),
+                                 text->NeedsHyphen, shapingBoundary()},
+      isContentful, IsLineFullyTruncatedInBlockDirection());
   }
 
   void InlineDisplayContentBuilder::AppendSoftLineBreakDisplayBox(const Line::Run &lineRun,
@@ -568,11 +568,11 @@ namespace krys::boo::layout
     auto &text = lineRun.TextContent();
     auto isContentful = true;
 
-    boxes.push_back(
-      {LineIndex(), inline_display::Box::Type::SoftLineBreak, layoutBox, lineRun.BidiLevel(),
-       softLineBreakRunRect, softLineBreakRunRect, IsFirstFormattedLine(), lineRun.Expansion(),
-       inline_display::Box::Text {text->Start, text->Length, Downcast<InlineTextBox>(layoutBox).Content()},
-       isContentful, IsLineFullyTruncatedInBlockDirection()});
+    boxes.emplace_back(
+      LineIndex(), inline_display::Box::Type::SoftLineBreak, layoutBox, lineRun.BidiLevel(),
+      softLineBreakRunRect, softLineBreakRunRect, IsFirstFormattedLine(), lineRun.Expansion(),
+      inline_display::Box::Text {text->Start, text->Length, Downcast<InlineTextBox>(layoutBox).Content()},
+      isContentful, IsLineFullyTruncatedInBlockDirection());
   }
 
   void InlineDisplayContentBuilder::AppendHardLineBreakDisplayBox(const Line::Run &lineRun,
@@ -580,9 +580,9 @@ namespace krys::boo::layout
                                                                   inline_display::Boxes &boxes) noexcept
   {
     auto isContentful = true;
-    boxes.push_back({LineIndex(), inline_display::Box::Type::LineBreakBox, lineRun.LayoutBox(),
-                     lineRun.BidiLevel(), lineBreakBoxRect, lineBreakBoxRect, IsFirstFormattedLine(),
-                     lineRun.Expansion(), null, isContentful, IsLineFullyTruncatedInBlockDirection()});
+    boxes.emplace_back(LineIndex(), inline_display::Box::Type::LineBreakBox, lineRun.LayoutBox(),
+                       lineRun.BidiLevel(), lineBreakBoxRect, lineBreakBoxRect, IsFirstFormattedLine(),
+                       lineRun.Expansion(), null, isContentful, IsLineFullyTruncatedInBlockDirection());
   }
 
   void InlineDisplayContentBuilder::AppendAtomicInlineLevelDisplayBox(const Line::Run &lineRun,
@@ -604,9 +604,9 @@ namespace krys::boo::layout
       return inkOverflow;
     };
 
-    boxes.push_back({LineIndex(), inline_display::Box::Type::AtomicInlineBox, layoutBox, lineRun.BidiLevel(),
-                     borderBoxRect, inkOverflow(), IsFirstFormattedLine(), lineRun.Expansion(), null,
-                     isContentful, IsLineFullyTruncatedInBlockDirection()});
+    boxes.emplace_back(LineIndex(), inline_display::Box::Type::AtomicInlineBox, layoutBox,
+                       lineRun.BidiLevel(), borderBoxRect, inkOverflow(), IsFirstFormattedLine(),
+                       lineRun.Expansion(), null, isContentful, IsLineFullyTruncatedInBlockDirection());
   }
 
   void InlineDisplayContentBuilder::AppendBlockLevelDisplayBox(const Line::Run &lineRun,
@@ -1736,7 +1736,7 @@ namespace krys::boo::layout
 
     if (RubyFormattingContext::HasInterlinearAnnotation(rubyBaseLayoutBox))
     {
-      interlinearRubyColumnRangeList.push_back({rubyBaseStart, rubyBaseEnd});
+      interlinearRubyColumnRangeList.emplace_back(rubyBaseStart, rubyBaseEnd);
     }
 
     if (annotationBox)

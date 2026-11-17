@@ -170,7 +170,7 @@ namespace krys::boo::style
   void WillChangeAnimatableFeatures::Data::AddFeature(Feature feature, css::PropertyId propertyId) noexcept
   {
     krys_debug_assert(feature == Feature::Property || propertyId == css::PropertyId::Invalid);
-    _animatableFeatures.push_back(WillChangeAnimatableFeature(feature, propertyId));
+    _animatableFeatures.emplace_back(feature, propertyId);
 
     _canCreateStackingContext |= WillChangeAnimatableFeature::PropertyCreatesStackingContext(propertyId);
     _canTriggerCompositingOnInline |= WillChangeAnimatableFeature::PropertyTriggersCompositing(propertyId);

@@ -244,13 +244,13 @@ namespace krys::boo
       return _hasSelfPaintInlineBox;
     }
 
+    void BoxModelObject() const = delete;
+
   private:
     KRYS_NODISCARD bool IsInlineFlowBox() const noexcept final
     {
       return true;
     }
-
-    void BoxModelObject() const = delete;
 
     void AddTextBoxVisualOverflow(LegacyInlineTextBox &, GlyphOverflowAndFallbackFontsMap &,
                                   LayoutRect &logicalVisualOverflow) noexcept;

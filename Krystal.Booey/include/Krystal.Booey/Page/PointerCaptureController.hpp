@@ -34,6 +34,7 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::dom
 {
@@ -84,7 +85,7 @@ namespace krys::boo
       bool PointerIsPressed {false};
       MouseButton PreviousMouseButton {MouseButton::PointerHasNotChanged};
 
-      explicit CapturingData(const dom::DOMString &pointerType) noexcept : PointerType(pointerType)
+      explicit CapturingData(dom::DOMString pointerType) noexcept : PointerType(krys::move(pointerType))
       {
       }
 

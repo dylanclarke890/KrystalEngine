@@ -21,10 +21,8 @@
 
 namespace krys::boo
 {
-  GraphicsLayerTransform::GraphicsLayerTransform() noexcept
-      : _anchorPoint(0.5, 0.5, 0), _flattening(true),
-        _dirty(false), // false by default since all default values would be combined as the identity matrix
-        _childrenDirty(false)
+  GraphicsLayerTransform::GraphicsLayerTransform() noexcept : _anchorPoint(0.5, 0.5, 0)
+
   {
   }
 

@@ -64,7 +64,7 @@ namespace krys::boo
     }
 
   private:
-    FEFlood(const Color &floodColor, float floodOpacity, const DestinationColorSpace &colorSpace) noexcept;
+    FEFlood(Color floodColor, float floodOpacity, const DestinationColorSpace &colorSpace) noexcept;
 
     KRYS_NODISCARD bool operator==(const FilterEffect &other) const noexcept override
     {

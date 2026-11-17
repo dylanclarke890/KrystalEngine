@@ -77,8 +77,8 @@ namespace krys::boo
     ApplyStyleCommand(dom::Document &document, const EditingStyle *style, EditAction action,
                       ApplyStylePropertyLevel level) noexcept;
 
-    ApplyStyleCommand(dom::Document &document, const EditingStyle *style, const dom::Position &start,
-                      const dom::Position &end, EditAction action, ApplyStylePropertyLevel level) noexcept;
+    ApplyStyleCommand(dom::Document &document, const EditingStyle *style, dom::Position start,
+                      dom::Position end, EditAction action, ApplyStylePropertyLevel level) noexcept;
 
     ApplyStyleCommand(dom::Element &element, bool removeOnly, EditAction action) noexcept;
 

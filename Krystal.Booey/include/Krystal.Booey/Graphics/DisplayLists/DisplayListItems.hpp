@@ -39,6 +39,7 @@
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::display_list
 {
@@ -267,7 +268,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "set-state";
 
-    explicit SetState(const GraphicsContextState &) noexcept;
+    explicit SetState(GraphicsContextState) noexcept;
 
     KRYS_NODISCARD GraphicsContextState &State() noexcept
     {
@@ -315,8 +316,8 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "set-line-dash";
 
-    SetLineDash(const DashArray &dashArray, float dashOffset) noexcept
-        : _dashArray(dashArray), _dashOffset(dashOffset)
+    SetLineDash(DashArray dashArray, float dashOffset) noexcept
+        : _dashArray(krys::move(dashArray)), _dashOffset(dashOffset)
     {
     }
 
@@ -475,7 +476,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "clip-out-to-path";
 
-    explicit ClipOutToPath(const boo::Path &path) noexcept : _path(path)
+    explicit ClipOutToPath(boo::Path path) noexcept : _path(krys::move(path))
     {
     }
 
@@ -498,7 +499,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "clip-path";
 
-    ClipPath(const boo::Path &path, boo::WindRule windRule) noexcept : _path(path), _windRule(windRule)
+    ClipPath(boo::Path path, boo::WindRule windRule) noexcept : _path(krys::move(path)), _windRule(windRule)
     {
     }
 
@@ -592,7 +593,7 @@ namespace krys::boo::display_list
     constexpr static std::string_view Name = "draw-control-part";
 
     DrawControlPart(ControlPart &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
-                    const ControlStyle &) noexcept;
+                    ControlStyle) noexcept;
 
     DrawControlPart(const DrawControlPart &) noexcept;
 
@@ -1136,7 +1137,7 @@ namespace krys::boo::display_list
     constexpr static std::string_view Name = "draw-dots-for-document-marker";
 
     DrawDotsForDocumentMarker(FloatRect rect, DocumentMarkerLineStyle style) noexcept
-        : _rect(rect), _style(style)
+        : _rect(rect), _style(krys::move(style))
     {
     }
 
@@ -1185,7 +1186,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "draw-path";
 
-    explicit DrawPath(const boo::Path &path) noexcept : _path(path)
+    explicit DrawPath(boo::Path path) noexcept : _path(krys::move(path))
     {
     }
 
@@ -1209,8 +1210,8 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "draw-focus-ring-path";
 
-    DrawFocusRingPath(const boo::Path &path, float outlineWidth, const boo::Color &color) noexcept
-        : _path(path), _outlineWidth(outlineWidth), _color(color)
+    DrawFocusRingPath(boo::Path path, float outlineWidth, boo::Color color) noexcept
+        : _path(krys::move(path)), _outlineWidth(outlineWidth), _color(krys::move(color))
     {
     }
 
@@ -1246,8 +1247,8 @@ namespace krys::boo::display_list
     constexpr static std::string_view Name = "draw-focus-ring-rects";
 
     DrawFocusRingRects(const List<FloatRect> &rects, float outlineOffset, float outlineWidth,
-                       const boo::Color &color) noexcept
-        : _rects(rects), _outlineOffset(outlineOffset), _outlineWidth(outlineWidth), _color(color)
+                       boo::Color color) noexcept
+        : _rects(rects), _outlineOffset(outlineOffset), _outlineWidth(outlineWidth), _color(krys::move(color))
     {
     }
 
@@ -1314,7 +1315,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "fill-rect-with-color";
 
-    FillRectWithColor(FloatRect rect, const boo::Color &color) noexcept : _rect(rect), _color(color)
+    FillRectWithColor(FloatRect rect, boo::Color color) noexcept : _rect(rect), _color(krys::move(color))
     {
     }
 
@@ -1414,9 +1415,9 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "fill-composited-rect";
 
-    FillCompositedRect(FloatRect rect, const boo::Color &color, CompositeOperator op,
+    FillCompositedRect(FloatRect rect, boo::Color color, CompositeOperator op,
                        boo::BlendMode blendMode) noexcept
-        : _rect(rect), _color(color), _op(op), _blendMode(blendMode)
+        : _rect(rect), _color(krys::move(color)), _op(op), _blendMode(blendMode)
     {
     }
 
@@ -1455,8 +1456,8 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "fill-rounded-rect";
 
-    FillRoundedRect(const FloatRoundedRect &rect, const boo::Color &color, boo::BlendMode blendMode) noexcept
-        : _rect(rect), _color(color), _blendMode(blendMode)
+    FillRoundedRect(const FloatRoundedRect &rect, boo::Color color, boo::BlendMode blendMode) noexcept
+        : _rect(rect), _color(krys::move(color)), _blendMode(blendMode)
     {
     }
 
@@ -1491,8 +1492,8 @@ namespace krys::boo::display_list
     constexpr static std::string_view Name = "fill-rect-with-rounded-hole";
 
     FillRectWithRoundedHole(const FloatRect &rect, const FloatRoundedRect &roundedHoleRect,
-                            const boo::Color &color) noexcept
-        : _rect(rect), _roundedHoleRect(roundedHoleRect), _color(color)
+                            boo::Color color) noexcept
+        : _rect(rect), _roundedHoleRect(roundedHoleRect), _color(krys::move(color))
     {
     }
 
@@ -1524,7 +1525,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "fill-path";
 
-    explicit FillPath(const boo::Path &path) noexcept : _path(path)
+    explicit FillPath(boo::Path path) noexcept : _path(krys::move(path))
     {
     }
 
@@ -1596,7 +1597,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "stroke-path";
 
-    explicit StrokePath(const boo::Path &path) noexcept : _path(path)
+    explicit StrokePath(boo::Path path) noexcept : _path(krys::move(path))
     {
     }
 
@@ -1719,7 +1720,8 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "set-URL-for-rect";
 
-    SetURLForRect(const url::URL &link, const FloatRect &destRect) noexcept : _link(link), _destRect(destRect)
+    SetURLForRect(url::URL link, const FloatRect &destRect) noexcept
+        : _link(krys::move(link)), _destRect(destRect)
     {
     }
 

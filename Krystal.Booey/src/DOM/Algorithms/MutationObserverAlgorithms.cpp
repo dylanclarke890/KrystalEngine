@@ -214,7 +214,7 @@ namespace krys::boo::dom
     List<Ref<RegisteredObserver>> registeredObservers = node.RegisteredObservers();
     for (auto &transient : node.TransientRegisteredObservers())
     {
-      registeredObservers.push_back(Ref<RegisteredObserver>(transient));
+      registeredObservers.emplace_back(transient);
     }
     return registeredObservers;
   }
@@ -374,7 +374,7 @@ namespace krys::boo::dom
       }
 
       // 5b. Enqueue record to observer's record queue.
-      observer->_recordQueue.push_back(krys::move(record));
+      observer->_recordQueue.emplace_back(krys::move(record));
 
       // 5c. Append observer to the surrounding agent's pending mutation observers.
       AppendToSet(SurroundingAgent().PendingMutationObservers, *observer);

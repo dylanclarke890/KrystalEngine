@@ -283,7 +283,7 @@ namespace krys::boo
   };
 
   constexpr inline Decimal::EncodedData::EncodedData(Sign sign, FormatClass formatClass) noexcept
-      : _coefficient(0), _exponent(0), _formatClass(formatClass), _sign(sign)
+      : _formatClass(formatClass), _sign(sign)
   {
   }
 

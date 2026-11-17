@@ -58,6 +58,7 @@
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/ResolveForFont.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <array>
 
@@ -434,12 +435,12 @@ namespace krys::boo
 
   public:
     HTMLAttributeEquivalent(PropertyId id, html::TagName tagName, dom::DOMStringAtom attrName) noexcept
-        : HTMLElementEquivalent(id, tagName), _attrName(attrName)
+        : HTMLElementEquivalent(id, tagName), _attrName(krys::move(attrName))
     {
     }
 
     HTMLAttributeEquivalent(PropertyId id, dom::DOMStringAtom attrName) noexcept
-        : HTMLElementEquivalent(id), _attrName(attrName)
+        : HTMLElementEquivalent(id), _attrName(krys::move(attrName))
     {
     }
 

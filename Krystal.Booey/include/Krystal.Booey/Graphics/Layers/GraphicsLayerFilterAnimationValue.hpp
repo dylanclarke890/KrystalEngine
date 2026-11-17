@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimationValue.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -37,9 +38,9 @@ namespace krys::boo
     FilterOperations _value;
 
   public:
-    GraphicsLayerFilterAnimationValue(double keyTime, const FilterOperations &value,
+    GraphicsLayerFilterAnimationValue(double keyTime, FilterOperations value,
                                       TimingFunction *timingFunction = nullptr) noexcept
-        : GraphicsLayerAnimationValue(keyTime, timingFunction), _value(value)
+        : GraphicsLayerAnimationValue(keyTime, timingFunction), _value(krys::move(value))
     {
     }
 

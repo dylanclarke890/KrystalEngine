@@ -24,11 +24,7 @@ namespace krys
     {
     }
 
-    DataRef &operator=(const DataRef &other) noexcept
-    {
-      _data = other._data;
-      return *this;
-    }
+    DataRef &operator=(const DataRef &other) noexcept = default;
 
     DataRef(DataRef &&) noexcept = default;
 

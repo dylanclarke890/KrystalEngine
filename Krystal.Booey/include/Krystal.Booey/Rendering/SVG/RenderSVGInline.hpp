@@ -45,9 +45,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsChildAllowed(const RenderObject &, const RenderStyle &) const noexcept override;
 
-  private:
     void GetElement() const = delete;
 
+  private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGInline";

@@ -49,7 +49,7 @@ namespace krys::boo::css
     WeakPtr<const CounterStyle> _fallbackReference;
     bool _isFallingBack {false};
 
-    CounterStyle(const CounterStyleDescriptors &descriptors, bool isPredefinedCounterStyle) noexcept;
+    CounterStyle(CounterStyleDescriptors descriptors, bool isPredefinedCounterStyle) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<CounterStyle> Create(const CounterStyleDescriptors &descriptors,

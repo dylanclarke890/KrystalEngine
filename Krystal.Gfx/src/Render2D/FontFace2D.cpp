@@ -80,9 +80,8 @@ namespace krys::gfx
     return CreateUnique<FontFace2D>(krys::move(face), options, size);
   }
 
-  FontFace2D::FontFace2D(Ref<text::FreeTypeFace> &&face, const FontFace2DOptions &options,
-                         FT_Size size) noexcept
-      : _face(krys::move(face)), _options(options), _size(size)
+  FontFace2D::FontFace2D(Ref<text::FreeTypeFace> &&face, FontFace2DOptions options, FT_Size size) noexcept
+      : _face(krys::move(face)), _options(krys::move(options)), _size(size)
   {
     static std::atomic<uint64> nextId {1u};
     _id = nextId.fetch_add(1u, std::memory_order_relaxed);

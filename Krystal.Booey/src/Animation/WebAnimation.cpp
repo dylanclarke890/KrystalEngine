@@ -2148,7 +2148,7 @@ namespace krys::boo
       {
         if (animation->GetPlayState() != WebAnimation::PlayState::Idle)
         {
-          sortedAnimations.push_back(animation);
+          sortedAnimations.emplace_back(animation);
         }
       }
     }

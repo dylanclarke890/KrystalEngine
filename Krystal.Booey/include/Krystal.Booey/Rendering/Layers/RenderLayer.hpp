@@ -631,7 +631,7 @@ namespace krys::boo
     EnumSet<LayerPositionUpdates> _layerPositionDirtyBits;
 
     const bool _isRenderViewLayer : 1;
-    const bool _forcedStackingContext : 1;
+    const bool _forcedStackingContext : 1 {false};
 
     bool _isNormalFlowOnly : 1 {false};
     bool _inResizeMode : 1 {false};

@@ -93,8 +93,7 @@ namespace krys::boo
                                                       const FloatSize &stdDeviation) noexcept;
 
   private:
-    FEDropShadow(float stdX, float stdY, float dx, float dy, const Color &shadowColor,
-                 float shadowOpacity) noexcept;
+    FEDropShadow(float stdX, float stdY, float dx, float dy, Color shadowColor, float shadowOpacity) noexcept;
 
     KRYS_NODISCARD bool operator==(const FilterEffect &other) const noexcept override
     {

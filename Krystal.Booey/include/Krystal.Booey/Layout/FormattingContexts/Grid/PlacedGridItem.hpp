@@ -63,7 +63,7 @@ namespace krys::boo::layout
 
   public:
     PlacedGridItem(const UnplacedGridItem &unplacedGridItem, GridAreaLines gridAreaLines,
-                   const ComputedSizes &inlineAxisSizes, const ComputedSizes &blockAxisSizes,
+                   ComputedSizes inlineAxisSizes, ComputedSizes blockAxisSizes,
                    const StyleSelfAlignmentData &inlineAxisAlignment,
                    const StyleSelfAlignmentData &blockAxisAlignment,
                    const style::ZoomFactor &usedZoom) noexcept;

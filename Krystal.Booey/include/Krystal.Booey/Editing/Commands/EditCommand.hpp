@@ -111,8 +111,8 @@ namespace krys::boo
     explicit EditCommand(dom::Document &document,
                          EditAction editingAction = EditAction::Unspecified) noexcept;
 
-    EditCommand(dom::Document &document, const VisibleSelection &startingSelection,
-                const VisibleSelection &endingSelection) noexcept;
+    EditCommand(dom::Document &document, VisibleSelection startingSelection,
+                VisibleSelection endingSelection) noexcept;
 
     KRYS_NODISCARD dom::Document &GetDocument() const noexcept
     {

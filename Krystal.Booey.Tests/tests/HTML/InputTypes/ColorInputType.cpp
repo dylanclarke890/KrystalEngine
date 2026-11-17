@@ -1,14 +1,17 @@
-﻿#include "Krystal.Booey/HTML/InputTypes/ColorInputType.hpp"
+﻿#include <utility>
+
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/InputTypes/ColorInputType.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/ColorChooserClient.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::tests
 {
@@ -39,8 +42,8 @@ namespace krys::boo::tests
       int32 Reattached {0};
       bool Ended {false};
 
-      RecordingColorChooser(ColorChooserClient &client, const Color &initialColor) noexcept
-          : Client(&client), Selected(initialColor)
+      RecordingColorChooser(ColorChooserClient &client, Color initialColor) noexcept
+          : Client(&client), Selected(krys::move(initialColor))
       {
       }
 

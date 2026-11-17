@@ -79,16 +79,16 @@ namespace krys::boo::dom::tests
       AbortAlgorithms::Add(
         [&](const Any &)
         {
-          log.push_back("signal algorithm");
+          log.emplace_back("signal algorithm");
           CHECK(dependent->Aborted());
           CHECK(std::any_cast<int>(dependent->Reason()) == 7);
         },
         signal);
-      AbortAlgorithms::Add([&](const Any &) { log.push_back("dependent algorithm"); }, *dependent);
+      AbortAlgorithms::Add([&](const Any &) { log.emplace_back("dependent algorithm"); }, *dependent);
       auto signalListener =
-        signal.AddEventListener(event_names::Abort, [&](Event &) { log.push_back("signal event"); });
-      auto dependentListener =
-        dependent->AddEventListener(event_names::Abort, [&](Event &) { log.push_back("dependent event"); });
+        signal.AddEventListener(event_names::Abort, [&](Event &) { log.emplace_back("signal event"); });
+      auto dependentListener = dependent->AddEventListener(event_names::Abort, [&](Event &)
+                                                           { log.emplace_back("dependent event"); });
 
       AbortAlgorithms::SignalAbort(signal, Any(7));
       CHECK(
@@ -109,12 +109,13 @@ namespace krys::boo::dom::tests
       AbortAlgorithms::Add(
         [&](const Any &reason)
         {
-          log.push_back("first");
+          log.emplace_back("first");
           CHECK(std::any_cast<int>(reason) == 4);
         },
         signal);
-      AbortAlgorithms::Add([&](const Any &) { log.push_back("second"); }, signal);
-      auto listener = signal.AddEventListener(event_names::Abort, [&](Event &) { log.push_back("event"); });
+      AbortAlgorithms::Add([&](const Any &) { log.emplace_back("second"); }, signal);
+      auto listener =
+        signal.AddEventListener(event_names::Abort, [&](Event &) { log.emplace_back("event"); });
 
       controller.Abort(Any(4));
       CHECK(log == List<std::string> {"first", "second", "event"});
@@ -126,11 +127,11 @@ namespace krys::boo::dom::tests
       self = AbortAlgorithmCallback(
         [&](const Any &)
         {
-          log.push_back("first");
+          log.emplace_back("first");
           AbortAlgorithms::Remove(*self, signal);
         });
       AbortAlgorithms::Add(*self, signal);
-      AbortAlgorithms::Add([&](const Any &) { log.push_back("second"); }, signal);
+      AbortAlgorithms::Add([&](const Any &) { log.emplace_back("second"); }, signal);
 
       controller.Abort();
       CHECK(log == List<std::string> {"first", "second"});

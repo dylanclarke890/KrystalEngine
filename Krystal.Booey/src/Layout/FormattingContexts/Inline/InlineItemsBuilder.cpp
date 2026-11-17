@@ -333,7 +333,7 @@ namespace krys::boo::layout
       UnwindBidiContextStack(paragraphContentBuilder, bidiContextStack, copyOfBidiStack,
                              blockLevelBidiContextIndex);
 
-      inlineItemOffsetList.push_back(paragraphContentBuilder.Length());
+      inlineItemOffsetList.emplace_back(paragraphContentBuilder.Length());
       paragraphContentBuilder.Append(text::NewlineCharacter);
 
       RewindBidiContextStack(paragraphContentBuilder, bidiContextStack, copyOfBidiStack,
@@ -372,14 +372,14 @@ namespace krys::boo::layout
               lastInlineTextBox = &layoutBox;
             }
             auto *inlineTextItem = DynamicDowncast<InlineTextItem>(inlineItem);
-            inlineItemOffsetList.push_back(inlineTextBoxOffset
-                                           + (inlineTextItem
-                                                ? inlineTextItem->Start()
-                                                : Downcast<InlineSoftLineBreakItem>(inlineItem).Position()));
+            inlineItemOffsetList.emplace_back(
+              inlineTextBoxOffset
+              + (inlineTextItem ? inlineTextItem->Start()
+                                : Downcast<InlineSoftLineBreakItem>(inlineItem).Position()));
           }
           else if (auto *inlineTextItem = DynamicDowncast<InlineTextItem>(inlineItem))
           {
-            inlineItemOffsetList.push_back(paragraphContentBuilder.Length());
+            inlineItemOffsetList.emplace_back(paragraphContentBuilder.Length());
             paragraphContentBuilder.Append(inlineTextItem->Content());
           }
           else if (Is<InlineSoftLineBreakItem>(inlineItem))
@@ -393,7 +393,7 @@ namespace krys::boo::layout
         }
         else if (inlineItem.IsAtomicInlineBox())
         {
-          inlineItemOffsetList.push_back(paragraphContentBuilder.Length());
+          inlineItemOffsetList.emplace_back(paragraphContentBuilder.Length());
           paragraphContentBuilder.Append(text::ObjectReplacementCharacter);
         }
         else if (inlineItem.IsInlineBoxStartOrEnd())
@@ -405,10 +405,10 @@ namespace krys::boo::layout
           {
             // Opaque items do not have position in the bidi paragraph. They inherit their bidi level from the
             // next inline item.
-            inlineItemOffsetList.push_back({});
+            inlineItemOffsetList.emplace_back();
             continue;
           }
-          inlineItemOffsetList.push_back(paragraphContentBuilder.Length());
+          inlineItemOffsetList.emplace_back(paragraphContentBuilder.Length());
           auto isEnteringBidi = inlineItem.IsInlineBoxStart();
           HandleEnterExitBidiContext(
             paragraphContentBuilder, style.GetUnicodeBidi(), style.GetWritingMode().IsBidiLTR(),
@@ -422,25 +422,25 @@ namespace krys::boo::layout
         else if (inlineItem.IsWordBreakOpportunity())
         {
           // Soft wrap opportunity markers are opaque to bidi.
-          inlineItemOffsetList.push_back({});
+          inlineItemOffsetList.emplace_back();
         }
         else if (inlineItem.IsFloat())
         {
           // Floats are not part of the inline content which make them opaque to bidi.
-          inlineItemOffsetList.push_back({});
+          inlineItemOffsetList.emplace_back();
         }
         else if (inlineItem.IsOpaque())
         {
           if (inlineItem.LayoutBox().IsOutOfFlowPositioned())
           {
             // Out of flow boxes participate in inflow layout as if they were static positioned.
-            inlineItemOffsetList.push_back(paragraphContentBuilder.Length());
+            inlineItemOffsetList.emplace_back(paragraphContentBuilder.Length());
             paragraphContentBuilder.Append(text::ObjectReplacementCharacter);
           }
           else
           {
             // truly opaque items are also opaque to bidi.
-            inlineItemOffsetList.push_back({});
+            inlineItemOffsetList.emplace_back();
           }
         }
         else if (inlineItem.IsBlock())
@@ -830,7 +830,7 @@ namespace krys::boo::layout
         auto *layoutBox = layoutQueue.pop_back_val();
         if (layoutBox->IsOutOfFlowPositioned())
         {
-          inlineItemList.push_back(InlineItem(*layoutBox, InlineItem::Type::Opaque));
+          inlineItemList.emplace_back(*layoutBox, InlineItem::Type::Opaque);
         }
         else if (auto *inlineTextBox = DynamicDowncast<InlineTextBox>(*layoutBox))
         {
@@ -846,11 +846,11 @@ namespace krys::boo::layout
         }
         else if (layoutBox->IsFloatingPositioned())
         {
-          inlineItemList.push_back(InlineItem(*layoutBox, InlineItem::Type::Float));
+          inlineItemList.emplace_back(*layoutBox, InlineItem::Type::Float);
         }
         else if (layoutBox->IsBlockLevelBox())
         {
-          inlineItemList.push_back(InlineItem(*layoutBox, InlineItem::Type::Block));
+          inlineItemList.emplace_back(*layoutBox, InlineItem::Type::Block);
         }
         else
         {
@@ -1352,14 +1352,14 @@ namespace krys::boo::layout
 
   void InlineItemsBuilder::HandleInlineBoxStart(const Box &inlineBox, InlineItemList &inlineItemList) noexcept
   {
-    inlineItemList.push_back(InlineItem(inlineBox, InlineItem::Type::InlineBoxStart));
+    inlineItemList.emplace_back(inlineBox, InlineItem::Type::InlineBoxStart);
     _contentRequiresVisualReordering |= RequiresVisualReordering(inlineBox);
     _hasTextAutospace |= !inlineBox.Style().GetTextAutospace().IsNoAutospace();
   }
 
   void InlineItemsBuilder::HandleInlineBoxEnd(const Box &inlineBox, InlineItemList &inlineItemList) noexcept
   {
-    inlineItemList.push_back(InlineItem(inlineBox, InlineItem::Type::InlineBoxEnd));
+    inlineItemList.emplace_back(inlineBox, InlineItem::Type::InlineBoxEnd);
     // Inline box end item itself can not trigger bidi content.
     krys_debug_assert(ContentRequiresVisualReordering() || inlineBox.GetWritingMode().IsBidiLTR()
                       || inlineBox.Style().GetUnicodeBidi() == UnicodeBidi::Normal);
@@ -1369,19 +1369,22 @@ namespace krys::boo::layout
   {
     if (layoutBox.IsRubyAnnotationBox())
     {
-      return inlineItemList.push_back(InlineItem(layoutBox, InlineItem::Type::Opaque));
+      inlineItemList.emplace_back(layoutBox, InlineItem::Type::Opaque);
+      return;
     }
 
     if (layoutBox.IsAtomicInlineBox())
     {
-      return inlineItemList.push_back(InlineItem(layoutBox, InlineItem::Type::AtomicInlineBox));
+      inlineItemList.emplace_back(layoutBox, InlineItem::Type::AtomicInlineBox);
+      return;
     }
 
     if (layoutBox.IsLineBreakBox())
     {
-      return inlineItemList.push_back(InlineItem(layoutBox, layoutBox.IsWordBreakOpportunity()
-                                                              ? InlineItem::Type::WordBreakOpportunity
-                                                              : InlineItem::Type::HardLineBreak));
+      inlineItemList.emplace_back(layoutBox, layoutBox.IsWordBreakOpportunity()
+                                               ? InlineItem::Type::WordBreakOpportunity
+                                               : InlineItem::Type::HardLineBreak);
+      return;
     }
 
     krys_debug_assert(false);

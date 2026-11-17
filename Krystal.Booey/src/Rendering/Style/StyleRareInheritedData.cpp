@@ -30,7 +30,7 @@
 namespace krys::boo
 {
   StyleRareInheritedData::StyleRareInheritedData() noexcept
-      : UsedZoom(style::Evaluate<float>(style::ComputedStyle::InitialZoom())), DeviceScaleFactor(1.0f),
+      : UsedZoom(style::Evaluate<float>(style::ComputedStyle::InitialZoom())),
         TextEmphasisColor(style::ComputedStyle::InitialTextEmphasisColor()),
         CaretColor(style::Color::GetCurrentColor()), AccentColor(style::ComputedStyle::InitialAccentColor()),
         ScrollbarColor(style::ComputedStyle::InitialScrollbarColor()),

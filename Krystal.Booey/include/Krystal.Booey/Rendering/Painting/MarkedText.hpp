@@ -29,6 +29,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/StringAtom.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -80,10 +81,10 @@ namespace krys::boo
 
     MarkedText() noexcept = default;
 
-    MarkedText(uint32 startOffset, uint32 endOffset, Type type, const StringAtom &highlightName = null,
+    MarkedText(uint32 startOffset, uint32 endOffset, Type type, StringAtom highlightName = null,
                int32 priority = 0) noexcept
-        : StartOffset(startOffset), EndOffset(endOffset), MarkedType(type), HighlightName(highlightName),
-          Priority(priority)
+        : StartOffset(startOffset), EndOffset(endOffset), MarkedType(type),
+          HighlightName(krys::move(highlightName)), Priority(priority)
     {
     }
 

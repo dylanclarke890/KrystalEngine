@@ -271,8 +271,8 @@ namespace krys::boo
                              uint32 varyingTrackIndex) noexcept
       : _grid(grid), _direction(direction),
         _rowIndex((direction == GridTrackSizingDirection::Columns) ? varyingTrackIndex : fixedTrackIndex),
-        _columnIndex((direction == GridTrackSizingDirection::Columns) ? fixedTrackIndex : varyingTrackIndex),
-        _gridItemIndex(0)
+        _columnIndex((direction == GridTrackSizingDirection::Columns) ? fixedTrackIndex : varyingTrackIndex)
+
   {
     if (_grid.MaxRows())
     {

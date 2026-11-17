@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -71,12 +72,12 @@ namespace krys::boo
     Size _menuSize;
 
   public:
-    PopupMenuStyle(const Color &foreground, const Color &background, const FontCascade &font,
-                   utf8_string language, bool visible, bool isDisplayNone, bool hasDefaultAppearance,
-                   TextDirection textDirection, bool hasTextDirectionOverride,
+    PopupMenuStyle(Color foreground, Color background, const FontCascade &font, utf8_string language,
+                   bool visible, bool isDisplayNone, bool hasDefaultAppearance, TextDirection textDirection,
+                   bool hasTextDirectionOverride,
                    BackgroundColorType backgroundColorType = BackgroundColorType::DefaultBackgroundColor,
                    PopupMenuType menuType = PopupMenuType::SelectPopup, Size menuSize = Size::Normal) noexcept
-        : _foregroundColor(foreground), _backgroundColor(background), _font(font),
+        : _foregroundColor(krys::move(foreground)), _backgroundColor(krys::move(background)), _font(font),
           _language(krys::move(language)), _visible(visible), _isDisplayNone(isDisplayNone),
           _hasDefaultAppearance(hasDefaultAppearance), _textDirection(textDirection),
           _hasTextDirectionOverride(hasTextDirectionOverride), _backgroundColorType(backgroundColorType),

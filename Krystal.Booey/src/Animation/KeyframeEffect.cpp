@@ -570,7 +570,7 @@ namespace krys::boo
         properties.reserve(inputKeyframe.Properties.size());
         for (auto &[name, value] : inputKeyframe.Properties)
         {
-          properties.push_back({krys::move(name), List<dom::DOMString> {krys::move(value)}});
+          properties.emplace_back(krys::move(name), List<dom::DOMString> {krys::move(value)});
         }
 
         for (const auto &propertyAndValue : ProcessKeyframeLikeObjectProperties(document, properties))
@@ -726,7 +726,7 @@ namespace krys::boo
       }
       else if (const auto *doubleValue = std::get_if<double>(&sourceOffsets))
       {
-        offsets.push_back(*doubleValue);
+        offsets.emplace_back(*doubleValue);
       }
       else if (const auto *timelineRangeOffset = std::get_if<TimelineRangeOffset>(&sourceOffsets))
       {
@@ -734,7 +734,7 @@ namespace krys::boo
         {
           return dom::Exception {dom::ExceptionCode::TypeError};
         }
-        offsets.push_back(*timelineRangeOffset);
+        offsets.emplace_back(*timelineRangeOffset);
       }
       else if (const auto *stringOffset = std::get_if<dom::DOMString>(&sourceOffsets))
       {
@@ -745,16 +745,16 @@ namespace krys::boo
         }
         if (const auto *doubleOffset = std::get_if<double>(&*parsedValue))
         {
-          offsets.push_back(*doubleOffset);
+          offsets.emplace_back(*doubleOffset);
         }
         else
         {
-          offsets.push_back(std::get<TimelineRangeOffset>(*parsedValue));
+          offsets.emplace_back(std::get<TimelineRangeOffset>(*parsedValue));
         }
       }
       else
       {
-        offsets.push_back(nullptr);
+        offsets.emplace_back(nullptr);
       }
 
       // 6. Assign each value in offsets to the keyframe offset of the keyframe with corresponding position in
@@ -783,7 +783,7 @@ namespace krys::boo
       //    “linear”, i.e. « "linear" ».
       if (easings.empty())
       {
-        easings.push_back(u8"linear");
+        easings.emplace_back(u8"linear");
       }
 
       // 9. If easings has fewer items than property keyframes, repeat the elements in easings successively

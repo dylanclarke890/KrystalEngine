@@ -1187,7 +1187,7 @@ namespace krys::boo::layout
     {
       if (leadingContentRunIndex && trailingContentRunIndex && hasBoundaryBetween)
       {
-        ranges.push_back({*leadingContentRunIndex, *trailingContentRunIndex});
+        ranges.emplace_back(*leadingContentRunIndex, *trailingContentRunIndex);
       }
       resetCandidateRange();
     };

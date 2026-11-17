@@ -28,11 +28,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::css
 {
-  VariableData::VariableData(const css::TokenRange &range, const ParserContext &context) noexcept
-      : _tokens(range.Tokens().begin(), range.Tokens().end()), _context(context)
+  VariableData::VariableData(const css::TokenRange &range, ParserContext context) noexcept
+      : _tokens(range.Tokens().begin(), range.Tokens().end()), _context(krys::move(context))
   {
   }
 

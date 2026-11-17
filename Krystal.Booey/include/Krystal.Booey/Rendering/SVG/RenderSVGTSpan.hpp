@@ -38,9 +38,9 @@ namespace krys::boo
       krys_debug_assert(IsRenderSVGTSpan());
     }
 
-  private:
     void GraphicsElement() const = delete;
 
+  private:
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGTSpan";

@@ -9,11 +9,11 @@ namespace krys
 {
   class Endian
   {
+  public:
     Endian() = delete;
 
     ~Endian() = delete;
 
-  public:
     /// @brief Represents the endianness of a system or value.
     enum Type : uint8
     {

@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Rendering/Selection/RenderObjectHighlightState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo
@@ -309,7 +310,7 @@ namespace krys::boo::inline_iterator
     {
     }
 
-    explicit BoxIterator(const Box &box) noexcept : _box(box)
+    explicit BoxIterator(Box box) noexcept : _box(krys::move(box))
     {
     }
 
@@ -396,7 +397,7 @@ namespace krys::boo::inline_iterator
     TIterator _begin;
 
   public:
-    explicit BoxRange(TIterator begin) noexcept : _begin(begin)
+    explicit BoxRange(TIterator begin) noexcept : _begin(krys::move(begin))
     {
     }
 

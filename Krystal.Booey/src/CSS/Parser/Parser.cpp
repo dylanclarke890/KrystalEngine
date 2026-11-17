@@ -652,7 +652,7 @@ namespace krys::boo::css
           return null;
         }
 
-        name.push_back(CSSOMStringAtom(nameToken.IdentCodePoints()));
+        name.emplace_back(nameToken.IdentCodePoints());
 
         if (tokens.Peek().Type() != TokenType::Delim || tokens.Peek().Delimiter() != U'.')
         {
@@ -1002,7 +1002,7 @@ namespace krys::boo::css
       {
         if (value.IsFontFamily())
         {
-          fontFamilies.push_back(CSSOMStringAtom(value.StringValue()));
+          fontFamilies.emplace_back(value.StringValue());
         }
       };
       auto cssFontFamily = properties->GetPropertyCSSValue(PropertyId::FontFamily);
@@ -1057,7 +1057,7 @@ namespace krys::boo::css
           continue;
         }
 
-        overrideColors.push_back({key, krys::move(color)});
+        overrideColors.emplace_back(key, krys::move(color));
       }
     }
 
@@ -1629,12 +1629,12 @@ namespace krys::boo::css
       if (ruleType == RuleType::Function)
       {
         auto rule = FunctionDeclarationsRule::Create(CreateStyleProperties(properties, _context.Mode));
-        TopContext().ParsedRules.push_back(krys::move(rule));
+        TopContext().ParsedRules.emplace_back(krys::move(rule));
         return;
       }
 
       auto rule = NestedDeclarationsRule::Create(CreateStyleProperties(properties, _context.Mode));
-      TopContext().ParsedRules.push_back(krys::move(rule));
+      TopContext().ParsedRules.emplace_back(krys::move(rule));
     };
 
     while (!tokens.IsAtEnd())

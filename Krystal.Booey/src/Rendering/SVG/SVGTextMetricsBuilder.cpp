@@ -225,7 +225,7 @@ namespace krys::boo
           {
             if (data.ProcessRenderer)
             {
-              textMetricsValues.push_back(SVGTextMetrics(SVGTextMetrics::MetricsType::SkippedSpaceMetrics));
+              textMetricsValues.emplace_back(SVGTextMetrics::MetricsType::SkippedSpaceMetrics);
             }
             ++skippedCharacters;
             i += characterLength;
@@ -240,7 +240,7 @@ namespace krys::boo
           float width = scaledFont.WidthForTextUsingSimplifiedMeasuring(view.substr(i, characterLength),
                                                                         TextDirection::LTR);
           float scaledWidth = width / scalingFactor;
-          textMetricsValues.push_back(SVGTextMetrics(characterLength, scaledWidth, scaledHeight));
+          textMetricsValues.emplace_back(characterLength, scaledWidth, scaledHeight);
           lastCharacter = currentCharacter;
           i += characterLength;
         }
@@ -281,7 +281,7 @@ namespace krys::boo
       {
         if (data.ProcessRenderer)
         {
-          textMetricsValues.push_back(SVGTextMetrics(SVGTextMetrics::MetricsType::SkippedSpaceMetrics));
+          textMetricsValues.emplace_back(SVGTextMetrics::MetricsType::SkippedSpaceMetrics);
         }
         skippedCharacters += numberOfCharacters;
         characterIndex += numberOfCharacters;

@@ -726,9 +726,7 @@ namespace krys::boo
   }
 
   RenderLayer::RenderLayer(RenderLayerModelObject &renderer) noexcept
-      : _isRenderViewLayer(renderer.IsRenderView()),
-        // FIXME: Media renderers force a stacking context, once there are any.
-        _forcedStackingContext(false), _renderer(renderer)
+      : _isRenderViewLayer(renderer.IsRenderView()), _renderer(renderer)
   {
     SetIsNormalFlowOnly(ShouldBeNormalFlowOnly());
     SetIsCSSStackingContext(ShouldBeCSSStackingContext());
@@ -6321,7 +6319,7 @@ namespace krys::boo
     {
       // For unpaginated layers, there is only one fragment.
       ClipRectsContext clipRectsContext(rootLayer, clipRectsType, clipRectOptions);
-      fragments.push_back(LayerFragment {CalculateRects(clipRectsContext, offsetFromRoot, dirtyRect)});
+      fragments.emplace_back(CalculateRects(clipRectsContext, offsetFromRoot, dirtyRect));
       return;
     }
 

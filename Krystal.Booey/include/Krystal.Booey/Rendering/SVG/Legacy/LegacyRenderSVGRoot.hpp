@@ -113,9 +113,9 @@ namespace krys::boo
 
     static void AddResourceForClientInvalidation(LegacyRenderSVGResourceContainer *) noexcept;
 
-  private:
     void GetElement() const = delete;
 
+  private:
     // Intentially left 'RenderSVGRoot' instead of 'LegacyRenderSVGRoot', to avoid breaking layout tests.
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {

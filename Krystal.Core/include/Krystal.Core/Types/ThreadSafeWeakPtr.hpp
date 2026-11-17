@@ -442,12 +442,7 @@ namespace krys
       return *this;
     }
 
-    ThreadSafeWeakPtr &operator=(const ThreadSafeWeakPtr &other) noexcept
-    {
-      _controlBlock = other._controlBlock;
-      _objectOfCorrectType = other._objectOfCorrectType;
-      return *this;
-    }
+    ThreadSafeWeakPtr &operator=(const ThreadSafeWeakPtr &other) noexcept = default;
 
     template <typename U>
     requires(!IsPointer<U>)

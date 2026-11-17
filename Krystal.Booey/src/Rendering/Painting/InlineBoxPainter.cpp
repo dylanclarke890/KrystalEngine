@@ -34,6 +34,7 @@
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
 namespace krys::boo
@@ -45,9 +46,9 @@ namespace krys::boo
   {
   }
 
-  InlineBoxPainter::InlineBoxPainter(const inline_iterator::InlineBox &inlineBox, PaintInfo &paintInfo,
+  InlineBoxPainter::InlineBoxPainter(inline_iterator::InlineBox inlineBox, PaintInfo &paintInfo,
                                      const LayoutPoint &paintOffset) noexcept
-      : _inlineBox(inlineBox), _paintInfo(paintInfo), _paintOffset(paintOffset),
+      : _inlineBox(krys::move(inlineBox)), _paintInfo(paintInfo), _paintOffset(paintOffset),
         _renderer(_inlineBox.Renderer()), _isFirstLineBox(_inlineBox.GetLineBox()->IsFirst()),
         _isRootInlineBox(_inlineBox.IsRootInlineBox()), _isHorizontal(_inlineBox.IsHorizontal())
   {

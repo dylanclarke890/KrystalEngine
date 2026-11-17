@@ -87,8 +87,7 @@ namespace krys::boo::css
 
     List<CSSStyleSheet *> _clients;
 
-    StyleSheetContents(ImportRule *ownerRule, const CSSOMString &originalURL,
-                       const ParserContext &context) noexcept;
+    StyleSheetContents(ImportRule *ownerRule, CSSOMString originalURL, ParserContext context) noexcept;
 
     StyleSheetContents(const StyleSheetContents &other) noexcept;
 

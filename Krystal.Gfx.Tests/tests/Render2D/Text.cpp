@@ -199,7 +199,7 @@ namespace krys::gfx::tests
     for (const auto character : text)
     {
       glyphs.push_back(_face->GlyphIndex(character));
-      positions.push_back({x, 0.f});
+      positions.emplace_back(x, 0.f);
       x += _face->Advance(glyphs.back(), 16.f);
     }
     for (int frame = 0; frame < 2; ++frame)

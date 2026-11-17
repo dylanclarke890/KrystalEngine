@@ -281,7 +281,7 @@ namespace krys::boo
     krys_debug_assert(root.Renderer());
     krys_debug_assert(_parentStack.empty());
 
-    _parentStack.push_back(Parent(root));
+    _parentStack.emplace_back(root);
 
     auto descendants = dom::ComposedTreeDescendants(root);
     auto it = descendants.begin();
@@ -389,7 +389,7 @@ namespace krys::boo
 
   void RenderTreeUpdater::PushParent(dom::Element &element, const style::ElementUpdate *update) noexcept
   {
-    _parentStack.push_back(Parent(element, update));
+    _parentStack.emplace_back(element, update);
 
     UpdateBeforeDescendants(element, update);
   }

@@ -148,13 +148,12 @@ namespace krys::boo
 
   public:
     /// @brief A dialog's submission, with the submitter's result.
-    FormSubmission(Maybe<dom::DOMString> returnValue, const url::URL &action, dom::DOMStringView target,
+    FormSubmission(Maybe<dom::DOMString> returnValue, url::URL action, dom::DOMStringView target,
                    dom::DOMStringView encodingType, dom::Event *event) noexcept;
 
     /// @brief A `GET` or `POST` submission of @p entryList.
-    FormSubmission(Method method, const url::URL &action, dom::DOMStringView target,
-                   dom::DOMStringView encodingType, Ref<html::DOMFormData> &&entryList,
-                   dom::Event *event) noexcept;
+    FormSubmission(Method method, url::URL action, dom::DOMStringView target, dom::DOMStringView encodingType,
+                   Ref<html::DOMFormData> &&entryList, dom::Event *event) noexcept;
 
     ~FormSubmission() noexcept;
 

@@ -43,12 +43,12 @@ namespace krys::boo::html::tests
 
       void FormResetCallback() noexcept override
       {
-        _log.push_back(u8"reset");
+        _log.emplace_back(u8"reset");
       }
 
       void FormDisabledCallback(bool disabled) noexcept override
       {
-        _log.push_back(disabled ? u8"disabled" : u8"enabled");
+        _log.emplace_back(disabled ? u8"disabled" : u8"enabled");
       }
     };
 

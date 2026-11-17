@@ -558,7 +558,7 @@ namespace krys::boo::dom
       {
         if (auto file = item->GetFile())
         {
-          files.push_back(krys::move(file));
+          files.emplace_back(krys::move(file));
         }
       }
       itemListContainsItems = true;

@@ -60,7 +60,6 @@ namespace krys::boo
 
     void MarkFilterEffectForRebuild() noexcept;
 
-  private:
     void GetElement() const = delete;
   };
 }

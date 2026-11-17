@@ -1209,7 +1209,7 @@ namespace krys::boo::css
             {
               return nullptr;
             }
-            argumentList.push_back(CSSOMStringAtom(ident.IdentCodePoints()));
+            argumentList.emplace_back(ident.IdentCodePoints());
           } while (!block.IsAtEnd());
           selector->SetArgumentList(FixedVector<CSSOMStringAtom>(argumentList.begin(), argumentList.end()));
           return selector;

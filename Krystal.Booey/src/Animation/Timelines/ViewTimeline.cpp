@@ -43,6 +43,7 @@
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperDeprecatedCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <utility>
 
@@ -96,8 +97,8 @@ namespace krys::boo
   }
 
   ViewTimeline::ViewTimeline(const css::CSSOMStringAtom &name, ScrollAxis axis,
-                             const style::ViewTimelineInsetItem &insets) noexcept
-      : ScrollTimeline(name, axis), _insets(insets)
+                             style::ViewTimelineInsetItem insets) noexcept
+      : ScrollTimeline(name, axis), _insets(krys::move(insets))
   {
   }
 

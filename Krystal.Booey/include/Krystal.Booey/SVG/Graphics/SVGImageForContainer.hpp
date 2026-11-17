@@ -103,7 +103,7 @@ namespace krys::boo::svg
 
   private:
     SVGImageForContainer(SVGImage *, const FloatSize &containerSize, float containerZoom,
-                         const url::URL &initialFragmentURL) noexcept;
+                         url::URL initialFragmentURL) noexcept;
   };
 }
 

@@ -674,7 +674,7 @@ namespace krys::ui
   void GraphicsContextRender2D::BeginTransparencyLayer(float opacity) noexcept
   {
     GraphicsContext::BeginTransparencyLayer(opacity);
-    _layerStack.push_back({});
+    _layerStack.emplace_back();
     _clipBoundsStack.push_back(_clipBounds);
     PrepareDraw(false);
 

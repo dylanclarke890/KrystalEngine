@@ -29,7 +29,7 @@ namespace krys::boo::html
 {
   void FormattingElementList::PushMarker() noexcept
   {
-    _formattingElements.emplace_back(FormattingListEntry {});
+    _formattingElements.emplace_back();
   }
 
   void FormattingElementList::PushElement(StackItem &&item) noexcept
@@ -94,7 +94,7 @@ namespace krys::boo::html
     }
 
     // 2. Add element to the list of active formatting elements.
-    _formattingElements.emplace_back(FormattingListEntry(krys::move(item)));
+    _formattingElements.emplace_back(krys::move(item));
   }
 
   StackItem *FormattingElementList::FindFromLastMarker(TagName tagName, Namespace tagNamespace) noexcept

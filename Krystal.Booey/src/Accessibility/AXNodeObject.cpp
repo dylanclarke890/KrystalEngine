@@ -799,7 +799,7 @@ namespace krys::boo
             if (std::ranges::none_of(childNodes,
                                      [&](const auto &node) { return node.get() == ownedElement.get(); }))
             {
-              childNodes.push_back(ownedElement);
+              childNodes.emplace_back(ownedElement);
             }
           }
         }

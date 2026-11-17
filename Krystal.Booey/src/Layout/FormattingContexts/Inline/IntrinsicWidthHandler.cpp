@@ -23,10 +23,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Layout/FormattingContexts/Inline/IntrinsicWidthHandler.hpp"
+#include <algorithm>
+
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBuilder.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/IntrinsicWidthHandler.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/TextOnlySimpleLineBuilder.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
@@ -388,9 +390,8 @@ namespace krys::boo::layout
       if (isInlineBoxWithInlineContent)
       {
         auto &boxGeometry = GetFormattingContext().GeometryForBox(*child);
-        maximumWidth = std::max(
-          maximumWidth, std::max<InlineLayoutUnit>(boxGeometry.MarginBorderAndPaddingStart().ToFloat(),
-                                                   boxGeometry.MarginBorderAndPaddingEnd().ToFloat()));
+        maximumWidth = std::max({maximumWidth, boxGeometry.MarginBorderAndPaddingStart().ToFloat(),
+                                 boxGeometry.MarginBorderAndPaddingEnd().ToFloat()});
         maximumWidth = std::max(maximumWidth, SimplifiedMinimumWidth(Downcast<ElementBox>(*child)));
         continue;
       }

@@ -57,7 +57,7 @@ namespace krys::boo::tests
 
       void SetNeedsDisplay() noexcept final
       {
-        NeedsDisplayRects.push_back(FloatRect(FloatPoint(), Size()));
+        NeedsDisplayRects.emplace_back(FloatPoint(), Size());
       }
 
       void SetNeedsDisplayInRect(const FloatRect &rect, ShouldClipToLayer) noexcept final

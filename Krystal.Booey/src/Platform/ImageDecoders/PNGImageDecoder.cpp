@@ -70,7 +70,7 @@ namespace krys::boo
     // Called if the decoding of the image fails.
     void PNGAPI DecodingFailed(png_structp png, png_const_charp)
     {
-      longjmp(png_jmpbuf(png), 1);
+      longjmp(png_jmpbuf(png), 1); // NOLINT(modernize-avoid-setjmp-longjmp): libpng
     }
 
     // Callbacks given to the read struct.  The first is for warnings (we want to
@@ -176,7 +176,7 @@ namespace krys::boo
       auto *decoder = static_cast<PNGImageDecoder *>(png_get_progressive_ptr(_png));
 
       // We need to do the setjmp here. Otherwise bad things will happen.
-      if (setjmp(png_jmpbuf(_png)))
+      if (setjmp(png_jmpbuf(_png))) // NOLINT(modernize-avoid-setjmp-longjmp): libpng
       {
         return decoder->SetFailed();
       }
@@ -324,7 +324,7 @@ namespace krys::boo
     uint64 pixelCount = static_cast<uint64>(width) * height + _decodedPixelCount;
     if (pixelCount > MaxDecodedPixels)
     {
-      longjmp(png_jmpbuf(png), 1);
+      longjmp(png_jmpbuf(png), 1); // NOLINT(modernize-avoid-setjmp-longjmp): libpng
     }
     _decodedPixelCount = static_cast<size_t>(pixelCount);
 
@@ -338,7 +338,7 @@ namespace krys::boo
     _doNothingOnFailure = false;
     if (!result)
     {
-      longjmp(png_jmpbuf(png), 1);
+      longjmp(png_jmpbuf(png), 1); // NOLINT(modernize-avoid-setjmp-longjmp): libpng
     }
 
     int bitDepth, colorType, interlaceType, compressionType, filterType, channels;
@@ -507,7 +507,7 @@ namespace krys::boo
       png_structp png = _reader->PngPtr();
       if (!buffer.Initialize(Size(), _premultiplyAlpha))
       {
-        longjmp(png_jmpbuf(png), 1);
+        longjmp(png_jmpbuf(png), 1); // NOLINT(modernize-avoid-setjmp-longjmp): libpng
       }
 
       unsigned colorChannels = _reader->HasAlpha() ? 4 : 3;
@@ -520,7 +520,7 @@ namespace krys::boo
         }
         if (!_reader->InterlaceBuffer())
         {
-          longjmp(png_jmpbuf(png), 1);
+          longjmp(png_jmpbuf(png), 1); // NOLINT(modernize-avoid-setjmp-longjmp): libpng
         }
       }
 
@@ -813,7 +813,7 @@ namespace krys::boo
         return;
       }
 
-      if (setjmp(png_jmpbuf(_png)))
+      if (setjmp(png_jmpbuf(_png))) // NOLINT(modernize-avoid-setjmp-longjmp): libpng
       {
         FallbackNotAnimated();
         return;
@@ -946,7 +946,7 @@ namespace krys::boo
       // Preserve the last frame as the starting state for this frame.
       if (!prevBuffer->BackingStore() || !buffer.Initialize(*prevBuffer->BackingStore()))
       {
-        longjmp(png_jmpbuf(png), 1);
+        longjmp(png_jmpbuf(png), 1); // NOLINT(modernize-avoid-setjmp-longjmp): libpng
       }
     }
     else
@@ -966,7 +966,7 @@ namespace krys::boo
         // Copy the whole previous buffer, then clear just its frame.
         if (!prevBuffer->BackingStore() || !buffer.Initialize(*prevBuffer->BackingStore()))
         {
-          longjmp(png_jmpbuf(png), 1);
+          longjmp(png_jmpbuf(png), 1); // NOLINT(modernize-avoid-setjmp-longjmp): libpng
         }
         buffer.BackingStore()->ClearRect(prevRect);
         buffer.SetHasAlpha(true);
@@ -1085,7 +1085,7 @@ namespace krys::boo
 
     _png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, DecodingFailed, nullptr);
     _info = png_create_info_struct(_png);
-    if (setjmp(png_jmpbuf(_png)))
+    if (setjmp(png_jmpbuf(_png))) // NOLINT(modernize-avoid-setjmp-longjmp): libpng
     {
       return 1;
     }
@@ -1123,7 +1123,7 @@ namespace krys::boo
 
     if (_totalFrames)
     {
-      if (setjmp(png_jmpbuf(_png)))
+      if (setjmp(png_jmpbuf(_png))) // NOLINT(modernize-avoid-setjmp-longjmp): libpng
       {
         return 1;
       }

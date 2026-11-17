@@ -188,13 +188,13 @@ namespace krys::serialisation
       Iterator() noexcept = default;
 
       Iterator(MemberIterator begin, MemberIterator end) noexcept
-          : _memberIteratorBegin(begin), _memberIteratorEnd(end), _index(0u),
-            _size(std::distance(begin, end)), _type(_size == 0 ? Type::null : Type::Member)
+          : _memberIteratorBegin(begin), _memberIteratorEnd(end), _size(std::distance(begin, end)),
+            _type(_size == 0 ? Type::null : Type::Member)
       {
       }
 
       Iterator(ValueIterator begin, ValueIterator end) noexcept
-          : _valueIteratorBegin(begin), _index(0u), _size(std::distance(begin, end)),
+          : _valueIteratorBegin(begin), _size(std::distance(begin, end)),
             _type(_size == 0 ? Type::null : Type::Value)
       {
       }
@@ -289,9 +289,7 @@ namespace krys::serialisation
       }
     }
 
-    ~JsonArchiveReader() noexcept override
-    {
-    }
+    ~JsonArchiveReader() noexcept override = default;
 
     /// @brief Sets the name for the next node created with StartNode
     void SetNextFieldName(stringview name)

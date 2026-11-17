@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include <numbers>
 
 namespace krys::boo::html::tests
 {
@@ -137,13 +138,13 @@ namespace krys::boo::html::tests
         TestData data;
         REQUIRE(Reflect<double>(*data.Element, TestAttribute) == 0.0);
 
-        Reflect<double>(*data.Element, TestAttribute, 3.14159265359);
+        Reflect<double>(*data.Element, TestAttribute, static_cast<double>(std::numbers::pi));
         REQUIRE_THAT(Reflect<double>(*data.Element, TestAttribute),
-                     Catch::Matchers::WithinRel(3.14159265359));
+                     Catch::Matchers::WithinRel(std::numbers::pi));
 
-        Reflect<double>(*data.Element, TestAttribute, -3.14159265359);
+        Reflect<double>(*data.Element, TestAttribute, -static_cast<double>(std::numbers::pi));
         REQUIRE_THAT(Reflect<double>(*data.Element, TestAttribute),
-                     Catch::Matchers::WithinRel(-3.14159265359));
+                     Catch::Matchers::WithinRel(-std::numbers::pi));
       }
     }
 

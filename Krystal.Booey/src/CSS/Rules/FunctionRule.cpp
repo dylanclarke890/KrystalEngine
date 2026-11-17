@@ -26,6 +26,7 @@
 #include "Krystal.Booey/CSS/Rules/FunctionRule.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::css
 {
@@ -36,10 +37,10 @@ namespace krys::boo::css
       *new FunctionRule(name, krys::move(parameters), krys::move(returnType), krys::move(rules)));
   }
 
-  FunctionRule::FunctionRule(const CSSOMStringAtom &name, List<Parameter> &&parameters,
+  FunctionRule::FunctionRule(CSSOMStringAtom name, List<Parameter> &&parameters,
                              CustomPropertySyntax &&returnType, List<Ref<Rule>> &&rules) noexcept
-      : GroupRule(RuleType::Function, krys::move(rules)), _name(name), _parameters(krys::move(parameters)),
-        _returnType(krys::move(returnType))
+      : GroupRule(RuleType::Function, krys::move(rules)), _name(krys::move(name)),
+        _parameters(krys::move(parameters)), _returnType(krys::move(returnType))
   {
   }
 

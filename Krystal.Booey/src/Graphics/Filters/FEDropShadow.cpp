@@ -23,6 +23,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -33,10 +34,10 @@ namespace krys::boo
     return AdoptRef(*new FEDropShadow(stdX, stdY, dx, dy, shadowColor, shadowOpacity));
   }
 
-  FEDropShadow::FEDropShadow(float stdX, float stdY, float dx, float dy, const Color &shadowColor,
+  FEDropShadow::FEDropShadow(float stdX, float stdY, float dx, float dy, Color shadowColor,
                              float shadowOpacity) noexcept
       : FilterEffect(FilterEffect::Type::FEDropShadow), _stdX(stdX), _stdY(stdY), _dx(dx), _dy(dy),
-        _shadowColor(shadowColor), _shadowOpacity(shadowOpacity)
+        _shadowColor(krys::move(shadowColor)), _shadowOpacity(shadowOpacity)
   {
   }
 

@@ -106,7 +106,7 @@ namespace krys::boo::style
             bool blendToIdentity = false) const noexcept override;
 
   private:
-    TranslateTransformFunction(const LengthPercentage &, const LengthPercentage &, const Length &,
+    TranslateTransformFunction(LengthPercentage, LengthPercentage, const Length &,
                                TransformFunctionBase::Type) noexcept;
 
     LengthPercentage _x;

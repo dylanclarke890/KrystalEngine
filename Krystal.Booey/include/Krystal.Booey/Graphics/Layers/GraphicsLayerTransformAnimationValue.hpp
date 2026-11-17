@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformOperations.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -37,9 +38,9 @@ namespace krys::boo
     TransformOperations _value;
 
   public:
-    GraphicsLayerTransformAnimationValue(double keyTime, const TransformOperations &value,
+    GraphicsLayerTransformAnimationValue(double keyTime, TransformOperations value,
                                          TimingFunction *timingFunction = nullptr) noexcept
-        : GraphicsLayerAnimationValue(keyTime, timingFunction), _value(value)
+        : GraphicsLayerAnimationValue(keyTime, timingFunction), _value(krys::move(value))
     {
     }
 

@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontFeatureValues.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::css
 {
@@ -64,12 +65,13 @@ namespace krys::boo::css
       bool _syntheticBold;
       bool _syntheticItalic;
 
-      CSSFontAccessor(CSSFontFace &fontFace, const FontDescription &fontDescription,
-                      const FontPaletteValues &fontPaletteValues, RefPtr<FontFeatureValues> fontFeatureValues,
+      CSSFontAccessor(CSSFontFace &fontFace, FontDescription fontDescription,
+                      FontPaletteValues fontPaletteValues, RefPtr<FontFeatureValues> fontFeatureValues,
                       bool syntheticBold, bool syntheticItalic) noexcept
-          : _fontFace(ShareRef(fontFace)), _fontDescription(fontDescription),
-            _fontFeatureValues(krys::move(fontFeatureValues)), _fontPaletteValues(fontPaletteValues),
-            _syntheticBold(syntheticBold), _syntheticItalic(syntheticItalic)
+          : _fontFace(ShareRef(fontFace)), _fontDescription(krys::move(fontDescription)),
+            _fontFeatureValues(krys::move(fontFeatureValues)),
+            _fontPaletteValues(krys::move(fontPaletteValues)), _syntheticBold(syntheticBold),
+            _syntheticItalic(syntheticItalic)
       {
       }
 

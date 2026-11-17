@@ -63,7 +63,7 @@ namespace krys::boo
       : Renderer(&flexItem), FlexBaseContentSize(flexBaseContentSize),
         MainAxisBorderAndPadding(mainAxisBorderAndPadding), MainAxisMargin(mainAxisMargin),
         MinMaxSizes(minMaxSizes), HypotheticalMainContentSize(ConstrainSizeByMinMax(flexBaseContentSize)),
-        Frozen(false), EverHadLayout(everHadLayout)
+        EverHadLayout(everHadLayout)
   {
     krys_debug_assert(!flexItem.IsOutOfFlowPositioned());
   }

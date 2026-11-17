@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -53,9 +55,9 @@ namespace krys::boo::layout
 
       KRYS_NODISCARD InlineLayoutUnit Height() const noexcept
       {
-        return std::max(NonLineBoxRelativeAlignedMaximumHeight,
-                        std::max(TopAndBottomAlignedMaximumHeightValue.Top.value_or(0.f),
-                                 TopAndBottomAlignedMaximumHeightValue.Bottom.value_or(0.f)));
+        return std::max({NonLineBoxRelativeAlignedMaximumHeight,
+                         TopAndBottomAlignedMaximumHeightValue.Top.value_or(0.f),
+                         TopAndBottomAlignedMaximumHeightValue.Bottom.value_or(0.f)});
       }
     };
 

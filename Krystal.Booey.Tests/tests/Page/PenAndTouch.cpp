@@ -211,7 +211,7 @@ namespace krys::boo::tests
                  [&](dom::Event &event)
                  {
                    CHECK_FALSE(event.Cancelable());
-                   fixture.Records.push_back("raw:a");
+                   fixture.Records.emplace_back("raw:a");
                  });
       (void)fixture.Touch(Type::TouchMove, {TouchFixture::Point(0, State::TouchMoved, 10, 70)});
       CHECK(fixture.Take()

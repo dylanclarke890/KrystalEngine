@@ -28,8 +28,10 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 
 namespace krys::boo::dom
 {
@@ -406,7 +408,7 @@ namespace krys::boo::dom
     }
   }
 
-  PointerEvent::PointerEvent(DOMStringAtom type, PointerID pointerId, const DOMString &pointerType,
+  PointerEvent::PointerEvent(DOMStringAtom type, PointerID pointerId, DOMString pointerType,
                              IsPrimary isPrimary) noexcept
       : MouseEvent(type, TrustedInit(TypeCanBubble(type), TypeIsCancelable(type), TypeIsComposed(type)),
                    nullptr, {}, {}, 0, 0, {}, ButtonForType(type), ButtonsForType(type), nullptr, 0,
@@ -415,8 +417,8 @@ namespace krys::boo::dom
         // FIXME: This may be wrong because we can create an event from a pressure sensitive device.
         // We don't have a backing MouseEvent to consult pressure/force information from, though, so let's do
         // the next best thing.
-        _pressure(PressureForPressureInsensitiveInputDevices(Buttons())), _pointerType(pointerType),
-        _isPrimary(isPrimary == IsPrimary::Yes),
+        _pressure(PressureForPressureInsensitiveInputDevices(Buttons())),
+        _pointerType(krys::move(pointerType)), _isPrimary(isPrimary == IsPrimary::Yes),
         _fractionalCoordinatesAllowed(FractionalCoordinatesAllowedForType(type))
   {
   }

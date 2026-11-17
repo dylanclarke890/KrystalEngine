@@ -287,7 +287,7 @@ namespace krys::boo::html
     };
     for (auto &file : _fileList->Files())
     {
-      settings.SelectedFiles.push_back(utf8_string(file->Path()));
+      settings.SelectedFiles.emplace_back(file->Path());
     }
     return settings;
   }

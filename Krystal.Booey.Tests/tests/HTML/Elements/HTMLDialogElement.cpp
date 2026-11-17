@@ -55,15 +55,15 @@ namespace krys::boo::html::tests
         Handles.push_back(dialog.AddEventListener(u8"cancel",
                                                   [this](dom::Event &event)
                                                   {
-                                                    Events.push_back(event.Cancelable() ? "cancel!"
-                                                                                        : "cancel");
+                                                    Events.emplace_back(event.Cancelable() ? "cancel!"
+                                                                                           : "cancel");
                                                     if (PreventCancel)
                                                     {
                                                       event.PreventDefault();
                                                     }
                                                   }));
         Handles.push_back(
-          dialog.AddEventListener(u8"close", [this](dom::Event &) { Events.push_back("close"); }));
+          dialog.AddEventListener(u8"close", [this](dom::Event &) { Events.emplace_back("close"); }));
       }
 
       /// @brief The events so far, after running the queued tasks (toggle and close are queued).

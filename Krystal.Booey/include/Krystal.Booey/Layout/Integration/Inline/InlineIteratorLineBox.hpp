@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBoxLegacyPath.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo::inline_iterator
@@ -407,7 +408,7 @@ namespace krys::boo::inline_iterator
     {
     }
 
-    explicit LineBoxIterator(const LineBox &lineBox) noexcept : _lineBox(lineBox)
+    explicit LineBoxIterator(LineBox lineBox) noexcept : _lineBox(krys::move(lineBox))
     {
     }
 

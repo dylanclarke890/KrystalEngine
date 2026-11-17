@@ -514,7 +514,7 @@ namespace krys::gfx
     for (int32 i = 0; i < segments; ++i)
     {
       const float angle = fullTurn * static_cast<float>(i) / static_cast<float>(segments);
-      _polygon.push_back({centre.x + _halfWidth * std::cos(angle), centre.y + _halfWidth * std::sin(angle)});
+      _polygon.emplace_back(centre.x + _halfWidth * std::cos(angle), centre.y + _halfWidth * std::sin(angle));
     }
     AddPolygon();
   }

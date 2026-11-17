@@ -28,13 +28,15 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
 namespace krys::boo::dom
 {
   Event::Event(DOMStringAtom type, const EventInit &eventInitDict) noexcept
-      : _type(type), _createTime(html::EventLoop::Current().Now()), _bubbles(eventInitDict.Bubbles),
-        _cancellable(eventInitDict.Cancelable), _composed(eventInitDict.Composed)
+      : _type(krys::move(type)), _createTime(html::EventLoop::Current().Now()),
+        _bubbles(eventInitDict.Bubbles), _cancellable(eventInitDict.Cancelable),
+        _composed(eventInitDict.Composed)
   {
     // 1. Let event be the result of running the inner event creation steps with this interface, null, now,
     // and eventInitDict.

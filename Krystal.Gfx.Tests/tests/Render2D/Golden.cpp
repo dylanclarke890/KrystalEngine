@@ -305,7 +305,7 @@ namespace krys::gfx::tests
       for (const char32_t *character = text; *character != U'\0'; ++character)
       {
         glyphs.push_back(face.GlyphIndex(*character));
-        positions.push_back({x, 0.f});
+        positions.emplace_back(x, 0.f);
         x += face.Advance(glyphs.back(), size);
       }
       renderer.DrawGlyphs(face, size, glyphs, positions, baseline, paint);

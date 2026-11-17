@@ -260,7 +260,7 @@ namespace krys::boo
     LayoutUnit _minContentSize;
     LayoutUnit _maxContentSize;
 
-    SizingState _sizingState;
+    SizingState _sizingState {SizingState::ColumnSizingFirstIteration};
 
     GridBaselineAlignment _baselineAlignment;
 

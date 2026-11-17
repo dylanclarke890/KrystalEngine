@@ -1422,7 +1422,7 @@ namespace krys::boo::html
     RefPtr<HTMLOptionElement> foundSelected;
     auto handleOptionElement = [&](HTMLOptionElement &option)
     {
-      _listItems.push_back(CreateWeakPtr(&option));
+      _listItems.emplace_back(CreateWeakPtr(&option));
       if (updateSelectedStates && !_multiple)
       {
         if (option.SelectedWithoutUpdate())

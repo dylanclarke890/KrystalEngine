@@ -34,13 +34,14 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::dom
 {
   DOMTokenList::DOMTokenList(Element &element, DOMStringAtom attributeName,
                              IsSupportedTokenFunction &&isSupportedToken) noexcept
-      : _attributeName {attributeName}, _element {ShareCheckedRef(element)},
+      : _attributeName {krys::move(attributeName)}, _element {ShareCheckedRef(element)},
         _isSupportedToken {krys::move(isSupportedToken)}
   {
     // 1. Let element be set’s element.

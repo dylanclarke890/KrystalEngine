@@ -13,7 +13,7 @@
 namespace krys
 {
   Application::Application(int argc, char **argv, const ApplicationSettings &settings)
-      : _context(CreateUnique<ApplicationContext>()), _running(false), _isWindowMinimised(false)
+      : _context(CreateUnique<ApplicationContext>())
   {
     pal::Initialise();
     Random::Initialise();

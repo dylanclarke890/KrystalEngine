@@ -381,7 +381,7 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD double AdjustedCoordinateForType(double coordinate) const noexcept;
 
-    PointerEvent(DOMStringAtom type, PointerID pointerId, const DOMString &pointerType,
+    PointerEvent(DOMStringAtom type, PointerID pointerId, DOMString pointerType,
                  IsPrimary isPrimary) noexcept;
 
     PointerEvent(DOMStringAtom type, const PlatformTouchEvent &event,

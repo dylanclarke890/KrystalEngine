@@ -486,8 +486,7 @@ namespace krys::pal
 
   namespace win32
   {
-    Win32Window::Win32Window(const WindowSettings &settings)
-        : _settings(settings), _callbacks(), _handle(nullptr)
+    Win32Window::Win32Window(WindowSettings settings) : _settings(krys::move(settings)), _callbacks()
     {
       ::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 

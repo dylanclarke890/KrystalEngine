@@ -33,7 +33,7 @@
 namespace krys::boo::css
 {
   inline StyleProperties::StyleProperties(css::ParserMode mode) noexcept
-      : _parserMode(static_cast<uint32>(mode)), _isMutable(true)
+      : _parserMode(static_cast<uint32>(mode))
   {
   }
 

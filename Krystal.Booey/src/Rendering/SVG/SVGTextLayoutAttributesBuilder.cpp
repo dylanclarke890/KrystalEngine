@@ -153,7 +153,7 @@ namespace krys::boo
       size_t atPosition = _textPositions.size();
       if (element)
       {
-        _textPositions.push_back(TextPosition(element.get(), _textLength));
+        _textPositions.emplace_back(element.get(), _textLength);
       }
 
       CollectTextPositioningElements(*inlineChild, lastCharacterWasSpace);

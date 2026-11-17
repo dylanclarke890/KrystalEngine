@@ -35,6 +35,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStreamSource.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathParser.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSource.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::style
 {
@@ -98,9 +99,8 @@ namespace krys::boo::style
   class ShapeSVGPathSource final : public svg::SVGPathSource
   {
   public:
-    explicit ShapeSVGPathSource(const Position &startPoint, const Shape &shape,
-                                const FloatSize &boxSize) noexcept
-        : _start(startPoint), _shape(shape), _boxSize(boxSize), _endIndex(shape.Commands.size())
+    explicit ShapeSVGPathSource(Position startPoint, const Shape &shape, const FloatSize &boxSize) noexcept
+        : _start(krys::move(startPoint)), _shape(shape), _boxSize(boxSize), _endIndex(shape.Commands.size())
     {
     }
 

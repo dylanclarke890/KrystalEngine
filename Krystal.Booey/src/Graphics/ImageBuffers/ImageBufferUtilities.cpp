@@ -42,7 +42,7 @@ namespace krys::boo
 
   static void PNGError(png_structp png, png_const_charp) noexcept
   {
-    longjmp(png_jmpbuf(png), 1);
+    longjmp(png_jmpbuf(png), 1); // NOLINT(modernize-avoid-setjmp-longjmp): libpng
   }
 
   static void PNGWarning(png_structp, png_const_charp) noexcept
@@ -68,7 +68,7 @@ namespace krys::boo
       return false;
     }
 
-    if (setjmp(png_jmpbuf(png)))
+    if (setjmp(png_jmpbuf(png))) // NOLINT(modernize-avoid-setjmp-longjmp): libpng
     {
       png_destroy_write_struct(&png, &info);
       return false;
@@ -101,7 +101,7 @@ namespace krys::boo
   static void JPEGErrorExit(j_common_ptr info) noexcept
   {
     auto *error = reinterpret_cast<JPEGErrorManager *>(info->err);
-    longjmp(error->SetjmpBuffer, 1);
+    longjmp(error->SetjmpBuffer, 1); // NOLINT(modernize-avoid-setjmp-longjmp): libjpeg
   }
 
   static void JPEGOutputMessage(j_common_ptr) noexcept
@@ -126,7 +126,7 @@ namespace krys::boo
 
     unsigned char *buffer = nullptr;
     unsigned long size = 0;
-    if (setjmp(error.SetjmpBuffer))
+    if (setjmp(error.SetjmpBuffer)) // NOLINT(modernize-avoid-setjmp-longjmp): libjpeg
     {
       jpeg_destroy_compress(&info);
       std::free(buffer);

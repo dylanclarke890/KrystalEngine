@@ -65,7 +65,7 @@ namespace krys::boo::dom
       return;
     }
 
-    _fontsToBeginLoading.push_back(CachedResourceHandle<CachedFont>(font));
+    _fontsToBeginLoading.emplace_back(font);
     // Increment the request count now, in order to prevent didFinishLoad from being dispatched after this
     // font has been requested but before it began loading. Balanced by DecrementRequestCount() in
     // LoadPendingFonts() and in StopLoadingAndClearFonts().

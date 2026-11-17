@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Rendering/Painting/TextDecorationPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/TextPaintStyle.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -54,7 +55,8 @@ namespace krys::boo
     {
     }
 
-    StyledMarkedText(const MarkedText &marker, Style style) noexcept : MarkedText {marker}, MarkedStyle(style)
+    StyledMarkedText(const MarkedText &marker, Style style) noexcept
+        : MarkedText {marker}, MarkedStyle(krys::move(style))
     {
     }
 

@@ -238,7 +238,7 @@ namespace krys::boo::css
       }
       if (values.empty())
       {
-        values.push_back(Ref<Value>(krys::move(value)));
+        values.emplace_back(krys::move(value));
       }
     }
 
@@ -372,7 +372,7 @@ namespace krys::boo::css
       if (auto *styleValue = std::get_if<RefPtr<CSSStyleValue>>(&value))
       {
         krys_assert(*styleValue);
-        styleValues.push_back(Ref<CSSStyleValue>(krys::move(*styleValue)));
+        styleValues.emplace_back(krys::move(*styleValue));
         continue;
       }
       auto result = ParseStyleValue(document, property, std::get<CSSOMString>(value), true);

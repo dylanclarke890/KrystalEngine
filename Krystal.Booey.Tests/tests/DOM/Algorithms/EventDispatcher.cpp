@@ -236,7 +236,7 @@ namespace krys::boo::dom::tests
       auto stopper = fixture.Child->AddEventListener(event_names::Click,
                                                      [&](Event &e)
                                                      {
-                                                       fixture.Log.push_back("child stops");
+                                                       fixture.Log.emplace_back("child stops");
                                                        e.StopPropagation();
                                                      });
       fixture.Listen(*fixture.Child, "child", false);
@@ -285,7 +285,7 @@ namespace krys::boo::dom::tests
                                                    {
                                                      added = fixture.Child->AddEventListener(
                                                        event_names::Click,
-                                                       [&](Event &) { fixture.Log.push_back("added"); });
+                                                       [&](Event &) { fixture.Log.emplace_back("added"); });
                                                    });
       auto event = CreateRef<Event>(event_names::Click);
       REQUIRE_FALSE(fixture.Child->DispatchEvent(*event).HasException());
@@ -297,7 +297,7 @@ namespace krys::boo::dom::tests
       AddEventListenerOptions once;
       once.Once = true;
       auto listener = fixture.Child->AddEventListener(
-        event_names::Click, [&](Event &) { fixture.Log.push_back("once"); }, once);
+        event_names::Click, [&](Event &) { fixture.Log.emplace_back("once"); }, once);
       for (int i = 0; i < 2; ++i)
       {
         auto event = CreateRef<Event>(event_names::Click);

@@ -270,7 +270,7 @@ namespace krys::boo::html::tests
         void HandleEvent(dom::Event &) noexcept override
         {
           (void)Target->SetAttribute(u8"value", u8"from-listener");
-          Calls->push_back(u8"returned");
+          Calls->emplace_back(u8"returned");
         }
       };
 

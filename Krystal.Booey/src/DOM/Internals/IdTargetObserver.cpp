@@ -25,11 +25,12 @@
 
 #include "Krystal.Booey/DOM/Internals/IdTargetObserver.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::dom
 {
   IdTargetObserver::IdTargetObserver(IdTargetObserverRegistry &registry, DOMStringAtom id) noexcept
-      : _registry(&registry), _id(id)
+      : _registry(&registry), _id(krys::move(id))
   {
     _registry->AddObserver(_id, *this);
   }

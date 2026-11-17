@@ -16,7 +16,7 @@ namespace krys::serialisation
     io::IStreamWriter &_stream;
 
   public:
-    typedef char Ch;
+    using Ch = char;
 
     RapidJsonStreamWriterAdapter(io::IStreamWriter &stream) : _stream(stream)
     {
@@ -52,7 +52,7 @@ namespace krys::serialisation
     io::IStreamReader &_stream;
 
   public:
-    typedef char Ch;
+    using Ch = char;
 
     RapidJsonStreamReaderAdapter(io::IStreamReader &stream) : _stream(stream)
     {

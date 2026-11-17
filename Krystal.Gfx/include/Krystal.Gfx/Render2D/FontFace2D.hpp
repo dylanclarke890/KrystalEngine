@@ -14,7 +14,7 @@
 #include "Krystal.Text/FreeTypeFace.hpp"
 
 // FreeType's own declaration of a size handle.
-typedef struct FT_SizeRec_ *FT_Size;
+using FT_Size = struct FT_SizeRec_ *;
 
 namespace krys::gfx
 {
@@ -88,7 +88,7 @@ namespace krys::gfx
       Create(Ref<text::FreeTypeFace> face, const FontFace2DOptions &options = {}) noexcept;
 
     /// @brief Use `Create`.
-    FontFace2D(Ref<text::FreeTypeFace> &&face, const FontFace2DOptions &options, FT_Size size) noexcept;
+    FontFace2D(Ref<text::FreeTypeFace> &&face, FontFace2DOptions options, FT_Size size) noexcept;
 
     ~FontFace2D() noexcept;
 

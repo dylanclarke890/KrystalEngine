@@ -1059,7 +1059,7 @@ namespace krys
       for (const char32_t *character = text; *character != U'\0'; ++character)
       {
         glyphs.push_back(font->GlyphIndex(*character));
-        positions.push_back({pen, 0.f});
+        positions.emplace_back(pen, 0.f);
         pen += font->Advance(glyphs.back(), size);
       }
       _renderer->DrawGlyphs(*font, size, glyphs, positions, {x, baseline}, paint);

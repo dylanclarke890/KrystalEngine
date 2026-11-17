@@ -72,7 +72,7 @@ namespace krys::boo::css
     bool _loading {false};
     ImportRule::SupportsCondition _supportsCondition;
 
-    ImportRule(const CSSOMString &href, mq::MediaQueryList &&mediaQueries,
+    ImportRule(CSSOMString href, mq::MediaQueryList &&mediaQueries,
                Maybe<CascadeLayerName> &&cascadeLayerName,
                ImportRule::SupportsCondition &&supportsCondition) noexcept;
 

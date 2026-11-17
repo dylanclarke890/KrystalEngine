@@ -11,8 +11,8 @@ namespace krys::boo::dom::tests
   {
     auto target = CreateRef<EventTarget>();
     List<std::string> dispatched;
-    auto first = target->AddEventListener(u8"first", [&](Event &) { dispatched.push_back("first"); });
-    auto second = target->AddEventListener(u8"second", [&](Event &) { dispatched.push_back("second"); });
+    auto first = target->AddEventListener(u8"first", [&](Event &) { dispatched.emplace_back("first"); });
+    auto second = target->AddEventListener(u8"second", [&](Event &) { dispatched.emplace_back("second"); });
 
     SECTION("Without a scope an event is dispatched straight away")
     {

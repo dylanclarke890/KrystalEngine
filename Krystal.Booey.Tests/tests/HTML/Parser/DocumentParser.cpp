@@ -97,7 +97,7 @@ namespace krys::boo::html::tests
 
             auto &value = attr->Value();
 
-            attributes.push_back({attrNamespaceName + attrLocalName, value});
+            attributes.emplace_back(attrNamespaceName + attrLocalName, value);
           }
 
           std::sort(attributes.begin(), attributes.end(),

@@ -43,7 +43,7 @@ namespace krys::boo
   {
     auto menuList = AdoptRef(*new AXMenuList(id, renderer, cache));
     menuList->_popup->SetParent(menuList.get());
-    menuList->_children.push_back(menuList->_popup);
+    menuList->_children.emplace_back(menuList->_popup);
     menuList->_childrenInitialized = true;
     return menuList;
   }

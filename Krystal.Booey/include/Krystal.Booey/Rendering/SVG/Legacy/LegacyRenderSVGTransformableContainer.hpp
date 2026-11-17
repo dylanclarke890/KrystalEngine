@@ -69,10 +69,10 @@ namespace krys::boo
       return _additionalTranslation;
     }
 
+    void GetElement() const = delete;
+
   private:
     KRYS_NODISCARD svg::SVGGraphicsElement &GraphicsElement() noexcept;
-
-    void GetElement() const = delete;
 
     bool CalculateLocalTransform() noexcept override;
 

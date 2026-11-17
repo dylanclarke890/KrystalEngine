@@ -155,8 +155,7 @@ namespace krys::boo
     KRYS_NODISCARD bool Equals(const PathOperation &other) const noexcept override;
 
   private:
-    ReferencePathOperation(const style::URL &, const css::CSSOMStringAtom &fragment,
-                           const svg::SVGElement *) noexcept;
+    ReferencePathOperation(style::URL, css::CSSOMStringAtom fragment, const svg::SVGElement *) noexcept;
 
     explicit ReferencePathOperation(Maybe<Path> &&) noexcept;
   };

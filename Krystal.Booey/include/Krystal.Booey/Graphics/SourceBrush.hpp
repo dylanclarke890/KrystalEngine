@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/Pattern.hpp"
 #include "Krystal.Booey/Graphics/SourceBrushLogicalGradient.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys
 {
@@ -50,7 +51,7 @@ namespace krys::boo
   public:
     SourceBrush() noexcept = default;
 
-    SourceBrush(const boo::Color &color) noexcept : _color(color)
+    SourceBrush(boo::Color color) noexcept : _color(krys::move(color))
     {
     }
 

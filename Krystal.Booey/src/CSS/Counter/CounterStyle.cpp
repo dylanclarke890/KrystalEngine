@@ -30,6 +30,7 @@
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <limits>
@@ -593,9 +594,8 @@ namespace krys::boo::css
     return false;
   }
 
-  CounterStyle::CounterStyle(const CounterStyleDescriptors &descriptors,
-                             bool isPredefinedCounterStyle) noexcept
-      : _descriptors(descriptors), _predefinedCounterStyle(isPredefinedCounterStyle)
+  CounterStyle::CounterStyle(CounterStyleDescriptors descriptors, bool isPredefinedCounterStyle) noexcept
+      : _descriptors(krys::move(descriptors)), _predefinedCounterStyle(isPredefinedCounterStyle)
   {
   }
 

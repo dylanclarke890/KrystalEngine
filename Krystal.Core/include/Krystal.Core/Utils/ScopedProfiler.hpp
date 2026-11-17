@@ -10,7 +10,7 @@ namespace krys
   class ScopedProfiler
   {
   public:
-    ScopedProfiler(const string &name) noexcept;
+    ScopedProfiler(string name) noexcept;
 
     ~ScopedProfiler() noexcept;
 

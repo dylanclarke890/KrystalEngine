@@ -4,7 +4,7 @@
 
 namespace krys::io
 {
-  Path::Path(const std::filesystem::path &path) : _path(path)
+  Path::Path(std::filesystem::path path) : _path(krys::move(path))
   {
   }
 

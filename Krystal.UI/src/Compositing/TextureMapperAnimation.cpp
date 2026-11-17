@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFloatAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerTransformAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformOperations.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
 namespace krys::ui
@@ -74,7 +75,7 @@ namespace krys::ui
           }
           else
           {
-            operations.push_back(boo::PassthroughFilterOperation::Create());
+            operations.emplace_back(boo::PassthroughFilterOperation::Create());
           }
         }
         else
@@ -85,7 +86,7 @@ namespace krys::ui
           }
           else
           {
-            operations.push_back(boo::PassthroughFilterOperation::Create());
+            operations.emplace_back(boo::PassthroughFilterOperation::Create());
           }
         }
       }
@@ -193,6 +194,7 @@ namespace krys::ui
   }
 
   TextureMapperAnimation::TextureMapperAnimation(utf8_stringview name,
+                                                 // NOLINTNEXTLINE(modernize-pass-by-value): explicit copy.
                                                  const boo::GraphicsLayerKeyframeValueList &keyframes,
                                                  const boo::GraphicsLayerAnimation &animation,
                                                  MonotonicTime::duration startTime, boo::Seconds pauseTime,

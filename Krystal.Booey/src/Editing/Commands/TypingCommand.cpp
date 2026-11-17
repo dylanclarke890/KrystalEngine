@@ -469,7 +469,7 @@ namespace krys::boo
     List<RefPtr<dom::StaticRange>> targetRanges;
     if (auto init = dom::StaticRangeInit::Create(range->Start, range->End); !init.HasException())
     {
-      targetRanges.push_back(CreateRef<dom::StaticRange>(init.ReleaseValue()));
+      targetRanges.emplace_back(CreateRef<dom::StaticRange>(init.ReleaseValue()));
     }
     return GetDocument().GetEditor().WillApplyEditing(*this, krys::move(targetRanges));
   }

@@ -198,7 +198,7 @@ namespace krys::boo
         return FloatPointGraph::Polygon();
       }
 
-      outPoly.push_back(std::make_pair(currentNode, nextNode));
+      outPoly.emplace_back(currentNode, nextNode);
 
       previousNode = currentNode;
       currentNode = nextNode;

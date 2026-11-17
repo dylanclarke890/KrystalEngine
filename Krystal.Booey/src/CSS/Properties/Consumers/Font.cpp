@@ -331,7 +331,7 @@ namespace krys::boo::css::parse_property
     {
       if (auto ident = ConsumeGenericFamilyUnresolved(tokens))
       {
-        list.push_back(UnresolvedFontFamilyName {*ident});
+        list.emplace_back(*ident);
       }
       else
       {
@@ -340,7 +340,7 @@ namespace krys::boo::css::parse_property
         {
           return null;
         }
-        list.push_back(UnresolvedFontFamilyName {krys::move(*familyName)});
+        list.emplace_back(krys::move(*familyName));
       }
     } while (ConsumeComma(tokens));
     return list;

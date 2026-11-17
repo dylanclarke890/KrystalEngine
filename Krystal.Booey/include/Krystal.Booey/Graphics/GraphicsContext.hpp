@@ -107,7 +107,7 @@ namespace krys::boo
     GraphicsContext(IsDeferred = IsDeferred::No, const GraphicsContextState::ChangeFlags & = {},
                     InterpolationQuality = InterpolationQuality::Default) noexcept;
 
-    GraphicsContext(IsDeferred, const GraphicsContextState &) noexcept;
+    GraphicsContext(IsDeferred, GraphicsContextState) noexcept;
 
     virtual ~GraphicsContext() noexcept;
 

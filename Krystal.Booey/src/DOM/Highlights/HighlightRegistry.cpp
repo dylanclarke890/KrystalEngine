@@ -80,7 +80,7 @@ namespace krys::boo::dom
     else
     {
       List<Ref<AbstractRange>> ranges;
-      ranges.push_back(krys::move(value));
+      ranges.emplace_back(krys::move(value));
       Set(AnnotationHighlightKey(), Highlight::Create(krys::move(ranges)));
     }
   }

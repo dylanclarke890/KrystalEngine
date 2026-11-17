@@ -21,9 +21,9 @@ namespace krys::serialisation
     struct NodeMetadata
     {
       rapidxml::xml_node<> *Node;
-      size_t NameCounter;
+      size_t NameCounter {0u};
 
-      NodeMetadata(rapidxml::xml_node<> *node) noexcept : Node(node), NameCounter(0u)
+      NodeMetadata(rapidxml::xml_node<> *node) noexcept : Node(node)
       {
       }
 

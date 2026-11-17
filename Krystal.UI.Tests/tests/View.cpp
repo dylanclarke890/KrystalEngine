@@ -920,7 +920,7 @@ namespace krys::ui::tests
     view.SetPointerLockHandler(
       [&](bool locked)
       {
-        records.push_back(locked ? "lock" : "unlock");
+        records.emplace_back(locked ? "lock" : "unlock");
         return hostLocks;
       });
 
@@ -2795,10 +2795,10 @@ namespace krys::ui::tests
       {
         switch (event.Type)
         {
-          case LoadEventType::Started:   events.push_back("started"); break;
-          case LoadEventType::Committed: events.push_back("committed"); break;
-          case LoadEventType::Finished:  events.push_back("finished"); break;
-          case LoadEventType::Failed:    events.push_back("failed"); break;
+          case LoadEventType::Started:   events.emplace_back("started"); break;
+          case LoadEventType::Committed: events.emplace_back("committed"); break;
+          case LoadEventType::Finished:  events.emplace_back("finished"); break;
+          case LoadEventType::Failed:    events.emplace_back("failed"); break;
         }
       });
 
@@ -2827,7 +2827,7 @@ namespace krys::ui::tests
       view.SetNavigationHandler(
         [&](const NavigationRequest &request)
         {
-          asked.push_back(std::string(request.URL.begin(), request.URL.end()));
+          asked.emplace_back(request.URL.begin(), request.URL.end());
           view.Load(boo::url::URL(request.URL));
         });
       view.Document().GetElementById(u8"next")->DispatchSimulatedClick(nullptr);

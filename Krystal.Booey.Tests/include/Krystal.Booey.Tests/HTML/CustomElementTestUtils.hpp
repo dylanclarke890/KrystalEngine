@@ -29,7 +29,7 @@ namespace krys::boo::html::tests
   public:
     LoggingElement(HTMLElement &element, Log &log) noexcept : CustomElement(element), _log(log)
     {
-      _log.push_back(u8"constructed");
+      _log.emplace_back(u8"constructed");
     }
 
     void ConnectedCallback() noexcept override

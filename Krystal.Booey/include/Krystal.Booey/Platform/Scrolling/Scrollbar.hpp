@@ -135,11 +135,11 @@ namespace krys::boo
 
     KRYS_NODISCARD static int32 PageStep(int32 viewWidthOrHeight, int32 contentWidthOrHeight) noexcept
     {
-      return std::max(
-        std::max<int32>(
-          std::lround(static_cast<float>(viewWidthOrHeight) * Scrollbar::MinFractionToStepWhenPaging()),
-          std::lround(static_cast<float>(contentWidthOrHeight - Scrollbar::MaxOverlapBetweenPages()))),
-        1);
+      return std::max({static_cast<int32>(std::lround(static_cast<float>(viewWidthOrHeight)
+                                                      * Scrollbar::MinFractionToStepWhenPaging())),
+                       static_cast<int32>(std::lround(
+                         static_cast<float>(contentWidthOrHeight - Scrollbar::MaxOverlapBetweenPages()))),
+                       1});
     }
 
     KRYS_NODISCARD static int32 PageStep(int32 viewWidthOrHeight) noexcept
@@ -149,9 +149,8 @@ namespace krys::boo
 
     KRYS_NODISCARD static float PageStepDelta(int32 widthOrHeight) noexcept
     {
-      return std::max(std::max(static_cast<float>(widthOrHeight) * Scrollbar::MinFractionToStepWhenPaging(),
-                               static_cast<float>(widthOrHeight - Scrollbar::MaxOverlapBetweenPages())),
-                      1.0f);
+      return std::max({static_cast<float>(widthOrHeight) * Scrollbar::MinFractionToStepWhenPaging(),
+                       static_cast<float>(widthOrHeight - Scrollbar::MaxOverlapBetweenPages()), 1.0f});
     }
 
     KRYS_NODISCARD ScrollableArea &GetScrollableArea() const noexcept;

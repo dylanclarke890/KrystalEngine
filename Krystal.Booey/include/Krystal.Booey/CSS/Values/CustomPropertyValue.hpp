@@ -33,6 +33,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::css
 {
@@ -47,8 +48,8 @@ namespace krys::boo::css
     const VariantValue _value;
     mutable CSSOMString _cachedCSSText;
 
-    CustomPropertyValue(const CSSOMStringAtom &name, VariantValue &&value) noexcept
-        : css::Value(ValueType::CustomProperty), _name(name), _value(krys::move(value))
+    CustomPropertyValue(CSSOMStringAtom name, VariantValue &&value) noexcept
+        : css::Value(ValueType::CustomProperty), _name(krys::move(name)), _value(krys::move(value))
     {
     }
 

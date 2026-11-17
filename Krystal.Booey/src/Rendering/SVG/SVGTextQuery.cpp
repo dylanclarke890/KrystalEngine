@@ -107,7 +107,7 @@ namespace krys::boo
 
       if (auto *inlineTextBox = DynamicDowncast<inline_iterator::SVGTextBox>(*box))
       {
-        _textBoxes.push_back(inline_iterator::SVGTextBoxIterator {*inlineTextBox});
+        _textBoxes.emplace_back(*inlineTextBox);
       }
 
       box.TraverseLineRightwardOnLine();

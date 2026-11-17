@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -39,7 +40,7 @@ namespace krys::boo
       : _context {context}, _shadow {shadow},
         _onlyDrawsShadow {!isLastShadowIteration || !lastShadowIterationShouldDrawText},
         _avoidDrawingShadow {ShadowIsCompletelyCoveredByText(opaque)},
-        _nothingToDraw {shadow && _avoidDrawingShadow && _onlyDrawsShadow}, _didSaveContext {false}
+        _nothingToDraw {shadow && _avoidDrawingShadow && _onlyDrawsShadow}
   {
     if (!shadow || _nothingToDraw)
     {
@@ -99,11 +100,11 @@ namespace krys::boo
   }
 
   TextPainter::TextPainter(GraphicsContext &context, const FontCascade &font, const RenderStyle &renderStyle,
-                           const TextPaintStyle &textPaintStyle, const style::TextShadows &shadow,
-                           const StringAtom &emphasisMark, float emphasisMarkOffset,
+                           TextPaintStyle textPaintStyle, const style::TextShadows &shadow,
+                           StringAtom emphasisMark, float emphasisMarkOffset,
                            const RenderCombineText *combinedText) noexcept
-      : _context(context), _font(font), _renderStyle(renderStyle), _style(textPaintStyle),
-        _emphasisMark(emphasisMark), _shadow(shadow), _emphasisMarkOffset(emphasisMarkOffset),
+      : _context(context), _font(font), _renderStyle(renderStyle), _style(krys::move(textPaintStyle)),
+        _emphasisMark(krys::move(emphasisMark)), _shadow(shadow), _emphasisMarkOffset(emphasisMarkOffset),
         _combinedText(combinedText)
   {
   }

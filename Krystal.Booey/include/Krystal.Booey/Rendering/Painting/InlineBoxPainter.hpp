@@ -72,7 +72,7 @@ namespace krys::boo
     void Paint() noexcept;
 
   private:
-    InlineBoxPainter(const inline_iterator::InlineBox &inlineBox, PaintInfo &paintInfo,
+    InlineBoxPainter(inline_iterator::InlineBox inlineBox, PaintInfo &paintInfo,
                      const LayoutPoint &paintOffset) noexcept;
 
     void PaintMask() noexcept;

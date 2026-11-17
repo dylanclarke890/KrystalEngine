@@ -934,7 +934,7 @@ namespace krys::boo::layout
         krys_debug_assert(false);
         return {};
       }
-      widths.push_back(LayoutUnit {state[breakIndex].LastLineWidth});
+      widths.emplace_back(state[breakIndex].LastLineWidth);
       breakIndex = state[breakIndex].PreviousBreakIndex;
     } while (breakIndex);
     std::ranges::reverse(widths);

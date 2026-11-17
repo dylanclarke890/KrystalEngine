@@ -36,6 +36,7 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -610,8 +611,8 @@ namespace krys::boo
     }
   }
 
-  RenderCounter::RenderCounter(dom::Document &document, const style::Content::Counter &counter) noexcept
-      : RenderText(Type::Counter, document, u8""), _counter(counter)
+  RenderCounter::RenderCounter(dom::Document &document, style::Content::Counter counter) noexcept
+      : RenderText(Type::Counter, document, u8""), _counter(krys::move(counter))
   {
     krys_debug_assert(IsRenderCounter());
     View().AddCounterNeedingUpdate(*this);
