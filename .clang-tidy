@@ -68,7 +68,6 @@ Checks: >
   performance-inefficient-vector-operation,
   performance-move-const-arg,
   performance-noexcept-move-constructor,
-  performance-unnecessary-copy-initialization,
   performance-unnecessary-value-param,
   portability-restrict-system-includes,
   portability-std-allocator-const,
@@ -99,6 +98,9 @@ Checks: >
 #   modernize-use-ranges,
 #   modernize-use-std-format,
 #   modernize-use-std-print,
+
+# Not wanted: it treats Ref/RefPtr copies that keep an object alive (and copies tests make on purpose) as waste.
+#   performance-unnecessary-copy-initialization,
 
 # Useful, but a large first pass; same as above:
 #   bugprone-easily-swappable-parameters,
