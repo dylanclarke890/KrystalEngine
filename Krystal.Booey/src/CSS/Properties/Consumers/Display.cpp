@@ -32,7 +32,7 @@
 namespace krys::boo::css::parse_property
 {
   // Keep in sync with the single keyword value fast path of CSSParserFastPaths's parseDisplay.
-  RefPtr<Value> ConsumeDisplay(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeDisplay(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'display'>        = [ <display-outside> || <display-inside> ] | <display-listitem> |
     // <display-internal> | <display-box> | <display-legacy> <display-outside>  = block | inline | run-in
@@ -51,9 +51,9 @@ namespace krys::boo::css::parse_property
     // Parse single keyword values
     auto singleKeyword = [&]()
     {
-      if (range.Peek().ValueId() == ValueId::InlineGridLanes)
+      if (tokens.Peek().ValueId() == ValueId::InlineGridLanes)
       {
-        return ConsumeIdent(range);
+        return ConsumeIdent(tokens);
       }
 
       return ConsumeIdent<
@@ -66,7 +66,7 @@ namespace krys::boo::css::parse_property
         // <display-legacy>
         ValueId::InlineBlock, ValueId::InlineFlex, ValueId::InlineGrid, ValueId::InlineTable,
         // No layout support for the full <display-listitem> syntax, so treat it as <display-legacy>
-        ValueId::ListItem>(range);
+        ValueId::ListItem>(tokens);
     }();
 
     auto AllowsValue = [&](ValueId value)
@@ -87,19 +87,19 @@ namespace krys::boo::css::parse_property
     }
 
     // Empty value, stop parsing
-    if (range.IsAtEnd())
+    if (tokens.IsAtEnd())
     {
       return nullptr;
     }
 
-    ValueId nextValueId = range.Peek().ValueId();
+    ValueId nextValueId = tokens.Peek().ValueId();
 
     // Parse [ <display-outside> || <display-inside> ]
     Maybe<ValueId> parsedDisplayOutside;
     Maybe<ValueId> parsedDisplayInside;
-    while (!range.IsAtEnd())
+    while (!tokens.IsAtEnd())
     {
-      nextValueId = range.Peek().ValueId();
+      nextValueId = tokens.Peek().ValueId();
       switch (nextValueId)
       {
         // <display-outside>
@@ -140,7 +140,7 @@ namespace krys::boo::css::parse_property
         }
       }
 
-      DiscardIdent(range);
+      DiscardIdent(tokens);
     }
 
     // Set defaults when one of the two values are unspecified

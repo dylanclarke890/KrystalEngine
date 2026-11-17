@@ -105,7 +105,7 @@ namespace krys::boo
 
   // FIXME: Preferring images' MIME types to their markup (preferMIMETypeForImages), with images on the
   // pasteboard.
-  bool WebContentReader::ReadHTML(utf8_stringview string) noexcept
+  bool WebContentReader::ReadHTML(utf8_stringview markup) noexcept
   {
     auto *document = Frame().Document();
     if (!document)
@@ -113,7 +113,7 @@ namespace krys::boo
       return false;
     }
 
-    AddFragment(CreateFragmentFromMarkup(*document, string, {}));
+    AddFragment(CreateFragmentFromMarkup(*document, markup, {}));
     return true;
   }
 
@@ -137,7 +137,7 @@ namespace krys::boo
 
   // FIXME: Removing the attributes of subresource URLs that aren't HTTP or data URLs
   // (removeSubresourceURLAttributes), with URL attributes.
-  bool WebContentMarkupReader::ReadHTML(utf8_stringview string) noexcept
+  bool WebContentMarkupReader::ReadHTML(utf8_stringview markup) noexcept
   {
     auto *document = Frame().Document();
     if (!document)
@@ -147,11 +147,11 @@ namespace krys::boo
 
     if (ShouldSanitize())
     {
-      _markup = SanitizeMarkup(string, document, MSOListQuirks::Disabled).value_or(utf8_string());
+      _markup = SanitizeMarkup(markup, document, MSOListQuirks::Disabled).value_or(utf8_string());
     }
     else
     {
-      _markup = utf8_string(string);
+      _markup = utf8_string(markup);
     }
 
     return !_markup.empty();

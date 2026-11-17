@@ -731,11 +731,11 @@ namespace krys::boo
     }
   }
 
-  bool Editor::DoTextFieldCommandFromEvent(dom::Element &e, dom::KeyboardEvent *ke) noexcept
+  bool Editor::DoTextFieldCommandFromEvent(dom::Element &e, dom::KeyboardEvent *event) noexcept
   {
     if (auto *client = Client())
     {
-      return client->DoTextFieldCommandFromEvent(e, ke);
+      return client->DoTextFieldCommandFromEvent(e, event);
     }
 
     return false;

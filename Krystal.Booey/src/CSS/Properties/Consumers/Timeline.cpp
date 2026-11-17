@@ -145,10 +145,10 @@ namespace krys::boo::css::parse_property
     return startInset;
   }
 
-  RefPtr<Value> ParseSingleViewTimelineInsetItem(const CSSOMString &string,
+  RefPtr<Value> ParseSingleViewTimelineInsetItem(const CSSOMString &input,
                                                  const ParserContext &context) noexcept
   {
-    auto inputStream = InputStream(CSSOMString(string));
+    auto inputStream = InputStream(CSSOMString(input));
     auto tokenizer = Tokenizer(inputStream);
     std::ignore = tokenizer.PumpTokenizer();
     auto tokens = tokenizer.Tokens();
@@ -230,10 +230,10 @@ namespace krys::boo::css::parse_property
     return ConsumeSingleAnimationRange(tokens, state, style::SingleAnimationRangeType::End);
   }
 
-  RefPtr<Value> ParseSingleAnimationRange(const CSSOMString &string, const ParserContext &context,
+  RefPtr<Value> ParseSingleAnimationRange(const CSSOMString &input, const ParserContext &context,
                                           style::SingleAnimationRangeType type) noexcept
   {
-    auto inputStream = InputStream(CSSOMString(string));
+    auto inputStream = InputStream(CSSOMString(input));
     auto tokenizer = Tokenizer(inputStream);
     std::ignore = tokenizer.PumpTokenizer();
     auto tokens = tokenizer.Tokens();

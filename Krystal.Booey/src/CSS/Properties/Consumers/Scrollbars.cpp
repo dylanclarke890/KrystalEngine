@@ -32,19 +32,19 @@
 
 namespace krys::boo::css::parse_property
 {
-  RefPtr<Value> ConsumeScrollbarColor(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeScrollbarColor(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'scrollbar-color'> = auto | <color>{2}
     // https://drafts.csswg.org/css-scrollbars/#propdef-scrollbar-color
 
-    if (auto ident = ConsumeIdent<ValueId::Auto>(range))
+    if (auto ident = ConsumeIdent<ValueId::Auto>(tokens))
     {
       return ident;
     }
 
-    if (auto thumbColor = ConsumeColor(range, state))
+    if (auto thumbColor = ConsumeColor(tokens, state))
     {
-      if (auto trackColor = ConsumeColor(range, state))
+      if (auto trackColor = ConsumeColor(tokens, state))
       {
         return ValuePair::CreateNonCoalescing(krys::move(thumbColor), krys::move(trackColor));
       }

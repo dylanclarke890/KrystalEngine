@@ -58,10 +58,10 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-path2d-addpath
-  dom::ExceptionOr<void> Path2D::AddPath(const Path2D &path, css::DOMMatrix2DInit &&matrixInit) noexcept
+  dom::ExceptionOr<void> Path2D::AddPath(const Path2D &path, css::DOMMatrix2DInit &&transform) noexcept
   {
     // 2. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
-    auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(matrixInit);
+    auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(transform);
     if (checkValid.HasException())
     {
       return checkValid.ReleaseException();
@@ -75,16 +75,16 @@ namespace krys::boo::html
 
     // 3. If one or more of matrix's m11 element, m12 element, m21 element, m22 element, m41 element, or m42
     //    element are infinite or NaN, then return.
-    for (auto value : {*matrixInit.M11, *matrixInit.M12, *matrixInit.M21, *matrixInit.M22, *matrixInit.M41,
-                       *matrixInit.M42})
+    for (auto value :
+         {*transform.M11, *transform.M12, *transform.M21, *transform.M22, *transform.M41, *transform.M42})
     {
       if (!std::isfinite(value))
       {
         return {};
       }
     }
-    AffineTransform matrix {*matrixInit.M11, *matrixInit.M12, *matrixInit.M21,
-                            *matrixInit.M22, *matrixInit.M41, *matrixInit.M42};
+    AffineTransform matrix {*transform.M11, *transform.M12, *transform.M21,
+                            *transform.M22, *transform.M41, *transform.M42};
 
     // 4. Create a copy of all the subpaths in path. Let c be this copy.
     // 5. Transform all the coordinates and lines in c by the transform matrix matrix.

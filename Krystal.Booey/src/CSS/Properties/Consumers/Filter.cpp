@@ -460,16 +460,16 @@ namespace krys::boo::css::parse_property
     return {krys::move(list)};
   }
 
-  Maybe<Filter> ConsumeUnresolvedFilter(TokenRange &range, PropertyParserState &state) noexcept
+  Maybe<Filter> ConsumeUnresolvedFilter(TokenRange &tokens, PropertyParserState &state) noexcept
   {
-    if (range.Peek().ValueId() == ValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
-      range.Discard();
-      range.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
       return Filter {keywords::None {}};
     }
 
-    if (auto filterValueList = ConsumeUnresolvedFilterValueList(range, state))
+    if (auto filterValueList = ConsumeUnresolvedFilterValueList(tokens, state))
     {
       return Filter {krys::move(*filterValueList)};
     }
@@ -477,9 +477,9 @@ namespace krys::boo::css::parse_property
     return {};
   }
 
-  RefPtr<Value> ConsumeFilter(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeFilter(TokenRange &tokens, PropertyParserState &state) noexcept
   {
-    if (auto property = ConsumeUnresolvedFilter(range, state))
+    if (auto property = ConsumeUnresolvedFilter(tokens, state))
     {
       return FilterValue::Create({krys::move(*property)});
     }

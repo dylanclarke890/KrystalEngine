@@ -122,11 +122,11 @@ namespace krys::boo::html
     return !std::isfinite(max) || max <= 0 ? 1 : max;
   }
 
-  void HTMLProgressElement::Max(double max) noexcept
+  void HTMLProgressElement::Max(double value) noexcept
   {
-    if (max > 0)
+    if (value > 0)
     {
-      Reflect<double>(*this, u8"max", krys::move(max));
+      Reflect<double>(*this, u8"max", krys::move(value));
     }
   }
 

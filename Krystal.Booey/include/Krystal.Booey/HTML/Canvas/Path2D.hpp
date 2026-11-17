@@ -61,7 +61,7 @@ namespace krys::boo::html
     ~Path2D() noexcept override = default;
 
     /// @see https://html.spec.whatwg.org/#dom-path2d-addpath
-    dom::ExceptionOr<void> AddPath(const Path2D &path, css::DOMMatrix2DInit &&matrixInit = {}) noexcept;
+    dom::ExceptionOr<void> AddPath(const Path2D &path, css::DOMMatrix2DInit &&transform = {}) noexcept;
 
     KRYS_NODISCARD const Path &GetPath() const noexcept
     {

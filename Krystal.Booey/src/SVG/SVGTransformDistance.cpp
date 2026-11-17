@@ -30,11 +30,11 @@ namespace krys::boo::svg
   {
   }
 
-  SVGTransformDistance::SVGTransformDistance(const SVGTransformValue &fromSVGTransform,
-                                             const SVGTransformValue &toSVGTransform) noexcept
-      : _type(fromSVGTransform.Type())
+  SVGTransformDistance::SVGTransformDistance(const SVGTransformValue &fromTransform,
+                                             const SVGTransformValue &toTransform) noexcept
+      : _type(fromTransform.Type())
   {
-    krys_debug_assert(_type == toSVGTransform.Type());
+    krys_debug_assert(_type == toTransform.Type());
 
     switch (_type)
     {
@@ -44,28 +44,28 @@ namespace krys::boo::svg
       case SVGTransformValue::SVG_TRANSFORM_UNKNOWN: break;
       case SVGTransformValue::SVG_TRANSFORM_ROTATE:
       {
-        FloatSize centerDistance = toSVGTransform.RotationCenter() - fromSVGTransform.RotationCenter();
-        _angle = toSVGTransform.Angle() - fromSVGTransform.Angle();
+        FloatSize centerDistance = toTransform.RotationCenter() - fromTransform.RotationCenter();
+        _angle = toTransform.Angle() - fromTransform.Angle();
         _cx = centerDistance.Width();
         _cy = centerDistance.Height();
         break;
       }
       case SVGTransformValue::SVG_TRANSFORM_TRANSLATE:
       {
-        FloatSize translationDistance = toSVGTransform.Translate() - fromSVGTransform.Translate();
+        FloatSize translationDistance = toTransform.Translate() - fromTransform.Translate();
         _transform.Translate(translationDistance.Width(), translationDistance.Height());
         break;
       }
       case SVGTransformValue::SVG_TRANSFORM_SCALE:
       {
-        float scaleX = toSVGTransform.Scale().Width() - fromSVGTransform.Scale().Width();
-        float scaleY = toSVGTransform.Scale().Height() - fromSVGTransform.Scale().Height();
+        float scaleX = toTransform.Scale().Width() - fromTransform.Scale().Width();
+        float scaleY = toTransform.Scale().Height() - fromTransform.Scale().Height();
         _transform.ScaleNonUniform(scaleX, scaleY);
         break;
       }
       case SVGTransformValue::SVG_TRANSFORM_SKEWX:
       case SVGTransformValue::SVG_TRANSFORM_SKEWY:
-        _angle = toSVGTransform.Angle() - fromSVGTransform.Angle();
+        _angle = toTransform.Angle() - fromTransform.Angle();
         break;
     }
   }

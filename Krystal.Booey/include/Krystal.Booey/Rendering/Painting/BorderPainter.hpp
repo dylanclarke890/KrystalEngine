@@ -96,7 +96,7 @@ namespace krys::boo
     void PaintTranslucentBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgesToDraw,
                                      bool antialias) const noexcept;
 
-    void PaintBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgeSet, bool antialias,
+    void PaintBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgesToDraw, bool antialias,
                           const Color *overrideColor = nullptr) const noexcept;
 
     void PaintOneBorderSide(const BorderShape &, const Sides &, const LayoutRect &sideRect, BoxSide,

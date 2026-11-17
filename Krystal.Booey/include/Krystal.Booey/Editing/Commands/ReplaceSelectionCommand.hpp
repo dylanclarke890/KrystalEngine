@@ -139,8 +139,7 @@ namespace krys::boo
     void DoApply() noexcept override;
 
     RefPtr<dom::Node> InsertAsListItems(dom::Element &listElement, dom::Node *insertionBlock,
-                                        const dom::Position &insertPos,
-                                        InsertedNodes &insertedNodes) noexcept;
+                                        const dom::Position &position, InsertedNodes &insertedNodes) noexcept;
 
     void UpdateNodesInserted(dom::Node *node) noexcept;
 

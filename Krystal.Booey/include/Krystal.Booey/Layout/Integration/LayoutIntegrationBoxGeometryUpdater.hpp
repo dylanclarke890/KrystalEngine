@@ -69,7 +69,7 @@ namespace krys::boo::layout_integration
 
     void Clear() noexcept;
 
-    void SetFormattingContextRootGeometry(LayoutUnit availableWidth) noexcept;
+    void SetFormattingContextRootGeometry(LayoutUnit availableLogicalWidth) noexcept;
 
     void SetFormattingContextContentGeometry(Maybe<LayoutUnit> availableLogicalWidth,
                                              Maybe<layout::IntrinsicWidthMode> intrinsicWidthMode) noexcept;

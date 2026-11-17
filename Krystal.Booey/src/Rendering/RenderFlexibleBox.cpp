@@ -3850,12 +3850,12 @@ namespace krys::boo
     return FirstBaselineCandidateOnLine(_orderIterator, _numberOfFlexItemsOnFirstLine);
   }
 
-  void RenderFlexibleBox::PaintChildren(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
-                                        PaintInfo &paintInfoForFlexItem) noexcept
+  void RenderFlexibleBox::PaintChildren(PaintInfo &forSelf, const LayoutPoint &paintOffset,
+                                        PaintInfo &forChild) noexcept
   {
     for (RenderBox *flexItem = _orderIterator.First(); flexItem; flexItem = _orderIterator.Next())
     {
-      if (!PaintChild(*flexItem, paintInfo, paintOffset, paintInfoForFlexItem, PaintAsInlineBlock))
+      if (!PaintChild(*flexItem, forSelf, paintOffset, forChild, PaintAsInlineBlock))
       {
         return;
       }

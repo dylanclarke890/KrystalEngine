@@ -97,7 +97,7 @@ namespace krys::boo
 
     explicit HitTestResult(const LayoutRect &rect) noexcept;
 
-    explicit HitTestResult(const HitTestLocation &other) noexcept;
+    explicit HitTestResult(const HitTestLocation &location) noexcept;
 
     HitTestResult(const HitTestResult &other) noexcept;
 

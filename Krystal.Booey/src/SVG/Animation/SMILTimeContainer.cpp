@@ -283,13 +283,13 @@ namespace krys::boo::svg
     _documentOrderIndexesDirty = false;
   }
 
-  void SMILTimeContainer::SortByPriority(AnimationsVector &animations, SMILTime elapsed) noexcept
+  void SMILTimeContainer::SortByPriority(AnimationsVector &smilElements, SMILTime elapsed) noexcept
   {
     if (_documentOrderIndexesDirty)
     {
       UpdateDocumentOrderIndexes();
     }
-    std::ranges::sort(animations,
+    std::ranges::sort(smilElements,
                       [elapsed](const auto &a, const auto &b)
                       {
                         // FIXME: This should also consider possible timing relations between the elements.

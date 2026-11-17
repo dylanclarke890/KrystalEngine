@@ -1927,7 +1927,7 @@ namespace krys::boo
     return style::OrthogonalDirection(AutoPlacementMajorAxisDirection());
   }
 
-  void RenderGrid::SetNeedsItemPlacement(SubgridDidChange subgridDidChange) noexcept
+  void RenderGrid::SetNeedsItemPlacement(SubgridDidChange descendantSubgridsNeedItemPlacement) noexcept
   {
     // The cached heights are keyed by address, so they go with the items they were computed for.
     _intrinsicLogicalHeightsForRowSizingFirstPass.reset();
@@ -1941,7 +1941,7 @@ namespace krys::boo
 
     auto *currentChild = this;
     while (currentChild
-           && (subgridDidChange == SubgridDidChange::Yes || currentChild->IsSubgridRows()
+           && (descendantSubgridsNeedItemPlacement == SubgridDidChange::Yes || currentChild->IsSubgridRows()
                || currentChild->IsSubgridColumns()))
     {
       currentChild = DynamicDowncast<RenderGrid>(currentChild->Parent());
@@ -1949,7 +1949,7 @@ namespace krys::boo
       {
         currentChild->CurrentGrid().SetNeedsItemsPlacement(true);
       }
-      subgridDidChange = SubgridDidChange::No;
+      descendantSubgridsNeedItemPlacement = SubgridDidChange::No;
     }
   }
 
@@ -3462,14 +3462,14 @@ namespace krys::boo
     _sizes.erase(&gridItem);
   }
 
-  void RenderGrid::PaintChildren(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
+  void RenderGrid::PaintChildren(PaintInfo &forSelf, const LayoutPoint &paintOffset,
                                  PaintInfo &forChild) noexcept
   {
     krys_debug_assert(!CurrentGrid().NeedsItemsPlacement());
     for (RenderBox *gridItem = CurrentGrid().GetOrderIterator().First(); gridItem;
          gridItem = CurrentGrid().GetOrderIterator().Next())
     {
-      (void)PaintChild(*gridItem, paintInfo, paintOffset, forChild, PaintAsInlineBlock);
+      (void)PaintChild(*gridItem, forSelf, paintOffset, forChild, PaintAsInlineBlock);
     }
   }
 

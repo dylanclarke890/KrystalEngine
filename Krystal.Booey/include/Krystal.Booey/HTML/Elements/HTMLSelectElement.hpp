@@ -229,7 +229,7 @@ namespace krys::boo::html
     KRYS_NODISCARD const List<WeakPtr<HTMLElement>> &ListItems() const noexcept;
 
     /// @brief Selects the option at @p optionIndex as the user would.
-    void OptionSelectedByUser(int32 optionIndex, bool fireOnChangeNow,
+    void OptionSelectedByUser(int32 optionIndex, bool dispatchChangeEvent,
                               bool allowMultipleSelection = false) noexcept;
 
     void OptionElementChildrenChanged() noexcept;
@@ -410,7 +410,7 @@ namespace krys::boo::html
 
     void SelectOption(int32 optionIndex, SelectOptionFlags flags = {}) noexcept;
 
-    void DeselectItemsWithoutValidation(HTMLElement *excludeElement = nullptr) noexcept;
+    void DeselectItemsWithoutValidation(HTMLElement *elementToExclude = nullptr) noexcept;
 
     void ParseMultipleAttribute(bool present) noexcept;
 

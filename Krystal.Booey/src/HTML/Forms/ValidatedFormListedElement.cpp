@@ -280,10 +280,10 @@ namespace krys::boo::html
     return _isFocusingWithValidationMessage;
   }
 
-  void ValidatedFormListedElement::SetDisabledByAncestorFieldset(bool newDisabledByAncestorFieldset) noexcept
+  void ValidatedFormListedElement::SetDisabledByAncestorFieldset(bool isDisabled) noexcept
   {
-    krys_debug_assert(ComputeIsDisabledByFieldsetAncestor() == newDisabledByAncestorFieldset);
-    SetDisabledInternal(_disabled, newDisabledByAncestorFieldset);
+    krys_debug_assert(ComputeIsDisabledByFieldsetAncestor() == isDisabled);
+    SetDisabledInternal(_disabled, isDisabled);
   }
 
   void ValidatedFormListedElement::SetDisabledInternal(bool disabled,

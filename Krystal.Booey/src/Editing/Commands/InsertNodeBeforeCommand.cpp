@@ -44,11 +44,11 @@ namespace krys::boo
   }
 
   InsertNodeBeforeCommand::InsertNodeBeforeCommand(
-    dom::Node &insertChild, dom::Node &refChild,
+    dom::Node &childToInsert, dom::Node &childToInsertBefore,
     ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
     EditAction editingAction) noexcept
-      : SimpleEditCommand(refChild.NodeDocument(), editingAction), _insertChild(ShareRef(insertChild)),
-        _refChild(ShareRef(refChild)),
+      : SimpleEditCommand(childToInsertBefore.NodeDocument(), editingAction),
+        _insertChild(ShareRef(childToInsert)), _refChild(ShareRef(childToInsertBefore)),
         _shouldAssumeContentIsAlwaysEditable(shouldAssumeContentIsAlwaysEditable)
   {
     krys_debug_assert(!_insertChild->ParentNode());

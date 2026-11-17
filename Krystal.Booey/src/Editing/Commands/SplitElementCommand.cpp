@@ -40,8 +40,9 @@ namespace krys::boo
     return CreateRef<SplitElementCommand>(element, splitPointChild);
   }
 
-  SplitElementCommand::SplitElementCommand(dom::Element &element, dom::Node &atChild) noexcept
-      : SimpleEditCommand(element.NodeDocument()), _element2(ShareRef(element)), _atChild(ShareRef(atChild))
+  SplitElementCommand::SplitElementCommand(dom::Element &element, dom::Node &splitPointChild) noexcept
+      : SimpleEditCommand(element.NodeDocument()), _element2(ShareRef(element)),
+        _atChild(ShareRef(splitPointChild))
   {
     krys_debug_assert(_atChild->ParentNode() == _element2.get());
   }

@@ -37,6 +37,6 @@ namespace krys::boo::css
   {
     /// @grammar <'display'> consuming
     /// @see https://drafts.csswg.org/css-display/#propdef-display
-    KRYS_NODISCARD RefPtr<Value> ConsumeDisplay(TokenRange &range, PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeDisplay(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

@@ -73,7 +73,7 @@ namespace krys::boo
   public:
     PositionedLayoutConstraints(const RenderBox &renderer, LogicalBoxAxis selfAxis) noexcept;
 
-    PositionedLayoutConstraints(const RenderBox &renderer, const RenderStyle &style,
+    PositionedLayoutConstraints(const RenderBox &renderer, const RenderStyle &selfStyleOverride,
                                 LogicalBoxAxis selfAxis) noexcept;
 
     void ComputeInsets() noexcept;

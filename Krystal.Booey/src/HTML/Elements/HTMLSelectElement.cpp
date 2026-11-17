@@ -491,7 +491,7 @@ namespace krys::boo::html
     return _multiple ? u8"select-multiple" : u8"select-one";
   }
 
-  void HTMLSelectElement::OptionSelectedByUser(int32 optionIndex, bool fireOnChangeNow,
+  void HTMLSelectElement::OptionSelectedByUser(int32 optionIndex, bool dispatchChangeEvent,
                                                bool allowMultipleSelection) noexcept
   {
     // User interaction such as mousedown events can cause list box select elements to send change events.
@@ -504,7 +504,7 @@ namespace krys::boo::html
       {
         renderer->UpdateFromElement();
       }
-      if (fireOnChangeNow)
+      if (dispatchChangeEvent)
       {
         ListBoxOnChange();
       }
@@ -520,7 +520,7 @@ namespace krys::boo::html
     }
 
     SelectOptionFlags flags {SelectOptionFlag::DeselectOtherOptions, SelectOptionFlag::UserDriven};
-    if (fireOnChangeNow)
+    if (dispatchChangeEvent)
     {
       flags.Add(SelectOptionFlag::DispatchChangeEvent);
     }
@@ -1694,11 +1694,11 @@ namespace krys::boo::html
     HTMLFormControlElement::DispatchBlurEvent(relatedTarget);
   }
 
-  void HTMLSelectElement::DeselectItemsWithoutValidation(HTMLElement *excludeElement) noexcept
+  void HTMLSelectElement::DeselectItemsWithoutValidation(HTMLElement *elementToExclude) noexcept
   {
     for (auto &element : ListItems())
     {
-      if (element.get() == excludeElement)
+      if (element.get() == elementToExclude)
       {
         continue;
       }

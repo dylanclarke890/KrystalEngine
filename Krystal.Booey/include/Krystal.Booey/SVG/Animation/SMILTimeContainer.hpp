@@ -123,7 +123,7 @@ namespace krys::boo::svg
 
     void UpdateDocumentOrderIndexes() noexcept;
 
-    void SortByPriority(AnimationsVector &animations, SMILTime elapsed) noexcept;
+    void SortByPriority(AnimationsVector &smilElements, SMILTime elapsed) noexcept;
 
     KRYS_NODISCARD MonotonicTime::duration LastResumeTime() const noexcept
     {

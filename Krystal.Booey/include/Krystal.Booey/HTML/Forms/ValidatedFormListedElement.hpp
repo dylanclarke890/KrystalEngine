@@ -99,7 +99,7 @@ namespace krys::boo::html
 
     void SetCustomValidationMessage(dom::DOMStringView message) noexcept override;
 
-    void SetDisabledByAncestorFieldset(bool newDisabledByAncestorFieldset) noexcept;
+    void SetDisabledByAncestorFieldset(bool isDisabled) noexcept;
 
     /// @see https://html.spec.whatwg.org/#concept-form-reset-control
     virtual void Reset() noexcept

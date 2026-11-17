@@ -135,9 +135,9 @@ namespace krys::boo::css
 
 #pragma region CSSFontFeatureValuesBlockRule
 
-  CSSFontFeatureValuesBlockRule::CSSFontFeatureValuesBlockRule(css::FontFeatureValuesBlockRule &block,
+  CSSFontFeatureValuesBlockRule::CSSFontFeatureValuesBlockRule(css::FontFeatureValuesBlockRule &rule,
                                                                CSSStyleSheet *parent) noexcept
-      : CSSRule(parent), _fontFeatureValuesBlockRule(ShareRef(block))
+      : CSSRule(parent), _fontFeatureValuesBlockRule(ShareRef(rule))
   {
   }
 

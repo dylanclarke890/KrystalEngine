@@ -37,7 +37,7 @@ namespace krys::boo::css
   {
     // MARK: <'scrollbar-color'> consuming
     // https://drafts.csswg.org/css-scrollbars/#propdef-scrollbar-color
-    KRYS_NODISCARD RefPtr<Value> ConsumeScrollbarColor(TokenRange &range,
+    KRYS_NODISCARD RefPtr<Value> ConsumeScrollbarColor(TokenRange &tokens,
                                                        PropertyParserState &state) noexcept;
   }
 }

@@ -2590,14 +2590,14 @@ namespace krys::boo
     }
   }
 
-  void RenderBlock::PaintChildren(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
+  void RenderBlock::PaintChildren(PaintInfo &forSelf, const LayoutPoint &paintOffset,
                                   PaintInfo &paintInfoForChild) noexcept
   {
     krys_debug_assert(!IsSkippedContentRoot(*this));
 
     for (auto &child : ChildrenOfType<RenderBox>(*this))
     {
-      if (!PaintChild(child, paintInfo, paintOffset, paintInfoForChild))
+      if (!PaintChild(child, forSelf, paintOffset, paintInfoForChild))
       {
         return;
       }

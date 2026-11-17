@@ -65,11 +65,11 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<utf8_string> ReadStringInCustomData(utf8_stringview type) noexcept final;
 
-    void WriteString(utf8_stringview type, utf8_stringview value) noexcept final;
+    void WriteString(utf8_stringview type, utf8_stringview data) noexcept final;
 
     void WriteData(utf8_stringview type, Ref<SharedBuffer> &&data) noexcept;
 
-    void WriteStringInCustomData(utf8_stringview type, utf8_stringview value) noexcept;
+    void WriteStringInCustomData(utf8_stringview type, utf8_stringview data) noexcept;
 
     void Clear() noexcept final;
 

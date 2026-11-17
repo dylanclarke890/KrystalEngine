@@ -37,14 +37,14 @@
 
 namespace krys::boo::css::parse_property
 {
-  RefPtr<Value> ConsumePaintOrder(TokenRange &range, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumePaintOrder(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'paint-order'> = normal | [ fill || stroke || markers ]
     // https://svgwg.org/svg2-draft/painting.html#PaintOrderProperty
 
-    if (range.Peek().ValueId() == ValueId::Normal)
+    if (tokens.Peek().ValueId() == ValueId::Normal)
     {
-      return ConsumeIdent(range);
+      return ConsumeIdent(tokens);
     }
 
     SmallList<ValueId, 3uz> paintTypeList;
@@ -53,18 +53,18 @@ namespace krys::boo::css::parse_property
     RefPtr<PrimitiveValue> markers;
     do
     {
-      ValueId id = range.Peek().ValueId();
+      ValueId id = tokens.Peek().ValueId();
       if (id == ValueId::Fill && !fill)
       {
-        fill = ConsumeIdent(range);
+        fill = ConsumeIdent(tokens);
       }
       else if (id == ValueId::Stroke && !stroke)
       {
-        stroke = ConsumeIdent(range);
+        stroke = ConsumeIdent(tokens);
       }
       else if (id == ValueId::Markers && !markers)
       {
-        markers = ConsumeIdent(range);
+        markers = ConsumeIdent(tokens);
       }
       else
       {
@@ -72,7 +72,7 @@ namespace krys::boo::css::parse_property
       }
 
       paintTypeList.push_back(id);
-    } while (!range.IsAtEnd());
+    } while (!tokens.IsAtEnd());
 
     // After parsing we serialize the paint-order list. Since it is not possible to
     // pop a last list items from ValueList without bigger cost, we create the
@@ -113,15 +113,15 @@ namespace krys::boo::css::parse_property
     return ValueList::CreateSpaceSeparated(krys::move(paintOrderList));
   }
 
-  RefPtr<Value> ConsumeStrokeDasharray(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeStrokeDasharray(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'stroke-dasharray'> = none | [ [ <length-percentage> | <number> ]+ ]#
     // https://svgwg.org/svg2-draft/painting.html#StrokeDashing
 
-    ValueId id = range.Peek().ValueId();
+    ValueId id = tokens.Peek().ValueId();
     if (id == ValueId::None)
     {
-      return ConsumeIdent(range);
+      return ConsumeIdent(tokens);
     }
 
     ValueListBuilder dashes;
@@ -130,7 +130,7 @@ namespace krys::boo::css::parse_property
       // FIXME: Figure out and document why overrideParserMode is explicitly set to HTMLStandardMode here or
       // remove the special case.
       auto dash = PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(
-        range, state,
+        tokens, state,
         {
           .UnitlessZeroLength = AllowUnitlessZero::No,
           .OverrideParserMode = ParserMode::HTMLStandard,
@@ -138,16 +138,16 @@ namespace krys::boo::css::parse_property
 
       if (!dash)
       {
-        dash = PrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(range, state);
+        dash = PrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(tokens, state);
       }
 
-      if (!dash || (ConsumeComma(range) && range.IsAtEnd()))
+      if (!dash || (ConsumeComma(tokens) && tokens.IsAtEnd()))
       {
         return nullptr;
       }
 
       dashes.push_back(krys::move(dash));
-    } while (!range.IsAtEnd());
+    } while (!tokens.IsAtEnd());
 
     return ValueList::CreateCommaSeparated(krys::move(dashes));
   }

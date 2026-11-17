@@ -75,29 +75,29 @@ namespace krys::boo::css::parse_property
     return ValuePair::Create(krys::move(firstValue), krys::move(secondValue));
   }
 
-  RefPtr<Value> ConsumeLineFitEdge(TokenRange &range, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeLineFitEdge(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'line-fit-edge'> = leading | <text-edge>
     // https://drafts.csswg.org/css-inline-3/#propdef-line-fit-edge
 
-    if (range.Peek().ValueId() == ValueId::Leading)
+    if (tokens.Peek().ValueId() == ValueId::Leading)
     {
-      return ConsumeIdent(range);
+      return ConsumeIdent(tokens);
     }
 
-    return ConsumeTextEdge(range);
+    return ConsumeTextEdge(tokens);
   }
 
-  RefPtr<Value> ConsumeTextBoxEdge(TokenRange &range, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeTextBoxEdge(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'text-box-edge'> = auto | <text-edge>
     // https://drafts.csswg.org/css-inline-3/#propdef-text-box-edge
 
-    if (range.Peek().ValueId() == ValueId::Auto)
+    if (tokens.Peek().ValueId() == ValueId::Auto)
     {
-      return ConsumeIdent(range);
+      return ConsumeIdent(tokens);
     }
 
-    return ConsumeTextEdge(range);
+    return ConsumeTextEdge(tokens);
   }
 }

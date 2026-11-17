@@ -68,29 +68,29 @@ namespace krys::boo::css::parse_property
     return ValueList::CreateSpaceSeparated(krys::move(list));
   }
 
-  RefPtr<Value> ConsumeCounterReset(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeCounterReset(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'counter-reset'> = [ <counter-name> <integer>? | <reversed-counter-name> <integer>? ]+ | none
     // https://drafts.csswg.org/css-lists/#propdef-counter-reset
 
     // FIXME: Implement support for `reversed-counter-name`.
 
-    return ConsumeCounter(range, state, 0);
+    return ConsumeCounter(tokens, state, 0);
   }
 
-  RefPtr<Value> ConsumeCounterIncrement(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeCounterIncrement(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'counter-increment'> = [ <counter-name> <integer>? ]+ | none
     // https://drafts.csswg.org/css-lists/#propdef-counter-increment
 
-    return ConsumeCounter(range, state, 1);
+    return ConsumeCounter(tokens, state, 1);
   }
 
-  RefPtr<Value> ConsumeCounterSet(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeCounterSet(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'counter-set'> = [ <counter-name> <integer>? ]+ | none
     // https://drafts.csswg.org/css-lists/#propdef-counter-set
 
-    return ConsumeCounter(range, state, 0);
+    return ConsumeCounter(tokens, state, 0);
   }
 }

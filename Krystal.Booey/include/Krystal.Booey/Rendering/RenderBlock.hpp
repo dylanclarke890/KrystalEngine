@@ -482,7 +482,7 @@ namespace krys::boo
       PaintAsInlineBlock,
     };
 
-    virtual void PaintChildren(PaintInfo &paintInfo, const LayoutPoint &, PaintInfo &forChild) noexcept;
+    virtual void PaintChildren(PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild) noexcept;
 
     /// @brief Paints @p child unless it paints itself (a self-painting layer or a float); false stops
     /// painting the remaining children.

@@ -1102,14 +1102,15 @@ namespace krys::boo::html
     return entry != _pastNamesMap.end() ? entry->second.get() : nullptr;
   }
 
-  void HTMLFormElement::AddToPastNamesMap(FormAssociatedElement &item, dom::DOMStringView pastName) noexcept
+  void HTMLFormElement::AddToPastNamesMap(FormAssociatedElement &element,
+                                          dom::DOMStringView pastName) noexcept
   {
-    krys_debug_assert(item.Form() == this);
+    krys_debug_assert(element.Form() == this);
     if (pastName.empty())
     {
       return;
     }
-    _pastNamesMap[dom::DOMStringAtom(pastName)] = CreateWeakPtr(&item.AsHTMLElement());
+    _pastNamesMap[dom::DOMStringAtom(pastName)] = CreateWeakPtr(&element.AsHTMLElement());
   }
 
   void HTMLFormElement::RemoveFromPastNamesMap(FormAssociatedElement &item) noexcept

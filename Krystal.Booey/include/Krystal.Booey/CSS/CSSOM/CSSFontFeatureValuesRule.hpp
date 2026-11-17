@@ -71,7 +71,7 @@ namespace krys::boo::css
   private:
     Ref<css::FontFeatureValuesBlockRule> _fontFeatureValuesBlockRule;
 
-    CSSFontFeatureValuesBlockRule(css::FontFeatureValuesBlockRule &block, CSSStyleSheet *parent) noexcept;
+    CSSFontFeatureValuesBlockRule(css::FontFeatureValuesBlockRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<CSSFontFeatureValuesBlockRule> Create(css::FontFeatureValuesBlockRule &rule,

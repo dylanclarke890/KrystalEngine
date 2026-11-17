@@ -745,7 +745,7 @@ namespace krys::boo
   }
 
   void BorderPainter::PaintBorderSides(const BorderShape &borderShape, const Sides &sides,
-                                       EnumSet<BoxSide> edgeSet, bool antialias,
+                                       EnumSet<BoxSide> edgesToDraw, bool antialias,
                                        const Color *overrideColor) const noexcept
   {
     Path roundedPath;
@@ -765,7 +765,7 @@ namespace krys::boo
     auto paintOneSide = [&](BoxSide side, BoxSide adjacentSide1, BoxSide adjacentSide2)
     {
       const auto &edge = sides.Edges.At(side);
-      if (!edge.ShouldRender() || !edgeSet.Contains(side))
+      if (!edge.ShouldRender() || !edgesToDraw.Contains(side))
       {
         return;
       }

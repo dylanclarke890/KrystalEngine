@@ -71,7 +71,7 @@ namespace krys::boo::css
 
     void AppendRule(const CSSOMString &rule) noexcept;
 
-    void DeleteRule(const CSSOMString &s) noexcept;
+    void DeleteRule(const CSSOMString &key) noexcept;
 
     KRYS_NODISCARD CSSKeyframeRule *FindRule(const CSSOMString &key) noexcept;
 

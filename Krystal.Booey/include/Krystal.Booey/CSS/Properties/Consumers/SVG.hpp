@@ -37,11 +37,11 @@ namespace krys::boo::css
   {
     // MARK: <'paint-order'> consuming
     // https://svgwg.org/svg2-draft/painting.html#PaintOrderProperty
-    KRYS_NODISCARD RefPtr<Value> ConsumePaintOrder(TokenRange &range, PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumePaintOrder(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // MARK: <'stroke-dasharray'> consuming
     // https://svgwg.org/svg2-draft/painting.html#StrokeDashing
-    KRYS_NODISCARD RefPtr<Value> ConsumeStrokeDasharray(TokenRange &range,
+    KRYS_NODISCARD RefPtr<Value> ConsumeStrokeDasharray(TokenRange &tokens,
                                                         PropertyParserState &state) noexcept;
   }
 }

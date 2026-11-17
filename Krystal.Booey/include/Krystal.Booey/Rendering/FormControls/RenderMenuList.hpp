@@ -206,7 +206,7 @@ namespace krys::boo
 
     void AdjustInnerStyle() noexcept;
 
-    void SetText(const utf8_string &s) noexcept;
+    void SetText(const utf8_string &text) noexcept;
 
     void SetTextFromOption(int32 optionIndex) noexcept;
 

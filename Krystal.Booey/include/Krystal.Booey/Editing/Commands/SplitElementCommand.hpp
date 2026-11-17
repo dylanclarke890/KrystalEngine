@@ -47,7 +47,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<SplitElementCommand> Create(dom::Element &element,
                                                           dom::Node &splitPointChild) noexcept;
 
-    SplitElementCommand(dom::Element &element, dom::Node &atChild) noexcept;
+    SplitElementCommand(dom::Element &element, dom::Node &splitPointChild) noexcept;
 
   private:
     void DoApply() noexcept override;
