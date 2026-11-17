@@ -359,9 +359,9 @@ namespace krys::boo::css
 
     KRYS_NODISCARD const dom::QualifiedName &Attribute() const noexcept;
 
-    KRYS_NODISCARD CSSOMStringAtom Argument() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &Argument() const noexcept
     {
-      return HasRareData() ? _data.Rare->Argument : null;
+      return HasRareData() ? _data.Rare->Argument : CSSOMStringAtom::Null();
     }
 
     /// @brief Whether the selector's `s` flag makes it match case-sensitively, whatever the attribute.

@@ -49,7 +49,7 @@ namespace krys::boo
 
   public:
     /// @brief The `download` attribute of the link followed; null if it has none.
-    KRYS_NODISCARD dom::DOMStringAtom DownloadAttribute() const noexcept
+    KRYS_NODISCARD const dom::DOMStringAtom &DownloadAttribute() const noexcept
     {
       return _downloadAttribute;
     }
@@ -129,7 +129,7 @@ namespace krys::boo
       return _resourceRequest;
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom FrameName() const noexcept
+    KRYS_NODISCARD const dom::DOMStringAtom &FrameName() const noexcept
     {
       return _frameName;
     }

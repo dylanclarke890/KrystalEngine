@@ -79,7 +79,7 @@ namespace krys::boo::css
     }
   }
 
-  CSSOMStringAtom CSSPositionTryRule::Name() const noexcept
+  const CSSOMStringAtom &CSSPositionTryRule::Name() const noexcept
   {
     return _positionTryRule->Name();
   }

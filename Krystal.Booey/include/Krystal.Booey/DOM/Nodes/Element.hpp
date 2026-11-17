@@ -245,19 +245,19 @@ namespace krys::boo::dom
 #pragma region Element - https://dom.spec.whatwg.org/#element
 
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
-    KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &NamespaceURI() const noexcept
     {
       return _qualifiedName.NamespaceURI();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-prefix
-    KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &Prefix() const noexcept
     {
       return _qualifiedName.NamespacePrefix();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-localname
-    KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &LocalName() const noexcept
     {
       return _qualifiedName.LocalName();
     }
@@ -785,7 +785,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-element-is-value
-    KRYS_NODISCARD DOMStringAtom IsValue() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &IsValue() const noexcept
     {
       return _is;
     }

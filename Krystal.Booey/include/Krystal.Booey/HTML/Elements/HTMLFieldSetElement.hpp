@@ -64,7 +64,7 @@ namespace krys::boo::html
     void Name(dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-fieldset-type
-    KRYS_NODISCARD dom::DOMStringAtom Type() const noexcept
+    KRYS_NODISCARD const dom::DOMStringAtom &Type() const noexcept
     {
       static const dom::DOMStringAtom type {u8"fieldset"};
       return type;

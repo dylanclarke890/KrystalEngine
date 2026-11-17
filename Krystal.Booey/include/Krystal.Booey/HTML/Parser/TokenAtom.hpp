@@ -123,7 +123,7 @@ namespace krys::boo::html
       _selfClosingTagAcknowledged = true;
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom Name() const noexcept
+    KRYS_NODISCARD const dom::DOMStringAtom &Name() const noexcept
     {
       krys_debug_assert(_type == TokenType::StartTag || _type == TokenType::EndTag
                         || _type == TokenType::DOCTYPE);
@@ -154,7 +154,7 @@ namespace krys::boo::html
       return krys::move(_data);
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom ProcessingInstructionTarget() const noexcept
+    KRYS_NODISCARD const dom::DOMStringAtom &ProcessingInstructionTarget() const noexcept
     {
       krys_debug_assert(_type == TokenType::ProcessingInstruction);
       return _name;

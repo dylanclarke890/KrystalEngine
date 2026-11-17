@@ -126,7 +126,7 @@ namespace krys::boo::dom
     Event(DOMStringAtom type, const EventInit &eventInitDict = {}) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-event-type
-    KRYS_NODISCARD DOMStringAtom Type() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &Type() const noexcept
     {
       return _type;
     }

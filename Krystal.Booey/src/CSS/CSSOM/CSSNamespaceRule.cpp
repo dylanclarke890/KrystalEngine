@@ -42,12 +42,12 @@ namespace krys::boo::css
     return AdoptRef(*new CSSNamespaceRule(rule, sheet));
   }
 
-  CSSOMStringAtom CSSNamespaceRule::NamespaceURI() const noexcept
+  const CSSOMStringAtom &CSSNamespaceRule::NamespaceURI() const noexcept
   {
     return _namespaceRule->Uri();
   }
 
-  CSSOMStringAtom CSSNamespaceRule::Prefix() const noexcept
+  const CSSOMStringAtom &CSSNamespaceRule::Prefix() const noexcept
   {
     return _namespaceRule->Prefix();
   }
