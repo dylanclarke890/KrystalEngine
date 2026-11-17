@@ -169,9 +169,9 @@ namespace krys::boo::html
     }
 
   protected:
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
-                            dom::DOMStringAtom namespaceURI) noexcept override;
+                            const dom::DOMStringAtom &namespaceURI) noexcept override;
 
     void OnAdopt(dom::Document &oldDocument) noexcept override;
 

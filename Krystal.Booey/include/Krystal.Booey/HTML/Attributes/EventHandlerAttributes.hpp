@@ -33,12 +33,12 @@ namespace krys::boo::html
     /// @brief The value of @p eventTarget's event handler @p name; null if it has none.
     /// @see https://html.spec.whatwg.org/#getting-the-current-value-of-the-event-handler
     KRYS_NODISCARD static const EventHandlerCallback *Get(const dom::EventTarget &eventTarget,
-                                                          dom::DOMStringAtom name) noexcept;
+                                                          const dom::DOMStringAtom &name) noexcept;
 
     /// @brief Sets @p eventTarget's event handler @p name to @p value, or deactivates it if @p value is
     /// empty.
     /// @see https://html.spec.whatwg.org/#event-handler-idl-attributes
-    static void Set(dom::EventTarget &eventTarget, dom::DOMStringAtom name,
+    static void Set(dom::EventTarget &eventTarget, const dom::DOMStringAtom &name,
                     EventHandlerCallback &&value) noexcept;
   };
 }

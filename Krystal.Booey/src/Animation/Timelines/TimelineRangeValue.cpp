@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  RefPtr<css::Value> ConvertToCSSValue(TimelineRangeValue &&value, RefPtr<dom::Element> element,
+  RefPtr<css::Value> ConvertToCSSValue(TimelineRangeValue &&value, const RefPtr<dom::Element> &element,
                                        style::SingleAnimationRangeType type) noexcept
   {
     if (!element)

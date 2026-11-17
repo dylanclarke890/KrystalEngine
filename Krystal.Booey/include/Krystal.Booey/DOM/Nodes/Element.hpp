@@ -382,7 +382,7 @@ namespace krys::boo::dom
     /// agent style sheets select it by as a pseudo-element of its host; null if it isn't one.
     KRYS_NODISCARD DOMStringAtom UserAgentPart() const noexcept;
 
-    void SetUserAgentPart(DOMStringAtom part) noexcept;
+    void SetUserAgentPart(const DOMStringAtom &part) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-customelementregistry
     KRYS_NODISCARD RefPtr<html::CustomElementRegistry> CustomElementRegistry() const noexcept
@@ -1465,7 +1465,7 @@ namespace krys::boo::dom
     /// `click` with a @p detail of 2 is followed by a `dblclick`.
     /// @return Whether the event was dispatched without being cancelled, and whether it was cancelled.
     DispatchMouseEventResult DispatchMouseEvent(const PlatformMouseEvent &platformEvent,
-                                                DOMStringAtom eventType, int32 detail = 0,
+                                                const DOMStringAtom &eventType, int32 detail = 0,
                                                 Element *relatedTarget = nullptr) noexcept;
 
 #pragma endregion
@@ -1637,22 +1637,23 @@ namespace krys::boo::dom
     /// if it's still in the element's shadow-including ancestors' trees, else the one with the attribute's
     /// value as its ID in the element's tree.
     /// @see https://html.spec.whatwg.org/#attr-associated-element
-    KRYS_NODISCARD RefPtr<Element> ElementForAttributeInternal(DOMStringAtom attributeName) const noexcept;
+    KRYS_NODISCARD RefPtr<Element>
+      ElementForAttributeInternal(const DOMStringAtom &attributeName) const noexcept;
 
     /// @brief Sets an element reflection attribute's element: the content attribute becomes empty, or is
     /// removed if @p element is null.
     /// @see https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:element
-    void SetElementAttribute(DOMStringAtom attributeName, Element *element) noexcept;
+    void SetElementAttribute(const DOMStringAtom &attributeName, Element *element) noexcept;
 
     /// @brief Whether @p attributeName (in the null namespace) is reflected by an `Element?` IDL attribute.
-    KRYS_NODISCARD static bool IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept;
+    KRYS_NODISCARD static bool IsElementReflectionAttribute(const DOMStringAtom &attributeName) noexcept;
 
     /// @brief The elements a `FrozenArray<Element>?` reflection attribute refers to: the ones set through its
     /// IDL attribute that are still in the element's shadow-including ancestors' trees, else the ones with
     /// the attribute's IDs in the element's tree; null if neither is set.
     /// @see https://html.spec.whatwg.org/#attr-associated-elements
     KRYS_NODISCARD Maybe<List<Ref<Element>>>
-      ElementsForAttributeInternal(DOMStringAtom attributeName) const noexcept;
+      ElementsForAttributeInternal(const DOMStringAtom &attributeName) const noexcept;
 
     /// @brief The elements a set of element references attribute resolves to: its unresolved targets
     /// (`ElementsForAttributeInternal`), each with its reference target resolved, leaving out those that
@@ -1664,12 +1665,13 @@ namespace krys::boo::dom
     /// @brief Sets a `FrozenArray<Element>?` reflection attribute's elements: the content attribute becomes
     /// empty, or is removed if @p elements is null.
     /// @see https://html.spec.whatwg.org/#attr-associated-elements
-    void SetElementsArrayAttribute(DOMStringAtom attributeName,
+    void SetElementsArrayAttribute(const DOMStringAtom &attributeName,
                                    const Maybe<List<Ref<Element>>> &elements) noexcept;
 
     /// @brief Whether @p attributeName (in the null namespace) is reflected by a `FrozenArray<Element>?` IDL
     /// attribute.
-    KRYS_NODISCARD static bool IsElementsArrayReflectionAttribute(DOMStringAtom attributeName) noexcept;
+    KRYS_NODISCARD static bool
+      IsElementsArrayReflectionAttribute(const DOMStringAtom &attributeName) noexcept;
 
     /// @brief The first element in tree order whose root is this element's root and whose ID is @p id.
     KRYS_NODISCARD RefPtr<Element> ElementInTreeWithId(DOMStringView id) const noexcept;
@@ -1816,8 +1818,8 @@ namespace krys::boo::dom
     /// @param oldValue The previous value, or null if the attribute was added.
     /// @param value The new value, or null if the attribute was removed.
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change-ext
-    virtual void OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
-                                    Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept;
+    virtual void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                    Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept;
 
 #pragma endregion
 

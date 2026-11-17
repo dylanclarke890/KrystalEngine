@@ -131,7 +131,7 @@ namespace krys::boo::html
     return false;
   }
 
-  void EmailInputType::AttributeChanged(dom::DOMStringAtom localName) noexcept
+  void EmailInputType::AttributeChanged(const dom::DOMStringAtom &localName) noexcept
   {
     if (localName == u8"multiple")
     {

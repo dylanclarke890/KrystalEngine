@@ -768,7 +768,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#fire-a-focus-event
-  void FocusAlgorithms::FireFocusEvent(dom::DOMStringAtom e, dom::Element &target,
+  void FocusAlgorithms::FireFocusEvent(const dom::DOMStringAtom &e, dom::Element &target,
                                        dom::EventTarget *relatedTarget) noexcept
   {
     // 1. Let view be target if target is a Window object; otherwise target's node document's relevant global

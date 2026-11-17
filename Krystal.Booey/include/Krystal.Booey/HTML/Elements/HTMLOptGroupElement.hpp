@@ -102,9 +102,9 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
 
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
-                            dom::DOMStringAtom namespaceURI) noexcept override;
+                            const dom::DOMStringAtom &namespaceURI) noexcept override;
 
 #pragma endregion
 

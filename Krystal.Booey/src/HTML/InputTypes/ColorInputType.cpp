@@ -210,7 +210,7 @@ namespace krys::boo::html
     }
   }
 
-  void ColorInputType::AttributeChanged(dom::DOMStringAtom name) noexcept
+  void ColorInputType::AttributeChanged(const dom::DOMStringAtom &name) noexcept
   {
     if (name == u8"value")
     {

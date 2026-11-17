@@ -191,9 +191,9 @@ namespace krys::boo::html
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
-                            dom::DOMStringAtom namespaceURI) noexcept override;
+                            const dom::DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     KRYS_NODISCARD HTMLTableSectionElement *LastBody() const noexcept;

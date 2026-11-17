@@ -205,8 +205,9 @@ namespace krys::boo::mathml
     KRYS_NODISCARD Maybe<dom::DOMString> AttributeValue(const dom::QualifiedName &name) const noexcept;
 
   private:
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            const dom::DOMStringAtom &namespaceURI) noexcept final;
   };
 }
 

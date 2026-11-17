@@ -122,9 +122,10 @@ namespace krys::boo::html
 
 #pragma region Extension Hooks
 
-  void HTMLStyleElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLStyleElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                            Maybe<dom::DOMStringView> oldValue,
                                             Maybe<dom::DOMStringView> value,
-                                            dom::DOMStringAtom namespaceURI) noexcept
+                                            const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)

@@ -104,9 +104,9 @@ namespace krys::boo::html
 
 #pragma endregion
 
-  void HTMLMapElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                                          Maybe<dom::DOMStringView> value,
-                                          dom::DOMStringAtom namespaceURI) noexcept
+  void HTMLMapElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                          Maybe<dom::DOMStringView> oldValue, Maybe<dom::DOMStringView> value,
+                                          const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 

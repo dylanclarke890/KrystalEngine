@@ -814,10 +814,10 @@ namespace krys::boo::html
     ScheduleSelectionChangeEvent();
   }
 
-  void HTMLTextFormControlElement::OnAttributeChanged(dom::DOMStringAtom localName,
+  void HTMLTextFormControlElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
                                                       Maybe<dom::DOMStringView> oldValue,
                                                       Maybe<dom::DOMStringView> value,
-                                                      dom::DOMStringAtom namespaceURI) noexcept
+                                                      const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI == null && localName == u8"placeholder")

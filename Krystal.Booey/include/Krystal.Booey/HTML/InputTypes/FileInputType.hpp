@@ -105,7 +105,7 @@ namespace krys::boo::html
 
     void DisabledStateChanged() noexcept final;
 
-    void AttributeChanged(dom::DOMStringAtom name) noexcept final;
+    void AttributeChanged(const dom::DOMStringAtom &name) noexcept final;
 
     void HandleActivationBehavior(dom::Event &event) noexcept final;
 

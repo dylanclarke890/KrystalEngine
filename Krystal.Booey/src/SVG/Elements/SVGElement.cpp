@@ -478,9 +478,9 @@ namespace krys::boo::svg
     InvalidateInstances();
   }
 
-  void SVGElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void SVGElement::OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
                                       Maybe<dom::DOMStringView> value,
-                                      dom::DOMStringAtom namespaceURI) noexcept
+                                      const dom::DOMStringAtom &namespaceURI) noexcept
   {
     AttributeChanged(dom::QualifiedName {namespaceURI, null, localName}, oldValue, value);
   }

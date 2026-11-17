@@ -92,9 +92,9 @@ namespace krys::boo::mathml
     return GetAttributeNS(name.NamespaceURI(), name.LocalName());
   }
 
-  void MathMLElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                                         Maybe<dom::DOMStringView> value,
-                                         dom::DOMStringAtom namespaceURI) noexcept
+  void MathMLElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                         Maybe<dom::DOMStringView> oldValue, Maybe<dom::DOMStringView> value,
+                                         const dom::DOMStringAtom &namespaceURI) noexcept
   {
     AttributeChanged(dom::QualifiedName {namespaceURI, null, localName}, oldValue, value);
   }

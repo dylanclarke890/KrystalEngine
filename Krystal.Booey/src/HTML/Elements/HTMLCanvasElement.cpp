@@ -435,9 +435,10 @@ namespace krys::boo::html
 
 #pragma region Element
 
-  void HTMLCanvasElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLCanvasElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                             Maybe<dom::DOMStringView> oldValue,
                                              Maybe<dom::DOMStringView> value,
-                                             dom::DOMStringAtom namespaceURI) noexcept
+                                             const dom::DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI == null && (localName == u8"width" || localName == u8"height"))
     {

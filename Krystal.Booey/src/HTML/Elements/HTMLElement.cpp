@@ -206,7 +206,7 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#dom-hidden
   // (The setter's steps are split between the overloads by the given value's type; a null value is the
   // empty string's overload.)
-  void HTMLElement::Hidden(dom::DOMString value) noexcept
+  void HTMLElement::Hidden(const dom::DOMString &value) noexcept
   {
     CEReactionsScope ceReactions;
     // 1. If the given value is a string that is an ASCII case-insensitive match for "until-found", then set
@@ -714,7 +714,7 @@ namespace krys::boo::html
     return PlainText(dom::MakeRangeSelectingNodeContents(self));
   }
 
-  void HTMLElement::InnerText(dom::DOMString value) noexcept
+  void HTMLElement::InnerText(const dom::DOMString &value) noexcept
   {
     // The innerText setter steps are to run set the inner text steps with this and the given value.
     CEReactionsScope ceReactions;
@@ -738,7 +738,7 @@ namespace krys::boo::html
     return InnerText();
   }
 
-  dom::ExceptionOr<void> HTMLElement::OuterText(dom::DOMString value) noexcept
+  dom::ExceptionOr<void> HTMLElement::OuterText(const dom::DOMString &value) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -1587,9 +1587,9 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                                       Maybe<dom::DOMStringView> value,
-                                       dom::DOMStringAtom namespaceURI) noexcept
+  void HTMLElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                       Maybe<dom::DOMStringView> oldValue, Maybe<dom::DOMStringView> value,
+                                       const dom::DOMStringAtom &namespaceURI) noexcept
   {
     StyledElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 

@@ -170,8 +170,8 @@ namespace krys::boo::dom
     /// @brief Marks the presentational hints out of date, for a change that isn't an attribute change.
     void InvalidatePresentationalHintStyle() noexcept;
 
-    void OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
-                            Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     /// @brief Writes the serialised inline style to the `style` attribute and clears the dirty flag.

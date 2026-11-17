@@ -778,9 +778,10 @@ namespace krys::boo::html
     HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
-  void HTMLTableElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLTableElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                            Maybe<dom::DOMStringView> oldValue,
                                             Maybe<dom::DOMStringView> value,
-                                            dom::DOMStringAtom namespaceURI) noexcept
+                                            const dom::DOMStringAtom &namespaceURI) noexcept
   {
     using namespace presentational_hints;
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);

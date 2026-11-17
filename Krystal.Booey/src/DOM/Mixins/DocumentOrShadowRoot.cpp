@@ -347,7 +347,7 @@ namespace krys::boo::dom
     }
   }
 
-  void DocumentOrShadowRoot::NotifyIdTargetObservers(Element &element, DOMStringAtom id) noexcept
+  void DocumentOrShadowRoot::NotifyIdTargetObservers(Element &element, const DOMStringAtom &id) noexcept
   {
     IdTargetObserverRegistry().NotifyObservers(element, id);
 

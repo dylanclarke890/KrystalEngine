@@ -194,7 +194,7 @@ namespace krys::boo::dom
     /// @brief Tells the observers of @p id in this tree that @p element gained or lost it; and, when this is
     /// a shadow root whose reference target is @p id, the observers of its host's ID too, as references to
     /// the host now go somewhere else.
-    void NotifyIdTargetObservers(Element &element, DOMStringAtom id) noexcept;
+    void NotifyIdTargetObservers(Element &element, const DOMStringAtom &id) noexcept;
 
     /// @brief Notes that @p element, in this tree, has @p id.
     void AddElementById(DOMStringAtom id, Element &element) noexcept;

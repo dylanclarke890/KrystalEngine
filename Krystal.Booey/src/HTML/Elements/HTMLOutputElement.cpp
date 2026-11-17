@@ -68,9 +68,10 @@ namespace krys::boo::html
     return *_htmlFor;
   }
 
-  void HTMLOutputElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLOutputElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                             Maybe<dom::DOMStringView> oldValue,
                                              Maybe<dom::DOMStringView> value,
-                                             dom::DOMStringAtom namespaceURI) noexcept
+                                             const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI == null && localName == u8"for" && _htmlFor)

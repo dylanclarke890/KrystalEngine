@@ -125,7 +125,7 @@ namespace krys::boo
     return ScaleDragImage(krys::move(image), {deviceScaleFactor, deviceScaleFactor});
   }
 
-  DragImageRef DissolveDragImageToFraction(DragImageRef image, float fraction) noexcept
+  DragImageRef DissolveDragImageToFraction(const DragImageRef &image, float fraction) noexcept
   {
     if (!image)
     {

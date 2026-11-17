@@ -102,7 +102,7 @@ namespace krys::boo::html
 
     void RemoveShadowSubtree() noexcept override;
 
-    void AttributeChanged(dom::DOMStringAtom name) noexcept override;
+    void AttributeChanged(const dom::DOMStringAtom &name) noexcept override;
 
     void DisabledStateChanged() noexcept final;
 

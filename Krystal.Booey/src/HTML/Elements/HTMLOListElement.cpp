@@ -33,9 +33,10 @@ namespace krys::boo::html
   {
   }
 
-  void HTMLOListElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLOListElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                            Maybe<dom::DOMStringView> oldValue,
                                             Maybe<dom::DOMStringView> value,
-                                            dom::DOMStringAtom namespaceURI) noexcept
+                                            const dom::DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI == null)
     {

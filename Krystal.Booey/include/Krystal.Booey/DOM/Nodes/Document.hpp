@@ -1890,7 +1890,7 @@ namespace krys::boo::dom
 
     /// @brief Notes a listener for @p type added to one of the document's nodes or to its window. A type the
     /// document has had a listener for stays noted.
-    void AddListenerTypeIfNeeded(DOMStringAtom type) noexcept;
+    void AddListenerTypeIfNeeded(const DOMStringAtom &type) noexcept;
 
     /// @brief Whether an `animationiteration` listener was ever added to the document's nodes or window, so
     /// CSS animations wake for each iteration to fire the event.
@@ -1924,7 +1924,7 @@ namespace krys::boo::dom
     void InvalidateOwnerTreeLiveCollectionCaches() noexcept;
 
     /// @brief Clears what those collections cached that depends on the attribute called @p localName.
-    void InvalidateOwnerTreeLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept;
+    void InvalidateOwnerTreeLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept;
 
     /// @brief Whether a live collection in the document has cached its items, which a change to the tree
     /// could affect.
@@ -1932,7 +1932,7 @@ namespace krys::boo::dom
 
     /// @brief Whether a live collection in the document has cached something that depends on the attribute
     /// called @p localName.
-    KRYS_NODISCARD bool HasLiveCollectionCachesForAttribute(DOMStringAtom localName) const noexcept;
+    KRYS_NODISCARD bool HasLiveCollectionCachesForAttribute(const DOMStringAtom &localName) const noexcept;
 
     /// @brief Whether a touch or pointer listener was ever added to the document's nodes or window. Without
     /// one, touches aren't dispatched in the document.

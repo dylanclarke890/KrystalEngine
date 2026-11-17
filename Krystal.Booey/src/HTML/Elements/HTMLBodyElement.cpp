@@ -160,9 +160,10 @@ namespace krys::boo::html
     HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
-  void HTMLBodyElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLBodyElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                           Maybe<dom::DOMStringView> oldValue,
                                            Maybe<dom::DOMStringView> value,
-                                           dom::DOMStringAtom namespaceURI) noexcept
+                                           const dom::DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI == null)
     {

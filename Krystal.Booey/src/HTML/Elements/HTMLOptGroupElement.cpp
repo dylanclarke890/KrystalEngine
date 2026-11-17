@@ -203,10 +203,10 @@ namespace krys::boo::html
     select->SetRecalcListItems();
   }
 
-  void HTMLOptGroupElement::OnAttributeChanged(dom::DOMStringAtom localName,
+  void HTMLOptGroupElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
                                                Maybe<dom::DOMStringView> oldValue,
                                                Maybe<dom::DOMStringView> value,
-                                               dom::DOMStringAtom namespaceURI) noexcept
+                                               const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 

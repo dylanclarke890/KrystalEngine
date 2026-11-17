@@ -48,7 +48,7 @@ namespace krys::boo::dom
     /// `namespaceUri` and `qualifiedName`. A null `qualifiedName` is the empty string.
     /// @see https://dom.spec.whatwg.org/#dom-domimplementation-createdocument
     KRYS_NODISCARD ExceptionOr<Ref<XMLDocument>>
-      CreateDocument(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName = DOMStringAtom::Empty(),
+      CreateDocument(DOMStringAtom namespaceUri, const DOMStringAtom &qualifiedName = DOMStringAtom::Empty(),
                      DocumentType *doctype = nullptr) noexcept;
 
     /// @brief Returns a document, with a basic tree already constructed including a title element, unless the

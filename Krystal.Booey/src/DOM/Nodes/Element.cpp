@@ -1144,7 +1144,7 @@ namespace krys::boo::dom
   }
 
   Element::DispatchMouseEventResult Element::DispatchMouseEvent(const PlatformMouseEvent &platformEvent,
-                                                                DOMStringAtom eventType, int32 detail,
+                                                                const DOMStringAtom &eventType, int32 detail,
                                                                 Element *relatedTarget) noexcept
   {
     auto eventIsDefaultPrevented = EventIsDefaultPrevented::No;
@@ -2405,7 +2405,7 @@ namespace krys::boo::dom
     return part ? DOMStringAtom(*part) : null;
   }
 
-  void Element::SetUserAgentPart(DOMStringAtom part) noexcept
+  void Element::SetUserAgentPart(const DOMStringAtom &part) noexcept
   {
     // We may set the useragentpart attribute on elements before appending them to the shadow tree.
     krys_debug_assert(!IsConnected() || IsInUserAgentShadowTree());
@@ -3020,8 +3020,8 @@ namespace krys::boo::dom
 
 #pragma region Extension Hooks
 
-  void Element::OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
-                                   Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept
+  void Element::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                   Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI != null)
     {
@@ -3573,7 +3573,7 @@ namespace krys::boo::dom
     return candidate->ResolveReferenceTarget();
   }
 
-  RefPtr<Element> Element::ElementForAttributeInternal(DOMStringAtom attributeName) const noexcept
+  RefPtr<Element> Element::ElementForAttributeInternal(const DOMStringAtom &attributeName) const noexcept
   {
     if (GetElementRareData())
     {
@@ -3625,7 +3625,7 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  void Element::SetElementAttribute(DOMStringAtom attributeName, Element *element) noexcept
+  void Element::SetElementAttribute(const DOMStringAtom &attributeName, Element *element) noexcept
   {
     krys_debug_assert(IsElementReflectionAttribute(attributeName));
 
@@ -3647,13 +3647,14 @@ namespace krys::boo::dom
     }
   }
 
-  bool Element::IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept
+  bool Element::IsElementReflectionAttribute(const DOMStringAtom &attributeName) noexcept
   {
     return attributeName == u8"popovertarget" || attributeName == u8"commandfor"
            || attributeName == u8"aria-activedescendant";
   }
 
-  Maybe<List<Ref<Element>>> Element::ElementsForAttributeInternal(DOMStringAtom attributeName) const noexcept
+  Maybe<List<Ref<Element>>>
+    Element::ElementsForAttributeInternal(const DOMStringAtom &attributeName) const noexcept
   {
     // 1. Let elements be an empty list.
     List<Ref<Element>> elements;
@@ -3713,7 +3714,7 @@ namespace krys::boo::dom
     return elements;
   }
 
-  void Element::SetElementsArrayAttribute(DOMStringAtom attributeName,
+  void Element::SetElementsArrayAttribute(const DOMStringAtom &attributeName,
                                           const Maybe<List<Ref<Element>>> &elements) noexcept
   {
     krys_debug_assert(IsElementsArrayReflectionAttribute(attributeName));
@@ -3753,7 +3754,7 @@ namespace krys::boo::dom
     }
   }
 
-  bool Element::IsElementsArrayReflectionAttribute(DOMStringAtom attributeName) noexcept
+  bool Element::IsElementsArrayReflectionAttribute(const DOMStringAtom &attributeName) noexcept
   {
     return attributeName == u8"aria-controls" || attributeName == u8"aria-describedby"
            || attributeName == u8"aria-details" || attributeName == u8"aria-errormessage"

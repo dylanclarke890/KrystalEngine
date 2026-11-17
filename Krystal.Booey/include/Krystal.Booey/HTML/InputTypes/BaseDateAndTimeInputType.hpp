@@ -165,7 +165,7 @@ namespace krys::boo::html
 
     void UpdateInnerTextValue() noexcept final;
 
-    void AttributeChanged(dom::DOMStringAtom name) noexcept final;
+    void AttributeChanged(const dom::DOMStringAtom &name) noexcept final;
 
     KRYS_NODISCARD bool IsPresentingAttachedView() const noexcept final;
 

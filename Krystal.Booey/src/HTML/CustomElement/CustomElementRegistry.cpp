@@ -91,7 +91,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-define
-  dom::ExceptionOr<void> CustomElementRegistry::Define(dom::DOMStringAtom name,
+  dom::ExceptionOr<void> CustomElementRegistry::Define(const dom::DOMStringAtom &name,
                                                        CustomElementFactory &&factory,
                                                        CustomElementOptions &&options) noexcept
   {
@@ -197,7 +197,7 @@ namespace krys::boo::html
     return FindInterface(name.LocalName());
   }
 
-  CustomElementInterface *CustomElementRegistry::FindInterface(dom::DOMStringAtom name) const noexcept
+  CustomElementInterface *CustomElementRegistry::FindInterface(const dom::DOMStringAtom &name) const noexcept
   {
     auto it = _nameMap.find(name);
     return it != _nameMap.end() ? it->second.get() : nullptr;
@@ -226,7 +226,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-whendefined
   // (The promise is a callback, called in a microtask once the name is defined.)
-  dom::ExceptionOr<void> CustomElementRegistry::WhenDefined(dom::DOMStringAtom name,
+  dom::ExceptionOr<void> CustomElementRegistry::WhenDefined(const dom::DOMStringAtom &name,
                                                             WhenDefinedCallback &&callback) noexcept
   {
     // 1. If name is not a valid custom element name, then return a promise rejected with a "SyntaxError"

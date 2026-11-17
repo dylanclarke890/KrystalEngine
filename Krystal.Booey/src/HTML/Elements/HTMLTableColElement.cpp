@@ -37,10 +37,10 @@ namespace krys::boo::html
 
 #pragma region HTMLTableColElement
 
-  void HTMLTableColElement::OnAttributeChanged(dom::DOMStringAtom localName,
+  void HTMLTableColElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
                                                Maybe<dom::DOMStringView> oldValue,
                                                Maybe<dom::DOMStringView> value,
-                                               dom::DOMStringAtom namespaceURI) noexcept
+                                               const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLTablePartElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)

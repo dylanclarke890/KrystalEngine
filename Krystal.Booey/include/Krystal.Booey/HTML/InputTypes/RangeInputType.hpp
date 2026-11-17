@@ -79,7 +79,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMString Serialize(const Decimal &value) const noexcept final;
 
-    void AttributeChanged(dom::DOMStringAtom localName) noexcept final;
+    void AttributeChanged(const dom::DOMStringAtom &localName) noexcept final;
 
     void SetValue(dom::DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;

@@ -201,7 +201,7 @@ namespace krys::boo::html
     return SerializeForNumberType(value);
   }
 
-  void RangeInputType::AttributeChanged(dom::DOMStringAtom localName) noexcept
+  void RangeInputType::AttributeChanged(const dom::DOMStringAtom &localName) noexcept
   {
     if (localName == u8"max" || localName == u8"min" || localName == u8"value")
     {

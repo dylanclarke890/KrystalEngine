@@ -78,9 +78,10 @@ namespace krys::boo::html
     FormListedElement::DidMoveToNewDocument();
   }
 
-  void HTMLObjectElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLObjectElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                             Maybe<dom::DOMStringView> oldValue,
                                              Maybe<dom::DOMStringView> value,
-                                             dom::DOMStringAtom namespaceURI) noexcept
+                                             const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLPlugInElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI == null)

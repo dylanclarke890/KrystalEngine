@@ -227,7 +227,7 @@ namespace krys::boo::css
       // Used for :is(), :not(), :has(), :where(), :host(), :nth-*(... of) and ::slotted().
       UniquePtr<SelectorList> SubSelectors;
 
-      explicit RareData(CSSOMStringAtom value) noexcept;
+      explicit RareData(const CSSOMStringAtom &value) noexcept;
 
       RareData(const RareData &other) noexcept;
 

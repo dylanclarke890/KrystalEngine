@@ -380,7 +380,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool Contains(const Node *other) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-lookupprefix
-    KRYS_NODISCARD DOMStringAtom LookupPrefix(DOMStringAtom namespaceURI) const noexcept;
+    KRYS_NODISCARD DOMStringAtom LookupPrefix(const DOMStringAtom &namespaceURI) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-lookupnamespaceuri
     KRYS_NODISCARD DOMStringAtom LookupNamespaceURI(DOMStringAtom prefix) const noexcept;
@@ -769,7 +769,7 @@ namespace krys::boo::dom
     void InvalidateLiveCollectionCachesForChildChange(const Node &child) noexcept;
 
     /// @brief Clears the caches that a change to the attribute called @p localName of the node affects.
-    void InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept;
+    void InvalidateLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept;
 
     /// @brief Whether an image has been painted for the node (as its content or a background): a later decode
     /// of a visible one is synchronous, so the image doesn't flicker.

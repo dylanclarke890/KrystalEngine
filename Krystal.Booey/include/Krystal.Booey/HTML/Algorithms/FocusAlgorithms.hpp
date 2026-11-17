@@ -109,7 +109,7 @@ namespace krys::boo::html
 
     /// @brief Fires a focus event named @p e at @p target, and the `focusin`/`focusout` that goes with it.
     /// @see https://html.spec.whatwg.org/#fire-a-focus-event
-    static void FireFocusEvent(dom::DOMStringAtom e, dom::Element &target,
+    static void FireFocusEvent(const dom::DOMStringAtom &e, dom::Element &target,
                                dom::EventTarget *relatedTarget) noexcept;
 
     /// @see https://html.spec.whatwg.org/#has-focus-steps

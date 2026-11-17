@@ -369,8 +369,9 @@ namespace krys::boo::html
 
     void OnChildrenChanged() noexcept final;
 
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            const dom::DOMStringAtom &namespaceURI) noexcept final;
 
     void DisabledStateChanged() noexcept final;
 

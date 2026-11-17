@@ -64,9 +64,10 @@ namespace krys::boo::html
     return !Is<RenderMeter>(Renderer()) && HTMLElement::ChildShouldCreateRenderer(child);
   }
 
-  void HTMLMeterElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLMeterElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                            Maybe<dom::DOMStringView> oldValue,
                                             Maybe<dom::DOMStringView> value,
-                                            dom::DOMStringAtom namespaceURI) noexcept
+                                            const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)

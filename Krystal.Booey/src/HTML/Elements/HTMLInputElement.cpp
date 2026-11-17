@@ -1874,9 +1874,10 @@ namespace krys::boo::html
 
 #pragma region DOM hooks
 
-  void HTMLInputElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLInputElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                            Maybe<dom::DOMStringView> oldValue,
                                             Maybe<dom::DOMStringView> value,
-                                            dom::DOMStringAtom namespaceURI) noexcept
+                                            const dom::DOMStringAtom &namespaceURI) noexcept
   {
     if (oldValue == value)
     {

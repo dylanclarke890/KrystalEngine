@@ -114,8 +114,9 @@ namespace krys::boo::dom
     return mutableProperties;
   }
 
-  void StyledElement::OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
-                                         Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept
+  void StyledElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                         Maybe<DOMStringView> value,
+                                         const DOMStringAtom &namespaceURI) noexcept
   {
     Element::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (oldValue != value)

@@ -36,8 +36,8 @@ namespace krys::boo::dom::tests
       }
 
     protected:
-      void OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
-                              Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept override
+      void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                              Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override
       {
         Element::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 

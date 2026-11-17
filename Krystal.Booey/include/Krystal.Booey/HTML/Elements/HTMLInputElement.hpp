@@ -741,8 +741,9 @@ namespace krys::boo::html
 
     void OnAdopt(dom::Document &oldDocument) noexcept final;
 
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            const dom::DOMStringAtom &namespaceURI) noexcept final;
 
     void OnClone(dom::Node &copy, bool subtree) noexcept final;
 

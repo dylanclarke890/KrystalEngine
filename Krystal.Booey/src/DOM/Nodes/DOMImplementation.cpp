@@ -39,7 +39,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<Ref<XMLDocument>> DOMImplementation::CreateDocument(DOMStringAtom namespaceUri,
-                                                                  DOMStringAtom qualifiedName,
+                                                                  const DOMStringAtom &qualifiedName,
                                                                   DocumentType *docType) noexcept
   {
     // 1. Let document be the result of creating a document that implements XMLDocument, given this's relevant

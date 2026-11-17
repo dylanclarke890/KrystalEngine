@@ -69,7 +69,7 @@ namespace krys::boo
   KRYS_NODISCARD DragImageRef PlatformAdjustDragImageForDeviceScaleFactor(DragImageRef image,
                                                                           float deviceScaleFactor) noexcept;
 
-  KRYS_NODISCARD DragImageRef DissolveDragImageToFraction(DragImageRef image, float delta) noexcept;
+  KRYS_NODISCARD DragImageRef DissolveDragImageToFraction(const DragImageRef &image, float delta) noexcept;
 
   /// @brief A drag image of @p image at its size, oriented by @p orientation; null if it has no size.
   KRYS_NODISCARD DragImageRef CreateDragImageFromImage(Image *image, ImageOrientation orientation) noexcept;

@@ -85,6 +85,6 @@ namespace krys::boo::html
 
     void Attach() noexcept final;
 
-    void AttributeChanged(dom::DOMStringAtom localName) noexcept final;
+    void AttributeChanged(const dom::DOMStringAtom &localName) noexcept final;
   };
 }

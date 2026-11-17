@@ -87,9 +87,10 @@ namespace krys::boo::html
     krys_unreachable();
   }
 
-  void HTMLButtonElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLButtonElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                             Maybe<dom::DOMStringView> oldValue,
                                              Maybe<dom::DOMStringView> value,
-                                             dom::DOMStringAtom namespaceURI) noexcept
+                                             const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)

@@ -6,7 +6,7 @@
 namespace krys::boo::dom
 {
   bool LiveCollectionDependsOnAttribute(LiveCollectionInvalidation invalidation,
-                                        DOMStringAtom localName) noexcept
+                                        const DOMStringAtom &localName) noexcept
   {
     switch (invalidation)
     {

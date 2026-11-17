@@ -247,9 +247,10 @@ namespace krys::boo
     }
   }
 
-  bool RenderLayerModelObject::ApplyCachedClipAndScrollPosition(RepaintRects &,
-                                                                const RenderLayerModelObject *,
-                                                                VisibleRectContext) const noexcept
+  bool RenderLayerModelObject::ApplyCachedClipAndScrollPosition(
+    RepaintRects &, const RenderLayerModelObject *,
+    // NOLINTNEXTLINE(performance-unnecessary-value-param): overrides change their copy.
+    VisibleRectContext) const noexcept
   {
     return false;
   }

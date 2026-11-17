@@ -964,7 +964,7 @@ namespace krys::boo::css
 
 #pragma region RareData
 
-  Selector::RareData::RareData(CSSOMStringAtom value) noexcept
+  Selector::RareData::RareData(const CSSOMStringAtom &value) noexcept
       : MatchingValue(value), SerialisingValue(value), Attribute(dom::AnyQualifiedName())
   {
   }

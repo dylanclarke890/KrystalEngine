@@ -52,14 +52,14 @@ namespace krys::boo::html
   }
 
   const EventHandlerCallback *EventHandlerAlgorithms::Get(const dom::EventTarget &eventTarget,
-                                                          dom::DOMStringAtom name) noexcept
+                                                          const dom::DOMStringAtom &name) noexcept
   {
     // Let eventTarget be the result of determining the target of an event handler; if it's null, return null.
     auto *target = DetermineTarget(const_cast<dom::EventTarget &>(eventTarget), name);
     return target ? target->EventHandlerValue(name) : nullptr;
   }
 
-  void EventHandlerAlgorithms::Set(dom::EventTarget &eventTarget, dom::DOMStringAtom name,
+  void EventHandlerAlgorithms::Set(dom::EventTarget &eventTarget, const dom::DOMStringAtom &name,
                                    EventHandlerCallback &&value) noexcept
   {
     // Let eventTarget be the result of determining the target of an event handler; if it's null, return.

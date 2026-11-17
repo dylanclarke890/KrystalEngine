@@ -563,7 +563,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD virtual bool ShouldUseInputMethod() const noexcept;
 
-    virtual void AttributeChanged(dom::DOMStringAtom) noexcept
+    virtual void AttributeChanged(const dom::DOMStringAtom &) noexcept
     {
     }
 

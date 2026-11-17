@@ -323,7 +323,7 @@ namespace krys::boo
   }
 
   void PointerLockController::DispatchLockedMouseEvent(const PlatformMouseEvent &event,
-                                                       dom::DOMStringAtom eventType) noexcept
+                                                       const dom::DOMStringAtom &eventType) noexcept
   {
     if (!_element || !_element->NodeDocument().Frame())
     {
