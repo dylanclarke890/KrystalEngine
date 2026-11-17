@@ -30,7 +30,7 @@ namespace krys::boo::dom::mixins::tests
 
       KRYS_NODISCARD Ref<dom::Element> Create(dom::DOMStringAtom localName, dom::DOMStringView id) noexcept
       {
-        auto element = Document->CreateElement(localName).ReleaseValue();
+        auto element = Document->CreateElement(krys::move(localName)).ReleaseValue();
         REQUIRE_FALSE(element->SetAttribute(u8"id", dom::DOMString(id)).HasException());
         return element;
       }

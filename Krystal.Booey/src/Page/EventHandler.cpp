@@ -820,7 +820,7 @@ namespace krys::boo
     {
       if (RefPtr<dom::Element> node = ShareRefPtr(DynamicDowncast<dom::Element>(clickNode)))
       {
-        return node->DispatchMouseEvent(platformMouseEvent, eventType, clickCount).Dispatched
+        return node->DispatchMouseEvent(platformMouseEvent, krys::move(eventType), clickCount).Dispatched
                == dom::Element::EventIsDispatched::Yes;
       }
     }
@@ -971,7 +971,7 @@ namespace krys::boo
     return areas;
   }
 
-  void EventHandler::NotifyScrollableAreasOfMouseEvents(dom::DOMStringAtom eventType,
+  void EventHandler::NotifyScrollableAreasOfMouseEvents(const dom::DOMStringAtom &eventType,
                                                         dom::Element *lastElementUnderMouse,
                                                         dom::Element *elementUnderMouse) noexcept
   {
@@ -1029,7 +1029,8 @@ namespace krys::boo
     // Fire mouseout/mouseover if the mouse has shifted to a different node.
     if (fireMouseOverOut == FireMouseOverOut::Yes)
     {
-      NotifyScrollableAreasOfMouseEvents(eventType, _lastElementUnderMouse.get(), _elementUnderMouse.get());
+      NotifyScrollableAreasOfMouseEvents(krys::move(eventType), _lastElementUnderMouse.get(),
+                                         _elementUnderMouse.get());
 
       if (_lastElementUnderMouse && &_lastElementUnderMouse->NodeDocument() != frame->Document())
       {
@@ -1146,8 +1147,8 @@ namespace krys::boo
                                { return ancestor.get() == element; });
   }
 
-  bool EventHandler::DispatchMouseEvent(dom::DOMStringAtom eventType, dom::Node *targetNode, int32 clickCount,
-                                        const PlatformMouseEvent &platformMouseEvent,
+  bool EventHandler::DispatchMouseEvent(const dom::DOMStringAtom &eventType, dom::Node *targetNode,
+                                        int32 clickCount, const PlatformMouseEvent &platformMouseEvent,
                                         FireMouseOverOut fireMouseOverOut) noexcept
   {
     _mouseMoveTargetOverride = nullptr;
@@ -3958,7 +3959,7 @@ namespace krys::boo
   {
     auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
       target.NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
-    bool accept = DispatchDragEvent(eventType, target, event, *dataTransfer);
+    bool accept = DispatchDragEvent(krys::move(eventType), target, event, *dataTransfer);
     dataTransfer->MakeInvalidForSecurity();
     if (accept && !dataTransfer->DropEffectIsUninitialized())
     {
@@ -4189,7 +4190,7 @@ namespace krys::boo
     if (ShouldDispatchEventsToDragSourceElement())
     {
       Ref<dom::Element> draggedElement = ShareRef(*DraggedElement());
-      (void)DispatchDragEvent(eventType, *draggedElement, event, *GetDragState().DataTransfer);
+      (void)DispatchDragEvent(krys::move(eventType), *draggedElement, event, *GetDragState().DataTransfer);
     }
   }
 

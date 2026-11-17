@@ -12,7 +12,7 @@ namespace krys::boo::css::tests
                                                           CSSOMStringAtom prefix = null) noexcept
     {
       return CreateUnique<MutableSelector>(
-        dom::QualifiedName(dom::StarAtom(), prefix, CSSOMStringAtom(localName)));
+        dom::QualifiedName(dom::StarAtom(), krys::move(prefix), CSSOMStringAtom(localName)));
     }
 
     KRYS_NODISCARD static UniquePtr<MutableSelector> Simple(SelectorMatch match,
@@ -48,7 +48,7 @@ namespace krys::boo::css::tests
       auto selector = CreateUnique<MutableSelector>();
       selector->SetMatch(match);
       selector->SetValue(CSSOMStringAtom(value));
-      selector->SetAttribute(dom::QualifiedName(dom::StarAtom(), prefix, CSSOMStringAtom(name)),
+      selector->SetAttribute(dom::QualifiedName(dom::StarAtom(), krys::move(prefix), CSSOMStringAtom(name)),
                              caseSensitive == IsCaseSensitive::Yes ? AttributeCaseFlag::None
                                                                    : AttributeCaseFlag::Insensitive);
       return selector;

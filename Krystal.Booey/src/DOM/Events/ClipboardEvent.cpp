@@ -4,13 +4,14 @@
 namespace krys::boo::dom
 {
   ClipboardEvent::ClipboardEvent(DOMStringAtom type, const ClipboardEventInit &eventInitDict) noexcept
-      : Event(type, eventInitDict), _clipboardData(eventInitDict.ClipboardData)
+      : Event(krys::move(type), eventInitDict), _clipboardData(eventInitDict.ClipboardData)
   {
   }
 
   ClipboardEvent::~ClipboardEvent() noexcept = default;
 
-  Ref<ClipboardEvent> ClipboardEvent::Create(DOMStringAtom type, Ref<DataTransfer> &&dataTransfer) noexcept
+  Ref<ClipboardEvent> ClipboardEvent::Create(const DOMStringAtom &type,
+                                             Ref<DataTransfer> &&dataTransfer) noexcept
   {
     ClipboardEventInit init;
     init.Bubbles = true;

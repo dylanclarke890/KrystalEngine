@@ -335,7 +335,7 @@ namespace krys::boo::dom
     {
       _elementsById = CreateUnique<TreeScopeOrderedMap>();
     }
-    _elementsById->Add(id, element);
+    _elementsById->Add(krys::move(id), element);
   }
 
   void DocumentOrShadowRoot::RemoveElementById(DOMStringAtom id, Element &element) noexcept
@@ -343,7 +343,7 @@ namespace krys::boo::dom
     krys_debug_assert(_elementsById);
     if (_elementsById)
     {
-      _elementsById->Remove(id, element);
+      _elementsById->Remove(krys::move(id), element);
     }
   }
 
@@ -362,7 +362,7 @@ namespace krys::boo::dom
   {
     if (_elementsById)
     {
-      _elementsById->OrderChanged(id);
+      _elementsById->OrderChanged(krys::move(id));
     }
   }
 
@@ -386,7 +386,7 @@ namespace krys::boo::dom
     {
       _imageMapsByName = CreateUnique<TreeScopeOrderedMap>();
     }
-    _imageMapsByName->Add(name, map);
+    _imageMapsByName->Add(krys::move(name), map);
   }
 
   void DocumentOrShadowRoot::RemoveImageMap(DOMStringAtom name, html::HTMLMapElement &map) noexcept
@@ -394,7 +394,7 @@ namespace krys::boo::dom
     krys_debug_assert(_imageMapsByName);
     if (_imageMapsByName)
     {
-      _imageMapsByName->Remove(name, map);
+      _imageMapsByName->Remove(krys::move(name), map);
     }
   }
 
@@ -402,7 +402,7 @@ namespace krys::boo::dom
   {
     if (_imageMapsByName)
     {
-      _imageMapsByName->OrderChanged(name);
+      _imageMapsByName->OrderChanged(krys::move(name));
     }
   }
 

@@ -108,8 +108,9 @@ namespace krys::boo::dom
     }
 
   private:
-    TouchEvent(TouchList *touches, TouchList *targetTouches, TouchList *changedTouches, DOMStringAtom type,
-               LocalFrameView *view, const DoublePoint &globalLocation, EnumSet<Modifier> modifiers) noexcept;
+    TouchEvent(TouchList *touches, TouchList *targetTouches, TouchList *changedTouches,
+               const DOMStringAtom &type, LocalFrameView *view, const DoublePoint &globalLocation,
+               EnumSet<Modifier> modifiers) noexcept;
   };
 }
 

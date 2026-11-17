@@ -68,25 +68,25 @@ namespace krys::boo::dom
 
     TreeScopeOrderedMap() noexcept = default;
 
-    void Add(DOMStringAtom key, Element &element) noexcept;
+    void Add(const DOMStringAtom &key, Element &element) noexcept;
 
-    void Remove(DOMStringAtom key, Element &element) noexcept;
+    void Remove(const DOMStringAtom &key, Element &element) noexcept;
 
     /// @brief Forgets the order of the elements with @p key, as it's changed.
-    void OrderChanged(DOMStringAtom key) noexcept;
+    void OrderChanged(const DOMStringAtom &key) noexcept;
 
     /// @brief How many elements have @p key.
-    KRYS_NODISCARD uint32 Count(DOMStringAtom key) const noexcept;
+    KRYS_NODISCARD uint32 Count(const DOMStringAtom &key) const noexcept;
 
     /// @brief The first element in tree order with @p key, or null if there's none.
     /// @param root The root of the tree scope.
-    KRYS_NODISCARD Element *First(DOMStringAtom key, const ContainerNode &root,
+    KRYS_NODISCARD Element *First(const DOMStringAtom &key, const ContainerNode &root,
                                   MatchFunction matches) const noexcept;
 
     /// @brief The elements with @p key, in tree order.
     /// @param root The root of the tree scope.
     /// @note The elements are valid until the map or the tree next changes.
-    KRYS_NODISCARD Span<Element *const> All(DOMStringAtom key, const ContainerNode &root,
+    KRYS_NODISCARD Span<Element *const> All(const DOMStringAtom &key, const ContainerNode &root,
                                             MatchFunction matches) const noexcept;
   };
 }

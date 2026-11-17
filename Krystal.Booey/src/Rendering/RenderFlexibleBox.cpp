@@ -2136,7 +2136,7 @@ namespace krys::boo
   }
 
   LayoutUnit RenderFlexibleBox::AutoMarginOffsetInMainAxis(const FlexLayoutItems &flexLayoutItems,
-                                                           LayoutUnit &availableFreeSpace) noexcept
+                                                           LayoutUnit &availableFreeSpace) const noexcept
   {
     if (availableFreeSpace <= 0_lu)
     {

@@ -207,7 +207,7 @@ namespace krys::boo::html
     SetForm(FindAssociatedForm(AsHTMLElement(), Form()));
   }
 
-  void FormListedElement::ParseAttribute(dom::DOMStringAtom localName,
+  void FormListedElement::ParseAttribute(const dom::DOMStringAtom &localName,
                                          Maybe<dom::DOMStringView> value) noexcept
   {
     if (localName == u8"form")
@@ -338,7 +338,7 @@ namespace krys::boo::html
 
   FormAttributeTargetObserver::FormAttributeTargetObserver(dom::DOMStringAtom id,
                                                            FormListedElement &element) noexcept
-      : IdTargetObserver(element.AsHTMLElement().TreeScope().IdTargetObserverRegistry(), id),
+      : IdTargetObserver(element.AsHTMLElement().TreeScope().IdTargetObserverRegistry(), krys::move(id)),
         _element(element)
   {
   }

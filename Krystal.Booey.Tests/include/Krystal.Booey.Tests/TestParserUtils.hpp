@@ -53,7 +53,7 @@ namespace krys::boo::tests
     }
   }
 
-  inline void Indent(utf8_string &output, size_t depth, utf8_string prefix = u8"| ") noexcept
+  inline void Indent(utf8_string &output, size_t depth, const utf8_string &prefix = u8"| ") noexcept
   {
     output += prefix;
 

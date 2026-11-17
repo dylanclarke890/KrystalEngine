@@ -68,7 +68,7 @@ namespace krys::ui::input
                              uint32 selectionStart = 0, uint32 selectionLength = 0) noexcept;
 
   /// @brief Characters typed without a key press, as a `keypress` with them alone.
-  KRYS_NODISCARD boo::PlatformKeyboardEvent TextInputEvent(utf8_string text) noexcept;
+  KRYS_NODISCARD boo::PlatformKeyboardEvent TextInputEvent(const utf8_string &text) noexcept;
 
   /// @brief The underlines under the input method's @p clauses of @p text, in the text's colour, thick under
   /// the clause being converted; one under all of it without clauses.
@@ -90,5 +90,5 @@ namespace krys::ui::input
                                                           const pal::TouchpadPanInput &input) noexcept;
 
   /// @brief The system cursor nearest to a Booey cursor.
-  KRYS_NODISCARD pal::CursorShape ToCursorShape(boo::Cursor cursor) noexcept;
+  KRYS_NODISCARD pal::CursorShape ToCursorShape(const boo::Cursor &cursor) noexcept;
 }

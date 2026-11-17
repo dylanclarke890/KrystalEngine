@@ -6,11 +6,11 @@
 namespace krys::boo::dom
 {
   CommandEvent::CommandEvent(DOMStringAtom type, const CommandEventInit &eventInitDict) noexcept
-      : Event(type, eventInitDict), _source(eventInitDict.Source), _command(eventInitDict.Command)
+      : Event(krys::move(type), eventInitDict), _source(eventInitDict.Source), _command(eventInitDict.Command)
   {
   }
 
-  Ref<CommandEvent> CommandEvent::Create(DOMStringAtom type, const CommandEventInit &init,
+  Ref<CommandEvent> CommandEvent::Create(const DOMStringAtom &type, const CommandEventInit &init,
                                          bool isTrusted) noexcept
   {
     auto event = CreateRef<CommandEvent>(type, init);

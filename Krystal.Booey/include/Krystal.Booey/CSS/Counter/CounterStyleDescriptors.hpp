@@ -171,7 +171,7 @@ namespace krys::boo::css
 
     void SetName(CounterStyleName name) noexcept;
 
-    void SetSystemData(CounterStyleSystemData systemData) noexcept;
+    void SetSystemData(const CounterStyleSystemData &systemData) noexcept;
 
     void SetNegative(CounterStyleNegativeSymbols negative) noexcept;
 
@@ -213,20 +213,20 @@ namespace krys::boo::css
   /// @brief The system named by a `system` descriptor value (`symbolic` if there is none).
   KRYS_NODISCARD CounterStyleSystem ToCounterStyleSystemEnum(const Value *system) noexcept;
 
-  KRYS_NODISCARD CounterStyleRanges RangeFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleRanges RangeFromValue(const Ref<Value> &value) noexcept;
 
-  KRYS_NODISCARD CounterStyleAdditiveSymbols AdditiveSymbolsFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleAdditiveSymbols AdditiveSymbolsFromValue(const Ref<Value> &value) noexcept;
 
-  KRYS_NODISCARD CounterStylePad PadFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStylePad PadFromValue(const Ref<Value> &value) noexcept;
 
-  KRYS_NODISCARD CounterStyleNegativeSymbols NegativeSymbolsFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleNegativeSymbols NegativeSymbolsFromValue(const Ref<Value> &value) noexcept;
 
-  KRYS_NODISCARD CounterStyleSymbol SymbolFromValue(RefPtr<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleSymbol SymbolFromValue(const RefPtr<Value> &value) noexcept;
 
-  KRYS_NODISCARD List<CounterStyleSymbol> SymbolsFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD List<CounterStyleSymbol> SymbolsFromValue(const Ref<Value> &value) noexcept;
 
-  KRYS_NODISCARD CounterStyleName FallbackNameFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleName FallbackNameFromValue(const Ref<Value> &value) noexcept;
 
-  KRYS_NODISCARD CounterStyleSystemData ExtractSystemDataFromValue(RefPtr<Value> systemValue,
+  KRYS_NODISCARD CounterStyleSystemData ExtractSystemDataFromValue(const RefPtr<Value> &systemValue,
                                                                    CounterStyleSystem system) noexcept;
 }

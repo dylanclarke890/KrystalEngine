@@ -219,7 +219,8 @@ namespace krys::boo::dom
     return registeredObservers;
   }
 
-  bool MutationObserverAlgorithms::IsAttributeOldValueRequested(Node &target, DOMStringAtom name) noexcept
+  bool MutationObserverAlgorithms::IsAttributeOldValueRequested(Node &target,
+                                                                const DOMStringAtom &name) noexcept
   {
     // The interested observers of "queue a mutation record" (steps 2 and 3) for an attribute in the null
     // namespace.
@@ -253,12 +254,10 @@ namespace krys::boo::dom
     return false;
   }
 
-  void MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType type, Ref<Node> &&target,
-                                                       DOMStringAtom name, DOMStringAtom namespaceURI,
-                                                       DOMStringAtom oldValue, SmallNodeList &&addedNodes,
-                                                       SmallNodeList &&removedNodes,
-                                                       RefPtr<Node> &&previousSibling,
-                                                       RefPtr<Node> &&nextSibling) noexcept
+  void MutationObserverAlgorithms::QueueMutationRecord(
+    MutationRecordType type, Ref<Node> &&target, const DOMStringAtom &name, const DOMStringAtom &namespaceURI,
+    const DOMStringAtom &oldValue, SmallNodeList &&addedNodes, SmallNodeList &&removedNodes,
+    RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept
   {
     // 1. Let interestedObservers be an empty map.
     List<InterestedObserver> interestedObservers;

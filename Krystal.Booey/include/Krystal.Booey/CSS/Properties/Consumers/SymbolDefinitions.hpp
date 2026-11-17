@@ -36,7 +36,7 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Ident;
 
     KRYS_NODISCARD static Maybe<SymbolRaw> Consume(TokenRange &tokens, PropertyParserState &state,
-                                                   AllowedSymbols symbolsAllowed,
+                                                   const AllowedSymbols &symbolsAllowed,
                                                    PropertyParserOptions options) noexcept;
   };
 

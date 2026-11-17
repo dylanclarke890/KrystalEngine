@@ -122,7 +122,7 @@ namespace krys::boo::dom
     {
       registry.value()->AppendToScopedDocumentSet(document);
     }
-    result->_is = definition != nullptr ? null : is;
+    result->_is = definition != nullptr ? null : krys::move(is);
 
     // 7. Return result.
     return AdoptRef(*result.release());

@@ -30,7 +30,7 @@
 namespace krys::boo::html
 {
   HTMLMaybeFormAssociatedCustomElement::HTMLMaybeFormAssociatedCustomElement(
-    dom::Document &document, dom::DOMStringAtom localName) noexcept
+    dom::Document &document, const dom::DOMStringAtom &localName) noexcept
       : HTMLElement(document, HTMLElementInterface::MaybeFormAssociatedCustom, localName,
                     HTMLElementFlags::None, dom::NodeFlags::None)
   {

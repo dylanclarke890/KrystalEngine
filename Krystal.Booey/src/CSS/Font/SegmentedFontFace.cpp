@@ -129,7 +129,7 @@ namespace krys::boo::css
 
   FontRanges CSSSegmentedFontFace::GetFontRanges(const FontDescription &fontDescription,
                                                  const FontPaletteValues &fontPaletteValues,
-                                                 RefPtr<FontFeatureValues> fontFeatureValues) noexcept
+                                                 const RefPtr<FontFeatureValues> &fontFeatureValues) noexcept
   {
     auto [iterator, isNewEntry] =
       _cache.try_emplace(CacheKey {FontDescriptionKey(fontDescription), fontPaletteValues}, FontRanges());

@@ -975,7 +975,7 @@ namespace krys::boo
     }
   }
 
-  void WebAnimation::EnqueueAnimationPlaybackEvent(dom::DOMStringAtom type,
+  void WebAnimation::EnqueueAnimationPlaybackEvent(const dom::DOMStringAtom &type,
                                                    Maybe<WebAnimationTime> currentTime,
                                                    Maybe<WebAnimationTime> scheduledTime) noexcept
   {

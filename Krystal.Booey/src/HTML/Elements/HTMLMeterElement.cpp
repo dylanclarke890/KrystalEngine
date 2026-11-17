@@ -88,13 +88,13 @@ namespace krys::boo::html
     KRYS_NODISCARD double ParseAttribute(const HTMLMeterElement &element, dom::DOMStringAtom name,
                                          double fallbackValue) noexcept
     {
-      auto attribute = element.GetAttribute(name);
+      auto attribute = element.GetAttribute(krys::move(name));
       return attribute ? ParseHTMLFloatingPointNumberValue(*attribute, fallbackValue) : fallbackValue;
     }
 
     void SetDoubleAttribute(HTMLMeterElement &element, dom::DOMStringAtom name, double value) noexcept
     {
-      Reflect<double>(element, name, krys::move(value));
+      Reflect<double>(element, krys::move(name), krys::move(value));
     }
   }
 

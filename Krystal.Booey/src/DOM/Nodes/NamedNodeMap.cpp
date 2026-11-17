@@ -37,24 +37,24 @@ namespace krys::boo::dom
 
   RefPtr<Attr> NamedNodeMap::GetNamedItem(DOMStringAtom qualifiedName) noexcept
   {
-    return ShareRefPtr(ElementAlgorithms::GetAttributeByName(qualifiedName, *_associatedElement));
+    return ShareRefPtr(ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *_associatedElement));
   }
 
   KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::GetNamedItem(DOMStringAtom qualifiedName) const noexcept
   {
-    return const_cast<NamedNodeMap *>(this)->GetNamedItem(qualifiedName);
+    return const_cast<NamedNodeMap *>(this)->GetNamedItem(krys::move(qualifiedName));
   }
 
   RefPtr<Attr> NamedNodeMap::GetNamedItemNS(DOMStringAtom attrNamespace, DOMStringAtom localName) noexcept
   {
-    return ShareRefPtr(
-      ElementAlgorithms::GetAttributeByNamespace(attrNamespace, localName, *_associatedElement));
+    return ShareRefPtr(ElementAlgorithms::GetAttributeByNamespace(
+      krys::move(attrNamespace), krys::move(localName), *_associatedElement));
   }
 
   KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::GetNamedItemNS(DOMStringAtom attrNamespace,
                                                                  DOMStringAtom localName) const noexcept
   {
-    return const_cast<NamedNodeMap *>(this)->GetNamedItemNS(attrNamespace, localName);
+    return const_cast<NamedNodeMap *>(this)->GetNamedItemNS(krys::move(attrNamespace), krys::move(localName));
   }
 
   ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItem(Attr &attr) noexcept
@@ -73,7 +73,7 @@ namespace krys::boo::dom
   {
     html::CEReactionsScope ceReactions;
     // 1. Let attr be the result of removing an attribute given qualifiedName and element.
-    auto attr = ElementAlgorithms::RemoveAttributeByName(qualifiedName, *_associatedElement);
+    auto attr = ElementAlgorithms::RemoveAttributeByName(krys::move(qualifiedName), *_associatedElement);
     // 2. If attr is null, then throw a "NotFoundError" DOMException.
     if (attr == nullptr)
     {
@@ -89,7 +89,8 @@ namespace krys::boo::dom
   {
     html::CEReactionsScope ceReactions;
     // 1. Let attr be the result of removing an attribute given namespace, localName, and element.
-    auto attr = ElementAlgorithms::RemoveAttributeByNamespace(attrNamespace, localName, *_associatedElement);
+    auto attr = ElementAlgorithms::RemoveAttributeByNamespace(krys::move(attrNamespace),
+                                                              krys::move(localName), *_associatedElement);
     // 2. If attr is null, then throw a "NotFoundError" DOMException.
     if (attr == nullptr)
     {
@@ -112,12 +113,12 @@ namespace krys::boo::dom
 
   RefPtr<Attr> NamedNodeMap::operator[](DOMStringAtom qualifiedName) noexcept
   {
-    return GetNamedItem(qualifiedName);
+    return GetNamedItem(krys::move(qualifiedName));
   }
 
   RefPtr<const Attr> NamedNodeMap::operator[](DOMStringAtom qualifiedName) const noexcept
   {
-    return GetNamedItem(qualifiedName);
+    return GetNamedItem(krys::move(qualifiedName));
   }
 
   List<DOMString> NamedNodeMap::SupportedPropertyNames() const noexcept

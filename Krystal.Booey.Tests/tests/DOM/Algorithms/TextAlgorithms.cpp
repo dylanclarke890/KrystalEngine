@@ -27,7 +27,7 @@ namespace krys::boo::dom::tests
       }
 
       /// @brief A collapsed live range at the offset in the node.
-      Ref<Range> RangeAt(size_t offset) noexcept
+      Ref<Range> RangeAt(size_t offset) const noexcept
       {
         auto range = Document->CreateRange();
         REQUIRE_FALSE(range->SetStart(*Node, offset).HasException());

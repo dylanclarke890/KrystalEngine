@@ -372,7 +372,7 @@ namespace krys::boo
   {
     if (element)
     {
-      EnqueueEvent(type, &element->NodeDocument());
+      EnqueueEvent(krys::move(type), &element->NodeDocument());
     }
   }
 
@@ -382,7 +382,7 @@ namespace krys::boo
     if (document)
     {
       document->QueueTaskToDispatchEvent(html::TaskSource::UserInteraction,
-                                         dom::Event::Create(type, true, false));
+                                         dom::Event::Create(krys::move(type), true, false));
     }
   }
 

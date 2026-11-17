@@ -117,7 +117,7 @@ namespace krys::boo
     return visiblePos;
   }
 
-  dom::Document *LocalFrame::DocumentAtPoint(const IntPoint &point) noexcept
+  dom::Document *LocalFrame::DocumentAtPoint(const IntPoint &point) const noexcept
   {
     if (!View())
     {

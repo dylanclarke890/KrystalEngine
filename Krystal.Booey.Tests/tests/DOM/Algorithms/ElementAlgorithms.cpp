@@ -61,7 +61,7 @@ namespace krys::boo::dom::tests
 
     Ref<Attr> NewAttribute(Document &document, DOMStringAtom localName, DOMString &&value) noexcept
     {
-      auto attr = document.CreateAttribute(localName).ReleaseValue();
+      auto attr = document.CreateAttribute(krys::move(localName)).ReleaseValue();
       attr->Value(krys::move(value));
       return attr;
     }
@@ -209,7 +209,7 @@ namespace krys::boo::dom::tests
     {
       auto check = [](Document &document, DOMStringAtom namespaceURI)
       {
-        auto element = document.CreateElementNS(namespaceURI, u8"g").ReleaseValue();
+        auto element = document.CreateElementNS(krys::move(namespaceURI), u8"g").ReleaseValue();
         REQUIRE_FALSE(element->SetAttribute(u8"viewBox", u8"0 0 1 1").HasException());
         CHECK(ElementAlgorithms::GetAttributeByName(u8"viewbox", *element) == nullptr);
         CHECK(ElementAlgorithms::GetAttributeByName(u8"viewBox", *element) != nullptr);
@@ -423,7 +423,7 @@ namespace krys::boo::dom::tests
 
     auto insert = [&](InsertAdjacentWhere where, DOMStringAtom name)
     {
-      auto node = document->CreateElement(name).ReleaseValue();
+      auto node = document->CreateElement(krys::move(name)).ReleaseValue();
       auto result = ElementAlgorithms::InsertAdjacent(*element, where, *node);
       REQUIRE_FALSE(result.HasException());
       CHECK(result.Value() == node.get());

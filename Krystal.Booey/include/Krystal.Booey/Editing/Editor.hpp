@@ -366,7 +366,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldDeleteRange(const Maybe<dom::SimpleRange> &range) const noexcept;
 
-    KRYS_NODISCARD bool SmartInsertDeleteEnabled() noexcept;
+    KRYS_NODISCARD bool SmartInsertDeleteEnabled() const noexcept;
 
     KRYS_NODISCARD bool CanSmartCopyOrDelete() noexcept;
 

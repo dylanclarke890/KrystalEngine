@@ -58,7 +58,7 @@ namespace krys::boo::tests
 
       /// @brief Runs the event loop @p delta after its last run, then the rendering update if one is
       /// scheduled.
-      void Frame(MonotonicTime::duration delta = {}) noexcept
+      void Frame(MonotonicTime::duration delta = {}) const noexcept
       {
         auto &loop = html::EventLoop::Current();
         loop.Run(loop.Now() + delta);

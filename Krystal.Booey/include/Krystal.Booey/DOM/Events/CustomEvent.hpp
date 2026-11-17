@@ -40,7 +40,7 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#dom-customevent-customevent
     CustomEvent(DOMStringAtom type, const CustomEventInit<T> &eventInitDict = {}) noexcept
-        : Event(type, eventInitDict), _detail(eventInitDict.Detail)
+        : Event(krys::move(type), eventInitDict), _detail(eventInitDict.Detail)
     {
     }
 
@@ -67,7 +67,7 @@ namespace krys::boo::dom
       }
 
       // 2. Initialize this with type, bubbles, and cancelable.
-      Initialize(*this, type, bubbles, cancelable);
+      Initialize(*this, krys::move(type), bubbles, cancelable);
 
       // 3. Set this's detail attribute to detail.
       _detail = detail;

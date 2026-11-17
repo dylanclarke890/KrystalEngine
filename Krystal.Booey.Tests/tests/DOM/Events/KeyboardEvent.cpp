@@ -6,8 +6,9 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    KRYS_NODISCARD PlatformKeyboardEvent Key(PlatformEvent::Type type, utf8_string text, utf8_string key,
-                                             utf8_string code, int32 keyCode, bool isKeypad = false,
+    KRYS_NODISCARD PlatformKeyboardEvent Key(PlatformEvent::Type type, const utf8_string &text,
+                                             utf8_string key, utf8_string code, int32 keyCode,
+                                             bool isKeypad = false,
                                              EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
       return PlatformKeyboardEvent(type, text, text, krys::move(key), krys::move(code), u8"", keyCode, true,

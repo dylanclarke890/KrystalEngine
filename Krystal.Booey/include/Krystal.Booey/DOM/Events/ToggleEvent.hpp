@@ -35,7 +35,7 @@ namespace krys::boo::dom
     ToggleEvent(DOMStringAtom type, const ToggleEventInit &eventInitDict = {}) noexcept;
 
     /// @brief A trusted event of type @p type, which doesn't bubble; composed if @p init says so.
-    KRYS_NODISCARD static Ref<ToggleEvent> Create(DOMStringAtom type, const ToggleEventInit &init,
+    KRYS_NODISCARD static Ref<ToggleEvent> Create(const DOMStringAtom &type, const ToggleEventInit &init,
                                                   bool isCancelable) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-toggleevent-oldstate

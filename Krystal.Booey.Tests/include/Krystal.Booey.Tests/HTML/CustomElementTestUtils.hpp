@@ -15,7 +15,7 @@ namespace krys::boo::html::tests
 {
   using Log = List<utf8_string>;
 
-  inline utf8_string Text(dom::DOMStringAtom value) noexcept
+  inline utf8_string Text(const dom::DOMStringAtom &value) noexcept
   {
     return value == null ? utf8_string(u8"null") : value.ToString();
   }
@@ -85,7 +85,7 @@ namespace krys::boo::html::tests
       EventLoop::Current().RunUntilIdle();
     }
 
-    CustomElementRegistry &Registry() noexcept
+    CustomElementRegistry &Registry() const noexcept
     {
       auto *registry = Document->CustomElementRegistry().get(); // The document keeps it alive.
       return *registry;
@@ -93,7 +93,7 @@ namespace krys::boo::html::tests
 
     void Define(dom::DOMStringAtom name, List<dom::DOMStringAtom> observed = {}) noexcept
     {
-      auto result = Registry().Define(name, [this](HTMLElement &element)
+      auto result = Registry().Define(krys::move(name), [this](HTMLElement &element)
                                       { return CreateUnique<LoggingElement>(element, Calls); },
                                       {.ObservedAttributes = krys::move(observed)});
       REQUIRE_FALSE(result.HasException());
@@ -117,7 +117,7 @@ namespace krys::boo::html::tests
       return *body;
     }
 
-    dom::Element &ById(dom::DOMStringView id) noexcept
+    dom::Element &ById(dom::DOMStringView id) const noexcept
     {
       auto element = Document->GetElementById(id);
       REQUIRE(element);
@@ -126,7 +126,7 @@ namespace krys::boo::html::tests
 
     Ref<dom::Element> Create(dom::DOMStringAtom name) noexcept
     {
-      auto element = Document->CreateElement(name);
+      auto element = Document->CreateElement(krys::move(name));
       REQUIRE_FALSE(element.HasException());
       return element.ReleaseValue();
     }

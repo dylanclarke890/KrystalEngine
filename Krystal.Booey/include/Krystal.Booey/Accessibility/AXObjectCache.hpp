@@ -291,7 +291,7 @@ namespace krys::boo
 
     /// @brief An attribute of @p element changed from @p oldValue to @p newValue (null when it was or is now
     /// absent): handled now, or once the tree is next updated if the element's renderer is out of date.
-    void DeferAttributeChangeIfNeeded(dom::Element &element, dom::DOMStringAtom name,
+    void DeferAttributeChangeIfNeeded(dom::Element &element, const dom::DOMStringAtom &name,
                                       Maybe<dom::DOMStringView> oldValue,
                                       Maybe<dom::DOMStringView> newValue) noexcept;
 

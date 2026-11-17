@@ -47,7 +47,7 @@ namespace krys::boo::html
   void DateTimeFieldElement::Initialize(DateTimeFieldElement &field, dom::DOMStringAtom part,
                                         utf8_stringview label) noexcept
   {
-    field.SetUserAgentPart(part);
+    field.SetUserAgentPart(krys::move(part));
     // Fields are focusable, and in sequential navigation.
     (void)field.SetAttribute(u8"tabindex", u8"0");
     (void)field.SetAttribute(u8"role", u8"spinbutton");

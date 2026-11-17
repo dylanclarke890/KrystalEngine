@@ -319,7 +319,7 @@ namespace krys::boo::dom::tests
     }
 
     /// @brief Checks that @p list, read before its attribute @p attribute changes, follows each change.
-    void CheckFollowsAttribute(Element &element, DOMTokenList &list, DOMStringAtom attribute)
+    void CheckFollowsAttribute(Element &element, DOMTokenList &list, const DOMStringAtom &attribute)
     {
       REQUIRE(list.Length() == 0);
 
@@ -339,7 +339,7 @@ namespace krys::boo::dom::tests
     template <typename TElement>
     TElement &CreateHTML(Document &document, DOMStringAtom localName)
     {
-      auto element = document.CreateElement(localName);
+      auto element = document.CreateElement(krys::move(localName));
       REQUIRE_FALSE(element.HasException());
       REQUIRE_FALSE(document.AppendChild(*element.Value()).HasException());
       if constexpr (SameType<TElement, Element>)

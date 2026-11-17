@@ -37,7 +37,7 @@ namespace krys::boo::dom
 
   void LiveCollection::InvalidateCacheForAttribute(DOMStringAtom localName) noexcept
   {
-    if (LiveCollectionDependsOnAttribute(_invalidation, localName))
+    if (LiveCollectionDependsOnAttribute(_invalidation, krys::move(localName)))
     {
       InvalidateCache();
     }

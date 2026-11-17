@@ -125,7 +125,7 @@ namespace krys::boo::tests
         }
       }
 
-      KRYS_NODISCARD PointerLockController &Controller() noexcept
+      KRYS_NODISCARD PointerLockController &Controller() const noexcept
       {
         return TestPage->GetPointerLockController();
       }

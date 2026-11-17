@@ -81,11 +81,11 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD static TargetElementResult
       TargetElementFromIRIString(dom::DOMStringView iri, const dom::DocumentOrShadowRoot &treeScope,
-                                 RefPtr<dom::Document> externalDocument = nullptr) noexcept;
+                                 const RefPtr<dom::Document> &externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static TargetElementResult
       TargetElementFromIRIString(const style::URL &iri, const dom::DocumentOrShadowRoot &treeScope,
-                                 RefPtr<dom::Document> externalDocument = nullptr) noexcept;
+                                 const RefPtr<dom::Document> &externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static bool IsExternalURIReference(dom::DOMStringView uri,
                                                       const dom::Document &document) noexcept;

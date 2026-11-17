@@ -63,7 +63,7 @@ namespace krys::boo
       return _color;
     }
 
-    void SetColor(const boo::Color color) noexcept
+    void SetColor(const boo::Color &color) noexcept
     {
       _color = color;
     }

@@ -35,7 +35,7 @@
 
 namespace krys::boo::dom
 {
-  void TreeScopeOrderedMap::Add(DOMStringAtom key, Element &element) noexcept
+  void TreeScopeOrderedMap::Add(const DOMStringAtom &key, Element &element) noexcept
   {
     auto &entry = _entries[key];
     // Where it comes among the others isn't known yet.
@@ -44,7 +44,7 @@ namespace krys::boo::dom
     ++entry.Count;
   }
 
-  void TreeScopeOrderedMap::Remove(DOMStringAtom key, Element &element) noexcept
+  void TreeScopeOrderedMap::Remove(const DOMStringAtom &key, Element &element) noexcept
   {
     auto it = _entries.find(key);
     krys_debug_assert(it != _entries.end());
@@ -67,7 +67,7 @@ namespace krys::boo::dom
     }
   }
 
-  void TreeScopeOrderedMap::OrderChanged(DOMStringAtom key) noexcept
+  void TreeScopeOrderedMap::OrderChanged(const DOMStringAtom &key) noexcept
   {
     if (auto it = _entries.find(key); it != _entries.end() && it->second.Count > 1)
     {
@@ -76,13 +76,13 @@ namespace krys::boo::dom
     }
   }
 
-  uint32 TreeScopeOrderedMap::Count(DOMStringAtom key) const noexcept
+  uint32 TreeScopeOrderedMap::Count(const DOMStringAtom &key) const noexcept
   {
     auto it = _entries.find(key);
     return it != _entries.end() ? it->second.Count : 0;
   }
 
-  Element *TreeScopeOrderedMap::First(DOMStringAtom key, const ContainerNode &root,
+  Element *TreeScopeOrderedMap::First(const DOMStringAtom &key, const ContainerNode &root,
                                       MatchFunction matches) const noexcept
   {
     auto it = _entries.find(key);
@@ -107,7 +107,7 @@ namespace krys::boo::dom
     return entry.First;
   }
 
-  Span<Element *const> TreeScopeOrderedMap::All(DOMStringAtom key, const ContainerNode &root,
+  Span<Element *const> TreeScopeOrderedMap::All(const DOMStringAtom &key, const ContainerNode &root,
                                                 MatchFunction matches) const noexcept
   {
     auto it = _entries.find(key);

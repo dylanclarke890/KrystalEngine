@@ -118,7 +118,7 @@ namespace krys::boo::tests
       }
 
       /// @brief Presses the key @p identifier (with the code @p code), as the host does.
-      bool Press(utf8_string identifier, utf8_string code = {}, int32 keyCode = 0) noexcept
+      bool Press(const utf8_string &identifier, utf8_string code = {}, int32 keyCode = 0) noexcept
       {
         return Frame->GetEventHandler().KeyEvent(
           PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", identifier, krys::move(code),

@@ -194,7 +194,8 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Dimension;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 PropertyParserState &state, AllowedSymbols,
+                                                                 PropertyParserState &state,
+                                                                 const AllowedSymbols &,
                                                                  PropertyParserOptions options) noexcept
     {
       krys_debug_assert(tokens.Peek().Type() == TokenType::Dimension);
@@ -233,7 +234,7 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Percentage;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
-                                                                 AllowedSymbols,
+                                                                 const AllowedSymbols &,
                                                                  PropertyParserOptions options) noexcept
     {
       krys_debug_assert(tokens.Peek().Type() == TokenType::Percentage);
@@ -264,7 +265,7 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Number;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
-                                                                 AllowedSymbols,
+                                                                 const AllowedSymbols &,
                                                                  PropertyParserOptions options) noexcept
     {
       krys_debug_assert(tokens.Peek().Type() == TokenType::Number);
@@ -295,7 +296,8 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Number;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 PropertyParserState &state, AllowedSymbols,
+                                                                 PropertyParserState &state,
+                                                                 const AllowedSymbols &,
                                                                  PropertyParserOptions options) noexcept
     {
       krys_debug_assert(tokens.Peek().Type() == TokenType::Number);
@@ -355,7 +357,7 @@ namespace krys::boo::css
   {
     constexpr static TokenType TokenType = TokenType::Ident;
 
-    KRYS_NODISCARD static Maybe<T> Consume(TokenRange &tokens, PropertyParserState &, AllowedSymbols,
+    KRYS_NODISCARD static Maybe<T> Consume(TokenRange &tokens, PropertyParserState &, const AllowedSymbols &,
                                            PropertyParserOptions) noexcept
     {
       krys_debug_assert(tokens.Peek().Type() == TokenType::Ident);

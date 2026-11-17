@@ -55,7 +55,7 @@ namespace krys::boo::svg
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
 
-    void Disabled(bool value) noexcept;
+    void Disabled(bool value) const noexcept;
 
     /// @see https://svgwg.org/svg2-draft/styling.html#__svg__SVGStyleElement__type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;

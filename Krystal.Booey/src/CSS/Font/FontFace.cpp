@@ -632,7 +632,7 @@ namespace krys::boo::css
   RefPtr<Font> CSSFontFace::GetFont(const FontDescription &fontDescription, bool syntheticBold,
                                     bool syntheticItalic, ExternalResourceDownloadPolicy policy,
                                     const FontPaletteValues &fontPaletteValues,
-                                    RefPtr<FontFeatureValues> fontFeatureValues) noexcept
+                                    const RefPtr<FontFeatureValues> &fontFeatureValues) noexcept
   {
     if (ComputeFailureState())
     {

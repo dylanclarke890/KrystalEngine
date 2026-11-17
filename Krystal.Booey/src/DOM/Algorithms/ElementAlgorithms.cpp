@@ -307,7 +307,7 @@ namespace krys::boo::dom
                                                  DOMStringAtom namespaceURI) noexcept
   {
     // 1. Let attr be the result of getting an attribute given namespace, localName, and element.
-    Attr *attr = GetAttributeByNamespace(namespaceURI, localName, element);
+    Attr *attr = GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), element);
     // 2. If attr is null, then return the empty string.
     if (attr == nullptr)
     {
@@ -354,8 +354,8 @@ namespace krys::boo::dom
     return oldAttr;
   }
 
-  void ElementAlgorithms::SetAttributeValue(Element &element, DOMStringAtom localName, DOMString value,
-                                            DOMStringAtom prefix, DOMStringAtom namespaceURI) noexcept
+  void ElementAlgorithms::SetAttributeValue(Element &element, const DOMStringAtom &localName, DOMString value,
+                                            DOMStringAtom prefix, const DOMStringAtom &namespaceURI) noexcept
   {
     // 1. Let attribute be the result of getting an attribute given namespace, localName, and element.
     Attr *attribute = GetAttributeByNamespace(namespaceURI, localName, element);
@@ -363,8 +363,9 @@ namespace krys::boo::dom
     //    document, localName, namespace, prefix, and value to element, and then return.
     if (attribute == nullptr)
     {
-      auto attr = AdoptRef<Attr>(*new Attr(
-        element.NodeDocument(), QualifiedName {namespaceURI, prefix, localName}, krys::move(value)));
+      auto attr = AdoptRef<Attr>(*new Attr(element.NodeDocument(),
+                                           QualifiedName {namespaceURI, krys::move(prefix), localName},
+                                           krys::move(value)));
       AppendAttribute(*attr, element);
     }
     // 3. Change attribute to value.
@@ -378,7 +379,7 @@ namespace krys::boo::dom
                                                         Element &element) noexcept
   {
     // 1. Let attr be the result of getting an attribute given qualifiedName and element.
-    auto attr = ShareRefPtr(GetAttributeByName(qualifiedName, element));
+    auto attr = ShareRefPtr(GetAttributeByName(krys::move(qualifiedName), element));
     // 2. If attr is non-null, then remove attr.
     if (attr != nullptr)
     {
@@ -394,7 +395,8 @@ namespace krys::boo::dom
                                                              Element &element) noexcept
   {
     // 1. Let attr be the result of getting an attribute given namespace, localName, and element.
-    auto attr = ShareRefPtr(GetAttributeByNamespace(namespaceURI, localName, element));
+    auto attr =
+      ShareRefPtr(GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), element));
     // 2. If attr is non-null, then remove attr.
     if (attr != nullptr)
     {
@@ -543,6 +545,7 @@ namespace krys::boo::dom
     ElementAlgorithms::CreateDOMTokenList(Element &element, DOMStringAtom attributeName,
                                           IsSupportedTokenFunction &&isSupportedToken) noexcept
   {
-    return UniquePtr<DOMTokenList>(new DOMTokenList(element, attributeName, krys::move(isSupportedToken)));
+    return UniquePtr<DOMTokenList>(
+      new DOMTokenList(element, krys::move(attributeName), krys::move(isSupportedToken)));
   }
 }

@@ -29,14 +29,15 @@
 namespace krys::boo::dom
 {
   InputEvent::InputEvent(DOMStringAtom type, const InputEventInit &eventInitDict) noexcept
-      : UIEvent(type, eventInitDict), _inputType(eventInitDict.InputType), _data(eventInitDict.Data),
-        _dataTransfer(eventInitDict.DataTransfer), _isInputMethodComposing(eventInitDict.IsComposing)
+      : UIEvent(krys::move(type), eventInitDict), _inputType(eventInitDict.InputType),
+        _data(eventInitDict.Data), _dataTransfer(eventInitDict.DataTransfer),
+        _isInputMethodComposing(eventInitDict.IsComposing)
   {
   }
 
   InputEvent::~InputEvent() noexcept = default;
 
-  Ref<InputEvent> InputEvent::Create(DOMStringAtom type, LocalDOMWindow *view, DOMStringView inputType,
+  Ref<InputEvent> InputEvent::Create(const DOMStringAtom &type, LocalDOMWindow *view, DOMStringView inputType,
                                      bool cancelable, Maybe<DOMString> data,
                                      RefPtr<DataTransfer> &&dataTransfer,
                                      const List<RefPtr<StaticRange>> &targetRanges, int32 detail,

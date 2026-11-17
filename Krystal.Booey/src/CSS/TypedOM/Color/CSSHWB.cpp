@@ -53,8 +53,9 @@ namespace krys::boo::css
     }
   }
 
-  dom::ExceptionOr<Ref<CSSHWB>> CSSHWB::Create(Ref<CSSNumericValue> hue, CSSNumberish whiteness,
-                                               CSSNumberish blackness, CSSNumberish alpha) noexcept
+  dom::ExceptionOr<Ref<CSSHWB>> CSSHWB::Create(Ref<CSSNumericValue> hue, const CSSNumberish &whiteness,
+                                               const CSSNumberish &blackness,
+                                               const CSSNumberish &alpha) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csshwb-csshwb
     auto rectifiedHue = RectifyHWBHue(krys::move(hue));
@@ -104,7 +105,7 @@ namespace krys::boo::css
     return RefPtr<CSSNumericValue>(_whiteness);
   }
 
-  dom::ExceptionOr<void> CSSHWB::SetW(CSSNumberish whiteness) noexcept
+  dom::ExceptionOr<void> CSSHWB::SetW(const CSSNumberish &whiteness) noexcept
   {
     auto rectified = RectifyHWBPercent(whiteness);
     if (rectified.HasException())
@@ -120,7 +121,7 @@ namespace krys::boo::css
     return RefPtr<CSSNumericValue>(_blackness);
   }
 
-  dom::ExceptionOr<void> CSSHWB::SetB(CSSNumberish blackness) noexcept
+  dom::ExceptionOr<void> CSSHWB::SetB(const CSSNumberish &blackness) noexcept
   {
     auto rectified = RectifyHWBPercent(blackness);
     if (rectified.HasException())
@@ -136,7 +137,7 @@ namespace krys::boo::css
     return RefPtr<CSSNumericValue>(_alpha);
   }
 
-  dom::ExceptionOr<void> CSSHWB::SetAlpha(CSSNumberish alpha) noexcept
+  dom::ExceptionOr<void> CSSHWB::SetAlpha(const CSSNumberish &alpha) noexcept
   {
     auto rectified = RectifyHWBPercent(alpha);
     if (rectified.HasException())

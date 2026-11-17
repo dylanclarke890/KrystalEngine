@@ -45,7 +45,7 @@ namespace krys::boo::tests
     {
       List<std::string> Records;
 
-      KRYS_NODISCARD WebAnimation::ReadyCallback Settled(std::string what) noexcept
+      KRYS_NODISCARD WebAnimation::ReadyCallback Settled(const std::string &what) noexcept
       {
         return [this, what](WebAnimation &animation)
         {
@@ -53,7 +53,7 @@ namespace krys::boo::tests
         };
       }
 
-      KRYS_NODISCARD WebAnimation::ErrorCallback Failed(std::string what) noexcept
+      KRYS_NODISCARD WebAnimation::ErrorCallback Failed(const std::string &what) noexcept
       {
         return [this, what](const dom::Exception &exception)
         {

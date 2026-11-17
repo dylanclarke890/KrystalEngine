@@ -16,7 +16,7 @@ namespace krys::boo::svg::tests
   /// @brief The name of a test attribute in the null namespace.
   KRYS_NODISCARD inline dom::QualifiedName TestAttributeName(dom::DOMStringAtom localName) noexcept
   {
-    return dom::QualifiedName {null, null, localName};
+    return dom::QualifiedName {null, null, krys::move(localName)};
   }
 
   /// @brief An SVG element with a property of every kind the registry reaches, standing in for the elements

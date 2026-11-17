@@ -141,7 +141,7 @@ namespace krys::boo
     KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const IntPoint &framePoint) const noexcept;
 
     /// @brief The document under @p point (in the window).
-    KRYS_NODISCARD dom::Document *DocumentAtPoint(const IntPoint &point) noexcept;
+    KRYS_NODISCARD dom::Document *DocumentAtPoint(const IntPoint &point) const noexcept;
 
     /// @brief The zoom applied to the whole document (the root style's `zoom`).
     KRYS_NODISCARD float PageZoomFactor() const noexcept

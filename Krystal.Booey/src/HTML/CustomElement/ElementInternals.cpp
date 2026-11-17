@@ -165,7 +165,8 @@ namespace krys::boo::html
     return _target->EnsureCustomStateSet();
   }
 
-  Maybe<dom::DOMString> ElementInternals::InternalContentAttribute(dom::DOMStringAtom name) const noexcept
+  Maybe<dom::DOMString>
+    ElementInternals::InternalContentAttribute(const dom::DOMStringAtom &name) const noexcept
   {
     if (auto it = _internalContentAttributeMap.find(name); it != _internalContentAttributeMap.end())
     {
@@ -174,21 +175,22 @@ namespace krys::boo::html
     return null;
   }
 
-  void ElementInternals::SetInternalContentAttribute(dom::DOMStringAtom name, dom::DOMString value) noexcept
+  void ElementInternals::SetInternalContentAttribute(const dom::DOMStringAtom &name,
+                                                     dom::DOMString value) noexcept
   {
     auto oldValue = InternalContentAttribute(name);
     _internalContentAttributeMap[name] = krys::move(value);
     InternalContentAttributeChanged(name, oldValue);
   }
 
-  void ElementInternals::RemoveInternalContentAttribute(dom::DOMStringAtom name) noexcept
+  void ElementInternals::RemoveInternalContentAttribute(const dom::DOMStringAtom &name) noexcept
   {
     auto oldValue = InternalContentAttribute(name);
     _internalContentAttributeMap.erase(name);
     InternalContentAttributeChanged(name, oldValue);
   }
 
-  void ElementInternals::InternalContentAttributeChanged(dom::DOMStringAtom name,
+  void ElementInternals::InternalContentAttributeChanged(const dom::DOMStringAtom &name,
                                                          const Maybe<dom::DOMString> &oldValue) noexcept
   {
     // The element's own attribute overrides its default.
@@ -204,7 +206,8 @@ namespace krys::boo::html
     }
   }
 
-  RefPtr<dom::Element> ElementInternals::ElementForAttributeInternal(dom::DOMStringAtom name) const noexcept
+  RefPtr<dom::Element>
+    ElementInternals::ElementForAttributeInternal(const dom::DOMStringAtom &name) const noexcept
   {
     // 1. Let element be the result of running reflectedTarget's get the element.
     auto *element = _target.get();
@@ -244,7 +247,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  void ElementInternals::SetElementAttribute(dom::DOMStringAtom name, dom::Element *element) noexcept
+  void ElementInternals::SetElementAttribute(const dom::DOMStringAtom &name, dom::Element *element) noexcept
   {
     // 1. If the given value is null:
     if (!element)
@@ -265,7 +268,7 @@ namespace krys::boo::html
   }
 
   Maybe<List<Ref<dom::Element>>>
-    ElementInternals::ElementsForAttributeInternal(dom::DOMStringAtom name) const noexcept
+    ElementInternals::ElementsForAttributeInternal(const dom::DOMStringAtom &name) const noexcept
   {
     // 1. Let elements be an empty list.
     List<Ref<dom::Element>> elements;
@@ -328,7 +331,7 @@ namespace krys::boo::html
     return elements;
   }
 
-  void ElementInternals::SetElementsArrayAttribute(dom::DOMStringAtom name,
+  void ElementInternals::SetElementsArrayAttribute(const dom::DOMStringAtom &name,
                                                    const Maybe<List<Ref<dom::Element>>> &elements) noexcept
   {
     // 1. If the given value is null:

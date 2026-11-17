@@ -98,7 +98,7 @@ namespace krys::boo::dom
       Ref<TEvent> event = EventFactory::Create<TEvent>(attributes);
 
       // 4. Initialize event's type attribute to e.
-      event->_type = e;
+      event->_type = krys::move(e);
 
       // 6. Let result be the result of dispatching event at target, with legacy target override flag set if
       // set.

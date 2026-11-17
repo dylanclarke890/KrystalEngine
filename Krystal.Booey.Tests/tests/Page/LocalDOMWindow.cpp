@@ -82,7 +82,7 @@ namespace krys::boo::tests
         return *Document->Window();
       }
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         REQUIRE(element);

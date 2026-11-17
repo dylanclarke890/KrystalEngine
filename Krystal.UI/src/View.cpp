@@ -760,7 +760,7 @@ namespace krys::ui
     writer.End();
   }
 
-  Expected<void> View::DefineCustomElement(boo::dom::DOMStringAtom name,
+  Expected<void> View::DefineCustomElement(const boo::dom::DOMStringAtom &name,
                                            boo::html::CustomElementFactory &&factory,
                                            boo::html::CustomElementOptions &&options) noexcept
   {
@@ -1160,7 +1160,7 @@ namespace krys::ui
     return HitTestInPage(ToPage(point));
   }
 
-  boo::dom::Element *View::HitTestInPage(const boo::IntPoint &point) noexcept
+  boo::dom::Element *View::HitTestInPage(const boo::IntPoint &point) const noexcept
   {
     return Document().ElementFromPoint(point.X(), point.Y()).get();
   }

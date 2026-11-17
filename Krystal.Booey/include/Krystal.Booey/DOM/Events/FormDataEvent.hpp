@@ -29,8 +29,8 @@ namespace krys::boo::dom
     FormDataEvent(DOMStringAtom type, const FormDataEventInit &eventInitDict) noexcept;
 
     /// @brief A trusted event of type @p type with @p formData.
-    KRYS_NODISCARD static Ref<FormDataEvent> Create(DOMStringAtom type, bool canBubble, bool isCancelable,
-                                                    bool isComposed,
+    KRYS_NODISCARD static Ref<FormDataEvent> Create(const DOMStringAtom &type, bool canBubble,
+                                                    bool isCancelable, bool isComposed,
                                                     Ref<html::DOMFormData> &&formData) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-formdataevent-formdata

@@ -497,7 +497,7 @@ namespace krys::boo::html
                                                   bool alreadySanitized = false) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
-    Ref<dom::Element> InsertForeignElement(TokenAtom &&token, dom::DOMStringAtom namespaceURI,
+    Ref<dom::Element> InsertForeignElement(TokenAtom &&token, const dom::DOMStringAtom &namespaceURI,
                                            bool onlyAddToElementStack) noexcept;
 
     /// @brief The sanitizer action for an element named @p localName in @p namespaceURI: "Keep" when the
@@ -535,7 +535,8 @@ namespace krys::boo::html
     void ParseGenericRCDATATextElement(TokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<dom::Element> CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
+    KRYS_NODISCARD Ref<dom::Element> CreateElement(const dom::DOMStringAtom &name,
+                                                   const dom::DOMStringAtom &namespaceURI,
                                                    const ParsedAttributeList &attributes,
                                                    dom::ContainerNode &intendedParent) noexcept;
 

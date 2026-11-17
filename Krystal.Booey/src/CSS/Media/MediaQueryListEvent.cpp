@@ -4,7 +4,7 @@ namespace krys::boo::css
 {
   MediaQueryListEvent::MediaQueryListEvent(CSSOMStringAtom type,
                                            const MediaQueryListEventInit &eventInitDict) noexcept
-      : Event(type, eventInitDict), _media(eventInitDict.Media), _matches(eventInitDict.Matches)
+      : Event(krys::move(type), eventInitDict), _media(eventInitDict.Media), _matches(eventInitDict.Matches)
   {
   }
 }

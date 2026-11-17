@@ -424,7 +424,7 @@ namespace krys::boo
                                                               LayoutUnit gapBetweenItems) noexcept;
 
     KRYS_NODISCARD LayoutUnit AutoMarginOffsetInMainAxis(const FlexLayoutItems &flexLayoutItems,
-                                                         LayoutUnit &availableFreeSpace) noexcept;
+                                                         LayoutUnit &availableFreeSpace) const noexcept;
 
     void UpdateAutoMarginsInMainAxis(RenderBox &flexItem, LayoutUnit autoMarginOffset) noexcept;
 

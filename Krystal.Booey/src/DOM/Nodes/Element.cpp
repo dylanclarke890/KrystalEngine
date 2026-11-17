@@ -382,7 +382,7 @@ namespace krys::boo::dom
     if (GetElementRareData())
     {
       auto *customStates = GetElementRareData()->CustomStateSet();
-      return customStates && customStates->Has(state);
+      return customStates && customStates->Has(krys::move(state));
     }
     return false;
   }
@@ -2107,7 +2107,7 @@ namespace krys::boo::dom
   Maybe<DOMString> Element::GetAttribute(DOMStringAtom qualifiedName) const noexcept
   {
     // 1. Let attr be the result of getting an attribute given qualifiedName and this.
-    Attr *attr = ElementAlgorithms::GetAttributeByName(qualifiedName, *this);
+    Attr *attr = ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *this);
     // 2. If attr is null, return null.
     if (attr == nullptr)
     {
@@ -2121,7 +2121,8 @@ namespace krys::boo::dom
   Maybe<DOMString> Element::GetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
     // 1. Let attr be the result of getting an attribute given namespace, localName, and this.
-    Attr *attr = ElementAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
+    Attr *attr =
+      ElementAlgorithms::GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
     // 2. If attr is null, return null.
     if (attr == nullptr)
     {
@@ -2180,8 +2181,8 @@ namespace krys::boo::dom
     html::CEReactionsScope ceReactions;
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
     //    qualifiedName given "attribute".
-    auto validateAndExtractResult =
-      NameValidation::ValidateAndExtract(namespaceURI, qualifiedName, ValidateAndExtractContext::Attribute);
+    auto validateAndExtractResult = NameValidation::ValidateAndExtract(
+      krys::move(namespaceURI), krys::move(qualifiedName), ValidateAndExtractContext::Attribute);
 
     if (validateAndExtractResult.HasException())
     {
@@ -2201,13 +2202,13 @@ namespace krys::boo::dom
   void Element::RemoveAttribute(DOMStringAtom qualifiedName) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ElementAlgorithms::RemoveAttributeByName(qualifiedName, *this);
+    ElementAlgorithms::RemoveAttributeByName(krys::move(qualifiedName), *this);
   }
 
   void Element::RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ElementAlgorithms::RemoveAttributeByNamespace(namespaceURI, localName, *this);
+    ElementAlgorithms::RemoveAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
   }
 
   ExceptionOr<bool> Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
@@ -2293,12 +2294,12 @@ namespace krys::boo::dom
 
   Attr *Element::GetAttributeNode(DOMStringAtom qualifiedName) const noexcept
   {
-    return ElementAlgorithms::GetAttributeByName(qualifiedName, *this);
+    return ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *this);
   }
 
   Attr *Element::GetAttributeNodeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
-    return ElementAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
+    return ElementAlgorithms::GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
   }
 
   ExceptionOr<RefPtr<Attr>> Element::SetAttributeNode(Attr &attr) noexcept
@@ -2433,18 +2434,18 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagName(*this, qualifiedName);
+    return NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
   }
 
   Ref<HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
                                                       DOMStringAtom localName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagNameNS(*this, namespaceURI, localName);
+    return NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceURI), krys::move(localName));
   }
 
   Ref<HTMLCollection> Element::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    return NodeAlgorithms::GetElementsByClassName(*this, classNames);
+    return NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
 
   ExceptionOr<Element *> Element::InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept
@@ -3502,7 +3503,7 @@ namespace krys::boo::dom
   RefPtr<Element> Element::ResolvedElementForAttribute(DOMStringAtom attributeName) const noexcept
   {
     // 1. Let unresolvedTarget be the result of running this's get the unresolved attr target element.
-    auto unresolvedTarget = ElementForAttributeInternal(attributeName);
+    auto unresolvedTarget = ElementForAttributeInternal(krys::move(attributeName));
     // 2. If unresolvedTarget is null, then return null.
     if (!unresolvedTarget)
     {
@@ -3515,7 +3516,7 @@ namespace krys::boo::dom
   List<Ref<Element>> Element::ResolvedElementsForAttribute(DOMStringAtom attributeName) const noexcept
   {
     // 1. Let unresolvedTargets be the result of running this's get the unresolved attr target elements.
-    auto unresolvedTargets = ElementsForAttributeInternal(attributeName);
+    auto unresolvedTargets = ElementsForAttributeInternal(krys::move(attributeName));
     // 2. If unresolvedTargets is null, then return « ».
     // 3. Let resolvedTargets be « ».
     List<Ref<Element>> resolvedTargets;

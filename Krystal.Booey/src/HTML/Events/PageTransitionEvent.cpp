@@ -4,12 +4,13 @@ namespace krys::boo::html
 {
   PageTransitionEvent::PageTransitionEvent(dom::DOMStringAtom type,
                                            const PageTransitionEventInit &eventInitDict) noexcept
-      : Event(type, eventInitDict), _persisted(eventInitDict.Persisted)
+      : Event(krys::move(type), eventInitDict), _persisted(eventInitDict.Persisted)
   {
   }
 
   // https://html.spec.whatwg.org/#fire-a-page-transition-event
-  Ref<PageTransitionEvent> PageTransitionEvent::Create(dom::DOMStringAtom type, bool persisted) noexcept
+  Ref<PageTransitionEvent> PageTransitionEvent::Create(const dom::DOMStringAtom &type,
+                                                       bool persisted) noexcept
   {
     // ... with the persisted attribute initialized to persisted, the cancelable attribute initialized to
     // true, the bubbles attribute initialized to true, and legacy target override flag set.

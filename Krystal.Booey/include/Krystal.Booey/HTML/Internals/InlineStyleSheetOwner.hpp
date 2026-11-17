@@ -68,12 +68,12 @@ namespace krys::boo::html
 
     void SetContentType(dom::DOMStringAtom contentType) noexcept
     {
-      _contentType = contentType;
+      _contentType = krys::move(contentType);
     }
 
     void SetMedia(dom::DOMStringAtom media) noexcept
     {
-      _media = media;
+      _media = krys::move(media);
     }
 
     KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;

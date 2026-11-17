@@ -89,7 +89,7 @@ namespace krys::boo::html
   HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface,
                            dom::DOMStringAtom localName, HTMLElementFlags flags,
                            dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document, dom::QualifiedName(infra::Namespaces::HTML, null, localName),
+      : StyledElement(document, dom::QualifiedName(infra::Namespaces::HTML, null, krys::move(localName)),
                       nodeFlags | dom::NodeFlags::IsHTMLElement),
         _flags(flags), _interface(interface)
   {

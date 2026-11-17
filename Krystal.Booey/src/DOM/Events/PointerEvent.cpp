@@ -78,9 +78,11 @@ namespace krys::boo::dom
       return init;
     }
 
-    KRYS_NODISCARD List<Ref<PointerEvent>>
-      CreateCoalescedPointerEvents(DOMStringAtom type, MouseButton button, const MouseEvent &mouseEvent,
-                                   PointerID pointerId, const DOMString &pointerType) noexcept
+    KRYS_NODISCARD List<Ref<PointerEvent>> CreateCoalescedPointerEvents(const DOMStringAtom &type,
+                                                                        MouseButton button,
+                                                                        const MouseEvent &mouseEvent,
+                                                                        PointerID pointerId,
+                                                                        const DOMString &pointerType) noexcept
     {
       if (type != event_names::PointerMove && type != event_names::PointerRawUpdate)
       {
@@ -100,9 +102,11 @@ namespace krys::boo::dom
       return result;
     }
 
-    KRYS_NODISCARD List<Ref<PointerEvent>>
-      CreatePredictedPointerEvents(DOMStringAtom type, MouseButton button, const MouseEvent &mouseEvent,
-                                   PointerID pointerId, const DOMString &pointerType) noexcept
+    KRYS_NODISCARD List<Ref<PointerEvent>> CreatePredictedPointerEvents(const DOMStringAtom &type,
+                                                                        MouseButton button,
+                                                                        const MouseEvent &mouseEvent,
+                                                                        PointerID pointerId,
+                                                                        const DOMString &pointerType) noexcept
     {
       if (type != event_names::PointerMove)
       {
@@ -123,7 +127,7 @@ namespace krys::boo::dom
     }
   }
 
-  DOMStringAtom PointerEvent::TypeFromMouseEventType(DOMStringAtom mouseEventType) noexcept
+  DOMStringAtom PointerEvent::TypeFromMouseEventType(const DOMStringAtom &mouseEventType) noexcept
   {
     if (mouseEventType == event_names::AuxClick)
     {
@@ -169,7 +173,7 @@ namespace krys::boo::dom
     return null;
   }
 
-  bool PointerEvent::TypeRequiresResolvedButton(DOMStringAtom type) noexcept
+  bool PointerEvent::TypeRequiresResolvedButton(const DOMStringAtom &type) noexcept
   {
     return type == event_names::PointerUp || type == event_names::PointerDown || type == event_names::Click
            || type == event_names::AuxClick || type == event_names::ContextMenu;
@@ -186,7 +190,7 @@ namespace krys::boo::dom
     initializer.IsPrimary = isPrimary;
     initializer.PointerType = pointerType;
     initializer.Composed = true;
-    Ref<PointerEvent> event = AdoptRef(*new PointerEvent(type, initializer));
+    Ref<PointerEvent> event = AdoptRef(*new PointerEvent(krys::move(type), initializer));
     event->_isTrusted = true;
     return event;
   }
@@ -203,15 +207,17 @@ namespace krys::boo::dom
     return Create(type, button, mouseEvent, pointerId, pointerType);
   }
 
-  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, MouseButton button, const MouseEvent &mouseEvent,
-                                         PointerID pointerId, const DOMString &pointerType) noexcept
+  Ref<PointerEvent> PointerEvent::Create(const DOMStringAtom &type, MouseButton button,
+                                         const MouseEvent &mouseEvent, PointerID pointerId,
+                                         const DOMString &pointerType) noexcept
   {
     return Create(type, button, mouseEvent, pointerId, pointerType, TypeCanBubble(type),
                   TypeIsCancelable(type));
   }
 
-  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, MouseButton button, const MouseEvent &mouseEvent,
-                                         PointerID pointerId, const DOMString &pointerType, bool canBubble,
+  Ref<PointerEvent> PointerEvent::Create(const DOMStringAtom &type, MouseButton button,
+                                         const MouseEvent &mouseEvent, PointerID pointerId,
+                                         const DOMString &pointerType, bool canBubble,
                                          bool isCancelable) noexcept
   {
     return AdoptRef(*new PointerEvent(type, button, mouseEvent, pointerId, pointerType, canBubble,
@@ -221,7 +227,8 @@ namespace krys::boo::dom
   Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, LocalDOMWindow *view, PointerID pointerId,
                                          const DOMString &pointerType, IsPrimary isPrimary) noexcept
   {
-    Ref<PointerEvent> event = AdoptRef(*new PointerEvent(type, pointerId, pointerType, isPrimary));
+    Ref<PointerEvent> event =
+      AdoptRef(*new PointerEvent(krys::move(type), pointerId, pointerType, isPrimary));
     event->SetView(view);
     return event;
   }
@@ -254,11 +261,11 @@ namespace krys::boo::dom
                                          bool isCancelable, uint32 index, bool isPrimary,
                                          LocalFrameView *view, const DoublePoint &touchDelta) noexcept
   {
-    return AdoptRef(*new PointerEvent(type, event, coalescedEvents, predictedEvents, canBubble, isCancelable,
-                                      index, isPrimary, view, touchDelta));
+    return AdoptRef(*new PointerEvent(krys::move(type), event, coalescedEvents, predictedEvents, canBubble,
+                                      isCancelable, index, isPrimary, view, touchDelta));
   }
 
-  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, const PlatformTouchEvent &event,
+  Ref<PointerEvent> PointerEvent::Create(const DOMStringAtom &type, const PlatformTouchEvent &event,
                                          const List<Ref<PointerEvent>> &coalescedEvents,
                                          const List<Ref<PointerEvent>> &predictedEvents, uint32 index,
                                          bool isPrimary, LocalFrameView *view,
@@ -342,7 +349,7 @@ namespace krys::boo::dom
             static_cast<int32>(std::round(tiltYRadians * DegreesPerRadian))};
   }
 
-  PointerEvent::PointerEvent(DOMStringAtom type, const PointerEventInit &initializer) noexcept
+  PointerEvent::PointerEvent(const DOMStringAtom &type, const PointerEventInit &initializer) noexcept
       : MouseEvent(type, initializer), _pointerId(static_cast<PointerID>(initializer.PointerId)),
         _width(initializer.Width), _height(initializer.Height), _pressure(initializer.Pressure),
         _tangentialPressure(initializer.TangentialPressure), _tiltX(initializer.TiltX),
@@ -371,7 +378,7 @@ namespace krys::boo::dom
     }
   }
 
-  PointerEvent::PointerEvent(DOMStringAtom type, MouseButton button, const MouseEvent &mouseEvent,
+  PointerEvent::PointerEvent(const DOMStringAtom &type, MouseButton button, const MouseEvent &mouseEvent,
                              PointerID pointerId, const DOMString &pointerType, bool canBubble,
                              bool isCancelable, bool isComposed) noexcept
       : MouseEvent(type, TrustedInit(canBubble, isCancelable, isComposed, mouseEvent.Detail()),
@@ -408,7 +415,7 @@ namespace krys::boo::dom
     }
   }
 
-  PointerEvent::PointerEvent(DOMStringAtom type, PointerID pointerId, DOMString pointerType,
+  PointerEvent::PointerEvent(const DOMStringAtom &type, PointerID pointerId, DOMString pointerType,
                              IsPrimary isPrimary) noexcept
       : MouseEvent(type, TrustedInit(TypeCanBubble(type), TypeIsCancelable(type), TypeIsComposed(type)),
                    nullptr, {}, {}, 0, 0, {}, ButtonForType(type), ButtonsForType(type), nullptr, 0,
@@ -423,7 +430,7 @@ namespace krys::boo::dom
   {
   }
 
-  PointerEvent::PointerEvent(DOMStringAtom type, const PlatformTouchEvent &event,
+  PointerEvent::PointerEvent(const DOMStringAtom &type, const PlatformTouchEvent &event,
                              const List<Ref<PointerEvent>> &coalescedEvents,
                              const List<Ref<PointerEvent>> &predictedEvents, bool canBubble,
                              bool isCancelable, uint32 index, bool isPrimary, LocalFrameView *view,
@@ -535,7 +542,7 @@ namespace krys::boo::dom
     }
   }
 
-  bool PointerEvent::FractionalCoordinatesAllowedForType(DOMStringAtom type) noexcept
+  bool PointerEvent::FractionalCoordinatesAllowedForType(const DOMStringAtom &type) noexcept
   {
     return !(type == event_names::AuxClick || type == event_names::Click || type == event_names::ContextMenu);
   }

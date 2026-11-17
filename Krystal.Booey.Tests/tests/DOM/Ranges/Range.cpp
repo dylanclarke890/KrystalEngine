@@ -1695,7 +1695,7 @@ namespace krys::boo::dom::tests
       {
       }
 
-      Ref<dom::Range> RangeOf(Node &startNode, uint64 startOffset, Node &endNode, uint64 endOffset)
+      Ref<dom::Range> RangeOf(Node &startNode, uint64 startOffset, Node &endNode, uint64 endOffset) const
       {
         auto range = Document->CreateRange();
         REQUIRE_FALSE(range->SetStart(startNode, startOffset).HasException());

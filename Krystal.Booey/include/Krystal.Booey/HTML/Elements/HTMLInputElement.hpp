@@ -357,7 +357,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Value() const noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-input-value
-    dom::ExceptionOr<void> Value(dom::DOMString value) noexcept
+    dom::ExceptionOr<void> Value(const dom::DOMString &value) noexcept
     {
       return SetValue(value);
     }

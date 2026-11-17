@@ -134,7 +134,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<QualifiedName> NameValidation::ValidateAndExtract(DOMStringAtom namespaceURI,
-                                                                DOMStringAtom qualifiedName,
+                                                                const DOMStringAtom &qualifiedName,
                                                                 ValidateAndExtractContext context) noexcept
   {
     // 1. If namespace is the empty string, then set it to null.

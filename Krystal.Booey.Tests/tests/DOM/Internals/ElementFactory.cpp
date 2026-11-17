@@ -129,7 +129,8 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<HTMLDocument>();
     auto create = [&](dom::DOMStringAtom localName)
     {
-      return ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, null, localName});
+      return ElementFactory::Create(*document,
+                                    QualifiedName {infra::Namespaces::HTML, null, krys::move(localName)});
     };
 
     for (auto name :

@@ -46,8 +46,9 @@ namespace krys::boo
     Maybe<dom::DOMString> _oldValue;
 
   public:
-    KRYS_NODISCARD static Ref<SetNodeAttributeCommand>
-      Create(dom::Element &element, dom::DOMStringAtom attribute, Maybe<dom::DOMString> value) noexcept;
+    KRYS_NODISCARD static Ref<SetNodeAttributeCommand> Create(dom::Element &element,
+                                                              const dom::DOMStringAtom &attribute,
+                                                              Maybe<dom::DOMString> value) noexcept;
 
     SetNodeAttributeCommand(dom::Element &element, dom::DOMStringAtom attribute,
                             Maybe<dom::DOMString> value) noexcept;

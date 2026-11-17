@@ -178,8 +178,8 @@ namespace krys::boo::tests
     };
 
     /// @brief A key event of @p type for a key with the value @p key that types @p text.
-    KRYS_NODISCARD PlatformKeyboardEvent KeyEvent(PlatformEvent::Type type, utf8_string key, utf8_string text,
-                                                  int32 keyCode,
+    KRYS_NODISCARD PlatformKeyboardEvent KeyEvent(PlatformEvent::Type type, utf8_string key,
+                                                  const utf8_string &text, int32 keyCode,
                                                   EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
       return PlatformKeyboardEvent(type, text, text, krys::move(key), u8"", u8"", keyCode, false, false,

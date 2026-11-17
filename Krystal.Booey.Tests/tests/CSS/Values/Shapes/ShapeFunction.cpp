@@ -45,7 +45,7 @@ namespace krys::boo::css::tests
                          .Size = krys::move(size),
                          .ArcSweep = sweep,
                          .ArcSize = arcSize,
-                         .Rotation = rotation};
+                         .Rotation = krys::move(rotation)};
     }
 
     ShapeFunction MakeShape(Shape::CommandsType commands, Maybe<FillRule> fillRule = {})

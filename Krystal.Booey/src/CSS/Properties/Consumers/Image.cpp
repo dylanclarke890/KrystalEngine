@@ -906,8 +906,9 @@ namespace krys::boo::css
     {
       constexpr static TokenType TokenType = TokenType::Function;
 
-      KRYS_NODISCARD static Maybe<ImageSetTypeFunctionRaw>
-        Consume(TokenRange &tokens, PropertyParserState &, AllowedSymbols, PropertyParserOptions) noexcept
+      KRYS_NODISCARD static Maybe<ImageSetTypeFunctionRaw> Consume(TokenRange &tokens, PropertyParserState &,
+                                                                   const AllowedSymbols &,
+                                                                   PropertyParserOptions) noexcept
       {
         krys_debug_assert(tokens.Peek().Type() == TokenType::Function);
         if (tokens.Peek().FunctionId() != ValueId::Type)

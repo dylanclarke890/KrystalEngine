@@ -49,7 +49,7 @@ namespace krys::boo::tests
       Document->StyleScope().FlushPendingUpdate();
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
     {
       auto element = Document->GetElementById(id);
       krys_assert(element);
@@ -66,7 +66,7 @@ namespace krys::boo::tests
     }
 
     /// @brief The display list of the whole view, laid out, as text.
-    KRYS_NODISCARD utf8_string Painted() noexcept
+    KRYS_NODISCARD utf8_string Painted() const noexcept
     {
       (void)Document->UpdateLayout();
       display_list::RecorderImpl recorder(

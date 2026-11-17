@@ -549,7 +549,7 @@ namespace krys::boo::css::tests
   {
     auto blend = [](BlendMode mode, boo::Color source, boo::Color backdrop)
     {
-      List<boo::Color> colors {source, backdrop};
+      List<boo::Color> colors {krys::move(source), krys::move(backdrop)};
       auto color = BlendSourceOver(ColorLayersResolver {.BlendMode = mode, .Colors = colors});
       return color.ToColorTypeLossy<SRGBA<uint8>>();
     };

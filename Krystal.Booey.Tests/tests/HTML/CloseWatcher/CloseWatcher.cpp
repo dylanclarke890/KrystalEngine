@@ -25,7 +25,7 @@ namespace krys::boo::html::tests
       List<dom::EventListenerHandle> Handles;
       bool PreventCancel {false};
 
-      void Watch(CloseWatcher &watcher, std::string name) noexcept
+      void Watch(CloseWatcher &watcher, const std::string &name) noexcept
       {
         Handles.push_back(watcher.AddEventListener(u8"cancel",
                                                    [this, name](dom::Event &event)

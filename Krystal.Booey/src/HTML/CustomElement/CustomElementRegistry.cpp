@@ -209,7 +209,7 @@ namespace krys::boo::html
     // 1. If this's custom element definition set contains an item with name name, then return that item's
     //    constructor.
     // 2. Return undefined.
-    return FindInterface(name);
+    return FindInterface(krys::move(name));
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-getname

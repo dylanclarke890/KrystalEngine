@@ -260,7 +260,7 @@ namespace krys::boo::dom
 #pragma endregion
 
     /// @brief A trusted event of type @p type, for the user agent to dispatch.
-    KRYS_NODISCARD static Ref<Event> Create(DOMStringAtom type, bool canBubble, bool isCancelable,
+    KRYS_NODISCARD static Ref<Event> Create(const DOMStringAtom &type, bool canBubble, bool isCancelable,
                                             bool isComposed = false) noexcept;
 
     /// @brief Whether the event is being dispatched (its dispatch flag).

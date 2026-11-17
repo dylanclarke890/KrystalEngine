@@ -29,7 +29,7 @@
 
 namespace krys::boo::dom
 {
-  void IdTargetObserverRegistry::AddObserver(DOMStringAtom id, IdTargetObserver &observer) noexcept
+  void IdTargetObserverRegistry::AddObserver(const DOMStringAtom &id, IdTargetObserver &observer) noexcept
   {
     if (id.View().empty())
     {
@@ -44,7 +44,7 @@ namespace krys::boo::dom
     set->Observers.insert(&observer);
   }
 
-  void IdTargetObserverRegistry::RemoveObserver(DOMStringAtom id, IdTargetObserver &observer) noexcept
+  void IdTargetObserverRegistry::RemoveObserver(const DOMStringAtom &id, IdTargetObserver &observer) noexcept
   {
     if (id.View().empty() || _registry.empty())
     {
@@ -61,7 +61,7 @@ namespace krys::boo::dom
     }
   }
 
-  void IdTargetObserverRegistry::NotifyObserversInternal(Element &element, DOMStringAtom id) noexcept
+  void IdTargetObserverRegistry::NotifyObserversInternal(Element &element, const DOMStringAtom &id) noexcept
   {
     krys_debug_assert(!_registry.empty());
 

@@ -312,7 +312,7 @@ namespace krys::boo::dom::tests
 
     auto toggle = [&](DOMStringAtom name, Maybe<bool> force)
     {
-      auto result = data.Node->ToggleAttribute(name, force);
+      auto result = data.Node->ToggleAttribute(krys::move(name), force);
       REQUIRE_FALSE(result.HasException());
       return result.Value();
     };

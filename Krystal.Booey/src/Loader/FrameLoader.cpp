@@ -420,8 +420,8 @@ namespace krys::boo
       return;
     }
 
-    FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(url), passedTarget,
-                                      downloadAttribute);
+    FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(url), krys::move(passedTarget),
+                                      krys::move(downloadAttribute));
     frameLoadRequest.SetReferrerPolicy(referrerPolicy);
     frameLoadRequest.SetSourceElement(sourceElement);
     ChangeLocation(krys::move(frameLoadRequest), triggeringEvent);

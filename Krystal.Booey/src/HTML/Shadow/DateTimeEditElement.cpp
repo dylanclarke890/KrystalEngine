@@ -209,7 +209,7 @@ namespace krys::boo::html
     return Downcast<dom::Element>(*FirstChild());
   }
 
-  void DateTimeEditElement::AddField(Ref<DateTimeFieldElement> field) noexcept
+  void DateTimeEditElement::AddField(const Ref<DateTimeFieldElement> &field) noexcept
   {
     if (_fields.size() == MaximumNumberOfFields)
     {

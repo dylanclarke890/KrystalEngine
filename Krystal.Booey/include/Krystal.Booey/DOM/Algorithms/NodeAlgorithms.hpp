@@ -50,22 +50,23 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#locate-a-namespace-prefix
     KRYS_NODISCARD static DOMStringAtom LocateNamespacePrefix(const Element &element,
-                                                              DOMStringAtom namespaceURI) noexcept;
+                                                              const DOMStringAtom &namespaceURI) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#locate-a-namespace
-    KRYS_NODISCARD static DOMStringAtom LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept;
+    KRYS_NODISCARD static DOMStringAtom LocateNamespace(const Node &node,
+                                                        const DOMStringAtom &prefix) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-getelementsbytagname
-    KRYS_NODISCARD static Ref<HTMLCollection> GetElementsByTagName(ContainerNode &root,
-                                                                   DOMStringAtom qualifiedName) noexcept;
+    KRYS_NODISCARD static Ref<HTMLCollection>
+      GetElementsByTagName(ContainerNode &root, const DOMStringAtom &qualifiedName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-getelementsbytagnamens
     KRYS_NODISCARD static Ref<HTMLCollection> GetElementsByTagNameNS(ContainerNode &root,
                                                                      DOMStringAtom namespaceUri,
-                                                                     DOMStringAtom localName) noexcept;
+                                                                     const DOMStringAtom &localName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-getelementsbyclassname
-    KRYS_NODISCARD static Ref<HTMLCollection> GetElementsByClassName(ContainerNode &root,
-                                                                     DOMStringAtom classNames) noexcept;
+    KRYS_NODISCARD static Ref<HTMLCollection>
+      GetElementsByClassName(ContainerNode &root, const DOMStringAtom &classNames) noexcept;
   };
 }

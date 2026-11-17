@@ -6,12 +6,12 @@
 namespace krys::boo::dom
 {
   ToggleEvent::ToggleEvent(DOMStringAtom type, const ToggleEventInit &eventInitDict) noexcept
-      : Event(type, eventInitDict), _oldState(eventInitDict.OldState), _newState(eventInitDict.NewState),
-        _source(eventInitDict.Source)
+      : Event(krys::move(type), eventInitDict), _oldState(eventInitDict.OldState),
+        _newState(eventInitDict.NewState), _source(eventInitDict.Source)
   {
   }
 
-  Ref<ToggleEvent> ToggleEvent::Create(DOMStringAtom type, const ToggleEventInit &init,
+  Ref<ToggleEvent> ToggleEvent::Create(const DOMStringAtom &type, const ToggleEventInit &init,
                                        bool isCancelable) noexcept
   {
     ToggleEventInit eventInit = init;

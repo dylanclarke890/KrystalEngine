@@ -49,7 +49,7 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Number;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
-                                                                 AllowedSymbols,
+                                                                 const AllowedSymbols &,
                                                                  PropertyParserOptions options) noexcept
     {
       krys_debug_assert(tokens.Peek().Type() == TokenType::Number);

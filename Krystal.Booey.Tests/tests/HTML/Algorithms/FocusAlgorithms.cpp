@@ -364,7 +364,7 @@ namespace krys::boo::html::tests
     auto append = [&](dom::ContainerNode &parent, dom::DOMStringAtom tagName, dom::DOMStringView id,
                       dom::DOMStringView tabIndex = {})
     {
-      auto element = document.CreateElement(tagName).ReleaseValue();
+      auto element = document.CreateElement(krys::move(tagName)).ReleaseValue();
       REQUIRE_FALSE(element->SetAttribute(u8"id", dom::DOMString(id)).HasException());
       if (!tabIndex.empty())
       {

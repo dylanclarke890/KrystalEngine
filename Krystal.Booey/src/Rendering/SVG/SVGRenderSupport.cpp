@@ -61,7 +61,7 @@ namespace krys::boo
 {
   LayoutRect SVGRenderSupport::ClippedOverflowRectForRepaint(const RenderElement &renderer,
                                                              const RenderLayerModelObject *repaintContainer,
-                                                             VisibleRectContext context) noexcept
+                                                             const VisibleRectContext &context) noexcept
   {
     // Return early for any cases where we don't actually paint
     if (renderer.IsInsideEntirelyHiddenLayer())
@@ -95,7 +95,7 @@ namespace krys::boo
     // parent.
     adjustedRect = renderer.LocalToParentTransform().MapRect(adjustedRect);
 
-    return parent.ComputeFloatVisibleRectInContainer(adjustedRect, container, context);
+    return parent.ComputeFloatVisibleRectInContainer(adjustedRect, container, krys::move(context));
   }
 
   const RenderElement &SVGRenderSupport::LocalToParentTransform(const RenderElement &renderer,

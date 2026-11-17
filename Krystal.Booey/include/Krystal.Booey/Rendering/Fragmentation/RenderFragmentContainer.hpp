@@ -169,7 +169,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect LayoutOverflowRectForBoxForPropagation(const RenderBox &box) noexcept;
 
-    KRYS_NODISCARD LayoutRect VisualOverflowRectForBoxForPropagation(const RenderBox &box) noexcept;
+    KRYS_NODISCARD LayoutRect VisualOverflowRectForBoxForPropagation(const RenderBox &box) const noexcept;
 
     /// @brief The part of @p rect (in @p box's coordinates) inside the fragment.
     KRYS_NODISCARD LayoutRect RectFlowPortionForBox(const RenderBox &box,

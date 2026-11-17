@@ -417,7 +417,7 @@ namespace krys::boo
     void CloneParagraphUnderNewElement(const dom::Position &start, const dom::Position &end,
                                        dom::Node *outerNode, dom::Element *blockElement) noexcept;
 
-    void CleanupAfterDeletion(VisiblePosition destination = VisiblePosition()) noexcept;
+    void CleanupAfterDeletion(const VisiblePosition &destination = VisiblePosition()) noexcept;
 
     KRYS_NODISCARD VisibleSelection ShouldBreakOutOfEmptyListItem() const noexcept;
 

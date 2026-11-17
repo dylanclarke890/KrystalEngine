@@ -49,7 +49,7 @@ namespace krys::boo::html
     auto &element = *Element();
     auto attribute = [&](dom::DOMStringAtom name)
     {
-      return element.GetAttribute(name).value_or(dom::DOMString());
+      return element.GetAttribute(krys::move(name)).value_or(dom::DOMString());
     };
     const Decimal stepBase = FindStepBase(Decimal(-259'200'000));
     const Decimal minimum =

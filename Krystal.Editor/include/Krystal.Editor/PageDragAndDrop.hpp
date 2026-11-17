@@ -217,7 +217,7 @@ namespace krys::editor
 
     /// @brief Moves the dragged card into @p list: before @p card if it was dropped on its upper half, after
     /// it if on its lower half, or at the end if on no card.
-    void DropCard(boo::dom::Element &list, RefPtr<boo::dom::Element> card, double clientY) noexcept
+    void DropCard(boo::dom::Element &list, const RefPtr<boo::dom::Element> &card, double clientY) noexcept
     {
       if (card == _dragged)
       {

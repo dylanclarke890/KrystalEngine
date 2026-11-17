@@ -32,7 +32,7 @@ namespace krys::boo::css
   }
 
   Maybe<SymbolRaw> SymbolKnownTokenTypeIdentConsumer::Consume(TokenRange &tokens, PropertyParserState &,
-                                                              AllowedSymbols symbolsAllowed,
+                                                              const AllowedSymbols &symbolsAllowed,
                                                               PropertyParserOptions) noexcept
   {
     krys_debug_assert(tokens.Peek().Type() == TokenType::Ident);

@@ -43,22 +43,22 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<QuadValue> Create(Quad quad) noexcept;
 
     /// @brief All four sides are `value`.
-    KRYS_NODISCARD static Ref<QuadValue> Create(Ref<Value> value) noexcept
+    KRYS_NODISCARD static Ref<QuadValue> Create(const Ref<Value> &value) noexcept
     {
       return Create(Quad {value, value, value, value});
     }
 
     /// @brief `first` for top and bottom, `second` for right and left.
-    KRYS_NODISCARD static Ref<QuadValue> Create(Ref<Value> first, Ref<Value> second) noexcept
+    KRYS_NODISCARD static Ref<QuadValue> Create(const Ref<Value> &first, const Ref<Value> &second) noexcept
     {
       return Create(Quad {first, second, first, second});
     }
 
     /// @brief `first` for top, `second` for right and left, `third` for bottom.
-    KRYS_NODISCARD static Ref<QuadValue> Create(Ref<Value> first, Ref<Value> second,
+    KRYS_NODISCARD static Ref<QuadValue> Create(Ref<Value> first, const Ref<Value> &second,
                                                 Ref<Value> third) noexcept
     {
-      return Create(Quad {first, second, third, second});
+      return Create(Quad {krys::move(first), second, krys::move(third), second});
     }
 
     /// @brief Top, right, bottom and left.

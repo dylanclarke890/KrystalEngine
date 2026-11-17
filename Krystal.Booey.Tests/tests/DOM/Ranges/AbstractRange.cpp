@@ -25,7 +25,7 @@ namespace krys::boo::dom::tests
 
       /// @brief A static range, or a live one, from (startNode, startOffset) to (endNode, endOffset).
       Ref<AbstractRange> MakeRange(bool live, Node &startNode, uint64 startOffset, Node &endNode,
-                                   uint64 endOffset)
+                                   uint64 endOffset) const
       {
         if (live)
         {

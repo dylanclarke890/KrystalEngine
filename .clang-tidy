@@ -28,7 +28,6 @@ Checks: >
   cppcoreguidelines-noexcept-move-operations,
   cppcoreguidelines-rvalue-reference-param-not-moved,
   cppcoreguidelines-slicing,
-  cppcoreguidelines-virtual-class-destructor,
   misc-definitions-in-headers,
   misc-misplaced-const,
   misc-redundant-expression,
@@ -76,7 +75,6 @@ Checks: >
   readability-duplicate-include,
   readability-identifier-naming,
   readability-inconsistent-declaration-parameter-name,
-  readability-make-member-function-const,
   readability-misleading-indentation,
   readability-redundant-casting,
   readability-redundant-control-flow,
@@ -101,6 +99,14 @@ Checks: >
 
 # Not wanted: it treats Ref/RefPtr copies that keep an object alive (and copies tests make on purpose) as waste.
 #   performance-unnecessary-copy-initialization,
+
+# Not wanted: protected virtual destructors are the deliberate pattern here (RefCounted<T> deletes as T,
+# so subclasses of T need the virtual), and -Wdelete-non-virtual-dtor catches the real bug at the delete.
+#   cppcoreguidelines-virtual-class-destructor,
+
+# Not wanted: it counts a change made through a pointer member as const, so most of what it flags are
+# mutators (SetNeedsLayout and the like) that would become const.
+#   readability-make-member-function-const,
 
 # Useful, but a large first pass; same as above:
 #   bugprone-easily-swappable-parameters,
@@ -137,3 +143,7 @@ CheckOptions:
   # move itself, not the function's name) catches uses after krys::move.
   cppcoreguidelines-rvalue-reference-param-not-moved.MoveFunction: '::krys::move'
   clang-analyzer-cplusplus.Move:WarnOn: All
+
+  # Iterators are cheap to copy and conventionally by value. The check's move fixes insert std::move:
+  # change them to krys::move.
+  performance-unnecessary-value-param.AllowedTypes: '[Ii]terator$'

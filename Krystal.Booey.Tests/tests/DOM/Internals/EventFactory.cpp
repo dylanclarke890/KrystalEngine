@@ -25,7 +25,7 @@ namespace krys::boo::dom::tests
       using dictionary_type = TestEventInit;
 
       TestEvent(DOMStringAtom type, const TestEventInit &init) noexcept
-          : Event(type, init), _value(init.Value)
+          : Event(krys::move(type), init), _value(init.Value)
       {
       }
 

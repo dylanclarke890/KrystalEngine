@@ -42,7 +42,7 @@ namespace krys::boo::tests
       TestPage->MainFrame().SetDocument(nullptr);
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
     {
       auto element = Document->GetElementById(id);
       REQUIRE(element);
@@ -55,7 +55,7 @@ namespace krys::boo::tests
     }
 
     /// @brief Runs the event loop @p delta after its last run, then the rendering update if one is scheduled.
-    void Frame(MonotonicTime::duration delta = {}) noexcept
+    void Frame(MonotonicTime::duration delta = {}) const noexcept
     {
       auto &loop = html::EventLoop::Current();
       loop.Run(loop.Now() + delta);

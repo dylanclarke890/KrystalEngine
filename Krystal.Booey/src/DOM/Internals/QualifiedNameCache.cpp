@@ -34,8 +34,9 @@ namespace krys::boo::dom
     return cache;
   }
 
-  Ref<QualifiedNameStorage> QualifiedNameCache::GetOrAdd(DOMStringAtom namespaceURI, DOMStringAtom prefix,
-                                                         DOMStringAtom localName) noexcept
+  Ref<QualifiedNameStorage> QualifiedNameCache::GetOrAdd(DOMStringAtom namespaceURI,
+                                                         const DOMStringAtom &prefix,
+                                                         const DOMStringAtom &localName) noexcept
   {
     // An empty namespace is no namespace.
     if (namespaceURI.View().empty())
@@ -58,8 +59,10 @@ namespace krys::boo::dom
     return storage;
   }
 
-  Ref<QualifiedNameStorage> QualifiedNameCache::GetOrAdd(DOMStringAtom namespaceURI, DOMStringAtom prefix,
-                                                         DOMStringAtom localName, html::TagName tagName,
+  Ref<QualifiedNameStorage> QualifiedNameCache::GetOrAdd(DOMStringAtom namespaceURI,
+                                                         const DOMStringAtom &prefix,
+                                                         const DOMStringAtom &localName,
+                                                         html::TagName tagName,
                                                          html::Namespace tagNamespace) noexcept
   {
     // An empty namespace is no namespace.

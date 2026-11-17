@@ -723,7 +723,7 @@ namespace krys::boo::html
                                                             const SanitizerConfig &configuration) noexcept
   {
     // 1. Let elementName be «[ "name" → localName, "namespace" → namespace ]».
-    SanitizerElementNamespace elementName {dom::DOMString(localName), namespaceURI};
+    SanitizerElementNamespace elementName {dom::DOMString(localName), krys::move(namespaceURI)};
 
     // 2. If configuration["replaceWithChildrenElements"] exists and contains elementName, then return
     //    "Replace with children".
@@ -751,9 +751,10 @@ namespace krys::boo::html
     return SanitizerAction::Keep;
   }
 
-  bool SanitizerAlgorithms::AllowsAttribute(dom::DOMStringView localName, dom::DOMStringAtom namespaceURI,
-                                            dom::DOMStringView value, dom::DOMStringView elementLocalName,
-                                            dom::DOMStringAtom elementNamespace,
+  bool SanitizerAlgorithms::AllowsAttribute(dom::DOMStringView localName,
+                                            const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
+                                            dom::DOMStringView elementLocalName,
+                                            const dom::DOMStringAtom &elementNamespace,
                                             const SanitizerConfig &configuration) noexcept
   {
     // 1. Let attrName be «[ "name" → localName, "namespace" → namespace ]».
@@ -865,8 +866,9 @@ namespace krys::boo::html
            && std::ranges::none_of(name, [](char8_t c) { return c >= u8'A' && c <= u8'Z'; });
   }
 
-  bool SanitizerAlgorithms::CompareItems(dom::DOMStringView nameA, dom::DOMStringAtom namespaceA,
-                                         dom::DOMStringView nameB, dom::DOMStringAtom namespaceB) noexcept
+  bool SanitizerAlgorithms::CompareItems(dom::DOMStringView nameA, const dom::DOMStringAtom &namespaceA,
+                                         dom::DOMStringView nameB,
+                                         const dom::DOMStringAtom &namespaceB) noexcept
   {
     // 1.-2. Let namespaceA be itemA["namespace"]. Let namespaceB be itemB["namespace"].
     // 3.-3a. If namespaceA is null: if namespaceB is not null, then return true.

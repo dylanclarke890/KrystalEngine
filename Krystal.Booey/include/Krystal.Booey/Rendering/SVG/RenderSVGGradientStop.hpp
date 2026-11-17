@@ -91,7 +91,7 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD svg::SVGGradientElement *GradientElement() noexcept;
+    KRYS_NODISCARD svg::SVGGradientElement *GradientElement() const noexcept;
   };
 }
 

@@ -472,18 +472,18 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> Document::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagName(*this, qualifiedName);
+    return NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
   }
 
   Ref<HTMLCollection> Document::GetElementsByTagNameNS(DOMStringAtom namespaceUri,
                                                        DOMStringAtom localName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagNameNS(*this, namespaceUri, localName);
+    return NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceUri), krys::move(localName));
   }
 
   Ref<HTMLCollection> Document::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    return NodeAlgorithms::GetElementsByClassName(*this, classNames);
+    return NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
 
   ExceptionOr<Ref<Element>> Document::CreateElement(DOMStringAtom localName,
@@ -525,7 +525,8 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Element>> Document::CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,
                                                       const ElementCreationOptionsOrString &options) noexcept
   {
-    return DocumentAlgorithms::InternalCreateElementNS(*this, namespaceUri, qualifiedName, options);
+    return DocumentAlgorithms::InternalCreateElementNS(*this, krys::move(namespaceUri),
+                                                       krys::move(qualifiedName), options);
   }
 
   Ref<DocumentFragment> Document::CreateDocumentFragment() noexcept
@@ -672,8 +673,8 @@ namespace krys::boo::dom
   {
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
     //    qualifiedName given "attribute".
-    auto nameResult =
-      NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Attribute);
+    auto nameResult = NameValidation::ValidateAndExtract(krys::move(namespaceUri), krys::move(qualifiedName),
+                                                         ValidateAndExtractContext::Attribute);
     if (nameResult.HasException())
     {
       return nameResult.ReleaseException();

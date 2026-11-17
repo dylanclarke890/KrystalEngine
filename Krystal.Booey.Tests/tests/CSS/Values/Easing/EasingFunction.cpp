@@ -19,8 +19,8 @@ namespace krys::boo::css::tests
       return EasingFunction {StepsEasingFunction {.Parameters = krys::move(parameters)}};
     }
 
-    EasingFunction CubicBezier(Number<ClosedUnitRange> x1, Number<> y1, Number<ClosedUnitRange> x2,
-                               Number<> y2)
+    EasingFunction CubicBezier(const Number<ClosedUnitRange> &x1, const Number<> &y1,
+                               const Number<ClosedUnitRange> &x2, const Number<> &y2)
     {
       return EasingFunction {CubicBezierEasingFunction {
         .Parameters = {.Value = {CubicBezierEasingParameters::Coordinate {x1, y1},

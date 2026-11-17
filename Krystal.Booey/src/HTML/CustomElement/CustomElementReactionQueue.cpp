@@ -297,8 +297,9 @@ namespace krys::boo::html
     {
       return;
     }
-    queue._items.emplace_back(Item::Type::AttributeChanged,
-                              Item::AttributeChangedPayload {attributeName, oldValue, newValue});
+    queue._items.emplace_back(
+      Item::Type::AttributeChanged,
+      Item::AttributeChangedPayload {attributeName, krys::move(oldValue), krys::move(newValue)});
     EnqueueElementOnAppropriateElementQueue(element);
   }
 

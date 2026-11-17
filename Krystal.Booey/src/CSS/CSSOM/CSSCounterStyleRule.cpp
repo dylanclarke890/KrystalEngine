@@ -261,7 +261,7 @@ namespace krys::boo::css
     }
 
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    MutableDescriptors().SetFallbackName(FallbackNameFromValue(krys::move(newValue)));
+    MutableDescriptors().SetFallbackName(FallbackNameFromValue(newValue));
   }
 
   void CSSCounterStyleRule::SetSymbols(const CSSOMString &text) noexcept

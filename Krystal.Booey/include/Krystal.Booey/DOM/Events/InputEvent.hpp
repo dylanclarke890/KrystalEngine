@@ -73,7 +73,7 @@ namespace krys::boo::dom
     ~InputEvent() noexcept override;
 
     /// @brief A trusted input event, which bubbles and crosses shadow boundaries.
-    KRYS_NODISCARD static Ref<InputEvent> Create(DOMStringAtom type, LocalDOMWindow *view,
+    KRYS_NODISCARD static Ref<InputEvent> Create(const DOMStringAtom &type, LocalDOMWindow *view,
                                                  DOMStringView inputType, bool cancelable,
                                                  Maybe<DOMString> data, RefPtr<DataTransfer> &&dataTransfer,
                                                  const List<RefPtr<StaticRange>> &targetRanges, int32 detail,

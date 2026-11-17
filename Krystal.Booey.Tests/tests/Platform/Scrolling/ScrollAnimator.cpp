@@ -59,7 +59,7 @@ namespace krys::boo::tests
       fixture.Frame(1'600ms);
     }
 
-    bool PressKey(AnimationPageFixture &fixture, utf8_string key, utf8_string identifier,
+    bool PressKey(AnimationPageFixture &fixture, const utf8_string &key, utf8_string identifier,
                   int32 keyCode) noexcept
     {
       return fixture.TestPage->MainFrame().GetEventHandler().KeyEvent(

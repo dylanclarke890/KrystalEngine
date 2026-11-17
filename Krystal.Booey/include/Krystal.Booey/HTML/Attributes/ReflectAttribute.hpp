@@ -141,7 +141,7 @@ namespace krys::boo::html
     KRYS_NODISCARD inline Maybe<dom::DOMString> GetContentAttribute(const dom::Element &element,
                                                                     dom::DOMStringAtom name) noexcept
     {
-      auto attribute = dom::ElementAlgorithms::GetAttributeByNamespace(null, name, element);
+      auto attribute = dom::ElementAlgorithms::GetAttributeByNamespace(null, krys::move(name), element);
       if (attribute == nullptr)
       {
         return null;
@@ -154,13 +154,13 @@ namespace krys::boo::html
     inline void SetContentAttribute(dom::Element &element, dom::DOMStringAtom name,
                                     dom::DOMString value) noexcept
     {
-      dom::ElementAlgorithms::SetAttributeValue(element, name, krys::move(value));
+      dom::ElementAlgorithms::SetAttributeValue(element, krys::move(name), krys::move(value));
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
     inline void DeleteContentAttribute(dom::Element &element, dom::DOMStringAtom name) noexcept
     {
-      dom::ElementAlgorithms::RemoveAttributeByNamespace(null, name, element);
+      dom::ElementAlgorithms::RemoveAttributeByNamespace(null, krys::move(name), element);
     }
 
 #pragma endregion
@@ -178,7 +178,7 @@ namespace krys::boo::html
                                                                     dom::DOMStringAtom name) noexcept
     {
       // The target element's internal content attribute map's value for the name, if it has one.
-      return internals.InternalContentAttribute(name);
+      return internals.InternalContentAttribute(krys::move(name));
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute
@@ -186,14 +186,14 @@ namespace krys::boo::html
                                     dom::DOMString value) noexcept
     {
       // The target element's internal content attribute map's value for the name.
-      internals.SetInternalContentAttribute(name, krys::move(value));
+      internals.SetInternalContentAttribute(krys::move(name), krys::move(value));
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
     inline void DeleteContentAttribute(ElementInternals &internals, dom::DOMStringAtom name) noexcept
     {
       // Removed from the target element's internal content attribute map.
-      internals.RemoveInternalContentAttribute(name);
+      internals.RemoveInternalContentAttribute(krys::move(name));
     }
 
 #pragma endregion
@@ -213,12 +213,13 @@ namespace krys::boo::html
       // 2. Let contentAttributeValue be the result of running this's get the content attribute.
       // 5. If contentAttributeValue is null, then return the empty string. (DOMString only.)
       // 6. Return contentAttributeValue.
-      return GetContentAttribute(target, name);
+      return GetContentAttribute(target, krys::move(name));
     }
 
     /// @brief Helper for setting reflected content attributes with 'DOMString?' type.
     template <ReflectTarget Target>
-    void ReflectDOMString(Target &target, dom::DOMStringAtom name, Maybe<dom::DOMString> value) noexcept
+    void ReflectDOMString(Target &target, const dom::DOMStringAtom &name,
+                          Maybe<dom::DOMString> value) noexcept
     {
       // 1. If the given value is null, then run this's delete the content attribute.
       if (!value.has_value())
@@ -237,7 +238,7 @@ namespace krys::boo::html
     void ReflectDOMString(Target &target, dom::DOMStringAtom name, dom::DOMString value) noexcept
     {
       // The setter steps are to run this's set the content attribute with the given value.
-      SetContentAttribute(target, name, krys::move(value));
+      SetContentAttribute(target, krys::move(name), krys::move(value));
     }
 
 #pragma endregion
@@ -253,7 +254,7 @@ namespace krys::boo::html
     {
       // 1. Let element be the result of running this's get the element.
       // 2. Let contentAttributeValue be the result of running this's get the content attribute.
-      auto contentAttributeValue = GetContentAttribute(target, name);
+      auto contentAttributeValue = GetContentAttribute(target, krys::move(name));
 
       // 3. If the reflected IDL attribute is treated as a URL:
       // 3a. If contentAttributeValue is null, then return the empty string.
@@ -283,7 +284,7 @@ namespace krys::boo::html
     void ReflectUSVString(Target &target, dom::DOMStringAtom name, dom::USVString value) noexcept
     {
       // The setter steps are to run this's set the content attribute with the given value.
-      SetContentAttribute(target, name, krys::move(value));
+      SetContentAttribute(target, krys::move(name), krys::move(value));
     }
 
 #pragma endregion
@@ -299,12 +300,12 @@ namespace krys::boo::html
       // 1. Let contentAttributeValue be the result of running this's get the content attribute.
       // 2. If contentAttributeValue is null, then return false.
       // 3. Return true.
-      return GetContentAttribute(target, name).has_value();
+      return GetContentAttribute(target, krys::move(name)).has_value();
     }
 
     /// @brief Helper for setting reflected content attributes with 'bool' type.
     template <ReflectTarget Target>
-    void ReflectBool(Target &target, dom::DOMStringAtom name, bool value) noexcept
+    void ReflectBool(Target &target, const dom::DOMStringAtom &name, bool value) noexcept
     {
       // 1. If the given value is false, then run this's delete the content attribute.
       if (!value)
@@ -329,7 +330,7 @@ namespace krys::boo::html
     KRYS_NODISCARD int32 ReflectLong(const Target &target, dom::DOMStringAtom name) noexcept
     {
       // 1. Let contentAttributeValue be the result of running this's get the content attribute.
-      auto contentAttributeValue = GetContentAttribute(target, name);
+      auto contentAttributeValue = GetContentAttribute(target, krys::move(name));
 
       // 2. If contentAttributeValue is not null:
       if (contentAttributeValue.has_value())
@@ -391,7 +392,7 @@ namespace krys::boo::html
       // 2. Run this's set the content attribute with the given value converted to the shortest possible
       // string
       //    representing the number as a valid integer.
-      SetContentAttribute(target, name, IntegerToString(value));
+      SetContentAttribute(target, krys::move(name), IntegerToString(value));
 
       if constexpr (OnlyNonNegative == OnlyNonNegativeNumbers::Yes)
       {
@@ -416,7 +417,7 @@ namespace krys::boo::html
                     "Cannot be both 'OnlyPositive' and 'OnlyPositiveWithFallback'.");
 
       // 1. Let contentAttributeValue be the result of running this's get the content attribute.
-      auto contentAttributeValue = GetContentAttribute(target, name);
+      auto contentAttributeValue = GetContentAttribute(target, krys::move(name));
 
       // 2. Let minimum be 0.
       uint64 minimum = 0u;
@@ -529,7 +530,7 @@ namespace krys::boo::html
 
       // 7. Run this's set the content attribute with newValue converted to the shortest possible string
       //    representing the number as a valid non-negative integer.
-      SetContentAttribute(target, name, IntegerToString(newValue));
+      SetContentAttribute(target, krys::move(name), IntegerToString(newValue));
 
       if constexpr (OnlyPositive == OnlyPositiveNumbers::Yes)
       {
@@ -548,7 +549,7 @@ namespace krys::boo::html
     KRYS_NODISCARD double ReflectDouble(const Target &target, dom::DOMStringAtom name) noexcept
     {
       // 1. Let contentAttributeValue be the result of running this's get the content attribute.
-      auto contentAttributeValue = GetContentAttribute(target, name);
+      auto contentAttributeValue = GetContentAttribute(target, krys::move(name));
 
       // 2. If contentAttributeValue is not null:
       if (contentAttributeValue.has_value())
@@ -594,7 +595,7 @@ namespace krys::boo::html
 
       // 2. Run this's set the content attribute with the given value, converted to the best representation of
       //    the number as a floating-point number.
-      SetContentAttribute(target, name, SerializeForNumberType(value));
+      SetContentAttribute(target, krys::move(name), SerializeForNumberType(value));
     }
 
 #pragma endregion
@@ -616,32 +617,32 @@ namespace krys::boo::html
   {
     if constexpr (OneOf<TValue, dom::DOMString, Maybe<dom::DOMString>>)
     {
-      return detail::ReflectDOMString(target, name);
+      return detail::ReflectDOMString(target, krys::move(name));
     }
     else if constexpr (SameType<TValue, dom::USVString>)
     {
-      return detail::ReflectUSVString<detail::TreatedAsURL::No>(target, name);
+      return detail::ReflectUSVString<detail::TreatedAsURL::No>(target, krys::move(name));
     }
     else if constexpr (SameType<TValue, bool>)
     {
-      return detail::ReflectBool(target, name);
+      return detail::ReflectBool(target, krys::move(name));
     }
     else if constexpr (SameType<TValue, int32>)
     {
-      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::No, detail::NoDefaultValue<int32>>(target,
-                                                                                                    name);
+      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::No, detail::NoDefaultValue<int32>>(
+        target, krys::move(name));
     }
     else if constexpr (SameType<TValue, uint32>)
     {
       return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
                                          detail::OnlyPositiveNumbersWithFallback::No,
-                                         detail::NoDefaultValue<uint32>, detail::NoRange<uint32>>(target,
-                                                                                                  name);
+                                         detail::NoDefaultValue<uint32>, detail::NoRange<uint32>>(
+        target, krys::move(name));
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers::No, detail::NoDefaultValue<double>>(target,
-                                                                                                    name);
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::No, detail::NoDefaultValue<double>>(
+        target, krys::move(name));
     }
     else
     {
@@ -660,29 +661,29 @@ namespace krys::boo::html
 
     if constexpr (OneOf<TValue, dom::DOMString, Maybe<dom::DOMString>>)
     {
-      detail::ReflectDOMString(target, name, krys::move(value));
+      detail::ReflectDOMString(target, krys::move(name), krys::move(value));
     }
     else if constexpr (SameType<TValue, dom::USVString>)
     {
-      return detail::ReflectUSVString<detail::TreatedAsURL::No>(target, name, krys::move(value));
+      return detail::ReflectUSVString<detail::TreatedAsURL::No>(target, krys::move(name), krys::move(value));
     }
     else if constexpr (SameType<TValue, bool>)
     {
-      detail::ReflectBool(target, name, value);
+      detail::ReflectBool(target, krys::move(name), value);
     }
     else if constexpr (SameType<TValue, int32>)
     {
-      detail::ReflectLong<detail::OnlyNonNegativeNumbers::No>(target, name, value);
+      detail::ReflectLong<detail::OnlyNonNegativeNumbers::No>(target, krys::move(name), value);
     }
     else if constexpr (SameType<TValue, uint32>)
     {
       detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
                                   detail::OnlyPositiveNumbersWithFallback::No,
-                                  detail::NoDefaultValue<uint32>>(target, name, value);
+                                  detail::NoDefaultValue<uint32>>(target, krys::move(name), value);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      detail::ReflectDouble<detail::OnlyPositiveNumbers::No>(target, name, value);
+      detail::ReflectDouble<detail::OnlyPositiveNumbers::No>(target, krys::move(name), value);
     }
     else
     {
@@ -700,18 +701,19 @@ namespace krys::boo::html
     if constexpr (SameType<TValue, int32>)
     {
       return detail::ReflectLong<detail::OnlyNonNegativeNumbers::No,
-                                 detail::MaybeReflectDefault<int32>(DefaultValue)>(target, name);
+                                 detail::MaybeReflectDefault<int32>(DefaultValue)>(target, krys::move(name));
     }
     else if constexpr (SameType<TValue, uint32>)
     {
       return detail::ReflectUnsignedLong<
         detail::OnlyPositiveNumbers::No, detail::OnlyPositiveNumbersWithFallback::No,
-        detail::MaybeReflectDefault<uint32>(DefaultValue), detail::NoRange<uint32>>(target, name);
+        detail::MaybeReflectDefault<uint32>(DefaultValue), detail::NoRange<uint32>>(target, krys::move(name));
     }
     else if constexpr (SameType<TValue, double>)
     {
       return detail::ReflectDouble<detail::OnlyPositiveNumbers::No,
-                                   detail::MaybeReflectDefault<double>(DefaultValue)>(target, name);
+                                   detail::MaybeReflectDefault<double>(DefaultValue)>(target,
+                                                                                      krys::move(name));
     }
     else
     {
@@ -733,8 +735,8 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
                                          detail::OnlyPositiveNumbersWithFallback::No,
-                                         detail::MaybeReflectDefault<uint32>(DefaultValue)>(target, name,
-                                                                                            value);
+                                         detail::MaybeReflectDefault<uint32>(DefaultValue)>(
+        target, krys::move(name), value);
     }
     else
     {
@@ -753,7 +755,7 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<
         detail::OnlyPositiveNumbers::No, detail::OnlyPositiveNumbersWithFallback::No,
-        detail::NoDefaultValue<uint32>, detail::MaybeReflectRange<uint32>(Range)>(target, name);
+        detail::NoDefaultValue<uint32>, detail::MaybeReflectRange<uint32>(Range)>(target, krys::move(name));
     }
     else
     {
@@ -775,8 +777,8 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<
         detail::OnlyPositiveNumbers::No, detail::OnlyPositiveNumbersWithFallback::No,
-        detail::MaybeReflectDefault<uint32>(DefaultValue), detail::MaybeReflectRange<uint32>(Range)>(target,
-                                                                                                     name);
+        detail::MaybeReflectDefault<uint32>(DefaultValue), detail::MaybeReflectRange<uint32>(Range)>(
+        target, krys::move(name));
     }
     else
     {
@@ -837,7 +839,7 @@ namespace krys::boo::html
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectSetter] setter");
 
-    return Reflect(target, name, krys::move(value));
+    return Reflect(target, krys::move(name), krys::move(value));
   }
 
 #pragma endregion
@@ -850,7 +852,7 @@ namespace krys::boo::html
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectURL(const Target &target,
                                                                  dom::DOMStringAtom name) noexcept
   {
-    return detail::ReflectUSVString<detail::TreatedAsURL::Yes>(target, name);
+    return detail::ReflectUSVString<detail::TreatedAsURL::Yes>(target, krys::move(name));
   }
 
   /// @brief Represents the `[ReflectURL]` IDL attribute (setter).
@@ -862,7 +864,7 @@ namespace krys::boo::html
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectURL] setter");
 
-    return detail::ReflectUSVString<detail::TreatedAsURL::Yes>(target, name, krys::move(value));
+    return detail::ReflectUSVString<detail::TreatedAsURL::Yes>(target, krys::move(name), krys::move(value));
   }
 
 #pragma endregion
@@ -877,8 +879,8 @@ namespace krys::boo::html
   {
     if constexpr (SameType<TValue, int32>)
     {
-      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::Yes, detail::NoDefaultValue<int32>>(target,
-                                                                                                     name);
+      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::Yes, detail::NoDefaultValue<int32>>(
+        target, krys::move(name));
     }
     else
     {
@@ -897,7 +899,7 @@ namespace krys::boo::html
 
     if constexpr (SameType<TValue, int32>)
     {
-      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::Yes>(target, name, value);
+      return detail::ReflectLong<detail::OnlyNonNegativeNumbers::Yes>(target, krys::move(name), value);
     }
     else
     {
@@ -915,7 +917,7 @@ namespace krys::boo::html
     if constexpr (SameType<TValue, int32>)
     {
       return detail::ReflectLong<detail::OnlyNonNegativeNumbers::Yes,
-                                 detail::MaybeReflectDefault<int32>(DefaultValue)>(target, name);
+                                 detail::MaybeReflectDefault<int32>(DefaultValue)>(target, krys::move(name));
     }
     else
     {
@@ -937,13 +939,13 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::Yes,
                                          detail::OnlyPositiveNumbersWithFallback::No,
-                                         detail::NoDefaultValue<uint32>, detail::NoRange<uint32>>(target,
-                                                                                                  name);
+                                         detail::NoDefaultValue<uint32>, detail::NoRange<uint32>>(
+        target, krys::move(name));
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes, detail::NoDefaultValue<double>>(target,
-                                                                                                     name);
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes, detail::NoDefaultValue<double>>(
+        target, krys::move(name));
     }
     else
     {
@@ -964,11 +966,11 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::Yes,
                                          detail::OnlyPositiveNumbersWithFallback::No,
-                                         detail::NoDefaultValue<uint32>>(target, name, value);
+                                         detail::NoDefaultValue<uint32>>(target, krys::move(name), value);
     }
     else if constexpr (SameType<TValue, double>)
     {
-      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes>(target, name, value);
+      return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes>(target, krys::move(name), value);
     }
     else
     {
@@ -988,12 +990,13 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<
         detail::OnlyPositiveNumbers::Yes, detail::OnlyPositiveNumbersWithFallback::No,
-        detail::MaybeReflectDefault<uint32>(DefaultValue), detail::NoRange<uint32>>(target, name);
+        detail::MaybeReflectDefault<uint32>(DefaultValue), detail::NoRange<uint32>>(target, krys::move(name));
     }
     else if constexpr (SameType<TValue, double>)
     {
       return detail::ReflectDouble<detail::OnlyPositiveNumbers::Yes,
-                                   detail::MaybeReflectDefault<double>(DefaultValue)>(target, name);
+                                   detail::MaybeReflectDefault<double>(DefaultValue)>(target,
+                                                                                      krys::move(name));
     }
     else
     {
@@ -1016,8 +1019,8 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::Yes,
                                          detail::OnlyPositiveNumbersWithFallback::No,
-                                         detail::MaybeReflectDefault<uint32>(DefaultValue)>(target, name,
-                                                                                            value);
+                                         detail::MaybeReflectDefault<uint32>(DefaultValue)>(
+        target, krys::move(name), value);
     }
     else
     {
@@ -1039,8 +1042,8 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
                                          detail::OnlyPositiveNumbersWithFallback::Yes,
-                                         detail::NoDefaultValue<uint32>, detail::NoRange<uint32>>(target,
-                                                                                                  name);
+                                         detail::NoDefaultValue<uint32>, detail::NoRange<uint32>>(
+        target, krys::move(name));
     }
     else if constexpr (SameType<TValue, double>)
     {
@@ -1066,7 +1069,7 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
                                          detail::OnlyPositiveNumbersWithFallback::Yes,
-                                         detail::NoDefaultValue<uint32>>(target, name, value);
+                                         detail::NoDefaultValue<uint32>>(target, krys::move(name), value);
     }
     else if constexpr (SameType<TValue, double>)
     {
@@ -1090,7 +1093,7 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<
         detail::OnlyPositiveNumbers::No, detail::OnlyPositiveNumbersWithFallback::Yes,
-        detail::MaybeReflectDefault<uint32>(DefaultValue), detail::NoRange<uint32>>(target, name);
+        detail::MaybeReflectDefault<uint32>(DefaultValue), detail::NoRange<uint32>>(target, krys::move(name));
     }
     else if constexpr (SameType<TValue, double>)
     {
@@ -1120,8 +1123,8 @@ namespace krys::boo::html
     {
       return detail::ReflectUnsignedLong<detail::OnlyPositiveNumbers::No,
                                          detail::OnlyPositiveNumbersWithFallback::Yes,
-                                         detail::MaybeReflectDefault<uint32>(DefaultValue)>(target, name,
-                                                                                            value);
+                                         detail::MaybeReflectDefault<uint32>(DefaultValue)>(
+        target, krys::move(name), value);
     }
     else if constexpr (SameType<TValue, double>)
     {

@@ -3,13 +3,13 @@
 namespace krys::boo::dom
 {
   FormDataEvent::FormDataEvent(DOMStringAtom type, const FormDataEventInit &eventInitDict) noexcept
-      : Event(type, eventInitDict),
+      : Event(krys::move(type), eventInitDict),
         _formData(eventInitDict.FormData ? Ref<html::DOMFormData>(eventInitDict.FormData)
                                          : html::DOMFormData::Create())
   {
   }
 
-  Ref<FormDataEvent> FormDataEvent::Create(DOMStringAtom type, bool canBubble, bool isCancelable,
+  Ref<FormDataEvent> FormDataEvent::Create(const DOMStringAtom &type, bool canBubble, bool isCancelable,
                                            bool isComposed, Ref<html::DOMFormData> &&formData) noexcept
   {
     FormDataEventInit init;

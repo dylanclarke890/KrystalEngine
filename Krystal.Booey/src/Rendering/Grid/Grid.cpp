@@ -131,7 +131,7 @@ namespace krys::boo
     _maxColumns = maxColumns;
   }
 
-  void Grid::ClampAreaToSubgridIfNeeded(GridArea &area) noexcept
+  void Grid::ClampAreaToSubgridIfNeeded(GridArea &area) const noexcept
   {
     if (!area.Rows.IsIndefinite())
     {

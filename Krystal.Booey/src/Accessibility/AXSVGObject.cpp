@@ -82,7 +82,7 @@ namespace krys::boo
     }
     auto hasValue = [](const dom::Element &element, dom::DOMStringAtom name)
     {
-      auto value = element.GetAttribute(name);
+      auto value = element.GetAttribute(krys::move(name));
       return value && !value->empty();
     };
     auto isAccessible = [&](const dom::Node &node)

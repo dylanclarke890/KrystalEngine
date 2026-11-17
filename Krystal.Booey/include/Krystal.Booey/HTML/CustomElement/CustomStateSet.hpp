@@ -56,14 +56,14 @@ namespace krys::boo::html
     }
 
     /// @return Whether @p state wasn't in the set.
-    bool Add(dom::DOMStringAtom state) noexcept;
+    bool Add(const dom::DOMStringAtom &state) noexcept;
 
     /// @return Whether @p state was in the set.
-    bool Delete(dom::DOMStringAtom state) noexcept;
+    bool Delete(const dom::DOMStringAtom &state) noexcept;
 
     void Clear() noexcept;
 
-    KRYS_NODISCARD bool Has(dom::DOMStringAtom state) const noexcept;
+    KRYS_NODISCARD bool Has(const dom::DOMStringAtom &state) const noexcept;
 
     KRYS_NODISCARD size_t Size() const noexcept;
 

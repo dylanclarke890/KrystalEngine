@@ -63,8 +63,9 @@ namespace krys::boo::dom
     static ExceptionOr<RefPtr<Attr>> SetAttribute(Attr &attr, Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-set-value
-    static void SetAttributeValue(Element &element, DOMStringAtom localName, DOMString value,
-                                  DOMStringAtom prefix = null, DOMStringAtom namespaceURI = null) noexcept;
+    static void SetAttributeValue(Element &element, const DOMStringAtom &localName, DOMString value,
+                                  DOMStringAtom prefix = null,
+                                  const DOMStringAtom &namespaceURI = null) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-remove-by-name
     static RefPtr<Attr> RemoveAttributeByName(DOMStringAtom qualifiedName, Element &element) noexcept;

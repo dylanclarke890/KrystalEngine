@@ -32,7 +32,7 @@ namespace krys::boo::html
     /// @note Customized built-in elements aren't supported: a definition is found by its local name alone.
     /// @see https://html.spec.whatwg.org/#look-up-a-custom-element-definition
     KRYS_NODISCARD static CustomElementInterface *
-      LookupCustomElementDefinition(CustomElementRegistry *registry, dom::DOMStringAtom namespaceURI,
+      LookupCustomElementDefinition(CustomElementRegistry *registry, const dom::DOMStringAtom &namespaceURI,
                                     dom::DOMStringAtom localName) noexcept;
 
     /// @see https://html.spec.whatwg.org/#look-up-a-custom-element-registry

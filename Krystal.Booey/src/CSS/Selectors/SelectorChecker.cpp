@@ -1583,7 +1583,7 @@ namespace krys::boo::css
         case SelectorPseudoElement::Part:
         {
           auto appendTranslatedPartNameToRuleScope =
-            [&](List<CSSOMStringAtom> &translatedPartNames, CSSOMStringAtom partName)
+            [&](List<CSSOMStringAtom> &translatedPartNames, const CSSOMStringAtom &partName)
           {
             if (checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Element)
             {

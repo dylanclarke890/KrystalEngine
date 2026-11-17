@@ -86,11 +86,11 @@ namespace krys::boo
     }
 
   private:
-    KRYS_NODISCARD dom::ContainerNode *ParentNode(dom::Node &node) noexcept;
+    KRYS_NODISCARD dom::ContainerNode *ParentNode(dom::Node &node) const noexcept;
 
-    KRYS_NODISCARD dom::Node *FirstChild(dom::Node &node) noexcept;
+    KRYS_NODISCARD dom::Node *FirstChild(dom::Node &node) const noexcept;
 
-    KRYS_NODISCARD dom::Node *NextSibling(dom::Node &node) noexcept;
+    KRYS_NODISCARD dom::Node *NextSibling(dom::Node &node) const noexcept;
 
     KRYS_NODISCARD State ComputeState(dom::Node &targetNode) noexcept;
   };

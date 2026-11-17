@@ -40,7 +40,7 @@ namespace krys::boo::dom
       return init;
     }
 
-    KRYS_NODISCARD UIEventInit TrustedInit(DOMStringAtom type) noexcept
+    KRYS_NODISCARD UIEventInit TrustedInit(const DOMStringAtom &type) noexcept
     {
       // https://w3c.github.io/touch-events/#list-of-touchevent-types
       UIEventInit init;
@@ -52,7 +52,7 @@ namespace krys::boo::dom
   }
 
   TouchEvent::TouchEvent(DOMStringAtom type, const TouchEventInit &initializer) noexcept
-      : MouseRelatedEvent(type, ToMouseEventInit(initializer)),
+      : MouseRelatedEvent(krys::move(type), ToMouseEventInit(initializer)),
         _touches(TouchList::Create(initializer.Touches)),
         _targetTouches(TouchList::Create(initializer.TargetTouches)),
         _changedTouches(TouchList::Create(initializer.ChangedTouches))
@@ -60,7 +60,7 @@ namespace krys::boo::dom
   }
 
   TouchEvent::TouchEvent(TouchList *touches, TouchList *targetTouches, TouchList *changedTouches,
-                         DOMStringAtom type, LocalFrameView *view, const DoublePoint &globalLocation,
+                         const DOMStringAtom &type, LocalFrameView *view, const DoublePoint &globalLocation,
                          EnumSet<Modifier> modifiers) noexcept
       : MouseRelatedEvent(type, TrustedInit(type), view, globalLocation, {}, 0, 0, modifiers, Simulated::No),
         _touches(ShareRefPtr(touches)), _targetTouches(ShareRefPtr(targetTouches)),
@@ -75,7 +75,7 @@ namespace krys::boo::dom
                                      DOMStringAtom type, LocalFrameView *view,
                                      const DoublePoint &globalLocation, EnumSet<Modifier> modifiers) noexcept
   {
-    return AdoptRef(
-      *new TouchEvent(touches, targetTouches, changedTouches, type, view, globalLocation, modifiers));
+    return AdoptRef(*new TouchEvent(touches, targetTouches, changedTouches, krys::move(type), view,
+                                    globalLocation, modifiers));
   }
 }

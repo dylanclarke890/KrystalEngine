@@ -432,7 +432,7 @@ namespace krys::boo
     /// @brief The cursor to show, as chosen by the last mouse move or cursor update.
     void SetCurrentMouseCursor(Cursor cursor) noexcept
     {
-      _currentMouseCursor = cursor;
+      _currentMouseCursor = krys::move(cursor);
     }
 
     KRYS_NODISCARD Cursor CurrentMouseCursor() const noexcept
@@ -658,7 +658,7 @@ namespace krys::boo
                                const PlatformMouseEvent &platformMouseEvent) noexcept;
 
     /// @return Whether the event was dispatched without being cancelled.
-    bool DispatchMouseEvent(dom::DOMStringAtom eventType, dom::Node *targetNode, int32 clickCount,
+    bool DispatchMouseEvent(const dom::DOMStringAtom &eventType, dom::Node *targetNode, int32 clickCount,
                             const PlatformMouseEvent &platformMouseEvent,
                             FireMouseOverOut fireMouseOverOut) noexcept;
 
@@ -672,7 +672,8 @@ namespace krys::boo
 
     /// @brief Tells the scrollable areas the mouse moved over, entered or left, which show their overlay
     /// scrollbars: the mouse is in a scroller and in each one around it.
-    void NotifyScrollableAreasOfMouseEvents(dom::DOMStringAtom eventType, dom::Element *lastElementUnderMouse,
+    void NotifyScrollableAreasOfMouseEvents(const dom::DOMStringAtom &eventType,
+                                            dom::Element *lastElementUnderMouse,
                                             dom::Element *elementUnderMouse) noexcept;
 
     void ClearElementUnderMouse() noexcept;

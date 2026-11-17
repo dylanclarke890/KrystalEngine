@@ -510,7 +510,8 @@ namespace krys::boo
       return 0.0;
     };
 
-    auto event = CreateEvent(eventType, scheduledTimelineTime, time(), _owningPseudoElementIdentifier);
+    auto event =
+      CreateEvent(krys::move(eventType), scheduledTimelineTime, time(), _owningPseudoElementIdentifier);
     event->SetTarget(ShareRefPtr<dom::EventTarget>(_owningElement.get()));
     EnqueueAnimationEvent(krys::move(event));
   }

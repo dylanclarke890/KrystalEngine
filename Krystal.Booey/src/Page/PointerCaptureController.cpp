@@ -405,8 +405,9 @@ namespace krys::boo
                                                         bool isPrimary, LocalFrameView *view,
                                                         const DoublePoint &touchDelta) noexcept
   {
-    DispatchEvent(*dom::PointerEvent::Create(type, event, {}, {}, index, isPrimary, view, touchDelta),
-                  target);
+    DispatchEvent(
+      *dom::PointerEvent::Create(krys::move(type), event, {}, {}, index, isPrimary, view, touchDelta),
+      target);
   }
 
   void PointerCaptureController::DispatchEnterOrLeaveEvent(dom::DOMStringAtom type,

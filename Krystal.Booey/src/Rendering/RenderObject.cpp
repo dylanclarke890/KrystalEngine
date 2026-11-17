@@ -1859,13 +1859,13 @@ namespace krys::boo
       return {};
     }
 
-    return ComputeRects(repaintRects, repaintContainer, context).ClippedOverflowRect;
+    return ComputeRects(repaintRects, repaintContainer, krys::move(context)).ClippedOverflowRect;
   }
 
   auto RenderObject::ComputeRects(const RepaintRects &rects, const RenderLayerModelObject *repaintContainer,
                                   VisibleRectContext context) const noexcept -> RepaintRects
   {
-    auto result = ComputeVisibleRectsInContainer(rects, repaintContainer, context);
+    auto result = ComputeVisibleRectsInContainer(rects, repaintContainer, krys::move(context));
     krys_assert(result.has_value());
     return *result;
   }

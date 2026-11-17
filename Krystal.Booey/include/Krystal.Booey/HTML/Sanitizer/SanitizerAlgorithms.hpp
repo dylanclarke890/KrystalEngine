@@ -82,9 +82,10 @@ namespace krys::boo::html
                                                                const SanitizerConfig &configuration) noexcept;
 
     /// @see https://html.spec.whatwg.org/#sanitizer-config-allows-an-attribute
-    KRYS_NODISCARD static bool AllowsAttribute(dom::DOMStringView localName, dom::DOMStringAtom namespaceURI,
+    KRYS_NODISCARD static bool AllowsAttribute(dom::DOMStringView localName,
+                                               const dom::DOMStringAtom &namespaceURI,
                                                dom::DOMStringView value, dom::DOMStringView elementLocalName,
-                                               dom::DOMStringAtom elementNamespace,
+                                               const dom::DOMStringAtom &elementNamespace,
                                                const SanitizerConfig &configuration) noexcept;
 
     /// @see https://html.spec.whatwg.org/#custom-data-attribute
@@ -92,7 +93,8 @@ namespace krys::boo::html
 
     /// @brief Whether @p a sorts before @p b: by namespace (null first), then by name.
     /// @see https://html.spec.whatwg.org/#compare-sanitizer-items
-    KRYS_NODISCARD static bool CompareItems(dom::DOMStringView nameA, dom::DOMStringAtom namespaceA,
-                                            dom::DOMStringView nameB, dom::DOMStringAtom namespaceB) noexcept;
+    KRYS_NODISCARD static bool CompareItems(dom::DOMStringView nameA, const dom::DOMStringAtom &namespaceA,
+                                            dom::DOMStringView nameB,
+                                            const dom::DOMStringAtom &namespaceB) noexcept;
   };
 }

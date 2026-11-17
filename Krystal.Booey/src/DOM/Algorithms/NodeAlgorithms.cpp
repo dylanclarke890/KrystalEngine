@@ -450,7 +450,7 @@ namespace krys::boo::dom
   }
 
   DOMStringAtom NodeAlgorithms::LocateNamespacePrefix(const Element &element,
-                                                      DOMStringAtom namespaceURI) noexcept
+                                                      const DOMStringAtom &namespaceURI) noexcept
   {
     // 1. If element's namespace is namespace and its namespace prefix is non-null, then return its namespace
     //    prefix.
@@ -482,7 +482,7 @@ namespace krys::boo::dom
     return null;
   }
 
-  DOMStringAtom NodeAlgorithms::LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept
+  DOMStringAtom NodeAlgorithms::LocateNamespace(const Node &node, const DOMStringAtom &prefix) noexcept
   {
     switch (node.NodeType())
     {
@@ -587,7 +587,7 @@ namespace krys::boo::dom
   }
 
   Ref<HTMLCollection> NodeAlgorithms::GetElementsByTagName(ContainerNode &root,
-                                                           DOMStringAtom qualifiedName) noexcept
+                                                           const DOMStringAtom &qualifiedName) noexcept
   {
     // 1. If qualifiedName is U+002A (*), then return an HTMLCollection rooted at root, whose filter matches
     // only
@@ -627,7 +627,7 @@ namespace krys::boo::dom
   }
 
   Ref<HTMLCollection> NodeAlgorithms::GetElementsByTagNameNS(ContainerNode &root, DOMStringAtom namespaceUri,
-                                                             DOMStringAtom localName) noexcept
+                                                             const DOMStringAtom &localName) noexcept
   {
     // 1. If namespace is the empty string, then set it to null.
     if (namespaceUri == DOMStringAtom::Empty())
@@ -666,7 +666,7 @@ namespace krys::boo::dom
   }
 
   Ref<HTMLCollection> NodeAlgorithms::GetElementsByClassName(ContainerNode &root,
-                                                             DOMStringAtom classNames) noexcept
+                                                             const DOMStringAtom &classNames) noexcept
   {
     bool isQuirksMode = root.NodeDocument()._quirksMode == QuirksMode::Quirks;
 

@@ -66,7 +66,7 @@ namespace krys::boo::tests
     /// @p underlines, or confirmed, without them.
     struct InputMethodKeyEvent : PlatformKeyboardEvent
     {
-      InputMethodKeyEvent(utf8_string text, Maybe<List<CompositionUnderline>> underlines) noexcept
+      InputMethodKeyEvent(const utf8_string &text, Maybe<List<CompositionUnderline>> underlines) noexcept
           : PlatformKeyboardEvent(Type::KeyDown, text, text, u8"Process", u8"KeyA", u8"U+0041", 0x41, false,
                                   false, false, {}, MonotonicTime::Now())
       {

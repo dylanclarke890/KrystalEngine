@@ -243,7 +243,7 @@ namespace krys::boo
 
       using MarkupAccumulator::Append;
 
-      KRYS_NODISCARD dom::ContainerNode *ParentNode(dom::Node &node) noexcept
+      KRYS_NODISCARD dom::ContainerNode *ParentNode(dom::Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -323,7 +323,7 @@ namespace krys::boo
 
       KRYS_NODISCARD utf8_string TextContentRespectingRange(const dom::Text &text) noexcept;
 
-      KRYS_NODISCARD bool ShouldPreserveMSOListStyleForElement(const dom::Element &element) noexcept;
+      KRYS_NODISCARD bool ShouldPreserveMSOListStyleForElement(const dom::Element &element) const noexcept;
 
       KRYS_NODISCARD SpanReplacementType SpanReplacementForElement(const dom::Element &element) noexcept;
 
@@ -342,7 +342,7 @@ namespace krys::boo
         AppendStartTag(out, element, false, DoesFullySelectNode);
       }
 
-      KRYS_NODISCARD dom::Node *FirstChild(dom::Node &node) noexcept
+      KRYS_NODISCARD dom::Node *FirstChild(dom::Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -351,7 +351,7 @@ namespace krys::boo
         return node.FirstChild();
       }
 
-      KRYS_NODISCARD dom::Node *NextSibling(dom::Node &node) noexcept
+      KRYS_NODISCARD dom::Node *NextSibling(dom::Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -360,7 +360,7 @@ namespace krys::boo
         return node.NextSibling();
       }
 
-      KRYS_NODISCARD dom::Node *NextSkippingChildren(dom::Node &node) noexcept
+      KRYS_NODISCARD dom::Node *NextSkippingChildren(dom::Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -369,7 +369,7 @@ namespace krys::boo
         return TreeQueries::NextSkippingChildren(node);
       }
 
-      KRYS_NODISCARD bool HasChildNodes(dom::Node &node) noexcept
+      KRYS_NODISCARD bool HasChildNodes(dom::Node &node) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -378,7 +378,7 @@ namespace krys::boo
         return node.HasChildNodes();
       }
 
-      KRYS_NODISCARD bool IsDescendantOf(dom::Node &node, dom::Node &possibleAncestor) noexcept
+      KRYS_NODISCARD bool IsDescendantOf(dom::Node &node, dom::Node &possibleAncestor) const noexcept
       {
         if (_useComposedTree) KRYS_UNLIKELY
         {
@@ -607,7 +607,8 @@ namespace krys::boo
     {
     }
 
-    bool StyledMarkupAccumulator::ShouldPreserveMSOListStyleForElement(const dom::Element &element) noexcept
+    bool StyledMarkupAccumulator::ShouldPreserveMSOListStyleForElement(
+      const dom::Element &element) const noexcept
     {
       if (_inMSOList)
       {
@@ -1435,7 +1436,7 @@ namespace krys::boo
     krys_debug_assert(treeType == dom::TreeType::Tree || treeType == dom::TreeType::ComposedTree);
   }
 
-  dom::ContainerNode *UserSelectNoneStateCache::ParentNode(dom::Node &node) noexcept
+  dom::ContainerNode *UserSelectNoneStateCache::ParentNode(dom::Node &node) const noexcept
   {
     if (_useComposedTree)
     {
@@ -1444,7 +1445,7 @@ namespace krys::boo
     return node.ParentOrShadowHostNode();
   }
 
-  dom::Node *UserSelectNoneStateCache::FirstChild(dom::Node &node) noexcept
+  dom::Node *UserSelectNoneStateCache::FirstChild(dom::Node &node) const noexcept
   {
     if (_useComposedTree)
     {
@@ -1453,7 +1454,7 @@ namespace krys::boo
     return node.FirstChild();
   }
 
-  dom::Node *UserSelectNoneStateCache::NextSibling(dom::Node &node) noexcept
+  dom::Node *UserSelectNoneStateCache::NextSibling(dom::Node &node) const noexcept
   {
     if (_useComposedTree)
     {

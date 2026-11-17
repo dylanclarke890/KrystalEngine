@@ -208,7 +208,7 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<Font> GetFont(const FontDescription &fontDescription, bool syntheticBold,
                                         bool syntheticItalic, ExternalResourceDownloadPolicy policy,
                                         const FontPaletteValues &fontPaletteValues,
-                                        RefPtr<FontFeatureValues> fontFeatureValues) noexcept;
+                                        const RefPtr<FontFeatureValues> &fontFeatureValues) noexcept;
 
     static void AppendSources(CSSFontFace &fontFace, ValueList &srcList, dom::Document *context,
                               bool isInitiatingElementInUserAgentShadowTree) noexcept;

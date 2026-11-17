@@ -116,21 +116,21 @@ namespace krys::boo::css
     // to `b`.
 
     template <typename Container, typename T>
-    KRYS_NODISCARD Container CompleteQuad(T a) noexcept
+    KRYS_NODISCARD Container CompleteQuad(const T &a) noexcept
     {
       return Container {a, a, a, a};
     }
 
     template <typename Container, typename T>
-    KRYS_NODISCARD Container CompleteQuad(T a, T b) noexcept
+    KRYS_NODISCARD Container CompleteQuad(const T &a, const T &b) noexcept
     {
       return Container {a, b, a, b};
     }
 
     template <typename Container, typename T>
-    KRYS_NODISCARD Container CompleteQuad(T a, T b, T c) noexcept
+    KRYS_NODISCARD Container CompleteQuad(T a, const T &b, T c) noexcept
     {
-      return Container {a, b, c, b};
+      return Container {krys::move(a), b, krys::move(c), b};
     }
 
     template <typename Container, typename T>

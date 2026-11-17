@@ -37,7 +37,7 @@ namespace krys::boo::layout::tests
         MouseEvent(PlatformEvent::Type::MouseReleased, position, modifiers));
     }
 
-    bool PressKey(EditorFixture &fixture, utf8_string key, utf8_string identifier, int32 keyCode,
+    bool PressKey(EditorFixture &fixture, const utf8_string &key, utf8_string identifier, int32 keyCode,
                   EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
       return fixture.Frame->GetEventHandler().KeyEvent(

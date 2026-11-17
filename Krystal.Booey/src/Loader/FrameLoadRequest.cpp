@@ -58,7 +58,7 @@ namespace krys::boo
       : _requester(krys::move(requester)), _resourceRequest(krys::move(resourceRequest)),
         _frameName(krys::move(frameName))
   {
-    SetDownloadAttribute(downloadAttribute);
+    SetDownloadAttribute(krys::move(downloadAttribute));
   }
 
   FrameLoadRequest::~FrameLoadRequest() noexcept = default;

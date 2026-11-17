@@ -85,13 +85,13 @@ namespace krys::boo::style
       {
         return b.SwitchOn([&](const LengthPercentage<css::NonNegativeUnzoomed> &bValue) -> ItemTolerance
                           { return krys::boo::style::Blend(aValue, bValue, context); },
-                          [&](auto) -> ItemTolerance
+                          [&](const auto &) -> ItemTolerance
                           {
                             krys_debug_assert_msg(false, "Unreachable");
                             return a;
                           });
       },
-      [&](auto) -> ItemTolerance
+      [&](const auto &) -> ItemTolerance
       {
         krys_debug_assert_msg(false, "Unreachable");
         return a;

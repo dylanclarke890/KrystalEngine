@@ -794,7 +794,7 @@ namespace krys::boo
                                      FontSmoothingMode) noexcept;
 
     KRYS_NODISCARD FloatRect ComputeLineBoundsAndAntialiasingModeForText(const FloatRect &, bool printing,
-                                                                         Color &) noexcept;
+                                                                         Color &) const noexcept;
 
     KRYS_NODISCARD float DashedLineCornerWidthForStrokeWidth(float) const noexcept;
 

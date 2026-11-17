@@ -35,7 +35,7 @@ namespace krys::boo::html
 
   CustomStateSet::~CustomStateSet() noexcept = default;
 
-  bool CustomStateSet::Add(dom::DOMStringAtom state) noexcept
+  bool CustomStateSet::Add(const dom::DOMStringAtom &state) noexcept
   {
     Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
     if (auto *element = _element.get())
@@ -47,7 +47,7 @@ namespace krys::boo::html
     return _states.add(state).second;
   }
 
-  bool CustomStateSet::Delete(dom::DOMStringAtom state) noexcept
+  bool CustomStateSet::Delete(const dom::DOMStringAtom &state) noexcept
   {
     Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
     if (auto *element = _element.get())
@@ -71,7 +71,7 @@ namespace krys::boo::html
     _states.clear();
   }
 
-  bool CustomStateSet::Has(dom::DOMStringAtom state) const noexcept
+  bool CustomStateSet::Has(const dom::DOMStringAtom &state) const noexcept
   {
     return _states.contains(state);
   }

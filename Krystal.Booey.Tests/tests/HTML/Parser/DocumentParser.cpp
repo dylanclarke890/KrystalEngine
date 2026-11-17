@@ -200,7 +200,7 @@ namespace krys::boo::html::tests
       List<HTMLTreeBuilderTest> tests;
       HTMLTreeBuilderTest currentTest;
 
-      auto parse = [&](utf8_string sectionName, utf8_string data)
+      auto parse = [&](const utf8_string &sectionName, const utf8_string &data)
       {
         if (sectionName == u8"data")
         {
@@ -325,7 +325,7 @@ namespace krys::boo::html::tests
       CHECK(equal);
     }
 
-    static void RunTest(string filename) noexcept
+    static void RunTest(const string &filename) noexcept
     {
       static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/html-tree-builder/";
 
@@ -348,14 +348,14 @@ namespace krys::boo::html::tests
   {
     Ref<dom::Element> CreateElement(dom::Document &document, dom::DOMStringAtom tagName)
     {
-      auto element = document.CreateElement(tagName);
+      auto element = document.CreateElement(krys::move(tagName));
       REQUIRE(element.HasValue());
       return *element;
     }
 
     Ref<svg::SVGElement> CreateSVGElement(dom::Document &document, dom::DOMStringAtom tagName) noexcept
     {
-      auto element = document.CreateElementNS(infra::Namespaces::SVG, tagName);
+      auto element = document.CreateElementNS(infra::Namespaces::SVG, krys::move(tagName));
       REQUIRE(element.HasValue());
       return Downcast<svg::SVGElement>(*element);
     }

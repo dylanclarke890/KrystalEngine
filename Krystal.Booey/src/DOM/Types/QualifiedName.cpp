@@ -44,14 +44,15 @@ namespace krys::boo::dom
 
   QualifiedName::QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix,
                                DOMStringAtom localName) noexcept
-      : _storage(QualifiedNameCache::ThreadLocalCache().GetOrAdd(namespaceURI, prefix, localName))
+      : _storage(QualifiedNameCache::ThreadLocalCache().GetOrAdd(krys::move(namespaceURI), krys::move(prefix),
+                                                                 krys::move(localName)))
   {
   }
 
   QualifiedName::QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName,
                                html::TagName tagName, html::Namespace tagNamespace) noexcept
-      : _storage(QualifiedNameCache::ThreadLocalCache().GetOrAdd(namespaceURI, prefix, localName, tagName,
-                                                                 tagNamespace))
+      : _storage(QualifiedNameCache::ThreadLocalCache().GetOrAdd(
+          krys::move(namespaceURI), krys::move(prefix), krys::move(localName), tagName, tagNamespace))
   {
   }
 

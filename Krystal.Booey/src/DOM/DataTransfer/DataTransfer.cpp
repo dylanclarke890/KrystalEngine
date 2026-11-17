@@ -605,7 +605,7 @@ namespace krys::boo::dom
     return reader.Types.contains(text::ToASCIILower(type));
   }
 
-  bool DataTransfer::HasStringOfType(Document &document, DOMStringView type) noexcept
+  bool DataTransfer::HasStringOfType(Document &document, DOMStringView type) const noexcept
   {
     krys_debug_assert(CanReadTypes());
 

@@ -41,7 +41,7 @@ namespace krys::boo::tests
         Document->StyleScope().FlushPendingUpdate();
       }
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         krys_assert(element);
@@ -64,7 +64,7 @@ namespace krys::boo::tests
       }
 
       /// @brief Whether the view, scrolled, paints something filled with @p colour.
-      KRYS_NODISCARD bool Paints(utf8_stringview colour) noexcept
+      KRYS_NODISCARD bool Paints(utf8_stringview colour) const noexcept
       {
         (void)Document->UpdateLayout();
         display_list::RecorderImpl recorder(

@@ -1504,7 +1504,7 @@ namespace krys::ui::tests
     SECTION("a click on its button asks the handler, which answers later")
     {
       RefPtr<boo::FileChooser> chooser;
-      view.SetFileChooserHandler([&](Ref<boo::FileChooser> request) { chooser = request; });
+      view.SetFileChooserHandler([&](Ref<boo::FileChooser> request) { chooser = krys::move(request); });
       click();
       REQUIRE(chooser);
       CHECK(chooser->Settings().AcceptMIMETypes == List<utf8_string> {u8"image/*"});

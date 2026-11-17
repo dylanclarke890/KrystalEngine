@@ -418,7 +418,7 @@ namespace krys::ui
     /// elements of that name are upgraded).
     /// @return An error if @p name isn't a valid custom element name or the view already defines it.
     KRYS_NODISCARD Expected<void>
-      DefineCustomElement(boo::dom::DOMStringAtom name, boo::html::CustomElementFactory &&factory,
+      DefineCustomElement(const boo::dom::DOMStringAtom &name, boo::html::CustomElementFactory &&factory,
                           boo::html::CustomElementOptions &&options = {}) noexcept;
 
     /// @brief Registers the font files (`.ttf`, `.otf`, `.ttc`, `.otc`) in @p directory for every page, so
@@ -826,7 +826,7 @@ namespace krys::ui
     }
 
     /// @brief The topmost element at @p point, in the viewport's CSS pixels.
-    KRYS_NODISCARD boo::dom::Element *HitTestInPage(const boo::IntPoint &point) noexcept;
+    KRYS_NODISCARD boo::dom::Element *HitTestInPage(const boo::IntPoint &point) const noexcept;
 
     /// @brief `MouseWheel` at @p point, in the viewport's CSS pixels.
     bool MouseWheelInPage(const boo::IntPoint &point, float notchesX, float notchesY,

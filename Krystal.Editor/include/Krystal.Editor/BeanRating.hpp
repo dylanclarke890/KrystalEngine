@@ -117,7 +117,7 @@ namespace krys
       .bean.filled { background-color: #6f4326; }
     )";
 
-    KRYS_NODISCARD static int32 Parse(boo::dom::DOMStringAtom value) noexcept
+    KRYS_NODISCARD static int32 Parse(const boo::dom::DOMStringAtom &value) noexcept
     {
       auto text = value.View();
       int32 rating = 0;

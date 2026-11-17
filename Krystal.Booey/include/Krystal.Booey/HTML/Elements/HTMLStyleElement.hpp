@@ -56,7 +56,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool Disabled() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-disabled
-    void Disabled(bool value) noexcept;
+    void Disabled(bool value) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-media
     KRYS_NODISCARD dom::DOMString Media() const noexcept;

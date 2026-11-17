@@ -112,7 +112,7 @@ namespace krys::boo::dom
 
   public:
     /// @see https://w3c.github.io/pointerevents/#dom-pointerevent-constructor
-    PointerEvent(DOMStringAtom type, const PointerEventInit &initializer = {}) noexcept;
+    PointerEvent(const DOMStringAtom &type, const PointerEventInit &initializer = {}) noexcept;
 
     ~PointerEvent() noexcept override;
 
@@ -123,7 +123,7 @@ namespace krys::boo::dom
 
     /// @brief The pointer event type a mouse event type maps to, or null if none: `pointerdown` for
     /// `mousedown`, say, and `click` for `click`.
-    KRYS_NODISCARD static DOMStringAtom TypeFromMouseEventType(DOMStringAtom mouseEventType) noexcept;
+    KRYS_NODISCARD static DOMStringAtom TypeFromMouseEventType(const DOMStringAtom &mouseEventType) noexcept;
 
     /// @brief The pointer event @p mouseEvent maps to, or null if it maps to none.
     /// @param button The button that changed, or `PointerHasNotChanged`.
@@ -131,11 +131,11 @@ namespace krys::boo::dom
                                                       PointerID pointerId,
                                                       const DOMString &pointerType) noexcept;
 
-    KRYS_NODISCARD static Ref<PointerEvent> Create(DOMStringAtom type, MouseButton button,
+    KRYS_NODISCARD static Ref<PointerEvent> Create(const DOMStringAtom &type, MouseButton button,
                                                    const MouseEvent &mouseEvent, PointerID pointerId,
                                                    const DOMString &pointerType) noexcept;
 
-    KRYS_NODISCARD static Ref<PointerEvent> Create(DOMStringAtom type, MouseButton button,
+    KRYS_NODISCARD static Ref<PointerEvent> Create(const DOMStringAtom &type, MouseButton button,
                                                    const MouseEvent &mouseEvent, PointerID pointerId,
                                                    const DOMString &pointerType, bool canBubble,
                                                    bool isCancelable) noexcept;
@@ -170,7 +170,7 @@ namespace krys::boo::dom
                                                    bool isPrimary, LocalFrameView *view,
                                                    const DoublePoint &touchDelta = {}) noexcept;
 
-    KRYS_NODISCARD static Ref<PointerEvent> Create(DOMStringAtom type, const PlatformTouchEvent &event,
+    KRYS_NODISCARD static Ref<PointerEvent> Create(const DOMStringAtom &type, const PlatformTouchEvent &event,
                                                    const List<Ref<PointerEvent>> &coalescedEvents,
                                                    const List<Ref<PointerEvent>> &predictedEvents,
                                                    uint32 touchIndex, bool isPrimary, LocalFrameView *view,
@@ -321,41 +321,43 @@ namespace krys::boo::dom
 
     /// @brief Whether a pointer event of @p type always says which button changed: `pointerdown`,
     /// `pointerup`, `click`, `auxclick` and `contextmenu`.
-    KRYS_NODISCARD static bool TypeRequiresResolvedButton(DOMStringAtom type) noexcept;
+    KRYS_NODISCARD static bool TypeRequiresResolvedButton(const DOMStringAtom &type) noexcept;
 
     KRYS_NODISCARD static MouseButton ButtonForType(DOMStringAtom type) noexcept
     {
-      return !TypeRequiresResolvedButton(type) ? MouseButton::PointerHasNotChanged : MouseButton::Left;
+      return !TypeRequiresResolvedButton(krys::move(type)) ? MouseButton::PointerHasNotChanged
+                                                           : MouseButton::Left;
     }
 
   protected:
     KRYS_NODISCARD static bool TypeCanBubble(DOMStringAtom type) noexcept
     {
-      return !TypeIsEnterOrLeave(type);
+      return !TypeIsEnterOrLeave(krys::move(type));
     }
 
-    KRYS_NODISCARD static bool TypeIsCancelable(DOMStringAtom type) noexcept
+    KRYS_NODISCARD static bool TypeIsCancelable(const DOMStringAtom &type) noexcept
     {
       return !TypeIsEnterOrLeave(type) && type != event_names::PointerRawUpdate;
     }
 
     KRYS_NODISCARD static bool TypeIsComposed(DOMStringAtom type) noexcept
     {
-      return !TypeIsEnterOrLeave(type);
+      return !TypeIsEnterOrLeave(krys::move(type));
     }
 
-    PointerEvent(DOMStringAtom type, MouseButton button, const MouseEvent &mouseEvent, PointerID pointerId,
-                 const DOMString &pointerType, bool canBubble, bool isCancelable, bool isComposed) noexcept;
+    PointerEvent(const DOMStringAtom &type, MouseButton button, const MouseEvent &mouseEvent,
+                 PointerID pointerId, const DOMString &pointerType, bool canBubble, bool isCancelable,
+                 bool isComposed) noexcept;
 
     void ReceivedTarget() noexcept override;
 
   private:
-    KRYS_NODISCARD static bool TypeIsEnterOrLeave(DOMStringAtom type) noexcept
+    KRYS_NODISCARD static bool TypeIsEnterOrLeave(const DOMStringAtom &type) noexcept
     {
       return type == event_names::PointerEnter || type == event_names::PointerLeave;
     }
 
-    KRYS_NODISCARD static uint16 ButtonsForType(DOMStringAtom type) noexcept
+    KRYS_NODISCARD static uint16 ButtonsForType(const DOMStringAtom &type) noexcept
     {
       // We have contact with the touch surface for most events except when we've released the touch or
       // canceled it.
@@ -377,14 +379,14 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD static PointerEventTilt TiltFromAngle(double altitudeAngle, double azimuthAngle) noexcept;
 
-    KRYS_NODISCARD static bool FractionalCoordinatesAllowedForType(DOMStringAtom type) noexcept;
+    KRYS_NODISCARD static bool FractionalCoordinatesAllowedForType(const DOMStringAtom &type) noexcept;
 
     KRYS_NODISCARD double AdjustedCoordinateForType(double coordinate) const noexcept;
 
-    PointerEvent(DOMStringAtom type, PointerID pointerId, DOMString pointerType,
+    PointerEvent(const DOMStringAtom &type, PointerID pointerId, DOMString pointerType,
                  IsPrimary isPrimary) noexcept;
 
-    PointerEvent(DOMStringAtom type, const PlatformTouchEvent &event,
+    PointerEvent(const DOMStringAtom &type, const PlatformTouchEvent &event,
                  const List<Ref<PointerEvent>> &coalescedEvents,
                  const List<Ref<PointerEvent>> &predictedEvents, bool canBubble, bool isCancelable,
                  uint32 touchIndex, bool isPrimary, LocalFrameView *view,

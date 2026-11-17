@@ -149,7 +149,8 @@ namespace krys::boo::tests
     /// @brief A press of the key named @p key (with the legacy identifier @p keyIdentifier) that types @p
     /// text.
     KRYS_NODISCARD bool Key(EventHandler &handler, utf8_string key, utf8_string keyIdentifier, int32 keyCode,
-                            utf8_string text = {}, EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
+                            const utf8_string &text = {},
+                            EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
       return handler.KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, text, text, krys::move(key),
                                                     u8"", krys::move(keyIdentifier), keyCode, false, false,

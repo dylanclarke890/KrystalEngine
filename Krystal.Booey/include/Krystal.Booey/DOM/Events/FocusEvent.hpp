@@ -25,7 +25,7 @@ namespace krys::boo::dom
     using dictionary_type = FocusEventInit;
 
     FocusEvent(DOMStringAtom type, const FocusEventInit &eventInitDict = {}) noexcept
-        : UIEvent(type, eventInitDict), _relatedTarget(eventInitDict.RelatedTarget)
+        : UIEvent(krys::move(type), eventInitDict), _relatedTarget(eventInitDict.RelatedTarget)
     {
     }
 

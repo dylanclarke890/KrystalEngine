@@ -536,7 +536,7 @@ namespace krys::boo
   }
 
   FloatRect GraphicsContext::ComputeLineBoundsAndAntialiasingModeForText(const FloatRect &rect, bool printing,
-                                                                         Color &color) noexcept
+                                                                         Color &color) const noexcept
   {
     FloatPoint origin = rect.Location();
     float thickness = std::max(rect.Height(), 0.5f);

@@ -76,7 +76,7 @@ namespace krys::boo
   KRYS_NODISCARD dom::Element *DeprecatedEnclosingBlockFlowElement(dom::Node *node) noexcept;
 
   KRYS_NODISCARD RefPtr<dom::Element> EnclosingBlock(
-    RefPtr<dom::Node> node,
+    const RefPtr<dom::Node> &node,
     EditingBoundaryCrossingRule rule = EditingBoundaryCrossingRule::CannotCrossEditingBoundary) noexcept;
 
   KRYS_NODISCARD RefPtr<dom::Element> EnclosingTableCell(const dom::Position &position) noexcept;

@@ -100,7 +100,7 @@ namespace krys::boo::html
     KRYS_NODISCARD static Ref<DateTimeEditElement>
       Create(dom::Document &document, DateTimeEditElementEditControlOwner &editControlOwner) noexcept;
 
-    void AddField(Ref<DateTimeFieldElement> field) noexcept;
+    void AddField(const Ref<DateTimeFieldElement> &field) noexcept;
 
     KRYS_NODISCARD dom::Element &FieldsWrapperElement() const noexcept;
 

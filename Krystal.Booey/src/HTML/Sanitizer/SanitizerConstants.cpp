@@ -271,7 +271,7 @@ namespace krys::boo::html
                                         const SanitizerAttributeNamespace &attribute,
                                         utf8_stringview elementName, utf8_stringview elementNamespace,
                                         utf8_stringview attributeName,
-                                        dom::DOMStringAtom attributeNamespace) noexcept
+                                        const dom::DOMStringAtom &attributeNamespace) noexcept
     {
       return element.Name == elementName && element.Namespace == dom::DOMStringAtom(elementNamespace)
              && attribute.Name == attributeName && attribute.Namespace == attributeNamespace;

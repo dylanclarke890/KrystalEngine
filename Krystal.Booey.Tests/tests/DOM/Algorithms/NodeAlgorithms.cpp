@@ -28,13 +28,13 @@ namespace krys::boo::dom::tests
   {
     KRYS_NODISCARD Ref<Element> CreateElement(Document &document, DOMStringAtom name) noexcept
     {
-      return document.CreateElement(name).ReleaseValue();
+      return document.CreateElement(krys::move(name)).ReleaseValue();
     }
 
     KRYS_NODISCARD Ref<Element> CreateElementNS(Document &document, DOMStringAtom namespaceURI,
                                                 DOMStringAtom qualifiedName) noexcept
     {
-      return document.CreateElementNS(namespaceURI, qualifiedName).ReleaseValue();
+      return document.CreateElementNS(krys::move(namespaceURI), krys::move(qualifiedName)).ReleaseValue();
     }
 
     void Append(Node &parent, Node &child) noexcept
@@ -42,13 +42,13 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(parent.AppendChild(child).HasException());
     }
 
-    void SetAttribute(Element &element, DOMStringAtom name, DOMString &&value) noexcept
+    void SetAttribute(Element &element, const DOMStringAtom &name, DOMString &&value) noexcept
     {
       REQUIRE_FALSE(element.SetAttribute(name, krys::move(value)).HasException());
     }
 
-    void SetAttributeNS(Element &element, DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
-                        DOMString &&value) noexcept
+    void SetAttributeNS(Element &element, const DOMStringAtom &namespaceURI,
+                        const DOMStringAtom &qualifiedName, DOMString &&value) noexcept
     {
       REQUIRE_FALSE(element.SetAttributeNS(namespaceURI, qualifiedName, krys::move(value)).HasException());
     }

@@ -139,9 +139,9 @@ namespace krys::boo::css
                                     CSSOMStringAtom &namespacePrefix) noexcept;
 
     // These will return nullptr when the selector is invalid.
-    KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeId(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeId(TokenRange &tokens) const noexcept;
 
-    KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeClass(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeClass(TokenRange &tokens) const noexcept;
 
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumePseudo(TokenRange &tokens) noexcept;
 

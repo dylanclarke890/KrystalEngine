@@ -151,6 +151,8 @@ namespace krys::boo
       dom::ScopedEventQueue::DispatchOrQueue(krys::move(event), ShareRef(element));
     }
 
+    // By value: they keep the roots alive while script runs.
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
     bool DispatchBeforeInputEvents(RefPtr<dom::Element> startRoot, RefPtr<dom::Element> endRoot,
                                    utf8_stringview inputTypeName,
                                    dom::IsInputMethodComposing isInputMethodComposing,
@@ -175,6 +177,8 @@ namespace krys::boo
       return continueWithDefaultBehavior;
     }
 
+    // By value: they keep the roots alive while script runs.
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
     void DispatchInputEvents(RefPtr<dom::Element> startRoot, RefPtr<dom::Element> endRoot,
                              utf8_stringview inputTypeName,
                              dom::IsInputMethodComposing isInputMethodComposing,
@@ -1253,7 +1257,7 @@ namespace krys::boo
     return _document.Selection().Granularity() == TextGranularity::WordGranularity;
   }
 
-  bool Editor::SmartInsertDeleteEnabled() noexcept
+  bool Editor::SmartInsertDeleteEnabled() const noexcept
   {
     auto *client = Client();
     return client && client->SmartInsertDeleteEnabled();

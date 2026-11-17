@@ -22,21 +22,21 @@ namespace krys::boo::dom::tests
       {
       }
 
-      NamedNodeMap &Attributes() noexcept
+      NamedNodeMap &Attributes() const noexcept
       {
         return Node->Attributes();
       }
 
       Ref<Attr> NewAttribute(DOMStringAtom name, DOMString &&value) noexcept
       {
-        auto attr = Document->CreateAttribute(name).ReleaseValue();
+        auto attr = Document->CreateAttribute(krys::move(name)).ReleaseValue();
         attr->Value(krys::move(value));
         return attr;
       }
 
       Ref<Attr> NewAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom name, DOMString &&value) noexcept
       {
-        auto attr = Document->CreateAttributeNS(namespaceURI, name).ReleaseValue();
+        auto attr = Document->CreateAttributeNS(krys::move(namespaceURI), krys::move(name)).ReleaseValue();
         attr->Value(krys::move(value));
         return attr;
       }

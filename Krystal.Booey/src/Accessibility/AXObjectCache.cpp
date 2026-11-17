@@ -1132,7 +1132,7 @@ namespace krys::boo
     RecomputeIsIgnored(*element->Renderer());
   }
 
-  void AXObjectCache::DeferAttributeChangeIfNeeded(dom::Element &element, dom::DOMStringAtom name,
+  void AXObjectCache::DeferAttributeChangeIfNeeded(dom::Element &element, const dom::DOMStringAtom &name,
                                                    Maybe<dom::DOMStringView> oldValue,
                                                    Maybe<dom::DOMStringView> newValue) noexcept
   {

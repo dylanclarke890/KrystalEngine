@@ -44,8 +44,8 @@ namespace krys::boo::html::tests
                                dom::DOMStringAtom elementNamespace = infra::Namespaces::HTML,
                                dom::DOMStringAtom attributeNamespace = null) noexcept
     {
-      return SanitizerAlgorithms::AllowsAttribute(attribute, attributeNamespace, value, element,
-                                                  elementNamespace, config);
+      return SanitizerAlgorithms::AllowsAttribute(attribute, krys::move(attributeNamespace), value, element,
+                                                  krys::move(elementNamespace), config);
     }
   }
 
@@ -162,7 +162,8 @@ namespace krys::boo::html::tests
     REQUIRE(config.Elements);
     auto has = [&](dom::DOMStringView name, dom::DOMStringAtom namespaceURI)
     {
-      return SanitizerAlgorithms::ActionForElementName(name, namespaceURI, config) == SanitizerAction::Keep;
+      return SanitizerAlgorithms::ActionForElementName(name, krys::move(namespaceURI), config)
+             == SanitizerAction::Keep;
     };
     CHECK(has(u8"p", infra::Namespaces::HTML));
     CHECK(has(u8"h6", infra::Namespaces::HTML));

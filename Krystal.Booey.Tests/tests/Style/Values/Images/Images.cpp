@@ -38,7 +38,7 @@ namespace krys::boo::style::tests
     KRYS_NODISCARD GradientLinearColorStop Stop(boo::Color color,
                                                 Maybe<float> percentage = std::nullopt) noexcept
     {
-      GradientLinearColorStop stop {Markable<style::Color> {style::Color {color}}, std::nullopt};
+      GradientLinearColorStop stop {Markable<style::Color> {style::Color {krys::move(color)}}, std::nullopt};
       if (percentage)
       {
         stop.Position = LengthPercentage<> {LengthPercentage<>::Percentage {*percentage}};

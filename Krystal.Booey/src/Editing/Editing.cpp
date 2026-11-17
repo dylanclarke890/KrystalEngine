@@ -423,7 +423,8 @@ namespace krys::boo
   // FIXME: Pass a position to this function. The enclosing block of [table, x] for example, should be the
   // block that contains the table and not the table, and this function should be the only one responsible for
   // knowing about these kinds of special cases.
-  RefPtr<dom::Element> EnclosingBlock(RefPtr<dom::Node> node, EditingBoundaryCrossingRule rule) noexcept
+  RefPtr<dom::Element> EnclosingBlock(const RefPtr<dom::Node> &node,
+                                      EditingBoundaryCrossingRule rule) noexcept
   {
     auto block = EnclosingNodeOfType(FirstPositionInOrBeforeNode(node.get()), IsBlock, rule);
     return DynamicDowncast<dom::Element>(krys::move(block));

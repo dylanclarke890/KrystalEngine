@@ -33,7 +33,7 @@ namespace krys::boo::dom
 
     /// @brief A trusted composition event with @p data, which bubbles, can be cancelled and crosses shadow
     /// boundaries.
-    KRYS_NODISCARD static Ref<CompositionEvent> Create(DOMStringAtom type, LocalDOMWindow *view,
+    KRYS_NODISCARD static Ref<CompositionEvent> Create(const DOMStringAtom &type, LocalDOMWindow *view,
                                                        DOMStringView data) noexcept;
 
     /// @note Legacy.

@@ -37,7 +37,7 @@ namespace krys::boo
 {
   namespace
   {
-    void SetOrRemoveAttribute(dom::Element &element, dom::DOMStringAtom attribute,
+    void SetOrRemoveAttribute(dom::Element &element, const dom::DOMStringAtom &attribute,
                               const Maybe<dom::DOMString> &value) noexcept
     {
       if (value)
@@ -52,7 +52,7 @@ namespace krys::boo
   }
 
   Ref<SetNodeAttributeCommand> SetNodeAttributeCommand::Create(dom::Element &element,
-                                                               dom::DOMStringAtom attribute,
+                                                               const dom::DOMStringAtom &attribute,
                                                                Maybe<dom::DOMString> value) noexcept
   {
     return CreateRef<SetNodeAttributeCommand>(element, attribute, krys::move(value));

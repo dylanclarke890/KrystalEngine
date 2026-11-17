@@ -49,7 +49,7 @@ namespace krys::boo::dom::tests
 
     public:
       NamespaceTestElement(Document &document, dom::DOMStringAtom namespacePrefix) noexcept
-          : Element(document, {u8"http://a", namespacePrefix, u8"test-element"}, NodeFlags::None)
+          : Element(document, {u8"http://a", krys::move(namespacePrefix), u8"test-element"}, NodeFlags::None)
       {
       }
     };

@@ -170,8 +170,8 @@ namespace krys::boo::svg
 
   namespace
   {
-    KRYS_NODISCARD bool IsXMLSpaceAttribute(dom::DOMStringAtom localName,
-                                            dom::DOMStringAtom namespaceURI) noexcept
+    KRYS_NODISCARD bool IsXMLSpaceAttribute(const dom::DOMStringAtom &localName,
+                                            const dom::DOMStringAtom &namespaceURI) noexcept
     {
       return localName == u8"space" && namespaceURI == infra::Namespaces::XML;
     }

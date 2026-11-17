@@ -1423,7 +1423,7 @@ namespace krys::boo
   }
 
   void RenderTableSection::SetCachedCollapsedBorder(const RenderTableCell &cell, CollapsedBorderSide side,
-                                                    CollapsedBorderValue border) noexcept
+                                                    const CollapsedBorderValue &border) noexcept
   {
     krys_debug_assert(Table()->CollapseBorders());
     krys_debug_assert(border.Width());

@@ -23,14 +23,14 @@ namespace krys::boo::dom::mixins
   template <typename TTarget>
   Maybe<dom::DOMString> ARIAMixin<TTarget>::ReflectedString(dom::DOMStringAtom name) const noexcept
   {
-    return html::Reflect<Maybe<dom::DOMString>>(ReflectedTarget(), name);
+    return html::Reflect<Maybe<dom::DOMString>>(ReflectedTarget(), krys::move(name));
   }
 
   template <typename TTarget>
   void ARIAMixin<TTarget>::SetReflectedString(dom::DOMStringAtom name, Maybe<dom::DOMString> value) noexcept
   {
     html::CEReactionsScope ceReactions;
-    html::Reflect<Maybe<dom::DOMString>>(ReflectedTarget(), name, krys::move(value));
+    html::Reflect<Maybe<dom::DOMString>>(ReflectedTarget(), krys::move(name), krys::move(value));
   }
 
   template <typename TTarget>
@@ -45,7 +45,7 @@ namespace krys::boo::dom::mixins
     // 5. Set this's cached attr-associated elements object to elementsAsFrozenArray.
     // 6. Return elementsAsFrozenArray.
     // (Steps 2 to 5 keep the array object script sees the same; without script, the list is returned.)
-    return ReflectedTarget().ElementsForAttributeInternal(name);
+    return ReflectedTarget().ElementsForAttributeInternal(krys::move(name));
   }
 
   template <typename TTarget>
@@ -53,7 +53,7 @@ namespace krys::boo::dom::mixins
                                                      const Maybe<List<Ref<dom::Element>>> &elements) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ReflectedTarget().SetElementsArrayAttribute(name, elements);
+    ReflectedTarget().SetElementsArrayAttribute(krys::move(name), elements);
   }
 
   template class ARIAMixin<dom::Element>;

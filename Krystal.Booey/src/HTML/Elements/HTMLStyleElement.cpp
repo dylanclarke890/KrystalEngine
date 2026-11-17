@@ -71,7 +71,7 @@ namespace krys::boo::html
     return sheet && sheet->Disabled();
   }
 
-  void HTMLStyleElement::Disabled(bool value) noexcept
+  void HTMLStyleElement::Disabled(bool value) const noexcept
   {
     // 1. If this does not have an associated CSS style sheet, return.
     // 2. If the given value is true, set this's associated CSS style sheet's disabled flag. Otherwise, unset

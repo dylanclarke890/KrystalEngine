@@ -145,7 +145,7 @@ namespace krys::boo
 
     void SetPseudoElementIdentifier(Maybe<style::PseudoElementIdentifier> pseudoElementIdentifier) noexcept
     {
-      _pseudoElementIdentifier = pseudoElementIdentifier;
+      _pseudoElementIdentifier = krys::move(pseudoElementIdentifier);
     }
 
     // Forwarded from HitTestLocation

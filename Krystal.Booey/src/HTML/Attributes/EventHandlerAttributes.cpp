@@ -18,7 +18,7 @@ namespace krys::boo::html
     constexpr std::array WindowEventHandlerNames {KRYS_WINDOW_EVENT_HANDLERS(KRYS_EVENT_HANDLER_NAME)};
 #undef KRYS_EVENT_HANDLER_NAME
 
-    KRYS_NODISCARD bool IsReflectedOnWindow(dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD bool IsReflectedOnWindow(const dom::DOMStringAtom &name) noexcept
     {
       auto view = name.View();
       return std::ranges::find(WindowReflectingBodyElementEventHandlers, view)
@@ -36,7 +36,7 @@ namespace krys::boo::html
     auto *node = DynamicDowncast<dom::Node>(eventTarget);
     auto *element = node ? DynamicDowncast<HTMLElement>(*node) : nullptr;
     if (!element || !(Is<HTMLBodyElement>(*element) || Is<HTMLFrameSetElement>(*element))
-        || !IsReflectedOnWindow(name))
+        || !IsReflectedOnWindow(krys::move(name)))
     {
       return &eventTarget;
     }

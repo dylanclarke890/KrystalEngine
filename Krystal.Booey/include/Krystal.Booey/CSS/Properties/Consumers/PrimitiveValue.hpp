@@ -29,7 +29,8 @@ namespace krys::boo::css
       return PrimitiveValue::CreateInteger(value.Value);
     }
 
-    KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(Calc auto value, PropertyParserOptions = {}) noexcept
+    KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(const Calc auto &value,
+                                                         PropertyParserOptions = {}) noexcept
     {
       return PrimitiveValue::Create(value.ProtectedCalc());
     }

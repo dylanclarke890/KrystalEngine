@@ -37,7 +37,7 @@ namespace krys::boo::html::tests
       (void)html->AppendChild(*Body);
     }
 
-    HTMLTableElement &Table(dom::DOMStringView markup) noexcept
+    HTMLTableElement &Table(dom::DOMStringView markup) const noexcept
     {
       dom::DOMString tableMarkup(u8"<table id=t>");
       tableMarkup += markup;

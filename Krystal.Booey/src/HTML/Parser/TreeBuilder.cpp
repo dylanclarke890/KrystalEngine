@@ -4288,9 +4288,9 @@ namespace krys::boo::html
   SanitizerAction TreeBuilder::SanitizerActionFor(dom::DOMStringView localName,
                                                   dom::DOMStringAtom namespaceURI) const noexcept
   {
-    return _sanitizerConfig
-             ? SanitizerAlgorithms::ActionForElementName(localName, namespaceURI, *_sanitizerConfig)
-             : SanitizerAction::Keep;
+    return _sanitizerConfig ? SanitizerAlgorithms::ActionForElementName(localName, krys::move(namespaceURI),
+                                                                        *_sanitizerConfig)
+                            : SanitizerAction::Keep;
   }
 
   void TreeBuilder::MergeAttributes(dom::Element &element, const ParsedAttributeList &attributes) noexcept
@@ -4318,7 +4318,8 @@ namespace krys::boo::html
     }
   }
 
-  Ref<dom::Element> TreeBuilder::InsertForeignElement(TokenAtom &&token, dom::DOMStringAtom namespaceURI,
+  Ref<dom::Element> TreeBuilder::InsertForeignElement(TokenAtom &&token,
+                                                      const dom::DOMStringAtom &namespaceURI,
                                                       bool onlyAddToElementStack) noexcept
   {
     // 1. Let element be the result of creating an element for the token given token, namespace, and the
@@ -4446,7 +4447,8 @@ namespace krys::boo::html
     _insertionMode = InsertionMode::Text;
   }
 
-  Ref<dom::Element> TreeBuilder::CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
+  Ref<dom::Element> TreeBuilder::CreateElement(const dom::DOMStringAtom &name,
+                                               const dom::DOMStringAtom &namespaceURI,
                                                const ParsedAttributeList &attributes,
                                                dom::ContainerNode &intendedParent) noexcept
   {
