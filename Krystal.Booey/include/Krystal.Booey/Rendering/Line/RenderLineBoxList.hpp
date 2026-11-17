@@ -74,7 +74,7 @@ namespace krys::boo
 
     void DirtyLineBoxes() noexcept;
 
-    void DirtyLineFromChangedChild(RenderBoxModelObject &parent) noexcept;
+    void DirtyLineFromChangedChild(RenderBoxModelObject &container) noexcept;
 
     void ShiftLinesBy(LayoutUnit shiftX, LayoutUnit shiftY) noexcept;
   };

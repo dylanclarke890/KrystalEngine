@@ -41,7 +41,7 @@ namespace krys::gfx
     BufferHandle Buffer {};
     uint64 Offset {0u};
     /// @brief Write here. Empty if the frame's transient memory is used up.
-    Span<byte> Data {};
+    Span<byte> Data;
 
     KRYS_NODISCARD bool IsValid() const noexcept
     {

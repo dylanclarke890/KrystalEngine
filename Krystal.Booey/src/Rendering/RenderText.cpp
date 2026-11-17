@@ -1107,7 +1107,7 @@ namespace krys::boo
   {
     auto firstRun = inline_iterator::LineLeftmostTextBoxFor(*this);
 
-    if (!firstRun || !Text().length())
+    if (!firstRun || Text().empty())
     {
       return CreatePositionWithAffinity(0, Affinity::Downstream);
     }

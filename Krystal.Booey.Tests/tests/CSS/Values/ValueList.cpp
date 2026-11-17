@@ -36,7 +36,7 @@ namespace krys::boo::css::tests
       auto empty = ValueList::CreateSpaceSeparated({});
       CHECK(empty->IsValueListValue());
       CHECK(empty->size() == 0u);
-      CHECK(CssText(*empty) == "");
+      CHECK(CssText(*empty).empty());
 
       CHECK(CssText(*ValueList::CreateSpaceSeparated({Px(1.0)})) == "1px");
       CHECK(CssText(*ValueList::CreateSpaceSeparated(Px(1.0), Px(2.0))) == "1px 2px");

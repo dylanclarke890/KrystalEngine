@@ -41,7 +41,7 @@ namespace krys::boo::layout
   {
   private:
     InlineLayoutUnit _trimmedTrailingWhitespaceWidth {0.f};
-    Maybe<InlineLayoutUnit> _overflowContentLogicalWidth {};
+    Maybe<InlineLayoutUnit> _overflowContentLogicalWidth;
 
   public:
     TextOnlySimpleLineBuilder(InlineFormattingContext &inlineFormattingContext, const ElementBox &rootBox,

@@ -51,7 +51,7 @@ namespace krys::boo::dom::tests
       document->SetURL(url::URL(url));
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      (void)parser->PumpTokenizer();
+      parser->PumpTokenizer();
       return document;
     }
 
@@ -693,7 +693,7 @@ namespace krys::boo::dom::tests
     CHECK(attribute->LocalName() == u8"id");
     CHECK(attribute->NamespaceURI() == null);
     CHECK(attribute->Prefix() == null);
-    CHECK(attribute->Value() == u8"");
+    CHECK(attribute->Value().empty());
     CHECK(attribute->OwnerElement() == nullptr);
     CHECK(&attribute->NodeDocument() == html.get());
 
@@ -802,7 +802,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Document.title: the first title element's text, anywhere, stripped and collapsed",
             "[DOM][Document][html:document.title][html:the-title-element-2]")
   {
-    CHECK(Parse(u8"<p>No title</p>")->Title() == u8"");
+    CHECK(Parse(u8"<p>No title</p>")->Title().empty());
     CHECK(Parse(u8"<title>  A \n  title </title>")->Title() == u8"A title");
 
     // The first title element in tree order, even outside the head.
@@ -826,7 +826,7 @@ namespace krys::boo::dom::tests
     // Without a head or a title, nothing is added.
     REQUIRE_FALSE(document->Head()->Remove().HasException());
     REQUIRE_FALSE(document->Title(u8"None").HasException());
-    CHECK(document->Title() == u8"");
+    CHECK(document->Title().empty());
   }
 
   TEST_CASE("Document.body: the first body or frameset child of the html element",
@@ -892,9 +892,9 @@ namespace krys::boo::dom::tests
 
     // Without an html element, nothing.
     auto empty = CreateRef<HTMLDocument>();
-    CHECK(empty->Dir() == u8"");
+    CHECK(empty->Dir().empty());
     empty->Dir(u8"rtl");
-    CHECK(empty->Dir() == u8"");
+    CHECK(empty->Dir().empty());
   }
 
   TEST_CASE(
@@ -963,14 +963,14 @@ namespace krys::boo::dom::tests
     SECTION("without a body, or with a frameset, the colours are empty and can't be set")
     {
       auto frameset = Parse(u8"<frameset bgcolor=red></frameset>");
-      CHECK(frameset->BgColor() == u8"");
+      CHECK(frameset->BgColor().empty());
       frameset->BgColor(u8"blue");
       CHECK(frameset->BodyOrFrameset()->GetAttribute(u8"bgcolor") == DOMString(u8"red"));
 
       auto empty = CreateRef<HTMLDocument>();
-      CHECK(empty->LinkColor() == u8"");
+      CHECK(empty->LinkColor().empty());
       empty->LinkColor(u8"blue");
-      CHECK(empty->LinkColor() == u8"");
+      CHECK(empty->LinkColor().empty());
     }
   }
 

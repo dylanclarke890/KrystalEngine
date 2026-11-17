@@ -262,7 +262,8 @@ namespace krys::boo
                          const HitTestLocation &locationInContainer, const LayoutPoint &adjustedLocation,
                          HitTestAction hitTestAction) noexcept override;
 
-    void PaintChildren(PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild) noexcept override;
+    void PaintChildren(PaintInfo &paintInfo, const LayoutPoint &,
+                       PaintInfo &paintInfoForFlexItem) noexcept override;
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;

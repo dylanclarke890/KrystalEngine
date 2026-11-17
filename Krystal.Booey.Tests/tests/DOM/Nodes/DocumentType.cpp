@@ -41,8 +41,8 @@ namespace krys::boo::dom::tests
     auto doctype = parsed->DocType();
     REQUIRE(doctype != nullptr);
     CHECK(doctype->Name() == u8"html");
-    CHECK(doctype->PublicId() == u8"");
-    CHECK(doctype->SystemId() == u8"");
+    CHECK(doctype->PublicId().empty());
+    CHECK(doctype->SystemId().empty());
     CHECK(&doctype->NodeDocument() == parsed.get());
   }
 

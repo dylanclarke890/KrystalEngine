@@ -79,7 +79,7 @@ namespace krys::serialisation
 
     size_t Tell() const
     {
-      return (size_t)_stream.Position();
+      return _stream.Position();
     }
 
     void Put(Ch)

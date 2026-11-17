@@ -38,7 +38,7 @@ namespace krys::gfx
     float MiterLimit {10.f};
     /// @brief Alternating dash and gap lengths, starting with a dash. An odd number of lengths is repeated to
     /// make it even. Empty, negative or all-zero patterns stroke solid.
-    List<float> Dashes {};
+    List<float> Dashes;
     /// @brief How far into the pattern each contour starts.
     float DashOffset {0.f};
   };

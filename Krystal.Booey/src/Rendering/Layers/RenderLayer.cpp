@@ -111,7 +111,7 @@ namespace krys::boo
     ClipRects() noexcept = default;
 
     ClipRects(const ClipRects &other) noexcept
-        : RefCounted(), _fixed(other.Fixed()), _overflowClipRect(other.OverflowClipRect()),
+        : _fixed(other.Fixed()), _overflowClipRect(other.OverflowClipRect()),
           _fixedClipRect(other.FixedClipRect()), _posClipRect(other.PosClipRect())
     {
     }
@@ -1318,7 +1318,7 @@ namespace krys::boo
     RebuildZOrderLists(_posZOrderList, _negZOrderList, childDirtyFlags);
     _zOrderListsDirty = false;
 
-    bool hasNegativeZOrderList = _negZOrderList && _negZOrderList->size();
+    bool hasNegativeZOrderList = _negZOrderList && !_negZOrderList->empty();
     // Having negative z-order lists affect whether a compositing layer needs a foreground layer.
     // Ideally we'd only trigger this when having z-order children changes, but we blow away the old z-order
     // lists on dirtying so we don't know the old state.
@@ -3285,7 +3285,7 @@ namespace krys::boo
   {
     if (_filters)
     {
-      return _filters->CalculateOutsets(Renderer(), FloatRect(LocalBoundingBox()));
+      return RenderLayerFilters::CalculateOutsets(Renderer(), FloatRect(LocalBoundingBox()));
     }
     return Renderer().Style().GetFilter().Outsets();
   }
@@ -7412,7 +7412,7 @@ namespace krys::boo
       // It's wrong to set innerNode, but then claim that you didn't hit anything, unless it is
       // a rect-based test.
       krys_debug_assert(!result.InnerNode()
-                        || (request.ResultIsElementList() && result.ListBasedTestResult().size()));
+                        || (request.ResultIsElementList() && !result.ListBasedTestResult().empty()));
       return false;
     }
 

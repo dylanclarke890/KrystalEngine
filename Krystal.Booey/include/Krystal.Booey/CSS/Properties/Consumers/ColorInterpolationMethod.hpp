@@ -41,6 +41,6 @@ namespace krys::boo::css
   {
     // MARK: <color-interpolation-method> consuming (raw)
     KRYS_NODISCARD Maybe<ColourInterpolationMethod>
-      ConsumeColorInterpolationMethod(TokenRange &tokens, PropertyParserState &state) noexcept;
+      ConsumeColorInterpolationMethod(TokenRange &args, PropertyParserState &state) noexcept;
   }
 }

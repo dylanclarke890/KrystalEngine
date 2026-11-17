@@ -226,7 +226,7 @@ namespace krys::boo::css
         return true;
       }
       if (text::IsASCIICaselessEqual(languageStringView, rangeStringView)
-          && languageStringView.find(u8'-') == dom::DOMStringView::npos)
+          && !languageStringView.contains(u8'-'))
       {
         return true;
       }

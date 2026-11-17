@@ -45,7 +45,7 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static Ref<SplitTextNodeCommand> Create(dom::Text &node, uint32 offset) noexcept;
 
-    SplitTextNodeCommand(dom::Text &node, uint32 offset) noexcept;
+    SplitTextNodeCommand(dom::Text &text, uint32 offset) noexcept;
 
   private:
     void DoApply() noexcept override;

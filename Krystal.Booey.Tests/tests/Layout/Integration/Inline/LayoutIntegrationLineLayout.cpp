@@ -252,7 +252,7 @@ layer at (0,0) size 800x60
       std::string result = "length " + std::to_string(text.GetComputedTextLength()) + ", box "
                            + std::to_string(box.X()) + " " + std::to_string(box.Y()) + " "
                            + std::to_string(box.Width()) + " " + std::to_string(box.Height());
-      for (uint32 index = 0; index < static_cast<uint32>(text.GetNumberOfChars()); ++index)
+      for (uint32 index = 0; index < text.GetNumberOfChars(); ++index)
       {
         auto start = text.GetStartPositionOfChar(index);
         if (!start.HasException())

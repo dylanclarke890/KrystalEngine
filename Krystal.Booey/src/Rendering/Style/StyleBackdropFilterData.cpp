@@ -36,7 +36,7 @@ namespace krys::boo
   }
 
   StyleBackdropFilterData::StyleBackdropFilterData(const StyleBackdropFilterData &other) noexcept
-      : RefCounted<StyleBackdropFilterData>(), BackdropFilter(other.BackdropFilter)
+      : BackdropFilter(other.BackdropFilter)
   {
   }
 

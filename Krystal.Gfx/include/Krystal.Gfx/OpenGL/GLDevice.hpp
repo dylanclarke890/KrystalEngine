@@ -18,7 +18,7 @@ namespace krys::gfx::opengl
     /// @brief Whether the device owns the buffer (the transient ring), so it can't be destroyed through the
     /// API.
     bool Internal {false};
-    string DebugName {};
+    string DebugName;
   };
 
   struct GLTexture
@@ -26,7 +26,7 @@ namespace krys::gfx::opengl
     GLuint Id {0u};
     GLenum Target {GL_TEXTURE_2D};
     TextureDesc Desc {};
-    string DebugName {};
+    string DebugName;
   };
 
   struct GLSampler
@@ -40,7 +40,7 @@ namespace krys::gfx::opengl
   {
     GLuint Id {0u};
     ShaderStage Stage {ShaderStage::Vertex};
-    string DebugName {};
+    string DebugName;
   };
 
   /// @brief A vertex or index buffer binding as last applied to a pipeline's vertex array.
@@ -57,21 +57,21 @@ namespace krys::gfx::opengl
     GLuint Program {0u};
     GLuint VertexArray {0u};
     GLenum Topology {GL_TRIANGLES};
-    SmallList<uint32, 2> Strides {};
+    SmallList<uint32, 2> Strides;
     BlendState Blend {};
     DepthStencilState DepthStencil {};
     RasterState Raster {};
     /// @brief The buffers the vertex array was last given, per slot; buffers are rebound only when they
     /// change.
-    SmallList<GLBufferBinding, 2> AppliedVertexBuffers {};
+    SmallList<GLBufferBinding, 2> AppliedVertexBuffers;
     GLuint AppliedIndexBuffer {0u};
-    string DebugName {};
+    string DebugName;
   };
 
   struct GLSwapchain
   {
-    NativeHandle Window {};
-    NativeHandle Surface {};
+    NativeHandle Window;
+    NativeHandle Surface;
     uint32 Width {0u};
     uint32 Height {0u};
     TextureFormat Format {TextureFormat::RGBA8Srgb};
@@ -139,13 +139,13 @@ namespace krys::gfx::opengl
     Pool<GLPipeline, PipelineHandle> _pipelines {};
     Pool<GLSwapchain, SwapchainHandle> _swapchains {};
 
-    HashMap<SamplerDesc, SamplerHandle, SamplerDescHash> _samplerCache {};
-    HashMap<FramebufferKey, GLuint, FramebufferKeyHash> _framebuffers {};
+    HashMap<SamplerDesc, SamplerHandle, SamplerDescHash> _samplerCache;
+    HashMap<FramebufferKey, GLuint, FramebufferKeyHash> _framebuffers;
     /// @brief Temporary framebuffers for blits.
     Array<GLuint, 2> _blitFramebuffers {0u, 0u};
 
     GLStateCache _state {};
-    CommandBuffer _commandBuffer {};
+    CommandBuffer _commandBuffer;
 
     BufferHandle _transientBuffer {};
     byte *_transientMemory {nullptr};

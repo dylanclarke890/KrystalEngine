@@ -36,8 +36,8 @@ namespace krys::serialisation
   private:
     io::IStreamWriter &_stream;
     rapidxml::xml_document<> _document;
-    Stack<NodeMetadata> _nodes {};
-    stringview _nextFieldName {};
+    Stack<NodeMetadata> _nodes;
+    stringview _nextFieldName;
 
   public:
     XmlArchiveWriter(io::IStreamWriter &stream) noexcept : _stream(stream)
@@ -199,10 +199,10 @@ namespace krys::serialisation
 
     struct NodeMetadata
     {
-      NodeType *Node;     /// @brief A pointer to this node
-      NodeType *Child;    /// @brief A pointer to its current child
-      size_t Size {0u};   /// @brief The remaining number of children for this node
-      stringview Name {}; /// @brief The NVP name for next child node
+      NodeType *Node;   /// @brief A pointer to this node
+      NodeType *Child;  /// @brief A pointer to its current child
+      size_t Size {0u}; /// @brief The remaining number of children for this node
+      stringview Name;  /// @brief The NVP name for next child node
 
       NodeMetadata(NodeType *node) noexcept
           : Node(node), Child(node->first_node()), Size(GetNumberOfChildren(node))
@@ -254,13 +254,13 @@ namespace krys::serialisation
     io::IStreamReader &_stream;
     List<byte> _data;
     rapidxml::xml_document<> _document;
-    Stack<NodeMetadata> _nodes {};
+    Stack<NodeMetadata> _nodes;
 
   public:
     XmlArchiveReader(io::IStreamReader &stream) : _stream(stream)
     {
       // Read the entire stream into memory
-      const auto size = static_cast<size_t>(_stream.Size());
+      const auto size = _stream.Size();
       _data.resize(size + 1); // +1 for null terminator
 
       _stream.Read(Span(_data.data(), _data.size() - 1));

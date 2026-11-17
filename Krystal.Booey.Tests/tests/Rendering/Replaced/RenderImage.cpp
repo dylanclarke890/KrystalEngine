@@ -183,7 +183,7 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD bool DrawsImage(PageInFrameFixture &fixture) noexcept
     {
-      return fixture.Painted().find(u8"draw-native-image") != utf8_string::npos;
+      return fixture.Painted().contains(u8"draw-native-image");
     }
   }
 

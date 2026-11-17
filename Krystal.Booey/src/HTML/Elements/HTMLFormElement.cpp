@@ -102,7 +102,7 @@ namespace krys::boo::html
     {
       auto contains = [&](char8 character)
       {
-        return target.find(character) != dom::DOMStringView::npos;
+        return target.contains(character);
       };
       if ((contains(u8'\n') || contains(u8'\r') || contains(u8'\t')) && contains(u8'<'))
       {

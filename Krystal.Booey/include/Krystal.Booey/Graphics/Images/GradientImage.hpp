@@ -57,7 +57,7 @@ namespace krys::boo
   private:
     GradientImage(boo::Gradient &, const FloatSize &) noexcept;
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
+    ImageDrawResult Draw(GraphicsContext &, const FloatRect &destRect, const FloatRect &srcRect,
                          ImagePaintingOptions = {}) noexcept override;
 
     void DrawPattern(GraphicsContext &, const FloatRect &destRect, const FloatRect &srcRect,

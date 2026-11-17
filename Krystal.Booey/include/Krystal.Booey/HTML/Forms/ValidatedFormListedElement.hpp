@@ -99,7 +99,7 @@ namespace krys::boo::html
 
     void SetCustomValidationMessage(dom::DOMStringView message) noexcept override;
 
-    void SetDisabledByAncestorFieldset(bool isDisabled) noexcept;
+    void SetDisabledByAncestorFieldset(bool newDisabledByAncestorFieldset) noexcept;
 
     /// @see https://html.spec.whatwg.org/#concept-form-reset-control
     virtual void Reset() noexcept
@@ -210,7 +210,7 @@ namespace krys::boo::html
 
     void SetDataListAncestorState(TriState isInsideDataList) noexcept;
 
-    void SyncWithFieldsetAncestors(dom::ContainerNode *insertionNode) noexcept;
+    void SyncWithFieldsetAncestors(dom::ContainerNode *insertionPoint) noexcept;
 
   private:
     KRYS_NODISCARD bool ComputeIsDisabledByFieldsetAncestor() const noexcept;

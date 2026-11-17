@@ -587,8 +587,7 @@ namespace krys::boo
 
     // Recurses down the tree, parenting descendant compositing layers and collecting an array of child layers
     // for the current compositing layer.
-    void UpdateBackingAndHierarchy(RenderLayer &layer,
-                                   List<Ref<GraphicsLayer>> &childGraphicsLayersOfEnclosingLayer,
+    void UpdateBackingAndHierarchy(RenderLayer &layer, List<Ref<GraphicsLayer>> &childLayersOfEnclosingLayer,
                                    UpdateBackingTraversalState &traversalState,
                                    EnumSet<UpdateLevel> updateLevel = {}) noexcept;
 

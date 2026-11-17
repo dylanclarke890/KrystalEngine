@@ -20,7 +20,7 @@ namespace krys::boo::css::tests
       auto document = CreateRef<dom::HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      (void)parser->PumpTokenizer();
+      parser->PumpTokenizer();
       return document;
     }
 
@@ -142,7 +142,7 @@ namespace krys::boo::css::tests
     REQUIRE(Document->Window()->MatchMedia(u8"(MIN-WIDTH: 100PX)")->Media() == u8"(min-width: 100px)");
     REQUIRE(Document->Window()->MatchMedia(u8"screen   and (color),PRINT")->Media()
             == u8"screen and (color), print");
-    REQUIRE(Document->Window()->MatchMedia(u8"")->Media() == u8"");
+    REQUIRE(Document->Window()->MatchMedia(u8"")->Media().empty());
     REQUIRE(Document->Window()->MatchMedia(u8"(min-width: 100px")->Media() == u8"(min-width: 100px)");
     REQUIRE(Document->Window()->MatchMedia(u8"foo bar")->Media() == u8"not all");
   }

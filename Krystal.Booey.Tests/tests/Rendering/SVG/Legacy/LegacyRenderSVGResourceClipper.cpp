@@ -30,7 +30,7 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD bool Contains(utf8_stringview text, utf8_stringview part) noexcept
     {
-      return text.find(part) != utf8_stringview::npos;
+      return text.contains(part);
     }
 
     constexpr const char8_t *ClippedShapes =

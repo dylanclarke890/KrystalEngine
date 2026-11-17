@@ -17,7 +17,7 @@ namespace krys::boo::dom::tests
       auto document = CreateRef<HTMLDocument>();
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      (void)parser->PumpTokenizer();
+      parser->PumpTokenizer();
       return document;
     }
 
@@ -75,7 +75,7 @@ namespace krys::boo::dom::tests
       REQUIRE(QueryAllIds(*document, u8"P") == u8"b d f");
       REQUIRE(QueryAllIds(*document, u8".x") == u8"a b e");
       REQUIRE(QueryAllIds(*document, u8"[title=t]") == u8"c");
-      REQUIRE(QueryAllIds(*document, u8"[title=T]") == u8"");
+      REQUIRE(QueryAllIds(*document, u8"[title=T]").empty());
       REQUIRE(QueryAllIds(*document, u8"#d") == u8"d");
       REQUIRE(QueryAllIds(*document, u8"div > p") == u8"b d");
       REQUIRE(QueryAllIds(*document, u8"em, span, #a") == u8"a c e");
@@ -106,13 +106,13 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(first->AppendChild(*second).HasException());
       REQUIRE(QueryAllIds(*fragment, u8"i") == u8"i1 i2");
       REQUIRE(QueryAllIds(*fragment, u8"i > i") == u8"i2");
-      REQUIRE(QueryAllIds(*fragment, u8":scope") == u8"");
+      REQUIRE(QueryAllIds(*fragment, u8":scope").empty());
     }
 
     SECTION("The node itself is never a result")
     {
       REQUIRE(QueryAllIds(a, u8"div, p") == u8"b d");
-      REQUIRE(QueryAllIds(a, u8":scope") == u8"");
+      REQUIRE(QueryAllIds(a, u8":scope").empty());
     }
 
     SECTION("A document's :scope is its document element")
@@ -133,7 +133,7 @@ namespace krys::boo::dom::tests
       REQUIRE(QueryAllIds(*document, u8"p") == u8"b d f");
       REQUIRE(QueryAllIds(*shadow, u8"p") == u8"inner");
       REQUIRE(QueryAllIds(*shadow, u8":host > p") == u8"inner");
-      REQUIRE(QueryAllIds(*shadow, u8"div > p") == u8"");
+      REQUIRE(QueryAllIds(*shadow, u8"div > p").empty());
     }
 
     SECTION("Elements in no namespace")

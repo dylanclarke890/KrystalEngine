@@ -199,9 +199,11 @@ namespace krys::boo::html::tests
     fixture.Click(30, 80);
     CHECK(clicked == List<dom::Element *> {&fixture.ById(u8"rect"), &fixture.ById(u8"image")});
 
-    (void)fixture.Frame->GetEventHandler().MouseMoved(fixture.Event(PlatformEvent::Type::MouseMoved, 75, 75));
+    (void)fixture.Frame->GetEventHandler().MouseMoved(
+      MapFixture::Event(PlatformEvent::Type::MouseMoved, 75, 75));
     CHECK(fixture.Frame->GetEventHandler().CurrentMouseCursor().GetType() == Cursor::Type::Hand);
-    (void)fixture.Frame->GetEventHandler().MouseMoved(fixture.Event(PlatformEvent::Type::MouseMoved, 30, 80));
+    (void)fixture.Frame->GetEventHandler().MouseMoved(
+      MapFixture::Event(PlatformEvent::Type::MouseMoved, 30, 80));
     CHECK(fixture.Frame->GetEventHandler().CurrentMouseCursor().GetType() != Cursor::Type::Hand);
   }
 
@@ -286,7 +288,7 @@ namespace krys::boo::html::tests
     auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(u8"<!DOCTYPE html><body><img id=img usemap=#m><map id=first name=m></map>",
                                  IsEOF::Yes);
-    (void)parser->PumpTokenizer();
+    parser->PumpTokenizer();
     auto &body = *document->Body();
     auto &image = Downcast<HTMLImageElement>(*document->GetElementById(u8"img"));
     auto &first = Downcast<HTMLMapElement>(*document->GetElementById(u8"first"));

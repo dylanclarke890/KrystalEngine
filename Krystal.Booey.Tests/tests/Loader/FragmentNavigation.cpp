@@ -173,7 +173,7 @@ namespace krys::boo::tests
 
     auto parser = CreateRef<html::DocumentParser>(*document);
     parser->InputStream().Append(u8"<!DOCTYPE html>" + utf8_string(Page), IsEOF::Yes);
-    (void)parser->PumpTokenizer();
+    parser->PumpTokenizer();
     html::EventLoop::Current().RunUntilIdle();
 
     auto section = document->GetElementById(u8"section");

@@ -99,10 +99,10 @@ namespace krys::boo::css
   }
 
   StyleSheetContents::StyleSheetContents(const StyleSheetContents &other) noexcept
-      : RefCounted(), CanMakeWeakPtr(), _originalURL(other._originalURL),
-        _encodingFromCharsetRule(other._encodingFromCharsetRule), _namespaces(other._namespaces),
-        _defaultNamespace(other._defaultNamespace), _isUserStyleSheet(other._isUserStyleSheet),
-        _loadCompleted(true), _hasSyntacticallyValidCSSHeader(other._hasSyntacticallyValidCSSHeader),
+      : _originalURL(other._originalURL), _encodingFromCharsetRule(other._encodingFromCharsetRule),
+        _namespaces(other._namespaces), _defaultNamespace(other._defaultNamespace),
+        _isUserStyleSheet(other._isUserStyleSheet), _loadCompleted(true),
+        _hasSyntacticallyValidCSSHeader(other._hasSyntacticallyValidCSSHeader),
         _hasNestingRulesCache(other._hasNestingRulesCache), _parserContext(other._parserContext)
   {
     krys_debug_assert(other.IsCacheable());

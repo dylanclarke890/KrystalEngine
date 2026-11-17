@@ -91,7 +91,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool ContainsAlternate(const Maybe<dom::DOMString> &rel) noexcept
     {
-      return rel && rel->find(u8"alternate") != dom::DOMString::npos;
+      return rel && rel->contains(u8"alternate");
     }
 
     void FilterEnabledNonemptyCSSStyleSheets(List<RefPtr<css::CSSStyleSheet>> &result,

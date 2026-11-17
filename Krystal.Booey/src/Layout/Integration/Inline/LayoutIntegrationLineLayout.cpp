@@ -1339,7 +1339,7 @@ namespace krys::boo::layout_integration
       box.MoveVertically(-fullBoundaries.Y());
     }
 
-    if (lines.size())
+    if (!lines.empty())
     {
       lines[0].SetLineBoxRectForSVGText(FloatRect {{}, fullBoundaries.Size()});
     }

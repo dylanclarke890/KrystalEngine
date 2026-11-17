@@ -302,9 +302,9 @@ namespace krys::boo::html
 
     KRYS_NODISCARD HTMLElement *ElementFromPastNamesMap(dom::DOMStringView pastName) const noexcept;
 
-    void AddToPastNamesMap(FormAssociatedElement &element, dom::DOMStringView pastName) noexcept;
+    void AddToPastNamesMap(FormAssociatedElement &item, dom::DOMStringView pastName) noexcept;
 
-    void RemoveFromPastNamesMap(FormAssociatedElement &element) noexcept;
+    void RemoveFromPastNamesMap(FormAssociatedElement &item) noexcept;
 
     void ResetListedFormControlElements() noexcept;
   };

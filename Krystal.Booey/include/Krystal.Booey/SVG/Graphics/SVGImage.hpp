@@ -146,7 +146,7 @@ namespace krys::boo::svg
       return static_cast<bool>(_page);
     }
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &destination, const FloatRect &source,
+    ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
                          ImagePaintingOptions = {}) noexcept final;
 
     ImageDrawResult DrawForContainer(GraphicsContext &, FloatSize containerSize, float containerZoom,

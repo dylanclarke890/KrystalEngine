@@ -401,7 +401,7 @@ namespace krys::boo::layout_integration
     {
       auto &displayContentFromPreviousLayout = inlineContent.DisplayContent();
       if (!lineDamage || !lineDamage->LayoutStartPosition()
-          || !displayContentFromPreviousLayout.LineList.size())
+          || displayContentFromPreviousLayout.LineList.empty())
       {
         return {};
       }
@@ -411,7 +411,7 @@ namespace krys::boo::layout_integration
         krys_debug_assert(false);
         return {};
       }
-      if (layoutResult.DisplayContent.BoxList.size()
+      if (!layoutResult.DisplayContent.BoxList.empty()
           && canidateLineIndex > layoutResult.DisplayContent.BoxList[0].LineIndex())
       {
         // We should never generate lines _before_ the damaged line.

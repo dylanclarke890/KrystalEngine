@@ -208,8 +208,8 @@ namespace krys::boo
     if (ExplicitGridDidResize(*oldStyle) || NamedGridLinesDefinitionDidChange(*oldStyle)
         || ImplicitGridLinesDefinitionDidChange(*oldStyle)
         || oldStyle->GetGridAutoFlow() != Style().GetGridAutoFlow()
-        || Style().GridTemplateColumns().AutoRepeatSizes.size()
-        || Style().GridTemplateRows().AutoRepeatSizes.size() || subgridDidChange == SubgridDidChange::Yes
+        || !Style().GridTemplateColumns().AutoRepeatSizes.empty()
+        || !Style().GridTemplateRows().AutoRepeatSizes.empty() || subgridDidChange == SubgridDidChange::Yes
         || isSubgridWithIndependentFormattingContextChange())
     {
       SetNeedsItemPlacement(subgridDidChange);

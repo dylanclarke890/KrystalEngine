@@ -55,8 +55,8 @@ namespace krys::boo::css::tests
   // Cases from WPT css/mediaqueries/match-media-parsing.html.
   TEST_CASE_METHOD(ValueFixture, "MediaQueryParser: list parsing", "[CSS][Queries][MediaQueryParser]")
   {
-    CHECK(Roundtrip(u8"") == "");
-    CHECK(Roundtrip(u8" ") == "");
+    CHECK(Roundtrip(u8"").empty());
+    CHECK(Roundtrip(u8" ").empty());
     CHECK(Roundtrip(u8"all") == "all");
     CHECK(Roundtrip(u8" all") == "all");
     CHECK(Roundtrip(u8"   all   ") == "all");

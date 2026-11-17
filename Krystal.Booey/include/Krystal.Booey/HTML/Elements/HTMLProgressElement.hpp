@@ -77,7 +77,7 @@ namespace krys::boo::html
     KRYS_NODISCARD double Max() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-progress-max
-    void Max(double value) noexcept;
+    void Max(double max) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-progress-position
     KRYS_NODISCARD double Position() const noexcept;

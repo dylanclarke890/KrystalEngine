@@ -40,9 +40,9 @@ namespace krys::gfx
   class Path2D
   {
   private:
-    List<PathVerb> _verbs {};
-    List<Vec2f> _points {};
-    Vec2f _contourStart {};
+    List<PathVerb> _verbs;
+    List<Vec2f> _points;
+    Vec2f _contourStart;
     bool _hasCurrentPoint {false};
 
   public:

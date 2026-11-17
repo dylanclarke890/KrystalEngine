@@ -26,7 +26,7 @@ namespace krys::io::tests
   TEST_CASE("Path Constructor - Copy", "[IO]")
   {
     krys::io::Path p1("dir/file");
-    krys::io::Path p2(p1);
+    const krys::io::Path &p2(p1);
     REQUIRE(p2.ToString() == "dir/file");
   }
 

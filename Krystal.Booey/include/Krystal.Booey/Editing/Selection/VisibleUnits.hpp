@@ -51,10 +51,10 @@ namespace krys::boo
   };
 
   // words
-  KRYS_NODISCARD VisiblePosition StartOfWord(const VisiblePosition &position,
+  KRYS_NODISCARD VisiblePosition StartOfWord(const VisiblePosition &c,
                                              WordSide side = WordSide::RightWordIfOnBoundary) noexcept;
 
-  KRYS_NODISCARD VisiblePosition EndOfWord(const VisiblePosition &position,
+  KRYS_NODISCARD VisiblePosition EndOfWord(const VisiblePosition &c,
                                            WordSide side = WordSide::RightWordIfOnBoundary) noexcept;
 
   KRYS_NODISCARD VisiblePosition PreviousWordPosition(const VisiblePosition &position) noexcept;
@@ -105,19 +105,19 @@ namespace krys::boo
 
   KRYS_NODISCARD bool IsLogicalEndOfLine(const VisiblePosition &position) noexcept;
 
-  KRYS_NODISCARD VisiblePosition LeftBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
+  KRYS_NODISCARD VisiblePosition LeftBoundaryOfLine(const VisiblePosition &c, TextDirection direction,
                                                     bool *reachedBoundary) noexcept;
 
-  KRYS_NODISCARD VisiblePosition RightBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
+  KRYS_NODISCARD VisiblePosition RightBoundaryOfLine(const VisiblePosition &c, TextDirection direction,
                                                      bool *reachedBoundary) noexcept;
 
   // paragraphs (perhaps a misnomer, can be divided by line break elements)
   KRYS_NODISCARD VisiblePosition StartOfParagraph(
-    const VisiblePosition &position,
+    const VisiblePosition &c,
     EditingBoundaryCrossingRule rule = EditingBoundaryCrossingRule::CannotCrossEditingBoundary) noexcept;
 
   KRYS_NODISCARD VisiblePosition EndOfParagraph(
-    const VisiblePosition &position,
+    const VisiblePosition &c,
     EditingBoundaryCrossingRule rule = EditingBoundaryCrossingRule::CannotCrossEditingBoundary) noexcept;
 
   KRYS_NODISCARD VisiblePosition StartOfNextParagraph(const VisiblePosition &position) noexcept;
@@ -162,9 +162,9 @@ namespace krys::boo
 
   KRYS_NODISCARD VisiblePosition EndOfDocument(const dom::Node *node) noexcept;
 
-  KRYS_NODISCARD VisiblePosition StartOfDocument(const VisiblePosition &position) noexcept;
+  KRYS_NODISCARD VisiblePosition StartOfDocument(const VisiblePosition &c) noexcept;
 
-  KRYS_NODISCARD VisiblePosition EndOfDocument(const VisiblePosition &position) noexcept;
+  KRYS_NODISCARD VisiblePosition EndOfDocument(const VisiblePosition &c) noexcept;
 
   KRYS_NODISCARD bool IsStartOfDocument(const VisiblePosition &position) noexcept;
 

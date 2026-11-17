@@ -63,7 +63,7 @@ namespace krys::gfx
     uint32 ColourAttachmentCount {0u};
     /// @brief Unused if its texture is invalid.
     DepthStencilAttachment DepthStencil {};
-    utf8_stringview DebugName {};
+    utf8_stringview DebugName;
 
     /// @brief A pass with a single colour target.
     KRYS_NODISCARD constexpr static RenderPassDesc SingleColour(const ColourAttachment &attachment) noexcept

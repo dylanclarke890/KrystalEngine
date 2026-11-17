@@ -30,11 +30,11 @@ namespace krys::boo::infra::tests
     // Multiple spaces between words collapsed to one
     REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"foo   bar   baz") == u8"foo bar baz");
     // Only whitespace — collapses to empty string
-    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"   ") == u8"");
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"   ").empty());
     // Empty string — unchanged
-    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"") == u8"");
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"").empty());
     // Mixed whitespace characters collapsed
-    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"\t\n\r\f") == u8"");
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"\t\n\r\f").empty());
     // Leading whitespace stripped
     REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"   foo") == u8"foo");
     // Trailing whitespace stripped
@@ -112,15 +112,15 @@ namespace krys::boo::infra::tests
             == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"foo bar baz   ")
             == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
-    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"      ") == List<dom::DOMString> {});
-    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"") == List<dom::DOMString> {});
-    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t\n\r\f") == List<dom::DOMString> {});
+    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"      ").empty());
+    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"").empty());
+    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t\n\r\f").empty());
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo \n bar \r baz \f")
             == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo \n  \r  baz \f")
             == List<dom::DOMString> {u8"foo", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo \n  \r    \f") == List<dom::DOMString> {u8"foo"});
-    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t    \n  \r    \f") == List<dom::DOMString> {});
+    REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t    \n  \r    \f").empty());
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo") == List<dom::DOMString> {u8"foo"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo ") == List<dom::DOMString> {u8"foo"});
     REQUIRE(StringAlgorithms::SplitOnWhitespace(u8"\t foo  ") == List<dom::DOMString> {u8"foo"});
@@ -139,7 +139,7 @@ namespace krys::boo::infra::tests
     REQUIRE(StringAlgorithms::SplitOnComma(u8"foo,bar,baz   ")
             == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"      ") == List<dom::DOMString> {u8""});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"") == List<dom::DOMString> {});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"").empty());
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t\n\r\f") == List<dom::DOMString> {u8""});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo \n bar \r baz \f")
             == List<dom::DOMString> {u8"foo \n bar \r baz"});
@@ -162,11 +162,11 @@ namespace krys::boo::infra::tests
     }
     {
       auto input = List<dom::DOMString> {};
-      REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt) == u8"");
+      REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt).empty());
     }
     {
       auto input = List<dom::DOMString> {u8""};
-      REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt) == u8"");
+      REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt).empty());
     }
     {
       auto input = List<dom::DOMString> {u8"foo", u8"", u8"bar"};
@@ -200,7 +200,7 @@ namespace krys::boo::infra::tests
   {
     CHECK(StringAlgorithms::NormalizeNewlines(u8"a\r\nb\rc\nd\r\r\n") == u8"a\nb\nc\nd\n\n");
     CHECK(StringAlgorithms::NormalizeNewlines(u8"\n\r") == u8"\n\n");
-    CHECK(StringAlgorithms::NormalizeNewlines(u8"") == u8"");
+    CHECK(StringAlgorithms::NormalizeNewlines(u8"").empty());
   }
 
   TEST_CASE("ASCII case-insensitive: only ASCII upper and lower alphas match each other",

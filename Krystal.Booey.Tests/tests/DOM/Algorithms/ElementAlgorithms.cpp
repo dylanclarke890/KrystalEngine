@@ -249,7 +249,7 @@ namespace krys::boo::dom::tests
     // Get an attribute value: the empty string if there's none.
     CHECK(ElementAlgorithms::GetAttributeValue(*element, u8"a") == u8"none");
     CHECK(ElementAlgorithms::GetAttributeValue(*element, u8"a", u8"urn:x") == u8"x");
-    CHECK(ElementAlgorithms::GetAttributeValue(*element, u8"b") == u8"");
+    CHECK(ElementAlgorithms::GetAttributeValue(*element, u8"b").empty());
   }
 
   TEST_CASE("Set an attribute: appends it, replaces the one with its name, or throws if it's in use",

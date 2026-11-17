@@ -47,7 +47,7 @@ namespace krys::boo::layout
     {
       const Box &LayoutBox;
       // Only text type of boxes may have offset. No offset also simply points to the end of the layout box.
-      Maybe<size_t> Offset {};
+      Maybe<size_t> Offset;
 
       enum class Type : uint8
       {

@@ -57,10 +57,10 @@ namespace krys::boo::css
     // https://drafts.fxtf.org/filter-effects/#FilterProperty
 
     // MARK: <'filter'> consuming (Value)
-    KRYS_NODISCARD RefPtr<Value> ConsumeFilter(TokenRange &tokens, PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeFilter(TokenRange &range, PropertyParserState &state) noexcept;
 
     // MARK: <'filter'> consuming (unresolved)
-    KRYS_NODISCARD Maybe<Filter> ConsumeUnresolvedFilter(TokenRange &tokens,
+    KRYS_NODISCARD Maybe<Filter> ConsumeUnresolvedFilter(TokenRange &range,
                                                          PropertyParserState &state) noexcept;
 
     // MARK: <'filter'> parsing (raw)

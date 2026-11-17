@@ -6,7 +6,6 @@
 namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
-  using css::tests::CssText;
   using css::tests::Tokens;
 
   namespace

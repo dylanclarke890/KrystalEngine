@@ -66,7 +66,7 @@ namespace krys::boo
     using Type = CounterNodeType;
 
   private:
-    EnumSet<Type> _type {};
+    EnumSet<Type> _type;
     int32 _value;
     int32 _countInParent {0};
     WeakPtr<RenderElement> _owner;

@@ -71,13 +71,13 @@ namespace krys
     uint32 _width {0u};
     uint32 _height {0u};
     float _time {0.f};
-    UniquePtr<gfx::Renderer2D> _renderer {};
+    UniquePtr<gfx::Renderer2D> _renderer;
     gfx::TextureHandle _image {};
-    UniquePtr<gfx::FontFace2D> _font {};
-    UniquePtr<gfx::FontFace2D> _boldFont {};
+    UniquePtr<gfx::FontFace2D> _font;
+    UniquePtr<gfx::FontFace2D> _boldFont;
     /// @brief Booey's loader, which reads files on the application's workers.
-    UniquePtr<ui::FileLoaderStrategy> _fileLoader {};
-    UniquePtr<ui::View> _pageView {};
+    UniquePtr<ui::FileLoaderStrategy> _fileLoader;
+    UniquePtr<ui::View> _pageView;
     /// @brief The page's listeners, which go when the page is loaded again.
     boo::dom::EventListenerHandle _cardPicker;
     boo::dom::EventListenerHandle _keyLogger;
@@ -110,7 +110,7 @@ namespace krys
     editor::BooeyFonts _booeyFonts {};
     EditorView _view {EditorView::Page};
     /// @brief The mouse in page view coordinates: below the header.
-    boo::IntPoint _pointer {};
+    boo::IntPoint _pointer;
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept

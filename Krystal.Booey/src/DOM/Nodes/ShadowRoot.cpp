@@ -281,7 +281,7 @@ namespace krys::boo::dom
   {
     if (!event.Composed())
     {
-      if (event._path.size() >= 1)
+      if (!event._path.empty())
       {
         auto &firstItem = event._path[0];
         if (auto *invocationTargetNode = DynamicDowncast<Node>(firstItem.InvocationTarget()))

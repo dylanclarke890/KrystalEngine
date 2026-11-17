@@ -64,7 +64,7 @@ namespace krys::gfx
     PixelRect2D Bounds {};
     /// @brief Rows from the top: one byte of coverage per pixel, or four (premultiplied RGBA) for colour
     /// glyphs.
-    List<uint8> Pixels {};
+    List<uint8> Pixels;
     bool Colour {false};
   };
 

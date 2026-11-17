@@ -43,7 +43,7 @@ namespace krys::ui::tests
       }
       auto text = root->LayerTreeAsText({boo::LayerTreeAsTextOptions::IncludeRepaintRects});
       compositor.ResetTrackedRepaintRects();
-      return text.find(u8"(repaint rects") != utf8_string::npos;
+      return text.contains(u8"(repaint rects");
     }
 
     /// @brief How a frame paints the page.

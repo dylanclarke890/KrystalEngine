@@ -2268,7 +2268,7 @@ namespace krys::ui::tests
     view.MousePressed(inside, pal::MouseButton::Left);
     view.MouseReleased(inside, pal::MouseButton::Left);
     REQUIRE(view.ShownOverlay());
-    CHECK(view.Record()->Items().size() > 0uz);
+    CHECK(!view.Record()->Items().empty());
   }
 
   namespace

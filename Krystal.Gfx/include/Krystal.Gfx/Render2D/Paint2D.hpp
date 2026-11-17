@@ -18,9 +18,9 @@ namespace krys::gfx
     /// @brief Maps pattern space into the draw's coordinates. In pattern space, a tile is `TileSize` and
     /// tiles repeat every `TileSize` + `Spacing` from the origin, in both directions.
     Transform2D PatternSpace {};
-    Vec2f TileSize {};
+    Vec2f TileSize;
     /// @brief The transparent gap after each tile.
-    Vec2f Spacing {};
+    Vec2f Spacing;
     SamplerFilter Filter {SamplerFilter::Linear};
     /// @brief Whether the texture's colours are already multiplied by their alpha.
     AlphaPremultiplication Alpha {AlphaPremultiplication::Premultiplied};

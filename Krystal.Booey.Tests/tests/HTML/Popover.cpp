@@ -429,7 +429,7 @@ namespace krys::boo::html::tests
       // Setting the element sets the attribute to the empty string; it's still found when it moves.
       auto &after = fixture.Get<HTMLButtonElement>(u8"after");
       after.PopoverTargetElementForBindings(&popover);
-      CHECK(NarrowOrNull(after.GetAttribute(u8"popovertarget")) == "");
+      CHECK(NarrowOrNull(after.GetAttribute(u8"popovertarget")).empty());
       CHECK(after.PopoverTargetElement().get() == &popover);
       (void)after.SetAttribute(u8"popovertarget", u8"nope");
       CHECK_FALSE(after.PopoverTargetElement());

@@ -55,7 +55,7 @@ namespace krys::boo::css::parse_property::tests
     CHECK(ConsumeList<'/', OneOrMore>(u8"a / 5") == "<null>");
     CHECK(ConsumeList<' ', OneOrMore>(u8"a b 5", false) == "a b");
     CHECK(ConsumeList<' ', OneOrMore>(u8"5", false) == "<null>");
-    CHECK(ConsumeList<' ', ZeroOrMore>(u8"5", false) == "");
+    CHECK(ConsumeList<' ', ZeroOrMore>(u8"5", false).empty());
   }
 
   TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumeListSeparatedBy bounds)",

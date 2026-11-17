@@ -331,7 +331,7 @@ namespace krys::boo
 
     void TextDidChangeInTextField(dom::Element &element) noexcept;
 
-    bool DoTextFieldCommandFromEvent(dom::Element &element, dom::KeyboardEvent *event) noexcept;
+    bool DoTextFieldCommandFromEvent(dom::Element &element, dom::KeyboardEvent *ke) noexcept;
 
     void TextWillBeDeletedInTextField(dom::Element &input) noexcept;
 

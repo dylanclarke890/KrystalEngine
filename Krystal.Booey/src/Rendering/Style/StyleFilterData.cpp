@@ -34,8 +34,7 @@ namespace krys::boo
   {
   }
 
-  StyleFilterData::StyleFilterData(const StyleFilterData &other) noexcept
-      : RefCounted<StyleFilterData>(), Filter(other.Filter)
+  StyleFilterData::StyleFilterData(const StyleFilterData &other) noexcept : Filter(other.Filter)
   {
   }
 

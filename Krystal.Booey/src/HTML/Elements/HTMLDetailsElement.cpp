@@ -230,7 +230,7 @@ namespace krys::boo::html
           {
             for (auto &otherDetailsElement : OtherElementsInNameGroup())
             {
-              (void)otherDetailsElement->RemoveAttribute(u8"open");
+              otherDetailsElement->RemoveAttribute(u8"open");
             }
           }
         }

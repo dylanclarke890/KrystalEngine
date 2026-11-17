@@ -32,8 +32,7 @@ namespace krys::boo
   }
 
   inline StyleBackgroundData::StyleBackgroundData(const StyleBackgroundData &other) noexcept
-      : RefCounted<StyleBackgroundData>(), Background(other.Background),
-        BackgroundColor(other.BackgroundColor), Outline(other.Outline)
+      : Background(other.Background), BackgroundColor(other.BackgroundColor), Outline(other.Outline)
   {
   }
 

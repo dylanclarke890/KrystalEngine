@@ -128,8 +128,8 @@ namespace krys::boo::svg::tests
 
   TEST_CASE("SVGPathByteStream: round trips unaltered", "[SVG][SVGPathByteStream]")
   {
-    CHECK(Unaltered(u8"") == u8"");
-    CHECK(Unaltered(u8"   ") == u8"");
+    CHECK(Unaltered(u8"").empty());
+    CHECK(Unaltered(u8"   ").empty());
     CHECK(Unaltered(u8"M 10 20 L 30 40 Z") == u8"M 10 20 L 30 40 Z");
     CHECK(Unaltered(u8"m 10 20 l 30 40 z") == u8"m 10 20 l 30 40 Z");
     CHECK(Unaltered(u8"M10,20L30-40") == u8"M 10 20 L 30 -40");
@@ -163,7 +163,7 @@ namespace krys::boo::svg::tests
     // A path must start with a moveto.
     auto noMove = RoundTrip(u8"L 10 10");
     CHECK_FALSE(noMove.Ok);
-    CHECK(noMove.Path == u8"");
+    CHECK(noMove.Path.empty());
 
     // Segments up to the error are kept.
     auto truncated = RoundTrip(u8"M 0 0 L 10 10 L 20");

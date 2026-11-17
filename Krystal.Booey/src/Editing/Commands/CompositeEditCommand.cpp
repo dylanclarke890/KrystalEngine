@@ -565,7 +565,7 @@ namespace krys::boo
       command->SetParent(nullptr);
       EnsureComposition()->Append(simpleCommand);
     }
-    _commands.push_back(krys::move(command));
+    _commands.emplace_back(krys::move(command));
   }
 
   void CompositeEditCommand::ApplyCommandToComposite(Ref<CompositeEditCommand> &&command,
@@ -578,7 +578,7 @@ namespace krys::boo
       command->SetEndingSelection(selection);
     }
     command->DoApply();
-    _commands.push_back(krys::move(command));
+    _commands.emplace_back(krys::move(command));
   }
 
   void CompositeEditCommand::ApplyStyle(const EditingStyle *style, EditAction editingAction) noexcept

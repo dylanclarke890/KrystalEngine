@@ -49,7 +49,7 @@ namespace krys::boo::css
 
 #pragma region Utils
 
-    void AddPropertyForCurrentShorthand(PropertyParserState &state, PropertyId property,
+    void AddPropertyForCurrentShorthand(PropertyParserState &state, PropertyId longhand,
                                         RefPtr<Value> &&value, IsImplicit implicit = IsImplicit::No) noexcept;
 
     void AddPropertyForAllLonghandsOfShorthand(PropertyParserState &state, PropertyId shorthand,

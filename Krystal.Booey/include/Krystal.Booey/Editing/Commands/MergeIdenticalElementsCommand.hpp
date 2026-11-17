@@ -47,7 +47,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<MergeIdenticalElementsCommand> Create(dom::Element &element1,
                                                                     dom::Element &element2) noexcept;
 
-    MergeIdenticalElementsCommand(dom::Element &element1, dom::Element &element2) noexcept;
+    MergeIdenticalElementsCommand(dom::Element &first, dom::Element &second) noexcept;
 
   private:
     void DoApply() noexcept override;

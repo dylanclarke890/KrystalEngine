@@ -92,9 +92,9 @@ namespace krys::boo::dom::tests
             "[dom:concept-reflect]")
   {
     CommonTestData data;
-    CHECK(data.Node->Id() == u8"");
-    CHECK(data.Node->ClassName() == u8"");
-    CHECK(data.Node->Slot() == u8"");
+    CHECK(data.Node->Id().empty());
+    CHECK(data.Node->ClassName().empty());
+    CHECK(data.Node->Slot().empty());
 
     data.Node->Id(u8"test-id");
     data.Node->ClassName(u8"a b");

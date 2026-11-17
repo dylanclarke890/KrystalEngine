@@ -107,7 +107,7 @@ namespace krys::boo::url
       krys_debug_assert(infra::StringAlgorithms::IsASCIIString(input));
 
       auto length = input.size();
-      if (length < 3 || input.find(u8'%') == utf8_stringview::npos)
+      if (length < 3 || !input.contains(u8'%'))
       {
         return utf8_string {input};
       }
@@ -680,12 +680,12 @@ namespace krys::boo::url
       newHost = newHost.substr(0, index);
     }
 
-    if (newHost.find(u8'@') != utf8_stringview::npos)
+    if (newHost.contains(u8'@'))
     {
       return false;
     }
 
-    if (newHost.find(u8':') != utf8_stringview::npos && !newHost.starts_with(u8'['))
+    if (newHost.contains(u8':') && !newHost.starts_with(u8'['))
     {
       return false;
     }
@@ -753,12 +753,12 @@ namespace krys::boo::url
 
     auto portString = hostAndPort.substr(colonIndex + 1);
     auto hostName = hostAndPort.substr(0, colonIndex);
-    if (hostName.find(u8'@') != utf8_stringview::npos)
+    if (hostName.contains(u8'@'))
     {
       return;
     }
     // Multiple colons are acceptable only in case of IPv6.
-    if (hostName.find(u8':') != utf8_stringview::npos && ipv6Separator == utf8_stringview::npos)
+    if (hostName.contains(u8':') && ipv6Separator == utf8_stringview::npos)
     {
       return;
     }
@@ -1458,7 +1458,7 @@ namespace krys::boo::url
 
   bool URL::HostIsIPAddress(utf8_stringview host) noexcept
   {
-    return host.find(u8':') != utf8_stringview::npos ? IsIPv6Address(host) : IsIPv4Address(host);
+    return host.contains(u8':') ? IsIPv6Address(host) : IsIPv4Address(host);
   }
 
   List<KeyValuePair> QueryParameters(const URL &url) noexcept

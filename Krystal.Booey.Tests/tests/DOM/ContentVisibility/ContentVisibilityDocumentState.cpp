@@ -37,7 +37,7 @@ namespace krys::boo::tests
         frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
         parser->InputStream().Append(u8"<!DOCTYPE html>" + krys::move(markup), IsEOF::Yes);
-        (void)parser->PumpTokenizer();
+        parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();
       }
 
@@ -71,7 +71,7 @@ namespace krys::boo::tests
           FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
         TestPage->MainFrame().View()->Paint(recorder, IntRect(IntPoint(), ViewSize));
         auto colourText = utf8_string(u8"(color ") + utf8_string(colour) + u8")";
-        return recorder.TakeDisplayList()->AsText({}).find(colourText) != utf8_string::npos;
+        return recorder.TakeDisplayList()->AsText({}).contains(colourText);
       }
     };
 

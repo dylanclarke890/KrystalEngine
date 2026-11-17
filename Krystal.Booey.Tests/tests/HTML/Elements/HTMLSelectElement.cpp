@@ -576,7 +576,7 @@ namespace krys::boo::tests
     KRYS_NODISCARD bool Dumps(EditorFixture &fixture, utf8_stringview text) noexcept
     {
       (void)fixture.Document->UpdateLayout();
-      return layout::tests::DumpWithIds(fixture).find(text) != utf8_string::npos;
+      return layout::tests::DumpWithIds(fixture).contains(text);
     }
   }
 

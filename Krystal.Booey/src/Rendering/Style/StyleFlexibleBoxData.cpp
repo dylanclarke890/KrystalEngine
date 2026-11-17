@@ -40,8 +40,8 @@ namespace krys::boo
   }
 
   inline StyleFlexibleBoxData::StyleFlexibleBoxData(const StyleFlexibleBoxData &other) noexcept
-      : RefCounted<StyleFlexibleBoxData>(), FlexGrow(other.FlexGrow), FlexShrink(other.FlexShrink),
-        FlexBasis(other.FlexBasis), FlexDirection(other.FlexDirection), FlexWrap(other.FlexWrap)
+      : FlexGrow(other.FlexGrow), FlexShrink(other.FlexShrink), FlexBasis(other.FlexBasis),
+        FlexDirection(other.FlexDirection), FlexWrap(other.FlexWrap)
   {
   }
 

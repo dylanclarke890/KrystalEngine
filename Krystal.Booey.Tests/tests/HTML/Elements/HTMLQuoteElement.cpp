@@ -13,7 +13,7 @@ namespace krys::boo::html::tests
     {
       auto element = document->CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
       auto &quote = Downcast<HTMLQuoteElement>(Downcast<HTMLElement>(*element));
-      CHECK(quote.Cite() == u8"");
+      CHECK(quote.Cite().empty());
 
       quote.Cite(u8"source.html");
       CHECK(element->GetAttribute(u8"cite") == u8"source.html");

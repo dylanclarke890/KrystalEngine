@@ -49,7 +49,7 @@ namespace krys::boo
   private:
     struct Sides
     {
-      Maybe<BorderData::RadiiType> Radii {}; // FIXME: Do we need this separately from the shape?
+      Maybe<BorderData::RadiiType> Radii; // FIXME: Do we need this separately from the shape?
       const BorderEdges &Edges;
       bool HaveAllSolidEdges {true};
       bool OuterEdgeIsRectangular {true};
@@ -96,7 +96,7 @@ namespace krys::boo
     void PaintTranslucentBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgesToDraw,
                                      bool antialias) const noexcept;
 
-    void PaintBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgesToDraw, bool antialias,
+    void PaintBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgeSet, bool antialias,
                           const Color *overrideColor = nullptr) const noexcept;
 
     void PaintOneBorderSide(const BorderShape &, const Sides &, const LayoutRect &sideRect, BoxSide,

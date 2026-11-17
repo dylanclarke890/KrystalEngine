@@ -59,7 +59,7 @@ namespace krys::boo::style
   struct ElementUpdate
   {
     UniquePtr<RenderStyle> Style;
-    EnumSet<Change> Changes {};
+    EnumSet<Change> Changes;
     bool RecompositeLayer {false};
     bool MayNeedRebuildRoot {false};
   };

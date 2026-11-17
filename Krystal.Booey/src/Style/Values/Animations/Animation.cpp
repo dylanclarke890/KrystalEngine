@@ -50,7 +50,7 @@ namespace krys::boo::style
   }
 
   Animation::AnimationData::AnimationData(const AnimationData &other) noexcept
-      : RefCounted<AnimationData>(), _name {other._name}, _delay {other._delay}, _duration {other._duration},
+      : _name {other._name}, _delay {other._delay}, _duration {other._duration},
         _iterationCount {other._iterationCount}, _timeline {other._timeline},
         _timingFunction {other._timingFunction},
         _defaultTimingFunctionForKeyframes {other._defaultTimingFunctionForKeyframes},

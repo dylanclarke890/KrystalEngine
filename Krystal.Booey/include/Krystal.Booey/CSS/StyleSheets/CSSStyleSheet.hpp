@@ -72,7 +72,7 @@ namespace krys::boo::css
     /// @see https://drafts.csswg.org/cssom/#dictdef-cssstylesheetinit
     struct Init
     {
-      Maybe<CSSOMString> BaseURL {};
+      Maybe<CSSOMString> BaseURL;
       MediaListOrDOMString Media {CSSOMString()};
       bool Disabled {false};
     };

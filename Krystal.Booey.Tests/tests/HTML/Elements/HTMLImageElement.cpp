@@ -208,7 +208,7 @@ namespace krys::boo::tests
 
     // A srcset or picture without image sources selects no source.
     CHECK(nocand->Errors == 1);
-    CHECK(css::tests::ToNarrow(fixture.Image(u8"nocand").CurrentSrc()) == "");
+    CHECK(css::tests::ToNarrow(fixture.Image(u8"nocand").CurrentSrc()).empty());
     // A URL that doesn't parse is the current URL as written.
     CHECK(bad->Errors == 1);
     CHECK(css::tests::ToNarrow(fixture.Image(u8"bad").CurrentSrc()) == "http://[bad");

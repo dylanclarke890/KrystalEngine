@@ -6,8 +6,6 @@
 
 namespace krys::boo::tests
 {
-  using style::tests::ResolverFixture;
-
   // Ported from web-platform-tests' mathml/presentation-markup/scripts/subsup-parameters-1.html: each font
   // sets one MATH constant, which the gaps and shifts measure.
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderMathMLScripts: the MATH table's parameters",

@@ -34,7 +34,7 @@ namespace krys::boo::css::tests
           == "auto 2px 3px 4px");
 
     // Only the -webkit-border-image shorthand overrides the border widths; the longhand serialises as empty.
-    CHECK(CssText(*BorderImageWidthValue::Create(Quad {Px(1.0)}, true)) == "");
+    CHECK(CssText(*BorderImageWidthValue::Create(Quad {Px(1.0)}, true)).empty());
   }
 
   TEST_CASE_METHOD(ValueFixture, "BorderImageWidthValue equality", "[CSS][Values][BorderImageWidthValue]")

@@ -85,7 +85,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CustomPropertyValue serialisation", "[CSS][Values][CustomPropertyValue]")
   {
     // Only the value is serialised, not the name.
-    CHECK(CssText(*CustomPropertyValue::CreateEmpty(Name())) == "");
+    CHECK(CssText(*CustomPropertyValue::CreateEmpty(Name())).empty());
     CHECK(CssText(*CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"1px solid"))) == "1px solid");
     CHECK(CssText(*CustomPropertyValue::CreateUnresolved(Name(), MakeReference(u8"var(--y, red)")))
           == "var(--y, red)");

@@ -285,7 +285,7 @@ namespace krys::boo::layout
               std::max<InlineLayoutUnit>(rightWidth, availableWidth - marginBoxRect.Left().ToFloat());
           }
         }
-        return InlineLayoutUnit {leftWidth + rightWidth};
+        return (leftWidth + rightWidth);
       };
 
       auto lineContentLogicalWidth = [&]

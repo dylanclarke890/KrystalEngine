@@ -158,7 +158,7 @@ namespace krys::gfx
                              0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f};
     /// @brief `ComponentTransfer`: for each channel value from 0 to 255, the red, green, blue and alpha it
     /// becomes, from 0 to 255.
-    List<Array<uint8, 4>> Table {};
+    List<Array<uint8, 4>> Table;
     /// @brief `Offset`: in pixels. `DisplacementMap`: the scale, in pixels.
     Array<float, 2> Offset {};
     /// @brief `Flood`: premultiplied, from 0 to 1, in the node's colour space.
@@ -170,7 +170,7 @@ namespace krys::gfx
     /// @brief `ConvolveMatrix`: the kernel's columns and rows, its values row by row, and the pixel it's
     /// centred on. At most 1024 values.
     Array<uint32, 2> Order {3u, 3u};
-    List<float> Kernel {};
+    List<float> Kernel;
     Array<int32, 2> Target {1, 1};
     float Divisor {1.f};
     /// @brief From 0 to 1, added to each channel.
@@ -217,8 +217,8 @@ namespace krys::gfx
   /// node's result is the filter's.
   struct FilterGraph2D
   {
-    List<FilterSource2D> Sources {};
-    List<FilterNode2D> Nodes {};
+    List<FilterSource2D> Sources;
+    List<FilterNode2D> Nodes;
   };
 
   /// @brief A filter's result: a premultiplied texture whose texel (0, 0) is the top-left of `Region`, and

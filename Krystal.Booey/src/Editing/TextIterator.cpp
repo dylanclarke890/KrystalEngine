@@ -690,7 +690,7 @@ namespace krys::boo
     {
       HandleTextNodeFirstLetter(const_cast<RenderTextFragment &>(*renderTextFragment));
     }
-    else if (!_textRun && rendererText.size())
+    else if (!_textRun && !rendererText.empty())
     {
       if (renderer.Style().GetVisibility() != Visibility::Visible
           && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
@@ -1626,7 +1626,7 @@ namespace krys::boo
     }
 
     utf8_string text = renderer->Text();
-    if (!renderer->HasRenderedText() && text.size())
+    if (!renderer->HasRenderedText() && !text.empty())
     {
       return true;
     }
@@ -1787,7 +1787,7 @@ namespace krys::boo
                                        TextIteratorBehaviors behaviors) noexcept
       : _underlyingIterator(range, behaviors)
   {
-    while (!AtEnd() && !_underlyingIterator.Text().size())
+    while (!AtEnd() && _underlyingIterator.Text().empty())
     {
       _underlyingIterator.Advance();
     }
@@ -1866,7 +1866,7 @@ namespace krys::boo
   BackwardsCharacterIterator::BackwardsCharacterIterator(const dom::SimpleRange &range) noexcept
       : _underlyingIterator(range)
   {
-    while (!AtEnd() && !_underlyingIterator.Text().size())
+    while (!AtEnd() && _underlyingIterator.Text().empty())
     {
       _underlyingIterator.Advance();
     }
@@ -1976,7 +1976,7 @@ namespace krys::boo
     _didLookAhead = false;
 
     // Go to next non-empty chunk
-    while (!_underlyingIterator.AtEnd() && !_underlyingIterator.Text().size())
+    while (!_underlyingIterator.AtEnd() && _underlyingIterator.Text().empty())
     {
       _underlyingIterator.Advance();
     }
@@ -2001,7 +2001,7 @@ namespace krys::boo
 
       // Look ahead to next chunk. If it is whitespace or a break, we can use the previous stuff
       _underlyingIterator.Advance();
-      if (_underlyingIterator.AtEnd() || !_underlyingIterator.Text().size()
+      if (_underlyingIterator.AtEnd() || _underlyingIterator.Text().empty()
           || DeprecatedIsSpaceOrNewline(_underlyingIterator.Text()[0]))
       {
         _didLookAhead = true;
@@ -2024,7 +2024,7 @@ namespace krys::boo
     {
       return _buffer;
     }
-    if (_previousText.Text().size())
+    if (!_previousText.Text().empty())
     {
       return _previousText.Text();
     }

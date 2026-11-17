@@ -43,7 +43,7 @@ namespace krys::gfx
     TextureFormat Format {TextureFormat::RGBA8Unorm};
     /// @brief The target is cleared to this value first, in the target's encoding; otherwise its contents
     /// are kept.
-    Maybe<Array<float, 4>> ClearColour {};
+    Maybe<Array<float, 4>> ClearColour;
   };
 
   /// @brief How `Renderer2D::DrawImage` samples and blends an image.
@@ -61,7 +61,7 @@ namespace krys::gfx
   struct DropShadow2D
   {
     /// @brief In the current coordinates, or in target pixels when shadows ignore transforms.
-    Vec2f Offset {};
+    Vec2f Offset;
     /// @brief Twice the standard deviation of the Gaussian blur, as CSS's shadow blur radius is; 0 for a
     /// sharp shadow.
     float BlurRadius {0.f};
@@ -302,7 +302,7 @@ namespace krys::gfx
       uint32 Chain {NoChain};
       BlendMode Blend {BlendMode::Normal};
       CompositeOperator2D Operator {CompositeOperator2D::SourceOver};
-      Maybe<DropShadow2D> DropShadow {};
+      Maybe<DropShadow2D> DropShadow;
       /// @brief Whether shadows' offsets and blurs are in target pixels rather than the current coordinates.
       bool ShadowsIgnoreTransforms {false};
     };
@@ -328,8 +328,8 @@ namespace krys::gfx
     /// @brief The clips in effect at once; they multiply.
     struct ClipChain
     {
-      SmallList<ClipShape, 4> Shapes {};
-      List<PathClip> Paths {};
+      SmallList<ClipShape, 4> Shapes;
+      List<PathClip> Paths;
       /// @brief The path clips' coverage: one path's cached mask, or several multiplied for this frame.
       MaskLocation Mask {};
       /// @brief Whether the mask is clipped out rather than to.
@@ -517,7 +517,7 @@ namespace krys::gfx
       bool HasComposite {false};
       TextureHandle Texture {};
       /// @brief What it does to its contents as it's composited.
-      Maybe<LayerFilter2D> Filter {};
+      Maybe<LayerFilter2D> Filter;
       /// @brief A drop shadow's composite, before the layer's in the parent, and its blurred texture.
       uint32 ShadowInstance {0u};
       uint32 ShadowBatch {0u};
@@ -615,7 +615,7 @@ namespace krys::gfx
     ShaderHandle _fragmentShader {};
     ShaderHandle _blurVertexShader {};
     ShaderHandle _blurFragmentShader {};
-    SmallList<TargetPipeline, 2> _blurPipelines {};
+    SmallList<TargetPipeline, 2> _blurPipelines;
     SamplerHandle _linearSampler {};
     SamplerHandle _nearestSampler {};
     /// @brief For patterns, whose textures repeat.
@@ -625,32 +625,32 @@ namespace krys::gfx
     TextureHandle _whiteTexture {};
     MaskAtlas _masks;
     GlyphAtlas _glyphs;
-    PathStroker _stroker {};
+    PathStroker _stroker;
     /// @brief Combines nested path clips.
-    PathRasteriser _rasteriser {};
-    List<float> _combinedClip {};
-    List<float> _dashes {};
+    PathRasteriser _rasteriser;
+    List<float> _combinedClip;
+    List<float> _dashes;
     Renderer2DStats _stats {};
-    SmallList<TargetPipeline, 2> _pipelines {};
+    SmallList<TargetPipeline, 2> _pipelines;
     CommandBuffer *_commands {nullptr};
     Render2DTarget _target {};
     DrawState _state {};
-    List<DrawState> _savedStates {};
-    List<RectInstance> _rects {};
-    List<Batch> _batches {};
-    List<ClipChain> _chains {};
-    List<Layer> _layers {};
+    List<DrawState> _savedStates;
+    List<RectInstance> _rects;
+    List<Batch> _batches;
+    List<ClipChain> _chains;
+    List<Layer> _layers;
     /// @brief Layers in the order they ended: children before their parents.
-    List<uint32> _layerOrder {};
+    List<uint32> _layerOrder;
     uint32 _currentLayer {NoLayer};
-    List<LayerTexture> _layerTextures {};
+    List<LayerTexture> _layerTextures;
     /// @brief The backdrop copies `End` has recorded this frame.
     uint32 _backdropCopies {0u};
-    List<GradientData> _gradients {};
-    List<detail::FlatGradientStop> _gradientStops {};
-    List<detail::FlatGradientStop> _flattened {};
-    List<PatternData> _patterns {};
-    List<ColourMatrixUniforms> _colourMatrices {};
+    List<GradientData> _gradients;
+    List<detail::FlatGradientStop> _gradientStops;
+    List<detail::FlatGradientStop> _flattened;
+    List<PatternData> _patterns;
+    List<ColourMatrixUniforms> _colourMatrices;
 
   public:
     /// @brief Past this many target pixels per em, glyphs are filled as outlines, as Skia draws large text.

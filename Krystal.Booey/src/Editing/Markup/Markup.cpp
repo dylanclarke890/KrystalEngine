@@ -617,8 +617,8 @@ namespace krys::boo
       {
         auto style = element.GetAttribute(u8"style").value_or(dom::DOMString());
         utf8_stringview view(style);
-        return view.starts_with(u8"mso-list:") || view.find(u8";mso-list:") != utf8_stringview::npos
-               || view.find(u8"\nmso-list:") != utf8_stringview::npos;
+        return view.starts_with(u8"mso-list:") || view.contains(u8";mso-list:")
+               || view.contains(u8"\nmso-list:");
       }
       return false;
     }
@@ -1747,7 +1747,7 @@ namespace krys::boo
     }
 
     // A string with no newlines gets added inline, rather than being put into a paragraph.
-    if (string.find(u8'\n') == utf8_string::npos)
+    if (!string.contains(u8'\n'))
     {
       FillContainerFromString(*fragment, string);
       return fragment;

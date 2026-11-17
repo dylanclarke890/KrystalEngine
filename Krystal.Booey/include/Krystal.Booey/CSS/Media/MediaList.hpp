@@ -69,9 +69,9 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMString Item(uint32 index) const noexcept;
 
-    dom::ExceptionOr<void> DeleteMedium(const CSSOMString &oldMedium) noexcept;
+    dom::ExceptionOr<void> DeleteMedium(const CSSOMString &value) noexcept;
 
-    void AppendMedium(const CSSOMString &newMedium) noexcept;
+    void AppendMedium(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD CSSOMString MediaText() const noexcept;
 

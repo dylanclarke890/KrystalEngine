@@ -22,7 +22,7 @@ namespace krys::boo::svg::tests
 
     CHECK(list->Parse(u8""));
     CHECK(list->IsEmpty());
-    CHECK(list->ValueAsString() == u8"");
+    CHECK(list->ValueAsString().empty());
 
     // The values of the items, as a list.
     CHECK(list->Parse(u8"1 2"));

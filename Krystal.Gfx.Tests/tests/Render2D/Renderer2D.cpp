@@ -43,7 +43,7 @@ namespace krys::gfx::tests
       UniquePtr<Device> _device;
       UniquePtr<Renderer2D> _renderer;
       TextureHandle _target {};
-      List<TextureHandle> _images {};
+      List<TextureHandle> _images;
       uint32 _width {4u};
       uint32 _height {4u};
       TextureFormat _format {TextureFormat::RGBA8Unorm};

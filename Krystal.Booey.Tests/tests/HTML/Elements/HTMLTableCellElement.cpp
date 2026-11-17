@@ -34,11 +34,11 @@ namespace krys::boo::html::tests
     auto &table = data.Table(u8"<tr><th id=h></th></tr>");
     auto &cell =
       Cell(*Downcast<HTMLTableRowElement>(Downcast<HTMLElement>(*table.Rows()->Item(0))).Cells()->Item(0));
-    CHECK(TableText(cell.Scope()) == "");
+    CHECK(TableText(cell.Scope()).empty());
     cell.Scope(u8"ROWGROUP");
     CHECK(TableText(cell.Scope()) == "rowgroup");
     cell.Scope(u8"column");
-    CHECK(TableText(cell.Scope()) == "");
+    CHECK(TableText(cell.Scope()).empty());
     CHECK(cell.GetAttribute(u8"scope") == u8"column");
   }
 

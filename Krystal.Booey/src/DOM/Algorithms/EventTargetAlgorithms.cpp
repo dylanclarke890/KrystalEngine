@@ -194,7 +194,7 @@ namespace krys::boo::dom
   {
     while (!eventTarget._eventListenerList.empty())
     {
-      RemoveEventListener(eventTarget, *eventTarget._eventListenerList.front().get());
+      RemoveEventListener(eventTarget, *eventTarget._eventListenerList.front());
     }
   }
 

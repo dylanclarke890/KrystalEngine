@@ -20,7 +20,7 @@ namespace krys::boo::html::tests
     auto element = document->CreateElement(u8"iframe").ReleaseValue();
     auto &iframe = AsIFrame(*element);
 
-    CHECK(iframe.SrcDoc() == u8"");
+    CHECK(iframe.SrcDoc().empty());
     iframe.SrcDoc(u8"<p>Hello");
     CHECK(element->GetAttribute(u8"srcdoc") == u8"<p>Hello");
     CHECK(iframe.SrcDoc() == u8"<p>Hello");

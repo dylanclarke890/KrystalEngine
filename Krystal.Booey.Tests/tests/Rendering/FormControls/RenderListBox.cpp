@@ -133,7 +133,7 @@ layer at (0,0) size 400x37
                          static_cast<float>(rect->Width()), static_cast<float>(rect->Height()));
       };
 
-      auto &elderberry = *select.ListItems()[5].get();
+      auto &elderberry = *select.ListItems()[5];
       CHECK(bounds(elderberry) == FloatRect(listBox.ItemBoundingBoxRect({}, 5)));
       CHECK(elderberry.GetClientRects()->Length() == 1u);
 

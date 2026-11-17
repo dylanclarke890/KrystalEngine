@@ -62,9 +62,9 @@ namespace krys::boo::css::calc
   };
 
   /// @brief Parses and simplifies the provided TokenRange into a Tree. Returns `null` on failure.
-  KRYS_NODISCARD Maybe<Tree> ParseAndSimplify(TokenRange &tokens, css::PropertyParserState &state,
+  KRYS_NODISCARD Maybe<Tree> ParseAndSimplify(TokenRange &range, css::PropertyParserState &state,
                                               const ParserOptions &options,
-                                              const SimplificationOptions &simplifyOptions) noexcept;
+                                              const SimplificationOptions &simplificationOptions) noexcept;
 
   /// @brief Returns whether the provided ValueId is one of the functions that should be parsed as a calc().
   KRYS_NODISCARD constexpr bool IsCalcFunction(ValueId functionId) noexcept

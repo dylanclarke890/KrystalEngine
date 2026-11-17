@@ -165,8 +165,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<LayoutUnit> AvailableLogicalHeightForContentBox() const noexcept;
 
-    void SetNeedsItemPlacement(
-      SubgridDidChange descendantSubgridsNeedItemPlacement = SubgridDidChange::No) noexcept;
+    void SetNeedsItemPlacement(SubgridDidChange subgridDidChange = SubgridDidChange::No) noexcept;
 
     KRYS_NODISCARD List<LayoutUnit>
       TrackSizesForComputedStyle(style::GridTrackSizingDirection direction) const noexcept;
@@ -315,7 +314,7 @@ namespace krys::boo
                          const HitTestLocation &locationInContainer, const LayoutPoint &adjustedLocation,
                          HitTestAction hitTestAction) noexcept override;
 
-    void PaintChildren(PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild) noexcept override;
+    void PaintChildren(PaintInfo &paintInfo, const LayoutPoint &, PaintInfo &forChild) noexcept override;
 
   private:
     void ComputeLayoutRequirementsForItemsBeforeLayout(GridLayoutState &gridLayoutState) const noexcept;

@@ -108,7 +108,7 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD bool Contains(utf8_stringview haystack, utf8_stringview needle) noexcept
     {
-      return haystack.find(needle) != utf8_stringview::npos;
+      return haystack.contains(needle);
     }
   }
 

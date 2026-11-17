@@ -64,7 +64,7 @@ namespace krys::boo::css::parse_property
       values.push_back(krys::move(parsedValue));
     }
 
-    if (values.size() && !(values.size() % 2))
+    if (!values.empty() && !(values.size() % 2))
     {
       return ValueList::CreateSpaceSeparated(krys::move(values));
     }

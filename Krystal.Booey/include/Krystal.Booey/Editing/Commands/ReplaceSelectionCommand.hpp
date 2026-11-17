@@ -109,7 +109,7 @@ namespace krys::boo
 
   public:
     ReplaceSelectionCommand(dom::Document &document, RefPtr<dom::DocumentFragment> &&fragment,
-                            EnumSet<CommandOption> options, EditAction editingAction) noexcept;
+                            EnumSet<CommandOption> options, EditAction editAction) noexcept;
 
     ~ReplaceSelectionCommand() noexcept override;
 
@@ -138,8 +138,9 @@ namespace krys::boo
 
     void DoApply() noexcept override;
 
-    RefPtr<dom::Node> InsertAsListItems(dom::Element &listElement, dom::Node *insertionNode,
-                                        const dom::Position &position, InsertedNodes &insertedNodes) noexcept;
+    RefPtr<dom::Node> InsertAsListItems(dom::Element &listElement, dom::Node *insertionBlock,
+                                        const dom::Position &insertPos,
+                                        InsertedNodes &insertedNodes) noexcept;
 
     void UpdateNodesInserted(dom::Node *node) noexcept;
 

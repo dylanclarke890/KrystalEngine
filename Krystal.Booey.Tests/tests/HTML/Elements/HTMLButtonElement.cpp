@@ -199,7 +199,7 @@ namespace krys::boo::html::tests
     {
       CHECK_FALSE(button.CommandForElement());
       button.CommandForElementForBindings(&popover);
-      CHECK(NarrowOrNull(button.GetAttribute(u8"commandfor")) == "");
+      CHECK(NarrowOrNull(button.GetAttribute(u8"commandfor")).empty());
       CHECK(button.CommandForElement().get() == &popover);
       CHECK(button.CommandForElementForBindings().get() == &popover);
       (void)button.SetAttribute(u8"commandfor", u8"nope");
@@ -215,7 +215,7 @@ namespace krys::boo::html::tests
       CHECK(Narrow(button.FormControlType()) == "submit");
       button.Command(u8"--spin");
       CHECK(Narrow(button.FormControlType()) == "button");
-      (void)button.RemoveAttribute(u8"command");
+      button.RemoveAttribute(u8"command");
       CHECK(Narrow(button.FormControlType()) == "submit");
 
       auto &inForm = fixture.Get<HTMLButtonElement>(u8"f");

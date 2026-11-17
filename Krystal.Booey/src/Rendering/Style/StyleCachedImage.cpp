@@ -130,7 +130,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    if (_url.Resolved.String().find(u8'#') == utf8_string::npos)
+    if (!_url.Resolved.String().contains(u8'#'))
     {
       _isRenderSVGResource = false;
       return nullptr;

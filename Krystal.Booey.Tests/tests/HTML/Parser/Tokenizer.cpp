@@ -100,7 +100,7 @@ namespace krys::boo::html::tests
       TokenizerState ExpectedState {TokenizerState::Data};
       bool AppendEOF {false};
       bool CDATASectionAllowed {false};
-      List<TokenizerError> Errors {};
+      List<TokenizerError> Errors;
     };
 
     KRYS_NODISCARD List<HTMLTokenizerTest> ParseHTMLTokenizerTests(std::istream &stream) noexcept

@@ -97,7 +97,7 @@ namespace krys::boo
 
     bool ReadFilePaths(const List<utf8_string> &paths) noexcept override;
 
-    bool ReadHTML(utf8_stringview markup) noexcept override;
+    bool ReadHTML(utf8_stringview string) noexcept override;
 
     bool ReadURL(const url::URL &url, utf8_stringview title) noexcept override;
 
@@ -131,7 +131,7 @@ namespace krys::boo
       return false;
     }
 
-    bool ReadHTML(utf8_stringview markup) noexcept override;
+    bool ReadHTML(utf8_stringview string) noexcept override;
 
     bool ReadURL(const url::URL &, utf8_stringview) noexcept override
     {

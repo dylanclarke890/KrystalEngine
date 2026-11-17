@@ -1013,7 +1013,7 @@ namespace krys::boo::css
         {
           SetForScope resistDefaultNamespace(_resistDefaultNamespace, true);
           auto selectorList = ConsumeComplexSelectorList(block);
-          if (selectorList.size() < 1 || !block.IsAtEnd())
+          if (selectorList.empty() || !block.IsAtEnd())
           {
             return nullptr;
           }

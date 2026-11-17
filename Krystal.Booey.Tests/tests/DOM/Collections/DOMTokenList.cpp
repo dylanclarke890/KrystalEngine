@@ -284,7 +284,7 @@ namespace krys::boo::dom::tests
             "[DOM][DOMTokenList][dom:dom-domtokenlist-value][dom:concept-dtl-serialize]")
   {
     CommonTestData data;
-    REQUIRE(data.TokenList.Value() == u8"");
+    REQUIRE(data.TokenList.Value().empty());
     REQUIRE_FALSE(data.TokenList.Add(u8"foo").HasException());
     REQUIRE_FALSE(data.TokenList.Add(u8"bar").HasException());
     REQUIRE(data.TokenList.Value() == u8"foo bar");

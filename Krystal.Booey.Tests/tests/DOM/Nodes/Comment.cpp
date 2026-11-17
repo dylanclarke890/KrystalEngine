@@ -35,7 +35,7 @@ namespace krys::boo::dom::tests
     CHECK(constructed->Data() == u8"data");
     CHECK(&constructed->NodeDocument() == document.get());
     CHECK(constructed->ParentNode() == nullptr);
-    CHECK(CreateRef<Comment>(*document)->Data() == u8"");
+    CHECK(CreateRef<Comment>(*document)->Data().empty());
 
     auto created = document->CreateComment(u8"created");
     CHECK(created->Data() == u8"created");

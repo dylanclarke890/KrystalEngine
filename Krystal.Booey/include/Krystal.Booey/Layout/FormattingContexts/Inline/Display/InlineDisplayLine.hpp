@@ -89,7 +89,7 @@ namespace krys::boo::inline_display
     bool _hasInflowBox : 1 {false};
     bool _hasContentfulBox : 1 {false};
     bool _hasBlockLevelBox : 1 {false};
-    Maybe<Ellipsis> _ellipsis {};
+    Maybe<Ellipsis> _ellipsis;
 
   public:
     Line(bool hasInflowBox, bool hasContentfulBox, bool hasBlockLevelBox, const FloatRect &lineBoxLogicalRect,

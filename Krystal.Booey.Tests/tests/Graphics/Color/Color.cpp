@@ -132,7 +132,7 @@ namespace krys::boo::tests
     Color c1 {DisplayP3<float> {1.0f, 0.5f, 0.25f, 1.0f}};
     CheckDisplayP3Components(c1);
 
-    Color c2(c1);
+    const Color &c2(c1);
     CheckDisplayP3Components(c2);
 
     Color c3 = c1;

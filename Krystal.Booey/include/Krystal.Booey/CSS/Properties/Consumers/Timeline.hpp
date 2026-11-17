@@ -63,7 +63,7 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleViewTimelineInsetItem(TokenRange &tokens,
                                                                     PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<Value> ParseSingleViewTimelineInsetItem(const CSSOMString &input,
+    KRYS_NODISCARD RefPtr<Value> ParseSingleViewTimelineInsetItem(const CSSOMString &string,
                                                                   const ParserContext &context) noexcept;
 
     // <single-animation-range> = normal | <length-percentage> | <timeline-range-name> <length-percentage>?
@@ -77,7 +77,7 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleAnimationRangeEnd(TokenRange &tokens,
                                                                 PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<Value> ParseSingleAnimationRange(const CSSOMString &input,
+    KRYS_NODISCARD RefPtr<Value> ParseSingleAnimationRange(const CSSOMString &string,
                                                            const ParserContext &context,
                                                            style::SingleAnimationRangeType type) noexcept;
   }

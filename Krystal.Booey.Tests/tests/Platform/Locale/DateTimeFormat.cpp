@@ -62,7 +62,7 @@ namespace krys::boo::tests
 
   TEST_CASE("DateTimeFormat: quoting literals", "[Core][DateTimeFormat]")
   {
-    CHECK(Quote(u8"") == u8"");
+    CHECK(Quote(u8"").empty());
     CHECK(Quote(u8"-/: ") == u8"-/: ");
     CHECK(Quote(u8"T") == u8"'T'");
     CHECK(Quote(u8"o'clock") == u8"'o''clock'");

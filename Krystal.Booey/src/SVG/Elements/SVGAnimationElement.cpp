@@ -710,7 +710,7 @@ namespace krys::boo::svg
     }
     else if (animationMode == AnimationMode::Values)
     {
-      _animationValid = _values.size() >= 1
+      _animationValid = !_values.empty()
                         && (calcMode == CalcMode::Paced || !hasKeyTimes || hasKeyPoints
                             || (_values.size() == keyTimes.size()))
                         && (calcMode == CalcMode::Discrete || keyTimes.empty() || keyTimes.back() == 1)

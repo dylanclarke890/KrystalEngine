@@ -163,7 +163,7 @@ namespace krys::io::tests
           ++sharedCount;
           // Heuristic: absolute path should point inside 'data' physical root if override won.
           // (Your VFSFileEntry holds AbsolutePath and RelativePath in your backend; adjust if different.)
-          sharedLooksOverride = e.AbsolutePath.ToString().find(data.generic_string()) != std::string::npos;
+          sharedLooksOverride = e.AbsolutePath.ToString().contains(data.generic_string());
         }
       }
       REQUIRE(sharedCount == 1);
@@ -180,11 +180,11 @@ namespace krys::io::tests
       for (const auto &e : rec)
       {
         const auto s = e.RelativePath.ToString();
-        if (s.find("ui/theme.txt") != std::string::npos)
+        if (s.contains("ui/theme.txt"))
         {
           has_theme = true;
         }
-        if (s.find("images/pic.png") != std::string::npos)
+        if (s.contains("images/pic.png"))
         {
           has_pic = true;
         }
@@ -197,11 +197,11 @@ namespace krys::io::tests
       for (const auto &e : flat)
       {
         const auto s = e.RelativePath.ToString();
-        if (s.find("ui/theme.txt") != std::string::npos)
+        if (s.contains("ui/theme.txt"))
         {
           flat_has_theme = true;
         }
-        if (s.find("images/pic.png") != std::string::npos)
+        if (s.contains("images/pic.png"))
         {
           flat_has_pic = true;
         }

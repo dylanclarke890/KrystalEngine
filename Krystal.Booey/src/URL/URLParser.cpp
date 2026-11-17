@@ -2352,7 +2352,7 @@ namespace krys::boo::url
         }
       }
     }
-    if (!iterator.AtEnd() || !items.size() || items.size() > 4)
+    if (!iterator.AtEnd() || items.empty() || items.size() > 4)
     {
       return Unexpected(IPv4ParsingError::NotIPv4);
     }

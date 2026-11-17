@@ -48,7 +48,7 @@ namespace krys::boo
              ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
              EditAction editingAction = EditAction::Insert) noexcept;
 
-    InsertNodeBeforeCommand(dom::Node &childToInsert, dom::Node &childToInsertBefore,
+    InsertNodeBeforeCommand(dom::Node &insertChild, dom::Node &refChild,
                             ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable,
                             EditAction editingAction) noexcept;
 

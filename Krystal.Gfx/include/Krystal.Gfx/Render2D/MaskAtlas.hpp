@@ -105,10 +105,10 @@ namespace krys::gfx
   private:
     Device *_device;
     MaskAtlasDesc _desc;
-    PathRasteriser _rasteriser {};
+    PathRasteriser _rasteriser;
     AtlasPages _pages;
-    HashMap<Key, Entry, KeyHash> _entries {};
-    List<RetiredTexture> _retired {};
+    HashMap<Key, Entry, KeyHash> _entries;
+    List<RetiredTexture> _retired;
     MaskAtlasStats _stats {};
     uint64 _collectedFrame {0u};
 

@@ -28,7 +28,7 @@ namespace krys::boo::dom::tests
     CommonTestData data;
     auto attr = data.Document->CreateAttributeNS(u8"urn:x", u8"x:a").ReleaseValue();
     CHECK(&attr->NodeDocument() == data.Document.get());
-    CHECK(attr->Value() == u8"");
+    CHECK(attr->Value().empty());
     CHECK(attr->OwnerElement() == nullptr);
     CHECK_FALSE(attr->HasChildNodes());
 

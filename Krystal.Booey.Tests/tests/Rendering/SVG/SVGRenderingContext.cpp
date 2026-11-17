@@ -11,7 +11,7 @@ namespace krys::boo::tests
   {
     KRYS_NODISCARD bool Contains(utf8_stringview text, utf8_stringview part) noexcept
     {
-      return text.find(part) != utf8_stringview::npos;
+      return text.contains(part);
     }
 
     KRYS_NODISCARD utf8_string FilteredRect(utf8_stringview filter) noexcept

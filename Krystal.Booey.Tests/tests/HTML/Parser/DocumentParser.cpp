@@ -303,7 +303,7 @@ namespace krys::boo::html::tests
           parser->ScriptingMode(*test.ScriptingMode);
         }
 
-        (void)parser->PumpTokenizer();
+        parser->PumpTokenizer();
 
         output = SerialiseDocument(*document);
       }
@@ -721,7 +721,7 @@ namespace krys::boo::html::tests
       *document,
       utf8_string(u8"<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' "
                   u8"xlink:href='#a'></svg>"));
-    (void)parser->PumpTokenizer();
+    parser->PumpTokenizer();
     auto svg = document->Body()->FirstElementChild();
     REQUIRE(svg);
 
@@ -749,7 +749,7 @@ namespace krys::boo::html::tests
     auto parser = CreateParser(*document, utf8_string(u8"<table><form id=f><tr><td><input id=i>"
                                                       u8"<input id=attr form=elsewhere><template><input id=t>"
                                                       u8"</template></td></tr></form></table>"));
-    (void)parser->PumpTokenizer();
+    parser->PumpTokenizer();
 
     auto &form = Downcast<HTMLFormElement>(*document->GetElementById(u8"f"));
     CHECK_FALSE(form.Contains(document->GetElementById(u8"i").get()));
@@ -773,7 +773,7 @@ namespace krys::boo::html::tests
     auto parser = CreateParser(*document, utf8_string(u8"<input id=i type=checkbox checked value=v>"
                                                       u8"<textarea id=t>text</textarea>"
                                                       u8"<select id=s><option>a<option selected>b</select>"));
-    (void)parser->PumpTokenizer();
+    parser->PumpTokenizer();
 
     auto &input = Downcast<HTMLInputElement>(*document->GetElementById(u8"i"));
     CHECK(input.Checked());

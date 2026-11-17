@@ -28,14 +28,14 @@ namespace krys::gfx
 
   private:
     /// @brief The contour or dash being stroked.
-    List<Vec2f> _points {};
+    List<Vec2f> _points;
     /// @brief Whether each point is a corner between two of the path's segments, which takes the style's
     /// join; points inside flattened curves take bevels.
-    List<uint8> _corners {};
-    List<Vec2f> _piece {};
-    List<uint8> _pieceCorners {};
-    List<Vec2f> _polygon {};
-    List<float> _dashes {};
+    List<uint8> _corners;
+    List<Vec2f> _piece;
+    List<uint8> _pieceCorners;
+    List<Vec2f> _polygon;
+    List<float> _dashes;
 
     Path2D *_outline {nullptr};
     const StrokeStyle *_style {nullptr};

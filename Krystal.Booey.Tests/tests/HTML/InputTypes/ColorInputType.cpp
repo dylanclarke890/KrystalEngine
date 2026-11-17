@@ -155,13 +155,13 @@ namespace krys::boo::tests
     CHECK(value(u8"rgb(255 0 0 / 0.4)") == "color(srgb 1 0 0 / 0.4)");
 
     // In Display P3, the value is in that colour space.
-    (void)input.RemoveAttribute(u8"alpha");
+    input.RemoveAttribute(u8"alpha");
     (void)input.SetAttribute(u8"colorspace", u8"display-p3");
     CHECK(value(u8"color(display-p3 1 0 0)") == "color(display-p3 1 0 0)");
     CHECK(input.ColourSpace() == u8"display-p3");
 
     // Changing the attributes updates a dirty value.
-    (void)input.RemoveAttribute(u8"colorspace");
+    input.RemoveAttribute(u8"colorspace");
     CHECK(input.Value() == u8"#ff0000");
   }
 

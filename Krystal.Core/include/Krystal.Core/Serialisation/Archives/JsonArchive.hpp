@@ -40,8 +40,8 @@ namespace krys::serialisation
 
     Stream _stream;
     Writer _writer;
-    stringview _nextName {}; // The next name, can be specified using a NamedField or generated automatically.
-    Stack<Node> _nodes {};
+    stringview _nextName; // The next name, can be specified using a NamedField or generated automatically.
+    Stack<Node> _nodes;
 
   public:
     JsonArchiveWriter(io::IStreamWriter &stream) noexcept : _stream(stream), _writer(_stream)
@@ -255,9 +255,9 @@ namespace krys::serialisation
       }
 
     private:
-      MemberIterator _memberIteratorBegin {}, _memberIteratorEnd {}; /// @brief The member iterator (object)
-      ValueIterator _valueIteratorBegin {};                          /// @brief The value iterator (array)
-      size_t _index {0u}, _size {0u}; /// @brief The current index of this iterator
+      MemberIterator _memberIteratorBegin, _memberIteratorEnd; /// @brief The member iterator (object)
+      ValueIterator _valueIteratorBegin {};                    /// @brief The value iterator (array)
+      size_t _index {0u}, _size {0u};                          /// @brief The current index of this iterator
 
       enum class Type
       {
@@ -268,10 +268,10 @@ namespace krys::serialisation
     };
 
   private:
-    stringview _nextName {};          /// @brief Next name set by NamedField
-    Stream _stream;                   /// @brief Rapidjson read stream
-    List<Iterator> _iteratorStack {}; /// @brief 'Stack' of rapidJSON iterators
-    rapidjson::Document _document;    /// @brief Rapidjson document
+    stringview _nextName;          /// @brief Next name set by NamedField
+    Stream _stream;                /// @brief Rapidjson read stream
+    List<Iterator> _iteratorStack; /// @brief 'Stack' of rapidJSON iterators
+    rapidjson::Document _document; /// @brief Rapidjson document
 
   public:
     JsonArchiveReader(io::IStreamReader &stream) noexcept : _stream(stream)

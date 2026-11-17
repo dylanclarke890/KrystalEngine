@@ -29,7 +29,7 @@ namespace krys::boo
     krys_debug_assert(result.ec == std::errc {});
 
     std::string_view formatted(buffer.data(), result.ptr);
-    if (formatted.find('.') != std::string_view::npos)
+    if (formatted.contains('.'))
     {
       while (formatted.ends_with('0'))
       {

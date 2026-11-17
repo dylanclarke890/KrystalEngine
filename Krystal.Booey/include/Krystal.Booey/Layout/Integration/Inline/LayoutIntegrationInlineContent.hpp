@@ -71,7 +71,7 @@ namespace krys::boo::layout_integration
     FloatRect _inkOverflow;
     float _clearGapBeforeFirstLine {0};
     float _clearGapAfterLastLine {0};
-    Maybe<float> _firstLinePaginationOffset {};
+    Maybe<float> _firstLinePaginationOffset;
     bool _hasMultilinePaintOverlap {false};
     bool _hasBlockLevelBoxes {false};
     bool _hasPaintedInlineLevelBoxes {false};

@@ -56,7 +56,7 @@ namespace krys::boo::layout
     Span<const InlineItem> _inlineItemList;
     SmallList<const InlineItem *, 32> _wrapOpportunityList;
     Maybe<InlineTextItem> _partialLeadingTextItem;
-    Maybe<PreviousLine> _previousLine {};
+    Maybe<PreviousLine> _previousLine;
     bool _isFirstFormattedLineCandidate {false};
 
   private:

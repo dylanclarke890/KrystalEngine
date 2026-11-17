@@ -53,7 +53,7 @@ namespace krys::boo::layout
       size_t Length {0};
       InlineLayoutUnit LogicalWidth {0};
       // FIXME: Remove this and collapse the rest of PartialRun over to PartialTrailingContent.
-      Maybe<InlineLayoutUnit> HyphenWidth {};
+      Maybe<InlineLayoutUnit> HyphenWidth;
     };
 
     enum class IsEndOfLine : bool
@@ -83,12 +83,12 @@ namespace krys::boo::layout
         Maybe<PartialRun> Partial; // nullopt partial run means the trailing run is a complete run.
         // Hyphen may be at the end of a full run in the middle of the continuous content (e.g. with adjacent
         // InlineTextItems).
-        Maybe<InlineLayoutUnit> HyphenWidth {};
+        Maybe<InlineLayoutUnit> HyphenWidth;
       };
 
       Action ResultAction {Action::Keep};
       IsEndOfLine EndOfLine {IsEndOfLine::No};
-      Maybe<PartialTrailingContent> PartialTrailing {};
+      Maybe<PartialTrailingContent> PartialTrailing;
       const InlineItem *LastWrapOpportunityItem {nullptr};
     };
 
@@ -139,7 +139,7 @@ namespace krys::boo::layout
           End,
         };
 
-        Maybe<ShapingBoundary> Shaping {};
+        Maybe<ShapingBoundary> Shaping;
 
       private:
         InlineLayoutUnit _contentWidth {0};
@@ -152,8 +152,8 @@ namespace krys::boo::layout
       InlineLayoutUnit _logicalWidth {0.f};
       InlineLayoutUnit _leadingTrimmableWidth {0.f};
       InlineLayoutUnit _trailingTrimmableWidth {0.f};
-      Maybe<InlineLayoutUnit> _hangingContentWidth {};
-      Maybe<InlineLayoutUnit> _minimumRequiredWidth {};
+      Maybe<InlineLayoutUnit> _hangingContentWidth;
+      Maybe<InlineLayoutUnit> _minimumRequiredWidth;
       bool _hasTextContent {false};
       bool _isTextOnlyContent {true};
       bool _isFullyTrimmable {false};
@@ -302,14 +302,14 @@ namespace krys::boo::layout
           // the previous run. Sometimes the breaking position is at the very beginning of the first run, so
           // there's no trailing run at all.
           bool Overflows {false};
-          Maybe<InlineContentBreaker::PartialRun> Partial {};
-          Maybe<InlineLayoutUnit> HyphenWidth {};
+          Maybe<InlineContentBreaker::PartialRun> Partial;
+          Maybe<InlineLayoutUnit> HyphenWidth;
         };
 
-        Maybe<TrailingContent> Trailing {};
+        Maybe<TrailingContent> Trailing;
       };
 
-      Maybe<BreakingPosition> Breaking {}; // Where we actually break this overflowing content.
+      Maybe<BreakingPosition> Breaking; // Where we actually break this overflowing content.
     };
 
     enum class WordBreakRule : uint8

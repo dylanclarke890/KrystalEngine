@@ -4,7 +4,7 @@
 namespace krys::pal
 {
   Input::Input(EventManager *events, UniquePtr<GamepadBackend> gamepads) noexcept
-      : _keyboard(), _mouse(), _events(events), _gamepadBackend(krys::move(gamepads))
+      : _events(events), _gamepadBackend(krys::move(gamepads))
   {
     if (_gamepadBackend)
     {

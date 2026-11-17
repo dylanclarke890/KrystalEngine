@@ -103,7 +103,7 @@ namespace krys::boo::html::tests
     {
       auto parser = CreateRef<DocumentParser>(*Document);
       parser->InputStream().Append(u8"<!DOCTYPE html><body>" + krys::move(markup), IsEOF::Yes);
-      (void)parser->PumpTokenizer();
+      parser->PumpTokenizer();
     }
 
     /// @brief The body, parsing an empty page first if there's none.

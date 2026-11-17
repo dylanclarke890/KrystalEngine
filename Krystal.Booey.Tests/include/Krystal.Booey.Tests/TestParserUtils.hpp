@@ -123,7 +123,6 @@ namespace krys::boo::tests
       }
 
       data += ToUTF8(line) + u8"\n";
-      continue;
     }
 
     if (!sectionName.empty())

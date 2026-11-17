@@ -131,7 +131,7 @@ namespace krys::pal::win32
 
     void AccessibilityNodeRemoved(AccessibilityNodeID node) noexcept override;
 
-    LRESULT HandleMessage(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
+    LRESULT HandleMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
 
   private:
     void CreateWindowClass(HMODULE instance);

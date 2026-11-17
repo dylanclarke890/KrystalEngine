@@ -71,18 +71,18 @@ namespace krys::text
 
         if (state == Accept)
         {
-          return DecodeOneSuccess<UTF8>(static_cast<char32>(codePoint), static_cast<uint8>(consumed));
+          return DecodeOneSuccess<UTF8>(static_cast<char32>(codePoint), consumed);
         }
         else if (state == Reject)
         {
-          return DecodeOneInvalidSequenceError<UTF8>(static_cast<uint8>(consumed));
+          return DecodeOneInvalidSequenceError<UTF8>(consumed);
         }
 
         // state is positive (e.g., 24, 36) -> we need more input, so loop continues
       }
 
       // If we exit the loop, we ran out of input before the DFA reached Accept
-      return DecodeOneIncompleteSequenceError<UTF8>(static_cast<uint8>(consumed));
+      return DecodeOneIncompleteSequenceError<UTF8>(consumed);
     }
 
     KRYS_NODISCARD constexpr static EncodeOneResult<UTF8> EncodeOne(char32 codePoint) noexcept

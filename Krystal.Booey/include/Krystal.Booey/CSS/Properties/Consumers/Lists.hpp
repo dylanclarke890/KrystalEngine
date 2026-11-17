@@ -35,11 +35,11 @@ namespace krys::boo::css
 
   namespace parse_property
   {
-    KRYS_NODISCARD RefPtr<Value> ConsumeCounterReset(TokenRange &tokens, PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterReset(TokenRange &range, PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<Value> ConsumeCounterIncrement(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterIncrement(TokenRange &range,
                                                          PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<Value> ConsumeCounterSet(TokenRange &tokens, PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterSet(TokenRange &range, PropertyParserState &state) noexcept;
   }
 }

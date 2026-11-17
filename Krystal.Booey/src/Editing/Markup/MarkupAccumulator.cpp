@@ -278,8 +278,7 @@ namespace krys::boo
     {
       for (auto c : id)
       {
-        if (!text::IsASCIIAlphanumeric(c)
-            && utf8_stringview(u8" \r\n-'()+,./:=?;!*#@$_%").find(c) == utf8_stringview::npos)
+        if (!text::IsASCIIAlphanumeric(c) && !utf8_stringview(u8" \r\n-'()+,./:=?;!*#@$_%").contains(c))
         {
           return false;
         }
@@ -290,7 +289,7 @@ namespace krys::boo
     /// @brief Whether a node's @p localName can be serialized: an XML `Name` without a colon.
     KRYS_NODISCARD bool IsWellFormedLocalName(utf8_stringview localName) noexcept
     {
-      return localName.find(u8':') == utf8_stringview::npos && dom::NameValidation::IsValidXMLName(localName);
+      return !localName.contains(u8':') && dom::NameValidation::IsValidXMLName(localName);
     }
 
     void AppendDocumentType(utf8_string &result, const dom::DocumentType &documentType) noexcept
@@ -1005,11 +1004,7 @@ namespace krys::boo
         // Error cases: a Comment node whose data contains characters that aren't XML Chars, or two adjacent
         // U+002D HYPHEN-MINUS characters (-), or ends with one.
         CheckWellFormed(
-          [&]
-          {
-            return IsXMLCharacterData(data) && data.find(u8"--") == utf8_string::npos
-                   && !data.ends_with(u8'-');
-          });
+          [&] { return IsXMLCharacterData(data) && !data.contains(u8"--") && !data.ends_with(u8'-'); });
         result.append(u8"<!--");
         result.append(data);
         result.append(u8"-->");
@@ -1032,8 +1027,7 @@ namespace krys::boo
           {
             auto &systemId = documentType.SystemId();
             return IsXMLPublicIdentifier(documentType.PublicId())
-                   && (systemId.find(u8'"') == utf8_string::npos
-                       || systemId.find(u8'\'') == utf8_string::npos)
+                   && (!systemId.contains(u8'"') || !systemId.contains(u8'\''))
                    && IsXMLCharacterData(systemId);
           });
         AppendDocumentType(result, documentType);
@@ -1051,8 +1045,7 @@ namespace krys::boo
             auto &target = instruction.Target();
             auto &data = instruction.Data();
             return !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(target, u8"xml")
-                   && target.find(u8':') == utf8_string::npos && IsXMLCharacterData(data)
-                   && data.find(u8"?>") == utf8_string::npos;
+                   && !target.contains(u8':') && IsXMLCharacterData(data) && !data.contains(u8"?>");
           });
         result.append(u8"<?");
         result.append(instruction.Target());

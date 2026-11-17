@@ -565,7 +565,7 @@ namespace krys::pal
     bool ReadInternetShortcut(utf8_stringview path, DragContent &content) noexcept
     {
       auto widePath = ToWide(path);
-      if (::_wcsicmp(::PathFindExtensionW(widePath.c_str()), L".url"))
+      if (::_wcsicmp(::PathFindExtensionW(widePath.c_str()), L".url") != 0)
       {
         return false;
       }

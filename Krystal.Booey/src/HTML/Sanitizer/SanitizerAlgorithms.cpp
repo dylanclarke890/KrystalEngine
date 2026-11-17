@@ -861,7 +861,7 @@ namespace krys::boo::html
     // at least one character after the hyphen, is XML-compatible, and contains no ASCII upper alphas.
     const auto &name = attribute.Name;
     return attribute.Namespace == null && name.starts_with(u8"data-") && name.size() > 5
-           && dom::NameValidation::IsValidXMLName(name) && name.find(u8':') == dom::DOMString::npos
+           && dom::NameValidation::IsValidXMLName(name) && !name.contains(u8':')
            && std::ranges::none_of(name, [](char8_t c) { return c >= u8'A' && c <= u8'Z'; });
   }
 

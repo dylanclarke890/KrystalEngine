@@ -43,7 +43,7 @@ namespace krys::boo
   }
 
   inline StyleBorderImageData::StyleBorderImageData(const StyleBorderImageData &other) noexcept
-      : RefCounted<StyleBorderImageData>(), BorderImage {other.BorderImage}
+      : BorderImage {other.BorderImage}
   {
   }
 

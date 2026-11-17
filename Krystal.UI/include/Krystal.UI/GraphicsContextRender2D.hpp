@@ -100,7 +100,7 @@ namespace krys::ui
 
     void FillRoundedRectImpl(const boo::FloatRoundedRect &, const boo::Color &) noexcept override;
 
-    void FillRectWithRoundedHole(const boo::FloatRect &, const boo::FloatRoundedRect &roundedHoleRect,
+    void FillRectWithRoundedHole(const boo::FloatRect &, const boo::FloatRoundedRect &innerRRect,
                                  const boo::Color &) noexcept override;
 
     void ClearRect(const boo::FloatRect &) noexcept override;
@@ -136,8 +136,8 @@ namespace krys::ui
     void DrawGlyphs(const boo::Font &, Span<const boo::GlyphBufferGlyph>, Span<const boo::GlyphBufferAdvance>,
                     const boo::FloatPoint &, boo::FontSmoothingMode) noexcept override;
 
-    void DrawLinesForText(const boo::FloatPoint &origin, float thickness,
-                          Span<const boo::FloatSegment> lineSegments, bool isPrinting, bool doubleLines,
+    void DrawLinesForText(const boo::FloatPoint &point, float thickness,
+                          Span<const boo::FloatSegment> lineSegments, bool isPrinting, bool doubleUnderlines,
                           boo::StrokeStyle) noexcept override;
 
     void DrawDotsForDocumentMarker(const boo::FloatRect &, boo::DocumentMarkerLineStyle) noexcept override;

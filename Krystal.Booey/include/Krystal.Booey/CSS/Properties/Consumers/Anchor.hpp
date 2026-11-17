@@ -58,8 +58,7 @@ namespace krys::boo::css
     //
     // Returns null if the keywords aren't valid/compatible. Otherwise, return a
     // PrimitiveValue or ValuePair depending on if the keywords can be collapsed.
-    KRYS_NODISCARD RefPtr<Value> ValueForPositionArea(ValueId dimension1, ValueId dimension2,
-                                                      ValueType type) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ValueForPositionArea(ValueId dim1, ValueId dim2, ValueType context) noexcept;
 
     /// @grammar <'position-area'>
     /// @see https://drafts.csswg.org/css-anchor-position-1/#propdef-position-area

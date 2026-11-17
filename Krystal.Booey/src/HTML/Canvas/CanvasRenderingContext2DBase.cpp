@@ -363,7 +363,7 @@ namespace krys::boo::html
   void CanvasRenderingContext2DBase::RealizeSavesLoop() noexcept
   {
     krys_debug_assert(_unrealizedSaveCount);
-    krys_debug_assert(_stateStack.size() >= 1);
+    krys_debug_assert(!_stateStack.empty());
     GraphicsContext *context = DrawingContext();
     do
     {
@@ -389,7 +389,7 @@ namespace krys::boo::html
       --_unrealizedSaveCount;
       return;
     }
-    krys_debug_assert(_stateStack.size() >= 1);
+    krys_debug_assert(!_stateStack.empty());
     if (_stateStack.size() <= 1)
     {
       return;

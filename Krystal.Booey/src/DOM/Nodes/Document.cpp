@@ -3793,7 +3793,7 @@ namespace krys::boo::dom
       // https://html.spec.whatwg.org/#pragma-set-default-language
       // 1. If the meta element has no content attribute, then return.
       // 2. If the element's content attribute contains a U+002C COMMA character (,), then return.
-      if (content.find(u8',') != DOMStringView::npos)
+      if (content.contains(u8','))
       {
         return;
       }

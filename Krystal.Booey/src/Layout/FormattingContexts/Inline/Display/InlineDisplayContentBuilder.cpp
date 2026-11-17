@@ -247,11 +247,11 @@ namespace krys::boo::layout
     struct Node
     {
       // Node's parent index in _displayBoxNodes.
-      Maybe<size_t> ParentIndex {};
+      Maybe<size_t> ParentIndex;
       // Associated display box index in inline_display::Boxes.
       size_t DisplayBoxIndex {0};
       // Child indexes in _displayBoxNodes.
-      List<size_t> Children {};
+      List<size_t> Children;
     };
 
   private:
@@ -322,8 +322,8 @@ namespace krys::boo::layout
 
   struct IsFirstLastIndex
   {
-    Maybe<size_t> First {};
-    Maybe<size_t> Last {};
+    Maybe<size_t> First;
+    Maybe<size_t> Last;
   };
 
   using IsFirstLastIndexesMap = HashMap<const Box *, IsFirstLastIndex>;

@@ -43,7 +43,7 @@ namespace krys::boo
   }
 
   inline StyleMaskBorderData::StyleMaskBorderData(const StyleMaskBorderData &other) noexcept
-      : RefCounted<StyleMaskBorderData>(), MaskBorder {other.MaskBorder}
+      : MaskBorder {other.MaskBorder}
   {
   }
 

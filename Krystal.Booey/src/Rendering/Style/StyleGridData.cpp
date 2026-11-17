@@ -40,9 +40,9 @@ namespace krys::boo
   }
 
   inline StyleGridData::StyleGridData(const StyleGridData &o) noexcept
-      : RefCounted<StyleGridData>(), GridAutoFlow(o.GridAutoFlow), GridAutoColumns(o.GridAutoColumns),
-        GridAutoRows(o.GridAutoRows), GridTemplateAreas(o.GridTemplateAreas),
-        GridTemplateColumns(o.GridTemplateColumns), GridTemplateRows(o.GridTemplateRows)
+      : GridAutoFlow(o.GridAutoFlow), GridAutoColumns(o.GridAutoColumns), GridAutoRows(o.GridAutoRows),
+        GridTemplateAreas(o.GridTemplateAreas), GridTemplateColumns(o.GridTemplateColumns),
+        GridTemplateRows(o.GridTemplateRows)
   {
   }
 

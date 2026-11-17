@@ -71,7 +71,7 @@ namespace krys::boo::dom
     const auto &existing = std::ranges::find_if(_eventListenerList, krys::move(AlreadyExists));
     if (existing != _eventListenerList.end())
     {
-      EventTargetAlgorithms::RemoveEventListener(*this, *existing->get());
+      EventTargetAlgorithms::RemoveEventListener(*this, **existing);
     }
   }
 

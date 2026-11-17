@@ -6,7 +6,6 @@
 namespace krys::boo::tests
 {
   using Catch::Matchers::WithinAbs;
-  using Catch::Matchers::WithinULP;
 
   static void ExpectRotatedRect(const FloatPoint &center, const FloatSize &size, float angle,
                                 const RotatedRect &info)

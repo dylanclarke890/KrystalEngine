@@ -301,7 +301,7 @@ namespace krys::boo
       return;
     }
 
-    if (literal.find('\'') == utf8_stringview::npos)
+    if (!literal.contains('\''))
     {
       buffer.push_back('\'');
       buffer.append(literal);

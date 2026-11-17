@@ -60,13 +60,13 @@ namespace krys::boo
   }
 
   StyleMiscNonInheritedData::StyleMiscNonInheritedData(const StyleMiscNonInheritedData &o) noexcept
-      : RefCounted<StyleMiscNonInheritedData>(), Opacity(o.Opacity), FlexibleBox(o.FlexibleBox),
-        MultiCol(o.MultiCol), Filter(o.Filter), Transform(o.Transform), Mask(o.Mask),
-        Animations(o.Animations), Transitions(o.Transitions), Content(o.Content), BoxShadow(o.BoxShadow),
-        AspectRatio(o.AspectRatio), AlignContent(o.AlignContent), AlignItems(o.AlignItems),
-        AlignSelf(o.AlignSelf), JustifyContent(o.JustifyContent), JustifyItems(o.JustifyItems),
-        JustifySelf(o.JustifySelf), ObjectPosition(o.ObjectPosition), Order(o.Order),
-        HasAttrContent(o.HasAttrContent), HasDisplayAffectedByAnimations(o.HasDisplayAffectedByAnimations),
+      : Opacity(o.Opacity), FlexibleBox(o.FlexibleBox), MultiCol(o.MultiCol), Filter(o.Filter),
+        Transform(o.Transform), Mask(o.Mask), Animations(o.Animations), Transitions(o.Transitions),
+        Content(o.Content), BoxShadow(o.BoxShadow), AspectRatio(o.AspectRatio), AlignContent(o.AlignContent),
+        AlignItems(o.AlignItems), AlignSelf(o.AlignSelf), JustifyContent(o.JustifyContent),
+        JustifyItems(o.JustifyItems), JustifySelf(o.JustifySelf), ObjectPosition(o.ObjectPosition),
+        Order(o.Order), HasAttrContent(o.HasAttrContent),
+        HasDisplayAffectedByAnimations(o.HasDisplayAffectedByAnimations),
         HasExplicitlySetColorScheme(o.HasExplicitlySetColorScheme),
         HasExplicitlySetDirection(o.HasExplicitlySetDirection),
         HasExplicitlySetWritingMode(o.HasExplicitlySetWritingMode), TableLayout(o.TableLayout),

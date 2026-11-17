@@ -114,7 +114,7 @@ namespace krys::boo
 
     for (auto &box : _boxes)
     {
-      if (box.Fragments->size())
+      if (!box.Fragments->empty())
       {
         firstFragment = &box.Fragments->front();
         break;
@@ -123,7 +123,7 @@ namespace krys::boo
 
     for (auto &box : _boxes | std::views::reverse)
     {
-      if (box.Fragments->size())
+      if (!box.Fragments->empty())
       {
         lastFragment = &box.Fragments->back();
         break;

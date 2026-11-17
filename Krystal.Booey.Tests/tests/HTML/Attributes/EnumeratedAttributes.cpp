@@ -61,7 +61,7 @@ namespace krys::boo::html::tests
     using Autocapitalize = EnumeratedAttribute<"autocapitalize", HTMLElement>;
     CHECK(Autocapitalize::ResolveCanonicalKeyword<dom::DOMString>(u8"on") == u8"sentences");
     CHECK(Autocapitalize::ResolveCanonicalKeyword<dom::DOMString>(u8"off") == u8"none");
-    CHECK(Autocapitalize::ResolveCanonicalKeyword<dom::DOMString>(null) == u8"");
+    CHECK(Autocapitalize::ResolveCanonicalKeyword<dom::DOMString>(null).empty());
 
     using CrossOrigin = EnumeratedAttribute<"crossorigin", HTMLElement>;
     CHECK(CrossOrigin::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(u8"") == u8"anonymous");

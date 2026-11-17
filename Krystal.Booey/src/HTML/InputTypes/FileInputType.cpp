@@ -52,8 +52,7 @@ namespace krys::boo::html
       for (size_t i = 0; i < type.size(); ++i)
       {
         auto c = type[i];
-        if (i != slash && !text::IsASCIIAlphanumeric(c)
-            && utf8_stringview(u8"!#$%&'*+-.^_`|~").find(c) == utf8_stringview::npos)
+        if (i != slash && !text::IsASCIIAlphanumeric(c) && !utf8_stringview(u8"!#$%&'*+-.^_`|~").contains(c))
         {
           return false;
         }

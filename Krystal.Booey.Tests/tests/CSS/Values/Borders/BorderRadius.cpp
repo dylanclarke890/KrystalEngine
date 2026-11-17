@@ -44,7 +44,7 @@ namespace krys::boo::css::tests
   TEST_CASE("BorderRadius(Serialise)", "[CSS][Borders][BorderRadius]")
   {
     // The default value serialises as nothing.
-    CHECK(SerialiseForTest(BorderRadius::DefaultValue()) == u8"");
+    CHECK(SerialiseForTest(BorderRadius::DefaultValue()).empty());
 
     CHECK(
       SerialiseForTest(BorderRadius {.Horizontal = Axis(LP {10_css_px}), .Vertical = Axis(LP {10_css_px})})

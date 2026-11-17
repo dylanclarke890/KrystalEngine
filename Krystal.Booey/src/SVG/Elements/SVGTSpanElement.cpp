@@ -24,7 +24,6 @@
 #include "Krystal.Booey/SVG/Elements/SVGAElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGTSpanElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 
 namespace krys::boo::svg

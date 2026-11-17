@@ -67,7 +67,7 @@ namespace krys::boo::html::tests
       SECTION("USVString")
       {
         TestData data;
-        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"");
+        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute).empty());
 
         // Not treated as a URL: the value is returned as it is, not completed.
         data.Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
@@ -77,7 +77,7 @@ namespace krys::boo::html::tests
 
         Reflect<dom::USVString>(*data.Element, TestAttribute, u8"");
         REQUIRE(data.Element->HasAttribute(TestAttribute));
-        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"");
+        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute).empty());
       }
 
       SECTION("bool")
@@ -315,7 +315,7 @@ namespace krys::boo::html::tests
 
     SECTION("An absent attribute is the empty string")
     {
-      REQUIRE(ReflectURL<dom::USVString>(*data.Element, TestAttribute) == u8"");
+      REQUIRE(ReflectURL<dom::USVString>(*data.Element, TestAttribute).empty());
     }
 
     SECTION("The value is completed against the document's base URL, and set as it is")

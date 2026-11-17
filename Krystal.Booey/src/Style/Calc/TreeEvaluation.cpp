@@ -106,7 +106,7 @@ namespace krys::boo::style::calc
   {
     if (root)
     {
-      return static_cast<double>(Evaluate(*root, percentResolutionLength, usedZoom));
+      return Evaluate(*root, percentResolutionLength, usedZoom);
     }
     return null;
   }

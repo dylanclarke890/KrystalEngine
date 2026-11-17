@@ -27,8 +27,7 @@
 
 namespace krys::boo::svg
 {
-  SVGPathAbsoluteConverter::SVGPathAbsoluteConverter(SVGPathConsumer &consumer) noexcept
-      : SVGPathConsumer(), _consumer(consumer)
+  SVGPathAbsoluteConverter::SVGPathAbsoluteConverter(SVGPathConsumer &consumer) noexcept : _consumer(consumer)
   {
   }
 

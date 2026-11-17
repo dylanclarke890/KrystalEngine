@@ -17,7 +17,7 @@ namespace krys::boo::style::tests
       {
       }
 
-      UniquePtr<RenderStyle> BodyStyle {};
+      UniquePtr<RenderStyle> BodyStyle;
 
       KRYS_NODISCARD ResolutionContext Context() noexcept
       {

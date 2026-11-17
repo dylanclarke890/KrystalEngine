@@ -41,7 +41,7 @@ namespace krys::boo
     const uint32 AdditionalLengthAtEnd {0};
     const bool IsLineBreak {false};
     // FIXME: Consider holding onto the truncation position instead. See webkit.org/b/164999
-    const Maybe<uint32> Truncation {};
+    const Maybe<uint32> Truncation;
     // where containing block's bidi direction != text box's direction.
     const bool HasMismatchingContentDirection {false};
 

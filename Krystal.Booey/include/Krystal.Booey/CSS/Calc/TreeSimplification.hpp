@@ -97,90 +97,89 @@ namespace krys::boo::css::calc
   };
 
   KRYS_NODISCARD Maybe<CanonicalDimension>
-    Canonicalize(NonCanonicalDimension dimension,
-                 const Maybe<ToLengthConversionData> &conversionData) noexcept;
+    Canonicalize(NonCanonicalDimension root, const Maybe<ToLengthConversionData> &conversionData) noexcept;
 
   KRYS_NODISCARD bool CanSimplify(const Tree &tree, const SimplificationOptions &options) noexcept;
 
   KRYS_NODISCARD Tree CopyAndSimplify(const Tree &tree, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Child CopyAndSimplify(const Child &child, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Child CopyAndSimplify(const Child &root, const SimplificationOptions &options) noexcept;
 
   KRYS_NODISCARD Maybe<Child> Simplify(Number &value, const SimplificationOptions &options) noexcept;
 
   KRYS_NODISCARD Maybe<Child> Simplify(Percentage &value, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(NonCanonicalDimension &value,
+  KRYS_NODISCARD Maybe<Child> Simplify(NonCanonicalDimension &root,
                                        const SimplificationOptions &options) noexcept;
 
   KRYS_NODISCARD Maybe<Child> Simplify(CanonicalDimension &value,
                                        const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Symbol &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Symbol &root, const SimplificationOptions &options) noexcept;
 
   KRYS_NODISCARD Maybe<Child> Simplify(SiblingCount &value, const SimplificationOptions &options) noexcept;
 
   KRYS_NODISCARD Maybe<Child> Simplify(SiblingIndex &value, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Sum &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Sum &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Product &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Product &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Negate &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Negate &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Invert &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Invert &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Min &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Min &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Max &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Max &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Clamp &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Clamp &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(RoundNearest &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(RoundNearest &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(RoundUp &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(RoundUp &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(RoundDown &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(RoundDown &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(RoundToZero &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(RoundToZero &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Mod &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Mod &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Rem &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Rem &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Sin &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Sin &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Cos &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Cos &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Tan &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Tan &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Asin &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Asin &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Acos &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Acos &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Atan &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Atan &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Atan2 &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Atan2 &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Pow &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Pow &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Sqrt &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Sqrt &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Hypot &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Hypot &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Log &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Log &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Exp &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Exp &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Abs &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Abs &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Sign &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Sign &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Random &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Random &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Progress &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Progress &root, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(Anchor &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(Anchor &anchor, const SimplificationOptions &options) noexcept;
 
-  KRYS_NODISCARD Maybe<Child> Simplify(AnchorSize &value, const SimplificationOptions &options) noexcept;
+  KRYS_NODISCARD Maybe<Child> Simplify(AnchorSize &anchorSize, const SimplificationOptions &options) noexcept;
 }

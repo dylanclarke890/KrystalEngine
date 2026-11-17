@@ -14,7 +14,6 @@
 
 namespace krys::boo::style::tests
 {
-  using Catch::Approx;
   using css::PropertyId;
 
   TEST_CASE_METHOD(BuilderFixture, "Style border radius", "[Style][Values][Borders]")

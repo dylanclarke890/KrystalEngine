@@ -52,7 +52,7 @@ namespace krys::boo::layout
     {
       PlacedFloatList PlacedFloats;
       SuspendedFloatList SuspendedFloats;
-      EnumSet<UsedFloat> HasIntrusiveFloat {};
+      EnumSet<UsedFloat> HasIntrusiveFloat;
     };
 
     FloatContent Floats {};
@@ -64,7 +64,7 @@ namespace krys::boo::layout
       // Note that with negative horizontal margin value, contentLogicalLeft + contentLogicalWidth is not
       // necessarily contentLogicalRight.
       InlineLayoutUnit LogicalRightIncludingNegativeMargin {0.f};
-      Maybe<InlineLayoutUnit> TrailingOverflowingContentWidth {};
+      Maybe<InlineLayoutUnit> TrailingOverflowingContentWidth;
     };
 
     ContentGeometry Content {};
@@ -76,7 +76,7 @@ namespace krys::boo::layout
       InlineLayoutUnit InitialLogicalLeft {0.f};
       // Inherited floats from parent formatting context offseting line box.
       InlineLayoutUnit IntrusiveFloatsOffset {0.f};
-      Maybe<InlineLayoutUnit> InitialLetterClearGap {};
+      Maybe<InlineLayoutUnit> InitialLetterClearGap;
     };
 
     LineGeometry Geometry {};
@@ -108,7 +108,7 @@ namespace krys::boo::layout
 
     struct Ruby
     {
-      HashMap<const Box *, InlineLayoutUnit> BaseAlignmentOffsetList {};
+      HashMap<const Box *, InlineLayoutUnit> BaseAlignmentOffsetList;
       InlineLayoutUnit AnnotationAlignmentOffset {0.f};
     };
 
@@ -123,7 +123,7 @@ namespace krys::boo::layout
     };
 
     // No value means line does not have any inline content (either float, out-of-flow or block inside inline)
-    Maybe<InlineContentEnding> ContentEnding {};
+    Maybe<InlineContentEnding> ContentEnding;
 
     enum class InflowContentType : uint8
     {
@@ -177,6 +177,6 @@ namespace krys::boo::layout
     InlineLayoutUnit FirstLineStartTrim {0.f};
     // This is only used for cases when intrusive floats prevent any content placement at current vertical
     // position.
-    Maybe<InlineLayoutUnit> HintForNextLineTopToAvoidIntrusiveFloat {};
+    Maybe<InlineLayoutUnit> HintForNextLineTopToAvoidIntrusiveFloat;
   };
 }

@@ -68,7 +68,8 @@ namespace krys::boo
                                                         TextIteratorBehaviors behaviors = {}) noexcept;
 
   // Text from the text iterator.
-  KRYS_NODISCARD utf8_string PlainText(const dom::SimpleRange &range, TextIteratorBehaviors behaviors = {},
+  KRYS_NODISCARD utf8_string PlainText(const dom::SimpleRange &range,
+                                       TextIteratorBehaviors defaultBehavior = {},
                                        bool isDisplayString = false) noexcept;
 
   enum class IgnoreCollapsedRanges : bool
@@ -359,7 +360,7 @@ namespace krys::boo
       return _underlyingIterator.AtEnd();
     }
 
-    void Advance(int32 numCharacters) noexcept;
+    void Advance(int32 count) noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
     {
@@ -395,7 +396,7 @@ namespace krys::boo
       return _underlyingIterator.AtEnd();
     }
 
-    void Advance(int32 numCharacters) noexcept;
+    void Advance(int32 count) noexcept;
 
     KRYS_NODISCARD utf8_stringview Text() const noexcept
     {

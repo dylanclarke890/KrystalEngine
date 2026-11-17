@@ -146,7 +146,7 @@ namespace krys::boo::dom::tests
     CHECK(TextAlgorithms::Substring(*data.Node, 7, 5).Value() == u8"789");
     CHECK(TextAlgorithms::Substring(*data.Node, 1, std::numeric_limits<size_t>::max()).Value()
           == u8"123456789");
-    CHECK(TextAlgorithms::Substring(*data.Node, 10, 1).Value() == u8"");
+    CHECK(TextAlgorithms::Substring(*data.Node, 10, 1).Value().empty());
 
     auto result = TextAlgorithms::Substring(*data.Node, 11, 0);
     REQUIRE(result.HasException());
@@ -280,7 +280,7 @@ namespace krys::boo::dom::tests
       auto split = TextAlgorithms::Split(*orphan, 3);
       REQUIRE_FALSE(split.HasException());
       CHECK(orphan->Data() == u8"abc");
-      CHECK(split.Value()->Data() == u8"");
+      CHECK(split.Value()->Data().empty());
       CHECK(split.Value()->ParentNode() == nullptr);
     }
 

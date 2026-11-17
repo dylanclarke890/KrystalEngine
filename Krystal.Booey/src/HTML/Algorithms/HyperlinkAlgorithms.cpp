@@ -39,8 +39,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMStringAtom MakeTargetBlankIfHasDanglingMarkup(dom::DOMStringAtom target) noexcept
     {
       auto view = target.View();
-      if ((view.find(u8'\n') != view.npos || view.find(u8'\r') != view.npos || view.find(u8'\t') != view.npos)
-          && view.find(u8'<') != view.npos)
+      if ((view.contains(u8'\n') || view.contains(u8'\r') || view.contains(u8'\t')) && view.contains(u8'<'))
       {
         return u8"_blank";
       }

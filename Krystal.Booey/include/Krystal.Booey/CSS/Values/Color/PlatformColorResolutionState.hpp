@@ -71,25 +71,25 @@ namespace krys::boo::css
 
     // Conversion data needed to evaluate `calc()` expressions with relative length units.
     // If unset, colors that require conversion data will return the invalid Color.
-    Maybe<ToLengthConversionData> ConversionData {};
+    Maybe<ToLengthConversionData> ConversionData;
 
     // Options to pass when resolving any other keyword with css::ColorFromKeyword()
     style::ColorOptions KeywordOptions {style::ColorOptions::None};
 
     // Appearance used to select from a light-dark() color function.
     // If unset, light-dark() colors will return the invalid Color.
-    Maybe<LightDarkColorAppearance> Appearance {};
+    Maybe<LightDarkColorAppearance> Appearance;
 
     // Colors are resolved:
     //   1. Checking if the color is set below, and if it is, returning it.
     //   2. If a delegate has been set, calling the associated delegate function,
     //      storing the result below, and returning that color.
     //   3. Returning the invalid `Color` value.
-    mutable Maybe<boo::Color> ResolvedCurrentColor {};
-    mutable Maybe<boo::Color> ResolvedInternalDocumentTextColor {};
-    mutable Maybe<boo::Color> ResolvedWebkitLink {};
-    mutable Maybe<boo::Color> ResolvedWebkitActiveLink {};
-    mutable Maybe<boo::Color> ResolvedWebkitFocusRingColor {};
+    mutable Maybe<boo::Color> ResolvedCurrentColor;
+    mutable Maybe<boo::Color> ResolvedInternalDocumentTextColor;
+    mutable Maybe<boo::Color> ResolvedWebkitLink;
+    mutable Maybe<boo::Color> ResolvedWebkitActiveLink;
+    mutable Maybe<boo::Color> ResolvedWebkitFocusRingColor;
 
     KRYS_NODISCARD boo::Color CurrentColor() const noexcept
     {

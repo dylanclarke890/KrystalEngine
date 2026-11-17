@@ -218,12 +218,12 @@ namespace krys::boo::html::tests
     auto document = CreateRef<dom::HTMLDocument>();
     auto div = document->CreateElement(u8"div").ReleaseValue();
     auto &element = Downcast<HTMLElement>(*div);
-    CHECK(element.Dir() == u8"");
+    CHECK(element.Dir().empty());
     element.Dir(u8"RTL");
     CHECK(element.Dir() == u8"rtl");
     CHECK(element.GetAttribute(u8"dir") == dom::DOMString(u8"RTL"));
     element.Dir(u8"up");
-    CHECK(element.Dir() == u8"");
+    CHECK(element.Dir().empty());
   }
 
   TEST_CASE("HTMLElement.click(): an untrusted click, unless disabled or already being clicked",
@@ -335,12 +335,12 @@ namespace krys::boo::html::tests
 
     SECTION("autocapitalize comes from the form owner of the controls")
     {
-      CHECK(inputElement.Autocapitalize() == u8"");
+      CHECK(inputElement.Autocapitalize().empty());
       REQUIRE_FALSE(form->SetAttribute(u8"autocapitalize", u8"WORDS").HasException());
       CHECK(formElement.Autocapitalize() == u8"words");
       CHECK(inputElement.Autocapitalize() == u8"words");
       // Not from an ancestor that isn't the form owner.
-      CHECK(divElement.Autocapitalize() == u8"");
+      CHECK(divElement.Autocapitalize().empty());
       REQUIRE_FALSE(input->SetAttribute(u8"autocapitalize", u8"off").HasException());
       CHECK(inputElement.Autocapitalize() == u8"none");
       REQUIRE_FALSE(input->SetAttribute(u8"autocapitalize", u8"bogus").HasException());
@@ -372,18 +372,18 @@ namespace krys::boo::html::tests
     auto div = document->CreateElement(u8"div").ReleaseValue();
     auto &element = Downcast<HTMLElement>(*div);
 
-    CHECK(element.InputMode() == u8"");
+    CHECK(element.InputMode().empty());
     element.InputMode(u8"NUMERIC");
     CHECK(div->GetAttribute(u8"inputmode") == dom::DOMString(u8"NUMERIC"));
     CHECK(element.InputMode() == u8"numeric");
     element.InputMode(u8"digits");
-    CHECK(element.InputMode() == u8"");
+    CHECK(element.InputMode().empty());
 
-    CHECK(element.EnterKeyHint() == u8"");
+    CHECK(element.EnterKeyHint().empty());
     element.EnterKeyHint(u8"Send");
     CHECK(element.EnterKeyHint() == u8"send");
     element.EnterKeyHint(u8"return");
-    CHECK(element.EnterKeyHint() == u8"");
+    CHECK(element.EnterKeyHint().empty());
   }
 
   TEST_CASE("HTMLElement.hidden: true, false or until-found",

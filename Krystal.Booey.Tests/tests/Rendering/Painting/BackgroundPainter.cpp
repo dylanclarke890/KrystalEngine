@@ -361,7 +361,7 @@ namespace krys::boo::tests
 
     auto drawsImage = [&]
     {
-      return fixture.Painted().find(u8"native-image") != utf8_string::npos;
+      return fixture.Painted().contains(u8"native-image");
     };
     CHECK_FALSE(drawsImage());
     CHECK(queue.PendingCount() == 1);

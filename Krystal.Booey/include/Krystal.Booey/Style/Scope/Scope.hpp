@@ -123,7 +123,7 @@ namespace krys::boo::style
     struct StyleSheetChange
     {
       ResolverUpdateType UpdateType;
-      List<Ref<css::StyleSheetContents>> AddedSheets {};
+      List<Ref<css::StyleSheetContents>> AddedSheets;
     };
 
     using ResolverSharingKey = std::tuple<List<RefPtr<css::StyleSheetContents>>, bool, bool>;

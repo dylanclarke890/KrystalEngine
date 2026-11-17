@@ -11,7 +11,7 @@ namespace krys::pal
 
   KeyboardEvent::KeyboardEvent(WindowHandle window, const krys::pal::Key key, const KeyState state,
                                const KeyModifiers modifiers, KeyText text) noexcept
-      : Event(), _window(window), _key(key), _state(state), _modifiers(modifiers), _text(krys::move(text))
+      : _window(window), _key(key), _state(state), _modifiers(modifiers), _text(krys::move(text))
   {
   }
 
@@ -45,7 +45,7 @@ namespace krys::pal
 #pragma region TextInputEvent
 
   TextInputEvent::TextInputEvent(WindowHandle window, utf8_string text) noexcept
-      : Event(), _window(window), _text(krys::move(text))
+      : _window(window), _text(krys::move(text))
   {
   }
 
@@ -64,7 +64,7 @@ namespace krys::pal
 #pragma region CompositionInputEvent
 
   CompositionInputEvent::CompositionInputEvent(WindowHandle window, CompositionInput input) noexcept
-      : Event(), _window(window), _input(krys::move(input))
+      : _window(window), _input(krys::move(input))
   {
   }
 
@@ -83,7 +83,7 @@ namespace krys::pal
 #pragma region PointerInputEvent
 
   PointerInputEvent::PointerInputEvent(WindowHandle window, const PointerInput &input) noexcept
-      : Event(), _window(window), _input(input)
+      : _window(window), _input(input)
   {
   }
 
@@ -102,7 +102,7 @@ namespace krys::pal
 #pragma region TouchpadPanEvent
 
   TouchpadPanEvent::TouchpadPanEvent(WindowHandle window, const TouchpadPanInput &input) noexcept
-      : Event(), _window(window), _input(input)
+      : _window(window), _input(input)
   {
   }
 
@@ -121,7 +121,7 @@ namespace krys::pal
 #pragma region DragInputEvent
 
   DragInputEvent::DragInputEvent(WindowHandle window, DragInput input) noexcept
-      : Event(), _window(window), _input(krys::move(input))
+      : _window(window), _input(krys::move(input))
   {
   }
 
@@ -140,7 +140,7 @@ namespace krys::pal
 #pragma region GamepadConnectionEvent
 
   GamepadConnectionEvent::GamepadConnectionEvent(uint32 slot, bool connected) noexcept
-      : Event(), _slot(slot), _connected(connected)
+      : _slot(slot), _connected(connected)
   {
   }
 
@@ -159,7 +159,7 @@ namespace krys::pal
 #pragma region GamepadButtonEvent
 
   GamepadButtonEvent::GamepadButtonEvent(uint32 slot, GamepadButton button, GamepadButtonState state) noexcept
-      : Event(), _slot(slot), _button(button), _state(state)
+      : _slot(slot), _button(button), _state(state)
   {
   }
 
@@ -184,7 +184,7 @@ namespace krys::pal
 
   MouseButtonEvent::MouseButtonEvent(WindowHandle window, const MouseButton button,
                                      const MouseButtonState state, const KeyModifiers modifiers) noexcept
-      : Event(), _window(window), _button(button), _state(state), _modifiers(modifiers)
+      : _window(window), _button(button), _state(state), _modifiers(modifiers)
   {
   }
 
@@ -224,8 +224,8 @@ namespace krys::pal
 
   LockedMouseMoveEvent::LockedMouseMoveEvent(WindowHandle window, float deltaX, float deltaY, float rawDeltaX,
                                              float rawDeltaY, KeyModifiers modifiers) noexcept
-      : Event(), _window(window), _deltaX(deltaX), _deltaY(deltaY), _rawDeltaX(rawDeltaX),
-        _rawDeltaY(rawDeltaY), _modifiers(modifiers)
+      : _window(window), _deltaX(deltaX), _deltaY(deltaY), _rawDeltaX(rawDeltaX), _rawDeltaY(rawDeltaY),
+        _modifiers(modifiers)
   {
   }
 
@@ -266,7 +266,7 @@ namespace krys::pal
   MouseMoveEvent::MouseMoveEvent(WindowHandle window, const float deltaX, const float deltaY,
                                  const float clientX, const float clientY,
                                  const KeyModifiers modifiers) noexcept
-      : Event(), _window(window), _deltaX(deltaX), _deltaY(deltaY), _clientX(clientX), _clientY(clientY),
+      : _window(window), _deltaX(deltaX), _deltaY(deltaY), _clientX(clientX), _clientY(clientY),
         _modifiers(modifiers)
   {
   }
@@ -308,7 +308,7 @@ namespace krys::pal
   MouseScrollEvent::MouseScrollEvent(WindowHandle window, const float deltaX, const float deltaY,
                                      const float clientX, const float clientY,
                                      const KeyModifiers modifiers) noexcept
-      : Event(), _window(window), _deltaX(deltaX), _deltaY(deltaY), _clientX(clientX), _clientY(clientY),
+      : _window(window), _deltaX(deltaX), _deltaY(deltaY), _clientX(clientX), _clientY(clientY),
         _modifiers(modifiers)
   {
   }
@@ -348,7 +348,7 @@ namespace krys::pal
 #pragma region WindowResizeEvent
 
   WindowResizeEvent::WindowResizeEvent(WindowHandle window, const uint32 width, const uint32 height) noexcept
-      : Event(), _window(window), _width(width), _height(height)
+      : _window(window), _width(width), _height(height)
   {
   }
 
@@ -371,7 +371,7 @@ namespace krys::pal
 
 #pragma region WindowMinimiseEvent
 
-  WindowMinimiseEvent::WindowMinimiseEvent(WindowHandle window) noexcept : Event(), _window(window)
+  WindowMinimiseEvent::WindowMinimiseEvent(WindowHandle window) noexcept : _window(window)
   {
   }
 
@@ -384,7 +384,7 @@ namespace krys::pal
 
 #pragma region WindowRestoreEvent
 
-  WindowRestoreEvent::WindowRestoreEvent(WindowHandle window) noexcept : Event(), _window(window)
+  WindowRestoreEvent::WindowRestoreEvent(WindowHandle window) noexcept : _window(window)
   {
   }
 

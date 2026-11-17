@@ -90,7 +90,7 @@ namespace krys::boo::layout
   private:
     bool UpdateInlineDamage(const InvalidatedLine &invalidatedLine, InlineDamage::Reason reason,
                             ShouldApplyRangeLayout shouldApplyRangeLayout = ShouldApplyRangeLayout::No,
-                            LayoutUnit restartPaginationAdjustment = 0_lu) noexcept;
+                            LayoutUnit pageTopAdjustment = 0_lu) noexcept;
 
     bool SetFullLayoutIfNeeded(const Box &layoutBox) noexcept;
 

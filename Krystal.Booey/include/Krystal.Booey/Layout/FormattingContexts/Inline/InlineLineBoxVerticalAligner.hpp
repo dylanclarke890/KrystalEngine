@@ -45,8 +45,8 @@ namespace krys::boo::layout
     {
       struct TopAndBottomAlignedMaximumHeight
       {
-        Maybe<InlineLayoutUnit> Top {};
-        Maybe<InlineLayoutUnit> Bottom {};
+        Maybe<InlineLayoutUnit> Top;
+        Maybe<InlineLayoutUnit> Bottom;
       };
 
       InlineLayoutUnit NonLineBoxRelativeAlignedMaximumHeight {0};

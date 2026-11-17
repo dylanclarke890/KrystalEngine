@@ -53,7 +53,7 @@ namespace krys::pal
   struct WindowSettings
   {
     /// @brief The title of the window.
-    string Title {};
+    string Title;
 
     /// @brief The size of the window's client area, at 96 DPI: the window is made that size scaled for its
     /// monitor's DPI (`GetSize()` has its size in pixels).

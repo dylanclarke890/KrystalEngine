@@ -152,7 +152,7 @@ namespace krys::boo::css::tests
     STATIC_CHECK(SerialisationSeparatorString<SpaceSeparatedList<int>> == u8" ");
     STATIC_CHECK(SerialisationSeparatorString<CommaSeparatedList<int>> == u8", ");
     STATIC_CHECK(SerialisationSeparatorStringForType<SerialisationSeparatorType::Slash> == u8" / ");
-    STATIC_CHECK(SerialisationSeparatorString<int> == u8"");
+    STATIC_CHECK(SerialisationSeparatorString<int>.empty());
   }
 
   TEST_CASE("Aggregates(like-ness traits)", "[CSS][Aggregates]")

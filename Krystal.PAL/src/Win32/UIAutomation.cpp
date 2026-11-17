@@ -530,8 +530,7 @@ namespace krys::pal::win32
         return E_POINTER;
       }
       // COM threading brings UI Automation's calls to the window's thread.
-      *options =
-        static_cast<ProviderOptions>(ProviderOptions_ServerSideProvider | ProviderOptions_UseComThreading);
+      *options = (ProviderOptions_ServerSideProvider | ProviderOptions_UseComThreading);
       return S_OK;
     }
 

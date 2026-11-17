@@ -172,7 +172,7 @@ namespace krys::boo
     dom::Position PositionToComputeInlineStyleChange(dom::Node &startNode,
                                                      RefPtr<dom::Node> &dummyElement) noexcept;
 
-    void ApplyInlineStyleChange(dom::Node &startNode, dom::Node &endNode, StyleChange &styleChange,
+    void ApplyInlineStyleChange(dom::Node &passedStart, dom::Node &passedEnd, StyleChange &styleChange,
                                 AddStyledElement addStyledElement) noexcept;
 
     void SplitTextAtStart(const dom::Position &start, const dom::Position &end) noexcept;

@@ -50,7 +50,7 @@ namespace krys::boo::html::tests
                         u8"<input type=radio name=r id=plain><input type=radio name=r id=x value=x>"
                         u8"<input type=text name=r value=text></form>");
     auto list = Radios(fixture, u8"r");
-    CHECK(list->Value() == u8"");
+    CHECK(list->Value().empty());
 
     fixture.Get<HTMLInputElement>(u8"x").SetChecked(true);
     CHECK(list->Value() == u8"x");
@@ -58,7 +58,7 @@ namespace krys::boo::html::tests
     CHECK(list->Value() == u8"on");
     // A checked radio button with an empty value gives the empty string.
     fixture.Get<HTMLInputElement>(u8"empty").SetChecked(true);
-    CHECK(list->Value() == u8"");
+    CHECK(list->Value().empty());
 
     // Setting checks the first radio button with the value, or without one for "on".
     list->SetValue(u8"x");

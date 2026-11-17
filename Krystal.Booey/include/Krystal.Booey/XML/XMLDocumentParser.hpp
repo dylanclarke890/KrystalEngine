@@ -131,7 +131,7 @@ namespace krys::boo::xml
     }
 
     static bool ParseDocumentFragment(dom::DOMStringView, dom::DocumentFragment &,
-                                      dom::Element *parent = nullptr) noexcept;
+                                      dom::Element *contextElement = nullptr) noexcept;
 
     /// @brief Whether the document parsed was well formed.
     KRYS_NODISCARD bool WellFormed() const noexcept

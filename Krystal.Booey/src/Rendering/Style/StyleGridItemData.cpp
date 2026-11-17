@@ -43,9 +43,8 @@ namespace krys::boo
   }
 
   inline StyleGridItemData::StyleGridItemData(const StyleGridItemData &o) noexcept
-      : RefCounted<StyleGridItemData>(), GridItemColumnStart(o.GridItemColumnStart),
-        GridItemColumnEnd(o.GridItemColumnEnd), GridItemRowStart(o.GridItemRowStart),
-        GridItemRowEnd(o.GridItemRowEnd)
+      : GridItemColumnStart(o.GridItemColumnStart), GridItemColumnEnd(o.GridItemColumnEnd),
+        GridItemRowStart(o.GridItemRowStart), GridItemRowEnd(o.GridItemRowEnd)
   {
   }
 

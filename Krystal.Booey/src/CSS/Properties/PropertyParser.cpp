@@ -84,11 +84,11 @@ namespace krys::boo::css
 #pragma region Custom Properties
 
   KRYS_NODISCARD static Pair<RefPtr<Value>, CustomPropertySyntax::Type>
-    ConsumeCustomPropertyValueWithSyntax(TokenRange &tokens, PropertyParserState &state,
+    ConsumeCustomPropertyValueWithSyntax(TokenRange &range, PropertyParserState &state,
                                          const CustomPropertySyntax &syntax) noexcept;
 
   KRYS_NODISCARD static Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
-    ConsumeTypedCustomPropertyValue(TokenRange &tokens, PropertyParserState &state,
+    ConsumeTypedCustomPropertyValue(TokenRange &range, PropertyParserState &state,
                                     const CSSOMStringAtom &name, const CustomPropertySyntax &syntax,
                                     style::BuilderState &builderState) noexcept;
 

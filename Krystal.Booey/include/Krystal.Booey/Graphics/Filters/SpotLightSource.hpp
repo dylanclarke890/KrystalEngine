@@ -89,7 +89,7 @@ namespace krys::boo
     TextStream &ExternalRepresentation(TextStream &) const noexcept override;
 
   private:
-    SpotLightSource(const FloatPoint3D &position, const FloatPoint3D &direction, float specularExponent,
+    SpotLightSource(const FloatPoint3D &position, const FloatPoint3D &pointsAt, float specularExponent,
                     float limitingConeAngle) noexcept;
 
     KRYS_NODISCARD bool operator==(const LightSource &other) const noexcept override

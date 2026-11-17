@@ -44,7 +44,7 @@ namespace krys::boo::layout
     InlineLayoutUnit _clearGapBeforeFirstLine {0.f};
     InlineLayoutUnit _clearGapAfterLastLine {0.f};
     InlineLayoutUnit _firstLineStartTrimForInitialLetter {0.f};
-    Maybe<size_t> _hyphenateLimitLines {};
+    Maybe<size_t> _hyphenateLimitLines;
     size_t _successiveHyphenatedLineCount {0};
     // Note that this does not include lines from nested blocks and it does not include lines with no content
     // either.

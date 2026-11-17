@@ -31,7 +31,7 @@ namespace krys::gfx
   {
     uint32 Stride {0u};
     VertexInputRate InputRate {VertexInputRate::PerVertex};
-    SmallList<VertexAttribute, 8> Attributes {};
+    SmallList<VertexAttribute, 8> Attributes;
   };
 
   enum class PrimitiveTopology : uint8
@@ -185,15 +185,15 @@ namespace krys::gfx
     ShaderHandle VertexShader {};
     ShaderHandle FragmentShader {};
     /// @brief One layout per vertex buffer slot.
-    SmallList<VertexBufferLayout, 2> VertexBuffers {};
+    SmallList<VertexBufferLayout, 2> VertexBuffers;
     PrimitiveTopology Topology {PrimitiveTopology::Triangles};
     BlendState Blend {};
     DepthStencilState DepthStencil {};
     RasterState Raster {};
     /// @brief The formats of the colour targets the pipeline renders into.
-    SmallList<TextureFormat, 4> ColourFormats {};
+    SmallList<TextureFormat, 4> ColourFormats;
     TextureFormat DepthStencilFormat {TextureFormat::Undefined};
-    utf8_stringview DebugName {};
+    utf8_stringview DebugName;
   };
 }
 

@@ -286,7 +286,7 @@ namespace krys::boo::css
 
     struct VariableType
     {
-      Maybe<GlobalKeyword> Keyword {};
+      Maybe<GlobalKeyword> Keyword;
       css::ClassifyBlockResult ClassifyBlockResult {};
     };
 
