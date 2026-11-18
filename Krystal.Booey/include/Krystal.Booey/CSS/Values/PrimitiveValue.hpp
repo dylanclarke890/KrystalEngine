@@ -504,21 +504,21 @@ namespace krys::boo::css
     KRYS_NODISCARD T ResolveAsAngle(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsAngle());
-      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), Value<double>(conversionData)));
+      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValue(conversionData)));
     }
 
     template <typename T = double, AngleUnit Unit = UnitTraits<AngleUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsAngleNoConversionDataRequired() const noexcept
     {
       krys_debug_assert(IsAngle());
-      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), ValueNoConversionDataRequired<double>()));
+      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValueNoConversionDataRequired()));
     }
 
     template <typename T = double, AngleUnit Unit = UnitTraits<AngleUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsAngleDeprecated() const noexcept
     {
       krys_debug_assert(IsAngle());
-      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), ValueDeprecated<double>()));
+      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValueDeprecated()));
     }
 
 #pragma endregion
@@ -552,14 +552,14 @@ namespace krys::boo::css
     KRYS_NODISCARD T ResolveAsTime(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsTime());
-      return ClampTo<T>(ComputeTime<Unit>(PrimitiveType(), Value<double>(conversionData)));
+      return ClampTo<T>(ComputeTime<Unit>(PrimitiveType(), DoubleValue(conversionData)));
     }
 
     template <typename T = double, TimeUnit Unit = UnitTraits<TimeUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsTimeNoConversionDataRequired() const noexcept
     {
       krys_debug_assert(IsTime());
-      return ClampTo<T>(ComputeTime<Unit>(PrimitiveType(), ValueNoConversionDataRequired<double>()));
+      return ClampTo<T>(ComputeTime<Unit>(PrimitiveType(), DoubleValueNoConversionDataRequired()));
     }
 
 #pragma endregion
@@ -646,21 +646,21 @@ namespace krys::boo::css
     KRYS_NODISCARD T ResolveAsResolution(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsResolution());
-      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), Value<double>(conversionData)));
+      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValue(conversionData)));
     }
 
     template <typename T = double, ResolutionUnit Unit = UnitTraits<ResolutionUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsResolutionNoConversionDataRequired() const noexcept
     {
       krys_debug_assert(IsResolution());
-      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), ValueNoConversionDataRequired<double>()));
+      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValueNoConversionDataRequired()));
     }
 
     template <typename T = double, ResolutionUnit Unit = UnitTraits<ResolutionUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsResolutionDeprecated() const noexcept
     {
       krys_debug_assert(IsResolution());
-      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), ValueDeprecated<double>()));
+      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValueDeprecated()));
     }
 
 #pragma endregion
