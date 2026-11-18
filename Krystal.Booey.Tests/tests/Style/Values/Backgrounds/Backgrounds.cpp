@@ -16,7 +16,7 @@
 namespace krys::boo::style::tests
 {
   using css::PropertyId;
-  using namespace css::Literals;
+  using namespace css::literals;
 
   namespace
   {

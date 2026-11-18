@@ -50,13 +50,13 @@ namespace krys
 
   public:
     template <typename CollectionA, typename CollectionB>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): used for both ends, so never moved.
     ZippedRange(CollectionA &&collectionA, CollectionB &&collectionB) noexcept
-        : _begin(boundsCheckedBegin(std::forward<CollectionA>(collectionA)),
-                 boundsCheckedBegin(std::forward<CollectionB>(collectionB))),
-          _end(boundsCheckedEnd(std::forward<CollectionA>(collectionA)),
-               boundsCheckedEnd(std::forward<CollectionB>(collectionB)))
+        : _begin(boundsCheckedBegin(collectionA), boundsCheckedBegin(collectionB)),
+          _end(boundsCheckedEnd(collectionA), boundsCheckedEnd(collectionB))
     {
-      // Prevent use after destruction of a returned temporary.
+      // Prevent use after destruction of a returned temporary (a borrowed range's iterators outlive it, so
+      // the collections are passed on as lvalues, for both ends).
       static_assert(std::ranges::borrowed_range<CollectionA>);
       static_assert(std::ranges::borrowed_range<CollectionB>);
     }

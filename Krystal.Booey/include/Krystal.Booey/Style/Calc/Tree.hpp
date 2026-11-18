@@ -602,9 +602,9 @@ namespace krys::boo::style::calc
   };
 
   template <typename TOperation>
-  KRYS_NODISCARD Child CreateChild(TOperation &&Op) noexcept
+  KRYS_NODISCARD Child CreateChild(TOperation op) noexcept
   {
-    return ChildConstruction<TOperation>::Create(krys::move(Op));
+    return ChildConstruction<TOperation>::Create(krys::move(op));
   }
 
   // Convenience constructors

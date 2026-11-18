@@ -82,15 +82,15 @@ namespace krys::boo::svg
 
   namespace
   {
-    KRYS_NODISCARD bool IsXOrYAttribute(dom::DOMStringAtom localName,
-                                        dom::DOMStringAtom namespaceURI) noexcept
+    KRYS_NODISCARD bool IsXOrYAttribute(const dom::DOMStringAtom &localName,
+                                        const dom::DOMStringAtom &namespaceURI) noexcept
     {
       return namespaceURI == null && (localName == u8"x" || localName == u8"y");
     }
   }
 
   void SVGTextPositioningElement::CollectPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     if (IsXOrYAttribute(localName, namespaceURI))
@@ -101,7 +101,7 @@ namespace krys::boo::svg
   }
 
   bool SVGTextPositioningElement::HasPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI) const noexcept
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (IsXOrYAttribute(localName, namespaceURI))
     {

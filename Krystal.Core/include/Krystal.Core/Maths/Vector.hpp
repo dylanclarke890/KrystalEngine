@@ -152,10 +152,8 @@ namespace krys
       {
         return x;
       }
-      else
-      {
-        return y;
-      }
+
+      return y;
     }
 
     KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
@@ -165,10 +163,8 @@ namespace krys
       {
         return x;
       }
-      else
-      {
-        return y;
-      }
+
+      return y;
     }
 
     VECTOR_COMMON_MEMBER_FUNCTIONS()
@@ -214,7 +210,7 @@ namespace krys
       {
         return x;
       }
-      else if (index == 1)
+      if (index == 1)
       {
         return y;
       }
@@ -231,7 +227,7 @@ namespace krys
       {
         return x;
       }
-      else if (index == 1)
+      if (index == 1)
       {
         return y;
       }
@@ -287,7 +283,7 @@ namespace krys
       {
         return x;
       }
-      else if (index == 1)
+      if (index == 1)
       {
         return y;
       }
@@ -308,7 +304,7 @@ namespace krys
       {
         return x;
       }
-      else if (index == 1)
+      if (index == 1)
       {
         return y;
       }

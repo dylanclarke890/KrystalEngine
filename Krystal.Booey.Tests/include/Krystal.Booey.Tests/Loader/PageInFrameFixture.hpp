@@ -23,19 +23,19 @@ namespace krys::boo::tests
     RefPtr<LocalFrame> Frame;
     Ref<dom::HTMLDocument> Document;
 
-    explicit PageInFrameFixture(utf8_string &&markup, IntSize viewSize = {200, 100},
+    explicit PageInFrameFixture(utf8_string markup, IntSize viewSize = {200, 100},
                                 CachePolicy cachePolicy = CachePolicy::Use) noexcept
         : PageInFrameFixture(LocalFrame::Create(), krys::move(markup), viewSize, cachePolicy)
     {
     }
 
     /// @brief As above, in @p page's main frame.
-    PageInFrameFixture(Page &page, utf8_string &&markup, IntSize viewSize = {200, 100}) noexcept
+    PageInFrameFixture(Page &page, utf8_string markup, IntSize viewSize = {200, 100}) noexcept
         : PageInFrameFixture(ShareRef(page.MainFrame()), krys::move(markup), viewSize, CachePolicy::Use)
     {
     }
 
-    PageInFrameFixture(Ref<LocalFrame> frame, utf8_string &&markup, IntSize viewSize,
+    PageInFrameFixture(Ref<LocalFrame> frame, utf8_string markup, IntSize viewSize,
                        CachePolicy cachePolicy) noexcept
         : ViewSize(viewSize), Frame(krys::move(frame)), Document(CreateRef<dom::HTMLDocument>())
     {
@@ -49,7 +49,7 @@ namespace krys::boo::tests
       Document->StyleScope().FlushPendingUpdate();
     }
 
-    KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
+    KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
     {
       auto element = Document->GetElementById(id);
       krys_assert(element);
@@ -66,7 +66,7 @@ namespace krys::boo::tests
     }
 
     /// @brief The display list of the whole view, laid out, as text.
-    KRYS_NODISCARD utf8_string Painted() noexcept
+    KRYS_NODISCARD utf8_string Painted() const noexcept
     {
       (void)Document->UpdateLayout();
       display_list::RecorderImpl recorder(

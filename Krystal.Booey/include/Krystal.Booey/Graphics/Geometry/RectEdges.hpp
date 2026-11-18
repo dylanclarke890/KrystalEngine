@@ -67,7 +67,7 @@ namespace krys::boo
     }
 
     template <typename U, typename Mapper>
-    KRYS_NODISCARD static RectEdges<T> Map(RectEdges<U> &&other, Mapper &&mapper) noexcept
+    KRYS_NODISCARD static RectEdges<T> Map(const RectEdges<U> &other, Mapper mapper) noexcept
     {
       return RectEdges<T> {
         mapper(other.Top()),
@@ -291,19 +291,19 @@ namespace krys::boo
     }
 
     template <typename F>
-    KRYS_NODISCARD bool AnyOf(F &&functor) const noexcept
+    KRYS_NODISCARD bool AnyOf(F functor) const noexcept
     {
       return std::ranges::any_of(_sides, std::forward<F>(functor));
     }
 
     template <typename F>
-    KRYS_NODISCARD bool AllOf(F &&functor) const noexcept
+    KRYS_NODISCARD bool AllOf(F functor) const noexcept
     {
       return std::ranges::all_of(_sides, std::forward<F>(functor));
     }
 
     template <typename F>
-    KRYS_NODISCARD bool NoneOf(F &&functor) const noexcept
+    KRYS_NODISCARD bool NoneOf(F functor) const noexcept
     {
       return std::ranges::none_of(_sides, std::forward<F>(functor));
     }
@@ -346,7 +346,7 @@ namespace krys::boo
   }
 
   template <typename T, typename F>
-  KRYS_NODISCARD RectEdges<T> blend(const RectEdges<T> &a, const RectEdges<T> &b, F &&functor) noexcept
+  KRYS_NODISCARD RectEdges<T> blend(const RectEdges<T> &a, const RectEdges<T> &b, F functor) noexcept
   {
     return {functor(a.Top(), b.Top(), BoxSide::Top), functor(a.Right(), b.Right(), BoxSide::Right),
             functor(a.Bottom(), b.Bottom(), BoxSide::Bottom), functor(a.Left(), b.Left(), BoxSide::Left)};

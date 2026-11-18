@@ -72,7 +72,7 @@ namespace krys::boo::html
     return defaultColorSpace;
   }
 
-  Ref<ImageData> ImageData::Create(Ref<ByteArrayPixelBuffer> &&pixelBuffer,
+  Ref<ImageData> ImageData::Create(const Ref<ByteArrayPixelBuffer> &pixelBuffer,
                                    Maybe<ImageDataPixelFormat> overridingPixelFormat) noexcept
   {
     auto colorSpace = ToPredefinedColorSpace(pixelBuffer->Format().ColorSpace);
@@ -90,7 +90,7 @@ namespace krys::boo::html
     return Create(krys::move(pixelBuffer), overridingPixelFormat);
   }
 
-  RefPtr<ImageData> ImageData::Create(Ref<PixelBuffer> &&pixelBuffer,
+  RefPtr<ImageData> ImageData::Create(const Ref<PixelBuffer> &pixelBuffer,
                                       Maybe<ImageDataPixelFormat> overridingPixelFormat) noexcept
   {
     if (auto *byteArray = DynamicDowncast<ByteArrayPixelBuffer>(*pixelBuffer))

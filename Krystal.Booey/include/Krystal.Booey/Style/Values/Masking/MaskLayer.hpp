@@ -169,13 +169,13 @@ namespace krys::boo::style
 
     KRYS_NODISCARD static PositionX InitialPositionX() noexcept
     {
-      using namespace css::Literals;
+      using namespace css::literals;
       return 0_css_percentage;
     }
 
     KRYS_NODISCARD static PositionY InitialPositionY() noexcept
     {
-      using namespace css::Literals;
+      using namespace css::literals;
       return 0_css_percentage;
     }
 
@@ -319,7 +319,7 @@ namespace krys::boo::style
   template <>
   struct Blending<MaskLayer>
   {
-    KRYS_NODISCARD bool CanBlend(const MaskLayer &, const MaskLayer &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const MaskLayer &, const MaskLayer &) noexcept;
   };
 
 #undef KRYS_FOR_EACH_MASK_LAYER_REFERENCE

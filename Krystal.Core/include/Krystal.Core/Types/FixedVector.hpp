@@ -74,7 +74,7 @@ namespace krys
     }
 
     template <Callable<size_t> Generator>
-    static FixedVector createWithSizeFromGenerator(size_t size, Generator &&generator)
+    static FixedVector createWithSizeFromGenerator(size_t size, Generator generator)
     {
       FixedVector result;
       result._values.reserve(size);
@@ -86,7 +86,7 @@ namespace krys
     }
 
     template <typename SizedRange, typename Mapper>
-    static FixedVector map(SizedRange &&range, Mapper &&mapper)
+    static FixedVector map(const SizedRange &range, Mapper mapper)
     {
       FixedVector result;
       if constexpr (std::ranges::sized_range<SizedRange>)
@@ -212,7 +212,7 @@ namespace krys
     }
 
     template <typename Predicate>
-    bool containsIf(Predicate &&predicate) const
+    bool containsIf(Predicate predicate) const
     {
       return findIf(std::forward<Predicate>(predicate)) != notFound;
     }
@@ -224,7 +224,7 @@ namespace krys
     }
 
     template <typename Predicate>
-    size_t findIf(Predicate &&predicate) const
+    size_t findIf(Predicate predicate) const
     {
       for (size_t i = 0; i < _values.size(); ++i)
       {
@@ -243,7 +243,7 @@ namespace krys
     }
 
     template <typename Predicate>
-    size_t reverseFindIf(Predicate &&predicate) const
+    size_t reverseFindIf(Predicate predicate) const
     {
       for (size_t i = _values.size(); i > 0; --i)
       {
@@ -256,7 +256,7 @@ namespace krys
     }
 
     template <typename Mapper>
-    auto map(Mapper &&mapper) const
+    auto map(Mapper mapper) const
     {
       using Result = remove_cvref_t<invoke_result_t<Mapper, const T &>>;
       std::vector<Result> result;

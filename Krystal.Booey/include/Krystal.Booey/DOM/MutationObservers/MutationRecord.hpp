@@ -35,7 +35,7 @@ namespace krys::boo::dom
 #pragma region MutationRecord - https://dom.spec.whatwg.org/#mutationrecord
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-type
-    KRYS_NODISCARD virtual DOMStringAtom Type() const noexcept = 0;
+    KRYS_NODISCARD virtual const DOMStringAtom &Type() const noexcept = 0;
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-target
     KRYS_NODISCARD virtual Ref<Node> Target() const noexcept = 0;
@@ -59,21 +59,21 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributename
-    KRYS_NODISCARD virtual DOMStringAtom AttributeName() const noexcept
+    KRYS_NODISCARD virtual const DOMStringAtom &AttributeName() const noexcept KRYS_LIFETIME_BOUND
     {
-      return null;
+      return DOMStringAtom::Null();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributenamespace
-    KRYS_NODISCARD virtual DOMStringAtom AttributeNamespace() const noexcept
+    KRYS_NODISCARD virtual const DOMStringAtom &AttributeNamespace() const noexcept KRYS_LIFETIME_BOUND
     {
-      return null;
+      return DOMStringAtom::Null();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-oldvalue
-    KRYS_NODISCARD virtual DOMStringAtom OldValue() const noexcept
+    KRYS_NODISCARD virtual const DOMStringAtom &OldValue() const noexcept KRYS_LIFETIME_BOUND
     {
-      return null;
+      return DOMStringAtom::Null();
     }
 
 #pragma endregion

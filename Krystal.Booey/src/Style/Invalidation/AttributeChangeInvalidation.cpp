@@ -67,11 +67,8 @@ namespace krys::boo::style
                            {
                              mayAffectStyleInShadowTree = true;
                            }
-                           if (features.AttributesAffectingHost.contains(attributeNameForLookups))
-                           {
-                             shouldInvalidateCurrent = true;
-                           }
-                           else if (features.ContentAttributeNamesInRules.contains(attributeNameForLookups))
+                           if (features.AttributesAffectingHost.contains(attributeNameForLookups)
+                               || features.ContentAttributeNamesInRules.contains(attributeNameForLookups))
                            {
                              shouldInvalidateCurrent = true;
                            }

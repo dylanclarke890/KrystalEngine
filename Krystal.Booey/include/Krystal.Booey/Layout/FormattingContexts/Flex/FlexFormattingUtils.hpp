@@ -65,8 +65,8 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD LayoutUnit UsedMinimumSizeInMainAxis(const LogicalFlexItem &flexItem) const noexcept;
 
-    KRYS_NODISCARD Maybe<LayoutUnit>
-      UsedMaximumSizeInMainAxis(const LogicalFlexItem &flexItem) const noexcept;
+    KRYS_NODISCARD static Maybe<LayoutUnit>
+      UsedMaximumSizeInMainAxis(const LogicalFlexItem &flexItem) noexcept;
 
     KRYS_NODISCARD LayoutUnit UsedMaxContentSizeInMainAxis(const LogicalFlexItem &flexItem) const noexcept;
 

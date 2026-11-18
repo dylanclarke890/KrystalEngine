@@ -43,6 +43,7 @@ namespace krys::boo
   {
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): its members are swapped out.
   inline RenderStyleBase::RenderStyleBase(RenderStyleBase &a, RenderStyleBase &&b) noexcept
       : _computedStyle(a._computedStyle, krys::move(b._computedStyle))
   {

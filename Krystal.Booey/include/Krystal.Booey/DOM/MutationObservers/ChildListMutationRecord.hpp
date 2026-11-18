@@ -50,7 +50,7 @@ namespace krys::boo::dom
     ChildListMutationRecord(Ref<Node> &&target, Ref<NodeList> &&added, Ref<NodeList> &&removed,
                             RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept;
 
-    KRYS_NODISCARD DOMStringAtom Type() const noexcept override
+    KRYS_NODISCARD const DOMStringAtom &Type() const noexcept override
     {
       static const DOMStringAtom type {u8"childList"};
       return type;

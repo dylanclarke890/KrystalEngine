@@ -244,9 +244,7 @@ namespace krys
       T sinHalfAngle = std::sqrt(0.5f - halfCosAngle);
       return Quaternion<T>(axis.x * sinHalfAngle, axis.y * sinHalfAngle, axis.z * sinHalfAngle, cosHalfAngle);
     }
-    else
-    {
-      return Quaternion<T>(1.0f, 0.0f, 0.0f, 0.0f);
-    }
+
+    return Quaternion<T>(1.0f, 0.0f, 0.0f, 0.0f);
   }
 }

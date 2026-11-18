@@ -105,11 +105,11 @@ namespace krys::boo::dom
   public:
     KRYS_NODISCARD static QualifiedNameCache &ThreadLocalCache() noexcept;
 
-    KRYS_NODISCARD Ref<QualifiedNameStorage> GetOrAdd(DOMStringAtom namespaceURI, DOMStringAtom prefix,
-                                                      DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD Ref<QualifiedNameStorage> GetOrAdd(DOMStringAtom namespaceURI, const DOMStringAtom &prefix,
+                                                      const DOMStringAtom &localName) noexcept;
 
-    KRYS_NODISCARD Ref<QualifiedNameStorage> GetOrAdd(DOMStringAtom namespaceURI, DOMStringAtom prefix,
-                                                      DOMStringAtom localName, html::TagName tagName,
+    KRYS_NODISCARD Ref<QualifiedNameStorage> GetOrAdd(DOMStringAtom namespaceURI, const DOMStringAtom &prefix,
+                                                      const DOMStringAtom &localName, html::TagName tagName,
                                                       html::Namespace tagNamespace) noexcept;
 
     void Remove(QualifiedNameStorage &storage) noexcept;

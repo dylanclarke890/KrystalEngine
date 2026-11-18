@@ -51,7 +51,7 @@ namespace krys::boo::dom
   }
 
   WheelEvent::WheelEvent(DOMStringAtom type, const WheelEventInit &initializer) noexcept
-      : MouseEvent(type, initializer), _deltaX(initializer.DeltaX), _deltaY(initializer.DeltaY),
+      : MouseEvent(krys::move(type), initializer), _deltaX(initializer.DeltaX), _deltaY(initializer.DeltaY),
         _deltaZ(initializer.DeltaZ), _deltaMode(initializer.DeltaMode)
   {
   }

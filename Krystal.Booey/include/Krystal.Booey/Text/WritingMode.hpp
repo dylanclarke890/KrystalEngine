@@ -69,8 +69,8 @@ namespace krys::boo
 
   enum class TextDirection : bool
   {
-    LTR = 0,
-    RTL = 1,
+    LTR = false,
+    RTL = true,
   };
 
   enum class TextOrientation : uint8

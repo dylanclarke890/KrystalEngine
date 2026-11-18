@@ -419,8 +419,9 @@ namespace krys::boo
     PushOntoTransformState(transformState, mode, nullptr, Parent(), translationOffset, false);
   }
 
-  LayoutSize RenderMultiColumnFlow::PhysicalTranslationFromFragmentToFlow(
-    const RenderMultiColumnSet *columnSet, const LayoutPoint &physicalPoint) const noexcept
+  LayoutSize
+    RenderMultiColumnFlow::PhysicalTranslationFromFragmentToFlow(const RenderMultiColumnSet *columnSet,
+                                                                 const LayoutPoint &physicalPoint) noexcept
   {
     LayoutPoint logicalPoint = columnSet->FlipForWritingMode(physicalPoint);
     LayoutPoint translatedPoint = columnSet->TranslateFragmentPointToFragmentedFlow(logicalPoint);

@@ -1458,17 +1458,18 @@ namespace krys::boo
     return AdjustSelectionRectForSimpleText(run, selectionRect, from, destination);
   }
 
-  int32 FontCascade::OffsetForPosition(const TextRun &run, float x, bool includePartialGlyphs) const noexcept
+  int32 FontCascade::OffsetForPosition(const TextRun &run, float position,
+                                       bool includePartialGlyphs) const noexcept
   {
     if (ShouldUseComplexTextController(GetCodePath(run)))
     {
-      return OffsetForPositionForComplexText(run, x, includePartialGlyphs);
+      return OffsetForPositionForComplexText(run, position, includePartialGlyphs);
     }
 
-    return OffsetForPositionForSimpleText(run, x, includePartialGlyphs);
+    return OffsetForPositionForSimpleText(run, position, includePartialGlyphs);
   }
 
-  bool FontCascade::CanHandleRunAsSimpleText(const TextRun &, uint32, uint32) const noexcept
+  bool FontCascade::CanHandleRunAsSimpleText(const TextRun &, uint32, uint32) noexcept
   {
     return true;
   }
@@ -1486,9 +1487,9 @@ namespace krys::boo
     return EnableKerning() || RequiresShaping();
   }
 
-  void FontCascade::SetCodePath(CodePath p) noexcept
+  void FontCascade::SetCodePath(CodePath codePath) noexcept
   {
-    s_codePath = p;
+    s_codePath = codePath;
   }
 
   FontCascade::CodePath FontCascade::GetCodePath() noexcept
@@ -2384,10 +2385,10 @@ namespace krys::boo
     selectionRect.SetWidth(LayoutUnit::FromFloatCeil(afterWidth - beforeWidth));
   }
 
-  int32 FontCascade::OffsetForPositionForSimpleText(const TextRun &run, float x,
+  int32 FontCascade::OffsetForPositionForSimpleText(const TextRun &run, float position,
                                                     bool includePartialGlyphs) const noexcept
   {
-    float delta = x;
+    float delta = position;
 
     WidthIterator it(*this, run);
     GlyphBuffer localGlyphBuffer;
@@ -2452,11 +2453,11 @@ namespace krys::boo
     return static_cast<int32>(offset);
   }
 
-  int32 FontCascade::OffsetForPositionForComplexText(const TextRun &run, float x,
+  int32 FontCascade::OffsetForPositionForComplexText(const TextRun &run, float position,
                                                      bool includePartialGlyphs) const noexcept
   {
     ComplexTextController controller(*this, run);
-    return static_cast<int32>(controller.OffsetForPosition(x, includePartialGlyphs));
+    return static_cast<int32>(controller.OffsetForPosition(position, includePartialGlyphs));
   }
 
   bool ShouldSynthesizeSmallCaps(bool dontSynthesizeSmallCaps, const Font *nextFont, char32 baseCharacter,

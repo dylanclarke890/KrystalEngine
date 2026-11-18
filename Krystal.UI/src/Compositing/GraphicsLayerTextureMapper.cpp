@@ -80,7 +80,7 @@ namespace krys::ui
     AddRepaintRect(rect);
   }
 
-  bool GraphicsLayerTextureMapper::SetChildren(List<Ref<GraphicsLayer>> &&children) noexcept
+  bool GraphicsLayerTextureMapper::SetChildren(List<Ref<GraphicsLayer>> children) noexcept
   {
     if (GraphicsLayer::SetChildren(krys::move(children)))
     {
@@ -936,7 +936,7 @@ namespace krys::ui
     NotifyChange(AnimationChange);
   }
 
-  bool GraphicsLayerTextureMapper::FiltersCanBeComposited(const boo::FilterOperations &filters) const noexcept
+  bool GraphicsLayerTextureMapper::FiltersCanBeComposited(const boo::FilterOperations &filters) noexcept
   {
     if (!filters.size())
     {

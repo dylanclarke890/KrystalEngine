@@ -85,14 +85,14 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-addeventlistener
     /// @note The target holds its listeners' callbacks: a callback that holds a reference to the target (or
     /// to a node of its document) keeps both alive, as there's no garbage collector to find the cycle.
-    void AddEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
+    void AddEventListener(const DOMStringAtom &type, Ref<EventListenerCallback> callback,
                           const AddEventListenerOptionsOrBool &options) noexcept;
 
     /// @brief Adds a listener that calls @p callback, owned by the returned handle: destroying the handle
     /// removes the listener, unless it was released to the target.
     /// @note Listeners released to their target can still be removed together by a signal in @p options.
     KRYS_NODISCARD EventListenerHandle
-      AddEventListener(DOMStringAtom type, Func<void(Event &)> &&callback,
+      AddEventListener(const DOMStringAtom &type, Func<void(Event &)> &&callback,
                        const AddEventListenerOptionsOrBool &options = false) noexcept;
 
     /// @brief Adds a listener that calls @p callback for the events of type @p type that are a @p TEvent (a
@@ -100,7 +100,7 @@ namespace krys::boo::dom
     template <typename TEvent>
     requires(DerivedFrom<TEvent, Event> && !SameType<TEvent, Event>)
     KRYS_NODISCARD EventListenerHandle
-      AddEventListener(DOMStringAtom type, Func<void(TEvent &)> &&callback,
+      AddEventListener(const DOMStringAtom &type, Func<void(TEvent &)> &&callback,
                        const AddEventListenerOptionsOrBool &options = false) noexcept
     {
       return AddEventListener(type,
@@ -116,7 +116,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-removeeventlistener
-    void RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
+    void RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> callback,
                              const EventListenerOptionsOrBool &options) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-dispatchevent

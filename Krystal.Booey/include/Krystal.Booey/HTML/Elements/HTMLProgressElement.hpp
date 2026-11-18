@@ -87,9 +87,9 @@ namespace krys::boo::html
 #pragma endregion
 
   protected:
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
-                            dom::DOMStringAtom namespaceURI) noexcept override;
+                            const dom::DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;

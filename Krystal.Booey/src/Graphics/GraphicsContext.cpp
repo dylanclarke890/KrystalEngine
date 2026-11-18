@@ -100,7 +100,7 @@ namespace krys::boo
     UnwindStateStack(StackSize());
   }
 
-  FloatSize GraphicsContext::PlatformShadowOffset(const FloatSize &shadowOffset) const noexcept
+  FloatSize GraphicsContext::PlatformShadowOffset(const FloatSize &shadowOffset) noexcept
   {
     return shadowOffset;
   }
@@ -536,7 +536,7 @@ namespace krys::boo
   }
 
   FloatRect GraphicsContext::ComputeLineBoundsAndAntialiasingModeForText(const FloatRect &rect, bool printing,
-                                                                         Color &color) noexcept
+                                                                         Color &color) const noexcept
   {
     FloatPoint origin = rect.Location();
     float thickness = std::max(rect.Height(), 0.5f);
@@ -615,7 +615,7 @@ namespace krys::boo
   }
 
   float GraphicsContext::DashedLinePatternOffsetForPatternAndStrokeWidth(float patternWidth,
-                                                                         float strokeWidth) const noexcept
+                                                                         float strokeWidth) noexcept
   {
     // Pattern starts with full fill and ends with the empty fill.
     // 1. Let's start with the empty phase after the corner.
@@ -646,8 +646,7 @@ namespace krys::boo
   }
 
   List<FloatPoint> GraphicsContext::CenterLineAndCutOffCorners(bool isVerticalLine, float cornerWidth,
-                                                               FloatPoint point1,
-                                                               FloatPoint point2) const noexcept
+                                                               FloatPoint point1, FloatPoint point2) noexcept
   {
     // Center line and cut off corners for pattern painting.
     if (isVerticalLine)

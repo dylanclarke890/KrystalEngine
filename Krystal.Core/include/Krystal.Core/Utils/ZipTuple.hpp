@@ -19,6 +19,7 @@ namespace krys
     auto tuple_zip_impl(TupleLikes &&...tupleLikes, std::index_sequence<I...>) noexcept
     {
       return std::tuple<zip_tuple_at_index_t<I, TupleLikes...>...> {
+        // NOLINTNEXTLINE(bugprone-use-after-move): each call moves out only element I of each tuple.
         zip_tuple_at_index<I>(std::forward<TupleLikes>(tupleLikes)...)...};
     }
   } // namespace detail

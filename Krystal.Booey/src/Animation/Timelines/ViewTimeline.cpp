@@ -58,7 +58,7 @@ namespace krys::boo
   }
 
   dom::ExceptionOr<Ref<ViewTimeline>> ViewTimeline::Create(dom::Document &document,
-                                                           ViewTimelineOptions &&options) noexcept
+                                                           const ViewTimelineOptions &options) noexcept
   {
     auto viewTimeline = AdoptRef(*new ViewTimeline(options.Axis));
 
@@ -720,7 +720,7 @@ namespace krys::boo
   template <typename F>
   double ViewTimeline::MapOffsetToTimelineRange(const ScrollTimeline::Data &data,
                                                 style::SingleAnimationRangeName name,
-                                                F &&valueWithinSubjectRange) const noexcept
+                                                F valueWithinSubjectRange) const noexcept
   {
     auto timelineRange = data.RangeEnd - data.RangeStart;
     krys_debug_assert(timelineRange);

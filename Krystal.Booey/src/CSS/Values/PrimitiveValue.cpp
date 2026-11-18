@@ -99,31 +99,31 @@ namespace krys::boo::css
     _value.PropertyId = property;
   }
 
-  PrimitiveValue::PrimitiveValue(double number, UnitType type) noexcept : css::Value(ValueType::Primitive)
+  PrimitiveValue::PrimitiveValue(double value, UnitType unit) noexcept : css::Value(ValueType::Primitive)
   {
-    SetPrimitiveUnitType(type);
-    _value.Number = number;
+    SetPrimitiveUnitType(unit);
+    _value.Number = value;
   }
 
-  PrimitiveValue::PrimitiveValue(const CSSOMString &string, UnitType type) noexcept
+  PrimitiveValue::PrimitiveValue(const CSSOMString &value, UnitType unit) noexcept
       : css::Value(ValueType::Primitive)
   {
-    krys_debug_assert(IsStringType(type));
-    SetPrimitiveUnitType(type);
-    _value.String = CSSOMStringAtom(string).LeakStorage();
+    krys_debug_assert(IsStringType(unit));
+    SetPrimitiveUnitType(unit);
+    _value.String = CSSOMStringAtom(value).LeakStorage();
   }
 
-  PrimitiveValue::PrimitiveValue(StaticValueTag, css::ValueId valueId) noexcept
+  PrimitiveValue::PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept
       : css::Value(ValueType::Primitive)
   {
     SetPrimitiveUnitType(UnitType::ValueId);
-    _value.ValueId = valueId;
+    _value.ValueId = keyword;
 
     MakeStatic();
   }
 
-  PrimitiveValue::PrimitiveValue(StaticValueTag, double number, UnitType type) noexcept
-      : PrimitiveValue(number, type)
+  PrimitiveValue::PrimitiveValue(StaticValueTag, double value, UnitType unit) noexcept
+      : PrimitiveValue(value, unit)
   {
     MakeStatic();
   }
@@ -140,10 +140,10 @@ namespace krys::boo::css
     _value.Calc = value.release();
   }
 
-  PrimitiveValue::PrimitiveValue(Ref<AttrValue> value) noexcept : css::Value(ValueType::Primitive)
+  PrimitiveValue::PrimitiveValue(Ref<AttrValue> attr) noexcept : css::Value(ValueType::Primitive)
   {
     SetPrimitiveUnitType(UnitType::Attr);
-    _value.Attr = value.release();
+    _value.Attr = attr.release();
   }
 
   PrimitiveValue::~PrimitiveValue() noexcept
@@ -186,9 +186,9 @@ namespace krys::boo::css
     return AdoptRef(*new PrimitiveValue(value, UnitType::Number));
   }
 
-  Ref<PrimitiveValue> PrimitiveValue::Create(double value, UnitType type) noexcept
+  Ref<PrimitiveValue> PrimitiveValue::Create(double value, UnitType unit) noexcept
   {
-    switch (type)
+    switch (unit)
     {
       case UnitType::Number:
         if (auto *result = ValueFromPool(CommonValuePool->_numberValues, value))
@@ -211,7 +211,7 @@ namespace krys::boo::css
       default: break;
     }
 
-    return AdoptRef(*new PrimitiveValue(value, type));
+    return AdoptRef(*new PrimitiveValue(value, unit));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::Create(const CSSOMString &value) noexcept
@@ -517,17 +517,17 @@ namespace krys::boo::css
   }
 
   Maybe<double>
-    PrimitiveValue::DoubleValueInternal(UnitType requestedUnitType,
+    PrimitiveValue::DoubleValueInternal(UnitType targetUnit,
                                         const ToLengthConversionData &conversionData) const noexcept
   {
     if (!IsValidUnitTypeForDoubleConversion(PrimitiveUnitType())
-        || !IsValidUnitTypeForDoubleConversion(requestedUnitType))
+        || !IsValidUnitTypeForDoubleConversion(targetUnit))
     {
       return null;
     }
 
     UnitType sourceUnitType = PrimitiveType();
-    if (requestedUnitType == sourceUnitType || requestedUnitType == UnitType::Dimension)
+    if (targetUnit == sourceUnitType || targetUnit == UnitType::Dimension)
     {
       return DoubleValue(conversionData);
     }
@@ -535,7 +535,7 @@ namespace krys::boo::css
     UnitCategory sourceCategory = UnitCategoryForType(sourceUnitType);
     krys_debug_assert(sourceCategory != UnitCategory::Other);
 
-    UnitType targetUnitType = requestedUnitType;
+    UnitType targetUnitType = targetUnit;
     UnitCategory targetCategory = UnitCategoryForType(targetUnitType);
     krys_debug_assert(targetCategory != UnitCategory::Other);
 
@@ -607,16 +607,16 @@ namespace krys::boo::css
     return convertedValue;
   }
 
-  Maybe<double> PrimitiveValue::DoubleValueInternalDeprecated(UnitType requestedUnitType) const noexcept
+  Maybe<double> PrimitiveValue::DoubleValueInternalDeprecated(UnitType targetUnit) const noexcept
   {
     if (!IsValidUnitTypeForDoubleConversion(PrimitiveUnitType())
-        || !IsValidUnitTypeForDoubleConversion(requestedUnitType))
+        || !IsValidUnitTypeForDoubleConversion(targetUnit))
     {
       return null;
     }
 
     UnitType sourceUnitType = PrimitiveType();
-    if (requestedUnitType == sourceUnitType || requestedUnitType == UnitType::Dimension)
+    if (targetUnit == sourceUnitType || targetUnit == UnitType::Dimension)
     {
       return DoubleValueDeprecated();
     }
@@ -624,7 +624,7 @@ namespace krys::boo::css
     UnitCategory sourceCategory = UnitCategoryForType(sourceUnitType);
     krys_debug_assert(sourceCategory != UnitCategory::Other);
 
-    UnitType targetUnitType = requestedUnitType;
+    UnitType targetUnitType = targetUnit;
     UnitCategory targetCategory = UnitCategoryForType(targetUnitType);
     krys_debug_assert(targetCategory != UnitCategory::Other);
 

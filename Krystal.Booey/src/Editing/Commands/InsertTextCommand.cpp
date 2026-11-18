@@ -168,7 +168,7 @@ namespace krys::boo
   // FIXME: Writing suggestions (isInsertingTextForWritingSuggestion), with writing suggestions.
   void InsertTextCommand::DoApply() noexcept
   {
-    krys_debug_assert(_text.find(u8'\n') == utf8_string::npos);
+    krys_debug_assert(!_text.contains(u8'\n'));
 
     if (EndingSelection().IsNoneOrOrphaned())
     {

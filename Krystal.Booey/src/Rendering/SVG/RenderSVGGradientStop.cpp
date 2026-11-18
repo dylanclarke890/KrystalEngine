@@ -68,7 +68,7 @@ namespace krys::boo
     ClearNeedsLayout();
   }
 
-  svg::SVGGradientElement *RenderSVGGradientStop::GradientElement() noexcept
+  svg::SVGGradientElement *RenderSVGGradientStop::GradientElement() const noexcept
   {
     return DynamicDowncast<svg::SVGGradientElement>(GetElement().ParentElement());
   }

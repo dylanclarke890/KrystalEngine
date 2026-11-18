@@ -22,7 +22,7 @@ namespace krys::boo::svg::tests
       u8R"html(<defs><foreignObject id=hidden width=10 height=10><div id=hd></div></foreignObject></defs>)html"
       u8R"html(</svg></body>)html");
     // The parser makes HTML elements in a foreign object, unless they're in an <svg>.
-    auto rect = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"rect");
+    auto rect = fixture.Document->CreateElementNS(infra::namespaces::SVG, u8"rect");
     REQUIRE_FALSE(rect.HasException());
     (void)fixture.ById(u8"fo").AppendChild(*rect.ReleaseValue());
     (void)fixture.Document->UpdateLayout();
@@ -77,9 +77,9 @@ layer at (0,0) size 200x100
     // Opacity clips to the foreign object's repaint rect, which starts at its location, where its content is
     // painted.
     auto painted = fixture.Painted();
-    CHECK(painted.find(u8"(clip\n  (rect at (0,0) size 40x30))") != utf8_string::npos);
-    CHECK(painted.find(u8"(begin-transparency-layer") != utf8_string::npos);
-    CHECK(painted.find(u8"(rect at (0,0) size 20x10)\n  (color #00FF00)") != utf8_string::npos);
+    CHECK(painted.contains(u8"(clip\n  (rect at (0,0) size 40x30))"));
+    CHECK(painted.contains(u8"(begin-transparency-layer"));
+    CHECK(painted.contains(u8"(rect at (0,0) size 20x10)\n  (color #00FF00)"));
   }
 
   TEST_CASE("SVGForeignObjectElement: positioned content", "[SVG][SVGForeignObjectElement]")

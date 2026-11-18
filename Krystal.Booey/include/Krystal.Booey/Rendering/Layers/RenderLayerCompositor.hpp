@@ -244,7 +244,7 @@ namespace krys::boo
       return _acceleratedCompositingForFixedPositionEnabled;
     }
 
-    KRYS_NODISCARD bool CanRender3DTransforms() const noexcept;
+    KRYS_NODISCARD static bool CanRender3DTransforms() noexcept;
 
     void WillRecalcStyle() noexcept;
 
@@ -281,8 +281,8 @@ namespace krys::boo
 
     // Whether layer's backing needs a graphics layer to do clipping by an ancestor (non-stacking-context
     // parent with overflow).
-    KRYS_NODISCARD bool ClippedByAncestor(RenderLayer &layer,
-                                          const RenderLayer *compositingAncestor) const noexcept;
+    KRYS_NODISCARD static bool ClippedByAncestor(RenderLayer &layer,
+                                                 const RenderLayer *compositingAncestor) noexcept;
 
     bool UpdateAncestorClippingStack(const RenderLayer &layer,
                                      const RenderLayer *compositingAncestor) const noexcept;
@@ -291,11 +291,11 @@ namespace krys::boo
     KRYS_NODISCARD static bool ClipsCompositingDescendants(const RenderLayer &layer) noexcept;
 
     // Whether the given layer needs an extra 'contents' layer.
-    KRYS_NODISCARD bool NeedsContentsCompositingLayer(const RenderLayer &layer) const noexcept;
+    KRYS_NODISCARD static bool NeedsContentsCompositingLayer(const RenderLayer &layer) noexcept;
 
     KRYS_NODISCARD bool FixedLayerIntersectsViewport(const RenderLayer &layer) const noexcept;
 
-    KRYS_NODISCARD bool SupportsFixedRootBackgroundCompositing() const noexcept;
+    KRYS_NODISCARD static bool SupportsFixedRootBackgroundCompositing() noexcept;
 
     KRYS_NODISCARD bool NeedsFixedRootBackgroundLayer(const RenderLayer &layer) const noexcept;
 
@@ -310,7 +310,7 @@ namespace krys::boo
     void RepaintOnCompositingChange(RenderLayer &layer,
                                     const RenderLayerModelObject *repaintContainer) noexcept;
 
-    void RepaintInCompositedAncestor(RenderLayer &layer, const LayoutRect &rect) noexcept;
+    static void RepaintInCompositedAncestor(RenderLayer &layer, const LayoutRect &rect) noexcept;
 
     // Notify us that a layer has been removed
     void LayerWillBeRemoved(RenderLayer &parent, RenderLayer &child) noexcept;
@@ -322,7 +322,7 @@ namespace krys::boo
     void EstablishesTopLayerWillChangeForLayer(RenderLayer &layer) noexcept;
 
     // Get the nearest ancestor layer that has overflow or clip, but is not a stacking context
-    KRYS_NODISCARD RenderLayer *EnclosingNonStackingClippingLayer(const RenderLayer &layer) const noexcept;
+    KRYS_NODISCARD static RenderLayer *EnclosingNonStackingClippingLayer(const RenderLayer &layer) noexcept;
 
     // Repaint all composited layers.
     void RepaintCompositedLayers() noexcept;
@@ -443,8 +443,9 @@ namespace krys::boo
     // FIXME: make the coordinated/async terminology consistent.
     KRYS_NODISCARD bool UseCoordinatedScrollingForLayer(const RenderLayer &layer) const noexcept;
 
-    KRYS_NODISCARD ScrollPositioningBehavior ComputeCoordinatedPositioningForLayer(
-      const RenderLayer &layer, const RenderLayer *compositingAncestor) const noexcept;
+    KRYS_NODISCARD static ScrollPositioningBehavior
+      ComputeCoordinatedPositioningForLayer(const RenderLayer &layer,
+                                            const RenderLayer *compositingAncestor) noexcept;
 
     void ResetTrackedRepaintRects() noexcept;
 
@@ -538,9 +539,8 @@ namespace krys::boo
     // Repaint this and its child layers.
     void RecursiveRepaintLayer(RenderLayer &layer) noexcept;
 
-    KRYS_NODISCARD bool
-      LayerRepaintTargetsBackingSharingLayer(RenderLayer &layer,
-                                             BackingSharingState &sharingState) const noexcept;
+    KRYS_NODISCARD static bool
+      LayerRepaintTargetsBackingSharingLayer(RenderLayer &layer, BackingSharingState &sharingState) noexcept;
 
     void ComputeExtent(const LayerOverlapMap &overlapMap, const RenderLayer &layer,
                        OverlapExtent &extent) const noexcept;
@@ -573,7 +573,7 @@ namespace krys::boo
       OverlapExtent &layerExtent, RenderLayer *stackingContextAncestor,
       const Maybe<BackingSharingSnapshot> &backingSharingSnapshot) noexcept;
 
-    void ClearBackingProviderSequencesInStackingContextOfLayer(RenderLayer &layer) noexcept;
+    static void ClearBackingProviderSequencesInStackingContextOfLayer(RenderLayer &layer) noexcept;
 
     void UpdateCompositingLayersTimerFired() noexcept;
 
@@ -591,14 +591,14 @@ namespace krys::boo
                                    UpdateBackingTraversalState &traversalState,
                                    EnumSet<UpdateLevel> updateLevel = {}) noexcept;
 
-    void AdjustOverflowScrollbarContainerLayers(RenderLayer &stackingContextLayer,
-                                                const List<RenderLayer *> &overflowScrollLayers,
-                                                const List<RenderLayer *> &layersClippedByScrollers,
-                                                List<Ref<GraphicsLayer>> &layerChildren) noexcept;
+    static void AdjustOverflowScrollbarContainerLayers(RenderLayer &stackingContextLayer,
+                                                       const List<RenderLayer *> &overflowScrollLayers,
+                                                       const List<RenderLayer *> &layersClippedByScrollers,
+                                                       List<Ref<GraphicsLayer>> &layerChildren) noexcept;
 
     KRYS_NODISCARD bool LayerHas3DContent(const RenderLayer &layer) const noexcept;
 
-    KRYS_NODISCARD bool IsRunningTransformAnimation(const RenderLayerModelObject &renderer) const noexcept;
+    KRYS_NODISCARD static bool IsRunningTransformAnimation(const RenderLayerModelObject &renderer) noexcept;
 
     bool AllowBackingStoreDetachingForFixedPosition(RenderLayer &layer,
                                                     const LayoutRect &absoluteBounds) noexcept;
@@ -630,18 +630,18 @@ namespace krys::boo
     KRYS_NODISCARD Page *GetPage() const noexcept;
 
     // Non layout-dependent
-    KRYS_NODISCARD bool
-      RequiresCompositingForAnimation(const RenderLayerModelObject &renderer) const noexcept;
+    KRYS_NODISCARD static bool
+      RequiresCompositingForAnimation(const RenderLayerModelObject &renderer) noexcept;
 
     KRYS_NODISCARD bool
       RequiresCompositingForTransform(const RenderLayerModelObject &renderer) const noexcept;
 
-    KRYS_NODISCARD bool
-      RequiresCompositingForBackfaceVisibility(const RenderLayerModelObject &renderer) const noexcept;
+    KRYS_NODISCARD static bool
+      RequiresCompositingForBackfaceVisibility(const RenderLayerModelObject &renderer) noexcept;
 
     KRYS_NODISCARD bool RequiresCompositingForCanvas(const RenderLayerModelObject &renderer) const noexcept;
 
-    KRYS_NODISCARD bool RequiresCompositingForFilters(const RenderLayerModelObject &renderer) const noexcept;
+    KRYS_NODISCARD static bool RequiresCompositingForFilters(const RenderLayerModelObject &renderer) noexcept;
 
     KRYS_NODISCARD bool
       RequiresCompositingForWillChange(const RenderLayerModelObject &renderer) const noexcept;
@@ -651,15 +651,16 @@ namespace krys::boo
                                                        const RenderLayer &layer,
                                                        RequiresCompositingData &queryData) const noexcept;
 
-    KRYS_NODISCARD bool
+    KRYS_NODISCARD static bool
       RequiresCompositingForOverflowScrolling(const RenderLayer &layer,
-                                              RequiresCompositingData &queryData) const noexcept;
+                                              RequiresCompositingData &queryData) noexcept;
 
-    KRYS_NODISCARD bool RequiresCompositingForAnchorPositioning(const RenderLayer &layer) const noexcept;
+    KRYS_NODISCARD static bool RequiresCompositingForAnchorPositioning(const RenderLayer &layer) noexcept;
 
-    KRYS_NODISCARD IndirectCompositingReason ComputeIndirectCompositingReason(
-      const RenderLayer &layer, bool hasCompositedDescendants, bool has3DTransformedDescendants,
-      bool paintsIntoProvidedBacking) const noexcept;
+    KRYS_NODISCARD static IndirectCompositingReason
+      ComputeIndirectCompositingReason(const RenderLayer &layer, bool hasCompositedDescendants,
+                                       bool has3DTransformedDescendants,
+                                       bool paintsIntoProvidedBacking) noexcept;
 
     KRYS_NODISCARD static ScrollPositioningBehavior
       LayerScrollBehahaviorRelativeToCompositedAncestor(const RenderLayer &layer,
@@ -669,8 +670,8 @@ namespace krys::boo
       StyleChangeMayAffectIndirectCompositingReasons(const RenderStyle &oldStyle,
                                                      const RenderStyle &newStyle) noexcept;
 
-    KRYS_NODISCARD LayoutRoundedRect
-      ParentRelativeScrollableRect(const RenderLayer &layer, const RenderLayer *ancestorLayer) const noexcept;
+    KRYS_NODISCARD static LayoutRoundedRect
+      ParentRelativeScrollableRect(const RenderLayer &layer, const RenderLayer *ancestorLayer) noexcept;
 
     // Returns list of layers and their clip rects required to clip the given layer, which include clips in
     // the containing block chain between the given layer and its composited ancestor.
@@ -678,7 +679,7 @@ namespace krys::boo
       ComputeAncestorClippingStack(const RenderLayer &layer,
                                    const RenderLayer *compositingAncestor) const noexcept;
 
-    KRYS_NODISCARD bool RequiresScrollLayer(RootLayerAttachment attachment) const noexcept;
+    KRYS_NODISCARD static bool RequiresScrollLayer(RootLayerAttachment attachment) noexcept;
 
     KRYS_NODISCARD bool RequiresHorizontalScrollbarLayer() const noexcept;
 
@@ -687,7 +688,7 @@ namespace krys::boo
     KRYS_NODISCARD bool RequiresScrollCornerLayer() const noexcept;
 
     // True if the FrameView uses a ScrollingCoordinator.
-    KRYS_NODISCARD bool HasCoordinatedScrolling() const noexcept;
+    KRYS_NODISCARD static bool HasCoordinatedScrolling() noexcept;
 
     // FIXME: make the coordinated/async terminology consistent.
     KRYS_NODISCARD bool IsAsyncScrollableStickyLayer(
@@ -696,7 +697,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldCompositeOverflowControls() const noexcept;
 
-    KRYS_NODISCARD bool DocumentUsesTiledBacking() const noexcept;
+    KRYS_NODISCARD static bool DocumentUsesTiledBacking() noexcept;
 
     void UpdateCompositingForLayerTreeAsTextDump() noexcept;
   };

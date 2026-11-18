@@ -231,7 +231,7 @@ namespace krys::boo::css
 
     /// @brief The colour value a successful construction made, or null.
     template <typename T>
-    KRYS_NODISCARD RefPtr<CSSStyleValue> Made(dom::ExceptionOr<Ref<T>> &&made) noexcept
+    KRYS_NODISCARD RefPtr<CSSStyleValue> Made(dom::ExceptionOr<Ref<T>> made) noexcept
     {
       if (made.HasException())
       {
@@ -292,7 +292,7 @@ namespace krys::boo::css
           if (auto c = ReifyColorComponents(document, split, {angle, percent(100), percent(100)}))
           {
             // Its components are numeric values, without `none`.
-            auto numeric = [](CSSColorPercent &&component) -> RefPtr<CSSNumericValue>
+            auto numeric = [](CSSColorPercent component) -> RefPtr<CSSNumericValue>
             {
               auto *value = std::get_if<RefPtr<CSSNumericValue>>(&component);
               return value ? krys::move(*value) : nullptr;

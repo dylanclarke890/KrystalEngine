@@ -65,7 +65,7 @@ namespace krys::boo::svg
       switch (type)
       {
           // clang-format off
-        case SVGLengthType::Number:      return css::LengthPercentageUnit::Px;
+        case SVGLengthType::Number:
         case SVGLengthType::Pixels:      return css::LengthPercentageUnit::Px;
         case SVGLengthType::Percentage:  return css::LengthPercentageUnit::Percentage;
         case SVGLengthType::Ems:         return css::LengthPercentageUnit::Em;

@@ -108,7 +108,7 @@ namespace krys::boo::html::tests
       List<HTMLTokenizerTest> tests;
       HTMLTokenizerTest currentTest;
 
-      auto parse = [&](utf8_string sectionName, utf8_string data)
+      auto parse = [&](const utf8_string &sectionName, utf8_string data)
       {
         if (sectionName == u8"name")
         {
@@ -276,7 +276,7 @@ namespace krys::boo::html::tests
       CHECK(equal);
     }
 
-    void RunTest(string filename) noexcept
+    void RunTest(const string &filename) noexcept
     {
       static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/html-tokenizer/";
 

@@ -107,7 +107,7 @@ namespace krys::ui::tests
         return nullptr;
       }
 
-      void WriteToClipboard(utf8_stringview, boo::SelectionData &&selectionData) noexcept override
+      void WriteToClipboard(utf8_stringview, boo::SelectionData selectionData) noexcept override
       {
         ++Writes;
         Text = selectionData.Text();
@@ -1504,7 +1504,7 @@ namespace krys::ui::tests
     SECTION("a click on its button asks the handler, which answers later")
     {
       RefPtr<boo::FileChooser> chooser;
-      view.SetFileChooserHandler([&](Ref<boo::FileChooser> request) { chooser = request; });
+      view.SetFileChooserHandler([&](Ref<boo::FileChooser> request) { chooser = krys::move(request); });
       click();
       REQUIRE(chooser);
       CHECK(chooser->Settings().AcceptMIMETypes == List<utf8_string> {u8"image/*"});
@@ -2031,14 +2031,14 @@ namespace krys::ui::tests
     WaitForCommit(view);
     CHECK(view.Document().GetURL().ProtocolIsFile());
     view.UpdateRendering();
-    CHECK(view.Record()->AsText({}).find(u8"native-image") == utf8_string::npos);
+    CHECK_FALSE(view.Record()->AsText({}).contains(u8"native-image"));
 
     // The load completes as a networking task, which asks for a rendering update.
     auto now = boo::html::EventLoop::Current().Now();
     CHECK(view.Update(now));
-    CHECK(view.Record()->AsText({}).find(u8"draw-pattern-native-image") != utf8_string::npos);
+    CHECK(view.Record()->AsText({}).contains(u8"draw-pattern-native-image"));
     // The <img> loads the same file, from the memory cache.
-    CHECK(view.Record()->AsText({}).find(u8"(draw-native-image") != utf8_string::npos);
+    CHECK(view.Record()->AsText({}).contains(u8"(draw-native-image"));
     auto &image = Downcast<boo::html::HTMLImageElement>(*view.Document().GetElementById(u8"img"));
     CHECK(image.Complete());
     CHECK(image.NaturalWidth() == 2u);
@@ -2282,9 +2282,10 @@ namespace krys::ui::tests
     }
 
     /// @brief The days since 1970-01-01 of the date @p date, as the date picker's cells name them.
-    KRYS_NODISCARD utf8_string DayValue(utf8_stringview date) noexcept
+    KRYS_NODISCARD utf8_string DayValue(utf8_stringview date)
     {
       auto components = boo::DateComponents::FromParsingDate(date);
+      REQUIRE(components);
       auto days = static_cast<int64>(components->MillisecondsSinceEpoch() / 86'400'000.0);
       auto text = std::to_string(days);
       return utf8_string(text.begin(), text.end());

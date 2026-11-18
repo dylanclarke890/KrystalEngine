@@ -83,7 +83,8 @@ namespace krys::boo::layout::tests
       return PlatformMouseEvent(point, point, MouseButton::Left, type, clickCount, {}, MonotonicTime::Now());
     }
 
-    bool PressKey(EditorFixture &fixture, utf8_string key, utf8_string identifier, int32 keyCode) noexcept
+    bool PressKey(EditorFixture &fixture, const utf8_string &key, utf8_string identifier,
+                  int32 keyCode) noexcept
     {
       return fixture.Frame->GetEventHandler().KeyEvent(
         PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),

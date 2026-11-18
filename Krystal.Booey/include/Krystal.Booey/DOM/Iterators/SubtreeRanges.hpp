@@ -259,10 +259,8 @@ namespace krys::boo::dom::detail
       {
         return iterator(_begin, _root);
       }
-      else
-      {
-        return iterator();
-      }
+
+      return iterator();
     }
 
     iterator end() const noexcept
@@ -484,6 +482,7 @@ namespace krys::boo::dom
 
   /// @brief Returns an iterator to the last node of a range.
   template <std::ranges::forward_range TRange>
+  // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
   constexpr auto Last(TRange &&range) noexcept
   {
     auto it = std::ranges::begin(range);
@@ -499,14 +498,16 @@ namespace krys::boo::dom
 
   /// @brief Returns an iterator to the first node of a range that satisfies a predicate.
   template <std::ranges::forward_range TRange, typename Predicate>
-  constexpr auto First(TRange &&range, Predicate &&pred) noexcept
+  // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+  constexpr auto First(TRange &&range, Predicate pred) noexcept
   {
     return std::ranges::find_if(range, krys::move(pred));
   }
 
   /// @brief Returns an iterator to the last node of a range that satisfies a predicate.
   template <std::ranges::forward_range TRange, typename Predicate>
-  constexpr auto Last(TRange &&range, Predicate &&pred) noexcept
+  // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+  constexpr auto Last(TRange &&range, Predicate pred) noexcept
   {
     auto it = std::ranges::begin(range);
     auto end = std::ranges::end(range);
@@ -524,18 +525,21 @@ namespace krys::boo::dom
   }
 
   template <DerivedFrom<Node> TNode, std::ranges::forward_range TRange>
+  // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
   constexpr auto FirstOfType(TRange &&range) noexcept
   {
     return First(range, [](auto &&node) { return Is<TNode>(node); });
   }
 
   template <DerivedFrom<Node> TNode, std::ranges::forward_range TRange>
+  // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
   constexpr auto LastOfType(TRange &&range) noexcept
   {
     return Last(range, [](auto &&node) { return Is<TNode>(node); });
   }
 
   template <DerivedFrom<Node> TNode, std::ranges::forward_range TRange>
+  // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
   constexpr bool HasNodeOfType(TRange &&range) noexcept
   {
     return First(range, [](auto &&node) { return Is<TNode>(node); }) != std::ranges::end(range);
@@ -543,6 +547,7 @@ namespace krys::boo::dom
 
   /// @brief Counts the number of nodes in a range.
   template <std::ranges::forward_range TRange>
+  // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
   constexpr auto Count(TRange &&range) noexcept
   {
     if constexpr (std::ranges::sized_range<remove_cvref_t<TRange>>)
@@ -563,7 +568,8 @@ namespace krys::boo::dom
 
   /// @brief Counts the number of nodes in a range that satisfy a predicate.
   template <std::ranges::forward_range TRange, typename Predicate>
-  constexpr auto Count(TRange &&range, Predicate &&pred) noexcept
+  // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+  constexpr auto Count(TRange &&range, Predicate pred) noexcept
   {
     size_t count = 0;
     for (auto &&value : range)

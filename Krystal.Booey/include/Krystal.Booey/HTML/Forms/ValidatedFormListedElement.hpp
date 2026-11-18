@@ -187,7 +187,7 @@ namespace krys::boo::html
     void RemovedFromAncestor(bool disconnectedFromDocument,
                              dom::ContainerNode &oldParentOfRemovedTree) noexcept;
 
-    void ParseAttribute(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> value) noexcept;
+    void ParseAttribute(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> value) noexcept;
 
     void ParseDisabledAttribute(Maybe<dom::DOMStringView> value) noexcept;
 

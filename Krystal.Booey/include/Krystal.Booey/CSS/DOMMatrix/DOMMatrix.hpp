@@ -38,7 +38,7 @@ namespace krys::boo::css
   public:
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-dommatrixreadonly
     KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrix>>
-      Create(Maybe<Variant<CSSOMString, List<double>>> &&init = null) noexcept;
+      Create(Maybe<Variant<CSSOMString, List<double>>> init = null) noexcept;
 
     KRYS_NODISCARD static Ref<DOMMatrix> Create(const TransformationMatrix &matrix, Is2D is2D) noexcept
     {

@@ -227,7 +227,7 @@ namespace krys::boo::html
     }
   }
 
-  void ImageInputType::AttributeChanged(dom::DOMStringAtom localName) noexcept
+  void ImageInputType::AttributeChanged(const dom::DOMStringAtom &localName) noexcept
   {
     krys_debug_assert(Element());
     if (localName == u8"alt")

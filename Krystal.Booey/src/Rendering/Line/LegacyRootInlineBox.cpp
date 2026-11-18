@@ -50,6 +50,7 @@ namespace krys::boo
       HighlightState boxState = box->SelectionState();
       if ((boxState == HighlightState::Start && state == HighlightState::End)
           || (boxState == HighlightState::End && state == HighlightState::Start))
+      // NOLINTNEXTLINE(bugprone-branch-clone): the conditions depend on their order.
       {
         state = HighlightState::Both;
       }

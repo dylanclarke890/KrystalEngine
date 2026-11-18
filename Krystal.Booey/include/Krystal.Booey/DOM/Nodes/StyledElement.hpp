@@ -64,7 +64,7 @@ namespace krys::boo::dom
     StyledElement(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
 
   public:
-    ~StyledElement() noexcept;
+    ~StyledElement() noexcept override;
 
 #pragma region ElementCSSInlineStyle - https://drafts.csswg.org/cssom/#the-elementcssinlinestyle-mixin
 
@@ -130,7 +130,8 @@ namespace krys::boo::dom
 
   protected:
     /// @brief Adds the declarations the attribute maps to, if it's a presentational attribute of the element.
-    virtual void CollectPresentationalHintsForAttribute(DOMStringAtom localName, DOMStringAtom namespaceURI,
+    virtual void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                        const DOMStringAtom &namespaceURI,
                                                         DOMStringView value,
                                                         css::MutableStyleProperties &style) noexcept
     {
@@ -147,31 +148,35 @@ namespace krys::boo::dom
     }
 
     /// @brief Whether a change to the attribute changes the element's presentational hints.
-    KRYS_NODISCARD virtual bool HasPresentationalHintsForAttribute(DOMStringAtom localName,
-                                                                   DOMStringAtom namespaceURI) const noexcept
+    KRYS_NODISCARD virtual bool
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept
     {
       (void)localName;
       (void)namespaceURI;
       return false;
     }
 
-    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                              css::ValueId identifier) noexcept;
+    static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                     css::PropertyId property,
+                                                     css::ValueId identifier) noexcept;
 
-    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                              double value, css::UnitType unit) noexcept;
+    static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                     css::PropertyId property, double value,
+                                                     css::UnitType unit) noexcept;
 
     void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                               const css::CSSOMString &value) noexcept;
 
-    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                              Ref<css::Value> &&value) noexcept;
+    static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                     css::PropertyId property,
+                                                     Ref<css::Value> &&value) noexcept;
 
     /// @brief Marks the presentational hints out of date, for a change that isn't an attribute change.
     void InvalidatePresentationalHintStyle() noexcept;
 
-    void OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
-                            Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept override;
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     /// @brief Writes the serialised inline style to the `style` attribute and clears the dirty flag.

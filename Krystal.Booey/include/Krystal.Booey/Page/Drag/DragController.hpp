@@ -100,14 +100,14 @@ namespace krys::boo
 
     /// @brief A drag entered or moved over @p frame.
     /// @return The operation a drop there would do, if any.
-    Maybe<DragOperation> DragEnteredOrUpdated(LocalFrame &frame, DragData &&dragData) noexcept;
+    Maybe<DragOperation> DragEnteredOrUpdated(LocalFrame &frame, DragData dragData) noexcept;
 
     /// @brief A drag left @p frame.
-    void DragExited(LocalFrame &frame, DragData &&dragData) noexcept;
+    void DragExited(LocalFrame &frame, DragData dragData) noexcept;
 
     /// @brief Drops the drag where it is.
     /// @return Whether the drop was handled.
-    bool PerformDragOperation(DragData &&dragData) noexcept;
+    bool PerformDragOperation(DragData dragData) noexcept;
 
     KRYS_NODISCARD bool MouseIsOverFileInput() const noexcept;
 
@@ -220,16 +220,16 @@ namespace krys::boo
 
     bool DragIsMove(FrameSelection &selection, const DragData &dragData) noexcept;
 
-    bool IsCopyKeyDown(const DragData &dragData) noexcept;
+    static bool IsCopyKeyDown(const DragData &dragData) noexcept;
 
     void MouseMovedIntoDocument(RefPtr<dom::Document> &&newDocument) noexcept;
 
     void DisallowFileAccessIfNeeded(DragData &dragData) noexcept;
 
-    KRYS_NODISCARD Maybe<HitTestResult> HitTestResultForDragStart(LocalFrame &source, dom::Element &element,
-                                                                  const IntPoint &location) const noexcept;
+    KRYS_NODISCARD static Maybe<HitTestResult>
+      HitTestResultForDragStart(LocalFrame &source, dom::Element &element, const IntPoint &location) noexcept;
 
-    KRYS_NODISCARD bool ShouldUseCachedImageForDragImage(const Image &image) const noexcept;
+    KRYS_NODISCARD static bool ShouldUseCachedImageForDragImage(const Image &image) noexcept;
 
     void DoImageDrag(dom::Element &element, const IntPoint &dragOrigin, const IntRect &layoutRect,
                      LocalFrame &frame, IntPoint &dragImageOffset, const DragState &state) noexcept;
@@ -242,8 +242,8 @@ namespace krys::boo
       return *_client;
     }
 
-    void DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, dom::Element &element, const url::URL &url,
-                                  utf8_stringview label) noexcept;
+    static void DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, dom::Element &element,
+                                         const url::URL &url, utf8_stringview label) noexcept;
   };
 
   /// @brief Whether @p element is a link a press may drag: an `a` with an `href` that isn't editable, or an

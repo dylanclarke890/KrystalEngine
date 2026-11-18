@@ -299,7 +299,7 @@ namespace krys::boo
     return _computedStyle.MutableFontCascadeWithoutUpdate();
   }
 
-  inline void RenderStyleBase::SetFontCascade(FontCascade &&fontCascade) noexcept
+  inline void RenderStyleBase::SetFontCascade(FontCascade fontCascade) noexcept
   {
     _computedStyle.SetFontCascade(krys::move(fontCascade));
   }

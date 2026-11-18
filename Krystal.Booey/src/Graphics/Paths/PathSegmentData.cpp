@@ -494,7 +494,7 @@ namespace krys::boo
     return CalculateArcToEndPoint(currentPoint, ControlPoint1, ControlPoint2, Radius);
   }
 
-  Maybe<FloatPoint> PathArcTo::TryGetEndPointWithoutContext() const noexcept
+  Maybe<FloatPoint> PathArcTo::TryGetEndPointWithoutContext() noexcept
   {
     return std::nullopt;
   }
@@ -657,7 +657,7 @@ namespace krys::boo
   }
 
   void PathEllipse::ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &,
-                                       FloatRect &boundingRect) const noexcept
+                                       FloatRect &boundingRect) noexcept
   {
     // FIXME: Implement this function.
     boundingRect.Extend(currentPoint);
@@ -906,30 +906,29 @@ namespace krys::boo
     ExtendRect(boundingRect, Start, ControlPoint1, endPoint);
   }
 
-  FloatPoint PathCloseSubpath::CalculateEndPoint(const FloatPoint &,
-                                                 FloatPoint &lastMoveToPoint) const noexcept
+  FloatPoint PathCloseSubpath::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) noexcept
   {
     return lastMoveToPoint;
   }
 
-  Maybe<FloatPoint> PathCloseSubpath::TryGetEndPointWithoutContext() const noexcept
+  Maybe<FloatPoint> PathCloseSubpath::TryGetEndPointWithoutContext() noexcept
   {
     return std::nullopt;
   }
 
   void PathCloseSubpath::ExtendFastBoundingRect(const FloatPoint &, const FloatPoint &lastMoveToPoint,
-                                                FloatRect &boundingRect) const noexcept
+                                                FloatRect &boundingRect) noexcept
   {
     boundingRect.Extend(lastMoveToPoint);
   }
 
   void PathCloseSubpath::ExtendBoundingRect(const FloatPoint &, const FloatPoint &lastMoveToPoint,
-                                            FloatRect &boundingRect) const noexcept
+                                            FloatRect &boundingRect) noexcept
   {
     boundingRect.Extend(lastMoveToPoint);
   }
 
-  void PathCloseSubpath::ApplyElements(const PathElementApplier &applier) const noexcept
+  void PathCloseSubpath::ApplyElements(const PathElementApplier &applier) noexcept
   {
     applier({PathElement::Type::CloseSubpath, {}});
   }

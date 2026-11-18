@@ -64,8 +64,9 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLLIElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                         dom::DOMStringAtom namespaceURI) const noexcept
+  bool
+    HTMLLIElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                      const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"type" || localName == u8"value"))
     {
@@ -74,8 +75,8 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLLIElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                             dom::DOMStringAtom namespaceURI,
+  void HTMLLIElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                             const dom::DOMStringAtom &namespaceURI,
                                                              dom::DOMStringView value,
                                                              css::MutableStyleProperties &style) noexcept
   {

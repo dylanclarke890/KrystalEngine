@@ -105,20 +105,20 @@ namespace krys::boo::css
     KRYS_NODISCARD char32 ConsumeEscapedCodePoint() noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#starts-with-a-valid-escape
-    KRYS_NODISCARD bool StartsWithValidEscape(char32 first, char32 second) const noexcept;
+    KRYS_NODISCARD static bool StartsWithValidEscape(char32 first, char32 second) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#check-if-three-code-points-would-start-an-ident-sequence
     KRYS_NODISCARD bool StartsWithIdentifier(char32 first, char32 second, char32 third) const noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#check-if-three-code-points-would-start-a-number
-    KRYS_NODISCARD bool StartsWithNumber(char32 first, char32 second, char32 third) const noexcept;
+    KRYS_NODISCARD static bool StartsWithNumber(char32 first, char32 second, char32 third) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#check-if-three-code-points-would-start-a-unicode-range
-    KRYS_NODISCARD bool StartsWithUnicodeRange(char32 first, char32 second, char32 third) const noexcept;
+    KRYS_NODISCARD static bool StartsWithUnicodeRange(char32 first, char32 second, char32 third) noexcept;
 
     /// @brief Helper function to check if the next characters in the input stream start with an exponent,
     /// which is part of a number token.
-    KRYS_NODISCARD bool StartsWithExponent(char32 first, char32 second, char32 third) const noexcept;
+    KRYS_NODISCARD static bool StartsWithExponent(char32 first, char32 second, char32 third) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#consume-an-ident-sequence
     KRYS_NODISCARD utf32_string ConsumeIdentSequence() noexcept;

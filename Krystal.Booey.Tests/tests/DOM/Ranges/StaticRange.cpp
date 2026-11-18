@@ -26,7 +26,7 @@ namespace krys::boo::dom::tests
         REQUIRE_FALSE(Parent->AppendChild(*Text).HasException());
       }
 
-      Ref<StaticRange> MakeRange(Node &startNode, uint64 startOffset, Node &endNode, uint64 endOffset)
+      static Ref<StaticRange> MakeRange(Node &startNode, uint64 startOffset, Node &endNode, uint64 endOffset)
       {
         return CreateRef<StaticRange>(
           StaticRangeInit::Create(BoundaryPoint {ShareRef(startNode), startOffset},

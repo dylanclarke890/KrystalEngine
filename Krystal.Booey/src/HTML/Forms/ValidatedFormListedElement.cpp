@@ -376,7 +376,7 @@ namespace krys::boo::html
     }
   }
 
-  void ValidatedFormListedElement::ParseAttribute(dom::DOMStringAtom localName,
+  void ValidatedFormListedElement::ParseAttribute(const dom::DOMStringAtom &localName,
                                                   Maybe<dom::DOMStringView> value) noexcept
   {
     if (localName == u8"disabled" && AsHTMLElement().CanBeActuallyDisabled())

@@ -49,7 +49,7 @@ namespace krys::boo::dom
     return AbortAlgorithms::CreateDependentAbortSignal(signals);
   }
 
-  krys::Any AbortSignal::ReasonOrAbortError(Maybe<krys::Any> &&reason) noexcept
+  krys::Any AbortSignal::ReasonOrAbortError(Maybe<krys::Any> reason) noexcept
   {
     if (reason && reason->has_value())
     {

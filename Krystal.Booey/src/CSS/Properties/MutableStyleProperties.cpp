@@ -44,7 +44,7 @@ namespace krys::boo::css
   {
   }
 
-  MutableStyleProperties::MutableStyleProperties(List<Property> &&properties) noexcept
+  MutableStyleProperties::MutableStyleProperties(List<Property> properties) noexcept
       : StyleProperties(css::ParserMode::HTMLStandard),
         _propertyVector(std::make_move_iterator(properties.begin()),
                         std::make_move_iterator(properties.end()))
@@ -107,7 +107,7 @@ namespace krys::boo::css
     return AdoptRef(*new MutableStyleProperties(mode));
   }
 
-  Ref<MutableStyleProperties> MutableStyleProperties::Create(List<Property> &&properties) noexcept
+  Ref<MutableStyleProperties> MutableStyleProperties::Create(List<Property> properties) noexcept
   {
     return AdoptRef(*new MutableStyleProperties(krys::move(properties)));
   }

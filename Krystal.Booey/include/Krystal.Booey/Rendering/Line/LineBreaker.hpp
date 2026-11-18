@@ -58,8 +58,8 @@ namespace krys::boo
                                                       RenderTextInfo &) noexcept;
 
   private:
-    void SkipTrailingWhitespace(LegacyInlineIterator &, const LineInfo &) noexcept;
+    static void SkipTrailingWhitespace(LegacyInlineIterator &, const LineInfo &) noexcept;
 
-    void SkipLeadingWhitespace(InlineBidiResolver &, LineInfo &) noexcept;
+    static void SkipLeadingWhitespace(InlineBidiResolver &, LineInfo &) noexcept;
   };
 }

@@ -174,10 +174,7 @@ namespace krys::boo::style
       return style::Blend(LineHeight::Percentage {a._value.Value()},
                           LineHeight::Percentage {b._value.Value()}, context);
     }
-    else
-    {
-      return style::Blend(LineHeight::Fixed {a._value.Value()}, LineHeight::Fixed {b._value.Value()},
-                          context);
-    }
+
+    return style::Blend(LineHeight::Fixed {a._value.Value()}, LineHeight::Fixed {b._value.Value()}, context);
   }
 }

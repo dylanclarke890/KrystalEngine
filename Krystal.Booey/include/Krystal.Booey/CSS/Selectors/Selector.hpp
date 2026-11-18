@@ -227,7 +227,7 @@ namespace krys::boo::css
       // Used for :is(), :not(), :has(), :where(), :host(), :nth-*(... of) and ::slotted().
       UniquePtr<SelectorList> SubSelectors;
 
-      explicit RareData(CSSOMStringAtom value) noexcept;
+      explicit RareData(const CSSOMStringAtom &value) noexcept;
 
       RareData(const RareData &other) noexcept;
 
@@ -297,7 +297,7 @@ namespace krys::boo::css
     KRYS_NODISCARD Array<uint8, 3> ComputeSpecificityTuple() const noexcept;
 
     bool VisitSimpleSelectors(
-      VisitFunc &&func,
+      const VisitFunc &func,
       VisitFunctionalPseudoClasses visitFunctionalPseudoClasses = VisitFunctionalPseudoClasses::No,
       VisitOnlySubject visitOnlySubject = VisitOnlySubject::No) const noexcept;
 
@@ -359,9 +359,9 @@ namespace krys::boo::css
 
     KRYS_NODISCARD const dom::QualifiedName &Attribute() const noexcept;
 
-    KRYS_NODISCARD CSSOMStringAtom Argument() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &Argument() const noexcept KRYS_LIFETIME_BOUND
     {
-      return HasRareData() ? _data.Rare->Argument : null;
+      return HasRareData() ? _data.Rare->Argument : CSSOMStringAtom::Null();
     }
 
     /// @brief Whether the selector's `s` flag makes it match case-sensitively, whatever the attribute.

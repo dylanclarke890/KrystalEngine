@@ -8,9 +8,9 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    const dom::DOMStringAtom SVG {infra::Namespaces::SVG};
-    const dom::DOMStringAtom MathML {infra::Namespaces::MathML};
-    const dom::DOMStringAtom XLink {infra::Namespaces::XLink};
+    const dom::DOMStringAtom SVG {infra::namespaces::SVG};
+    const dom::DOMStringAtom MathML {infra::namespaces::MathML};
+    const dom::DOMStringAtom XLink {infra::namespaces::XLink};
 
     KRYS_NODISCARD Ref<Sanitizer> Make(const SanitizerConfig &config)
     {
@@ -41,11 +41,11 @@ namespace krys::boo::html::tests
 
     KRYS_NODISCARD bool Allows(const SanitizerConfig &config, dom::DOMStringView attribute,
                                dom::DOMStringView value = u8"", dom::DOMStringView element = u8"div",
-                               dom::DOMStringAtom elementNamespace = infra::Namespaces::HTML,
+                               dom::DOMStringAtom elementNamespace = infra::namespaces::HTML,
                                dom::DOMStringAtom attributeNamespace = null) noexcept
     {
-      return SanitizerAlgorithms::AllowsAttribute(attribute, attributeNamespace, value, element,
-                                                  elementNamespace, config);
+      return SanitizerAlgorithms::AllowsAttribute(attribute, krys::move(attributeNamespace), value, element,
+                                                  krys::move(elementNamespace), config);
     }
   }
 
@@ -90,9 +90,10 @@ namespace krys::boo::html::tests
       input.Elements->back().Attributes =
         List<SanitizerAttributeNamespace> {u8"cx", {u8"href", XLink}, {u8"title", u8""}};
       auto config = Make(input)->Get();
+      REQUIRE(config.Elements);
       REQUIRE(config.Elements->size() == 2);
       auto &circle = (*config.Elements)[1];
-      CHECK((*config.Elements)[0].Namespace == infra::Namespaces::HTML);
+      CHECK((*config.Elements)[0].Namespace == infra::namespaces::HTML);
       REQUIRE((*config.Elements)[0].RemoveAttributes);
       CHECK((*config.Elements)[0].RemoveAttributes->empty());
       CHECK(circle.Namespace == SVG);
@@ -162,14 +163,15 @@ namespace krys::boo::html::tests
     REQUIRE(config.Elements);
     auto has = [&](dom::DOMStringView name, dom::DOMStringAtom namespaceURI)
     {
-      return SanitizerAlgorithms::ActionForElementName(name, namespaceURI, config) == SanitizerAction::Keep;
+      return SanitizerAlgorithms::ActionForElementName(name, krys::move(namespaceURI), config)
+             == SanitizerAction::Keep;
     };
-    CHECK(has(u8"p", infra::Namespaces::HTML));
-    CHECK(has(u8"h6", infra::Namespaces::HTML));
+    CHECK(has(u8"p", infra::namespaces::HTML));
+    CHECK(has(u8"h6", infra::namespaces::HTML));
     CHECK(has(u8"mfrac", MathML));
     CHECK(has(u8"foreignObject", SVG));
-    CHECK_FALSE(has(u8"script", infra::Namespaces::HTML));
-    CHECK_FALSE(has(u8"img", infra::Namespaces::HTML));
+    CHECK_FALSE(has(u8"script", infra::namespaces::HTML));
+    CHECK_FALSE(has(u8"img", infra::namespaces::HTML));
     CHECK_FALSE(has(u8"use", SVG));
     CHECK(config.Comments == false);
     CHECK(config.DataAttributes == false);
@@ -213,7 +215,7 @@ namespace krys::boo::html::tests
       CHECK_FALSE(sanitizer->RemoveElement(u8"b"));
       CHECK(sanitizer->ReplaceElementWithChildren(u8"p"));
       CHECK(
-        SanitizerAlgorithms::ActionForElementName(u8"p", infra::Namespaces::HTML, sanitizer->Configuration())
+        SanitizerAlgorithms::ActionForElementName(u8"p", infra::namespaces::HTML, sanitizer->Configuration())
         == SanitizerAction::ReplaceWithChildren);
       CHECK_FALSE(sanitizer->ReplaceElementWithChildren(u8"html"));
       CHECK(sanitizer->AllowAttribute(u8"class"));
@@ -226,6 +228,7 @@ namespace krys::boo::html::tests
       span.Attributes = List<SanitizerAttributeNamespace> {u8"class", u8"title"};
       CHECK(sanitizer->AllowElement(span));
       auto config = sanitizer->Get();
+      REQUIRE(config.Elements);
       auto it =
         std::ranges::find_if(*config.Elements, [](const auto &element) { return element.Name == u8"span"; });
       REQUIRE(it != config.Elements->end());

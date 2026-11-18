@@ -276,9 +276,9 @@ namespace krys::boo
   {
     switch (direction)
     {
-      case ScrollDirection::ScrollUp:    return ScrollEventAxis::Vertical;
+      case ScrollDirection::ScrollUp:
       case ScrollDirection::ScrollDown:  return ScrollEventAxis::Vertical;
-      case ScrollDirection::ScrollLeft:  return ScrollEventAxis::Horizontal;
+      case ScrollDirection::ScrollLeft:
       case ScrollDirection::ScrollRight: return ScrollEventAxis::Horizontal;
     }
     return ScrollEventAxis::Vertical;

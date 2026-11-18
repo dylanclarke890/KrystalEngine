@@ -72,7 +72,7 @@ namespace krys::boo::css
     }
 
     Rule(const Rule &other) noexcept
-        : RefCounted(), _type(other._type), _hasDocumentSecurityOrigin(other._hasDocumentSecurityOrigin)
+        : _type(other._type), _hasDocumentSecurityOrigin(other._hasDocumentSecurityOrigin)
     {
     }
 
@@ -660,9 +660,9 @@ namespace krys::boo::css
     struct Descriptor
     {
       CSSOMStringAtom Name;
-      CSSOMString Syntax {};
-      Maybe<bool> Inherits {};
-      RefPtr<const VariableData> InitialValue {};
+      CSSOMString Syntax;
+      Maybe<bool> Inherits;
+      RefPtr<const VariableData> InitialValue;
     };
 
   private:

@@ -31,7 +31,7 @@ namespace krys::boo::dom
 
     /// @brief An event of type @p type; trusted if @p isTrusted.
     KRYS_NODISCARD static Ref<ContentVisibilityAutoStateChangeEvent>
-      Create(DOMStringAtom type, const ContentVisibilityAutoStateChangeEventInit &init,
+      Create(const DOMStringAtom &type, const ContentVisibilityAutoStateChangeEventInit &init,
              bool isTrusted = false) noexcept;
 
     /// @brief Whether the element now skips its contents.

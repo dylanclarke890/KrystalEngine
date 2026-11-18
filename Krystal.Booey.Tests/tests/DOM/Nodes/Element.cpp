@@ -61,7 +61,7 @@ namespace krys::boo::dom::tests
     CHECK(prefixed->LocalName() == u8"Thing");
 
     auto div = document->CreateElement(u8"div").ReleaseValue();
-    CHECK(div->NamespaceURI() == infra::Namespaces::HTML);
+    CHECK(div->NamespaceURI() == infra::namespaces::HTML);
     CHECK(div->Prefix() == null);
     CHECK(div->LocalName() == u8"div");
   }
@@ -74,16 +74,16 @@ namespace krys::boo::dom::tests
     SECTION("Uppercased for an HTML element in an HTML document")
     {
       CHECK(document->CreateElement(u8"div").ReleaseValue()->TagName() == u8"DIV");
-      CHECK(document->CreateElementNS(infra::Namespaces::HTML, u8"h:sPan").ReleaseValue()->TagName()
+      CHECK(document->CreateElementNS(infra::namespaces::HTML, u8"h:sPan").ReleaseValue()->TagName()
             == u8"H:SPAN");
     }
 
     SECTION("Otherwise its qualified name as it is")
     {
-      CHECK(document->CreateElementNS(infra::Namespaces::SVG, u8"s:foreignObject").ReleaseValue()->TagName()
+      CHECK(document->CreateElementNS(infra::namespaces::SVG, u8"s:foreignObject").ReleaseValue()->TagName()
             == u8"s:foreignObject");
       auto xml = CreateRef<XMLDocument>();
-      CHECK(xml->CreateElementNS(infra::Namespaces::HTML, u8"div").ReleaseValue()->TagName() == u8"div");
+      CHECK(xml->CreateElementNS(infra::namespaces::HTML, u8"div").ReleaseValue()->TagName() == u8"div");
     }
   }
 
@@ -242,7 +242,7 @@ namespace krys::boo::dom::tests
       CHECK(data.Node->GetAttributeNames() == List<DOMString> {u8"mixed"});
 
       auto xml = CreateRef<XMLDocument>();
-      auto element = xml->CreateElementNS(infra::Namespaces::HTML, u8"div").ReleaseValue();
+      auto element = xml->CreateElementNS(infra::namespaces::HTML, u8"div").ReleaseValue();
       REQUIRE_FALSE(element->SetAttribute(u8"Mixed", u8"1").HasException());
       CHECK(element->GetAttributeNames() == List<DOMString> {u8"Mixed"});
     }
@@ -312,7 +312,7 @@ namespace krys::boo::dom::tests
 
     auto toggle = [&](DOMStringAtom name, Maybe<bool> force)
     {
-      auto result = data.Node->ToggleAttribute(name, force);
+      auto result = data.Node->ToggleAttribute(krys::move(name), force);
       REQUIRE_FALSE(result.HasException());
       return result.Value();
     };
@@ -578,7 +578,7 @@ namespace krys::boo::dom::tests
     CHECK(tagNames->Item(0)->Id() == u8"inner");
     CHECK(root->GetElementsByTagName(u8"p")->Length() == 0u);
 
-    auto tagNamesNS = root->GetElementsByTagNameNS(infra::Namespaces::HTML, u8"*");
+    auto tagNamesNS = root->GetElementsByTagNameNS(infra::namespaces::HTML, u8"*");
     REQUIRE(tagNamesNS->Length() == 1u);
     CHECK(tagNamesNS->Item(0)->Id() == u8"inner");
 

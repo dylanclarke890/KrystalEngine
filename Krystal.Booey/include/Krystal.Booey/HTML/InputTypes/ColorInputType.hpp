@@ -97,7 +97,7 @@ namespace krys::boo::html
     void SetValue(dom::DOMStringView value, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
 
-    void AttributeChanged(dom::DOMStringAtom name) noexcept final;
+    void AttributeChanged(const dom::DOMStringAtom &name) noexcept final;
 
     void HandleActivationBehavior(dom::Event &event) noexcept final;
 

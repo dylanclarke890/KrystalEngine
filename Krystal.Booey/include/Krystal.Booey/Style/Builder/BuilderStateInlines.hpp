@@ -124,7 +124,7 @@ namespace krys::boo::style
     }
   }
 
-  inline void BuilderState::SetFontDescriptionFamilies(FontFamilies &&families) noexcept
+  inline void BuilderState::SetFontDescriptionFamilies(FontFamilies families) noexcept
   {
     if (_style.GetFontDescription().Families() == families.ToPlatform()
         && _style.GetFontDescription().IsSpecifiedFont() == families.IsSpecifiedFont())
@@ -139,7 +139,7 @@ namespace krys::boo::style
     // FIXME: `FontCascade::updateUseBackslashAsYenSymbol()` comes with the font cache.
   }
 
-  inline void BuilderState::SetFontDescriptionFeatureSettings(FontFeatureSettings &&featureSettings) noexcept
+  inline void BuilderState::SetFontDescriptionFeatureSettings(FontFeatureSettings featureSettings) noexcept
   {
     if (_style.GetFontDescription().FeatureSettings() == featureSettings.Platform())
     {
@@ -152,7 +152,7 @@ namespace krys::boo::style
     fontCascade.UpdateRequiresShaping();
   }
 
-  inline void BuilderState::SetFontDescriptionFontPalette(FontPalette &&fontPalette) noexcept
+  inline void BuilderState::SetFontDescriptionFontPalette(const FontPalette &fontPalette) noexcept
   {
     if (_style.GetFontDescription().GetFontPalette() == fontPalette.Platform())
     {
@@ -250,7 +250,7 @@ namespace krys::boo::style
     _style.MutableFontDescriptionWithoutUpdate().SetOpticalSizing(opticalSizing);
   }
 
-  inline void BuilderState::SetFontDescriptionSpecifiedLocale(WebkitLocale &&specifiedLocale) noexcept
+  inline void BuilderState::SetFontDescriptionSpecifiedLocale(WebkitLocale specifiedLocale) noexcept
   {
     if (_style.GetFontDescription().SpecifiedLocale() == specifiedLocale.GetPlatform())
     {
@@ -338,7 +338,7 @@ namespace krys::boo::style
   }
 
   inline void
-    BuilderState::SetFontDescriptionVariationSettings(FontVariationSettings &&variationSettings) noexcept
+    BuilderState::SetFontDescriptionVariationSettings(FontVariationSettings variationSettings) noexcept
   {
     if (_style.GetFontDescription().VariationSettings() == variationSettings.Platform())
     {
@@ -372,7 +372,7 @@ namespace krys::boo::style
   }
 
   inline void
-    BuilderState::SetFontDescriptionVariantAlternates(FontVariantAlternates &&variantAlternates) noexcept
+    BuilderState::SetFontDescriptionVariantAlternates(FontVariantAlternates variantAlternates) noexcept
   {
     if (_style.GetFontDescription().VariantAlternates() == variantAlternates.GetPlatform())
     {

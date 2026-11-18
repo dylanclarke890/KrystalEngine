@@ -487,12 +487,12 @@ namespace krys::boo::url::tests
     CHECK(url1.IsValid());
     URL url2 {krys::move(url1)};
     CHECK(url2.IsValid());
-    CHECK_FALSE(url1.IsValid()); // NOLINT(bugprone-use-after-move)
+    CHECK_FALSE(url1.IsValid()); // NOLINT(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
 
     URL url3 {u8"http://www.webkit.org"};
     url3 = krys::move(url2);
     CHECK(url3.IsValid());
-    CHECK_FALSE(url2.IsValid()); // NOLINT(bugprone-use-after-move)
+    CHECK_FALSE(url2.IsValid()); // NOLINT(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
 
     url3 = {};
     CHECK_FALSE(url3.IsValid());

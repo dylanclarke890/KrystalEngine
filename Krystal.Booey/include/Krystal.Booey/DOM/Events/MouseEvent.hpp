@@ -44,7 +44,7 @@ namespace krys::boo::dom
   class Node;
 
   /// @brief Whether @p eventType is `click` or `auxclick`.
-  KRYS_NODISCARD bool IsAnyClick(DOMStringAtom eventType) noexcept;
+  KRYS_NODISCARD bool IsAnyClick(const DOMStringAtom &eventType) noexcept;
 
   KRYS_NODISCARD bool IsAnyClick(const Event &event) noexcept;
 
@@ -90,7 +90,7 @@ namespace krys::boo::dom
     /// @brief A trusted event of type @p eventType from @p event, which happened in @p view.
     /// @param coalescedEvents The events for the moves @p event stands for.
     /// @param predictedEvents The events for the moves predicted after @p event.
-    KRYS_NODISCARD static Ref<MouseEvent> Create(DOMStringAtom eventType, LocalFrameView *view,
+    KRYS_NODISCARD static Ref<MouseEvent> Create(const DOMStringAtom &eventType, LocalFrameView *view,
                                                  const PlatformMouseEvent &event,
                                                  const List<Ref<MouseEvent>> &coalescedEvents,
                                                  const List<Ref<MouseEvent>> &predictedEvents, int32 detail,

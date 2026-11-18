@@ -25,7 +25,7 @@ namespace krys::boo::style::tests
 namespace krys::boo::css
 {
   template <>
-  constexpr bool TreatAsVariantLike<style::tests::ConversionTestSize> = true;
+  constexpr inline bool TreatAsVariantLike<style::tests::ConversionTestSize> = true;
 }
 
 namespace krys::boo::style::tests
@@ -33,7 +33,7 @@ namespace krys::boo::style::tests
   using css::PropertyId;
   using css::UnitType;
   using css::ValueId;
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TEST_CASE_METHOD(BuilderFixture, "CSSValueConversion: strings and identifiers",
                    "[Style][CSSValueConversion]")
@@ -250,7 +250,7 @@ namespace krys::boo::style::tests
     {
       auto fixed = Convert<ConversionTestSize>(PropertyId::Width, u8"2em");
       REQUIRE(fixed.IsFixed());
-      CHECK(fixed.TryFixed()->UnresolvedValue() == 32);
+      CHECK(fixed.TryFixed().value().UnresolvedValue() == 32);
       CHECK(Convert<ConversionTestSize>(PropertyId::Width, u8"50%").IsPercent());
       CHECK(Convert<ConversionTestSize>(PropertyId::Width, u8"calc(50% - 10px)").IsCalculated());
     }
@@ -263,13 +263,15 @@ namespace krys::boo::style::tests
       REQUIRE(px);
       CHECK(px->TryFixed()->UnresolvedValue() == 10);
       CHECK(DeprecatedCSSValueConversion<ConversionTestSize> {}(element, *Parse(PropertyId::Width, u8"50%"))
-              ->IsPercent());
+              .value()
+              .IsPercent());
       CHECK_FALSE(
         DeprecatedCSSValueConversion<ConversionTestSize> {}(element, *Parse(PropertyId::Width, u8"2em")));
       CHECK_FALSE(DeprecatedCSSValueConversion<ConversionTestSize> {}(
         element, *Parse(PropertyId::Width, u8"calc(1px + 2%)")));
       CHECK(DeprecatedCSSValueConversion<ConversionTestSize> {}(element, *Parse(PropertyId::Width, u8"auto"))
-              ->HoldsAlternative<css::keywords::Auto>());
+              .value()
+              .HoldsAlternative<css::keywords::Auto>());
     }
   }
 }

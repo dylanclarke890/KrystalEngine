@@ -101,10 +101,10 @@ namespace krys::boo::style
   template <>
   struct Blending<RelativeControlPoint>
   {
-    KRYS_NODISCARD bool CanBlend(const RelativeControlPoint &, const RelativeControlPoint &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const RelativeControlPoint &, const RelativeControlPoint &) noexcept;
 
-    KRYS_NODISCARD RelativeControlPoint Blend(const RelativeControlPoint &, const RelativeControlPoint &,
-                                              const BlendingContext &) noexcept;
+    KRYS_NODISCARD static RelativeControlPoint
+      Blend(const RelativeControlPoint &, const RelativeControlPoint &, const BlendingContext &) noexcept;
   };
 
   // <to-control-point> = [<position> | <relative-control-point>]
@@ -137,10 +137,10 @@ namespace krys::boo::style
   template <>
   struct Blending<AbsoluteControlPoint>
   {
-    KRYS_NODISCARD bool CanBlend(const AbsoluteControlPoint &, const AbsoluteControlPoint &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const AbsoluteControlPoint &, const AbsoluteControlPoint &) noexcept;
 
-    KRYS_NODISCARD AbsoluteControlPoint Blend(const AbsoluteControlPoint &, const AbsoluteControlPoint &,
-                                              const BlendingContext &) noexcept;
+    KRYS_NODISCARD static AbsoluteControlPoint
+      Blend(const AbsoluteControlPoint &, const AbsoluteControlPoint &, const BlendingContext &) noexcept;
   };
 
   // MARK: - Move Command
@@ -454,9 +454,10 @@ namespace krys::boo::style
   template <>
   struct Blending<ArcCommand>
   {
-    KRYS_NODISCARD bool CanBlend(const ArcCommand &, const ArcCommand &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const ArcCommand &, const ArcCommand &) noexcept;
 
-    KRYS_NODISCARD ArcCommand Blend(const ArcCommand &, const ArcCommand &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static ArcCommand Blend(const ArcCommand &, const ArcCommand &,
+                                           const BlendingContext &) noexcept;
   };
 
   // MARK: - Close Command
@@ -525,9 +526,9 @@ namespace krys::boo::style
   template <>
   struct Blending<Shape>
   {
-    KRYS_NODISCARD bool CanBlend(const Shape &, const Shape &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const Shape &, const Shape &) noexcept;
 
-    KRYS_NODISCARD Shape Blend(const Shape &, const Shape &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Shape Blend(const Shape &, const Shape &, const BlendingContext &) noexcept;
   };
 
   // Returns whether the shape and path can be interpolated together

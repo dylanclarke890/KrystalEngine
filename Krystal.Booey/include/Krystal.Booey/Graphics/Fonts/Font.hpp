@@ -222,7 +222,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RefPtr<Font> HalfWidthFont() const noexcept;
 
-    KRYS_NODISCARD bool IsProbablyOnlyUsedToRenderIcons() const noexcept;
+    KRYS_NODISCARD static bool IsProbablyOnlyUsedToRenderIcons() noexcept;
 
     KRYS_NODISCARD const Font *VariantFont(const FontDescription &description,
                                            FontVariant variant) const noexcept
@@ -239,7 +239,7 @@ namespace krys::boo
       return this;
     }
 
-    KRYS_NODISCARD bool VariantCapsSupportedForSynthesis(FontVariantCaps fontVariantCaps) const noexcept;
+    KRYS_NODISCARD static bool VariantCapsSupportedForSynthesis(FontVariantCaps fontVariantCaps) noexcept;
 
     KRYS_NODISCARD const Font &VerticalRightOrientationFont() const noexcept;
 
@@ -305,11 +305,10 @@ namespace krys::boo
     /// @brief Applies kerning and ligatures to the glyphs of @p glyphBuffer from @p beginningGlyphIndex, and
     /// returns the advance before the first of them.
     /// @note FIXME: Doesn't transform anything: text that needs shaping is shaped on the complex path.
-    KRYS_NODISCARD GlyphBufferAdvance ApplyTransforms(GlyphBuffer &glyphBuffer, uint32 beginningGlyphIndex,
-                                                      uint32 beginningStringIndex, bool enableKerning,
-                                                      bool requiresShaping, const StringAtom &locale,
-                                                      utf8_stringview text,
-                                                      TextDirection textDirection) const noexcept;
+    KRYS_NODISCARD static GlyphBufferAdvance
+      ApplyTransforms(GlyphBuffer &glyphBuffer, uint32 beginningGlyphIndex, uint32 beginningStringIndex,
+                      bool enableKerning, bool requiresShaping, const StringAtom &locale,
+                      utf8_stringview text, TextDirection textDirection) noexcept;
 
     KRYS_NODISCARD float SpaceWidth(
       SyntheticBoldInclusion syntheticBoldInclusion = SyntheticBoldInclusion::Incorporate) const noexcept
@@ -408,7 +407,7 @@ namespace krys::boo
       return _attributes;
     }
 
-    KRYS_NODISCARD boo::ColorGlyphType ColorGlyphType(Glyph glyph) const noexcept;
+    KRYS_NODISCARD static boo::ColorGlyphType ColorGlyphType(Glyph glyph) noexcept;
 
   private:
     void PlatformInit() noexcept;
@@ -427,7 +426,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RefPtr<Font> CreateHalfWidthFont() const noexcept;
 
-    KRYS_NODISCARD RefPtr<Font> PlatformCreateHalfWidthFont() const noexcept;
+    KRYS_NODISCARD static RefPtr<Font> PlatformCreateHalfWidthFont() noexcept;
 
     KRYS_NODISCARD DerivedFonts &EnsureDerivedFontData() const noexcept;
 

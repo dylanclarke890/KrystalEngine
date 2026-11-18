@@ -65,13 +65,13 @@ namespace krys::boo::tests
     auto root = document.DocumentElement();
     REQUIRE(root);
     CHECK(IsSVG<svg::SVGSvgElement>(*root));
-    CHECK(root->NamespaceURI() == infra::Namespaces::SVG);
+    CHECK(root->NamespaceURI() == infra::namespaces::SVG);
     CHECK(Is<dom::Comment>(root->FirstChild()));
 
     auto circle = document.GetElementById(u8"c");
     REQUIRE(circle);
     CHECK(IsSVG<svg::SVGCircleElement>(*circle));
-    CHECK(circle->GetAttributeNS(infra::Namespaces::XLink, u8"title") == u8"dot");
+    CHECK(circle->GetAttributeNS(infra::namespaces::XLink, u8"title") == u8"dot");
 
     auto *desc = circle->NextSibling();
     REQUIRE(desc);
@@ -130,8 +130,8 @@ namespace krys::boo::tests
     auto *error = root->FirstChild();
     REQUIRE(Is<dom::Element>(error));
     CHECK(Downcast<dom::Element>(*error).LocalName() == u8"parsererror");
-    CHECK(Downcast<dom::Element>(*error).NamespaceURI() == infra::Namespaces::HTML);
-    CHECK(error->TextContent().value_or(u8"").find(u8"error on line 1") != utf8_string::npos);
+    CHECK(Downcast<dom::Element>(*error).NamespaceURI() == infra::namespaces::HTML);
+    CHECK(error->TextContent().value_or(u8"").contains(u8"error on line 1"));
   }
 
   TEST_CASE("A malformed SVG document is shown inside an HTML document", "[XML][XMLDocumentParser]")

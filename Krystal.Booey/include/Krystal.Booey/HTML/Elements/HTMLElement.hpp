@@ -217,7 +217,7 @@ namespace krys::boo::html
     KRYS_NODISCARD BoolOr<dom::DOMString> Hidden() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hidden
-    void Hidden(dom::DOMString value) noexcept;
+    void Hidden(const dom::DOMString &value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-hidden
     void Hidden(bool value) noexcept;
@@ -306,7 +306,7 @@ namespace krys::boo::html
     /// @brief Replaces the element's children with @p value's text, with a `<br>` for each line break.
     /// @see https://html.spec.whatwg.org/#dom-innertext
     /// @see https://html.spec.whatwg.org/#set-the-inner-text-steps
-    void InnerText(dom::DOMString value) noexcept;
+    void InnerText(const dom::DOMString &value) noexcept;
 
     /// @brief The same as `InnerText()`.
     /// @see https://html.spec.whatwg.org/#dom-outertext
@@ -315,7 +315,7 @@ namespace krys::boo::html
     /// @brief Replaces the element itself with @p value's text, with a `<br>` for each line break, merged
     /// with the text around it; `NoModificationAllowedError` if the element has no parent.
     /// @see https://html.spec.whatwg.org/#dom-outertext
-    dom::ExceptionOr<void> OuterText(dom::DOMString value) noexcept;
+    dom::ExceptionOr<void> OuterText(const dom::DOMString &value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-attachinternals
     KRYS_NODISCARD dom::ExceptionOr<Ref<ElementInternals>> AttachInternals() noexcept;
@@ -431,10 +431,11 @@ namespace krys::boo::html
     };
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                const dom::DOMStringAtom &namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
@@ -468,8 +469,8 @@ namespace krys::boo::html
     void AddHTMLPixelsToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               dom::DOMStringView value) noexcept;
 
-    void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                             dom::DOMStringView attributeValue) noexcept;
+    static void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                                    dom::DOMStringView attributeValue) noexcept;
 
     /// @brief The value of the attribute in the null namespace, or an empty view if there isn't one.
     KRYS_NODISCARD dom::DOMString AttributeOrEmpty(dom::DOMStringView localName) const noexcept;
@@ -522,9 +523,9 @@ namespace krys::boo::html
 
 #pragma region Extensibility Hooks
 
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
-                            dom::DOMStringAtom namespaceURI) noexcept override;
+                            const dom::DOMStringAtom &namespaceURI) noexcept override;
 
     /// @see https://html.spec.whatwg.org/#html-element-insertion-steps
     void OnInsert() noexcept override
@@ -1084,8 +1085,8 @@ namespace krys::boo::html
                               UseCSSPXAsUnitType useCSSPX, IsMultiLength isMultiLength,
                               AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
 
-    void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
-                                                  css::MutableStyleProperties &style) noexcept;
+    static void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
+                                                         css::MutableStyleProperties &style) noexcept;
 
     void MapLanguageAttributeToLocale(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
 

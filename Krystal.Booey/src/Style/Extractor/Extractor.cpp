@@ -437,9 +437,10 @@ namespace krys::boo::style
     return {};
   }
 
-  css::CSSOMString Extractor::CustomPropertyValueSerialisationInStyle(
-    const RenderStyle &style, const css::CSSOMStringAtom &propertyName,
-    const css::SerialisationContext &context) const noexcept
+  css::CSSOMString
+    Extractor::CustomPropertyValueSerialisationInStyle(const RenderStyle &style,
+                                                       const css::CSSOMStringAtom &propertyName,
+                                                       const css::SerialisationContext &context) noexcept
   {
     if (const auto *value = style.CustomPropertyValue(propertyName))
     {

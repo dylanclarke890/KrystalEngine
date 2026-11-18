@@ -454,7 +454,7 @@ namespace krys::boo::dom::tests
     CHECK(byTagName->Item(0) == paragraph);
     CHECK(document->GetElementsByTagName(u8"*")->Length() == 2u);
 
-    auto byNamespace = document->GetElementsByTagNameNS(infra::Namespaces::HTML, u8"p");
+    auto byNamespace = document->GetElementsByTagNameNS(infra::namespaces::HTML, u8"p");
     REQUIRE(byNamespace->Length() == 1u);
     CHECK(byNamespace->Item(0) == paragraph);
 
@@ -482,7 +482,7 @@ namespace krys::boo::dom::tests
       auto document = CreateRef<HTMLDocument>();
       auto element = document->CreateElement(u8"DIV").ReleaseValue();
       CHECK(element->LocalName() == u8"div");
-      CHECK(element->NamespaceURI() == infra::Namespaces::HTML);
+      CHECK(element->NamespaceURI() == infra::namespaces::HTML);
       CHECK(element->Prefix() == null);
       CHECK(Is<html::HTMLElement>(*element));
     }
@@ -499,11 +499,11 @@ namespace krys::boo::dom::tests
     {
       auto context = CreateRef<HTMLDocument>();
       auto document =
-        context->Implementation().CreateDocument(infra::Namespaces::HTML, u8"html", nullptr).ReleaseValue();
+        context->Implementation().CreateDocument(infra::namespaces::HTML, u8"html", nullptr).ReleaseValue();
       REQUIRE(document->ContentType() == u8"application/xhtml+xml");
       auto element = document->CreateElement(u8"Div").ReleaseValue();
       CHECK(element->LocalName() == u8"Div");
-      CHECK(element->NamespaceURI() == infra::Namespaces::HTML);
+      CHECK(element->NamespaceURI() == infra::namespaces::HTML);
     }
 
     SECTION("3. the creation options")
@@ -792,8 +792,8 @@ namespace krys::boo::dom::tests
 
     // Not when the document element isn't an html element.
     auto xml = CreateRef<XMLDocument>();
-    auto root = xml->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
-    REQUIRE_FALSE(root->AppendChild(*xml->CreateElementNS(infra::Namespaces::HTML, u8"head").ReleaseValue())
+    auto root = xml->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
+    REQUIRE_FALSE(root->AppendChild(*xml->CreateElementNS(infra::namespaces::HTML, u8"head").ReleaseValue())
                     .HasException());
     REQUIRE_FALSE(xml->AppendChild(*root).HasException());
     CHECK(xml->Head() == nullptr);

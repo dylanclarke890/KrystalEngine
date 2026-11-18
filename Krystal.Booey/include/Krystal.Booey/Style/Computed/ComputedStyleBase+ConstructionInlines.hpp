@@ -90,6 +90,7 @@ namespace krys::boo::style
   {
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): its members are swapped out.
   inline ComputedStyleBase::ComputedStyleBase(ComputedStyleBase &a, ComputedStyleBase &&b) noexcept
       : _nonInheritedData(std::exchange(a._nonInheritedData, krys::move(b._nonInheritedData))),
         _nonInheritedFlags(std::exchange(a._nonInheritedFlags, b._nonInheritedFlags)),

@@ -93,7 +93,7 @@ namespace krys::boo::css::parse_property
     template <typename F>
     KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentOverflowPosition(TokenRange &tokens, PropertyParserState &,
                                                                   ValueId overflowSafety,
-                                                                  F &&predicate) noexcept
+                                                                  F predicate) noexcept
     {
       krys_debug_assert(tokens.Peek().ValueId() == ValueId::Safe
                         || tokens.Peek().ValueId() == ValueId::Unsafe);

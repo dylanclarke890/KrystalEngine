@@ -16,7 +16,7 @@ namespace krys::boo::style::tests
 
     KRYS_NODISCARD Ref<dom::Element> Create(dom::Document &document, dom::DOMStringAtom localName)
     {
-      auto element = document.CreateElement(localName);
+      auto element = document.CreateElement(krys::move(localName));
       REQUIRE_FALSE(element.HasException());
       return element.ReleaseValue();
     }
@@ -35,7 +35,7 @@ namespace krys::boo::style::tests
       return style;
     }
 
-    KRYS_NODISCARD Ref<css::StyleSheetContents> ParseSheet(utf8_string &&text)
+    KRYS_NODISCARD Ref<css::StyleSheetContents> ParseSheet(const utf8_string &text)
     {
       auto contents = css::StyleSheetContents::Create(css::ParserContext(css::ParserMode::HTMLStandard));
       contents->ParseString(text);

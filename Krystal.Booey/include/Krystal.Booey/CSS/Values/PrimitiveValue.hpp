@@ -112,7 +112,7 @@ namespace krys::boo::css
 
     PrimitiveValue(double value, UnitType unit) noexcept;
 
-    explicit PrimitiveValue(Ref<calc::Value> calc) noexcept;
+    explicit PrimitiveValue(Ref<calc::Value> value) noexcept;
 
     explicit PrimitiveValue(Ref<AttrValue> attr) noexcept;
 

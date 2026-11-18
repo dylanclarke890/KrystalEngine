@@ -74,7 +74,7 @@ namespace krys::boo
   public:
     ChromeClient() noexcept = default;
 
-    virtual ~ChromeClient() noexcept = default;
+    ~ChromeClient() noexcept override = default;
 
     /// @brief The page asks to be brought to the front (`window.focus()`); the host decides whether it is.
     virtual void Focus() noexcept
@@ -370,14 +370,16 @@ namespace krys::boo
     /// @brief The page asks to lock the pointer: the host hides the cursor, keeps it where it is and reports
     /// the mouse's movement, then calls @p completionHandler with whether it did; a host that doesn't
     /// override this has no pointer lock.
-    virtual void RequestPointerLock(Func<void(PointerLockRequestResult)> &&completionHandler) noexcept
+    // NOLINTNEXTLINE(performance-unnecessary-value-param): callables are taken by value.
+    virtual void RequestPointerLock(Func<void(PointerLockRequestResult)> completionHandler) noexcept
     {
       completionHandler(PointerLockRequestResult::Unsupported);
     }
 
     /// @brief The page asks to unlock the pointer: the host shows the cursor again, then calls
     /// @p completionHandler with whether it did.
-    virtual void RequestPointerUnlock(Func<void(bool)> &&completionHandler) noexcept
+    // NOLINTNEXTLINE(performance-unnecessary-value-param): callables are taken by value.
+    virtual void RequestPointerUnlock(Func<void(bool)> completionHandler) noexcept
     {
       completionHandler(false);
     }

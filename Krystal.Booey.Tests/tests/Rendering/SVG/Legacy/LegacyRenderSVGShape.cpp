@@ -264,11 +264,9 @@ layer at (0,0) size 800x104
       Painted(u8R"html(<body style="margin: 0"><svg width=200 height=100><g transform="scale(3 1)">)html"
               u8R"html(<rect x=10 y=8 width=20 height=48 fill=none stroke=blue stroke-width=2 )html"
               u8R"html(vector-effect=non-scaling-stroke /></g></svg></body>)html");
-    CHECK(painted.find(u8R"((concatenate-ctm
-  (ctm {m=((0.33,0.00)(0.00,1.00)) t=(0.00,0.00)})))")
-          != utf8_string::npos);
-    CHECK(painted.find(u8R"((stroke-path
-  (path move to (30,8), add line to (90,8), add line to (90,56), add line to (30,56), close subpath)))")
-          != utf8_string::npos);
+    CHECK(painted.contains(u8R"((concatenate-ctm
+  (ctm {m=((0.33,0.00)(0.00,1.00)) t=(0.00,0.00)})))"));
+    CHECK(painted.contains(u8R"((stroke-path
+  (path move to (30,8), add line to (90,8), add line to (90,56), add line to (30,56), close subpath)))"));
   }
 }

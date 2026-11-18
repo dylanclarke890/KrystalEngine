@@ -25,7 +25,7 @@ namespace krys::boo::html::tests
       Ref<dom::Document> Document;
       Ref<html::HTMLElement> Element;
 
-      TestData(Maybe<dom::DOMString> &&initialValue = null)
+      TestData(Maybe<dom::DOMString> initialValue = null)
           : Document(CreateRef<dom::Document>()), Element(CreateRef<TestHTMLElement>(*Document))
       {
         if (initialValue != null)

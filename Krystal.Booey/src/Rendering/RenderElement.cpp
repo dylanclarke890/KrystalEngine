@@ -1104,16 +1104,11 @@ namespace krys::boo
         }
       }
 
-      if (IsFloating() && _style.Floating() != newStyle.Floating())
+      if ((IsFloating() && _style.Floating() != newStyle.Floating())
+          || (IsOutOfFlowPositioned() && _style.GetPosition() != newStyle.GetPosition()))
       {
-        // For changes in float styles, we need to conceivably remove ourselves
-        // from the floating objects list.
-        Downcast<RenderBox>(*this).RemoveFloatingOrOutOfFlowChildFromBlockLists();
-      }
-      else if (IsOutOfFlowPositioned() && _style.GetPosition() != newStyle.GetPosition())
-      {
-        // For changes in positioning styles, we need to conceivably remove ourselves
-        // from the positioned objects list.
+        // For changes in float or positioning styles, we need to conceivably remove ourselves
+        // from the floating or positioned objects list.
         Downcast<RenderBox>(*this).RemoveFloatingOrOutOfFlowChildFromBlockLists();
       }
 

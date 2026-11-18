@@ -66,7 +66,7 @@ namespace krys::boo::css
                                                    Ref<StyleProperties> &&properties) noexcept;
 
     /// @attention Keyframes are never copied.
-    KRYS_NODISCARD Ref<KeyframeRule> Copy() const noexcept;
+    KRYS_NODISCARD static Ref<KeyframeRule> Copy() noexcept;
 
     KRYS_NODISCARD CSSOMString KeyText() const noexcept;
 

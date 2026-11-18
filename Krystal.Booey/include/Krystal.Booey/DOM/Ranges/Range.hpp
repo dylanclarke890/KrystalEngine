@@ -209,8 +209,8 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD ExceptionOr<SmallNodeList> GetContainedChildren(Node *commonAncestor) const noexcept;
 
-    KRYS_NODISCARD ExceptionOr<void>
+    KRYS_NODISCARD static ExceptionOr<void>
       CloneCharacterDataContents(DocumentFragment &fragment, Node &container, size_t offset, size_t length,
-                                 DeleteClonedContent deleteClonedContent) const noexcept;
+                                 DeleteClonedContent deleteClonedContent) noexcept;
   };
 }

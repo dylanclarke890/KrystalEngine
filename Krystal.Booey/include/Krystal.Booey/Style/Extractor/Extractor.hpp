@@ -112,9 +112,9 @@ namespace krys::boo::style
                                        const css::SerialisationContext &) const noexcept;
 
     /// @brief Extract a serialised value for the specified custom property using the provided RenderStyle.
-    KRYS_NODISCARD css::CSSOMString
+    KRYS_NODISCARD static css::CSSOMString
       CustomPropertyValueSerialisationInStyle(const RenderStyle &, const css::CSSOMStringAtom &propertyName,
-                                              const css::SerialisationContext &) const noexcept;
+                                              const css::SerialisationContext &) noexcept;
 
     // Helper methods for HTML editing.
     KRYS_NODISCARD Ref<css::MutableStyleProperties>

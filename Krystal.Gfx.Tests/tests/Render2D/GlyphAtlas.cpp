@@ -61,11 +61,11 @@ namespace krys::gfx::tests
     CHECK(atlas.Stats().Hits == 1u);
 
     // Each quarter of a pixel, size, transform and face is a glyph of its own.
-    CHECK(atlas.GetGlyph(*face, a, 16.f, 1u)->Texels != first->Texels);
-    CHECK(atlas.GetGlyph(*face, a, 17.f, 0u)->Texels != first->Texels);
-    CHECK(atlas.GetGlyph(*face, a, 16.f, 0u, Transform2D::Scale(2.f, 2.f))->Texels != first->Texels);
+    CHECK(atlas.GetGlyph(*face, a, 16.f, 1u).value().Texels != first->Texels);
+    CHECK(atlas.GetGlyph(*face, a, 17.f, 0u).value().Texels != first->Texels);
+    CHECK(atlas.GetGlyph(*face, a, 16.f, 0u, Transform2D::Scale(2.f, 2.f)).value().Texels != first->Texels);
     auto other = LiberationSansFace();
-    CHECK(atlas.GetGlyph(*other, a, 16.f, 0u)->Texels != first->Texels);
+    CHECK(atlas.GetGlyph(*other, a, 16.f, 0u).value().Texels != first->Texels);
     CHECK(atlas.Stats().Rasterised == 5u);
 
     // A blurred glyph, for shadows, is another: coverage grown by the blur's reach.

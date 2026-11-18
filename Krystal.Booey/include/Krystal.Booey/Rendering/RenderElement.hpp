@@ -197,7 +197,7 @@ namespace krys::boo
       return true;
     }
 
-    void DidAttachChild(RenderObject &child, RenderObject *beforeChild) noexcept;
+    static void DidAttachChild(RenderObject &child, RenderObject *beforeChild) noexcept;
 
     virtual void DirtyLineFromChangedChild() noexcept
     {
@@ -252,7 +252,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsVisibleInViewport() const noexcept;
 
     /// @brief Whether the images of the renderer may animate.
-    KRYS_NODISCARD bool AllowsAnimation() const noexcept;
+    KRYS_NODISCARD bool AllowsAnimation() const noexcept override;
 
     /// @brief The renderer's style with its animations applied at their current time.
     KRYS_NODISCARD UniquePtr<RenderStyle> AnimatedStyle() const noexcept;
@@ -631,7 +631,7 @@ namespace krys::boo
     // Called by RenderTreeBuilder: they take and give up ownership of the child.
     RenderObject *AttachRendererInternal(RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
 
-    KRYS_NODISCARD RenderPtr<RenderObject> DetachRendererInternal(RenderObject &renderer) noexcept;
+    KRYS_NODISCARD static RenderPtr<RenderObject> DetachRendererInternal(RenderObject &renderer) noexcept;
 
     KRYS_NODISCARD style::Difference AdjustStyleDifference(style::Difference diff) const noexcept;
 

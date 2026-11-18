@@ -19,8 +19,8 @@ namespace krys::boo::dom
     MutationObserverInit _options;
 
   public:
-    RegisteredObserver(Ref<MutationObserver> &&observer, const MutationObserverInit &options) noexcept
-        : _observer(krys::move(observer)), _options(options)
+    RegisteredObserver(Ref<MutationObserver> &&observer, MutationObserverInit options) noexcept
+        : _observer(krys::move(observer)), _options(krys::move(options))
     {
     }
 

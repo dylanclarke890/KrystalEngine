@@ -104,7 +104,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsZeroWidthSpaceSeparator() const noexcept;
 
-    KRYS_NODISCARD bool IsQuirkNonBreakingSpace() const noexcept;
+    KRYS_NODISCARD static bool IsQuirkNonBreakingSpace() noexcept;
 
     KRYS_NODISCARD bool IsFullyTrimmable() const noexcept;
 

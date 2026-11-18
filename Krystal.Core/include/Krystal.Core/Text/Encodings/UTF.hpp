@@ -73,7 +73,7 @@ namespace krys::text
         {
           return DecodeOneSuccess<UTF8>(static_cast<char32>(codePoint), consumed);
         }
-        else if (state == Reject)
+        if (state == Reject)
         {
           return DecodeOneInvalidSequenceError<UTF8>(consumed);
         }

@@ -256,7 +256,7 @@ namespace krys::boo
     // Typically the CachedImage that owns us.
     KRYS_NODISCARD RefPtr<ImageObserver> GetImageObserver() const noexcept;
 
-    void SetImageObserver(RefPtr<ImageObserver> &&) noexcept;
+    void SetImageObserver(RefPtr<ImageObserver>) noexcept;
 
     KRYS_NODISCARD url::URL SourceURL() const noexcept;
 
@@ -273,7 +273,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual RefPtr<NativeImage>
       CurrentPreTransformedNativeImage(ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
 
-    virtual void DrawPattern(GraphicsContext &, const FloatRect &destRect, const FloatRect &srcRect,
+    virtual void DrawPattern(GraphicsContext &, const FloatRect &destRect, const FloatRect &tileRect,
                              const AffineTransform &patternTransform, const FloatPoint &phase,
                              const FloatSize &spacing, ImagePaintingOptions = {}) noexcept;
 
@@ -288,7 +288,7 @@ namespace krys::boo
     virtual ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
                                  ImagePaintingOptions = {}) noexcept = 0;
 
-    ImageDrawResult DrawTiled(GraphicsContext &, const FloatRect &dstRect, const FloatPoint &srcPoint,
+    ImageDrawResult DrawTiled(GraphicsContext &, const FloatRect &destinationRect, const FloatPoint &srcPoint,
                               const FloatSize &tileSize, const FloatSize &spacing,
                               ImagePaintingOptions = {}) noexcept;
 

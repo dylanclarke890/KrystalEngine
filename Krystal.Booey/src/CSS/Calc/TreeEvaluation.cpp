@@ -88,7 +88,7 @@ namespace krys::boo::css::calc
   // MARK: Evaluation.
 
   template <typename Op, typename... Args>
-  static Maybe<double> ExecuteMathOperationAfterUnwrapping(Args &&...args) noexcept
+  static Maybe<double> ExecuteMathOperationAfterUnwrapping(Args... args) noexcept
   {
     if ((!args.has_value() || ...))
     {

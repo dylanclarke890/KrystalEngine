@@ -32,8 +32,10 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#look-up-a-custom-element-definition
-  CustomElementInterface *CustomElementAlgorithms::LookupCustomElementDefinition(
-    CustomElementRegistry *registry, dom::DOMStringAtom namespaceURI, dom::DOMStringAtom localName) noexcept
+  CustomElementInterface *
+    CustomElementAlgorithms::LookupCustomElementDefinition(CustomElementRegistry *registry,
+                                                           const dom::DOMStringAtom &namespaceURI,
+                                                           dom::DOMStringAtom localName) noexcept
   {
     // 1. If registry is null, then return null.
     if (registry == nullptr)
@@ -42,7 +44,7 @@ namespace krys::boo::html
     }
 
     // 2. If namespace is not the HTML namespace, then return null.
-    if (namespaceURI != infra::Namespaces::HTML)
+    if (namespaceURI != infra::namespaces::HTML)
     {
       return nullptr;
     }
@@ -52,7 +54,7 @@ namespace krys::boo::html
     // 4. If registry's custom element definition set contains an item with name equal to is and local name
     //    equal to localName, then return that item. (Skipped: there are no customized built-in elements.)
     // 5. Return null.
-    return registry->FindInterface(localName);
+    return registry->FindInterface(krys::move(localName));
   }
 
   // https://html.spec.whatwg.org/#look-up-a-custom-element-registry

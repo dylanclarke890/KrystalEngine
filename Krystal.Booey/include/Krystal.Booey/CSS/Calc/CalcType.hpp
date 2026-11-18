@@ -111,7 +111,7 @@ namespace krys::boo::css::calc
     Exponent Resolution = 0;
     Exponent Flex = 0;
     Exponent Percent = 0;
-    PercentHintValue PercentHint = {};
+    PercentHintValue PercentHint;
 
     constexpr bool operator==(const Type &) const noexcept = default;
 

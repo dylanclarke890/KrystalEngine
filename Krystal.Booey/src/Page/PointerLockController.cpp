@@ -323,7 +323,7 @@ namespace krys::boo
   }
 
   void PointerLockController::DispatchLockedMouseEvent(const PlatformMouseEvent &event,
-                                                       dom::DOMStringAtom eventType) noexcept
+                                                       const dom::DOMStringAtom &eventType) noexcept
   {
     if (!_element || !_element->NodeDocument().Frame())
     {
@@ -372,7 +372,7 @@ namespace krys::boo
   {
     if (element)
     {
-      EnqueueEvent(type, &element->NodeDocument());
+      EnqueueEvent(krys::move(type), &element->NodeDocument());
     }
   }
 
@@ -382,7 +382,7 @@ namespace krys::boo
     if (document)
     {
       document->QueueTaskToDispatchEvent(html::TaskSource::UserInteraction,
-                                         dom::Event::Create(type, true, false));
+                                         dom::Event::Create(krys::move(type), true, false));
     }
   }
 

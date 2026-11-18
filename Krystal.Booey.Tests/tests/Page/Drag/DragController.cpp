@@ -109,7 +109,7 @@ namespace krys::boo::tests
         return Frame->GetEventHandler();
       }
 
-      KRYS_NODISCARD DragController &Controller() noexcept
+      KRYS_NODISCARD DragController &Controller() const noexcept
       {
         return TestPage->GetDragController();
       }
@@ -196,7 +196,7 @@ namespace krys::boo::tests
       }
 
       KRYS_NODISCARD DragData Data(int32 x, int32 y, EnumSet<DragApplicationFlags> flags = {},
-                                   EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
+                                   EnumSet<PlatformEvent::Modifier> modifiers = {}) const noexcept
       {
         return DragData(&Client->Data, IntPoint(x, y), IntPoint(x, y), Client->SourceMask, flags, modifiers);
       }
@@ -228,7 +228,7 @@ namespace krys::boo::tests
                                     operation);
       }
 
-      KRYS_NODISCARD std::string InnerHTML(const dom::Node &node) noexcept
+      KRYS_NODISCARD static std::string InnerHTML(const dom::Node &node) noexcept
       {
         return Narrow(SerializeFragment(node, SerializedNodes::SubtreesOfChildren));
       }

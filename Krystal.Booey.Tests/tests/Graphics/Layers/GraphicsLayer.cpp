@@ -54,8 +54,8 @@ namespace krys::boo::tests
         return CreateTestLayer(type, client);
       }
 
-      KRYS_NODISCARD Ref<TestGraphicsLayer> CreateTestLayer(GraphicsLayerType type,
-                                                            GraphicsLayerClient &client) noexcept
+      KRYS_NODISCARD static Ref<TestGraphicsLayer> CreateTestLayer(GraphicsLayerType type,
+                                                                   GraphicsLayerClient &client) noexcept
       {
         return AdoptRef(*new TestGraphicsLayer(type, client));
       }
@@ -252,8 +252,7 @@ namespace krys::boo::tests
 )");
 
     CHECK(root->LayerTreeAsText({LayerTreeAsTextOptions::IncludePaintingPhases})
-            .find(u8"(paintingPhases [background, foreground])")
-          != utf8_string::npos);
+            .contains(u8"(paintingPhases [background, foreground])"));
   }
 
   TEST_CASE("GraphicsLayer: coverage grows in the direction it moves", "[Graphics][GraphicsLayer]")

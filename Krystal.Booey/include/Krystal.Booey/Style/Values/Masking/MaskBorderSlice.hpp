@@ -90,7 +90,7 @@ namespace krys::boo::style
     using Edges = css::MinimallySerialisingSpaceSeparatedRectEdges<Value>;
 
     Edges Values {Value::Number {0}};
-    Maybe<css::keywords::Fill> Fill {};
+    Maybe<css::keywords::Fill> Fill;
 
     MaskBorderSlice(Edges values, Maybe<css::keywords::Fill> fill = {}) noexcept
         : Values {krys::move(values)}, Fill {fill}
@@ -165,25 +165,27 @@ namespace krys::boo::style
   template <>
   struct Blending<MaskBorderSliceValue>
   {
-    KRYS_NODISCARD bool CanBlend(const MaskBorderSliceValue &, const MaskBorderSliceValue &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const MaskBorderSliceValue &, const MaskBorderSliceValue &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderSliceValue &,
-                                                                      const MaskBorderSliceValue &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const MaskBorderSliceValue &,
+                                                    const MaskBorderSliceValue &) noexcept;
 
-    KRYS_NODISCARD MaskBorderSliceValue Blend(const MaskBorderSliceValue &, const MaskBorderSliceValue &,
-                                              const BlendingContext &) noexcept;
+    KRYS_NODISCARD static MaskBorderSliceValue
+      Blend(const MaskBorderSliceValue &, const MaskBorderSliceValue &, const BlendingContext &) noexcept;
   };
 
   template <>
   struct Blending<MaskBorderSlice>
   {
-    KRYS_NODISCARD bool CanBlend(const MaskBorderSlice &, const MaskBorderSlice &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const MaskBorderSlice &, const MaskBorderSlice &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderSlice &,
-                                                                      const MaskBorderSlice &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const MaskBorderSlice &,
+                                                    const MaskBorderSlice &) noexcept;
 
-    KRYS_NODISCARD MaskBorderSlice Blend(const MaskBorderSlice &, const MaskBorderSlice &,
-                                         const BlendingContext &) noexcept;
+    KRYS_NODISCARD static MaskBorderSlice Blend(const MaskBorderSlice &, const MaskBorderSlice &,
+                                                const BlendingContext &) noexcept;
   };
 }
 

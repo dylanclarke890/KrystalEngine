@@ -41,7 +41,7 @@ namespace krys::boo::style::tests
 {
   using css::PropertyId;
   using css::ValueId;
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TEST_CASE_METHOD(BuilderFixture, "Style integers and their keywords",
                    "[Style][Values][KeywordAndLengthGroups]")
@@ -232,8 +232,8 @@ namespace krys::boo::style::tests
     CHECK(Convert<ScrollbarColor>(PropertyId::ScrollbarColor, u8"auto").IsAuto());
     auto colors = Convert<ScrollbarColor>(PropertyId::ScrollbarColor, u8"red blue");
     REQUIRE(colors.IsParts());
-    CHECK(colors.TryValue()->Thumb == Color {boo::Color::red});
-    CHECK(colors.TryValue()->Track == Color {boo::Color::blue});
+    CHECK(colors.TryValue().value().Thumb == Color {boo::Color::red});
+    CHECK(colors.TryValue().value().Track == Color {boo::Color::blue});
     CHECK(Serialised(colors) == "rgb(255, 0, 0) rgb(0, 0, 255)");
     CHECK_FALSE(IsInvalid());
   }

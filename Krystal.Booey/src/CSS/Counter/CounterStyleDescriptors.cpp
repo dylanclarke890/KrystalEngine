@@ -66,7 +66,7 @@ namespace krys::boo::css
       return {primitiveValue->IsCustomIdent(), primitiveValue->StringValue()};
     }
 
-    KRYS_NODISCARD CounterStyleName NameFromValue(Ref<Value> value) noexcept
+    KRYS_NODISCARD CounterStyleName NameFromValue(const Ref<Value> &value) noexcept
     {
       auto *primitiveValue = DynamicDowncast<PrimitiveValue>(*value);
       if (!primitiveValue)
@@ -128,7 +128,7 @@ namespace krys::boo::css
       {
         return CounterStyleName(u8"decimal"sv);
       }
-      return FallbackNameFromValue(krys::move(fallback));
+      return FallbackNameFromValue(fallback);
     }
 
     KRYS_NODISCARD CounterStyleSymbol PrefixFromStyleProperties(const StyleProperties &properties) noexcept
@@ -252,7 +252,7 @@ namespace krys::boo::css
     }
   }
 
-  CounterStyleRanges RangeFromValue(Ref<Value> value) noexcept
+  CounterStyleRanges RangeFromValue(const Ref<Value> &value) noexcept
   {
     auto *list = DynamicDowncast<ValueList>(*value);
     if (!list)
@@ -283,12 +283,12 @@ namespace krys::boo::css
     return result;
   }
 
-  CounterStyleSymbol SymbolFromValue(RefPtr<Value> value) noexcept
+  CounterStyleSymbol SymbolFromValue(const RefPtr<Value> &value) noexcept
   {
     return SymbolFromValue(value.get());
   }
 
-  CounterStyleAdditiveSymbols AdditiveSymbolsFromValue(Ref<Value> value) noexcept
+  CounterStyleAdditiveSymbols AdditiveSymbolsFromValue(const Ref<Value> &value) noexcept
   {
     CounterStyleAdditiveSymbols result;
     for (const auto &additiveSymbol : Downcast<ValueList>(*value))
@@ -301,7 +301,7 @@ namespace krys::boo::css
     return result;
   }
 
-  CounterStylePad PadFromValue(Ref<Value> value) noexcept
+  CounterStylePad PadFromValue(const Ref<Value> &value) noexcept
   {
     auto &list = Downcast<ValueList>(*value);
     krys_debug_assert(list.size() == 2);
@@ -310,7 +310,7 @@ namespace krys::boo::css
     return {static_cast<uint32>(std::max(0, length)), SymbolFromValue(&list[1])};
   }
 
-  CounterStyleNegativeSymbols NegativeSymbolsFromValue(Ref<Value> value) noexcept
+  CounterStyleNegativeSymbols NegativeSymbolsFromValue(const Ref<Value> &value) noexcept
   {
     CounterStyleNegativeSymbols result;
     if (auto *list = DynamicDowncast<ValueList>(*value))
@@ -327,7 +327,7 @@ namespace krys::boo::css
     return result;
   }
 
-  List<CounterStyleSymbol> SymbolsFromValue(Ref<Value> value) noexcept
+  List<CounterStyleSymbol> SymbolsFromValue(const Ref<Value> &value) noexcept
   {
     List<CounterStyleSymbol> result;
     for (const auto &symbolValue : Downcast<ValueList>(*value))
@@ -341,12 +341,12 @@ namespace krys::boo::css
     return result;
   }
 
-  CounterStyleName FallbackNameFromValue(Ref<Value> value) noexcept
+  CounterStyleName FallbackNameFromValue(const Ref<Value> &value) noexcept
   {
-    return NameFromValue(krys::move(value));
+    return NameFromValue(value);
   }
 
-  CounterStyleSystemData ExtractSystemDataFromValue(RefPtr<Value> systemValue,
+  CounterStyleSystemData ExtractSystemDataFromValue(const RefPtr<Value> &systemValue,
                                                     CounterStyleSystem system) noexcept
   {
     CounterStyleSystemData result {CounterStyleName(u8"decimal"sv), 1};
@@ -403,7 +403,7 @@ namespace krys::boo::css
     auto system = ToCounterStyleSystemEnum(systemValue.get());
     auto systemData = ExtractSystemDataFromStyleProperties(properties, system);
     CounterStyleDescriptors descriptors {
-      .Name = name,
+      .Name = krys::move(name),
       .System = system,
       .NegativeSymbols = NegativeSymbolsFromStyleProperties(properties),
       .Prefix = PrefixFromStyleProperties(properties),
@@ -475,7 +475,7 @@ namespace krys::boo::css
     Name = krys::move(name);
   }
 
-  void CounterStyleDescriptors::SetSystemData(CounterStyleSystemData systemData) noexcept
+  void CounterStyleDescriptors::SetSystemData(const CounterStyleSystemData &systemData) noexcept
   {
     if (ExtendsName == systemData.first && FixedSystemFirstSymbolValue == systemData.second)
     {

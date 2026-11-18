@@ -91,7 +91,7 @@ namespace krys::boo
         _mouseEventData(MouseEventDataForFirstMouseEvent(event)),
         _type(GetNavigationType(isFormSubmission, event != nullptr))
   {
-    SetDownloadAttribute(downloadAttribute);
+    SetDownloadAttribute(krys::move(downloadAttribute));
     SetSourceElement(sourceElement);
   }
 

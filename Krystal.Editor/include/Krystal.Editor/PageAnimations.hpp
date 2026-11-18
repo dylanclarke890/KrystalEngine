@@ -60,7 +60,7 @@ namespace krys::editor
       {
         if (auto element = document.GetElementById(id))
         {
-          return element->AddEventListener(type, krys::move(callback));
+          return element->AddEventListener(krys::move(type), krys::move(callback));
         }
         return {};
       };

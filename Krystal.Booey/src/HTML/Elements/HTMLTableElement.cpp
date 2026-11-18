@@ -85,7 +85,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::Caption(RefPtr<HTMLTableCaptionElement> &&caption) noexcept
+  dom::ExceptionOr<void> HTMLTableElement::Caption(const RefPtr<HTMLTableCaptionElement> &caption) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -136,7 +136,7 @@ namespace krys::boo::html
     return FirstTableSection(*this, TagName::thead);
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::THead(RefPtr<HTMLTableSectionElement> &&head) noexcept
+  dom::ExceptionOr<void> HTMLTableElement::THead(const RefPtr<HTMLTableSectionElement> &head) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -208,7 +208,7 @@ namespace krys::boo::html
     return FirstTableSection(*this, TagName::tfoot);
   }
 
-  dom::ExceptionOr<void> HTMLTableElement::TFoot(RefPtr<HTMLTableSectionElement> &&foot) noexcept
+  dom::ExceptionOr<void> HTMLTableElement::TFoot(const RefPtr<HTMLTableSectionElement> &foot) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -651,8 +651,8 @@ namespace krys::boo::html
     }
   }
 
-  bool HTMLTableElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLTableElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"width" || localName == u8"height" || localName == u8"bgcolor"
@@ -665,8 +665,8 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLTableElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                dom::DOMStringAtom namespaceURI,
+  void HTMLTableElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                const dom::DOMStringAtom &namespaceURI,
                                                                 dom::DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {
@@ -778,9 +778,10 @@ namespace krys::boo::html
     HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
-  void HTMLTableElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLTableElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                            Maybe<dom::DOMStringView> oldValue,
                                             Maybe<dom::DOMStringView> value,
-                                            dom::DOMStringAtom namespaceURI) noexcept
+                                            const dom::DOMStringAtom &namespaceURI) noexcept
   {
     using namespace presentational_hints;
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);

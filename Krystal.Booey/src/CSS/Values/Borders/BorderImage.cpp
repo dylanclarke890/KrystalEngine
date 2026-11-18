@@ -23,7 +23,7 @@
 
 namespace krys::boo::css
 {
-  Ref<ValueList> CreateBorderImageValue(BorderImageComponents &&components) noexcept
+  Ref<ValueList> CreateBorderImageValue(BorderImageComponents components) noexcept
   {
     ValueListBuilder list;
     if (components.Source)

@@ -75,25 +75,25 @@ namespace krys::boo::css
 
   public:
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-add
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Add(List<CSSNumberish> &&values) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Add(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-sub
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Sub(List<CSSNumberish> &&values) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Sub(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-mul
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Mul(List<CSSNumberish> &&values) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Mul(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-div
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Div(List<CSSNumberish> &&values) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Div(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-min
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Min(List<CSSNumberish> &&values) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Min(List<CSSNumberish> numberishes) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-max
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Max(List<CSSNumberish> &&values) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>> Max(List<CSSNumberish> numberishes) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-equals
-    KRYS_NODISCARD bool Equals(List<CSSNumberish> &&values) noexcept;
+    KRYS_NODISCARD bool Equals(List<CSSNumberish> values) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-to
     KRYS_NODISCARD dom::ExceptionOr<Ref<CSSUnitValue>> To(const CSSOMString &unit) noexcept;
@@ -101,7 +101,7 @@ namespace krys::boo::css
     KRYS_NODISCARD dom::ExceptionOr<Ref<CSSUnitValue>> To(UnitType unit) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-tosum
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSMathSum>> ToSum(List<CSSOMString> &&units) noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<CSSMathSum>> ToSum(const List<CSSOMString> &units) noexcept;
 
     KRYS_NODISCARD const CSSNumericType &Type() const noexcept
     {
@@ -113,7 +113,7 @@ namespace krys::boo::css
                                                                        CSSOMString &&cssText) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#rectify-a-numberish-value
-    KRYS_NODISCARD static Ref<CSSNumericValue> RectifyNumberish(CSSNumberish &&numberish) noexcept;
+    KRYS_NODISCARD static Ref<CSSNumericValue> RectifyNumberish(CSSNumberish numberish) noexcept;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#create-a-sum-value
     KRYS_NODISCARD virtual Maybe<SumValue> ToSumValue() const noexcept = 0;
@@ -139,14 +139,14 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>>
-      AddInternal(List<Ref<CSSNumericValue>> &&values) noexcept;
+      AddInternal(List<Ref<CSSNumericValue>> numericValues) noexcept;
 
     KRYS_NODISCARD dom::ExceptionOr<Ref<CSSNumericValue>>
-      MultiplyInternal(List<Ref<CSSNumericValue>> &&values) noexcept;
+      MultiplyInternal(List<Ref<CSSNumericValue>> numericValues) noexcept;
 
     template <typename T>
     KRYS_NODISCARD List<Ref<CSSNumericValue>>
-      PrependItemsOfTypeOrThis(List<Ref<CSSNumericValue>> &&values) noexcept;
+      PrependItemsOfTypeOrThis(List<Ref<CSSNumericValue>> numericValues) noexcept;
   };
 }
 

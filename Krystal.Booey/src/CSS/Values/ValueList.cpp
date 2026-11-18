@@ -154,13 +154,13 @@ namespace krys::boo::css
                                    krys::move(value3), krys::move(value4)));
   }
 
-  Ref<ValueList> ValueList::Create(char32 separator, ValueListBuilder builder) noexcept
+  Ref<ValueList> ValueList::Create(char32 separator, ValueListBuilder values) noexcept
   {
     switch (separator)
     {
-      case U',': return CreateCommaSeparated(krys::move(builder));
-      case U'/': return CreateSlashSeparated(krys::move(builder));
-      case U' ': return CreateSpaceSeparated(krys::move(builder));
+      case U',': return CreateCommaSeparated(krys::move(values));
+      case U'/': return CreateSlashSeparated(krys::move(values));
+      case U' ': return CreateSpaceSeparated(krys::move(values));
       default:   break;
     }
     krys_unreachable();

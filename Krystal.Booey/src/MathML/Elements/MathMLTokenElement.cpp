@@ -66,8 +66,8 @@ namespace krys::boo::mathml
     return StyledElement::ChildShouldCreateRenderer(child);
   }
 
-  bool MathMLTokenElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                              dom::DOMStringAtom namespaceURI) const noexcept
+  bool MathMLTokenElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && localName == MathMLNames::MathvariantAttr().LocalName()
         && HasTagName(html::TagName::mi))
@@ -77,8 +77,8 @@ namespace krys::boo::mathml
     return MathMLPresentationElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void MathMLTokenElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                  dom::DOMStringAtom namespaceURI,
+  void MathMLTokenElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                  const dom::DOMStringAtom &namespaceURI,
                                                                   dom::DOMStringView value,
                                                                   css::MutableStyleProperties &style) noexcept
   {

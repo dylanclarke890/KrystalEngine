@@ -11,6 +11,7 @@ namespace krys::serialisation
   {
   public:
     template <typename T>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): only its type is used.
     static auto GetVersion(T &&value) noexcept -> Version
     {
       if constexpr (HasTraitVersion<T>)

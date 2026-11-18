@@ -196,7 +196,7 @@ namespace krys::boo::css::tests
       List<CSSTokenizerTest> tests;
       CSSTokenizerTest currentTest;
 
-      auto parse = [&](utf8_string sectionName, utf8_string data)
+      auto parse = [&](const utf8_string &sectionName, const utf8_string &data)
       {
         if (sectionName == u8"data")
         {
@@ -248,7 +248,7 @@ namespace krys::boo::css::tests
       CHECK(equal);
     }
 
-    void RunTest(string filename) noexcept
+    void RunTest(const string &filename) noexcept
     {
       static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/css-tokenizer/";
 

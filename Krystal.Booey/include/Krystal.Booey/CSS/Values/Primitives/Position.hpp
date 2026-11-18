@@ -184,7 +184,7 @@ namespace krys::boo::css
   KRYS_NODISCARD bool IsCenterPosition(const Position &position) noexcept;
 
   /// @brief Splits a position into its horizontal and vertical halves.
-  KRYS_NODISCARD Pair<PositionX, PositionY> Split(Position &&position) noexcept;
+  KRYS_NODISCARD Pair<PositionX, PositionY> Split(Position position) noexcept;
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::TwoComponentPositionHorizontal, 1)

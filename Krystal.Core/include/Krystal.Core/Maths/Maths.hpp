@@ -290,10 +290,8 @@ namespace krys
       {
         return x;
       }
-      else
-      {
-        return (x < T(0)) ? -x : x;
-      }
+
+      return (x < T(0)) ? -x : x;
     }
     else if constexpr (UnsignedIntegral<T>)
     {

@@ -208,7 +208,7 @@ namespace krys::boo
     void MoveAllChildren(RenderBoxModelObject &from, RenderBoxModelObject &to, RenderObject *beforeChild,
                          NormalizeAfterInsertion normalizeAfterInsertion) noexcept;
 
-    void RemoveFloatingObjects(RenderBlock &renderer) noexcept;
+    static void RemoveFloatingObjects(RenderBlock &renderer) noexcept;
 
     KRYS_NODISCARD RenderObject *SplitAnonymousBoxesAroundChild(RenderBoxModelObject &parent,
                                                                 RenderObject &originalBeforeChild) noexcept;

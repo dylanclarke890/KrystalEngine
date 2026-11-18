@@ -101,7 +101,7 @@ namespace krys::boo
 
     explicit FontRanges(RefPtr<Font> &&font) noexcept;
 
-    FontRanges(FontRanges &&other, boo::IsGenericFontFamily isGenericFontFamily) noexcept;
+    FontRanges(FontRanges other, boo::IsGenericFontFamily isGenericFontFamily) noexcept;
 
     ~FontRanges() noexcept;
 

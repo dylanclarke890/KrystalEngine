@@ -160,7 +160,7 @@ namespace krys::boo::style
                                 RuleMatchingBehavior = RuleMatchingBehavior::MatchAllRules) noexcept;
 
     KRYS_NODISCARD UnadjustedStyle UnadjustedStyleForCachedMatchResult(
-      dom::Element &element, const ResolutionContext &context, CachedMatchResult &&cachedResult) noexcept;
+      dom::Element &element, const ResolutionContext &context, CachedMatchResult cachedResult) noexcept;
 
     KRYS_NODISCARD ResolvedStyle
       StyleForElement(dom::Element &element, const ResolutionContext &context,

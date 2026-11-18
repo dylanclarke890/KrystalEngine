@@ -1045,7 +1045,7 @@ namespace krys::boo::style
   }
 
   template <typename TFunction>
-  void Scope::EvaluateMediaQueries(TFunction &&testFunction) noexcept
+  void Scope::EvaluateMediaQueries(TFunction testFunction) noexcept
   {
     auto resolverScopes = CollectResolverScopes();
     for (auto &[resolver, scopes] : resolverScopes)

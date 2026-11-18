@@ -73,8 +73,9 @@ namespace krys::boo
     bool MapStartEndPositionsIntoFragmentCoordinates(Data *, const SVGTextFragment &, uint32 &startPosition,
                                                      uint32 &endPosition) const noexcept;
 
-    void ModifyStartEndPositionsRespectingLigatures(Data *, const SVGTextFragment &, uint32 &startPosition,
-                                                    uint32 &endPosition) const noexcept;
+    static void ModifyStartEndPositionsRespectingLigatures(Data *, const SVGTextFragment &,
+                                                           uint32 &startPosition,
+                                                           uint32 &endPosition) noexcept;
 
     bool NumberOfCharactersCallback(Data *, const SVGTextFragment &) const noexcept;
 

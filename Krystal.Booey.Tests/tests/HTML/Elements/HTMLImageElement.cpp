@@ -55,7 +55,7 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD ImageLoader::DecodePromise Promise() noexcept
       {
-        return [this](dom::ExceptionOr<void> &&result)
+        return [this](const dom::ExceptionOr<void> &result)
         {
           if (result.HasException())
           {

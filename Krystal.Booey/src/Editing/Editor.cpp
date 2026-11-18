@@ -151,6 +151,8 @@ namespace krys::boo
       dom::ScopedEventQueue::DispatchOrQueue(krys::move(event), ShareRef(element));
     }
 
+    // By value: they keep the roots alive while script runs.
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
     bool DispatchBeforeInputEvents(RefPtr<dom::Element> startRoot, RefPtr<dom::Element> endRoot,
                                    utf8_stringview inputTypeName,
                                    dom::IsInputMethodComposing isInputMethodComposing,
@@ -175,6 +177,8 @@ namespace krys::boo
       return continueWithDefaultBehavior;
     }
 
+    // By value: they keep the roots alive while script runs.
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
     void DispatchInputEvents(RefPtr<dom::Element> startRoot, RefPtr<dom::Element> endRoot,
                              utf8_stringview inputTypeName,
                              dom::IsInputMethodComposing isInputMethodComposing,
@@ -282,8 +286,8 @@ namespace krys::boo
   // Returns whether caller should continue with "the default processing", which is the same as
   // the event handler NOT setting the return value to false
   // https://w3c.github.io/clipboard-apis/#fire-a-clipboard-event
-  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind,
-                                      Ref<dom::DataTransfer> &&dataTransfer) noexcept
+  bool Editor::DispatchClipboardEvent(const RefPtr<dom::Element> &target, ClipboardEventKind kind,
+                                      const Ref<dom::DataTransfer> &dataTransfer) noexcept
   {
     // FIXME: Move the target selection code here.
     if (!target)
@@ -307,7 +311,7 @@ namespace krys::boo
     return !noDefaultProcessing;
   }
 
-  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind) noexcept
+  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> target, ClipboardEventKind kind) noexcept
   {
     if (!target)
     {
@@ -574,7 +578,7 @@ namespace krys::boo
       }
       if (Is<svg::SVGImageElement>(DynamicDowncast<svg::SVGElement>(&element)))
       {
-        return element.GetAttributeNS(infra::Namespaces::XLink, u8"href").value_or(dom::DOMString());
+        return element.GetAttributeNS(infra::namespaces::XLink, u8"href").value_or(dom::DOMString());
       }
       if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
           htmlElement
@@ -759,7 +763,7 @@ namespace krys::boo
 
   // There are no Writing Tools to suppress editing; see DIFFERENCES.md.
   bool Editor::WillApplyEditing(CompositeEditCommand &command,
-                                List<RefPtr<dom::StaticRange>> &&targetRanges) noexcept
+                                const List<RefPtr<dom::StaticRange>> &targetRanges) noexcept
   {
     if (!command.ShouldDispatchInputEvents())
     {
@@ -915,7 +919,7 @@ namespace krys::boo
     RespondToChangedContents(newSelection);
   }
 
-  bool Editor::WillReapplyEditing(const EditCommandComposition &composition) const noexcept
+  bool Editor::WillReapplyEditing(const EditCommandComposition &composition) noexcept
   {
     return DispatchBeforeInputEvents(ShareRefPtr(composition.StartingRootEditableElement()),
                                      ShareRefPtr(composition.EndingRootEditableElement()), u8"historyRedo",
@@ -1039,7 +1043,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::ApplyStyle(RefPtr<EditingStyle> &&style, EditAction editingAction) noexcept
+  void Editor::ApplyStyle(const RefPtr<EditingStyle> &style, EditAction editingAction) noexcept
   {
     if (!style)
     {
@@ -1214,7 +1218,7 @@ namespace krys::boo
     return selection.IsRange() && selection.RootEditableElement();
   }
 
-  bool Editor::CanDeleteRange(const dom::SimpleRange &range) const noexcept
+  bool Editor::CanDeleteRange(const dom::SimpleRange &range) noexcept
   {
     if (!range.Start.Container->HasEditableStyle() || !range.End.Container->HasEditableStyle())
     {
@@ -1253,7 +1257,7 @@ namespace krys::boo
     return _document.Selection().Granularity() == TextGranularity::WordGranularity;
   }
 
-  bool Editor::SmartInsertDeleteEnabled() noexcept
+  bool Editor::SmartInsertDeleteEnabled() const noexcept
   {
     auto *client = Client();
     return client && client->SmartInsertDeleteEnabled();
@@ -2047,7 +2051,7 @@ namespace krys::boo
     }
   }
 
-  IntRect Editor::FirstRectForRange(const dom::SimpleRange &range) const noexcept
+  IntRect Editor::FirstRectForRange(const dom::SimpleRange &range) noexcept
   {
     (void)range.Start.GetDocument().UpdateLayout();
 

@@ -64,7 +64,7 @@ namespace krys::boo::dom
 
     /// @brief Calls @p func with each element descendant of @p rootNode in tree order, until it returns true.
     template <typename TFunc>
-    void ForEachDescendantElement(const ContainerNode &rootNode, TFunc &&func) noexcept
+    void ForEachDescendantElement(const ContainerNode &rootNode, TFunc func) noexcept
     {
       for (auto *node = TreeQueries::Next(rootNode, &rootNode); node;
            node = TreeQueries::Next(*node, &rootNode))
@@ -225,7 +225,7 @@ namespace krys::boo::dom
   }
 
   bool SelectorDataList::SelectorMatches(const SelectorData &selectorData, const Element &element,
-                                         const ContainerNode &rootNode) const noexcept
+                                         const ContainerNode &rootNode) noexcept
   {
     css::SelectorChecker selectorChecker(element.NodeDocument());
     css::SelectorChecker::CheckingContext selectorCheckingContext(css::SelectorChecker::Mode::QueryingRules);
@@ -425,9 +425,8 @@ namespace krys::boo::dom
     return true;
   }
 
-  const ContainerNode &
-    SelectorDataList::SearchRootForAncestorId(const ContainerNode &rootNode,
-                                              const SelectorData &selectorData) const noexcept
+  const ContainerNode &SelectorDataList::SearchRootForAncestorId(const ContainerNode &rootNode,
+                                                                 const SelectorData &selectorData) noexcept
   {
     if (!CanUseIdFastPath(rootNode))
     {

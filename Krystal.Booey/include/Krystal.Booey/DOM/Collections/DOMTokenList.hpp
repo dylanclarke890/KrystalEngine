@@ -372,7 +372,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-dtl-serialize
     KRYS_NODISCARD DOMString SerialiseSteps() const noexcept;
 
-    KRYS_NODISCARD ExceptionOr<void> ValidateToken(DOMStringView token) const noexcept
+    KRYS_NODISCARD static ExceptionOr<void> ValidateToken(DOMStringView token) noexcept
     {
       if (token.empty())
       {

@@ -95,16 +95,13 @@ namespace krys::boo
                                                      - std::max(visibleBounds.X(), exposeRect.X()));
 
       if (intersectWidth == exposeRect.Width()
-          || (alignX.LegacyHorizontalVisibilityThresholdEnabled() && intersectWidth >= MinIntersectForReveal))
+          || (alignX.LegacyHorizontalVisibilityThresholdEnabled() && intersectWidth >= MinIntersectForReveal)
+          || intersectWidth == visibleBounds.Width())
       {
         // If the rectangle is fully visible, use the specified visible behavior.
         // If the rectangle is partially visible, but over a certain threshold,
-        // then treat it as fully visible to avoid unnecessary horizontal scrolling
-        scrollX = alignX.GetVisibleBehavior();
-      }
-      else if (intersectWidth == visibleBounds.Width())
-      {
-        // The rect is bigger than the visible area.
+        // then treat it as fully visible to avoid unnecessary horizontal scrolling.
+        // The same if the rect is bigger than the visible area.
         scrollX = alignX.GetVisibleBehavior();
       }
       else if (intersectWidth > 0)
@@ -164,14 +161,10 @@ namespace krys::boo
     {
       auto intersectHeight = std::max(LayoutUnit(), std::min(visibleBounds.MaxY(), exposeRect.MaxY())
                                                       - std::max(visibleBounds.Y(), exposeRect.Y()));
-      if (intersectHeight == exposeRect.Height())
+      if (intersectHeight == exposeRect.Height() || intersectHeight == visibleBounds.Height())
       {
-        // If the rectangle is fully visible, use the specified visible behavior.
-        scrollY = alignY.GetVisibleBehavior();
-      }
-      else if (intersectHeight == visibleBounds.Height())
-      {
-        // The rect is bigger than the visible area.
+        // If the rectangle is fully visible, or bigger than the visible area, use the specified visible
+        // behavior.
         scrollY = alignY.GetVisibleBehavior();
       }
       else if (intersectHeight > 0)

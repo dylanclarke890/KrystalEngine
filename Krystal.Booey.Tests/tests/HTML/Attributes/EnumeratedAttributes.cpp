@@ -71,9 +71,10 @@ namespace krys::boo::html::tests
   {
     template <typename TElement>
     KRYS_NODISCARD Ref<TElement> Create(dom::Document &document, dom::DOMStringAtom name,
-                                        dom::DOMStringAtom attribute = {}, Maybe<dom::DOMString> value = null)
+                                        const dom::DOMStringAtom &attribute = {},
+                                        Maybe<dom::DOMString> value = null)
     {
-      auto element = document.CreateElement(name).ReleaseValue();
+      auto element = document.CreateElement(krys::move(name)).ReleaseValue();
       if (value)
       {
         REQUIRE_FALSE(element->SetAttribute(attribute, krys::move(*value)).HasException());
@@ -82,7 +83,7 @@ namespace krys::boo::html::tests
     }
 
     template <typename TElement>
-    void CheckCrossOriginAndFetchPriority(dom::Document &document, dom::DOMStringAtom name)
+    void CheckCrossOriginAndFetchPriority(dom::Document &document, const dom::DOMStringAtom &name)
     {
       INFO(reinterpret_cast<const char *>(name.View().data()));
       CHECK(Create<TElement>(document, name)->CrossOrigin() == null);
@@ -104,7 +105,7 @@ namespace krys::boo::html::tests
     }
 
     template <typename TElement>
-    void CheckReferrerPolicy(dom::Document &document, dom::DOMStringAtom name)
+    void CheckReferrerPolicy(dom::Document &document, const dom::DOMStringAtom &name)
     {
       INFO(reinterpret_cast<const char *>(name.View().data()));
       CHECK(Create<TElement>(document, name)->ReferrerPolicy() == u8"");

@@ -121,5 +121,5 @@ namespace krys::boo::style
 namespace krys::boo::css
 {
   template <typename N, typename... Ks>
-  constexpr auto TreatAsVariantLike<style::PrimitiveNumericOrKeyword<N, Ks...>> = true;
+  constexpr inline auto TreatAsVariantLike<style::PrimitiveNumericOrKeyword<N, Ks...>> = true;
 }

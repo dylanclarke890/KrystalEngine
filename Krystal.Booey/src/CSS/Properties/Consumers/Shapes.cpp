@@ -46,16 +46,16 @@
 
 namespace krys::boo::css::parse_property
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   template <ValueId Name, typename T>
-  KRYS_NODISCARD static BasicShape ToBasicShape(T &&parameters) noexcept
+  KRYS_NODISCARD static BasicShape ToBasicShape(T parameters) noexcept
   {
     return BasicShape {FunctionNotation<Name, T> {krys::move(parameters)}};
   }
 
   template <ValueId Name, typename T>
-  KRYS_NODISCARD static Maybe<BasicShape> ToBasicShape(Maybe<T> &&parameters) noexcept
+  KRYS_NODISCARD static Maybe<BasicShape> ToBasicShape(Maybe<T> parameters) noexcept
   {
     if (!parameters)
     {

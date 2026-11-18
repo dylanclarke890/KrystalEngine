@@ -54,7 +54,7 @@ namespace krys::log
     ILogger &operator=(ILogger &&) = default;
 
     template <typename... Args>
-    void Log(Level level, stringview fmt, Args &&...args)
+    void Log(Level level, stringview fmt, const Args &...args)
     {
       auto message = std::vformat(fmt, std::make_format_args(args...));
       LogImpl(level, message);

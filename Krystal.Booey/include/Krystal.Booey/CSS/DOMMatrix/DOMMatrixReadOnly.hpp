@@ -65,7 +65,7 @@ namespace krys::boo::css
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-dommatrixreadonly
     KRYS_NODISCARD static dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
-      Create(Maybe<Variant<CSSOMString, List<double>>> &&init = null) noexcept;
+      Create(Maybe<Variant<CSSOMString, List<double>>> init = null) noexcept;
 
     KRYS_NODISCARD static Ref<DOMMatrixReadOnly> Create(const TransformationMatrix &matrix,
                                                         Is2D is2D) noexcept
@@ -242,7 +242,7 @@ namespace krys::boo::css
     KRYS_NODISCARD Ref<DOMMatrix> Inverse() const noexcept;
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-transformpoint
-    KRYS_NODISCARD Ref<dom::DOMPoint> TransformPoint(dom::DOMPointInit &&) const noexcept;
+    KRYS_NODISCARD Ref<dom::DOMPoint> TransformPoint(dom::DOMPointInit) const noexcept;
 
     KRYS_NODISCARD Array<float, 16> ToFloat32Array() const noexcept;
 
@@ -277,7 +277,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static dom::ExceptionOr<Ref<T>> FromArrayHelper(Span<const TValue>) noexcept;
 
     template <typename T>
-    KRYS_NODISCARD static dom::ExceptionOr<Ref<T>> FromMatrixHelper(DOMMatrixInit &&) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<T>> FromMatrixHelper(DOMMatrixInit) noexcept;
   };
 
   template <typename T, typename TValue>
@@ -300,7 +300,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/geometry/#create-a-dommatrix-from-the-dictionary
   template <typename T>
-  inline dom::ExceptionOr<Ref<T>> DOMMatrixReadOnly::FromMatrixHelper(DOMMatrixInit &&init) noexcept
+  inline dom::ExceptionOr<Ref<T>> DOMMatrixReadOnly::FromMatrixHelper(DOMMatrixInit init) noexcept
   {
     auto result = ValidateAndFixup(init);
     if (result.HasException())

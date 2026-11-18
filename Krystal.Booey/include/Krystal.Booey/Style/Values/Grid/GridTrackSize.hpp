@@ -37,7 +37,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   struct GridTrackMinMaxParameters
   {
@@ -89,38 +89,36 @@ namespace krys::boo::style
     using MinMax = GridTrackMinMax;
     using FitContent = GridTrackFitContent;
 
-    GridTrackSize(css::keywords::Auto keyword) noexcept
-        : _type(Type::Breadth), _minTrackBreadth(keyword), _maxTrackBreadth(keyword)
+    GridTrackSize(css::keywords::Auto keyword) noexcept : _minTrackBreadth(keyword), _maxTrackBreadth(keyword)
     {
       CacheMinMaxTrackBreadthTypes();
     }
 
     GridTrackSize(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept
-        : _type(Type::Breadth), _minTrackBreadth(literal), _maxTrackBreadth(literal)
+        : _minTrackBreadth(literal), _maxTrackBreadth(literal)
     {
       CacheMinMaxTrackBreadthTypes();
     }
 
     GridTrackSize(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept
-        : _type(Type::Breadth), _minTrackBreadth(literal), _maxTrackBreadth(literal)
+        : _minTrackBreadth(literal), _maxTrackBreadth(literal)
     {
       CacheMinMaxTrackBreadthTypes();
     }
 
     GridTrackSize(css::ValueLiteral<css::FlexUnit::Fr> literal) noexcept
-        : _type(Type::Breadth), _minTrackBreadth(literal), _maxTrackBreadth(literal)
+        : _minTrackBreadth(literal), _maxTrackBreadth(literal)
     {
       CacheMinMaxTrackBreadthTypes();
     }
 
-    GridTrackSize(const Breadth &breadth) noexcept
-        : _type(Type::Breadth), _minTrackBreadth(breadth), _maxTrackBreadth(breadth)
+    GridTrackSize(const Breadth &breadth) noexcept : _minTrackBreadth(breadth), _maxTrackBreadth(breadth)
     {
       CacheMinMaxTrackBreadthTypes();
     }
 
     GridTrackSize(Breadth &&breadth) noexcept
-        : _type(Type::Breadth), _minTrackBreadth(breadth), _maxTrackBreadth(krys::move(breadth))
+        : _minTrackBreadth(breadth), _maxTrackBreadth(krys::move(breadth))
     {
       CacheMinMaxTrackBreadthTypes();
     }
@@ -357,8 +355,8 @@ namespace krys::boo::style
   template <>
   struct Blending<GridTrackSize>
   {
-    KRYS_NODISCARD GridTrackSize Blend(const GridTrackSize &, const GridTrackSize &,
-                                       const BlendingContext &) noexcept;
+    KRYS_NODISCARD static GridTrackSize Blend(const GridTrackSize &, const GridTrackSize &,
+                                              const BlendingContext &) noexcept;
   };
 }
 

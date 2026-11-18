@@ -605,7 +605,7 @@ namespace krys::boo::css
     return AdoptRef(*new CounterStyle(descriptors, isPredefinedCounterStyle));
   }
 
-  void CounterStyle::SetFallbackReference(Ref<CounterStyle> &&fallback) noexcept
+  void CounterStyle::SetFallbackReference(const Ref<CounterStyle> &fallback) noexcept
   {
     _fallbackReference = CreateWeakPtr(fallback.get());
   }

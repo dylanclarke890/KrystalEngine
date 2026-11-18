@@ -43,7 +43,7 @@ namespace krys::boo::tests
 
   private:
     template <typename TFunction>
-    static void ForEachLine(const Path &path, TFunction &&function) noexcept
+    static void ForEachLine(const Path &path, TFunction function) noexcept
     {
       constexpr int32 curveSteps = 16;
       FloatPoint current;

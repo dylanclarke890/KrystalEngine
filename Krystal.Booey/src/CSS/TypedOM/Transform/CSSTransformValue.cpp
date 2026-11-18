@@ -49,7 +49,7 @@ namespace krys::boo::css
   {
     template <typename T>
     KRYS_NODISCARD dom::ExceptionOr<Ref<CSSTransformComponent>>
-      UpcastComponent(dom::ExceptionOr<Ref<T>> &&component) noexcept
+      UpcastComponent(dom::ExceptionOr<Ref<T>> component) noexcept
     {
       if (component.HasException())
       {

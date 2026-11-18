@@ -75,7 +75,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD T operator()(BuilderState &state, const css::PrimitiveValue &primitiveValue) noexcept
     {
-      using namespace css::Literals;
+      using namespace css::literals;
 
       auto convertLengthPercentage = [&]() -> T
       {
@@ -145,7 +145,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD T operator()(BuilderState &state, const css::Value &value) noexcept
     {
-      using namespace css::Literals;
+      using namespace css::literals;
 
       auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
       if (!primitiveValue)

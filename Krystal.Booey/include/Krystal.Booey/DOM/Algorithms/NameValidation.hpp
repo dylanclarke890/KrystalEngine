@@ -34,7 +34,7 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#validate-and-extract
     KRYS_NODISCARD static ExceptionOr<QualifiedName>
-      ValidateAndExtract(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
+      ValidateAndExtract(DOMStringAtom namespaceURI, const DOMStringAtom &qualifiedName,
                          ValidateAndExtractContext context) noexcept;
 
 #pragma endregion

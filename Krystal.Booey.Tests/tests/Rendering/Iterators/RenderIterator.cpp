@@ -13,7 +13,7 @@ namespace krys::boo::tests
   namespace
   {
     template <typename TRange>
-    KRYS_NODISCARD List<std::string> Ids(TRange &&range)
+    KRYS_NODISCARD List<std::string> Ids(const TRange &range)
     {
       List<std::string> ids;
       for (auto &renderer : range)

@@ -105,8 +105,8 @@ namespace krys::boo
     KRYS_NODISCARD static bool ShouldFlipStartAndEndPoints(WritingMode writingMode) noexcept;
 
   private:
-    KRYS_NODISCARD bool LineOverlapsBoundingBox(LayoutUnit lineTop, LayoutUnit lineHeight,
-                                                const LayoutRect &rect) const noexcept
+    KRYS_NODISCARD static bool LineOverlapsBoundingBox(LayoutUnit lineTop, LayoutUnit lineHeight,
+                                                       const LayoutRect &rect) noexcept
     {
       if (rect.IsEmpty())
       {

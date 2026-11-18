@@ -1,5 +1,15 @@
 ---
-# Krystal's conventions (see CLAUDE.md). Kept deliberately small: add checks as the code is brought in line.
+# Only the engine's own modules (and their tests and generated code), not vcpkg or third-party/.
+HeaderFilterRegex: '.*[/\\]Krystal\.[A-Za-z.]+[/\\].*'
+
+# Vendored code inside the modules (magic_enum, Khronos's OpenGL headers).
+ExcludeHeaderFilterRegex: '.*[/\\](MagicEnum\.hpp|OpenGL[/\\]Official[/\\].*)'
+
+# Auto-fixes are formatted with .clang-format.
+FormatStyle: file
+
+WarningsAsErrors: ''
+
 Checks: >
   -*,
   bugprone-assert-side-effect,
@@ -28,7 +38,6 @@ Checks: >
   cppcoreguidelines-noexcept-move-operations,
   cppcoreguidelines-rvalue-reference-param-not-moved,
   cppcoreguidelines-slicing,
-  cppcoreguidelines-virtual-class-destructor,
   misc-definitions-in-headers,
   misc-misplaced-const,
   misc-redundant-expression,
@@ -73,10 +82,11 @@ Checks: >
   portability-std-allocator-const,
   readability-container-contains,
   readability-container-size-empty,
+  readability-convert-member-functions-to-static,
   readability-duplicate-include,
+  readability-else-after-return,
   readability-identifier-naming,
   readability-inconsistent-declaration-parameter-name,
-  readability-make-member-function-const,
   readability-misleading-indentation,
   readability-redundant-casting,
   readability-redundant-control-flow,
@@ -84,13 +94,40 @@ Checks: >
   readability-redundant-member-init,
   readability-redundant-smartptr-get,
   readability-static-accessed-through-instance
+  
+CheckOptions:
+  # Engine wrappers instead of std's: Krystal.Core/TypeTraits.hpp and Concepts.hpp.
+  portability-restrict-system-includes.Includes: '*,-type_traits,-concepts'
 
-# Still to address (noisy on the WebKit port); add to Checks above once the code is ready:
+  # krys::move instead of std::move. bugprone-use-after-move and performance-move-const-arg only
+  # recognise std::move and can't be configured, so clang-analyzer-cplusplus.Move (which follows the
+  # move itself, not the function's name) catches uses after krys::move.
+  clang-analyzer-cplusplus.Move:WarnOn: All
+
+  # Moving a member out counts as consuming the parameter (std::get(variant &&) and the like).
+  cppcoreguidelines-rvalue-reference-param-not-moved.AllowPartialMove: true
+  
+  # An unnamed && parameter only selects an overload (a tag, or catching temporaries), so there's nothing to move.
+  cppcoreguidelines-rvalue-reference-param-not-moved.IgnoreUnnamedParams: true
+  cppcoreguidelines-rvalue-reference-param-not-moved.MoveFunction: '::krys::move'
+
+  # Iterators are cheap to copy and conventionally by value. The check's move fixes insert std::move:
+  # change them to krys::move.
+  performance-unnecessary-value-param.AllowedTypes: '[Ii]terator$'
+
+  # Namespaces: krys, krys::detail.
+  readability-identifier-naming.NamespaceCase: lower_case
+
+# Not enabled but possibly wanted.
+#   bugprone-easily-swappable-parameters,
+#   cppcoreguidelines-virtual-class-destructor,
+#   misc-const-correctness,
+#   misc-unused-parameters,
 #   modernize-avoid-c-arrays,
 #   modernize-avoid-c-style-cast,
 #   modernize-loop-convert,
-#   modernize-make-shared,              (configure MakeSmartPtrFunction first)
-#   modernize-make-unique,              (configure MakeSmartPtrFunction for CreateUnique first)
+#   modernize-make-shared,						# NOTE: Configure MakeSmartPtrFunction first.
+#   modernize-make-unique,						# NOTE: Configure MakeSmartPtrFunction for CreateUnique first.
 #   modernize-raw-string-literal,
 #   modernize-return-braced-init-list,
 #   modernize-use-designated-initializers,
@@ -98,42 +135,12 @@ Checks: >
 #   modernize-use-ranges,
 #   modernize-use-std-format,
 #   modernize-use-std-print,
-
-# Not wanted: it treats Ref/RefPtr copies that keep an object alive (and copies tests make on purpose) as waste.
 #   performance-unnecessary-copy-initialization,
-
-# Useful, but a large first pass; same as above:
-#   bugprone-easily-swappable-parameters,
-#   bugprone-narrowing-conversions,
-#   bugprone-unchecked-optional-access,
-#   misc-const-correctness,
-#   misc-include-cleaner,               (tune for the PCH and unity build: IgnoreHeaders)
-#   misc-unused-parameters,
-#   readability-convert-member-functions-to-static,
-#   readability-else-after-return,
 #   readability-implicit-bool-conversion,
+#   readability-make-member-function-const,
 #   readability-simplify-boolean-expr,
 
-WarningsAsErrors: ''
-
-# Only the engine's own modules (and their tests and generated code), not vcpkg or third-party/.
-HeaderFilterRegex: '.*[/\\]Krystal\.[A-Za-z.]+[/\\].*'
-
-# Vendored code inside the modules (magic_enum, Khronos's OpenGL headers).
-ExcludeHeaderFilterRegex: '.*[/\\](MagicEnum\.hpp|OpenGL[/\\]Official[/\\].*)'
-
-# Auto-fixes are formatted with .clang-format.
-FormatStyle: file
-
-CheckOptions:
-  # Engine wrappers instead of std's: Krystal.Core/TypeTraits.hpp and Concepts.hpp.
-  portability-restrict-system-includes.Includes: '*,-type_traits,-concepts'
-
-  # Namespaces: krys, krys::detail.
-  readability-identifier-naming.NamespaceCase: lower_case
-
-  # krys::move instead of std::move. bugprone-use-after-move and performance-move-const-arg only
-  # recognise std::move and can't be configured, so clang-analyzer-cplusplus.Move (which follows the
-  # move itself, not the function's name) catches uses after krys::move.
-  cppcoreguidelines-rvalue-reference-param-not-moved.MoveFunction: '::krys::move'
-  clang-analyzer-cplusplus.Move:WarnOn: All
+# Not wanted.
+# bugprone-narrowing-conversions,     # MSVC already guards against these; the remainder are mainly noise
+# bugprone-unchecked-optional-access, # Triggers a lot of false positives, particularly with Catch2's CHECK and REQUIRE macros.
+# misc-include-cleaner,				  # Can't enable as-is and causes a lot of false positives

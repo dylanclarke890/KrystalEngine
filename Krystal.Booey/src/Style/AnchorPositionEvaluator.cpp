@@ -870,7 +870,8 @@ namespace krys::boo::style
       return null;
     }
 
-    auto *anchorRenderer = FindAnchorForAnchorFunctionAndAttemptResolution(builderState, elementName);
+    auto *anchorRenderer =
+      FindAnchorForAnchorFunctionAndAttemptResolution(builderState, krys::move(elementName));
     if (!anchorRenderer)
     {
       return null;
@@ -998,7 +999,8 @@ namespace krys::boo::style
       return null;
     }
 
-    auto *anchorRenderer = FindAnchorForAnchorFunctionAndAttemptResolution(builderState, elementName);
+    auto *anchorRenderer =
+      FindAnchorForAnchorFunctionAndAttemptResolution(builderState, krys::move(elementName));
     if (!anchorRenderer)
     {
       return null;

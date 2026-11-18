@@ -71,7 +71,7 @@ namespace krys::boo
 
     KRYS_NODISCARD OrderIterator Reverse() const noexcept;
 
-    KRYS_NODISCARD bool ShouldSkipChild(const RenderObject &child) const noexcept;
+    KRYS_NODISCARD static bool ShouldSkipChild(const RenderObject &child) noexcept;
 
   private:
     void Reset() noexcept;

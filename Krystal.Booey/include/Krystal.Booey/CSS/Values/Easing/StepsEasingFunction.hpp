@@ -118,5 +118,5 @@ namespace std
 }
 
 template <typename T, typename TKeyword, auto TShouldSerialiseKeyword>
-constexpr bool krys::boo::css::TreatAsTupleLike<
+constexpr inline bool krys::boo::css::TreatAsTupleLike<
   krys::boo::css::StepsEasingParameters::Kind<T, TKeyword, TShouldSerialiseKeyword>> = true;

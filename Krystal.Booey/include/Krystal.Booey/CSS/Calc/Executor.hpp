@@ -73,7 +73,7 @@ namespace krys::boo::css::calc
   struct OperatorExecutor<Operator::Sum>
   {
     template <typename Range>
-    KRYS_NODISCARD double operator()(Range &&range) const noexcept
+    KRYS_NODISCARD double operator()(const Range &range) const noexcept
     {
       double sum = 0;
       for (double value : range)
@@ -109,7 +109,7 @@ namespace krys::boo::css::calc
   struct OperatorExecutor<Operator::Product>
   {
     template <typename Range>
-    KRYS_NODISCARD double operator()(Range &&range) const noexcept
+    KRYS_NODISCARD double operator()(const Range &range) const noexcept
     {
       double product = 1;
       for (double value : range)
@@ -149,7 +149,7 @@ namespace krys::boo::css::calc
     // from the operation staying in a lower precision.
 
     template <FloatingPointRange R>
-    KRYS_NODISCARD auto operator()(R &&range) const noexcept
+    KRYS_NODISCARD auto operator()(const R &range) const noexcept
     {
       if (range.empty())
       {
@@ -204,7 +204,7 @@ namespace krys::boo::css::calc
     // from the operation staying in a lower precision.
 
     template <FloatingPointRange R>
-    KRYS_NODISCARD auto operator()(R &&range) const noexcept
+    KRYS_NODISCARD auto operator()(const R &range) const noexcept
     {
       if (range.empty())
       {
@@ -530,7 +530,7 @@ namespace krys::boo::css::calc
   struct OperatorExecutor<Operator::Hypot>
   {
     template <typename Range>
-    KRYS_NODISCARD double operator()(Range &&range) const noexcept
+    KRYS_NODISCARD double operator()(const Range &range) const noexcept
     {
       if (range.empty())
       {

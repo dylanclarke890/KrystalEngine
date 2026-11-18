@@ -405,7 +405,7 @@ namespace krys::boo
       return _hasInterchangeNewlineAtEnd;
     }
 
-    void RemoveNode(dom::Node &node) noexcept;
+    static void RemoveNode(dom::Node &node) noexcept;
 
     void RemoveNodePreservingChildren(dom::Node &node) noexcept;
 
@@ -414,7 +414,7 @@ namespace krys::boo
 
     void RemoveInterchangeNodes(dom::Node *container) noexcept;
 
-    void InsertNodeBefore(dom::Node &node, dom::Node &refNode) noexcept;
+    static void InsertNodeBefore(dom::Node &node, dom::Node &refNode) noexcept;
   };
 
   ReplacementFragment::ReplacementFragment(RefPtr<dom::DocumentFragment> &&inputFragment,
@@ -481,12 +481,9 @@ namespace krys::boo
       {
         text.append(textNode->Data());
       }
-      else if (HasTagName(node, html::TagName::br))
-      {
-        text.push_back(u8'\n');
-      }
-      else if (node->ParentNode() == &fragment && Is<dom::Element>(*node) && !text.empty()
-               && text.back() != u8'\n')
+      else if (HasTagName(node, html::TagName::br)
+               || (node->ParentNode() == &fragment && Is<dom::Element>(*node) && !text.empty()
+                   && text.back() != u8'\n'))
       {
         text.push_back(u8'\n');
       }

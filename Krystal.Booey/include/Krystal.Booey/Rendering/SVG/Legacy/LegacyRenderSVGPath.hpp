@@ -70,7 +70,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Path *ZeroLengthLinecapPath(const FloatPoint &) const noexcept;
 
-    KRYS_NODISCARD FloatRect ZeroLengthSubpathRect(const FloatPoint &, float) const noexcept;
+    KRYS_NODISCARD static FloatRect ZeroLengthSubpathRect(const FloatPoint &, float) noexcept;
 
     void UpdateZeroLengthSubpaths() noexcept;
 

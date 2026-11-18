@@ -12,7 +12,7 @@ namespace krys::boo::css::tests
                                                           CSSOMStringAtom prefix = null) noexcept
     {
       return CreateUnique<MutableSelector>(
-        dom::QualifiedName(dom::StarAtom(), prefix, CSSOMStringAtom(localName)));
+        dom::QualifiedName(dom::StarAtom(), krys::move(prefix), CSSOMStringAtom(localName)));
     }
 
     KRYS_NODISCARD static UniquePtr<MutableSelector> Simple(SelectorMatch match,
@@ -48,7 +48,7 @@ namespace krys::boo::css::tests
       auto selector = CreateUnique<MutableSelector>();
       selector->SetMatch(match);
       selector->SetValue(CSSOMStringAtom(value));
-      selector->SetAttribute(dom::QualifiedName(dom::StarAtom(), prefix, CSSOMStringAtom(name)),
+      selector->SetAttribute(dom::QualifiedName(dom::StarAtom(), krys::move(prefix), CSSOMStringAtom(name)),
                              caseSensitive == IsCaseSensitive::Yes ? AttributeCaseFlag::None
                                                                    : AttributeCaseFlag::Insensitive);
       return selector;
@@ -83,7 +83,7 @@ namespace krys::boo::css::tests
     /// @brief Joins simple selectors into a compound selector, in source order.
     template <typename... TRest>
     KRYS_NODISCARD static UniquePtr<MutableSelector> Compound(UniquePtr<MutableSelector> first,
-                                                              TRest &&...rest) noexcept
+                                                              TRest... rest) noexcept
     {
       (first->PrependComplexSelectorComponent(SelectorRelation::Compounding, krys::move(rest)), ...);
       return first;
@@ -99,7 +99,7 @@ namespace krys::boo::css::tests
     }
 
     template <typename... TSelectors>
-    KRYS_NODISCARD static MutableSelectorList MutableList(TSelectors &&...selectors) noexcept
+    KRYS_NODISCARD static MutableSelectorList MutableList(TSelectors... selectors) noexcept
     {
       MutableSelectorList list;
       (list.push_back(krys::move(selectors)), ...);
@@ -107,7 +107,7 @@ namespace krys::boo::css::tests
     }
 
     template <typename... TSelectors>
-    KRYS_NODISCARD static SelectorList List(TSelectors &&...selectors) noexcept
+    KRYS_NODISCARD static SelectorList List(TSelectors... selectors) noexcept
     {
       return SelectorList(MutableList(krys::move(selectors)...));
     }

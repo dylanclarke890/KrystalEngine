@@ -151,8 +151,8 @@ namespace krys::boo
 
     /// @brief Reads @p srcRect (in logical units) into a new pixel buffer of @p outputFormat; what's outside
     /// the buffer is transparent black. Null if the pixel buffer can't be made.
-    KRYS_NODISCARD RefPtr<PixelBuffer> GetPixelBuffer(const PixelBufferFormat &outputFormat,
-                                                      const IntRect &srcRect) const noexcept;
+    KRYS_NODISCARD RefPtr<PixelBuffer> GetPixelBuffer(const PixelBufferFormat &destinationFormat,
+                                                      const IntRect &sourceRect) const noexcept;
 
     /// @brief What's been drawn, encoded as @p mimeType (PNG, JPEG or WebP; a JPEG is drawn over black) as a
     /// `data:` URL; `data:,` if it can't be.
@@ -162,17 +162,18 @@ namespace krys::boo
     /// empty if it can't be.
     KRYS_NODISCARD List<uint8> ToData(utf8_stringview mimeType, Maybe<double> quality = {}) const noexcept;
 
-    KRYS_NODISCARD static utf8_string ToDataURL(Ref<ImageBuffer> source, utf8_stringview mimeType,
+    KRYS_NODISCARD static utf8_string ToDataURL(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
                                                 Maybe<double> quality = {}) noexcept;
 
-    KRYS_NODISCARD static List<uint8> ToData(Ref<ImageBuffer> source, utf8_stringview mimeType,
+    KRYS_NODISCARD static List<uint8> ToData(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
                                              Maybe<double> quality = {}) noexcept;
 
     /// @brief Writes @p srcRect of @p pixelBuffer at @p destPoint, replacing what's there, whatever the
     /// context's state.
-    void PutPixelBuffer(const PixelBufferSourceView &pixelBuffer, const IntRect &srcRect,
-                        const IntPoint &destPoint = {},
-                        AlphaPremultiplication destFormat = AlphaPremultiplication::Premultiplied) noexcept;
+    void PutPixelBuffer(
+      const PixelBufferSourceView &pixelBuffer, const IntRect &sourceRect,
+      const IntPoint &destinationPoint = {},
+      AlphaPremultiplication destinationFormat = AlphaPremultiplication::Premultiplied) noexcept;
 
     /// @brief Turns what's drawn into a luminance mask (for `mask-mode: luminance`).
     /// @brief Turns what's drawn into a luminance mask: alpha is the luminance of the colours, converted to

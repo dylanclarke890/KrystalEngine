@@ -326,7 +326,7 @@ DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ConicGradient::GradientBoxType, 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ConicGradient, 3)
 
 template <typename C, typename P>
-constexpr bool krys::boo::css::TreatAsTupleLike<krys::boo::style::GradientColorStop<C, P>> = true;
+constexpr inline bool krys::boo::css::TreatAsTupleLike<krys::boo::style::GradientColorStop<C, P>> = true;
 
 namespace std
 {

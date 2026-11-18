@@ -118,7 +118,7 @@ namespace krys::boo::css
   namespace
   {
     template <typename Predicate>
-    void SkipWhile(CSSOMStringView &string, Predicate &&predicate) noexcept
+    void SkipWhile(CSSOMStringView &string, Predicate predicate) noexcept
     {
       while (!string.empty() && predicate(string.front()))
       {

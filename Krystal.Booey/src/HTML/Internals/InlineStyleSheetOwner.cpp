@@ -50,7 +50,7 @@ namespace krys::boo::html
     }
 
     // https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block
-    KRYS_NODISCARD bool IsValidCSSContentType(dom::DOMStringAtom type) noexcept
+    KRYS_NODISCARD bool IsValidCSSContentType(const dom::DOMStringAtom &type) noexcept
     {
       if (type.View().empty())
       {

@@ -103,7 +103,7 @@ namespace krys::boo::dom
     {
       return;
     }
-    InitUIEvent(type, bubbles, cancelable, view, 0);
+    InitUIEvent(krys::move(type), bubbles, cancelable, view, 0);
     _inputType = TextEventInputType::Keyboard;
     _data = DOMString(data);
     _pastingFragment = nullptr;

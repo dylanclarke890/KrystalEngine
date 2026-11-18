@@ -150,7 +150,7 @@ namespace krys::boo::layout
     return lineBoxHeight;
   }
 
-  InlineLayoutUnit LineBoxVerticalAligner::SimplifiedVerticalAlignment(LineBox &lineBox) const noexcept
+  InlineLayoutUnit LineBoxVerticalAligner::SimplifiedVerticalAlignment(LineBox &lineBox) noexcept
   {
     auto &rootInlineBox = lineBox.RootInlineBox();
     auto rootInlineBoxAscent = rootInlineBox.Ascent();
@@ -187,7 +187,7 @@ namespace krys::boo::layout
 
   InlineLayoutUnit LineBoxVerticalAligner::LogicalTopOffsetFromParentBaseline(
     const InlineLevelBox &inlineLevelBox, const InlineLevelBox &parentInlineBox,
-    IsInlineLevelBoxAlignment isInlineLevelBoxAlignment) const noexcept
+    IsInlineLevelBoxAlignment isInlineLevelBoxAlignment) noexcept
   {
     krys_debug_assert(parentInlineBox.IsInlineBox());
 
@@ -579,7 +579,7 @@ namespace krys::boo::layout
 
   InlineLayoutUnit
     LineBoxVerticalAligner::AdjustForAnnotationIfNeeded(LineBox &lineBox,
-                                                        InlineLayoutUnit lineBoxHeight) const noexcept
+                                                        InlineLayoutUnit lineBoxHeight) noexcept
   {
     auto lineBoxTop = InlineLayoutUnit {};
     auto lineBoxBottom = lineBoxHeight;

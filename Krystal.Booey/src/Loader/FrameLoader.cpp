@@ -109,7 +109,7 @@ namespace krys::boo
     return _loadType == FrameLoadType::Reload ? CachePolicy::Reload : CachePolicy::Use;
   }
 
-  void FrameLoader::Load(FrameLoadRequest &&request) noexcept
+  void FrameLoader::Load(FrameLoadRequest request) noexcept
   {
     auto &resourceRequest = request.GetResourceRequest();
 
@@ -420,14 +420,14 @@ namespace krys::boo
       return;
     }
 
-    FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(url), passedTarget,
-                                      downloadAttribute);
+    FrameLoadRequest frameLoadRequest(ShareRef(*document), ResourceRequest(url), krys::move(passedTarget),
+                                      krys::move(downloadAttribute));
     frameLoadRequest.SetReferrerPolicy(referrerPolicy);
     frameLoadRequest.SetSourceElement(sourceElement);
     ChangeLocation(krys::move(frameLoadRequest), triggeringEvent);
   }
 
-  void FrameLoader::ChangeLocation(FrameLoadRequest &&frameRequest, dom::Event *triggeringEvent) noexcept
+  void FrameLoader::ChangeLocation(FrameLoadRequest frameRequest, dom::Event *triggeringEvent) noexcept
   {
     krys_assert(frameRequest.GetResourceRequest().HTTPMethod() == u8"GET");
 

@@ -56,7 +56,7 @@ namespace krys::boo::html
     Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
-  uint32 HTMLVideoElement::VideoWidth() const noexcept
+  uint32 HTMLVideoElement::VideoWidth() noexcept
   {
     // 1. If this's readyState attribute is HAVE_NOTHING, then return 0.
     // 2. Return the natural width of the video in CSS pixels.
@@ -64,7 +64,7 @@ namespace krys::boo::html
     return 0u;
   }
 
-  uint32 HTMLVideoElement::VideoHeight() const noexcept
+  uint32 HTMLVideoElement::VideoHeight() noexcept
   {
     // 1. If this's readyState attribute is HAVE_NOTHING, then return 0.
     // 2. Return the natural height of the video in CSS pixels.
@@ -96,8 +96,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLVideoElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLVideoElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"width" || localName == u8"height"))
     {
@@ -106,8 +106,8 @@ namespace krys::boo::html
     return HTMLMediaElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLVideoElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                dom::DOMStringAtom namespaceURI,
+  void HTMLVideoElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                const dom::DOMStringAtom &namespaceURI,
                                                                 dom::DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {

@@ -47,7 +47,7 @@ namespace krys::boo::style
 
     /// @brief Calls @p function for each element descendant of @p root, in tree order.
     template <typename TFunction>
-    void ForEachDescendantElement(dom::Element &root, TFunction &&function) noexcept
+    void ForEachDescendantElement(dom::Element &root, TFunction function) noexcept
     {
       for (auto *node = dom::TreeQueries::Next(root, &root); node;
            node = dom::TreeQueries::Next(*node, &root))
@@ -433,7 +433,7 @@ namespace krys::boo::style
   }
 
   template <typename TFunction>
-  void ChildChangeInvalidation::TraverseRemovedElements(TFunction &&function) noexcept
+  void ChildChangeInvalidation::TraverseRemovedElements(TFunction function) noexcept
   {
     if (_childChange.IsInsertion() && _childChange.ChangeType != ChildChange::Type::AllChildrenReplaced)
     {
@@ -463,7 +463,7 @@ namespace krys::boo::style
   }
 
   template <typename TFunction>
-  void ChildChangeInvalidation::TraverseAddedElements(TFunction &&function) noexcept
+  void ChildChangeInvalidation::TraverseAddedElements(TFunction function) noexcept
   {
     if (!_childChange.IsInsertion())
     {
@@ -499,7 +499,7 @@ namespace krys::boo::style
   }
 
   template <typename TFunction>
-  void ChildChangeInvalidation::TraverseRemainingExistingSiblings(TFunction &&function) noexcept
+  void ChildChangeInvalidation::TraverseRemainingExistingSiblings(TFunction function) noexcept
   {
     if (_childChange.IsInsertion() && _childChange.ChangeType == ChildChange::Type::AllChildrenReplaced)
     {

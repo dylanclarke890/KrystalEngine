@@ -26,7 +26,7 @@ namespace krys::boo::dom
   struct AddEventListenerOptions : public EventListenerOptions
   {
     bool Once = false;
-    Maybe<bool> Passive {};
+    Maybe<bool> Passive;
     RefPtr<AbortSignal> Signal;
   };
 
@@ -67,15 +67,15 @@ namespace krys::boo::dom
     bool _once {false};
 
   public:
-    EventListener(const DOMStringAtom type, RefPtr<EventListenerCallback> &&callback,
+    EventListener(DOMStringAtom type, RefPtr<EventListenerCallback> &&callback,
                   AddEventListenerOptions &&options) noexcept
-        : _type(type), _callback(krys::move(callback)), _signal(krys::move(options.Signal)), _removed(false),
+        : _type(krys::move(type)), _callback(krys::move(callback)), _signal(krys::move(options.Signal)),
           _capture(options.Capture), _passive(options.Passive), _once(options.Once)
     {
     }
 
     /// @see https://dom.spec.whatwg.org/#event-listener-type
-    KRYS_NODISCARD DOMStringAtom Type() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &Type() const noexcept KRYS_LIFETIME_BOUND
     {
       return _type;
     }

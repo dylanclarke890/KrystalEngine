@@ -75,9 +75,9 @@ namespace krys::boo::style
   template <>
   struct Blending<Circle>
   {
-    KRYS_NODISCARD bool CanBlend(const Circle &, const Circle &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const Circle &, const Circle &) noexcept;
 
-    KRYS_NODISCARD Circle Blend(const Circle &, const Circle &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Circle Blend(const Circle &, const Circle &, const BlendingContext &) noexcept;
   };
 }
 

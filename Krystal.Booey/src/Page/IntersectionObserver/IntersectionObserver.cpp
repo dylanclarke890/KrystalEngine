@@ -240,8 +240,8 @@ namespace krys::boo
   }
 
   dom::ExceptionOr<Ref<IntersectionObserver>>
-    IntersectionObserver::Create(dom::Document &document, IntersectionObserverCallback &&callback,
-                                 Init &&init, IncludeObscuredInsets includeObscuredInsets) noexcept
+    IntersectionObserver::Create(dom::Document &document, IntersectionObserverCallback &&callback, Init init,
+                                 IncludeObscuredInsets includeObscuredInsets) noexcept
   {
     RefPtr<dom::ContainerNode> root;
     if (init.Root)

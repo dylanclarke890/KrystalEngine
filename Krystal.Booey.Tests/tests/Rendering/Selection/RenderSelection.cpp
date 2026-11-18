@@ -155,19 +155,19 @@ namespace krys::boo::tests
     RenderSelectionFixture fixture(u8"<style>::selection{background:#00FF00;color:#FF0000}</style>"
                                    u8"<p id=a>First line</p><p id=b>Last line</p>");
     auto unselected = fixture.Painted();
-    CHECK(unselected.find(u8"#00FF00") == utf8_string::npos);
-    CHECK(unselected.find(u8"#FF0000") == utf8_string::npos);
+    CHECK_FALSE(unselected.contains(u8"#00FF00"));
+    CHECK_FALSE(unselected.contains(u8"#FF0000"));
 
     fixture.Select(fixture.TextIn(u8"a"), 6, fixture.TextIn(u8"b"), 4);
     auto selected = fixture.Painted();
     // The selected text's background and the body's gaps are filled with the selection's background (made
     // translucent, so that it looks the same over white), and the selected text is painted in its colour.
-    CHECK(selected.find(u8"(color #00FF00CC)") != utf8_string::npos);
-    CHECK(selected.find(u8"#FF0000") != utf8_string::npos);
+    CHECK(selected.contains(u8"(color #00FF00CC)"));
+    CHECK(selected.contains(u8"#FF0000"));
 
     // Without focus, the theme's selection colours give way to the inactive ones; ::selection's stay.
     fixture.Document->SetFocusedAndActive(false);
-    CHECK(fixture.Painted().find(u8"(color #00FF00CC)") != utf8_string::npos);
+    CHECK(fixture.Painted().contains(u8"(color #00FF00CC)"));
   }
 
   TEST_CASE("RenderSelection: the theme's colours", "[Rendering][RenderSelection]")
@@ -186,13 +186,13 @@ namespace krys::boo::tests
         .Resolved();
     CHECK(std::abs(static_cast<int32>(overWhite.Blue) - 247) <= 2);
     CHECK(std::abs(static_cast<int32>(overWhite.Red) - 194) <= 2);
-    CHECK(active.find(u8"(color " + activeBackground + u8")") != utf8_string::npos);
+    CHECK(active.contains(u8"(color " + activeBackground + u8")"));
 
     fixture.Document->SetFocusedAndActive(false);
     auto inactive = fixture.Painted();
     auto inactiveBackground =
       SerialisationForRenderTreeAsText(theme.InactiveSelectionBackgroundColor(style::ColorOptions::None));
-    CHECK(inactive.find(activeBackground) == utf8_string::npos);
-    CHECK(inactive.find(u8"(color " + inactiveBackground + u8")") != utf8_string::npos);
+    CHECK_FALSE(inactive.contains(activeBackground));
+    CHECK(inactive.contains(u8"(color " + inactiveBackground + u8")"));
   }
 }

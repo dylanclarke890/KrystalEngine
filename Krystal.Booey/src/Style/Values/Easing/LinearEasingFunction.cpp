@@ -49,7 +49,7 @@ namespace krys::boo::style
 
   template <typename Resolver>
   KRYS_NODISCARD static Ref<TimingFunction>
-    CreateTimingFunctionWithResolver(const css::LinearEasingFunction &function, Resolver &&resolver) noexcept
+    CreateTimingFunctionWithResolver(const css::LinearEasingFunction &function, Resolver resolver) noexcept
   {
     // https://drafts.csswg.org/css-easing-2/#create-a-linear-easing-function
 

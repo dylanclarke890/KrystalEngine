@@ -123,7 +123,7 @@ namespace krys::boo::css
   {
     template <TokenType, typename ResultType>
     KRYS_NODISCARD static std::nullopt_t Consume(TokenRange &tokens, PropertyParserState &state,
-                                                 AllowedSymbols allowedSymbols,
+                                                 const AllowedSymbols &allowedSymbols,
                                                  PropertyParserOptions options) noexcept
     {
       (void)tokens;
@@ -135,8 +135,8 @@ namespace krys::boo::css
 
     template <TokenType, typename ResultType, typename F>
     KRYS_NODISCARD static std::nullopt_t Consume(TokenRange &tokens, PropertyParserState &state,
-                                                 AllowedSymbols allowedSymbols, PropertyParserOptions options,
-                                                 F &&func) noexcept
+                                                 const AllowedSymbols &allowedSymbols,
+                                                 PropertyParserOptions options, F func) noexcept
     {
       (void)tokens;
       (void)state;
@@ -155,7 +155,7 @@ namespace krys::boo::css
   {
     template <TokenType TokenType, typename ResultType>
     KRYS_NODISCARD static Maybe<ResultType> Consume(TokenRange &tokens, PropertyParserState &state,
-                                                    AllowedSymbols symbolsAllowed,
+                                                    const AllowedSymbols &symbolsAllowed,
                                                     PropertyParserOptions options) noexcept
     {
       using Consumer = MetaConsumerDispatcher<TokenType, ConsumerDefinition<T>>;
@@ -172,8 +172,8 @@ namespace krys::boo::css
 
     template <TokenType TokenType, typename ResultType, typename F>
     KRYS_NODISCARD static Maybe<ResultType> Consume(TokenRange &tokens, PropertyParserState &state,
-                                                    AllowedSymbols symbolsAllowed,
-                                                    PropertyParserOptions options, F &&func) noexcept
+                                                    const AllowedSymbols &symbolsAllowed,
+                                                    PropertyParserOptions options, F func) noexcept
     {
       using Consumer = MetaConsumerDispatcher<TokenType, ConsumerDefinition<T>>;
       if constexpr (Consumer::Supported)
@@ -225,6 +225,8 @@ namespace krys::boo::css
 
     using Unroller = MetaConsumerUnroller<T, Ts...>;
 
+    // `AllowedSymbols` is by value in these overloads: as `const &`, an lvalue would pick the `F &&...` one.
+    // NOLINTBEGIN(performance-unnecessary-value-param)
     template <typename... F>
     KRYS_NODISCARD static decltype(auto) Consume(TokenRange &tokens, PropertyParserState &state,
                                                  AllowedSymbols symbolsAllowed, PropertyParserOptions options,
@@ -237,28 +239,28 @@ namespace krys::boo::css
       {
         case TokenType::Function:
         {
-          return Unroller::template Consume<TokenType::Function, ResultType>(
-            tokens, state, krys::move(symbolsAllowed), options, visitor);
+          return Unroller::template Consume<TokenType::Function, ResultType>(tokens, state, symbolsAllowed,
+                                                                             options, visitor);
         }
         case TokenType::Number:
         {
-          return Unroller::template Consume<TokenType::Number, ResultType>(
-            tokens, state, krys::move(symbolsAllowed), options, visitor);
+          return Unroller::template Consume<TokenType::Number, ResultType>(tokens, state, symbolsAllowed,
+                                                                           options, visitor);
         }
         case TokenType::Percentage:
         {
-          return Unroller::template Consume<TokenType::Percentage, ResultType>(
-            tokens, state, krys::move(symbolsAllowed), options, visitor);
+          return Unroller::template Consume<TokenType::Percentage, ResultType>(tokens, state, symbolsAllowed,
+                                                                               options, visitor);
         }
         case TokenType::Dimension:
         {
-          return Unroller::template Consume<TokenType::Dimension, ResultType>(
-            tokens, state, krys::move(symbolsAllowed), options, visitor);
+          return Unroller::template Consume<TokenType::Dimension, ResultType>(tokens, state, symbolsAllowed,
+                                                                              options, visitor);
         }
         case TokenType::Ident:
         {
-          return Unroller::template Consume<TokenType::Ident, ResultType>(
-            tokens, state, krys::move(symbolsAllowed), options, visitor);
+          return Unroller::template Consume<TokenType::Ident, ResultType>(tokens, state, symbolsAllowed,
+                                                                          options, visitor);
         }
         default:
         {
@@ -273,7 +275,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static decltype(auto) Consume(TokenRange &tokens, PropertyParserState &state,
                                                  AllowedSymbols symbolsAllowed, F &&...f) noexcept
     {
-      return Consume(tokens, state, krys::move(symbolsAllowed), {}, std::forward<F>(f)...);
+      return Consume(tokens, state, symbolsAllowed, {}, std::forward<F>(f)...);
     }
 
     // Overloaded with the `AllowedSymbols` parameter removed so it can be defaulted when using the
@@ -302,8 +304,10 @@ namespace krys::boo::css
     {
       using ResultType = typename MetaConsumeResult<T, Ts...>::type;
 
-      return Consume(tokens, state, krys::move(symbolsAllowed), options,
+      return Consume(tokens, state, symbolsAllowed, options,
                      [](auto &&value) { return ResultType {krys::move(value)}; });
     }
+
+    // NOLINTEND(performance-unnecessary-value-param)
   };
 }

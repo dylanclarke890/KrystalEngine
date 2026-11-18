@@ -314,7 +314,7 @@ namespace krys::boo
     KRYS_NODISCARD bool AnyComponentIsNone() const noexcept;
 
     template <typename Functor>
-    KRYS_NODISCARD decltype(auto) CallOnUnderlyingType(Functor &&functor) const noexcept
+    KRYS_NODISCARD decltype(auto) CallOnUnderlyingType(Functor functor) const noexcept
     {
       if (IsOutOfLine())
       {
@@ -502,7 +502,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static uint64
-      EncodedOutOfLineComponents(Ref<OutOfLineComponents> &&outOfLineComponents) noexcept
+      EncodedOutOfLineComponents(Ref<OutOfLineComponents> outOfLineComponents) noexcept
     {
       return std::bit_cast<uint64>(outOfLineComponents.release());
     }

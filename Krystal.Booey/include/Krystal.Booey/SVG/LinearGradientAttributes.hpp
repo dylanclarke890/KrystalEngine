@@ -63,25 +63,25 @@ namespace krys::boo::svg
 
     void SetX1(SVGLengthValue value) noexcept
     {
-      _x1 = value;
+      _x1 = krys::move(value);
       _x1Set = true;
     }
 
     void SetY1(SVGLengthValue value) noexcept
     {
-      _y1 = value;
+      _y1 = krys::move(value);
       _y1Set = true;
     }
 
     void SetX2(SVGLengthValue value) noexcept
     {
-      _x2 = value;
+      _x2 = krys::move(value);
       _x2Set = true;
     }
 
     void SetY2(SVGLengthValue value) noexcept
     {
-      _y2 = value;
+      _y2 = krys::move(value);
       _y2Set = true;
     }
 

@@ -58,7 +58,7 @@ namespace krys::boo::style
   template <>
   struct Blending<Orphans>
   {
-    KRYS_NODISCARD Orphans Blend(const Orphans &, const Orphans &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Orphans Blend(const Orphans &, const Orphans &, const BlendingContext &) noexcept;
   };
 }
 

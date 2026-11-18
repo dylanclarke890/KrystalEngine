@@ -120,7 +120,7 @@ namespace krys::boo
     template <>
     struct Blending<TabSize>
     {
-      KRYS_NODISCARD bool CanBlend(const TabSize &, const TabSize &) noexcept;
+      KRYS_NODISCARD static bool CanBlend(const TabSize &, const TabSize &) noexcept;
 
       KRYS_NODISCARD TabSize Blend(const TabSize &, const TabSize &, const BlendingContext &) noexcept;
     };

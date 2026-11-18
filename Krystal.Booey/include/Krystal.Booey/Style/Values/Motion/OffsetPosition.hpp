@@ -106,7 +106,7 @@ namespace krys::boo::style
   template <>
   struct Blending<OffsetPosition>
   {
-    KRYS_NODISCARD bool CanBlend(const OffsetPosition &, const OffsetPosition &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const OffsetPosition &, const OffsetPosition &) noexcept;
 
     KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const OffsetPosition &,
                                                                       const OffsetPosition &) noexcept;

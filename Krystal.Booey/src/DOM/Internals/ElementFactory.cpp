@@ -66,7 +66,7 @@ namespace krys::boo::dom
     // 6a. Let interface be the element interface for localName and namespace.
     // 6b. Set result to the result of creating an element internal given document, interface, localName,
     //     namespace, prefix, "uncustomized", is, and registry.
-    else if (name.NamespaceURI() == infra::Namespaces::HTML)
+    else if (name.NamespaceURI() == infra::namespaces::HTML)
     {
       // HTML's tag names are case-sensitive; createElement lowercases them in HTML documents.
       result = html::HTMLElementFactory::TryCreate(document, name.TagName());
@@ -88,7 +88,7 @@ namespace krys::boo::dom
         }
       }
     }
-    else if (name.NamespaceURI() == infra::Namespaces::SVG)
+    else if (name.NamespaceURI() == infra::namespaces::SVG)
     {
       // SVG's tag names are case-sensitive.
       result = svg::SVGElementFactory::TryCreate(document, name.TagName());
@@ -98,7 +98,7 @@ namespace krys::boo::dom
         result = CreateRefPtr<svg::SVGUnknownElement>(document);
       }
     }
-    else if (name.NamespaceURI() == infra::Namespaces::MathML)
+    else if (name.NamespaceURI() == infra::namespaces::MathML)
     {
       // MathML's tag names are case-sensitive.
       result = mathml::MathMLElementFactory::TryCreate(document, name.TagName());
@@ -122,7 +122,7 @@ namespace krys::boo::dom
     {
       registry.value()->AppendToScopedDocumentSet(document);
     }
-    result->_is = definition != nullptr ? null : is;
+    result->_is = definition != nullptr ? null : krys::move(is);
 
     // 7. Return result.
     return AdoptRef(*result.release());

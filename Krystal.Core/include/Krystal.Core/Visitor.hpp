@@ -149,9 +149,10 @@ namespace krys
 
   template <class V, class... F>
   requires(HasSwitchOn<V>)
-  KRYS_ALWAYS_INLINE auto SwitchOn(V &&v, F &&...f) -> decltype(v.SwitchOn(std::forward<F>(f)...))
+  KRYS_ALWAYS_INLINE auto SwitchOn(V &&v, F &&...f)
+    -> decltype(std::forward<V>(v).SwitchOn(std::forward<F>(f)...))
   {
-    return v.SwitchOn(std::forward<F>(f)...);
+    return std::forward<V>(v).SwitchOn(std::forward<F>(f)...);
   }
 
   template <class F, class Tuple>

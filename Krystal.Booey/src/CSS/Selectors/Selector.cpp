@@ -276,9 +276,9 @@ namespace krys::boo::css
 
 #pragma endregion
 
-  Maybe<PseudoElementType> Selector::StylePseudoElementTypeFor(SelectorPseudoElement type) noexcept
+  Maybe<PseudoElementType> Selector::StylePseudoElementTypeFor(SelectorPseudoElement pseudoElement) noexcept
   {
-    switch (type)
+    switch (pseudoElement)
     {
       case SelectorPseudoElement::FirstLine:
       {
@@ -476,7 +476,7 @@ namespace krys::boo::css
 
     template <typename TAppend>
     void AppendInterleaved(StringBuilder &builder, const FixedVector<CSSOMStringAtom> &list,
-                           CSSOMStringView separator, TAppend &&append) noexcept
+                           CSSOMStringView separator, TAppend append) noexcept
     {
       bool first = true;
       for (const auto &item : list)
@@ -887,7 +887,7 @@ namespace krys::boo::css
       }
       return previousSelector->SelectorText(relationSeparator, builder);
     }
-    else if (auto separatorText = separatorTextForNestingRelative())
+    if (auto separatorText = separatorTextForNestingRelative())
     {
       // We have a separator but no preceding selector which can happen with implicit relative nesting
       // selector.
@@ -899,10 +899,10 @@ namespace krys::boo::css
 
 #pragma endregion
 
-  void Selector::SetAttribute(const dom::QualifiedName &value, AttributeCaseFlag caseFlag) noexcept
+  void Selector::SetAttribute(const dom::QualifiedName &name, AttributeCaseFlag caseFlag) noexcept
   {
     CreateRareData();
-    _data.Rare->Attribute = value;
+    _data.Rare->Attribute = name;
     SetFlag(SelectorFlag::CaseInsensitiveAttributeValueMatching, caseFlag == AttributeCaseFlag::Insensitive);
     SetFlag(SelectorFlag::CaseSensitiveAttributeValueMatching, caseFlag == AttributeCaseFlag::Sensitive);
   }
@@ -964,7 +964,7 @@ namespace krys::boo::css
 
 #pragma region RareData
 
-  Selector::RareData::RareData(CSSOMStringAtom value) noexcept
+  Selector::RareData::RareData(const CSSOMStringAtom &value) noexcept
       : MatchingValue(value), SerialisingValue(value), Attribute(dom::AnyQualifiedName())
   {
   }
@@ -1044,7 +1044,7 @@ namespace krys::boo::css
     SetFlag(SelectorFlag::IsLastInComplexSelector, true);
   }
 
-  bool Selector::VisitSimpleSelectors(VisitFunc &&func,
+  bool Selector::VisitSimpleSelectors(const VisitFunc &func,
                                       VisitFunctionalPseudoClasses visitFunctionalPseudoClasses,
                                       VisitOnlySubject visitOnlySubject) const noexcept
   {

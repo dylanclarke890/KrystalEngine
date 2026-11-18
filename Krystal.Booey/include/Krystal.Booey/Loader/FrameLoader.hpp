@@ -155,7 +155,7 @@ namespace krys::boo
     /// @brief Loads @p request into the frame, as the host asks: its URL, or the substitute data it carries.
     /// A fragment of the document's URL (without data of its own) navigates within the document; another
     /// document commits on a later task.
-    void Load(FrameLoadRequest &&request) noexcept;
+    void Load(FrameLoadRequest request) noexcept;
 
     /// @brief Stops the frame's provisional load, if any; the client is told it failed (cancelled).
     void StopAllLoaders() noexcept;
@@ -183,7 +183,7 @@ namespace krys::boo
                         dom::Element *sourceElement = nullptr) noexcept;
 
     /// @brief Navigates as @p frameRequest asks, to a `GET` request.
-    void ChangeLocation(FrameLoadRequest &&frameRequest, dom::Event *triggeringEvent = nullptr) noexcept;
+    void ChangeLocation(FrameLoadRequest frameRequest, dom::Event *triggeringEvent = nullptr) noexcept;
 
     /// @brief Hands a form submission (a `GET` or a `POST`) to the host.
     void SubmitForm(Ref<FormSubmission> &&submission) noexcept;

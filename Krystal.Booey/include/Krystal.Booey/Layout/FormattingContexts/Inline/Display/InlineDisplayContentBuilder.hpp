@@ -118,8 +118,8 @@ namespace krys::boo::layout
                                                                   const InlineRect &containerLogicalRect,
                                                                   WritingMode writingMode) noexcept;
 
-    void SetInlineBoxGeometry(const Box &inlineBox, BoxGeometry &boxGeometry, const InlineRect &logicalRect,
-                              bool isFirstInlineBoxFragment) noexcept;
+    static void SetInlineBoxGeometry(const Box &inlineBox, BoxGeometry &boxGeometry,
+                                     const InlineRect &logicalRect, bool isFirstInlineBoxFragment) noexcept;
 
     void AdjustVisualGeometryForDisplayBox(
       size_t displayBoxNodeIndex, InlineLayoutUnit &contentLineRightEdge, InlineLayoutUnit lineBoxLogicalTop,
@@ -131,8 +131,8 @@ namespace krys::boo::layout
                                                        AncestorStack &ancestorStack,
                                                        inline_display::Boxes &boxes) noexcept;
 
-    void SetLogicalLeft(inline_display::Box &box, InlineLayoutUnit logicalLeft,
-                        WritingMode writingMode) const noexcept;
+    static void SetLogicalLeft(inline_display::Box &box, InlineLayoutUnit logicalLeft,
+                               WritingMode writingMode) noexcept;
 
     void SetGeometryForBlockLevelOutOfFlowBoxes(const List<size_t> &indexList, const Line::RunList &lineRuns,
                                                 const List<int32> &visualOrderList = {}) noexcept;

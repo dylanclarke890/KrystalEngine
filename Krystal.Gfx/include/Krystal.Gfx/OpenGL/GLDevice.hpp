@@ -236,13 +236,13 @@ namespace krys::gfx::opengl
 
     void ExecuteBeginRenderPass(ReplayState &replay, const commands::BeginRenderPass &command) noexcept;
 
-    void ExecuteEndRenderPass(ReplayState &replay) noexcept;
+    static void ExecuteEndRenderPass(ReplayState &replay) noexcept;
 
     void ExecuteBindPipeline(ReplayState &replay, PipelineHandle handle) noexcept;
 
     void ApplyPipelineState(const GLPipeline &pipeline, bool flipFrontFace) noexcept;
 
-    void PrepareDraw(ReplayState &replay) noexcept;
+    static void PrepareDraw(ReplayState &replay) noexcept;
 
     void ExecuteCopyBufferToTexture(const commands::CopyBufferToTexture &command) noexcept;
 

@@ -1024,13 +1024,14 @@ namespace krys::boo
 
   void CompositeEditCommand::RemoveNodeAttribute(dom::Element &element, dom::DOMStringAtom attribute) noexcept
   {
-    SetNodeAttribute(element, attribute, null);
+    SetNodeAttribute(element, krys::move(attribute), null);
   }
 
   void CompositeEditCommand::SetNodeAttribute(dom::Element &element, dom::DOMStringAtom attribute,
                                               Maybe<dom::DOMString> value) noexcept
   {
-    ApplyCommandToComposite(SetNodeAttributeCommand::Create(element, attribute, krys::move(value)));
+    ApplyCommandToComposite(
+      SetNodeAttributeCommand::Create(element, krys::move(attribute), krys::move(value)));
   }
 
   namespace
@@ -1067,12 +1068,12 @@ namespace krys::boo
     }
   }
 
-  bool CompositeEditCommand::ShouldRebalanceLeadingWhitespaceFor(utf8_stringview text) const noexcept
+  bool CompositeEditCommand::ShouldRebalanceLeadingWhitespaceFor(utf8_stringview text) noexcept
   {
     return ContainsOnlyDeprecatedEditingWhitespace(text);
   }
 
-  RefPtr<dom::Text> CompositeEditCommand::TextNodeForRebalance(const dom::Position &position) const noexcept
+  RefPtr<dom::Text> CompositeEditCommand::TextNodeForRebalance(const dom::Position &position) noexcept
   {
     if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor)
     {
@@ -1753,7 +1754,7 @@ namespace krys::boo
   // Deleting a paragraph will leave a placeholder. Remove it (and prune
   // empty or unrendered parents).
 
-  void CompositeEditCommand::CleanupAfterDeletion(VisiblePosition destination) noexcept
+  void CompositeEditCommand::CleanupAfterDeletion(const VisiblePosition &destination) noexcept
   {
     VisiblePosition caretAfterDelete = EndingSelection().VisibleStart();
     if (caretAfterDelete != destination && IsStartOfParagraph(caretAfterDelete)

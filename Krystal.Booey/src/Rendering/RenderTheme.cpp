@@ -84,7 +84,7 @@ namespace krys::boo
 
   StyleAppearance RenderTheme::AdjustAppearanceForElement(RenderStyle &style, const RenderStyle &parentStyle,
                                                           const dom::Element *element,
-                                                          StyleAppearance autoAppearance) const noexcept
+                                                          StyleAppearance autoAppearance) noexcept
   {
     if (!element)
     {
@@ -312,7 +312,7 @@ namespace krys::boo
   }
 
   StyleAppearance RenderTheme::AutoAppearanceForElement(RenderStyle &style,
-                                                        const dom::Element *elementPtr) const noexcept
+                                                        const dom::Element *elementPtr) noexcept
   {
     if (!elementPtr)
     {
@@ -540,7 +540,7 @@ namespace krys::boo
     }
   }
 
-  RefPtr<ControlPart> RenderTheme::CreateControlPart(const RenderElement &renderer) const noexcept
+  RefPtr<ControlPart> RenderTheme::CreateControlPart(const RenderElement &renderer) noexcept
   {
     auto appearance = renderer.Style().UsedAppearance();
 
@@ -585,6 +585,9 @@ namespace krys::boo
 
       case StyleAppearance::InnerSpinButton:              return InnerSpinButtonPart::Create();
 
+      // NOLINTNEXTLINE(bugprone-branch-clone): kept with their own appearances.
+      // NOLINTNEXTLINE(bugprone-branch-clone): kept with their own appearances.
+      // NOLINTNEXTLINE(bugprone-branch-clone): kept with their own appearances.
       case StyleAppearance::ListButton:                   break;
 
       case StyleAppearance::SearchFieldDecoration:        break;
@@ -605,8 +608,7 @@ namespace krys::boo
     return nullptr;
   }
 
-  void RenderTheme::UpdateControlPartForRenderer(ControlPart &part,
-                                                 const RenderElement &renderer) const noexcept
+  void RenderTheme::UpdateControlPartForRenderer(ControlPart &part, const RenderElement &renderer) noexcept
   {
     if (auto *meterPart = DynamicDowncast<MeterPart>(part))
     {
@@ -1067,7 +1069,7 @@ namespace krys::boo
     return box.IsHorizontalWritingMode() ? box.Height().ToInt() : LayoutUnit(box.Width() / 2.0f).ToInt();
   }
 
-  bool RenderTheme::IsControlContainer(StyleAppearance appearance) const noexcept
+  bool RenderTheme::IsControlContainer(StyleAppearance appearance) noexcept
   {
     // There are more leaves than this, but we'll patch this function as we add support for
     // more controls.
@@ -1104,18 +1106,18 @@ namespace krys::boo
            && style.UsedAppearance() != StyleAppearance::Listbox;
   }
 
-  bool RenderTheme::IsWindowActive(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsWindowActive(const RenderElement &renderer) noexcept
   {
     return renderer.GetDocument().IsFocusedAndActive();
   }
 
-  bool RenderTheme::IsChecked(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsChecked(const RenderElement &renderer) noexcept
   {
     auto *element = DynamicDowncast<html::HTMLInputElement>(renderer.GetElement());
     return element && element->MatchesCheckedPseudoClass();
   }
 
-  bool RenderTheme::IsIndeterminate(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsIndeterminate(const RenderElement &renderer) noexcept
   {
     // This does not currently support multiple elements and therefore radio buttons are excluded.
     // FIXME: However, what about <progress>?
@@ -1123,13 +1125,13 @@ namespace krys::boo
     return input && input->IsCheckbox() && css::MatchesIndeterminatePseudoClass(*input);
   }
 
-  bool RenderTheme::IsEnabled(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsEnabled(const RenderElement &renderer) noexcept
   {
     auto *element = renderer.GetElement();
     return element && !element->IsDisabledFormControl();
   }
 
-  bool RenderTheme::IsFocused(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsFocused(const RenderElement &renderer) noexcept
   {
     auto *element = renderer.GetElement();
     if (!element)
@@ -1148,13 +1150,13 @@ namespace krys::boo
     return delegate == document.FocusedElement() && document.Selection().IsFocusedAndActive();
   }
 
-  bool RenderTheme::IsPressed(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsPressed(const RenderElement &renderer) noexcept
   {
     auto *element = renderer.GetElement();
     return element && element->Active();
   }
 
-  bool RenderTheme::IsSpinUpButtonPartPressed(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsSpinUpButtonPartPressed(const RenderElement &renderer) noexcept
   {
     if (auto *spinButton = DynamicDowncast<html::SpinButtonElement>(renderer.GetElement()))
     {
@@ -1163,7 +1165,7 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderTheme::IsReadOnlyControl(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsReadOnlyControl(const RenderElement &renderer) noexcept
   {
     if (auto *element = renderer.GetElement())
     {
@@ -1172,7 +1174,7 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderTheme::IsHovered(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsHovered(const RenderElement &renderer) noexcept
   {
     if (auto *spinButton = DynamicDowncast<html::SpinButtonElement>(renderer.GetElement()))
     {
@@ -1186,7 +1188,7 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderTheme::IsSpinUpButtonPartHovered(const RenderElement &renderer) const noexcept
+  bool RenderTheme::IsSpinUpButtonPartHovered(const RenderElement &renderer) noexcept
   {
     if (auto *spinButton = DynamicDowncast<html::SpinButtonElement>(renderer.GetElement()))
     {
@@ -1195,7 +1197,7 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderTheme::IsPresenting(const RenderElement &) const noexcept
+  bool RenderTheme::IsPresenting(const RenderElement &) noexcept
   {
     // FIXME: Inputs presenting a picker (isPresentingAttachedView), with the pickers (G14d4).
     return false;
@@ -1212,13 +1214,13 @@ namespace krys::boo
     return renderer.Style().UsedAppearance() == StyleAppearance::DefaultButton;
   }
 
-  bool RenderTheme::HasListButton(const RenderElement &renderer) const noexcept
+  bool RenderTheme::HasListButton(const RenderElement &renderer) noexcept
   {
     auto *input = DynamicDowncast<html::HTMLInputElement>(renderer.GeneratingElement());
     return input && input->List();
   }
 
-  bool RenderTheme::HasListButtonPressed(const RenderElement &renderer) const noexcept
+  bool RenderTheme::HasListButtonPressed(const RenderElement &renderer) noexcept
   {
     auto *input = DynamicDowncast<html::HTMLInputElement>(renderer.GeneratingElement());
     if (!input)
@@ -1303,7 +1305,7 @@ namespace krys::boo
     }
   }
 
-  float RenderTheme::UsedZoomForComputedStyle(const RenderStyle &renderStyle) const noexcept
+  float RenderTheme::UsedZoomForComputedStyle(const RenderStyle &renderStyle) noexcept
   {
     return renderStyle.EvaluationTimeZoomEnabled() ? 1.0f : renderStyle.UsedZoom();
   }
@@ -1637,6 +1639,9 @@ namespace krys::boo
   {
     auto useDarkAppearance = HasFlag(options, style::ColorOptions::UseDarkAppearance);
 
+    // NOLINTBEGIN(bugprone-branch-clone): one documented case per system colour.
+    // NOLINTBEGIN(bugprone-branch-clone): one documented case per system colour.
+    // NOLINTBEGIN(bugprone-branch-clone): one documented case per system colour.
     switch (cssValueId)
     {
       // https://drafts.csswg.org/css-color-4/#valdef-system-color-canvas
@@ -1834,6 +1839,9 @@ namespace krys::boo
 
       default:                           return {};
     }
+    // NOLINTEND(bugprone-branch-clone)
+    // NOLINTEND(bugprone-branch-clone)
+    // NOLINTEND(bugprone-branch-clone)
   }
 
   Color RenderTheme::TextSearchHighlightColor(style::ColorOptions options) const noexcept
@@ -1896,8 +1904,7 @@ namespace krys::boo
   // Value chosen to return dark gray for both white on black and black on white.
   constexpr float DatePlaceholderColorLightnessAdjustmentFactor = 0.66f;
 
-  Color RenderTheme::DatePlaceholderTextColor(const Color &textColor,
-                                              const Color &backgroundColor) const noexcept
+  Color RenderTheme::DatePlaceholderTextColor(const Color &textColor, const Color &backgroundColor) noexcept
   {
     // FIXME: Consider using LCHA<float> rather than HSLA<float> for better perceptual results and to avoid
     // clamping to sRGB gamut, which is what HSLA does.

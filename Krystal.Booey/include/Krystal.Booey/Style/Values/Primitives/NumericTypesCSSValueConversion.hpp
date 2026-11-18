@@ -35,7 +35,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   template <css::Range R, typename V>
   struct CSSValueConversion<Integer<R, V>>

@@ -64,7 +64,7 @@ namespace krys::boo
       return {_glyphs[index], _fonts[index].get()};
     }
 
-    void SetGlyphDataForCharacter(char32 c, GlyphData glyphData) noexcept
+    void SetGlyphDataForCharacter(char32 c, const GlyphData &glyphData) noexcept
     {
       SetGlyphDataForIndex(GlyphPage::IndexForCodePoint(c), glyphData);
     }
@@ -114,7 +114,7 @@ namespace krys::boo
       _mixedFont = CreateUnique<MixedFontGlyphPage>(_singleFont.get());
       _singleFont = nullptr;
     }
-    _mixedFont->SetGlyphDataForCharacter(character, glyphData);
+    _mixedFont->SetGlyphDataForCharacter(character, krys::move(glyphData));
   }
 
   void FontCascadeFonts::GlyphPageCacheEntry::SetSingleFontPage(RefPtr<GlyphPage> &&page) noexcept
@@ -283,7 +283,7 @@ namespace krys::boo
       if (fontRanges.IsNull() && fontSelector)
       {
         fontRanges =
-          fontSelector->FontRangesForFamily(description, css::GenericFontFamilyNames::StandardFamily());
+          fontSelector->FontRangesForFamily(description, css::generic_font_family_names::StandardFamily());
       }
       if (fontRanges.IsNull())
       {

@@ -145,7 +145,7 @@ namespace krys::boo
     void TrailingSpacesHang(LegacyInlineIterator &, RenderObject &, bool canBreakMidWord,
                             bool previousCharacterIsSpace) noexcept;
 
-    KRYS_NODISCARD bool CanBreakAtThisPosition() const noexcept
+    KRYS_NODISCARD static bool CanBreakAtThisPosition() noexcept
     {
       return false;
     }

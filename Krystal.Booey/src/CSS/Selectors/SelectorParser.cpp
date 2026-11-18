@@ -168,7 +168,7 @@ namespace krys::boo::css
 
   template <typename TConsumeSelector>
   MutableSelectorList SelectorParser::ConsumeSelectorList(TokenRange &tokens,
-                                                          TConsumeSelector &&consumeSelector) noexcept
+                                                          TConsumeSelector consumeSelector) noexcept
   {
     MutableSelectorList selectorList;
     auto selector = consumeSelector(tokens);
@@ -215,9 +215,8 @@ namespace krys::boo::css
   }
 
   template <typename TConsumeSelector>
-  MutableSelectorList
-    SelectorParser::ConsumeForgivingSelectorList(TokenRange &tokens,
-                                                 TConsumeSelector &&consumeSelector) noexcept
+  MutableSelectorList SelectorParser::ConsumeForgivingSelectorList(TokenRange &tokens,
+                                                                   TConsumeSelector consumeSelector) noexcept
   {
     if (_failedParsing)
     {
@@ -842,7 +841,7 @@ namespace krys::boo::css
     return true;
   }
 
-  UniquePtr<MutableSelector> SelectorParser::ConsumeId(TokenRange &tokens) noexcept
+  UniquePtr<MutableSelector> SelectorParser::ConsumeId(TokenRange &tokens) const noexcept
   {
     krys_debug_assert(tokens.Peek().Type() == TokenType::Hash);
     if (tokens.Peek().HashType() != HashTokenType::Id)
@@ -859,7 +858,7 @@ namespace krys::boo::css
     return selector;
   }
 
-  UniquePtr<MutableSelector> SelectorParser::ConsumeClass(TokenRange &tokens) noexcept
+  UniquePtr<MutableSelector> SelectorParser::ConsumeClass(TokenRange &tokens) const noexcept
   {
     krys_debug_assert(IsDelimiter(tokens.Peek(), U'.'));
     std::ignore = tokens.Consume();

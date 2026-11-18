@@ -103,6 +103,7 @@ namespace krys::boo::svg
   class SVGAnimatedOrientType : public SVGAnimatedEnumeration
   {
   public:
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): the base moves it.
     using SVGAnimatedEnumeration::SVGAnimatedEnumeration;
 
     KRYS_NODISCARD static Ref<SVGAnimatedOrientType> Create(SVGElement *contextElement,

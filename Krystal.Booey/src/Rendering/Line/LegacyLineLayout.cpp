@@ -481,7 +481,7 @@ namespace krys::boo
     return LegacyRootBox();
   }
 
-  void LegacyLineLayout::RemoveInlineBox(BidiRun &run, const LegacyRootInlineBox &rootLineBox) const noexcept
+  void LegacyLineLayout::RemoveInlineBox(BidiRun &run, const LegacyRootInlineBox &rootLineBox) noexcept
   {
     auto *inlineBox = run.Box();
     auto *parent = inlineBox->Parent();

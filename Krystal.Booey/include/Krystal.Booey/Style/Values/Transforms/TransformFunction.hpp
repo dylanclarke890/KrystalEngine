@@ -88,8 +88,8 @@ namespace krys::boo::style
   template <>
   struct Blending<TransformFunction>
   {
-    KRYS_NODISCARD TransformFunction Blend(const TransformFunction &, const TransformFunction &,
-                                           const BlendingContext &) noexcept;
+    KRYS_NODISCARD static TransformFunction Blend(const TransformFunction &, const TransformFunction &,
+                                                  const BlendingContext &) noexcept;
   };
 
   // MARK: - Platform

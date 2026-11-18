@@ -85,8 +85,8 @@ namespace krys::boo::css
     KRYS_NODISCARD virtual List<Entry> Entries() const noexcept = 0;
 
     /// @brief @p value reified for @p property, or null if there's no value or it can't be.
-    KRYS_NODISCARD static RefPtr<CSSStyleValue> ReifyValue(dom::Document &document, RefPtr<Value> value,
-                                                           Maybe<PropertyId> property) noexcept;
+    KRYS_NODISCARD static RefPtr<CSSStyleValue>
+      ReifyValue(dom::Document &document, const RefPtr<Value> &value, Maybe<PropertyId> property) noexcept;
 
     /// @brief @p value reified for @p property, its items each reified if it's a list-valued property's list.
     KRYS_NODISCARD static List<Ref<CSSStyleValue>>

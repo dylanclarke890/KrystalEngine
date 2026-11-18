@@ -56,7 +56,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool SupportsSelectionAPI() const noexcept final;
 
-    void AttributeChanged(dom::DOMStringAtom localName) noexcept final;
+    void AttributeChanged(const dom::DOMStringAtom &localName) noexcept final;
 
     KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept final;
   };

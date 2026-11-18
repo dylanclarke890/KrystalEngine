@@ -59,7 +59,7 @@ namespace krys::boo::layout
 
     void Layout(const ConstraintsForFlexContent &constraints) noexcept;
 
-    KRYS_NODISCARD IntrinsicWidthConstraints ComputedIntrinsicWidthConstraints() noexcept;
+    KRYS_NODISCARD static IntrinsicWidthConstraints ComputedIntrinsicWidthConstraints() noexcept;
 
     KRYS_NODISCARD const ElementBox &Root() const noexcept
     {

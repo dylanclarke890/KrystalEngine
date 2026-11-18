@@ -166,7 +166,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD RefPtr<Element> DragImageElement() const noexcept;
 
     /// @brief Takes the data, effects, drag image and files @p other (`dragstart`'s data transfer) has.
-    void MoveDragState(Ref<DataTransfer> &&other) noexcept;
+    void MoveDragState(const Ref<DataTransfer> &other) noexcept;
 
     /// @brief Whether the page set a drag image.
     KRYS_NODISCARD bool HasDragImage() const noexcept;
@@ -221,7 +221,7 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool HasFileOfType(DOMStringView type) noexcept;
 
-    KRYS_NODISCARD bool HasStringOfType(Document &document, DOMStringView type) noexcept;
+    KRYS_NODISCARD bool HasStringOfType(Document &document, DOMStringView type) const noexcept;
 
     KRYS_NODISCARD Pasteboard &GetPasteboard() noexcept
     {

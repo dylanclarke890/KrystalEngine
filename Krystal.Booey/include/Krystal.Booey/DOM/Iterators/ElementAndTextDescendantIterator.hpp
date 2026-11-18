@@ -253,7 +253,7 @@ namespace krys::boo::dom
       return {*_root, ElementAndTextDescendantIterator::FirstChild};
     }
 
-    KRYS_NODISCARD ElementAndTextDescendantIterator end() const noexcept
+    KRYS_NODISCARD static ElementAndTextDescendantIterator end() noexcept
     {
       return {};
     }

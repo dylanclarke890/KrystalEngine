@@ -107,7 +107,7 @@ namespace krys
     }
 
     template <typename T, typename F>
-    static decltype(auto) DecodedPayload(Storage value, F &&f) noexcept
+    static decltype(auto) DecodedPayload(Storage value, F f) noexcept
     {
       Storage maskedData = value & PayloadMask;
 
@@ -124,7 +124,7 @@ namespace krys
     }
 
     template <typename T, typename F>
-    static decltype(auto) DecodedConstPayload(Storage value, F &&f) noexcept
+    static decltype(auto) DecodedConstPayload(Storage value, F f) noexcept
     {
       Storage maskedData = value & PayloadMask;
 

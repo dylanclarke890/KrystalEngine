@@ -65,7 +65,7 @@ namespace krys::boo
 
     /// @brief Replaces what's on the clipboard with @p selectionData's text, markup, URI list, buffers and
     /// custom data.
-    virtual void WriteToClipboard(utf8_stringview pasteboardName, SelectionData &&selectionData) noexcept = 0;
+    virtual void WriteToClipboard(utf8_stringview pasteboardName, SelectionData selectionData) noexcept = 0;
 
     virtual void ClearClipboard(utf8_stringview pasteboardName) noexcept = 0;
 

@@ -56,7 +56,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool Disabled() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-disabled
-    void Disabled(bool value) noexcept;
+    void Disabled(bool value) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-media
     KRYS_NODISCARD dom::DOMString Media() const noexcept;
@@ -88,9 +88,9 @@ namespace krys::boo::html
 #pragma endregion
 
   protected:
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
-                            dom::DOMStringAtom namespaceURI) noexcept override;
+                            const dom::DOMStringAtom &namespaceURI) noexcept override;
 
     void OnInsert() noexcept override;
 

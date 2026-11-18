@@ -79,7 +79,7 @@ namespace krys::gfx
       case TextureFormat::RGBA32Float:          return 16u;
       case TextureFormat::R32Uint:              return 4u;
       case TextureFormat::Depth16Unorm:         return 2u;
-      case TextureFormat::Depth24UnormStencil8: return 4u;
+      case TextureFormat::Depth24UnormStencil8:
       case TextureFormat::Depth32Float:         return 4u;
     }
     krys_unreachable();

@@ -444,7 +444,7 @@ namespace krys::boo::layout
     KRYS_NODISCARD UniquePtr<Box> RemoveFromParent() noexcept;
 
   protected:
-    Box(ElementAttributes &&elementAttributes, RenderStyle &&style, UniquePtr<RenderStyle> &&firstLineStyle,
+    Box(ElementAttributes elementAttributes, RenderStyle &&style, UniquePtr<RenderStyle> &&firstLineStyle,
         EnumSet<BaseTypeFlag> baseTypeFlags) noexcept;
 
   private:

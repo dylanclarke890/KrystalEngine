@@ -36,8 +36,8 @@
 namespace krys::boo::html
 {
   CustomElementInterface::CustomElementInterface(dom::DOMStringAtom localName, CustomElementFactory &&factory,
-                                                 CustomElementOptions &&options) noexcept
-      : _name(infra::Namespaces::HTML, null, localName), _factory(krys::move(factory)),
+                                                 const CustomElementOptions &options) noexcept
+      : _name(infra::namespaces::HTML, null, krys::move(localName)), _factory(krys::move(factory)),
         _isElementInternalsDisabled(options.DisableInternals), _isShadowDisabled(options.DisableShadow),
         _isFormAssociated(options.FormAssociated)
   {
@@ -78,7 +78,7 @@ namespace krys::boo::html
   {
     (void)registry;
     (void)name;
-    krys_debug_assert(name.NamespaceURI() == infra::Namespaces::HTML);
+    krys_debug_assert(name.NamespaceURI() == infra::namespaces::HTML);
 
     // As an element constructor does when it isn't upgrading, the element is defined (custom, with this
     // definition) before its behaviour is constructed.
@@ -193,7 +193,7 @@ namespace krys::boo::html
   }
 
   template <typename TFunction>
-  void CustomElementInterface::InvokeCallback(dom::Element &element, TFunction &&function) noexcept
+  void CustomElementInterface::InvokeCallback(dom::Element &element, TFunction function) noexcept
   {
     auto *customElement = element.GetCustomElement();
     if (customElement == nullptr)
@@ -230,8 +230,8 @@ namespace krys::boo::html
 
   void CustomElementInterface::InvokeAttributeChangedCallback(dom::Element &element,
                                                               const dom::QualifiedName &attributeName,
-                                                              dom::DOMStringAtom oldValue,
-                                                              dom::DOMStringAtom newValue) noexcept
+                                                              const dom::DOMStringAtom &oldValue,
+                                                              const dom::DOMStringAtom &newValue) noexcept
   {
     InvokeCallback(element,
                    [&](CustomElement &customElement)

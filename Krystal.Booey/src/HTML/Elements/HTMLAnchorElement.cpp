@@ -182,9 +182,10 @@ namespace krys::boo::html
     return *_relList;
   }
 
-  void HTMLAnchorElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLAnchorElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                             Maybe<dom::DOMStringView> oldValue,
                                              Maybe<dom::DOMStringView> value,
-                                             dom::DOMStringAtom namespaceURI) noexcept
+                                             const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI == null && localName == u8"rel" && _relList)

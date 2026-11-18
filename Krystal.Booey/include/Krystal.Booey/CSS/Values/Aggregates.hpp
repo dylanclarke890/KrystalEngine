@@ -44,12 +44,10 @@
 #include "Krystal.Core/Utils/Apply.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
 #include "Krystal.Core/Visitor.hpp"
-#include <concepts>
 #include <functional>
 #include <initializer_list>
 #include <ranges>
 #include <tuple>
-#include <type_traits>
 
 namespace krys::boo::css
 {
@@ -72,7 +70,7 @@ namespace krys::boo::css
   namespace krys::boo::css                                                                                   \
   {                                                                                                          \
     template <>                                                                                              \
-    constexpr SerialisationSeparatorType SerialisationSeparator<T> = separator;                              \
+    constexpr inline SerialisationSeparatorType SerialisationSeparator<T> = separator;                       \
   }
 
 #pragma endregion
@@ -94,7 +92,7 @@ namespace krys::boo::css
   namespace krys::boo::css                                                                                   \
   {                                                                                                          \
     template <>                                                                                              \
-    constexpr SerialisationCoalescingType SerialisationCoalescing<T> = coalescing;                           \
+    constexpr inline SerialisationCoalescingType SerialisationCoalescing<T> = coalescing;                    \
   }
 
 #pragma endregion
@@ -105,13 +103,16 @@ namespace krys::boo::css
   constexpr CSSOMStringView SerialisationSeparatorStringForType = u8"";
 
   template <>
-  constexpr CSSOMStringView SerialisationSeparatorStringForType<SerialisationSeparatorType::Space> = u8" ";
+  constexpr inline CSSOMStringView SerialisationSeparatorStringForType<SerialisationSeparatorType::Space> =
+    u8" ";
 
   template <>
-  constexpr CSSOMStringView SerialisationSeparatorStringForType<SerialisationSeparatorType::Comma> = u8", ";
+  constexpr inline CSSOMStringView SerialisationSeparatorStringForType<SerialisationSeparatorType::Comma> =
+    u8", ";
 
   template <>
-  constexpr CSSOMStringView SerialisationSeparatorStringForType<SerialisationSeparatorType::Slash> = u8" / ";
+  constexpr inline CSSOMStringView SerialisationSeparatorStringForType<SerialisationSeparatorType::Slash> =
+    u8" / ";
 
   template <typename T>
   constexpr CSSOMStringView SerialisationSeparatorString =
@@ -209,7 +210,7 @@ namespace krys::boo::css
   }                                                                                                          \
                                                                                                              \
   template <>                                                                                                \
-  constexpr bool ::krys::boo::css::TreatAsTupleLike<T> = true;
+  constexpr inline bool ::krys::boo::css::TreatAsTupleLike<T> = true;
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as space separated.
 #define DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                  \
@@ -258,12 +259,12 @@ namespace krys::boo::css
 /// @brief Defines variant-like conformance for a type.
 #define DEFINE_VARIANT_LIKE_CONFORMANCE(T)                                                                   \
   template <>                                                                                                \
-  constexpr bool ::krys::boo::css::TreatAsVariantLike<T> = true;
+  constexpr inline bool ::krys::boo::css::TreatAsVariantLike<T> = true;
 
 /// @brief Defines tokens-like conformance for a type.
 #define DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                     \
   template <>                                                                                                \
-  constexpr bool ::krys::boo::css::TreatAsRangeLike<T> = true;
+  constexpr inline bool ::krys::boo::css::TreatAsRangeLike<T> = true;
 
 /// @brief Defines tokens-like conformance and that the type should be serialized as space separated.
 #define DEFINE_SPACE_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
@@ -292,10 +293,10 @@ namespace krys::boo::css
   constexpr bool TreatAsOptionalLike<Markable<T, TTraits>> = true;
 
   template <typename... Ts>
-  constexpr bool TreatAsTupleLike<std::tuple<Ts...>> = true;
+  constexpr inline bool TreatAsTupleLike<std::tuple<Ts...>> = true;
 
   template <typename... Ts>
-  constexpr bool TreatAsVariantLike<Variant<Ts...>> = true;
+  constexpr inline bool TreatAsVariantLike<Variant<Ts...>> = true;
 
 #pragma endregion
 
@@ -385,7 +386,7 @@ namespace krys::boo::css
   }
 
   template <ValueId C, typename T>
-  constexpr bool TreatAsTupleLike<FunctionNotation<C, T>> = true;
+  constexpr inline bool TreatAsTupleLike<FunctionNotation<C, T>> = true;
 
 #pragma endregion
 
@@ -425,10 +426,10 @@ namespace krys::boo::css
   }
 
   template <typename T, size_t N>
-  constexpr bool TreatAsTupleLike<SpaceSeparatedArray<T, N>> = true;
+  constexpr inline bool TreatAsTupleLike<SpaceSeparatedArray<T, N>> = true;
 
   template <typename T, size_t N>
-  constexpr auto SerialisationSeparator<SpaceSeparatedArray<T, N>> = SerialisationSeparatorType::Space;
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedArray<T, N>> = SerialisationSeparatorType::Space;
 
   /// @brief Convenience for representing a two element array.
   template <typename T>
@@ -479,14 +480,14 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedPair<T>> = true;
+  constexpr inline bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedPair<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedPair<T>> =
+  constexpr inline auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedPair<T>> =
     SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedPair<T>> =
+  constexpr inline auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedPair<T>> =
     SerialisationCoalescingType::Minimal;
 
 #pragma endregion
@@ -527,10 +528,10 @@ namespace krys::boo::css
   }
 
   template <typename T, size_t N>
-  constexpr auto TreatAsTupleLike<CommaSeparatedArray<T, N>> = true;
+  constexpr inline auto TreatAsTupleLike<CommaSeparatedArray<T, N>> = true;
 
   template <typename T, size_t N>
-  constexpr auto SerialisationSeparator<CommaSeparatedArray<T, N>> = SerialisationSeparatorType::Comma;
+  constexpr inline auto SerialisationSeparator<CommaSeparatedArray<T, N>> = SerialisationSeparatorType::Comma;
 
   // Convenience for representing a two element array.
   template <typename T>
@@ -598,7 +599,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedList map(SizedRange &&range, Mapper &&mapper)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    static SpaceSeparatedList map(SizedRange &&range, Mapper mapper)
     {
       Container result;
       if constexpr (std::ranges::sized_range<SizedRange>)
@@ -623,7 +625,7 @@ namespace krys::boo::css
     }
 
     template <typename Mapper>
-    auto map(Mapper &&mapper) const
+    auto map(Mapper mapper) const
     {
       using Result = std::remove_cvref_t<std::invoke_result_t<Mapper, const T &>>;
       SmallList<Result, inlineCapacity> result;
@@ -644,10 +646,10 @@ namespace krys::boo::css
   };
 
   template <typename T, size_t N>
-  constexpr auto TreatAsRangeLike<SpaceSeparatedList<T, N>> = true;
+  constexpr inline auto TreatAsRangeLike<SpaceSeparatedList<T, N>> = true;
 
   template <typename T, size_t N>
-  constexpr auto SerialisationSeparator<SpaceSeparatedList<T, N>> = SerialisationSeparatorType::Space;
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedList<T, N>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -711,7 +713,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedList map(SizedRange &&range, Mapper &&mapper)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    static CommaSeparatedList map(SizedRange &&range, Mapper mapper)
     {
       Container result;
       if constexpr (std::ranges::sized_range<SizedRange>)
@@ -736,7 +739,7 @@ namespace krys::boo::css
     }
 
     template <typename Mapper>
-    auto map(Mapper &&mapper) const
+    auto map(Mapper mapper) const
     {
       using Result = std::remove_cvref_t<std::invoke_result_t<Mapper, const T &>>;
       SmallList<Result, inlineCapacity> result;
@@ -757,10 +760,10 @@ namespace krys::boo::css
   };
 
   template <typename T, size_t N>
-  constexpr auto TreatAsRangeLike<CommaSeparatedList<T, N>> = true;
+  constexpr inline auto TreatAsRangeLike<CommaSeparatedList<T, N>> = true;
 
   template <typename T, size_t N>
-  constexpr auto SerialisationSeparator<CommaSeparatedList<T, N>> = SerialisationSeparatorType::Comma;
+  constexpr inline auto SerialisationSeparator<CommaSeparatedList<T, N>> = SerialisationSeparatorType::Comma;
 
 #pragma endregion
 
@@ -787,7 +790,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedListHashSet map(SizedRange &&range, Mapper &&mapper)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    static SpaceSeparatedListHashSet map(SizedRange &&range, Mapper mapper)
     {
       Container result;
       for (auto &&item : range)
@@ -826,10 +830,11 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr auto TreatAsRangeLike<SpaceSeparatedListHashSet<T>> = true;
+  constexpr inline auto TreatAsRangeLike<SpaceSeparatedListHashSet<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<SpaceSeparatedListHashSet<T>> = SerialisationSeparatorType::Space;
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedListHashSet<T>> =
+    SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -856,7 +861,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedListHashSet map(SizedRange &&range, Mapper &&mapper)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    static CommaSeparatedListHashSet map(SizedRange &&range, Mapper mapper)
     {
       Container result;
       for (auto &&item : range)
@@ -895,10 +901,11 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr auto TreatAsRangeLike<CommaSeparatedListHashSet<T>> = true;
+  constexpr inline auto TreatAsRangeLike<CommaSeparatedListHashSet<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<CommaSeparatedListHashSet<T>> = SerialisationSeparatorType::Comma;
+  constexpr inline auto SerialisationSeparator<CommaSeparatedListHashSet<T>> =
+    SerialisationSeparatorType::Comma;
 
 #pragma endregion
 
@@ -927,13 +934,13 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    static SpaceSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
     {
       return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedFixedList Map(SizedRange &&range, Mapper &&mapper)
+    static SpaceSeparatedFixedList Map(SizedRange &&range, Mapper mapper)
     {
       return map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
@@ -1014,9 +1021,10 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr auto TreatAsRangeLike<SpaceSeparatedFixedList<T>> = true;
+  constexpr inline auto TreatAsRangeLike<SpaceSeparatedFixedList<T>> = true;
   template <typename T>
-  constexpr auto SerialisationSeparator<SpaceSeparatedFixedList<T>> = SerialisationSeparatorType::Space;
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedFixedList<T>> =
+    SerialisationSeparatorType::Space;
 
   // Wraps a variable (though known at construction) number of elements of a single type, semantically marking
   // them as serializing as "comma separated".
@@ -1043,13 +1051,13 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    static CommaSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
     {
       return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedFixedList Map(SizedRange &&range, Mapper &&mapper)
+    static CommaSeparatedFixedList Map(SizedRange &&range, Mapper mapper)
     {
       return map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
@@ -1130,10 +1138,11 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr auto TreatAsRangeLike<CommaSeparatedFixedList<T>> = true;
+  constexpr inline auto TreatAsRangeLike<CommaSeparatedFixedList<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<CommaSeparatedFixedList<T>> = SerialisationSeparatorType::Comma;
+  constexpr inline auto SerialisationSeparator<CommaSeparatedFixedList<T>> =
+    SerialisationSeparatorType::Comma;
 
   // Wraps a variable (though known at construction) number of elements of a single type in a reference
   // counted container, semantically marking them as serializing as "space separated".
@@ -1159,7 +1168,7 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    static SpaceSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
     {
       return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
@@ -1225,9 +1234,9 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr auto TreatAsRangeLike<SpaceSeparatedRefCountedFixedVector<T>> = true;
+  constexpr inline auto TreatAsRangeLike<SpaceSeparatedRefCountedFixedVector<T>> = true;
   template <typename T>
-  constexpr auto SerialisationSeparator<SpaceSeparatedRefCountedFixedVector<T>> =
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedRefCountedFixedVector<T>> =
     SerialisationSeparatorType::Space;
 
   // Wraps a variable (though known at construction) number of elements of a single type in a reference
@@ -1254,7 +1263,7 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    static CommaSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    static CommaSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
     {
       return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
     }
@@ -1320,9 +1329,9 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr auto TreatAsRangeLike<CommaSeparatedRefCountedFixedVector<T>> = true;
+  constexpr inline auto TreatAsRangeLike<CommaSeparatedRefCountedFixedVector<T>> = true;
   template <typename T>
-  constexpr auto SerialisationSeparator<CommaSeparatedRefCountedFixedVector<T>> =
+  constexpr inline auto SerialisationSeparator<CommaSeparatedRefCountedFixedVector<T>> =
     SerialisationSeparatorType::Comma;
 
 #pragma region SpaceSeparatedTuple
@@ -1358,10 +1367,11 @@ namespace krys::boo::css
   }
 
   template <typename... Ts>
-  constexpr bool TreatAsTupleLike<SpaceSeparatedTuple<Ts...>> = true;
+  constexpr inline bool TreatAsTupleLike<SpaceSeparatedTuple<Ts...>> = true;
 
   template <typename... Ts>
-  constexpr auto SerialisationSeparator<SpaceSeparatedTuple<Ts...>> = SerialisationSeparatorType::Space;
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedTuple<Ts...>> =
+    SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -1398,10 +1408,11 @@ namespace krys::boo::css
   }
 
   template <typename... Ts>
-  constexpr bool TreatAsTupleLike<CommaSeparatedTuple<Ts...>> = true;
+  constexpr inline bool TreatAsTupleLike<CommaSeparatedTuple<Ts...>> = true;
 
   template <typename... Ts>
-  constexpr auto SerialisationSeparator<CommaSeparatedTuple<Ts...>> = SerialisationSeparatorType::Comma;
+  constexpr inline auto SerialisationSeparator<CommaSeparatedTuple<Ts...>> =
+    SerialisationSeparatorType::Comma;
 
 #pragma endregion
 
@@ -1445,10 +1456,10 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<SpaceSeparatedPoint<T>> = true;
+  constexpr inline bool TreatAsTupleLike<SpaceSeparatedPoint<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<SpaceSeparatedPoint<T>> = SerialisationSeparatorType::Space;
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedPoint<T>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -1492,10 +1503,10 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<SpaceSeparatedSize<T>> = true;
+  constexpr inline bool TreatAsTupleLike<SpaceSeparatedSize<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<SpaceSeparatedSize<T>> = SerialisationSeparatorType::Space;
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedSize<T>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -1548,14 +1559,14 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedPoint<T>> = true;
+  constexpr inline bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedPoint<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedPoint<T>> =
+  constexpr inline auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedPoint<T>> =
     SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedPoint<T>> =
+  constexpr inline auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedPoint<T>> =
     SerialisationCoalescingType::Minimal;
 
 #pragma endregion
@@ -1573,7 +1584,7 @@ namespace krys::boo::css
     SpaceSeparatedPair<T> Value;
 
     template <typename U>
-    constexpr MinimallySerialisingSpaceSeparatedSize(U p1) noexcept : Value(p1, p1)
+    constexpr MinimallySerialisingSpaceSeparatedSize(const U &p1) noexcept : Value(p1, p1)
     {
     }
 
@@ -1609,14 +1620,14 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedSize<T>> = true;
+  constexpr inline bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedSize<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedSize<T>> =
+  constexpr inline auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedSize<T>> =
     SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedSize<T>> =
+  constexpr inline auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedSize<T>> =
     SerialisationCoalescingType::Minimal;
 
 #pragma endregion
@@ -1669,10 +1680,11 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  constexpr auto TreatAsTupleLike<SpaceSeparatedRectEdges<T>> = true;
+  constexpr inline auto TreatAsTupleLike<SpaceSeparatedRectEdges<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<SpaceSeparatedRectEdges<T>> = SerialisationSeparatorType::Space;
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedRectEdges<T>> =
+    SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -1724,10 +1736,11 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<CommaSeparatedRectEdges<T>> = true;
+  constexpr inline bool TreatAsTupleLike<CommaSeparatedRectEdges<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<CommaSeparatedRectEdges<T>> = SerialisationSeparatorType::Comma;
+  constexpr inline auto SerialisationSeparator<CommaSeparatedRectEdges<T>> =
+    SerialisationSeparatorType::Comma;
 
 #pragma endregion
 
@@ -1790,14 +1803,14 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedRectEdges<T>> = true;
+  constexpr inline bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedRectEdges<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedRectEdges<T>> =
+  constexpr inline auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedRectEdges<T>> =
     SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedRectEdges<T>> =
+  constexpr inline auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedRectEdges<T>> =
     SerialisationCoalescingType::Minimal;
 
 #pragma endregion
@@ -1852,14 +1865,14 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedRectCorners<T>> = true;
+  constexpr inline bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedRectCorners<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedRectCorners<T>> =
+  constexpr inline auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedRectCorners<T>> =
     SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedRectCorners<T>> =
+  constexpr inline auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedRectCorners<T>> =
     SerialisationCoalescingType::Minimal;
 
 #pragma endregion
@@ -1882,7 +1895,7 @@ namespace krys::boo::css
     List _value;
 
   public:
-    ListOrNone(List &&list) : _value {krys::move(list)}
+    ListOrNone(List list) : _value {krys::move(list)}
     {
       krys_assert(!_value.isEmpty());
     }
@@ -1968,7 +1981,7 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr auto TreatAsVariantLike<ListOrNone<T>> = true;
+  constexpr inline auto TreatAsVariantLike<ListOrNone<T>> = true;
 
   // Concept to constrain types to only those that derive from `ListOrNone`.
   template <typename T>
@@ -2096,9 +2109,9 @@ namespace krys::boo::css
   };
 
   template <typename List, typename Defaulter>
-  constexpr auto TreatAsRangeLike<ListOrDefault<List, Defaulter>> = true;
+  constexpr inline auto TreatAsRangeLike<ListOrDefault<List, Defaulter>> = true;
   template <typename List, typename Defaulter>
-  constexpr auto SerialisationSeparator<ListOrDefault<List, Defaulter>> = SerialisationSeparator<List>;
+  constexpr inline auto SerialisationSeparator<ListOrDefault<List, Defaulter>> = SerialisationSeparator<List>;
 
   // Concept to constrain types to only those that derive from `ListOrDefault`.
   template <typename T>
@@ -2108,7 +2121,7 @@ namespace krys::boo::css
 #define DEFINE_RANGE_LIKE_CONFORMANCE_FOR_LIST_OR_DEFAULT_DERIVED_TYPE(t)                                    \
   DEFINE_RANGE_LIKE_CONFORMANCE(t)                                                                           \
   template <>                                                                                                \
-  constexpr auto krys::boo::css::SerialisationSeparator<t> =                                                 \
+  constexpr inline auto krys::boo::css::SerialisationSeparator<t> =                                          \
     krys::boo::css::SerialisationSeparator<typename t::List>;
 
 #pragma endregion
@@ -2248,7 +2261,7 @@ namespace krys::boo::css
     using Keyword = K;
     using value_type = typename EnumSet::value_type;
 
-    constexpr EnumSetOrKeywordBase(EnumSet &&list) noexcept : _value {krys::move(list)}
+    constexpr EnumSetOrKeywordBase(EnumSet list) noexcept : _value {krys::move(list)}
     {
       krys_assert(!_value.IsEmpty());
     }
@@ -2447,7 +2460,7 @@ namespace krys::boo::css
   };
 
   template <typename T, typename K, typename Traits>
-  constexpr auto TreatAsVariantLike<ValueOrKeyword<T, K, Traits>> = true;
+  constexpr inline auto TreatAsVariantLike<ValueOrKeyword<T, K, Traits>> = true;
 
   // Concept to constrain types to only those that derive from `ValueOrKeyword`.
   template <typename T>
@@ -2480,7 +2493,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    KRYS_NODISCARD static SpaceSeparatedEnumSet Map(SizedRange &&range, Mapper &&mapper) noexcept
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    KRYS_NODISCARD static SpaceSeparatedEnumSet Map(SizedRange &&range, Mapper mapper) noexcept
     {
       Container result;
       for (auto &&Value : range)
@@ -2563,10 +2577,10 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr auto TreatAsRangeLike<SpaceSeparatedEnumSet<T>> = true;
+  constexpr inline auto TreatAsRangeLike<SpaceSeparatedEnumSet<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<SpaceSeparatedEnumSet<T>> = SerialisationSeparatorType::Space;
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedEnumSet<T>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -2595,7 +2609,8 @@ namespace krys::boo::css
     }
 
     template <typename SizedRange, typename Mapper>
-    KRYS_NODISCARD constexpr static CommaSeparatedEnumSet Map(SizedRange &&range, Mapper &&mapper) noexcept
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
+    KRYS_NODISCARD constexpr static CommaSeparatedEnumSet Map(SizedRange &&range, Mapper mapper) noexcept
     {
       Container result;
       for (auto &&Value : range)
@@ -2678,10 +2693,10 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr auto TreatAsRangeLike<CommaSeparatedEnumSet<T>> = true;
+  constexpr inline auto TreatAsRangeLike<CommaSeparatedEnumSet<T>> = true;
 
   template <typename T>
-  constexpr auto SerialisationSeparator<CommaSeparatedEnumSet<T>> = SerialisationSeparatorType::Comma;
+  constexpr inline auto SerialisationSeparator<CommaSeparatedEnumSet<T>> = SerialisationSeparatorType::Comma;
 
 #pragma endregion
 

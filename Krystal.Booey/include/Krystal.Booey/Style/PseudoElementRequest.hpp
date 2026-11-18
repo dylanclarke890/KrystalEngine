@@ -48,8 +48,8 @@ namespace krys::boo::style
       krys_debug_assert(type == PseudoElementType::Highlight);
     }
 
-    explicit PseudoElementRequest(const PseudoElementIdentifier &pseudoElementIdentifier) noexcept
-        : _identifier(pseudoElementIdentifier)
+    explicit PseudoElementRequest(PseudoElementIdentifier pseudoElementIdentifier) noexcept
+        : _identifier(krys::move(pseudoElementIdentifier))
     {
     }
 

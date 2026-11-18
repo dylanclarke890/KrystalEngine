@@ -113,10 +113,11 @@ namespace krys::boo::svg
 
   private:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                         dom::DOMStringAtom namespaceURI) const noexcept final;
+      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                         const dom::DOMStringAtom &namespaceURI) const noexcept final;
 
-    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                const dom::DOMStringAtom &namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept final;
   };

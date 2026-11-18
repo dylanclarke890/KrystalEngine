@@ -138,7 +138,7 @@ namespace krys::boo::html
 
     void ElementRemovedFromAncestor(dom::Element &element, bool disconnectedFromDocument) noexcept override;
 
-    void ParseAttribute(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> value) noexcept;
+    void ParseAttribute(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> value) noexcept;
 
     void ParseFormAttribute(Maybe<dom::DOMStringView> value) noexcept;
 

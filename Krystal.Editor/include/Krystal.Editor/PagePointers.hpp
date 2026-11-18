@@ -50,7 +50,7 @@ namespace krys::editor
         return;
       }
 
-      auto listen = [&](RefPtr<boo::dom::EventTarget> target, utf8_stringview type,
+      auto listen = [&](const RefPtr<boo::dom::EventTarget> &target, utf8_stringview type,
                         Func<void(boo::dom::Event &)> &&callback)
       {
         if (target)

@@ -195,7 +195,7 @@ namespace krys::boo
     /// @brief Records that the serialization isn't well-formed unless @p wellFormed returns true, when it
     /// must be (only the XML serialization has error cases).
     template <Predicate TPredicate>
-    void CheckWellFormed(TPredicate &&wellFormed) noexcept
+    void CheckWellFormed(TPredicate wellFormed) noexcept
     {
       if (_wellFormed && _requireWellFormed == RequireWellFormed::Yes && InXMLFragmentSerialization())
       {

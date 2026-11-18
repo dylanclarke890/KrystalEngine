@@ -200,7 +200,7 @@ namespace krys::boo
     return false;
   }
 
-  bool GraphicsLayer::SetChildren(List<Ref<GraphicsLayer>> &&newChildren) noexcept
+  bool GraphicsLayer::SetChildren(List<Ref<GraphicsLayer>> newChildren) noexcept
   {
     // If the contents of the arrays are the same, nothing to do.
     auto sameChildren = [&]
@@ -456,7 +456,7 @@ namespace krys::boo
     _maskLayer = krys::move(layer);
   }
 
-  Path GraphicsLayer::ShapeLayerPath() const noexcept
+  Path GraphicsLayer::ShapeLayerPath() noexcept
   {
     return Path();
   }
@@ -465,7 +465,7 @@ namespace krys::boo
   {
   }
 
-  WindRule GraphicsLayer::ShapeLayerWindRule() const noexcept
+  WindRule GraphicsLayer::ShapeLayerWindRule() noexcept
   {
     return WindRule::NonZero;
   }

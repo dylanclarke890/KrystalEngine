@@ -451,8 +451,8 @@ namespace krys::boo::svg
     /// one.
     /// @see https://svgwg.org/svg2-draft/styling.html#PresentationAttributes
     KRYS_NODISCARD static css::PropertyId
-      CssPropertyIdForSVGAttributeName(dom::DOMStringAtom localName,
-                                       dom::DOMStringAtom namespaceURI) noexcept;
+      CssPropertyIdForSVGAttributeName(const dom::DOMStringAtom &localName,
+                                       const dom::DOMStringAtom &namespaceURI) noexcept;
 
   protected:
     void FinishParsingChildren() noexcept override;
@@ -470,14 +470,15 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD SVGElementRareData &EnsureSVGRareData() noexcept;
 
-    void ReportAttributeParsingError(SVGParsingError error, const dom::QualifiedName &name,
-                                     dom::DOMStringView value) noexcept;
+    static void ReportAttributeParsingError(SVGParsingError error, const dom::QualifiedName &name,
+                                            dom::DOMStringView value) noexcept;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                const dom::DOMStringAtom &namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
@@ -846,8 +847,9 @@ namespace krys::boo::svg
   private:
     void WillRecalcStyle(EnumSet<style::Change>) noexcept override;
 
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            const dom::DOMStringAtom &namespaceURI) noexcept final;
 
     virtual void ClearTarget() noexcept
     {

@@ -68,9 +68,9 @@ namespace krys::boo::style
     };
 
     Type ChangeType;
-    InvalidationRuleSetVector InvalidationRuleSets {};
+    InvalidationRuleSetVector InvalidationRuleSets;
 
-    void Append(DynamicMediaQueryEvaluationChanges &&other) noexcept
+    void Append(DynamicMediaQueryEvaluationChanges other) noexcept
     {
       ChangeType = std::max(ChangeType, other.ChangeType);
       if (ChangeType == Type::ResetStyle)
@@ -116,8 +116,8 @@ namespace krys::boo::style
     struct CollectedMediaQueryChanges
     {
       bool RequiredFullReset {false};
-      List<size_t> ChangedQueryIndexes {};
-      List<List<Ref<const css::StyleRule>> *> AffectedRules {};
+      List<size_t> ChangedQueryIndexes;
+      List<List<Ref<const css::StyleRule>> *> AffectedRules;
     };
 
     struct CascadeLayer
@@ -218,7 +218,8 @@ namespace krys::boo::style
 
     void AddRule(const css::StyleRule &rule, uint32 selectorIndex, uint32 selectorListIndex) noexcept;
 
-    void AddToRuleSet(const css::CSSOMStringAtom &key, AtomRuleMap &map, const RuleData &ruleData) noexcept;
+    static void AddToRuleSet(const css::CSSOMStringAtom &key, AtomRuleMap &map,
+                             const RuleData &ruleData) noexcept;
 
     void ShrinkToFit() noexcept;
 
@@ -351,7 +352,7 @@ namespace krys::boo::style
       PositionTryRuleForName(const css::CSSOMStringAtom &name) const noexcept;
 
   private:
-    void AddRule(RuleData &&ruleData, CascadeLayerIdentifier cascadeLayerIdentifier,
+    void AddRule(RuleData ruleData, CascadeLayerIdentifier cascadeLayerIdentifier,
                  ContainerQueryIdentifier containerQueryIdentifier, ScopeRuleIdentifier scopeRuleIdentifier,
                  RuleFeatureSet::CollectionContext *featureCollectionContext) noexcept;
 
@@ -359,10 +360,10 @@ namespace krys::boo::style
       const css::mq::MediaQueryEvaluator &evaluator, size_t startIndex) noexcept;
 
     template <typename TFunction>
-    void TraverseRuleDatas(TFunction &&function) noexcept;
+    void TraverseRuleDatas(TFunction function) noexcept;
 
     template <typename TFunction>
-    void TraverseRuleDatas(TFunction &&function) const noexcept;
+    void TraverseRuleDatas(TFunction function) const noexcept;
 
     KRYS_NODISCARD CascadeLayer &CascadeLayerForIdentifier(CascadeLayerIdentifier identifier) noexcept
     {

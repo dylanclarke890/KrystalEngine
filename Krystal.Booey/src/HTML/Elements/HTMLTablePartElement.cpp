@@ -51,9 +51,8 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  bool
-    HTMLTablePartElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                             dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLTablePartElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"bgcolor" || localName == u8"background" || localName == u8"valign"
@@ -65,7 +64,7 @@ namespace krys::boo::html
   }
 
   void HTMLTablePartElement::CollectPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;
@@ -153,7 +152,7 @@ namespace krys::boo::html::detail
 {
   Ref<HTMLElement> CreateTableElement(dom::Document &document, dom::DOMStringView localName) noexcept
   {
-    auto element = document.CreateElementNS(infra::Namespaces::HTML, dom::DOMStringAtom(localName));
+    auto element = document.CreateElementNS(infra::namespaces::HTML, dom::DOMStringAtom(localName));
     krys_debug_assert(!element.HasException());
     return ShareRef(Downcast<HTMLElement>(*element.ReleaseValue()));
   }

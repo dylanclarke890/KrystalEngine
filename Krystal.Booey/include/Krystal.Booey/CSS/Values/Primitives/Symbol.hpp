@@ -42,10 +42,6 @@ namespace krys::boo::css
 
     ValueId Value;
 
-    constexpr Symbol(SymbolRaw &&value) : Value {value.Value}
-    {
-    }
-
     constexpr Symbol(const SymbolRaw &value) : Value {value.Value}
     {
     }

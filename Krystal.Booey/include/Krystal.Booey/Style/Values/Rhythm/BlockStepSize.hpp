@@ -57,13 +57,13 @@ namespace krys::boo::style
   template <>
   struct Blending<BlockStepSize>
   {
-    KRYS_NODISCARD bool CanBlend(const BlockStepSize &, const BlockStepSize &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BlockStepSize &, const BlockStepSize &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BlockStepSize &,
-                                                                      const BlockStepSize &) noexcept;
+    KRYS_NODISCARD static bool RequiresInterpolationForAccumulativeIteration(const BlockStepSize &,
+                                                                             const BlockStepSize &) noexcept;
 
-    KRYS_NODISCARD BlockStepSize Blend(const BlockStepSize &, const BlockStepSize &,
-                                       const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BlockStepSize Blend(const BlockStepSize &, const BlockStepSize &,
+                                              const BlendingContext &) noexcept;
   };
 }
 

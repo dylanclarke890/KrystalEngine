@@ -53,12 +53,12 @@ namespace krys::boo::dom
     }
 
     /// @brief Registers @p value as the highlight named @p key, in place of any highlight of that name.
-    void Set(DOMStringAtom key, Ref<Highlight> &&value) noexcept;
+    void Set(const DOMStringAtom &key, Ref<Highlight> &&value) noexcept;
 
     /// @brief The highlight named @p key, if any.
-    KRYS_NODISCARD Highlight *Get(DOMStringAtom key) const noexcept;
+    KRYS_NODISCARD Highlight *Get(const DOMStringAtom &key) const noexcept;
 
-    KRYS_NODISCARD bool Has(DOMStringAtom key) const noexcept
+    KRYS_NODISCARD bool Has(const DOMStringAtom &key) const noexcept
     {
       return _map.contains(key);
     }
@@ -68,7 +68,7 @@ namespace krys::boo::dom
 
     /// @brief Unregisters the highlight named @p key.
     /// @return Whether there was one.
-    bool Delete(DOMStringAtom key) noexcept;
+    bool Delete(const DOMStringAtom &key) noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {

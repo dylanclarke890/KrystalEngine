@@ -161,8 +161,8 @@ namespace krys::boo::style
   };
 
   inline LengthWrapperData::LengthWrapperData(uint8 opaqueType) noexcept
-      : _floatValue {0.0f}, _opaqueType {opaqueType}, _kind {LengthWrapperDataKind::Default},
-        _hasQuirk {false}
+      : _opaqueType {opaqueType}, _kind {LengthWrapperDataKind::Default}
+
   {
   }
 
@@ -243,6 +243,7 @@ namespace krys::boo::style
     }
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): the move itself, by exchange.
   inline void LengthWrapperData::Initialise(LengthWrapperData &&other) noexcept
   {
     _opaqueType = other._opaqueType;

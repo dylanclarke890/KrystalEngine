@@ -50,8 +50,8 @@ namespace krys::boo
       CalculateAlignmentBaselineShift(bool isVerticalText,
                                       const RenderSVGInlineText &textRenderer) const noexcept;
 
-    KRYS_NODISCARD float CalculateGlyphOrientationAngle(bool isVerticalText, const RenderStyle &,
-                                                        char32 character) const noexcept;
+    KRYS_NODISCARD static float CalculateGlyphOrientationAngle(bool isVerticalText, const RenderStyle &,
+                                                               char32 character) noexcept;
 
     KRYS_NODISCARD float CalculateGlyphAdvanceAndOrientation(bool isVerticalText, SVGTextMetrics &,
                                                              float angle, float &xOrientationShift,

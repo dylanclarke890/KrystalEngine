@@ -264,8 +264,8 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutRect FragmentsBoundingBox(const LayoutRect &layerBoundingBox) const noexcept;
 
-    KRYS_NODISCARD LayoutUnit
-      OffsetFromLogicalTopOfFirstFragment(const RenderBlock *currentBlock) const noexcept;
+    KRYS_NODISCARD static LayoutUnit
+      OffsetFromLogicalTopOfFirstFragment(const RenderBlock *currentBlock) noexcept;
 
     void ClearRenderBoxFragmentInfoAndCustomStyle(const RenderBox &box,
                                                   const RenderFragmentContainer *newStartFragment,
@@ -356,7 +356,7 @@ namespace krys::boo
 
     void UpdateFragmentsFragmentedFlowPortionRect() noexcept;
 
-    KRYS_NODISCARD bool ShouldRepaint(const LayoutRect &rect) const noexcept;
+    KRYS_NODISCARD static bool ShouldRepaint(const LayoutRect &rect) noexcept;
 
     bool GetFragmentRangeForBoxFromCachedInfo(const RenderBox &box, RenderFragmentContainer *&startFragment,
                                               RenderFragmentContainer *&endFragment) const noexcept;

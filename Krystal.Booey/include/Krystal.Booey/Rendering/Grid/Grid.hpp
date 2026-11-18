@@ -113,7 +113,7 @@ namespace krys::boo
 
     void SetClampingForSubgrid(uint32 maxRows, uint32 maxColumns) noexcept;
 
-    void ClampAreaToSubgridIfNeeded(GridArea &area) noexcept;
+    void ClampAreaToSubgridIfNeeded(GridArea &area) const noexcept;
 
     void SetAutoRepeatEmptyColumns(UniquePtr<OrderedTrackIndexSet> autoRepeatEmptyColumns) noexcept;
 

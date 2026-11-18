@@ -2067,7 +2067,7 @@ namespace krys::boo
       switch (distribution)
       {
         case ContentDistribution::SpaceBetween: return {OverflowAlignment::Default, ContentPosition::Start};
-        case ContentDistribution::SpaceAround:  return {OverflowAlignment::Safe, ContentPosition::Center};
+        case ContentDistribution::SpaceAround:
         case ContentDistribution::SpaceEvenly:  return {OverflowAlignment::Safe, ContentPosition::Center};
         case ContentDistribution::Stretch:      return {OverflowAlignment::Default, ContentPosition::Start};
         case ContentDistribution::Default:      return {OverflowAlignment::Default, ContentPosition::Normal};
@@ -2728,6 +2728,7 @@ namespace krys::boo
       case ItemPosition::SelfEnd:
         // self-end is based on the grid item's block-flow direction.
         return hasSameDirection ? GridAxisPosition::GridAxisEnd : GridAxisPosition::GridAxisStart;
+      // NOLINTNEXTLINE(bugprone-branch-clone): left and right are explained separately.
       case ItemPosition::Left:
         // Aligns the alignment subject to be flush with the alignment container's 'line-left' edge.
         // The alignment axis (column axis) is always orthogonal to the inline axis, hence this value behaves

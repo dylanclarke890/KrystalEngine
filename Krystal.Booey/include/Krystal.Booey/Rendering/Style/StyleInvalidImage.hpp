@@ -44,7 +44,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool Equals(const StyleInvalidImage &) const noexcept
+    KRYS_NODISCARD static bool Equals(const StyleInvalidImage &) noexcept
     {
       return false;
     }

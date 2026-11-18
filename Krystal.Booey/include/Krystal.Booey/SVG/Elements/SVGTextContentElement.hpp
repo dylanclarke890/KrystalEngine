@@ -135,7 +135,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD dom::ExceptionOr<float> GetRotationOfChar(uint32 charnum) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getCharNumAtPosition
-    KRYS_NODISCARD int32 GetCharNumAtPosition(dom::DOMPointInit &&) noexcept;
+    KRYS_NODISCARD int32 GetCharNumAtPosition(dom::DOMPointInit) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__selectSubString
     dom::ExceptionOr<void> SelectSubString(uint32 charnum, uint32 nchars) noexcept;
@@ -179,10 +179,11 @@ namespace krys::boo::svg
                           Maybe<dom::DOMStringView> value) noexcept override;
 
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                const dom::DOMStringAtom &namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 

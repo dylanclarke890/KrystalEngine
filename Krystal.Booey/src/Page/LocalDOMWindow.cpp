@@ -445,8 +445,7 @@ namespace krys::boo
   }
 
   Ref<css::CSSStyleDeclaration>
-    LocalDOMWindow::GetComputedStyle(dom::Element &element,
-                                     const css::CSSOMString &pseudoElement) const noexcept
+    LocalDOMWindow::GetComputedStyle(dom::Element &element, const css::CSSOMString &pseudoElement) noexcept
   {
     if (!pseudoElement.starts_with(u8':'))
     {

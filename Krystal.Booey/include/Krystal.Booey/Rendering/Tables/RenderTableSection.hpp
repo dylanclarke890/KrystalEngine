@@ -279,7 +279,7 @@ namespace krys::boo
     void RemoveCachedCollapsedBorders(const RenderTableCell &cell) noexcept;
 
     void SetCachedCollapsedBorder(const RenderTableCell &cell, CollapsedBorderSide side,
-                                  CollapsedBorderValue border) noexcept;
+                                  const CollapsedBorderValue &border) noexcept;
 
     KRYS_NODISCARD CollapsedBorderValue CachedCollapsedBorder(const RenderTableCell &cell,
                                                               CollapsedBorderSide side) const noexcept;

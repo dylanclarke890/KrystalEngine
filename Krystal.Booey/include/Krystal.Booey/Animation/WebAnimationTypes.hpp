@@ -83,7 +83,7 @@ namespace krys::boo
   /// @brief A set of property ids.
   struct CSSPropertiesBitSet
   {
-    std::bitset<css::TotalPropertyIdValues> Properties {};
+    std::bitset<css::TotalPropertyIdValues> Properties;
 
     void Set(css::PropertyId property) noexcept
     {

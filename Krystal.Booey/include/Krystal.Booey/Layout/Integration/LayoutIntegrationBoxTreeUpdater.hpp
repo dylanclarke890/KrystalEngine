@@ -78,7 +78,7 @@ namespace krys::boo::layout_integration
     const layout::Box &Insert(const RenderElement &parent, RenderObject &child,
                               const RenderObject *beforeChild = nullptr) noexcept;
 
-    UniquePtr<layout::Box> Remove(const RenderElement &parent, RenderObject &child) noexcept;
+    static UniquePtr<layout::Box> Remove(const RenderElement &parent, RenderObject &child) noexcept;
 
   private:
     KRYS_NODISCARD const RenderBlock &RootRenderer() const noexcept
@@ -108,7 +108,7 @@ namespace krys::boo::layout_integration
 
     void BuildTreeForGridContent() noexcept;
 
-    void InsertChild(UniquePtr<layout::Box> childBox, RenderObject &childRenderer,
-                     const RenderObject *beforeChild = nullptr) noexcept;
+    static void InsertChild(UniquePtr<layout::Box> childBox, RenderObject &childRenderer,
+                            const RenderObject *beforeChild = nullptr) noexcept;
   };
 }

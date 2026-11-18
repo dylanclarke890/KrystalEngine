@@ -37,7 +37,7 @@ namespace krys::boo
   {
     switch (_trim)
     {
-      case TrimType::SpaceAll: return false;
+      case TrimType::SpaceAll:
       case TrimType::Auto:     return false;
       case TrimType::TrimAll:
         return charactersData.CurrentCharacterClass == CharacterClass::FullWidthOpeningPunctuation

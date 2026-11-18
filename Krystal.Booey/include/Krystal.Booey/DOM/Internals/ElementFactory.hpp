@@ -40,7 +40,7 @@ namespace krys::boo::dom
     template <typename T>
     KRYS_NODISCARD static Ref<T> CreateHTMLElement(Document &document, DOMStringAtom localName) noexcept
     {
-      auto element = Create(document, QualifiedName {infra::Namespaces::HTML, null, localName});
+      auto element = Create(document, QualifiedName {infra::namespaces::HTML, null, krys::move(localName)});
       return ShareRef(Downcast<T>(Downcast<html::HTMLElement>(*element)));
     }
   };

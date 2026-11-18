@@ -66,7 +66,7 @@ namespace krys::boo::html::tests
       void DefineInternals(dom::DOMStringAtom name, CustomElementOptions &&options = {}) noexcept
       {
         auto result = Registry().Define(
-          name,
+          krys::move(name),
           [this](HTMLElement &element)
           {
             auto behaviour = CreateUnique<InternalsElement>(element, Calls);

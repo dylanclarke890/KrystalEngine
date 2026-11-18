@@ -421,7 +421,7 @@ namespace krys::boo
         _state, GraphicsContextState::ToIndex(GraphicsContextState::Change::ShadowsIgnoreTransforms));
     }
 
-    KRYS_NODISCARD FloatSize PlatformShadowOffset(const FloatSize &) const noexcept;
+    KRYS_NODISCARD static FloatSize PlatformShadowOffset(const FloatSize &) noexcept;
 
     KRYS_NODISCARD bool DrawLuminanceMask() const noexcept
     {
@@ -794,18 +794,18 @@ namespace krys::boo
                                      FontSmoothingMode) noexcept;
 
     KRYS_NODISCARD FloatRect ComputeLineBoundsAndAntialiasingModeForText(const FloatRect &, bool printing,
-                                                                         Color &) noexcept;
+                                                                         Color &) const noexcept;
 
     KRYS_NODISCARD float DashedLineCornerWidthForStrokeWidth(float) const noexcept;
 
     KRYS_NODISCARD float DashedLinePatternWidthForStrokeWidth(float) const noexcept;
 
-    KRYS_NODISCARD float DashedLinePatternOffsetForPatternAndStrokeWidth(float patternWidth,
-                                                                         float strokeWidth) const noexcept;
+    KRYS_NODISCARD static float DashedLinePatternOffsetForPatternAndStrokeWidth(float patternWidth,
+                                                                                float strokeWidth) noexcept;
 
-    KRYS_NODISCARD List<FloatPoint> CenterLineAndCutOffCorners(bool isVerticalLine, float cornerWidth,
-                                                               FloatPoint point1,
-                                                               FloatPoint point2) const noexcept;
+    KRYS_NODISCARD static List<FloatPoint> CenterLineAndCutOffCorners(bool isVerticalLine, float cornerWidth,
+                                                                      FloatPoint point1,
+                                                                      FloatPoint point2) noexcept;
 
     struct RectsAndStrokeColor
     {

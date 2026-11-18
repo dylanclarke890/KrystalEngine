@@ -19,8 +19,8 @@ namespace krys::boo::html
     dom::DOMStringAtom Namespace;
 
     SanitizerElementNamespace(dom::DOMString name,
-                              dom::DOMStringAtom namespaceURI = infra::Namespaces::HTML) noexcept
-        : Name(krys::move(name)), Namespace(namespaceURI)
+                              dom::DOMStringAtom namespaceURI = infra::namespaces::HTML) noexcept
+        : Name(krys::move(name)), Namespace(krys::move(namespaceURI))
     {
     }
 
@@ -44,7 +44,7 @@ namespace krys::boo::html
     dom::DOMStringAtom Namespace;
 
     SanitizerAttributeNamespace(dom::DOMString name, dom::DOMStringAtom namespaceURI = null) noexcept
-        : Name(krys::move(name)), Namespace(namespaceURI)
+        : Name(krys::move(name)), Namespace(krys::move(namespaceURI))
     {
     }
 

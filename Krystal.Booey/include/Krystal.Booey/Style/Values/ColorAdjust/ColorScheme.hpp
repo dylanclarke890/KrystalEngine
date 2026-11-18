@@ -41,7 +41,7 @@ namespace krys::boo::style
     css::SpaceSeparatedList<css::CustomIdentifier> Schemes;
     Maybe<css::keywords::Only> Only;
 
-    ColorScheme(css::keywords::Normal) noexcept : Schemes {}, Only {null}
+    ColorScheme(css::keywords::Normal) noexcept : Only {null}
     {
     }
 

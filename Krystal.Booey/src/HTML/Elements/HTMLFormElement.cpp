@@ -690,7 +690,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#submit-dialog
-  void HTMLFormElement::SubmitDialog(Ref<FormSubmission> &&formSubmission) noexcept
+  void HTMLFormElement::SubmitDialog(const Ref<FormSubmission> &formSubmission) noexcept
   {
     // Let subject be the nearest ancestor dialog element of form, if any.
     RefPtr<HTMLDialogElement> dialog;
@@ -739,9 +739,10 @@ namespace krys::boo::html
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
   }
 
-  void HTMLFormElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLFormElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                           Maybe<dom::DOMStringView> oldValue,
                                            Maybe<dom::DOMStringView> value,
-                                           dom::DOMStringAtom namespaceURI) noexcept
+                                           const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -1016,7 +1017,7 @@ namespace krys::boo::html
     return _wasUserSubmitted;
   }
 
-  HTMLFormControlElement *HTMLFormElement::FindSubmitter(const dom::Event *event) const noexcept
+  HTMLFormControlElement *HTMLFormElement::FindSubmitter(const dom::Event *event) noexcept
   {
     if (!event)
     {
@@ -1278,8 +1279,8 @@ namespace krys::boo::html
   }
 
   RefPtr<DOMFormData>
-    HTMLFormElement::ConstructEntryList(RefPtr<HTMLFormControlElement> &&submitter,
-                                        Ref<DOMFormData> &&domFormData,
+    HTMLFormElement::ConstructEntryList(const RefPtr<HTMLFormControlElement> &submitter,
+                                        const Ref<DOMFormData> &domFormData,
                                         List<Pair<dom::DOMString, dom::DOMString>> *formValues) noexcept
   {
     // https://html.spec.whatwg.org/#constructing-the-form-data-set

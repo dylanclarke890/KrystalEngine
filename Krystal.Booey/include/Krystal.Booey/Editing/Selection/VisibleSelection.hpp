@@ -273,7 +273,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsInPasswordField() const noexcept;
 
     // FIXME: Fields the host autofilled and lets the user see (autofilledAndViewable), with autofill.
-    KRYS_NODISCARD bool IsInAutoFilledAndViewableField() const noexcept
+    KRYS_NODISCARD static bool IsInAutoFilledAndViewableField() noexcept
     {
       return false;
     }

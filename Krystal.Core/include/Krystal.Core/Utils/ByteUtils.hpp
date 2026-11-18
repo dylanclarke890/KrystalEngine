@@ -23,7 +23,7 @@ namespace krys
     /// chunk.
     template <size_t N, typename TFunc>
     requires Callable<TFunc, FixedSpan<const byte, N>>
-    constexpr static void ForEachNBytes(Span<const byte> bytes, TFunc &&func) noexcept
+    constexpr static void ForEachNBytes(Span<const byte> bytes, TFunc func) noexcept
     {
       size_t totalBytes = bytes.size();
       size_t offset = 0uz;

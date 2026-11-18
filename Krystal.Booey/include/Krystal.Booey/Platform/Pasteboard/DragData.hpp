@@ -142,9 +142,9 @@ namespace krys::boo
 
     KRYS_NODISCARD List<utf8_string> AsFilenames() const noexcept;
 
-    KRYS_NODISCARD bool CanSmartReplace() const noexcept;
+    KRYS_NODISCARD static bool CanSmartReplace() noexcept;
 
-    KRYS_NODISCARD bool ContainsColor() const noexcept;
+    KRYS_NODISCARD static bool ContainsColor() noexcept;
 
     KRYS_NODISCARD bool ContainsFiles() const noexcept;
 
@@ -167,6 +167,6 @@ namespace krys::boo
 
     void DisallowFileAccess() noexcept;
 
-    KRYS_NODISCARD bool ShouldMatchStyleOnDrop() const noexcept;
+    KRYS_NODISCARD static bool ShouldMatchStyleOnDrop() noexcept;
   };
 }

@@ -59,8 +59,8 @@ namespace krys::boo::html
     {
       auto *element = DynamicDowncast<dom::Element>(node);
       return element && element->LocalName().View() == u8"script"
-             && (element->NamespaceURI().View() == infra::Namespaces::HTML
-                 || element->NamespaceURI().View() == infra::Namespaces::SVG);
+             && (element->NamespaceURI().View() == infra::namespaces::HTML
+                 || element->NamespaceURI().View() == infra::namespaces::SVG);
     }
   }
 
@@ -496,9 +496,10 @@ namespace krys::boo::html
     HTMLElement::OnChildrenChanged();
   }
 
-  void HTMLOptionElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLOptionElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                             Maybe<dom::DOMStringView> oldValue,
                                              Maybe<dom::DOMStringView> value,
-                                             dom::DOMStringAtom namespaceURI) noexcept
+                                             const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)

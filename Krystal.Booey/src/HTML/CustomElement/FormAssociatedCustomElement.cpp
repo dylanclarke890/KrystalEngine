@@ -68,7 +68,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
   dom::ExceptionOr<void> FormAssociatedCustomElement::SetValidity(ValidityStateFlags flags,
-                                                                  dom::DOMString message,
+                                                                  const dom::DOMString &message,
                                                                   HTMLElement *validationAnchor) noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
@@ -119,7 +119,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
   void FormAssociatedCustomElement::SetFormValue(CustomElementFormValue &&submissionValue,
-                                                 Maybe<CustomElementFormValue> &&state) noexcept
+                                                 Maybe<CustomElementFormValue> state) noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
 

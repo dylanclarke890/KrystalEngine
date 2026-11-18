@@ -268,10 +268,11 @@ namespace krys::boo
     }
   }
 
-  bool LegacyRenderSVGResourcePattern::BuildTileImageTransform(
-    RenderElement &renderer, const svg::PatternAttributes &attributes,
-    const svg::SVGPatternElement &patternElement, FloatRect &patternBoundaries,
-    AffineTransform &tileImageTransform) const noexcept
+  bool LegacyRenderSVGResourcePattern::BuildTileImageTransform(RenderElement &renderer,
+                                                               const svg::PatternAttributes &attributes,
+                                                               const svg::SVGPatternElement &patternElement,
+                                                               FloatRect &patternBoundaries,
+                                                               AffineTransform &tileImageTransform) noexcept
   {
     FloatRect objectBoundingBox = renderer.ObjectBoundingBox();
     patternBoundaries = CalculatePatternBoundaries(attributes, objectBoundingBox, patternElement);
@@ -299,7 +300,7 @@ namespace krys::boo
 
   RefPtr<ImageBuffer> LegacyRenderSVGResourcePattern::CreateTileImage(
     GraphicsContext &context, const FloatSize &size, const FloatSize &scale,
-    const AffineTransform &tileImageTransform, const svg::PatternAttributes &attributes) const noexcept
+    const AffineTransform &tileImageTransform, const svg::PatternAttributes &attributes) noexcept
   {
     // This is equivalent to making createImageBuffer() use roundedIntSize().
     auto roundedUnscaledImageBufferSize = [](const FloatSize &size, const FloatSize &scale) -> FloatSize

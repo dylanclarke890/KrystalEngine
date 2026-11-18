@@ -223,7 +223,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool WasUserSubmitted() const noexcept;
 
     /// @brief The form control the event that submits the form was targeted at, if any.
-    KRYS_NODISCARD HTMLFormControlElement *FindSubmitter(const dom::Event *event) const noexcept;
+    KRYS_NODISCARD static HTMLFormControlElement *FindSubmitter(const dom::Event *event) noexcept;
 
     /// @see https://html.spec.whatwg.org/#default-button
     KRYS_NODISCARD HTMLFormControlElement *DefaultButton() const noexcept;
@@ -247,7 +247,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#constructing-the-form-data-set
     /// @return The entry list, or null if the form is already constructing one.
     KRYS_NODISCARD RefPtr<DOMFormData>
-      ConstructEntryList(RefPtr<HTMLFormControlElement> &&submitter, Ref<DOMFormData> &&domFormData,
+      ConstructEntryList(const RefPtr<HTMLFormControlElement> &submitter, const Ref<DOMFormData> &domFormData,
                          List<Pair<dom::DOMString, dom::DOMString>> *formValues) noexcept;
 
     KRYS_NODISCARD const FormSubmission::Attributes &Attributes() const noexcept
@@ -279,15 +279,15 @@ namespace krys::boo::html
 
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
-                            dom::DOMStringAtom namespaceURI) noexcept override;
+                            const dom::DOMStringAtom &namespaceURI) noexcept override;
 
   private:
     void Submit(dom::Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
                 HTMLFormControlElement *submitter = nullptr) noexcept;
 
-    void SubmitDialog(Ref<FormSubmission> &&formSubmission) noexcept;
+    void SubmitDialog(const Ref<FormSubmission> &formSubmission) noexcept;
 
     KRYS_NODISCARD uint32 FormElementIndexWithFormAttribute(dom::Element &element, uint32 rangeStart,
                                                             uint32 rangeEnd) noexcept;

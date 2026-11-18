@@ -35,7 +35,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TransformFunctionSizeDependencies Translate::ComputeSizeDependencies() const noexcept
   {

@@ -390,7 +390,7 @@ namespace krys::boo
                            MayExtendDragSession mayExtendDragSession = MayExtendDragSession::No) noexcept;
 
     /// @brief Whether a drag of an image may be dropped in the frame as a file.
-    KRYS_NODISCARD bool CanDropCurrentlyDraggedImageAsFile() const noexcept;
+    KRYS_NODISCARD static bool CanDropCurrentlyDraggedImageAsFile() noexcept;
 
     /// @brief Extends the selection to the last known mouse position, as dragging (and autoscrolling) does.
     void UpdateSelectionForMouseDrag() noexcept;
@@ -432,7 +432,7 @@ namespace krys::boo
     /// @brief The cursor to show, as chosen by the last mouse move or cursor update.
     void SetCurrentMouseCursor(Cursor cursor) noexcept
     {
-      _currentMouseCursor = cursor;
+      _currentMouseCursor = krys::move(cursor);
     }
 
     KRYS_NODISCARD Cursor CurrentMouseCursor() const noexcept
@@ -613,7 +613,7 @@ namespace krys::boo
 
     KRYS_NODISCARD EnumSet<DragSourceAction> UpdateDragSourceActionsAllowed() const noexcept;
 
-    KRYS_NODISCARD bool ShouldAllowMouseDownToStartDrag() const noexcept;
+    KRYS_NODISCARD static bool ShouldAllowMouseDownToStartDrag() noexcept;
 
     bool DispatchDragEvent(dom::DOMStringAtom eventType, dom::Element &target,
                            const PlatformMouseEvent &event, dom::DataTransfer &dataTransfer) noexcept;
@@ -654,11 +654,11 @@ namespace krys::boo
                               IgnoreAncestorNodesForClickEvent ignoreAncestorNodesForClickEvent) noexcept;
 
     /// @return Whether the click was dispatched without being cancelled.
-    bool DispatchAnyClickEvent(dom::DOMStringAtom eventType, dom::Node *clickNode, int32 clickCount,
-                               const PlatformMouseEvent &platformMouseEvent) noexcept;
+    static bool DispatchAnyClickEvent(dom::DOMStringAtom eventType, dom::Node *clickNode, int32 clickCount,
+                                      const PlatformMouseEvent &platformMouseEvent) noexcept;
 
     /// @return Whether the event was dispatched without being cancelled.
-    bool DispatchMouseEvent(dom::DOMStringAtom eventType, dom::Node *targetNode, int32 clickCount,
+    bool DispatchMouseEvent(const dom::DOMStringAtom &eventType, dom::Node *targetNode, int32 clickCount,
                             const PlatformMouseEvent &platformMouseEvent,
                             FireMouseOverOut fireMouseOverOut) noexcept;
 
@@ -672,7 +672,8 @@ namespace krys::boo
 
     /// @brief Tells the scrollable areas the mouse moved over, entered or left, which show their overlay
     /// scrollbars: the mouse is in a scroller and in each one around it.
-    void NotifyScrollableAreasOfMouseEvents(dom::DOMStringAtom eventType, dom::Element *lastElementUnderMouse,
+    void NotifyScrollableAreasOfMouseEvents(const dom::DOMStringAtom &eventType,
+                                            dom::Element *lastElementUnderMouse,
                                             dom::Element *elementUnderMouse) noexcept;
 
     void ClearElementUnderMouse() noexcept;
@@ -683,7 +684,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<Cursor> SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept;
 
-    KRYS_NODISCARD bool UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) const noexcept;
+    KRYS_NODISCARD static bool UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) noexcept;
 
     void FakeMouseMoveEventTimerFired() noexcept;
 
@@ -734,7 +735,7 @@ namespace krys::boo
 
     bool HandleMousePressEventTripleClick(const MouseEventWithHitTestResults &event) noexcept;
 
-    KRYS_NODISCARD bool CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) const noexcept;
+    KRYS_NODISCARD static bool CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) noexcept;
 
     KRYS_NODISCARD bool MouseDownMayStartSelect() const noexcept;
 
@@ -755,9 +756,9 @@ namespace krys::boo
     void SelectClosestContextualWordOrLinkFromHitTestResult(
       const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept;
 
-    KRYS_NODISCARD VisiblePosition SelectionExtentRespectingEditingBoundary(const VisibleSelection &selection,
-                                                                            const LayoutPoint &localPoint,
-                                                                            dom::Node *targetNode) noexcept;
+    KRYS_NODISCARD static VisiblePosition
+      SelectionExtentRespectingEditingBoundary(const VisibleSelection &selection,
+                                               const LayoutPoint &localPoint, dom::Node *targetNode) noexcept;
 
     bool
       HandleMouseDraggedEvent(const MouseEventWithHitTestResults &event,

@@ -598,7 +598,7 @@ namespace krys::pal::win32
             SetString(*value, info->KeyboardShortcut);
           }
           break;
-        case UIA_FrameworkIdPropertyId:         SetString(*value, u8"Krystal"); break;
+        case UIA_FrameworkIdPropertyId:
         case UIA_ProviderDescriptionPropertyId: SetString(*value, u8"Krystal"); break;
         case UIA_IsKeyboardFocusablePropertyId: SetBool(*value, states.Contains(State::Focusable)); break;
         case UIA_HasKeyboardFocusPropertyId:    SetBool(*value, states.Contains(State::Focused)); break;

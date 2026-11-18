@@ -244,9 +244,10 @@ namespace krys::boo::html
     return NodeDocument().CompleteURL(*href);
   }
 
-  void HTMLLinkElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLLinkElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                           Maybe<dom::DOMStringView> oldValue,
                                            Maybe<dom::DOMStringView> value,
-                                           dom::DOMStringAtom namespaceURI) noexcept
+                                           const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)

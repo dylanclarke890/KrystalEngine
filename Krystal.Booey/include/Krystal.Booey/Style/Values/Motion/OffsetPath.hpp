@@ -261,7 +261,7 @@ namespace krys::boo::style
   template <>
   struct Blending<OffsetPath>
   {
-    KRYS_NODISCARD bool CanBlend(const OffsetPath &, const OffsetPath &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const OffsetPath &, const OffsetPath &) noexcept;
 
     KRYS_NODISCARD OffsetPath Blend(const OffsetPath &, const OffsetPath &, const BlendingContext &) noexcept;
   };

@@ -55,7 +55,7 @@ namespace krys::boo
       krys_debug_assert(type == Type::Light || type == Type::Dark);
     }
 
-    FontPaletteIndex(uint32 integer) noexcept : IndexType(Type::Integer), Integer(integer)
+    FontPaletteIndex(uint32 integer) noexcept : Integer(integer)
     {
     }
 

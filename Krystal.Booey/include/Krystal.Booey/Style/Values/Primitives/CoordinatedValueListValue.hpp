@@ -370,7 +370,7 @@ namespace krys::boo::style
   // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
   // with each properties `css::PropertyId` as the first template argument, and then and'ing the results.
   template <CoordinatedValueListValue T, typename F>
-  constexpr bool AllOfCoordinatedValueListProperties(KRYS_NOESCAPE F &&f) noexcept
+  constexpr bool AllOfCoordinatedValueListProperties(KRYS_NOESCAPE F f) noexcept
   {
     return std::apply([&]<typename... Ts>(const Ts &...)
                       { return (f.template operator()<Ts::value>() && ...); }, T::Properties);
@@ -379,7 +379,7 @@ namespace krys::boo::style
   // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
   // with each properties `css::PropertyId` as the first template argument, and then or'ing the results.
   template <CoordinatedValueListValue T, typename F>
-  constexpr bool AnyOfCoordinatedValueListProperties(KRYS_NOESCAPE F &&f) noexcept
+  constexpr bool AnyOfCoordinatedValueListProperties(KRYS_NOESCAPE F f) noexcept
   {
     return std::apply([&]<typename... Ts>(const Ts &...)
                       { return (f.template operator()<Ts::value>() || ...); }, T::Properties);
@@ -388,7 +388,7 @@ namespace krys::boo::style
   // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
   // with each properties `css::PropertyId` as the first template argument.
   template <CoordinatedValueListValue T, typename F>
-  constexpr void EachCoordinatedValueListProperties(KRYS_NOESCAPE F &&f) noexcept
+  constexpr void EachCoordinatedValueListProperties(KRYS_NOESCAPE F f) noexcept
   {
     std::apply([&]<typename... Ts>(const Ts &...) { (f.template operator()<Ts::value>(), ...); },
                T::Properties);

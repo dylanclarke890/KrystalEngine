@@ -99,26 +99,26 @@ namespace krys::boo::layout_integration
 
     void SetListMarkerOffsetForMarkerOutside(const RenderListMarker &listMarker) noexcept;
 
-    KRYS_NODISCARD layout::BoxGeometry::HorizontalEdges
+    KRYS_NODISCARD static layout::BoxGeometry::HorizontalEdges
       HorizontalLogicalMargin(const RenderBoxModelObject &renderer, Maybe<LayoutUnit> availableWidth,
                               WritingMode writingMode, bool retainMarginStart = true,
                               bool retainMarginEnd = true) noexcept;
 
-    KRYS_NODISCARD layout::BoxGeometry::VerticalEdges
+    KRYS_NODISCARD static layout::BoxGeometry::VerticalEdges
       VerticalLogicalMargin(const RenderBoxModelObject &renderer, Maybe<LayoutUnit> availableWidth,
                             WritingMode writingMode) noexcept;
 
-    KRYS_NODISCARD layout::BoxGeometry::Edges LogicalBorder(const RenderBoxModelObject &renderer,
-                                                            WritingMode writingMode,
-                                                            bool isIntrinsicWidthMode = false,
-                                                            bool retainBorderStart = true,
-                                                            bool retainBorderEnd = true) noexcept;
+    KRYS_NODISCARD static layout::BoxGeometry::Edges LogicalBorder(const RenderBoxModelObject &renderer,
+                                                                   WritingMode writingMode,
+                                                                   bool isIntrinsicWidthMode = false,
+                                                                   bool retainBorderStart = true,
+                                                                   bool retainBorderEnd = true) noexcept;
 
-    KRYS_NODISCARD layout::BoxGeometry::Edges LogicalPadding(const RenderBoxModelObject &renderer,
-                                                             Maybe<LayoutUnit> availableWidth,
-                                                             WritingMode writingMode,
-                                                             bool retainPaddingStart = true,
-                                                             bool retainPaddingEnd = true) noexcept;
+    KRYS_NODISCARD static layout::BoxGeometry::Edges LogicalPadding(const RenderBoxModelObject &renderer,
+                                                                    Maybe<LayoutUnit> availableWidth,
+                                                                    WritingMode writingMode,
+                                                                    bool retainPaddingStart = true,
+                                                                    bool retainPaddingEnd = true) noexcept;
 
     KRYS_NODISCARD layout::LayoutState &GetLayoutState() noexcept
     {

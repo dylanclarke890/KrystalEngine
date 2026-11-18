@@ -365,7 +365,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasVerticalOverflow() const noexcept;
 
-    KRYS_NODISCARD bool ShowsOverflowControls() const noexcept;
+    KRYS_NODISCARD static bool ShowsOverflowControls() noexcept;
 
     KRYS_NODISCARD ScrollOffset ClampScrollOffset(const ScrollOffset &offset) const noexcept;
 

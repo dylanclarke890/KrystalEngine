@@ -31,7 +31,7 @@ namespace krys::boo::svg::tests
           == PropertyId::TransformOrigin);
     CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"d", null) == PropertyId::D);
     CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"href", null) == PropertyId::Invalid);
-    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"fill", infra::Namespaces::XLink)
+    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"fill", infra::namespaces::XLink)
           == PropertyId::Invalid);
 
     auto document =
@@ -45,7 +45,7 @@ namespace krys::boo::svg::tests
     {
       auto &rect = *document->GetElementById(u8"r");
       REQUIRE_FALSE(rect.SetAttribute(u8"fill", u8"blue").HasException());
-      CHECK(Hints(rect).find("fill: blue;") != std::string::npos);
+      CHECK(Hints(rect).contains("fill: blue;"));
     }
 
     SECTION("Resolution")

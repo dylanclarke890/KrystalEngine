@@ -81,12 +81,14 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD constexpr const Exception &GetException() const noexcept
     {
+      krys_debug_assert(HasException());
       krys_debug_assert(!_wasReleased);
       return _value.error();
     }
 
     KRYS_NODISCARD constexpr Exception &&ReleaseException() noexcept
     {
+      krys_debug_assert(HasException());
       krys_debug_assert(!std::exchange(_wasReleased, true));
       return krys::move(_value.error());
     }
@@ -313,12 +315,14 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD constexpr const Exception &GetException() const noexcept
     {
+      krys_debug_assert(HasException());
       krys_debug_assert(!_wasReleased);
       return _value.error();
     }
 
     KRYS_NODISCARD constexpr Exception &&ReleaseException() noexcept
     {
+      krys_debug_assert(HasException());
       krys_debug_assert(!std::exchange(_wasReleased, true));
       return krys::move(_value.error());
     }

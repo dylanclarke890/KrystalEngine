@@ -120,7 +120,7 @@ namespace krys::boo::layout
       return Style().GetFlexBasis().IsContent();
     }
 
-    KRYS_NODISCARD bool HasAvailableSpaceDependentFlexBasis() const noexcept
+    KRYS_NODISCARD static bool HasAvailableSpaceDependentFlexBasis() noexcept
     {
       return false;
     }

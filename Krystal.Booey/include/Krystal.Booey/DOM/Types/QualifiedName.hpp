@@ -82,17 +82,17 @@ namespace krys::boo::dom
       return _storage->_namespace;
     }
 
-    KRYS_NODISCARD const DOMStringAtom &NamespaceURI() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &NamespaceURI() const noexcept KRYS_LIFETIME_BOUND
     {
       return _storage->_namespaceURI;
     }
 
-    KRYS_NODISCARD const DOMStringAtom &NamespacePrefix() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &NamespacePrefix() const noexcept KRYS_LIFETIME_BOUND
     {
       return _storage->_namespacePrefix;
     }
 
-    KRYS_NODISCARD const DOMStringAtom &LocalName() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &LocalName() const noexcept KRYS_LIFETIME_BOUND
     {
       return _storage->_localName;
     }
@@ -111,10 +111,8 @@ namespace krys::boo::dom
       {
         return LocalName().ToString();
       }
-      else
-      {
-        return NamespacePrefix().ToString() + u8":" + LocalName().ToString();
-      }
+
+      return NamespacePrefix().ToString() + u8":" + LocalName().ToString();
     }
 
     KRYS_NODISCARD QualifiedNameStorage *get() const noexcept

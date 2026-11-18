@@ -157,25 +157,28 @@ namespace krys::boo::style
   template <>
   struct Blending<MaskBorderOutsetValue>
   {
-    KRYS_NODISCARD bool CanBlend(const MaskBorderOutsetValue &, const MaskBorderOutsetValue &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const MaskBorderOutsetValue &,
+                                        const MaskBorderOutsetValue &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderOutsetValue &,
-                                                                      const MaskBorderOutsetValue &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const MaskBorderOutsetValue &,
+                                                    const MaskBorderOutsetValue &) noexcept;
 
-    KRYS_NODISCARD MaskBorderOutsetValue Blend(const MaskBorderOutsetValue &, const MaskBorderOutsetValue &,
-                                               const BlendingContext &) noexcept;
+    KRYS_NODISCARD static MaskBorderOutsetValue
+      Blend(const MaskBorderOutsetValue &, const MaskBorderOutsetValue &, const BlendingContext &) noexcept;
   };
 
   template <>
   struct Blending<MaskBorderOutset>
   {
-    KRYS_NODISCARD bool CanBlend(const MaskBorderOutset &, const MaskBorderOutset &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const MaskBorderOutset &, const MaskBorderOutset &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderOutset &,
-                                                                      const MaskBorderOutset &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const MaskBorderOutset &,
+                                                    const MaskBorderOutset &) noexcept;
 
-    KRYS_NODISCARD MaskBorderOutset Blend(const MaskBorderOutset &, const MaskBorderOutset &,
-                                          const BlendingContext &) noexcept;
+    KRYS_NODISCARD static MaskBorderOutset Blend(const MaskBorderOutset &, const MaskBorderOutset &,
+                                                 const BlendingContext &) noexcept;
   };
 }
 

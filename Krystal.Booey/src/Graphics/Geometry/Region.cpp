@@ -202,12 +202,12 @@ namespace krys::boo
   }
 
   template <typename TCompareOperation>
-  bool Region::Shape::CompareShapes(const Shape &aShape, const Shape &bShape) noexcept
+  bool Region::Shape::CompareShapes(const Shape &shape1, const Shape &shape2) noexcept
   {
     bool result = TCompareOperation::DefaultResult;
 
-    auto aSpans = aShape.Spans();
-    auto bSpans = bShape.Spans();
+    auto aSpans = shape1.Spans();
+    auto bSpans = shape2.Spans();
 
     bool aHadSegmentInPreviousSpan = false;
     bool bHadSegmentInPreviousSpan = false;
@@ -218,8 +218,8 @@ namespace krys::boo
       int bY = bSpans[0].Y;
       int bMaxY = bSpans[1].Y;
 
-      auto aSegments = aShape.Segments(aSpans);
-      auto bSegments = bShape.Segments(bSpans);
+      auto aSegments = shape1.Segments(aSpans);
+      auto bSegments = shape2.Segments(bSpans);
 
       // Look for a non-overlapping part of the spans. If B had a segment in its previous span, then we
       // already tested A against B within that span.

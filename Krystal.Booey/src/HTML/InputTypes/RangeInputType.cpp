@@ -96,7 +96,7 @@ namespace krys::boo::html
     auto &element = *Element();
     auto attribute = [&](dom::DOMStringAtom name)
     {
-      return element.GetAttribute(name).value_or(dom::DOMString());
+      return element.GetAttribute(krys::move(name)).value_or(dom::DOMString());
     };
     const Decimal stepBase = FindStepBase(Decimal(RangeDefaultStepBase));
     const Decimal minimum = ParseToNumber(attribute(u8"min"), Decimal(RangeDefaultMinimum));
@@ -201,7 +201,7 @@ namespace krys::boo::html
     return SerializeForNumberType(value);
   }
 
-  void RangeInputType::AttributeChanged(dom::DOMStringAtom localName) noexcept
+  void RangeInputType::AttributeChanged(const dom::DOMStringAtom &localName) noexcept
   {
     if (localName == u8"max" || localName == u8"min" || localName == u8"value")
     {

@@ -474,8 +474,8 @@ namespace krys::boo
                || object.Role() == AXRole::PopUpButton || object.IsRangeControl();
       }
 
-      KRYS_NODISCARD dom::DOMString EmbeddedControlText(const dom::Element &element,
-                                                        const AXObject &object) noexcept
+      KRYS_NODISCARD static dom::DOMString EmbeddedControlText(const dom::Element &element,
+                                                               const AXObject &object) noexcept
       {
         // 2C. ... textbox: return the value of the textbox.
         if (object.IsTextControl() && !object.IsComboBox())
@@ -581,7 +581,7 @@ namespace krys::boo
         {
           return nullptr;
         }
-        auto href = element.GetAttributeNS(infra::Namespaces::XLink, u8"href");
+        auto href = element.GetAttributeNS(infra::namespaces::XLink, u8"href");
         if (!href || href->empty())
         {
           href = element.GetAttribute(u8"href");
@@ -605,7 +605,7 @@ namespace krys::boo
         }
         if (element.LocalName() == u8"a")
         {
-          if (auto title = element.GetAttributeNS(infra::Namespaces::XLink, u8"title");
+          if (auto title = element.GetAttributeNS(infra::namespaces::XLink, u8"title");
               title && !title->empty())
           {
             return *title;

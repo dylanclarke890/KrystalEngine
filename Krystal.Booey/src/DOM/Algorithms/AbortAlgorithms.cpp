@@ -8,7 +8,7 @@ namespace krys::boo::dom
 {
   void AbortAlgorithms::SignalAbort(AbortController &controller, Maybe<krys::Any> reason) noexcept
   {
-    SignalAbort(*controller._signal, reason);
+    SignalAbort(*controller._signal, krys::move(reason));
   }
 
   void AbortAlgorithms::Add(const AbortAlgorithmCallback &algorithm, AbortSignal &signal) noexcept

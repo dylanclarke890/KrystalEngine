@@ -3,13 +3,13 @@
 namespace krys::boo::dom
 {
   CompositionEvent::CompositionEvent(DOMStringAtom type, const CompositionEventInit &initializer) noexcept
-      : UIEvent(type, initializer), _data(initializer.Data)
+      : UIEvent(krys::move(type), initializer), _data(initializer.Data)
   {
   }
 
   CompositionEvent::~CompositionEvent() noexcept = default;
 
-  Ref<CompositionEvent> CompositionEvent::Create(DOMStringAtom type, LocalDOMWindow *view,
+  Ref<CompositionEvent> CompositionEvent::Create(const DOMStringAtom &type, LocalDOMWindow *view,
                                                  DOMStringView data) noexcept
   {
     CompositionEventInit init;
@@ -31,7 +31,7 @@ namespace krys::boo::dom
       return;
     }
 
-    InitUIEvent(type, canBubble, cancelable, view, 0);
+    InitUIEvent(krys::move(type), canBubble, cancelable, view, 0);
 
     _data = DOMString(data);
   }

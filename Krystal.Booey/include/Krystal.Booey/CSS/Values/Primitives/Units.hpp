@@ -164,11 +164,7 @@ namespace krys::boo::css
   template <UnitEnum T, UnitEnum U>
   KRYS_NODISCARD constexpr bool IsUnit(U other) noexcept
   {
-    if constexpr (SameType<T, U>)
-    {
-      return true;
-    }
-    else if constexpr (NestedUnitEnumOf<U, T>)
+    if constexpr (SameType<T, U> || NestedUnitEnumOf<U, T>)
     {
       return true;
     }
@@ -262,7 +258,7 @@ namespace krys::boo::css
   }
 
 #define KRYS_DEFINE_CSS_UNIT_LITERAL(type, name)                                                             \
-  inline namespace Literals                                                                                  \
+  inline namespace literals                                                                                  \
   {                                                                                                          \
     consteval ValueLiteral<type> operator""_css_##name(long double value)                                    \
     {                                                                                                        \

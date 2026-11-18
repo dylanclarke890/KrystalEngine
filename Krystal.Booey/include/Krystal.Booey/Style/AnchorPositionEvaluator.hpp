@@ -325,7 +325,8 @@ namespace krys::boo::style
 
   private:
     KRYS_NODISCARD static RenderBoxModelObject *
-      FindAnchorForAnchorFunctionAndAttemptResolution(BuilderState &, Maybe<ScopedName> elementName) noexcept;
+      FindAnchorForAnchorFunctionAndAttemptResolution(BuilderState &,
+                                                      Maybe<ScopedName> anchorNameArgument) noexcept;
 
     KRYS_NODISCARD static AnchorElements
       FindAnchorsForAnchorPositionedElement(const dom::Element &,

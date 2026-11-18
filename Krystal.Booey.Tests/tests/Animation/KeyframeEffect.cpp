@@ -50,13 +50,13 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD Ref<KeyframeEffect> Valid(dom::ExceptionOr<Ref<KeyframeEffect>> &&result)
+    KRYS_NODISCARD Ref<KeyframeEffect> Valid(dom::ExceptionOr<Ref<KeyframeEffect>> result)
     {
       REQUIRE(result.HasValue());
       return result.ReleaseValue();
     }
 
-    KRYS_NODISCARD dom::ExceptionCode Error(dom::ExceptionOr<Ref<KeyframeEffect>> &&result)
+    KRYS_NODISCARD dom::ExceptionCode Error(dom::ExceptionOr<Ref<KeyframeEffect>> result)
     {
       REQUIRE(result.HasException());
       return result.ReleaseException().Code();

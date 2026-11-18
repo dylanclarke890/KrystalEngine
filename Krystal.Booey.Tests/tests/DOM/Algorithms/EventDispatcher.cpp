@@ -24,7 +24,7 @@ namespace krys::boo::dom::tests
   {
     KRYS_NODISCARD Ref<Element> NewElement(Document &document, dom::DOMStringAtom localName)
     {
-      auto element = document.CreateElement(localName);
+      auto element = document.CreateElement(krys::move(localName));
       REQUIRE_FALSE(element.HasException());
       return element.ReleaseValue();
     }
@@ -46,7 +46,7 @@ namespace krys::boo::dom::tests
         REQUIRE_FALSE(Parent->AppendChild(*Child).HasException());
       }
 
-      void Listen(EventTarget &target, std::string name, bool capture)
+      void Listen(EventTarget &target, const std::string &name, bool capture)
       {
         Listeners.push_back(target.AddEventListener(
           event_names::Click, [this, name](Event &) { Log.push_back(name); }, capture));
@@ -423,7 +423,7 @@ namespace krys::boo::dom::tests
     {
       using dictionary_type = EventInit;
 
-      TestEvent(dom::DOMStringAtom type, const dictionary_type &init) noexcept : Event(type, init)
+      TestEvent(dom::DOMStringAtom type, const dictionary_type &init) noexcept : Event(krys::move(type), init)
       {
       }
     };

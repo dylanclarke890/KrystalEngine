@@ -107,22 +107,20 @@ namespace krys::boo
 
       return static_cast<int32>(text.size());
     }
-    else
-    {
-      position = ubrk_preceding(it, position);
-      while (position != UBRK_DONE)
-      {
-        // We stop searching when the character following the break is alphanumeric.
-        if (position && u_isalnum(CodePointAt(text, position)))
-        {
-          return position;
-        }
 
-        position = ubrk_preceding(it, position);
+    position = ubrk_preceding(it, position);
+    while (position != UBRK_DONE)
+    {
+      // We stop searching when the character following the break is alphanumeric.
+      if (position && u_isalnum(CodePointAt(text, position)))
+      {
+        return position;
       }
 
-      return 0;
+      position = ubrk_preceding(it, position);
     }
+
+    return 0;
   }
 
   void FindWordBoundary(utf8_stringview text, int32 position, int32 *start, int32 *end) noexcept

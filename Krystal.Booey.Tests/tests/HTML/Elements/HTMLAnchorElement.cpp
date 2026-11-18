@@ -120,7 +120,7 @@ namespace krys::boo::html::tests
     {
       Click(fixture.ById(u8"inner"), 1);
       REQUIRE(fixture.Navigations().size() == 1);
-      CHECK(fixture.Navigations()[0].Action.GetMouseEventData()->Button == MouseButton::Middle);
+      CHECK(fixture.Navigations()[0].Action.GetMouseEventData().value().Button == MouseButton::Middle);
       // The right button doesn't.
       Click(fixture.ById(u8"inner"), 2);
       CHECK(fixture.Navigations().size() == 1);

@@ -414,7 +414,7 @@ namespace krys::boo
   using FeaturesMap = HashMap<FontTag, int, FourCharacterTagHash>;
 
   KRYS_NODISCARD FeaturesMap ComputeFeatureSettingsFromVariants(const FontVariantSettings &,
-                                                                RefPtr<FontFeatureValues>) noexcept;
+                                                                const RefPtr<FontFeatureValues> &) noexcept;
 
   enum class ResolvedEmojiPolicy : uint8
   {

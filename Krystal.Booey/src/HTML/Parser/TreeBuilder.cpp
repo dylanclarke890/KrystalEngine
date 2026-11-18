@@ -64,7 +64,7 @@ namespace krys::boo::html
   {
   }
 
-  void TreeBuilder::ProcessToken(TokenAtom &&token) noexcept
+  void TreeBuilder::ProcessToken(TokenAtom token) noexcept
   {
     if (_ignoreNextNewline)
     {
@@ -103,7 +103,7 @@ namespace krys::boo::html
     }
 
     auto &adjustedCurrentNode = AdjustedCurrentNode();
-    if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::HTML)
+    if (adjustedCurrentNode.NamespaceURI() == infra::namespaces::HTML)
     {
       return true;
     }
@@ -124,7 +124,7 @@ namespace krys::boo::html
       }
     }
 
-    if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::MathML
+    if (adjustedCurrentNode.NamespaceURI() == infra::namespaces::MathML
         && adjustedCurrentNode.LocalName() == u8"annotation-xml" && token.Type() == TokenType::StartTag
         && token.Name() == u8"svg")
     {
@@ -145,7 +145,7 @@ namespace krys::boo::html
     return false;
   }
 
-  void TreeBuilder::ProcessAccordingToRulesForHTMLContent(TokenAtom &&token) noexcept
+  void TreeBuilder::ProcessAccordingToRulesForHTMLContent(TokenAtom token) noexcept
   {
     switch (_insertionMode)
     {
@@ -173,7 +173,7 @@ namespace krys::boo::html
     }
   }
 
-  void TreeBuilder::ProcessAccordingToRulesForForeignContent(TokenAtom &&token) noexcept
+  void TreeBuilder::ProcessAccordingToRulesForForeignContent(TokenAtom token) noexcept
   {
     auto InvalidTag = [&]()
     {
@@ -189,7 +189,7 @@ namespace krys::boo::html
         }
 
         if (!IsMathMLTextIntegrationPoint(currentNode) && !IsHTMLIntegrationPoint(currentNode)
-            && currentNode.NamespaceURI() != infra::Namespaces::HTML)
+            && currentNode.NamespaceURI() != infra::namespaces::HTML)
         {
           _openElementStack.Pop();
           continue;
@@ -310,11 +310,11 @@ namespace krys::boo::html
         }
 
         auto &adjustedCurrentNode = AdjustedCurrentNode();
-        if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::MathML)
+        if (adjustedCurrentNode.NamespaceURI() == infra::namespaces::MathML)
         {
           AdjustMathMLAttributes(token);
         }
-        else if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::SVG)
+        else if (adjustedCurrentNode.NamespaceURI() == infra::namespaces::SVG)
         {
           constexpr static Array<Array<dom::DOMStringView, 2uz>, 37uz> svgTagNameAdjustments = {
             Array<dom::DOMStringView, 2uz> {u8"altglyph", u8"altGlyph"},
@@ -368,7 +368,7 @@ namespace krys::boo::html
         }
 
         AdjustForeignAttributes(token);
-        InsertForeignElement(krys::move(token), adjustedCurrentNode.NamespaceURI(), false);
+        InsertForeignElement(token, adjustedCurrentNode.NamespaceURI(), false);
 
         if (token.IsSelfClosing())
         {
@@ -435,7 +435,7 @@ namespace krys::boo::html
           ++nodeIt;
 
           // 6. If node is not an element in the HTML namespace, return to the step labeled loop.
-          if (nodeIt->Element().NamespaceURI() != infra::Namespaces::HTML)
+          if (nodeIt->Element().NamespaceURI() != infra::namespaces::HTML)
           {
             continue;
           }
@@ -460,10 +460,8 @@ namespace krys::boo::html
     {
       return _context->Element();
     }
-    else
-    {
-      return CurrentNode();
-    }
+
+    return CurrentNode();
   }
 
   void TreeBuilder::ParseError(const TokenAtom &token) noexcept
@@ -623,7 +621,7 @@ namespace krys::boo::html
     return _templateInsertionModes.back();
   }
 
-  void TreeBuilder::InitialMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InitialMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -710,7 +708,7 @@ namespace krys::boo::html
     BeforeHTMLMode(krys::move(token));
   }
 
-  void TreeBuilder::BeforeHTMLMode(TokenAtom &&token) noexcept
+  void TreeBuilder::BeforeHTMLMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -742,7 +740,7 @@ namespace krys::boo::html
       {
         if (token.Name() == u8"html")
         {
-          auto html = CreateElement(token.Name(), infra::Namespaces::HTML, token.Attributes(), _document);
+          auto html = CreateElement(token.Name(), infra::namespaces::HTML, token.Attributes(), _document);
           _document.AppendChild(*html);
           _openElementStack.Push({TagName::html, Namespace::HTML, *html, krys::move(token.Attributes())});
 
@@ -766,7 +764,7 @@ namespace krys::boo::html
     }
 
     auto html = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML));
+      _document, dom::QualifiedName(infra::namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML));
     _document.AppendChild(*html);
     _openElementStack.Push({TagName::html, Namespace::HTML, *html, {}});
 
@@ -774,7 +772,7 @@ namespace krys::boo::html
     BeforeHeadMode(krys::move(token));
   }
 
-  void TreeBuilder::BeforeHeadMode(TokenAtom &&token) noexcept
+  void TreeBuilder::BeforeHeadMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -813,7 +811,7 @@ namespace krys::boo::html
 
         if (token.Name() == u8"head")
         {
-          _head = Downcast<HTMLHeadElement>(InsertHTMLElement(krys::move(token)));
+          _head = Downcast<HTMLHeadElement>(InsertHTMLElement(token));
           _insertionMode = InsertionMode::InHead;
           return;
         }
@@ -834,7 +832,7 @@ namespace krys::boo::html
     }
 
     _head = Downcast<HTMLHeadElement>(
-      dom::ElementFactory::Create(_document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"head",
+      dom::ElementFactory::Create(_document, dom::QualifiedName(infra::namespaces::HTML, null, u8"head",
                                                                 TagName::head, Namespace::HTML)));
     InsertElementAtAdjustedInsertionLocation(*_head);
     _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
@@ -843,7 +841,7 @@ namespace krys::boo::html
     InHeadMode(krys::move(token));
   }
 
-  void TreeBuilder::InHeadMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InHeadMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -881,19 +879,20 @@ namespace krys::boo::html
             InBodyMode(krys::move(token));
             return;
           }
+          // NOLINTBEGIN(bugprone-branch-clone): meta has its own (skipped) steps.
           case TagName::base:
           case TagName::basefont:
           case TagName::bgsound:
           case TagName::link:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             return;
           }
           case TagName::meta:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
@@ -910,6 +909,7 @@ namespace krys::boo::html
 
             return;
           }
+          // NOLINTEND(bugprone-branch-clone)
           case TagName::title:
           {
             ParseGenericRCDATATextElement(krys::move(token));
@@ -919,7 +919,7 @@ namespace krys::boo::html
           {
             if (_scriptingMode == ParserScriptingMode::Disabled)
             {
-              InsertHTMLElement(krys::move(token));
+              InsertHTMLElement(token);
               _insertionMode = InsertionMode::InHeadNoscript;
             }
             else
@@ -938,7 +938,7 @@ namespace krys::boo::html
           {
             auto adjustedInsertionLocation = AppropriatePlaceToInsertNode();
 
-            auto element = CreateElement(token.Name(), infra::Namespaces::HTML, token.Attributes(),
+            auto element = CreateElement(token.Name(), infra::namespaces::HTML, token.Attributes(),
                                          *adjustedInsertionLocation.Parent);
             auto &script = Downcast<HTMLScriptElement>(*element);
 
@@ -966,7 +966,7 @@ namespace krys::boo::html
           }
           case TagName::template_:
           {
-            InsertTemplateElement(krys::move(token));
+            InsertTemplateElement(token);
             return;
           }
           case TagName::head:
@@ -1066,7 +1066,7 @@ namespace krys::boo::html
     AfterHeadMode(krys::move(token));
   }
 
-  void TreeBuilder::InHeadNoscriptMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InHeadNoscriptMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -1145,7 +1145,7 @@ namespace krys::boo::html
     InHeadMode(krys::move(token));
   }
 
-  void TreeBuilder::AfterHeadMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterHeadMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -1185,7 +1185,7 @@ namespace krys::boo::html
           }
           case TagName::body:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _framesetOk = false;
 
             _insertionMode = InsertionMode::InBody;
@@ -1193,7 +1193,7 @@ namespace krys::boo::html
           }
           case TagName::frameset:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InFrameset;
             return;
@@ -1252,7 +1252,7 @@ namespace krys::boo::html
     }
 
     auto body = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"body", TagName::body, Namespace::HTML));
+      _document, dom::QualifiedName(infra::namespaces::HTML, null, u8"body", TagName::body, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*body);
     _openElementStack.Push({TagName::body, Namespace::HTML, *body, {}});
 
@@ -1261,7 +1261,7 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void TreeBuilder::InBodyMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InBodyMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -1372,7 +1372,7 @@ namespace krys::boo::html
             auto &bodyElement = Downcast<HTMLBodyElement>(_openElementStack[1].Element());
             (void)dom::MutationAlgorithms::Remove(bodyElement);
             _openElementStack.PopUntil(_openElementStack.Top().Element());
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InFrameset;
             return;
@@ -1408,7 +1408,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::h1:
@@ -1439,7 +1439,7 @@ namespace krys::boo::html
               }
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::pre:
@@ -1450,7 +1450,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _ignoreNextNewline = true;
             _framesetOk = false;
@@ -1470,7 +1470,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            auto element = InsertHTMLElement(krys::move(token));
+            auto element = InsertHTMLElement(token);
             if (!containsTemplateElement)
             {
               _form = Downcast<HTMLFormElement>(krys::move(element));
@@ -1511,7 +1511,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::dd:
@@ -1561,7 +1561,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::plaintext:
@@ -1571,7 +1571,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _tokenizer.State(TokenizerState::PLAINTEXT);
             return;
@@ -1586,7 +1586,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _framesetOk = false;
 
@@ -1611,7 +1611,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             auto &a = _openElementStack.Bottom();
             _activeFormattingElements.PushElement(
@@ -1633,7 +1633,7 @@ namespace krys::boo::html
           case TagName::u:
           {
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             auto &fmtOpenItem = _openElementStack.Bottom();
             ParsedAttributeList fmtAttrsCopy = fmtOpenItem.Attributes();
@@ -1653,7 +1653,7 @@ namespace krys::boo::html
               ReconstructActiveFormattingElements();
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             auto &nobrOpenItem = _openElementStack.Bottom();
             ParsedAttributeList nobrAttrsCopy = nobrOpenItem.Attributes();
@@ -1668,7 +1668,7 @@ namespace krys::boo::html
           case TagName::object:
           {
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _activeFormattingElements.PushMarker();
             _framesetOk = false;
 
@@ -1682,7 +1682,7 @@ namespace krys::boo::html
               ClosePElement(token);
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _framesetOk = false;
 
             _insertionMode = InsertionMode::InTable;
@@ -1696,7 +1696,7 @@ namespace krys::boo::html
           case TagName::wbr:
           {
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             _framesetOk = false;
@@ -1731,7 +1731,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
@@ -1746,7 +1746,7 @@ namespace krys::boo::html
           case TagName::source:
           case TagName::track:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
@@ -1769,7 +1769,7 @@ namespace krys::boo::html
               }
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             _framesetOk = false;
@@ -1786,7 +1786,7 @@ namespace krys::boo::html
           }
           case TagName::textarea:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _ignoreNextNewline = true;
             _tokenizer.State(TokenizerState::RCDATA);
@@ -1831,7 +1831,7 @@ namespace krys::boo::html
 
             // Scripting is disabled: treat as 'any other start tag'.
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::select:
@@ -1852,7 +1852,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _framesetOk = false;
 
             return;
@@ -1876,7 +1876,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             return;
           }
@@ -1900,7 +1900,7 @@ namespace krys::boo::html
             }
 
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             return;
           }
@@ -1916,7 +1916,7 @@ namespace krys::boo::html
               }
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::rp:
@@ -1933,7 +1933,7 @@ namespace krys::boo::html
               }
             }
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::math:
@@ -1941,7 +1941,7 @@ namespace krys::boo::html
             ReconstructActiveFormattingElements();
             AdjustMathMLAttributes(token);
             AdjustForeignAttributes(token);
-            InsertForeignElement(krys::move(token), infra::Namespaces::MathML, false);
+            InsertForeignElement(token, infra::namespaces::MathML, false);
 
             if (token.IsSelfClosing())
             {
@@ -1956,7 +1956,7 @@ namespace krys::boo::html
             ReconstructActiveFormattingElements();
             AdjustSVGAttributes(token);
             AdjustForeignAttributes(token);
-            InsertForeignElement(krys::move(token), infra::Namespaces::SVG, false);
+            InsertForeignElement(token, infra::namespaces::SVG, false);
 
             if (token.IsSelfClosing())
             {
@@ -1984,7 +1984,7 @@ namespace krys::boo::html
           default:
           {
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             return;
           }
@@ -2127,7 +2127,7 @@ namespace krys::boo::html
               ParseError(token);
               auto pElement = dom::ElementFactory::Create(
                 _document,
-                dom::QualifiedName(infra::Namespaces::HTML, null, u8"p", TagName::p, Namespace::HTML));
+                dom::QualifiedName(infra::namespaces::HTML, null, u8"p", TagName::p, Namespace::HTML));
               InsertElementAtAdjustedInsertionLocation(*pElement);
               _openElementStack.Push({TagName::p, Namespace::HTML, *pElement, {}});
             }
@@ -2241,7 +2241,7 @@ namespace krys::boo::html
             // Act as if this were a "br" start tag with no attributes.
             token._attributes.clear();
             ReconstructActiveFormattingElements();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
 
             _framesetOk = false;
@@ -2296,7 +2296,7 @@ namespace krys::boo::html
     }
   }
 
-  void TreeBuilder::TextMode(TokenAtom &&token) noexcept
+  void TreeBuilder::TextMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2335,7 +2335,7 @@ namespace krys::boo::html
     }
   }
 
-  void TreeBuilder::InTableMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InTableMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2386,7 +2386,7 @@ namespace krys::boo::html
           {
             _openElementStack.PopUntilTableContext();
             _activeFormattingElements.PushMarker();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InCaption;
             return;
@@ -2394,7 +2394,7 @@ namespace krys::boo::html
           case TagName::colgroup:
           {
             _openElementStack.PopUntilTableContext();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InColumnGroup;
             return;
@@ -2404,7 +2404,7 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableContext();
 
             auto colgroup = dom::ElementFactory::Create(
-              _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"colgroup", TagName::colgroup,
+              _document, dom::QualifiedName(infra::namespaces::HTML, null, u8"colgroup", TagName::colgroup,
                                             Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*colgroup);
             _openElementStack.Push({TagName::colgroup, Namespace::HTML, *colgroup, {}});
@@ -2419,7 +2419,7 @@ namespace krys::boo::html
           case TagName::thead:
           {
             _openElementStack.PopUntilTableContext();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InTableBody;
             return;
@@ -2432,7 +2432,7 @@ namespace krys::boo::html
 
             auto tbody = dom::ElementFactory::Create(
               _document,
-              dom::QualifiedName(infra::Namespaces::HTML, null, u8"tbody", TagName::tbody, Namespace::HTML));
+              dom::QualifiedName(infra::namespaces::HTML, null, u8"tbody", TagName::tbody, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tbody);
             _openElementStack.Push({TagName::tbody, Namespace::HTML, *tbody, {}});
 
@@ -2480,7 +2480,7 @@ namespace krys::boo::html
 
             ParseError(token);
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
@@ -2501,7 +2501,7 @@ namespace krys::boo::html
 
             // Otherwise: Insert an HTML element for the token, and, if the parser is not parsing template
             // contents, set the form element pointer to point to the element created.
-            auto element = InsertHTMLElement(krys::move(token));
+            auto element = InsertHTMLElement(token);
             if (!containsTemplateElement)
             {
               _form = Downcast<HTMLFormElement>(krys::move(element));
@@ -2570,7 +2570,7 @@ namespace krys::boo::html
     _fosterParenting = false;
   }
 
-  void TreeBuilder::InTableTextMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InTableTextMode(TokenAtom token) noexcept
   {
     if (token.Type() == TokenType::Character)
     {
@@ -2624,7 +2624,7 @@ namespace krys::boo::html
     ProcessToken(krys::move(token));
   }
 
-  void TreeBuilder::InCaptionMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InCaptionMode(TokenAtom token) noexcept
   {
     auto CloseCaption = [&]() -> bool
     {
@@ -2715,7 +2715,7 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void TreeBuilder::InColumnGroupMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InColumnGroupMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2755,7 +2755,7 @@ namespace krys::boo::html
           }
           case TagName::col:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             return;
@@ -2818,7 +2818,7 @@ namespace krys::boo::html
     InTableMode(krys::move(token));
   }
 
-  void TreeBuilder::InTableBodyMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InTableBodyMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2830,7 +2830,7 @@ namespace krys::boo::html
           case TagName::tr:
           {
             _openElementStack.PopUntilTableBodyContext();
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
 
             _insertionMode = InsertionMode::InRow;
             return;
@@ -2843,7 +2843,7 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableBodyContext();
 
             auto tr =
-              dom::ElementFactory::Create(_document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"tr",
+              dom::ElementFactory::Create(_document, dom::QualifiedName(infra::namespaces::HTML, null, u8"tr",
                                                                         TagName::tr, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tr);
             _openElementStack.Push({TagName::tr, Namespace::HTML, *tr, {}});
@@ -2938,7 +2938,7 @@ namespace krys::boo::html
     InTableMode(krys::move(token));
   }
 
-  void TreeBuilder::InRowMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InRowMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -2952,7 +2952,7 @@ namespace krys::boo::html
           {
             _openElementStack.PopUntilTableRowContext();
 
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _insertionMode = InsertionMode::InCell;
 
             _activeFormattingElements.PushMarker();
@@ -3061,7 +3061,7 @@ namespace krys::boo::html
     InTableMode(krys::move(token));
   }
 
-  void TreeBuilder::InCellMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InCellMode(TokenAtom token) noexcept
   {
     auto CloseTheCell = [&]()
     {
@@ -3172,7 +3172,7 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void TreeBuilder::InTemplateMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InTemplateMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3293,7 +3293,7 @@ namespace krys::boo::html
     }
   }
 
-  void TreeBuilder::AfterBodyMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterBodyMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3360,7 +3360,7 @@ namespace krys::boo::html
     ProcessToken(krys::move(token));
   }
 
-  void TreeBuilder::InFramesetMode(TokenAtom &&token) noexcept
+  void TreeBuilder::InFramesetMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3403,12 +3403,12 @@ namespace krys::boo::html
           }
           case TagName::frameset:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             return;
           }
           case TagName::frame:
           {
-            InsertHTMLElement(krys::move(token));
+            InsertHTMLElement(token);
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
             return;
@@ -3459,7 +3459,7 @@ namespace krys::boo::html
     ParseError(token);
   }
 
-  void TreeBuilder::AfterFramesetMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterFramesetMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3528,7 +3528,7 @@ namespace krys::boo::html
     ParseError(token);
   }
 
-  void TreeBuilder::AfterAfterBodyMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterAfterBodyMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -3581,7 +3581,7 @@ namespace krys::boo::html
     InBodyMode(krys::move(token));
   }
 
-  void TreeBuilder::AfterAfterFramesetMode(TokenAtom &&token) noexcept
+  void TreeBuilder::AfterAfterFramesetMode(TokenAtom token) noexcept
   {
     switch (token.Type())
     {
@@ -4102,7 +4102,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#parsing-main-inhead (a start tag whose tag name is "template")
-  void TreeBuilder::InsertTemplateElement(TokenAtom &&token) noexcept
+  void TreeBuilder::InsertTemplateElement(TokenAtom &token) noexcept
   {
     // 1. Let templateStartTag be the start tag.
     auto &templateStartTag = token;
@@ -4131,7 +4131,7 @@ namespace krys::boo::html
 
     // 8. Let template be the result of creating an element for the token given templateStartTag, the HTML
     //    namespace, and the target parent of the appropriate place for inserting a node.
-    auto element = CreateElement(templateStartTag.Name(), infra::Namespaces::HTML,
+    auto element = CreateElement(templateStartTag.Name(), infra::namespaces::HTML,
                                  templateStartTag.Attributes(), *AppropriatePlaceToInsertNode().Parent);
     auto &templateElement = Downcast<HTMLTemplateElement>(*element);
 
@@ -4288,9 +4288,9 @@ namespace krys::boo::html
   SanitizerAction TreeBuilder::SanitizerActionFor(dom::DOMStringView localName,
                                                   dom::DOMStringAtom namespaceURI) const noexcept
   {
-    return _sanitizerConfig
-             ? SanitizerAlgorithms::ActionForElementName(localName, namespaceURI, *_sanitizerConfig)
-             : SanitizerAction::Keep;
+    return _sanitizerConfig ? SanitizerAlgorithms::ActionForElementName(localName, krys::move(namespaceURI),
+                                                                        *_sanitizerConfig)
+                            : SanitizerAction::Keep;
   }
 
   void TreeBuilder::MergeAttributes(dom::Element &element, const ParsedAttributeList &attributes) noexcept
@@ -4318,7 +4318,8 @@ namespace krys::boo::html
     }
   }
 
-  Ref<dom::Element> TreeBuilder::InsertForeignElement(TokenAtom &&token, dom::DOMStringAtom namespaceURI,
+  Ref<dom::Element> TreeBuilder::InsertForeignElement(TokenAtom &token,
+                                                      const dom::DOMStringAtom &namespaceURI,
                                                       bool onlyAddToElementStack) noexcept
   {
     // 1. Let element be the result of creating an element for the token given token, namespace, and the
@@ -4351,9 +4352,9 @@ namespace krys::boo::html
     return element;
   }
 
-  Ref<dom::Element> TreeBuilder::InsertHTMLElement(TokenAtom &&token) noexcept
+  Ref<dom::Element> TreeBuilder::InsertHTMLElement(TokenAtom &token) noexcept
   {
-    return InsertForeignElement(krys::move(token), infra::Namespaces::HTML, false);
+    return InsertForeignElement(token, infra::namespaces::HTML, false);
   }
 
   void TreeBuilder::InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position) noexcept
@@ -4412,10 +4413,10 @@ namespace krys::boo::html
     InsertComment(data, InsertionLocation {&_document, nullptr});
   }
 
-  void TreeBuilder::ParseGenericRawTextElement(TokenAtom &&token) noexcept
+  void TreeBuilder::ParseGenericRawTextElement(TokenAtom token) noexcept
   {
     // 1. Insert an HTML element for the token.
-    InsertHTMLElement(krys::move(token));
+    InsertHTMLElement(token);
 
     // 2. If the algorithm that was invoked is the generic raw text element parsing algorithm, switch the
     //    tokenizer to the RAWTEXT state; otherwise the algorithm invoked was the generic RCDATA element
@@ -4429,10 +4430,10 @@ namespace krys::boo::html
     _insertionMode = InsertionMode::Text;
   }
 
-  void TreeBuilder::ParseGenericRCDATATextElement(TokenAtom &&token) noexcept
+  void TreeBuilder::ParseGenericRCDATATextElement(TokenAtom token) noexcept
   {
     // 1. Insert an HTML element for the token.
-    InsertHTMLElement(krys::move(token));
+    InsertHTMLElement(token);
 
     // 2. If the algorithm that was invoked is the generic raw text element parsing algorithm, switch the
     //    tokenizer to the RAWTEXT state; otherwise the algorithm invoked was the generic RCDATA element
@@ -4446,7 +4447,8 @@ namespace krys::boo::html
     _insertionMode = InsertionMode::Text;
   }
 
-  Ref<dom::Element> TreeBuilder::CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
+  Ref<dom::Element> TreeBuilder::CreateElement(const dom::DOMStringAtom &name,
+                                               const dom::DOMStringAtom &namespaceURI,
                                                const ParsedAttributeList &attributes,
                                                dom::ContainerNode &intendedParent) noexcept
   {
@@ -4554,26 +4556,26 @@ namespace krys::boo::html
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXML))
         {
-          namespaceUri = infra::Namespaces::XML;
-          prefix = infra::NamespacePrefixes::XML;
+          namespaceUri = infra::namespaces::XML;
+          prefix = infra::namespace_prefixes::XML;
           prefixLength = 4uz; // xml + :
         }
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXLink))
         {
-          namespaceUri = infra::Namespaces::XLink;
-          prefix = infra::NamespacePrefixes::XLink;
+          namespaceUri = infra::namespaces::XLink;
+          prefix = infra::namespace_prefixes::XLink;
           prefixLength = 6uz; // xlink + :
         }
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXMLNS))
         {
-          namespaceUri = infra::Namespaces::XMLNS;
+          namespaceUri = infra::namespaces::XMLNS;
 
           // xmlns:xlink has the xmlns prefix; xmlns has none.
           if (HasFlag(attr.Flags, ParsedAttributeFlags::HasPrefix))
           {
-            prefix = infra::NamespacePrefixes::XMLNS;
+            prefix = infra::namespace_prefixes::XMLNS;
             prefixLength = 6uz; // xmlns + :
           }
         }
@@ -4860,7 +4862,7 @@ namespace krys::boo::html
 
 #pragma region Quirks Mode Algorithms
 
-  bool TreeBuilder::IsQuirksModeDOCTYPE(const TokenAtom &token) const noexcept
+  bool TreeBuilder::IsQuirksModeDOCTYPE(const TokenAtom &token) noexcept
   {
     krys_debug_assert(token.Type() == TokenType::DOCTYPE);
 
@@ -4966,7 +4968,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool TreeBuilder::IsLimitedQuirksModeDOCTYPE(const TokenAtom &token) const noexcept
+  bool TreeBuilder::IsLimitedQuirksModeDOCTYPE(const TokenAtom &token) noexcept
   {
     krys_debug_assert(token.Type() == TokenType::DOCTYPE);
 
@@ -5392,9 +5394,9 @@ namespace krys::boo::html
 
 #pragma region IntegrationPoint Algorithms
 
-  bool TreeBuilder::IsMathMLTextIntegrationPoint(const dom::Element &element) const noexcept
+  bool TreeBuilder::IsMathMLTextIntegrationPoint(const dom::Element &element) noexcept
   {
-    if (element.NamespaceURI() == infra::Namespaces::MathML)
+    if (element.NamespaceURI() == infra::namespaces::MathML)
     {
       auto name = ParseTagName(element.LocalName().View());
       switch (name)
@@ -5413,9 +5415,9 @@ namespace krys::boo::html
     return false;
   }
 
-  bool TreeBuilder::IsHTMLIntegrationPoint(const dom::Element &element) const noexcept
+  bool TreeBuilder::IsHTMLIntegrationPoint(const dom::Element &element) noexcept
   {
-    if (element.NamespaceURI() == infra::Namespaces::MathML)
+    if (element.NamespaceURI() == infra::namespaces::MathML)
     {
       if (element.LocalName() == u8"annotation-xml")
       {
@@ -5433,7 +5435,7 @@ namespace krys::boo::html
         return false;
       }
     }
-    else if (element.NamespaceURI() == infra::Namespaces::SVG)
+    else if (element.NamespaceURI() == infra::namespaces::SVG)
     {
       auto name = ParseTagName(element.LocalName().View());
       switch (name)

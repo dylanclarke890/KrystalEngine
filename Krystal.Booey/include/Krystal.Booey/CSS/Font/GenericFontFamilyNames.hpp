@@ -4,7 +4,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
-namespace krys::boo::css::GenericFontFamilyNames
+namespace krys::boo::css::generic_font_family_names
 {
   /// @brief Indexes the generic font family names, in name order.
   enum class FamilyNamesIndex : uint8

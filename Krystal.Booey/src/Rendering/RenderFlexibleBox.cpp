@@ -387,6 +387,9 @@ namespace krys::boo
     {
       switch (position)
       {
+        // NOLINTNEXTLINE(bugprone-branch-clone): the note applies to the second group only.
+        // NOLINTNEXTLINE(bugprone-branch-clone): the note applies to the second group only.
+        // NOLINTNEXTLINE(bugprone-branch-clone): the note applies to the second group only.
         case ItemPosition::Legacy:
         case ItemPosition::Auto:
         case ItemPosition::Normal: krys_debug_assert(false); break;
@@ -1786,7 +1789,7 @@ namespace krys::boo
     return true;
   }
 
-  bool RenderFlexibleBox::FlexItemHasComputableAspectRatio(const RenderBox &flexItem) const noexcept
+  bool RenderFlexibleBox::FlexItemHasComputableAspectRatio(const RenderBox &flexItem) noexcept
   {
     if (!FlexItemHasAspectRatio(flexItem))
     {
@@ -2136,7 +2139,7 @@ namespace krys::boo
   }
 
   LayoutUnit RenderFlexibleBox::AutoMarginOffsetInMainAxis(const FlexLayoutItems &flexLayoutItems,
-                                                           LayoutUnit &availableFreeSpace) noexcept
+                                                           LayoutUnit &availableFreeSpace) const noexcept
   {
     if (availableFreeSpace <= 0_lu)
     {

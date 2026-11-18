@@ -423,7 +423,7 @@ namespace krys::boo::html
     }
   }
 
-  void BaseDateAndTimeInputType::AttributeChanged(dom::DOMStringAtom name) noexcept
+  void BaseDateAndTimeInputType::AttributeChanged(const dom::DOMStringAtom &name) noexcept
   {
     if (name == u8"max" || name == u8"min")
     {

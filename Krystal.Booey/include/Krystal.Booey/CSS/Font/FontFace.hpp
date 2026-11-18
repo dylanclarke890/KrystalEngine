@@ -208,7 +208,7 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<Font> GetFont(const FontDescription &fontDescription, bool syntheticBold,
                                         bool syntheticItalic, ExternalResourceDownloadPolicy policy,
                                         const FontPaletteValues &fontPaletteValues,
-                                        RefPtr<FontFeatureValues> fontFeatureValues) noexcept;
+                                        const RefPtr<FontFeatureValues> &fontFeatureValues) noexcept;
 
     static void AppendSources(CSSFontFace &fontFace, ValueList &srcList, dom::Document *context,
                               bool isInitiatingElementInUserAgentShadowTree) noexcept;
@@ -217,14 +217,14 @@ namespace krys::boo::css
 
     KRYS_NODISCARD FontLoadTiming GetFontLoadTiming() const noexcept;
 
-    KRYS_NODISCARD bool ShouldIgnoreFontLoadCompletions() const noexcept
+    KRYS_NODISCARD static bool ShouldIgnoreFontLoadCompletions() noexcept
     {
       return false;
     }
 
     KRYS_NODISCARD bool Purgeable() const noexcept;
 
-    KRYS_NODISCARD AllowUserInstalledFonts GetAllowUserInstalledFonts() const noexcept
+    KRYS_NODISCARD static AllowUserInstalledFonts GetAllowUserInstalledFonts() noexcept
     {
       return AllowUserInstalledFonts::Yes;
     }
@@ -247,7 +247,7 @@ namespace krys::boo::css
     KRYS_NODISCARD MutableStyleProperties &MutableProperties() noexcept;
 
     template <typename TFunc>
-    void IterateClients(TFunc &&callback) noexcept;
+    void IterateClients(TFunc callback) noexcept;
   };
 
   /// @brief Something told when a font face loads, changes state or has its descriptors changed.

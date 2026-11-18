@@ -36,6 +36,9 @@ namespace krys::boo
   class StyleInheritedData : public RefCounted<StyleInheritedData>
   {
   public:
+    // Copied only through Copy(), and never assigned.
+    StyleInheritedData &operator=(const StyleInheritedData &) noexcept = delete;
+
     KRYS_NODISCARD static Ref<StyleInheritedData> Create() noexcept
     {
       return AdoptRef(*new StyleInheritedData);
@@ -62,7 +65,5 @@ namespace krys::boo
     StyleInheritedData() noexcept;
 
     StyleInheritedData(const StyleInheritedData &) noexcept;
-
-    void operator=(const StyleInheritedData &) noexcept = delete;
   };
 }

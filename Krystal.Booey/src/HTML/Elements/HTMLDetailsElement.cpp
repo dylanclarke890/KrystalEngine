@@ -104,7 +104,7 @@ namespace krys::boo::html
     (void)root.AppendChild(*defaultSlot);
     _defaultSlot = krys::move(defaultSlot);
 
-    auto style = document.CreateElementNS(infra::Namespaces::HTML, u8"style").ReleaseValue();
+    auto style = document.CreateElementNS(infra::namespaces::HTML, u8"style").ReleaseValue();
     (void)style->TextContent(dom::DOMString(css::DetailsElementShadowUserAgentStyleSheet));
     (void)root.AppendChild(*style);
   }
@@ -177,10 +177,10 @@ namespace krys::boo::html
     _toggleEventTask->Queue(oldState, newState);
   }
 
-  void HTMLDetailsElement::OnAttributeChanged(dom::DOMStringAtom localName,
+  void HTMLDetailsElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
                                               Maybe<dom::DOMStringView> oldValue,
                                               Maybe<dom::DOMStringView> value,
-                                              dom::DOMStringAtom namespaceURI) noexcept
+                                              const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 

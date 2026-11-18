@@ -1859,13 +1859,13 @@ namespace krys::boo
       return {};
     }
 
-    return ComputeRects(repaintRects, repaintContainer, context).ClippedOverflowRect;
+    return ComputeRects(repaintRects, repaintContainer, krys::move(context)).ClippedOverflowRect;
   }
 
   auto RenderObject::ComputeRects(const RepaintRects &rects, const RenderLayerModelObject *repaintContainer,
                                   VisibleRectContext context) const noexcept -> RepaintRects
   {
-    auto result = ComputeVisibleRectsInContainer(rects, repaintContainer, context);
+    auto result = ComputeVisibleRectsInContainer(rects, repaintContainer, krys::move(context));
     krys_assert(result.has_value());
     return *result;
   }
@@ -1887,10 +1887,10 @@ namespace krys::boo
     return *result;
   }
 
-  auto RenderObject::ComputeVisibleRectsInContainer(const RepaintRects &rects,
-                                                    const RenderLayerModelObject *container,
-                                                    VisibleRectContext context) const noexcept
-    -> Maybe<RepaintRects>
+  auto RenderObject::ComputeVisibleRectsInContainer(
+    const RepaintRects &rects, const RenderLayerModelObject *container,
+    // NOLINTNEXTLINE(performance-unnecessary-value-param): overrides change their copy.
+    VisibleRectContext context) const noexcept -> Maybe<RepaintRects>
   {
     if (container == this)
     {
@@ -1920,9 +1920,10 @@ namespace krys::boo
     return parent->ComputeVisibleRectsInContainer(adjustedRects, container, context);
   }
 
-  Maybe<FloatRect> RenderObject::ComputeFloatVisibleRectInContainer(const FloatRect &,
-                                                                    const RenderLayerModelObject *,
-                                                                    VisibleRectContext) const noexcept
+  Maybe<FloatRect> RenderObject::ComputeFloatVisibleRectInContainer(
+    const FloatRect &, const RenderLayerModelObject *,
+    // NOLINTNEXTLINE(performance-unnecessary-value-param): overrides change their copy.
+    VisibleRectContext) const noexcept
   {
     krys_debug_assert(false);
     return FloatRect();

@@ -120,6 +120,6 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD Maybe<FloatRect> ParseViewBox(dom::DOMStringView value) noexcept;
 
-    KRYS_NODISCARD Maybe<FloatRect> ParseViewBox(dom::DOMStringView &buffer, bool validate) noexcept;
+    KRYS_NODISCARD static Maybe<FloatRect> ParseViewBox(dom::DOMStringView &buffer, bool validate) noexcept;
   };
 }

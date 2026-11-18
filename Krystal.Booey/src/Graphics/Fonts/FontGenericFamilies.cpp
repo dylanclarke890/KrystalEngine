@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  using namespace css::GenericFontFamilyNames;
+  using namespace css::generic_font_family_names;
 
   KRYS_NODISCARD static const utf8_string &EmptyFamily() noexcept
   {

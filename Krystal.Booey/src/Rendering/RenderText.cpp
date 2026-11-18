@@ -551,7 +551,7 @@ namespace krys::boo
     return Downcast<dom::Text>(GetNode());
   }
 
-  bool RenderText::ComputeUseBackslashAsYenSymbol() const noexcept
+  bool RenderText::ComputeUseBackslashAsYenSymbol() noexcept
   {
     // FIXME: Fonts that use the yen sign for backslash, once there are any.
     // (No encoding shows backslash as a yen sign: documents are UTF-8 only; see DIFFERENCES.md.)
@@ -869,7 +869,7 @@ namespace krys::boo
       MeasureTextConsideringPossibleTrailingSpace(bool currentCharacterIsSpace, size_t startIndex,
                                                   size_t wordLength, WordTrailingSpace &wordTrailingSpace,
                                                   HashSet<RefPtr<const Font>> &fallbackFonts,
-                                                  TMeasureTextCallback &&callback) noexcept
+                                                  TMeasureTextCallback callback) noexcept
     {
       Maybe<float> wordTrailingSpaceWidth;
       if (currentCharacterIsSpace)

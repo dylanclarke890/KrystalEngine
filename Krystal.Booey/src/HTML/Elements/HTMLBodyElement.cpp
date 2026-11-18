@@ -100,8 +100,9 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLBodyElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                           dom::DOMStringAtom namespaceURI) const noexcept
+  bool
+    HTMLBodyElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                        const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"background" || localName == u8"marginwidth" || localName == u8"leftmargin"
@@ -113,8 +114,8 @@ namespace krys::boo::html
     return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLBodyElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                               dom::DOMStringAtom namespaceURI,
+  void HTMLBodyElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                               const dom::DOMStringAtom &namespaceURI,
                                                                dom::DOMStringView value,
                                                                css::MutableStyleProperties &style) noexcept
   {
@@ -160,9 +161,10 @@ namespace krys::boo::html
     HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
-  void HTMLBodyElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLBodyElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                           Maybe<dom::DOMStringView> oldValue,
                                            Maybe<dom::DOMStringView> value,
-                                           dom::DOMStringAtom namespaceURI) noexcept
+                                           const dom::DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI == null)
     {

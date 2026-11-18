@@ -23,8 +23,7 @@ namespace krys::ui
       ReadBufferFromClipboard(utf8_stringview pasteboardName,
                               utf8_stringview pasteboardType) noexcept override;
 
-    void WriteToClipboard(utf8_stringview pasteboardName,
-                          boo::SelectionData &&selectionData) noexcept override;
+    void WriteToClipboard(utf8_stringview pasteboardName, boo::SelectionData selectionData) noexcept override;
 
     void ClearClipboard(utf8_stringview pasteboardName) noexcept override;
 

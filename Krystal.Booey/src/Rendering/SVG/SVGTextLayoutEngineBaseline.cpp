@@ -69,7 +69,6 @@ namespace krys::boo
         // predominant script of the character data content.
         return AlignmentBaseline::Alphabetic;
       case DominantBaseline::NoChange:
-        return DominantBaselineToAlignmentBaseline(isVerticalText, *textRenderer.Parent());
       case DominantBaseline::ResetSize:
         return DominantBaselineToAlignmentBaseline(isVerticalText, *textRenderer.Parent());
       case DominantBaseline::Ideographic:    return AlignmentBaseline::Ideographic;
@@ -123,7 +122,7 @@ namespace krys::boo
 
   float SVGTextLayoutEngineBaseline::CalculateGlyphOrientationAngle(bool isVerticalText,
                                                                     const RenderStyle &style,
-                                                                    char32 character) const noexcept
+                                                                    char32 character) noexcept
   {
     if (isVerticalText)
     {

@@ -88,7 +88,7 @@ namespace krys::boo::dom
     void InvalidateLiveCollectionCaches() noexcept;
 
     /// @brief Clears what those collections cached that depends on the attribute called @p localName.
-    void InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept;
+    void InvalidateLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept;
 
     /// @brief Clears the cache of the node's `childNodes`, the only collection to hold nodes but elements.
     void InvalidateChildNodeListCache() noexcept;

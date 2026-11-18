@@ -98,10 +98,10 @@ namespace krys::boo::svg
     KRYS_NODISCARD Ref<dom::NodeList> GetEnclosureList(SVGRect &, SVGElement *referenceElement) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__checkIntersection
-    KRYS_NODISCARD static bool CheckIntersection(Ref<SVGElement> &&, SVGRect &) noexcept;
+    KRYS_NODISCARD static bool CheckIntersection(const Ref<SVGElement> &, SVGRect &) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__checkEnclosure
-    KRYS_NODISCARD static bool CheckEnclosure(Ref<SVGElement> &&, SVGRect &) noexcept;
+    KRYS_NODISCARD static bool CheckEnclosure(const Ref<SVGElement> &, SVGRect &) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__deselectAll
     void DeselectAll() noexcept;
@@ -121,14 +121,14 @@ namespace krys::boo::svg
     KRYS_NODISCARD static Ref<SVGTransform> CreateSVGTransform() noexcept;
 
     KRYS_NODISCARD static Ref<SVGTransform>
-      CreateSVGTransformFromMatrix(css::DOMMatrix2DInit &&matrixInit) noexcept;
+      CreateSVGTransformFromMatrix(css::DOMMatrix2DInit matrixInit) noexcept;
 
     /// @brief The first element in the subtree of the `<svg>` element whose id is @p id.
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__getElementById
     KRYS_NODISCARD RefPtr<dom::Element> GetElementById(dom::DOMStringView id) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__suspendRedraw
-    KRYS_NODISCARD uint32 SuspendRedraw(uint32) noexcept
+    KRYS_NODISCARD static uint32 SuspendRedraw(uint32) noexcept
     {
       return 1;
     }
@@ -283,7 +283,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD RefPtr<SVGViewElement>
       FindViewAnchor(dom::DOMStringView fragmentIdentifier) const noexcept;
 
-    KRYS_NODISCARD SVGSvgElement *FindRootAnchor(const SVGViewElement *) const noexcept;
+    KRYS_NODISCARD static SVGSvgElement *FindRootAnchor(const SVGViewElement *) noexcept;
 
     KRYS_NODISCARD SVGSvgElement *FindRootAnchor(dom::DOMStringView) const noexcept;
   };

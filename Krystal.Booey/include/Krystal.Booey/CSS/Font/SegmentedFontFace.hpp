@@ -90,7 +90,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD FontRanges GetFontRanges(const FontDescription &fontDescription,
                                             const FontPaletteValues &fontPaletteValues,
-                                            RefPtr<FontFeatureValues> fontFeatureValues) noexcept;
+                                            const RefPtr<FontFeatureValues> &fontFeatureValues) noexcept;
 
     KRYS_NODISCARD SmallList<Ref<CSSFontFace>, 1> &ConstituentFaces() noexcept
     {

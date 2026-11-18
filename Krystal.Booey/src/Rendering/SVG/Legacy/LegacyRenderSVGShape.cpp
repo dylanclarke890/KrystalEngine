@@ -200,7 +200,7 @@ namespace krys::boo
   }
 
   Path *LegacyRenderSVGShape::NonScalingStrokePath(const Path *path,
-                                                   const AffineTransform &strokeTransform) const noexcept
+                                                   const AffineTransform &strokeTransform) noexcept
   {
     static Path tempPath;
 

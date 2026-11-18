@@ -219,25 +219,28 @@ namespace krys::boo::style
   template <>
   struct Blending<BorderImageWidthValue>
   {
-    KRYS_NODISCARD bool CanBlend(const BorderImageWidthValue &, const BorderImageWidthValue &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BorderImageWidthValue &,
+                                        const BorderImageWidthValue &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BorderImageWidthValue &,
-                                                                      const BorderImageWidthValue &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const BorderImageWidthValue &,
+                                                    const BorderImageWidthValue &) noexcept;
 
-    KRYS_NODISCARD BorderImageWidthValue Blend(const BorderImageWidthValue &, const BorderImageWidthValue &,
-                                               const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BorderImageWidthValue
+      Blend(const BorderImageWidthValue &, const BorderImageWidthValue &, const BlendingContext &) noexcept;
   };
 
   template <>
   struct Blending<BorderImageWidth>
   {
-    KRYS_NODISCARD bool CanBlend(const BorderImageWidth &, const BorderImageWidth &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BorderImageWidth &, const BorderImageWidth &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BorderImageWidth &,
-                                                                      const BorderImageWidth &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const BorderImageWidth &,
+                                                    const BorderImageWidth &) noexcept;
 
-    KRYS_NODISCARD BorderImageWidth Blend(const BorderImageWidth &, const BorderImageWidth &,
-                                          const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BorderImageWidth Blend(const BorderImageWidth &, const BorderImageWidth &,
+                                                 const BlendingContext &) noexcept;
   };
 }
 

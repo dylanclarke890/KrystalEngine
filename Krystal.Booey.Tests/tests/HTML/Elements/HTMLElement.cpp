@@ -63,7 +63,7 @@ namespace krys::boo::html::tests
     auto isInteractive =
       [&](dom::DOMStringAtom localName, utf8_stringview attribute = {}, utf8_stringview value = {})
     {
-      auto element = document->CreateElement(localName).ReleaseValue();
+      auto element = document->CreateElement(krys::move(localName)).ReleaseValue();
       if (!attribute.empty())
       {
         REQUIRE_FALSE(
@@ -111,7 +111,7 @@ namespace krys::boo::html::tests
     auto outer = create(u8"no");
     auto inherit = create();
     auto invalid = create(u8"maybe");
-    auto svg = document->CreateElementNS(infra::Namespaces::SVG, u8"g").ReleaseValue();
+    auto svg = document->CreateElementNS(infra::namespaces::SVG, u8"g").ReleaseValue();
     auto insideSvg = create();
     REQUIRE_FALSE(outer->AppendChild(*inherit).HasException());
     REQUIRE_FALSE(inherit->AppendChild(*invalid).HasException());

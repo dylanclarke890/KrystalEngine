@@ -22,21 +22,21 @@ namespace krys::boo::dom::tests
       {
       }
 
-      NamedNodeMap &Attributes() noexcept
+      NamedNodeMap &Attributes() const noexcept
       {
         return Node->Attributes();
       }
 
       Ref<Attr> NewAttribute(DOMStringAtom name, DOMString &&value) noexcept
       {
-        auto attr = Document->CreateAttribute(name).ReleaseValue();
+        auto attr = Document->CreateAttribute(krys::move(name)).ReleaseValue();
         attr->Value(krys::move(value));
         return attr;
       }
 
       Ref<Attr> NewAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom name, DOMString &&value) noexcept
       {
-        auto attr = Document->CreateAttributeNS(namespaceURI, name).ReleaseValue();
+        auto attr = Document->CreateAttributeNS(krys::move(namespaceURI), krys::move(name)).ReleaseValue();
         attr->Value(krys::move(value));
         return attr;
       }
@@ -99,7 +99,7 @@ namespace krys::boo::dom::tests
     SECTION("Otherwise they're all kept")
     {
       auto document = CreateRef<XMLDocument>();
-      auto element = document->CreateElementNS(infra::Namespaces::HTML, u8"div").ReleaseValue();
+      auto element = document->CreateElementNS(infra::namespaces::HTML, u8"div").ReleaseValue();
       REQUIRE_FALSE(element->SetAttribute(u8"Upper", u8"").HasException());
       REQUIRE_FALSE(element->SetAttribute(u8"lower", u8"").HasException());
       CHECK(element->Attributes().SupportedPropertyNames() == List<DOMString> {u8"Upper", u8"lower"});

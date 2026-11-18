@@ -61,7 +61,7 @@ namespace krys::boo::dom
       {
         return element;
       }
-      if (element->NamespaceURI() == infra::Namespaces::HTML
+      if (element->NamespaceURI() == infra::namespaces::HTML
           && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
       {
         return element;
@@ -109,7 +109,7 @@ namespace krys::boo::dom
       // 2b. If element is in the HTML namespace and has a name attribute whose value is neither the empty
       // string
       //     nor is in result, append element's name attribute value to result.
-      if (element->NamespaceURI() == infra::Namespaces::HTML)
+      if (element->NamespaceURI() == infra::namespaces::HTML)
       {
         auto name = ElementAlgorithms::GetAttributeValue(*element, u8"name");
         if (!name.empty() && !std::ranges::contains(supportedNames, name))

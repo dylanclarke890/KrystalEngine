@@ -51,10 +51,9 @@ namespace krys::boo::dom
         case PlatformEvent::Type::KeyUp:      return event_names::KeyUp;
         case PlatformEvent::Type::RawKeyDown: return event_names::KeyDown;
         case PlatformEvent::Type::Char:       return event_names::KeyPress;
+        // The caller should disambiguate the combined KeyDown event into RawKeyDown or Char events.
         case PlatformEvent::Type::KeyDown:
-          // The caller should disambiguate the combined event into RawKeyDown or Char events.
-          break;
-        default: break;
+        default:                              break;
       }
       krys_debug_assert(false);
       return event_names::KeyDown;
@@ -100,7 +99,7 @@ namespace krys::boo::dom
   }
 
   KeyboardEvent::KeyboardEvent(DOMStringAtom type, const KeyboardEventInit &initializer) noexcept
-      : UIEventWithKeyState(type, initializer), _key(initializer.Key), _code(initializer.Code),
+      : UIEventWithKeyState(krys::move(type), initializer), _key(initializer.Key), _code(initializer.Code),
         _keyIdentifier(initializer.KeyIdentifier), _location(initializer.Location),
         _repeat(initializer.Repeat), _isComposing(initializer.IsComposing), _charCode(initializer.CharCode),
         _keyCode(initializer.KeyCode), _which(initializer.Which)
@@ -109,7 +108,7 @@ namespace krys::boo::dom
 
   KeyboardEvent::KeyboardEvent(DOMStringAtom type, const UIEventInit &eventInitDict,
                                const PlatformKeyboardEvent &key) noexcept
-      : UIEventWithKeyState(type, eventInitDict, key.Modifiers()),
+      : UIEventWithKeyState(krys::move(type), eventInitDict, key.Modifiers()),
         _underlyingPlatformEvent(CreateUnique<PlatformKeyboardEvent>(key)), _key(key.Key()),
         _code(key.Code()), _keyIdentifier(key.KeyIdentifier()), _location(LocationCodeForKey(key)),
         _repeat(key.IsAutoRepeat())
@@ -139,7 +138,7 @@ namespace krys::boo::dom
       return;
     }
 
-    InitUIEvent(type, canBubble, cancelable, view, 0);
+    InitUIEvent(krys::move(type), canBubble, cancelable, view, 0);
 
     _keyIdentifier = DOMString(keyIdentifier);
     _location = location;

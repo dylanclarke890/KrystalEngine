@@ -85,24 +85,25 @@ namespace krys::boo::css
     return AdoptRef(*new FunctionValue(name, krys::move(argument)));
   }
 
-  Ref<FunctionValue> FunctionValue::Create(css::ValueId name, Ref<Value> argument1,
-                                           Ref<Value> argument2) noexcept
+  Ref<FunctionValue> FunctionValue::Create(css::ValueId name, Ref<Value> firstArgument,
+                                           Ref<Value> secondArgument) noexcept
   {
-    return AdoptRef(*new FunctionValue(name, krys::move(argument1), krys::move(argument2)));
+    return AdoptRef(*new FunctionValue(name, krys::move(firstArgument), krys::move(secondArgument)));
   }
 
-  Ref<FunctionValue> FunctionValue::Create(css::ValueId name, Ref<Value> argument1, Ref<Value> argument2,
-                                           Ref<Value> argument3) noexcept
+  Ref<FunctionValue> FunctionValue::Create(css::ValueId name, Ref<Value> firstArgument,
+                                           Ref<Value> secondArgument, Ref<Value> thirdArgument) noexcept
   {
-    return AdoptRef(
-      *new FunctionValue(name, krys::move(argument1), krys::move(argument2), krys::move(argument3)));
+    return AdoptRef(*new FunctionValue(name, krys::move(firstArgument), krys::move(secondArgument),
+                                       krys::move(thirdArgument)));
   }
 
-  Ref<FunctionValue> FunctionValue::Create(css::ValueId name, Ref<Value> argument1, Ref<Value> argument2,
-                                           Ref<Value> argument3, Ref<Value> argument4) noexcept
+  Ref<FunctionValue> FunctionValue::Create(css::ValueId name, Ref<Value> firstArgument,
+                                           Ref<Value> secondArgument, Ref<Value> thirdArgument,
+                                           Ref<Value> fourthArgument) noexcept
   {
-    return AdoptRef(*new FunctionValue(name, krys::move(argument1), krys::move(argument2),
-                                       krys::move(argument3), krys::move(argument4)));
+    return AdoptRef(*new FunctionValue(name, krys::move(firstArgument), krys::move(secondArgument),
+                                       krys::move(thirdArgument), krys::move(fourthArgument)));
   }
 
   CSSOMString FunctionValue::CustomCSSText(const SerialisationContext &context) const noexcept

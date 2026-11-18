@@ -69,7 +69,7 @@ namespace krys::boo
       return krys::move(vector);
     }
 
-    KRYS_NODISCARD List<uint8> NormalizeLineEndingsToCRLF(List<uint8> &&source) noexcept
+    KRYS_NODISCARD List<uint8> NormalizeLineEndingsToCRLF(List<uint8> source) noexcept
     {
       List<uint8> result;
       result.reserve(source.size());
@@ -125,12 +125,12 @@ namespace krys::boo
       {
       }
 
-      void Append(List<uint8> &&bytes) noexcept
+      void Append(List<uint8> bytes) noexcept
       {
         _appendableData.insert(_appendableData.end(), bytes.begin(), bytes.end());
       }
 
-      void Append(RefPtr<Blob> &&blob) noexcept
+      void Append(const RefPtr<Blob> &blob) noexcept
       {
         if (!blob)
         {
@@ -185,7 +185,7 @@ namespace krys::boo
       return memoryCost;
     }
 
-    KRYS_NODISCARD Ref<BlobData> BuildBlobData(List<BlobPartVariant> &&blobPartVariants, EndingType endings,
+    KRYS_NODISCARD Ref<BlobData> BuildBlobData(List<BlobPartVariant> blobPartVariants, EndingType endings,
                                                utf8_stringview contentType) noexcept
     {
       BlobBuilder builder(endings, contentType);
@@ -245,7 +245,7 @@ namespace krys::boo
   {
   }
 
-  Blob::Blob(List<BlobPartVariant> &&blobPartVariants, const BlobPropertyBag &propertyBag) noexcept
+  Blob::Blob(List<BlobPartVariant> blobPartVariants, const BlobPropertyBag &propertyBag) noexcept
       : _type(NormalizedContentType(propertyBag.Type)), _memoryCost(ComputeMemoryCost(blobPartVariants)),
         _data(BuildBlobData(krys::move(blobPartVariants), propertyBag.Endings, _type))
   {
@@ -256,8 +256,7 @@ namespace krys::boo
     return AdoptRef(*new Blob(BlobData::Create({}), {}, 0, 0));
   }
 
-  Ref<Blob> Blob::Create(List<BlobPartVariant> &&blobPartVariants,
-                         const BlobPropertyBag &propertyBag) noexcept
+  Ref<Blob> Blob::Create(List<BlobPartVariant> blobPartVariants, const BlobPropertyBag &propertyBag) noexcept
   {
     return AdoptRef(*new Blob(krys::move(blobPartVariants), propertyBag));
   }

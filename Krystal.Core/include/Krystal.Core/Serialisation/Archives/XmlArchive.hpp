@@ -187,7 +187,7 @@ namespace krys::serialisation
     }
 
   private:
-    KRYS_NODISCARD bool IsWhitespace(char c) noexcept
+    KRYS_NODISCARD static bool IsWhitespace(char c) noexcept
     {
       return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }

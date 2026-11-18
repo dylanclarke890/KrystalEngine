@@ -112,7 +112,7 @@ namespace krys::gfx::tests
 
       /// @brief Draws one 2D frame into the target; it's cleared first when `clear` is set.
       template <typename TFunc>
-      void Draw(TFunc &&draw, Maybe<Array<float, 4>> clear = Array<float, 4> {0.f, 0.f, 0.f, 0.f})
+      void Draw(TFunc draw, Maybe<Array<float, 4>> clear = Array<float, 4> {0.f, 0.f, 0.f, 0.f})
       {
         _device->BeginFrame();
         auto &commands = _device->GetCommandBuffer();
@@ -1986,7 +1986,7 @@ namespace krys::gfx::tests
     /// their centres; empty offsets expect transparent pixels, and NaN skips the pixel.
     template <typename TFunc>
     KRYS_NODISCARD uint32 GreyMismatches(const List<Pixel> &pixels, uint32 width, GradientSpreadMethod spread,
-                                         TFunc &&offset)
+                                         TFunc offset)
     {
       uint32 mismatches = 0u;
       for (uint32 i = 0u; i < pixels.size(); ++i)
@@ -2402,7 +2402,7 @@ namespace krys::gfx::tests
     /// than `tolerance` steps; NaN skips a pixel.
     template <typename TFunc>
     KRYS_NODISCARD uint32 AlphaMismatches(const List<Pixel> &pixels, uint32 width, int tolerance,
-                                          TFunc &&expected)
+                                          TFunc expected)
     {
       uint32 mismatches = 0u;
       for (uint32 i = 0u; i < pixels.size(); ++i)

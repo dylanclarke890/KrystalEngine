@@ -187,7 +187,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasCachedPseudoStyles() const noexcept
     {
-      return _computedStyle._cachedPseudoStyles && _computedStyle._cachedPseudoStyles->Styles.size();
+      return _computedStyle._cachedPseudoStyles && !_computedStyle._cachedPseudoStyles->Styles.empty();
     }
 
     const style::PseudoStyleCache *CachedPseudoStyles() const
@@ -243,7 +243,7 @@ namespace krys::boo
 
     inline FontCascade &MutableFontCascadeWithoutUpdate() noexcept;
 
-    inline void SetFontCascade(FontCascade &&) noexcept;
+    inline void SetFontCascade(FontCascade) noexcept;
 
     KRYS_NODISCARD inline const FontCascadeDescription &GetFontDescription() const noexcept;
 
@@ -264,9 +264,9 @@ namespace krys::boo
 
     KRYS_NODISCARD inline const style::LineHeight &SpecifiedLineHeight() const noexcept;
 
-    inline void SetLetterSpacingFromAnimation(style::LetterSpacing &&) noexcept;
+    inline void SetLetterSpacingFromAnimation(style::LetterSpacing) noexcept;
 
-    inline void SetWordSpacingFromAnimation(style::WordSpacing &&) noexcept;
+    inline void SetWordSpacingFromAnimation(style::WordSpacing) noexcept;
 
     inline void SynchronizeLetterSpacingWithFontCascade() noexcept;
 

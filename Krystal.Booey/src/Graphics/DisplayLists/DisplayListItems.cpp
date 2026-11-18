@@ -35,12 +35,12 @@
 
 namespace krys::boo::display_list
 {
-  void Save::Apply(GraphicsContext &context) const noexcept
+  void Save::Apply(GraphicsContext &context) noexcept
   {
     context.Save();
   }
 
-  void Restore::Apply(GraphicsContext &context) const noexcept
+  void Restore::Apply(GraphicsContext &context) noexcept
   {
     context.Restore();
   }
@@ -198,7 +198,7 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"wind-rule", GetWindRule());
   }
 
-  void ResetClip::Apply(GraphicsContext &context) const noexcept
+  void ResetClip::Apply(GraphicsContext &context) noexcept
   {
     context.ResetClip();
   }
@@ -441,7 +441,7 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"page-rect", PageRect());
   }
 
-  void EndPage::Apply(GraphicsContext &context) const noexcept
+  void EndPage::Apply(GraphicsContext &context) noexcept
   {
     context.EndPage();
   }
@@ -923,7 +923,7 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"requiresClipToRect", _requiresClipToRect == GraphicsContext::RequiresClipToRect::Yes);
   }
 
-  void EndTransparencyLayer::Apply(GraphicsContext &context) const noexcept
+  void EndTransparencyLayer::Apply(GraphicsContext &context) noexcept
   {
     if (context.IsInTransparencyLayer())
     {

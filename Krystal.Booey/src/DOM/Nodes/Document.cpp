@@ -472,18 +472,18 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> Document::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagName(*this, qualifiedName);
+    return NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
   }
 
   Ref<HTMLCollection> Document::GetElementsByTagNameNS(DOMStringAtom namespaceUri,
                                                        DOMStringAtom localName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagNameNS(*this, namespaceUri, localName);
+    return NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceUri), krys::move(localName));
   }
 
   Ref<HTMLCollection> Document::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    return NodeAlgorithms::GetElementsByClassName(*this, classNames);
+    return NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
 
   ExceptionOr<Ref<Element>> Document::CreateElement(DOMStringAtom localName,
@@ -513,7 +513,7 @@ namespace krys::boo::dom
     DOMStringAtom namespaceURI = null;
     if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
     {
-      namespaceURI = infra::Namespaces::HTML;
+      namespaceURI = infra::namespaces::HTML;
     }
 
     // 5. Return the result of creating an element given this, localName, namespace, null, is, true, and
@@ -525,7 +525,8 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Element>> Document::CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,
                                                       const ElementCreationOptionsOrString &options) noexcept
   {
-    return DocumentAlgorithms::InternalCreateElementNS(*this, namespaceUri, qualifiedName, options);
+    return DocumentAlgorithms::InternalCreateElementNS(*this, krys::move(namespaceUri),
+                                                       krys::move(qualifiedName), options);
   }
 
   Ref<DocumentFragment> Document::CreateDocumentFragment() noexcept
@@ -672,8 +673,8 @@ namespace krys::boo::dom
   {
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
     //    qualifiedName given "attribute".
-    auto nameResult =
-      NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Attribute);
+    auto nameResult = NameValidation::ValidateAndExtract(krys::move(namespaceUri), krys::move(qualifiedName),
+                                                         ValidateAndExtractContext::Attribute);
     if (nameResult.HasException())
     {
       return nameResult.ReleaseException();
@@ -845,7 +846,7 @@ namespace krys::boo::dom
 
   // https://html.spec.whatwg.org/#dom-parsehtmlunsafe
   ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup,
-                                                       html::ParseHTMLUnsafeOptions &&options) noexcept
+                                                       html::ParseHTMLUnsafeOptions options) noexcept
   {
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
     //    algorithm with the current global object, html, options, and "Document parseHTMLUnsafe".
@@ -870,7 +871,7 @@ namespace krys::boo::dom
 
   // https://html.spec.whatwg.org/#dom-parsehtml
   ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html,
-                                                 html::SetHTMLOptions &&options) noexcept
+                                                 const html::SetHTMLOptions &options) noexcept
   {
     // 1. Let document be a new Document, whose content type is "text/html" and origin is this's relevant
     //    global object's associated Document's origin.
@@ -935,17 +936,14 @@ namespace krys::boo::dom
       return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
         TextAlgorithms::ChildTextContent(*title));
     }
-    else
-    {
-      auto title = html::DOMTreeAccessors::GetTitleElement(*this);
-      if (title == nullptr)
-      {
-        return {};
-      }
 
-      return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
-        TextAlgorithms::ChildTextContent(*title));
+    auto title = html::DOMTreeAccessors::GetTitleElement(*this);
+    if (title == nullptr)
+    {
+      return {};
     }
+
+    return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(TextAlgorithms::ChildTextContent(*title));
   }
 
   ExceptionOr<void> Document::Title(DOMString value) noexcept
@@ -961,7 +959,7 @@ namespace krys::boo::dom
       {
         // Let element be the result of creating an element given the document element's node document,
         // "title", and the SVG namespace. Insert element as the first child of the document element.
-        title = ElementFactory::Create(*this, {infra::Namespaces::SVG, null, u8"title"});
+        title = ElementFactory::Create(*this, {infra::namespaces::SVG, null, u8"title"});
 
         if (auto insert =
               MutationAlgorithms::PreInsert(*title, *documentElement, documentElement->FirstChild());
@@ -978,7 +976,7 @@ namespace krys::boo::dom
       }
     }
     // If the document element is in the HTML namespace:
-    else if (documentElement && documentElement->NamespaceURI() == infra::Namespaces::HTML)
+    else if (documentElement && documentElement->NamespaceURI() == infra::namespaces::HTML)
     {
       RefPtr<html::HTMLHeadElement> head = Head();
       RefPtr<Element> element = ShareRefPtr(html::DOMTreeAccessors::GetTitleElement(*this));
@@ -995,7 +993,7 @@ namespace krys::boo::dom
       {
         // 3a. Let element be the result of creating an element given the document element's node document,
         //     "title", and the HTML namespace.
-        element = ElementFactory::Create(*this, {infra::Namespaces::HTML, null, u8"title"});
+        element = ElementFactory::Create(*this, {infra::namespaces::HTML, null, u8"title"});
 
         // 3b. Append element to the head element.
         if (auto append = MutationAlgorithms::Append(*element, *head); append.HasException())
@@ -1297,7 +1295,7 @@ namespace krys::boo::dom
     }
   }
 
-  void Document::InvalidateOwnerTreeLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept
+  void Document::InvalidateOwnerTreeLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept
   {
     // Last first: each that forgets its items removes itself, which moves the last into its place.
     for (auto i = _ownerTreeLiveCollectionCaches.size(); i-- > 0;)
@@ -1311,7 +1309,7 @@ namespace krys::boo::dom
     return std::ranges::any_of(_liveCollectionCacheCounts, [](uint32 count) { return count != 0; });
   }
 
-  bool Document::HasLiveCollectionCachesForAttribute(DOMStringAtom localName) const noexcept
+  bool Document::HasLiveCollectionCachesForAttribute(const DOMStringAtom &localName) const noexcept
   {
     for (size_t i = 0; i < _liveCollectionCacheCounts.size(); ++i)
     {
@@ -1471,7 +1469,7 @@ namespace krys::boo::dom
     return CompleteURL(url, _baseURL);
   }
 
-  url::URL Document::CompleteURL(utf8_stringview url, const url::URL &baseURL) const noexcept
+  url::URL Document::CompleteURL(utf8_stringview url, const url::URL &baseURL) noexcept
   {
     return url::URL(baseURL, url);
   }
@@ -4276,7 +4274,7 @@ namespace krys::boo::dom
     }
   }
 
-  void Document::AddListenerTypeIfNeeded(DOMStringAtom type) noexcept
+  void Document::AddListenerTypeIfNeeded(const DOMStringAtom &type) noexcept
   {
     if (type == event_names::AnimationIteration)
     {

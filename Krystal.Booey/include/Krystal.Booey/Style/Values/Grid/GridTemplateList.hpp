@@ -39,7 +39,7 @@ namespace krys::boo::style
   struct GridTrackEntryRepeat
   {
     uint32 Repeats {0};
-    RepeatTrackList Tracks {};
+    RepeatTrackList Tracks;
 
     KRYS_NODISCARD bool operator==(const GridTrackEntryRepeat &) const noexcept = default;
   };
@@ -47,7 +47,7 @@ namespace krys::boo::style
   struct GridTrackEntryAutoRepeat
   {
     AutoRepeatType Type {AutoRepeatType::None};
-    RepeatTrackList Tracks {};
+    RepeatTrackList Tracks;
 
     KRYS_NODISCARD bool operator==(const GridTrackEntryAutoRepeat &) const noexcept = default;
   };
@@ -64,15 +64,15 @@ namespace krys::boo::style
   // <'grid-template-columns'/'grid-template-rows'> = none | <track-list> | <auto-track-list>
   struct GridTemplateList
   {
-    GridTrackList Tracks {};
+    GridTrackList Tracks;
 
     // Calculated from `Tracks`.
 
-    List<GridTrackSize> Sizes {};
+    List<GridTrackSize> Sizes;
     GridNamedLinesMap NamedLines {};
     GridOrderedNamedLinesMap OrderedNamedLines {};
 
-    List<GridTrackSize> AutoRepeatSizes {};
+    List<GridTrackSize> AutoRepeatSizes;
     GridNamedLinesMap AutoRepeatNamedLines {};
     GridOrderedNamedLinesMap AutoRepeatOrderedNamedLines {};
 
@@ -113,7 +113,7 @@ namespace krys::boo::style
   template <>
   struct Blending<GridTemplateList>
   {
-    KRYS_NODISCARD bool CanBlend(const GridTemplateList &, const GridTemplateList &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const GridTemplateList &, const GridTemplateList &) noexcept;
 
     KRYS_NODISCARD GridTemplateList Blend(const GridTemplateList &, const GridTemplateList &,
                                           const BlendingContext &) noexcept;

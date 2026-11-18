@@ -91,9 +91,10 @@ namespace krys::boo::style
   template <>
   struct Blending<BasicShape>
   {
-    KRYS_NODISCARD bool CanBlend(const BasicShape &, const BasicShape &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BasicShape &, const BasicShape &) noexcept;
 
-    KRYS_NODISCARD BasicShape Blend(const BasicShape &, const BasicShape &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BasicShape Blend(const BasicShape &, const BasicShape &,
+                                           const BlendingContext &) noexcept;
   };
 
   // MARK: - Path

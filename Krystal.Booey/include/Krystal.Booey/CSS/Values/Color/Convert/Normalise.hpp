@@ -125,7 +125,7 @@ namespace krys::boo::css
     -> GetCSSColorParseTypeWithCalcComponentResult<typename Descriptor::Canonical, Index>
   {
     return krys::SwitchOn(
-      variant, [](auto value)
+      variant, [](const auto &value)
       { return NormaliseAndClampNumericComponentsIntoCanonicalRepresentation<Descriptor, Index>(value); });
   }
 
@@ -202,7 +202,7 @@ namespace krys::boo::css
     -> GetCSSColorParseTypeWithCalcComponentResult<typename Descriptor::Canonical, Index>
   {
     return krys::SwitchOn(
-      variant, [](auto value)
+      variant, [](const auto &value)
       { return NormaliseNumericComponentsIntoCanonicalRepresentation<Descriptor, Index>(value); });
   }
 

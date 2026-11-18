@@ -138,7 +138,7 @@ namespace krys::boo::dom
 
 #pragma region ShadowRoot (DOM Parsing)
 
-  ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and set HTML given this, html, options, and Safe.
@@ -146,7 +146,7 @@ namespace krys::boo::dom
                                                            html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and pre-insert HTML given this, null, html, options, and Safe.
@@ -154,7 +154,7 @@ namespace krys::boo::dom
                                                                  html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and pre-insert HTML given this, this's first child, html, options, and Safe.
@@ -163,7 +163,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html,
-                                              html::SetHTMLUnsafeOptions &&options) noexcept
+                                              const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -175,7 +175,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html,
-                                                 html::SetHTMLUnsafeOptions &&options) noexcept
+                                                 const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -188,7 +188,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html,
-                                                  html::SetHTMLUnsafeOptions &&options) noexcept
+                                                  const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -200,7 +200,7 @@ namespace krys::boo::dom
       html::FragmentParserMode::Unsafe);
   }
 
-  DOMString ShadowRoot::GetHTML(GetHTMLOptions &&options) const noexcept
+  DOMString ShadowRoot::GetHTML(GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
                              ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,

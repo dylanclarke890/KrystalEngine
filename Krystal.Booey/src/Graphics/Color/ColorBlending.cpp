@@ -38,19 +38,7 @@ namespace krys::boo
       return color.CallOnUnderlyingType(
         [&]<typename ColorType>(const ColorType &)
         {
-          if constexpr (SameType<ColorType, SRGBA<uint8>>)
-          {
-            return true;
-          }
-          else if constexpr (SameType<ColorType, SRGBA<float>>)
-          {
-            return true;
-          }
-          else if constexpr (SameType<ColorType, HSLA<float>>)
-          {
-            return true;
-          }
-          else if constexpr (SameType<ColorType, HWBA<float>>)
+          if constexpr (OneOf<ColorType, SRGBA<uint8>, SRGBA<float>, HSLA<float>, HWBA<float>>)
           {
             return true;
           }

@@ -66,10 +66,10 @@ namespace krys::boo::style
   template <>
   struct Blending<Perspective>
   {
-    KRYS_NODISCARD bool CanBlend(const Perspective &, const Perspective &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const Perspective &, const Perspective &) noexcept;
 
-    KRYS_NODISCARD Perspective Blend(const Perspective &, const Perspective &,
-                                     const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Perspective Blend(const Perspective &, const Perspective &,
+                                            const BlendingContext &) noexcept;
   };
 }
 

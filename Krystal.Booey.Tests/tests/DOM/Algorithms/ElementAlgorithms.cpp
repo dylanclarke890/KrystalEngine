@@ -31,13 +31,13 @@ namespace krys::boo::dom::tests
       List<AttributeChange> Changes;
 
       explicit AttributeChangeRecordingElement(dom::Document &document) noexcept
-          : Element(document, {infra::Namespaces::HTML, null, u8"test-element"}, NodeFlags::None)
+          : Element(document, {infra::namespaces::HTML, null, u8"test-element"}, NodeFlags::None)
       {
       }
 
     protected:
-      void OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
-                              Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept override
+      void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                              Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override
       {
         Element::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
@@ -61,7 +61,7 @@ namespace krys::boo::dom::tests
 
     Ref<Attr> NewAttribute(Document &document, DOMStringAtom localName, DOMString &&value) noexcept
     {
-      auto attr = document.CreateAttribute(localName).ReleaseValue();
+      auto attr = document.CreateAttribute(krys::move(localName)).ReleaseValue();
       attr->Value(krys::move(value));
       return attr;
     }
@@ -209,13 +209,13 @@ namespace krys::boo::dom::tests
     {
       auto check = [](Document &document, DOMStringAtom namespaceURI)
       {
-        auto element = document.CreateElementNS(namespaceURI, u8"g").ReleaseValue();
+        auto element = document.CreateElementNS(krys::move(namespaceURI), u8"g").ReleaseValue();
         REQUIRE_FALSE(element->SetAttribute(u8"viewBox", u8"0 0 1 1").HasException());
         CHECK(ElementAlgorithms::GetAttributeByName(u8"viewbox", *element) == nullptr);
         CHECK(ElementAlgorithms::GetAttributeByName(u8"viewBox", *element) != nullptr);
       };
-      check(*CreateRef<HTMLDocument>(), infra::Namespaces::SVG);
-      check(*CreateRef<XMLDocument>(), infra::Namespaces::HTML);
+      check(*CreateRef<HTMLDocument>(), infra::namespaces::SVG);
+      check(*CreateRef<XMLDocument>(), infra::namespaces::HTML);
     }
 
     SECTION("The first with the qualified name")
@@ -349,7 +349,7 @@ namespace krys::boo::dom::tests
       CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);
     };
 
-    requireNotSupported(attach(*document->CreateElementNS(infra::Namespaces::SVG, u8"div").ReleaseValue()));
+    requireNotSupported(attach(*document->CreateElementNS(infra::namespaces::SVG, u8"div").ReleaseValue()));
     requireNotSupported(attach(*document->CreateElement(u8"img").ReleaseValue()));
     requireNotSupported(attach(*document->CreateElement(u8"input").ReleaseValue()));
 
@@ -423,7 +423,7 @@ namespace krys::boo::dom::tests
 
     auto insert = [&](InsertAdjacentWhere where, DOMStringAtom name)
     {
-      auto node = document->CreateElement(name).ReleaseValue();
+      auto node = document->CreateElement(krys::move(name)).ReleaseValue();
       auto result = ElementAlgorithms::InsertAdjacent(*element, where, *node);
       REQUIRE_FALSE(result.HasException());
       CHECK(result.Value() == node.get());

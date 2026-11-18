@@ -6,7 +6,7 @@
 
 namespace krys::boo::tests
 {
-  using namespace css::Literals;
+  using namespace css::literals;
   using style::ComputedStyle;
 
   namespace

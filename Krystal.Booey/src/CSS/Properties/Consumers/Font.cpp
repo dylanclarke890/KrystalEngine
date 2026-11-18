@@ -190,31 +190,31 @@ namespace krys::boo::css::parse_property
     {
       case ValueId::Serif:
       {
-        return GenericFontFamilyNames::SerifFamily();
+        return generic_font_family_names::SerifFamily();
       }
       case ValueId::SansSerif:
       {
-        return GenericFontFamilyNames::SansSerifFamily();
+        return generic_font_family_names::SansSerifFamily();
       }
       case ValueId::Cursive:
       {
-        return GenericFontFamilyNames::CursiveFamily();
+        return generic_font_family_names::CursiveFamily();
       }
       case ValueId::Fantasy:
       {
-        return GenericFontFamilyNames::FantasyFamily();
+        return generic_font_family_names::FantasyFamily();
       }
       case ValueId::Monospace:
       {
-        return GenericFontFamilyNames::MonospaceFamily();
+        return generic_font_family_names::MonospaceFamily();
       }
       case ValueId::SystemUi:
       {
-        return GenericFontFamilyNames::SystemUiFamily();
+        return generic_font_family_names::SystemUiFamily();
       }
       case ValueId::Math:
       {
-        return GenericFontFamilyNames::MathFamily();
+        return generic_font_family_names::MathFamily();
       }
       default:
       {
@@ -223,42 +223,42 @@ namespace krys::boo::css::parse_property
     }
   }
 
-  GenericFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept
+  generic_font_family_names::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept
   {
     switch (ident)
     {
       case ValueId::Serif:
       {
-        return GenericFontFamilyNames::FamilyNamesIndex::SerifFamily;
+        return generic_font_family_names::FamilyNamesIndex::SerifFamily;
       }
       case ValueId::SansSerif:
       {
-        return GenericFontFamilyNames::FamilyNamesIndex::SansSerifFamily;
+        return generic_font_family_names::FamilyNamesIndex::SansSerifFamily;
       }
       case ValueId::Cursive:
       {
-        return GenericFontFamilyNames::FamilyNamesIndex::CursiveFamily;
+        return generic_font_family_names::FamilyNamesIndex::CursiveFamily;
       }
       case ValueId::Fantasy:
       {
-        return GenericFontFamilyNames::FamilyNamesIndex::FantasyFamily;
+        return generic_font_family_names::FamilyNamesIndex::FantasyFamily;
       }
       case ValueId::Monospace:
       {
-        return GenericFontFamilyNames::FamilyNamesIndex::MonospaceFamily;
+        return generic_font_family_names::FamilyNamesIndex::MonospaceFamily;
       }
       case ValueId::SystemUi:
       {
-        return GenericFontFamilyNames::FamilyNamesIndex::SystemUiFamily;
+        return generic_font_family_names::FamilyNamesIndex::SystemUiFamily;
       }
       case ValueId::Math:
       {
-        return GenericFontFamilyNames::FamilyNamesIndex::MathFamily;
+        return generic_font_family_names::FamilyNamesIndex::MathFamily;
       }
       default:
       {
         krys_debug_assert(false);
-        return GenericFontFamilyNames::FamilyNamesIndex::StandardFamily;
+        return generic_font_family_names::FamilyNamesIndex::StandardFamily;
       }
     }
   }

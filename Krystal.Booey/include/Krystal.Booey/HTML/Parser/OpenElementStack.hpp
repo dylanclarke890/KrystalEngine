@@ -109,17 +109,17 @@ namespace krys::boo::html
 #pragma region InScope
 
   private:
-    KRYS_NODISCARD bool IsScopeMarker(const StackItem &item) const noexcept;
+    KRYS_NODISCARD static bool IsScopeMarker(const StackItem &item) noexcept;
 
     KRYS_NODISCARD bool IsListItemScopeMarker(const StackItem &item) const noexcept;
 
     KRYS_NODISCARD bool IsButtonScopeMarker(const StackItem &item) const noexcept;
 
-    KRYS_NODISCARD bool IsTableScopeMarker(const StackItem &item) const noexcept;
+    KRYS_NODISCARD static bool IsTableScopeMarker(const StackItem &item) noexcept;
 
-    KRYS_NODISCARD bool IsTableBodyScopeMarker(const StackItem &item) const noexcept;
+    KRYS_NODISCARD static bool IsTableBodyScopeMarker(const StackItem &item) noexcept;
 
-    KRYS_NODISCARD bool IsTableRowScopeMarker(const StackItem &item) const noexcept;
+    KRYS_NODISCARD static bool IsTableRowScopeMarker(const StackItem &item) noexcept;
 
   public:
     KRYS_NODISCARD bool HasElementInScope(TagName targetNode) const noexcept;

@@ -182,15 +182,13 @@ namespace krys::boo::style
             ? Maybe<CounterStyle> {Style}
             : std::nullopt}});
     }
-    else
-    {
-      return visitor(CountersFunction {
-        .Parameters = {
-          css::CustomIdentifier {Identifier}, Separator,
-          Style != css::CustomIdentifier {css::CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}
-            ? Maybe<CounterStyle> {Style}
-            : std::nullopt}});
-    }
+
+    return visitor(CountersFunction {
+      .Parameters = {
+        css::CustomIdentifier {Identifier}, Separator,
+        Style != css::CustomIdentifier {css::CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}
+          ? Maybe<CounterStyle> {Style}
+          : std::nullopt}});
   }
 
   // MARK: - Conversion

@@ -83,13 +83,13 @@ namespace krys::boo::html
 
   public:
     CustomElementInterface(dom::DOMStringAtom localName, CustomElementFactory &&factory,
-                           CustomElementOptions &&options) noexcept;
+                           const CustomElementOptions &options) noexcept;
 
     ~CustomElementInterface() noexcept;
 
-    KRYS_NODISCARD static Ref<CustomElementInterface> Create(dom::DOMStringAtom localName,
+    KRYS_NODISCARD static Ref<CustomElementInterface> Create(const dom::DOMStringAtom &localName,
                                                              CustomElementFactory &&factory,
-                                                             CustomElementOptions &&options) noexcept
+                                                             CustomElementOptions options) noexcept
     {
       return CreateRef<CustomElementInterface>(localName, krys::move(factory), krys::move(options));
     }
@@ -118,7 +118,8 @@ namespace krys::boo::html
                                dom::Document &newDocument) noexcept;
 
     void InvokeAttributeChangedCallback(dom::Element &element, const dom::QualifiedName &attributeName,
-                                        dom::DOMStringAtom oldValue, dom::DOMStringAtom newValue) noexcept;
+                                        const dom::DOMStringAtom &oldValue,
+                                        const dom::DOMStringAtom &newValue) noexcept;
 
     void InvokeFormAssociatedCallback(dom::Element &element, HTMLFormElement *form) noexcept;
 
@@ -126,7 +127,7 @@ namespace krys::boo::html
 
     void InvokeFormDisabledCallback(dom::Element &element, bool isDisabled) noexcept;
 
-    KRYS_NODISCARD bool ObservesAttribute(dom::DOMStringAtom name) const noexcept
+    KRYS_NODISCARD bool ObservesAttribute(const dom::DOMStringAtom &name) const noexcept
     {
       return _observedAttributes.contains(name);
     }
@@ -160,6 +161,6 @@ namespace krys::boo::html
                                                                     const dom::QualifiedName &name) noexcept;
 
     template <typename TFunction>
-    void InvokeCallback(dom::Element &element, TFunction &&function) noexcept;
+    void InvokeCallback(dom::Element &element, TFunction function) noexcept;
   };
 }

@@ -28,13 +28,13 @@ namespace krys::boo::dom::tests
 
       Ref<Element> Create(DOMStringAtom name) noexcept
       {
-        return Document->CreateElement(name).ReleaseValue();
+        return Document->CreateElement(krys::move(name)).ReleaseValue();
       }
 
       /// @brief Appends a new element to @p parent.
       Ref<Element> Add(Node &parent, DOMStringAtom name) noexcept
       {
-        auto element = Create(name);
+        auto element = Create(krys::move(name));
         REQUIRE_FALSE(parent.AppendChild(*element).HasException());
         return element;
       }

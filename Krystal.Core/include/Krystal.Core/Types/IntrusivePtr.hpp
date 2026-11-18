@@ -126,6 +126,7 @@ namespace krys
 
     template <typename X, typename Y, typename Z, IsNullable ONullable>
     requires ConvertibleTo<X *, T *>
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): released.
     KRYS_ALWAYS_INLINE constexpr IntrusivePtr(IntrusivePtr<X, Y, Z, ONullable> &&o) noexcept
         : _ptr(static_cast<T *>(o.release()))
     {
@@ -383,6 +384,7 @@ namespace krys
 
   template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): released.
     Upcast(IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &&source) noexcept
   {
     static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
@@ -408,6 +410,7 @@ namespace krys
   /// @brief Casts @p source to its derived type @p Target, which it must be; a null pointer stays null.
   template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, Nullable>
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): released.
     Downcast(IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &&source) noexcept
   {
     static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");
@@ -437,6 +440,7 @@ namespace krys
   /// @brief @p source as its derived type @p Target if it is one, and null otherwise (so always nullable).
   template <typename Target, typename Source, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   KRYS_NODISCARD constexpr detail::IntrusivePtrCast<Target, Source, PtrTraits, RefPolicy, IsNullable::Yes>
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): released when the cast succeeds.
     DynamicDowncast(IntrusivePtr<Source, PtrTraits, RefPolicy, Nullable> &&source) noexcept
   {
     static_assert(!UnnecessaryTypeCast<Target, Source>, "Unnecessary cast to same type");

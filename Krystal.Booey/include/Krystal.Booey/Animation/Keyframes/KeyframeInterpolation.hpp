@@ -106,7 +106,7 @@ namespace krys::boo
 
     /// @brief The keyframes of the interval @p iterationProgress is in, for @p property, with the default
     /// start and end keyframes standing in for implicit 0% and 100% keyframes.
-    KRYS_NODISCARD KeyframeInterval InterpolationKeyframes(Property property, double iterationProgress,
+    KRYS_NODISCARD KeyframeInterval InterpolationKeyframes(const Property &property, double iterationProgress,
                                                            const Keyframe &defaultStartKeyframe,
                                                            const Keyframe &defaultEndKeyframe) const noexcept;
 

@@ -28,8 +28,8 @@
 
 namespace krys::boo
 {
-  TextStream &operator<<(TextStream &ts, const LayoutSize &size) noexcept
+  TextStream &operator<<(TextStream &ts, const LayoutSize &value) noexcept
   {
-    return ts << "width=" << size.Width().ToFloat() << " height=" << size.Height().ToFloat();
+    return ts << "width=" << value.Width().ToFloat() << " height=" << value.Height().ToFloat();
   }
 }

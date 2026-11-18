@@ -18,7 +18,7 @@ namespace krys::boo::css::calc::tests
     }
 
     template <typename Op>
-    Child Node(Op &&op, Type type = Type::CreateLength())
+    Child Node(Op op, Type type = Type::CreateLength())
     {
       return CreateChild(krys::move(op), type);
     }

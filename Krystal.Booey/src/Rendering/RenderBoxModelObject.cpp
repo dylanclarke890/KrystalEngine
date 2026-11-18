@@ -1251,7 +1251,7 @@ namespace krys::boo
     return positioningAreaSize;
   }
 
-  bool RenderBoxModelObject::FixedBackgroundPaintsInLocalCoordinates() const noexcept
+  bool RenderBoxModelObject::FixedBackgroundPaintsInLocalCoordinates() noexcept
   {
     // Only a composited root layer paints its fixed background in its own coordinates; there's no
     // compositing.

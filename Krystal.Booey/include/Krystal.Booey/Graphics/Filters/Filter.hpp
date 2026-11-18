@@ -127,7 +127,7 @@ namespace krys::boo
                                                         const FloatRect &sourceImageRect) const noexcept;
 
     /// @brief The image buffer holding @p filterImage's pixels; null when an accelerated backend holds them.
-    KRYS_NODISCARD ImageBuffer *FilterResultBuffer(FilterImage &filterImage) const noexcept;
+    KRYS_NODISCARD static ImageBuffer *FilterResultBuffer(FilterImage &filterImage) noexcept;
 
   protected:
     explicit Filter(FilterFunction::Type type) noexcept;

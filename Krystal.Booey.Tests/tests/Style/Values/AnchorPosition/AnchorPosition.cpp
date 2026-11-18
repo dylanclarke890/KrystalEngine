@@ -54,7 +54,7 @@ namespace krys::boo::style::tests
 
     auto area = Convert<PositionArea>(PropertyId::PositionArea, u8"top left");
     REQUIRE(area.IsValue());
-    CHECK(area.TryValue()->BlockOrXAxis().Track() == PositionAreaTrack::Start);
+    CHECK(area.TryValue().value().BlockOrXAxis().Track() == PositionAreaTrack::Start);
     // The computed value puts the x axis first.
     CHECK(Serialised(area) == "left top");
     CHECK(Created(area) == "left top");

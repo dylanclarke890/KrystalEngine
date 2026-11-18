@@ -54,10 +54,10 @@ namespace krys::boo::html
     void Height(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-videowidth
-    KRYS_NODISCARD uint32 VideoWidth() const noexcept;
+    KRYS_NODISCARD static uint32 VideoWidth() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-videoheight
-    KRYS_NODISCARD uint32 VideoHeight() const noexcept;
+    KRYS_NODISCARD static uint32 VideoHeight() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-poster
     KRYS_NODISCARD dom::USVString Poster() const noexcept;
@@ -75,10 +75,11 @@ namespace krys::boo::html
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                const dom::DOMStringAtom &namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
   };

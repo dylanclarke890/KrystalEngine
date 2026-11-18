@@ -458,11 +458,9 @@ namespace krys::boo::css::parse_property
             return null;
           });
       }
-      else
-      {
-        // A `comma` NOT getting successfully consumed means this is using the modern syntax.
-        return ConsumeAbsoluteFunctionParameters<Descriptor>(args, state, krys::move(*red));
-      }
+
+      // A `comma` NOT getting successfully consumed means this is using the modern syntax.
+      return ConsumeAbsoluteFunctionParameters<Descriptor>(args, state, krys::move(*red));
     }
 
     // MARK: - hsl() / hsla()
@@ -516,17 +514,15 @@ namespace krys::boo::css::parse_property
             return null;
           });
       }
-      else
-      {
-        // A `comma` NOT getting successfully consumed means this is using the modern syntax.
-        return ConsumeAbsoluteFunctionParameters<Descriptor>(args, state, krys::move(*hue));
-      }
+
+      // A `comma` NOT getting successfully consumed means this is using the modern syntax.
+      return ConsumeAbsoluteFunctionParameters<Descriptor>(args, state, krys::move(*hue));
     }
 
     // MARK: - color()
 
     template <typename Functor>
-    KRYS_NODISCARD auto CallWithColorFunction(ValueId id, Functor &&functor) noexcept
+    KRYS_NODISCARD auto CallWithColorFunction(ValueId id, Functor functor) noexcept
       -> decltype(functor.template operator()<ColorRGBFunction<ExtendedSRGBA<float>>>())
     {
       switch (id)
@@ -576,7 +572,7 @@ namespace krys::boo::css::parse_property
     }
 
     template <typename Functor>
-    KRYS_NODISCARD auto ConsumeColorSpace(TokenRange &args, Functor &&functor) noexcept
+    KRYS_NODISCARD auto ConsumeColorSpace(TokenRange &args, Functor functor) noexcept
       -> decltype(functor.template operator()<ColorRGBFunction<ExtendedSRGBA<float>>>())
     {
       return CallWithColorFunction(args.Peek().ValueId(),

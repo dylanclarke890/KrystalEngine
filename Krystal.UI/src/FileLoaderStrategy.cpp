@@ -50,7 +50,7 @@ namespace krys::ui
     /// @brief What loading @p url, the file at @p path, gave: @p contents as a resource, or an error if the
     /// file couldn't be read.
     KRYS_NODISCARD boo::LoadResult LoadResultFor(const boo::url::URL &url, const std::filesystem::path &path,
-                                                 Maybe<FileContents> &&contents) noexcept
+                                                 Maybe<FileContents> contents) noexcept
     {
       if (!contents)
       {

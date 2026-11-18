@@ -15,7 +15,7 @@ namespace krys::boo::css::calc::tests
     }
 
     template <typename Op>
-    Child Node(Op &&op, Type type = Type::CreateLength())
+    Child Node(Op op, Type type = Type::CreateLength())
     {
       return CreateChild(krys::move(op), type);
     }
@@ -38,7 +38,7 @@ namespace krys::boo::css::calc::tests
                                     .AllowZeroValueLengthRemovalFromSum = removeZeros};
     }
 
-    Child Simplified(Child &&root, const SimplificationOptions &options = Options())
+    Child Simplified(Child root, const SimplificationOptions &options = Options())
     {
       return CopyAndSimplify(root, options);
     }
@@ -81,14 +81,14 @@ namespace krys::boo::css::calc::tests
       return Canonicalize(NonCanonicalDimension {.Value = value, .Unit = unit}, null);
     };
 
-    CHECK(canonical(1.0, UnitType::in)->Value == 96.0);
-    CHECK(canonical(2.54, UnitType::cm)->Value == Catch::Approx(96.0));
-    CHECK(canonical(72.0, UnitType::pt)->Value == Catch::Approx(96.0));
-    CHECK(canonical(1.0, UnitType::turn)->Dimension == Dimension::Angle);
-    CHECK(canonical(1.0, UnitType::turn)->Value == 360.0);
-    CHECK(canonical(1500.0, UnitType::ms)->Value == Catch::Approx(1.5));
-    CHECK(canonical(2.0, UnitType::khz)->Value == 2000.0);
-    CHECK(canonical(96.0, UnitType::dpi)->Value == Catch::Approx(1.0));
+    CHECK(canonical(1.0, UnitType::in).value().Value == 96.0);
+    CHECK(canonical(2.54, UnitType::cm).value().Value == Catch::Approx(96.0));
+    CHECK(canonical(72.0, UnitType::pt).value().Value == Catch::Approx(96.0));
+    CHECK(canonical(1.0, UnitType::turn).value().Dimension == Dimension::Angle);
+    CHECK(canonical(1.0, UnitType::turn).value().Value == 360.0);
+    CHECK(canonical(1500.0, UnitType::ms).value().Value == Catch::Approx(1.5));
+    CHECK(canonical(2.0, UnitType::khz).value().Value == 2000.0);
+    CHECK(canonical(96.0, UnitType::dpi).value().Value == Catch::Approx(1.0));
 
     // Font, viewport and container relative lengths need conversion data.
     CHECK_FALSE(canonical(1.0, UnitType::em));

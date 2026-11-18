@@ -305,7 +305,7 @@ namespace krys
     template <class U>
     KRYS_ALWAYS_INLINE constexpr static T *exchange(StorageType &ptr, U &&newValue) noexcept
     {
-      return ptr.exchange(newValue);
+      return ptr.exchange(std::forward<U>(newValue));
     }
 
     template <typename Other>

@@ -114,7 +114,7 @@ namespace krys::boo
     }
 
     template <typename TMapFunction>
-    KRYS_NODISCARD GradientColorStops MapColors(TMapFunction &&mapFunction) const noexcept
+    KRYS_NODISCARD GradientColorStops MapColors(TMapFunction mapFunction) const noexcept
     {
       StopVector stops;
       stops.reserve(_stops.size());

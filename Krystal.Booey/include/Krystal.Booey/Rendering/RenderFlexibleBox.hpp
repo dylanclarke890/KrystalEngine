@@ -359,7 +359,7 @@ namespace krys::boo
 
     KRYS_NODISCARD double PreferredAspectRatioForFlexItem(const RenderBox &flexItem) const noexcept;
 
-    KRYS_NODISCARD bool FlexItemHasComputableAspectRatio(const RenderBox &flexItem) const noexcept;
+    KRYS_NODISCARD static bool FlexItemHasComputableAspectRatio(const RenderBox &flexItem) noexcept;
 
     KRYS_NODISCARD bool
       FlexItemHasComputableAspectRatioAndCrossSizeIsConsideredDefinite(const RenderBox &flexItem) noexcept;
@@ -424,7 +424,7 @@ namespace krys::boo
                                                               LayoutUnit gapBetweenItems) noexcept;
 
     KRYS_NODISCARD LayoutUnit AutoMarginOffsetInMainAxis(const FlexLayoutItems &flexLayoutItems,
-                                                         LayoutUnit &availableFreeSpace) noexcept;
+                                                         LayoutUnit &availableFreeSpace) const noexcept;
 
     void UpdateAutoMarginsInMainAxis(RenderBox &flexItem, LayoutUnit autoMarginOffset) noexcept;
 
@@ -492,9 +492,9 @@ namespace krys::boo
                                 double &totalFlexGrow, double &totalFlexShrink,
                                 double &totalWeightedFlexShrink) noexcept;
 
-    void FreezeViolations(List<FlexLayoutItem *> &violations, LayoutUnit &availableFreeSpace,
-                          double &totalFlexGrow, double &totalFlexShrink,
-                          double &totalWeightedFlexShrink) noexcept;
+    static void FreezeViolations(List<FlexLayoutItem *> &violations, LayoutUnit &availableFreeSpace,
+                                 double &totalFlexGrow, double &totalFlexShrink,
+                                 double &totalWeightedFlexShrink) noexcept;
 
     void ResetAutoMarginsAndLogicalTopInCrossAxis(RenderBox &flexItem) noexcept;
 

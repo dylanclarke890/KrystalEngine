@@ -329,7 +329,7 @@ namespace krys::boo
         List<FloatRect> rects;
         for (; curr; curr = curr->NextLineBox())
         {
-          rects.push_back(FloatRect(curr->TopLeft(), curr->Size()));
+          rects.emplace_back(curr->TopLeft(), curr->Size());
         }
         return rects;
       }

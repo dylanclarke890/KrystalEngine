@@ -328,7 +328,7 @@ namespace krys::boo::css::calc
   template <typename Op, typename Completion>
   static Maybe<Child> SimplifyForOperationWithCompletion(Child &a, Child &b,
                                                          const SimplificationOptions &options,
-                                                         Completion &&completion) noexcept
+                                                         Completion completion) noexcept
   {
     return SwitchTogether(
       a, b,
@@ -1228,7 +1228,7 @@ namespace krys::boo::css::calc
           // - clamp(none, VAL, MAX) is equivalent to min(VAL, MAX)
           return CreateChildWithValueBasedOn(ExecuteMathOperation<Min>(val.Value, max.Value), val);
         }
-        else if (maxIsNone)
+        if (maxIsNone)
         {
           auto &minChild = get<Child>(root.Min);
           if (!krys::HoldsAlternative<T>(minChild))

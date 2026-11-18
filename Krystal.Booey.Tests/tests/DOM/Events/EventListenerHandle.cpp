@@ -20,7 +20,7 @@ namespace krys::boo::dom::tests
 
       void Fire(DOMStringAtom type) noexcept
       {
-        (void)Target->DispatchEvent(*Event::Create(type, false, false));
+        (void)Target->DispatchEvent(*Event::Create(krys::move(type), false, false));
       }
     };
   }

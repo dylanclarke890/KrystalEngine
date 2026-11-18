@@ -54,6 +54,7 @@ namespace krys
     {
       constexpr auto inputCategory = Input::Model::ComponentInfo[IndexInInput].Category;
       if constexpr (!inputCategory)
+      // NOLINTNEXTLINE(bugprone-branch-clone): no category, then each output component.
       {
         return null;
       }
@@ -100,12 +101,8 @@ namespace krys
   template <typename Output, typename Input>
   KRYS_NODISCARD Output ConvertColourCarryingForwardMissing(const Input &color) noexcept
   {
-    if constexpr (SameType<Input, Output>)
-    {
-      return ConvertColour<Output>(color);
-    }
-    else if constexpr (SameType<typename Input::ComponentType, uint8>
-                       || SameType<typename Output::ComponentType, uint8>)
+    if constexpr (SameType<Input, Output> || SameType<typename Input::ComponentType, uint8>
+                  || SameType<typename Output::ComponentType, uint8>)
     {
       return ConvertColour<Output>(color);
     }

@@ -150,7 +150,7 @@ namespace krys::boo::style
       Kind Contents;
     };
 
-    RefPtr<Value> _value {};
+    RefPtr<Value> _value;
   };
 
   DEFINE_TYPE_WRAPPER_GET(ShapeOutside::Image, Value);
@@ -213,7 +213,7 @@ namespace krys::boo::style
   template <>
   struct Blending<ShapeOutside>
   {
-    KRYS_NODISCARD bool CanBlend(const ShapeOutside &, const ShapeOutside &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const ShapeOutside &, const ShapeOutside &) noexcept;
 
     KRYS_NODISCARD ShapeOutside Blend(const ShapeOutside &, const ShapeOutside &,
                                       const BlendingContext &) noexcept;

@@ -19,10 +19,11 @@ namespace krys::boo::css::tests
 
     BorderRadius::Axis Axis(LP topLeft, LP topRight, LP bottomRight, LP bottomLeft)
     {
-      return BorderRadius::Axis {topLeft, topRight, bottomRight, bottomLeft};
+      return BorderRadius::Axis {krys::move(topLeft), krys::move(topRight), krys::move(bottomRight),
+                                 krys::move(bottomLeft)};
     }
 
-    BorderRadius::Axis Axis(LP all)
+    BorderRadius::Axis Axis(const LP &all)
     {
       return Axis(all, all, all, all);
     }

@@ -140,7 +140,7 @@ namespace krys::boo::svg
 
   auto SVGURIReference::TargetElementFromIRIString(dom::DOMStringView iri,
                                                    const dom::DocumentOrShadowRoot &treeScope,
-                                                   RefPtr<dom::Document> externalDocument) noexcept
+                                                   const RefPtr<dom::Document> &externalDocument) noexcept
     -> TargetElementResult
   {
     // If there's no fragment identifier contained within the IRI string, we can't lookup an element.
@@ -195,10 +195,10 @@ namespace krys::boo::svg
 
   auto SVGURIReference::TargetElementFromIRIString(const style::URL &iri,
                                                    const dom::DocumentOrShadowRoot &treeScope,
-                                                   RefPtr<dom::Document> externalDocument) noexcept
+                                                   const RefPtr<dom::Document> &externalDocument) noexcept
     -> TargetElementResult
   {
-    return TargetElementFromIRIString(iri.Resolved.String(), treeScope, krys::move(externalDocument));
+    return TargetElementFromIRIString(iri.Resolved.String(), treeScope, externalDocument);
   }
 
   bool SVGURIReference::HaveLoadedRequiredResources() const noexcept

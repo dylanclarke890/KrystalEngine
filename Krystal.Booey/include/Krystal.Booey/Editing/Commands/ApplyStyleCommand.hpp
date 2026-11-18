@@ -150,8 +150,8 @@ namespace krys::boo
     void RemoveInlineStyle(EditingStyle &style, const dom::Position &start,
                            const dom::Position &end) noexcept;
 
-    KRYS_NODISCARD bool NodeFullySelected(dom::Element &element, const dom::Position &start,
-                                          const dom::Position &end) const noexcept;
+    KRYS_NODISCARD static bool NodeFullySelected(dom::Element &element, const dom::Position &start,
+                                                 const dom::Position &end) noexcept;
 
     // style-application helpers
     void ApplyBlockStyle(EditingStyle &style) noexcept;
@@ -185,7 +185,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldSplitTextElement(dom::Element *element, EditingStyle &style) noexcept;
 
-    KRYS_NODISCARD bool IsValidCaretPositionInTextNode(const dom::Position &position) noexcept;
+    KRYS_NODISCARD static bool IsValidCaretPositionInTextNode(const dom::Position &position) noexcept;
 
     bool MergeStartWithPreviousIfIdentical(const dom::Position &start, const dom::Position &end) noexcept;
 

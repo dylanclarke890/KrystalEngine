@@ -60,17 +60,17 @@ namespace krys::boo::dom
     ~IdTargetObserverRegistry() noexcept = default;
 
     /// @brief Tells the observers of @p id that @p element gained or lost it.
-    void NotifyObservers(Element &element, DOMStringAtom id) noexcept;
+    void NotifyObservers(Element &element, const DOMStringAtom &id) noexcept;
 
   private:
-    void AddObserver(DOMStringAtom id, IdTargetObserver &observer) noexcept;
+    void AddObserver(const DOMStringAtom &id, IdTargetObserver &observer) noexcept;
 
-    void RemoveObserver(DOMStringAtom id, IdTargetObserver &observer) noexcept;
+    void RemoveObserver(const DOMStringAtom &id, IdTargetObserver &observer) noexcept;
 
-    void NotifyObserversInternal(Element &element, DOMStringAtom id) noexcept;
+    void NotifyObserversInternal(Element &element, const DOMStringAtom &id) noexcept;
   };
 
-  inline void IdTargetObserverRegistry::NotifyObservers(Element &element, DOMStringAtom id) noexcept
+  inline void IdTargetObserverRegistry::NotifyObservers(Element &element, const DOMStringAtom &id) noexcept
   {
     krys_debug_assert(!id.View().empty());
     krys_debug_assert(!_notifyingObserversInSet);

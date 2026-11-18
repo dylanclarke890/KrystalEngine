@@ -36,7 +36,7 @@ namespace krys::boo::tests
         Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
       }
 
-      KRYS_NODISCARD LocalFrameView &View() noexcept
+      KRYS_NODISCARD LocalFrameView &View() const noexcept
       {
         return *Frame->View();
       }

@@ -382,7 +382,7 @@ namespace krys::ui
     /// `Update` until `IsLoading` is false (or the load handler hears it committed).
     /// @param cachePolicy How its style sheets, images and other resources use the memory cache: `Reload`
     /// loads them again, as reloading a page does.
-    void LoadHTML(utf8_string &&markup, boo::url::URL &&url = {},
+    void LoadHTML(utf8_string markup, boo::url::URL &&url = {},
                   boo::CachePolicy cachePolicy = boo::CachePolicy::Use) noexcept;
 
     /// @brief Starts loading the UTF-8 file at @p path, at the file's URL, through the loader strategy; as
@@ -418,7 +418,7 @@ namespace krys::ui
     /// elements of that name are upgraded).
     /// @return An error if @p name isn't a valid custom element name or the view already defines it.
     KRYS_NODISCARD Expected<void>
-      DefineCustomElement(boo::dom::DOMStringAtom name, boo::html::CustomElementFactory &&factory,
+      DefineCustomElement(const boo::dom::DOMStringAtom &name, boo::html::CustomElementFactory &&factory,
                           boo::html::CustomElementOptions &&options = {}) noexcept;
 
     /// @brief Registers the font files (`.ttf`, `.otf`, `.ttc`, `.otc`) in @p directory for every page, so
@@ -764,7 +764,7 @@ namespace krys::ui
 
     /// @brief Replaces the document with one parsed from @p markup at once, without a load: the overlays'
     /// content.
-    void ReplaceDocument(utf8_string &&markup) noexcept;
+    void ReplaceDocument(utf8_string markup) noexcept;
 
     void ShowOverlay(Overlay &overlay) noexcept;
 
@@ -792,7 +792,7 @@ namespace krys::ui
     KRYS_NODISCARD boo::MouseButton HeldButton() const noexcept;
 
     /// @brief The drag @p item describes, of @p dataTransfer's data, started in the page.
-    void DragStarted(boo::DragItem &&item, boo::dom::DataTransfer &dataTransfer) noexcept;
+    void DragStarted(boo::DragItem item, boo::dom::DataTransfer &dataTransfer) noexcept;
 
     /// @brief The drag moved to @p point (in viewport coordinates), with @p modifiers held: over the page,
     /// it's entered or updated, and off it, it's left.
@@ -826,7 +826,7 @@ namespace krys::ui
     }
 
     /// @brief The topmost element at @p point, in the viewport's CSS pixels.
-    KRYS_NODISCARD boo::dom::Element *HitTestInPage(const boo::IntPoint &point) noexcept;
+    KRYS_NODISCARD boo::dom::Element *HitTestInPage(const boo::IntPoint &point) const noexcept;
 
     /// @brief `MouseWheel` at @p point, in the viewport's CSS pixels.
     bool MouseWheelInPage(const boo::IntPoint &point, float notchesX, float notchesY,

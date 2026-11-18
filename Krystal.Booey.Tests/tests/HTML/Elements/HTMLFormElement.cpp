@@ -278,7 +278,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       REQUIRE_FALSE(form.RequestSubmit(&fixture.Get<HTMLInputElement>(u8"go")).HasException());
       REQUIRE(fixture.Submissions().size() == 1);
       CHECK(fixture.Submissions()[0].Submitter == "go");
-      CHECK(fixture.Submissions()[0].Entries.find("&go=Go&") != std::string::npos);
+      CHECK(fixture.Submissions()[0].Entries.contains("&go=Go&"));
       REQUIRE(events->Submitters.size() == 1);
       CHECK(events->Submitters[0] == "go");
 
@@ -296,8 +296,8 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       fixture.Get<HTMLButtonElement>(u8"other").Click();
       REQUIRE(fixture.Submissions().size() == 1);
       CHECK(fixture.Submissions()[0].Submitter == "other");
-      CHECK(fixture.Submissions()[0].Entries.find("&other=o&") != std::string::npos);
-      CHECK(fixture.Submissions()[0].Entries.find("go=Go") == std::string::npos);
+      CHECK(fixture.Submissions()[0].Entries.contains("&other=o&"));
+      CHECK_FALSE(fixture.Submissions()[0].Entries.contains("go=Go"));
     }
 
     SECTION("POST and the encoding type")

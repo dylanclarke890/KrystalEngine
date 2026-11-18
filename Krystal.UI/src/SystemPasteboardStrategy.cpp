@@ -78,8 +78,7 @@ namespace krys::ui
     return boo::SharedBuffer::Create(krys::move(*bytes));
   }
 
-  void SystemPasteboardStrategy::WriteToClipboard(utf8_stringview,
-                                                  boo::SelectionData &&selectionData) noexcept
+  void SystemPasteboardStrategy::WriteToClipboard(utf8_stringview, boo::SelectionData selectionData) noexcept
   {
     pal::ClipboardContent content;
     if (selectionData.HasText())

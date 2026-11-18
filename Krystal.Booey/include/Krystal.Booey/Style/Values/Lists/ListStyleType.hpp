@@ -49,7 +49,7 @@ namespace krys::boo::style
     css::CSSOMStringAtom _identifier {null};
 
   public:
-    ListStyleType(css::keywords::None) noexcept : _type {Type::None}
+    ListStyleType(css::keywords::None) noexcept
     {
     }
 
@@ -66,22 +66,22 @@ namespace krys::boo::style
     // <counter-style> specific constructors.
 
     ListStyleType(css::keywords::Circle keyword) noexcept
-        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(keyword.Value)}}}}
+        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(css::keywords::Circle::Value)}}}}
     {
     }
 
     ListStyleType(css::keywords::Decimal keyword) noexcept
-        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(keyword.Value)}}}}
+        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(css::keywords::Decimal::Value)}}}}
     {
     }
 
     ListStyleType(css::keywords::Disc keyword) noexcept
-        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(keyword.Value)}}}}
+        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(css::keywords::Disc::Value)}}}}
     {
     }
 
     ListStyleType(css::keywords::Square keyword) noexcept
-        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(keyword.Value)}}}}
+        : ListStyleType {CounterStyle {{css::CSSOMStringAtom {css::ToString(css::keywords::Square::Value)}}}}
     {
     }
 

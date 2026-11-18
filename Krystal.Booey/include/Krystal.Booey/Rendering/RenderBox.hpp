@@ -926,7 +926,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<LayoutUnit> ExplicitIntrinsicInnerLogicalHeight() const noexcept;
 
-    KRYS_NODISCARD bool ComputeHasTransformRelatedProperty(const RenderStyle &styleToUse) const noexcept;
+    KRYS_NODISCARD static bool ComputeHasTransformRelatedProperty(const RenderStyle &styleToUse) noexcept;
 
     KRYS_NODISCARD LayoutUnit ComputeIntrinsicLogicalWidthUsing(const style::PreferredSize &logicalWidth,
                                                                 LayoutUnit availableLogicalWidth,
@@ -948,7 +948,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IncludeHorizontalScrollbarSize() const noexcept;
 
-    KRYS_NODISCARD bool CanUseOverlayScrollbars() const noexcept;
+    KRYS_NODISCARD static bool CanUseOverlayScrollbars() noexcept;
 
     KRYS_NODISCARD bool HasAutoScrollbar(ScrollbarOrientation orientation) const noexcept;
 
@@ -1408,7 +1408,7 @@ namespace krys::boo
                                        const style::MaximumSize &maxLogicalWidth,
                                        LayoutUnit borderAndPaddingLogicalWidth) noexcept;
 
-    KRYS_NODISCARD bool IsAspectRatioDegenerate(double aspectRatio) const noexcept
+    KRYS_NODISCARD static bool IsAspectRatioDegenerate(double aspectRatio) noexcept
     {
       return !aspectRatio || std::isnan(aspectRatio);
     }

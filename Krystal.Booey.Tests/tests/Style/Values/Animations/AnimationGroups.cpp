@@ -18,7 +18,7 @@
 namespace krys::boo::style::tests
 {
   using css::PropertyId;
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TEST_CASE_METHOD(BuilderFixture, "Style EasingFunction", "[Style][Values][Animations]")
   {
@@ -84,14 +84,14 @@ namespace krys::boo::style::tests
     CHECK(animationName(u8"none").IsNone());
     // A quoted name is an identifier unless it would read as a keyword.
     auto quoted = animationName(u8"\"two words\"");
-    CHECK(quoted.TryKeyframesName()->IsIdentifier);
+    CHECK(quoted.TryKeyframesName().value().IsIdentifier);
     auto keywordString = animationName(u8"\"none\"");
     REQUIRE(keywordString.TryKeyframesName());
     CHECK_FALSE(keywordString.TryKeyframesName()->IsIdentifier);
     CHECK(Serialised(keywordString) == "\"none\"");
 
     auto duration = Convert<SingleAnimationDuration>(PropertyId::AnimationDuration, u8"2s");
-    CHECK(duration.TryTime()->Value == 2);
+    CHECK(duration.TryTime().value().Value == 2);
     CHECK(Convert<SingleAnimationDuration>(PropertyId::AnimationDuration, u8"auto").IsAuto());
     CHECK(
       Convert<SingleAnimationIterationCount>(PropertyId::AnimationIterationCount, u8"infinite").IsInfinite());
@@ -103,7 +103,7 @@ namespace krys::boo::style::tests
       CHECK(Convert<SingleAnimationTimeline>(PropertyId::AnimationTimeline, u8"auto").IsAuto());
       CHECK(Convert<SingleAnimationTimeline>(PropertyId::AnimationTimeline, u8"none").IsNone());
       auto named = Convert<SingleAnimationTimeline>(PropertyId::AnimationTimeline, u8"--scroller");
-      CHECK(named.TryCustomIdentifier()->Value == u8"--scroller");
+      CHECK(named.TryCustomIdentifier().value().Value == u8"--scroller");
 
       auto scroll = Convert<SingleAnimationTimeline>(PropertyId::AnimationTimeline, u8"scroll(root inline)");
       REQUIRE(scroll.TryScrollFunction());

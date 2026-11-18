@@ -136,28 +136,30 @@ namespace krys::boo::html
     /// @brief The value the target element's ARIA defaults give @p name (an ARIA attribute's content
     /// attribute name), if the internals set one.
     /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
-    KRYS_NODISCARD Maybe<dom::DOMString> InternalContentAttribute(dom::DOMStringAtom name) const noexcept;
+    KRYS_NODISCARD Maybe<dom::DOMString>
+      InternalContentAttribute(const dom::DOMStringAtom &name) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
-    void SetInternalContentAttribute(dom::DOMStringAtom name, dom::DOMString value) noexcept;
+    void SetInternalContentAttribute(const dom::DOMStringAtom &name, dom::DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
-    void RemoveInternalContentAttribute(dom::DOMStringAtom name) noexcept;
+    void RemoveInternalContentAttribute(const dom::DOMStringAtom &name) noexcept;
 
     /// @brief The element an `Element?` ARIA attribute of the internals refers to.
     /// @see https://html.spec.whatwg.org/#attr-associated-element
-    KRYS_NODISCARD RefPtr<dom::Element> ElementForAttributeInternal(dom::DOMStringAtom name) const noexcept;
+    KRYS_NODISCARD RefPtr<dom::Element>
+      ElementForAttributeInternal(const dom::DOMStringAtom &name) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#attr-associated-element
-    void SetElementAttribute(dom::DOMStringAtom name, dom::Element *element) noexcept;
+    void SetElementAttribute(const dom::DOMStringAtom &name, dom::Element *element) noexcept;
 
     /// @brief The elements a `FrozenArray<Element>?` ARIA attribute of the internals refers to.
     /// @see https://html.spec.whatwg.org/#attr-associated-elements
     KRYS_NODISCARD Maybe<List<Ref<dom::Element>>>
-      ElementsForAttributeInternal(dom::DOMStringAtom name) const noexcept;
+      ElementsForAttributeInternal(const dom::DOMStringAtom &name) const noexcept;
 
     /// @see https://html.spec.whatwg.org/#attr-associated-elements
-    void SetElementsArrayAttribute(dom::DOMStringAtom name,
+    void SetElementsArrayAttribute(const dom::DOMStringAtom &name,
                                    const Maybe<List<Ref<dom::Element>>> &elements) noexcept;
 
   private:
@@ -170,7 +172,7 @@ namespace krys::boo::html
 
     /// @brief Tells accessibility the default for @p name changed from @p oldValue, unless the element's own
     /// attribute overrides it.
-    void InternalContentAttributeChanged(dom::DOMStringAtom name,
+    void InternalContentAttributeChanged(const dom::DOMStringAtom &name,
                                          const Maybe<dom::DOMString> &oldValue) noexcept;
   };
 }

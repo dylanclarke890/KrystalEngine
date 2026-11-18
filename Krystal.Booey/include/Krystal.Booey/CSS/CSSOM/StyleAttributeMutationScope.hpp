@@ -57,6 +57,6 @@ namespace krys::boo::css
     ~StyleAttributeMutationScope() noexcept;
 
     /// @brief Queues the record when the outermost scope ends.
-    void EnqueueMutationRecord() noexcept;
+    static void EnqueueMutationRecord() noexcept;
   };
 }

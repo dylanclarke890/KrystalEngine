@@ -317,10 +317,8 @@ namespace krys
         // If the axis length is near zero, return a default axis
         return Vector3<T>(1.0f, 0.0f, 0.0f);
       }
-      else
-      {
-        return axis / length; // Return the normalized axis
-      }
+
+      return axis / length; // Return the normalized axis
     }
 
 #pragma endregion AxisAngle

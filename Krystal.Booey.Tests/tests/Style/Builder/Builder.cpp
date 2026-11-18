@@ -50,7 +50,7 @@ namespace krys::boo::style::tests
         Build();
       }
 
-      KRYS_NODISCARD std::string Custom(const RenderStyle &style, utf8_stringview name) const noexcept
+      KRYS_NODISCARD static std::string Custom(const RenderStyle &style, utf8_stringview name) noexcept
       {
         const auto *property = style.CustomPropertyValue(css::CSSOMStringAtom {name});
         if (!property)

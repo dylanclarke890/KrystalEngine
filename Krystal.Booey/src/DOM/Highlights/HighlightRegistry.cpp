@@ -36,7 +36,7 @@ namespace krys::boo::dom
     }
   }
 
-  void HighlightRegistry::Set(DOMStringAtom key, Ref<Highlight> &&value) noexcept
+  void HighlightRegistry::Set(const DOMStringAtom &key, Ref<Highlight> &&value) noexcept
   {
     auto [iterator, isNewEntry] = _map.insert_or_assign(key, krys::move(value));
     if (isNewEntry)
@@ -46,7 +46,7 @@ namespace krys::boo::dom
     }
   }
 
-  Highlight *HighlightRegistry::Get(DOMStringAtom key) const noexcept
+  Highlight *HighlightRegistry::Get(const DOMStringAtom &key) const noexcept
   {
     auto found = _map.find(key);
     return found == _map.end() ? nullptr : found->second.get();
@@ -62,7 +62,7 @@ namespace krys::boo::dom
     }
   }
 
-  bool HighlightRegistry::Delete(DOMStringAtom key) noexcept
+  bool HighlightRegistry::Delete(const DOMStringAtom &key) noexcept
   {
     if (auto found = std::ranges::find(_highlightNames, key); found != _highlightNames.end())
     {

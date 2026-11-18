@@ -289,7 +289,7 @@ namespace krys::boo::css
     {
     }
 
-    PrimitiveData(Calc calc) noexcept : _payload {calc.ProtectedCalc().release()}, _index {calc}
+    PrimitiveData(const Calc &calc) noexcept : _payload {calc.ProtectedCalc().release()}, _index {calc}
     {
     }
 
@@ -366,6 +366,8 @@ namespace krys::boo::css
     }
 
     template <SubsumesChildPrimitiveData<PrimitiveData> T>
+    // A converting move (the constraint admits only rvalues), done by SetAsMovedFrom().
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
     PrimitiveData(T &&other) noexcept : _payload {other._payload}, _index {other._index}
     {
       other.SetAsMovedFrom();
@@ -391,6 +393,8 @@ namespace krys::boo::css
     }
 
     template <SubsumesChildPrimitiveData<PrimitiveData> T>
+    // A converting move (the constraint admits only rvalues), done by SetAsMovedFrom().
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
     PrimitiveData &operator=(T &&other) noexcept
     {
       if (IsCalc())

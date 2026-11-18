@@ -9,7 +9,7 @@ namespace krys::boo::dom
   public:
     CharacterDataMutationRecord(Ref<Node> &&target, DOMStringAtom oldValue) noexcept;
 
-    KRYS_NODISCARD DOMStringAtom Type() const noexcept override
+    KRYS_NODISCARD const DOMStringAtom &Type() const noexcept override
     {
       static const DOMStringAtom type {u8"characterData"};
       return type;

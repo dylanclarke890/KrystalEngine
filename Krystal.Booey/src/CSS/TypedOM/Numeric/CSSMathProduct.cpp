@@ -29,7 +29,7 @@
 
 namespace krys::boo::css
 {
-  dom::ExceptionOr<Ref<CSSMathProduct>> CSSMathProduct::Create(List<CSSNumberish> &&numberishes) noexcept
+  dom::ExceptionOr<Ref<CSSMathProduct>> CSSMathProduct::Create(List<CSSNumberish> numberishes) noexcept
   {
     List<Ref<CSSNumericValue>> values;
     values.reserve(numberishes.size());

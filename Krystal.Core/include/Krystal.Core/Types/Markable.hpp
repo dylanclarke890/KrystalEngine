@@ -123,11 +123,7 @@ namespace krys
     {
     }
 
-    constexpr Markable(const Maybe<T> &value) noexcept : _value(bool(value) ? *value : Traits::EmptyValue())
-    {
-    }
-
-    constexpr Markable(Maybe<T> &&value) noexcept
+    constexpr Markable(Maybe<T> value) noexcept
         : _value(bool(value) ? krys::move(*value) : Traits::EmptyValue())
     {
     }

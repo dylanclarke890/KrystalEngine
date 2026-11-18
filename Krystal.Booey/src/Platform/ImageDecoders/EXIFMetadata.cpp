@@ -135,7 +135,7 @@ namespace krys::boo
       /// @brief Calls @p function with each tag of the image file directory at @p offset, and the offset of
       /// its entry.
       template <typename TFunction>
-      void ForEachEntry(size_t offset, TFunction &&function) const noexcept
+      void ForEachEntry(size_t offset, TFunction function) const noexcept
       {
         // An image file directory is a count of entries, then that many 12-byte entries: the tag, the type,
         // the count, and the value or the offset to it.

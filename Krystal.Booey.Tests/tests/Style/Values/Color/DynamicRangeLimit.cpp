@@ -169,7 +169,7 @@ namespace krys::boo::style::tests
 
   TEST_CASE("Style opacity", "[Style][Values][Color]")
   {
-    using namespace css::Literals;
+    using namespace css::literals;
 
     constexpr Opacity transparent {0.0f};
     constexpr Opacity half {0.5_css_number};

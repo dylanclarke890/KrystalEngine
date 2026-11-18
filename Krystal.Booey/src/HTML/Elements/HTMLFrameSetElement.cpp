@@ -53,8 +53,8 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"rows", krys::move(value));
   }
 
-  bool HTMLFrameSetElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                               dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLFrameSetElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null && (localName == u8"bordercolor"))
     {
@@ -64,7 +64,7 @@ namespace krys::boo::html
   }
 
   void HTMLFrameSetElement::CollectPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;

@@ -86,7 +86,7 @@ namespace krys::boo::style
   // https://drafts.fxtf.org/css-masking/#propdef-clip
   struct Clip
   {
-    Clip(css::keywords::Auto) noexcept : _value {}
+    Clip(css::keywords::Auto) noexcept
     {
     }
 
@@ -149,11 +149,12 @@ namespace krys::boo::style
   template <>
   struct Blending<Clip>
   {
-    KRYS_NODISCARD bool CanBlend(const Clip &, const Clip &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const Clip &, const Clip &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const Clip &, const Clip &) noexcept;
+    KRYS_NODISCARD static bool RequiresInterpolationForAccumulativeIteration(const Clip &,
+                                                                             const Clip &) noexcept;
 
-    KRYS_NODISCARD Clip Blend(const Clip &, const Clip &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Clip Blend(const Clip &, const Clip &, const BlendingContext &) noexcept;
   };
 }
 

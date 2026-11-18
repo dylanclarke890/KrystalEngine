@@ -33,7 +33,7 @@ namespace krys::boo
   StyleOriginatedAnimationEvent::StyleOriginatedAnimationEvent(
     dom::DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime, double elapsedTime,
     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
-      : AnimationEventBase(type, animation, scheduledTime), _elapsedTime(elapsedTime),
+      : AnimationEventBase(krys::move(type), animation, scheduledTime), _elapsedTime(elapsedTime),
         _pseudoElementIdentifier(pseudoElementIdentifier)
   {
   }
@@ -42,7 +42,7 @@ namespace krys::boo
                                                                const dom::EventInit &eventInitDict,
                                                                double elapsedTime,
                                                                css::CSSOMString pseudoElement) noexcept
-      : AnimationEventBase(type, eventInitDict), _elapsedTime(elapsedTime),
+      : AnimationEventBase(krys::move(type), eventInitDict), _elapsedTime(elapsedTime),
         _pseudoElement(krys::move(pseudoElement))
   {
     RefPtr<dom::Node> node = ShareRefPtr(DynamicDowncast<dom::Node>(Target().get()));

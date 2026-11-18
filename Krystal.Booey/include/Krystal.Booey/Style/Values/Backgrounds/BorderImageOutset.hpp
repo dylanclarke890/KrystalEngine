@@ -157,27 +157,28 @@ namespace krys::boo::style
   template <>
   struct Blending<BorderImageOutsetValue>
   {
-    KRYS_NODISCARD bool CanBlend(const BorderImageOutsetValue &, const BorderImageOutsetValue &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BorderImageOutsetValue &,
+                                        const BorderImageOutsetValue &) noexcept;
 
-    KRYS_NODISCARD bool
+    KRYS_NODISCARD static bool
       RequiresInterpolationForAccumulativeIteration(const BorderImageOutsetValue &,
                                                     const BorderImageOutsetValue &) noexcept;
 
-    KRYS_NODISCARD BorderImageOutsetValue Blend(const BorderImageOutsetValue &,
-                                                const BorderImageOutsetValue &,
-                                                const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BorderImageOutsetValue
+      Blend(const BorderImageOutsetValue &, const BorderImageOutsetValue &, const BlendingContext &) noexcept;
   };
 
   template <>
   struct Blending<BorderImageOutset>
   {
-    KRYS_NODISCARD bool CanBlend(const BorderImageOutset &, const BorderImageOutset &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BorderImageOutset &, const BorderImageOutset &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BorderImageOutset &,
-                                                                      const BorderImageOutset &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const BorderImageOutset &,
+                                                    const BorderImageOutset &) noexcept;
 
-    KRYS_NODISCARD BorderImageOutset Blend(const BorderImageOutset &, const BorderImageOutset &,
-                                           const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BorderImageOutset Blend(const BorderImageOutset &, const BorderImageOutset &,
+                                                  const BlendingContext &) noexcept;
   };
 }
 

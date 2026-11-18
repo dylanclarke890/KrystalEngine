@@ -85,8 +85,9 @@ namespace krys
       }
     }
 
-    void AttributeChangedCallback(boo::dom::DOMStringAtom localName, boo::dom::DOMStringAtom,
-                                  boo::dom::DOMStringAtom newValue, boo::dom::DOMStringAtom) noexcept override
+    void AttributeChangedCallback(const boo::dom::DOMStringAtom &localName, const boo::dom::DOMStringAtom &,
+                                  const boo::dom::DOMStringAtom &newValue,
+                                  const boo::dom::DOMStringAtom &) noexcept override
     {
       if (localName == u8"value")
       {
@@ -117,7 +118,7 @@ namespace krys
       .bean.filled { background-color: #6f4326; }
     )";
 
-    KRYS_NODISCARD static int32 Parse(boo::dom::DOMStringAtom value) noexcept
+    KRYS_NODISCARD static int32 Parse(const boo::dom::DOMStringAtom &value) noexcept
     {
       auto text = value.View();
       int32 rating = 0;

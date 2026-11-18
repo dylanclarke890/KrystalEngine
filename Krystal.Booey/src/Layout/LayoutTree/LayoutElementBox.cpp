@@ -47,7 +47,7 @@ namespace krys::boo::layout
     _replacedData->ListMarkerAttributes = listMarkerAttributes;
   }
 
-  ElementBox::ElementBox(ElementAttributes &&attributes, ReplacedAttributes &&replacedAttributes,
+  ElementBox::ElementBox(ElementAttributes &&attributes, ReplacedAttributes replacedAttributes,
                          RenderStyle &&style, UniquePtr<RenderStyle> &&firstLineStyle) noexcept
       : Box(krys::move(attributes), krys::move(style), krys::move(firstLineStyle), ElementBoxFlag),
         _replacedData(CreateUnique<ReplacedData>())

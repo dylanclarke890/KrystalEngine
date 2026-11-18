@@ -130,7 +130,8 @@ namespace krys::boo
 
     /// @brief Dispatches the mouse event of type @p eventType from @p event at the locked element (and a
     /// `click` after a `mouseup`).
-    void DispatchLockedMouseEvent(const PlatformMouseEvent &event, dom::DOMStringAtom eventType) noexcept;
+    void DispatchLockedMouseEvent(const PlatformMouseEvent &event,
+                                  const dom::DOMStringAtom &eventType) noexcept;
 
     /// @brief Dispatches the `wheel` event from @p event at the locked element.
     void DispatchLockedWheelEvent(const PlatformWheelEvent &event) noexcept;
@@ -140,7 +141,7 @@ namespace krys::boo
 
     void EnqueueEvent(dom::DOMStringAtom type, dom::Element *element) noexcept;
 
-    void EnqueueEvent(dom::DOMStringAtom type, dom::Document *document) noexcept;
+    static void EnqueueEvent(dom::DOMStringAtom type, dom::Document *document) noexcept;
 
     void ResolvePromises() noexcept;
 

@@ -791,7 +791,7 @@ namespace krys::boo
     return value.ToInt() == value;
   }
 
-  inline namespace Literals
+  inline namespace literals
   {
     KRYS_NODISCARD constexpr LayoutUnit operator""_lu(unsigned long long value) noexcept
     {

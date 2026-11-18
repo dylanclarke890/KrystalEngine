@@ -47,12 +47,12 @@ namespace krys::boo::dom
                                                               Event *underlyingEvent, Element &target,
                                                               SimulatedClickSource source) noexcept
       {
-        return AdoptRef(*new SimulatedPointerEvent(type, event, underlyingEvent, target, source));
+        return AdoptRef(*new SimulatedPointerEvent(krys::move(type), event, underlyingEvent, target, source));
       }
 
     private:
       // If the device type cannot be detected by the user agent, then the value MUST be an empty string.
-      SimulatedPointerEvent(DOMStringAtom type, const MouseEvent &event, Event *underlyingEvent,
+      SimulatedPointerEvent(const DOMStringAtom &type, const MouseEvent &event, Event *underlyingEvent,
                             Element &target, SimulatedClickSource source) noexcept
           : PointerEvent(type, MouseButton::Left, event, SimulatedPointerID, {}, TypeCanBubble(type),
                          TypeIsCancelable(type), TypeIsComposed(type))
@@ -81,12 +81,12 @@ namespace krys::boo::dom
     void SimulateMouseEvent(DOMStringAtom eventType, Element &element, Event *underlyingEvent,
                             SimulatedClickSource source) noexcept
     {
-      auto event = MouseEvent::CreateSimulated(eventType, underlyingEvent, element,
+      auto event = MouseEvent::CreateSimulated(krys::move(eventType), underlyingEvent, element,
                                                source == SimulatedClickSource::UserAgent);
       (void)EventDispatcher::DispatchToTarget(*event, &element);
     }
 
-    void SimulatePointerEvent(DOMStringAtom eventType, Element &element, Event *underlyingEvent,
+    void SimulatePointerEvent(const DOMStringAtom &eventType, Element &element, Event *underlyingEvent,
                               SimulatedClickSource source) noexcept
     {
       auto mouseEvent = MouseEvent::CreateSimulated(eventType, underlyingEvent, element,

@@ -297,7 +297,7 @@ namespace krys::boo
 
     void InputText(utf8_stringview text, bool selectInsertedText = false) noexcept;
 
-    KRYS_NODISCARD bool IsRemovableBlock(const dom::Node *node) noexcept;
+    KRYS_NODISCARD static bool IsRemovableBlock(const dom::Node *node) noexcept;
 
     void InsertNodeAfter(dom::Node &insertChild, dom::Node &refChild) noexcept;
 
@@ -332,9 +332,9 @@ namespace krys::boo
     void ReplaceCollapsibleWhitespaceWithNonBreakingSpaceIfNeeded(
       const VisiblePosition &visiblePosition) noexcept;
 
-    KRYS_NODISCARD RefPtr<dom::Text> TextNodeForRebalance(const dom::Position &position) const noexcept;
+    KRYS_NODISCARD static RefPtr<dom::Text> TextNodeForRebalance(const dom::Position &position) noexcept;
 
-    KRYS_NODISCARD bool ShouldRebalanceLeadingWhitespaceFor(utf8_stringview text) const noexcept;
+    KRYS_NODISCARD static bool ShouldRebalanceLeadingWhitespaceFor(utf8_stringview text) noexcept;
 
     void RemoveNodeAttribute(dom::Element &element, dom::DOMStringAtom attribute) noexcept;
 
@@ -357,7 +357,8 @@ namespace krys::boo
     void MoveRemainingSiblingsToNewParent(dom::Node *node, dom::Node *pastLastNodeToMove,
                                           dom::Element &newParent) noexcept;
 
-    void UpdatePositionForNodeRemovalPreservingChildren(dom::Position &position, dom::Node &node) noexcept;
+    static void UpdatePositionForNodeRemovalPreservingChildren(dom::Position &position,
+                                                               dom::Node &node) noexcept;
 
     void Prune(dom::Node *node) noexcept;
 
@@ -417,7 +418,7 @@ namespace krys::boo
     void CloneParagraphUnderNewElement(const dom::Position &start, const dom::Position &end,
                                        dom::Node *outerNode, dom::Element *blockElement) noexcept;
 
-    void CleanupAfterDeletion(VisiblePosition destination = VisiblePosition()) noexcept;
+    void CleanupAfterDeletion(const VisiblePosition &destination = VisiblePosition()) noexcept;
 
     KRYS_NODISCARD VisibleSelection ShouldBreakOutOfEmptyListItem() const noexcept;
 

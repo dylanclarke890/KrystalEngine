@@ -77,7 +77,7 @@ namespace krys::gfx::tests
       }
 
       template <typename TFunc>
-      void Draw(TFunc &&draw)
+      void Draw(TFunc draw)
       {
         _device->BeginFrame();
         auto &commands = _device->GetCommandBuffer();

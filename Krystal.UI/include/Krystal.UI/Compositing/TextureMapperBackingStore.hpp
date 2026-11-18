@@ -33,7 +33,7 @@ namespace krys::ui
   public:
     void SetColor(boo::Color color) noexcept
     {
-      _color = color;
+      _color = krys::move(color);
     }
 
     void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,

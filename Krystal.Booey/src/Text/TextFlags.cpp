@@ -31,7 +31,7 @@
 namespace krys::boo
 {
   FeaturesMap ComputeFeatureSettingsFromVariants(const FontVariantSettings &variantSettings,
-                                                 RefPtr<FontFeatureValues> fontFeatureValues) noexcept
+                                                 const RefPtr<FontFeatureValues> &fontFeatureValues) noexcept
   {
     FeaturesMap features;
     auto set = [&](const FontTag &tag, int value)

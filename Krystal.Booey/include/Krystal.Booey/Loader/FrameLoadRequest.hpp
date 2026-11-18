@@ -49,7 +49,7 @@ namespace krys::boo
 
   public:
     /// @brief The `download` attribute of the link followed; null if it has none.
-    KRYS_NODISCARD dom::DOMStringAtom DownloadAttribute() const noexcept
+    KRYS_NODISCARD const dom::DOMStringAtom &DownloadAttribute() const noexcept KRYS_LIFETIME_BOUND
     {
       return _downloadAttribute;
     }
@@ -77,7 +77,7 @@ namespace krys::boo
 
     void SetDownloadAttribute(dom::DOMStringAtom downloadAttribute) noexcept
     {
-      _downloadAttribute = downloadAttribute;
+      _downloadAttribute = krys::move(downloadAttribute);
     }
   };
 
@@ -129,7 +129,7 @@ namespace krys::boo
       return _resourceRequest;
     }
 
-    KRYS_NODISCARD dom::DOMStringAtom FrameName() const noexcept
+    KRYS_NODISCARD const dom::DOMStringAtom &FrameName() const noexcept KRYS_LIFETIME_BOUND
     {
       return _frameName;
     }
@@ -147,7 +147,7 @@ namespace krys::boo
 
     void SetFrameName(dom::DOMStringAtom frameName) noexcept
     {
-      _frameName = frameName;
+      _frameName = krys::move(frameName);
     }
 
     KRYS_NODISCARD ReferrerPolicy GetReferrerPolicy() const noexcept

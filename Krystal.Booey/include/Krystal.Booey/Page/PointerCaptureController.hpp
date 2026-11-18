@@ -201,8 +201,8 @@ namespace krys::boo
                                                    PointerID pointerId) const noexcept;
 
     /// @brief What dispatching a `pointermove` at an element of @p document would do to the pointer's state.
-    void PointerMoveWasSkipped(CapturingData &capturingData, dom::Document &document,
-                               bool isPrimary) noexcept;
+    static void PointerMoveWasSkipped(CapturingData &capturingData, dom::Document &document,
+                                      bool isPrimary) noexcept;
 
     void PointerEventWillBeDispatched(const dom::PointerEvent &event, dom::EventTarget *target) noexcept;
 

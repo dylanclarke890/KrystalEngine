@@ -110,8 +110,8 @@ namespace krys::boo::css::tests
     REQUIRE(red->Keyword());
     CHECK(red->Keyword()->Value == ValueId::Red);
 
-    CHECK(Parse(u8"currentcolor")->Keyword()->Value == ValueId::Currentcolor);
-    CHECK(Parse(u8"Canvas")->Keyword()->Value == ValueId::Canvas);
+    CHECK(Parse(u8"currentcolor").value().Keyword()->Value == ValueId::Currentcolor);
+    CHECK(Parse(u8"Canvas").value().Keyword()->Value == ValueId::Canvas);
     CHECK_FALSE(Parse(u8"foo"));
 
     SECTION("Allowed colour types")
@@ -144,10 +144,10 @@ namespace krys::boo::css::tests
     REQUIRE(hex->Hex());
     CHECK(hex->Hex()->Value == SRGBA<uint8> {255, 128, 0});
 
-    CHECK(Parse(u8"#f80")->Hex()->Value == SRGBA<uint8> {255, 136, 0});
-    CHECK(Parse(u8"#f808")->Hex()->Value == SRGBA<uint8> {255, 136, 0, 136});
-    CHECK(Parse(u8"#ff800080")->Hex()->Value == SRGBA<uint8> {255, 128, 0, 128});
-    CHECK(Parse(u8"#ff80")->Hex()->Value == SRGBA<uint8> {255, 255, 136, 0});
+    CHECK(Parse(u8"#f80").value().Hex()->Value == SRGBA<uint8> {255, 136, 0});
+    CHECK(Parse(u8"#f808").value().Hex()->Value == SRGBA<uint8> {255, 136, 0, 136});
+    CHECK(Parse(u8"#ff800080").value().Hex()->Value == SRGBA<uint8> {255, 128, 0, 128});
+    CHECK(Parse(u8"#ff80").value().Hex()->Value == SRGBA<uint8> {255, 255, 136, 0});
     CHECK_FALSE(Parse(u8"#ff800"));
     CHECK_FALSE(Parse(u8"#ggg"));
 
@@ -158,19 +158,19 @@ namespace krys::boo::css::tests
       CHECK_FALSE(Parse(u8"ff0000", Quirks(PropertyId::Width)));
 
       auto quirks = Quirks(PropertyId::Color);
-      CHECK(Parse(u8"ff0000", quirks)->Hex()->Value == SRGBA<uint8> {255, 0, 0});
-      CHECK(Parse(u8"f00", quirks)->Hex()->Value == SRGBA<uint8> {255, 0, 0});
+      CHECK(Parse(u8"ff0000", quirks).value().Hex()->Value == SRGBA<uint8> {255, 0, 0});
+      CHECK(Parse(u8"f00", quirks).value().Hex()->Value == SRGBA<uint8> {255, 0, 0});
       CHECK_FALSE(Parse(u8"ff00", quirks));
 
       // Numbers are zero padded to six digits.
-      CHECK(Parse(u8"123456", quirks)->Hex()->Value == SRGBA<uint8> {0x12, 0x34, 0x56});
-      CHECK(Parse(u8"1", quirks)->Hex()->Value == SRGBA<uint8> {0, 0, 1});
+      CHECK(Parse(u8"123456", quirks).value().Hex()->Value == SRGBA<uint8> {0x12, 0x34, 0x56});
+      CHECK(Parse(u8"1", quirks).value().Hex()->Value == SRGBA<uint8> {0, 0, 1});
       CHECK_FALSE(Parse(u8"1234567", quirks));
       CHECK_FALSE(Parse(u8"1.5", quirks));
       CHECK_FALSE(Parse(u8"-1", quirks));
 
       // Dimensions keep their unit: `0001ff` is the number 1 with the unit `ff`.
-      CHECK(Parse(u8"0001ff", quirks)->Hex()->Value == SRGBA<uint8> {0, 0x01, 0xFF});
+      CHECK(Parse(u8"0001ff", quirks).value().Hex()->Value == SRGBA<uint8> {0, 0x01, 0xFF});
       CHECK(Parse(u8"ff0000", Quirks(PropertyId::BackgroundColor)));
 
       // Never inside another colour.
@@ -438,21 +438,23 @@ namespace krys::boo::css::tests
     REQUIRE(longer);
     CHECK(std::get<ColourInterpolationMethod::OKLCH>(longer->ColourSpace).HueInterpolationMethod
           == HueInterpolationMethod::Longer);
-    CHECK(std::get<ColourInterpolationMethod::LCH>(parse(u8"in lch decreasing hue")->ColourSpace)
+    CHECK(std::get<ColourInterpolationMethod::LCH>(parse(u8"in lch decreasing hue").value().ColourSpace)
             .HueInterpolationMethod
           == HueInterpolationMethod::Decreasing);
-    CHECK(std::get<ColourInterpolationMethod::HWB>(parse(u8"in hwb increasing hue")->ColourSpace)
+    CHECK(std::get<ColourInterpolationMethod::HWB>(parse(u8"in hwb increasing hue").value().ColourSpace)
             .HueInterpolationMethod
           == HueInterpolationMethod::Increasing);
 
-    CHECK(std::holds_alternative<ColourInterpolationMethod::XYZD65>(parse(u8"in xyz")->ColourSpace));
-    CHECK(std::holds_alternative<ColourInterpolationMethod::XYZD65>(parse(u8"in xyz-d65")->ColourSpace));
-    CHECK(std::holds_alternative<ColourInterpolationMethod::XYZD50>(parse(u8"in xyz-d50")->ColourSpace));
+    CHECK(std::holds_alternative<ColourInterpolationMethod::XYZD65>(parse(u8"in xyz").value().ColourSpace));
     CHECK(
-      std::holds_alternative<ColourInterpolationMethod::SRGBLinear>(parse(u8"in srgb-linear")->ColourSpace));
+      std::holds_alternative<ColourInterpolationMethod::XYZD65>(parse(u8"in xyz-d65").value().ColourSpace));
+    CHECK(
+      std::holds_alternative<ColourInterpolationMethod::XYZD50>(parse(u8"in xyz-d50").value().ColourSpace));
+    CHECK(std::holds_alternative<ColourInterpolationMethod::SRGBLinear>(
+      parse(u8"in srgb-linear").value().ColourSpace));
     CHECK(std::holds_alternative<ColourInterpolationMethod::DisplayP3Linear>(
-      parse(u8"in display-p3-linear")->ColourSpace));
-    CHECK(std::holds_alternative<ColourInterpolationMethod::OKLab>(parse(u8"in oklab")->ColourSpace));
+      parse(u8"in display-p3-linear").value().ColourSpace));
+    CHECK(std::holds_alternative<ColourInterpolationMethod::OKLab>(parse(u8"in oklab").value().ColourSpace));
 
     // Rectangular spaces don't take a hue method; polar ones need `hue` after it.
     CHECK_FALSE(parse(u8"in srgb shorter hue"));
@@ -489,7 +491,7 @@ namespace krys::boo::css::tests
   {
     /// @brief Tokenizes `css` and consumes it with `consume`; null unless every token was consumed.
     template <typename TConsume>
-    RefPtr<Value> ConsumeValue(utf8_stringview css, const ParserContext &context, TConsume &&consume)
+    RefPtr<Value> ConsumeValue(utf8_stringview css, const ParserContext &context, TConsume consume)
     {
       InputStream input {CSSOMString(css)};
       Tokenizer tokenizer {input};

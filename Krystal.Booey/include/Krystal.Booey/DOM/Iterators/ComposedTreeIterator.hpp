@@ -396,7 +396,7 @@ namespace krys::boo::dom
       return {*_parent, ComposedTreeIterator::FirstChild};
     }
 
-    KRYS_NODISCARD ComposedTreeIterator end() const noexcept
+    KRYS_NODISCARD static ComposedTreeIterator end() noexcept
     {
       return {};
     }
@@ -449,7 +449,7 @@ namespace krys::boo::dom
       return Iterator(*_parent);
     }
 
-    KRYS_NODISCARD Iterator end() const noexcept
+    KRYS_NODISCARD static Iterator end() noexcept
     {
       return {};
     }

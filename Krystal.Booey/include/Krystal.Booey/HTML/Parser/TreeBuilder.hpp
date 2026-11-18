@@ -320,7 +320,7 @@ namespace krys::boo::html
   public:
     TreeBuilder(dom::Document &document, Tokenizer &tokenizer, Maybe<StackItem> &context) noexcept;
 
-    void ProcessToken(TokenAtom &&token) noexcept;
+    void ProcessToken(TokenAtom token) noexcept;
 
     void ScriptingMode(ParserScriptingMode mode) noexcept
     {
@@ -354,7 +354,7 @@ namespace krys::boo::html
       }
 
       auto &adjustedCurrentNode = AdjustedCurrentNode();
-      return adjustedCurrentNode.NamespaceURI() != infra::Namespaces::HTML;
+      return adjustedCurrentNode.NamespaceURI() != infra::namespaces::HTML;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#reset-the-insertion-mode-appropriately
@@ -370,9 +370,9 @@ namespace krys::boo::html
   private:
     bool ShouldProcessAccordingToRulesForHTMLContent(const TokenAtom &token) noexcept;
 
-    void ProcessAccordingToRulesForHTMLContent(TokenAtom &&token) noexcept;
+    void ProcessAccordingToRulesForHTMLContent(TokenAtom token) noexcept;
 
-    void ProcessAccordingToRulesForForeignContent(TokenAtom &&token) noexcept;
+    void ProcessAccordingToRulesForForeignContent(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-node
     KRYS_NODISCARD dom::Element &CurrentNode() noexcept;
@@ -380,7 +380,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
     KRYS_NODISCARD dom::Element &AdjustedCurrentNode() noexcept;
 
-    void ParseError(const TokenAtom &token) noexcept;
+    static void ParseError(const TokenAtom &token) noexcept;
 
 #pragma region InsertionMode Algorithms
 
@@ -388,67 +388,67 @@ namespace krys::boo::html
     KRYS_NODISCARD InsertionMode CurrentTemplateInsertionMode() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-initial-insertion-mode
-    void InitialMode(TokenAtom &&token) noexcept;
+    void InitialMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-before-html-insertion-mode
-    void BeforeHTMLMode(TokenAtom &&token) noexcept;
+    void BeforeHTMLMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-before-head-insertion-mode
-    void BeforeHeadMode(TokenAtom &&token) noexcept;
+    void BeforeHeadMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#parsing-main-inhead
-    void InHeadMode(TokenAtom &&token) noexcept;
+    void InHeadMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-head-noscript-insertion-mode
-    void InHeadNoscriptMode(TokenAtom &&token) noexcept;
+    void InHeadNoscriptMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-head-insertion-mode
-    void AfterHeadMode(TokenAtom &&token) noexcept;
+    void AfterHeadMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-body-insertion-mode
-    void InBodyMode(TokenAtom &&token) noexcept;
+    void InBodyMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-text-insertion-mode
-    void TextMode(TokenAtom &&token) noexcept;
+    void TextMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-table-insertion-mode
-    void InTableMode(TokenAtom &&token) noexcept;
+    void InTableMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-table-text-insertion-mode
-    void InTableTextMode(TokenAtom &&token) noexcept;
+    void InTableTextMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-caption-insertion-mode
-    void InCaptionMode(TokenAtom &&token) noexcept;
+    void InCaptionMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-column-group-insertion-mode
-    void InColumnGroupMode(TokenAtom &&token) noexcept;
+    void InColumnGroupMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-table-body-insertion-mode
-    void InTableBodyMode(TokenAtom &&token) noexcept;
+    void InTableBodyMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-row-insertion-mode
-    void InRowMode(TokenAtom &&token) noexcept;
+    void InRowMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-cell-insertion-mode
-    void InCellMode(TokenAtom &&token) noexcept;
+    void InCellMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-template-insertion-mode
-    void InTemplateMode(TokenAtom &&token) noexcept;
+    void InTemplateMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-body-insertion-mode
-    void AfterBodyMode(TokenAtom &&token) noexcept;
+    void AfterBodyMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-frameset-insertion-mode
-    void InFramesetMode(TokenAtom &&token) noexcept;
+    void InFramesetMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-frameset-insertion-mode
-    void AfterFramesetMode(TokenAtom &&token) noexcept;
+    void AfterFramesetMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-after-body-insertion-mode
-    void AfterAfterBodyMode(TokenAtom &&token) noexcept;
+    void AfterAfterBodyMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-after-frameset-insertion-mode
-    void AfterAfterFramesetMode(TokenAtom &&token) noexcept;
+    void AfterAfterFramesetMode(TokenAtom token) noexcept;
 
     void InBodyGenericEndTag(const TokenAtom &token, TagName tagName);
 
@@ -469,7 +469,7 @@ namespace krys::boo::html
     bool RemoveNonWhitespace(TokenAtom &token) noexcept;
 
     /// @brief Skips leading whitespace in a character token and returns whether any characters remain.
-    bool SkipLeadingWhitespace(TokenAtom &token) noexcept;
+    static bool SkipLeadingWhitespace(TokenAtom &token) noexcept;
 
     /// @brief Inserts leading whitespace in a character token and returns whether any characters remain.
     bool InsertLeadingWhitespace(TokenAtom &token) noexcept;
@@ -497,7 +497,7 @@ namespace krys::boo::html
                                                   bool alreadySanitized = false) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
-    Ref<dom::Element> InsertForeignElement(TokenAtom &&token, dom::DOMStringAtom namespaceURI,
+    Ref<dom::Element> InsertForeignElement(TokenAtom &token, const dom::DOMStringAtom &namespaceURI,
                                            bool onlyAddToElementStack) noexcept;
 
     /// @brief The sanitizer action for an element named @p localName in @p namespaceURI: "Keep" when the
@@ -513,10 +513,10 @@ namespace krys::boo::html
     /// @brief The "in head" insertion mode's steps for a template start tag, which may attach a declarative
     /// shadow root.
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead
-    void InsertTemplateElement(TokenAtom &&token) noexcept;
+    void InsertTemplateElement(TokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-html-element
-    Ref<dom::Element> InsertHTMLElement(TokenAtom &&token) noexcept;
+    Ref<dom::Element> InsertHTMLElement(TokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-comment
     void InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position = null) noexcept;
@@ -529,13 +529,14 @@ namespace krys::boo::html
     void AppendCommentToDocument(dom::DOMStringView data) noexcept;
 
     /// @see https://html.spec.whatwg.org/#generic-raw-text-element-parsing-algorithm
-    void ParseGenericRawTextElement(TokenAtom &&token) noexcept;
+    void ParseGenericRawTextElement(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#generic-rcdata-text-element-parsing-algorithm
-    void ParseGenericRCDATATextElement(TokenAtom &&token) noexcept;
+    void ParseGenericRCDATATextElement(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<dom::Element> CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
+    KRYS_NODISCARD Ref<dom::Element> CreateElement(const dom::DOMStringAtom &name,
+                                                   const dom::DOMStringAtom &namespaceURI,
                                                    const ParsedAttributeList &attributes,
                                                    dom::ContainerNode &intendedParent) noexcept;
 
@@ -552,21 +553,21 @@ namespace krys::boo::html
 #pragma region Adjust Attribute Algorithms
 
     /// @see https://html.spec.whatwg.org/#adjust-foreign-attributes
-    void AdjustForeignAttributes(TokenAtom &token) noexcept;
+    static void AdjustForeignAttributes(TokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#adjust-svg-attributes
-    void AdjustSVGAttributes(TokenAtom &token) noexcept;
+    static void AdjustSVGAttributes(TokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#adjust-math-ml-attributes
-    void AdjustMathMLAttributes(TokenAtom &token) noexcept;
+    static void AdjustMathMLAttributes(TokenAtom &token) noexcept;
 
 #pragma endregion
 
 #pragma region Quirks Mode Algorithms
 
-    bool IsQuirksModeDOCTYPE(const TokenAtom &token) const noexcept;
+    static bool IsQuirksModeDOCTYPE(const TokenAtom &token) noexcept;
 
-    bool IsLimitedQuirksModeDOCTYPE(const TokenAtom &token) const noexcept;
+    static bool IsLimitedQuirksModeDOCTYPE(const TokenAtom &token) noexcept;
 
 #pragma endregion
 
@@ -581,9 +582,9 @@ namespace krys::boo::html
 
 #pragma region IntegrationPoint Algorithms
 
-    KRYS_NODISCARD bool IsMathMLTextIntegrationPoint(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD static bool IsMathMLTextIntegrationPoint(const dom::Element &element) noexcept;
 
-    KRYS_NODISCARD bool IsHTMLIntegrationPoint(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD static bool IsHTMLIntegrationPoint(const dom::Element &element) noexcept;
 
 #pragma endregion
   };

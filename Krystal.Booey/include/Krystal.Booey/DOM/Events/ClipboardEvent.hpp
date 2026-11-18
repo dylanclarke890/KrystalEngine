@@ -32,7 +32,7 @@ namespace krys::boo::dom
 
     /// @brief A trusted clipboard event carrying @p dataTransfer, which bubbles, can be cancelled and crosses
     /// shadow boundaries.
-    KRYS_NODISCARD static Ref<ClipboardEvent> Create(DOMStringAtom type,
+    KRYS_NODISCARD static Ref<ClipboardEvent> Create(const DOMStringAtom &type,
                                                      Ref<DataTransfer> &&dataTransfer) noexcept;
 
     /// @see https://w3c.github.io/clipboard-apis/#dom-clipboardevent-clipboarddata

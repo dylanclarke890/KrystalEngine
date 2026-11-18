@@ -98,18 +98,18 @@ namespace krys::boo
     }
   }
 
-  void LayoutRoundedRect::InflateWithRadii(LayoutUnit amount) noexcept
+  void LayoutRoundedRect::InflateWithRadii(LayoutUnit size) noexcept
   {
     LayoutRect old = _rect;
 
-    if (amount < 0)
+    if (size < 0)
     {
-      _rect.InflateX(std::max(-_rect.Width() / 2, amount));
-      _rect.InflateY(std::max(-_rect.Height() / 2, amount));
+      _rect.InflateX(std::max(-_rect.Width() / 2, size));
+      _rect.InflateY(std::max(-_rect.Height() / 2, size));
     }
     else
     {
-      _rect.Inflate(amount);
+      _rect.Inflate(size);
     }
 
     // Considering the inflation factor of shorter size to scale the radii seems appropriate here

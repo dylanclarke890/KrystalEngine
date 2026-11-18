@@ -211,7 +211,7 @@ namespace krys::boo
       return _identifier;
     }
 
-    KRYS_NODISCARD StringAtom KeyframesName() const noexcept;
+    KRYS_NODISCARD const StringAtom &KeyframesName() const noexcept KRYS_LIFETIME_BOUND;
 
     /// @brief The name the keyframes' animation has on a graphics layer.
     KRYS_NODISCARD const utf8_string &AcceleratedAnimationName() const noexcept;

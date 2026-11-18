@@ -10,6 +10,7 @@ namespace krys
   constexpr decltype(auto) apply_impl(F &&functor, T &&tupleLike, std::index_sequence<I...>) noexcept
   {
     using std::get;
+    // NOLINTNEXTLINE(bugprone-use-after-move): get<I> moves out only element I, as std::apply does.
     return std::invoke(std::forward<F>(functor), get<I>(std::forward<T>(tupleLike))...);
   }
 

@@ -27,7 +27,7 @@ namespace krys
     }
 
     template <typename F>
-    KRYS_NODISCARD constexpr auto Map(F &&function) const noexcept
+    KRYS_NODISCARD constexpr auto Map(F function) const noexcept
       -> ColourComponents<decltype(function(std::declval<T>())), N>;
 
     KRYS_NODISCARD constexpr ColourComponents Abs() const noexcept;
@@ -68,7 +68,7 @@ namespace krys
   ColourComponents(T, Ts...) -> ColourComponents<T, 1 + sizeof...(Ts)>;
 
   template <typename F, typename T, typename... Ts>
-  KRYS_NODISCARD constexpr auto MapColourComponents(F &&function, T component, Ts... Components)
+  KRYS_NODISCARD constexpr auto MapColourComponents(F function, T component, Ts... Components)
     -> ColourComponents<decltype(function(component[0], Components[0]...)), T::Size>
   {
     static_assert(std::conjunction_v<BoolConstant<Ts::Size == T::Size>...>,
@@ -85,7 +85,7 @@ namespace krys
 
   template <typename T, size_t N>
   template <typename F>
-  constexpr auto ColourComponents<T, N>::Map(F &&function) const noexcept
+  constexpr auto ColourComponents<T, N>::Map(F function) const noexcept
     -> ColourComponents<decltype(function(std::declval<T>())), N>
   {
     return MapColourComponents(std::forward<F>(function), *this);

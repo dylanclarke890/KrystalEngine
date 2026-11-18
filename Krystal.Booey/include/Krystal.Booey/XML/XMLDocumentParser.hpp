@@ -110,7 +110,7 @@ namespace krys::boo::xml
              dom::DOMStringAtom defaultNamespaceURI) noexcept
     {
       return AdoptRef(
-        *new XMLDocumentParser(fragment, krys::move(prefixToNamespaceMap), defaultNamespaceURI));
+        *new XMLDocumentParser(fragment, krys::move(prefixToNamespaceMap), krys::move(defaultNamespaceURI)));
     }
 
     XMLDocumentParser() = delete;

@@ -1827,7 +1827,7 @@ namespace krys::boo
           auto familyName = LoneFontFamilyName(value);
           if (FontCache::IsSystemFontForbiddenForEditing(familyName)
               || (standardFontFamilySerializationMode == StandardFontFamilySerializationMode::Strip
-                  && familyName == css::GenericFontFamilyNames::StandardFamily().View()))
+                  && familyName == css::generic_font_family_names::StandardFamily().View()))
           {
             shouldRemoveFontFamily = true;
           }

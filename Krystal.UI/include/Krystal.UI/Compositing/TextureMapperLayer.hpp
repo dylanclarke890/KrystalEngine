@@ -199,7 +199,7 @@ namespace krys::ui
 
     void SetDebugBorderColor(boo::Color debugBorderColor) noexcept
     {
-      _state.DebugBorderColor = debugBorderColor;
+      _state.DebugBorderColor = krys::move(debugBorderColor);
     }
 
     void SetDebugBorderWidth(float debugBorderWidth) noexcept

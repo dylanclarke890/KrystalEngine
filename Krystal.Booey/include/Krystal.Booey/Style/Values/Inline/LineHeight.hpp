@@ -67,12 +67,13 @@ namespace krys::boo::style
   template <>
   struct Blending<LineHeight>
   {
-    KRYS_NODISCARD bool CanBlend(const LineHeight &, const LineHeight &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const LineHeight &, const LineHeight &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const LineHeight &,
-                                                                      const LineHeight &) noexcept;
+    KRYS_NODISCARD static bool RequiresInterpolationForAccumulativeIteration(const LineHeight &,
+                                                                             const LineHeight &) noexcept;
 
-    KRYS_NODISCARD LineHeight Blend(const LineHeight &, const LineHeight &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static LineHeight Blend(const LineHeight &, const LineHeight &,
+                                           const BlendingContext &) noexcept;
   };
 }
 

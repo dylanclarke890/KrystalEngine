@@ -45,7 +45,7 @@ namespace krys::boo::xml
                                                        utf8_stringview style = {}) noexcept
     {
       auto element = dom::ElementFactory::Create(
-        document, dom::QualifiedName(infra::Namespaces::HTML, null, dom::DOMStringAtom(localName)));
+        document, dom::QualifiedName(infra::namespaces::HTML, null, dom::DOMStringAtom(localName)));
       if (!style.empty())
       {
         dom::ElementAlgorithms::SetAttributeValue(*element, u8"style", dom::DOMString(style));
@@ -141,7 +141,7 @@ namespace krys::boo::xml
       AppendChild(*document, *rootElement);
       documentElement = krys::move(body);
     }
-    else if (documentElement->NamespaceURI() == infra::Namespaces::SVG)
+    else if (documentElement->NamespaceURI() == infra::namespaces::SVG)
     {
       auto rootElement = CreateHTMLElement(*document, u8"html");
       auto head = CreateHTMLElement(*document, u8"head");

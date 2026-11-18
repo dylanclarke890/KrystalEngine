@@ -68,7 +68,7 @@ namespace krys::boo::svg
       _target->SetBaseValInternal(dom::DOMString {value.value_or(dom::DOMStringView {})});
       return;
     }
-    else if (name == SVGNames::RelAttr())
+    if (name == SVGNames::RelAttr())
     {
       // Update SVGAElement::relList() if more rel attributes values are supported.
       auto hasToken = [&](dom::DOMStringView relation)

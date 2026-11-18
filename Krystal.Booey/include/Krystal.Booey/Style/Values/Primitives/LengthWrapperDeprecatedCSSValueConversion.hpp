@@ -32,7 +32,7 @@ namespace krys::boo::style
   // MARK: - Deprecated Conversions
 
   KRYS_NODISCARD Maybe<css::ToLengthConversionData>
-    DeprecatedLengthConversionCreateCSSToLengthConversionData(RefPtr<dom::Element>) noexcept;
+    DeprecatedLengthConversionCreateCSSToLengthConversionData(const RefPtr<dom::Element> &) noexcept;
 
   template <LengthWrapperBaseDerived T>
   struct DeprecatedCSSValueConversion<T>

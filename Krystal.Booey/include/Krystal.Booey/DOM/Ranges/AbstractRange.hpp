@@ -27,7 +27,8 @@ namespace krys::boo::dom
     BoundaryPoint _end;
 
   protected:
-    AbstractRange(BoundaryPoint start, BoundaryPoint end) noexcept : _start(start), _end(end)
+    AbstractRange(BoundaryPoint start, BoundaryPoint end) noexcept
+        : _start(krys::move(start)), _end(krys::move(end))
     {
     }
 

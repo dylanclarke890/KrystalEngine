@@ -9,7 +9,8 @@
 namespace krys::boo::html::presentational_hints
 {
   /// @brief Whether the attribute is @p localName in the null namespace.
-  KRYS_NODISCARD inline bool IsAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+  KRYS_NODISCARD inline bool IsAttribute(const dom::DOMStringAtom &localName,
+                                         const dom::DOMStringAtom &namespaceURI,
                                          dom::DOMStringView expected) noexcept
   {
     return namespaceURI == null && localName == expected;

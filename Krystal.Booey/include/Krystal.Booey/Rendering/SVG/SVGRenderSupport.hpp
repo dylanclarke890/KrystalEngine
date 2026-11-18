@@ -94,7 +94,7 @@ namespace krys::boo
     // rect calculations
     KRYS_NODISCARD static LayoutRect ClippedOverflowRectForRepaint(const RenderElement &,
                                                                    const RenderLayerModelObject *container,
-                                                                   VisibleRectContext) noexcept;
+                                                                   const VisibleRectContext &) noexcept;
 
     KRYS_NODISCARD static Maybe<FloatRect>
       ComputeFloatVisibleRectInContainer(const RenderElement &, const FloatRect &,

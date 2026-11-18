@@ -47,15 +47,15 @@ namespace krys::boo::svg
 
   public:
     KRYS_NODISCARD static Ref<SVGPrimitivePropertyAnimator>
-      Create(const dom::QualifiedName &attributeName, Ref<SVGProperty> &&property,
-             AnimationMode animationMode, CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
+      Create(const dom::QualifiedName &attributeName, Ref<SVGProperty> property, AnimationMode animationMode,
+             CalcMode calcMode, bool isAccumulated, bool isAdditive) noexcept
     {
       return AdoptRef(*new SVGPrimitivePropertyAnimator(attributeName, krys::move(property), animationMode,
                                                         calcMode, isAccumulated, isAdditive));
     }
 
     template <typename... TArgs>
-    SVGPrimitivePropertyAnimator(const dom::QualifiedName &attributeName, Ref<SVGProperty> &&property,
+    SVGPrimitivePropertyAnimator(const dom::QualifiedName &attributeName, const Ref<SVGProperty> &property,
                                  TArgs &&...arguments) noexcept
         : Base(attributeName, std::forward<TArgs>(arguments)...),
           _property(ShareRef(static_cast<ValuePropertyType &>(*property)))

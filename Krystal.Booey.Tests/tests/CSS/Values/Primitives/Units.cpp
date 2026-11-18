@@ -182,7 +182,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("PrimitiveUnits(literals)", "[CSS][Primitives][Units]")
   {
-    using namespace css::Literals;
+    using namespace css::literals;
 
     constexpr auto length = 10_css_px;
     STATIC_CHECK(length.Value == 10.0);

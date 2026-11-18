@@ -107,8 +107,8 @@ namespace krys::boo
     void InsertIntoGridAndLayoutItem(const GridTrackSizingAlgorithm &algorithm, RenderBox &gridItem,
                                      const GridArea &area, MasonryLayoutPhase layoutPhase) noexcept;
 
-    KRYS_NODISCARD LayoutUnit CalculateMasonryIntrinsicLogicalWidth(RenderBox &gridItem,
-                                                                    MasonryLayoutPhase layoutPhase) noexcept;
+    KRYS_NODISCARD static LayoutUnit
+      CalculateMasonryIntrinsicLogicalWidth(RenderBox &gridItem, MasonryLayoutPhase layoutPhase) noexcept;
 
     void ResizeAndResetRunningPositions() noexcept;
 

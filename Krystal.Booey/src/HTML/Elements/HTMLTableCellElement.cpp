@@ -39,10 +39,10 @@ namespace krys::boo::html
 
 #pragma region HTMLTableCellElement
 
-  void HTMLTableCellElement::OnAttributeChanged(dom::DOMStringAtom localName,
+  void HTMLTableCellElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
                                                 Maybe<dom::DOMStringView> oldValue,
                                                 Maybe<dom::DOMStringView> value,
-                                                dom::DOMStringAtom namespaceURI) noexcept
+                                                const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLTablePartElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)
@@ -240,9 +240,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool
-    HTMLTableCellElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                             dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLTableCellElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null
         && (localName == u8"nowrap" || localName == u8"width" || localName == u8"height"))
@@ -253,7 +252,7 @@ namespace krys::boo::html
   }
 
   void HTMLTableCellElement::CollectPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     using namespace presentational_hints;

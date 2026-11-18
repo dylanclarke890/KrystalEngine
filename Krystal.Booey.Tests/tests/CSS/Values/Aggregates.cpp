@@ -104,6 +104,7 @@ namespace krys::boo::css::tests
 
     struct TestIntOrAuto : ValueOrKeyword<int, keywords::Auto, NegativeIsEmptyTraits>
     {
+      // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): the base moves it.
       using Base::Base;
     };
 

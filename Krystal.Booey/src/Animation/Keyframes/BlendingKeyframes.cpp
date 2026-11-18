@@ -90,13 +90,13 @@ namespace krys::boo
     return true;
   }
 
-  StringAtom BlendingKeyframes::KeyframesName() const noexcept
+  const StringAtom &BlendingKeyframes::KeyframesName() const noexcept
   {
     if (const auto *name = std::get_if<StringAtom>(&_identifier))
     {
       return *name;
     }
-    return null;
+    return StringAtom::Null();
   }
 
   void BlendingKeyframes::Insert(BlendingKeyframe &&keyframe) noexcept

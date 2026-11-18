@@ -54,8 +54,8 @@ namespace krys::boo
 
     void ApplyStyleAfterInsertion(dom::Node *originalEnclosingBlock) noexcept;
 
-    void GetAncestorsInsideBlock(const dom::Node *insertionNode, dom::Element *outerBlock,
-                                 List<RefPtr<dom::Element>> &ancestors) noexcept;
+    static void GetAncestorsInsideBlock(const dom::Node *insertionNode, dom::Element *outerBlock,
+                                        List<RefPtr<dom::Element>> &ancestors) noexcept;
 
     Ref<dom::Element> CloneHierarchyUnderNewBlock(const List<RefPtr<dom::Element>> &ancestors,
                                                   Ref<dom::Element> &&blockToInsert) noexcept;

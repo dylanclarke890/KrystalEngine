@@ -142,7 +142,7 @@ namespace krys::boo::style::tests
 
     SECTION("SVG and MathML")
     {
-      auto svg = document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+      auto svg = document->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
       UserAgentStyle::EnsureDefaultStyleSheetsForElement(*svg);
       RequireFullyParsed(css::SVGUserAgentStyleSheet, UserAgentStyle::SVGStyleSheet);
 
@@ -150,7 +150,7 @@ namespace krys::boo::style::tests
       UserAgentStyle::EnsureDefaultStyleSheetsForElement(*svg);
       REQUIRE(UserAgentStyle::DefaultStyleVersion == version);
 
-      auto math = document->CreateElementNS(infra::Namespaces::MathML, u8"math").ReleaseValue();
+      auto math = document->CreateElementNS(infra::namespaces::MathML, u8"math").ReleaseValue();
       UserAgentStyle::EnsureDefaultStyleSheetsForElement(*math);
       RequireFullyParsed(css::MathMLUserAgentStyleSheet, UserAgentStyle::MathMLStyleSheet);
       RequireFullyParsed(css::MathMLCoreExtrasUserAgentStyleSheet,
@@ -185,8 +185,8 @@ namespace krys::boo::style::tests
 
     // Only in HTML documents: an XML document's tables can hold forms.
     auto document = CreateRef<dom::XMLDocument>();
-    auto table = document->CreateElementNS(infra::Namespaces::HTML, u8"table").ReleaseValue();
-    auto form = document->CreateElementNS(infra::Namespaces::HTML, u8"form").ReleaseValue();
+    auto table = document->CreateElementNS(infra::namespaces::HTML, u8"table").ReleaseValue();
+    auto form = document->CreateElementNS(infra::namespaces::HTML, u8"form").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*table).HasException());
     REQUIRE_FALSE(table->AppendChild(*form).HasException());
     auto &resolver = document->StyleScope().GetResolver();

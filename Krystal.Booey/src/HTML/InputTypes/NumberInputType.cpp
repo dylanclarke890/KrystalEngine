@@ -482,7 +482,7 @@ namespace krys::boo::html
     return dom::DOMString(Element()->GetLocale().ConvertFromLocalizedNumber(visibleValue));
   }
 
-  void NumberInputType::AttributeChanged(dom::DOMStringAtom name) noexcept
+  void NumberInputType::AttributeChanged(const dom::DOMStringAtom &name) noexcept
   {
     krys_debug_assert(Element());
     if (name == u8"max" || name == u8"min")
@@ -560,7 +560,7 @@ namespace krys::boo::html
     auto extractBound = [&](dom::DOMStringAtom attributeName, const Decimal &defaultValue) -> Decimal
     {
       Decimal valueFromAttribute =
-        ParseToNumberOrNaN(element.GetAttribute(attributeName).value_or(dom::DOMString()));
+        ParseToNumberOrNaN(element.GetAttribute(krys::move(attributeName)).value_or(dom::DOMString()));
       if (valueFromAttribute.IsFinite())
       {
         rangeLimitations = RangeLimitations::Valid;

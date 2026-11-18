@@ -473,7 +473,7 @@ namespace krys::boo
     /// @brief Disassociates the animation from its effect and timeline.
     void Remove() noexcept;
 
-    void EnqueueAnimationPlaybackEvent(dom::DOMStringAtom type, Maybe<WebAnimationTime> currentTime,
+    void EnqueueAnimationPlaybackEvent(const dom::DOMStringAtom &type, Maybe<WebAnimationTime> currentTime,
                                        Maybe<WebAnimationTime> scheduledTime) noexcept;
 
     /// @brief The animation's position in the global animation list, or zero if it has none.

@@ -405,7 +405,7 @@ namespace krys::ui
 
   template <typename TPaint>
   void TextureMapper::PaintIntoTexture(BitmapTexture &texture, const boo::IntRect &targetRect,
-                                       TPaint &&paint) noexcept
+                                       TPaint paint) noexcept
   {
     auto *commands = _renderer ? _renderer->GetCommandBuffer() : nullptr;
     if (!commands || !texture.Handle().IsValid() || targetRect.IsEmpty())

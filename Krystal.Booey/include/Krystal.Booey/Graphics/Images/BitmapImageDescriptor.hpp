@@ -127,9 +127,9 @@ namespace krys::boo
 
     KRYS_NODISCARD SubsamplingLevel MaximumSubsamplingLevel() const noexcept;
 
-    KRYS_NODISCARD SubsamplingLevel SubsamplingLevelForScaleFactor(GraphicsContext &,
-                                                                   const FloatSize &scaleFactor,
-                                                                   AllowImageSubsampling) const noexcept;
+    KRYS_NODISCARD static SubsamplingLevel SubsamplingLevelForScaleFactor(GraphicsContext &,
+                                                                          const FloatSize &scaleFactor,
+                                                                          AllowImageSubsampling) noexcept;
 
     void Dump(TextStream &) const noexcept;
 

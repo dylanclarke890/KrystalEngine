@@ -100,6 +100,6 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString
       ConvertFromVisibleValue(dom::DOMStringView visibleValue) const noexcept final;
 
-    void AttributeChanged(dom::DOMStringAtom name) noexcept final;
+    void AttributeChanged(const dom::DOMStringAtom &name) noexcept final;
   };
 }

@@ -98,13 +98,13 @@ namespace krys::boo::style
   template <>
   struct Blending<ScrollbarColor>
   {
-    bool Equals(const ScrollbarColor &, const ScrollbarColor &, const RenderStyle &,
-                const RenderStyle &) noexcept;
+    static bool Equals(const ScrollbarColor &, const ScrollbarColor &, const RenderStyle &,
+                       const RenderStyle &) noexcept;
 
-    KRYS_NODISCARD bool CanBlend(const ScrollbarColor &, const ScrollbarColor &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const ScrollbarColor &, const ScrollbarColor &) noexcept;
 
-    ScrollbarColor Blend(const ScrollbarColor &, const ScrollbarColor &, const RenderStyle &,
-                         const RenderStyle &, const BlendingContext &) noexcept;
+    static ScrollbarColor Blend(const ScrollbarColor &, const ScrollbarColor &, const RenderStyle &,
+                                const RenderStyle &, const BlendingContext &) noexcept;
   };
 }
 

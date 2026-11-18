@@ -156,7 +156,7 @@ namespace krys::boo
     _currentTextFragment = SVGTextFragment();
   }
 
-  bool SVGTextLayoutEngine::ParentDefinesTextLength(RenderObject *parent) const noexcept
+  bool SVGTextLayoutEngine::ParentDefinesTextLength(RenderObject *parent) noexcept
   {
     RenderObject *currentParent = parent;
     while (currentParent)

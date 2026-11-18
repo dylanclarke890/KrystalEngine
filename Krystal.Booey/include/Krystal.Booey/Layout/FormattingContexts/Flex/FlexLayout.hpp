@@ -75,8 +75,8 @@ namespace krys::boo::layout
     KRYS_NODISCARD FlexBaseAndHypotheticalMainSizeList FlexBaseAndHypotheticalMainSizeForFlexItems(
       const LogicalFlexItems &flexItems, bool isSizedUnderMinMaxConstraints) const noexcept;
 
-    KRYS_NODISCARD LayoutUnit FlexContainerInnerMainSize(
-      const ConstraintsForFlexContent::AxisGeometry &mainAxisGeometry) const noexcept;
+    KRYS_NODISCARD static LayoutUnit
+      FlexContainerInnerMainSize(const ConstraintsForFlexContent::AxisGeometry &mainAxisGeometry) noexcept;
 
     KRYS_NODISCARD LineRanges ComputeFlexLines(
       const LogicalFlexItems &flexItems, LayoutUnit flexContainerInnerMainSize,
@@ -96,7 +96,7 @@ namespace krys::boo::layout
     void StretchFlexLines(LinesCrossSizeList &flexLinesCrossSizeList, size_t numberOfLines,
                           Maybe<LayoutUnit> crossAxisAvailableSpace) const noexcept;
 
-    KRYS_NODISCARD bool CollapseNonVisibleFlexItems() noexcept;
+    KRYS_NODISCARD static bool CollapseNonVisibleFlexItems() noexcept;
 
     KRYS_NODISCARD SizeList
       ComputeCrossSizeForFlexItems(const LogicalFlexItems &flexItems, const LineRanges &lineRanges,

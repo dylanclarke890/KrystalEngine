@@ -269,10 +269,10 @@ namespace krys::boo::html
       KRYS_NON_COPY_MOVABLE(AllowedScope);
 
     private:
-      uint32 _originalCount;
+      uint32 _originalCount {s_customElementReactionDisallowedCount};
 
     public:
-      AllowedScope() noexcept : _originalCount(s_customElementReactionDisallowedCount)
+      AllowedScope() noexcept
       {
         s_customElementReactionDisallowedCount = 0;
       }
@@ -298,10 +298,10 @@ namespace krys::boo::html
     static CustomElementReactionStack *s_currentProcessingStack;
 
     CustomElementQueue _queue;
-    CustomElementReactionStack *const _previousProcessingStack;
+    CustomElementReactionStack *const _previousProcessingStack {s_currentProcessingStack};
 
   public:
-    CustomElementReactionStack() noexcept : _previousProcessingStack(s_currentProcessingStack)
+    CustomElementReactionStack() noexcept
     {
       s_currentProcessingStack = this;
     }
@@ -358,11 +358,11 @@ namespace krys::boo::html
     KRYS_NON_COPY_MOVABLE(CustomElementReactionStackSuspension);
 
   private:
-    CustomElementReactionStack *_suspendedStack;
+    CustomElementReactionStack *_suspendedStack {CustomElementReactionStack::s_currentProcessingStack};
 
   public:
     CustomElementReactionStackSuspension() noexcept
-        : _suspendedStack(CustomElementReactionStack::s_currentProcessingStack)
+
     {
       CustomElementReactionStack::s_currentProcessingStack = nullptr;
     }

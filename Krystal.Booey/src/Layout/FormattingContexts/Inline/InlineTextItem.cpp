@@ -91,7 +91,7 @@ namespace krys::boo::layout
     return decoded.Length == _length && decoded.CodePoint == text::ZeroWidthSpace;
   }
 
-  bool InlineTextItem::IsQuirkNonBreakingSpace() const noexcept
+  bool InlineTextItem::IsQuirkNonBreakingSpace() noexcept
   {
     // Only `nbsp-mode: space` makes a no-break space breakable, and that mode isn't supported.
     return false;

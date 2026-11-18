@@ -72,9 +72,10 @@ namespace krys::boo::html
     /// @brief One of the definition's observed attributes was set, changed or removed.
     /// @param oldValue Null if the attribute was added.
     /// @param newValue Null if the attribute was removed.
-    virtual void AttributeChangedCallback(dom::DOMStringAtom localName, dom::DOMStringAtom oldValue,
-                                          dom::DOMStringAtom newValue,
-                                          dom::DOMStringAtom namespaceURI) noexcept
+    virtual void AttributeChangedCallback(const dom::DOMStringAtom &localName,
+                                          const dom::DOMStringAtom &oldValue,
+                                          const dom::DOMStringAtom &newValue,
+                                          const dom::DOMStringAtom &namespaceURI) noexcept
     {
       (void)localName;
       (void)oldValue;

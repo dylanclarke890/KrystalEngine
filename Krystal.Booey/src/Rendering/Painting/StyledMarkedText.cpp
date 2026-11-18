@@ -82,6 +82,9 @@ namespace krys::boo
     auto style = baseStyle;
     switch (markedText.MarkedType)
     {
+      // NOLINTNEXTLINE(bugprone-branch-clone): the grammar and spelling cases have their own note.
+      // NOLINTNEXTLINE(bugprone-branch-clone): the grammar and spelling cases have their own note.
+      // NOLINTNEXTLINE(bugprone-branch-clone): the grammar and spelling cases have their own note.
       case MarkedText::Type::Correction:
       case MarkedText::Type::DictationAlternatives:
       case MarkedText::Type::Unmarked:              break;
@@ -191,7 +194,7 @@ namespace krys::boo
   }
 
   KRYS_NODISCARD static List<StyledMarkedText>
-    CoalesceAdjacentWithSameRanges(List<StyledMarkedText> &&styledTexts)
+    CoalesceAdjacentWithSameRanges(List<StyledMarkedText> styledTexts)
   {
     krys_debug_assert(!styledTexts.empty());
     List<StyledMarkedText> frontmostMarkedTexts;
@@ -369,7 +372,7 @@ namespace krys::boo
 
   template <typename TEqualityFunction>
   KRYS_NODISCARD static List<StyledMarkedText> CoalesceAdjacent(const List<StyledMarkedText> &textsToCoalesce,
-                                                                TEqualityFunction &&equalityFunction)
+                                                                TEqualityFunction equalityFunction)
   {
     if (textsToCoalesce.size() <= 1)
     {

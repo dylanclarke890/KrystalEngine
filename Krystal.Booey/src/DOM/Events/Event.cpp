@@ -220,7 +220,8 @@ namespace krys::boo::dom
     return composedPath;
   }
 
-  Ref<Event> Event::Create(DOMStringAtom type, bool canBubble, bool isCancelable, bool isComposed) noexcept
+  Ref<Event> Event::Create(const DOMStringAtom &type, bool canBubble, bool isCancelable,
+                           bool isComposed) noexcept
   {
     auto event = CreateRef<Event>(
       type, EventInit {.Bubbles = canBubble, .Cancelable = isCancelable, .Composed = isComposed});
@@ -250,7 +251,7 @@ namespace krys::boo::dom
     }
 
     // 2. Initialize this with type, bubbles, and cancelable.
-    Initialize(*this, type, bubbles, cancelable);
+    Initialize(*this, krys::move(type), bubbles, cancelable);
   }
 
   void Event::SetTarget(RefPtr<EventTarget> target) noexcept
@@ -284,7 +285,7 @@ namespace krys::boo::dom
     event._target = nullptr;
 
     // 5. Set event's type attribute to type.
-    event._type = type;
+    event._type = krys::move(type);
 
     // 6. Set event's bubbles attribute to bubbles.
     event._bubbles = bubbles;

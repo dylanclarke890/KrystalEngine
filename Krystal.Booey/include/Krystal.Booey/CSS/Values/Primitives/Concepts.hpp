@@ -30,7 +30,6 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <tuple>
-#include <type_traits>
 
 namespace krys::boo::css
 {

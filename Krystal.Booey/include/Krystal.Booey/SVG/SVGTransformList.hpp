@@ -58,7 +58,7 @@ namespace krys::boo::svg
       return AdoptRef(*new SVGTransformList(other, access));
     }
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<SVGTransform>>
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<SVGTransform>>
       CreateSVGTransformFromMatrix(css::DOMMatrix2DInit &&matrixInit) noexcept
     {
       Ref svgTransform = SVGTransform::Create();

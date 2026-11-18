@@ -41,7 +41,7 @@ namespace krys::boo::css
     {
       case Status::Pending: krys_debug_assert(false); break;
       case Status::Loading: krys_debug_assert(GetStatus() == Status::Pending); break;
-      case Status::Success: krys_debug_assert(GetStatus() == Status::Loading); break;
+      case Status::Success:
       case Status::Failure: krys_debug_assert(GetStatus() == Status::Loading); break;
     }
 

@@ -64,7 +64,7 @@ namespace krys::ui::tests
       }
 
       template <typename TFunc>
-      KRYS_NODISCARD List<Pixel> Draw(TFunc &&draw)
+      KRYS_NODISCARD List<Pixel> Draw(TFunc draw)
       {
         _device->BeginFrame();
         auto &commands = _device->GetCommandBuffer();
@@ -87,7 +87,7 @@ namespace krys::ui::tests
 
       /// @brief What @p record draws, recorded into a display list and replayed.
       template <typename TFunc>
-      KRYS_NODISCARD List<Pixel> Replayed(TFunc &&record)
+      KRYS_NODISCARD List<Pixel> Replayed(TFunc record)
       {
         boo::display_list::RecorderImpl recorder(boo::FloatSize {Width, Height});
         record(static_cast<boo::GraphicsContext &>(recorder));

@@ -12,8 +12,8 @@ namespace krys::boo::tests
     void Navigate(NavigationFixture &fixture, utf8_stringview url,
                   dom::DOMStringAtom target = dom::DOMStringAtom::Empty()) noexcept
     {
-      fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url), target, nullptr,
-                                             ReferrerPolicy::EmptyString, null);
+      fixture.Frame->Loader().ChangeLocation(url::URL(fixture.Document->GetURL(), url), krys::move(target),
+                                             nullptr, ReferrerPolicy::EmptyString, null);
     }
   }
 

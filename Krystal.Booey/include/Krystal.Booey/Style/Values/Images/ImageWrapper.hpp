@@ -65,7 +65,7 @@ namespace krys::boo::style
   template <>
   struct Blending<ImageWrapper>
   {
-    KRYS_NODISCARD ImageWrapper Blend(const ImageWrapper &, const ImageWrapper &,
-                                      const BlendingContext &) noexcept;
+    KRYS_NODISCARD static ImageWrapper Blend(const ImageWrapper &, const ImageWrapper &,
+                                             const BlendingContext &) noexcept;
   };
 }

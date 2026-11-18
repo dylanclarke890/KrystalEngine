@@ -36,7 +36,7 @@
 namespace krys::boo::css
 {
   dom::ExceptionOr<Ref<DOMMatrixReadOnly>>
-    DOMMatrixReadOnly::Create(Maybe<Variant<CSSOMString, List<double>>> &&init) noexcept
+    DOMMatrixReadOnly::Create(Maybe<Variant<CSSOMString, List<double>>> init) noexcept
   {
     if (!init)
     {
@@ -365,7 +365,7 @@ namespace krys::boo::css
     return matrix->InvertSelf();
   }
 
-  Ref<dom::DOMPoint> DOMMatrixReadOnly::TransformPoint(dom::DOMPointInit &&pointInit) const noexcept
+  Ref<dom::DOMPoint> DOMMatrixReadOnly::TransformPoint(dom::DOMPointInit pointInit) const noexcept
   {
     _matrix.Map4ComponentPoint(pointInit.X, pointInit.Y, pointInit.Z, pointInit.W);
     return dom::DOMPoint::Create(pointInit.X, pointInit.Y, pointInit.Z, pointInit.W);

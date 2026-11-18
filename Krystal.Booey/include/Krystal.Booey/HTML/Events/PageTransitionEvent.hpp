@@ -27,7 +27,8 @@ namespace krys::boo::html
     PageTransitionEvent(dom::DOMStringAtom type, const PageTransitionEventInit &eventInitDict = {}) noexcept;
 
     /// @brief A trusted page transition event, which bubbles and is cancelable.
-    KRYS_NODISCARD static Ref<PageTransitionEvent> Create(dom::DOMStringAtom type, bool persisted) noexcept;
+    KRYS_NODISCARD static Ref<PageTransitionEvent> Create(const dom::DOMStringAtom &type,
+                                                          bool persisted) noexcept;
 
     /// @brief Whether the document comes from, or goes into, the back/forward cache.
     /// @see https://html.spec.whatwg.org/#dom-pagetransitionevent-persisted

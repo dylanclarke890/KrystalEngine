@@ -53,7 +53,7 @@ namespace krys::boo::style
       Right,
     };
 
-    constexpr TextUnderlinePosition(css::keywords::Auto) noexcept : _value {}
+    constexpr TextUnderlinePosition(css::keywords::Auto) noexcept
     {
     }
 

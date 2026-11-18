@@ -127,7 +127,7 @@ namespace krys::boo::svg
     return SVGTextQuery(Renderer()).RotationOfCharacter(charnum);
   }
 
-  int32 SVGTextContentElement::GetCharNumAtPosition(dom::DOMPointInit &&pointInit) noexcept
+  int32 SVGTextContentElement::GetCharNumAtPosition(dom::DOMPointInit pointInit) noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
       {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
@@ -170,16 +170,15 @@ namespace krys::boo::svg
 
   namespace
   {
-    KRYS_NODISCARD bool IsXMLSpaceAttribute(dom::DOMStringAtom localName,
-                                            dom::DOMStringAtom namespaceURI) noexcept
+    KRYS_NODISCARD bool IsXMLSpaceAttribute(const dom::DOMStringAtom &localName,
+                                            const dom::DOMStringAtom &namespaceURI) noexcept
     {
-      return localName == u8"space" && namespaceURI == infra::Namespaces::XML;
+      return localName == u8"space" && namespaceURI == infra::namespaces::XML;
     }
   }
 
-  bool
-    SVGTextContentElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                              dom::DOMStringAtom namespaceURI) const noexcept
+  bool SVGTextContentElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (IsXMLSpaceAttribute(localName, namespaceURI))
     {
@@ -189,7 +188,7 @@ namespace krys::boo::svg
   }
 
   void SVGTextContentElement::CollectPresentationalHintsForAttribute(
-    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI, dom::DOMStringView value,
     css::MutableStyleProperties &style) noexcept
   {
     if (IsXMLSpaceAttribute(localName, namespaceURI))

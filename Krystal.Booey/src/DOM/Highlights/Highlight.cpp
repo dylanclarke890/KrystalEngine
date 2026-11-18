@@ -46,12 +46,12 @@ namespace krys::boo::dom
     }
   }
 
-  Ref<Highlight> Highlight::Create(List<Ref<AbstractRange>> &&initialRanges) noexcept
+  Ref<Highlight> Highlight::Create(List<Ref<AbstractRange>> initialRanges) noexcept
   {
     return AdoptRef(*new Highlight(krys::move(initialRanges)));
   }
 
-  Highlight::Highlight(List<Ref<AbstractRange>> &&initialRanges) noexcept
+  Highlight::Highlight(List<Ref<AbstractRange>> initialRanges) noexcept
   {
     _highlightRanges.reserve(initialRanges.size());
     for (auto &range : initialRanges)

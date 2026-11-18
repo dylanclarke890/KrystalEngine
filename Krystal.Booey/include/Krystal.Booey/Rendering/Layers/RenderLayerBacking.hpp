@@ -148,7 +148,7 @@ namespace krys::boo
       return _backingSharingLayers;
     }
 
-    void SetBackingSharingLayers(ListHashSet<RenderLayer *> &&sharingLayers) noexcept;
+    void SetBackingSharingLayers(const ListHashSet<RenderLayer *> &sharingLayers) noexcept;
 
     KRYS_NODISCARD bool HasBackingSharingLayers() const noexcept
     {
@@ -278,7 +278,7 @@ namespace krys::boo
     // act as a container for the GraphicsLayers for descendants, but its contents usually render into the
     // window (in which case this returns true). This returns false for other layers, and when the document
     // layer actually needs to paint into its backing store for some reason.
-    KRYS_NODISCARD bool PaintsIntoWindow() const noexcept;
+    KRYS_NODISCARD static bool PaintsIntoWindow() noexcept;
 
     // Returns true for a composited layer that has no backing store of its own, so paints into some ancestor
     // layer.
@@ -414,7 +414,7 @@ namespace krys::boo
       return _overflowControlsContainer.get();
     }
 
-    KRYS_NODISCARD GraphicsLayer *LayerForContents() const noexcept;
+    KRYS_NODISCARD static GraphicsLayer *LayerForContents() noexcept;
 
     void AdjustOverflowControlsPositionRelativeToAncestor(const RenderLayer &ancestorLayer) noexcept;
 
@@ -506,13 +506,13 @@ namespace krys::boo
 
     void EnsureClippingStackLayers(LayerAncestorClippingStack &clippingStack) noexcept;
 
-    void RemoveClippingStackLayers(LayerAncestorClippingStack &clippingStack) noexcept;
+    static void RemoveClippingStackLayers(LayerAncestorClippingStack &clippingStack) noexcept;
 
     void UpdateClippingStackLayerGeometry(LayerAncestorClippingStack &clippingStack,
                                           const RenderLayer *compositedAncestor,
                                           LayoutRect &parentGraphicsLayerRect) noexcept;
 
-    void ConnectClippingStackLayers(LayerAncestorClippingStack &clippingStack) noexcept;
+    static void ConnectClippingStackLayers(LayerAncestorClippingStack &clippingStack) noexcept;
 
     void UpdateOpacity(const RenderStyle &style) noexcept;
 

@@ -84,8 +84,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD Element *QueryFirst(ContainerNode &rootNode) const noexcept;
 
   private:
-    KRYS_NODISCARD bool SelectorMatches(const SelectorData &selectorData, const Element &element,
-                                        const ContainerNode &rootNode) const noexcept;
+    KRYS_NODISCARD static bool SelectorMatches(const SelectorData &selectorData, const Element &element,
+                                               const ContainerNode &rootNode) noexcept;
 
     template <typename TOutput>
     void Execute(ContainerNode &rootNode, TOutput &output) const noexcept;
@@ -113,8 +113,8 @@ namespace krys::boo::dom
 
     /// @brief The narrowest subtree of @p rootNode that holds what the selector can match, going by an ID in
     /// it that only one element has.
-    KRYS_NODISCARD const ContainerNode &
-      SearchRootForAncestorId(const ContainerNode &rootNode, const SelectorData &selectorData) const noexcept;
+    KRYS_NODISCARD static const ContainerNode &
+      SearchRootForAncestorId(const ContainerNode &rootNode, const SelectorData &selectorData) noexcept;
 
     template <typename TOutput>
     void ExecuteSingleSelectorData(const ContainerNode &rootNode, const ContainerNode &searchRootNode,

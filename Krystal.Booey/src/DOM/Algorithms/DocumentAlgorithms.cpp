@@ -78,8 +78,8 @@ namespace krys::boo::dom
   {
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
     //    qualifiedName given "element".
-    auto nameResult =
-      NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Element);
+    auto nameResult = NameValidation::ValidateAndExtract(krys::move(namespaceUri), krys::move(qualifiedName),
+                                                         ValidateAndExtractContext::Element);
     if (nameResult.HasException())
     {
       return nameResult.ReleaseException();

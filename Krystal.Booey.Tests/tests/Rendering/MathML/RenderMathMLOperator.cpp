@@ -145,7 +145,7 @@ namespace krys::boo::tests
     // One glyph, the minus sign, and not the text.
     auto runs = PaintedRuns(fixture);
     CHECK(runs.starts_with("1@0,"));
-    CHECK(runs.find(' ') == std::string::npos);
+    CHECK_FALSE(runs.contains(' '));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderMathMLOperator: vertical stretching",

@@ -1883,7 +1883,7 @@ namespace krys::boo::url
         _url._pathEnd = _url._pathAfterLastSlash;
         _url._queryEnd = _url._pathAfterLastSlash;
         break;
-      case State::SpecialAuthoritySlashes:       Failure(); return;
+      case State::SpecialAuthoritySlashes:
       case State::SpecialAuthorityIgnoreSlashes: Failure(); return;
       case State::AuthorityOrHost:
         _url._userEnd = static_cast<uint32>(CurrentPosition(authorityOrHostBegin));
@@ -2042,9 +2042,6 @@ namespace krys::boo::url
       case State::PathStart:     krys_unreachable();
       case State::FilePathStart: [[fallthrough]];
       case State::Path:
-        _url._pathEnd = static_cast<uint32>(CurrentPosition(c));
-        _url._queryEnd = _url._pathEnd;
-        break;
       case State::OpaquePath:
         _url._pathEnd = static_cast<uint32>(CurrentPosition(c));
         _url._queryEnd = _url._pathEnd;
@@ -2647,22 +2644,12 @@ namespace krys::boo::url
     for (size_t i = 0; i < input.size(); ++i)
     {
       char8 byte = input[i];
-      if (byte != '%')
+      if (byte == '%' && input.size() > 2 && i < input.size() - 2 && text::IsASCIIHexDigit(input[i + 1])
+          && text::IsASCIIHexDigit(input[i + 2]))
       {
-        output.push_back(byte);
-      }
-      else if (input.size() > 2 && i < input.size() - 2)
-      {
-        if (text::IsASCIIHexDigit(input[i + 1]) && text::IsASCIIHexDigit(input[i + 2]))
-        {
-          SyntaxViolation(iteratorForSyntaxViolationPosition);
-          output.push_back(static_cast<char8>(text::ToASCIIHexValue(input[i + 1], input[i + 2])));
-          i += 2;
-        }
-        else
-        {
-          output.push_back(byte);
-        }
+        SyntaxViolation(iteratorForSyntaxViolationPosition);
+        output.push_back(static_cast<char8>(text::ToASCIIHexValue(input[i + 1], input[i + 2])));
+        i += 2;
       }
       else
       {
@@ -2680,21 +2667,11 @@ namespace krys::boo::url
     for (size_t i = 0; i < input.size(); ++i)
     {
       char8 byte = input[i];
-      if (byte != '%')
+      if (byte == '%' && input.size() > 2 && i < input.size() - 2 && text::IsASCIIHexDigit(input[i + 1])
+          && text::IsASCIIHexDigit(input[i + 2]))
       {
-        output.push_back(byte);
-      }
-      else if (input.size() > 2 && i < input.size() - 2)
-      {
-        if (text::IsASCIIHexDigit(input[i + 1]) && text::IsASCIIHexDigit(input[i + 2]))
-        {
-          output.push_back(static_cast<char8>(text::ToASCIIHexValue(input[i + 1], input[i + 2])));
-          i += 2;
-        }
-        else
-        {
-          output.push_back(byte);
-        }
+        output.push_back(static_cast<char8>(text::ToASCIIHexValue(input[i + 1], input[i + 2])));
+        i += 2;
       }
       else
       {

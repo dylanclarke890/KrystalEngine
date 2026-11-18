@@ -33,7 +33,7 @@ namespace krys::boo::dom
     CommandEvent(DOMStringAtom type, const CommandEventInit &eventInitDict = {}) noexcept;
 
     /// @brief An event of type @p type; trusted if @p isTrusted.
-    KRYS_NODISCARD static Ref<CommandEvent> Create(DOMStringAtom type, const CommandEventInit &init,
+    KRYS_NODISCARD static Ref<CommandEvent> Create(const DOMStringAtom &type, const CommandEventInit &init,
                                                    bool isTrusted = false) noexcept;
 
     /// @brief The button that invoked the command, retargeted against the current target.

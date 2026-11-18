@@ -151,8 +151,8 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldMergeEnd(bool selectionEndWasEndOfParagraph) noexcept;
 
-    KRYS_NODISCARD bool ShouldMerge(const VisiblePosition &source,
-                                    const VisiblePosition &destination) noexcept;
+    KRYS_NODISCARD static bool ShouldMerge(const VisiblePosition &source,
+                                           const VisiblePosition &destination) noexcept;
 
     void MergeEndIfNeeded() noexcept;
 

@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  CachedResource::CachedResource(CachedResourceRequest &&request, Type type) noexcept
+  CachedResource::CachedResource(CachedResourceRequest request, Type type) noexcept
       : _options(request.Options()),
         _decodedDataDeletionTimer(*this, &CachedResource::DecodedDataDeletionTimerFired),
         _initiatorType(request.InitiatorType()), _type(type)
@@ -78,7 +78,7 @@ namespace krys::boo
     // suspended; it still finishes once the document is gone, as other documents may share the resource.
     auto completeAsNetworkingTask =
       [protectedThis = CachedResourceHandle<CachedResource>(*this),
-       document = CreateWeakPtr(cachedResourceLoader.GetDocument())](LoadResult &&result)
+       document = CreateWeakPtr(cachedResourceLoader.GetDocument())](LoadResult result)
     {
       auto steps = [protectedThis, result = krys::move(result)]() mutable
       {
@@ -127,7 +127,7 @@ namespace krys::boo
     loaderStrategy->LoadResource(*frame, _resourceRequest, _options, krys::move(completeAsNetworkingTask));
   }
 
-  void CachedResource::DidFinishLoad(LoadResult &&result) noexcept
+  void CachedResource::DidFinishLoad(LoadResult result) noexcept
   {
     // The resource's clients hear of it before its document's loads are checked.
     CachedResourceHandle<CachedResource> protectedThis(*this);
@@ -146,7 +146,7 @@ namespace krys::boo
     loader->LoadDone();
   }
 
-  void CachedResource::ApplyLoadResult(LoadResult &&result) noexcept
+  void CachedResource::ApplyLoadResult(LoadResult result) noexcept
   {
     if (!IsLoading())
     {

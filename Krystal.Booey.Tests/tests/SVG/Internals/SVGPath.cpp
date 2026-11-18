@@ -215,10 +215,10 @@ namespace krys::boo::svg::tests
     // The end point picks up float noise (y is about 1.7e-6), so check the curves rather than the exact end.
     // 5.52285 is the quarter circle cubic constant (0.552285) times the radius.
     CHECK(clockwise.starts_with(u8"M 0 0 C "));
-    CHECK(clockwise.find(u8" 10 -10 C 15.5228 -10 20 -5.52285 20 ") != dom::DOMString::npos);
+    CHECK(clockwise.contains(u8" 10 -10 C 15.5228 -10 20 -5.52285 20 "));
 
     auto anticlockwise = Normalised(u8"M 0 0 A 10 10 0 0 0 20 0");
-    CHECK(anticlockwise.find(u8" 10 10 C ") != dom::DOMString::npos);
+    CHECK(anticlockwise.contains(u8" 10 10 C "));
 
     // Radii too small to reach are scaled up, so this is the same half circle.
     CHECK(Normalised(u8"M 0 0 A 1 1 0 0 1 20 0") == clockwise);

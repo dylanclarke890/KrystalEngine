@@ -43,14 +43,14 @@ namespace krys::boo::css::tests
     }
 
     template <typename T>
-    KRYS_NODISCARD Ref<T> Value(dom::ExceptionOr<Ref<T>> &&result)
+    KRYS_NODISCARD Ref<T> Value(dom::ExceptionOr<Ref<T>> result)
     {
       REQUIRE(result.HasValue());
       return result.ReleaseValue();
     }
 
     template <typename T>
-    KRYS_NODISCARD dom::ExceptionCode Error(dom::ExceptionOr<T> &&result)
+    KRYS_NODISCARD dom::ExceptionCode Error(dom::ExceptionOr<T> result)
     {
       REQUIRE(result.HasException());
       return result.ReleaseException().Code();

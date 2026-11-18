@@ -53,7 +53,7 @@ namespace krys::boo::css
 
     explicit MutableStyleProperties(const StyleProperties &other) noexcept;
 
-    explicit MutableStyleProperties(List<Property> &&properties) noexcept;
+    explicit MutableStyleProperties(List<Property> properties) noexcept;
 
   public:
     ~MutableStyleProperties() noexcept;
@@ -70,7 +70,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Ref<MutableStyleProperties> Create() noexcept;
 
-    KRYS_NODISCARD static Ref<MutableStyleProperties> Create(List<Property> &&properties) noexcept;
+    KRYS_NODISCARD static Ref<MutableStyleProperties> Create(List<Property> properties) noexcept;
 
     KRYS_NODISCARD static Ref<MutableStyleProperties> CreateEmpty() noexcept;
 

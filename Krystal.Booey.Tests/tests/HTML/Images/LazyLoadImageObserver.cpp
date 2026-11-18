@@ -35,12 +35,12 @@ namespace krys::boo::tests
         Document->StyleScope().FlushPendingUpdate();
       }
 
-      KRYS_NODISCARD LocalFrame &Frame() noexcept
+      KRYS_NODISCARD LocalFrame &Frame() const noexcept
       {
         return TestPage->MainFrame();
       }
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         krys_assert(element);

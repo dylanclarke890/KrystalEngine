@@ -155,7 +155,7 @@ layer at (0,0) size 800x154
     CHECK(BoxOf(fixture, u8"f1").Location() == LayoutPoint(0, 10));
     CHECK(BlockOf(fixture, u8"line").LogicalLeftOffsetForLine(0_lu, 1_lu) == 0_lu);
     CHECK(BlockOf(fixture, u8"line").LogicalLeftOffsetForLine(10_lu, 1_lu) == 30_lu);
-    CHECK(Dump(fixture).find(u8R"(text run at (30,9) width 19: "two ")") != utf8_string::npos);
+    CHECK(Dump(fixture).contains(u8R"(text run at (30,9) width 19: "two ")"));
 
     // Floats that fit beside the first line go to its top, even after its content.
     CHECK(BoxOf(fixture, u8"f2").Location() == LayoutPoint(0, 0));

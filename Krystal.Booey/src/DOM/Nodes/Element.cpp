@@ -382,7 +382,7 @@ namespace krys::boo::dom
     if (GetElementRareData())
     {
       auto *customStates = GetElementRareData()->CustomStateSet();
-      return customStates && customStates->Has(state);
+      return customStates && customStates->Has(krys::move(state));
     }
     return false;
   }
@@ -829,12 +829,12 @@ namespace krys::boo::dom
     }
 
     Maybe<DOMString> linkAttribute;
-    if (NamespaceURI().View() == infra::Namespaces::SVG && LocalName().View() == u8"a")
+    if (NamespaceURI().View() == infra::namespaces::SVG && LocalName().View() == u8"a")
     {
       linkAttribute = GetAttribute(u8"href");
       if (!linkAttribute)
       {
-        linkAttribute = GetAttributeNS(infra::Namespaces::XLink, u8"href");
+        linkAttribute = GetAttributeNS(infra::namespaces::XLink, u8"href");
       }
     }
     else
@@ -1144,7 +1144,7 @@ namespace krys::boo::dom
   }
 
   Element::DispatchMouseEventResult Element::DispatchMouseEvent(const PlatformMouseEvent &platformEvent,
-                                                                DOMStringAtom eventType, int32 detail,
+                                                                const DOMStringAtom &eventType, int32 detail,
                                                                 Element *relatedTarget) noexcept
   {
     auto eventIsDefaultPrevented = EventIsDefaultPrevented::No;
@@ -1598,7 +1598,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<WebAnimation>>
     Element::Animate(KeyframesInput &&keyframes,
-                     Maybe<Variant<double, KeyframeAnimationOptions>> &&options) noexcept
+                     Maybe<Variant<double, KeyframeAnimationOptions>> options) noexcept
   {
     DOMString id;
     Maybe<RefPtr<AnimationTimeline>> timeline;
@@ -1916,7 +1916,7 @@ namespace krys::boo::dom
 
     // 2. If this is in the HTML namespace and its node document is an HTML document, then return
     //    qualifiedName in ASCII uppercase.
-    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = krys::text::ToASCIIUpper(qualifiedName);
     }
@@ -1969,15 +1969,15 @@ namespace krys::boo::dom
     return ClassNamesForValue(classes ? Maybe<DOMStringView>(*classes) : null);
   }
 
-  List<DOMStringAtom> Element::ClassNamesForValue(Maybe<DOMStringView> classes) const noexcept
+  List<DOMStringAtom> Element::ClassNamesForValue(Maybe<DOMStringView> value) const noexcept
   {
     List<DOMStringAtom> classNames;
-    if (!classes)
+    if (!value)
     {
       return classNames;
     }
     bool foldCase = NodeDocument().InQuirksMode();
-    DOMStringView remaining = *classes;
+    DOMStringView remaining = *value;
     while (!remaining.empty())
     {
       auto start = std::ranges::find_if_not(remaining, [](char8 c) { return text::IsASCIIWhitespace(c); });
@@ -2107,7 +2107,7 @@ namespace krys::boo::dom
   Maybe<DOMString> Element::GetAttribute(DOMStringAtom qualifiedName) const noexcept
   {
     // 1. Let attr be the result of getting an attribute given qualifiedName and this.
-    Attr *attr = ElementAlgorithms::GetAttributeByName(qualifiedName, *this);
+    Attr *attr = ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *this);
     // 2. If attr is null, return null.
     if (attr == nullptr)
     {
@@ -2121,7 +2121,8 @@ namespace krys::boo::dom
   Maybe<DOMString> Element::GetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
     // 1. Let attr be the result of getting an attribute given namespace, localName, and this.
-    Attr *attr = ElementAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
+    Attr *attr =
+      ElementAlgorithms::GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
     // 2. If attr is null, return null.
     if (attr == nullptr)
     {
@@ -2144,7 +2145,7 @@ namespace krys::boo::dom
 
     // 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
     //    to qualifiedName in ASCII lowercase.
-    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = qualifiedName.ToASCIILower();
     }
@@ -2180,8 +2181,8 @@ namespace krys::boo::dom
     html::CEReactionsScope ceReactions;
     // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
     //    qualifiedName given "attribute".
-    auto validateAndExtractResult =
-      NameValidation::ValidateAndExtract(namespaceURI, qualifiedName, ValidateAndExtractContext::Attribute);
+    auto validateAndExtractResult = NameValidation::ValidateAndExtract(
+      krys::move(namespaceURI), krys::move(qualifiedName), ValidateAndExtractContext::Attribute);
 
     if (validateAndExtractResult.HasException())
     {
@@ -2201,13 +2202,13 @@ namespace krys::boo::dom
   void Element::RemoveAttribute(DOMStringAtom qualifiedName) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ElementAlgorithms::RemoveAttributeByName(qualifiedName, *this);
+    ElementAlgorithms::RemoveAttributeByName(krys::move(qualifiedName), *this);
   }
 
   void Element::RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept
   {
     html::CEReactionsScope ceReactions;
-    ElementAlgorithms::RemoveAttributeByNamespace(namespaceURI, localName, *this);
+    ElementAlgorithms::RemoveAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
   }
 
   ExceptionOr<bool> Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
@@ -2222,7 +2223,7 @@ namespace krys::boo::dom
 
     // 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
     //    to qualifiedName in ASCII lowercase.
-    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = qualifiedName.ToASCIILower();
     }
@@ -2266,7 +2267,7 @@ namespace krys::boo::dom
   {
     // 1. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
     //    to qualifiedName in ASCII lowercase.
-    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = qualifiedName.ToASCIILower();
     }
@@ -2293,12 +2294,12 @@ namespace krys::boo::dom
 
   Attr *Element::GetAttributeNode(DOMStringAtom qualifiedName) const noexcept
   {
-    return ElementAlgorithms::GetAttributeByName(qualifiedName, *this);
+    return ElementAlgorithms::GetAttributeByName(krys::move(qualifiedName), *this);
   }
 
   Attr *Element::GetAttributeNodeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
-    return ElementAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
+    return ElementAlgorithms::GetAttributeByNamespace(krys::move(namespaceURI), krys::move(localName), *this);
   }
 
   ExceptionOr<RefPtr<Attr>> Element::SetAttributeNode(Attr &attr) noexcept
@@ -2404,7 +2405,7 @@ namespace krys::boo::dom
     return part ? DOMStringAtom(*part) : null;
   }
 
-  void Element::SetUserAgentPart(DOMStringAtom part) noexcept
+  void Element::SetUserAgentPart(const DOMStringAtom &part) noexcept
   {
     // We may set the useragentpart attribute on elements before appending them to the shadow tree.
     krys_debug_assert(!IsConnected() || IsInUserAgentShadowTree());
@@ -2433,18 +2434,18 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagName(*this, qualifiedName);
+    return NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
   }
 
   Ref<HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
                                                       DOMStringAtom localName) noexcept
   {
-    return NodeAlgorithms::GetElementsByTagNameNS(*this, namespaceURI, localName);
+    return NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceURI), krys::move(localName));
   }
 
   Ref<HTMLCollection> Element::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    return NodeAlgorithms::GetElementsByClassName(*this, classNames);
+    return NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
 
   ExceptionOr<Element *> Element::InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept
@@ -2548,7 +2549,7 @@ namespace krys::boo::dom
     return ReplaceChildrenWithFragment(*container, fragment.ReleaseValue());
   }
 
-  ExceptionOr<void> Element::SetHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> Element::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let target be the target for HTML insertion given this.
@@ -2558,7 +2559,7 @@ namespace krys::boo::dom
       html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> Element::AppendHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> Element::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let target be the target for HTML insertion given this.
@@ -2568,7 +2569,7 @@ namespace krys::boo::dom
       html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> Element::PrependHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> Element::PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let target be the target for HTML insertion given this.
@@ -2578,7 +2579,8 @@ namespace krys::boo::dom
       target, target.FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options) noexcept
+  ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html,
+                                           const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -2592,7 +2594,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> Element::AppendHTMLUnsafe(DOMStringView html,
-                                              html::SetHTMLUnsafeOptions &&options) noexcept
+                                              const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -2606,7 +2608,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> Element::PrependHTMLUnsafe(DOMStringView html,
-                                               html::SetHTMLUnsafeOptions &&options) noexcept
+                                               const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input
@@ -2620,21 +2622,21 @@ namespace krys::boo::dom
       html::FragmentParserMode::Unsafe);
   }
 
-  ExceptionOr<void> Element::BeforeHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> Element::BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(*this, html, &options.Sanitizer,
                                                      html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> Element::AfterHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> Element::AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(*this, html, &options.Sanitizer,
                                                     html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> Element::ReplaceWithHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> Element::ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(*this, html, &options.Sanitizer,
@@ -2642,7 +2644,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> Element::BeforeHTMLUnsafe(DOMStringView html,
-                                              html::SetHTMLUnsafeOptions &&options) noexcept
+                                              const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(
@@ -2650,7 +2652,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> Element::AfterHTMLUnsafe(DOMStringView html,
-                                             html::SetHTMLUnsafeOptions &&options) noexcept
+                                             const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(
@@ -2658,14 +2660,14 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> Element::ReplaceWithHTMLUnsafe(DOMStringView html,
-                                                   html::SetHTMLUnsafeOptions &&options) noexcept
+                                                   const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  DOMString Element::GetHTML(GetHTMLOptions &&options) const noexcept
+  DOMString Element::GetHTML(GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
                              ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
@@ -3019,8 +3021,8 @@ namespace krys::boo::dom
 
 #pragma region Extension Hooks
 
-  void Element::OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
-                                   Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept
+  void Element::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                   Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept
   {
     if (namespaceURI != null)
     {
@@ -3502,7 +3504,7 @@ namespace krys::boo::dom
   RefPtr<Element> Element::ResolvedElementForAttribute(DOMStringAtom attributeName) const noexcept
   {
     // 1. Let unresolvedTarget be the result of running this's get the unresolved attr target element.
-    auto unresolvedTarget = ElementForAttributeInternal(attributeName);
+    auto unresolvedTarget = ElementForAttributeInternal(krys::move(attributeName));
     // 2. If unresolvedTarget is null, then return null.
     if (!unresolvedTarget)
     {
@@ -3515,7 +3517,7 @@ namespace krys::boo::dom
   List<Ref<Element>> Element::ResolvedElementsForAttribute(DOMStringAtom attributeName) const noexcept
   {
     // 1. Let unresolvedTargets be the result of running this's get the unresolved attr target elements.
-    auto unresolvedTargets = ElementsForAttributeInternal(attributeName);
+    auto unresolvedTargets = ElementsForAttributeInternal(krys::move(attributeName));
     // 2. If unresolvedTargets is null, then return « ».
     // 3. Let resolvedTargets be « ».
     List<Ref<Element>> resolvedTargets;
@@ -3572,7 +3574,7 @@ namespace krys::boo::dom
     return candidate->ResolveReferenceTarget();
   }
 
-  RefPtr<Element> Element::ElementForAttributeInternal(DOMStringAtom attributeName) const noexcept
+  RefPtr<Element> Element::ElementForAttributeInternal(const DOMStringAtom &attributeName) const noexcept
   {
     if (GetElementRareData())
     {
@@ -3624,7 +3626,7 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  void Element::SetElementAttribute(DOMStringAtom attributeName, Element *element) noexcept
+  void Element::SetElementAttribute(const DOMStringAtom &attributeName, Element *element) noexcept
   {
     krys_debug_assert(IsElementReflectionAttribute(attributeName));
 
@@ -3646,13 +3648,14 @@ namespace krys::boo::dom
     }
   }
 
-  bool Element::IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept
+  bool Element::IsElementReflectionAttribute(const DOMStringAtom &attributeName) noexcept
   {
     return attributeName == u8"popovertarget" || attributeName == u8"commandfor"
            || attributeName == u8"aria-activedescendant";
   }
 
-  Maybe<List<Ref<Element>>> Element::ElementsForAttributeInternal(DOMStringAtom attributeName) const noexcept
+  Maybe<List<Ref<Element>>>
+    Element::ElementsForAttributeInternal(const DOMStringAtom &attributeName) const noexcept
   {
     // 1. Let elements be an empty list.
     List<Ref<Element>> elements;
@@ -3712,7 +3715,7 @@ namespace krys::boo::dom
     return elements;
   }
 
-  void Element::SetElementsArrayAttribute(DOMStringAtom attributeName,
+  void Element::SetElementsArrayAttribute(const DOMStringAtom &attributeName,
                                           const Maybe<List<Ref<Element>>> &elements) noexcept
   {
     krys_debug_assert(IsElementsArrayReflectionAttribute(attributeName));
@@ -3752,7 +3755,7 @@ namespace krys::boo::dom
     }
   }
 
-  bool Element::IsElementsArrayReflectionAttribute(DOMStringAtom attributeName) noexcept
+  bool Element::IsElementsArrayReflectionAttribute(const DOMStringAtom &attributeName) noexcept
   {
     return attributeName == u8"aria-controls" || attributeName == u8"aria-describedby"
            || attributeName == u8"aria-details" || attributeName == u8"aria-errormessage"

@@ -281,7 +281,7 @@ namespace krys::boo::tests
       return type == PasteboardCustomData::BooeyType() ? CustomData : nullptr;
     }
 
-    void WriteToClipboard(utf8_stringview pasteboardName, SelectionData &&selectionData) noexcept final
+    void WriteToClipboard(utf8_stringview pasteboardName, SelectionData selectionData) noexcept final
     {
       ClearClipboard(pasteboardName);
       ++Writes;
@@ -442,12 +442,12 @@ namespace krys::boo::tests
     }
 
     /// @brief The markup of @p element's children.
-    KRYS_NODISCARD utf8_string InnerHTML(const dom::Node &node) noexcept
+    KRYS_NODISCARD static utf8_string InnerHTML(const dom::Node &node) noexcept
     {
       return SerializeFragment(node, SerializedNodes::SubtreesOfChildren);
     }
 
-    KRYS_NODISCARD dom::SimpleRange CollapsedRange(dom::Node &node, uint64 offset) noexcept
+    KRYS_NODISCARD static dom::SimpleRange CollapsedRange(dom::Node &node, uint64 offset) noexcept
     {
       return {{ShareRef(node), offset}, {ShareRef(node), offset}};
     }

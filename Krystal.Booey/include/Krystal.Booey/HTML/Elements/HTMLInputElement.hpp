@@ -357,7 +357,7 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::DOMString Value() const noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-input-value
-    dom::ExceptionOr<void> Value(dom::DOMString value) noexcept
+    dom::ExceptionOr<void> Value(const dom::DOMString &value) noexcept
     {
       return SetValue(value);
     }
@@ -726,10 +726,11 @@ namespace krys::boo::html
 
   protected:
     KRYS_NODISCARD bool
-      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+      HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                         const dom::DOMStringAtom &namespaceURI) const noexcept override;
 
-    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+    void CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                const dom::DOMStringAtom &namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
 
@@ -741,8 +742,9 @@ namespace krys::boo::html
 
     void OnAdopt(dom::Document &oldDocument) noexcept final;
 
-    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                            Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+    void OnAttributeChanged(const dom::DOMStringAtom &localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            const dom::DOMStringAtom &namespaceURI) noexcept final;
 
     void OnClone(dom::Node &copy, bool subtree) noexcept final;
 

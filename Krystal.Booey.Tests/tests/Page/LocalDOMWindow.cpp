@@ -82,7 +82,7 @@ namespace krys::boo::tests
         return *Document->Window();
       }
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         REQUIRE(element);
@@ -636,7 +636,7 @@ namespace krys::boo::tests
 
     SECTION("an svg element's handlers are its own")
     {
-      auto svg = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+      auto svg = fixture.Document->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
       auto &svgElement = Downcast<svg::SVGElement>(*svg);
       svgElement.SetOnResize([](dom::Event &) {});
       CHECK(svgElement.OnResize() != nullptr);

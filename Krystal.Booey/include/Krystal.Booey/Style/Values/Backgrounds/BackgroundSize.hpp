@@ -58,8 +58,8 @@ namespace krys::boo::style
     {
     }
 
-    BackgroundSize(BackgroundSizeLength &&value) noexcept
-        : _value {LengthSize {value, css::keywords::Auto {}}}
+    BackgroundSize(BackgroundSizeLength value) noexcept
+        : _value {LengthSize {krys::move(value), css::keywords::Auto {}}}
     {
     }
 
@@ -173,10 +173,10 @@ namespace krys::boo::style
   template <>
   struct Blending<BackgroundSize>
   {
-    KRYS_NODISCARD bool CanBlend(const BackgroundSize &, const BackgroundSize &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BackgroundSize &, const BackgroundSize &) noexcept;
 
-    KRYS_NODISCARD BackgroundSize Blend(const BackgroundSize &, const BackgroundSize &,
-                                        const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BackgroundSize Blend(const BackgroundSize &, const BackgroundSize &,
+                                               const BlendingContext &) noexcept;
   };
 }
 

@@ -116,10 +116,10 @@ namespace krys::boo
       return u8"RenderSVGResourceClipper";
     }
 
-    KRYS_NODISCARD ClipperData::Inputs ComputeInputs(const GraphicsContext &, const RenderElement &,
-                                                     const FloatRect &objectBoundingBox,
-                                                     const FloatRect &clippedContentBounds,
-                                                     float usedZoom) noexcept;
+    KRYS_NODISCARD static ClipperData::Inputs ComputeInputs(const GraphicsContext &, const RenderElement &,
+                                                            const FloatRect &objectBoundingBox,
+                                                            const FloatRect &clippedContentBounds,
+                                                            float usedZoom) noexcept;
 
     KRYS_NODISCARD EnumSet<ApplyResult> PathOnlyClipping(GraphicsContext &, const RenderElement &,
                                                          const AffineTransform &, const FloatRect &,

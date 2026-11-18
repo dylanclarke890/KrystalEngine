@@ -915,7 +915,7 @@ namespace krys::boo
 
   static Maybe<DidRepaintAndMarkContainingBlock>
     RepaintAndMarkContainingBlockDirtyBeforeTearDown(const dom::Element &root,
-                                                     auto composedTreeDescendants) noexcept
+                                                     const auto &composedTreeDescendants) noexcept
   {
     auto *destroyRootRenderer = root.Renderer();
     if (destroyRootRenderer && destroyRootRenderer->RenderTreeBeingDestroyed())

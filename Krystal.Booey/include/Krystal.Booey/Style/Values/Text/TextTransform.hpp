@@ -52,7 +52,7 @@ namespace krys::boo::style
     using EnumSet = TextTransformValueEnumSet;
     using value_type = TextTransformValueEnumSet::value_type;
 
-    constexpr TextTransform(css::keywords::None) noexcept : _value {}
+    constexpr TextTransform(css::keywords::None) noexcept
     {
     }
 

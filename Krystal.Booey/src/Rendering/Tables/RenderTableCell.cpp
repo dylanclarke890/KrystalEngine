@@ -1987,7 +1987,8 @@ namespace krys::boo
       uint32 _count {0};
     };
 
-    void AddBorderStyle(List<CollapsedBorderValue> &borderValues, CollapsedBorderValue borderValue) noexcept
+    void AddBorderStyle(List<CollapsedBorderValue> &borderValues,
+                        const CollapsedBorderValue &borderValue) noexcept
     {
       if (!borderValue.Exists())
       {

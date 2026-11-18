@@ -199,7 +199,7 @@ namespace krys::boo::html
     std::erase_if(_scheduledTasks, [](const UniquePtr<Timer> &timer) { return !timer->IsActive(); });
   }
 
-  MonotonicTime::duration EventLoop::Now() const noexcept
+  MonotonicTime::duration EventLoop::Now() noexcept
   {
     return ThreadTimers::Current().CurrentTime();
   }

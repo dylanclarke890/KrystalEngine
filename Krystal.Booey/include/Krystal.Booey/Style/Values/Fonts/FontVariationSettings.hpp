@@ -95,7 +95,8 @@ namespace krys::boo::style
   template <>
   struct Blending<FontVariationSettings>
   {
-    KRYS_NODISCARD bool CanBlend(const FontVariationSettings &, const FontVariationSettings &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const FontVariationSettings &,
+                                        const FontVariationSettings &) noexcept;
 
     KRYS_NODISCARD FontVariationSettings Blend(const FontVariationSettings &, const FontVariationSettings &,
                                                const BlendingContext &) noexcept;

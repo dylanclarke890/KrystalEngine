@@ -4,7 +4,8 @@
 namespace krys::boo::dom
 {
   UIEvent::UIEvent(DOMStringAtom type, const UIEventInit &eventInitDict) noexcept
-      : Event(type, eventInitDict), _view(ShareRefPtr(eventInitDict.View)), _detail(eventInitDict.Detail)
+      : Event(krys::move(type), eventInitDict), _view(ShareRefPtr(eventInitDict.View)),
+        _detail(eventInitDict.Detail)
   {
   }
 
@@ -23,7 +24,7 @@ namespace krys::boo::dom
       return;
     }
 
-    InitEvent(type, bubbles, cancelable);
+    InitEvent(krys::move(type), bubbles, cancelable);
     _view = ShareRefPtr(view);
     _detail = detail;
   }

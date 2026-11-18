@@ -130,8 +130,8 @@ namespace krys::boo
 
     KRYS_NODISCARD Ref<Font> FontForPlatformData(const FontPlatformData &platformData) noexcept;
 
-    KRYS_NODISCARD RefPtr<Font> SimilarFont(const FontDescription &description,
-                                            const StringAtom &family) noexcept;
+    KRYS_NODISCARD static RefPtr<Font> SimilarFont(const FontDescription &description,
+                                                   const StringAtom &family) noexcept;
 
     /// @brief A registered font that has every character of @p characterCluster (UTF-8), the best match for
     /// @p description, or null if none has.
@@ -142,12 +142,12 @@ namespace krys::boo
                                                                   utf8_stringview characterCluster) noexcept;
 
     /// @brief The names of every registered family.
-    KRYS_NODISCARD List<utf8_string> SystemFontFamilies() const noexcept;
+    KRYS_NODISCARD static List<utf8_string> SystemFontFamilies() noexcept;
 
     /// @brief The capabilities of each registered face of @p familyName; empty if there's no such family.
-    KRYS_NODISCARD List<FontSelectionCapabilities>
+    KRYS_NODISCARD static List<FontSelectionCapabilities>
       GetFontSelectionCapabilitiesInFamily(const StringAtom &familyName,
-                                           AllowUserInstalledFonts allowUserInstalledFonts) const noexcept;
+                                           AllowUserInstalledFonts allowUserInstalledFonts) noexcept;
 
     void AddClient(FontSelector &client) noexcept;
 
@@ -201,7 +201,7 @@ namespace krys::boo
                                                             const StringAtom &family,
                                                             EnumSet<FontLookupOptions> options) noexcept;
 
-    KRYS_NODISCARD UniquePtr<FontPlatformData>
+    KRYS_NODISCARD static UniquePtr<FontPlatformData>
       CreateFontPlatformData(const FontDescription &description, const StringAtom &family,
                              EnumSet<FontLookupOptions> options) noexcept;
 

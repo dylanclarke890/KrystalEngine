@@ -181,8 +181,8 @@ namespace krys::boo::style
   template <>
   struct Blending<DynamicRangeLimit>
   {
-    KRYS_NODISCARD DynamicRangeLimit Blend(const DynamicRangeLimit &from, const DynamicRangeLimit &to,
-                                           const BlendingContext &context) noexcept;
+    KRYS_NODISCARD static DynamicRangeLimit Blend(const DynamicRangeLimit &from, const DynamicRangeLimit &to,
+                                                  const BlendingContext &context) noexcept;
   };
 }
 

@@ -36,7 +36,7 @@ namespace krys::boo::dom
 {
   namespace
   {
-    KRYS_NODISCARD bool IsMoveEventType(DOMStringAtom eventType) noexcept
+    KRYS_NODISCARD bool IsMoveEventType(const DOMStringAtom &eventType) noexcept
     {
       return eventType == event_names::MouseMove || eventType == event_names::PointerMove
              || eventType == event_names::PointerRawUpdate || eventType == event_names::TouchMove;
@@ -61,9 +61,9 @@ namespace krys::boo::dom
                                        LocalFrameView *view, const DoublePoint &screenLocation,
                                        const DoublePoint &windowLocation, double movementX, double movementY,
                                        EnumSet<Modifier> modifiers, Simulated isSimulated) noexcept
-      : UIEventWithKeyState(type, eventInitDict, modifiers), _view(ShareRefPtr(view)), _movementX(movementX),
-        _movementY(movementY), _windowLocation(windowLocation), _screenLocation(screenLocation),
-        _isSimulated(isSimulated == Simulated::Yes)
+      : UIEventWithKeyState(krys::move(type), eventInitDict, modifiers), _view(ShareRefPtr(view)),
+        _movementX(movementX), _movementY(movementY), _windowLocation(windowLocation),
+        _screenLocation(screenLocation), _isSimulated(isSimulated == Simulated::Yes)
   {
     if (view)
     {
@@ -73,7 +73,7 @@ namespace krys::boo::dom
   }
 
   MouseRelatedEvent::MouseRelatedEvent(DOMStringAtom type, const MouseEventInit &initializer) noexcept
-      : UIEventWithKeyState(type, initializer), _view(ShareRefPtr(FrameViewOf(initializer.View))),
+      : UIEventWithKeyState(krys::move(type), initializer), _view(ShareRefPtr(FrameViewOf(initializer.View))),
         _movementX(initializer.MovementX), _movementY(initializer.MovementY),
         _screenLocation(initializer.ScreenX, initializer.ScreenY)
   {

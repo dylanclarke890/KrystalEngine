@@ -25,14 +25,10 @@
 
 namespace krys::boo
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   StyleSurroundData::StyleSurroundData() noexcept
-      : HasExplicitlySetBorderBottomLeftRadius(false), HasExplicitlySetBorderBottomRightRadius(false),
-        HasExplicitlySetBorderTopLeftRadius(false), HasExplicitlySetBorderTopRightRadius(false),
-        HasExplicitlySetPaddingBottom(false), HasExplicitlySetPaddingLeft(false),
-        HasExplicitlySetPaddingRight(false), HasExplicitlySetPaddingTop(false), Inset(css::keywords::Auto {}),
-        Margin(0_css_px), Padding(0_css_px)
+      : Inset(css::keywords::Auto {}), Margin(0_css_px), Padding(0_css_px)
   {
   }
 

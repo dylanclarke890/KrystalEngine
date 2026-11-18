@@ -41,7 +41,7 @@ namespace krys::boo::style::tests
       /// @brief The mode declarations are parsed in.
       css::ParserMode Mode {css::ParserMode::HTMLStandard};
 
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
+      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) const noexcept
       {
         auto element = Document->GetElementById(id);
         krys_assert(element);

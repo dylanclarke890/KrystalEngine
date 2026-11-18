@@ -83,7 +83,7 @@ namespace krys::boo::html::tests
     auto &textarea = fixture.Get<HTMLTextAreaElement>(u8"t");
     form.Submit();
     REQUIRE(fixture.Submissions().size() == 1);
-    CHECK(fixture.Submissions()[0].Entries.find('\n') != std::string::npos);
+    CHECK(fixture.Submissions()[0].Entries.contains('\n'));
 
     // The legacy aliases of hard are not keywords.
     textarea.Wrap(u8"physical");

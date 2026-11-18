@@ -39,7 +39,7 @@ namespace krys::boo::dom
   /// @brief Whether a change to the attribute called @p localName can change the items of a collection with
   /// @p invalidation.
   KRYS_NODISCARD bool LiveCollectionDependsOnAttribute(LiveCollectionInvalidation invalidation,
-                                                       DOMStringAtom localName) noexcept;
+                                                       const DOMStringAtom &localName) noexcept;
 
   /// @brief The part of a live collection that keeps its cache valid: while it has a cache it's registered
   /// with its root, which clears it on a change to the root's descendants, and counted by the document, which

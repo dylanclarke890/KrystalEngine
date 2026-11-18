@@ -46,20 +46,21 @@ namespace krys::boo::dom
     static void RemoveTransientRegisteredObservers(MutationObserver &observer) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#queue-a-mutation-record
-    static void QueueMutationRecord(MutationRecordType type, Ref<Node> &&target, DOMStringAtom name,
-                                    DOMStringAtom namespaceURI, DOMStringAtom oldValue,
-                                    SmallNodeList &&addedNodes, SmallNodeList &&removedNodes,
-                                    RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept;
+    static void QueueMutationRecord(MutationRecordType type, const Ref<Node> &target,
+                                    const DOMStringAtom &name, const DOMStringAtom &namespaceURI,
+                                    const DOMStringAtom &oldValue, const SmallNodeList &addedNodes,
+                                    const SmallNodeList &removedNodes, const RefPtr<Node> &previousSibling,
+                                    const RefPtr<Node> &nextSibling) noexcept;
 
     /// @brief Whether a mutation record for a change to `target`'s attribute `name` (in the null namespace)
     /// would carry the old value, i.e. an interested observer set `attributeOldValue`. Lets callers skip
     /// computing an old value nobody reads.
-    KRYS_NODISCARD static bool IsAttributeOldValueRequested(Node &target, DOMStringAtom name) noexcept;
+    KRYS_NODISCARD static bool IsAttributeOldValueRequested(Node &target, const DOMStringAtom &name) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#queue-a-tree-mutation-record
-    static void QueueTreeMutationRecord(Ref<Node> &&target, SmallNodeList &&addedNodes,
-                                        SmallNodeList &&removedNodes, RefPtr<Node> &&previousSibling,
-                                        RefPtr<Node> &&nextSibling) noexcept;
+    static void QueueTreeMutationRecord(Ref<Node> target, SmallNodeList addedNodes,
+                                        SmallNodeList removedNodes, RefPtr<Node> previousSibling,
+                                        RefPtr<Node> nextSibling) noexcept;
 
   private:
     /// @brief @p node's registered observer list: its registered observers, then its transient registered

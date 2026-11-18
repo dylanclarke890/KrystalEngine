@@ -5,7 +5,7 @@
 namespace krys::boo::infra
 {
   /// @see https://infra.spec.whatwg.org/#namespaces
-  namespace Namespaces
+  namespace namespaces
   {
     /// @see https://infra.spec.whatwg.org/#xml-namespace
     constexpr const char8 *XML = u8"http://www.w3.org/XML/1998/namespace";
@@ -21,7 +21,7 @@ namespace krys::boo::infra
     constexpr const char8 *XLink = u8"http://www.w3.org/1999/xlink";
   }
 
-  namespace NamespacePrefixes
+  namespace namespace_prefixes
   {
     constexpr const char8 *XML = u8"xml";
     constexpr const char8 *XMLNS = u8"xmlns";

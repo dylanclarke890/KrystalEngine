@@ -109,12 +109,12 @@ namespace krys::boo::dom
   protected:
     UIEventWithKeyState(DOMStringAtom type, const UIEventInit &eventInitDict,
                         EnumSet<Modifier> modifiers) noexcept
-        : UIEvent(type, eventInitDict), _modifiers(modifiers)
+        : UIEvent(krys::move(type), eventInitDict), _modifiers(modifiers)
     {
     }
 
     UIEventWithKeyState(DOMStringAtom type, const EventModifierInit &initializer) noexcept
-        : UIEvent(type, initializer), _modifiers(ModifiersFromInitializer(initializer))
+        : UIEvent(krys::move(type), initializer), _modifiers(ModifiersFromInitializer(initializer))
     {
     }
 

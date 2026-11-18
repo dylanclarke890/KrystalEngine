@@ -112,11 +112,11 @@ namespace krys::boo::css
   private:
     template <typename TConsumeSelector>
     KRYS_NODISCARD MutableSelectorList ConsumeSelectorList(TokenRange &tokens,
-                                                           TConsumeSelector &&consumeSelector) noexcept;
+                                                           TConsumeSelector consumeSelector) noexcept;
 
     template <typename TConsumeSelector>
     KRYS_NODISCARD MutableSelectorList
-      ConsumeForgivingSelectorList(TokenRange &tokens, TConsumeSelector &&consumeSelector) noexcept;
+      ConsumeForgivingSelectorList(TokenRange &tokens, TConsumeSelector consumeSelector) noexcept;
 
     KRYS_NODISCARD MutableSelectorList ConsumeCompoundSelectorList(TokenRange &tokens) noexcept;
 
@@ -135,21 +135,21 @@ namespace krys::boo::css
     /// @note This doesn't include element names, since they're handled specially.
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeSimpleSelector(TokenRange &tokens) noexcept;
 
-    KRYS_NODISCARD bool ConsumeName(TokenRange &tokens, CSSOMStringAtom &name,
-                                    CSSOMStringAtom &namespacePrefix) noexcept;
+    KRYS_NODISCARD static bool ConsumeName(TokenRange &tokens, CSSOMStringAtom &name,
+                                           CSSOMStringAtom &namespacePrefix) noexcept;
 
     // These will return nullptr when the selector is invalid.
-    KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeId(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeId(TokenRange &tokens) const noexcept;
 
-    KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeClass(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeClass(TokenRange &tokens) const noexcept;
 
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumePseudo(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeAttribute(TokenRange &tokens) noexcept;
 
-    KRYS_NODISCARD UniquePtr<MutableSelector> ConsumeNesting(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD static UniquePtr<MutableSelector> ConsumeNesting(TokenRange &tokens) noexcept;
 
-    KRYS_NODISCARD SelectorRelation ConsumeCombinator(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD static SelectorRelation ConsumeCombinator(TokenRange &tokens) noexcept;
 
     KRYS_NODISCARD SelectorMatch ConsumeAttributeMatch(TokenRange &tokens) noexcept;
 

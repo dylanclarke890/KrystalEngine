@@ -59,7 +59,7 @@ namespace krys::text
   /// @brief Encodes the input code points into code units using the specified encoding and policy.
   template <Encoding TEncoding, EncodePolicy Policy = DefaultEncodePolicy,
             typename TOutput = std::basic_string<typename TEncoding::code_unit>, CodePointInputRange TInput>
-  KRYS_NODISCARD constexpr EncodeResult<TOutput> Encode(TInput &&input) noexcept
+  KRYS_NODISCARD constexpr EncodeResult<TOutput> Encode(const TInput &input) noexcept
   {
     EncodeResult<TOutput> result {};
 

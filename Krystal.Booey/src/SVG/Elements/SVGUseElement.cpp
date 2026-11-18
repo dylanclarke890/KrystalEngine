@@ -66,7 +66,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD Ref<SVGElement> CreateSVGElement(dom::Document &document, utf8_stringview localName,
                                                     html::TagName tagName) noexcept
     {
-      auto element = dom::ElementFactory::Create(document, dom::QualifiedName(infra::Namespaces::SVG, null,
+      auto element = dom::ElementFactory::Create(document, dom::QualifiedName(infra::namespaces::SVG, null,
                                                                               dom::DOMStringAtom(localName),
                                                                               tagName, html::Namespace::SVG));
       return Downcast<SVGElement>(krys::move(element));
@@ -75,7 +75,7 @@ namespace krys::boo::svg
     // Calls @p function with each descendant of @p root that is a @p T, in tree order; the function returns
     // the node to carry on after (the descendant itself, or the node that replaced it).
     template <typename T, typename TFunction>
-    void ForEachDescendantOfType(dom::ContainerNode &root, TFunction &&function) noexcept
+    void ForEachDescendantOfType(dom::ContainerNode &root, TFunction function) noexcept
     {
       auto *node = root.FirstChild();
       while (node)
@@ -489,7 +489,7 @@ namespace krys::boo::svg
     // The elements of @p subtree that @p predicate matches, not looking inside them.
     template <typename TPredicate>
     KRYS_NODISCARD List<Ref<dom::Element>> MatchingElementsInSubtree(SVGElement &subtree,
-                                                                     TPredicate &&predicate) noexcept
+                                                                     TPredicate predicate) noexcept
     {
       List<Ref<dom::Element>> elements;
       auto *node = subtree.FirstChild();
@@ -535,7 +535,7 @@ namespace krys::boo::svg
     // Calls @p function with each SVG element of @p clone and the element of @p original in the same place,
     // which must have the same shape.
     template <typename TFunction>
-    void ForEachDescendantPair(SVGElement &clone, SVGElement &original, TFunction &&function) noexcept
+    void ForEachDescendantPair(SVGElement &clone, SVGElement &original, TFunction function) noexcept
     {
       dom::Node *cloneNode = clone.FirstChild();
       dom::Node *originalNode = original.FirstChild();

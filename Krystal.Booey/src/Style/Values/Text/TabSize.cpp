@@ -33,7 +33,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TabSize CSSValueConversion<TabSize>::operator()(BuilderState &state, const css::Value &value) noexcept
   {
@@ -72,12 +72,10 @@ namespace krys::boo::style
       krys_debug_assert(b.IsSpaces());
       return style::Blend(std::get<TabSize::Spaces>(a._value), std::get<TabSize::Spaces>(b._value), context);
     }
-    else
-    {
-      krys_debug_assert(a.IsLength());
-      krys_debug_assert(b.IsLength());
-      return style::Blend(std::get<TabSize::Length>(a._value), std::get<TabSize::Length>(b._value), context);
-    }
+
+    krys_debug_assert(a.IsLength());
+    krys_debug_assert(b.IsLength());
+    return style::Blend(std::get<TabSize::Length>(a._value), std::get<TabSize::Length>(b._value), context);
   }
 
   // MARK: - Platform

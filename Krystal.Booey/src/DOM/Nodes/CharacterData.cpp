@@ -77,14 +77,15 @@ namespace krys::boo::dom
     return mixins::ChildNode::Remove(*this);
   }
 
-  ExceptionOr<void> CharacterData::BeforeHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> CharacterData::BeforeHTML(DOMStringView html,
+                                              const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(*this, html, &options.Sanitizer,
                                                      html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> CharacterData::AfterHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  ExceptionOr<void> CharacterData::AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(*this, html, &options.Sanitizer,
@@ -92,7 +93,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> CharacterData::ReplaceWithHTML(DOMStringView html,
-                                                   html::SetHTMLOptions &&options) noexcept
+                                                   const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(*this, html, &options.Sanitizer,
@@ -100,7 +101,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> CharacterData::BeforeHTMLUnsafe(DOMStringView html,
-                                                    html::SetHTMLUnsafeOptions &&options) noexcept
+                                                    const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(
@@ -108,7 +109,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> CharacterData::AfterHTMLUnsafe(DOMStringView html,
-                                                   html::SetHTMLUnsafeOptions &&options) noexcept
+                                                   const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(
@@ -116,7 +117,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> CharacterData::ReplaceWithHTMLUnsafe(DOMStringView html,
-                                                         html::SetHTMLUnsafeOptions &&options) noexcept
+                                                         const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(

@@ -572,7 +572,7 @@ namespace krys::boo
     KRYS_NODISCARD float WidthForSimpleTextSlow(utf8_stringview text, TextDirection textDirection,
                                                 float *cacheEntry) const noexcept;
 
-    KRYS_NODISCARD bool CanHandleRunAsSimpleText(const TextRun &run, uint32 from, uint32 to) const noexcept;
+    KRYS_NODISCARD static bool CanHandleRunAsSimpleText(const TextRun &run, uint32 from, uint32 to) noexcept;
 
     KRYS_NODISCARD Maybe<GlyphData> GetEmphasisMarkGlyphData(const StringAtom &mark) const noexcept;
 

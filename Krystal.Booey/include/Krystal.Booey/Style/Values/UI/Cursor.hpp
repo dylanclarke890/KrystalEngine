@@ -51,7 +51,7 @@ namespace krys::boo::style
   {
     using ImagesType = Maybe<CursorImageList>;
 
-    ImagesType Images {};
+    ImagesType Images;
     CursorType Predefined {CursorType::Auto};
 
     Cursor(ImagesType &&images, CursorType predefined) noexcept
@@ -69,7 +69,7 @@ namespace krys::boo::style
     }
 
     // Special constructor for use constructing initial 'auto' value.
-    Cursor(css::keywords::Auto) noexcept : Predefined {CursorType::Auto}
+    Cursor(css::keywords::Auto) noexcept
     {
     }
 

@@ -71,7 +71,7 @@ namespace krys::boo
   }
 
   RefPtr<ImageBuffer> SnapshotFrameRect(LocalFrame &frame, const IntRect &imageRect,
-                                        SnapshotOptions &&options) noexcept
+                                        SnapshotOptions options) noexcept
   {
     List<FloatRect> clipRects;
     return SnapshotFrameRectWithClip(frame, imageRect, clipRects, krys::move(options));
@@ -80,7 +80,7 @@ namespace krys::boo
   // FIXME: The page's scale when it delegates scaling to the host, once pages can.
   RefPtr<ImageBuffer> SnapshotFrameRectWithClip(LocalFrame &frame, const IntRect &imageRect,
                                                 const List<FloatRect> &clipRects,
-                                                SnapshotOptions &&options) noexcept
+                                                SnapshotOptions options) noexcept
   {
     if (!frame.GetPage())
     {
@@ -175,7 +175,7 @@ namespace krys::boo
     return buffer;
   }
 
-  RefPtr<ImageBuffer> SnapshotSelection(LocalFrame &frame, SnapshotOptions &&options) noexcept
+  RefPtr<ImageBuffer> SnapshotSelection(LocalFrame &frame, SnapshotOptions options) noexcept
   {
     auto &selection = frame.Document()->Selection();
 
@@ -196,7 +196,7 @@ namespace krys::boo
     return SnapshotFrameRect(frame, EnclosingIntRect(selectionBounds), krys::move(options));
   }
 
-  RefPtr<ImageBuffer> SnapshotNode(LocalFrame &frame, dom::Node &node, SnapshotOptions &&options) noexcept
+  RefPtr<ImageBuffer> SnapshotNode(LocalFrame &frame, dom::Node &node, SnapshotOptions options) noexcept
   {
     if (!node.Renderer())
     {

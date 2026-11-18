@@ -753,6 +753,7 @@ namespace krys
     }
 
     template <typename U>
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): its members are exchanged out.
     void MoveConstructFrom(ThreadSafeWeakOrStrongPtr<U> &&other) noexcept
     {
       krys_assert(IsStrong());

@@ -154,7 +154,7 @@ namespace krys::ui
                                                    float height) const noexcept;
 
     /// @brief The deepest unignored object at @p viewPoint (in @p view's coordinates) in @p cache's tree.
-    KRYS_NODISCARD boo::AXObject *HitTestIn(boo::AXObjectCache &cache, View &view,
-                                            const boo::IntPoint &viewPoint) noexcept;
+    KRYS_NODISCARD static boo::AXObject *HitTestIn(boo::AXObjectCache &cache, View &view,
+                                                   const boo::IntPoint &viewPoint) noexcept;
   };
 }

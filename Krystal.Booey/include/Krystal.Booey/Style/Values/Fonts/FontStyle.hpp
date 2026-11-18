@@ -38,8 +38,7 @@ namespace krys::boo::style
   {
     using Angle = style::Angle<css::Range {-90, 90}>;
 
-    FontStyle(css::keywords::Normal) noexcept
-        : _platformSlope {std::nullopt}, _platformAxis {FontStyleAxis::slnt}
+    FontStyle(css::keywords::Normal) noexcept : _platformSlope {std::nullopt}
     {
     }
 
@@ -48,14 +47,13 @@ namespace krys::boo::style
     {
     }
 
-    FontStyle(css::keywords::Oblique) noexcept
-        : _platformSlope {ItalicValue()}, _platformAxis {FontStyleAxis::slnt}
+    FontStyle(css::keywords::Oblique) noexcept : _platformSlope {ItalicValue()}
     {
     }
 
     FontStyle(Angle angle) noexcept
-        : _platformSlope {FontSelectionValue::ClampFloat(static_cast<float>(angle.Value))},
-          _platformAxis {FontStyleAxis::slnt}
+        : _platformSlope {FontSelectionValue::ClampFloat(static_cast<float>(angle.Value))}
+
     {
     }
 
@@ -150,9 +148,10 @@ namespace krys::boo::style
   template <>
   struct Blending<FontStyle>
   {
-    KRYS_NODISCARD bool CanBlend(const FontStyle &, const FontStyle &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const FontStyle &, const FontStyle &) noexcept;
 
-    KRYS_NODISCARD FontStyle Blend(const FontStyle &, const FontStyle &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static FontStyle Blend(const FontStyle &, const FontStyle &,
+                                          const BlendingContext &) noexcept;
   };
 }
 

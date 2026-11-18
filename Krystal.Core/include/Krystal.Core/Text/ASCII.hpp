@@ -98,7 +98,7 @@ namespace krys::text
   }
 
   template <typename T>
-  KRYS_NODISCARD std::basic_string<typename T::value_type> ToASCIILower(T input) noexcept
+  KRYS_NODISCARD std::basic_string<typename T::value_type> ToASCIILower(const T &input) noexcept
   {
     std::basic_string<typename T::value_type> result {};
     for (auto codePoint : input)
@@ -117,7 +117,7 @@ namespace krys::text
   }
 
   template <typename T>
-  KRYS_NODISCARD std::basic_string<typename T::value_type> ToASCIIUpper(T input) noexcept
+  KRYS_NODISCARD std::basic_string<typename T::value_type> ToASCIIUpper(const T &input) noexcept
   {
     std::basic_string<typename T::value_type> result {};
     for (auto codePoint : input)

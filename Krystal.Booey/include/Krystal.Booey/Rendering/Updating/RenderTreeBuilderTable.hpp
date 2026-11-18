@@ -69,7 +69,8 @@ namespace krys::boo
 
     void Attach(RenderTableRow &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
 
-    KRYS_NODISCARD bool ChildRequiresTable(const RenderElement &parent, const RenderObject &child) noexcept;
+    KRYS_NODISCARD static bool ChildRequiresTable(const RenderElement &parent,
+                                                  const RenderObject &child) noexcept;
 
     void CollapseAndDestroyAnonymousSiblingCells(const RenderTableCell &willBeDestroyed) noexcept;
 

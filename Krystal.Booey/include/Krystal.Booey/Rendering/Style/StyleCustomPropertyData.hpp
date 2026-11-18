@@ -88,6 +88,6 @@ namespace krys::boo::style
     CustomPropertyData(const CustomPropertyData &) noexcept;
 
     template <typename TCallback>
-    void ForEachInternal(TCallback &&) const noexcept;
+    void ForEachInternal(const TCallback &) const noexcept;
   };
 }

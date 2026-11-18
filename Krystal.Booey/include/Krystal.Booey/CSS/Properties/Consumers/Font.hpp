@@ -56,7 +56,7 @@ namespace krys::boo::css
   struct ParserContext;
   struct PropertyParserState;
 
-  namespace GenericFontFamilyNames
+  namespace generic_font_family_names
   {
     enum class FamilyNamesIndex : uint8;
   }
@@ -130,7 +130,7 @@ namespace krys::boo::css
     // https://drafts.csswg.org/css-fonts-4/#generic-family-name-syntax
     KRYS_NODISCARD CSSOMStringAtom GenericFontFamily(ValueId ident) noexcept;
 
-    KRYS_NODISCARD GenericFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept;
+    KRYS_NODISCARD generic_font_family_names::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept;
 
     // MARK: 'font-size-adjust'
     // https://drafts.csswg.org/css-fonts-4/#font-size-adjust-prop

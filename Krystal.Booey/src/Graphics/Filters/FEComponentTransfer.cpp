@@ -156,7 +156,7 @@ namespace krys::boo
 
       switch (function.Type)
       {
-        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_UNKNOWN:  break;
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_UNKNOWN:
         case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_IDENTITY: break;
         case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_TABLE:
         case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_DISCRETE:

@@ -12,7 +12,7 @@ namespace krys::boo::html::tests
                                                 utf8_stringview attribute = {},
                                                 utf8_stringview value = {}) noexcept
     {
-      auto element = document.CreateElement(localName).ReleaseValue();
+      auto element = document.CreateElement(krys::move(localName)).ReleaseValue();
       if (!attribute.empty())
       {
         REQUIRE_FALSE(
@@ -47,7 +47,7 @@ namespace krys::boo::html::tests
     auto outer = CreateWith(*document, u8"section", u8"headingoffset", u8"1");
     auto reset = CreateWith(*document, u8"div", u8"headingoffset", u8"2");
     REQUIRE_FALSE(reset->SetAttribute(u8"headingreset", u8"").HasException());
-    auto svg = document->CreateElementNS(infra::Namespaces::SVG, u8"g").ReleaseValue();
+    auto svg = document->CreateElementNS(infra::namespaces::SVG, u8"g").ReleaseValue();
     REQUIRE_FALSE(svg->SetAttribute(u8"headingoffset", u8"5").HasException());
     auto invalid = CreateWith(*document, u8"div", u8"headingoffset", u8"-1");
     auto heading = CreateWith(*document, u8"h1", u8"headingoffset", u8"1");

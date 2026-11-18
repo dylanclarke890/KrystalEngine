@@ -29,7 +29,7 @@
 namespace krys::boo
 {
   KeyframeInterpolation::KeyframeInterval
-    KeyframeInterpolation::InterpolationKeyframes(Property property, double iterationProgress,
+    KeyframeInterpolation::InterpolationKeyframes(const Property &property, double iterationProgress,
                                                   const Keyframe &defaultStartKeyframe,
                                                   const Keyframe &defaultEndKeyframe) const noexcept
   {
@@ -206,7 +206,7 @@ namespace krys::boo
     //         3. Replace the property value of target property on keyframe with the result of combining
     //            underlying value (Va) and value to combine (Vb) using the procedure for the composite
     //            operation to use corresponding to the target property’s animation type.
-    if (IsPropertyAdditiveOrCumulative(property))
+    if (IsPropertyAdditiveOrCumulative(krys::move(property)))
     {
       // Only do this for the 0 keyframe if it was provided explicitly, since otherwise we want to use the
       // "neutral value for composition" which really means we don't want to do anything but rather just use

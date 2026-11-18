@@ -37,10 +37,8 @@ namespace krys
 
       return static_cast<long long>(x) + ((x < T(0)) ? T(0) : T(1));
     }
-    else
-    {
-      return std::ceil(x);
-    }
+
+    return std::ceil(x);
   }
 
   template <FloatingPoint T>
@@ -52,10 +50,8 @@ namespace krys
       {
         return x;
       }
-      else
-      {
-        return static_cast<T>(static_cast<long long>(x) - ((x < T(0)) ? 1ll : 0ll));
-      }
+
+      return static_cast<T>(static_cast<long long>(x) - ((x < T(0)) ? 1ll : 0ll));
     }
     else
     {
@@ -70,10 +66,8 @@ namespace krys
     {
       return T(static_cast<long long>(x + (x > T(0) ? T(0.5) : T(-0.5))));
     }
-    else
-    {
-      return std::round(x);
-    }
+
+    return std::round(x);
   }
 
   template <FloatingPoint T>
@@ -83,10 +77,8 @@ namespace krys
     {
       return T(static_cast<long long>(x));
     }
-    else
-    {
-      return std::trunc(x);
-    }
+
+    return std::trunc(x);
   }
 
   VECTOR_ROUND_FUNC(Ceil);

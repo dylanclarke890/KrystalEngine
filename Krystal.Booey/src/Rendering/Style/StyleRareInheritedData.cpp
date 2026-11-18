@@ -59,13 +59,13 @@ namespace krys::boo
         HyphenateLimitLines(style::ComputedStyle::InitialHyphenateLimitLines()),
         UsedTouchAction(style::ComputedStyle::InitialTouchAction()),
         TextSecurity(static_cast<unsigned>(style::ComputedStyle::InitialTextSecurity())),
-        UserModify(static_cast<unsigned>(boo::UserModify::ReadOnly)),
+
         WordBreak(static_cast<unsigned>(style::ComputedStyle::InitialWordBreak())),
         OverflowWrap(static_cast<unsigned>(style::ComputedStyle::InitialOverflowWrap())),
-        LineBreak(static_cast<unsigned>(boo::LineBreak::Auto)),
+
         UserSelect(static_cast<unsigned>(style::ComputedStyle::InitialUserSelect())),
         SpeakAs(static_cast<unsigned>(style::ComputedStyle::InitialSpeakAs().ToRaw())),
-        Hyphens(static_cast<unsigned>(boo::Hyphens::Manual)),
+
         TextCombine(static_cast<unsigned>(style::ComputedStyle::InitialTextCombine())),
         TextEmphasisPosition(
           static_cast<unsigned>(style::ComputedStyle::InitialTextEmphasisPosition().ToRaw())),
@@ -85,12 +85,8 @@ namespace krys::boo
         HangingPunctuation(static_cast<unsigned>(style::ComputedStyle::InitialHangingPunctuation().ToRaw())),
         PaintOrder(static_cast<unsigned>(style::ComputedStyle::InitialPaintOrder().GetType())),
         CapStyle(static_cast<unsigned>(style::ComputedStyle::InitialCapStyle())),
-        JoinStyle(static_cast<unsigned>(style::ComputedStyle::InitialJoinStyle())),
-        HasExplicitlySetStrokeWidth(false), HasExplicitlySetStrokeColor(false), HasAutoCaretColor(true),
-        EffectiveInert(false), EffectivelyTransparent(false), IsInSubtreeWithBlendMode(false),
-        IsForceHidden(false), UsedContentVisibility(static_cast<unsigned>(ContentVisibility::Visible)),
-        AutoRevealsWhenFound(false), InsideDefaultButton(false), InsideSubmitButton(false),
-        EvaluationTimeZoomEnabled(false)
+        JoinStyle(static_cast<unsigned>(style::ComputedStyle::InitialJoinStyle()))
+
   {
   }
 

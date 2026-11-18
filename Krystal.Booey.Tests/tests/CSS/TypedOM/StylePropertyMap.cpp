@@ -74,8 +74,7 @@ namespace krys::boo::css::tests
     {
       REQUIRE_FALSE(map.Set(u8"height", Strings({u8"20px"})).HasException());
       CHECK(Get(map, u8"height") == "20px");
-      CHECK(ToNarrow(element.GetAttribute(u8"style").value_or(dom::DOMString())).find("height: 20px")
-            != std::string::npos);
+      CHECK(ToNarrow(element.GetAttribute(u8"style").value_or(dom::DOMString())).contains("height: 20px"));
 
       REQUIRE_FALSE(map.Set(u8"height", Values(CSSNumericFactory::Px(30))).HasException());
       CHECK(Get(map, u8"height") == "30px");
@@ -171,7 +170,7 @@ namespace krys::boo::css::tests
     CHECK(Get(map, u8"--y") == "1");
 
     REQUIRE_FALSE(map.Set(u8"color", Strings({u8"red"})).HasException());
-    CHECK(RuleText(rule).find("color: red") != std::string::npos);
+    CHECK(RuleText(rule).contains("color: red"));
     REQUIRE_FALSE(map.Delete(u8"margin-left").HasException());
     CHECK(Get(map, u8"margin-left") == "undefined");
 

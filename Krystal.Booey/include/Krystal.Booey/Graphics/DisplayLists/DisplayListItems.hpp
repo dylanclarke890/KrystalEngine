@@ -50,7 +50,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "save";
 
-    void Apply(GraphicsContext &) const noexcept;
+    static void Apply(GraphicsContext &) noexcept;
 
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {
@@ -62,7 +62,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "restore";
 
-    void Apply(GraphicsContext &) const noexcept;
+    static void Apply(GraphicsContext &) noexcept;
 
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {
@@ -523,7 +523,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "reset-clip";
 
-    void Apply(GraphicsContext &) const noexcept;
+    static void Apply(GraphicsContext &) noexcept;
 
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {
@@ -1013,7 +1013,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "end-transparency-layer";
 
-    void Apply(GraphicsContext &) const noexcept;
+    static void Apply(GraphicsContext &) noexcept;
 
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {
@@ -1704,7 +1704,7 @@ namespace krys::boo::display_list
   public:
     constexpr static std::string_view Name = "end-page";
 
-    void Apply(GraphicsContext &) const noexcept;
+    static void Apply(GraphicsContext &) noexcept;
 
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept
     {

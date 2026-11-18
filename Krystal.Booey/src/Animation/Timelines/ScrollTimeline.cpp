@@ -43,7 +43,7 @@
 namespace krys::boo
 {
   Ref<ScrollTimeline> ScrollTimeline::Create(dom::Document &document,
-                                             ScrollTimelineOptions &&options) noexcept
+                                             const ScrollTimelineOptions &options) noexcept
   {
     // https://drafts.csswg.org/scroll-animations-1/#dom-scrolltimeline-scrolltimeline
 

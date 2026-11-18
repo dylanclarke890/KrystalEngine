@@ -216,6 +216,14 @@ namespace krys
     {
     }
 
+    /// @brief The null atom, for functions that return a reference to an atom or the null one.
+    KRYS_NODISCARD static const StringAtom &Null() noexcept
+    {
+      // Shared by every thread: the null atom has no string, so it never touches a pool.
+      static const StringAtom nullAtom;
+      return nullAtom;
+    }
+
     /// @brief The calling thread's empty atom.
     KRYS_NODISCARD static const StringAtom &Empty() noexcept
     {

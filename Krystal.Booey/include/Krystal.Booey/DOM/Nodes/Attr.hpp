@@ -44,13 +44,13 @@ namespace krys::boo::dom
 #pragma region Attr - https://dom.spec.whatwg.org/#attr
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-namespaceuri
-    KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &NamespaceURI() const noexcept KRYS_LIFETIME_BOUND
     {
       return _name.NamespaceURI();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-prefix
-    KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &Prefix() const noexcept KRYS_LIFETIME_BOUND
     {
       return _name.NamespacePrefix();
     }
@@ -62,7 +62,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-localname
-    KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &LocalName() const noexcept KRYS_LIFETIME_BOUND
     {
       return _name.LocalName();
     }
@@ -91,7 +91,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-specified
-    KRYS_NODISCARD bool Specified() const noexcept
+    KRYS_NODISCARD static bool Specified() noexcept
     {
       return true;
     }

@@ -318,7 +318,7 @@ namespace krys::boo::layout
   FloatingContext::Constraints
     InlineFormattingUtils::FloatConstraintsForLine(InlineLayoutUnit lineLogicalTop,
                                                    InlineLayoutUnit contentLogicalHeight,
-                                                   const FloatingContext &floatingContext) const noexcept
+                                                   const FloatingContext &floatingContext) noexcept
   {
     auto logicalTopCandidate = LayoutUnit {lineLogicalTop};
     auto logicalBottomCandidate = LayoutUnit {lineLogicalTop + contentLogicalHeight};

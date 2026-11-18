@@ -202,7 +202,7 @@ namespace krys::boo::style
 
   private:
     template <typename T>
-    KRYS_NODISCARD static ColorKind CreateIndirectColor(T &&color) noexcept;
+    KRYS_NODISCARD static ColorKind CreateIndirectColor(T color) noexcept;
 
     KRYS_NODISCARD static ColorKind Copy(const ColorKind &other) noexcept;
   };
@@ -266,19 +266,19 @@ namespace krys::boo::style
   template <>
   struct Blending<Color>
   {
-    KRYS_NODISCARD bool Equals(const Color &a, const Color &b, const RenderStyle &aStyle,
-                               const RenderStyle &bStyle) noexcept;
+    KRYS_NODISCARD static bool Equals(const Color &a, const Color &b, const RenderStyle &aStyle,
+                                      const RenderStyle &bStyle) noexcept;
 
-    KRYS_NODISCARD bool CanBlend(const Color &a, const Color &b) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const Color &a, const Color &b) noexcept;
 
-    KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const Color &,
-                                                                                const Color &) noexcept
+    KRYS_NODISCARD static constexpr bool RequiresInterpolationForAccumulativeIteration(const Color &,
+                                                                                       const Color &) noexcept
     {
       return true;
     }
 
-    KRYS_NODISCARD Color Blend(const Color &a, const Color &b, const RenderStyle &aStyle,
-                               const RenderStyle &bStyle, const BlendingContext &context) noexcept;
+    KRYS_NODISCARD static Color Blend(const Color &a, const Color &b, const RenderStyle &aStyle,
+                                      const RenderStyle &bStyle, const BlendingContext &context) noexcept;
   };
 
   // MARK: - Color Implementation

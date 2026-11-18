@@ -94,7 +94,7 @@ namespace krys::boo::css
     }
   }
 
-  Ref<ImportRule> ImportRule::Copy() const noexcept
+  Ref<ImportRule> ImportRule::Copy() noexcept
   {
     krys_unreachable();
   }

@@ -336,8 +336,9 @@ namespace krys::boo::style
       return 1;
     }
 
-    void NormalizeStopsAndEndpointsOutsideRange(List<ResolvedGradientStop> &stops,
-                                                ColourInterpolationMethod colorInterpolationMethod) noexcept
+    static void
+      NormalizeStopsAndEndpointsOutsideRange(List<ResolvedGradientStop> &stops,
+                                             ColourInterpolationMethod colorInterpolationMethod) noexcept
     {
       size_t numberOfStops = stops.size();
       size_t lastStopIndex = numberOfStops - 1;

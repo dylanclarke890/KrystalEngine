@@ -110,9 +110,10 @@ namespace krys::boo::html
 
 #pragma endregion
 
-  void HTMLSlotElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLSlotElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                           Maybe<dom::DOMStringView> oldValue,
                                            Maybe<dom::DOMStringView> value,
-                                           dom::DOMStringAtom namespaceURI) noexcept
+                                           const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 

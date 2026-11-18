@@ -814,10 +814,10 @@ namespace krys::boo::html
     ScheduleSelectionChangeEvent();
   }
 
-  void HTMLTextFormControlElement::OnAttributeChanged(dom::DOMStringAtom localName,
+  void HTMLTextFormControlElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
                                                       Maybe<dom::DOMStringView> oldValue,
                                                       Maybe<dom::DOMStringView> value,
-                                                      dom::DOMStringAtom namespaceURI) noexcept
+                                                      const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI == null && localName == u8"placeholder")
@@ -1055,7 +1055,7 @@ namespace krys::boo::html
   }
 
   void HTMLTextFormControlElement::AdjustInnerTextStyle(const RenderStyle &parentStyle,
-                                                        RenderStyle &textBlockStyle) const noexcept
+                                                        RenderStyle &textBlockStyle) noexcept
   {
     // The inner block, if present, always has its direction set to LTR,
     // so we need to inherit the direction and unicode-bidi style from the element.

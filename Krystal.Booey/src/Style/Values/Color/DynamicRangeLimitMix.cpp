@@ -31,7 +31,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   void AddWeightedLimitTo(DynamicRangeLimitMixFunction &addingTo, const DynamicRangeLimit &limit,
                           const DynamicRangeLimitMixPercentage &mixPercentage) noexcept

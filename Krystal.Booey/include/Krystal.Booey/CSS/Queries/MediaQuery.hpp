@@ -60,7 +60,7 @@ namespace krys::boo::css::mq
   {
     Maybe<mq::Prefix> Prefix;
     CSSOMStringAtom MediaType {null};
-    Maybe<mq::Condition> Condition {};
+    Maybe<mq::Condition> Condition;
   };
 
   using MediaQueryList = List<MediaQuery>;
@@ -72,7 +72,7 @@ namespace krys::boo::css::mq
   };
 
   template <typename TraverseFunction>
-  void TraverseFeatures(const MediaQuery &query, TraverseFunction &&function) noexcept
+  void TraverseFeatures(const MediaQuery &query, TraverseFunction function) noexcept
   {
     if (query.Condition)
     {
@@ -81,7 +81,7 @@ namespace krys::boo::css::mq
   }
 
   template <typename TraverseFunction>
-  void TraverseFeatures(const MediaQueryList &list, TraverseFunction &&function) noexcept
+  void TraverseFeatures(const MediaQueryList &list, TraverseFunction function) noexcept
   {
     for (auto &query : list)
     {

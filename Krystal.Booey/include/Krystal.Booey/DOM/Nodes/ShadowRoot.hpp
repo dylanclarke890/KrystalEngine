@@ -231,38 +231,39 @@ namespace krys::boo::dom
     /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context,
     /// sanitized by @p options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtml
-    ExceptionOr<void> SetHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtml
-    ExceptionOr<void> AppendHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtml
-    ExceptionOr<void> PrependHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context;
     /// sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtmlunsafe
-    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
+                                    const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtmlunsafe
     ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
-                                       html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
-                                        html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                        const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief The shadow root's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-gethtml
-    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions &&options = {}) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions options = {}) const noexcept;
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.

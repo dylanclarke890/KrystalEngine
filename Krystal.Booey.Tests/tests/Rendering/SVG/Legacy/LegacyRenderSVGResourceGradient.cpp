@@ -139,7 +139,7 @@ layer at (0,0) size 800x104
     CHECK(Contains(text, u8"RenderSVGGradientStop {stop} [offset=0.00] [color=#0000FF]"));
 
     // The stroke waits for its gradient, and takes it once there's one with the id.
-    auto gradient = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"radialGradient");
+    auto gradient = fixture.Document->CreateElementNS(infra::namespaces::SVG, u8"radialGradient");
     REQUIRE_FALSE(gradient.HasException());
     (void)gradient.Value()->SetAttribute(u8"id", u8"later");
     (void)ElementById(*fixture.Document, u8"g").ParentNode()->AppendChild(*gradient.Value());

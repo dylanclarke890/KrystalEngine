@@ -46,7 +46,7 @@ namespace krys::boo::style
     using EnumSet = HangingPunctuationValueEnumSet;
     using value_type = HangingPunctuationValueEnumSet::value_type;
 
-    constexpr HangingPunctuation(css::keywords::None) noexcept : _value {}
+    constexpr HangingPunctuation(css::keywords::None) noexcept
     {
     }
 

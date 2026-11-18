@@ -266,7 +266,8 @@ namespace krys::ui::input
     class InputMethodPlatformKeyboardEvent : public boo::PlatformKeyboardEvent
     {
     public:
-      InputMethodPlatformKeyboardEvent(utf8_string text, Maybe<List<boo::CompositionUnderline>> underlines,
+      InputMethodPlatformKeyboardEvent(const utf8_string &text,
+                                       Maybe<List<boo::CompositionUnderline>> underlines,
                                        uint32 selectionStart, uint32 selectionLength) noexcept
           : PlatformKeyboardEvent(Type::KeyDown, text, text, u8"Unidentified", u8"Unidentified", u8"U+0000",
                                   boo::vk::Process, false, false, false, {},
@@ -291,7 +292,7 @@ namespace krys::ui::input
                                             selectionLength);
   }
 
-  boo::PlatformKeyboardEvent TextInputEvent(utf8_string text) noexcept
+  boo::PlatformKeyboardEvent TextInputEvent(const utf8_string &text) noexcept
   {
     auto keyIdentifier = KeyIdentifierForText(text);
     return boo::PlatformKeyboardEvent(boo::PlatformEvent::Type::Char, text, text, text, {},
@@ -319,7 +320,7 @@ namespace krys::ui::input
     return underlines;
   }
 
-  pal::CursorShape ToCursorShape(boo::Cursor cursor) noexcept
+  pal::CursorShape ToCursorShape(const boo::Cursor &cursor) noexcept
   {
     using Type = boo::Cursor::Type;
     switch (cursor.GetType())

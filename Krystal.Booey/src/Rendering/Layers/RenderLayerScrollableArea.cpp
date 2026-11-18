@@ -1379,7 +1379,7 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderLayerScrollableArea::ShowsOverflowControls() const noexcept
+  bool RenderLayerScrollableArea::ShowsOverflowControls() noexcept
   {
     return true;
   }

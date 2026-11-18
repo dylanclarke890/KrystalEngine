@@ -110,7 +110,7 @@ namespace krys::boo::infra
     template <typename TFunc>
     KRYS_NODISCARD static dom::DOMStringView CollectCodePointSequence(dom::DOMStringView input,
                                                                       position_variable &position,
-                                                                      TFunc &&condition) noexcept
+                                                                      TFunc condition) noexcept
     {
       // 1. Let result be the empty string.
       position_variable start = position;
@@ -130,7 +130,7 @@ namespace krys::boo::infra
     /// @note As for CollectCodePointSequence, @p condition should test only for ASCII code points.
     template <typename TFunc>
     static void AdvancePositionWhile(dom::DOMStringView input, position_variable &position,
-                                     TFunc &&condition) noexcept
+                                     TFunc condition) noexcept
     {
       while (position != input.end() && condition(*position))
       {
@@ -260,7 +260,7 @@ namespace krys::boo::infra
 
     /// @see https://infra.spec.whatwg.org/#string-concatenate
     KRYS_NODISCARD static dom::DOMString Concatenate(Span<dom::DOMString> tokens,
-                                                     Maybe<dom::DOMString> separator) noexcept
+                                                     const Maybe<dom::DOMString> &separator) noexcept
     {
       // 1. If list is empty, then return the empty string.
       if (tokens.empty())

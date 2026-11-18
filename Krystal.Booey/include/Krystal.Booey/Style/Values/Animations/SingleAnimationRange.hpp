@@ -153,8 +153,8 @@ namespace krys::boo::style
     {
     }
 
-    SingleAnimationRangeEdge(Name name, Maybe<Offset> &&offset) noexcept
-        : _name {name}, _offset {offset ? *offset : Offset::DefaultValue(type)}
+    SingleAnimationRangeEdge(Name name, Maybe<Offset> offset) noexcept
+        : _name {name}, _offset {offset ? krys::move(*offset) : Offset::DefaultValue(type)}
     {
     }
 

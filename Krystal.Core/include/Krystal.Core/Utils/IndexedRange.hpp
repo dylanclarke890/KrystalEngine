@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
@@ -17,6 +18,7 @@ namespace krys
     Iterator _end;
 
     template <typename Collection>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): only its end is taken.
     BoundsCheckedIterator(Collection &&collection, Iterator &&iterator)
         : _iterator(krys::move(iterator)), _end(std::end(collection))
     {
@@ -108,12 +110,15 @@ namespace krys
     Iterator _end;
 
   public:
+    // Constrained so it doesn't hide the copy and move constructors.
     template <typename Collection>
-    IndexedRange(Collection &&collection) noexcept
-        : _begin(boundsCheckedBegin(std::forward<Collection>(collection))),
-          _end(boundsCheckedEnd(std::forward<Collection>(collection)))
+    requires(!SameType<remove_cvref_t<Collection>, IndexedRange>)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): used for both ends, so never moved.
+    explicit IndexedRange(Collection &&collection) noexcept
+        : _begin(boundsCheckedBegin(collection)), _end(boundsCheckedEnd(collection))
     {
-      // Prevent use after destruction of a returned temporary.
+      // Prevent use after destruction of a returned temporary (a borrowed range's iterators outlive it, so
+      // the collection is passed on as an lvalue, for both ends).
       static_assert(std::ranges::borrowed_range<Collection>);
     }
 

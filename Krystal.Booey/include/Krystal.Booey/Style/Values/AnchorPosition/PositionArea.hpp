@@ -79,7 +79,7 @@ namespace krys::boo
 
     struct PositionArea
     {
-      PositionArea(css::keywords::None) noexcept : _value {}
+      PositionArea(css::keywords::None) noexcept
       {
       }
 

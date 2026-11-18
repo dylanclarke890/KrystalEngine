@@ -74,7 +74,7 @@ namespace krys::boo::css::calc::tests
     CHECK_FALSE(Type::MadeConsistent(hinted, angleHinted));
 
     CHECK(TransformType<OutputTransform::None>(Type::CreateFlex()) == Type::CreateFlex());
-    CHECK(TransformType<OutputTransform::AngleMadeConsistent>(hinted)->Angle == 1);
+    CHECK(TransformType<OutputTransform::AngleMadeConsistent>(hinted).value().Angle == 1);
     CHECK_FALSE(TransformType<OutputTransform::NumberMadeConsistent>(Maybe<Type> {}));
 
     CHECK(MergeTypes<MergePolicy::Same>(Type::CreateTime(), Type::CreateTime()) == Type::CreateTime());

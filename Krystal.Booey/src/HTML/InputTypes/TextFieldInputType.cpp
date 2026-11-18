@@ -467,7 +467,7 @@ namespace krys::boo::html
     _container = nullptr;
   }
 
-  void TextFieldInputType::AttributeChanged(dom::DOMStringAtom name) noexcept
+  void TextFieldInputType::AttributeChanged(const dom::DOMStringAtom &name) noexcept
   {
     if (name == u8"value" || name == u8"placeholder")
     {

@@ -91,6 +91,7 @@ namespace krys::boo::style
       auto &document = element.NodeDocument();
       auto documentElement = document.DocumentElement();
       if (!documentElement || documentElement.get() == &element)
+      // NOLINTNEXTLINE(bugprone-branch-clone): the fallbacks, in order.
       {
         _rootElementStyle = document.InitialContainingBlockStyle();
       }
@@ -360,7 +361,7 @@ namespace krys::boo::style
 
   UnadjustedStyle Resolver::UnadjustedStyleForCachedMatchResult(dom::Element &element,
                                                                 const ResolutionContext &context,
-                                                                CachedMatchResult &&cachedResult) noexcept
+                                                                CachedMatchResult cachedResult) noexcept
   {
     auto &unadjustedStyle = cachedResult.UnadjustedStyle;
 
@@ -727,7 +728,7 @@ namespace krys::boo::style
       RenderStyle::CreatePtrWithRegisteredInitialValues(document.StyleScope().GetCustomPropertyRegistry());
 
     FontCascadeDescription fontDescription;
-    fontDescription.SetOneFamily(css::GenericFontFamilyNames::StandardFamily());
+    fontDescription.SetOneFamily(css::generic_font_family_names::StandardFamily());
     fontDescription.SetKeywordSizeFromIdentifier(css::ValueId::Medium);
 
     auto size = FontSizeForKeyword(static_cast<uint32>(css::ValueId::Medium), false, document);

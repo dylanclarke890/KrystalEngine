@@ -88,11 +88,10 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
-    void SetFormValue(CustomElementFormValue &&submissionValue,
-                      Maybe<CustomElementFormValue> &&state) noexcept;
+    void SetFormValue(CustomElementFormValue &&submissionValue, Maybe<CustomElementFormValue> state) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
-    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags, dom::DOMString message,
+    dom::ExceptionOr<void> SetValidity(ValidityStateFlags flags, const dom::DOMString &message,
                                        HTMLElement *validationAnchor) noexcept;
 
     KRYS_NODISCARD dom::DOMString ValidationMessage() const noexcept final;

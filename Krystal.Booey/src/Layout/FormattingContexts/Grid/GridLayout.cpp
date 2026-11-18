@@ -218,6 +218,7 @@ namespace krys::boo::layout
     {
       switch (placedGridItem.InlineAxisAlignment().Position())
       {
+        // NOLINTNEXTLINE(bugprone-branch-clone): the cases are grouped by reason.
         case ItemPosition::FlexStart:
         case ItemPosition::SelfStart:
         case ItemPosition::Start:     return {};
@@ -255,6 +256,7 @@ namespace krys::boo::layout
     {
       switch (placedGridItem.BlockAxisAlignment().Position())
       {
+        // NOLINTNEXTLINE(bugprone-branch-clone): the cases are grouped by reason.
         case ItemPosition::FlexStart:
         case ItemPosition::SelfStart:
         case ItemPosition::Start:     return {};

@@ -623,7 +623,8 @@ namespace krys::boo
     return rect;
   }
 
-  LayoutRect RenderFragmentContainer::VisualOverflowRectForBoxForPropagation(const RenderBox &box) noexcept
+  LayoutRect
+    RenderFragmentContainer::VisualOverflowRectForBoxForPropagation(const RenderBox &box) const noexcept
   {
     LayoutRect rect = VisualOverflowRectForBox(box);
     FragmentedFlow()->FlipForWritingModeLocalCoordinates(rect);

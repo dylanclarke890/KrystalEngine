@@ -86,11 +86,11 @@ namespace krys::boo
     }
 
   private:
-    KRYS_NODISCARD dom::ContainerNode *ParentNode(dom::Node &node) noexcept;
+    KRYS_NODISCARD dom::ContainerNode *ParentNode(dom::Node &node) const noexcept;
 
-    KRYS_NODISCARD dom::Node *FirstChild(dom::Node &node) noexcept;
+    KRYS_NODISCARD dom::Node *FirstChild(dom::Node &node) const noexcept;
 
-    KRYS_NODISCARD dom::Node *NextSibling(dom::Node &node) noexcept;
+    KRYS_NODISCARD dom::Node *NextSibling(dom::Node &node) const noexcept;
 
     KRYS_NODISCARD State ComputeState(dom::Node &targetNode) noexcept;
   };
@@ -121,7 +121,7 @@ namespace krys::boo
 
   // These methods are used by HTMLElement & ShadowRoot to replace the children with respected fragment/text.
   dom::ExceptionOr<void> ReplaceChildrenWithFragment(dom::ContainerNode &container,
-                                                     Ref<dom::DocumentFragment> &&fragment) noexcept;
+                                                     const Ref<dom::DocumentFragment> &fragment) noexcept;
 
   enum class ConvertBlocksToInlines : bool
   {
@@ -230,7 +230,7 @@ namespace krys::boo
                    MSOListQuirks msoListQuirks = MSOListQuirks::Disabled,
                    const Func<void(dom::DocumentFragment &)> &fragmentSanitizer = {}) noexcept;
 
-  KRYS_NODISCARD utf8_string SanitizedMarkupForFragmentInDocument(Ref<dom::DocumentFragment> &&fragment,
+  KRYS_NODISCARD utf8_string SanitizedMarkupForFragmentInDocument(const Ref<dom::DocumentFragment> &fragment,
                                                                   dom::Document &document,
                                                                   MSOListQuirks msoListQuirks,
                                                                   utf8_stringview originalMarkup) noexcept;

@@ -57,9 +57,9 @@ namespace krys::boo::css
   // <request-url-modifier> = <cross-origin-modifier> | <integrity-modifier> | <referrer-policy-modifier>
   struct URLModifiers
   {
-    Maybe<URLCrossOriginFunction> CrossOrigin {};
-    Maybe<URLIntegrityFunction> Integrity {};
-    Maybe<URLReferrerPolicyFunction> ReferrerPolicy {};
+    Maybe<URLCrossOriginFunction> CrossOrigin;
+    Maybe<URLIntegrityFunction> Integrity;
+    Maybe<URLReferrerPolicyFunction> ReferrerPolicy;
 
     KRYS_NODISCARD bool operator==(const URLModifiers &) const noexcept = default;
   };

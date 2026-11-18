@@ -130,7 +130,7 @@ namespace krys::boo::dom
     }
   }
 
-  void Node::InvalidateLiveCollectionCachesForAttribute(DOMStringAtom localName) noexcept
+  void Node::InvalidateLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept
   {
     if (auto &document = NodeDocument(); document.HasLiveCollectionCachesForAttribute(localName))
     {
@@ -533,7 +533,7 @@ namespace krys::boo::dom
     return TreeQueries::IsInclusiveDescendant(*other, *this);
   }
 
-  DOMStringAtom Node::LookupPrefix(DOMStringAtom namespaceURI) const noexcept
+  DOMStringAtom Node::LookupPrefix(const DOMStringAtom &namespaceURI) const noexcept
   {
     // 1. If namespace is null or the empty string, then return null.
     if (namespaceURI == null || namespaceURI == DOMStringAtom::Empty())

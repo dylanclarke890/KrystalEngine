@@ -30,156 +30,152 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 
-namespace krys::boo::css
+namespace krys::boo::css::mq
 {
-  namespace mq
+  KRYS_NODISCARD EvaluationResult EvaluateLengthFeature(
+    const Feature &feature, LayoutUnit, const ToLengthConversionData &conversionData) noexcept;
+
+  KRYS_NODISCARD EvaluationResult EvaluateRatioFeature(const Feature &feature, FloatSize,
+                                                       const ToLengthConversionData &conversionData) noexcept;
+
+  KRYS_NODISCARD EvaluationResult EvaluateBooleanFeature(
+    const Feature &feature, bool, const ToLengthConversionData &conversionData) noexcept;
+
+  KRYS_NODISCARD EvaluationResult EvaluateIntegerFeature(
+    const Feature &feature, int32, const ToLengthConversionData &conversionData) noexcept;
+
+  KRYS_NODISCARD EvaluationResult EvaluateNumberFeature(
+    const Feature &feature, double, const ToLengthConversionData &conversionData) noexcept;
+
+  KRYS_NODISCARD EvaluationResult EvaluateResolutionFeature(
+    const Feature &feature, float, const ToLengthConversionData &conversionData) noexcept;
+
+  KRYS_NODISCARD EvaluationResult EvaluateIdentifierFeature(
+    const Feature &feature, ValueId currentValue, const ToLengthConversionData &conversionData) noexcept;
+
+  template <typename ConcreteEvaluator>
+  class GenericMediaQueryEvaluator
   {
-    KRYS_NODISCARD EvaluationResult EvaluateLengthFeature(
-      const Feature &feature, LayoutUnit, const ToLengthConversionData &conversionData) noexcept;
-
-    KRYS_NODISCARD EvaluationResult EvaluateRatioFeature(
-      const Feature &feature, FloatSize, const ToLengthConversionData &conversionData) noexcept;
-
-    KRYS_NODISCARD EvaluationResult EvaluateBooleanFeature(
-      const Feature &feature, bool, const ToLengthConversionData &conversionData) noexcept;
-
-    KRYS_NODISCARD EvaluationResult EvaluateIntegerFeature(
-      const Feature &feature, int32, const ToLengthConversionData &conversionData) noexcept;
-
-    KRYS_NODISCARD EvaluationResult EvaluateNumberFeature(
-      const Feature &feature, double, const ToLengthConversionData &conversionData) noexcept;
-
-    KRYS_NODISCARD EvaluationResult EvaluateResolutionFeature(
-      const Feature &feature, float, const ToLengthConversionData &conversionData) noexcept;
-
-    KRYS_NODISCARD EvaluationResult EvaluateIdentifierFeature(
-      const Feature &feature, ValueId identifier, const ToLengthConversionData &conversionData) noexcept;
-
-    template <typename ConcreteEvaluator>
-    class GenericMediaQueryEvaluator
+  public:
+    KRYS_NODISCARD EvaluationResult EvaluateQueryInParens(
+      const QueryInParens &queryInParens, const FeatureEvaluationContext &context) const noexcept
     {
-    public:
-      KRYS_NODISCARD EvaluationResult EvaluateQueryInParens(
-        const QueryInParens &queryInParens, const FeatureEvaluationContext &context) const noexcept
-      {
-        return krys::SwitchOn(
-          queryInParens, [&](const Condition &condition) { return EvaluateCondition(condition, context); },
-          [&](const mq::Feature &feature) { return AsConcreteEvaluator().EvaluateFeature(feature, context); },
-          [&](const mq::StyleRange &range)
-          {
-            return range.Schema ? range.Schema->EvaluateStyleRange(range, context)
-                                : mq::EvaluationResult::Unknown;
-          },
-          [&](const mq::GeneralEnclosed &) { return mq::EvaluationResult::Unknown; });
-      }
-
-      KRYS_NODISCARD EvaluationResult
-        EvaluateCondition(const Condition &condition, const FeatureEvaluationContext &context) const noexcept
-      {
-        if (condition.Queries.empty())
+      return krys::SwitchOn(
+        queryInParens, [&](const Condition &condition) { return EvaluateCondition(condition, context); },
+        [&](const mq::Feature &feature) { return AsConcreteEvaluator().EvaluateFeature(feature, context); },
+        [&](const mq::StyleRange &range)
         {
-          return EvaluationResult::Unknown;
-        }
+          return range.Schema ? range.Schema->EvaluateStyleRange(range, context)
+                              : mq::EvaluationResult::Unknown;
+        },
+        [&](const mq::GeneralEnclosed &) { return mq::EvaluationResult::Unknown; });
+    }
 
-        switch (condition.LogicalOperator)
-        {
-          case LogicalOperator::Not:
-          {
-            return !AsConcreteEvaluator().EvaluateQueryInParens(condition.Queries.front(), context);
-          }
-          // Kleene 3-valued logic.
-          case LogicalOperator::And:
-          {
-            auto result = EvaluationResult::True;
-            for (auto &query : condition.Queries)
-            {
-              auto queryResult = AsConcreteEvaluator().EvaluateQueryInParens(query, context);
-              if (queryResult == EvaluationResult::False)
-              {
-                return EvaluationResult::False;
-              }
-
-              if (queryResult == EvaluationResult::Unknown)
-              {
-                result = EvaluationResult::Unknown;
-              }
-            }
-
-            return result;
-          }
-          case LogicalOperator::Or:
-          {
-            auto result = EvaluationResult::False;
-            for (auto &query : condition.Queries)
-            {
-              auto queryResult = AsConcreteEvaluator().EvaluateQueryInParens(query, context);
-              if (queryResult == EvaluationResult::True)
-              {
-                return EvaluationResult::True;
-              }
-
-              if (queryResult == EvaluationResult::Unknown)
-              {
-                result = EvaluationResult::Unknown;
-              }
-            }
-
-            return result;
-          }
-        }
-
-        krys_unreachable();
-      }
-
-      KRYS_NODISCARD EvaluationResult EvaluateFeature(const Feature &feature,
+    KRYS_NODISCARD EvaluationResult EvaluateCondition(const Condition &condition,
                                                       const FeatureEvaluationContext &context) const noexcept
-      {
-        if (!feature.Schema)
-        {
-          return mq::EvaluationResult::Unknown;
-        }
-
-        return feature.Schema->Evaluate(feature, context);
-      }
-
-    private:
-      KRYS_NODISCARD const ConcreteEvaluator &AsConcreteEvaluator() const noexcept
-      {
-        return static_cast<const ConcreteEvaluator &>(*this);
-      }
-    };
-
-    KRYS_NODISCARD constexpr EvaluationResult operator&(EvaluationResult left,
-                                                        EvaluationResult right) noexcept
     {
-      if (left == EvaluationResult::Unknown || right == EvaluationResult::Unknown)
+      if (condition.Queries.empty())
       {
         return EvaluationResult::Unknown;
       }
 
-      if (left == EvaluationResult::True && right == EvaluationResult::True)
+      switch (condition.LogicalOperator)
       {
-        return EvaluationResult::True;
-      }
+        case LogicalOperator::Not:
+        {
+          return !AsConcreteEvaluator().EvaluateQueryInParens(condition.Queries.front(), context);
+        }
+        // Kleene 3-valued logic.
+        case LogicalOperator::And:
+        {
+          auto result = EvaluationResult::True;
+          for (auto &query : condition.Queries)
+          {
+            auto queryResult = AsConcreteEvaluator().EvaluateQueryInParens(query, context);
+            if (queryResult == EvaluationResult::False)
+            {
+              return EvaluationResult::False;
+            }
 
-      return EvaluationResult::False;
-    }
+            if (queryResult == EvaluationResult::Unknown)
+            {
+              result = EvaluationResult::Unknown;
+            }
+          }
 
-    KRYS_NODISCARD constexpr EvaluationResult operator!(EvaluationResult result) noexcept
-    {
-      switch (result)
-      {
-        case EvaluationResult::True:    return EvaluationResult::False;
-        case EvaluationResult::False:   return EvaluationResult::True;
-        case EvaluationResult::Unknown: return EvaluationResult::Unknown;
+          return result;
+        }
+        case LogicalOperator::Or:
+        {
+          auto result = EvaluationResult::False;
+          for (auto &query : condition.Queries)
+          {
+            auto queryResult = AsConcreteEvaluator().EvaluateQueryInParens(query, context);
+            if (queryResult == EvaluationResult::True)
+            {
+              return EvaluationResult::True;
+            }
+
+            if (queryResult == EvaluationResult::Unknown)
+            {
+              result = EvaluationResult::Unknown;
+            }
+          }
+
+          return result;
+        }
       }
 
       krys_unreachable();
     }
 
-    KRYS_NODISCARD constexpr EvaluationResult ToEvaluationResult(bool boolean) noexcept
+    KRYS_NODISCARD EvaluationResult EvaluateFeature(const Feature &feature,
+                                                    const FeatureEvaluationContext &context) const noexcept
     {
-      return boolean ? EvaluationResult::True : EvaluationResult::False;
+      if (!feature.Schema)
+      {
+        return mq::EvaluationResult::Unknown;
+      }
+
+      return feature.Schema->Evaluate(feature, context);
     }
+
+  private:
+    KRYS_NODISCARD const ConcreteEvaluator &AsConcreteEvaluator() const noexcept
+    {
+      return static_cast<const ConcreteEvaluator &>(*this);
+    }
+  };
+
+  KRYS_NODISCARD constexpr EvaluationResult operator&(EvaluationResult left, EvaluationResult right) noexcept
+  {
+    if (left == EvaluationResult::Unknown || right == EvaluationResult::Unknown)
+    {
+      return EvaluationResult::Unknown;
+    }
+
+    if (left == EvaluationResult::True && right == EvaluationResult::True)
+    {
+      return EvaluationResult::True;
+    }
+
+    return EvaluationResult::False;
+  }
+
+  KRYS_NODISCARD constexpr EvaluationResult operator!(EvaluationResult result) noexcept
+  {
+    switch (result)
+    {
+      case EvaluationResult::True:    return EvaluationResult::False;
+      case EvaluationResult::False:   return EvaluationResult::True;
+      case EvaluationResult::Unknown: return EvaluationResult::Unknown;
+    }
+
+    krys_unreachable();
+  }
+
+  KRYS_NODISCARD constexpr EvaluationResult ToEvaluationResult(bool boolean) noexcept
+  {
+    return boolean ? EvaluationResult::True : EvaluationResult::False;
   }
 }

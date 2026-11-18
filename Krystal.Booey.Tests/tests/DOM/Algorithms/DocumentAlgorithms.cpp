@@ -94,7 +94,7 @@ namespace krys::boo::dom::tests
     CHECK(element->LocalName() == u8"Local");
     CHECK(&element->NodeDocument() == document.get());
 
-    auto html = document->CreateElementNS(infra::Namespaces::HTML, u8"DIV").ReleaseValue();
+    auto html = document->CreateElementNS(infra::namespaces::HTML, u8"DIV").ReleaseValue();
     CHECK(html->LocalName() == u8"DIV");
     CHECK(Is<html::HTMLElement>(*html));
 

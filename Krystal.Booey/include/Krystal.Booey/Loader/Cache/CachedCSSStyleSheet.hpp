@@ -44,7 +44,7 @@ namespace krys::boo
     RefPtr<css::StyleSheetContents> _parsedStyleSheetCache;
 
   public:
-    explicit CachedCSSStyleSheet(CachedResourceRequest &&request) noexcept;
+    explicit CachedCSSStyleSheet(const CachedResourceRequest &request) noexcept;
 
     ~CachedCSSStyleSheet() noexcept override;
 
@@ -63,12 +63,12 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<css::StyleSheetContents>
       RestoreParsedStyleSheet(const css::ParserContext &context) noexcept;
 
-    void SaveParsedStyleSheet(Ref<css::StyleSheetContents> &&sheet) noexcept;
+    void SaveParsedStyleSheet(const Ref<css::StyleSheetContents> &sheet) noexcept;
 
     KRYS_NODISCARD bool MimeTypeAllowedByNosniff() const noexcept;
 
     /// @brief The encoding the sheet's text is decoded from.
-    KRYS_NODISCARD utf8_stringview Encoding() const noexcept;
+    KRYS_NODISCARD static utf8_stringview Encoding() noexcept;
 
   private:
     KRYS_NODISCARD utf8_string ResponseMIMEType() const noexcept;

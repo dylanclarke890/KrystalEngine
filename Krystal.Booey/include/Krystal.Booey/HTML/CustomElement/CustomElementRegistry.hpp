@@ -95,7 +95,7 @@ namespace krys::boo::html
     /// @brief Defines @p name as a custom element whose behaviour @p factory creates, and upgrades the
     /// elements already waiting for it.
     /// @see https://html.spec.whatwg.org/#dom-customelementregistry-define
-    dom::ExceptionOr<void> Define(dom::DOMStringAtom name, CustomElementFactory &&factory,
+    dom::ExceptionOr<void> Define(const dom::DOMStringAtom &name, CustomElementFactory &&factory,
                                   CustomElementOptions &&options = {}) noexcept;
 
     /// @brief The definition of @p name; null if there's none.
@@ -108,7 +108,8 @@ namespace krys::boo::html
 
     /// @brief Calls @p callback (in a microtask) once @p name is defined, or now if it already is.
     /// @see https://html.spec.whatwg.org/#dom-customelementregistry-whendefined
-    dom::ExceptionOr<void> WhenDefined(dom::DOMStringAtom name, WhenDefinedCallback &&callback) noexcept;
+    dom::ExceptionOr<void> WhenDefined(const dom::DOMStringAtom &name,
+                                       WhenDefinedCallback &&callback) noexcept;
 
     /// @brief Tries to upgrade @p root and its shadow-including descendants.
     /// @see https://html.spec.whatwg.org/#dom-customelementregistry-upgrade
@@ -122,11 +123,11 @@ namespace krys::boo::html
     /// a definition is added.
     void AppendToScopedDocumentSet(dom::Document &document) noexcept;
 
-    KRYS_NODISCARD CustomElementInterface *FindInterface(dom::DOMStringAtom name) const noexcept;
+    KRYS_NODISCARD CustomElementInterface *FindInterface(const dom::DOMStringAtom &name) const noexcept;
 
     KRYS_NODISCARD CustomElementInterface *FindInterface(const dom::QualifiedName &name) const noexcept;
 
   private:
-    void AddElementDefinition(Ref<CustomElementInterface> &&elementInterface) noexcept;
+    void AddElementDefinition(const Ref<CustomElementInterface> &elementInterface) noexcept;
   };
 }

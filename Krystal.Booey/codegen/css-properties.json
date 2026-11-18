@@ -956,6 +956,7 @@
           "fontCascade"
         ],
         "render-style-storage-kind": "value",
+        "render-style-setter-takes-const-reference": true,
         "render-style-type": "Style::FontPalette",
         "parser-grammar": "normal | light | dark | <palette-identifier>"
       },

@@ -35,6 +35,9 @@ namespace krys::boo
   class StyleFontData : public RefCounted<StyleFontData>
   {
   public:
+    // Copied only through Copy(), and never assigned.
+    StyleFontData &operator=(const StyleFontData &) noexcept = delete;
+
     KRYS_NODISCARD static Ref<StyleFontData> Create() noexcept
     {
       return AdoptRef(*new StyleFontData);
@@ -52,7 +55,5 @@ namespace krys::boo
     StyleFontData() noexcept;
 
     StyleFontData(const StyleFontData &) noexcept;
-
-    void operator=(const StyleFontData &) noexcept = delete;
   };
 }

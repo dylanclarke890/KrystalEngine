@@ -38,7 +38,7 @@ namespace krys::boo::layout
   {
   }
 
-  bool InlineQuirks::TrailingNonBreakingSpaceNeedsAdjustment(bool, bool) const noexcept
+  bool InlineQuirks::TrailingNonBreakingSpaceNeedsAdjustment(bool, bool) noexcept
   {
     // Only `nbsp-mode: space` makes trailing no-break spaces trimmable, and that mode isn't supported.
     return false;

@@ -144,10 +144,10 @@ namespace krys::boo::html
     ValidatedFormListedElement::DidMoveToNewDocument();
   }
 
-  void HTMLFormControlElement::OnAttributeChanged(dom::DOMStringAtom localName,
+  void HTMLFormControlElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
                                                   Maybe<dom::DOMStringView> oldValue,
                                                   Maybe<dom::DOMStringView> value,
-                                                  dom::DOMStringAtom namespaceURI) noexcept
+                                                  const dom::DOMStringAtom &namespaceURI) noexcept
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
     if (namespaceURI != null)

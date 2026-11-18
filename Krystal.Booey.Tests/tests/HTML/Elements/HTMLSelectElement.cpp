@@ -57,7 +57,8 @@ namespace krys::boo::tests
     }
 
     /// @brief Presses the key @p key (with the key identifier @p identifier) in the frame, as the host does.
-    bool PressKey(EditorFixture &fixture, utf8_string key, utf8_string identifier, int32 keyCode) noexcept
+    bool PressKey(EditorFixture &fixture, const utf8_string &key, utf8_string identifier,
+                  int32 keyCode) noexcept
     {
       return fixture.Frame->GetEventHandler().KeyEvent(
         PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
@@ -826,7 +827,7 @@ namespace krys::boo::tests
       option.RemoveAttribute(u8"label");
       (void)option.TextContent(dom::DOMString(u8"Replaced"));
       (void)fixture.Document->UpdateLayout();
-      CHECK(layout::tests::DumpWithIds(fixture).find(u8"\"Contents\"") == utf8_string::npos);
+      CHECK_FALSE(layout::tests::DumpWithIds(fixture).contains(u8"\"Contents\""));
       CHECK(Dumps(fixture, u8"\"Replaced\""));
     }
 

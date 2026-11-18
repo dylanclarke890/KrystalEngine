@@ -511,7 +511,7 @@ namespace krys::boo
     return false;
   }
 
-  bool LocalFrameView::IsEnclosedInCompositingLayer() const noexcept
+  bool LocalFrameView::IsEnclosedInCompositingLayer() noexcept
   {
     // FIXME: Frames inside frames (the owner renderer's repaint container), once there are any.
     return false;

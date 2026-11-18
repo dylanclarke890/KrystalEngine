@@ -87,7 +87,7 @@ namespace krys::boo
 
     LegacyInlineFlowBox *CreateLineBoxes(RenderObject *, const LineInfo &, LegacyInlineBox *) noexcept;
 
-    void RemoveInlineBox(BidiRun &, const LegacyRootInlineBox &) const noexcept;
+    static void RemoveInlineBox(BidiRun &, const LegacyRootInlineBox &) noexcept;
 
     void RemoveEmptyTextBoxesAndUpdateVisualReordering(LegacyRootInlineBox *, BidiRun *firstRun) noexcept;
 

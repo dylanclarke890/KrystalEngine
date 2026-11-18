@@ -30,7 +30,7 @@ namespace krys::boo
 {
   // Perform a spherical linear interpolation between the two
   // passed quaternions with 0 <= t <= 1.
-  Quaternion Quaternion::Slerp(const Quaternion &other, double t) const noexcept
+  Quaternion Quaternion::Slerp(const Quaternion &other, double progress) const noexcept
   {
     constexpr double epsilon = 1e-5;
     Quaternion copy = *this;
@@ -59,8 +59,8 @@ namespace krys::boo
     }
 
     double halfAngle = std::acos(cosHalfAngle);
-    double scale = std::sin((1 - t) * halfAngle) / sinHalfAngle;
-    double invscale = std::sin(t * halfAngle) / sinHalfAngle;
+    double scale = std::sin((1 - progress) * halfAngle) / sinHalfAngle;
+    double invscale = std::sin(progress * halfAngle) / sinHalfAngle;
 
     return {copy.X * scale + other.X * invscale, copy.Y * scale + other.Y * invscale,
             copy.Z * scale + other.Z * invscale, copy.W * scale + other.W * invscale};

@@ -21,7 +21,7 @@ namespace krys::boo::html
     // The row's index among its section's or table's rows, counted with next.
     template <typename TNext>
     KRYS_NODISCARD int32 IndexOfRow(const HTMLTableRowElement &row, HTMLTableRowElement *first,
-                                    TNext &&next) noexcept
+                                    TNext next) noexcept
     {
       int32 index = 0;
       for (auto *current = first; current; current = next(current))

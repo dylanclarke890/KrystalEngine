@@ -60,7 +60,7 @@ namespace krys::boo::style
     ScopeOrdinal StyleScopeOrdinal {ScopeOrdinal::Element};
     style::FromStyleAttribute FromStyleAttribute {style::FromStyleAttribute::No};
     style::CascadeLayerPriority CascadeLayerPriority {RuleSet::CascadeLayerPriorityForUnlayered};
-    EnumSet<UsedRuleType> UsedRuleTypes {};
+    EnumSet<UsedRuleType> UsedRuleTypes;
     style::IsCacheable IsCacheable {style::IsCacheable::Yes};
 
     KRYS_NODISCARD friend bool operator==(const MatchedProperties &a, const MatchedProperties &b) noexcept
@@ -77,7 +77,7 @@ namespace krys::boo::style
   {
     bool IsForLink {false};
     bool IsCompletelyNonCacheable {false};
-    EnumSet<UsedRuleType> UsedRuleTypes {};
+    EnumSet<UsedRuleType> UsedRuleTypes;
     List<MatchedProperties> UserAgentDeclarations;
     List<MatchedProperties> UserDeclarations;
     List<MatchedProperties> AuthorDeclarations;

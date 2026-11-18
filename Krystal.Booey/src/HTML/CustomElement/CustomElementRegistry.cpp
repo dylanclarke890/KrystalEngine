@@ -91,7 +91,7 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-define
-  dom::ExceptionOr<void> CustomElementRegistry::Define(dom::DOMStringAtom name,
+  dom::ExceptionOr<void> CustomElementRegistry::Define(const dom::DOMStringAtom &name,
                                                        CustomElementFactory &&factory,
                                                        CustomElementOptions &&options) noexcept
   {
@@ -144,7 +144,8 @@ namespace krys::boo::html
     return {};
   }
 
-  void CustomElementRegistry::AddElementDefinition(Ref<CustomElementInterface> &&elementInterface) noexcept
+  void
+    CustomElementRegistry::AddElementDefinition(const Ref<CustomElementInterface> &elementInterface) noexcept
   {
     // 16. Append definition to this's custom element definition set.
     auto localName = elementInterface->Name().LocalName();
@@ -190,14 +191,14 @@ namespace krys::boo::html
 
   CustomElementInterface *CustomElementRegistry::FindInterface(const dom::QualifiedName &name) const noexcept
   {
-    if (name.NamespaceURI() != infra::Namespaces::HTML)
+    if (name.NamespaceURI() != infra::namespaces::HTML)
     {
       return nullptr;
     }
     return FindInterface(name.LocalName());
   }
 
-  CustomElementInterface *CustomElementRegistry::FindInterface(dom::DOMStringAtom name) const noexcept
+  CustomElementInterface *CustomElementRegistry::FindInterface(const dom::DOMStringAtom &name) const noexcept
   {
     auto it = _nameMap.find(name);
     return it != _nameMap.end() ? it->second.get() : nullptr;
@@ -209,7 +210,7 @@ namespace krys::boo::html
     // 1. If this's custom element definition set contains an item with name name, then return that item's
     //    constructor.
     // 2. Return undefined.
-    return FindInterface(name);
+    return FindInterface(krys::move(name));
   }
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-getname
@@ -226,7 +227,7 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-customelementregistry-whendefined
   // (The promise is a callback, called in a microtask once the name is defined.)
-  dom::ExceptionOr<void> CustomElementRegistry::WhenDefined(dom::DOMStringAtom name,
+  dom::ExceptionOr<void> CustomElementRegistry::WhenDefined(const dom::DOMStringAtom &name,
                                                             WhenDefinedCallback &&callback) noexcept
   {
     // 1. If name is not a valid custom element name, then return a promise rejected with a "SyntaxError"

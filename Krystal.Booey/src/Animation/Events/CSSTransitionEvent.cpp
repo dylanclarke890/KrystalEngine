@@ -32,14 +32,15 @@ namespace krys::boo
                                          Maybe<Seconds> scheduledTime, double elapsedTime,
                                          const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                          css::CSSOMString propertyName) noexcept
-      : StyleOriginatedAnimationEvent(type, animation, scheduledTime, elapsedTime, pseudoElementIdentifier),
+      : StyleOriginatedAnimationEvent(krys::move(type), animation, scheduledTime, elapsedTime,
+                                      pseudoElementIdentifier),
         _propertyName(krys::move(propertyName))
   {
   }
 
   CSSTransitionEvent::CSSTransitionEvent(dom::DOMStringAtom type,
                                          const CSSTransitionEventInit &eventInitDict) noexcept
-      : StyleOriginatedAnimationEvent(type, eventInitDict, eventInitDict.ElapsedTime,
+      : StyleOriginatedAnimationEvent(krys::move(type), eventInitDict, eventInitDict.ElapsedTime,
                                       eventInitDict.PseudoElement),
         _propertyName(eventInitDict.PropertyName)
   {

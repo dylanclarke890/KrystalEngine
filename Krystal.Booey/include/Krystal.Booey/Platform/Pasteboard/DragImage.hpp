@@ -61,15 +61,15 @@ namespace krys::boo
   // These functions should be memory neutral, eg. if they return a newly allocated image,
   // they should release the input image. As a corollary these methods don't guarantee
   // the input image ref will still be valid after they have been called.
-  KRYS_NODISCARD DragImageRef FitDragImageToMaxSize(DragImageRef image, const IntSize &srcSize,
-                                                    const IntSize &dstSize) noexcept;
+  KRYS_NODISCARD DragImageRef FitDragImageToMaxSize(DragImageRef image, const IntSize &layoutSize,
+                                                    const IntSize &maxSize) noexcept;
 
   KRYS_NODISCARD DragImageRef ScaleDragImage(DragImageRef image, FloatSize scale) noexcept;
 
   KRYS_NODISCARD DragImageRef PlatformAdjustDragImageForDeviceScaleFactor(DragImageRef image,
                                                                           float deviceScaleFactor) noexcept;
 
-  KRYS_NODISCARD DragImageRef DissolveDragImageToFraction(DragImageRef image, float delta) noexcept;
+  KRYS_NODISCARD DragImageRef DissolveDragImageToFraction(const DragImageRef &image, float fraction) noexcept;
 
   /// @brief A drag image of @p image at its size, oriented by @p orientation; null if it has no size.
   KRYS_NODISCARD DragImageRef CreateDragImageFromImage(Image *image, ImageOrientation orientation) noexcept;

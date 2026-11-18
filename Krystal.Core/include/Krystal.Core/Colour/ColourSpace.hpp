@@ -170,8 +170,7 @@ namespace krys
   constexpr ColourSpace ColourSpaceFor = ColourSpaceMapping<CanonicalColourType<ColourType>>::ColourSpace;
 
   template <typename T, typename Functor>
-  KRYS_NODISCARD constexpr decltype(auto) CallWithColourType(ColourSpace colorSpace,
-                                                             Functor &&functor) noexcept
+  KRYS_NODISCARD constexpr decltype(auto) CallWithColourType(ColourSpace colorSpace, Functor functor) noexcept
   {
     switch (colorSpace)
     {
@@ -270,8 +269,7 @@ namespace krys
 
   template <typename T, typename Functor>
   KRYS_NODISCARD constexpr decltype(auto) CallWithColourType(const ColourComponents<T, 4> &components,
-                                                             ColourSpace colorSpace,
-                                                             Functor &&functor) noexcept
+                                                             ColourSpace colorSpace, Functor functor) noexcept
   {
     return CallWithColourType<T>(
       colorSpace, [&]<typename ColourType>()

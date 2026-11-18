@@ -30,7 +30,7 @@ namespace krys::boo::dom::mixins::tests
 
       KRYS_NODISCARD Ref<dom::Element> Create(dom::DOMStringAtom localName, dom::DOMStringView id) noexcept
       {
-        auto element = Document->CreateElement(localName).ReleaseValue();
+        auto element = Document->CreateElement(krys::move(localName)).ReleaseValue();
         REQUIRE_FALSE(element->SetAttribute(u8"id", dom::DOMString(id)).HasException());
         return element;
       }
@@ -82,7 +82,7 @@ namespace krys::boo::dom::mixins::tests
 
     SECTION("on elements in any namespace")
     {
-      auto svg = Document->CreateElementNS(infra::Namespaces::SVG, u8"rect").ReleaseValue();
+      auto svg = Document->CreateElementNS(infra::namespaces::SVG, u8"rect").ReleaseValue();
       svg->AriaHidden(dom::DOMString(u8"true"));
       CHECK(svg->GetAttribute(u8"aria-hidden") == u8"true");
       CHECK(svg->AriaHidden() == u8"true");

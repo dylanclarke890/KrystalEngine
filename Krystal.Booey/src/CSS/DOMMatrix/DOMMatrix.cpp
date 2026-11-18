@@ -29,8 +29,7 @@
 
 namespace krys::boo::css
 {
-  dom::ExceptionOr<Ref<DOMMatrix>>
-    DOMMatrix::Create(Maybe<Variant<CSSOMString, List<double>>> &&init) noexcept
+  dom::ExceptionOr<Ref<DOMMatrix>> DOMMatrix::Create(Maybe<Variant<CSSOMString, List<double>>> init) noexcept
   {
     if (!init)
     {

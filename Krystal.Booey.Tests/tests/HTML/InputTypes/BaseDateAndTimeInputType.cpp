@@ -118,7 +118,7 @@ namespace krys::boo::tests
       }
 
       /// @brief Presses the key @p identifier (with the code @p code), as the host does.
-      bool Press(utf8_string identifier, utf8_string code = {}, int32 keyCode = 0) noexcept
+      bool Press(const utf8_string &identifier, utf8_string code = {}, int32 keyCode = 0) noexcept
       {
         return Frame->GetEventHandler().KeyEvent(
           PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", identifier, krys::move(code),
@@ -259,7 +259,7 @@ namespace krys::boo::tests
     SECTION("Arabic digits")
     {
       auto &date = fixture.Input(u8"date", u8"ar-EG", {{u8"value", u8"2026-03-07"}});
-      CHECK(Shown(date).find(u8"\u0662\u0660\u0662\u0666") != utf8_string::npos);
+      CHECK(Shown(date).contains(u8"\u0662\u0660\u0662\u0666"));
     }
 
     SECTION("the visible value is localised")

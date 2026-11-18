@@ -352,7 +352,7 @@ namespace krys::boo
     // Sometimes (for plug-ins) we need to eagerly go into compositing mode.
     void EnterCompositingMode() noexcept;
 
-    KRYS_NODISCARD bool IsEnclosedInCompositingLayer() const noexcept;
+    KRYS_NODISCARD static bool IsEnclosedInCompositingLayer() noexcept;
 
     /// @brief Whether the view's contents scroll in a composited layer (the render view's).
     KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
@@ -371,7 +371,7 @@ namespace krys::boo
 
     void PositionScrollbarLayers() noexcept;
 
-    KRYS_NODISCARD bool ManagesScrollbars() const noexcept
+    KRYS_NODISCARD static bool ManagesScrollbars() noexcept
     {
       return true;
     }

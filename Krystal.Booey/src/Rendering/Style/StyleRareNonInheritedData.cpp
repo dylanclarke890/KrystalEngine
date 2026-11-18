@@ -86,7 +86,7 @@ namespace krys::boo
         OverscrollBehaviorX(static_cast<unsigned>(style::ComputedStyle::InitialOverscrollBehaviorX())),
         OverscrollBehaviorY(static_cast<unsigned>(style::ComputedStyle::InitialOverscrollBehaviorY())),
         TransformStyle3D(static_cast<unsigned>(style::ComputedStyle::InitialTransformStyle3D())),
-        TransformStyleForcedToFlat(false),
+
         BackfaceVisibility(static_cast<unsigned>(style::ComputedStyle::InitialBackfaceVisibility())),
         ScrollBehavior(static_cast<unsigned>(style::ComputedStyle::InitialScrollBehavior())),
         TextDecorationStyle(static_cast<unsigned>(style::ComputedStyle::InitialTextDecorationStyle())),
@@ -105,10 +105,9 @@ namespace krys::boo
         PositionTryOrder(static_cast<unsigned>(style::ComputedStyle::InitialPositionTryOrder())),
         PositionVisibility(static_cast<unsigned>(style::ComputedStyle::InitialPositionVisibility().ToRaw())),
         FieldSizing(static_cast<unsigned>(style::ComputedStyle::InitialFieldSizing())),
-        NativeAppearanceDisabled(static_cast<unsigned>(false)),
+
         ScrollbarWidth(static_cast<unsigned>(style::ComputedStyle::InitialScrollbarWidth())),
-        UsesAnchorFunctions(false), AnchorFunctionScrollCompensatedAxes(0), IsPopoverInvoker(false),
-        UseSVGZoomRulesForLength(false),
+
         MarginTrim(static_cast<unsigned>(style::ComputedStyle::InitialMarginTrim().ToRaw())),
         Contain(static_cast<unsigned>(style::ComputedStyle::InitialContain().ToRaw())),
         OverflowContinue(static_cast<unsigned>(style::ComputedStyle::InitialOverflowContinue())),

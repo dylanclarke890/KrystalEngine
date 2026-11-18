@@ -114,19 +114,13 @@ namespace krys::boo::css
 
     // MARK: Copy/Move Construction/Assignment
 
-    PrimitiveNumericOrKeyword(const PrimitiveNumericOrKeyword &other) noexcept : _data {other._data}
-    {
-    }
+    PrimitiveNumericOrKeyword(const PrimitiveNumericOrKeyword &other) noexcept = default;
 
     PrimitiveNumericOrKeyword(PrimitiveNumericOrKeyword &&other) noexcept : _data {krys::move(other._data)}
     {
     }
 
-    PrimitiveNumericOrKeyword &operator=(const PrimitiveNumericOrKeyword &other) noexcept
-    {
-      _data = other._data;
-      return *this;
-    }
+    PrimitiveNumericOrKeyword &operator=(const PrimitiveNumericOrKeyword &other) noexcept = default;
 
     PrimitiveNumericOrKeyword &operator=(PrimitiveNumericOrKeyword &&other) noexcept
     {
@@ -287,7 +281,7 @@ namespace krys::boo::css
   };
 
   template <typename N, typename... Ks>
-  constexpr auto TreatAsVariantLike<PrimitiveNumericOrKeyword<N, Ks...>> = true;
+  constexpr inline auto TreatAsVariantLike<PrimitiveNumericOrKeyword<N, Ks...>> = true;
 }
 
 namespace krys

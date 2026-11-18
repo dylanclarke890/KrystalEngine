@@ -160,7 +160,7 @@ namespace krys::boo::style
             const auto &toShadow = toShadows[index - (maxLength - toLength)];
             return style::Blend(fromShadow, toShadow, fromStyle, toStyle, context);
           }
-          else if (hasFrom)
+          if (hasFrom)
           {
             const auto &fromShadow = fromShadows[index - (maxLength - fromLength)];
             const auto &toShadow = MatchingShadows::ShadowForInterpolation(fromShadow);

@@ -72,11 +72,11 @@ namespace krys::tests
       tree.add({low, low + 1, low});
     }
 
-    CHECK(tree.nextIntervalAfter(0)->Data() == 10);
-    CHECK(tree.nextIntervalAfter(10)->Data() == 20);
-    CHECK(tree.nextIntervalAfter(21)->Data() == 25);
-    CHECK(tree.nextIntervalAfter(49)->Data() == 50);
-    CHECK(tree.nextIntervalAfter(75)->Data() == 80);
+    CHECK(tree.nextIntervalAfter(0).value().Data() == 10);
+    CHECK(tree.nextIntervalAfter(10).value().Data() == 20);
+    CHECK(tree.nextIntervalAfter(21).value().Data() == 25);
+    CHECK(tree.nextIntervalAfter(49).value().Data() == 50);
+    CHECK(tree.nextIntervalAfter(75).value().Data() == 80);
     CHECK_FALSE(tree.nextIntervalAfter(90));
   }
 }

@@ -51,7 +51,7 @@ namespace krys::boo::svg
     return sheet && sheet->Disabled();
   }
 
-  void SVGStyleElement::Disabled(bool value) noexcept
+  void SVGStyleElement::Disabled(bool value) const noexcept
   {
     if (auto *sheet = Sheet())
     {

@@ -263,13 +263,13 @@ namespace krys::boo::html::tests
     MapFixture fixture {utf8_string(MapMarkup)
                         + u8"<style>area:focus-visible{outline:auto 3px #ff0000}</style>"};
     auto unfocused = fixture.Painted();
-    CHECK(unfocused.find(u8"focus-ring") == utf8_string::npos);
+    CHECK_FALSE(unfocused.contains(u8"focus-ring"));
 
     // A focus ring in the area's shape.
     fixture.Area(u8"circle").Focus({.FocusVisible = true});
     auto painted = fixture.Painted();
-    CHECK(painted.find(u8"focus-ring") != utf8_string::npos);
-    CHECK(painted.find(u8"#FF0000") != utf8_string::npos);
+    CHECK(painted.contains(u8"focus-ring"));
+    CHECK(painted.contains(u8"#FF0000"));
 
     // Not without the focus visible, as the outline is none.
     fixture.Area(u8"rect").Focus({.FocusVisible = false});

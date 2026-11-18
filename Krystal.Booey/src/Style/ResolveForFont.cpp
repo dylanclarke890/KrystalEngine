@@ -330,10 +330,11 @@ namespace krys::boo::style
           // FIXME: Treat system-ui like other generic font families
           if (ident == css::ValueId::SystemUi)
           {
-            return {css::GenericFontFamilyNames::SystemUiFamily(), true};
+            return {css::generic_font_family_names::SystemUiFamily(), true};
           }
-          return {css::GenericFontFamilyNames::FamilyName(css::parse_property::GenericFontFamilyIndex(ident)),
-                  true};
+          return {
+            css::generic_font_family_names::FamilyName(css::parse_property::GenericFontFamilyIndex(ident)),
+            true};
         },
         [&](const css::CSSOMStringAtom &familyString) -> std::pair<StringAtom, bool>
         { return {familyString, false}; });

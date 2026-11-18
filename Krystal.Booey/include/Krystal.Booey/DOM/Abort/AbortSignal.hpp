@@ -124,7 +124,7 @@ namespace krys::boo::dom
     {
       if (Aborted())
       {
-        throw Reason();
+        throw krys::Any(Reason());
       }
     }
 
@@ -138,7 +138,7 @@ namespace krys::boo::dom
   private:
     /// @brief @p reason if it is given, otherwise a new "AbortError" `DOMException`. An empty reason
     /// (undefined) counts as not given.
-    KRYS_NODISCARD static krys::Any ReasonOrAbortError(Maybe<krys::Any> &&reason) noexcept;
+    KRYS_NODISCARD static krys::Any ReasonOrAbortError(Maybe<krys::Any> reason) noexcept;
 
     void DidAddEventListener(const EventListener &listener) noexcept final;
 

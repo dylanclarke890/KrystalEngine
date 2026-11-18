@@ -596,7 +596,7 @@ namespace krys::boo
 
   private:
     // multiply passed 2D point by matrix (assume z=0)
-    void MultVecMatrix(double x, double y, double &dstX, double &dstY) const noexcept;
+    void MultVecMatrix(double x, double y, double &resultX, double &resultY) const noexcept;
 
     KRYS_NODISCARD FloatPoint InternalMapPoint(const FloatPoint &sourcePoint) const noexcept
     {
@@ -606,7 +606,8 @@ namespace krys::boo
       return FloatPoint(static_cast<float>(resultX), static_cast<float>(resultY));
     }
 
-    void MultVecMatrix(double x, double y, double z, double &dstX, double &dstY, double &dstZ) const noexcept;
+    void MultVecMatrix(double x, double y, double z, double &resultX, double &resultY,
+                       double &resultZ) const noexcept;
 
     KRYS_NODISCARD FloatPoint3D InternalMapPoint(const FloatPoint3D &sourcePoint) const noexcept
     {

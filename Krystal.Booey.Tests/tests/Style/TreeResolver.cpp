@@ -21,7 +21,7 @@ namespace krys::boo::style::tests
 
     KRYS_NODISCARD Ref<dom::Element> Create(dom::Document &document, dom::DOMStringAtom localName)
     {
-      auto element = document.CreateElement(localName);
+      auto element = document.CreateElement(krys::move(localName));
       REQUIRE_FALSE(element.HasException());
       return element.ReleaseValue();
     }

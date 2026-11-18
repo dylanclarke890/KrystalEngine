@@ -40,7 +40,8 @@ namespace krys::boo::css
 {
   StylePropertyMapReadOnly::~StylePropertyMapReadOnly() noexcept = default;
 
-  RefPtr<CSSStyleValue> StylePropertyMapReadOnly::ReifyValue(dom::Document &document, RefPtr<Value> value,
+  RefPtr<CSSStyleValue> StylePropertyMapReadOnly::ReifyValue(dom::Document &document,
+                                                             const RefPtr<Value> &value,
                                                              Maybe<PropertyId> property) noexcept
   {
     if (!value)

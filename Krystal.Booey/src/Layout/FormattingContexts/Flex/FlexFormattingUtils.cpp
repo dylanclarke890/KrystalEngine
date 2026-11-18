@@ -155,8 +155,7 @@ namespace krys::boo::layout
     return minimumContentSize;
   }
 
-  Maybe<LayoutUnit>
-    FlexFormattingUtils::UsedMaximumSizeInMainAxis(const LogicalFlexItem &flexItem) const noexcept
+  Maybe<LayoutUnit> FlexFormattingUtils::UsedMaximumSizeInMainAxis(const LogicalFlexItem &flexItem) noexcept
   {
     // Initial value of 'max-width: none' computes to used 'infinite'
     return flexItem.MainAxis().MaximumSize;

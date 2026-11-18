@@ -374,7 +374,7 @@ namespace krys::boo
 
     KRYS_NODISCARD ScrollOffset GetScrollOffset() const noexcept;
 
-    KRYS_NODISCARD ScrollOffset MinimumScrollOffset() const noexcept
+    KRYS_NODISCARD static ScrollOffset MinimumScrollOffset() noexcept
     {
       return {};
     }

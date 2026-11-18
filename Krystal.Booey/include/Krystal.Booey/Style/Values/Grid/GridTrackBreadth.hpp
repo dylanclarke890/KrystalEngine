@@ -36,7 +36,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   // FIXME: Make LengthWrapperBase support additional numeric types in addition to the <length-percentage> one
   // and then replace GridTrackBreadth with that.
@@ -200,8 +200,8 @@ namespace krys::boo::style
   template <>
   struct Blending<GridTrackBreadth>
   {
-    KRYS_NODISCARD GridTrackBreadth Blend(const GridTrackBreadth &, const GridTrackBreadth &,
-                                          const BlendingContext &) noexcept;
+    KRYS_NODISCARD static GridTrackBreadth Blend(const GridTrackBreadth &, const GridTrackBreadth &,
+                                                 const BlendingContext &) noexcept;
   };
 }
 

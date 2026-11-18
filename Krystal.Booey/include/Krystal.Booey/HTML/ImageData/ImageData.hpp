@@ -54,10 +54,10 @@ namespace krys::boo::html
 
   public:
     /// @brief Image data sharing @p pixelBuffer's bytes.
-    KRYS_NODISCARD static Ref<ImageData> Create(Ref<ByteArrayPixelBuffer> &&pixelBuffer,
+    KRYS_NODISCARD static Ref<ImageData> Create(const Ref<ByteArrayPixelBuffer> &pixelBuffer,
                                                 Maybe<ImageDataPixelFormat> = {}) noexcept;
 
-    KRYS_NODISCARD static RefPtr<ImageData> Create(Ref<PixelBuffer> &&pixelBuffer,
+    KRYS_NODISCARD static RefPtr<ImageData> Create(const Ref<PixelBuffer> &pixelBuffer,
                                                    Maybe<ImageDataPixelFormat> = {}) noexcept;
 
     KRYS_NODISCARD static RefPtr<ImageData> Create(RefPtr<ByteArrayPixelBuffer> &&pixelBuffer,

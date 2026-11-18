@@ -95,7 +95,7 @@ namespace krys::boo::html
 
   public:
     ListAttributeTargetObserver(dom::DOMStringAtom id, HTMLInputElement &element) noexcept
-        : IdTargetObserver(element.TreeScope().IdTargetObserverRegistry(), id),
+        : IdTargetObserver(element.TreeScope().IdTargetObserverRegistry(), krys::move(id)),
           _element(CreateWeakPtr(&element))
     {
     }
@@ -457,13 +457,13 @@ namespace krys::boo::html
     return _size;
   }
 
-  dom::ExceptionOr<void> HTMLInputElement::Size(uint32 size) noexcept
+  dom::ExceptionOr<void> HTMLInputElement::Size(uint32 value) noexcept
   {
-    if (!size)
+    if (!value)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
     }
-    auto limitedSize = size > 2'147'483'647 ? static_cast<uint32>(DefaultSize) : size;
+    auto limitedSize = value > 2'147'483'647 ? static_cast<uint32>(DefaultSize) : value;
     auto string = std::to_string(limitedSize);
     (void)SetAttribute(u8"size",
                        dom::DOMString(reinterpret_cast<const char8 *>(string.data()), string.size()));
@@ -1087,6 +1087,7 @@ namespace krys::boo::html
     }
     if (IsDateField() || IsDateTimeLocalField() || IsMonthField() || IsTimeField() || IsWeekField())
     {
+      // NOLINTNEXTLINE(bugprone-parent-virtual-call): focus only, without HTMLElement's simulated click.
       return dom::Element::AccessKeyAction(sendMouseEvents);
     }
     return HTMLTextFormControlElement::AccessKeyAction(sendMouseEvents);
@@ -1874,9 +1875,10 @@ namespace krys::boo::html
 
 #pragma region DOM hooks
 
-  void HTMLInputElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+  void HTMLInputElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                            Maybe<dom::DOMStringView> oldValue,
                                             Maybe<dom::DOMStringView> value,
-                                            dom::DOMStringAtom namespaceURI) noexcept
+                                            const dom::DOMStringAtom &namespaceURI) noexcept
   {
     if (oldValue == value)
     {
@@ -2358,8 +2360,8 @@ namespace krys::boo::html
 
 #pragma region Presentational hints
 
-  bool HTMLInputElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLInputElement::HasPresentationalHintsForAttribute(
+    const dom::DOMStringAtom &localName, const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null)
     {
@@ -2376,8 +2378,8 @@ namespace krys::boo::html
     return HTMLTextFormControlElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLInputElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                                dom::DOMStringAtom namespaceURI,
+  void HTMLInputElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                                const dom::DOMStringAtom &namespaceURI,
                                                                 dom::DOMStringView value,
                                                                 css::MutableStyleProperties &style) noexcept
   {

@@ -189,7 +189,7 @@ namespace krys::boo::css
       _descriptors.FixedSystemFirstSymbolValue = firstSymbolValue;
     }
 
-    void SetFallbackReference(Ref<CounterStyle> &&fallback) noexcept;
+    void SetFallbackReference(const Ref<CounterStyle> &fallback) noexcept;
 
     KRYS_NODISCARD bool IsFallbackUnresolved() const noexcept
     {

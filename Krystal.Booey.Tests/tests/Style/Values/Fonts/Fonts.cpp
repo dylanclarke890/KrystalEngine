@@ -47,19 +47,19 @@ namespace krys::boo::style::tests
     REQUIRE(families.size() == 3);
     CHECK(families.IsSpecifiedFont());
     CHECK(families.First().Value == u8"Foo Bar");
-    CHECK(families.ToPlatform()[1] == css::GenericFontFamilyNames::SerifFamily());
+    CHECK(families.ToPlatform()[1] == css::generic_font_family_names::SerifFamily());
     CHECK(families.Last().Value == u8"Arial");
     CHECK(Serialised(families) == "\"Foo Bar\", serif, Arial");
     CHECK(Created(families) == "\"Foo Bar\", serif, Arial");
 
     auto generic = Convert<FontFamilies>(PropertyId::FontFamily, u8"monospace, Courier");
     CHECK(generic.FirstFontKind() == FontFamilyKind::Generic);
-    CHECK(generic.First().Value == css::GenericFontFamilyNames::MonospaceFamily());
+    CHECK(generic.First().Value == css::generic_font_family_names::MonospaceFamily());
     CHECK(Serialised(generic) == "monospace, Courier");
 
     auto system = ConvertSystemFont<FontFamilies>(*State);
     CHECK(system.FirstFontKind() == FontFamilyKind::Generic);
-    CHECK(system.First().Value == css::GenericFontFamilyNames::StandardFamily());
+    CHECK(system.First().Value == css::generic_font_family_names::StandardFamily());
     CHECK_FALSE(IsInvalid());
 
     CHECK(families == Convert<FontFamilies>(PropertyId::FontFamily, u8"\"Foo Bar\", serif, Arial"));
@@ -174,7 +174,7 @@ namespace krys::boo::style::tests
     auto angle = Convert<FontStyle>(PropertyId::FontStyle, u8"oblique 20deg");
     CHECK(angle.IsOblique());
     CHECK(angle.IsConsideredItalic());
-    CHECK(angle.GetAngle()->Value == 20);
+    CHECK(angle.GetAngle().value().Value == 20);
     CHECK(Serialised(angle) == "oblique 20deg");
     CHECK(Created(angle) == "oblique 20deg");
     CHECK_FALSE(Convert<FontStyle>(PropertyId::FontStyle, u8"oblique 10deg").IsConsideredItalic());
@@ -183,7 +183,7 @@ namespace krys::boo::style::tests
     CHECK_FALSE(Blending<FontStyle> {}.CanBlend(italic, angle));
     auto blended = Blending<FontStyle> {}.Blend(Convert<FontStyle>(PropertyId::FontStyle, u8"oblique 10deg"),
                                                 angle, BlendingContext {0.5});
-    CHECK(blended.GetAngle()->Value == 15);
+    CHECK(blended.GetAngle().value().Value == 15);
     CHECK(Blending<FontStyle> {}.Blend(normal, normal, BlendingContext {0.5}).IsNormal());
     CHECK(Blending<FontStyle> {}.Blend(normal, angle, BlendingContext {0.25, true}) == normal);
 

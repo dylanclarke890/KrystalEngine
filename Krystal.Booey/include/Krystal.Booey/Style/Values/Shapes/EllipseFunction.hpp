@@ -75,9 +75,9 @@ namespace krys::boo::style
   template <>
   struct Blending<Ellipse>
   {
-    KRYS_NODISCARD bool CanBlend(const Ellipse &, const Ellipse &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const Ellipse &, const Ellipse &) noexcept;
 
-    KRYS_NODISCARD Ellipse Blend(const Ellipse &, const Ellipse &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Ellipse Blend(const Ellipse &, const Ellipse &, const BlendingContext &) noexcept;
   };
 }
 

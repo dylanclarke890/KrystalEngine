@@ -92,7 +92,7 @@ namespace krys::boo
 
     void MarkAllClientsForInvalidationIfNeeded(InvalidationMode, VisitedRenderers *visitedRenderers) noexcept;
 
-    void MarkClientForInvalidation(RenderObject &, InvalidationMode) noexcept;
+    static void MarkClientForInvalidation(RenderObject &, InvalidationMode) noexcept;
 
   private:
     void AddClient(RenderElement &) noexcept;

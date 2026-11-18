@@ -245,19 +245,19 @@ namespace krys::boo::dom
 #pragma region Element - https://dom.spec.whatwg.org/#element
 
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
-    KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &NamespaceURI() const noexcept KRYS_LIFETIME_BOUND
     {
       return _qualifiedName.NamespaceURI();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-prefix
-    KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &Prefix() const noexcept KRYS_LIFETIME_BOUND
     {
       return _qualifiedName.NamespacePrefix();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-localname
-    KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &LocalName() const noexcept KRYS_LIFETIME_BOUND
     {
       return _qualifiedName.LocalName();
     }
@@ -382,7 +382,7 @@ namespace krys::boo::dom
     /// agent style sheets select it by as a pseudo-element of its host; null if it isn't one.
     KRYS_NODISCARD DOMStringAtom UserAgentPart() const noexcept;
 
-    void SetUserAgentPart(DOMStringAtom part) noexcept;
+    void SetUserAgentPart(const DOMStringAtom &part) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-customelementregistry
     KRYS_NODISCARD RefPtr<html::CustomElementRegistry> CustomElementRegistry() const noexcept
@@ -426,70 +426,72 @@ namespace krys::boo::dom
     /// context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtml
-    ExceptionOr<void> SetHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtml
-    ExceptionOr<void> AppendHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtml
-    ExceptionOr<void> PrependHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the element's children (a template's contents) with @p html, parsed as HTML in its
     /// context; sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtmlunsafe
-    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
+                                    const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtmlunsafe
     ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
-                                       html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
-                                        html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                        const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
-    ExceptionOr<void> BeforeHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
-    ExceptionOr<void> AfterHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
-    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context; sanitized only if
     /// @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
     ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
-                                       html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
-    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
+                                      const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
     ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
-                                            html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
 
     /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-element-gethtml
-    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions &&options = {}) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions options = {}) const noexcept;
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
@@ -785,7 +787,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-element-is-value
-    KRYS_NODISCARD DOMStringAtom IsValue() const noexcept
+    KRYS_NODISCARD const DOMStringAtom &IsValue() const noexcept KRYS_LIFETIME_BOUND
     {
       return _is;
     }
@@ -1353,7 +1355,7 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animatable-animate
     KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>>
       Animate(boo::KeyframesInput &&keyframes,
-              Maybe<Variant<double, KeyframeAnimationOptions>> &&options = null) noexcept;
+              Maybe<Variant<double, KeyframeAnimationOptions>> options = null) noexcept;
 
     /// @brief The relevant animations whose effects target the element (or, with `subtree`, its descendants
     /// too), in composite order.
@@ -1465,7 +1467,7 @@ namespace krys::boo::dom
     /// `click` with a @p detail of 2 is followed by a `dblclick`.
     /// @return Whether the event was dispatched without being cancelled, and whether it was cancelled.
     DispatchMouseEventResult DispatchMouseEvent(const PlatformMouseEvent &platformEvent,
-                                                DOMStringAtom eventType, int32 detail = 0,
+                                                const DOMStringAtom &eventType, int32 detail = 0,
                                                 Element *relatedTarget = nullptr) noexcept;
 
 #pragma endregion
@@ -1637,22 +1639,23 @@ namespace krys::boo::dom
     /// if it's still in the element's shadow-including ancestors' trees, else the one with the attribute's
     /// value as its ID in the element's tree.
     /// @see https://html.spec.whatwg.org/#attr-associated-element
-    KRYS_NODISCARD RefPtr<Element> ElementForAttributeInternal(DOMStringAtom attributeName) const noexcept;
+    KRYS_NODISCARD RefPtr<Element>
+      ElementForAttributeInternal(const DOMStringAtom &attributeName) const noexcept;
 
     /// @brief Sets an element reflection attribute's element: the content attribute becomes empty, or is
     /// removed if @p element is null.
     /// @see https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:element
-    void SetElementAttribute(DOMStringAtom attributeName, Element *element) noexcept;
+    void SetElementAttribute(const DOMStringAtom &attributeName, Element *element) noexcept;
 
     /// @brief Whether @p attributeName (in the null namespace) is reflected by an `Element?` IDL attribute.
-    KRYS_NODISCARD static bool IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept;
+    KRYS_NODISCARD static bool IsElementReflectionAttribute(const DOMStringAtom &attributeName) noexcept;
 
     /// @brief The elements a `FrozenArray<Element>?` reflection attribute refers to: the ones set through its
     /// IDL attribute that are still in the element's shadow-including ancestors' trees, else the ones with
     /// the attribute's IDs in the element's tree; null if neither is set.
     /// @see https://html.spec.whatwg.org/#attr-associated-elements
     KRYS_NODISCARD Maybe<List<Ref<Element>>>
-      ElementsForAttributeInternal(DOMStringAtom attributeName) const noexcept;
+      ElementsForAttributeInternal(const DOMStringAtom &attributeName) const noexcept;
 
     /// @brief The elements a set of element references attribute resolves to: its unresolved targets
     /// (`ElementsForAttributeInternal`), each with its reference target resolved, leaving out those that
@@ -1664,12 +1667,13 @@ namespace krys::boo::dom
     /// @brief Sets a `FrozenArray<Element>?` reflection attribute's elements: the content attribute becomes
     /// empty, or is removed if @p elements is null.
     /// @see https://html.spec.whatwg.org/#attr-associated-elements
-    void SetElementsArrayAttribute(DOMStringAtom attributeName,
+    void SetElementsArrayAttribute(const DOMStringAtom &attributeName,
                                    const Maybe<List<Ref<Element>>> &elements) noexcept;
 
     /// @brief Whether @p attributeName (in the null namespace) is reflected by a `FrozenArray<Element>?` IDL
     /// attribute.
-    KRYS_NODISCARD static bool IsElementsArrayReflectionAttribute(DOMStringAtom attributeName) noexcept;
+    KRYS_NODISCARD static bool
+      IsElementsArrayReflectionAttribute(const DOMStringAtom &attributeName) noexcept;
 
     /// @brief The first element in tree order whose root is this element's root and whose ID is @p id.
     KRYS_NODISCARD RefPtr<Element> ElementInTreeWithId(DOMStringView id) const noexcept;
@@ -1816,8 +1820,8 @@ namespace krys::boo::dom
     /// @param oldValue The previous value, or null if the attribute was added.
     /// @param value The new value, or null if the attribute was removed.
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change-ext
-    virtual void OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
-                                    Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept;
+    virtual void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                    Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept;
 
 #pragma endregion
 

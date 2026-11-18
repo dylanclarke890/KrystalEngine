@@ -89,7 +89,7 @@ namespace krys::boo::html
   HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface,
                            dom::DOMStringAtom localName, HTMLElementFlags flags,
                            dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document, dom::QualifiedName(infra::Namespaces::HTML, null, localName),
+      : StyledElement(document, dom::QualifiedName(infra::namespaces::HTML, null, krys::move(localName)),
                       nodeFlags | dom::NodeFlags::IsHTMLElement),
         _flags(flags), _interface(interface)
   {
@@ -206,7 +206,7 @@ namespace krys::boo::html
   // https://html.spec.whatwg.org/#dom-hidden
   // (The setter's steps are split between the overloads by the given value's type; a null value is the
   // empty string's overload.)
-  void HTMLElement::Hidden(dom::DOMString value) noexcept
+  void HTMLElement::Hidden(const dom::DOMString &value) noexcept
   {
     CEReactionsScope ceReactions;
     // 1. If the given value is a string that is an ASCII case-insensitive match for "until-found", then set
@@ -247,6 +247,7 @@ namespace krys::boo::html
   void HTMLElement::Hidden(double value) noexcept
   {
     CEReactionsScope ceReactions;
+    // NOLINTBEGIN(bugprone-branch-clone): the spec's steps, in order.
     // 5. Otherwise, if the given value is 0, then remove the hidden attribute.
     if (value == 0)
     {
@@ -262,6 +263,7 @@ namespace krys::boo::html
     {
       dom::ElementAlgorithms::SetAttributeValue(*this, u8"hidden", u8"");
     }
+    // NOLINTEND(bugprone-branch-clone)
   }
 
   bool HTMLElement::Inert() const noexcept
@@ -714,7 +716,7 @@ namespace krys::boo::html
     return PlainText(dom::MakeRangeSelectingNodeContents(self));
   }
 
-  void HTMLElement::InnerText(dom::DOMString value) noexcept
+  void HTMLElement::InnerText(const dom::DOMString &value) noexcept
   {
     // The innerText setter steps are to run set the inner text steps with this and the given value.
     CEReactionsScope ceReactions;
@@ -738,7 +740,7 @@ namespace krys::boo::html
     return InnerText();
   }
 
-  dom::ExceptionOr<void> HTMLElement::OuterText(dom::DOMString value) noexcept
+  dom::ExceptionOr<void> HTMLElement::OuterText(const dom::DOMString &value) noexcept
   {
     CEReactionsScope ceReactions;
 
@@ -957,7 +959,7 @@ namespace krys::boo::html
   namespace
   {
     /// @brief What a popover algorithm returns once @p validity says the popover can't be shown or hidden.
-    KRYS_NODISCARD dom::ExceptionOr<void> InvalidPopoverResult(dom::ExceptionOr<bool> &&validity,
+    KRYS_NODISCARD dom::ExceptionOr<void> InvalidPopoverResult(dom::ExceptionOr<bool> validity,
                                                                bool throwExceptions) noexcept
     {
       if (throwExceptions && validity.HasException())
@@ -1587,9 +1589,9 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
-                                       Maybe<dom::DOMStringView> value,
-                                       dom::DOMStringAtom namespaceURI) noexcept
+  void HTMLElement::OnAttributeChanged(const dom::DOMStringAtom &localName,
+                                       Maybe<dom::DOMStringView> oldValue, Maybe<dom::DOMStringView> value,
+                                       const dom::DOMStringAtom &namespaceURI) noexcept
   {
     StyledElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
@@ -1732,8 +1734,8 @@ namespace krys::boo::html
     }
   }
 
-  bool HTMLElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                       dom::DOMStringAtom namespaceURI) const noexcept
+  bool HTMLElement::HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                       const dom::DOMStringAtom &namespaceURI) const noexcept
   {
     if (namespaceURI == null)
     {
@@ -1743,19 +1745,19 @@ namespace krys::boo::html
         return true;
       }
     }
-    else if (namespaceURI == infra::Namespaces::XML && localName == u8"lang")
+    else if (namespaceURI == infra::namespaces::XML && localName == u8"lang")
     {
       return true;
     }
     return StyledElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
-  void HTMLElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
-                                                           dom::DOMStringAtom namespaceURI,
+  void HTMLElement::CollectPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,
+                                                           const dom::DOMStringAtom &namespaceURI,
                                                            dom::DOMStringView value,
                                                            css::MutableStyleProperties &style) noexcept
   {
-    if (namespaceURI == infra::Namespaces::XML && localName == u8"lang")
+    if (namespaceURI == infra::namespaces::XML && localName == u8"lang")
     {
       MapLanguageAttributeToLocale(value, style);
       return;
@@ -1864,7 +1866,7 @@ namespace krys::boo::html
     else if (localName == u8"lang")
     {
       // xml:lang has a higher priority than lang.
-      if (!HasAttributeNS(infra::Namespaces::XML, u8"lang"))
+      if (!HasAttributeNS(infra::namespaces::XML, u8"lang"))
       {
         MapLanguageAttributeToLocale(value, style);
       }
@@ -1928,6 +1930,7 @@ namespace krys::boo::html
     auto floatValue = css::ValueId::Invalid;
     auto verticalAlignValue = css::ValueId::Invalid;
 
+    // NOLINTBEGIN(bugprone-branch-clone): one branch per keyword.
     if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"absmiddle")
         || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"abscenter"))
     {
@@ -1967,6 +1970,7 @@ namespace krys::boo::html
     {
       verticalAlignValue = css::ValueId::TextTop;
     }
+    // NOLINTEND(bugprone-branch-clone)
 
     if (floatValue != css::ValueId::Invalid)
     {

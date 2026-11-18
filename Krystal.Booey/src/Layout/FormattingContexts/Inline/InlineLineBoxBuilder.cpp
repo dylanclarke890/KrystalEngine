@@ -66,6 +66,7 @@ namespace krys::boo::layout
           return InlineFormattingUtils::SnapToInt(fontMetrics.CapHeight().value_or(0.f), inlineBox);
         case TextEdgeOver::Ex:
           return InlineFormattingUtils::SnapToInt(fontMetrics.XHeight().value_or(0.f), inlineBox);
+        // NOLINTNEXTLINE(bugprone-branch-clone): IdeographicInk is still to do.
         case TextEdgeOver::Ideographic:
           return InlineFormattingUtils::Ascent(fontMetrics, FontBaseline::Ideographic, inlineBox);
         case TextEdgeOver::IdeographicInk:
@@ -85,6 +86,7 @@ namespace krys::boo::layout
       {
         case TextEdgeUnder::Text:       return InlineFormattingUtils::Descent(fontMetrics, fontBaseline, inlineBox);
         case TextEdgeUnder::Alphabetic: return 0.f;
+        // NOLINTNEXTLINE(bugprone-branch-clone): IdeographicInk is still to do.
         case TextEdgeUnder::Ideographic:
           return InlineFormattingUtils::Descent(fontMetrics, FontBaseline::Ideographic, inlineBox);
         case TextEdgeUnder::IdeographicInk:
