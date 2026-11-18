@@ -1055,7 +1055,7 @@ namespace krys::boo::html
   }
 
   void HTMLTextFormControlElement::AdjustInnerTextStyle(const RenderStyle &parentStyle,
-                                                        RenderStyle &textBlockStyle) const noexcept
+                                                        RenderStyle &textBlockStyle) noexcept
   {
     // The inner block, if present, always has its direction set to LTR,
     // so we need to inherit the direction and unicode-bidi style from the element.

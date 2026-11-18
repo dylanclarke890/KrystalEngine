@@ -42,6 +42,6 @@ namespace krys::boo
 
     KRYS_NODISCARD bool PreservesTypingStyle() const noexcept override;
 
-    KRYS_NODISCARD bool ShouldUseBreakElement(const dom::Position &position) noexcept;
+    KRYS_NODISCARD static bool ShouldUseBreakElement(const dom::Position &position) noexcept;
   };
 }

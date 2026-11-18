@@ -302,7 +302,7 @@ namespace krys::boo::html
 
     /// @brief Whether the context has been lost; never, as there are no context loss events.
     /// @see https://html.spec.whatwg.org/#dom-context-2d-iscontextlost
-    KRYS_NODISCARD constexpr bool IsContextLost() const noexcept
+    KRYS_NODISCARD static constexpr bool IsContextLost() noexcept
     {
       return false;
     }
@@ -519,14 +519,14 @@ namespace krys::boo::html
 
     void SetFillStyle(Ref<CanvasPattern> &&) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CanvasGradient>> CreateLinearGradient(float x0, float y0, float x1,
-                                                                              float y1) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CanvasGradient>>
+      CreateLinearGradient(float x0, float y0, float x1, float y1) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CanvasGradient>>
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CanvasGradient>>
       CreateRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<Ref<CanvasGradient>> CreateConicGradient(float angleInRadians, float x,
-                                                                             float y) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<CanvasGradient>>
+      CreateConicGradient(float angleInRadians, float x, float y) noexcept;
 
     /// @brief A pattern of @p image repeated as @p repetition says; null if the image isn't ready yet.
     KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>>
@@ -845,8 +845,8 @@ namespace krys::boo::html
     void FullCanvasCompositedDrawImage(T &image, const FloatRect &dest, const FloatRect &src,
                                        CompositeOperator) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CachedImage &, RenderElement *,
-                                                                         bool repeatX, bool repeatY) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<RefPtr<CanvasPattern>>
+      CreatePattern(CachedImage &, RenderElement *, bool repeatX, bool repeatY) noexcept;
 
     KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(HTMLImageElement &, bool repeatX,
                                                                          bool repeatY) noexcept;
@@ -854,8 +854,8 @@ namespace krys::boo::html
     KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(svg::SVGImageElement &, bool repeatX,
                                                                          bool repeatY) noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasBase &, bool repeatX,
-                                                                         bool repeatY) noexcept;
+    KRYS_NODISCARD static dom::ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasBase &, bool repeatX,
+                                                                                bool repeatY) noexcept;
 
     dom::ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect,
                                      const FloatRect &dstRect) noexcept;

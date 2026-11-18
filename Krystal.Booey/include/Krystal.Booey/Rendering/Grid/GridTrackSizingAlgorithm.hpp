@@ -458,8 +458,9 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit ItemSizeForTrackSizeComputationPhase(
       TrackSizeComputationPhase phase, RenderBox &gridItem, GridLayoutState &gridLayoutState) const noexcept;
 
-    KRYS_NODISCARD LayoutUnit ItemSizeForTrackSizeComputationPhaseMasonry(
-      TrackSizeComputationPhase phase, const MasonryMinMaxTrackSize &trackSize) const noexcept;
+    KRYS_NODISCARD static LayoutUnit
+      ItemSizeForTrackSizeComputationPhaseMasonry(TrackSizeComputationPhase phase,
+                                                  const MasonryMinMaxTrackSize &trackSize) noexcept;
 
     template <TrackSizeComputationVariant variant, TrackSizeComputationPhase phase>
     void DistributeSpaceToTracks(List<GridTrack *> &tracks, List<GridTrack *> *growBeyondGrowthLimitsTracks,

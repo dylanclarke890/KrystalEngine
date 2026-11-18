@@ -268,7 +268,7 @@ namespace krys::boo::layout
   }
 
   LayoutUnit FlexLayout::FlexContainerInnerMainSize(
-    const ConstraintsForFlexContent::AxisGeometry &mainAxisGeometry) const noexcept
+    const ConstraintsForFlexContent::AxisGeometry &mainAxisGeometry) noexcept
   {
     // 4. Determine the main size of the flex container using the rules of the formatting context in which it
     // participates.

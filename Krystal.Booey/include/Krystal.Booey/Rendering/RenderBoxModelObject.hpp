@@ -313,7 +313,7 @@ namespace krys::boo
 
     /// @brief Whether the root's fixed background is painted in its layer's coordinates: never, as there's no
     /// compositing.
-    KRYS_NODISCARD bool FixedBackgroundPaintsInLocalCoordinates() const noexcept;
+    KRYS_NODISCARD static bool FixedBackgroundPaintsInLocalCoordinates() noexcept;
 
     /// @brief Whether @p image is decoded for drawing synchronously, or on the work queue, drawing nothing
     /// until it's decoded.

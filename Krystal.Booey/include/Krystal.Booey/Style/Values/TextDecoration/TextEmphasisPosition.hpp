@@ -103,14 +103,12 @@ namespace krys::boo::style
         }
         return visitor(css::SpaceSeparatedTuple {css::keywords::Over {}});
       }
-      else
+
+      if (Contains(TextEmphasisPositionValue::Left))
       {
-        if (Contains(TextEmphasisPositionValue::Left))
-        {
-          return visitor(css::SpaceSeparatedTuple {css::keywords::Under {}, css::keywords::Left {}});
-        }
-        return visitor(css::SpaceSeparatedTuple {css::keywords::Under {}});
+        return visitor(css::SpaceSeparatedTuple {css::keywords::Under {}, css::keywords::Left {}});
       }
+      return visitor(css::SpaceSeparatedTuple {css::keywords::Under {}});
     }
 
     KRYS_NODISCARD constexpr bool operator==(const TextEmphasisPosition &) const noexcept = default;

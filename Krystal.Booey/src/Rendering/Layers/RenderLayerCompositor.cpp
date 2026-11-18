@@ -655,7 +655,7 @@ namespace krys::boo
     CacheAcceleratedCompositingFlags();
   }
 
-  bool RenderLayerCompositor::CanRender3DTransforms() const noexcept
+  bool RenderLayerCompositor::CanRender3DTransforms() noexcept
   {
     // FIXME: 3D transforms, once Render2D draws in 3D: they're flattened, so they don't need compositing.
     return false;
@@ -2330,8 +2330,7 @@ namespace krys::boo
     child.SetNeedsCompositingLayerConnection();
   }
 
-  RenderLayer *
-    RenderLayerCompositor::EnclosingNonStackingClippingLayer(const RenderLayer &layer) const noexcept
+  RenderLayer *RenderLayerCompositor::EnclosingNonStackingClippingLayer(const RenderLayer &layer) noexcept
   {
     for (auto *parent = layer.Parent(); parent; parent = parent->Parent())
     {
@@ -2653,7 +2652,7 @@ namespace krys::boo
     }
   }
 
-  bool RenderLayerCompositor::HasCoordinatedScrolling() const noexcept
+  bool RenderLayerCompositor::HasCoordinatedScrolling() noexcept
   {
     return false;
   }
@@ -2806,8 +2805,9 @@ namespace krys::boo
     }
   }
 
-  bool RenderLayerCompositor::LayerRepaintTargetsBackingSharingLayer(
-    RenderLayer &layer, BackingSharingState &sharingState) const noexcept
+  bool
+    RenderLayerCompositor::LayerRepaintTargetsBackingSharingLayer(RenderLayer &layer,
+                                                                  BackingSharingState &sharingState) noexcept
   {
     if (sharingState.BackingProviderCandidates().empty())
     {
@@ -3181,7 +3181,7 @@ namespace krys::boo
   // RenderLayer that is an ancestor in the renderer hierarchy, but a sibling in the z-order hierarchy.
   // FIXME: can we do this without a tree walk?
   bool RenderLayerCompositor::ClippedByAncestor(RenderLayer &layer,
-                                                const RenderLayer *compositingAncestor) const noexcept
+                                                const RenderLayer *compositingAncestor) noexcept
   {
     krys_debug_assert(layer.IsComposited());
     if (!compositingAncestor)
@@ -3402,8 +3402,7 @@ namespace krys::boo
     return CanUseDescendantClippingLayer(layer);
   }
 
-  bool RenderLayerCompositor::RequiresCompositingForAnimation(
-    const RenderLayerModelObject &renderer) const noexcept
+  bool RenderLayerCompositor::RequiresCompositingForAnimation(const RenderLayerModelObject &renderer) noexcept
   {
     // All compositing triggers are allowed, including animations and animated opacity.
     if (auto styleable = style::Styleable::FromRenderer(renderer))
@@ -3495,7 +3494,7 @@ namespace krys::boo
   }
 
   bool RenderLayerCompositor::RequiresCompositingForBackfaceVisibility(
-    const RenderLayerModelObject &renderer) const noexcept
+    const RenderLayerModelObject &renderer) noexcept
   {
     if (renderer.Style().GetBackfaceVisibility() != BackfaceVisibility::Hidden)
     {
@@ -3517,8 +3516,7 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderLayerCompositor::RequiresCompositingForFilters(
-    const RenderLayerModelObject &renderer) const noexcept
+  bool RenderLayerCompositor::RequiresCompositingForFilters(const RenderLayerModelObject &renderer) noexcept
   {
     if (renderer.HasBackdropFilter())
     {
@@ -3620,7 +3618,7 @@ namespace krys::boo
   }
 
   bool RenderLayerCompositor::RequiresCompositingForOverflowScrolling(
-    const RenderLayer &layer, RequiresCompositingData &queryData) const noexcept
+    const RenderLayer &layer, RequiresCompositingData &queryData) noexcept
   {
     if (!layer.CanUseCompositedScrolling())
     {
@@ -3637,14 +3635,14 @@ namespace krys::boo
     return layer.HasCompositedScrollableOverflow();
   }
 
-  bool RenderLayerCompositor::RequiresCompositingForAnchorPositioning(const RenderLayer &layer) const noexcept
+  bool RenderLayerCompositor::RequiresCompositingForAnchorPositioning(const RenderLayer &layer) noexcept
   {
     return layer.AnchorScrollAdjustment().has_value();
   }
 
   IndirectCompositingReason RenderLayerCompositor::ComputeIndirectCompositingReason(
     const RenderLayer &layer, bool hasCompositedDescendants, bool has3DTransformedDescendants,
-    bool paintsIntoProvidedBacking) const noexcept
+    bool paintsIntoProvidedBacking) noexcept
   {
     // When a layer has composited descendants, some effects, like 2d transforms, filters, masks etc must be
     // implemented via compositing so that they also apply to those composited descendants.
@@ -3870,13 +3868,12 @@ namespace krys::boo
 
   ScrollPositioningBehavior
     RenderLayerCompositor::ComputeCoordinatedPositioningForLayer(const RenderLayer &,
-                                                                 const RenderLayer *) const noexcept
+                                                                 const RenderLayer *) noexcept
   {
     return ScrollPositioningBehavior::None;
   }
 
-  bool
-    RenderLayerCompositor::IsRunningTransformAnimation(const RenderLayerModelObject &renderer) const noexcept
+  bool RenderLayerCompositor::IsRunningTransformAnimation(const RenderLayerModelObject &renderer) noexcept
   {
     if (auto styleable = style::Styleable::FromRenderer(renderer))
     {
@@ -3893,7 +3890,7 @@ namespace krys::boo
 
   // If an element has composited negative z-index children, those children render in front of the layer
   // background, so we need an extra 'contents' layer for the foreground of the layer object.
-  bool RenderLayerCompositor::NeedsContentsCompositingLayer(const RenderLayer &layer) const noexcept
+  bool RenderLayerCompositor::NeedsContentsCompositingLayer(const RenderLayer &layer) noexcept
   {
     for (auto *childLayer : layer.NegativeZOrderLayers())
     {
@@ -3906,7 +3903,7 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderLayerCompositor::RequiresScrollLayer(RootLayerAttachment) const noexcept
+  bool RenderLayerCompositor::RequiresScrollLayer(RootLayerAttachment) noexcept
   {
     // We need to handle our own scrolling: there's no platform widget.
     return true;
@@ -4015,7 +4012,7 @@ namespace krys::boo
     }
   }
 
-  bool RenderLayerCompositor::SupportsFixedRootBackgroundCompositing() const noexcept
+  bool RenderLayerCompositor::SupportsFixedRootBackgroundCompositing() noexcept
   {
     // FIXME: Frame layers with a tiled backing, once there are any.
     return false;
@@ -4087,7 +4084,7 @@ namespace krys::boo
     return 1;
   }
 
-  bool RenderLayerCompositor::DocumentUsesTiledBacking() const noexcept
+  bool RenderLayerCompositor::DocumentUsesTiledBacking() noexcept
   {
     // FIXME: Frame layers with a tiled backing, once there are any.
     return false;
@@ -4551,7 +4548,7 @@ namespace krys::boo
 
   LayoutRoundedRect
     RenderLayerCompositor::ParentRelativeScrollableRect(const RenderLayer &layer,
-                                                        const RenderLayer *ancestorLayer) const noexcept
+                                                        const RenderLayer *ancestorLayer) noexcept
   {
     // FIXME: ancestorLayer needs to be always non-null, so should become a reference.
     if (!ancestorLayer)

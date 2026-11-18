@@ -122,7 +122,7 @@ namespace krys::boo
 
   float SVGTextLayoutEngineBaseline::CalculateGlyphOrientationAngle(bool isVerticalText,
                                                                     const RenderStyle &style,
-                                                                    char32 character) const noexcept
+                                                                    char32 character) noexcept
   {
     if (isVerticalText)
     {

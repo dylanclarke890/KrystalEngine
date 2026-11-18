@@ -108,7 +108,7 @@ namespace krys::boo
 
     void RecordTextFragment(inline_iterator::SVGTextBoxIterator, const List<SVGTextMetrics> &) noexcept;
 
-    KRYS_NODISCARD bool ParentDefinesTextLength(RenderObject *) const noexcept;
+    KRYS_NODISCARD static bool ParentDefinesTextLength(RenderObject *) noexcept;
 
     void LayoutTextOnLineOrPath(inline_iterator::SVGTextBoxIterator, const RenderSVGInlineText &,
                                 const RenderStyle &) noexcept;

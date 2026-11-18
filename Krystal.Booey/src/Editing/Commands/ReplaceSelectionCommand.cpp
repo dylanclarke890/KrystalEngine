@@ -405,7 +405,7 @@ namespace krys::boo
       return _hasInterchangeNewlineAtEnd;
     }
 
-    void RemoveNode(dom::Node &node) noexcept;
+    static void RemoveNode(dom::Node &node) noexcept;
 
     void RemoveNodePreservingChildren(dom::Node &node) noexcept;
 
@@ -414,7 +414,7 @@ namespace krys::boo
 
     void RemoveInterchangeNodes(dom::Node *container) noexcept;
 
-    void InsertNodeBefore(dom::Node &node, dom::Node &refNode) noexcept;
+    static void InsertNodeBefore(dom::Node &node, dom::Node &refNode) noexcept;
   };
 
   ReplacementFragment::ReplacementFragment(RefPtr<dom::DocumentFragment> &&inputFragment,

@@ -2209,14 +2209,14 @@ namespace krys::boo
     }
   }
 
-  bool FrameSelection::ShouldChangeSelection(const VisibleSelection &) const noexcept
+  bool FrameSelection::ShouldChangeSelection(const VisibleSelection &) noexcept
   {
     return true;
   }
 
   // FIXME: Asking the editor client whether to delete the range (shouldDeleteRange), with the editing
   // delegates.
-  bool FrameSelection::ShouldDeleteSelection(const VisibleSelection &) const noexcept
+  bool FrameSelection::ShouldDeleteSelection(const VisibleSelection &) noexcept
   {
     return true;
   }
@@ -2492,7 +2492,7 @@ namespace krys::boo
     return true;
   }
 
-  bool CaretBase::ShouldRepaintCaret(const RenderView *view, bool isContentEditable) const noexcept
+  bool CaretBase::ShouldRepaintCaret(const RenderView *view, bool isContentEditable) noexcept
   {
     krys_debug_assert(view);
     bool caretBrowsing =

@@ -887,7 +887,7 @@ namespace krys::boo::css
       }
       return previousSelector->SelectorText(relationSeparator, builder);
     }
-    else if (auto separatorText = separatorTextForNestingRelative())
+    if (auto separatorText = separatorTextForNestingRelative())
     {
       // We have a separator but no preceding selector which can happen with implicit relative nesting
       // selector.

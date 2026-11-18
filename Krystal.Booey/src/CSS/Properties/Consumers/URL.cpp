@@ -91,99 +91,96 @@ namespace krys::boo::css::parse_property
           return {};
         }
 
-        else
+        while (!args.IsAtEnd())
         {
-          while (!args.IsAtEnd())
+          switch (args.Peek().FunctionId())
           {
-            switch (args.Peek().FunctionId())
+            case ValueId::CrossOrigin:
             {
-              case ValueId::CrossOrigin:
-              {
-                if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::CrossOrigin))
-                {
-                  return {};
-                }
-
-                if (result->Modifiers.CrossOrigin)
-                {
-                  return {};
-                }
-
-                auto crossOriginArgs = ConsumeFunction(args);
-                auto crossOriginValue = MetaConsumer<keywords::Anonymous, keywords::UseCredentials>::Consume(
-                  crossOriginArgs, state);
-
-                if (!crossOriginValue || !crossOriginArgs.IsAtEnd())
-                {
-                  return {};
-                }
-
-                result->Modifiers.CrossOrigin = URLCrossOriginFunction {.Parameters = {*crossOriginValue}};
-                break;
-              }
-              case ValueId::Integrity:
-              {
-                if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::Integrity))
-                {
-                  return {};
-                }
-
-                if (result->Modifiers.Integrity)
-                {
-                  return {};
-                }
-
-                auto integrityArgs = ConsumeFunction(args);
-                if (integrityArgs.Peek().Type() != TokenType::String)
-                {
-                  return {};
-                }
-
-                auto integrityValue = ConsumeStringRaw(integrityArgs);
-
-                if (!integrityArgs.IsAtEnd())
-                {
-                  return {};
-                }
-
-                result->Modifiers.Integrity =
-                  URLIntegrityFunction {.Parameters = {CSSOMString(integrityValue)}};
-
-                break;
-              }
-              case ValueId::ReferrerPolicy:
-              {
-                if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::ReferrerPolicy))
-                {
-                  return {};
-                }
-
-                if (result->Modifiers.ReferrerPolicy)
-                {
-                  return {};
-                }
-
-                auto referrerPolicyArgs = ConsumeFunction(args);
-                auto referrerPolicyValue =
-                  MetaConsumer<keywords::NoReferrer, keywords::NoReferrerWhenDowngrade, keywords::SameOrigin,
-                               keywords::Origin, keywords::StrictOrigin, keywords::OriginWhenCrossOrigin,
-                               keywords::StrictOriginWhenCrossOrigin,
-                               keywords::UnsafeUrl>::Consume(referrerPolicyArgs, state);
-
-                if (!referrerPolicyValue || !referrerPolicyArgs.IsAtEnd())
-                {
-                  return {};
-                }
-
-                result->Modifiers.ReferrerPolicy =
-                  URLReferrerPolicyFunction {.Parameters = {*referrerPolicyValue}};
-
-                break;
-              }
-              default:
+              if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::CrossOrigin))
               {
                 return {};
               }
+
+              if (result->Modifiers.CrossOrigin)
+              {
+                return {};
+              }
+
+              auto crossOriginArgs = ConsumeFunction(args);
+              auto crossOriginValue =
+                MetaConsumer<keywords::Anonymous, keywords::UseCredentials>::Consume(crossOriginArgs, state);
+
+              if (!crossOriginValue || !crossOriginArgs.IsAtEnd())
+              {
+                return {};
+              }
+
+              result->Modifiers.CrossOrigin = URLCrossOriginFunction {.Parameters = {*crossOriginValue}};
+              break;
+            }
+            case ValueId::Integrity:
+            {
+              if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::Integrity))
+              {
+                return {};
+              }
+
+              if (result->Modifiers.Integrity)
+              {
+                return {};
+              }
+
+              auto integrityArgs = ConsumeFunction(args);
+              if (integrityArgs.Peek().Type() != TokenType::String)
+              {
+                return {};
+              }
+
+              auto integrityValue = ConsumeStringRaw(integrityArgs);
+
+              if (!integrityArgs.IsAtEnd())
+              {
+                return {};
+              }
+
+              result->Modifiers.Integrity =
+                URLIntegrityFunction {.Parameters = {CSSOMString(integrityValue)}};
+
+              break;
+            }
+            case ValueId::ReferrerPolicy:
+            {
+              if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::ReferrerPolicy))
+              {
+                return {};
+              }
+
+              if (result->Modifiers.ReferrerPolicy)
+              {
+                return {};
+              }
+
+              auto referrerPolicyArgs = ConsumeFunction(args);
+              auto referrerPolicyValue =
+                MetaConsumer<keywords::NoReferrer, keywords::NoReferrerWhenDowngrade, keywords::SameOrigin,
+                             keywords::Origin, keywords::StrictOrigin, keywords::OriginWhenCrossOrigin,
+                             keywords::StrictOriginWhenCrossOrigin,
+                             keywords::UnsafeUrl>::Consume(referrerPolicyArgs, state);
+
+              if (!referrerPolicyValue || !referrerPolicyArgs.IsAtEnd())
+              {
+                return {};
+              }
+
+              result->Modifiers.ReferrerPolicy =
+                URLReferrerPolicyFunction {.Parameters = {*referrerPolicyValue}};
+
+              break;
+            }
+            default:
+            {
+              return {};
             }
           }
         }

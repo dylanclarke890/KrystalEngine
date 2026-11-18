@@ -211,7 +211,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit ClientLogicalHeightForFixedPosition() const noexcept;
 
-    KRYS_NODISCARD bool ShouldUsePrintingLayout() const noexcept
+    KRYS_NODISCARD static bool ShouldUsePrintingLayout() noexcept
     {
       return false;
     }
@@ -345,7 +345,7 @@ namespace krys::boo
     };
 
   private:
-    KRYS_NODISCARD bool ShouldRepaint(const LayoutRect &rect) const noexcept;
+    KRYS_NODISCARD static bool ShouldRepaint(const LayoutRect &rect) noexcept;
 
     /// @return Whether the whole view is now dirty.
     bool AccumulateRepaintRect(IntRect rect, IntRect viewRect) noexcept;

@@ -127,7 +127,7 @@ namespace krys::boo::html
     void SetSize(const IntSize &size) noexcept;
 
     /// @brief Whether a buffer of @p area pixels is accelerated.
-    KRYS_NODISCARD bool ShouldAccelerate(uint64 area) const noexcept;
+    KRYS_NODISCARD static bool ShouldAccelerate(uint64 area) noexcept;
 
     void AddCanvasNeedingPreparationForDisplayOrFlush() noexcept;
 

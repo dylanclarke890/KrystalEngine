@@ -275,12 +275,12 @@ namespace krys::pal
 template <>
 struct std::formatter<krys::pal::Key>
 {
-  constexpr auto parse(std::format_parse_context &ctx)
+  constexpr static auto parse(std::format_parse_context &ctx)
   {
     return ctx.begin();
   }
 
-  auto format(const krys::pal::Key &key, std::format_context &ctx) const
+  static auto format(const krys::pal::Key &key, std::format_context &ctx)
   {
     switch (key)
     {
@@ -298,12 +298,12 @@ struct std::formatter<krys::pal::Key>
 template <>
 struct std::formatter<krys::pal::KeyState>
 {
-  constexpr auto parse(std::format_parse_context &ctx)
+  constexpr static auto parse(std::format_parse_context &ctx)
   {
     return ctx.begin();
   }
 
-  auto format(const krys::pal::KeyState &state, std::format_context &ctx) const
+  static auto format(const krys::pal::KeyState &state, std::format_context &ctx)
   {
     switch (state)
     {

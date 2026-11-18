@@ -1919,7 +1919,7 @@ namespace krys::boo
     }
   }
 
-  bool EventHandler::UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) const noexcept
+  bool EventHandler::UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) noexcept
   {
     if (!node)
     {
@@ -3363,7 +3363,7 @@ namespace krys::boo
 
   // FIXME: The chrome client's shouldUseMouseEventForSelection and quirks, once there are any. (There's no
   // image overlay text; see DIFFERENCES.md.)
-  bool EventHandler::CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) const noexcept
+  bool EventHandler::CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) noexcept
   {
     auto *node = event.TargetNode();
 
@@ -3826,12 +3826,12 @@ namespace krys::boo
     GetDragState().Source = ShareRefPtr(element);
   }
 
-  bool EventHandler::CanDropCurrentlyDraggedImageAsFile() const noexcept
+  bool EventHandler::CanDropCurrentlyDraggedImageAsFile() noexcept
   {
     return true;
   }
 
-  bool EventHandler::ShouldAllowMouseDownToStartDrag() const noexcept
+  bool EventHandler::ShouldAllowMouseDownToStartDrag() noexcept
   {
     return true;
   }

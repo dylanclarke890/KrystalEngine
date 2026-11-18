@@ -259,10 +259,8 @@ namespace krys::boo::dom::detail
       {
         return iterator(_begin, _root);
       }
-      else
-      {
-        return iterator();
-      }
+
+      return iterator();
     }
 
     iterator end() const noexcept

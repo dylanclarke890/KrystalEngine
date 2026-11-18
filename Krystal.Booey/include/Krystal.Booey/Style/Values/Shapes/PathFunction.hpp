@@ -144,9 +144,9 @@ namespace krys::boo::style
   template <>
   struct Blending<Path>
   {
-    KRYS_NODISCARD bool CanBlend(const Path &, const Path &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const Path &, const Path &) noexcept;
 
-    KRYS_NODISCARD Path Blend(const Path &, const Path &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Path Blend(const Path &, const Path &, const BlendingContext &) noexcept;
   };
 }
 

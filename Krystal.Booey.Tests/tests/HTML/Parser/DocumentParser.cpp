@@ -50,7 +50,7 @@ namespace krys::boo::html::tests
             {
               return u8"svg ";
             }
-            else if (element.NamespaceURI() == infra::namespaces::MathML)
+            if (element.NamespaceURI() == infra::namespaces::MathML)
             {
               return u8"math ";
             }
@@ -73,7 +73,7 @@ namespace krys::boo::html::tests
               {
                 return u8"xml ";
               }
-              else if (attr->NamespaceURI() == infra::namespaces::XMLNS)
+              if (attr->NamespaceURI() == infra::namespaces::XMLNS)
               {
                 return u8"xmlns ";
               }

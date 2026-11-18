@@ -623,19 +623,20 @@ namespace krys::boo::dom
                                                             DOMStringAtom qualifiedName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createevent
-    KRYS_NODISCARD ExceptionOr<Ref<Event>> CreateEvent(DOMStringView interface) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<Event>> CreateEvent(DOMStringView interface) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createrange
     KRYS_NODISCARD Ref<Range> CreateRange() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createnodeiterator
-    KRYS_NODISCARD Ref<NodeIterator> CreateNodeIterator(Node &root,
-                                                        WhatToShow whatToShow = WhatToShow::SHOW_ALL,
-                                                        RefPtr<NodeFilter> &&filter = nullptr) noexcept;
+    KRYS_NODISCARD static Ref<NodeIterator>
+      CreateNodeIterator(Node &root, WhatToShow whatToShow = WhatToShow::SHOW_ALL,
+                         RefPtr<NodeFilter> &&filter = nullptr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createtreewalker
-    KRYS_NODISCARD Ref<TreeWalker> CreateTreeWalker(Node &root, WhatToShow whatToShow = WhatToShow::SHOW_ALL,
-                                                    RefPtr<NodeFilter> &&filter = nullptr) noexcept;
+    KRYS_NODISCARD static Ref<TreeWalker> CreateTreeWalker(Node &root,
+                                                           WhatToShow whatToShow = WhatToShow::SHOW_ALL,
+                                                           RefPtr<NodeFilter> &&filter = nullptr) noexcept;
 
 #pragma endregion
 
@@ -946,7 +947,7 @@ namespace krys::boo::dom
 
     /// @brief Parses @p url relative to @p baseURL.
     /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
-    KRYS_NODISCARD url::URL CompleteURL(utf8_stringview url, const url::URL &baseURL) const noexcept;
+    KRYS_NODISCARD static url::URL CompleteURL(utf8_stringview url, const url::URL &baseURL) noexcept;
 
 #pragma endregion
 
@@ -1795,7 +1796,7 @@ namespace krys::boo::dom
 
     /// @brief Whether the document is being printed.
     // Always false: there's no printing.
-    KRYS_NODISCARD bool Printing() const noexcept
+    KRYS_NODISCARD static bool Printing() noexcept
     {
       return false;
     }
@@ -1804,8 +1805,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
 
     /// @brief How a background colour is composited: over what's beneath it.
-    KRYS_NODISCARD CompositeOperator CompositeOperatorForBackgroundColor(const Color &,
-                                                                         const RenderElement &) const noexcept
+    KRYS_NODISCARD static CompositeOperator
+      CompositeOperatorForBackgroundColor(const Color &, const RenderElement &) noexcept
     {
       return CompositeOperator::SourceOver;
     }
@@ -2260,7 +2261,7 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#the-document-object:get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
 
-    KRYS_NODISCARD bool IsScriptingDisabled() const noexcept
+    KRYS_NODISCARD static bool IsScriptingDisabled() noexcept
     {
       // SPEC-VIOLATION(HTML, DOM): We don't have global objects or JavaScript so we'll always return true
       // here. A document is scripting-disabled if the document does not have a browsing context.

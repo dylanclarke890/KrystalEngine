@@ -44,12 +44,12 @@ namespace krys::boo
     _disallowFileAccess = true;
   }
 
-  bool DragData::CanSmartReplace() const noexcept
+  bool DragData::CanSmartReplace() noexcept
   {
     return false;
   }
 
-  bool DragData::ContainsColor() const noexcept
+  bool DragData::ContainsColor() noexcept
   {
     return false;
   }
@@ -117,7 +117,7 @@ namespace krys::boo
     return utf8_string(_platformDragData->GetURL().String());
   }
 
-  bool DragData::ShouldMatchStyleOnDrop() const noexcept
+  bool DragData::ShouldMatchStyleOnDrop() noexcept
   {
     return false;
   }

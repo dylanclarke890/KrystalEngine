@@ -238,7 +238,7 @@ namespace krys::boo
                                         hitTestAction);
   }
 
-  bool RenderFragmentedFlow::ShouldRepaint(const LayoutRect &rect) const noexcept
+  bool RenderFragmentedFlow::ShouldRepaint(const LayoutRect &rect) noexcept
   {
     return !rect.IsEmpty();
   }
@@ -948,7 +948,7 @@ namespace krys::boo
   }
 
   LayoutUnit
-    RenderFragmentedFlow::OffsetFromLogicalTopOfFirstFragment(const RenderBlock *currentBlock) const noexcept
+    RenderFragmentedFlow::OffsetFromLogicalTopOfFirstFragment(const RenderBlock *currentBlock) noexcept
   {
     // As a last resort, take the slow path.
     LayoutRect blockRect(0_lu, 0_lu, currentBlock->Width(), currentBlock->Height());

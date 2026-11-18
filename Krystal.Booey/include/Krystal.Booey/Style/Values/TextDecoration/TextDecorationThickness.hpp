@@ -97,12 +97,13 @@ namespace krys::boo
     template <>
     struct Blending<TextDecorationThickness>
     {
-      KRYS_NODISCARD bool CanBlend(const TextDecorationThickness &, const TextDecorationThickness &,
-                                   const RenderStyle &, const RenderStyle &) noexcept;
+      KRYS_NODISCARD static bool CanBlend(const TextDecorationThickness &, const TextDecorationThickness &,
+                                          const RenderStyle &, const RenderStyle &) noexcept;
 
-      KRYS_NODISCARD TextDecorationThickness Blend(const TextDecorationThickness &,
-                                                   const TextDecorationThickness &, const RenderStyle &,
-                                                   const RenderStyle &, const BlendingContext &) noexcept;
+      KRYS_NODISCARD static TextDecorationThickness Blend(const TextDecorationThickness &,
+                                                          const TextDecorationThickness &,
+                                                          const RenderStyle &, const RenderStyle &,
+                                                          const BlendingContext &) noexcept;
     };
   }
 }

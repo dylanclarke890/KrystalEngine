@@ -103,9 +103,10 @@ namespace krys::boo::style
   template <>
   struct Blending<TextIndent>
   {
-    KRYS_NODISCARD bool CanBlend(const TextIndent &, const TextIndent &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const TextIndent &, const TextIndent &) noexcept;
 
-    KRYS_NODISCARD TextIndent Blend(const TextIndent &, const TextIndent &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static TextIndent Blend(const TextIndent &, const TextIndent &,
+                                           const BlendingContext &) noexcept;
   };
 }
 

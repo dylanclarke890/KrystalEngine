@@ -160,8 +160,9 @@ namespace krys::boo
     RenderFragmentContainer *PhysicalTranslationFromFlowToFragment(LayoutPoint &physicalPoint) const noexcept;
 
     /// @brief The inverse of PhysicalTranslationFromFlowToFragment: from a point in @p columnSet to the flow.
-    KRYS_NODISCARD LayoutSize PhysicalTranslationFromFragmentToFlow(
-      const RenderMultiColumnSet *columnSet, const LayoutPoint &physicalPoint) const noexcept;
+    KRYS_NODISCARD static LayoutSize
+      PhysicalTranslationFromFragmentToFlow(const RenderMultiColumnSet *columnSet,
+                                            const LayoutPoint &physicalPoint) noexcept;
 
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,

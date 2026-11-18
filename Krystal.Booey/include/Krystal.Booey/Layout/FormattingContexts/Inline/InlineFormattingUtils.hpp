@@ -92,9 +92,9 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD InlineLayoutUnit InitialLineHeight(bool isFirstLine) const noexcept;
 
-    KRYS_NODISCARD FloatingContext::Constraints
+    KRYS_NODISCARD static FloatingContext::Constraints
       FloatConstraintsForLine(InlineLayoutUnit lineLogicalTop, InlineLayoutUnit contentLogicalHeight,
-                              const FloatingContext &floatingContext) const noexcept;
+                              const FloatingContext &floatingContext) noexcept;
 
     KRYS_NODISCARD static InlineRect FlipVisualRectToLogicalForWritingMode(const InlineRect &visualRect,
                                                                            WritingMode writingMode) noexcept;

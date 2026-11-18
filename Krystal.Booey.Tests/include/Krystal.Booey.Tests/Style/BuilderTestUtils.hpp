@@ -67,7 +67,7 @@ namespace krys::boo::style::tests
     }
 
     /// @brief Parses `value` as the value of `property`.
-    KRYS_NODISCARD Ref<css::Value> Parse(css::PropertyId property, utf8_stringview value) noexcept
+    KRYS_NODISCARD static Ref<css::Value> Parse(css::PropertyId property, utf8_stringview value) noexcept
     {
       utf8_string declaration {css::ToString(property)};
       declaration += u8": ";

@@ -84,7 +84,7 @@ namespace krys::boo
     }
   }
 
-  utf8_stringview CachedCSSStyleSheet::Encoding() const noexcept
+  utf8_stringview CachedCSSStyleSheet::Encoding() noexcept
   {
     // Style sheets are UTF-8 only, whatever the request, the response or `@charset` say (see DIFFERENCES.md).
     return u8"UTF-8";

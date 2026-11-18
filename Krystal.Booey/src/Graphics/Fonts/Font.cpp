@@ -322,7 +322,7 @@ namespace krys::boo
   }
 
   GlyphBufferAdvance Font::ApplyTransforms(GlyphBuffer &, uint32, uint32, bool, bool, const StringAtom &,
-                                           utf8_stringview, TextDirection) const noexcept
+                                           utf8_stringview, TextDirection) noexcept
   {
     return MakeGlyphBufferAdvance();
   }
@@ -391,7 +391,7 @@ namespace krys::boo
     return _mathData.get();
   }
 
-  bool Font::IsProbablyOnlyUsedToRenderIcons() const noexcept
+  bool Font::IsProbablyOnlyUsedToRenderIcons() noexcept
   {
     // FIXME: Not implemented yet.
     return false;
@@ -483,7 +483,7 @@ namespace krys::boo
     return true;
   }
 
-  ColorGlyphType Font::ColorGlyphType(Glyph) const noexcept
+  ColorGlyphType Font::ColorGlyphType(Glyph) noexcept
   {
     // FIXME: https://bugs.webkit.org/show_bug.cgi?id=259205 Determine if the glyph is a color glyph or not.
     return ColorGlyphType::Outline;
@@ -694,7 +694,7 @@ namespace krys::boo
                         GetOrigin(), FontIsInterstitial::No);
   }
 
-  RefPtr<Font> Font::PlatformCreateHalfWidthFont() const noexcept
+  RefPtr<Font> Font::PlatformCreateHalfWidthFont() noexcept
   {
     // FIXME: https://bugs.webkit.org/show_bug.cgi?id=281333 : implement half width font for this platform.
     return nullptr;
@@ -705,7 +705,7 @@ namespace krys::boo
     _treatAsFixedPitch = _platformData.IsFixedPitch();
   }
 
-  bool Font::VariantCapsSupportedForSynthesis(FontVariantCaps fontVariantCaps) const noexcept
+  bool Font::VariantCapsSupportedForSynthesis(FontVariantCaps fontVariantCaps) noexcept
   {
     switch (fontVariantCaps)
     {

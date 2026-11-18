@@ -213,7 +213,7 @@ namespace krys::serialisation
         {
           throw std::exception("No more objects in input");
         }
-        else if (_type == Type::null)
+        if (_type == Type::null)
         {
           throw std::exception("null or empty iterator");
         }
@@ -228,10 +228,8 @@ namespace krys::serialisation
         {
           return _memberIteratorBegin[_index].name.GetString();
         }
-        else
-        {
-          return nullptr;
-        }
+
+        return nullptr;
       }
 
       /// @brief Adjust our position such that we are at the node with the given name.

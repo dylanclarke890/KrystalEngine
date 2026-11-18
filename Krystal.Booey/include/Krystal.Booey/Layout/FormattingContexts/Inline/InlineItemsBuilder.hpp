@@ -78,7 +78,7 @@ namespace krys::boo::layout
     void HandleTextContent(const InlineTextBox &inlineTextBox, InlineItemList &inlineItemList,
                            Maybe<size_t> partialContentOffset) noexcept;
 
-    KRYS_NODISCARD bool
+    KRYS_NODISCARD static bool
       BuildInlineItemListForTextFromBreakingPositionsCache(const InlineTextBox &inlineTextBox,
                                                            InlineItemList &inlineItemList) noexcept;
 
@@ -86,7 +86,7 @@ namespace krys::boo::layout
 
     void HandleInlineBoxEnd(const Box &inlineBox, InlineItemList &inlineItemList) noexcept;
 
-    void HandleInlineLevelBox(const Box &layoutBox, InlineItemList &inlineItemList) noexcept;
+    static void HandleInlineLevelBox(const Box &layoutBox, InlineItemList &inlineItemList) noexcept;
 
     KRYS_NODISCARD bool ContentRequiresVisualReordering() const noexcept
     {

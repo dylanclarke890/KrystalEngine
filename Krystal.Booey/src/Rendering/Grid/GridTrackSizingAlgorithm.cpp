@@ -725,7 +725,7 @@ namespace krys::boo
   }
 
   LayoutUnit GridTrackSizingAlgorithm::ItemSizeForTrackSizeComputationPhaseMasonry(
-    TrackSizeComputationPhase phase, const MasonryMinMaxTrackSize &trackSize) const noexcept
+    TrackSizeComputationPhase phase, const MasonryMinMaxTrackSize &trackSize) noexcept
   {
     switch (phase)
     {

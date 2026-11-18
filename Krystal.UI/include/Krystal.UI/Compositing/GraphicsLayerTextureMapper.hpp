@@ -244,7 +244,7 @@ namespace krys::ui
 
     KRYS_NODISCARD bool ShouldHaveBackingStore() const noexcept;
 
-    KRYS_NODISCARD bool FiltersCanBeComposited(const boo::FilterOperations &filters) const noexcept;
+    KRYS_NODISCARD static bool FiltersCanBeComposited(const boo::FilterOperations &filters) noexcept;
 
     void UpdateVisibleRects(const boo::FloatRect &visibleRect) noexcept;
 

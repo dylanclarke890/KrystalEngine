@@ -123,7 +123,7 @@ namespace krys::boo::style
   template <>
   struct Blending<FontSizeAdjust>
   {
-    KRYS_NODISCARD bool CanBlend(const FontSizeAdjust &, const FontSizeAdjust &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const FontSizeAdjust &, const FontSizeAdjust &) noexcept;
 
     KRYS_NODISCARD FontSizeAdjust Blend(const FontSizeAdjust &, const FontSizeAdjust &,
                                         const BlendingContext &) noexcept;

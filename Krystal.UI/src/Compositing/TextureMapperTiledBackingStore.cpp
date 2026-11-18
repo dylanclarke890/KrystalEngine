@@ -319,9 +319,9 @@ namespace krys::ui
     }
   }
 
-  boo::IntSize
-    TextureMapperTiledBackingStore::ComputeTileSize(const boo::IntSize &viewportSize, int32 maxTextureSize,
-                                                    const boo::IntRect &contentsRect) const noexcept
+  boo::IntSize TextureMapperTiledBackingStore::ComputeTileSize(const boo::IntSize &viewportSize,
+                                                               int32 maxTextureSize,
+                                                               const boo::IntRect &contentsRect) noexcept
   {
     // Tiles are painted by the GPU: tiles as wide as the viewport (or half of it), and a quarter of its
     // height.

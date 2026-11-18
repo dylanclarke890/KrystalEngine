@@ -936,7 +936,7 @@ namespace krys::ui
     NotifyChange(AnimationChange);
   }
 
-  bool GraphicsLayerTextureMapper::FiltersCanBeComposited(const boo::FilterOperations &filters) const noexcept
+  bool GraphicsLayerTextureMapper::FiltersCanBeComposited(const boo::FilterOperations &filters) noexcept
   {
     if (!filters.size())
     {

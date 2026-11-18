@@ -54,8 +54,8 @@ namespace krys::boo::tests
         return CreateTestLayer(type, client);
       }
 
-      KRYS_NODISCARD Ref<TestGraphicsLayer> CreateTestLayer(GraphicsLayerType type,
-                                                            GraphicsLayerClient &client) noexcept
+      KRYS_NODISCARD static Ref<TestGraphicsLayer> CreateTestLayer(GraphicsLayerType type,
+                                                                   GraphicsLayerClient &client) noexcept
       {
         return AdoptRef(*new TestGraphicsLayer(type, client));
       }

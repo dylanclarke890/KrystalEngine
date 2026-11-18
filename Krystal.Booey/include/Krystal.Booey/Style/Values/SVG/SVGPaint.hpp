@@ -242,13 +242,13 @@ namespace krys::boo::style
   template <>
   struct Blending<SVGPaint>
   {
-    KRYS_NODISCARD bool Equals(const SVGPaint &, const SVGPaint &, const RenderStyle &,
-                               const RenderStyle &) noexcept;
+    KRYS_NODISCARD static bool Equals(const SVGPaint &, const SVGPaint &, const RenderStyle &,
+                                      const RenderStyle &) noexcept;
 
-    KRYS_NODISCARD bool CanBlend(const SVGPaint &, const SVGPaint &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const SVGPaint &, const SVGPaint &) noexcept;
 
-    KRYS_NODISCARD SVGPaint Blend(const SVGPaint &, const SVGPaint &, const RenderStyle &,
-                                  const RenderStyle &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static SVGPaint Blend(const SVGPaint &, const SVGPaint &, const RenderStyle &,
+                                         const RenderStyle &, const BlendingContext &) noexcept;
   };
 }
 

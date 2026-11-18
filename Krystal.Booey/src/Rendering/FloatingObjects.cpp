@@ -349,7 +349,7 @@ namespace krys::boo
         return _belowLogicalHeight;
       }
 
-      KRYS_NODISCARD LayoutUnit HighValue() const noexcept
+      KRYS_NODISCARD static LayoutUnit HighValue() noexcept
       {
         return LayoutUnit::Max();
       }

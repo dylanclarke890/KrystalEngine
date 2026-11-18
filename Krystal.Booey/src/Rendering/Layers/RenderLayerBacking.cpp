@@ -1832,7 +1832,7 @@ namespace krys::boo
     UpdateDirectlyCompositedBackgroundImage(contentsInfo, didUpdateContentsRect);
   }
 
-  GraphicsLayer *RenderLayerBacking::LayerForContents() const noexcept
+  GraphicsLayer *RenderLayerBacking::LayerForContents() noexcept
   {
     return nullptr;
   }
@@ -3527,7 +3527,7 @@ namespace krys::boo
     return {};
   }
 
-  bool RenderLayerBacking::PaintsIntoWindow() const noexcept
+  bool RenderLayerBacking::PaintsIntoWindow() noexcept
   {
     // The view's layer always paints into its graphics layer: compositing is forced.
     return false;

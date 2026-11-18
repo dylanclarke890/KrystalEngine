@@ -380,7 +380,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
     KRYS_NODISCARD dom::Element &AdjustedCurrentNode() noexcept;
 
-    void ParseError(const TokenAtom &token) noexcept;
+    static void ParseError(const TokenAtom &token) noexcept;
 
 #pragma region InsertionMode Algorithms
 
@@ -469,7 +469,7 @@ namespace krys::boo::html
     bool RemoveNonWhitespace(TokenAtom &token) noexcept;
 
     /// @brief Skips leading whitespace in a character token and returns whether any characters remain.
-    bool SkipLeadingWhitespace(TokenAtom &token) noexcept;
+    static bool SkipLeadingWhitespace(TokenAtom &token) noexcept;
 
     /// @brief Inserts leading whitespace in a character token and returns whether any characters remain.
     bool InsertLeadingWhitespace(TokenAtom &token) noexcept;
@@ -553,21 +553,21 @@ namespace krys::boo::html
 #pragma region Adjust Attribute Algorithms
 
     /// @see https://html.spec.whatwg.org/#adjust-foreign-attributes
-    void AdjustForeignAttributes(TokenAtom &token) noexcept;
+    static void AdjustForeignAttributes(TokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#adjust-svg-attributes
-    void AdjustSVGAttributes(TokenAtom &token) noexcept;
+    static void AdjustSVGAttributes(TokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#adjust-math-ml-attributes
-    void AdjustMathMLAttributes(TokenAtom &token) noexcept;
+    static void AdjustMathMLAttributes(TokenAtom &token) noexcept;
 
 #pragma endregion
 
 #pragma region Quirks Mode Algorithms
 
-    bool IsQuirksModeDOCTYPE(const TokenAtom &token) const noexcept;
+    static bool IsQuirksModeDOCTYPE(const TokenAtom &token) noexcept;
 
-    bool IsLimitedQuirksModeDOCTYPE(const TokenAtom &token) const noexcept;
+    static bool IsLimitedQuirksModeDOCTYPE(const TokenAtom &token) noexcept;
 
 #pragma endregion
 
@@ -582,9 +582,9 @@ namespace krys::boo::html
 
 #pragma region IntegrationPoint Algorithms
 
-    KRYS_NODISCARD bool IsMathMLTextIntegrationPoint(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD static bool IsMathMLTextIntegrationPoint(const dom::Element &element) noexcept;
 
-    KRYS_NODISCARD bool IsHTMLIntegrationPoint(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD static bool IsHTMLIntegrationPoint(const dom::Element &element) noexcept;
 
 #pragma endregion
   };

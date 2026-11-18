@@ -521,7 +521,7 @@ namespace krys::boo::css
     return current;
   }
 
-  bool Tokenizer::StartsWithValidEscape(char32 first, char32 second) const noexcept
+  bool Tokenizer::StartsWithValidEscape(char32 first, char32 second) noexcept
   {
     if (first != U'\\')
     {
@@ -561,7 +561,7 @@ namespace krys::boo::css
     return false;
   }
 
-  bool Tokenizer::StartsWithNumber(char32 first, char32 second, char32 third) const noexcept
+  bool Tokenizer::StartsWithNumber(char32 first, char32 second, char32 third) noexcept
   {
     if (first == U'+' || first == U'-')
     {
@@ -596,7 +596,7 @@ namespace krys::boo::css
     return false;
   }
 
-  bool Tokenizer::StartsWithUnicodeRange(char32 first, char32 second, char32 third) const noexcept
+  bool Tokenizer::StartsWithUnicodeRange(char32 first, char32 second, char32 third) noexcept
   {
     if ((first == U'U' || first == U'u') && second == U'+' && (IsHexDigit(third) || third == U'?'))
     {
@@ -606,7 +606,7 @@ namespace krys::boo::css
     return false;
   }
 
-  bool Tokenizer::StartsWithExponent(char32 first, char32 second, char32 third) const noexcept
+  bool Tokenizer::StartsWithExponent(char32 first, char32 second, char32 third) noexcept
   {
     if (first != U'E' && first != U'e')
     {

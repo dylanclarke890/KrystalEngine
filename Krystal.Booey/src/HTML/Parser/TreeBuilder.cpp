@@ -460,10 +460,8 @@ namespace krys::boo::html
     {
       return _context->Element();
     }
-    else
-    {
-      return CurrentNode();
-    }
+
+    return CurrentNode();
   }
 
   void TreeBuilder::ParseError(const TokenAtom &token) noexcept
@@ -4864,7 +4862,7 @@ namespace krys::boo::html
 
 #pragma region Quirks Mode Algorithms
 
-  bool TreeBuilder::IsQuirksModeDOCTYPE(const TokenAtom &token) const noexcept
+  bool TreeBuilder::IsQuirksModeDOCTYPE(const TokenAtom &token) noexcept
   {
     krys_debug_assert(token.Type() == TokenType::DOCTYPE);
 
@@ -4970,7 +4968,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool TreeBuilder::IsLimitedQuirksModeDOCTYPE(const TokenAtom &token) const noexcept
+  bool TreeBuilder::IsLimitedQuirksModeDOCTYPE(const TokenAtom &token) noexcept
   {
     krys_debug_assert(token.Type() == TokenType::DOCTYPE);
 
@@ -5396,7 +5394,7 @@ namespace krys::boo::html
 
 #pragma region IntegrationPoint Algorithms
 
-  bool TreeBuilder::IsMathMLTextIntegrationPoint(const dom::Element &element) const noexcept
+  bool TreeBuilder::IsMathMLTextIntegrationPoint(const dom::Element &element) noexcept
   {
     if (element.NamespaceURI() == infra::namespaces::MathML)
     {
@@ -5417,7 +5415,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool TreeBuilder::IsHTMLIntegrationPoint(const dom::Element &element) const noexcept
+  bool TreeBuilder::IsHTMLIntegrationPoint(const dom::Element &element) noexcept
   {
     if (element.NamespaceURI() == infra::namespaces::MathML)
     {

@@ -157,17 +157,20 @@ namespace krys::boo::dom
       return false;
     }
 
-    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                              css::ValueId identifier) noexcept;
+    static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                     css::PropertyId property,
+                                                     css::ValueId identifier) noexcept;
 
-    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                              double value, css::UnitType unit) noexcept;
+    static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                     css::PropertyId property, double value,
+                                                     css::UnitType unit) noexcept;
 
     void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                               const css::CSSOMString &value) noexcept;
 
-    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                                              Ref<css::Value> &&value) noexcept;
+    static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                     css::PropertyId property,
+                                                     Ref<css::Value> &&value) noexcept;
 
     /// @brief Marks the presentational hints out of date, for a change that isn't an attribute change.
     void InvalidatePresentationalHintStyle() noexcept;

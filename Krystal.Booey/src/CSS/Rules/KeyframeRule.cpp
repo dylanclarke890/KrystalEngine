@@ -117,7 +117,7 @@ namespace krys::boo::css
     return AdoptRef(*new KeyframeRule(ToKeys(keys), krys::move(properties)));
   }
 
-  Ref<KeyframeRule> KeyframeRule::Copy() const noexcept
+  Ref<KeyframeRule> KeyframeRule::Copy() noexcept
   {
     krys_unreachable();
   }

@@ -45,8 +45,8 @@ namespace krys::boo::layout
   public:
     explicit InlineQuirks(const InlineFormattingContext &inlineFormattingContext) noexcept;
 
-    KRYS_NODISCARD bool TrailingNonBreakingSpaceNeedsAdjustment(bool isInIntrinsicWidthMode,
-                                                                bool lineHasOverflow) const noexcept;
+    KRYS_NODISCARD static bool TrailingNonBreakingSpaceNeedsAdjustment(bool isInIntrinsicWidthMode,
+                                                                       bool lineHasOverflow) noexcept;
 
     KRYS_NODISCARD InlineLayoutUnit InitialLineHeight() const noexcept;
 

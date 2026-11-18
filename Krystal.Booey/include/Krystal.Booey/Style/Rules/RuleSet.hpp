@@ -218,7 +218,8 @@ namespace krys::boo::style
 
     void AddRule(const css::StyleRule &rule, uint32 selectorIndex, uint32 selectorListIndex) noexcept;
 
-    void AddToRuleSet(const css::CSSOMStringAtom &key, AtomRuleMap &map, const RuleData &ruleData) noexcept;
+    static void AddToRuleSet(const css::CSSOMStringAtom &key, AtomRuleMap &map,
+                             const RuleData &ruleData) noexcept;
 
     void ShrinkToFit() noexcept;
 

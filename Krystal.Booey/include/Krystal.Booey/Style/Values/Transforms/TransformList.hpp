@@ -128,15 +128,16 @@ namespace krys::boo
     template <>
     struct Blending<TransformList>
     {
-      KRYS_NODISCARD bool CanBlend(const TransformList &, const TransformList &, CompositeOperation) noexcept;
+      KRYS_NODISCARD static bool CanBlend(const TransformList &, const TransformList &,
+                                          CompositeOperation) noexcept;
 
-      KRYS_NODISCARD TransformList Blend(const TransformList &, const TransformList &,
-                                         const BlendingContext &) noexcept;
+      KRYS_NODISCARD static TransformList Blend(const TransformList &, const TransformList &,
+                                                const BlendingContext &) noexcept;
 
       /// @brief Blends against the border box of the animated renderer, and uses the animation's shared
       /// prefix of `transform` functions.
-      KRYS_NODISCARD TransformList Blend(const TransformList &, const TransformList &,
-                                         const interpolation::Context &) noexcept;
+      KRYS_NODISCARD static TransformList Blend(const TransformList &, const TransformList &,
+                                                const interpolation::Context &) noexcept;
 
     private:
       KRYS_NODISCARD static TransformList BlendTransformLists(const TransformList &, const TransformList &,

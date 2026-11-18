@@ -165,7 +165,7 @@ namespace krys::boo
 
     KRYS_NODISCARD AffineTransform NonScalingStrokeTransform() const noexcept;
 
-    KRYS_NODISCARD Path *NonScalingStrokePath(const Path *, const AffineTransform &) const noexcept;
+    KRYS_NODISCARD static Path *NonScalingStrokePath(const Path *, const AffineTransform &) noexcept;
 
     KRYS_NODISCARD virtual FloatRect
       AdjustStrokeBoundingBoxForMarkersAndZeroLengthLinecaps(RepaintRectCalculation,
@@ -234,7 +234,8 @@ namespace krys::boo
 
     void UpdateRepaintBoundingBox() noexcept;
 
-    KRYS_NODISCARD bool SetupNonScalingStrokeContext(AffineTransform &, GraphicsContextStateSaver &) noexcept;
+    KRYS_NODISCARD static bool SetupNonScalingStrokeContext(AffineTransform &,
+                                                            GraphicsContextStateSaver &) noexcept;
 
     KRYS_NODISCARD FloatRect CalculateApproximateStrokeBoundingBox() const noexcept;
 

@@ -408,7 +408,7 @@ namespace krys::boo::html
       });
     }
 
-    KRYS_NODISCARD bool IsTokenizerWhitespace(char32 character) const noexcept
+    KRYS_NODISCARD static bool IsTokenizerWhitespace(char32 character) noexcept
     {
       return character == ' ' || character == '\x0A' || character == '\x09' || character == '\x0C';
     }

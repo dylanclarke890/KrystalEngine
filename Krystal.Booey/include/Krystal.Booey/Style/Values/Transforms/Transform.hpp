@@ -128,18 +128,19 @@ namespace krys::boo::style
   template <>
   struct Blending<Transform>
   {
-    KRYS_NODISCARD bool CanBlend(const Transform &, const Transform &, CompositeOperation) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const Transform &, const Transform &, CompositeOperation) noexcept;
 
-    KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const Transform &,
-                                                                                const Transform &) noexcept
+    KRYS_NODISCARD static constexpr bool
+      RequiresInterpolationForAccumulativeIteration(const Transform &, const Transform &) noexcept
     {
       return true;
     }
 
-    KRYS_NODISCARD Transform Blend(const Transform &, const Transform &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Transform Blend(const Transform &, const Transform &,
+                                          const BlendingContext &) noexcept;
 
-    KRYS_NODISCARD Transform Blend(const Transform &, const Transform &,
-                                   const interpolation::Context &) noexcept;
+    KRYS_NODISCARD static Transform Blend(const Transform &, const Transform &,
+                                          const interpolation::Context &) noexcept;
   };
 
   // MARK: - Platform

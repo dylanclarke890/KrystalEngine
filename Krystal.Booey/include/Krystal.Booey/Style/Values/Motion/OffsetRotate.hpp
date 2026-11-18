@@ -93,7 +93,7 @@ namespace krys::boo::style
   template <>
   struct Blending<OffsetRotate>
   {
-    KRYS_NODISCARD bool CanBlend(const OffsetRotate &, const OffsetRotate &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const OffsetRotate &, const OffsetRotate &) noexcept;
 
     KRYS_NODISCARD OffsetRotate Blend(const OffsetRotate &, const OffsetRotate &,
                                       const BlendingContext &) noexcept;

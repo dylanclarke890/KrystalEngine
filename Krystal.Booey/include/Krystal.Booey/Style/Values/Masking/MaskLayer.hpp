@@ -319,7 +319,7 @@ namespace krys::boo::style
   template <>
   struct Blending<MaskLayer>
   {
-    KRYS_NODISCARD bool CanBlend(const MaskLayer &, const MaskLayer &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const MaskLayer &, const MaskLayer &) noexcept;
   };
 
 #undef KRYS_FOR_EACH_MASK_LAYER_REFERENCE

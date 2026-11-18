@@ -127,7 +127,7 @@ namespace krys::boo::dom
       return iterator(*_node);
     }
 
-    KRYS_NODISCARD iterator end() const noexcept
+    KRYS_NODISCARD static iterator end() noexcept
     {
       return {};
     }

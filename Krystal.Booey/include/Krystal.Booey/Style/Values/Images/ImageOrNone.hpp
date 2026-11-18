@@ -96,7 +96,7 @@ namespace krys::boo::style
   template <>
   struct Blending<ImageOrNone>
   {
-    KRYS_NODISCARD bool CanBlend(const ImageOrNone &, const ImageOrNone &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const ImageOrNone &, const ImageOrNone &) noexcept;
 
     KRYS_NODISCARD ImageOrNone Blend(const ImageOrNone &, const ImageOrNone &,
                                      const BlendingContext &) noexcept;

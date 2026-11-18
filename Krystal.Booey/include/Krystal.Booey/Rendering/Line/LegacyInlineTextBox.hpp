@@ -137,7 +137,7 @@ namespace krys::boo
 
     KRYS_NODISCARD int32 CaretMaxOffset() const noexcept final;
 
-    KRYS_NODISCARD bool HasMarkers() const noexcept;
+    KRYS_NODISCARD static bool HasMarkers() noexcept;
 
   private:
     KRYS_NODISCARD LayoutUnit SelectionTop() const noexcept;

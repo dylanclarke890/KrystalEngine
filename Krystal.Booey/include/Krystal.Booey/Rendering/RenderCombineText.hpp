@@ -66,7 +66,7 @@ namespace krys::boo
     }
 
     /// @brief Combined text takes one em.
-    KRYS_NODISCARD float CombinedTextWidth(const FontCascade &font) const noexcept
+    KRYS_NODISCARD static float CombinedTextWidth(const FontCascade &font) noexcept
     {
       return font.Size();
     }

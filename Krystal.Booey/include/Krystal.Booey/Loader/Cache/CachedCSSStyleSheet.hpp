@@ -68,7 +68,7 @@ namespace krys::boo
     KRYS_NODISCARD bool MimeTypeAllowedByNosniff() const noexcept;
 
     /// @brief The encoding the sheet's text is decoded from.
-    KRYS_NODISCARD utf8_stringview Encoding() const noexcept;
+    KRYS_NODISCARD static utf8_stringview Encoding() noexcept;
 
   private:
     KRYS_NODISCARD utf8_string ResponseMIMEType() const noexcept;

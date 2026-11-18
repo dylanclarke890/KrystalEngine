@@ -167,7 +167,7 @@ namespace krys::boo
     return _operatorType == Type::VerticalOperator ? _ascent + _descent : _width;
   }
 
-  bool MathOperator::GetGlyph(const RenderStyle &style, char32 character, GlyphData &glyph) const noexcept
+  bool MathOperator::GetGlyph(const RenderStyle &style, char32 character, GlyphData &glyph) noexcept
   {
     const auto &fontCascade = style.GetFontCascade();
     glyph = fontCascade.GlyphDataForCharacter(character, style.GetWritingMode().IsBidiRTL());
@@ -297,7 +297,7 @@ namespace krys::boo
   }
 
   bool MathOperator::CalculateGlyphAssemblyFallback(const List<OpenTypeMathData::AssemblyPart> &assemblyParts,
-                                                    GlyphAssemblyData &assemblyData) const noexcept
+                                                    GlyphAssemblyData &assemblyData) noexcept
   {
     // The structure of the Open Type Math table is a bit more general than the one currently used by the
     // MathOperator code, so we try to fallback in a reasonable way.

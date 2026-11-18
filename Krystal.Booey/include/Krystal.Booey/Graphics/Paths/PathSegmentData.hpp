@@ -154,7 +154,7 @@ namespace krys::boo
     KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
                                                 FloatPoint &lastMoveToPoint) const noexcept;
 
-    KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
+    KRYS_NODISCARD static Maybe<FloatPoint> TryGetEndPointWithoutContext() noexcept;
 
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
@@ -247,8 +247,8 @@ namespace krys::boo
     void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                                 FloatRect &boundingRect) const noexcept;
 
-    void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                            FloatRect &boundingRect) const noexcept;
+    static void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
+                                   FloatRect &boundingRect) noexcept;
 
     /// @brief Applies the segment as elements, its curves as cubic béziers, after the path's @p currentPoint
     /// (none at the start of a path), as a platform path adds it.
@@ -503,18 +503,18 @@ namespace krys::boo
 
     KRYS_NODISCARD bool operator==(const PathCloseSubpath &) const noexcept = default;
 
-    KRYS_NODISCARD FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
-                                                FloatPoint &lastMoveToPoint) const noexcept;
+    KRYS_NODISCARD static FloatPoint CalculateEndPoint(const FloatPoint &currentPoint,
+                                                       FloatPoint &lastMoveToPoint) noexcept;
 
-    KRYS_NODISCARD Maybe<FloatPoint> TryGetEndPointWithoutContext() const noexcept;
+    KRYS_NODISCARD static Maybe<FloatPoint> TryGetEndPointWithoutContext() noexcept;
 
-    void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                                FloatRect &boundingRect) const noexcept;
+    static void ExtendFastBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
+                                       FloatRect &boundingRect) noexcept;
 
-    void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
-                            FloatRect &boundingRect) const noexcept;
+    static void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
+                                   FloatRect &boundingRect) noexcept;
 
-    void ApplyElements(const PathElementApplier &) const noexcept;
+    static void ApplyElements(const PathElementApplier &) noexcept;
 
     void Transform(const AffineTransform &) noexcept;
   };

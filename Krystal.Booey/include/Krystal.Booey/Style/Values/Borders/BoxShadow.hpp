@@ -119,23 +119,23 @@ namespace krys::boo::style
   template <>
   struct Blending<BoxShadow>
   {
-    KRYS_NODISCARD BoxShadow Blend(const BoxShadow &, const BoxShadow &, const RenderStyle &,
-                                   const RenderStyle &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BoxShadow Blend(const BoxShadow &, const BoxShadow &, const RenderStyle &,
+                                          const RenderStyle &, const BlendingContext &) noexcept;
   };
 
   template <>
   struct Blending<BoxShadows>
   {
-    KRYS_NODISCARD bool CanBlend(const BoxShadows &, const BoxShadows &, CompositeOperation) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BoxShadows &, const BoxShadows &, CompositeOperation) noexcept;
 
-    KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const BoxShadows &,
-                                                                                const BoxShadows &) noexcept
+    KRYS_NODISCARD static constexpr bool
+      RequiresInterpolationForAccumulativeIteration(const BoxShadows &, const BoxShadows &) noexcept
     {
       return true;
     }
 
-    KRYS_NODISCARD BoxShadows Blend(const BoxShadows &, const BoxShadows &, const RenderStyle &,
-                                    const RenderStyle &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BoxShadows Blend(const BoxShadows &, const BoxShadows &, const RenderStyle &,
+                                           const RenderStyle &, const BlendingContext &) noexcept;
   };
 
   // MARK: - Shadow-specific Interfaces

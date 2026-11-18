@@ -657,11 +657,11 @@ namespace krys::boo
       _contentsRectClipsDescendants = b;
     }
 
-    KRYS_NODISCARD Path ShapeLayerPath() const noexcept;
+    KRYS_NODISCARD static Path ShapeLayerPath() noexcept;
 
     virtual void SetShapeLayerPath(const Path &path) noexcept;
 
-    KRYS_NODISCARD WindRule ShapeLayerWindRule() const noexcept;
+    KRYS_NODISCARD static WindRule ShapeLayerWindRule() noexcept;
 
     virtual void SetShapeLayerWindRule(WindRule windRule) noexcept;
 

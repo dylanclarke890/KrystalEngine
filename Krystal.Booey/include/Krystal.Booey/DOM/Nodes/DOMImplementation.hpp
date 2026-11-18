@@ -59,7 +59,7 @@ namespace krys::boo::dom
 
     /// @note Useless; always returns true.
     /// @see https://dom.spec.whatwg.org/#dom-domimplementation-hasfeature
-    KRYS_NODISCARD bool HasFeature() const noexcept
+    KRYS_NODISCARD static bool HasFeature() noexcept
     {
       return true;
     }

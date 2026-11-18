@@ -86,8 +86,8 @@ namespace krys::ui
     KRYS_NODISCARD boo::TransformationMatrix
       AdjustedTransformForRect(const boo::FloatRect &targetRect) noexcept;
 
-    KRYS_NODISCARD boo::IntSize ComputeTileSize(const boo::IntSize &viewportSize, int32 maxTextureSize,
-                                                const boo::IntRect &contentsRect) const noexcept;
+    KRYS_NODISCARD static boo::IntSize ComputeTileSize(const boo::IntSize &viewportSize, int32 maxTextureSize,
+                                                       const boo::IntRect &contentsRect) noexcept;
 
     KRYS_NODISCARD Pair<boo::IntRect, boo::IntRect>
       ComputeCoverAndKeepRect(const boo::IntRect &contentsRect) const noexcept;

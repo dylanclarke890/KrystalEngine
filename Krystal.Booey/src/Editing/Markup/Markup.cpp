@@ -325,7 +325,8 @@ namespace krys::boo
 
       KRYS_NODISCARD bool ShouldPreserveMSOListStyleForElement(const dom::Element &element) const noexcept;
 
-      KRYS_NODISCARD SpanReplacementType SpanReplacementForElement(const dom::Element &element) noexcept;
+      KRYS_NODISCARD static SpanReplacementType
+        SpanReplacementForElement(const dom::Element &element) noexcept;
 
       void AppendStartTag(utf8_string &out, const dom::Element &element, bool addDisplayInline,
                           RangeFullySelectsNode rangeFullySelectsNode) noexcept;

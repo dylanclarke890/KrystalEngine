@@ -89,8 +89,8 @@ namespace krys::boo::style
   template <>
   struct Blending<SVGStrokeDasharray>
   {
-    KRYS_NODISCARD SVGStrokeDasharray Blend(const SVGStrokeDasharray &, const SVGStrokeDasharray &,
-                                            const BlendingContext &) noexcept;
+    KRYS_NODISCARD static SVGStrokeDasharray Blend(const SVGStrokeDasharray &, const SVGStrokeDasharray &,
+                                                   const BlendingContext &) noexcept;
   };
 }
 

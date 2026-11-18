@@ -456,7 +456,7 @@ namespace krys::boo
     _maskLayer = krys::move(layer);
   }
 
-  Path GraphicsLayer::ShapeLayerPath() const noexcept
+  Path GraphicsLayer::ShapeLayerPath() noexcept
   {
     return Path();
   }
@@ -465,7 +465,7 @@ namespace krys::boo
   {
   }
 
-  WindRule GraphicsLayer::ShapeLayerWindRule() const noexcept
+  WindRule GraphicsLayer::ShapeLayerWindRule() noexcept
   {
     return WindRule::NonZero;
   }

@@ -1881,7 +1881,7 @@ namespace krys::boo::layout
   }
 
   void InlineDisplayContentBuilder::SetLogicalLeft(inline_display::Box &box, InlineLayoutUnit logicalLeft,
-                                                   WritingMode writingMode) const noexcept
+                                                   WritingMode writingMode) noexcept
   {
     switch (writingMode.BlockDirection())
     {

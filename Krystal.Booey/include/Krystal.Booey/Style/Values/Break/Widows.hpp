@@ -58,7 +58,7 @@ namespace krys::boo::style
   template <>
   struct Blending<Widows>
   {
-    KRYS_NODISCARD Widows Blend(const Widows &, const Widows &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Widows Blend(const Widows &, const Widows &, const BlendingContext &) noexcept;
   };
 }
 

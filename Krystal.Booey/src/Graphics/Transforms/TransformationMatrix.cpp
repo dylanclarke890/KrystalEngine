@@ -997,7 +997,7 @@ namespace krys::boo
       // applied.
       return *this;
     }
-    else if (length != 1)
+    if (length != 1)
     {
       x /= length;
       y /= length;

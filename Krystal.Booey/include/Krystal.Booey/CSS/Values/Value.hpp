@@ -171,12 +171,12 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static CSSOMStringView SeparatorCSSText(ValueSeparator separator) noexcept;
 
-    KRYS_NODISCARD bool CustomMayDependOnBaseUrl() const noexcept
+    KRYS_NODISCARD static bool CustomMayDependOnBaseUrl() noexcept
     {
       return false;
     }
 
-    KRYS_NODISCARD IterationStatus CustomVisitChildren(const Func<IterationStatus(Value &)> &) const noexcept
+    KRYS_NODISCARD static IterationStatus CustomVisitChildren(const Func<IterationStatus(Value &)> &) noexcept
     {
       return IterationStatus::Continue;
     }

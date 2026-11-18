@@ -167,10 +167,8 @@ namespace krys
     {
       return b;
     }
-    else
-    {
-      return Min(a, b);
-    }
+
+    return Min(a, b);
   }
 
   template <FloatingPoint T>
@@ -180,7 +178,7 @@ namespace krys
     {
       return FMin(b, c);
     }
-    else if (IsNaN(b))
+    if (IsNaN(b))
     {
       return FMin(a, c);
     }
@@ -201,7 +199,7 @@ namespace krys
     {
       return FMin(b, c, d);
     }
-    else if (IsNaN(b))
+    if (IsNaN(b))
     {
       return Min(a, FMin(c, d));
     }
@@ -284,10 +282,8 @@ namespace krys
     {
       return b;
     }
-    else
-    {
-      return Max(a, b);
-    }
+
+    return Max(a, b);
   }
 
   template <FloatingPoint T>
@@ -297,7 +293,7 @@ namespace krys
     {
       return FMax(b, c);
     }
-    else if (IsNaN(b))
+    if (IsNaN(b))
     {
       return FMax(a, c);
     }
@@ -318,7 +314,7 @@ namespace krys
     {
       return FMax(b, c, d);
     }
-    else if (IsNaN(b))
+    if (IsNaN(b))
     {
       return Max(a, FMax(c, d));
     }

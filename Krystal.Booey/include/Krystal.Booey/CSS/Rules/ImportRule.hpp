@@ -87,7 +87,7 @@ namespace krys::boo::css
                                                  ImportRule::SupportsCondition &&supportsCondition) noexcept;
 
     /// @attention Import rules are never copied.
-    KRYS_NODISCARD Ref<ImportRule> Copy() const noexcept;
+    KRYS_NODISCARD static Ref<ImportRule> Copy() noexcept;
 
     KRYS_NODISCARD StyleSheetContents *ParentStyleSheet() const noexcept
     {

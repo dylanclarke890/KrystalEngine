@@ -1397,7 +1397,7 @@ namespace krys::boo
   }
 
   bool ApplyStyleCommand::NodeFullySelected(dom::Element &element, const dom::Position &start,
-                                            const dom::Position &end) const noexcept
+                                            const dom::Position &end) noexcept
   {
     // The tree may have changed and Position::upstream() relies on an up-to-date layout.
     element.NodeDocument().UpdateLayoutIgnorePendingStylesheets();

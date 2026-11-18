@@ -123,7 +123,7 @@ namespace krys::boo
 
     void UpdateRenderTree(dom::ContainerNode &root) noexcept;
 
-    void UpdateSVGRenderer(dom::Element &element) noexcept;
+    static void UpdateSVGRenderer(dom::Element &element) noexcept;
 
     void UpdateElementRenderer(dom::Element &element, const style::ElementUpdate &elementUpdate) noexcept;
 

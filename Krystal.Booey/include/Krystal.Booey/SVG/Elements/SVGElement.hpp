@@ -470,8 +470,8 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD SVGElementRareData &EnsureSVGRareData() noexcept;
 
-    void ReportAttributeParsingError(SVGParsingError error, const dom::QualifiedName &name,
-                                     dom::DOMStringView value) noexcept;
+    static void ReportAttributeParsingError(SVGParsingError error, const dom::QualifiedName &name,
+                                            dom::DOMStringView value) noexcept;
 
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(const dom::DOMStringAtom &localName,

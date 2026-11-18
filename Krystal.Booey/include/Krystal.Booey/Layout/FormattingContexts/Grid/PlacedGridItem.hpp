@@ -114,7 +114,7 @@ namespace krys::boo::layout
     }
 
     // FIXME: Add support for grid item's with preferred aspect ratios.
-    KRYS_NODISCARD bool HasPreferredAspectRatio() const noexcept
+    KRYS_NODISCARD static bool HasPreferredAspectRatio() noexcept
     {
       return false;
     }

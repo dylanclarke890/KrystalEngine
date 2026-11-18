@@ -150,7 +150,7 @@ namespace krys::boo
     KRYS_NODISCARD bool CurrentFrameIsComplete(const RenderElement *) noexcept;
 
     // Returns an image and the image's resolution scale factor.
-    KRYS_NODISCARD Pair<Image *, float> BrokenImage(float deviceScaleFactor) const noexcept;
+    KRYS_NODISCARD static Pair<Image *, float> BrokenImage(float deviceScaleFactor) noexcept;
 
     KRYS_NODISCARD bool WillPaintBrokenImage() const noexcept;
 

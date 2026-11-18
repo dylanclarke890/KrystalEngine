@@ -151,7 +151,7 @@ namespace krys::boo::style
       return MaskMode::MatchSource;
     }
 
-    KRYS_NODISCARD CompositeOperator CompositeForPainting(bool /* isLastLayer */) const noexcept
+    KRYS_NODISCARD static CompositeOperator CompositeForPainting(bool /* isLastLayer */) noexcept
     {
       return GetComposite();
     }
@@ -313,7 +313,7 @@ namespace krys::boo::style
   template <>
   struct Blending<BackgroundLayer>
   {
-    KRYS_NODISCARD bool CanBlend(const BackgroundLayer &, const BackgroundLayer &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BackgroundLayer &, const BackgroundLayer &) noexcept;
   };
 
 #undef KRYS_FOR_EACH_BACKGROUND_LAYER_REFERENCE

@@ -208,7 +208,7 @@ namespace krys::boo
       return next;
     }
 
-    KRYS_NODISCARD bool AtTextParagraphSeparator() const noexcept
+    KRYS_NODISCARD static bool AtTextParagraphSeparator() noexcept
     {
       return false;
     }

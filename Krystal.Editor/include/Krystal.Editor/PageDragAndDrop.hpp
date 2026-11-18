@@ -190,7 +190,7 @@ namespace krys::editor
 
     /// @brief A drag leaving the drop zone unmarks it (its contents don't take the pointer, so a leave there
     /// is the zone's own).
-    void DragLeave(boo::dom::Event &event) noexcept
+    static void DragLeave(boo::dom::Event &event) noexcept
     {
       auto *target = TargetElement(event);
       if (target && target->GetAttribute(u8"id") == boo::dom::DOMString(u8"drop-zone"))

@@ -108,7 +108,8 @@ namespace krys::boo::style
   template <>
   struct Blending<FontWeight>
   {
-    KRYS_NODISCARD FontWeight Blend(const FontWeight &, const FontWeight &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static FontWeight Blend(const FontWeight &, const FontWeight &,
+                                           const BlendingContext &) noexcept;
   };
 }
 

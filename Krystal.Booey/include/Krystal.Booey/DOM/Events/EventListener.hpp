@@ -67,9 +67,9 @@ namespace krys::boo::dom
     bool _once {false};
 
   public:
-    EventListener(const DOMStringAtom &type, RefPtr<EventListenerCallback> &&callback,
+    EventListener(DOMStringAtom type, RefPtr<EventListenerCallback> &&callback,
                   AddEventListenerOptions &&options) noexcept
-        : _type(type), _callback(krys::move(callback)), _signal(krys::move(options.Signal)),
+        : _type(krys::move(type)), _callback(krys::move(callback)), _signal(krys::move(options.Signal)),
           _capture(options.Capture), _passive(options.Passive), _once(options.Once)
     {
     }

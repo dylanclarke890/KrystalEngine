@@ -28,12 +28,12 @@ namespace krys::serialisation
       _stream.Write(data);
     }
 
-    Ch *PutBegin()
+    static Ch *PutBegin()
     {
       krys_not_implemented();
     }
 
-    size_t PutEnd(Ch *)
+    static size_t PutEnd(Ch *)
     {
       krys_not_implemented();
     }
@@ -82,17 +82,17 @@ namespace krys::serialisation
       return _stream.Position();
     }
 
-    void Put(Ch)
+    static void Put(Ch)
     {
       krys_not_implemented();
     }
 
-    Ch *PutBegin()
+    static Ch *PutBegin()
     {
       krys_not_implemented();
     }
 
-    size_t PutEnd(Ch *)
+    static size_t PutEnd(Ch *)
     {
       krys_not_implemented();
     }

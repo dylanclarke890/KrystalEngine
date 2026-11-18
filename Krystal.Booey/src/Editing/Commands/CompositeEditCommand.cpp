@@ -1068,12 +1068,12 @@ namespace krys::boo
     }
   }
 
-  bool CompositeEditCommand::ShouldRebalanceLeadingWhitespaceFor(utf8_stringview text) const noexcept
+  bool CompositeEditCommand::ShouldRebalanceLeadingWhitespaceFor(utf8_stringview text) noexcept
   {
     return ContainsOnlyDeprecatedEditingWhitespace(text);
   }
 
-  RefPtr<dom::Text> CompositeEditCommand::TextNodeForRebalance(const dom::Position &position) const noexcept
+  RefPtr<dom::Text> CompositeEditCommand::TextNodeForRebalance(const dom::Position &position) noexcept
   {
     if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor)
     {

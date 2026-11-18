@@ -77,9 +77,9 @@ namespace krys::boo::style
   template <>
   struct Blending<Polygon>
   {
-    KRYS_NODISCARD bool CanBlend(const Polygon &, const Polygon &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const Polygon &, const Polygon &) noexcept;
 
-    KRYS_NODISCARD Polygon Blend(const Polygon &, const Polygon &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static Polygon Blend(const Polygon &, const Polygon &, const BlendingContext &) noexcept;
   };
 }
 

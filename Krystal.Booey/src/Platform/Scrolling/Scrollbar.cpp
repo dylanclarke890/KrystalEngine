@@ -141,7 +141,7 @@ namespace krys::boo
     return Theme().UsesOverlayScrollbars();
   }
 
-  bool Scrollbar::ShouldParticipateInHitTesting() const noexcept
+  bool Scrollbar::ShouldParticipateInHitTesting() noexcept
   {
     // Classic scrollbars always take part; overlay scrollbars do too, even faded out, as WebKit's do, so the
     // mouse finds them where they show.

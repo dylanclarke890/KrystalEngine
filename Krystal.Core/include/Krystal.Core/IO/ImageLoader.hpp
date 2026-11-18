@@ -27,7 +27,7 @@ namespace krys::io
     ~ImageLoader() = default;
 
     /// @brief Checks if the image from the stream is a HDR image.
-    KRYS_NODISCARD bool IsHDRImage(IStreamReader &stream);
+    KRYS_NODISCARD static bool IsHDRImage(IStreamReader &stream);
 
     /// @brief Loads an image from the given stream.
     KRYS_NODISCARD Expected<Image> Load(IStreamReader &stream, const ImageLoadSettings &settings = {});

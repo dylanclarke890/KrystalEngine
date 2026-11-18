@@ -185,7 +185,7 @@ namespace krys::boo
     return Renderer().View().Selection().RangeForTextBox(Renderer(), SelectableRange());
   }
 
-  bool LegacyInlineTextBox::HasMarkers() const noexcept
+  bool LegacyInlineTextBox::HasMarkers() noexcept
   {
     // (There are no document markers; see DIFFERENCES.md.)
     return false;

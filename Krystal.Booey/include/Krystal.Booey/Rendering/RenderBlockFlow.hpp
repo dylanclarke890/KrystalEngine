@@ -559,7 +559,7 @@ namespace krys::boo
 
     void TrimBlockEndChildrenMargins() noexcept;
 
-    void SetStaticInlinePositionForChild(RenderBox &child, LayoutUnit inlinePosition) noexcept;
+    static void SetStaticInlinePositionForChild(RenderBox &child, LayoutUnit inlinePosition) noexcept;
 
     void UpdateStaticInlinePositionForChild(RenderBox &child, LayoutUnit logicalTop) noexcept;
 

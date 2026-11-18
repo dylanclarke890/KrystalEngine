@@ -549,7 +549,7 @@ namespace krys::boo
     SetHasTransformRelatedProperty(ComputeHasTransformRelatedProperty(styleToUse));
   }
 
-  bool RenderBox::ComputeHasTransformRelatedProperty(const RenderStyle &styleToUse) const noexcept
+  bool RenderBox::ComputeHasTransformRelatedProperty(const RenderStyle &styleToUse) noexcept
   {
     if (styleToUse.HasTransformRelatedProperty())
     {
@@ -4018,7 +4018,7 @@ namespace krys::boo
                || (Style().OverflowX() == Overflow::Hidden && !Style().GetScrollbarGutter().IsAuto()));
   }
 
-  bool RenderBox::CanUseOverlayScrollbars() const noexcept
+  bool RenderBox::CanUseOverlayScrollbars() noexcept
   {
     // The legacy scrollbar style (::-webkit-scrollbar) was dropped.
     return ScrollbarTheme::Theme().UsesOverlayScrollbars();

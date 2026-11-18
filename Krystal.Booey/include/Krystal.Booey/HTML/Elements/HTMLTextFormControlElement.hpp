@@ -289,7 +289,7 @@ namespace krys::boo::html
     /// @brief The value with a line break where each line wraps, for `wrap="hard"`.
     KRYS_NODISCARD dom::DOMString ValueWithHardLineBreaks() const noexcept;
 
-    void AdjustInnerTextStyle(const RenderStyle &parentStyle, RenderStyle &textBlockStyle) const noexcept;
+    static void AdjustInnerTextStyle(const RenderStyle &parentStyle, RenderStyle &textBlockStyle) noexcept;
 
     void OnInsert() noexcept override;
 

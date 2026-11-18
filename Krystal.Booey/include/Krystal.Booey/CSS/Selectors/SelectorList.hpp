@@ -169,7 +169,7 @@ namespace krys::boo::css
       return {FirstSelectorComponent()};
     }
 
-    KRYS_NODISCARD const_iterator end() const noexcept
+    KRYS_NODISCARD static const_iterator end() noexcept
     {
       return {};
     }

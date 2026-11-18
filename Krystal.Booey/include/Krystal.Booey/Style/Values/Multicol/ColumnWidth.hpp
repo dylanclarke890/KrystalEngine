@@ -56,10 +56,10 @@ namespace krys::boo::style
   template <>
   struct Blending<ColumnWidth>
   {
-    KRYS_NODISCARD bool CanBlend(const ColumnWidth &, const ColumnWidth &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const ColumnWidth &, const ColumnWidth &) noexcept;
 
-    KRYS_NODISCARD ColumnWidth Blend(const ColumnWidth &, const ColumnWidth &,
-                                     const BlendingContext &) noexcept;
+    KRYS_NODISCARD static ColumnWidth Blend(const ColumnWidth &, const ColumnWidth &,
+                                            const BlendingContext &) noexcept;
   };
 }
 

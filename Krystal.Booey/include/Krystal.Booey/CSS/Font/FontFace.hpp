@@ -217,14 +217,14 @@ namespace krys::boo::css
 
     KRYS_NODISCARD FontLoadTiming GetFontLoadTiming() const noexcept;
 
-    KRYS_NODISCARD bool ShouldIgnoreFontLoadCompletions() const noexcept
+    KRYS_NODISCARD static bool ShouldIgnoreFontLoadCompletions() noexcept
     {
       return false;
     }
 
     KRYS_NODISCARD bool Purgeable() const noexcept;
 
-    KRYS_NODISCARD AllowUserInstalledFonts GetAllowUserInstalledFonts() const noexcept
+    KRYS_NODISCARD static AllowUserInstalledFonts GetAllowUserInstalledFonts() noexcept
     {
       return AllowUserInstalledFonts::Yes;
     }

@@ -160,7 +160,7 @@ namespace krys::boo::layout
       return _quirksMode == QuirksMode::No;
     }
 
-    KRYS_NODISCARD bool IsTextShapingAcrossInlineBoxesEnabled() const noexcept
+    KRYS_NODISCARD static bool IsTextShapingAcrossInlineBoxesEnabled() noexcept
     {
       return true;
     }

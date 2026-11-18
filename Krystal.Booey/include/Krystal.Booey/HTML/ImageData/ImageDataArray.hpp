@@ -76,7 +76,7 @@ namespace krys::boo::html
     }
 
     /// @brief Whether the pixels were given away; never, as there are no scripts to transfer them.
-    KRYS_NODISCARD bool IsDetached() const noexcept
+    KRYS_NODISCARD static bool IsDetached() noexcept
     {
       return false;
     }

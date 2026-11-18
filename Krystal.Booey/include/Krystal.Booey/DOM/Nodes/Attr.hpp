@@ -91,7 +91,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-specified
-    KRYS_NODISCARD bool Specified() const noexcept
+    KRYS_NODISCARD static bool Specified() noexcept
     {
       return true;
     }

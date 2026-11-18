@@ -919,7 +919,7 @@ namespace krys::boo
     RespondToChangedContents(newSelection);
   }
 
-  bool Editor::WillReapplyEditing(const EditCommandComposition &composition) const noexcept
+  bool Editor::WillReapplyEditing(const EditCommandComposition &composition) noexcept
   {
     return DispatchBeforeInputEvents(ShareRefPtr(composition.StartingRootEditableElement()),
                                      ShareRefPtr(composition.EndingRootEditableElement()), u8"historyRedo",
@@ -1218,7 +1218,7 @@ namespace krys::boo
     return selection.IsRange() && selection.RootEditableElement();
   }
 
-  bool Editor::CanDeleteRange(const dom::SimpleRange &range) const noexcept
+  bool Editor::CanDeleteRange(const dom::SimpleRange &range) noexcept
   {
     if (!range.Start.Container->HasEditableStyle() || !range.End.Container->HasEditableStyle())
     {
@@ -2051,7 +2051,7 @@ namespace krys::boo
     }
   }
 
-  IntRect Editor::FirstRectForRange(const dom::SimpleRange &range) const noexcept
+  IntRect Editor::FirstRectForRange(const dom::SimpleRange &range) noexcept
   {
     (void)range.Start.GetDocument().UpdateLayout();
 

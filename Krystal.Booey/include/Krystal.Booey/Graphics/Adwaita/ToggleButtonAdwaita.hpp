@@ -40,10 +40,10 @@ namespace krys::boo
               const ControlStyle &) noexcept override;
 
   private:
-    void DrawCheckbox(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
-                      const ControlStyle &) noexcept;
+    static void DrawCheckbox(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
+                             const ControlStyle &) noexcept;
 
-    void DrawRadio(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
-                   const ControlStyle &) noexcept;
+    static void DrawRadio(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
+                          const ControlStyle &) noexcept;
   };
 }

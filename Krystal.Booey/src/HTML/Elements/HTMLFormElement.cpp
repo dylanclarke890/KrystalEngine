@@ -1017,7 +1017,7 @@ namespace krys::boo::html
     return _wasUserSubmitted;
   }
 
-  HTMLFormControlElement *HTMLFormElement::FindSubmitter(const dom::Event *event) const noexcept
+  HTMLFormControlElement *HTMLFormElement::FindSubmitter(const dom::Event *event) noexcept
   {
     if (!event)
     {

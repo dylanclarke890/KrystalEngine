@@ -295,7 +295,7 @@ namespace krys::boo::html
 
 #pragma region InScope
 
-  bool OpenElementStack::IsScopeMarker(const StackItem &item) const noexcept
+  bool OpenElementStack::IsScopeMarker(const StackItem &item) noexcept
   {
     switch (item.Namespace())
     {
@@ -381,7 +381,7 @@ namespace krys::boo::html
     return item.Namespace() == Namespace::HTML && item.TagName() == TagName::button;
   }
 
-  bool OpenElementStack::IsTableScopeMarker(const StackItem &item) const noexcept
+  bool OpenElementStack::IsTableScopeMarker(const StackItem &item) noexcept
   {
     if (item.Namespace() != Namespace::HTML)
     {
@@ -392,7 +392,7 @@ namespace krys::boo::html
            || item.TagName() == TagName::html;
   }
 
-  bool OpenElementStack::IsTableBodyScopeMarker(const StackItem &item) const noexcept
+  bool OpenElementStack::IsTableBodyScopeMarker(const StackItem &item) noexcept
   {
     if (item.Namespace() != Namespace::HTML)
     {
@@ -404,7 +404,7 @@ namespace krys::boo::html
            || item.TagName() == TagName::html;
   }
 
-  bool OpenElementStack::IsTableRowScopeMarker(const StackItem &item) const noexcept
+  bool OpenElementStack::IsTableRowScopeMarker(const StackItem &item) noexcept
   {
     if (item.Namespace() != Namespace::HTML)
     {

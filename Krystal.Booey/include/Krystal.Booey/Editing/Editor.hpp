@@ -293,19 +293,19 @@ namespace krys::boo
       return _copyingFromMenuOrKeyBinding;
     }
 
-    KRYS_NODISCARD utf8_string ReadPlainTextFromPasteboard(Pasteboard &pasteboard) noexcept;
+    KRYS_NODISCARD static utf8_string ReadPlainTextFromPasteboard(Pasteboard &pasteboard) noexcept;
 
     /// @brief Writes the selection's text and markup (with its styles inlined) to @p pasteboard.
     void WriteSelectionToPasteboard(Pasteboard &pasteboard) noexcept;
 
     /// @brief Writes @p url, titled @p title, to @p pasteboard.
-    void CopyURL(const url::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept;
+    static void CopyURL(const url::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept;
 
     /// @brief Writes the image @p imageElement shows to @p pasteboard: its URL, titled @p title, and its
     /// markup.
     // FIXME: The image itself, with images on the pasteboard.
-    void WriteImageToPasteboard(Pasteboard &pasteboard, dom::Element &imageElement, const url::URL &url,
-                                utf8_stringview title) noexcept;
+    static void WriteImageToPasteboard(Pasteboard &pasteboard, dom::Element &imageElement,
+                                       const url::URL &url, utf8_stringview title) noexcept;
 
     /// @brief The pasteboard's richest content as a fragment to paste at @p context.
     /// @param allowPlainText Whether plain text may be read when there's no richer content.
@@ -362,7 +362,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool CanDelete() const noexcept;
 
-    KRYS_NODISCARD bool CanDeleteRange(const dom::SimpleRange &range) const noexcept;
+    KRYS_NODISCARD static bool CanDeleteRange(const dom::SimpleRange &range) noexcept;
 
     KRYS_NODISCARD bool ShouldDeleteRange(const Maybe<dom::SimpleRange> &range) const noexcept;
 
@@ -444,7 +444,7 @@ namespace krys::boo
 
     void UnappliedEditing(EditCommandComposition &composition) noexcept;
 
-    bool WillReapplyEditing(const EditCommandComposition &composition) const noexcept;
+    static bool WillReapplyEditing(const EditCommandComposition &composition) noexcept;
 
     void ReappliedEditing(EditCommandComposition &composition) noexcept;
 
@@ -550,7 +550,7 @@ namespace krys::boo
 
     /// @brief The first line's rect of @p range in absolute coordinates (the caret's, without its width, when
     /// it's collapsed), for placing an input method's windows.
-    KRYS_NODISCARD IntRect FirstRectForRange(const dom::SimpleRange &range) const noexcept;
+    KRYS_NODISCARD static IntRect FirstRectForRange(const dom::SimpleRange &range) noexcept;
 
     void CloseTyping() noexcept;
 
@@ -580,8 +580,8 @@ namespace krys::boo
 
     bool DispatchClipboardEvent(RefPtr<dom::Element> target, ClipboardEventKind kind) noexcept;
 
-    bool DispatchClipboardEvent(const RefPtr<dom::Element> &target, ClipboardEventKind kind,
-                                const Ref<dom::DataTransfer> &dataTransfer) noexcept;
+    static bool DispatchClipboardEvent(const RefPtr<dom::Element> &target, ClipboardEventKind kind,
+                                       const Ref<dom::DataTransfer> &dataTransfer) noexcept;
 
     KRYS_NODISCARD RefPtr<dom::Element> FindEventTargetFromSelection() const noexcept;
 

@@ -233,7 +233,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsOverlayScrollbar() const noexcept;
 
-    KRYS_NODISCARD bool ShouldParticipateInHitTesting() const noexcept;
+    KRYS_NODISCARD static bool ShouldParticipateInHitTesting() noexcept;
 
     KRYS_NODISCARD ScrollbarTheme &Theme() const noexcept
     {

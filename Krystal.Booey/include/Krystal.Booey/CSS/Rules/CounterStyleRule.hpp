@@ -109,7 +109,7 @@ namespace krys::boo::css
       return _descriptors.AdditiveSymbolsCSSText();
     }
 
-    KRYS_NODISCARD CSSOMString SpeakAs() const noexcept
+    KRYS_NODISCARD static CSSOMString SpeakAs() noexcept
     {
       return {};
     }

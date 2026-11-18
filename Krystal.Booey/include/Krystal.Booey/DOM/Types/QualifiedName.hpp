@@ -111,10 +111,8 @@ namespace krys::boo::dom
       {
         return LocalName().ToString();
       }
-      else
-      {
-        return NamespacePrefix().ToString() + u8":" + LocalName().ToString();
-      }
+
+      return NamespacePrefix().ToString() + u8":" + LocalName().ToString();
     }
 
     KRYS_NODISCARD QualifiedNameStorage *get() const noexcept

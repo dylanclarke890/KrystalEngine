@@ -275,7 +275,7 @@ namespace krys::boo
     static void ForEachWindow(const Func<void(LocalDOMWindow &)> &function) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-queuemicrotask
-    void QueueMicrotask(Func<void()> &&callback) noexcept;
+    static void QueueMicrotask(Func<void()> &&callback) noexcept;
 
 #pragma region Animation frames - https://html.spec.whatwg.org/#animation-frames
 
@@ -310,8 +310,8 @@ namespace krys::boo
     /// @brief The resolved values of @p element's properties, or of its pseudo-element @p pseudoElement (such
     /// as `::before`).
     /// @see https://drafts.csswg.org/cssom/#dom-window-getcomputedstyle
-    KRYS_NODISCARD Ref<css::CSSStyleDeclaration>
-      GetComputedStyle(dom::Element &element, const css::CSSOMString &pseudoElement = {}) const noexcept;
+    KRYS_NODISCARD static Ref<css::CSSStyleDeclaration>
+      GetComputedStyle(dom::Element &element, const css::CSSOMString &pseudoElement = {}) noexcept;
 
     /// @brief The document's selection, while the window's document is its frame's.
     /// @see https://w3c.github.io/selection-api/#dom-window-getselection

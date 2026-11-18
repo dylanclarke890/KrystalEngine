@@ -131,7 +131,7 @@ namespace krys::boo::css
     {
     }
 
-    dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept;
+    static dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept;
 
   protected:
     KRYS_NODISCARD bool HasCachedSelectorText() const noexcept

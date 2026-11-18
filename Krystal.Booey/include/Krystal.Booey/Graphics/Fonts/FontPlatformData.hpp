@@ -187,7 +187,7 @@ namespace krys::boo
       return _isHashTableDeletedValue;
     }
 
-    KRYS_NODISCARD bool IsEmoji() const noexcept
+    KRYS_NODISCARD static bool IsEmoji() noexcept
     {
       return false;
     }

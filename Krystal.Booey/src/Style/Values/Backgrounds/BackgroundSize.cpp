@@ -91,10 +91,8 @@ namespace krys::boo::style
         {
           return CreateCSSValue(pool, style, css::keywords::Auto {});
         }
-        else
-        {
-          return CreateCSSValue(pool, style, lengthSize);
-        }
+
+        return CreateCSSValue(pool, style, lengthSize);
       });
   }
 

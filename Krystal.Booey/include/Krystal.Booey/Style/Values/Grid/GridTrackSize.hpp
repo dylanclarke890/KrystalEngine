@@ -355,8 +355,8 @@ namespace krys::boo::style
   template <>
   struct Blending<GridTrackSize>
   {
-    KRYS_NODISCARD GridTrackSize Blend(const GridTrackSize &, const GridTrackSize &,
-                                       const BlendingContext &) noexcept;
+    KRYS_NODISCARD static GridTrackSize Blend(const GridTrackSize &, const GridTrackSize &,
+                                              const BlendingContext &) noexcept;
   };
 }
 

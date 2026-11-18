@@ -936,17 +936,14 @@ namespace krys::boo::dom
       return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
         TextAlgorithms::ChildTextContent(*title));
     }
-    else
-    {
-      auto title = html::DOMTreeAccessors::GetTitleElement(*this);
-      if (title == nullptr)
-      {
-        return {};
-      }
 
-      return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
-        TextAlgorithms::ChildTextContent(*title));
+    auto title = html::DOMTreeAccessors::GetTitleElement(*this);
+    if (title == nullptr)
+    {
+      return {};
     }
+
+    return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(TextAlgorithms::ChildTextContent(*title));
   }
 
   ExceptionOr<void> Document::Title(DOMString value) noexcept
@@ -1472,7 +1469,7 @@ namespace krys::boo::dom
     return CompleteURL(url, _baseURL);
   }
 
-  url::URL Document::CompleteURL(utf8_stringview url, const url::URL &baseURL) const noexcept
+  url::URL Document::CompleteURL(utf8_stringview url, const url::URL &baseURL) noexcept
   {
     return url::URL(baseURL, url);
   }

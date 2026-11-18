@@ -823,7 +823,7 @@ namespace krys::boo::svg
     return svgAnchor ? ShareRefPtr(DynamicDowncast<SVGViewElement>(*svgAnchor)) : nullptr;
   }
 
-  SVGSvgElement *SVGSvgElement::FindRootAnchor(const SVGViewElement *viewElement) const noexcept
+  SVGSvgElement *SVGSvgElement::FindRootAnchor(const SVGViewElement *viewElement) noexcept
   {
     if (!viewElement)
     {

@@ -441,8 +441,9 @@ namespace krys::boo
     return FontForPlatformData(PlatformDataForFace(*face, description, {}));
   }
 
-  List<FontSelectionCapabilities> FontCache::GetFontSelectionCapabilitiesInFamily(
-    const StringAtom &familyName, AllowUserInstalledFonts allowUserInstalledFonts) const noexcept
+  List<FontSelectionCapabilities>
+    FontCache::GetFontSelectionCapabilitiesInFamily(const StringAtom &familyName,
+                                                    AllowUserInstalledFonts allowUserInstalledFonts) noexcept
   {
     // Every registered font is the host's, so none is installed by the user.
     (void)allowUserInstalledFonts;
@@ -455,7 +456,7 @@ namespace krys::boo
     return result;
   }
 
-  List<utf8_string> FontCache::SystemFontFamilies() const noexcept
+  List<utf8_string> FontCache::SystemFontFamilies() noexcept
   {
     return FontDatabase::Singleton().Families();
   }

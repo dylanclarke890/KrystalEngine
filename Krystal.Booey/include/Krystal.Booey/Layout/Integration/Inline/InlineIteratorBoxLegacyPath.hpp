@@ -62,7 +62,7 @@ namespace krys::boo::inline_iterator
       return _inlineBox->IsRootInlineBox();
     }
 
-    KRYS_NODISCARD bool IsBlockLevelBox() const noexcept
+    KRYS_NODISCARD static bool IsBlockLevelBox() noexcept
     {
       return false;
     }
@@ -102,7 +102,7 @@ namespace krys::boo::inline_iterator
       return _inlineBox->BidiLevel();
     }
 
-    KRYS_NODISCARD bool HasHyphen() const noexcept
+    KRYS_NODISCARD static bool HasHyphen() noexcept
     {
       return false;
     }
@@ -158,7 +158,7 @@ namespace krys::boo::inline_iterator
       return _inlineBox->Renderer();
     }
 
-    KRYS_NODISCARD bool HasRenderer() const noexcept
+    KRYS_NODISCARD static bool HasRenderer() noexcept
     {
       return true;
     }

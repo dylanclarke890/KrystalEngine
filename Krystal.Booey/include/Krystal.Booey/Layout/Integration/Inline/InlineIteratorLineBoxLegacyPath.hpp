@@ -99,18 +99,18 @@ namespace krys::boo::inline_iterator
       return LogicalBottom();
     }
 
-    KRYS_NODISCARD bool HasEllipsis() const noexcept
+    KRYS_NODISCARD static bool HasEllipsis() noexcept
     {
       return false;
     }
 
-    KRYS_NODISCARD FloatRect EllipsisVisualRectIgnoringBlockDirection() const noexcept
+    KRYS_NODISCARD static FloatRect EllipsisVisualRectIgnoringBlockDirection() noexcept
     {
       krys_debug_assert(false);
       return {};
     }
 
-    KRYS_NODISCARD TextRun EllipsisText() const noexcept
+    KRYS_NODISCARD static TextRun EllipsisText() noexcept
     {
       krys_debug_assert(false);
       return TextRun {utf8_stringview()};
@@ -141,12 +141,12 @@ namespace krys::boo::inline_iterator
       return _rootInlineBox->BlockFlow();
     }
 
-    KRYS_NODISCARD bool IsFirstAfterPageBreak() const noexcept
+    KRYS_NODISCARD static bool IsFirstAfterPageBreak() noexcept
     {
       return false;
     }
 
-    KRYS_NODISCARD bool HasBlockLevelBox() const noexcept
+    KRYS_NODISCARD static bool HasBlockLevelBox() noexcept
     {
       return false;
     }

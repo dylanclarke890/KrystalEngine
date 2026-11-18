@@ -181,10 +181,11 @@ namespace krys::boo::layout
                                                               UnplacedGridItems &unplacedGridItems) noexcept;
 
   private:
-    KRYS_NODISCARD PlacementResult PlaceGridItems(
-      UnplacedGridItems &unplacedGridItems, const List<style::GridTrackSize> &gridTemplateColumnsTrackSizes,
-      const List<style::GridTrackSize> &gridTemplateRowsTrackSizes,
-      GridAutoFlowOptions autoFlowOptions) noexcept;
+    KRYS_NODISCARD static PlacementResult
+      PlaceGridItems(UnplacedGridItems &unplacedGridItems,
+                     const List<style::GridTrackSize> &gridTemplateColumnsTrackSizes,
+                     const List<style::GridTrackSize> &gridTemplateRowsTrackSizes,
+                     GridAutoFlowOptions autoFlowOptions) noexcept;
 
     KRYS_NODISCARD static GridDimensions CalculateGridDimensions(const UnplacedGridItems &unplacedGridItems,
                                                                  size_t explicitColumnsCount,

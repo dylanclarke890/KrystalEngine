@@ -350,7 +350,7 @@ namespace krys::boo::layout_integration
   }
 
   void InlineContentBuilder::ComputeIsFirstIsLastBoxAndBidiReorderingForInlineContent(
-    inline_display::Boxes &boxes) const noexcept
+    inline_display::Boxes &boxes) noexcept
   {
     if (boxes.empty())
     {

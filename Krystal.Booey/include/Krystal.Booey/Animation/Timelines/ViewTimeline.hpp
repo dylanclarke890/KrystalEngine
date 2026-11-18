@@ -196,7 +196,7 @@ namespace krys::boo
 
     void CacheCurrentTime() noexcept;
 
-    KRYS_NODISCARD dom::ExceptionOr<SpecifiedViewTimelineInsets>
+    KRYS_NODISCARD static dom::ExceptionOr<SpecifiedViewTimelineInsets>
       ValidateSpecifiedInsets(const ViewTimelineInsetValue &inset, const dom::Document &document) noexcept;
   };
 }

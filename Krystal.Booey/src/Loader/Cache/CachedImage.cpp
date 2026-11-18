@@ -118,7 +118,7 @@ namespace krys::boo
     }
   }
 
-  Pair<Image *, float> CachedImage::BrokenImage(float) const noexcept
+  Pair<Image *, float> CachedImage::BrokenImage(float) noexcept
   {
     // The icon is drawn as shapes, so one serves every device scale factor.
     return {&BrokenImageIcon::Singleton(), 1.f};

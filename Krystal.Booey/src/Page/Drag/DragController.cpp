@@ -977,7 +977,7 @@ namespace krys::boo
   }
 
   Maybe<HitTestResult> DragController::HitTestResultForDragStart(LocalFrame &source, dom::Element &element,
-                                                                 const IntPoint &location) const noexcept
+                                                                 const IntPoint &location) noexcept
   {
     if (!source.View() || !source.Document() || !source.Document()->GetRenderView())
     {
@@ -1314,7 +1314,7 @@ namespace krys::boo
     return maxDragImageSize;
   }
 
-  bool DragController::ShouldUseCachedImageForDragImage(const Image &image) const noexcept
+  bool DragController::ShouldUseCachedImageForDragImage(const Image &image) noexcept
   {
     return image.Size().Height() * image.Size().Width() <= MaxOriginalImageArea;
   }

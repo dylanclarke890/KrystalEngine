@@ -474,8 +474,8 @@ namespace krys::boo
                || object.Role() == AXRole::PopUpButton || object.IsRangeControl();
       }
 
-      KRYS_NODISCARD dom::DOMString EmbeddedControlText(const dom::Element &element,
-                                                        const AXObject &object) noexcept
+      KRYS_NODISCARD static dom::DOMString EmbeddedControlText(const dom::Element &element,
+                                                               const AXObject &object) noexcept
       {
         // 2C. ... textbox: return the value of the textbox.
         if (object.IsTextControl() && !object.IsComboBox())

@@ -120,7 +120,8 @@ namespace krys::boo::style
   template <>
   struct Blending<FontWidth>
   {
-    KRYS_NODISCARD FontWidth Blend(const FontWidth &, const FontWidth &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static FontWidth Blend(const FontWidth &, const FontWidth &,
+                                          const BlendingContext &) noexcept;
   };
 }
 

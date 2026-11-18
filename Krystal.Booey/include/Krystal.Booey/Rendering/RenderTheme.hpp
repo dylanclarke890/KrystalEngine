@@ -156,9 +156,9 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD RefPtr<ControlPart> CreateControlPart(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static RefPtr<ControlPart> CreateControlPart(const RenderElement &) noexcept;
 
-    void UpdateControlPartForRenderer(ControlPart &, const RenderElement &) const noexcept;
+    static void UpdateControlPartForRenderer(ControlPart &, const RenderElement &) noexcept;
 
     // These methods are called to paint the widget as a background of the RenderElement. A widget's
     // foreground, e.g., the text of a button, is always rendered by the engine itself. The boolean return
@@ -167,7 +167,7 @@ namespace krys::boo
 
     bool Paint(const RenderBox &, const PaintInfo &, const LayoutRect &) noexcept;
 
-    bool PaintBorderOnly(const RenderBox &, const PaintInfo &) noexcept;
+    static bool PaintBorderOnly(const RenderBox &, const PaintInfo &) noexcept;
 
     void PaintDecorations(const RenderBox &, const PaintInfo &, const LayoutRect &) noexcept;
 
@@ -192,7 +192,7 @@ namespace krys::boo
 
     // A method for asking if a control is a container or not.  Leaf controls have to have some special
     // behavior (like the baseline position API above).
-    KRYS_NODISCARD bool IsControlContainer(StyleAppearance) const noexcept;
+    KRYS_NODISCARD static bool IsControlContainer(StyleAppearance) noexcept;
 
     // A method asking if the control changes its tint when the window has focus or not.
     KRYS_NODISCARD virtual bool ControlSupportsTints(const RenderElement &) const noexcept
@@ -286,8 +286,8 @@ namespace krys::boo
 
     KRYS_NODISCARD Color DefaultButtonTextColor(style::ColorOptions) const noexcept;
 
-    KRYS_NODISCARD Color DatePlaceholderTextColor(const Color &textColor,
-                                                  const Color &backgroundColor) const noexcept;
+    KRYS_NODISCARD static Color DatePlaceholderTextColor(const Color &textColor,
+                                                         const Color &backgroundColor) noexcept;
 
     KRYS_NODISCARD Color DocumentMarkerLineColor(const RenderText &,
                                                  DocumentMarkerLineStyleMode) const noexcept;
@@ -473,33 +473,33 @@ namespace krys::boo
       return maximumLogicalWidth;
     }
 
-    KRYS_NODISCARD bool IsWindowActive(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsWindowActive(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsChecked(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsChecked(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsIndeterminate(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsIndeterminate(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsEnabled(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsEnabled(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsFocused(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsFocused(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsPressed(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsPressed(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsSpinUpButtonPartPressed(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsSpinUpButtonPartPressed(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsHovered(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsHovered(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsSpinUpButtonPartHovered(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsSpinUpButtonPartHovered(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsPresenting(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsPresenting(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool IsReadOnlyControl(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool IsReadOnlyControl(const RenderElement &) noexcept;
 
     KRYS_NODISCARD bool IsDefault(const RenderElement &) const noexcept;
 
-    KRYS_NODISCARD bool HasListButton(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool HasListButton(const RenderElement &) noexcept;
 
-    KRYS_NODISCARD bool HasListButtonPressed(const RenderElement &) const noexcept;
+    KRYS_NODISCARD static bool HasListButtonPressed(const RenderElement &) noexcept;
 
   protected:
     KRYS_NODISCARD ControlStyle ExtractControlStyleForRenderer(const RenderElement &) const noexcept;
@@ -796,7 +796,7 @@ namespace krys::boo
     // setting the zoomed size on the computed style. In order to make sure this behavior remains if
     // the flag is off, we return the used zoom value, which was being used before, when the flag
     // is disabled and 1.0f when it is enabled so that we do not modify the value.
-    KRYS_NODISCARD float UsedZoomForComputedStyle(const RenderStyle &) const noexcept;
+    KRYS_NODISCARD static float UsedZoomForComputedStyle(const RenderStyle &) noexcept;
 
     KRYS_NODISCARD virtual ColorCache &GetColorCache(style::ColorOptions) const noexcept;
 
@@ -813,12 +813,13 @@ namespace krys::boo
     void AdjustButtonOrCheckboxOrColorWellOrInnerSpinButtonOrRadioStyle(RenderStyle &,
                                                                         const dom::Element *) const noexcept;
 
-    KRYS_NODISCARD StyleAppearance AutoAppearanceForElement(RenderStyle &,
-                                                            const dom::Element *) const noexcept;
+    KRYS_NODISCARD static StyleAppearance AutoAppearanceForElement(RenderStyle &,
+                                                                   const dom::Element *) noexcept;
 
-    KRYS_NODISCARD StyleAppearance AdjustAppearanceForElement(RenderStyle &, const RenderStyle &parentStyle,
-                                                              const dom::Element *,
-                                                              StyleAppearance) const noexcept;
+    KRYS_NODISCARD static StyleAppearance AdjustAppearanceForElement(RenderStyle &,
+                                                                     const RenderStyle &parentStyle,
+                                                                     const dom::Element *,
+                                                                     StyleAppearance) noexcept;
 
     KRYS_NODISCARD Color SpellingMarkerColor(style::ColorOptions) const noexcept;
 

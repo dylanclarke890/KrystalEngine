@@ -113,7 +113,7 @@ namespace krys::boo::style
   template <>
   struct Blending<GridTemplateList>
   {
-    KRYS_NODISCARD bool CanBlend(const GridTemplateList &, const GridTemplateList &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const GridTemplateList &, const GridTemplateList &) noexcept;
 
     KRYS_NODISCARD GridTemplateList Blend(const GridTemplateList &, const GridTemplateList &,
                                           const BlendingContext &) noexcept;

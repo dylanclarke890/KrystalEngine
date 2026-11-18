@@ -116,9 +116,9 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual uint32 BytesPerRow() const noexcept;
 
-    KRYS_NODISCARD const DestinationColorSpace &ColorSpace() const noexcept;
+    KRYS_NODISCARD static const DestinationColorSpace &ColorSpace() noexcept;
 
-    KRYS_NODISCARD PixelFormat GetPixelFormat() const noexcept
+    KRYS_NODISCARD static PixelFormat GetPixelFormat() noexcept
     {
       return PixelFormat::RGBA8;
     }

@@ -161,15 +161,15 @@ namespace krys::boo
     template <>
     struct Blending<Filter>
     {
-      KRYS_NODISCARD bool CanBlend(const Filter &, const Filter &, CompositeOperation) noexcept;
+      KRYS_NODISCARD static bool CanBlend(const Filter &, const Filter &, CompositeOperation) noexcept;
 
-      KRYS_NODISCARD constexpr bool RequiresInterpolationForAccumulativeIteration(const Filter &,
-                                                                                  const Filter &) noexcept
+      KRYS_NODISCARD static constexpr bool
+        RequiresInterpolationForAccumulativeIteration(const Filter &, const Filter &) noexcept
       {
         return true;
       }
 
-      KRYS_NODISCARD Filter Blend(const Filter &, const Filter &, const BlendingContext &) noexcept;
+      KRYS_NODISCARD static Filter Blend(const Filter &, const Filter &, const BlendingContext &) noexcept;
     };
 
     // MARK: - Platform

@@ -626,7 +626,7 @@ namespace krys::boo
 
 #pragma region Repaint
 
-  bool RenderView::ShouldRepaint(const LayoutRect &rect) const noexcept
+  bool RenderView::ShouldRepaint(const LayoutRect &rect) noexcept
   {
     return !rect.IsEmpty();
   }

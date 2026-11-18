@@ -54,10 +54,10 @@ namespace krys::boo::html
     void Height(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-videowidth
-    KRYS_NODISCARD uint32 VideoWidth() const noexcept;
+    KRYS_NODISCARD static uint32 VideoWidth() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-videoheight
-    KRYS_NODISCARD uint32 VideoHeight() const noexcept;
+    KRYS_NODISCARD static uint32 VideoHeight() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-poster
     KRYS_NODISCARD dom::USVString Poster() const noexcept;

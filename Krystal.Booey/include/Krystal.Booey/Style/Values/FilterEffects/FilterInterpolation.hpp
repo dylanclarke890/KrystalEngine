@@ -142,10 +142,8 @@ namespace krys::boo::style
           {
             return FilterValue {Ref<FilterOperation> {krys::move(toOp)}};
           }
-          else
-          {
-            return FilterValue {PassthroughFilterOperation::Create()};
-          }
+
+          return FilterValue {PassthroughFilterOperation::Create()};
         }
         else
         {
@@ -153,10 +151,8 @@ namespace krys::boo::style
           {
             return FilterValue {Ref<FilterOperation> {krys::move(fromOp)}};
           }
-          else
-          {
-            return FilterValue {PassthroughFilterOperation::Create()};
-          }
+
+          return FilterValue {PassthroughFilterOperation::Create()};
         }
       })};
   }

@@ -144,7 +144,8 @@ namespace krys::boo
   private:
     KRYS_NODISCARD LayoutUnit StretchSize() const noexcept;
 
-    KRYS_NODISCARD bool GetGlyph(const RenderStyle &style, char32 character, GlyphData &glyph) const noexcept;
+    KRYS_NODISCARD static bool GetGlyph(const RenderStyle &style, char32 character,
+                                        GlyphData &glyph) noexcept;
 
     KRYS_NODISCARD bool GetBaseGlyph(const RenderStyle &style, GlyphData &baseGlyph) const noexcept
     {
@@ -163,12 +164,12 @@ namespace krys::boo
     void CalculateStretchyData(const RenderStyle &style, bool calculateMaxPreferredWidth,
                                LayoutUnit targetSize = 0_lu) noexcept;
 
-    KRYS_NODISCARD bool
+    KRYS_NODISCARD static bool
       CalculateGlyphAssemblyFallback(const List<OpenTypeMathData::AssemblyPart> &assemblyParts,
-                                     GlyphAssemblyData &assemblyData) const noexcept;
+                                     GlyphAssemblyData &assemblyData) noexcept;
 
-    LayoutRect PaintGlyph(const RenderStyle &style, PaintInfo &info, const GlyphData &data,
-                          const LayoutPoint &origin, GlyphPaintTrimming trim) noexcept;
+    static LayoutRect PaintGlyph(const RenderStyle &style, PaintInfo &info, const GlyphData &data,
+                                 const LayoutPoint &origin, GlyphPaintTrimming trim) noexcept;
 
     void FillWithVerticalExtensionGlyph(const RenderStyle &style, PaintInfo &info, const LayoutPoint &from,
                                         const LayoutPoint &to) noexcept;

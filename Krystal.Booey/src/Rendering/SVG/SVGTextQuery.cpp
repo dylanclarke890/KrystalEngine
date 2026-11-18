@@ -187,7 +187,7 @@ namespace krys::boo
   void SVGTextQuery::ModifyStartEndPositionsRespectingLigatures(Data *queryData,
                                                                 const SVGTextFragment &fragment,
                                                                 uint32 &startPosition,
-                                                                uint32 &endPosition) const noexcept
+                                                                uint32 &endPosition) noexcept
   {
     const SVGTextLayoutAttributes *layoutAttributes = queryData->TextRenderer->LayoutAttributes();
     const List<SVGTextMetrics> &textMetricsValues = layoutAttributes->TextMetricsValues();
@@ -230,6 +230,7 @@ namespace krys::boo
   }
 
   // NumberOfCharacters() implementation
+  // NOLINTNEXTLINE(readability-convert-member-functions-to-static): a ProcessTextFragmentCallback.
   bool SVGTextQuery::NumberOfCharactersCallback(Data *, const SVGTextFragment &) const noexcept
   {
     // no-op
@@ -252,6 +253,7 @@ namespace krys::boo
     };
   }
 
+  // NOLINTNEXTLINE(readability-convert-member-functions-to-static): a ProcessTextFragmentCallback.
   bool SVGTextQuery::TextLengthCallback(Data *queryData, const SVGTextFragment &fragment) const noexcept
   {
     auto *data = static_cast<TextLengthData *>(queryData);
@@ -589,6 +591,7 @@ namespace krys::boo
     };
   }
 
+  // NOLINTNEXTLINE(readability-convert-member-functions-to-static): a ProcessTextFragmentCallback.
   bool SVGTextQuery::CharacterNumberAtPositionCallback(Data *queryData,
                                                        const SVGTextFragment &fragment) const noexcept
   {

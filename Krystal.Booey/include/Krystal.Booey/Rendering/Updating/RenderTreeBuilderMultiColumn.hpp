@@ -51,8 +51,8 @@ namespace krys::boo
     /// @brief Some renderers (column spanners) are moved out of the flow to live among column sets. If
     /// @p beforeChild is such a renderer, resolves it to the placeholder that lives at its original place in
     /// the tree.
-    KRYS_NODISCARD RenderObject *ResolveMovedChild(RenderFragmentedFlow &enclosingFragmentedFlow,
-                                                   RenderObject *beforeChild) noexcept;
+    KRYS_NODISCARD static RenderObject *ResolveMovedChild(RenderFragmentedFlow &enclosingFragmentedFlow,
+                                                          RenderObject *beforeChild) noexcept;
 
     /// @brief Moves the spanners whose placeholders are in @p container back to their placeholders.
     void RestoreColumnSpannersForContainer(RenderMultiColumnFlow &multiColumnFlow,

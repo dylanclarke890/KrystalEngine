@@ -102,7 +102,7 @@ namespace krys::boo::html
     }
   }
 
-  bool CanvasBase::ShouldAccelerate(uint64 area) const noexcept
+  bool CanvasBase::ShouldAccelerate(uint64 area) noexcept
   {
     // Accelerated drawing is on, and there's no minimum area: the host's backend draws every canvas, there
     // being no unaccelerated one.

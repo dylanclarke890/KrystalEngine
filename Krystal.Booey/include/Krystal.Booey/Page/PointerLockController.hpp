@@ -141,7 +141,7 @@ namespace krys::boo
 
     void EnqueueEvent(dom::DOMStringAtom type, dom::Element *element) noexcept;
 
-    void EnqueueEvent(dom::DOMStringAtom type, dom::Document *document) noexcept;
+    static void EnqueueEvent(dom::DOMStringAtom type, dom::Document *document) noexcept;
 
     void ResolvePromises() noexcept;
 

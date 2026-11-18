@@ -64,7 +64,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
 
-    KRYS_NODISCARD bool SupportsValidationForBindings() const noexcept
+    KRYS_NODISCARD static bool SupportsValidationForBindings() noexcept
     {
       return false;
     }

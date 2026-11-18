@@ -620,10 +620,8 @@ namespace krys::boo::style
       {
         return CreateCSSValue(pool, style, Length<> {0_css_px});
       }
-      else
-      {
-        return CreateCSSValue(pool, style, length);
-      }
+
+      return CreateCSSValue(pool, style, length);
     };
 
     auto includeLength = [](const auto &length) -> bool

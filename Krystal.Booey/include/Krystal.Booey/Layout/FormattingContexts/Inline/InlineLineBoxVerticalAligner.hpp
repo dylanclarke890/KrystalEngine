@@ -76,7 +76,7 @@ namespace krys::boo::layout
     KRYS_NODISCARD InlineLayoutUnit ComputeLogicalHeightAndAlign(LineBox &lineBox) const noexcept;
 
   private:
-    KRYS_NODISCARD InlineLayoutUnit SimplifiedVerticalAlignment(LineBox &lineBox) const noexcept;
+    KRYS_NODISCARD static InlineLayoutUnit SimplifiedVerticalAlignment(LineBox &lineBox) noexcept;
 
     KRYS_NODISCARD LineBoxAlignmentContent ComputeLineBoxLogicalHeight(LineBox &lineBox) const noexcept;
 
@@ -85,16 +85,16 @@ namespace krys::boo::layout
 
     void AlignInlineLevelBoxes(LineBox &lineBox, InlineLayoutUnit lineBoxLogicalHeight) const noexcept;
 
-    KRYS_NODISCARD InlineLayoutUnit
-      AdjustForAnnotationIfNeeded(LineBox &lineBox, InlineLayoutUnit lineBoxHeight) const noexcept;
+    KRYS_NODISCARD static InlineLayoutUnit
+      AdjustForAnnotationIfNeeded(LineBox &lineBox, InlineLayoutUnit lineBoxHeight) noexcept;
 
     KRYS_NODISCARD Maybe<InlineLevelBox::AscentAndDescent>
       LayoutBoundsForInlineBoxSubtree(const LineBox::InlineLevelBoxList &nonRootInlineLevelBoxes,
                                       size_t inlineBoxIndex) const noexcept;
 
-    KRYS_NODISCARD InlineLayoutUnit LogicalTopOffsetFromParentBaseline(
+    KRYS_NODISCARD static InlineLayoutUnit LogicalTopOffsetFromParentBaseline(
       const InlineLevelBox &inlineLevelBox, const InlineLevelBox &parentInlineBox,
-      IsInlineLevelBoxAlignment isInlineLevelBoxAlignment = IsInlineLevelBoxAlignment::No) const noexcept;
+      IsInlineLevelBoxAlignment isInlineLevelBoxAlignment = IsInlineLevelBoxAlignment::No) noexcept;
 
     KRYS_NODISCARD const InlineFormattingUtils &FormattingUtils() const noexcept;
 

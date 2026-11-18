@@ -95,7 +95,7 @@ namespace krys::boo
     _isReset = true;
   }
 
-  bool OrderIterator::ShouldSkipChild(const RenderObject &child) const noexcept
+  bool OrderIterator::ShouldSkipChild(const RenderObject &child) noexcept
   {
     return child.IsOutOfFlowPositioned() || child.IsExcludedFromNormalLayout();
   }

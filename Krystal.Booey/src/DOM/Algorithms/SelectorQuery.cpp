@@ -225,7 +225,7 @@ namespace krys::boo::dom
   }
 
   bool SelectorDataList::SelectorMatches(const SelectorData &selectorData, const Element &element,
-                                         const ContainerNode &rootNode) const noexcept
+                                         const ContainerNode &rootNode) noexcept
   {
     css::SelectorChecker selectorChecker(element.NodeDocument());
     css::SelectorChecker::CheckingContext selectorCheckingContext(css::SelectorChecker::Mode::QueryingRules);
@@ -425,9 +425,8 @@ namespace krys::boo::dom
     return true;
   }
 
-  const ContainerNode &
-    SelectorDataList::SearchRootForAncestorId(const ContainerNode &rootNode,
-                                              const SelectorData &selectorData) const noexcept
+  const ContainerNode &SelectorDataList::SearchRootForAncestorId(const ContainerNode &rootNode,
+                                                                 const SelectorData &selectorData) noexcept
   {
     if (!CanUseIdFastPath(rootNode))
     {

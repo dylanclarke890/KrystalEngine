@@ -469,8 +469,8 @@ namespace krys::boo::html
     void AddHTMLPixelsToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               dom::DOMStringView value) noexcept;
 
-    void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
-                             dom::DOMStringView attributeValue) noexcept;
+    static void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                                    dom::DOMStringView attributeValue) noexcept;
 
     /// @brief The value of the attribute in the null namespace, or an empty view if there isn't one.
     KRYS_NODISCARD dom::DOMString AttributeOrEmpty(dom::DOMStringView localName) const noexcept;
@@ -1085,8 +1085,8 @@ namespace krys::boo::html
                               UseCSSPXAsUnitType useCSSPX, IsMultiLength isMultiLength,
                               AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
 
-    void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
-                                                  css::MutableStyleProperties &style) noexcept;
+    static void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
+                                                         css::MutableStyleProperties &style) noexcept;
 
     void MapLanguageAttributeToLocale(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
 

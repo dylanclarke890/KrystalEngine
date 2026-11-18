@@ -159,7 +159,7 @@ namespace krys::boo
 
     bool UpdateCaretRect(dom::Document &document, const VisiblePosition &caretPosition) noexcept;
 
-    KRYS_NODISCARD bool ShouldRepaintCaret(const RenderView *view, bool isContentEditable) const noexcept;
+    KRYS_NODISCARD static bool ShouldRepaintCaret(const RenderView *view, bool isContentEditable) noexcept;
 
     void PaintCaret(const dom::Node &node, GraphicsContext &context, const LayoutPoint &paintOffset,
                     CaretAnimator *caretAnimator) const noexcept;
@@ -517,9 +517,9 @@ namespace krys::boo
 
     KRYS_NODISCARD dom::Document *GetDocument() noexcept override;
 
-    KRYS_NODISCARD bool ShouldChangeSelection(const VisibleSelection &newSelection) const noexcept;
+    KRYS_NODISCARD static bool ShouldChangeSelection(const VisibleSelection &newSelection) noexcept;
 
-    KRYS_NODISCARD bool ShouldDeleteSelection(const VisibleSelection &selection) const noexcept;
+    KRYS_NODISCARD static bool ShouldDeleteSelection(const VisibleSelection &selection) noexcept;
 
     void SetSelectionByMouseIfDifferent(
       const VisibleSelection &passedNewSelection, TextGranularity granularity,
@@ -617,8 +617,8 @@ namespace krys::boo
     KRYS_NODISCARD VisiblePosition ModifyMovingBackward(TextGranularity granularity,
                                                         bool *reachedBoundary = nullptr) noexcept;
 
-    void AdjustSelectionExtentIfNeeded(VisiblePosition &extent, bool isForward,
-                                       UserTriggered userTriggered) noexcept;
+    static void AdjustSelectionExtentIfNeeded(VisiblePosition &extent, bool isForward,
+                                              UserTriggered userTriggered) noexcept;
 
     KRYS_NODISCARD LayoutUnit LineDirectionPointForBlockDirectionNavigation(PositionType type) noexcept;
 

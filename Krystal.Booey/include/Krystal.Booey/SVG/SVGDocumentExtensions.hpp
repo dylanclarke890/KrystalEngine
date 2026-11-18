@@ -97,6 +97,6 @@ namespace krys::boo::svg
 
     void ClearTargetDependencies(SVGElement &referencedElement) noexcept;
 
-    void RebuildAllElementReferencesForTarget(SVGElement &referencedElement) noexcept;
+    static void RebuildAllElementReferencesForTarget(SVGElement &referencedElement) noexcept;
   };
 }

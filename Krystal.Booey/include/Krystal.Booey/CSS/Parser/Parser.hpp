@@ -205,7 +205,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD RefPtr<ImportRule> ConsumeImportRule(TokenRange prelude) noexcept;
 
-    KRYS_NODISCARD RefPtr<NamespaceRule> ConsumeNamespaceRule(TokenRange prelude) noexcept;
+    KRYS_NODISCARD static RefPtr<NamespaceRule> ConsumeNamespaceRule(TokenRange prelude) noexcept;
 
     KRYS_NODISCARD RefPtr<MediaRule> ConsumeMediaRule(TokenRange prelude, TokenRange block) noexcept;
 

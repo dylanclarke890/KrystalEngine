@@ -515,7 +515,7 @@ namespace krys::ui::tests
       }
 
       /// @brief The bounds of @p layer's repaints since the last reset, in its coordinates.
-      KRYS_NODISCARD boo::FloatRect Bounds(boo::GraphicsLayer &layer) const noexcept
+      KRYS_NODISCARD static boo::FloatRect Bounds(boo::GraphicsLayer &layer) noexcept
       {
         auto text = layer.LayerTreeAsText({boo::LayerTreeAsTextOptions::IncludeRepaintRects,
                                            boo::LayerTreeAsTextOptions::IncludeRootLayerProperties});

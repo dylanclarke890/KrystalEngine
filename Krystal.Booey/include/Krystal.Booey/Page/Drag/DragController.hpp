@@ -220,16 +220,16 @@ namespace krys::boo
 
     bool DragIsMove(FrameSelection &selection, const DragData &dragData) noexcept;
 
-    bool IsCopyKeyDown(const DragData &dragData) noexcept;
+    static bool IsCopyKeyDown(const DragData &dragData) noexcept;
 
     void MouseMovedIntoDocument(RefPtr<dom::Document> &&newDocument) noexcept;
 
     void DisallowFileAccessIfNeeded(DragData &dragData) noexcept;
 
-    KRYS_NODISCARD Maybe<HitTestResult> HitTestResultForDragStart(LocalFrame &source, dom::Element &element,
-                                                                  const IntPoint &location) const noexcept;
+    KRYS_NODISCARD static Maybe<HitTestResult>
+      HitTestResultForDragStart(LocalFrame &source, dom::Element &element, const IntPoint &location) noexcept;
 
-    KRYS_NODISCARD bool ShouldUseCachedImageForDragImage(const Image &image) const noexcept;
+    KRYS_NODISCARD static bool ShouldUseCachedImageForDragImage(const Image &image) noexcept;
 
     void DoImageDrag(dom::Element &element, const IntPoint &dragOrigin, const IntRect &layoutRect,
                      LocalFrame &frame, IntPoint &dragImageOffset, const DragState &state) noexcept;
@@ -242,8 +242,8 @@ namespace krys::boo
       return *_client;
     }
 
-    void DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, dom::Element &element, const url::URL &url,
-                                  utf8_stringview label) noexcept;
+    static void DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, dom::Element &element,
+                                         const url::URL &url, utf8_stringview label) noexcept;
   };
 
   /// @brief Whether @p element is a link a press may drag: an `a` with an `href` that isn't editable, or an

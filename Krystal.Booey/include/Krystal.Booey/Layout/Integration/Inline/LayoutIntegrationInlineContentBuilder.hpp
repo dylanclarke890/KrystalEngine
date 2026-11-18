@@ -66,7 +66,7 @@ namespace krys::boo::layout_integration
                                                 InlineContent &inlineContent,
                                                 const layout::InlineDamage *lineDamage) const noexcept;
 
-    void
-      ComputeIsFirstIsLastBoxAndBidiReorderingForInlineContent(inline_display::Boxes &boxes) const noexcept;
+    static void
+      ComputeIsFirstIsLastBoxAndBidiReorderingForInlineContent(inline_display::Boxes &boxes) noexcept;
   };
 }

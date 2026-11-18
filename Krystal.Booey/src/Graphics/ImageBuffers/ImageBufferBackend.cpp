@@ -75,7 +75,7 @@ namespace krys::boo
     return static_cast<uint32>(Size().Width()) * PixelBuffer::BytesPerPixel(GetPixelFormat());
   }
 
-  const DestinationColorSpace &ImageBufferBackend::ColorSpace() const noexcept
+  const DestinationColorSpace &ImageBufferBackend::ColorSpace() noexcept
   {
     return DestinationColorSpace::SRGB();
   }

@@ -221,7 +221,7 @@ namespace krys::boo::style
   template <>
   struct Blending<ClipPath>
   {
-    KRYS_NODISCARD bool CanBlend(const ClipPath &, const ClipPath &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const ClipPath &, const ClipPath &) noexcept;
 
     KRYS_NODISCARD ClipPath Blend(const ClipPath &, const ClipPath &, const BlendingContext &) noexcept;
   };

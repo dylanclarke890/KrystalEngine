@@ -200,7 +200,7 @@ namespace krys::boo
     return page;
   }
 
-  EnumSet<FilterRenderingMode> Page::PreferredFilterRenderingModes(const GraphicsContext &) const noexcept
+  EnumSet<FilterRenderingMode> Page::PreferredFilterRenderingModes(const GraphicsContext &) noexcept
   {
     // There's no software rendering: the drawing backend applies filters on the GPU.
     return {FilterRenderingMode::Accelerated, FilterRenderingMode::GraphicsContext};

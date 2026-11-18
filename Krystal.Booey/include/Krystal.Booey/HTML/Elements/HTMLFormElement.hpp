@@ -223,7 +223,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool WasUserSubmitted() const noexcept;
 
     /// @brief The form control the event that submits the form was targeted at, if any.
-    KRYS_NODISCARD HTMLFormControlElement *FindSubmitter(const dom::Event *event) const noexcept;
+    KRYS_NODISCARD static HTMLFormControlElement *FindSubmitter(const dom::Event *event) noexcept;
 
     /// @see https://html.spec.whatwg.org/#default-button
     KRYS_NODISCARD HTMLFormControlElement *DefaultButton() const noexcept;

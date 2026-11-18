@@ -1789,7 +1789,7 @@ namespace krys::boo
     return true;
   }
 
-  bool RenderFlexibleBox::FlexItemHasComputableAspectRatio(const RenderBox &flexItem) const noexcept
+  bool RenderFlexibleBox::FlexItemHasComputableAspectRatio(const RenderBox &flexItem) noexcept
   {
     if (!FlexItemHasAspectRatio(flexItem))
     {

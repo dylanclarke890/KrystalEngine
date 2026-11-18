@@ -200,8 +200,8 @@ namespace krys::boo::style
   template <>
   struct Blending<GridTrackBreadth>
   {
-    KRYS_NODISCARD GridTrackBreadth Blend(const GridTrackBreadth &, const GridTrackBreadth &,
-                                          const BlendingContext &) noexcept;
+    KRYS_NODISCARD static GridTrackBreadth Blend(const GridTrackBreadth &, const GridTrackBreadth &,
+                                                 const BlendingContext &) noexcept;
   };
 }
 

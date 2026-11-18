@@ -94,14 +94,14 @@ namespace krys::boo
       return u8"RenderSVGResourcePattern";
     }
 
-    bool BuildTileImageTransform(RenderElement &, const svg::PatternAttributes &,
-                                 const svg::SVGPatternElement &, FloatRect &patternBoundaries,
-                                 AffineTransform &tileImageTransform) const noexcept;
+    static bool BuildTileImageTransform(RenderElement &, const svg::PatternAttributes &,
+                                        const svg::SVGPatternElement &, FloatRect &patternBoundaries,
+                                        AffineTransform &tileImageTransform) noexcept;
 
-    KRYS_NODISCARD RefPtr<ImageBuffer> CreateTileImage(GraphicsContext &, const FloatSize &,
-                                                       const FloatSize &scale,
-                                                       const AffineTransform &tileImageTransform,
-                                                       const svg::PatternAttributes &) const noexcept;
+    KRYS_NODISCARD static RefPtr<ImageBuffer> CreateTileImage(GraphicsContext &, const FloatSize &,
+                                                              const FloatSize &scale,
+                                                              const AffineTransform &tileImageTransform,
+                                                              const svg::PatternAttributes &) noexcept;
 
     KRYS_NODISCARD PatternData *BuildPattern(RenderElement &, EnumSet<RenderSVGResourceMode>,
                                              GraphicsContext &) noexcept;

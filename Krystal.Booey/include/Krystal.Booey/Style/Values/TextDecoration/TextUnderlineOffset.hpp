@@ -47,12 +47,12 @@ namespace krys::boo::style
   template <>
   struct Blending<TextUnderlineOffset>
   {
-    KRYS_NODISCARD bool CanBlend(const TextUnderlineOffset &, const TextUnderlineOffset &,
-                                 const RenderStyle &, const RenderStyle &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const TextUnderlineOffset &, const TextUnderlineOffset &,
+                                        const RenderStyle &, const RenderStyle &) noexcept;
 
-    KRYS_NODISCARD TextUnderlineOffset Blend(const TextUnderlineOffset &, const TextUnderlineOffset &,
-                                             const RenderStyle &, const RenderStyle &,
-                                             const BlendingContext &) noexcept;
+    KRYS_NODISCARD static TextUnderlineOffset Blend(const TextUnderlineOffset &, const TextUnderlineOffset &,
+                                                    const RenderStyle &, const RenderStyle &,
+                                                    const BlendingContext &) noexcept;
   };
 }
 

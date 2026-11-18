@@ -123,9 +123,9 @@ namespace krys::boo::style
   template <>
   struct Blending<ZIndex>
   {
-    KRYS_NODISCARD bool CanBlend(const ZIndex &, const ZIndex &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const ZIndex &, const ZIndex &) noexcept;
 
-    KRYS_NODISCARD ZIndex Blend(const ZIndex &, const ZIndex &, const BlendingContext &) noexcept;
+    KRYS_NODISCARD static ZIndex Blend(const ZIndex &, const ZIndex &, const BlendingContext &) noexcept;
   };
 }
 

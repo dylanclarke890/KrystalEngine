@@ -215,7 +215,7 @@ namespace krys::boo::url
       ParseIPv4Host(const CodePointIterator &iteratorForSyntaxViolationPosition,
                     CodePointIterator iterator) noexcept;
 
-    KRYS_NODISCARD Expected<uint32, IPv4PieceParsingError>
+    KRYS_NODISCARD static Expected<uint32, IPv4PieceParsingError>
       ParseIPv4Piece(CodePointIterator &iterator, bool &didSeeSyntaxViolation) noexcept;
 
     KRYS_NODISCARD Maybe<IPv6Address> ParseIPv6Host(CodePointIterator iterator) noexcept;

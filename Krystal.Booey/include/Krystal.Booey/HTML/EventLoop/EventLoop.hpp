@@ -121,7 +121,7 @@ namespace krys::boo::html
     void Run(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget = null) noexcept;
 
     /// @brief The host's time, as of the last time it ran the loop.
-    KRYS_NODISCARD MonotonicTime::duration Now() const noexcept;
+    KRYS_NODISCARD static MonotonicTime::duration Now() noexcept;
 
     /// @brief When the loop next has work: now if a task or a completion is waiting, or when the next timer
     /// fires; none if it's idle.

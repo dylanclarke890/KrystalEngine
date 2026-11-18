@@ -271,7 +271,7 @@ namespace krys::boo
   }
 
   SubsamplingLevel BitmapImageDescriptor::SubsamplingLevelForScaleFactor(GraphicsContext &, const FloatSize &,
-                                                                         AllowImageSubsampling) const noexcept
+                                                                         AllowImageSubsampling) noexcept
   {
     // Images are subsampled only where the platform decoder can decode at a lower resolution.
     return SubsamplingLevel::Default;

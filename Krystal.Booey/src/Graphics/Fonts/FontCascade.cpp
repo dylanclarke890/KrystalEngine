@@ -1469,7 +1469,7 @@ namespace krys::boo
     return OffsetForPositionForSimpleText(run, position, includePartialGlyphs);
   }
 
-  bool FontCascade::CanHandleRunAsSimpleText(const TextRun &, uint32, uint32) const noexcept
+  bool FontCascade::CanHandleRunAsSimpleText(const TextRun &, uint32, uint32) noexcept
   {
     return true;
   }

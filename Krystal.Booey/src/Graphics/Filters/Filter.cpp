@@ -112,7 +112,7 @@ namespace krys::boo
     return result;
   }
 
-  ImageBuffer *Filter::FilterResultBuffer(FilterImage &filterImage) const noexcept
+  ImageBuffer *Filter::FilterResultBuffer(FilterImage &filterImage) noexcept
   {
     return filterImage.GetImageBuffer();
   }

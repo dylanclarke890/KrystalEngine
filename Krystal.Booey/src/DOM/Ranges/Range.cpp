@@ -1336,7 +1336,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Range::CloneCharacterDataContents(DocumentFragment &fragment, Node &container,
                                                       size_t offset, size_t length,
-                                                      DeleteClonedContent deleteClonedContent) const noexcept
+                                                      DeleteClonedContent deleteClonedContent) noexcept
   {
     CharacterData &characterData = Downcast<CharacterData>(container);
 

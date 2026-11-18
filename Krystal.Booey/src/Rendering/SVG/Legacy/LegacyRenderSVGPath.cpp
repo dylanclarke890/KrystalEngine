@@ -213,7 +213,7 @@ namespace krys::boo
   }
 
   FloatRect LegacyRenderSVGPath::ZeroLengthSubpathRect(const FloatPoint &linecapPosition,
-                                                       float strokeWidth) const noexcept
+                                                       float strokeWidth) noexcept
   {
     return FloatRect(linecapPosition.X() - strokeWidth / 2, linecapPosition.Y() - strokeWidth / 2,
                      strokeWidth, strokeWidth);

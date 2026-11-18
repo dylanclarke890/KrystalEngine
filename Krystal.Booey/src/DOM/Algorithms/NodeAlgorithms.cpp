@@ -613,10 +613,8 @@ namespace krys::boo::dom
                                              {
                                                return element._qualifiedName.Name() == qualifiedNameLowercase;
                                              }
-                                             else
-                                             {
-                                               return element._qualifiedName.Name() == qualifiedName;
-                                             }
+
+                                             return element._qualifiedName.Name() == qualifiedName;
                                            });
     }
 

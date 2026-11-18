@@ -343,7 +343,7 @@ namespace krys::boo
     virtual void SetTextInternal(utf8_string text, bool force) noexcept;
 
   private:
-    KRYS_NODISCARD bool ComputeUseBackslashAsYenSymbol() const noexcept;
+    KRYS_NODISCARD static bool ComputeUseBackslashAsYenSymbol() noexcept;
 
     void ComputeFontCodePath() noexcept;
 

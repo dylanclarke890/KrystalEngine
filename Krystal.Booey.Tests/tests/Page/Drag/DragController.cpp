@@ -228,7 +228,7 @@ namespace krys::boo::tests
                                     operation);
       }
 
-      KRYS_NODISCARD std::string InnerHTML(const dom::Node &node) noexcept
+      KRYS_NODISCARD static std::string InnerHTML(const dom::Node &node) noexcept
       {
         return Narrow(SerializeFragment(node, SerializedNodes::SubtreesOfChildren));
       }

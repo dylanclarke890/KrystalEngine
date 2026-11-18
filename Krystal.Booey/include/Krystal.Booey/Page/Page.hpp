@@ -306,8 +306,8 @@ namespace krys::boo
 
     /// @brief How the page's filters are applied when drawn into @p context: through the graphics context
     /// (there's no software or accelerated filter rendering).
-    KRYS_NODISCARD EnumSet<FilterRenderingMode>
-      PreferredFilterRenderingModes(const GraphicsContext &context) const noexcept;
+    KRYS_NODISCARD static EnumSet<FilterRenderingMode>
+      PreferredFilterRenderingModes(const GraphicsContext &context) noexcept;
 
     KRYS_NODISCARD bool IsRenderingUpdateScheduled() const noexcept
     {

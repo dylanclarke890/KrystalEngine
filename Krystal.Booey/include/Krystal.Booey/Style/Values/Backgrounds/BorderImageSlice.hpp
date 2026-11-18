@@ -165,25 +165,28 @@ namespace krys::boo::style
   template <>
   struct Blending<BorderImageSliceValue>
   {
-    KRYS_NODISCARD bool CanBlend(const BorderImageSliceValue &, const BorderImageSliceValue &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BorderImageSliceValue &,
+                                        const BorderImageSliceValue &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BorderImageSliceValue &,
-                                                                      const BorderImageSliceValue &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const BorderImageSliceValue &,
+                                                    const BorderImageSliceValue &) noexcept;
 
-    KRYS_NODISCARD BorderImageSliceValue Blend(const BorderImageSliceValue &, const BorderImageSliceValue &,
-                                               const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BorderImageSliceValue
+      Blend(const BorderImageSliceValue &, const BorderImageSliceValue &, const BlendingContext &) noexcept;
   };
 
   template <>
   struct Blending<BorderImageSlice>
   {
-    KRYS_NODISCARD bool CanBlend(const BorderImageSlice &, const BorderImageSlice &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const BorderImageSlice &, const BorderImageSlice &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const BorderImageSlice &,
-                                                                      const BorderImageSlice &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const BorderImageSlice &,
+                                                    const BorderImageSlice &) noexcept;
 
-    KRYS_NODISCARD BorderImageSlice Blend(const BorderImageSlice &, const BorderImageSlice &,
-                                          const BlendingContext &) noexcept;
+    KRYS_NODISCARD static BorderImageSlice Blend(const BorderImageSlice &, const BorderImageSlice &,
+                                                 const BlendingContext &) noexcept;
   };
 }
 

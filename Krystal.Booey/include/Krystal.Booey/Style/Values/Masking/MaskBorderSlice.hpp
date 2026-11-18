@@ -165,25 +165,27 @@ namespace krys::boo::style
   template <>
   struct Blending<MaskBorderSliceValue>
   {
-    KRYS_NODISCARD bool CanBlend(const MaskBorderSliceValue &, const MaskBorderSliceValue &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const MaskBorderSliceValue &, const MaskBorderSliceValue &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderSliceValue &,
-                                                                      const MaskBorderSliceValue &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const MaskBorderSliceValue &,
+                                                    const MaskBorderSliceValue &) noexcept;
 
-    KRYS_NODISCARD MaskBorderSliceValue Blend(const MaskBorderSliceValue &, const MaskBorderSliceValue &,
-                                              const BlendingContext &) noexcept;
+    KRYS_NODISCARD static MaskBorderSliceValue
+      Blend(const MaskBorderSliceValue &, const MaskBorderSliceValue &, const BlendingContext &) noexcept;
   };
 
   template <>
   struct Blending<MaskBorderSlice>
   {
-    KRYS_NODISCARD bool CanBlend(const MaskBorderSlice &, const MaskBorderSlice &) noexcept;
+    KRYS_NODISCARD static bool CanBlend(const MaskBorderSlice &, const MaskBorderSlice &) noexcept;
 
-    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const MaskBorderSlice &,
-                                                                      const MaskBorderSlice &) noexcept;
+    KRYS_NODISCARD static bool
+      RequiresInterpolationForAccumulativeIteration(const MaskBorderSlice &,
+                                                    const MaskBorderSlice &) noexcept;
 
-    KRYS_NODISCARD MaskBorderSlice Blend(const MaskBorderSlice &, const MaskBorderSlice &,
-                                         const BlendingContext &) noexcept;
+    KRYS_NODISCARD static MaskBorderSlice Blend(const MaskBorderSlice &, const MaskBorderSlice &,
+                                                const BlendingContext &) noexcept;
   };
 }
 

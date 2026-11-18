@@ -458,11 +458,9 @@ namespace krys::boo::css::parse_property
             return null;
           });
       }
-      else
-      {
-        // A `comma` NOT getting successfully consumed means this is using the modern syntax.
-        return ConsumeAbsoluteFunctionParameters<Descriptor>(args, state, krys::move(*red));
-      }
+
+      // A `comma` NOT getting successfully consumed means this is using the modern syntax.
+      return ConsumeAbsoluteFunctionParameters<Descriptor>(args, state, krys::move(*red));
     }
 
     // MARK: - hsl() / hsla()
@@ -516,11 +514,9 @@ namespace krys::boo::css::parse_property
             return null;
           });
       }
-      else
-      {
-        // A `comma` NOT getting successfully consumed means this is using the modern syntax.
-        return ConsumeAbsoluteFunctionParameters<Descriptor>(args, state, krys::move(*hue));
-      }
+
+      // A `comma` NOT getting successfully consumed means this is using the modern syntax.
+      return ConsumeAbsoluteFunctionParameters<Descriptor>(args, state, krys::move(*hue));
     }
 
     // MARK: - color()

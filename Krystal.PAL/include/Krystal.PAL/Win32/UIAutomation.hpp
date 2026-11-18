@@ -73,6 +73,6 @@ namespace krys::pal::win32
     KRYS_NODISCARD UIAElement &Element(AccessibilityNodeID node) noexcept;
 
   private:
-    void Disconnect(UIAElement &element) noexcept;
+    static void Disconnect(UIAElement &element) noexcept;
   };
 }
