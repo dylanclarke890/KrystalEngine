@@ -67,7 +67,7 @@ namespace krys::boo::css::tests
     auto empty = CompleteURL(u8"", ContextWithBase(u8"https://example.com/"));
     REQUIRE(empty);
     CHECK_FALSE(empty->IsNone());
-    CHECK_FALSE(CompleteURL(u8"a.png", ParserContext {ParserMode::HTMLStandard})->IsNone());
+    CHECK_FALSE(CompleteURL(u8"a.png", ParserContext {ParserMode::HTMLStandard}).value().IsNone());
   }
 
   TEST_CASE("CSSURL(Resolve)", "[CSS][Primitives][URL]")

@@ -343,7 +343,7 @@ namespace krys::boo::tests
       auto &line = result.DisplayContent.LineList[0];
       CHECK(line.ContentLogicalWidth() == 60.f);
       REQUIRE(line.HasEllipsis());
-      CHECK(line.GetEllipsis()->EllipsisType == inline_display::Line::Ellipsis::Type::Inline);
+      CHECK(line.GetEllipsis().value().EllipsisType == inline_display::Line::Ellipsis::Type::Inline);
       REQUIRE(result.DisplayContent.BoxList.size() == 2);
       auto &text = result.DisplayContent.BoxList[1].GetText();
       REQUIRE(text.PartiallyVisibleContentLength());

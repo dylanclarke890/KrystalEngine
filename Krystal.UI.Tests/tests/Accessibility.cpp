@@ -267,11 +267,13 @@ namespace krys::ui::tests
       CHECK(info->Bounds.Height == 40);
 
       auto fieldInfo = tree.Node(field);
+      REQUIRE(fieldInfo);
       CHECK(fieldInfo->Role == pal::AccessibilityRole::Edit);
       CHECK(fieldInfo->Value == u8"Hello");
       CHECK(fieldInfo->States.Contains(pal::AccessibilityState::Editable));
 
       auto rangeInfo = tree.Node(range);
+      REQUIRE(rangeInfo);
       CHECK(rangeInfo->Role == pal::AccessibilityRole::Slider);
       REQUIRE(rangeInfo->Range);
       CHECK(rangeInfo->Range->Value == 4);
@@ -280,7 +282,7 @@ namespace krys::ui::tests
 
       auto heading = FindByRole(tree, root, pal::AccessibilityRole::Heading);
       REQUIRE(heading != 0);
-      CHECK(tree.Node(heading)->HeadingLevel == 2);
+      CHECK(tree.Node(heading).value().HeadingLevel == 2);
 
       CHECK(tree.SelectedChildren(list).size() == 1);
       CHECK_FALSE(tree.Node(0));
@@ -290,7 +292,7 @@ namespace krys::ui::tests
     {
       CHECK(tree.PerformAction(box, pal::AccessibilityAction::Press));
       CHECK(Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"box")).Checked());
-      CHECK(tree.Node(box)->States.Contains(pal::AccessibilityState::Checked));
+      CHECK(tree.Node(box).value().States.Contains(pal::AccessibilityState::Checked));
 
       CHECK(tree.PerformAction(field, pal::AccessibilityAction::Focus));
       CHECK(tree.Focus() == field);
@@ -304,9 +306,9 @@ namespace krys::ui::tests
             == u8"Changed");
 
       CHECK(tree.SetRangeValue(range, 8));
-      CHECK(tree.Node(range)->Range->Value == 8);
+      CHECK(tree.Node(range).value().Range->Value == 8);
       CHECK(tree.PerformAction(range, pal::AccessibilityAction::Decrement));
-      CHECK(tree.Node(range)->Range->Value == 6);
+      CHECK(tree.Node(range).value().Range->Value == 6);
     }
 
     SECTION("Hit testing")
@@ -455,12 +457,12 @@ namespace krys::ui::tests
     CHECK(bold->Start == text.find(u8"bold"));
     CHECK(bold->End == text.find(u8"bold") + 4);
     CHECK(bold->Style.FontWeight == 700);
-    CHECK(tree.TextRunAt(paragraph, text.find(u8"it"))->Style.Italic);
-    CHECK(tree.TextRunAt(paragraph, text.find(u8"under"))->Style.Underline);
-    CHECK(tree.TextRunAt(paragraph, text.find(u8"gone"))->Style.Strikethrough);
-    CHECK(tree.TextRunAt(paragraph, text.find(u8"blue"))->Style.BackgroundColor == 0xFF'00'00'FFu);
+    CHECK(tree.TextRunAt(paragraph, text.find(u8"it")).value().Style.Italic);
+    CHECK(tree.TextRunAt(paragraph, text.find(u8"under")).value().Style.Underline);
+    CHECK(tree.TextRunAt(paragraph, text.find(u8"gone")).value().Style.Strikethrough);
+    CHECK(tree.TextRunAt(paragraph, text.find(u8"blue")).value().Style.BackgroundColor == 0xFF'00'00'FFu);
     // Past the end is the last character's run.
-    CHECK(tree.TextRunAt(paragraph, text.size())->Style.BackgroundColor == 0xFF'00'00'FFu);
+    CHECK(tree.TextRunAt(paragraph, text.size()).value().Style.BackgroundColor == 0xFF'00'00'FFu);
   }
 
   TEST_CASE("View: accessibility at a device scale factor", "[UI][Accessibility]")
@@ -484,7 +486,7 @@ namespace krys::ui::tests
     REQUIRE((button && field && menu));
 
     // The window is in the view's pixels, the origin among them.
-    auto bounds = tree.Node(button)->Bounds;
+    auto bounds = tree.Node(button).value().Bounds;
     CHECK(bounds.X == 0);
     CHECK(bounds.Y == 50);
     CHECK(bounds.Width == 200);
@@ -503,7 +505,7 @@ namespace krys::ui::tests
     view.UpdateRendering();
     auto plum = FindByName(tree, tree.Children(root).back(), u8"Plum");
     REQUIRE(plum != 0);
-    auto plumBounds = tree.Node(plum)->Bounds;
+    auto plumBounds = tree.Node(plum).value().Bounds;
     CHECK(plumBounds.Y >= static_cast<float>(overlay->Rect().Y() * 2 + 50));
     auto hit = tree.HitTest(plumBounds.X + plumBounds.Width / 2, plumBounds.Y + plumBounds.Height / 2);
     CHECK((hit == plum || tree.Parent(hit) == plum));
@@ -543,7 +545,7 @@ namespace krys::ui::tests
     CHECK(tree.Parent(plum) != 0);
 
     // Its nodes are where the overlay is in the window, and hit testing finds them there.
-    auto bounds = tree.Node(plum)->Bounds;
+    auto bounds = tree.Node(plum).value().Bounds;
     CHECK(bounds.Y >= static_cast<float>(overlay->Rect().Y() + 50));
     auto hit = tree.HitTest(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2);
     CHECK((hit == plum || tree.Parent(hit) == plum));

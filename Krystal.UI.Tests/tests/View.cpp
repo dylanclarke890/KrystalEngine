@@ -2282,9 +2282,10 @@ namespace krys::ui::tests
     }
 
     /// @brief The days since 1970-01-01 of the date @p date, as the date picker's cells name them.
-    KRYS_NODISCARD utf8_string DayValue(utf8_stringview date) noexcept
+    KRYS_NODISCARD utf8_string DayValue(utf8_stringview date)
     {
       auto components = boo::DateComponents::FromParsingDate(date);
+      REQUIRE(components);
       auto days = static_cast<int64>(components->MillisecondsSinceEpoch() / 86'400'000.0);
       auto text = std::to_string(days);
       return utf8_string(text.begin(), text.end());

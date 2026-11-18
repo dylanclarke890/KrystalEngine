@@ -90,6 +90,7 @@ namespace krys::boo::html::tests
       input.Elements->back().Attributes =
         List<SanitizerAttributeNamespace> {u8"cx", {u8"href", XLink}, {u8"title", u8""}};
       auto config = Make(input)->Get();
+      REQUIRE(config.Elements);
       REQUIRE(config.Elements->size() == 2);
       auto &circle = (*config.Elements)[1];
       CHECK((*config.Elements)[0].Namespace == infra::namespaces::HTML);
@@ -227,6 +228,7 @@ namespace krys::boo::html::tests
       span.Attributes = List<SanitizerAttributeNamespace> {u8"class", u8"title"};
       CHECK(sanitizer->AllowElement(span));
       auto config = sanitizer->Get();
+      REQUIRE(config.Elements);
       auto it =
         std::ranges::find_if(*config.Elements, [](const auto &element) { return element.Name == u8"span"; });
       REQUIRE(it != config.Elements->end());

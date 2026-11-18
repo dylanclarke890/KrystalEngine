@@ -86,7 +86,7 @@ namespace krys::boo::css::calc::tests
     CHECK(*sumType->PercentHint == PercentHint::Length);
 
     // px * px -> length².
-    CHECK(ToType(Multiply(Px(1.0), Px(2.0)))->Length == 2);
+    CHECK(ToType(Multiply(Px(1.0), Px(2.0))).value().Length == 2);
 
     // px - deg can't be added.
     CHECK_FALSE(ToType(Subtract(Px(1.0), CreateNumeric(1.0, UnitType::deg))));

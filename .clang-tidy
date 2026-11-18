@@ -21,14 +21,12 @@ Checks: >
   bugprone-infinite-loop,
   bugprone-integer-division,
   bugprone-move-forwarding-reference,
-  bugprone-narrowing-conversions,
   bugprone-parent-virtual-call,
   bugprone-redundant-branch-condition,
   bugprone-suspicious-missing-comma,
   bugprone-suspicious-semicolon,
   bugprone-suspicious-string-compare,
   bugprone-swapped-arguments,
-  bugprone-unchecked-optional-access,
   bugprone-undelegated-constructor,
   bugprone-unhandled-self-assignment,
   bugprone-unused-raii,
@@ -142,3 +140,7 @@ CheckOptions:
 #   readability-implicit-bool-conversion,
 #   readability-make-member-function-const,
 #   readability-simplify-boolean-expr,
+
+# Not wanted.
+# bugprone-narrowing-conversions,     # MSVC already guards against these; the remainder are mainly noise
+# bugprone-unchecked-optional-access, # Triggers a lot of false positives, particularly with Catch2's CHECK and REQUIRE macros.

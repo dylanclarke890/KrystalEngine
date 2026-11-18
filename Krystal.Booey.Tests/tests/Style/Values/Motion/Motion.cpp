@@ -64,11 +64,11 @@ namespace krys::boo::style::tests
 
       // `contain` shortens the ray by half the element's larger side.
       auto contained = Convert<OffsetPath>(PropertyId::OffsetPath, u8"ray(90deg closest-side contain)");
-      CHECK(TryPath(contained, MotionData())->Length() == Approx(40));
+      CHECK(TryPath(contained, MotionData()).value().Length() == Approx(40));
 
       // `farthest-corner` reaches the corner diagonally.
       auto corner = Convert<OffsetPath>(PropertyId::OffsetPath, u8"ray(0deg farthest-corner)");
-      CHECK(TryPath(corner, MotionData())->Length() == Approx(std::hypot(100.0, 50.0)));
+      CHECK(TryPath(corner, MotionData()).value().Length() == Approx(std::hypot(100.0, 50.0)));
 
       // A ray needs the containing block.
       CHECK_FALSE(TryPath(ray, TransformOperationData {FloatRect {0, 0, 20, 20}}));
@@ -79,11 +79,11 @@ namespace krys::boo::style::tests
       auto circle = Convert<OffsetPath>(PropertyId::OffsetPath, u8"circle(10px)");
       REQUIRE(circle.IsBasicShape());
       // Without a position, the circle is centred on the starting position.
-      CHECK(TryPath(circle, MotionData())->BoundingRect() == FloatRect {90, 40, 20, 20});
+      CHECK(TryPath(circle, MotionData()).value().BoundingRect() == FloatRect {90, 40, 20, 20});
 
       auto box = Convert<OffsetPath>(PropertyId::OffsetPath, u8"border-box");
       REQUIRE(box.IsBox());
-      CHECK(TryPath(box, MotionData())->BoundingRect() == FloatRect {0, 0, 200, 100});
+      CHECK(TryPath(box, MotionData()).value().BoundingRect() == FloatRect {0, 0, 200, 100});
       CHECK_FALSE(TryPath(box, TransformOperationData {FloatRect {0, 0, 20, 20}}));
 
       auto reference = Convert<OffsetPath>(PropertyId::OffsetPath, u8"url(#path)");
@@ -140,7 +140,7 @@ namespace krys::boo::style::tests
     REQUIRE(reference->GetPath());
     CHECK(reference->GetPath(TransformOperationData {FloatRect {}})->BoundingRect()
           == FloatRect {0, 0, 10, 10});
-    CHECK(Downcast<ReferencePathOperation>(*reference->Clone()).GetPath()->BoundingRect()
+    CHECK(Downcast<ReferencePathOperation>(*reference->Clone()).GetPath().value().BoundingRect()
           == FloatRect {0, 0, 10, 10});
   }
 

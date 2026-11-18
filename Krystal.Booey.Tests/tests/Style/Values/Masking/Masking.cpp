@@ -72,12 +72,12 @@ namespace krys::boo::style::tests
     auto svgPath = Convert<ClipPath>(PropertyId::ClipPath, u8"path('M 10 10 h 30 v 40 Z')");
     REQUIRE(svgPath.IsBasicShape());
     CHECK(Serialised(svgPath) == "path(\"M 10 10 h 30 v 40 Z\")");
-    CHECK(TryPath(svgPath, TransformOperationData {FloatRect {0, 0, 100, 100}})->BoundingRect()
+    CHECK(TryPath(svgPath, TransformOperationData {FloatRect {0, 0, 100, 100}}).value().BoundingRect()
           == FloatRect {10, 10, 30, 40});
 
     auto reference = Convert<ClipPath>(PropertyId::ClipPath, u8"url(#clip)");
     REQUIRE(reference.IsReference());
-    CHECK(reference.TryReference()->Fragment().View() == u8"clip");
+    CHECK(reference.TryReference().value().Fragment().View() == u8"clip");
     // Without SVG geometry the reference has no path yet.
     CHECK_FALSE(TryPath(reference, TransformOperationData {FloatRect {0, 0, 100, 100}}));
 

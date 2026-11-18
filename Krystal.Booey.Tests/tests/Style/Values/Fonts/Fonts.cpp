@@ -174,7 +174,7 @@ namespace krys::boo::style::tests
     auto angle = Convert<FontStyle>(PropertyId::FontStyle, u8"oblique 20deg");
     CHECK(angle.IsOblique());
     CHECK(angle.IsConsideredItalic());
-    CHECK(angle.GetAngle()->Value == 20);
+    CHECK(angle.GetAngle().value().Value == 20);
     CHECK(Serialised(angle) == "oblique 20deg");
     CHECK(Created(angle) == "oblique 20deg");
     CHECK_FALSE(Convert<FontStyle>(PropertyId::FontStyle, u8"oblique 10deg").IsConsideredItalic());
@@ -183,7 +183,7 @@ namespace krys::boo::style::tests
     CHECK_FALSE(Blending<FontStyle> {}.CanBlend(italic, angle));
     auto blended = Blending<FontStyle> {}.Blend(Convert<FontStyle>(PropertyId::FontStyle, u8"oblique 10deg"),
                                                 angle, BlendingContext {0.5});
-    CHECK(blended.GetAngle()->Value == 15);
+    CHECK(blended.GetAngle().value().Value == 15);
     CHECK(Blending<FontStyle> {}.Blend(normal, normal, BlendingContext {0.5}).IsNormal());
     CHECK(Blending<FontStyle> {}.Blend(normal, angle, BlendingContext {0.25, true}) == normal);
 

@@ -57,54 +57,56 @@ namespace krys::boo::css::tests
     CHECK(length->GetRaw()->Unit == LengthUnit::Px);
     CHECK(length->GetRaw()->Value == 5.0);
 
-    CHECK(ConsumeAll<Length<>>(u8"2em")->GetRaw()->Unit == LengthUnit::Em);
+    CHECK(ConsumeAll<Length<>>(u8"2em").value().GetRaw()->Unit == LengthUnit::Em);
     CHECK_FALSE(ConsumeAll<Length<>>(u8"5deg"));
     CHECK_FALSE(ConsumeAll<Length<>>(u8"5%"));
     CHECK_FALSE(ConsumeAll<Length<NonNegative>>(u8"-5px"));
-    CHECK(ConsumeAll<Length<>>(u8"calc(1px + 1em)")->IsCalc());
+    CHECK(ConsumeAll<Length<>>(u8"calc(1px + 1em)").value().IsCalc());
 
     // Unitless values: zero (unless disallowed), SVG attributes, and quirky properties in quirks mode.
     CHECK(ConsumeAll<Length<>>(u8"0"));
     CHECK_FALSE(ConsumeAll<Length<>>(u8"0", ParserMode::HTMLStandard, PropertyId::Invalid,
                                      {.UnitlessZeroLength = AllowUnitlessZero::No}));
     CHECK_FALSE(ConsumeAll<Length<>>(u8"5"));
-    CHECK(ConsumeAll<Length<>>(u8"5", ParserMode::SVGAttribute)->GetRaw()->Unit == LengthUnit::Px);
+    CHECK(ConsumeAll<Length<>>(u8"5", ParserMode::SVGAttribute).value().GetRaw()->Unit == LengthUnit::Px);
     CHECK(ConsumeAll<Length<>>(u8"5", ParserMode::HTMLQuirks, PropertyId::FontSize));
     CHECK_FALSE(ConsumeAll<Length<>>(u8"5", ParserMode::HTMLQuirks, PropertyId::Invalid));
     CHECK_FALSE(ConsumeAll<Length<>>(u8"5", ParserMode::HTMLStandard, PropertyId::FontSize));
 
     // The quirky em unit is only allowed in UA sheets.
     CHECK_FALSE(ConsumeAll<Length<>>(u8"1__qem"));
-    CHECK(ConsumeAll<Length<>>(u8"1__qem", ParserMode::UASheet)->GetRaw()->Unit == LengthUnit::QuirkyEm);
+    CHECK(ConsumeAll<Length<>>(u8"1__qem", ParserMode::UASheet).value().GetRaw()->Unit
+          == LengthUnit::QuirkyEm);
     CHECK(ConsumeAll<Length<>>(u8"1__qem", ParserMode::HTMLStandard, PropertyId::Invalid,
                                {.OverrideParserMode = ParserMode::UASheet}));
   }
 
   TEST_CASE("ConsumerDefinition(LengthPercentage)", "[CSS][Properties][Consumers]")
   {
-    CHECK(ConsumeAll<LengthPercentage<>>(u8"5px")->GetRaw()->Unit == LengthPercentageUnit::Px);
+    CHECK(ConsumeAll<LengthPercentage<>>(u8"5px").value().GetRaw()->Unit == LengthPercentageUnit::Px);
 
     auto percentage = ConsumeAll<LengthPercentage<>>(u8"50%");
     REQUIRE(percentage);
     CHECK(percentage->GetRaw()->Unit == LengthPercentageUnit::Percentage);
     CHECK(percentage->GetRaw()->Value == 50.0);
 
-    CHECK(ConsumeAll<LengthPercentage<>>(u8"0")->GetRaw()->Unit == LengthPercentageUnit::Px);
+    CHECK(ConsumeAll<LengthPercentage<>>(u8"0").value().GetRaw()->Unit == LengthPercentageUnit::Px);
     CHECK(ConsumeAll<LengthPercentage<>>(u8"5", ParserMode::HTMLQuirks, PropertyId::FontSize));
     CHECK_FALSE(ConsumeAll<LengthPercentage<>>(u8"1__qem"));
     CHECK_FALSE(ConsumeAll<LengthPercentage<NonNegative>>(u8"-1%"));
-    CHECK(ConsumeAll<LengthPercentage<>>(u8"calc(50% - 1px)")->IsCalc());
+    CHECK(ConsumeAll<LengthPercentage<>>(u8"calc(50% - 1px)").value().IsCalc());
   }
 
   TEST_CASE("ConsumerDefinition(AnglePercentage)", "[CSS][Properties][Consumers]")
   {
-    CHECK(ConsumeAll<AnglePercentage<>>(u8"1turn")->GetRaw()->Unit == AnglePercentageUnit::Turn);
-    CHECK(ConsumeAll<AnglePercentage<>>(u8"25%")->GetRaw()->Unit == AnglePercentageUnit::Percentage);
+    CHECK(ConsumeAll<AnglePercentage<>>(u8"1turn").value().GetRaw()->Unit == AnglePercentageUnit::Turn);
+    CHECK(ConsumeAll<AnglePercentage<>>(u8"25%").value().GetRaw()->Unit == AnglePercentageUnit::Percentage);
     CHECK_FALSE(ConsumeAll<AnglePercentage<>>(u8"5px"));
 
     CHECK(ConsumeAll<AnglePercentage<>>(u8"0", ParserMode::HTMLStandard, PropertyId::Invalid,
                                         {.UnitlessZeroAngle = AllowUnitlessZero::Yes})
-            ->GetRaw()
+            .value()
+            .GetRaw()
             ->Unit
           == AnglePercentageUnit::Deg);
     CHECK_FALSE(ConsumeAll<AnglePercentage<>>(u8"0"));
@@ -112,32 +114,32 @@ namespace krys::boo::css::tests
 
   TEST_CASE("ConsumerDefinition(Time)", "[CSS][Properties][Consumers]")
   {
-    CHECK(ConsumeAll<Time<>>(u8"2s")->GetRaw()->Unit == TimeUnit::S);
-    CHECK(ConsumeAll<Time<>>(u8"200ms")->GetRaw()->Unit == TimeUnit::Ms);
+    CHECK(ConsumeAll<Time<>>(u8"2s").value().GetRaw()->Unit == TimeUnit::S);
+    CHECK(ConsumeAll<Time<>>(u8"200ms").value().GetRaw()->Unit == TimeUnit::Ms);
     CHECK_FALSE(ConsumeAll<Time<>>(u8"0"));
     CHECK_FALSE(ConsumeAll<Time<NonNegative>>(u8"-1s"));
-    CHECK(ConsumeAll<Time<>>(u8"calc(1s + 5ms)")->IsCalc());
+    CHECK(ConsumeAll<Time<>>(u8"calc(1s + 5ms)").value().IsCalc());
   }
 
   TEST_CASE("ConsumerDefinition(Resolution)", "[CSS][Properties][Consumers]")
   {
-    CHECK(ConsumeAll<Resolution<>>(u8"2dppx")->GetRaw()->Unit == ResolutionUnit::Dppx);
-    CHECK(ConsumeAll<Resolution<>>(u8"96dpi")->GetRaw()->Unit == ResolutionUnit::Dpi);
-    CHECK(ConsumeAll<Resolution<>>(u8"1x")->GetRaw()->Unit == ResolutionUnit::X);
+    CHECK(ConsumeAll<Resolution<>>(u8"2dppx").value().GetRaw()->Unit == ResolutionUnit::Dppx);
+    CHECK(ConsumeAll<Resolution<>>(u8"96dpi").value().GetRaw()->Unit == ResolutionUnit::Dpi);
+    CHECK(ConsumeAll<Resolution<>>(u8"1x").value().GetRaw()->Unit == ResolutionUnit::X);
     CHECK_FALSE(ConsumeAll<Resolution<>>(u8"1"));
   }
 
   TEST_CASE("ConsumerDefinition(Flex)", "[CSS][Properties][Consumers]")
   {
-    CHECK(ConsumeAll<Flex<>>(u8"1fr")->GetRaw()->Value == 1.0);
+    CHECK(ConsumeAll<Flex<>>(u8"1fr").value().GetRaw()->Value == 1.0);
     CHECK_FALSE(ConsumeAll<Flex<NonNegative>>(u8"-1fr"));
     CHECK_FALSE(ConsumeAll<Flex<>>(u8"1px"));
   }
 
   TEST_CASE("ConsumerDefinition(Frequency)", "[CSS][Properties][Consumers]")
   {
-    CHECK(ConsumeAll<Frequency<>>(u8"440hz")->GetRaw()->Unit == FrequencyUnit::Hz);
-    CHECK(ConsumeAll<Frequency<>>(u8"1khz")->GetRaw()->Unit == FrequencyUnit::Khz);
+    CHECK(ConsumeAll<Frequency<>>(u8"440hz").value().GetRaw()->Unit == FrequencyUnit::Hz);
+    CHECK(ConsumeAll<Frequency<>>(u8"1khz").value().GetRaw()->Unit == FrequencyUnit::Khz);
     CHECK_FALSE(ConsumeAll<Frequency<>>(u8"1s"));
   }
 }

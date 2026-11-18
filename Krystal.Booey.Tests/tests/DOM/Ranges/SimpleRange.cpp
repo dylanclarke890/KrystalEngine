@@ -31,8 +31,8 @@ namespace krys::boo::dom::tests
       CHECK(std::is_gt(TreeOrder(At(d, 1), At(bText, 1))));
       CHECK(std::is_lt(TreeOrder(At(bText, 2), At(iText, 0))));
       CHECK(std::is_eq(TreeOrder(At(d, 1), At(d, 1))));
-      CHECK(MakeBoundaryPointBeforeNode(i)->Offset == 1);
-      CHECK(MakeBoundaryPointAfterNode(i)->Offset == 2);
+      CHECK(MakeBoundaryPointBeforeNode(i).value().Offset == 1);
+      CHECK(MakeBoundaryPointAfterNode(i).value().Offset == 2);
       CHECK(MakeBoundaryPointAfterNodeContents(bText).Offset == 2);
     }
 
