@@ -3,14 +3,14 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Events/Event.hpp"
 #include "Krystal.PAL/DragAndDrop.hpp"
-#include "Krystal.PAL/Gamepad.hpp"
+#include "Krystal.PAL/Input/Gamepad.hpp"
+#include "Krystal.PAL/Input/KeyModifiers.hpp"
+#include "Krystal.PAL/Input/Keys.hpp"
+#include "Krystal.PAL/Input/MouseButtons.hpp"
+#include "Krystal.PAL/Input/Pointer.hpp"
+#include "Krystal.PAL/Input/TextInput.hpp"
+#include "Krystal.PAL/Input/TouchpadPan.hpp"
 #include "Krystal.PAL/IWindow.hpp"
-#include "Krystal.PAL/KeyModifiers.hpp"
-#include "Krystal.PAL/Keys.hpp"
-#include "Krystal.PAL/MouseButtons.hpp"
-#include "Krystal.PAL/Pointer.hpp"
-#include "Krystal.PAL/TextInput.hpp"
-#include "Krystal.PAL/TouchpadPan.hpp"
 
 namespace krys::pal
 {

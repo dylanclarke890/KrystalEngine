@@ -364,10 +364,10 @@ namespace krys::pal::win32
     /// @brief Null once disconnected.
     UIAutomation *_owner {nullptr};
     /// @brief 0 for the window's element.
-    AccessibilityNodeID _node {0};
+    AccessibilityNodeId _node {0};
 
   public:
-    UIAElement(UIAutomation &owner, AccessibilityNodeID node) noexcept : _owner(&owner), _node(node)
+    UIAElement(UIAutomation &owner, AccessibilityNodeId node) noexcept : _owner(&owner), _node(node)
     {
     }
 
@@ -378,7 +378,7 @@ namespace krys::pal::win32
       _owner = nullptr;
     }
 
-    KRYS_NODISCARD AccessibilityNodeID Node() const noexcept
+    KRYS_NODISCARD AccessibilityNodeId Node() const noexcept
     {
       return _node;
     }
@@ -692,7 +692,7 @@ namespace krys::pal::win32
         return UIA_E_ELEMENTNOTAVAILABLE;
       }
       auto &tree = _owner->Tree();
-      AccessibilityNodeID found = 0;
+      AccessibilityNodeId found = 0;
       bool foundWindow = false;
       if (!_node)
       {
@@ -1984,7 +1984,7 @@ namespace krys::pal::win32
     return *_root;
   }
 
-  UIAElement &UIAutomation::Element(AccessibilityNodeID node) noexcept
+  UIAElement &UIAutomation::Element(AccessibilityNodeId node) noexcept
   {
     if (!node)
     {
@@ -2005,7 +2005,7 @@ namespace krys::pal::win32
     element.Release();
   }
 
-  void UIAutomation::NodeRemoved(AccessibilityNodeID node) noexcept
+  void UIAutomation::NodeRemoved(AccessibilityNodeId node) noexcept
   {
     auto it = _elements.find(node);
     if (it == _elements.end())
@@ -2017,7 +2017,7 @@ namespace krys::pal::win32
     Disconnect(*element);
   }
 
-  void UIAutomation::RaiseTextChange(AccessibilityNodeID node) noexcept
+  void UIAutomation::RaiseTextChange(AccessibilityNodeId node) noexcept
   {
     if (node && _tree.Node(node))
     {
@@ -2025,7 +2025,7 @@ namespace krys::pal::win32
     }
   }
 
-  void UIAutomation::RaiseEvent(AccessibilityNodeID node, AccessibilityEvent event) noexcept
+  void UIAutomation::RaiseEvent(AccessibilityNodeId node, AccessibilityEvent event) noexcept
   {
     auto info = node ? _tree.Node(node) : null;
     if (!info)

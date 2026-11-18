@@ -1,4 +1,4 @@
-﻿#include "Krystal.PAL/Input.hpp"
+﻿#include "Krystal.PAL/Input/Input.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 
 namespace krys::pal

@@ -5,7 +5,7 @@
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/ScopedProfiler.hpp"
-#include "Krystal.PAL/Input.hpp"
+#include "Krystal.PAL/Input/Input.hpp"
 #include "Krystal.PAL/Platform.hpp"
 #include <thread>
 #include <utility>

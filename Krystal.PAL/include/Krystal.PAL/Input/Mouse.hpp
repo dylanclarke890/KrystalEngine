@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.PAL/MouseButtons.hpp"
+#include "Krystal.PAL/Input/MouseButtons.hpp"
 
 namespace krys::pal
 {

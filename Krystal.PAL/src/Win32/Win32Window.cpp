@@ -1334,7 +1334,7 @@ namespace krys::pal
       return _uiAutomation && UIAutomation::ClientsAreListening();
     }
 
-    void Win32Window::RaiseAccessibilityEvent(AccessibilityNodeID node, AccessibilityEvent event) noexcept
+    void Win32Window::RaiseAccessibilityEvent(AccessibilityNodeId node, AccessibilityEvent event) noexcept
     {
       if (IsAccessibilityActive())
       {
@@ -1342,7 +1342,7 @@ namespace krys::pal
       }
     }
 
-    void Win32Window::RaiseAccessibilityTextChange(AccessibilityNodeID node, AccessibilityTextChange, uint64,
+    void Win32Window::RaiseAccessibilityTextChange(AccessibilityNodeId node, AccessibilityTextChange, uint64,
                                                    utf8_stringview) noexcept
     {
       // UI Automation's text changed event doesn't say what changed: clients read the text again.
@@ -1352,7 +1352,7 @@ namespace krys::pal
       }
     }
 
-    void Win32Window::AccessibilityNodeRemoved(AccessibilityNodeID node) noexcept
+    void Win32Window::AccessibilityNodeRemoved(AccessibilityNodeId node) noexcept
     {
       if (_uiAutomation)
       {

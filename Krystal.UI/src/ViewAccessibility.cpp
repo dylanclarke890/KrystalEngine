@@ -31,9 +31,9 @@ namespace krys::ui
     // Each page's cache numbers its objects from the same counter, so the nodes of other pages than the
     // view's (an overlay's, an SVG image's) have the top bit set and their cache's tag above their objects'
     // IDs.
-    constexpr pal::AccessibilityNodeID ForeignNodeBit = 1ull << 63;
+    constexpr pal::AccessibilityNodeId ForeignNodeBit = 1ull << 63;
     constexpr uint32 ForeignTagShift = 40;
-    constexpr pal::AccessibilityNodeID ForeignObjectIDMask = (1ull << ForeignTagShift) - 1;
+    constexpr pal::AccessibilityNodeId ForeignObjectIDMask = (1ull << ForeignTagShift) - 1;
 
     KRYS_NODISCARD pal::AccessibilityRole ToPalRole(const AXObject &object) noexcept
     {
@@ -302,13 +302,13 @@ namespace krys::ui
     }
   }
 
-  pal::AccessibilityNodeID ViewAccessibility::ID(const AXObject *object) const noexcept
+  pal::AccessibilityNodeId ViewAccessibility::ID(const AXObject *object) const noexcept
   {
     if (!object)
     {
       return 0;
     }
-    auto id = static_cast<pal::AccessibilityNodeID>(object->ObjectID());
+    auto id = static_cast<pal::AccessibilityNodeId>(object->ObjectID());
     auto *cache = object->AxObjectCache();
     if (!cache || cache == _view.Document().ExistingAXObjectCache())
     {
@@ -325,7 +325,7 @@ namespace krys::ui
     {
       _foreignCaches.push_back({CreateWeakPtr(&cache->GetDocument()), cache});
     }
-    return ForeignNodeBit | (static_cast<pal::AccessibilityNodeID>(index + 1) << ForeignTagShift) | id;
+    return ForeignNodeBit | (static_cast<pal::AccessibilityNodeId>(index + 1) << ForeignTagShift) | id;
   }
 
   Pair<View *, boo::IntPoint> ViewAccessibility::ViewAndOrigin(const AXObject &object) const noexcept
@@ -418,7 +418,7 @@ namespace krys::ui
     return _view.Document().AxObjectCache();
   }
 
-  AXObject *ViewAccessibility::Object(pal::AccessibilityNodeID node) noexcept
+  AXObject *ViewAccessibility::Object(pal::AccessibilityNodeId node) noexcept
   {
     auto *cache = Cache();
     if (!cache || !node)
@@ -499,13 +499,13 @@ namespace krys::ui
     }
   }
 
-  pal::AccessibilityNodeID ViewAccessibility::Root() noexcept
+  pal::AccessibilityNodeId ViewAccessibility::Root() noexcept
   {
     auto *cache = Cache();
     return ID(cache ? cache->RootObject() : nullptr);
   }
 
-  Maybe<pal::AccessibilityNode> ViewAccessibility::Node(pal::AccessibilityNodeID node) noexcept
+  Maybe<pal::AccessibilityNode> ViewAccessibility::Node(pal::AccessibilityNodeId node) noexcept
   {
     auto *object = Object(node);
     if (!object)
@@ -637,7 +637,7 @@ namespace krys::ui
     return result;
   }
 
-  pal::AccessibilityNodeID ViewAccessibility::Parent(pal::AccessibilityNodeID node) noexcept
+  pal::AccessibilityNodeId ViewAccessibility::Parent(pal::AccessibilityNodeId node) noexcept
   {
     auto *object = Object(node);
     if (!object)
@@ -652,9 +652,9 @@ namespace krys::ui
     return ID(object->ParentObjectUnignored());
   }
 
-  List<pal::AccessibilityNodeID> ViewAccessibility::Children(pal::AccessibilityNodeID node) noexcept
+  List<pal::AccessibilityNodeId> ViewAccessibility::Children(pal::AccessibilityNodeId node) noexcept
   {
-    List<pal::AccessibilityNodeID> children;
+    List<pal::AccessibilityNodeId> children;
     if (auto *object = Object(node))
     {
       for (const auto &child : object->Children())
@@ -672,7 +672,7 @@ namespace krys::ui
     return children;
   }
 
-  pal::AccessibilityNodeID ViewAccessibility::Focus() noexcept
+  pal::AccessibilityNodeId ViewAccessibility::Focus() noexcept
   {
     // A modal overlay has the focus.
     if (auto *overlay = _view.ShownOverlay(); overlay && overlay->IsModal())
@@ -689,7 +689,7 @@ namespace krys::ui
     return ID(cache ? cache->FocusedObject() : nullptr);
   }
 
-  pal::AccessibilityNodeID ViewAccessibility::HitTest(float x, float y) noexcept
+  pal::AccessibilityNodeId ViewAccessibility::HitTest(float x, float y) noexcept
   {
     auto *cache = Cache();
     if (!cache)
@@ -740,9 +740,9 @@ namespace krys::ui
     return hit ? hit : webArea;
   }
 
-  List<pal::AccessibilityNodeID> ViewAccessibility::SelectedChildren(pal::AccessibilityNodeID node) noexcept
+  List<pal::AccessibilityNodeId> ViewAccessibility::SelectedChildren(pal::AccessibilityNodeId node) noexcept
   {
-    List<pal::AccessibilityNodeID> selected;
+    List<pal::AccessibilityNodeId> selected;
     if (auto *object = Object(node))
     {
       for (const auto &child : object->SelectedChildren())
@@ -753,7 +753,7 @@ namespace krys::ui
     return selected;
   }
 
-  bool ViewAccessibility::PerformAction(pal::AccessibilityNodeID node,
+  bool ViewAccessibility::PerformAction(pal::AccessibilityNodeId node,
                                         pal::AccessibilityAction action) noexcept
   {
     RefPtr<AXObject> object = ShareRefPtr(Object(node));
@@ -804,19 +804,19 @@ namespace krys::ui
     return false;
   }
 
-  bool ViewAccessibility::SetValue(pal::AccessibilityNodeID node, utf8_stringview value) noexcept
+  bool ViewAccessibility::SetValue(pal::AccessibilityNodeId node, utf8_stringview value) noexcept
   {
     RefPtr<AXObject> object = ShareRefPtr(Object(node));
     return object && object->CanSetValueAttribute() && object->SetValue(boo::DOMStringView(value));
   }
 
-  bool ViewAccessibility::SetRangeValue(pal::AccessibilityNodeID node, double value) noexcept
+  bool ViewAccessibility::SetRangeValue(pal::AccessibilityNodeId node, double value) noexcept
   {
     RefPtr<AXObject> object = ShareRefPtr(Object(node));
     return object && object->CanSetValueAttribute() && object->SetValue(static_cast<float>(value));
   }
 
-  utf8_string ViewAccessibility::Text(pal::AccessibilityNodeID node) noexcept
+  utf8_string ViewAccessibility::Text(pal::AccessibilityNodeId node) noexcept
   {
     auto *object = Object(node);
     if (!object || IsPassword(*object))
@@ -831,7 +831,7 @@ namespace krys::ui
     return text;
   }
 
-  Maybe<pal::AccessibilityTextRange> ViewAccessibility::TextSelection(pal::AccessibilityNodeID node) noexcept
+  Maybe<pal::AccessibilityTextRange> ViewAccessibility::TextSelection(pal::AccessibilityNodeId node) noexcept
   {
     auto *object = Object(node);
     if (!object || !(object->IsTextControl() || object->IsNonNativeTextControl()))
@@ -848,7 +848,7 @@ namespace krys::ui
     return pal::AccessibilityTextRange {range.Location, range.Length};
   }
 
-  bool ViewAccessibility::SetTextSelection(pal::AccessibilityNodeID node,
+  bool ViewAccessibility::SetTextSelection(pal::AccessibilityNodeId node,
                                            pal::AccessibilityTextRange range) noexcept
   {
     RefPtr<AXObject> object = ShareRefPtr(Object(node));
@@ -865,7 +865,7 @@ namespace krys::ui
     return true;
   }
 
-  List<pal::AccessibilityRect> ViewAccessibility::TextBounds(pal::AccessibilityNodeID node,
+  List<pal::AccessibilityRect> ViewAccessibility::TextBounds(pal::AccessibilityNodeId node,
                                                              pal::AccessibilityTextRange range) noexcept
   {
     List<pal::AccessibilityRect> bounds;
@@ -892,7 +892,7 @@ namespace krys::ui
     return bounds;
   }
 
-  List<uint64> ViewAccessibility::TextLineStarts(pal::AccessibilityNodeID node) noexcept
+  List<uint64> ViewAccessibility::TextLineStarts(pal::AccessibilityNodeId node) noexcept
   {
     List<uint64> starts;
     auto *object = Object(node);
@@ -928,7 +928,7 @@ namespace krys::ui
     return starts;
   }
 
-  Maybe<pal::AccessibilityTextRun> ViewAccessibility::TextRunAt(pal::AccessibilityNodeID node,
+  Maybe<pal::AccessibilityTextRun> ViewAccessibility::TextRunAt(pal::AccessibilityNodeId node,
                                                                 uint64 offset) noexcept
   {
     auto *object = Object(node);

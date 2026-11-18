@@ -124,12 +124,12 @@ namespace krys::pal::win32
 
     KRYS_NODISCARD bool IsAccessibilityActive() const noexcept override;
 
-    void RaiseAccessibilityEvent(AccessibilityNodeID node, AccessibilityEvent event) noexcept override;
+    void RaiseAccessibilityEvent(AccessibilityNodeId node, AccessibilityEvent event) noexcept override;
 
-    void RaiseAccessibilityTextChange(AccessibilityNodeID node, AccessibilityTextChange change, uint64 offset,
+    void RaiseAccessibilityTextChange(AccessibilityNodeId node, AccessibilityTextChange change, uint64 offset,
                                       utf8_stringview text) noexcept override;
 
-    void AccessibilityNodeRemoved(AccessibilityNodeID node) noexcept override;
+    void AccessibilityNodeRemoved(AccessibilityNodeId node) noexcept override;
 
     LRESULT HandleMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
 

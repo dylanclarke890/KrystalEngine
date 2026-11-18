@@ -33,9 +33,9 @@ namespace krys::ui::tests
     public:
       pal::IAccessibilityTree *Tree {nullptr};
       bool Active {true};
-      List<Pair<pal::AccessibilityNodeID, pal::AccessibilityEvent>> Events;
+      List<Pair<pal::AccessibilityNodeId, pal::AccessibilityEvent>> Events;
       List<utf8_string> TextChanges;
-      List<pal::AccessibilityNodeID> Removed;
+      List<pal::AccessibilityNodeId> Removed;
 
       KRYS_NODISCARD pal::WindowHandle GetWindowHandle() const noexcept override
       {
@@ -152,25 +152,25 @@ namespace krys::ui::tests
         return Active;
       }
 
-      void RaiseAccessibilityEvent(pal::AccessibilityNodeID node,
+      void RaiseAccessibilityEvent(pal::AccessibilityNodeId node,
                                    pal::AccessibilityEvent event) noexcept override
       {
         Events.emplace_back(node, event);
       }
 
-      void RaiseAccessibilityTextChange(pal::AccessibilityNodeID, pal::AccessibilityTextChange change, uint64,
+      void RaiseAccessibilityTextChange(pal::AccessibilityNodeId, pal::AccessibilityTextChange change, uint64,
                                         utf8_stringview text) noexcept override
       {
         TextChanges.push_back(utf8_string(change == pal::AccessibilityTextChange::Inserted ? u8"+" : u8"-")
                               + utf8_string(text));
       }
 
-      void AccessibilityNodeRemoved(pal::AccessibilityNodeID node) noexcept override
+      void AccessibilityNodeRemoved(pal::AccessibilityNodeId node) noexcept override
       {
         Removed.push_back(node);
       }
 
-      KRYS_NODISCARD bool HasEvent(pal::AccessibilityNodeID node,
+      KRYS_NODISCARD bool HasEvent(pal::AccessibilityNodeId node,
                                    pal::AccessibilityEvent event) const noexcept
       {
         for (const auto &[eventNode, eventType] : Events)
@@ -185,8 +185,8 @@ namespace krys::ui::tests
     };
 
     /// @brief The first node under @p node (itself included) whose name is @p name; 0 if none.
-    KRYS_NODISCARD pal::AccessibilityNodeID
-      FindByName(pal::IAccessibilityTree &tree, pal::AccessibilityNodeID node, utf8_stringview name) noexcept
+    KRYS_NODISCARD pal::AccessibilityNodeId
+      FindByName(pal::IAccessibilityTree &tree, pal::AccessibilityNodeId node, utf8_stringview name) noexcept
     {
       if (auto info = tree.Node(node); info && info->Name == name)
       {
@@ -203,8 +203,8 @@ namespace krys::ui::tests
     }
 
     /// @brief The first node under @p node (itself included) with @p role; 0 if none.
-    KRYS_NODISCARD pal::AccessibilityNodeID FindByRole(pal::IAccessibilityTree &tree,
-                                                       pal::AccessibilityNodeID node,
+    KRYS_NODISCARD pal::AccessibilityNodeId FindByRole(pal::IAccessibilityTree &tree,
+                                                       pal::AccessibilityNodeId node,
                                                        pal::AccessibilityRole role) noexcept
     {
       if (auto info = tree.Node(node); info && info->Role == role)
@@ -405,7 +405,7 @@ namespace krys::ui::tests
     REQUIRE(chart != 0);
     auto image = tree.Parent(chart);
     REQUIRE(image != 0);
-    CHECK(tree.Children(image) == List<pal::AccessibilityNodeID> {chart});
+    CHECK(tree.Children(image) == List<pal::AccessibilityNodeId> {chart});
     CHECK(chart != image);
     auto sales = FindByName(tree, chart, u8"Sales");
     REQUIRE(sales != 0);

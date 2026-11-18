@@ -1,4 +1,4 @@
-﻿#include "Krystal.PAL/Mouse.hpp"
+﻿#include "Krystal.PAL/Input/Mouse.hpp"
 
 namespace krys::pal
 {

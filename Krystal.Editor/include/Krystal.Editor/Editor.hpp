@@ -33,7 +33,7 @@
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/Events.hpp"
-#include "Krystal.PAL/Keys.hpp"
+#include "Krystal.PAL/Input/Keys.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/View.hpp"
