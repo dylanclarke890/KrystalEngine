@@ -10,7 +10,7 @@ namespace krys::pal
 {
   /// @brief A node of a window's accessibility tree, as its host numbers them; 0 is no node. A node keeps its
   /// ID while it exists, and an ID isn't reused for another node.
-  using AccessibilityNodeID = uint64;
+  using AccessibilityNodeId = uint64;
 
   /// @brief What a node is, as assistive technology presents it.
   enum class AccessibilityRole : uint8
@@ -272,55 +272,55 @@ namespace krys::pal
     virtual ~IAccessibilityTree() noexcept = default;
 
     /// @brief The node at the top of the tree (the window's content); 0 if there's nothing to expose.
-    KRYS_NODISCARD virtual AccessibilityNodeID Root() noexcept = 0;
+    KRYS_NODISCARD virtual AccessibilityNodeId Root() noexcept = 0;
 
     /// @brief What's known of @p node; null if it's gone.
-    KRYS_NODISCARD virtual Maybe<AccessibilityNode> Node(AccessibilityNodeID node) noexcept = 0;
+    KRYS_NODISCARD virtual Maybe<AccessibilityNode> Node(AccessibilityNodeId node) noexcept = 0;
 
     /// @brief The node above @p node; 0 for the root, or if it's gone.
-    KRYS_NODISCARD virtual AccessibilityNodeID Parent(AccessibilityNodeID node) noexcept = 0;
+    KRYS_NODISCARD virtual AccessibilityNodeId Parent(AccessibilityNodeId node) noexcept = 0;
 
     /// @brief The nodes below @p node, in order.
-    KRYS_NODISCARD virtual List<AccessibilityNodeID> Children(AccessibilityNodeID node) noexcept = 0;
+    KRYS_NODISCARD virtual List<AccessibilityNodeId> Children(AccessibilityNodeId node) noexcept = 0;
 
     /// @brief The node with the focus; 0 if none.
-    KRYS_NODISCARD virtual AccessibilityNodeID Focus() noexcept = 0;
+    KRYS_NODISCARD virtual AccessibilityNodeId Focus() noexcept = 0;
 
     /// @brief The deepest node at (@p x, @p y) in the window's client area; 0 if none.
-    KRYS_NODISCARD virtual AccessibilityNodeID HitTest(float x, float y) noexcept = 0;
+    KRYS_NODISCARD virtual AccessibilityNodeId HitTest(float x, float y) noexcept = 0;
 
     /// @brief The selected items of a list, tree, grid or tab list.
-    KRYS_NODISCARD virtual List<AccessibilityNodeID> SelectedChildren(AccessibilityNodeID node) noexcept = 0;
+    KRYS_NODISCARD virtual List<AccessibilityNodeId> SelectedChildren(AccessibilityNodeId node) noexcept = 0;
 
     /// @brief Takes @p action for @p node; whether it was taken.
-    virtual bool PerformAction(AccessibilityNodeID node, AccessibilityAction action) noexcept = 0;
+    virtual bool PerformAction(AccessibilityNodeId node, AccessibilityAction action) noexcept = 0;
 
     /// @brief Sets a text field's text (as typing would, if it's focused); whether it was set.
-    virtual bool SetValue(AccessibilityNodeID node, utf8_stringview value) noexcept = 0;
+    virtual bool SetValue(AccessibilityNodeId node, utf8_stringview value) noexcept = 0;
 
     /// @brief Sets a range control's value; whether it was set.
-    virtual bool SetRangeValue(AccessibilityNodeID node, double value) noexcept = 0;
+    virtual bool SetRangeValue(AccessibilityNodeId node, double value) noexcept = 0;
 
     /// @brief @p node's text (a text field's, or the text under it); empty for a password.
-    KRYS_NODISCARD virtual utf8_string Text(AccessibilityNodeID node) noexcept = 0;
+    KRYS_NODISCARD virtual utf8_string Text(AccessibilityNodeId node) noexcept = 0;
 
     /// @brief The selected part of @p node's text (empty at the caret), or null if the selection isn't in it.
-    KRYS_NODISCARD virtual Maybe<AccessibilityTextRange> TextSelection(AccessibilityNodeID node) noexcept = 0;
+    KRYS_NODISCARD virtual Maybe<AccessibilityTextRange> TextSelection(AccessibilityNodeId node) noexcept = 0;
 
     /// @brief Selects @p range of @p node's text; whether it was selected.
-    virtual bool SetTextSelection(AccessibilityNodeID node, AccessibilityTextRange range) noexcept = 0;
+    virtual bool SetTextSelection(AccessibilityNodeId node, AccessibilityTextRange range) noexcept = 0;
 
     /// @brief The bounds of each line of @p range of @p node's text, in the window's client area.
-    KRYS_NODISCARD virtual List<AccessibilityRect> TextBounds(AccessibilityNodeID node,
+    KRYS_NODISCARD virtual List<AccessibilityRect> TextBounds(AccessibilityNodeId node,
                                                               AccessibilityTextRange range) noexcept = 0;
 
     /// @brief Where each line of @p node's text after the first starts, as ascending offsets in its text, as
     /// it's laid out (wrapped lines included).
-    KRYS_NODISCARD virtual List<uint64> TextLineStarts(AccessibilityNodeID node) noexcept = 0;
+    KRYS_NODISCARD virtual List<uint64> TextLineStarts(AccessibilityNodeId node) noexcept = 0;
 
     /// @brief The run of @p node's text drawn alike that the character at @p offset is in (the last
     /// character's, past the end); null if it has no text.
-    KRYS_NODISCARD virtual Maybe<AccessibilityTextRun> TextRunAt(AccessibilityNodeID node,
+    KRYS_NODISCARD virtual Maybe<AccessibilityTextRun> TextRunAt(AccessibilityNodeId node,
                                                                  uint64 offset) noexcept = 0;
   };
 }

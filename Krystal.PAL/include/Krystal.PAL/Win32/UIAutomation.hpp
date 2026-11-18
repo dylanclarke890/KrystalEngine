@@ -28,7 +28,7 @@ namespace krys::pal::win32
     HWND _window {nullptr};
     IAccessibilityTree &_tree;
     /// @brief The elements made for the tree's nodes, by node, each holding a reference.
-    HashMap<AccessibilityNodeID, UIAElement *> _elements;
+    HashMap<AccessibilityNodeId, UIAElement *> _elements;
     /// @brief The window's element, made on the first `WM_GETOBJECT`.
     UIAElement *_root {nullptr};
 
@@ -47,12 +47,12 @@ namespace krys::pal::win32
     /// @brief Whether a UI Automation client is listening for events.
     KRYS_NODISCARD static bool ClientsAreListening() noexcept;
 
-    void RaiseEvent(AccessibilityNodeID node, AccessibilityEvent event) noexcept;
+    void RaiseEvent(AccessibilityNodeId node, AccessibilityEvent event) noexcept;
 
-    void RaiseTextChange(AccessibilityNodeID node) noexcept;
+    void RaiseTextChange(AccessibilityNodeId node) noexcept;
 
     /// @brief Disconnects @p node's element, if it has one.
-    void NodeRemoved(AccessibilityNodeID node) noexcept;
+    void NodeRemoved(AccessibilityNodeId node) noexcept;
 
     // For the elements.
 
@@ -70,7 +70,7 @@ namespace krys::pal::win32
     KRYS_NODISCARD UIAElement &Root() noexcept;
 
     /// @brief @p node's element (made if it has none); the window's for 0.
-    KRYS_NODISCARD UIAElement &Element(AccessibilityNodeID node) noexcept;
+    KRYS_NODISCARD UIAElement &Element(AccessibilityNodeId node) noexcept;
 
   private:
     static void Disconnect(UIAElement &element) noexcept;

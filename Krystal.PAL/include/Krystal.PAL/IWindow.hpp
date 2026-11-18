@@ -218,14 +218,14 @@ namespace krys::pal
     KRYS_NODISCARD virtual bool IsAccessibilityActive() const noexcept = 0;
 
     /// @brief Tells assistive technology @p event happened to @p node.
-    virtual void RaiseAccessibilityEvent(AccessibilityNodeID node, AccessibilityEvent event) noexcept = 0;
+    virtual void RaiseAccessibilityEvent(AccessibilityNodeId node, AccessibilityEvent event) noexcept = 0;
 
     /// @brief Tells assistive technology @p text was inserted into or deleted from @p node's text at
     /// @p offset (in bytes of its UTF-8 text).
-    virtual void RaiseAccessibilityTextChange(AccessibilityNodeID node, AccessibilityTextChange change,
+    virtual void RaiseAccessibilityTextChange(AccessibilityNodeId node, AccessibilityTextChange change,
                                               uint64 offset, utf8_stringview text) noexcept = 0;
 
     /// @brief Tells the window @p node left the tree, so it lets go of what it made for it.
-    virtual void AccessibilityNodeRemoved(AccessibilityNodeID node) noexcept = 0;
+    virtual void AccessibilityNodeRemoved(AccessibilityNodeId node) noexcept = 0;
   };
 }
