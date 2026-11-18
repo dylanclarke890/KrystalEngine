@@ -181,10 +181,10 @@ namespace krys::boo::css
   };
 
   template <Range nR, Range pR, typename V>
-  constexpr auto TreatAsVariantLike<NumberOrPercentage<nR, pR, V>> = true;
+  constexpr inline auto TreatAsVariantLike<NumberOrPercentage<nR, pR, V>> = true;
 
   template <Range nR, Range pR, typename V>
-  constexpr auto TreatAsVariantLike<NumberOrPercentageResolvedToNumber<nR, pR, V>> = true;
+  constexpr inline auto TreatAsVariantLike<NumberOrPercentageResolvedToNumber<nR, pR, V>> = true;
 }
 
 namespace krys

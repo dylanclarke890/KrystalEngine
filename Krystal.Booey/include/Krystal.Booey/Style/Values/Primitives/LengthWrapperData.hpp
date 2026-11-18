@@ -161,8 +161,8 @@ namespace krys::boo::style
   };
 
   inline LengthWrapperData::LengthWrapperData(uint8 opaqueType) noexcept
-      : _floatValue {0.0f}, _opaqueType {opaqueType}, _kind {LengthWrapperDataKind::Default},
-        _hasQuirk {false}
+      : _opaqueType {opaqueType}, _kind {LengthWrapperDataKind::Default}
+
   {
   }
 

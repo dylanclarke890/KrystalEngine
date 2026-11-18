@@ -44,7 +44,7 @@ namespace krys::boo::html
     }
 
     // 2. If namespace is not the HTML namespace, then return null.
-    if (namespaceURI != infra::Namespaces::HTML)
+    if (namespaceURI != infra::namespaces::HTML)
     {
       return nullptr;
     }

@@ -29,7 +29,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   // <'contain-intrinsic-*'> = auto? [ none | <length [0,inf]> ]
   // https://drafts.csswg.org/css-sizing-4/#intrinsic-size-override

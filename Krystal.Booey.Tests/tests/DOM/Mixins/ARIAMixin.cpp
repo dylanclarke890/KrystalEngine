@@ -82,7 +82,7 @@ namespace krys::boo::dom::mixins::tests
 
     SECTION("on elements in any namespace")
     {
-      auto svg = Document->CreateElementNS(infra::Namespaces::SVG, u8"rect").ReleaseValue();
+      auto svg = Document->CreateElementNS(infra::namespaces::SVG, u8"rect").ReleaseValue();
       svg->AriaHidden(dom::DOMString(u8"true"));
       CHECK(svg->GetAttribute(u8"aria-hidden") == u8"true");
       CHECK(svg->AriaHidden() == u8"true");

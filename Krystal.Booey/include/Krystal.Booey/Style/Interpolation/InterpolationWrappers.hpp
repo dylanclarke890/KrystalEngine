@@ -214,6 +214,11 @@ namespace krys::boo::style::interpolation
   DiscreteWrapper(css::PropertyId, T (TGetterStyle::*getter)() const noexcept,
                   void (TSetterStyle::*setter)(T) noexcept) -> DiscreteWrapper<T, T, T>;
 
+  // Deduction guide for getter/setters that return values and take const references.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  DiscreteWrapper(css::PropertyId, T (TGetterStyle::*getter)() const noexcept,
+                  void (TSetterStyle::*setter)(const T &) noexcept) -> DiscreteWrapper<T, T, const T &>;
+
   // Deduction guide for getter/setters that return const references and take r-value references.
   template <typename T, typename TGetterStyle, typename TSetterStyle>
   DiscreteWrapper(css::PropertyId, const T &(TGetterStyle::*getter)() const noexcept,

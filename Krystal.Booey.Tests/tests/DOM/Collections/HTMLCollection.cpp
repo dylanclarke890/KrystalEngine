@@ -201,7 +201,7 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<HTMLDocument>();
     auto root = document->CreateElement(u8"div").ReleaseValue();
     auto unnamed = document->CreateElement(u8"span").ReleaseValue();
-    auto svg = document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+    auto svg = document->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
     REQUIRE_FALSE(svg->SetAttribute(u8"name", u8"n").HasException());
     REQUIRE_FALSE(svg->SetAttribute(u8"id", u8"i").HasException());
     REQUIRE_FALSE(root->AppendChild(*unnamed).HasException());

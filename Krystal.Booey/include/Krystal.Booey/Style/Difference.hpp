@@ -86,7 +86,7 @@ namespace krys::boo::style
   struct Difference
   {
     DifferenceResult Result {DifferenceResult::Equal};
-    EnumSet<DifferenceContextSensitiveProperty> ContextSensitiveProperties {};
+    EnumSet<DifferenceContextSensitiveProperty> ContextSensitiveProperties;
 
     constexpr Difference() noexcept = default;
 

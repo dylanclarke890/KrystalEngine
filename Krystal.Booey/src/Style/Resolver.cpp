@@ -728,7 +728,7 @@ namespace krys::boo::style
       RenderStyle::CreatePtrWithRegisteredInitialValues(document.StyleScope().GetCustomPropertyRegistry());
 
     FontCascadeDescription fontDescription;
-    fontDescription.SetOneFamily(css::GenericFontFamilyNames::StandardFamily());
+    fontDescription.SetOneFamily(css::generic_font_family_names::StandardFamily());
     fontDescription.SetKeywordSizeFromIdentifier(css::ValueId::Medium);
 
     auto size = FontSizeForKeyword(static_cast<uint32>(css::ValueId::Medium), false, document);

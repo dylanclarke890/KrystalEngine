@@ -69,7 +69,7 @@ namespace krys::boo::css
   private:
     void Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept final;
 
-    explicit CSSKeywordValue(const CSSOMString &value) noexcept : _value(value)
+    explicit CSSKeywordValue(CSSOMString value) noexcept : _value(krys::move(value))
     {
     }
   };

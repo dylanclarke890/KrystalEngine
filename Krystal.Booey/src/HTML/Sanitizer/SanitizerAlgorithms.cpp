@@ -838,8 +838,8 @@ namespace krys::boo::html
 
     // 10. If elementNamespace is the MathML namespace, localName is "href", namespace is null or the XLink
     //     namespace, and value contains a javascript: URL, then return false.
-    if (elementNamespace == infra::Namespaces::MathML && localName == u8"href"
-        && (namespaceURI == null || namespaceURI == infra::Namespaces::XLink) && ContainsJavaScriptURL(value))
+    if (elementNamespace == infra::namespaces::MathML && localName == u8"href"
+        && (namespaceURI == null || namespaceURI == infra::namespaces::XLink) && ContainsJavaScriptURL(value))
     {
       return false;
     }

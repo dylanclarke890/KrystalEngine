@@ -29,7 +29,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   // <'aspect-ratio'> = auto || <ratio>
   // https://drafts.csswg.org/css-sizing-4/#propdef-aspect-ratio

@@ -126,8 +126,8 @@ namespace krys::boo
                                       const RenderStyle &) const noexcept;
 
     private:
-      CustomProperty(const css::CSSOMStringAtom &name, Kind &&value) noexcept
-          : _name(name), _value(krys::move(value))
+      CustomProperty(css::CSSOMStringAtom name, Kind &&value) noexcept
+          : _name(krys::move(name)), _value(krys::move(value))
       {
       }
 

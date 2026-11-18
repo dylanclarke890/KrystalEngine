@@ -48,7 +48,7 @@ namespace krys::boo::style
     template <typename... F>
     decltype(auto) SwitchOn(F &&...f) const noexcept
     {
-      using namespace css::GenericFontFamilyNames;
+      using namespace css::generic_font_family_names;
 
       auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
 
@@ -127,7 +127,7 @@ namespace krys::boo::style
     public:
       const_iterator() noexcept = default;
 
-      const_iterator(inner_iterator it) noexcept : _it {it}
+      const_iterator(inner_iterator it) noexcept : _it {krys::move(it)}
       {
       }
 

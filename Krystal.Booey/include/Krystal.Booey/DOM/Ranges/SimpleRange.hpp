@@ -258,7 +258,7 @@ namespace krys::boo::dom
     SimpleRange _range;
 
   public:
-    explicit IntersectingNodeRange(const SimpleRange &range) noexcept : _range(range)
+    explicit IntersectingNodeRange(SimpleRange range) noexcept : _range(krys::move(range))
     {
     }
 
@@ -286,7 +286,7 @@ namespace krys::boo::dom
     SimpleRange _range;
 
   public:
-    explicit IntersectingNodeRangeWithQuirk(const SimpleRange &range) noexcept : _range(range)
+    explicit IntersectingNodeRangeWithQuirk(SimpleRange range) noexcept : _range(krys::move(range))
     {
     }
 

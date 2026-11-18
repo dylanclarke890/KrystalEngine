@@ -17,12 +17,12 @@ namespace krys::boo::style::tests
 namespace krys::boo::css
 {
   template <>
-  constexpr bool TreatAsVariantLike<style::tests::TestSize> = true;
+  constexpr inline bool TreatAsVariantLike<style::tests::TestSize> = true;
 }
 
 namespace krys::boo::style::tests
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   namespace
   {

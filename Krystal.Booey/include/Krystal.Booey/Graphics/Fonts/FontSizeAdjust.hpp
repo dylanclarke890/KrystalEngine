@@ -54,7 +54,7 @@ namespace krys::boo
 
     Metric MetricType {Metric::ExHeight};
     ValueType Type {ValueType::Number};
-    Markable<float> Value {};
+    Markable<float> Value;
 
     KRYS_NODISCARD bool operator==(const FontSizeAdjust &) const noexcept = default;
 

@@ -115,11 +115,7 @@ namespace krys::detail
       return *this;
     }
 
-    constexpr IntrusiveWeakPtr &operator=(const IntrusiveWeakPtr &o) noexcept
-    {
-      _impl = o._impl;
-      return *this;
-    }
+    constexpr IntrusiveWeakPtr &operator=(const IntrusiveWeakPtr &o) noexcept = default;
 
     template <typename X, typename Y, typename Z, IsNullable Nullable>
     constexpr IntrusiveWeakPtr &operator=(const IntrusiveWeakPtr<X, Y, Z, Nullable> &o) noexcept

@@ -57,7 +57,7 @@ namespace krys::boo::style
       {
         const auto &tagQualifiedName = selector.TagQualifiedName();
         const auto &selectorNamespace = tagQualifiedName.NamespaceURI();
-        if (selectorNamespace == dom::StarAtom() || selectorNamespace.View() == infra::Namespaces::HTML)
+        if (selectorNamespace == dom::StarAtom() || selectorNamespace.View() == infra::namespaces::HTML)
         {
           if (tagQualifiedName == dom::AnyQualifiedName())
           {
@@ -133,7 +133,7 @@ namespace krys::boo::style
         _matchBasedOnRuleHash(ToUnderlying(ComputeMatchBasedOnRuleHash(*Selector()))),
         _canMatchPseudoElement(css::ComplexSelectorCanMatchPseudoElement(*Selector())),
         _propertyAllowlist(ToUnderlying(DeterminePropertyAllowlist(Selector()))),
-        _usedRuleTypes(static_cast<uint32>(usedRuleTypes.ToRaw())), _isEnabled(true), _position(position),
+        _usedRuleTypes(static_cast<uint32>(usedRuleTypes.ToRaw())), _position(position),
         _descendantSelectorIdentifierHashes(css::SelectorFilter::CollectHashes(*Selector()))
   {
     krys_debug_assert(_position == position);

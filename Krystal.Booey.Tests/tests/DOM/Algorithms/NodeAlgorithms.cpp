@@ -195,7 +195,7 @@ namespace krys::boo::dom::tests
     {
       auto element = CreateElementNS(*document, u8"urn:x", u8"p:e");
       SetAttribute(*element, u8"a", u8"1");
-      SetAttributeNS(*element, infra::Namespaces::XML, u8"xml:lang", u8"en");
+      SetAttributeNS(*element, infra::namespaces::XML, u8"xml:lang", u8"en");
 
       auto copyNode = NodeAlgorithms::CloneSingleNode(*element, *document);
       auto *copy = Downcast<Element>(copyNode.get());
@@ -203,7 +203,7 @@ namespace krys::boo::dom::tests
       CHECK(copy->Prefix() == u8"p");
       CHECK(copy->LocalName() == u8"e");
       CHECK(copy->GetAttribute(u8"a") == u8"1");
-      CHECK(copy->GetAttributeNS(infra::Namespaces::XML, u8"lang") == u8"en");
+      CHECK(copy->GetAttributeNS(infra::namespaces::XML, u8"lang") == u8"en");
       CHECK(copy->IsEqualNode(element.get()));
     }
 
@@ -233,11 +233,11 @@ namespace krys::boo::dom::tests
 
     SECTION("Attr")
     {
-      auto attribute = document->CreateAttributeNS(infra::Namespaces::XML, u8"xml:name").ReleaseValue();
+      auto attribute = document->CreateAttributeNS(infra::namespaces::XML, u8"xml:name").ReleaseValue();
       attribute->Value(u8"value");
       auto copyNode = NodeAlgorithms::CloneSingleNode(*attribute, *document);
       auto &copy = Downcast<Attr>(*copyNode);
-      CHECK(copy.NamespaceURI() == infra::Namespaces::XML);
+      CHECK(copy.NamespaceURI() == infra::namespaces::XML);
       CHECK(copy.LocalName() == u8"name");
       CHECK(copy.Prefix() == u8"xml");
       CHECK(copy.Value() == u8"value");
@@ -421,8 +421,8 @@ namespace krys::boo::dom::tests
     CHECK(NodeAlgorithms::LocateNamespacePrefix(*element, u8"urn:element") == u8"e");
 
     // 2. The first xmlns attribute declaring the namespace.
-    SetAttributeNS(*element, infra::Namespaces::XMLNS, u8"xmlns:x", u8"urn:declared");
-    SetAttributeNS(*element, infra::Namespaces::XMLNS, u8"xmlns:y", u8"urn:declared");
+    SetAttributeNS(*element, infra::namespaces::XMLNS, u8"xmlns:x", u8"urn:declared");
+    SetAttributeNS(*element, infra::namespaces::XMLNS, u8"xmlns:y", u8"urn:declared");
     CHECK(NodeAlgorithms::LocateNamespacePrefix(*element, u8"urn:declared") == u8"x");
 
     // 3. The parent element's.
@@ -448,16 +448,16 @@ namespace krys::boo::dom::tests
     SECTION("Element")
     {
       // 1. and 2. The reserved prefixes.
-      CHECK(NodeAlgorithms::LocateNamespace(*element, u8"xml") == infra::Namespaces::XML);
-      CHECK(NodeAlgorithms::LocateNamespace(*element, u8"xmlns") == infra::Namespaces::XMLNS);
+      CHECK(NodeAlgorithms::LocateNamespace(*element, u8"xml") == infra::namespaces::XML);
+      CHECK(NodeAlgorithms::LocateNamespace(*element, u8"xmlns") == infra::namespaces::XMLNS);
 
       // 3. Its own prefix.
       CHECK(NodeAlgorithms::LocateNamespace(*element, u8"e") == u8"urn:element");
 
       // 4. An xmlns attribute declaring the prefix, or the default namespace; an empty one undeclares it.
-      SetAttributeNS(*element, infra::Namespaces::XMLNS, u8"xmlns:x", u8"urn:x");
-      SetAttributeNS(*element, infra::Namespaces::XMLNS, u8"xmlns", u8"urn:default");
-      SetAttributeNS(*element, infra::Namespaces::XMLNS, u8"xmlns:p", u8"");
+      SetAttributeNS(*element, infra::namespaces::XMLNS, u8"xmlns:x", u8"urn:x");
+      SetAttributeNS(*element, infra::namespaces::XMLNS, u8"xmlns", u8"urn:default");
+      SetAttributeNS(*element, infra::namespaces::XMLNS, u8"xmlns:p", u8"");
       CHECK(NodeAlgorithms::LocateNamespace(*element, u8"x") == u8"urn:x");
       CHECK(NodeAlgorithms::LocateNamespace(*element, null) == u8"urn:default");
       CHECK(NodeAlgorithms::LocateNamespace(*element, u8"p") == null);
@@ -514,7 +514,7 @@ namespace krys::boo::dom::tests
       auto document = CreateRef<HTMLDocument>();
       auto root = CreateElement(*document, u8"div");
       auto html = CreateElement(*document, u8"p");
-      auto svg = CreateElementNS(*document, infra::Namespaces::SVG, u8"P");
+      auto svg = CreateElementNS(*document, infra::namespaces::SVG, u8"P");
       auto prefixed = CreateElementNS(*document, u8"urn:x", u8"x:p");
       Append(*root, *html);
       Append(*root, *svg);
@@ -533,9 +533,9 @@ namespace krys::boo::dom::tests
     SECTION("elsewhere, by qualified name exactly")
     {
       auto document = CreateRef<XMLDocument>();
-      auto root = CreateElementNS(*document, infra::Namespaces::HTML, u8"div");
-      auto lower = CreateElementNS(*document, infra::Namespaces::HTML, u8"p");
-      auto upper = CreateElementNS(*document, infra::Namespaces::HTML, u8"P");
+      auto root = CreateElementNS(*document, infra::namespaces::HTML, u8"div");
+      auto lower = CreateElementNS(*document, infra::namespaces::HTML, u8"p");
+      auto upper = CreateElementNS(*document, infra::namespaces::HTML, u8"P");
       Append(*root, *lower);
       Append(*root, *upper);
 

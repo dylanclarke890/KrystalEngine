@@ -25,7 +25,7 @@ namespace krys::boo::mathml::tests
     KRYS_NODISCARD Ref<dom::Element> Create(dom::Document &document,
                                             const dom::DOMStringAtom &localName) noexcept
     {
-      auto element = document.CreateElementNS(infra::Namespaces::MathML, localName);
+      auto element = document.CreateElementNS(infra::namespaces::MathML, localName);
       krys_assert(!element.HasException());
       krys_assert(element.Value()->LocalName() == localName);
       return element.ReleaseValue();

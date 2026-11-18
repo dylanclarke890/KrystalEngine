@@ -79,7 +79,7 @@ namespace krys::boo::style
     }
 
   private:
-    RefPtr<StyleImage> _image {};
+    RefPtr<StyleImage> _image;
   };
 
   // MARK: - Conversion

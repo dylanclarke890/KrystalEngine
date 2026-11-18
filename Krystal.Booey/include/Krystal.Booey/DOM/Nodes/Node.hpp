@@ -237,7 +237,7 @@ namespace krys::boo::dom
     void SetNodeDocument(Document &document) noexcept;
 
   public:
-    virtual ~Node() noexcept;
+    ~Node() noexcept override;
 
 #pragma region Node - https://dom.spec.whatwg.org/#node
 

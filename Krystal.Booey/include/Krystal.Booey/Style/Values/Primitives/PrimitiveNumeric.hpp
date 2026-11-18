@@ -695,8 +695,8 @@ namespace krys
 namespace krys::boo::css
 {
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<style::AnglePercentage<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<style::AnglePercentage<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<style::LengthPercentage<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<style::LengthPercentage<R, V>> = true;
 }

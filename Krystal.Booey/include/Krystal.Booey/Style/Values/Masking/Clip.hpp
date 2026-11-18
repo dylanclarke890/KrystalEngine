@@ -86,7 +86,7 @@ namespace krys::boo::style
   // https://drafts.fxtf.org/css-masking/#propdef-clip
   struct Clip
   {
-    Clip(css::keywords::Auto) noexcept : _value {}
+    Clip(css::keywords::Auto) noexcept
     {
     }
 

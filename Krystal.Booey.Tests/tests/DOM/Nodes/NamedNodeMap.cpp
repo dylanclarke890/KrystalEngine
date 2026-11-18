@@ -99,7 +99,7 @@ namespace krys::boo::dom::tests
     SECTION("Otherwise they're all kept")
     {
       auto document = CreateRef<XMLDocument>();
-      auto element = document->CreateElementNS(infra::Namespaces::HTML, u8"div").ReleaseValue();
+      auto element = document->CreateElementNS(infra::namespaces::HTML, u8"div").ReleaseValue();
       REQUIRE_FALSE(element->SetAttribute(u8"Upper", u8"").HasException());
       REQUIRE_FALSE(element->SetAttribute(u8"lower", u8"").HasException());
       CHECK(element->Attributes().SupportedPropertyNames() == List<DOMString> {u8"Upper", u8"lower"});

@@ -74,7 +74,7 @@ namespace krys::boo
     KRYS_NODISCARD const utf8_string &MathFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
 
     /// @brief The family the generic family @p family resolves to for @p script, or null for `system-ui`.
-    KRYS_NODISCARD const utf8_string *FontFamily(css::GenericFontFamilyNames::FamilyNamesIndex family,
+    KRYS_NODISCARD const utf8_string *FontFamily(css::generic_font_family_names::FamilyNamesIndex family,
                                                  UScriptCode script = USCRIPT_COMMON) const noexcept;
 
     /// @return Whether the family changed.

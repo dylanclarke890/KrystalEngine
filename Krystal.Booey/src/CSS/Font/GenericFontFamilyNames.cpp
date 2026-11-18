@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-namespace krys::boo::css::GenericFontFamilyNames
+namespace krys::boo::css::generic_font_family_names
 {
   const CSSOMStringAtom &CursiveFamily() noexcept
   {

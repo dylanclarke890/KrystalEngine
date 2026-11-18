@@ -283,7 +283,7 @@ namespace krys::boo
       if (fontRanges.IsNull() && fontSelector)
       {
         fontRanges =
-          fontSelector->FontRangesForFamily(description, css::GenericFontFamilyNames::StandardFamily());
+          fontSelector->FontRangesForFamily(description, css::generic_font_family_names::StandardFamily());
       }
       if (fontRanges.IsNull())
       {

@@ -22,7 +22,7 @@
 namespace krys::boo::style::tests
 {
   using css::PropertyId;
-  using namespace css::Literals;
+  using namespace css::literals;
   using Flag = TextDecorationLine::Flag;
 
   TEST_CASE("Style TextDecorationLine packing", "[Style][Values][TextDecoration]")

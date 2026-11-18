@@ -64,7 +64,7 @@ namespace krys::boo::dom
     StyledElement(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
 
   public:
-    ~StyledElement() noexcept;
+    ~StyledElement() noexcept override;
 
 #pragma region ElementCSSInlineStyle - https://drafts.csswg.org/cssom/#the-elementcssinlinestyle-mixin
 

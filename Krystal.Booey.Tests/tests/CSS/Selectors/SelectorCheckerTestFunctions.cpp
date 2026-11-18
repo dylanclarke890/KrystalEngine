@@ -24,9 +24,9 @@ namespace krys::boo::css::tests
     CHECK(EffectiveLang(*div) == u8"en");
 
     // lang in no namespace counts on SVG elements, but not on MathML ones.
-    auto svg = document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+    auto svg = document->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
     REQUIRE_FALSE(svg->SetAttribute(u8"lang", u8"fr").HasException());
-    auto math = document->CreateElementNS(infra::Namespaces::MathML, u8"math").ReleaseValue();
+    auto math = document->CreateElementNS(infra::namespaces::MathML, u8"math").ReleaseValue();
     REQUIRE_FALSE(math->SetAttribute(u8"lang", u8"de").HasException());
     REQUIRE_FALSE(div->AppendChild(*svg).HasException());
     REQUIRE_FALSE(div->AppendChild(*math).HasException());
@@ -34,9 +34,9 @@ namespace krys::boo::css::tests
     CHECK(EffectiveLang(*math) == u8"en");
 
     // xml:lang counts on any element, and comes before lang.
-    REQUIRE_FALSE(math->SetAttributeNS(infra::Namespaces::XML, u8"xml:lang", u8"es").HasException());
+    REQUIRE_FALSE(math->SetAttributeNS(infra::namespaces::XML, u8"xml:lang", u8"es").HasException());
     CHECK(EffectiveLang(*math) == u8"es");
-    REQUIRE_FALSE(svg->SetAttributeNS(infra::Namespaces::XML, u8"xml:lang", u8"it").HasException());
+    REQUIRE_FALSE(svg->SetAttributeNS(infra::namespaces::XML, u8"xml:lang", u8"it").HasException());
     CHECK(EffectiveLang(*svg) == u8"it");
 
     // An empty value is the language too (unknown).

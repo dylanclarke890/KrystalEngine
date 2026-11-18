@@ -150,7 +150,7 @@ namespace krys::boo::style
       Kind Contents;
     };
 
-    RefPtr<Value> _value {};
+    RefPtr<Value> _value;
   };
 
   DEFINE_TYPE_WRAPPER_GET(ShapeOutside::Image, Value);

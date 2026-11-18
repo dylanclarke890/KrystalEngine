@@ -37,7 +37,7 @@ namespace krys::boo::html
 {
   CustomElementInterface::CustomElementInterface(dom::DOMStringAtom localName, CustomElementFactory &&factory,
                                                  const CustomElementOptions &options) noexcept
-      : _name(infra::Namespaces::HTML, null, krys::move(localName)), _factory(krys::move(factory)),
+      : _name(infra::namespaces::HTML, null, krys::move(localName)), _factory(krys::move(factory)),
         _isElementInternalsDisabled(options.DisableInternals), _isShadowDisabled(options.DisableShadow),
         _isFormAssociated(options.FormAssociated)
   {
@@ -78,7 +78,7 @@ namespace krys::boo::html
   {
     (void)registry;
     (void)name;
-    krys_debug_assert(name.NamespaceURI() == infra::Namespaces::HTML);
+    krys_debug_assert(name.NamespaceURI() == infra::namespaces::HTML);
 
     // As an element constructor does when it isn't upgrading, the element is defined (custom, with this
     // definition) before its behaviour is constructed.

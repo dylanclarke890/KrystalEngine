@@ -50,7 +50,7 @@ namespace krys::boo::dom::tests
     auto shadow = host->AttachShadow({}).ReleaseValue();
     CHECK(shadow->Host() == host.get());
     auto templateElement =
-      data.Document->CreateElementNS(infra::Namespaces::HTML, u8"template").ReleaseValue();
+      data.Document->CreateElementNS(infra::namespaces::HTML, u8"template").ReleaseValue();
     CHECK(Downcast<html::HTMLTemplateElement>(*templateElement).TemplateContents().Host()
           == templateElement.get());
   }

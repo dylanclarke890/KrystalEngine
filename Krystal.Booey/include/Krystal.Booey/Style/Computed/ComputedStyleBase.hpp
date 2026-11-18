@@ -492,7 +492,7 @@ namespace krys::boo
 
       KRYS_NODISCARD bool HasCachedPseudoStyles() const noexcept
       {
-        return _cachedPseudoStyles && _cachedPseudoStyles->Styles.size();
+        return _cachedPseudoStyles && !_cachedPseudoStyles->Styles.empty();
       }
 
       KRYS_NODISCARD const PseudoStyleCache *CachedPseudoStyles() const noexcept

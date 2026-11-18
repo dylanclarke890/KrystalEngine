@@ -139,13 +139,13 @@ namespace krys::boo
     style::TouchAction UsedTouchAction;
 
     unsigned TextSecurity : 2;
-    unsigned UserModify : 2;
+    unsigned UserModify : 2 {static_cast<unsigned>(boo::UserModify::ReadOnly)};
     unsigned WordBreak : 3;
     unsigned OverflowWrap : 2;
-    unsigned LineBreak : 3;
+    unsigned LineBreak : 3 {static_cast<unsigned>(boo::LineBreak::Auto)};
     unsigned UserSelect : 2;
     unsigned SpeakAs : 4;
-    unsigned Hyphens : 2;
+    unsigned Hyphens : 2 {static_cast<unsigned>(boo::Hyphens::Manual)};
     unsigned TextCombine : 1;
     unsigned TextEmphasisPosition : 4;
     unsigned TextUnderlinePosition : 4;
@@ -164,18 +164,18 @@ namespace krys::boo
     unsigned PaintOrder : 3;
     unsigned CapStyle : 2;
     unsigned JoinStyle : 2;
-    unsigned HasExplicitlySetStrokeWidth : 1;
-    unsigned HasExplicitlySetStrokeColor : 1;
-    unsigned HasAutoCaretColor : 1;
-    unsigned EffectiveInert : 1;
-    unsigned EffectivelyTransparent : 1;
-    unsigned IsInSubtreeWithBlendMode : 1;
-    unsigned IsForceHidden : 1;
-    unsigned UsedContentVisibility : 2;
-    unsigned AutoRevealsWhenFound : 1;
-    unsigned InsideDefaultButton : 1;
-    unsigned InsideSubmitButton : 1;
-    unsigned EvaluationTimeZoomEnabled : 1;
+    unsigned HasExplicitlySetStrokeWidth : 1 {false};
+    unsigned HasExplicitlySetStrokeColor : 1 {false};
+    unsigned HasAutoCaretColor : 1 {true};
+    unsigned EffectiveInert : 1 {false};
+    unsigned EffectivelyTransparent : 1 {false};
+    unsigned IsInSubtreeWithBlendMode : 1 {false};
+    unsigned IsForceHidden : 1 {false};
+    unsigned UsedContentVisibility : 2 {static_cast<unsigned>(ContentVisibility::Visible)};
+    unsigned AutoRevealsWhenFound : 1 {false};
+    unsigned InsideDefaultButton : 1 {false};
+    unsigned InsideSubmitButton : 1 {false};
+    unsigned EvaluationTimeZoomEnabled : 1 {false};
 
   private:
     StyleRareInheritedData() noexcept;

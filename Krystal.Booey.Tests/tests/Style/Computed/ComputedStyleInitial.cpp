@@ -4,7 +4,7 @@
 
 namespace krys::boo::style::tests
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TEST_CASE("ComputedStyle: generated initial values", "[Style][ComputedStyle]")
   {

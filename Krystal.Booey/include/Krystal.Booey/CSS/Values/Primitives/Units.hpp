@@ -262,7 +262,7 @@ namespace krys::boo::css
   }
 
 #define KRYS_DEFINE_CSS_UNIT_LITERAL(type, name)                                                             \
-  inline namespace Literals                                                                                  \
+  inline namespace literals                                                                                  \
   {                                                                                                          \
     consteval ValueLiteral<type> operator""_css_##name(long double value)                                    \
     {                                                                                                        \

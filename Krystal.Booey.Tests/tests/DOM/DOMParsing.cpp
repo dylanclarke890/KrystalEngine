@@ -99,7 +99,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(annotation->InnerHTML(u8"<div></div>").HasException());
       auto *child = DynamicDowncast<Element>(annotation->FirstChild());
       REQUIRE(child);
-      CHECK(child->NamespaceURI() == infra::Namespaces::HTML);
+      CHECK(child->NamespaceURI() == infra::namespaces::HTML);
     }
 
     SECTION("goes into a template's content")
@@ -140,14 +140,14 @@ namespace krys::boo::dom::tests
             "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
   {
     auto document = CreateRef<XMLDocument>();
-    auto root = document->CreateElementNS(infra::Namespaces::HTML, u8"div").ReleaseValue();
+    auto root = document->CreateElementNS(infra::namespaces::HTML, u8"div").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*root).HasException());
 
     CHECK_FALSE(root->InnerHTML(u8"<p>well formed</p>").HasException());
     auto p = root->FirstElementChild();
     REQUIRE(p);
     CHECK(p->LocalName() == u8"p");
-    CHECK(p->NamespaceURI() == infra::Namespaces::HTML);
+    CHECK(p->NamespaceURI() == infra::namespaces::HTML);
 
     auto result = root->InnerHTML(u8"<p>not closed");
     REQUIRE(result.HasException());
@@ -161,7 +161,7 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<XMLDocument>();
     auto root = document->CreateElementNS(u8"urn:root", u8"root").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*root).HasException());
-    REQUIRE_FALSE(root->SetAttributeNS(infra::Namespaces::XMLNS, u8"xmlns:p", u8"urn:outer").HasException());
+    REQUIRE_FALSE(root->SetAttributeNS(infra::namespaces::XMLNS, u8"xmlns:p", u8"urn:outer").HasException());
     auto context = document->CreateElementNS(u8"urn:root", u8"context").ReleaseValue();
     REQUIRE_FALSE(root->AppendChild(*context).HasException());
 
@@ -179,7 +179,7 @@ namespace krys::boo::dom::tests
     SECTION("a prefix declared nearer the context wins")
     {
       REQUIRE_FALSE(
-        context->SetAttributeNS(infra::Namespaces::XMLNS, u8"xmlns:p", u8"urn:inner").HasException());
+        context->SetAttributeNS(infra::namespaces::XMLNS, u8"xmlns:p", u8"urn:inner").HasException());
       REQUIRE_FALSE(context->InnerHTML(u8"<p:b/>").HasException());
       auto b = context->FirstElementChild();
       REQUIRE(b);
@@ -204,7 +204,7 @@ namespace krys::boo::dom::tests
 
     SECTION("serialises a template's contents")
     {
-      auto templateElement = document->CreateElementNS(infra::Namespaces::HTML, u8"template").ReleaseValue();
+      auto templateElement = document->CreateElementNS(infra::namespaces::HTML, u8"template").ReleaseValue();
       REQUIRE_FALSE(root->AppendChild(*templateElement).HasException());
       REQUIRE_FALSE(templateElement->InnerHTML(u8"<b/>").HasException());
       CHECK(templateElement->FirstChild() == nullptr);
@@ -307,12 +307,12 @@ namespace krys::boo::dom::tests
             "[DOM][Element][DOMParsing][html:xml-fragment-parsing-algorithm]")
   {
     auto document = CreateRef<XMLDocument>();
-    auto root = document->CreateElementNS(infra::Namespaces::HTML, u8"div").ReleaseValue();
+    auto root = document->CreateElementNS(infra::namespaces::HTML, u8"div").ReleaseValue();
     REQUIRE_FALSE(document->AppendChild(*root).HasException());
 
     for (auto name : {u8"script", u8"style"})
     {
-      auto element = document->CreateElementNS(infra::Namespaces::HTML, DOMStringAtom(name)).ReleaseValue();
+      auto element = document->CreateElementNS(infra::namespaces::HTML, DOMStringAtom(name)).ReleaseValue();
       REQUIRE_FALSE(root->AppendChild(*element).HasException());
 
       REQUIRE_FALSE(element->InnerHTML(u8"<b/>").HasException());
@@ -398,10 +398,10 @@ namespace krys::boo::dom::tests
     SECTION("serialises attributes with their serialised names")
     {
       auto span = make(u8"span");
-      REQUIRE_FALSE(span->SetAttributeNS(infra::Namespaces::XML, u8"a:lang", u8"1").HasException());
-      REQUIRE_FALSE(span->SetAttributeNS(infra::Namespaces::XLink, u8"b:href", u8"2").HasException());
-      REQUIRE_FALSE(span->SetAttributeNS(infra::Namespaces::XMLNS, u8"xmlns", u8"3").HasException());
-      REQUIRE_FALSE(span->SetAttributeNS(infra::Namespaces::XMLNS, u8"xmlns:c", u8"4").HasException());
+      REQUIRE_FALSE(span->SetAttributeNS(infra::namespaces::XML, u8"a:lang", u8"1").HasException());
+      REQUIRE_FALSE(span->SetAttributeNS(infra::namespaces::XLink, u8"b:href", u8"2").HasException());
+      REQUIRE_FALSE(span->SetAttributeNS(infra::namespaces::XMLNS, u8"xmlns", u8"3").HasException());
+      REQUIRE_FALSE(span->SetAttributeNS(infra::namespaces::XMLNS, u8"xmlns:c", u8"4").HasException());
       REQUIRE_FALSE(span->SetAttributeNS(u8"urn:x", u8"d:e", u8"5").HasException());
       CHECK(MarkupText(span->OuterHTML().ReleaseValue())
             == "<span xml:lang=\"1\" xlink:href=\"2\" xmlns=\"3\" xmlns:c=\"4\" d:e=\"5\"></span>");
@@ -409,11 +409,11 @@ namespace krys::boo::dom::tests
 
     SECTION("uses the local name of HTML, SVG and MathML elements, and the qualified name of others")
     {
-      CHECK(MarkupText(makeNS(infra::Namespaces::HTML, u8"a:div")->OuterHTML().ReleaseValue())
+      CHECK(MarkupText(makeNS(infra::namespaces::HTML, u8"a:div")->OuterHTML().ReleaseValue())
             == "<div></div>");
-      CHECK(MarkupText(makeNS(infra::Namespaces::SVG, u8"b:svg")->OuterHTML().ReleaseValue())
+      CHECK(MarkupText(makeNS(infra::namespaces::SVG, u8"b:svg")->OuterHTML().ReleaseValue())
             == "<svg></svg>");
-      CHECK(MarkupText(makeNS(infra::Namespaces::MathML, u8"c:math")->OuterHTML().ReleaseValue())
+      CHECK(MarkupText(makeNS(infra::namespaces::MathML, u8"c:math")->OuterHTML().ReleaseValue())
             == "<math></math>");
       CHECK(MarkupText(makeNS(u8"urn:x", u8"d:e")->OuterHTML().ReleaseValue()) == "<d:e></d:e>");
     }

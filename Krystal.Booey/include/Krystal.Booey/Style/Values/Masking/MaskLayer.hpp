@@ -169,13 +169,13 @@ namespace krys::boo::style
 
     KRYS_NODISCARD static PositionX InitialPositionX() noexcept
     {
-      using namespace css::Literals;
+      using namespace css::literals;
       return 0_css_percentage;
     }
 
     KRYS_NODISCARD static PositionY InitialPositionY() noexcept
     {
-      using namespace css::Literals;
+      using namespace css::literals;
       return 0_css_percentage;
     }
 

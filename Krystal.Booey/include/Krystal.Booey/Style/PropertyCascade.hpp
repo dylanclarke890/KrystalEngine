@@ -90,7 +90,7 @@ namespace krys::boo::style
     {
       EnumSet<PropertyType> Types;
       // Ids are mutually exclusive with types. They are low-priority only.
-      SmallList<css::PropertyId, 4> Ids {};
+      SmallList<css::PropertyId, 4> Ids;
 
       KRYS_NODISCARD bool IsEmpty() const noexcept
       {

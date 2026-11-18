@@ -85,7 +85,7 @@
 
 namespace krys::boo
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   class PathOperation;
   class StyleBackdropFilterData;
@@ -214,7 +214,7 @@ namespace krys::boo
 
     unsigned TransformStyle3D : 2;
     unsigned TransformStyleForcedToFlat
-      : 1; // The used value for transform-style is forced to flat by a grouping property.
+      : 1 {false}; // The used value for transform-style is forced to flat by a grouping property.
     unsigned BackfaceVisibility : 1;
 
     unsigned ScrollBehavior : 1;
@@ -234,13 +234,13 @@ namespace krys::boo
     unsigned PositionTryOrder : 3;
     unsigned PositionVisibility : 3;
     unsigned FieldSizing : 1;
-    unsigned NativeAppearanceDisabled : 1;
+    unsigned NativeAppearanceDisabled : 1 {static_cast<unsigned>(false)};
     unsigned ScrollbarWidth : 2;
-    unsigned UsesAnchorFunctions : 1;
-    unsigned AnchorFunctionScrollCompensatedAxes : 2;
+    unsigned UsesAnchorFunctions : 1 {false};
+    unsigned AnchorFunctionScrollCompensatedAxes : 2 {0};
     unsigned UsesTreeCountingFunctions : 1;
-    unsigned IsPopoverInvoker : 1;
-    unsigned UseSVGZoomRulesForLength : 1;
+    unsigned IsPopoverInvoker : 1 {false};
+    unsigned UseSVGZoomRulesForLength : 1 {false};
     unsigned MarginTrim : 4;
     unsigned Contain : 5;
     unsigned OverflowContinue : 1;

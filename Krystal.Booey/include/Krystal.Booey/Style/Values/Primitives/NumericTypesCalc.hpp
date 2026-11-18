@@ -34,7 +34,7 @@ namespace krys::boo::style
 {
   // MARK: - Conversion to `calc::Child`.
 
-  KRYS_NODISCARD inline calc::Child CopyCalculation(Ref<calc::Value> value) noexcept
+  KRYS_NODISCARD inline calc::Child CopyCalculation(const Ref<calc::Value> &value) noexcept
   {
     return value->CopyRoot();
   }

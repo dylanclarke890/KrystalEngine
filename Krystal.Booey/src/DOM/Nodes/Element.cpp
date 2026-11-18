@@ -829,12 +829,12 @@ namespace krys::boo::dom
     }
 
     Maybe<DOMString> linkAttribute;
-    if (NamespaceURI().View() == infra::Namespaces::SVG && LocalName().View() == u8"a")
+    if (NamespaceURI().View() == infra::namespaces::SVG && LocalName().View() == u8"a")
     {
       linkAttribute = GetAttribute(u8"href");
       if (!linkAttribute)
       {
-        linkAttribute = GetAttributeNS(infra::Namespaces::XLink, u8"href");
+        linkAttribute = GetAttributeNS(infra::namespaces::XLink, u8"href");
       }
     }
     else
@@ -1916,7 +1916,7 @@ namespace krys::boo::dom
 
     // 2. If this is in the HTML namespace and its node document is an HTML document, then return
     //    qualifiedName in ASCII uppercase.
-    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = krys::text::ToASCIIUpper(qualifiedName);
     }
@@ -2145,7 +2145,7 @@ namespace krys::boo::dom
 
     // 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
     //    to qualifiedName in ASCII lowercase.
-    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = qualifiedName.ToASCIILower();
     }
@@ -2223,7 +2223,7 @@ namespace krys::boo::dom
 
     // 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
     //    to qualifiedName in ASCII lowercase.
-    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = qualifiedName.ToASCIILower();
     }
@@ -2267,7 +2267,7 @@ namespace krys::boo::dom
   {
     // 1. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
     //    to qualifiedName in ASCII lowercase.
-    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = qualifiedName.ToASCIILower();
     }

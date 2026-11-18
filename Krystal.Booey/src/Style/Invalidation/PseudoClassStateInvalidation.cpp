@@ -105,7 +105,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool HasLanguageAttribute(const dom::Element &element) noexcept
     {
-      return element.HasAttributeNS(infra::Namespaces::XML, u8"lang")
+      return element.HasAttributeNS(infra::namespaces::XML, u8"lang")
              || element.HasAttributeNS(null, u8"lang");
     }
 
@@ -147,7 +147,7 @@ namespace krys::boo::style
     auto &namespaceURI = attributeName.NamespaceURI();
     bool presenceChanged = oldValue.has_value() != newValue.has_value();
 
-    if (namespaceURI.View() == infra::Namespaces::XML)
+    if (namespaceURI.View() == infra::namespaces::XML)
     {
       if (localName == u8"lang")
       {
@@ -158,9 +158,9 @@ namespace krys::boo::style
       return;
     }
 
-    if (namespaceURI.View() == infra::Namespaces::XLink)
+    if (namespaceURI.View() == infra::namespaces::XLink)
     {
-      if (localName == u8"href" && presenceChanged && element.NamespaceURI().View() == infra::Namespaces::SVG
+      if (localName == u8"href" && presenceChanged && element.NamespaceURI().View() == infra::namespaces::SVG
           && element.LocalName().View() == u8"a")
       {
         InvalidateStates(invalidations, element, {PseudoClass::AnyLink, PseudoClass::Link});
@@ -185,7 +185,7 @@ namespace krys::boo::style
     {
       bool isLinkElement =
         IsOneOf(element, {html::TagName::a, html::TagName::area})
-        || (element.NamespaceURI().View() == infra::Namespaces::SVG && element.LocalName().View() == u8"a");
+        || (element.NamespaceURI().View() == infra::namespaces::SVG && element.LocalName().View() == u8"a");
       if (presenceChanged && isLinkElement)
       {
         InvalidateStates(invalidations, element, {PseudoClass::AnyLink, PseudoClass::Link});

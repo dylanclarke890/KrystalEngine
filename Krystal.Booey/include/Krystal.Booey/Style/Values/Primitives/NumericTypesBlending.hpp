@@ -34,7 +34,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   // MARK: Interpolation of base numeric types
   // https://drafts.csswg.org/css-values/#combining-values

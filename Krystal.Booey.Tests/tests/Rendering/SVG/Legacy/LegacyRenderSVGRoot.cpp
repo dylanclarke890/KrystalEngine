@@ -135,7 +135,7 @@ layer at (0,0) size 800x104
                    "[Rendering][SVG][LegacyRenderSVGRoot]")
   {
     ResolverFixture fixture {u8R"html(<!DOCTYPE html>)html"};
-    auto svg = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+    auto svg = fixture.Document->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
     REQUIRE_FALSE(fixture.Document->ReplaceChild(*svg, *fixture.Document->DocumentElement()).HasException());
     (void)fixture.Document->UpdateLayout();
 
@@ -153,7 +153,7 @@ layer at (0,0) size 800x104
                    "[Rendering][SVG][LegacyRenderSVGRoot]")
   {
     PaintFixture fixture {u8R"html(<!DOCTYPE html>)html"};
-    auto svg = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+    auto svg = fixture.Document->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
     REQUIRE_FALSE(svg->SetAttribute(u8"style", u8"background: lime").HasException());
     REQUIRE_FALSE(fixture.Document->ReplaceChild(*svg, *fixture.Document->DocumentElement()).HasException());
 

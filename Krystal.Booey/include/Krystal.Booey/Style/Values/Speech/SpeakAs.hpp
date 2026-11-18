@@ -47,7 +47,7 @@ namespace krys::boo::style
     using EnumSet = SpeakAsValueEnumSet;
     using value_type = SpeakAsValueEnumSet::value_type;
 
-    constexpr SpeakAs(css::keywords::Normal) noexcept : _value {}
+    constexpr SpeakAs(css::keywords::Normal) noexcept
     {
     }
 

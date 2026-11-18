@@ -62,7 +62,7 @@ namespace krys::boo::style
                              .Values.SystemFonts[css::parse_property::LowerFontShorthand(valueID)];
         if (font.Family == null || font.Family.View().empty())
         {
-          return {css::GenericFontFamilyNames::StandardFamily(), FontFamilyKind::Generic};
+          return {css::generic_font_family_names::StandardFamily(), FontFamilyKind::Generic};
         }
         return {font.Family, FontFamilyKind::Specified};
       }

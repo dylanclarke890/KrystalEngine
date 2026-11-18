@@ -35,7 +35,7 @@
 
 namespace krys::boo
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   struct BorderData
   {

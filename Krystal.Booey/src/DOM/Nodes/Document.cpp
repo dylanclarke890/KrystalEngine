@@ -513,7 +513,7 @@ namespace krys::boo::dom
     DOMStringAtom namespaceURI = null;
     if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
     {
-      namespaceURI = infra::Namespaces::HTML;
+      namespaceURI = infra::namespaces::HTML;
     }
 
     // 5. Return the result of creating an element given this, localName, namespace, null, is, true, and
@@ -962,7 +962,7 @@ namespace krys::boo::dom
       {
         // Let element be the result of creating an element given the document element's node document,
         // "title", and the SVG namespace. Insert element as the first child of the document element.
-        title = ElementFactory::Create(*this, {infra::Namespaces::SVG, null, u8"title"});
+        title = ElementFactory::Create(*this, {infra::namespaces::SVG, null, u8"title"});
 
         if (auto insert =
               MutationAlgorithms::PreInsert(*title, *documentElement, documentElement->FirstChild());
@@ -979,7 +979,7 @@ namespace krys::boo::dom
       }
     }
     // If the document element is in the HTML namespace:
-    else if (documentElement && documentElement->NamespaceURI() == infra::Namespaces::HTML)
+    else if (documentElement && documentElement->NamespaceURI() == infra::namespaces::HTML)
     {
       RefPtr<html::HTMLHeadElement> head = Head();
       RefPtr<Element> element = ShareRefPtr(html::DOMTreeAccessors::GetTitleElement(*this));
@@ -996,7 +996,7 @@ namespace krys::boo::dom
       {
         // 3a. Let element be the result of creating an element given the document element's node document,
         //     "title", and the HTML namespace.
-        element = ElementFactory::Create(*this, {infra::Namespaces::HTML, null, u8"title"});
+        element = ElementFactory::Create(*this, {infra::namespaces::HTML, null, u8"title"});
 
         // 3b. Append element to the head element.
         if (auto append = MutationAlgorithms::Append(*element, *head); append.HasException())

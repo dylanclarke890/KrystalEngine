@@ -60,7 +60,7 @@ namespace krys::boo::css::mq
   {
     Maybe<mq::Prefix> Prefix;
     CSSOMStringAtom MediaType {null};
-    Maybe<mq::Condition> Condition {};
+    Maybe<mq::Condition> Condition;
   };
 
   using MediaQueryList = List<MediaQuery>;

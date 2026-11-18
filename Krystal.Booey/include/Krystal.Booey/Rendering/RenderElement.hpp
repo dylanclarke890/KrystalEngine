@@ -252,7 +252,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsVisibleInViewport() const noexcept;
 
     /// @brief Whether the images of the renderer may animate.
-    KRYS_NODISCARD bool AllowsAnimation() const noexcept;
+    KRYS_NODISCARD bool AllowsAnimation() const noexcept override;
 
     /// @brief The renderer's style with its animations applied at their current time.
     KRYS_NODISCARD UniquePtr<RenderStyle> AnimatedStyle() const noexcept;

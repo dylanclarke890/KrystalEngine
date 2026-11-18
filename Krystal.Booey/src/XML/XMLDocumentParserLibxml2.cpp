@@ -349,7 +349,7 @@ namespace krys::boo::xml
         reinterpret_cast<const XMLSAX2Namespace *>(libxmlNamespaces), static_cast<size_t>(numNamespaces));
       for (auto &xmlNamespace : namespaces)
       {
-        auto namespaceQName = dom::DOMStringAtom(infra::NamespacePrefixes::XMLNS);
+        auto namespaceQName = dom::DOMStringAtom(infra::namespace_prefixes::XMLNS);
         auto namespaceURI = ToString(xmlNamespace.URI);
         if (xmlNamespace.Prefix)
         {
@@ -358,7 +358,7 @@ namespace krys::boo::xml
           namespaceQName = dom::DOMStringAtom(qualifiedName);
         }
 
-        auto result = dom::NameValidation::ValidateAndExtract(infra::Namespaces::XMLNS, namespaceQName,
+        auto result = dom::NameValidation::ValidateAndExtract(infra::namespaces::XMLNS, namespaceQName,
                                                               dom::ValidateAndExtractContext::Attribute);
         if (result.HasException())
         {
@@ -455,7 +455,7 @@ namespace krys::boo::xml
       }
       else if (Is<svg::SVGElement>(_currentNode.get()) || localName == u8"svg")
       {
-        uri = infra::Namespaces::SVG;
+        uri = infra::namespaces::SVG;
       }
       else
       {

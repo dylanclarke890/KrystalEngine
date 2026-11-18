@@ -90,7 +90,7 @@ namespace krys::boo::style
     using Edges = css::MinimallySerialisingSpaceSeparatedRectEdges<Value>;
 
     Edges Values {Value::Percentage {100}};
-    Maybe<css::keywords::Fill> Fill {};
+    Maybe<css::keywords::Fill> Fill;
 
     BorderImageSlice(Edges values, Maybe<css::keywords::Fill> fill = {}) noexcept
         : Values {krys::move(values)}, Fill {fill}

@@ -578,7 +578,7 @@ namespace krys::boo
       }
       if (Is<svg::SVGImageElement>(DynamicDowncast<svg::SVGElement>(&element)))
       {
-        return element.GetAttributeNS(infra::Namespaces::XLink, u8"href").value_or(dom::DOMString());
+        return element.GetAttributeNS(infra::namespaces::XLink, u8"href").value_or(dom::DOMString());
       }
       if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
           htmlElement

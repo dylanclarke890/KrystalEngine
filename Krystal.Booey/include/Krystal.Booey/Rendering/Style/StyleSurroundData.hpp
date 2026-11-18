@@ -46,15 +46,15 @@ namespace krys::boo
     bool operator==(const StyleSurroundData &) const noexcept;
 
     // Here instead of in BorderData to pack up against the refcount.
-    bool HasExplicitlySetBorderBottomLeftRadius : 1;
-    bool HasExplicitlySetBorderBottomRightRadius : 1;
-    bool HasExplicitlySetBorderTopLeftRadius : 1;
-    bool HasExplicitlySetBorderTopRightRadius : 1;
+    bool HasExplicitlySetBorderBottomLeftRadius : 1 {false};
+    bool HasExplicitlySetBorderBottomRightRadius : 1 {false};
+    bool HasExplicitlySetBorderTopLeftRadius : 1 {false};
+    bool HasExplicitlySetBorderTopRightRadius : 1 {false};
 
-    bool HasExplicitlySetPaddingBottom : 1;
-    bool HasExplicitlySetPaddingLeft : 1;
-    bool HasExplicitlySetPaddingRight : 1;
-    bool HasExplicitlySetPaddingTop : 1;
+    bool HasExplicitlySetPaddingBottom : 1 {false};
+    bool HasExplicitlySetPaddingLeft : 1 {false};
+    bool HasExplicitlySetPaddingRight : 1 {false};
+    bool HasExplicitlySetPaddingTop : 1 {false};
 
     style::InsetBox Inset;
     style::MarginBox Margin;

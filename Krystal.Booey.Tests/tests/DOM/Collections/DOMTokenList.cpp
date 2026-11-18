@@ -408,7 +408,7 @@ namespace krys::boo::dom::tests
     }
     SECTION("SVG a's relList")
     {
-      auto element = document->CreateElementNS(infra::Namespaces::SVG, u8"a");
+      auto element = document->CreateElementNS(infra::namespaces::SVG, u8"a");
       REQUIRE_FALSE(element.HasException());
       auto &anchor = Downcast<svg::SVGAElement>(Downcast<svg::SVGElement>(*element.Value()));
       CheckFollowsAttribute(anchor, anchor.RelList(), u8"rel");

@@ -41,7 +41,7 @@ namespace krys::boo::style::tests
 {
   using css::PropertyId;
   using css::ValueId;
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TEST_CASE_METHOD(BuilderFixture, "Style integers and their keywords",
                    "[Style][Values][KeywordAndLengthGroups]")

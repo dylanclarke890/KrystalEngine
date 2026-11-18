@@ -45,7 +45,7 @@ namespace krys::boo::style
 
     struct RuleAndTactics
     {
-      Markable<ScopedName> Rule {};
+      Markable<ScopedName> Rule;
       css::ListOrNull<css::SpaceSeparatedList<Tactic>> Tactics {std::nullopt};
 
       KRYS_NODISCARD bool operator==(const RuleAndTactics &) const noexcept = default;
@@ -53,7 +53,7 @@ namespace krys::boo::style
 
     struct PositionArea
     {
-      RefPtr<const css::ImmutableStyleProperties> Properties {};
+      RefPtr<const css::ImmutableStyleProperties> Properties;
 
       KRYS_NODISCARD bool operator==(const PositionArea &) const noexcept;
     };

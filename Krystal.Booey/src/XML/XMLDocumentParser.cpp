@@ -221,7 +221,7 @@ namespace krys::boo::xml
         for (auto &attribute : element->AttributeList())
         {
           // A declaration nearer the context element hides an ancestor's for the same prefix.
-          if (attribute->Prefix() == infra::NamespacePrefixes::XMLNS)
+          if (attribute->Prefix() == infra::namespace_prefixes::XMLNS)
           {
             result.PrefixNamespaces.try_emplace(attribute->LocalName(),
                                                 dom::DOMStringAtom(attribute->Value()));

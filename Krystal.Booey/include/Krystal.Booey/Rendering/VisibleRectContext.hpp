@@ -55,10 +55,10 @@ namespace krys::boo
     bool HasPositionFixedDescendant {false};
     bool DirtyRectIsFlipped {false};
     bool DescendantNeedsEnclosingIntRect {false};
-    EnumSet<Option> Options {};
+    EnumSet<Option> Options;
     /// @brief An intersection observer's scroll margin, which grows the clips of the scroll containers on the
     /// way.
-    Maybe<IntersectionObserverMarginBox> ScrollMargin {};
+    Maybe<IntersectionObserverMarginBox> ScrollMargin;
 
     KRYS_NODISCARD RepaintRectCalculation GetRepaintRectCalculation() const noexcept
     {

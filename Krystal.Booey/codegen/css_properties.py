@@ -636,6 +636,12 @@ class StylePropertyCodeGenProperties:
             allowed_types=[bool],
             default_value=False,
         ),
+        # A setter that only reads its argument (a custom setter that converts it) takes `const T &`, not `T`.
+        Schema.Entry(
+            "render-style-setter-takes-const-reference",
+            allowed_types=[bool],
+            default_value=False,
+        ),
         Schema.Entry("render-style-storage-container", allowed_types=[str], default_value="data"),
         Schema.Entry("render-style-storage-kind", allowed_types=[str]),
         Schema.Entry("render-style-storage-name", allowed_types=[str]),
@@ -741,6 +747,7 @@ class StylePropertyCodeGenProperties:
     render_style_setter_exported: bool
     render_style_setter_inline: bool
     render_style_setter_returns_if_changed: bool
+    render_style_setter_takes_const_reference: bool
     render_style_storage_container: str
     render_style_storage_kind: str | None
     render_style_storage_name: str | None
@@ -1337,6 +1344,8 @@ class StyleProperty:
     def setter_argument_type(self):
         if self.codegen_properties.render_style_storage_kind == "reference":
             return f"{self.codegen_properties.render_style_type} &&"
+        if self.codegen_properties.render_style_setter_takes_const_reference:
+            return f"const {self.codegen_properties.render_style_type} &"
         return f"{self.codegen_properties.render_style_type}"
 
     # Computes the return type of the setter.
@@ -10863,7 +10872,7 @@ class GenerateStyleComputedStyleProperties:
         to.write(f"{{")
         with to.indent():
             if requires_using_namespace_css_literals:
-                to.write(f"using namespace css::Literals;")
+                to.write(f"using namespace css::literals;")
             to.write(f"return {initial_expression};")
         to.write(f"}}")
         to.newline()

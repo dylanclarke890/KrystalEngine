@@ -74,7 +74,7 @@ namespace krys::boo
   public:
     ChromeClient() noexcept = default;
 
-    virtual ~ChromeClient() noexcept = default;
+    ~ChromeClient() noexcept override = default;
 
     /// @brief The page asks to be brought to the front (`window.focus()`); the host decides whether it is.
     virtual void Focus() noexcept

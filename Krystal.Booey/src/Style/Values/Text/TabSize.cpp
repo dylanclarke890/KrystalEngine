@@ -33,7 +33,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TabSize CSSValueConversion<TabSize>::operator()(BuilderState &state, const css::Value &value) noexcept
   {

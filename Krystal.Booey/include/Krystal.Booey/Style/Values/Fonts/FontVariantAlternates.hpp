@@ -48,7 +48,7 @@ namespace krys::boo::style
       _platform.ValuesRef().HistoricalForms = true;
     }
 
-    FontVariantAlternates(Platform value) noexcept : _platform {value}
+    FontVariantAlternates(Platform value) noexcept : _platform {krys::move(value)}
     {
     }
 

@@ -247,7 +247,7 @@ namespace krys::boo::style
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontPalette(FontPalette value) noexcept
+  inline void ComputedStyleProperties::SetFontPalette(const FontPalette &value) noexcept
   {
     auto description = GetFontDescription();
     description.SetFontPalette(value.Platform());

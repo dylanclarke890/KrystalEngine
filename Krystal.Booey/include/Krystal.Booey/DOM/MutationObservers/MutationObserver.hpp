@@ -19,11 +19,11 @@ namespace krys::boo::dom
   struct MutationObserverInit
   {
     bool ChildList {false};
-    Maybe<bool> Attributes {};
-    Maybe<bool> CharacterData {};
+    Maybe<bool> Attributes;
+    Maybe<bool> CharacterData;
     bool Subtree {false};
-    Maybe<bool> AttributeOldValue {};
-    Maybe<bool> CharacterDataOldValue {};
+    Maybe<bool> AttributeOldValue;
+    Maybe<bool> CharacterDataOldValue;
     Maybe<List<DOMStringAtom>> AttributeFilter;
   };
 

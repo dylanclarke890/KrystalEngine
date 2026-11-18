@@ -190,7 +190,7 @@ namespace krys::boo::dom
 
     // 9. If prefix is "xml" and namespace is not the XML namespace, then throw a "NamespaceError"
     // DOMException.
-    if (prefix == infra::NamespacePrefixes::XML && namespaceURI != infra::Namespaces::XML)
+    if (prefix == infra::namespace_prefixes::XML && namespaceURI != infra::namespaces::XML)
     {
       return ExceptionCode::NamespaceError;
     }
@@ -198,15 +198,15 @@ namespace krys::boo::dom
     // 10. If either qualifiedName or prefix is "xmlns" and namespace is not the XMLNS namespace, then throw a
     // "NamespaceError" DOMException.
     bool namedXMLNS =
-      qualifiedName == infra::NamespacePrefixes::XMLNS || prefix == infra::NamespacePrefixes::XMLNS;
-    if (namedXMLNS && namespaceURI != infra::Namespaces::XMLNS)
+      qualifiedName == infra::namespace_prefixes::XMLNS || prefix == infra::namespace_prefixes::XMLNS;
+    if (namedXMLNS && namespaceURI != infra::namespaces::XMLNS)
     {
       return ExceptionCode::NamespaceError;
     }
 
     // 11. If namespace is the XMLNS namespace and neither qualifiedName nor prefix is "xmlns", then throw a
     // "NamespaceError" DOMException.
-    if (namespaceURI == infra::Namespaces::XMLNS && !namedXMLNS)
+    if (namespaceURI == infra::namespaces::XMLNS && !namedXMLNS)
     {
       return ExceptionCode::NamespaceError;
     }

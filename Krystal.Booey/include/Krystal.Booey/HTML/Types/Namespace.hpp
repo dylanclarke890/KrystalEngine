@@ -31,32 +31,32 @@ namespace krys::boo::html
       return Namespace::None;
     }
 
-    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::Namespaces::HTML))
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::namespaces::HTML))
     {
       return Namespace::HTML;
     }
 
-    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::Namespaces::SVG))
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::namespaces::SVG))
     {
       return Namespace::SVG;
     }
 
-    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::Namespaces::MathML))
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::namespaces::MathML))
     {
       return Namespace::MathML;
     }
 
-    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::Namespaces::XML))
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::namespaces::XML))
     {
       return Namespace::XML;
     }
 
-    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::Namespaces::XMLNS))
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::namespaces::XMLNS))
     {
       return Namespace::XMLNS;
     }
 
-    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::Namespaces::XLink))
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(name, infra::namespaces::XLink))
     {
       return Namespace::XLink;
     }

@@ -150,7 +150,7 @@ namespace krys::boo::style::tests
 
     SECTION("origins")
     {
-      using namespace css::Literals;
+      using namespace css::literals;
       TransformOrigin origin {Convert<TransformOriginX>(PropertyId::TransformOriginX, u8"left"),
                               Convert<TransformOriginY>(PropertyId::TransformOriginY, u8"25%"),
                               TransformOriginZ {5_css_px}};

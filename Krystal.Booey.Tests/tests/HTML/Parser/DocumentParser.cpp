@@ -46,11 +46,11 @@ namespace krys::boo::html::tests
           auto localName = element.LocalName().ToString();
           auto namespaceName = [&] -> dom::DOMString
           {
-            if (element.NamespaceURI() == infra::Namespaces::SVG)
+            if (element.NamespaceURI() == infra::namespaces::SVG)
             {
               return u8"svg ";
             }
-            else if (element.NamespaceURI() == infra::Namespaces::MathML)
+            else if (element.NamespaceURI() == infra::namespaces::MathML)
             {
               return u8"math ";
             }
@@ -69,15 +69,15 @@ namespace krys::boo::html::tests
             auto attrLocalName = attr->LocalName().ToString();
             auto attrNamespaceName = [&] -> dom::DOMString
             {
-              if (attr->NamespaceURI() == infra::Namespaces::XML)
+              if (attr->NamespaceURI() == infra::namespaces::XML)
               {
                 return u8"xml ";
               }
-              else if (attr->NamespaceURI() == infra::Namespaces::XMLNS)
+              else if (attr->NamespaceURI() == infra::namespaces::XMLNS)
               {
                 return u8"xmlns ";
               }
-              else if (attr->NamespaceURI() == infra::Namespaces::XLink)
+              else if (attr->NamespaceURI() == infra::namespaces::XLink)
               {
                 return u8"xlink ";
               }
@@ -101,7 +101,7 @@ namespace krys::boo::html::tests
             output += name + u8"=\"" + value + u8"\"\n";
           }
 
-          if (element.NamespaceURI() == infra::Namespaces::HTML && element.LocalName() == u8"template")
+          if (element.NamespaceURI() == infra::namespaces::HTML && element.LocalName() == u8"template")
           {
             krys::boo::tests::Indent(output, depth + 1uz);
             output += u8"content\n";
@@ -263,14 +263,14 @@ namespace krys::boo::html::tests
         {
           auto space = context.find(u8' ');
           auto namespaceURI =
-            context.starts_with(u8"svg ") ? infra::Namespaces::SVG : infra::Namespaces::MathML;
+            context.starts_with(u8"svg ") ? infra::namespaces::SVG : infra::namespaces::MathML;
           element = document->CreateElementNS(namespaceURI, dom::DOMStringAtom(context.substr(space + 1)))
                       .ReleaseValue();
         }
         else
         {
           TagName fragmentTagName = ParseTagName(*test.FragmentContext);
-          dom::QualifiedName qName = dom::QualifiedName {infra::Namespaces::HTML, null,
+          dom::QualifiedName qName = dom::QualifiedName {infra::namespaces::HTML, null,
                                                          dom::DOMStringAtom(test.FragmentContext.value()),
                                                          fragmentTagName, Namespace::HTML};
           element = dom::ElementFactory::Create(*document, qName, null);
@@ -347,7 +347,7 @@ namespace krys::boo::html::tests
 
     Ref<svg::SVGElement> CreateSVGElement(dom::Document &document, dom::DOMStringAtom tagName) noexcept
     {
-      auto element = document.CreateElementNS(infra::Namespaces::SVG, krys::move(tagName));
+      auto element = document.CreateElementNS(infra::namespaces::SVG, krys::move(tagName));
       REQUIRE(element.HasValue());
       return Downcast<svg::SVGElement>(*element);
     }
@@ -718,18 +718,18 @@ namespace krys::boo::html::tests
     REQUIRE(svg);
 
     // xmlns has no prefix.
-    auto xmlns = svg->GetAttributeNodeNS(infra::Namespaces::XMLNS, u8"xmlns");
+    auto xmlns = svg->GetAttributeNodeNS(infra::namespaces::XMLNS, u8"xmlns");
     REQUIRE(xmlns);
     CHECK(xmlns->Prefix() == null);
     CHECK(svg->GetAttribute(u8"xmlns") == dom::DOMString(u8"http://www.w3.org/2000/svg"));
 
     // xmlns:xlink and xlink:href keep their prefixes.
-    auto xlink = svg->GetAttributeNodeNS(infra::Namespaces::XMLNS, u8"xlink");
+    auto xlink = svg->GetAttributeNodeNS(infra::namespaces::XMLNS, u8"xlink");
     REQUIRE(xlink);
-    CHECK(xlink->Prefix() == infra::NamespacePrefixes::XMLNS);
-    auto href = svg->GetAttributeNodeNS(infra::Namespaces::XLink, u8"href");
+    CHECK(xlink->Prefix() == infra::namespace_prefixes::XMLNS);
+    auto href = svg->GetAttributeNodeNS(infra::namespaces::XLink, u8"href");
     REQUIRE(href);
-    CHECK(href->Prefix() == infra::NamespacePrefixes::XLink);
+    CHECK(href->Prefix() == infra::namespace_prefixes::XLink);
   }
 
   TEST_CASE("DocumentParser: form controls join the open form even when they aren't inside it",

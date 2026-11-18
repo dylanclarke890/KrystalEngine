@@ -35,7 +35,7 @@ namespace krys::boo::dom
   class VisibilityChangeClient : public AbstractRefCountedAndCanMakeWeakPtr<VisibilityChangeClient>
   {
   public:
-    virtual ~VisibilityChangeClient() noexcept = default;
+    ~VisibilityChangeClient() noexcept override = default;
 
     /// @brief The document's visibility state changed.
     virtual void VisibilityStateChanged() noexcept = 0;

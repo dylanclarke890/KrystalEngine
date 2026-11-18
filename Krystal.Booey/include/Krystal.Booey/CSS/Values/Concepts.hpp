@@ -25,7 +25,6 @@
 #pragma once
 
 #include "Krystal.Core/Concepts.hpp"
-#include <type_traits>
 
 namespace krys::boo::css
 {

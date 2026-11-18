@@ -59,8 +59,8 @@ namespace krys::boo::html
     {
       auto *element = DynamicDowncast<dom::Element>(node);
       return element && element->LocalName().View() == u8"script"
-             && (element->NamespaceURI().View() == infra::Namespaces::HTML
-                 || element->NamespaceURI().View() == infra::Namespaces::SVG);
+             && (element->NamespaceURI().View() == infra::namespaces::HTML
+                 || element->NamespaceURI().View() == infra::namespaces::SVG);
     }
   }
 

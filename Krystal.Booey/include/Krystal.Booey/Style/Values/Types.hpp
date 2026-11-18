@@ -145,32 +145,32 @@ namespace krys::boo::style
   // Specialize `TreatAsNonConverting` for `css::KeywordValueConstant<C>`, to indicate that its type does not
   // change from the CSS representation.
   template <css::ValueId C>
-  constexpr bool TreatAsNonConverting<css::KeywordValueConstant<C>> = true;
+  constexpr inline bool TreatAsNonConverting<css::KeywordValueConstant<C>> = true;
 
   // Specialize `TreatAsNonConverting` for `css::CustomIdentifier`, to indicate that its type does not change
   // from the CSS representation.
   template <>
-  constexpr bool TreatAsNonConverting<css::CustomIdentifier> = true;
+  constexpr inline bool TreatAsNonConverting<css::CustomIdentifier> = true;
 
   // Specialize `TreatAsNonConverting` for `css::PropertyIdentifier`, to indicate that its type does not
   // change from the CSS representation.
   template <>
-  constexpr bool TreatAsNonConverting<css::PropertyIdentifier> = true;
+  constexpr inline bool TreatAsNonConverting<css::PropertyIdentifier> = true;
 
   // Specialize `TreatAsNonConverting` for `css::CSSOMStringAtom`, to indicate that its type does not change
   // from the CSS representation.
   template <>
-  constexpr bool TreatAsNonConverting<css::CSSOMStringAtom> = true;
+  constexpr inline bool TreatAsNonConverting<css::CSSOMStringAtom> = true;
 
   // Specialize `TreatAsNonConverting` for `css::CSSOMString`, to indicate that its type does not change from
   // the CSS representation.
   template <>
-  constexpr bool TreatAsNonConverting<css::CSSOMString> = true;
+  constexpr inline bool TreatAsNonConverting<css::CSSOMString> = true;
 
   // Specialize `TreatAsNonConverting` for `url::URL`, to indicate that its type does not change from the CSS
   // representation.
   template <>
-  constexpr bool TreatAsNonConverting<url::URL> = true;
+  constexpr inline bool TreatAsNonConverting<url::URL> = true;
 
 #pragma endregion
 

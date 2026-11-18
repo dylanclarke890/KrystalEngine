@@ -138,7 +138,7 @@ namespace krys::boo::dom
 
     // 2. If this NamedNodeMap object's element is in the HTML namespace and its node document is an HTML
     //    document, then for each name of names:
-    if (_associatedElement->NamespaceURI() == infra::Namespaces::HTML
+    if (_associatedElement->NamespaceURI() == infra::namespaces::HTML
         && Is<HTMLDocument>(_associatedElement->NodeDocument()))
     {
       // 2a. Let lowercaseName be name, in ASCII lowercase.

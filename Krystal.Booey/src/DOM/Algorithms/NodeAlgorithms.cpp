@@ -463,7 +463,7 @@ namespace krys::boo::dom
     //    element's first such attribute's local name.
     for (auto &attribute : element._attributes)
     {
-      if (attribute->Prefix() == infra::NamespacePrefixes::XMLNS && attribute->Value() == namespaceURI)
+      if (attribute->Prefix() == infra::namespace_prefixes::XMLNS && attribute->Value() == namespaceURI)
       {
         return attribute->LocalName();
       }
@@ -490,15 +490,15 @@ namespace krys::boo::dom
       case NodeType::ELEMENT_NODE:
       {
         // 1. If prefix is "xml", then return the XML namespace.
-        if (prefix == infra::NamespacePrefixes::XML)
+        if (prefix == infra::namespace_prefixes::XML)
         {
-          return infra::Namespaces::XML;
+          return infra::namespaces::XML;
         }
 
         // 2. If prefix is "xmlns", then return the XMLNS namespace.
-        if (prefix == infra::NamespacePrefixes::XMLNS)
+        if (prefix == infra::namespace_prefixes::XMLNS)
         {
-          return infra::Namespaces::XMLNS;
+          return infra::namespaces::XMLNS;
         }
 
         // 3. If its namespace is non-null and its namespace prefix is prefix, then return namespace.
@@ -515,14 +515,14 @@ namespace krys::boo::dom
         //    not the empty string, and null otherwise.
         for (auto &attribute : element._attributes)
         {
-          if (attribute->NamespaceURI() != infra::Namespaces::XMLNS)
+          if (attribute->NamespaceURI() != infra::namespaces::XMLNS)
           {
             continue;
           }
 
-          if ((attribute->Prefix() == infra::NamespacePrefixes::XMLNS && attribute->LocalName() == prefix)
+          if ((attribute->Prefix() == infra::namespace_prefixes::XMLNS && attribute->LocalName() == prefix)
               || (prefix == null && attribute->Prefix() == null
-                  && attribute->LocalName() == infra::NamespacePrefixes::XMLNS))
+                  && attribute->LocalName() == infra::namespace_prefixes::XMLNS))
           {
             return attribute->Value().empty() ? null : DOMStringAtom(attribute->Value());
           }
@@ -609,7 +609,7 @@ namespace krys::boo::dom
       return CreateRef<LiveHTMLCollection>(root,
                                            [qualifiedName, qualifiedNameLowercase](const Element &element)
                                            {
-                                             if (element.NamespaceURI() == infra::Namespaces::HTML)
+                                             if (element.NamespaceURI() == infra::namespaces::HTML)
                                              {
                                                return element._qualifiedName.Name() == qualifiedNameLowercase;
                                              }

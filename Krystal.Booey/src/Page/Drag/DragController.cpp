@@ -73,7 +73,7 @@ namespace krys::boo
     {
       return anchorElement->HasAttribute(u8"href") && anchorElement->IsLiveLink();
     }
-    if (element.NamespaceURI().View() == infra::Namespaces::SVG && element.LocalName().View() == u8"a")
+    if (element.NamespaceURI().View() == infra::namespaces::SVG && element.LocalName().View() == u8"a")
     {
       return css::IsLink(element);
     }

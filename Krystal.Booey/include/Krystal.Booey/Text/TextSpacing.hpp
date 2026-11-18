@@ -140,7 +140,7 @@ namespace krys::boo
     using Options = EnumSet<Type>;
 
   private:
-    Options _options {};
+    Options _options;
 
   public:
     constexpr TextAutospace() noexcept = default;

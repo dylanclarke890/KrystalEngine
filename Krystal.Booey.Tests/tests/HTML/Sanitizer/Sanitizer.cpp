@@ -8,9 +8,9 @@ namespace krys::boo::html::tests
 {
   namespace
   {
-    const dom::DOMStringAtom SVG {infra::Namespaces::SVG};
-    const dom::DOMStringAtom MathML {infra::Namespaces::MathML};
-    const dom::DOMStringAtom XLink {infra::Namespaces::XLink};
+    const dom::DOMStringAtom SVG {infra::namespaces::SVG};
+    const dom::DOMStringAtom MathML {infra::namespaces::MathML};
+    const dom::DOMStringAtom XLink {infra::namespaces::XLink};
 
     KRYS_NODISCARD Ref<Sanitizer> Make(const SanitizerConfig &config)
     {
@@ -41,7 +41,7 @@ namespace krys::boo::html::tests
 
     KRYS_NODISCARD bool Allows(const SanitizerConfig &config, dom::DOMStringView attribute,
                                dom::DOMStringView value = u8"", dom::DOMStringView element = u8"div",
-                               dom::DOMStringAtom elementNamespace = infra::Namespaces::HTML,
+                               dom::DOMStringAtom elementNamespace = infra::namespaces::HTML,
                                dom::DOMStringAtom attributeNamespace = null) noexcept
     {
       return SanitizerAlgorithms::AllowsAttribute(attribute, krys::move(attributeNamespace), value, element,
@@ -92,7 +92,7 @@ namespace krys::boo::html::tests
       auto config = Make(input)->Get();
       REQUIRE(config.Elements->size() == 2);
       auto &circle = (*config.Elements)[1];
-      CHECK((*config.Elements)[0].Namespace == infra::Namespaces::HTML);
+      CHECK((*config.Elements)[0].Namespace == infra::namespaces::HTML);
       REQUIRE((*config.Elements)[0].RemoveAttributes);
       CHECK((*config.Elements)[0].RemoveAttributes->empty());
       CHECK(circle.Namespace == SVG);
@@ -165,12 +165,12 @@ namespace krys::boo::html::tests
       return SanitizerAlgorithms::ActionForElementName(name, krys::move(namespaceURI), config)
              == SanitizerAction::Keep;
     };
-    CHECK(has(u8"p", infra::Namespaces::HTML));
-    CHECK(has(u8"h6", infra::Namespaces::HTML));
+    CHECK(has(u8"p", infra::namespaces::HTML));
+    CHECK(has(u8"h6", infra::namespaces::HTML));
     CHECK(has(u8"mfrac", MathML));
     CHECK(has(u8"foreignObject", SVG));
-    CHECK_FALSE(has(u8"script", infra::Namespaces::HTML));
-    CHECK_FALSE(has(u8"img", infra::Namespaces::HTML));
+    CHECK_FALSE(has(u8"script", infra::namespaces::HTML));
+    CHECK_FALSE(has(u8"img", infra::namespaces::HTML));
     CHECK_FALSE(has(u8"use", SVG));
     CHECK(config.Comments == false);
     CHECK(config.DataAttributes == false);
@@ -214,7 +214,7 @@ namespace krys::boo::html::tests
       CHECK_FALSE(sanitizer->RemoveElement(u8"b"));
       CHECK(sanitizer->ReplaceElementWithChildren(u8"p"));
       CHECK(
-        SanitizerAlgorithms::ActionForElementName(u8"p", infra::Namespaces::HTML, sanitizer->Configuration())
+        SanitizerAlgorithms::ActionForElementName(u8"p", infra::namespaces::HTML, sanitizer->Configuration())
         == SanitizerAction::ReplaceWithChildren);
       CHECK_FALSE(sanitizer->ReplaceElementWithChildren(u8"html"));
       CHECK(sanitizer->AllowAttribute(u8"class"));

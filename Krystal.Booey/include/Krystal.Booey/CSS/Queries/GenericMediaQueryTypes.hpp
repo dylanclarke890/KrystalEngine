@@ -97,7 +97,7 @@ namespace krys::boo::css::mq
     Maybe<Comparison> LeftComparison;
     Maybe<Comparison> RightComparison;
 
-    Maybe<ValueId> FunctionId {};
+    Maybe<ValueId> FunctionId;
 
     const FeatureSchema *Schema {nullptr};
   };
@@ -125,7 +125,7 @@ namespace krys::boo::css::mq
     /// @brief The comparison between each pair of adjacent values.
     List<ComparisonOperator> Operators;
 
-    Maybe<ValueId> FunctionId {};
+    Maybe<ValueId> FunctionId;
 
     const FeatureSchema *Schema {nullptr};
   };
@@ -138,7 +138,7 @@ namespace krys::boo::css::mq
     mq::LogicalOperator LogicalOperator {mq::LogicalOperator::And};
     List<QueryInParens> Queries;
 
-    Maybe<ValueId> FunctionId {};
+    Maybe<ValueId> FunctionId;
   };
 
   enum class EvaluationResult : uint8
@@ -161,7 +161,7 @@ namespace krys::boo::css::mq
   {
     WeakRef<const dom::Document> Document;
     ToLengthConversionData ConversionData {};
-    CheckedPtr<const RenderElement> Renderer {};
+    CheckedPtr<const RenderElement> Renderer;
   };
 
   /// @brief Describes a feature the parser accepts: its name, whether it's discrete or a range, and the type
@@ -203,10 +203,10 @@ namespace krys::boo::css::mq
       return EvaluationResult::Unknown;
     }
 
-    FeatureSchema(const CSSOMStringAtom &name, Type type, ValueType valueType,
+    FeatureSchema(CSSOMStringAtom name, Type type, ValueType valueType,
                   MediaQueryDynamicDependency dependencies,
                   FixedVector<ValueId> valueIdentifiers = {}) noexcept
-        : Name(name), FeatureType(type), FeatureValueType(valueType), Dependencies(dependencies),
+        : Name(krys::move(name)), FeatureType(type), FeatureValueType(valueType), Dependencies(dependencies),
           ValueIdentifiers(krys::move(valueIdentifiers))
     {
     }

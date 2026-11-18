@@ -9,7 +9,7 @@
 namespace krys::boo::style::tests
 {
   using css::PropertyId;
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TEST_CASE_METHOD(BuilderFixture, "Style border-spacing", "[Style][Values][CSS2]")
   {

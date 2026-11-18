@@ -233,5 +233,5 @@ namespace krys
 namespace krys::boo::css
 {
   template <auto nR, auto pR, typename V>
-  constexpr auto TreatAsVariantLike<style::NumberOrPercentage<nR, pR, V>> = true;
+  constexpr inline auto TreatAsVariantLike<style::NumberOrPercentage<nR, pR, V>> = true;
 }

@@ -37,7 +37,7 @@
 
 namespace krys::boo::css
 {
-  using namespace GenericFontFamilyNames;
+  using namespace generic_font_family_names;
 
   size_t
     CSSFontFaceSet::FontSelectionRequestHash::operator()(const FontSelectionRequest &request) const noexcept

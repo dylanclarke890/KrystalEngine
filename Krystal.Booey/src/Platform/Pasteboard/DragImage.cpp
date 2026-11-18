@@ -236,7 +236,7 @@ namespace krys::boo
       FontCascadeDescription description;
       description.SetWeight(bold ? BoldWeightValue() : NormalWeightValue());
       const auto &family = settings.Values.SystemFonts[SystemFontKeyword::SmallCaption].Family;
-      description.SetOneFamily(family == null ? css::GenericFontFamilyNames::StandardFamily() : family);
+      description.SetOneFamily(family == null ? css::generic_font_family_names::StandardFamily() : family);
       description.SetSpecifiedSize(size);
       description.SetComputedSize(size);
       FontCascade result(krys::move(description));

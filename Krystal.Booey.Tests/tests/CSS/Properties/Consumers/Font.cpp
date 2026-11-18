@@ -78,16 +78,17 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(GenericFontFamily)", "[CSS][Properties][Consumers]")
   {
-    CHECK(GenericFontFamily(ValueId::Serif) == GenericFontFamilyNames::SerifFamily());
+    CHECK(GenericFontFamily(ValueId::Serif) == generic_font_family_names::SerifFamily());
     CHECK(GenericFontFamily(ValueId::SansSerif).View() == u8"-internal-sans-serif");
     CHECK(GenericFontFamily(ValueId::Math).View() == u8"-internal-math");
     CHECK(GenericFontFamily(ValueId::Bold) == null);
 
     CHECK(GenericFontFamilyIndex(ValueId::Monospace)
-          == GenericFontFamilyNames::FamilyNamesIndex::MonospaceFamily);
+          == generic_font_family_names::FamilyNamesIndex::MonospaceFamily);
     CHECK(GenericFontFamilyIndex(ValueId::SystemUi)
-          == GenericFontFamilyNames::FamilyNamesIndex::SystemUiFamily);
-    CHECK(GenericFontFamilyNames::FamilyName(GenericFontFamilyNames::FamilyNamesIndex::StandardFamily).View()
+          == generic_font_family_names::FamilyNamesIndex::SystemUiFamily);
+    CHECK(generic_font_family_names::FamilyName(generic_font_family_names::FamilyNamesIndex::StandardFamily)
+            .View()
           == u8"-internal-standard");
   }
 

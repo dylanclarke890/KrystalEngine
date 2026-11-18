@@ -66,7 +66,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD Ref<SVGElement> CreateSVGElement(dom::Document &document, utf8_stringview localName,
                                                     html::TagName tagName) noexcept
     {
-      auto element = dom::ElementFactory::Create(document, dom::QualifiedName(infra::Namespaces::SVG, null,
+      auto element = dom::ElementFactory::Create(document, dom::QualifiedName(infra::namespaces::SVG, null,
                                                                               dom::DOMStringAtom(localName),
                                                                               tagName, html::Namespace::SVG));
       return Downcast<SVGElement>(krys::move(element));

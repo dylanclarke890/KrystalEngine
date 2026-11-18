@@ -52,11 +52,11 @@ namespace krys::boo::svg
   {
     // We recognize XHTML and MathML, as implemented in Gecko and suggested in the SVG Tiny
     // recommendation (http://www.w3.org/TR/SVG11/struct.html#RequiredExtensionsAttribute).
-    if (extension == infra::Namespaces::MathML)
+    if (extension == infra::namespaces::MathML)
     {
       return true;
     }
-    return extension == infra::Namespaces::HTML;
+    return extension == infra::namespaces::HTML;
   }
 
   bool SVGTests::IsValid() const noexcept

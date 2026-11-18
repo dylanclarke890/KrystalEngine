@@ -77,7 +77,7 @@ namespace krys::boo::html::mixins
       }
     }
     if (localName == u8"a"
-        && (namespaceURI == infra::Namespaces::SVG || namespaceURI == infra::Namespaces::MathML))
+        && (namespaceURI == infra::namespaces::SVG || namespaceURI == infra::namespaces::MathML))
     {
       return 0;
     }

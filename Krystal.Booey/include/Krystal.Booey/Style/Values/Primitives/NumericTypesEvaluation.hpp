@@ -39,7 +39,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
 #pragma region Length
 
@@ -115,13 +115,13 @@ namespace krys::boo::style
   template <typename Result>
   struct Evaluation<Ref<calc::Value>, Result>
   {
-    KRYS_NODISCARD Result operator()(Ref<calc::Value> calculation, Result referenceLength,
+    KRYS_NODISCARD Result operator()(const Ref<calc::Value> &calculation, Result referenceLength,
                                      ZoomFactor usedZoom) noexcept
     {
       return Result(calculation->Evaluate(referenceLength, usedZoom));
     }
 
-    KRYS_NODISCARD Result operator()(Ref<calc::Value> calculation, Result referenceLength,
+    KRYS_NODISCARD Result operator()(const Ref<calc::Value> &calculation, Result referenceLength,
                                      ZoomNeeded token) noexcept
     {
       return Result(calculation->Evaluate(referenceLength, token));

@@ -354,7 +354,7 @@ namespace krys::boo::html
       }
 
       auto &adjustedCurrentNode = AdjustedCurrentNode();
-      return adjustedCurrentNode.NamespaceURI() != infra::Namespaces::HTML;
+      return adjustedCurrentNode.NamespaceURI() != infra::namespaces::HTML;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#reset-the-insertion-mode-appropriately

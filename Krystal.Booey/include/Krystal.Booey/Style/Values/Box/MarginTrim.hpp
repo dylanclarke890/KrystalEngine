@@ -50,7 +50,7 @@ namespace krys::boo::style
     {
     }
 
-    constexpr MarginTrim(css::keywords::None) noexcept : _value {}
+    constexpr MarginTrim(css::keywords::None) noexcept
     {
     }
 

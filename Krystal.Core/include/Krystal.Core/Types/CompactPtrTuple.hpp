@@ -50,9 +50,7 @@ namespace krys
       set(ptr);
     }
 
-    KRYS_ALWAYS_INLINE constexpr CompactPtr(const CompactPtr &other) noexcept : _ptr(other._ptr)
-    {
-    }
+    KRYS_ALWAYS_INLINE constexpr CompactPtr(const CompactPtr &other) noexcept = default;
 
     template <typename X>
     KRYS_ALWAYS_INLINE constexpr CompactPtr(const CompactPtr<X> &other) noexcept : _ptr(other._ptr)

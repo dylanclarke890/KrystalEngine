@@ -80,15 +80,15 @@ namespace krys::boo::dom::tests
     SECTION("HTML, SVG and MathML elements have an inline style")
     {
       auto html = document->CreateElement(u8"div").ReleaseValue();
-      auto svg = document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
-      auto math = document->CreateElementNS(infra::Namespaces::MathML, u8"math").ReleaseValue();
+      auto svg = document->CreateElementNS(infra::namespaces::SVG, u8"svg").ReleaseValue();
+      auto math = document->CreateElementNS(infra::namespaces::MathML, u8"math").ReleaseValue();
 
       REQUIRE(Is<StyledElement>(static_cast<Node &>(*html)));
       REQUIRE(Is<StyledElement>(static_cast<Node &>(*svg)));
       REQUIRE(Is<StyledElement>(static_cast<Node &>(*math)));
       REQUIRE(Is<svg::SVGElement>(static_cast<Node &>(*svg)));
       REQUIRE(Is<mathml::MathMLElement>(static_cast<Node &>(*math)));
-      REQUIRE(math->NamespaceURI() == infra::Namespaces::MathML);
+      REQUIRE(math->NamespaceURI() == infra::namespaces::MathML);
       REQUIRE(math->LocalName() == u8"math");
     }
 

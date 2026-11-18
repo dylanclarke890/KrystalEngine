@@ -25,7 +25,7 @@ namespace krys::boo::style::tests
 namespace krys::boo::css
 {
   template <>
-  constexpr bool TreatAsVariantLike<style::tests::ConversionTestSize> = true;
+  constexpr inline bool TreatAsVariantLike<style::tests::ConversionTestSize> = true;
 }
 
 namespace krys::boo::style::tests
@@ -33,7 +33,7 @@ namespace krys::boo::style::tests
   using css::PropertyId;
   using css::UnitType;
   using css::ValueId;
-  using namespace css::Literals;
+  using namespace css::literals;
 
   TEST_CASE_METHOD(BuilderFixture, "CSSValueConversion: strings and identifiers",
                    "[Style][CSSValueConversion]")

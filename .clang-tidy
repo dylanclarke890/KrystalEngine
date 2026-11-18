@@ -1,5 +1,4 @@
 ---
-# Krystal's conventions (see CLAUDE.md). Kept deliberately small: add checks as the code is brought in line.
 Checks: >
   -*,
   bugprone-assert-side-effect,
@@ -144,6 +143,8 @@ CheckOptions:
   # recognise std::move and can't be configured, so clang-analyzer-cplusplus.Move (which follows the
   # move itself, not the function's name) catches uses after krys::move.
   cppcoreguidelines-rvalue-reference-param-not-moved.MoveFunction: '::krys::move'
+  # Moving a member out counts as consuming the parameter (std::get(variant &&) and the like).
+  cppcoreguidelines-rvalue-reference-param-not-moved.AllowPartialMove: true
   clang-analyzer-cplusplus.Move:WarnOn: All
 
   # Iterators are cheap to copy and conventionally by value. The check's move fixes insert std::move:

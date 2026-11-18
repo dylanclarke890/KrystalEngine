@@ -417,8 +417,8 @@ namespace krys::boo
   private:
     KRYS_NODISCARD bool Equals(const FilterOperation &) const noexcept override;
 
-    DropShadowFilterOperation(const IntPoint &location, int stdDeviation, const Color &color) noexcept
-        : DropShadowFilterOperationBase(Type::DropShadow, location, stdDeviation), _color(color)
+    DropShadowFilterOperation(const IntPoint &location, int stdDeviation, Color color) noexcept
+        : DropShadowFilterOperationBase(Type::DropShadow, location, stdDeviation), _color(krys::move(color))
     {
     }
 

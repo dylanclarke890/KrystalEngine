@@ -60,7 +60,7 @@ namespace krys::boo::style
     uint32 _canMatchPseudoElement : 1;
     uint32 _propertyAllowlist : 3;
     uint32 _usedRuleTypes : 1;
-    uint32 _isEnabled : 1;
+    uint32 _isEnabled : 1 {true};
     // If we have more rules than 2^bitcount here we'll get confused about rule order.
     uint32 _position : 21;
     css::SelectorFilter::Hashes _descendantSelectorIdentifierHashes;

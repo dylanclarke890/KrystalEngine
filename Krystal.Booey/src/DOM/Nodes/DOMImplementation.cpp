@@ -51,12 +51,12 @@ namespace krys::boo::dom
     Ref<XMLDocument> document = [&] -> Ref<XMLDocument>
     {
       RefPtr<XMLDocument> doc = nullptr;
-      if (namespaceUri == infra::Namespaces::HTML)
+      if (namespaceUri == infra::namespaces::HTML)
       {
         doc = CreateRefPtr<XHTMLDocument>();
         doc->_contentType = u8"application/xhtml+xml";
       }
-      else if (namespaceUri == infra::Namespaces::SVG)
+      else if (namespaceUri == infra::namespaces::SVG)
       {
         doc = CreateRefPtr<svg::SVGDocument>();
         doc->_contentType = u8"image/svg+xml";
@@ -130,7 +130,7 @@ namespace krys::boo::dom
     }
 
     // 5. Append the result of creating an element given doc, "html", and the HTML namespace, to doc.
-    auto htmlElement = ElementFactory::Create(*document, {infra::Namespaces::HTML, null, u8"html"});
+    auto htmlElement = ElementFactory::Create(*document, {infra::namespaces::HTML, null, u8"html"});
     if (auto appendResult = document->AppendChild(*htmlElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
@@ -139,7 +139,7 @@ namespace krys::boo::dom
     // 6. Append the result of creating an element given doc, "head", and the HTML namespace, to the html
     // element
     //    created earlier.
-    auto headElement = ElementFactory::Create(*document, {infra::Namespaces::HTML, null, u8"head"});
+    auto headElement = ElementFactory::Create(*document, {infra::namespaces::HTML, null, u8"head"});
     if (auto appendResult = htmlElement->AppendChild(*headElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
@@ -150,7 +150,7 @@ namespace krys::boo::dom
     {
       // 7a. Append the result of creating an element given doc, "title", and the HTML namespace, to the head
       //     element created earlier.
-      auto titleElement = ElementFactory::Create(*document, {infra::Namespaces::HTML, null, u8"title"});
+      auto titleElement = ElementFactory::Create(*document, {infra::namespaces::HTML, null, u8"title"});
       if (auto appendResult = headElement->AppendChild(*titleElement); appendResult.HasException())
       {
         return appendResult.ReleaseException();
@@ -171,7 +171,7 @@ namespace krys::boo::dom
     // 8. Append the result of creating an element given doc, "body", and the HTML namespace, to the html
     // element
     //    created earlier.
-    auto bodyElement = ElementFactory::Create(*document, {infra::Namespaces::HTML, null, u8"body"});
+    auto bodyElement = ElementFactory::Create(*document, {infra::namespaces::HTML, null, u8"body"});
     if (auto appendResult = htmlElement->AppendChild(*bodyElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();

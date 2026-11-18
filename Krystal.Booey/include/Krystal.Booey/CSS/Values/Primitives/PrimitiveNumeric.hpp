@@ -112,19 +112,13 @@ namespace krys::boo::css
 
     // MARK: Copy/Move Construction/Assignment
 
-    constexpr PrimitiveNumeric(const PrimitiveNumeric &other) noexcept : _data {other._data}
-    {
-    }
+    constexpr PrimitiveNumeric(const PrimitiveNumeric &other) noexcept = default;
 
     constexpr PrimitiveNumeric(PrimitiveNumeric &&other) noexcept : _data {krys::move(other._data)}
     {
     }
 
-    constexpr PrimitiveNumeric &operator=(const PrimitiveNumeric &other) noexcept
-    {
-      _data = other._data;
-      return *this;
-    }
+    constexpr PrimitiveNumeric &operator=(const PrimitiveNumeric &other) noexcept = default;
 
     constexpr PrimitiveNumeric &operator=(PrimitiveNumeric &&other) noexcept
     {
@@ -344,40 +338,40 @@ namespace krys::boo::css
 #pragma region TreatAsVariantLike Specializations
 
   template <typename Raw>
-  constexpr auto TreatAsVariantLike<PrimitiveNumeric<Raw>> = true;
+  constexpr inline auto TreatAsVariantLike<PrimitiveNumeric<Raw>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<Integer<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<Integer<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<Number<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<Number<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<Percentage<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<Percentage<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<Angle<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<Angle<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<Length<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<Length<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<Time<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<Time<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<Frequency<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<Frequency<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<Resolution<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<Resolution<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<Flex<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<Flex<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<AnglePercentage<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<AnglePercentage<R, V>> = true;
 
   template <auto R, typename V>
-  constexpr auto TreatAsVariantLike<LengthPercentage<R, V>> = true;
+  constexpr inline auto TreatAsVariantLike<LengthPercentage<R, V>> = true;
 
 #pragma endregion
 }

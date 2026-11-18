@@ -22,7 +22,7 @@ namespace krys::boo::svg::tests
       u8R"html(<defs><foreignObject id=hidden width=10 height=10><div id=hd></div></foreignObject></defs>)html"
       u8R"html(</svg></body>)html");
     // The parser makes HTML elements in a foreign object, unless they're in an <svg>.
-    auto rect = fixture.Document->CreateElementNS(infra::Namespaces::SVG, u8"rect");
+    auto rect = fixture.Document->CreateElementNS(infra::namespaces::SVG, u8"rect");
     REQUIRE_FALSE(rect.HasException());
     (void)fixture.ById(u8"fo").AppendChild(*rect.ReleaseValue());
     (void)fixture.Document->UpdateLayout();

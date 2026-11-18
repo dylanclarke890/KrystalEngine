@@ -61,8 +61,8 @@ namespace krys::boo
 
     uint8 HasAutoSpecifiedZIndex : 1;
     uint8 HasAutoUsedZIndex : 1;
-    uint8 BoxSizing : 1;
-    uint8 BoxDecorationBreak : 1;
+    uint8 BoxSizing : 1 {static_cast<uint8>(boo::BoxSizing::ContentBox)};
+    uint8 BoxDecorationBreak : 1 {static_cast<uint8>(boo::BoxDecorationBreak::Slice)};
 
     style::ZIndex::Value SpecifiedZIndexValue;
     style::ZIndex::Value UsedZIndexValue;

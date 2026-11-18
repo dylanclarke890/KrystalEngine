@@ -272,7 +272,7 @@ namespace krys::boo::dom
   {
     // 1. If element is in the HTML namespace and its node document is an HTML document, then set
     //    qualifiedName to qualifiedName in ASCII lowercase.
-    if (element.NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(element.NodeDocument()))
+    if (element.NamespaceURI() == infra::namespaces::HTML && Is<HTMLDocument>(element.NodeDocument()))
     {
       qualifiedName = qualifiedName.ToASCIILower();
     }
@@ -415,7 +415,7 @@ namespace krys::boo::dom
                                                         html::CustomElementRegistry *registry) noexcept
   {
     // 1. If element's namespace is not the HTML namespace, then throw a "NotSupportedError" DOMException.
-    if (element.NamespaceURI() != infra::Namespaces::HTML)
+    if (element.NamespaceURI() != infra::namespaces::HTML)
     {
       return Exception {ExceptionCode::NotSupportedError};
     }

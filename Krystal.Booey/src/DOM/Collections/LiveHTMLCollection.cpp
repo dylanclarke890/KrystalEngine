@@ -117,7 +117,7 @@ namespace krys::boo::dom
         {
           _namedItems.try_emplace(DOMString(id), element);
         }
-        if (element->NamespaceURI() == infra::Namespaces::HTML)
+        if (element->NamespaceURI() == infra::namespaces::HTML)
         {
           if (auto elementName = ElementAlgorithms::GetAttributeValue(*element, u8"name");
               !elementName.empty())
@@ -174,7 +174,7 @@ namespace krys::boo::dom
       // 2b. If element is in the HTML namespace and has a name attribute whose value is neither the empty
       // string
       //     nor is in result, append element's name attribute value to result.
-      if (element.NamespaceURI() == infra::Namespaces::HTML)
+      if (element.NamespaceURI() == infra::namespaces::HTML)
       {
         auto name = ElementAlgorithms::GetAttributeValue(element, u8"name");
         if (!name.empty() && !std::ranges::contains(supportedNames, name))

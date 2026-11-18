@@ -260,7 +260,7 @@ namespace krys::boo::infra
 
     /// @see https://infra.spec.whatwg.org/#string-concatenate
     KRYS_NODISCARD static dom::DOMString Concatenate(Span<dom::DOMString> tokens,
-                                                     Maybe<dom::DOMString> separator) noexcept
+                                                     const Maybe<dom::DOMString> &separator) noexcept
     {
       // 1. If list is empty, then return the empty string.
       if (tokens.empty())

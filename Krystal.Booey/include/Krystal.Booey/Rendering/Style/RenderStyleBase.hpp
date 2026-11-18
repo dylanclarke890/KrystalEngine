@@ -187,7 +187,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasCachedPseudoStyles() const noexcept
     {
-      return _computedStyle._cachedPseudoStyles && _computedStyle._cachedPseudoStyles->Styles.size();
+      return _computedStyle._cachedPseudoStyles && !_computedStyle._cachedPseudoStyles->Styles.empty();
     }
 
     const style::PseudoStyleCache *CachedPseudoStyles() const

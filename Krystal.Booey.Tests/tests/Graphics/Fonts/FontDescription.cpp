@@ -228,14 +228,14 @@ namespace krys::boo::tests
 
     SECTION("families")
     {
-      description.SetOneFamily(css::GenericFontFamilyNames::MonospaceFamily());
+      description.SetOneFamily(css::generic_font_family_names::MonospaceFamily());
       CHECK(description.UseFixedDefaultSize());
       description.SetFamilies(
-        List<StringAtom> {StringAtom {u8"Arial"}, css::GenericFontFamilyNames::SerifFamily()});
+        List<StringAtom> {StringAtom {u8"Arial"}, css::generic_font_family_names::SerifFamily()});
       CHECK_FALSE(description.UseFixedDefaultSize());
       CHECK(description.FamilyCount() == 2);
       CHECK(description.EffectiveFamilyCount() == 2);
-      CHECK(description.EffectiveFamilyAt(1) == css::GenericFontFamilyNames::SerifFamily());
+      CHECK(description.EffectiveFamilyAt(1) == css::generic_font_family_names::SerifFamily());
 
       CHECK(FontCascadeDescription::FamilyNamesAreEqual(u8"Arial", u8"aRIAL"));
       CHECK_FALSE(FontCascadeDescription::FamilyNamesAreEqual(u8"Arial", u8"Arial2"));

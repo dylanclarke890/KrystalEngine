@@ -78,7 +78,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const SVGPathData &) const noexcept = default;
 
   private:
-    Maybe<PathFunction> _path {};
+    Maybe<PathFunction> _path;
   };
 
   // MARK: - Conversion

@@ -31,7 +31,7 @@ namespace krys::boo::svg::tests
           == PropertyId::TransformOrigin);
     CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"d", null) == PropertyId::D);
     CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"href", null) == PropertyId::Invalid);
-    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"fill", infra::Namespaces::XLink)
+    CHECK(SVGElement::CssPropertyIdForSVGAttributeName(u8"fill", infra::namespaces::XLink)
           == PropertyId::Invalid);
 
     auto document =

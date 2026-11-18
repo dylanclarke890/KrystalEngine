@@ -42,7 +42,7 @@ namespace krys::boo::style
     {
     }
 
-    constexpr TextAutospace(css::keywords::NoAutospace) noexcept : _value {}
+    constexpr TextAutospace(css::keywords::NoAutospace) noexcept
     {
     }
 

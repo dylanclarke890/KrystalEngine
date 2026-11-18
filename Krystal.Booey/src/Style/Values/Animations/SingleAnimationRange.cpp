@@ -34,7 +34,7 @@
 
 namespace krys::boo::style
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   SingleAnimationRangeLength SingleAnimationRangeLength::DefaultValue(SingleAnimationRangeType type) noexcept
   {

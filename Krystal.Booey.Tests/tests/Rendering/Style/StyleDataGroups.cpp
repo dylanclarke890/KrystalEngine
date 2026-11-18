@@ -13,7 +13,7 @@
 
 namespace krys::boo::tests
 {
-  using namespace css::Literals;
+  using namespace css::literals;
   using style::ComputedStyle;
 
   TEST_CASE("Style data groups: initial values", "[Rendering][Style]")

@@ -305,15 +305,15 @@ namespace krys::boo::html
         config.Elements.emplace();
         for (auto &element : DefaultHTMLElements)
         {
-          config.Elements->push_back(DefaultSanitizerElement(element, infra::Namespaces::HTML));
+          config.Elements->push_back(DefaultSanitizerElement(element, infra::namespaces::HTML));
         }
         for (auto &element : DefaultMathMLElements)
         {
-          config.Elements->push_back(DefaultSanitizerElement(element, infra::Namespaces::MathML));
+          config.Elements->push_back(DefaultSanitizerElement(element, infra::namespaces::MathML));
         }
         for (auto &element : DefaultSVGElements)
         {
-          config.Elements->push_back(DefaultSanitizerElement(element, infra::Namespaces::SVG));
+          config.Elements->push_back(DefaultSanitizerElement(element, infra::namespaces::SVG));
         }
         return config;
       }()};
@@ -339,8 +339,8 @@ namespace krys::boo::html
                                                                 u8"iframe",
                                                                 u8"object",
                                                                 u8"script",
-                                                                {u8"script", infra::Namespaces::SVG},
-                                                                {u8"use", infra::Namespaces::SVG},
+                                                                {u8"script", infra::namespaces::SVG},
+                                                                {u8"use", infra::namespaces::SVG},
                                                               };
                                                             config.RemoveAttributes.emplace();
                                                             return config;
@@ -352,8 +352,8 @@ namespace krys::boo::html
   {
     static NeverDestroyed<List<SanitizerElementNamespace>> elements {List<SanitizerElementNamespace> {
       u8"html",
-      {u8"svg", infra::Namespaces::SVG},
-      {u8"math", infra::Namespaces::MathML},
+      {u8"svg", infra::namespaces::SVG},
+      {u8"math", infra::namespaces::MathML},
     }};
     return elements.get();
   }
@@ -362,9 +362,9 @@ namespace krys::boo::html
                                                     const SanitizerAttributeNamespace &attribute) noexcept
   {
     dom::DOMStringAtom none = null;
-    auto xlink = dom::DOMStringAtom(infra::Namespaces::XLink);
-    using infra::Namespaces::HTML;
-    using infra::Namespaces::SVG;
+    auto xlink = dom::DOMStringAtom(infra::namespaces::XLink);
+    using infra::namespaces::HTML;
+    using infra::namespaces::SVG;
 
     // The built-in navigating URL attributes list corresponds to all HTML elements marked with
     // navigating URL attributes in their normative definitions, as well as the element-attribute pairs
@@ -382,7 +382,7 @@ namespace krys::boo::html
                                                    const SanitizerAttributeNamespace &attribute) noexcept
   {
     dom::DOMStringAtom none = null;
-    using infra::Namespaces::SVG;
+    using infra::namespaces::SVG;
     return IsSanitizerPair(element, attribute, u8"animate", SVG, u8"attributeName", none)
            || IsSanitizerPair(element, attribute, u8"animateTransform", SVG, u8"attributeName", none)
            || IsSanitizerPair(element, attribute, u8"set", SVG, u8"attributeName", none);

@@ -124,7 +124,7 @@ namespace krys::boo
     /// @brief Only use fixed default size when there is only one font family, and that family is "monospace".
     KRYS_NODISCARD bool UseFixedDefaultSize() const noexcept
     {
-      return FamilyCount() == 1 && FirstFamily() == css::GenericFontFamilyNames::MonospaceFamily();
+      return FamilyCount() == 1 && FirstFamily() == css::generic_font_family_names::MonospaceFamily();
     }
 
     KRYS_NODISCARD boo::Kerning GetKerning() const noexcept

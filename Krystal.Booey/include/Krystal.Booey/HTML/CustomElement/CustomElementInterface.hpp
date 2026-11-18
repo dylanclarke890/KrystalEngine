@@ -87,7 +87,7 @@ namespace krys::boo::html
 
     ~CustomElementInterface() noexcept;
 
-    KRYS_NODISCARD static Ref<CustomElementInterface> Create(dom::DOMStringAtom localName,
+    KRYS_NODISCARD static Ref<CustomElementInterface> Create(const dom::DOMStringAtom &localName,
                                                              CustomElementFactory &&factory,
                                                              CustomElementOptions options) noexcept
     {
@@ -126,7 +126,7 @@ namespace krys::boo::html
 
     void InvokeFormDisabledCallback(dom::Element &element, bool isDisabled) noexcept;
 
-    KRYS_NODISCARD bool ObservesAttribute(dom::DOMStringAtom name) const noexcept
+    KRYS_NODISCARD bool ObservesAttribute(const dom::DOMStringAtom &name) const noexcept
     {
       return _observedAttributes.contains(name);
     }

@@ -46,7 +46,7 @@
 
 namespace krys::boo::css::parse_property
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   template <ValueId Name, typename T>
   KRYS_NODISCARD static BasicShape ToBasicShape(T parameters) noexcept

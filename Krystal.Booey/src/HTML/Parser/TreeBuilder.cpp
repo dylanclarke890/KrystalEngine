@@ -103,7 +103,7 @@ namespace krys::boo::html
     }
 
     auto &adjustedCurrentNode = AdjustedCurrentNode();
-    if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::HTML)
+    if (adjustedCurrentNode.NamespaceURI() == infra::namespaces::HTML)
     {
       return true;
     }
@@ -124,7 +124,7 @@ namespace krys::boo::html
       }
     }
 
-    if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::MathML
+    if (adjustedCurrentNode.NamespaceURI() == infra::namespaces::MathML
         && adjustedCurrentNode.LocalName() == u8"annotation-xml" && token.Type() == TokenType::StartTag
         && token.Name() == u8"svg")
     {
@@ -189,7 +189,7 @@ namespace krys::boo::html
         }
 
         if (!IsMathMLTextIntegrationPoint(currentNode) && !IsHTMLIntegrationPoint(currentNode)
-            && currentNode.NamespaceURI() != infra::Namespaces::HTML)
+            && currentNode.NamespaceURI() != infra::namespaces::HTML)
         {
           _openElementStack.Pop();
           continue;
@@ -310,11 +310,11 @@ namespace krys::boo::html
         }
 
         auto &adjustedCurrentNode = AdjustedCurrentNode();
-        if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::MathML)
+        if (adjustedCurrentNode.NamespaceURI() == infra::namespaces::MathML)
         {
           AdjustMathMLAttributes(token);
         }
-        else if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::SVG)
+        else if (adjustedCurrentNode.NamespaceURI() == infra::namespaces::SVG)
         {
           constexpr static Array<Array<dom::DOMStringView, 2uz>, 37uz> svgTagNameAdjustments = {
             Array<dom::DOMStringView, 2uz> {u8"altglyph", u8"altGlyph"},
@@ -435,7 +435,7 @@ namespace krys::boo::html
           ++nodeIt;
 
           // 6. If node is not an element in the HTML namespace, return to the step labeled loop.
-          if (nodeIt->Element().NamespaceURI() != infra::Namespaces::HTML)
+          if (nodeIt->Element().NamespaceURI() != infra::namespaces::HTML)
           {
             continue;
           }
@@ -742,7 +742,7 @@ namespace krys::boo::html
       {
         if (token.Name() == u8"html")
         {
-          auto html = CreateElement(token.Name(), infra::Namespaces::HTML, token.Attributes(), _document);
+          auto html = CreateElement(token.Name(), infra::namespaces::HTML, token.Attributes(), _document);
           _document.AppendChild(*html);
           _openElementStack.Push({TagName::html, Namespace::HTML, *html, krys::move(token.Attributes())});
 
@@ -766,7 +766,7 @@ namespace krys::boo::html
     }
 
     auto html = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML));
+      _document, dom::QualifiedName(infra::namespaces::HTML, null, u8"html", TagName::html, Namespace::HTML));
     _document.AppendChild(*html);
     _openElementStack.Push({TagName::html, Namespace::HTML, *html, {}});
 
@@ -834,7 +834,7 @@ namespace krys::boo::html
     }
 
     _head = Downcast<HTMLHeadElement>(
-      dom::ElementFactory::Create(_document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"head",
+      dom::ElementFactory::Create(_document, dom::QualifiedName(infra::namespaces::HTML, null, u8"head",
                                                                 TagName::head, Namespace::HTML)));
     InsertElementAtAdjustedInsertionLocation(*_head);
     _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
@@ -940,7 +940,7 @@ namespace krys::boo::html
           {
             auto adjustedInsertionLocation = AppropriatePlaceToInsertNode();
 
-            auto element = CreateElement(token.Name(), infra::Namespaces::HTML, token.Attributes(),
+            auto element = CreateElement(token.Name(), infra::namespaces::HTML, token.Attributes(),
                                          *adjustedInsertionLocation.Parent);
             auto &script = Downcast<HTMLScriptElement>(*element);
 
@@ -1254,7 +1254,7 @@ namespace krys::boo::html
     }
 
     auto body = dom::ElementFactory::Create(
-      _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"body", TagName::body, Namespace::HTML));
+      _document, dom::QualifiedName(infra::namespaces::HTML, null, u8"body", TagName::body, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*body);
     _openElementStack.Push({TagName::body, Namespace::HTML, *body, {}});
 
@@ -1943,7 +1943,7 @@ namespace krys::boo::html
             ReconstructActiveFormattingElements();
             AdjustMathMLAttributes(token);
             AdjustForeignAttributes(token);
-            InsertForeignElement(token, infra::Namespaces::MathML, false);
+            InsertForeignElement(token, infra::namespaces::MathML, false);
 
             if (token.IsSelfClosing())
             {
@@ -1958,7 +1958,7 @@ namespace krys::boo::html
             ReconstructActiveFormattingElements();
             AdjustSVGAttributes(token);
             AdjustForeignAttributes(token);
-            InsertForeignElement(token, infra::Namespaces::SVG, false);
+            InsertForeignElement(token, infra::namespaces::SVG, false);
 
             if (token.IsSelfClosing())
             {
@@ -2129,7 +2129,7 @@ namespace krys::boo::html
               ParseError(token);
               auto pElement = dom::ElementFactory::Create(
                 _document,
-                dom::QualifiedName(infra::Namespaces::HTML, null, u8"p", TagName::p, Namespace::HTML));
+                dom::QualifiedName(infra::namespaces::HTML, null, u8"p", TagName::p, Namespace::HTML));
               InsertElementAtAdjustedInsertionLocation(*pElement);
               _openElementStack.Push({TagName::p, Namespace::HTML, *pElement, {}});
             }
@@ -2406,7 +2406,7 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableContext();
 
             auto colgroup = dom::ElementFactory::Create(
-              _document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"colgroup", TagName::colgroup,
+              _document, dom::QualifiedName(infra::namespaces::HTML, null, u8"colgroup", TagName::colgroup,
                                             Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*colgroup);
             _openElementStack.Push({TagName::colgroup, Namespace::HTML, *colgroup, {}});
@@ -2434,7 +2434,7 @@ namespace krys::boo::html
 
             auto tbody = dom::ElementFactory::Create(
               _document,
-              dom::QualifiedName(infra::Namespaces::HTML, null, u8"tbody", TagName::tbody, Namespace::HTML));
+              dom::QualifiedName(infra::namespaces::HTML, null, u8"tbody", TagName::tbody, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tbody);
             _openElementStack.Push({TagName::tbody, Namespace::HTML, *tbody, {}});
 
@@ -2845,7 +2845,7 @@ namespace krys::boo::html
             _openElementStack.PopUntilTableBodyContext();
 
             auto tr =
-              dom::ElementFactory::Create(_document, dom::QualifiedName(infra::Namespaces::HTML, null, u8"tr",
+              dom::ElementFactory::Create(_document, dom::QualifiedName(infra::namespaces::HTML, null, u8"tr",
                                                                         TagName::tr, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tr);
             _openElementStack.Push({TagName::tr, Namespace::HTML, *tr, {}});
@@ -4133,7 +4133,7 @@ namespace krys::boo::html
 
     // 8. Let template be the result of creating an element for the token given templateStartTag, the HTML
     //    namespace, and the target parent of the appropriate place for inserting a node.
-    auto element = CreateElement(templateStartTag.Name(), infra::Namespaces::HTML,
+    auto element = CreateElement(templateStartTag.Name(), infra::namespaces::HTML,
                                  templateStartTag.Attributes(), *AppropriatePlaceToInsertNode().Parent);
     auto &templateElement = Downcast<HTMLTemplateElement>(*element);
 
@@ -4356,7 +4356,7 @@ namespace krys::boo::html
 
   Ref<dom::Element> TreeBuilder::InsertHTMLElement(TokenAtom &token) noexcept
   {
-    return InsertForeignElement(token, infra::Namespaces::HTML, false);
+    return InsertForeignElement(token, infra::namespaces::HTML, false);
   }
 
   void TreeBuilder::InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position) noexcept
@@ -4558,26 +4558,26 @@ namespace krys::boo::html
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXML))
         {
-          namespaceUri = infra::Namespaces::XML;
-          prefix = infra::NamespacePrefixes::XML;
+          namespaceUri = infra::namespaces::XML;
+          prefix = infra::namespace_prefixes::XML;
           prefixLength = 4uz; // xml + :
         }
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXLink))
         {
-          namespaceUri = infra::Namespaces::XLink;
-          prefix = infra::NamespacePrefixes::XLink;
+          namespaceUri = infra::namespaces::XLink;
+          prefix = infra::namespace_prefixes::XLink;
           prefixLength = 6uz; // xlink + :
         }
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXMLNS))
         {
-          namespaceUri = infra::Namespaces::XMLNS;
+          namespaceUri = infra::namespaces::XMLNS;
 
           // xmlns:xlink has the xmlns prefix; xmlns has none.
           if (HasFlag(attr.Flags, ParsedAttributeFlags::HasPrefix))
           {
-            prefix = infra::NamespacePrefixes::XMLNS;
+            prefix = infra::namespace_prefixes::XMLNS;
             prefixLength = 6uz; // xmlns + :
           }
         }
@@ -5398,7 +5398,7 @@ namespace krys::boo::html
 
   bool TreeBuilder::IsMathMLTextIntegrationPoint(const dom::Element &element) const noexcept
   {
-    if (element.NamespaceURI() == infra::Namespaces::MathML)
+    if (element.NamespaceURI() == infra::namespaces::MathML)
     {
       auto name = ParseTagName(element.LocalName().View());
       switch (name)
@@ -5419,7 +5419,7 @@ namespace krys::boo::html
 
   bool TreeBuilder::IsHTMLIntegrationPoint(const dom::Element &element) const noexcept
   {
-    if (element.NamespaceURI() == infra::Namespaces::MathML)
+    if (element.NamespaceURI() == infra::namespaces::MathML)
     {
       if (element.LocalName() == u8"annotation-xml")
       {
@@ -5437,7 +5437,7 @@ namespace krys::boo::html
         return false;
       }
     }
-    else if (element.NamespaceURI() == infra::Namespaces::SVG)
+    else if (element.NamespaceURI() == infra::namespaces::SVG)
     {
       auto name = ParseTagName(element.LocalName().View());
       switch (name)

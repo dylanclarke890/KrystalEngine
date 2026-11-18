@@ -14,7 +14,7 @@
 
 namespace krys::boo::style::tests
 {
-  using namespace css::Literals;
+  using namespace css::literals;
 
   namespace
   {

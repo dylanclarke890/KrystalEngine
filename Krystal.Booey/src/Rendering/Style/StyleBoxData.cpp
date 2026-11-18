@@ -35,8 +35,7 @@ namespace krys::boo
         VerticalAlign(style::ComputedStyle::InitialVerticalAlign()),
         HasAutoSpecifiedZIndex(static_cast<uint8>(style::ComputedStyle::InitialSpecifiedZIndex()._isAuto)),
         HasAutoUsedZIndex(static_cast<uint8>(style::ComputedStyle::InitialUsedZIndex()._isAuto)),
-        BoxSizing(static_cast<uint8>(boo::BoxSizing::ContentBox)),
-        BoxDecorationBreak(static_cast<uint8>(boo::BoxDecorationBreak::Slice)),
+
         SpecifiedZIndexValue(style::ComputedStyle::InitialSpecifiedZIndex()._value),
         UsedZIndexValue(style::ComputedStyle::InitialUsedZIndex()._value)
   {

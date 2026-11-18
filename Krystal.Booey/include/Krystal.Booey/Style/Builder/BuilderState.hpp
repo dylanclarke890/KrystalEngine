@@ -85,12 +85,12 @@ namespace krys::boo::style
 
   struct BuilderContext
   {
-    RefPtr<const dom::Document> Document {};
+    RefPtr<const dom::Document> Document;
     const RenderStyle *ParentStyle {};
     const RenderStyle *RootElementStyle {};
-    RefPtr<const dom::Element> Element {};
+    RefPtr<const dom::Element> Element;
     style::TreeResolutionState *TreeResolutionState {};
-    Maybe<BuilderPositionTryFallback> PositionTryFallback {};
+    Maybe<BuilderPositionTryFallback> PositionTryFallback;
   };
 
   class BuilderState : public CanMakeCheckedPtr<BuilderState>

@@ -68,7 +68,7 @@ namespace krys::boo::style
     };
 
     Type ChangeType;
-    InvalidationRuleSetVector InvalidationRuleSets {};
+    InvalidationRuleSetVector InvalidationRuleSets;
 
     void Append(DynamicMediaQueryEvaluationChanges &&other) noexcept
     {
@@ -116,8 +116,8 @@ namespace krys::boo::style
     struct CollectedMediaQueryChanges
     {
       bool RequiredFullReset {false};
-      List<size_t> ChangedQueryIndexes {};
-      List<List<Ref<const css::StyleRule>> *> AffectedRules {};
+      List<size_t> ChangedQueryIndexes;
+      List<List<Ref<const css::StyleRule>> *> AffectedRules;
     };
 
     struct CascadeLayer

@@ -51,7 +51,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("NumericRaw(dimensions)", "[CSS][Primitives][NumericRaw]")
   {
-    using namespace css::Literals;
+    using namespace css::literals;
 
     constexpr LengthRaw<> length {LengthUnit::Em, 2};
     STATIC_CHECK(length.Unit == LengthUnit::Em);
@@ -73,7 +73,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("NumericRaw(composites)", "[CSS][Primitives][NumericRaw]")
   {
-    using namespace css::Literals;
+    using namespace css::literals;
 
     constexpr LengthPercentageRaw<> percentage {PercentageUnit::Percentage, 50};
     STATIC_CHECK(percentage.Unit == LengthPercentageUnit::Percentage);
@@ -93,7 +93,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("NumericRaw(single unit)", "[CSS][Primitives][NumericRaw]")
   {
-    using namespace css::Literals;
+    using namespace css::literals;
 
     constexpr NumberRaw<> number {2.5};
     STATIC_CHECK(number.Value == 2.5);

@@ -155,8 +155,8 @@ namespace krys::boo::css
   template <typename... Ts>
   KRYS_NODISCARD bool RequiresConversionData(const Variant<Ts...> &component) noexcept
   {
-    return krys::SwitchOn(component,
-                          [&](auto alternative) -> bool { return RequiresConversionData(alternative); });
+    return krys::SwitchOn(component, [&](const auto &alternative) -> bool
+                          { return RequiresConversionData(alternative); });
   }
 
   template <typename T>
@@ -177,7 +177,7 @@ namespace krys::boo::css
   KRYS_NODISCARD constexpr bool IsUnevaluatedCalc(const Variant<Ts...> &component) noexcept
   {
     return krys::SwitchOn(component,
-                          [&](auto alternative) -> bool { return IsUnevaluatedCalc(alternative); });
+                          [&](const auto &alternative) -> bool { return IsUnevaluatedCalc(alternative); });
   }
 
   template <typename T>
@@ -208,7 +208,7 @@ namespace krys::boo::css
                                                         const ToLengthConversionData &conversionData,
                                                         const SymbolTable &symbolTable) noexcept
   {
-    return krys::SwitchOn(component, [&](auto alternative) -> Variant<Ts...>
+    return krys::SwitchOn(component, [&](const auto &alternative) -> Variant<Ts...>
                           { return SimplifyUnevaluatedCalc(alternative, conversionData, symbolTable); });
   }
 

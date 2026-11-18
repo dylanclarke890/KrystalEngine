@@ -53,7 +53,7 @@ namespace krys::boo::style
     constexpr static ContainValueEnumSet content {ContainValue::Layout, ContainValue::Style,
                                                   ContainValue::Paint};
 
-    constexpr Contain(css::keywords::None) noexcept : _value {}
+    constexpr Contain(css::keywords::None) noexcept
     {
     }
 

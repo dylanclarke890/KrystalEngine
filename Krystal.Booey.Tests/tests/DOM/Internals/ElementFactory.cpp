@@ -36,7 +36,7 @@ namespace krys::boo::dom::tests
 
     SECTION("An uppercase name in the HTML namespace is unknown")
     {
-      auto element = document->CreateElementNS(infra::Namespaces::HTML, u8"DIV");
+      auto element = document->CreateElementNS(infra::namespaces::HTML, u8"DIV");
       REQUIRE_FALSE(element.HasException());
       auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element.Value());
       REQUIRE(htmlElement != nullptr);
@@ -45,7 +45,7 @@ namespace krys::boo::dom::tests
 
     SECTION("A lowercase name in the HTML namespace is its element")
     {
-      auto element = document->CreateElementNS(infra::Namespaces::HTML, u8"div");
+      auto element = document->CreateElementNS(infra::namespaces::HTML, u8"div");
       REQUIRE_FALSE(element.HasException());
       auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element.Value());
       REQUIRE(htmlElement != nullptr);
@@ -75,10 +75,10 @@ namespace krys::boo::dom::tests
     SECTION("The namespace, prefix, local name and registry it's given")
     {
       auto element =
-        ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, u8"h", u8"div"}, null,
+        ElementFactory::Create(*document, QualifiedName {infra::namespaces::HTML, u8"h", u8"div"}, null,
                                false, RefPtr<html::CustomElementRegistry>(registry));
       CHECK(ElementIs<html::HTMLDivElement, html::HTMLElement>(*element));
-      CHECK(element->NamespaceURI() == infra::Namespaces::HTML);
+      CHECK(element->NamespaceURI() == infra::namespaces::HTML);
       CHECK(element->Prefix() == u8"h");
       CHECK(element->LocalName() == u8"div");
       CHECK(element->CustomElementRegistry() == registry);
@@ -93,19 +93,19 @@ namespace krys::boo::dom::tests
     {
       document->SetCustomElementRegistry(RefPtr<html::CustomElementRegistry>(registry));
       auto element =
-        ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, null, u8"div"});
+        ElementFactory::Create(*document, QualifiedName {infra::namespaces::HTML, null, u8"div"});
       CHECK(element->CustomElementRegistry() == registry);
     }
 
     SECTION("A valid custom element name in the HTML namespace is undefined")
     {
       auto element =
-        ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, null, u8"x-a"});
+        ElementFactory::Create(*document, QualifiedName {infra::namespaces::HTML, null, u8"x-a"});
       CHECK(element->GetCustomElementState() == CustomElementState::Undefined);
       CHECK_FALSE(ElementAlgorithms::IsDefined(*element));
       CHECK_FALSE(ElementAlgorithms::IsCustom(*element));
 
-      auto svg = ElementFactory::Create(*document, QualifiedName {infra::Namespaces::SVG, null, u8"x-a"});
+      auto svg = ElementFactory::Create(*document, QualifiedName {infra::namespaces::SVG, null, u8"x-a"});
       CHECK(ElementIs<svg::SVGUnknownElement, svg::SVGElement>(*svg));
       CHECK(svg->GetCustomElementState() == CustomElementState::Uncustomized);
     }
@@ -113,9 +113,9 @@ namespace krys::boo::dom::tests
     SECTION("Unknown names give the namespace's unknown element, or Element")
     {
       CHECK(ElementIs<html::HTMLUnknownElement, html::HTMLElement>(
-        *ElementFactory::Create(*document, QualifiedName {infra::Namespaces::HTML, null, u8"nope"})));
+        *ElementFactory::Create(*document, QualifiedName {infra::namespaces::HTML, null, u8"nope"})));
       CHECK(ElementIs<mathml::MathMLUnknownElement, mathml::MathMLElement>(
-        *ElementFactory::Create(*document, QualifiedName {infra::Namespaces::MathML, null, u8"nope"})));
+        *ElementFactory::Create(*document, QualifiedName {infra::namespaces::MathML, null, u8"nope"})));
       auto element = ElementFactory::Create(*document, QualifiedName {u8"urn:x", null, u8"nope"});
       CHECK_FALSE(Is<html::HTMLElement>(*element));
       CHECK(element->NamespaceURI() == u8"urn:x");
@@ -130,7 +130,7 @@ namespace krys::boo::dom::tests
     auto create = [&](dom::DOMStringAtom localName)
     {
       return ElementFactory::Create(*document,
-                                    QualifiedName {infra::Namespaces::HTML, null, krys::move(localName)});
+                                    QualifiedName {infra::namespaces::HTML, null, krys::move(localName)});
     };
 
     for (auto name :

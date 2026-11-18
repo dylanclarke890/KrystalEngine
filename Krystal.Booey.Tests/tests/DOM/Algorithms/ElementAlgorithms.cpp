@@ -31,7 +31,7 @@ namespace krys::boo::dom::tests
       List<AttributeChange> Changes;
 
       explicit AttributeChangeRecordingElement(dom::Document &document) noexcept
-          : Element(document, {infra::Namespaces::HTML, null, u8"test-element"}, NodeFlags::None)
+          : Element(document, {infra::namespaces::HTML, null, u8"test-element"}, NodeFlags::None)
       {
       }
 
@@ -214,8 +214,8 @@ namespace krys::boo::dom::tests
         CHECK(ElementAlgorithms::GetAttributeByName(u8"viewbox", *element) == nullptr);
         CHECK(ElementAlgorithms::GetAttributeByName(u8"viewBox", *element) != nullptr);
       };
-      check(*CreateRef<HTMLDocument>(), infra::Namespaces::SVG);
-      check(*CreateRef<XMLDocument>(), infra::Namespaces::HTML);
+      check(*CreateRef<HTMLDocument>(), infra::namespaces::SVG);
+      check(*CreateRef<XMLDocument>(), infra::namespaces::HTML);
     }
 
     SECTION("The first with the qualified name")
@@ -349,7 +349,7 @@ namespace krys::boo::dom::tests
       CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);
     };
 
-    requireNotSupported(attach(*document->CreateElementNS(infra::Namespaces::SVG, u8"div").ReleaseValue()));
+    requireNotSupported(attach(*document->CreateElementNS(infra::namespaces::SVG, u8"div").ReleaseValue()));
     requireNotSupported(attach(*document->CreateElement(u8"img").ReleaseValue()));
     requireNotSupported(attach(*document->CreateElement(u8"input").ReleaseValue()));
 

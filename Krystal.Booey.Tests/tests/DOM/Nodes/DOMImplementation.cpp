@@ -79,12 +79,12 @@ namespace krys::boo::dom::tests
 
     SECTION("1. and 7. the interface and content type follow the namespace")
     {
-      auto xhtml = implementation.CreateDocument(infra::Namespaces::HTML, u8"html").ReleaseValue();
+      auto xhtml = implementation.CreateDocument(infra::namespaces::HTML, u8"html").ReleaseValue();
       CHECK(xhtml->ContentType() == u8"application/xhtml+xml");
       CHECK(Is<XHTMLDocument>(static_cast<Document &>(*xhtml)));
       CHECK(Is<html::HTMLElement>(*xhtml->DocumentElement()));
 
-      auto svg = implementation.CreateDocument(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+      auto svg = implementation.CreateDocument(infra::namespaces::SVG, u8"svg").ReleaseValue();
       CHECK(svg->ContentType() == u8"image/svg+xml");
       CHECK(Is<svg::SVGDocument>(static_cast<Document &>(*svg)));
 
@@ -120,7 +120,7 @@ namespace krys::boo::dom::tests
       CHECK(document->DocType()->PublicId().empty());
       CHECK(document->DocType()->SystemId().empty());
       auto html = document->DocumentElement();
-      CHECK(html->NamespaceURI() == infra::Namespaces::HTML);
+      CHECK(html->NamespaceURI() == infra::namespaces::HTML);
       CHECK(childNames(*html) == u8"HEAD BODY");
       CHECK(childNames(*html->FirstChild()) == u8"TITLE");
       CHECK(html->FirstChild()->TextContent() == u8"Hello");

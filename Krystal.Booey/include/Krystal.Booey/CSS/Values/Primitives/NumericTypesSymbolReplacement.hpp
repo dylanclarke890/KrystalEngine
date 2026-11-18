@@ -78,7 +78,7 @@ namespace krys::boo::css
                                                                  const SymbolTable &symbolTable) noexcept
   {
     return krys::SwitchOn(component, [&](auto part) -> TypesMinusSymbol<Ts...>
-                          { return ReplaceSymbol(part, symbolTable); });
+                          { return ReplaceSymbol(krys::move(part), symbolTable); });
   }
 
   template <typename T>

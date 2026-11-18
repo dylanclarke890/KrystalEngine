@@ -60,13 +60,13 @@ namespace krys::boo
 
     const dom::DOMStringAtom &XMLNSAtom() noexcept
     {
-      static const dom::DOMStringAtom atom(infra::NamespacePrefixes::XMLNS);
+      static const dom::DOMStringAtom atom(infra::namespace_prefixes::XMLNS);
       return atom;
     }
 
     const dom::DOMStringAtom &XMLAtom() noexcept
     {
-      static const dom::DOMStringAtom atom(infra::NamespacePrefixes::XML);
+      static const dom::DOMStringAtom atom(infra::namespace_prefixes::XML);
       return atom;
     }
 
@@ -141,8 +141,8 @@ namespace krys::boo
       // let tagname be current node's local name. Otherwise, let tagname be current node's qualified name.
       auto namespaceURI = element.NamespaceURI().View();
       if (!inXMLFragmentSerialization
-          && (namespaceURI == infra::Namespaces::HTML || namespaceURI == infra::Namespaces::MathML
-              || namespaceURI == infra::Namespaces::SVG))
+          && (namespaceURI == infra::namespaces::HTML || namespaceURI == infra::namespaces::MathML
+              || namespaceURI == infra::namespaces::SVG))
       {
         return element.LocalName().ToString();
       }
@@ -159,21 +159,21 @@ namespace krys::boo
       }
 
       utf8_stringview prefix;
-      if (namespaceURI == infra::Namespaces::XML)
+      if (namespaceURI == infra::namespaces::XML)
       {
-        prefix = infra::NamespacePrefixes::XML;
+        prefix = infra::namespace_prefixes::XML;
       }
-      else if (namespaceURI == infra::Namespaces::XMLNS)
+      else if (namespaceURI == infra::namespaces::XMLNS)
       {
         if (attribute.LocalName() == XMLNSAtom())
         {
-          return utf8_string(infra::NamespacePrefixes::XMLNS);
+          return utf8_string(infra::namespace_prefixes::XMLNS);
         }
-        prefix = infra::NamespacePrefixes::XMLNS;
+        prefix = infra::namespace_prefixes::XMLNS;
       }
-      else if (namespaceURI == infra::Namespaces::XLink)
+      else if (namespaceURI == infra::namespaces::XLink)
       {
-        prefix = infra::NamespacePrefixes::XLink;
+        prefix = infra::namespace_prefixes::XLink;
       }
       else
       {
@@ -206,13 +206,13 @@ namespace krys::boo
       // HTML Parser will create xmlns attributes without namespace for HTML elements, allow those as well.
       auto namespaceURI = attribute.NamespaceURI().View();
       if (attribute.LocalName() == XMLNSAtom()
-          && (namespaceURI.empty() || namespaceURI == infra::Namespaces::XMLNS))
+          && (namespaceURI.empty() || namespaceURI == infra::namespaces::XMLNS))
       {
         namespaces.insert_or_assign(EmptyAtom(), dom::DOMStringAtom(attribute.Value()));
         return false;
       }
 
-      if (attribute.Prefix() == XMLNSAtom() && namespaceURI == infra::Namespaces::XMLNS)
+      if (attribute.Prefix() == XMLNSAtom() && namespaceURI == infra::namespaces::XMLNS)
       {
         namespaces.insert_or_assign(attribute.LocalName(), dom::DOMStringAtom(attribute.Value()));
         namespaces.insert_or_assign(dom::DOMStringAtom(attribute.Value()), attribute.LocalName());
@@ -433,8 +433,8 @@ namespace krys::boo
       // Make sure xml prefix and namespace are always known to uphold the constraints listed at
       // http://www.w3.org/TR/xml-names11/#xmlReserved.
       Namespaces namespaceHash;
-      namespaceHash.insert_or_assign(XMLAtom(), infra::Namespaces::XML);
-      namespaceHash.insert_or_assign(infra::Namespaces::XML, XMLAtom());
+      namespaceHash.insert_or_assign(XMLAtom(), infra::namespaces::XML);
+      namespaceHash.insert_or_assign(infra::namespaces::XML, XMLAtom());
 
       // An element's children are serialized in the default namespace in scope on it, so that children in no
       // namespace declare the empty default namespace.
@@ -746,7 +746,7 @@ namespace krys::boo
 
     // Make sure xml prefix and namespace are always known to uphold the constraints listed at
     // http://www.w3.org/TR/xml-names11/#xmlReserved.
-    if (namespaceURI.View() == infra::Namespaces::XML)
+    if (namespaceURI.View() == infra::namespaces::XML)
     {
       return;
     }
@@ -837,9 +837,9 @@ namespace krys::boo
       // we now should create a default namespace declaration to make this namespace well-formed. However,
       // http://www.w3.org/TR/xml-names11/#xmlReserved states "The prefix xml MUST NOT be declared as the
       // default namespace.", so use the xml prefix explicitly.
-      if (element.NamespaceURI().View() == infra::Namespaces::XML)
+      if (element.NamespaceURI().View() == infra::namespaces::XML)
       {
-        result.append(infra::NamespacePrefixes::XML);
+        result.append(infra::namespace_prefixes::XML);
         result.push_back(u8':');
       }
     }
@@ -888,7 +888,7 @@ namespace krys::boo
     auto namespaceURI = attribute.NamespaceURI();
     if (!namespaceURI.View().empty())
     {
-      if (namespaceURI.View() == infra::Namespaces::XML)
+      if (namespaceURI.View() == infra::namespaces::XML)
       {
         // Always use xml as prefix if the namespace is the XML namespace.
         prefix = XMLAtom();

@@ -89,7 +89,7 @@ namespace krys::boo::html
   HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface,
                            dom::DOMStringAtom localName, HTMLElementFlags flags,
                            dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document, dom::QualifiedName(infra::Namespaces::HTML, null, krys::move(localName)),
+      : StyledElement(document, dom::QualifiedName(infra::namespaces::HTML, null, krys::move(localName)),
                       nodeFlags | dom::NodeFlags::IsHTMLElement),
         _flags(flags), _interface(interface)
   {
@@ -1745,7 +1745,7 @@ namespace krys::boo::html
         return true;
       }
     }
-    else if (namespaceURI == infra::Namespaces::XML && localName == u8"lang")
+    else if (namespaceURI == infra::namespaces::XML && localName == u8"lang")
     {
       return true;
     }
@@ -1757,7 +1757,7 @@ namespace krys::boo::html
                                                            dom::DOMStringView value,
                                                            css::MutableStyleProperties &style) noexcept
   {
-    if (namespaceURI == infra::Namespaces::XML && localName == u8"lang")
+    if (namespaceURI == infra::namespaces::XML && localName == u8"lang")
     {
       MapLanguageAttributeToLocale(value, style);
       return;
@@ -1866,7 +1866,7 @@ namespace krys::boo::html
     else if (localName == u8"lang")
     {
       // xml:lang has a higher priority than lang.
-      if (!HasAttributeNS(infra::Namespaces::XML, u8"lang"))
+      if (!HasAttributeNS(infra::namespaces::XML, u8"lang"))
       {
         MapLanguageAttributeToLocale(value, style);
       }

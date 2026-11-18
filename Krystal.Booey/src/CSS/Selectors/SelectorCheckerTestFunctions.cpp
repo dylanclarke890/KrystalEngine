@@ -93,9 +93,9 @@ namespace krys::boo::css
     {
       return element.HasAttribute(u8"href") && !svg::IsInSVGImage(&element);
     }
-    if (element.NamespaceURI().View() == infra::Namespaces::SVG && element.LocalName().View() == u8"a")
+    if (element.NamespaceURI().View() == infra::namespaces::SVG && element.LocalName().View() == u8"a")
     {
-      return (element.HasAttribute(u8"href") || element.HasAttributeNS(infra::Namespaces::XLink, u8"href"))
+      return (element.HasAttribute(u8"href") || element.HasAttributeNS(infra::namespaces::XLink, u8"href"))
              && !svg::IsInSVGImage(&element);
     }
     return false;
@@ -291,7 +291,7 @@ namespace krys::boo::css
   {
     // To determine the language of a node, user agents must use the first appropriate step in the following
     // list:
-    dom::DOMStringAtom xmlNamespace(infra::Namespaces::XML);
+    dom::DOMStringAtom xmlNamespace(infra::namespaces::XML);
     for (auto *ancestor = &element; ancestor;
          ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor))
     {
@@ -304,8 +304,8 @@ namespace krys::boo::css
 
       // If the node is an HTML element or an element in the SVG namespace, and it has a lang in no namespace
       // attribute set: Use the value of that attribute.
-      if (ancestor->NamespaceURI() == infra::Namespaces::HTML
-          || ancestor->NamespaceURI() == infra::Namespaces::SVG)
+      if (ancestor->NamespaceURI() == infra::namespaces::HTML
+          || ancestor->NamespaceURI() == infra::namespaces::SVG)
       {
         if (auto lang = ancestor->GetAttributeNS(null, u8"lang"))
         {

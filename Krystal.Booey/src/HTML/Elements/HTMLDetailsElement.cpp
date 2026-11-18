@@ -104,7 +104,7 @@ namespace krys::boo::html
     (void)root.AppendChild(*defaultSlot);
     _defaultSlot = krys::move(defaultSlot);
 
-    auto style = document.CreateElementNS(infra::Namespaces::HTML, u8"style").ReleaseValue();
+    auto style = document.CreateElementNS(infra::namespaces::HTML, u8"style").ReleaseValue();
     (void)style->TextContent(dom::DOMString(css::DetailsElementShadowUserAgentStyleSheet));
     (void)root.AppendChild(*style);
   }

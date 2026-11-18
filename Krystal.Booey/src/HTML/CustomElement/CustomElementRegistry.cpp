@@ -191,7 +191,7 @@ namespace krys::boo::html
 
   CustomElementInterface *CustomElementRegistry::FindInterface(const dom::QualifiedName &name) const noexcept
   {
-    if (name.NamespaceURI() != infra::Namespaces::HTML)
+    if (name.NamespaceURI() != infra::namespaces::HTML)
     {
       return nullptr;
     }

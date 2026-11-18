@@ -47,19 +47,19 @@ namespace krys::boo::style::tests
     REQUIRE(families.size() == 3);
     CHECK(families.IsSpecifiedFont());
     CHECK(families.First().Value == u8"Foo Bar");
-    CHECK(families.ToPlatform()[1] == css::GenericFontFamilyNames::SerifFamily());
+    CHECK(families.ToPlatform()[1] == css::generic_font_family_names::SerifFamily());
     CHECK(families.Last().Value == u8"Arial");
     CHECK(Serialised(families) == "\"Foo Bar\", serif, Arial");
     CHECK(Created(families) == "\"Foo Bar\", serif, Arial");
 
     auto generic = Convert<FontFamilies>(PropertyId::FontFamily, u8"monospace, Courier");
     CHECK(generic.FirstFontKind() == FontFamilyKind::Generic);
-    CHECK(generic.First().Value == css::GenericFontFamilyNames::MonospaceFamily());
+    CHECK(generic.First().Value == css::generic_font_family_names::MonospaceFamily());
     CHECK(Serialised(generic) == "monospace, Courier");
 
     auto system = ConvertSystemFont<FontFamilies>(*State);
     CHECK(system.FirstFontKind() == FontFamilyKind::Generic);
-    CHECK(system.First().Value == css::GenericFontFamilyNames::StandardFamily());
+    CHECK(system.First().Value == css::generic_font_family_names::StandardFamily());
     CHECK_FALSE(IsInvalid());
 
     CHECK(families == Convert<FontFamilies>(PropertyId::FontFamily, u8"\"Foo Bar\", serif, Arial"));

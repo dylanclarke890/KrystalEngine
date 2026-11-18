@@ -696,7 +696,7 @@ namespace krys::boo::tests
     SECTION("Only HTML documents have commands")
     {
       auto svg =
-        document.Implementation().CreateDocument(infra::Namespaces::SVG, u8"svg", nullptr).ReleaseValue();
+        document.Implementation().CreateDocument(infra::namespaces::SVG, u8"svg", nullptr).ReleaseValue();
       auto threw = [](const auto &result)
       {
         return result.HasException() && result.GetException().Code() == dom::ExceptionCode::InvalidStateError;
