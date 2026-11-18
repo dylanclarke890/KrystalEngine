@@ -38,7 +38,6 @@ Checks: >
   modernize-avoid-setjmp-longjmp,
   modernize-avoid-variadic-functions,
   modernize-concat-nested-namespaces,
-  modernize-deprecated-headers,
   modernize-deprecated-ios-base-aliases,
   modernize-min-max-use-initializer-list,
   modernize-pass-by-value,
@@ -107,6 +106,9 @@ Checks: >
 # Not wanted: it counts a change made through a pointer member as const, so most of what it flags are
 # mutators (SetNeedsLayout and the like) that would become const.
 #   readability-make-member-function-const,
+
+# Not wanted: it crashes clang-tidy (an access violation at the end of the file) with the precompiled header.
+#   modernize-deprecated-headers,
 
 # Useful, but a large first pass; same as above:
 #   bugprone-easily-swappable-parameters,

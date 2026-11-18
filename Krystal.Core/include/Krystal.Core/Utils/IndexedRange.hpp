@@ -113,6 +113,7 @@ namespace krys
     // Constrained so it doesn't hide the copy and move constructors.
     template <typename Collection>
     requires(!SameType<remove_cvref_t<Collection>, IndexedRange>)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): used for both ends, so never moved.
     explicit IndexedRange(Collection &&collection) noexcept
         : _begin(boundsCheckedBegin(collection)), _end(boundsCheckedEnd(collection))
     {

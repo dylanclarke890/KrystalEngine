@@ -50,6 +50,7 @@ namespace krys
 
   public:
     template <typename CollectionA, typename CollectionB>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): used for both ends, so never moved.
     ZippedRange(CollectionA &&collectionA, CollectionB &&collectionB) noexcept
         : _begin(boundsCheckedBegin(collectionA), boundsCheckedBegin(collectionB)),
           _end(boundsCheckedEnd(collectionA), boundsCheckedEnd(collectionB))
